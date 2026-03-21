@@ -42,11 +42,12 @@ As of 2026-03-21:
 - `pveproxy` is listening on port `8006`.
 - `vmbr0` now carries the public uplink and `vmbr10` provides the internal `10.10.10.0/24` guest network.
 - Host-side IPv4 forwarding and NAT are enabled for guest egress.
+- Public ingress on TCP `80/443` is forwarded to the NGINX VM at `10.10.10.10`.
 - Template VM `9000` exists and the initial guest set (`110/120/130/140`) is provisioned and running.
 - SSH password authentication is disabled on the host.
 - Debian guests are intended to be managed as `ops` through the Proxmox jump path, not as `root`.
 - `ops@pam` exists with `PVEAdmin` for routine Proxmox administration.
-- The next risk area is ingress forwarding, firewall policy, TFA, notifications, and steady-state Tailscale access, not base VM creation.
+- The next risk area is management firewall policy, TFA, TLS, monitoring, notifications, and steady-state Tailscale access, not base VM creation.
 
 Treat the next phase as ingress, security, backup, and API automation work.
 

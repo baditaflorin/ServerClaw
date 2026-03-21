@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.11.0
-platform_version: 0.8.0
+repo_version: 0.12.0
+platform_version: 0.9.0
 
 desired_state:
   host_id: proxmox_florin
@@ -37,6 +37,7 @@ desired_state:
     guest_default_gateway: 10.10.10.1
     guest_outbound_via_host_nat: true
     public_edge_vm: 10.10.10.10
+    public_edge_forwarding_enabled: true
     public_ingress_ports:
       - 80
       - 443
@@ -85,6 +86,11 @@ observed_state:
     internal_ipv4_gateway: 10.10.10.1/24
     ipv4_forwarding: true
     outbound_nat: true
+    public_edge_ipv4: 10.10.10.10
+    public_ingress_forwarding_enabled: true
+    public_ingress_forwarded_ports:
+      - 80
+      - 443
   dns:
     zone: lv3.org
     root_a: 65.108.75.123
@@ -123,8 +129,8 @@ observed_state:
 
 release_tracks:
   repo_versioning:
-    current: 0.11.0
+    current: 0.12.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.8.0
+    current: 0.9.0
     meaning: intended platform release for the actual server configuration

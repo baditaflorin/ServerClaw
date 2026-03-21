@@ -28,4 +28,4 @@ make provision-guests
 ## Notes
 
 - This runbook provisions guest shells and baseline packages, not the final application configuration.
-- Public ingress forwarding to the NGINX VM is still separate work.
+- Public ingress forwarding to the NGINX VM is now handled separately by [configure-public-ingress.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-public-ingress.md).

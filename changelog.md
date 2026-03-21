@@ -6,6 +6,18 @@ The repo uses semantic versioning for repository maturity and operating contract
 
 Historical entries before `0.10.0` are reconstructed from repository history, ADR metadata, and observed platform evolution.
 
+## 0.12.0 - 2026-03-21
+
+- implemented the single-edge public ingress model from ADR 0013
+- added host-side nftables DNAT for public TCP `80/443` to the NGINX VM
+- added an explicit ingress runbook and make target
+- updated ADR 0013 from partial to implemented
+
+Platform impact:
+
+- the public host IPv4 now forwards `80/443` to `10.10.10.10`
+- `nginx.lv3.org` and direct HTTP to the host can terminate on the NGINX VM
+
 ## 0.11.0 - 2026-03-21
 
 - added this changelog to make version history explicit

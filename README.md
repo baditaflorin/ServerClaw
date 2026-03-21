@@ -45,6 +45,13 @@ vmbr10 internal bridge on 10.10.10.1/24
 
 Host-side IPv4 forwarding and NAT are enabled for `10.10.10.0/24` guest egress.
 
+Public ingress is now converged to the single-edge model:
+
+```text
+65.108.75.123:80  -> 10.10.10.10:80
+65.108.75.123:443 -> 10.10.10.10:443
+```
+
 Initial guest provisioning is now implemented and applied:
 
 ```text
@@ -74,6 +81,7 @@ password SSH disabled on host and guests
 - [Repository map](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/repository-map.md)
 - [Assistant operator guide](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/assistant-operator-guide.md)
 - [Initial access runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/initial-access.md)
+- [Configure public ingress runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-public-ingress.md)
 - [ADR 0001: Bootstrap model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0001-bootstrap-dedicated-host-with-ansible.md)
 - [ADR 0002: Target Proxmox VE 9 on Debian 13](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0002-target-proxmox-ve-9-on-debian-13.md)
 - [ADR 0003: Prefer Rescue plus installimage](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0003-prefer-hetzner-rescue-plus-installimage-for-bootstrap.md)
@@ -103,8 +111,8 @@ This repo now tracks three distinct things:
 
 Current values:
 
-- `repo_version`: `0.11.0`
-- `platform_version`: `0.8.0`
+- `repo_version`: `0.12.0`
+- `platform_version`: `0.9.0`
 - `observed_os`: `Debian 13`
 - `observed_proxmox_installed`: `true`
 - `observed_pve_manager_version`: `9.1.6`
@@ -131,9 +139,9 @@ This repository is intentionally opinionated:
 ## Planned workflow
 
 1. Inspect disks, networking, and current Debian 13 base state.
-2. Configure public ingress forwarding to the NGINX VM.
-3. Finish the remaining Proxmox host security baseline around firewall, TFA, TLS, and notifications.
-4. Establish the steady-state operator access path with Tailscale, replacing the temporary jump-host-only flow.
+2. Finish the remaining Proxmox host security baseline around management firewall policy, TFA, TLS, and notifications.
+3. Establish the steady-state operator access path with Tailscale, replacing the temporary jump-host-only flow.
+4. Implement the monitoring stack on `10.10.10.40`.
 5. Configure storage, backups, and notifications.
 6. Commit the resulting automation and operational docs in this repo.
 
@@ -150,6 +158,7 @@ The first executable automation scaffold now exists:
 - [roles/proxmox_kernel/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_kernel/tasks/main.yml)
 - [roles/proxmox_platform/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_platform/tasks/main.yml)
 - [roles/proxmox_network/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_network/tasks/main.yml)
+- [docs/runbooks/configure-public-ingress.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-public-ingress.md)
 - [roles/proxmox_guests/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_guests/tasks/main.yml)
 - [roles/linux_access/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/linux_access/tasks/main.yml)
 - [roles/proxmox_access/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_access/tasks/main.yml)

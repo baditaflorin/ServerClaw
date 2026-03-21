@@ -28,6 +28,7 @@ Read these in order when picking up the repository cold:
 ### Operational procedures
 
 - [docs/runbooks](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks): operator procedures for access, install, networking, provisioning, and hardening
+- [docs/runbooks/configure-public-ingress.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-public-ingress.md): public edge forwarding from the host to the NGINX VM
 
 ### Automation entry points
 

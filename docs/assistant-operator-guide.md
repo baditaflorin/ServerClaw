@@ -70,6 +70,7 @@ Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/M
 - `make syntax-check`
 - `make install-proxmox`
 - `make configure-network`
+- `make configure-ingress`
 - `make provision-guests`
 - `make harden-access`
 - `make harden-guest-access`

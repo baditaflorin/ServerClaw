@@ -13,6 +13,10 @@ proxmox_internal_bridge: vmbr10
 proxmox_internal_ipv4: 10.10.10.1
 proxmox_internal_cidr: 24
 proxmox_internal_network: 10.10.10.0/24
+proxmox_public_edge_ipv4: 10.10.10.10
+proxmox_public_ingress_tcp_ports:
+  - 80
+  - 443
 
 proxmox_guests:
   - vmid: 110

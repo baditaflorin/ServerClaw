@@ -1,5 +1,5 @@
-repo_version: 0.11.0
-platform_version: 0.8.0
+repo_version: 0.12.0
+platform_version: 0.9.0
 
 proxmox_release_major: 9
 proxmox_suite: trixie

@@ -24,6 +24,7 @@
     - role: proxmox_network
       tags:
         - network
+        - ingress
     - role: proxmox_guests
       tags:
         - guests

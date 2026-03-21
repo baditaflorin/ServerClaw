@@ -1,9 +1,9 @@
 # ADR 0013: Public Ingress And Guest Egress Model
 
 - Status: Accepted
-- Implementation Status: Partial
-- Implemented In Repo Version: 0.5.0
-- Implemented In Platform Version: 0.3.0
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.12.0
+- Implemented In Platform Version: 0.9.0
 - Implemented On: 2026-03-21
 - Date: 2026-03-21
 
@@ -46,11 +46,12 @@ Ingress:
 - TLS termination, routing, and public service publishing are centralized instead of being scattered across guests.
 - Public exposure decisions become explicit because new public services require either NGINX routing or a new ADR.
 
-## Follow-up requirements
+## Implementation Note
 
-This ADR still requires implementation details for:
+This ADR is implemented through host-side nftables DNAT on the public Proxmox node:
 
-- the exact forwarding mechanism from the Proxmox host to `10.10.10.10`
-- TLS certificate handling between the public edge and upstream services
-- internal service discovery and naming for private guests
-- firewall rules for allowed forwarded traffic
+- TCP `80` and `443` on the public host IPv4 are forwarded to `10.10.10.10`
+- only the declared edge VM receives public ingress by default
+- guest egress remains host-side NAT through `10.10.10.1`
+
+TLS certificate handling and internal naming for upstream applications remain follow-on concerns, but they do not block the ingress model itself from being implemented.
