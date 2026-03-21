@@ -1,6 +1,10 @@
 # ADR 0010: Initial Proxmox VM Topology
 
 - Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.6.0
+- Implemented In Platform Version: 0.6.0
+- Implemented On: 2026-03-21
 - Date: 2026-03-21
 
 ## Context

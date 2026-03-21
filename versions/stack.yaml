@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.6.0
+repo_version: 0.7.0
 platform_version: 0.6.0
 
 desired_state:
@@ -116,7 +116,7 @@ observed_state:
 
 release_tracks:
   repo_versioning:
-    current: 0.6.0
+    current: 0.7.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.6.0

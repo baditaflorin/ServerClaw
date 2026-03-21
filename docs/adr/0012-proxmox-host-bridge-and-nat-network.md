@@ -1,6 +1,10 @@
 # ADR 0012: Proxmox Host Bridge And NAT Network
 
 - Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.3.0
+- Implemented In Platform Version: 0.3.0
+- Implemented On: 2026-03-21
 - Date: 2026-03-21
 
 ## Context

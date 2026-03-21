@@ -1,6 +1,10 @@
 # ADR 0013: Public Ingress And Guest Egress Model
 
 - Status: Accepted
+- Implementation Status: Partial
+- Implemented In Repo Version: 0.5.0
+- Implemented In Platform Version: 0.3.0
+- Implemented On: 2026-03-21
 - Date: 2026-03-21
 
 ## Context

@@ -1,6 +1,10 @@
 # ADR 0001: Bootstrap Dedicated Host With Ansible
 
 - Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.2.0
+- Implemented In Platform Version: 0.1.0
+- Implemented On: 2026-03-21
 - Date: 2026-03-21
 
 ## Context

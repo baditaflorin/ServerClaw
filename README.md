@@ -76,6 +76,7 @@ The private SSH jump path through the Proxmox host to the guests is working.
 - [ADR 0014: Operator access to private guest network](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0014-operator-access-to-private-guest-network.md)
 - [ADR 0015: lv3.org DNS and subdomain model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0015-lv3-org-dns-and-subdomain-model.md)
 - [ADR 0016: Provision guests from Debian 13 cloud template](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0016-provision-guests-from-debian-13-cloud-template.md)
+- [ADR 0017: ADR lifecycle and implementation metadata](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0017-adr-lifecycle-and-implementation-metadata.md)
 
 ## Versioning
 
@@ -87,11 +88,19 @@ This repo now tracks three distinct things:
 
 Current values:
 
-- `repo_version`: `0.6.0`
+- `repo_version`: `0.7.0`
 - `platform_version`: `0.6.0`
 - `observed_os`: `Debian 13`
 - `observed_proxmox_installed`: `true`
 - `observed_pve_manager_version`: `9.1.6`
+
+ADR metadata now tracks both acceptance and implementation:
+
+- decision status
+- implementation status
+- first repo version implemented
+- first platform version implemented
+- implementation date
 
 ## Engineering stance
 
