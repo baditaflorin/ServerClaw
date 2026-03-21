@@ -13,3 +13,68 @@ proxmox_internal_bridge: vmbr10
 proxmox_internal_ipv4: 10.10.10.1
 proxmox_internal_cidr: 24
 proxmox_internal_network: 10.10.10.0/24
+
+proxmox_guests:
+  - vmid: 110
+    name: nginx-lv3
+    role: nginx
+    ipv4: 10.10.10.10
+    cidr: 24
+    gateway4: 10.10.10.1
+    cores: 2
+    memory_mb: 4096
+    disk_gb: 32
+    tags:
+      - ingress
+      - nginx
+      - lv3
+    packages:
+      - nginx
+  - vmid: 120
+    name: docker-runtime-lv3
+    role: docker-runtime
+    ipv4: 10.10.10.20
+    cidr: 24
+    gateway4: 10.10.10.1
+    cores: 4
+    memory_mb: 12288
+    disk_gb: 96
+    tags:
+      - docker
+      - runtime
+      - lv3
+    packages:
+      - docker.io
+  - vmid: 130
+    name: docker-build-lv3
+    role: docker-build
+    ipv4: 10.10.10.30
+    cidr: 24
+    gateway4: 10.10.10.1
+    cores: 12
+    memory_mb: 24576
+    disk_gb: 160
+    tags:
+      - docker
+      - build
+      - lv3
+    packages:
+      - docker.io
+      - git
+      - make
+      - build-essential
+  - vmid: 140
+    name: monitoring-lv3
+    role: monitoring
+    ipv4: 10.10.10.40
+    cidr: 24
+    gateway4: 10.10.10.1
+    cores: 4
+    memory_mb: 8192
+    disk_gb: 64
+    tags:
+      - monitoring
+      - grafana
+      - lv3
+    packages:
+      - prometheus-node-exporter

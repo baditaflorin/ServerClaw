@@ -1,0 +1,35 @@
+#cloud-config
+hostname: {{ item.name }}
+fqdn: {{ item.name }}.lv3.org
+manage_etc_hosts: true
+package_update: true
+package_upgrade: true
+ssh_pwauth: false
+disable_root: true
+
+users:
+  - default
+  - name: {{ proxmox_guest_ci_user }}
+    gecos: LV3 Operations
+    groups: sudo
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    lock_passwd: true
+    ssh_authorized_keys:
+      - {{ lookup('file', bootstrap_authorized_key_path) | trim }}
+
+packages:
+  - qemu-guest-agent
+  - sudo
+  - curl
+  - ca-certificates
+  - jq
+{% for package in item.packages %}
+  - {{ package }}
+{% endfor %}
+
+runcmd:
+  - systemctl enable --now qemu-guest-agent
+  - test -x /usr/bin/docker && systemctl enable --now docker || true
+
+final_message: "{{ item.name }} cloud-init completed."

@@ -21,3 +21,6 @@
     - role: proxmox_network
       tags:
         - network
+    - role: proxmox_guests
+      tags:
+        - guests

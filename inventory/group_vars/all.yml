@@ -1,5 +1,5 @@
-repo_version: 0.5.0
-platform_version: 0.5.0
+repo_version: 0.6.0
+platform_version: 0.6.0
 
 proxmox_release_major: 9
 proxmox_suite: trixie
@@ -28,3 +28,16 @@ debian_prereq_packages:
   - wget
   - gpg
   - apt-transport-https
+
+bootstrap_authorized_key_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/keys/hetzner_llm_agents_ed25519.pub
+
+debian_cloud_image_url: https://cloud.debian.org/images/cloud/trixie/latest/debian-13-genericcloud-amd64.qcow2
+debian_cloud_image_sha512: 0e5edfbe49b0cca779a4a7dc9738f34c92e3ff481ee1f7d5c4e93e180654fe275eb8c96397224c6ca04a2910eaaed27489f431573ebe4cb5412ef257888b2b18
+debian_cloud_image_filename: debian-13-genericcloud-amd64.qcow2
+proxmox_template_vmid: 9000
+proxmox_template_name: debian13-cloud-template
+proxmox_storage_id: local
+proxmox_snippets_storage_id: local
+proxmox_guest_ci_user: ops
+proxmox_guest_nameserver: 1.1.1.1
+proxmox_guest_searchdomain: lv3.org

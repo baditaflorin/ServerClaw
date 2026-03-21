@@ -1,0 +1,145 @@
+---
+- name: Ensure template cache directory exists
+  ansible.builtin.file:
+    path: /var/lib/vz/template/cache
+    state: directory
+    mode: "0755"
+
+- name: Ensure snippets directory exists
+  ansible.builtin.file:
+    path: /var/lib/vz/snippets
+    state: directory
+    mode: "0755"
+
+- name: Download official Debian 13 cloud image
+  ansible.builtin.get_url:
+    url: "{{ debian_cloud_image_url }}"
+    dest: "/var/lib/vz/template/cache/{{ debian_cloud_image_filename }}"
+    mode: "0644"
+    checksum: "sha512:{{ debian_cloud_image_sha512 }}"
+
+- name: Check whether Proxmox template exists
+  ansible.builtin.command: "qm config {{ proxmox_template_vmid }}"
+  register: proxmox_template_config
+  failed_when: false
+  changed_when: false
+
+- name: Create Debian 13 cloud template VM
+  ansible.builtin.shell: |
+    set -euo pipefail
+    qm create {{ proxmox_template_vmid }} \
+      --name {{ proxmox_template_name }} \
+      --ostype l26 \
+      --scsihw virtio-scsi-single \
+      --cpu host \
+      --cores 2 \
+      --memory 2048 \
+      --agent enabled=1,fstrim_cloned_disks=1 \
+      --serial0 socket \
+      --vga serial0 \
+      --net0 virtio,bridge={{ proxmox_internal_bridge }}
+    qm disk import {{ proxmox_template_vmid }} /var/lib/vz/template/cache/{{ debian_cloud_image_filename }} {{ proxmox_storage_id }} --format qcow2 --target-disk scsi0
+    qm set {{ proxmox_template_vmid }} \
+      --boot order=scsi0 \
+      --ide2 {{ proxmox_storage_id }}:cloudinit \
+      --ciupgrade 1
+    qm template {{ proxmox_template_vmid }}
+  args:
+    executable: /bin/bash
+  when: proxmox_template_config.rc != 0
+
+- name: Render cloud-init user-data snippets for guests
+  ansible.builtin.template:
+    src: user-data.yml.j2
+    dest: "/var/lib/vz/snippets/{{ item.name }}-user-data.yml"
+    mode: "0644"
+  loop: "{{ proxmox_guests }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Check which guest VMs already exist
+  ansible.builtin.command: "qm status {{ item.vmid }}"
+  register: proxmox_guest_status
+  failed_when: false
+  changed_when: false
+  loop: "{{ proxmox_guests }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Clone guest VMs from template
+  ansible.builtin.command:
+    argv:
+      - qm
+      - clone
+      - "{{ proxmox_template_vmid | string }}"
+      - "{{ item.item.vmid | string }}"
+      - --name
+      - "{{ item.item.name }}"
+      - --full
+      - "1"
+      - --storage
+      - "{{ proxmox_storage_id }}"
+      - --format
+      - qcow2
+  loop: "{{ proxmox_guest_status.results }}"
+  when: item.rc != 0
+  loop_control:
+    label: "{{ item.item.name }}"
+
+- name: Resize guest disks on first clone
+  ansible.builtin.command:
+    argv:
+      - qm
+      - resize
+      - "{{ item.item.vmid | string }}"
+      - scsi0
+      - "{{ item.item.disk_gb }}G"
+  loop: "{{ proxmox_guest_status.results }}"
+  when: item.rc != 0
+  loop_control:
+    label: "{{ item.item.name }}"
+
+- name: Apply guest hardware and cloud-init settings
+  ansible.builtin.command:
+    argv:
+      - qm
+      - set
+      - "{{ item.vmid | string }}"
+      - --cpu
+      - host
+      - --cores
+      - "{{ item.cores | string }}"
+      - --memory
+      - "{{ item.memory_mb | string }}"
+      - --balloon
+      - "0"
+      - --agent
+      - enabled=1,fstrim_cloned_disks=1
+      - --onboot
+      - "1"
+      - --tags
+      - "{{ item.tags | join(';') }}"
+      - --net0
+      - "virtio,bridge={{ proxmox_internal_bridge }}"
+      - --ipconfig0
+      - "ip={{ item.ipv4 }}/{{ item.cidr }},gw={{ item.gateway4 }}"
+      - --nameserver
+      - "{{ proxmox_guest_nameserver }}"
+      - --searchdomain
+      - "{{ proxmox_guest_searchdomain }}"
+      - --cicustom
+      - "user={{ proxmox_snippets_storage_id }}:snippets/{{ item.name }}-user-data.yml"
+      - --description
+      - "{{ item.role }} VM for lv3.org platform"
+  loop: "{{ proxmox_guests }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Start guest VMs
+  ansible.builtin.command: "qm start {{ item.vmid }}"
+  register: proxmox_guest_start
+  failed_when: proxmox_guest_start.rc not in [0, 255]
+  changed_when: proxmox_guest_start.rc == 0
+  loop: "{{ proxmox_guests }}"
+  loop_control:
+    label: "{{ item.name }}"

@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.5.0
-platform_version: 0.5.0
+repo_version: 0.6.0
+platform_version: 0.6.0
 
 desired_state:
   host_id: proxmox_florin
@@ -25,6 +25,14 @@ desired_state:
     docker_runtime_vm: 10.10.10.20
     docker_build_vm: 10.10.10.30
     monitoring_vm: 10.10.10.40
+  guest_provisioning:
+    template_vmid: 9000
+    template_name: debian13-cloud-template
+    guest_vmids:
+      nginx_vm: 110
+      docker_runtime_vm: 120
+      docker_build_vm: 130
+      monitoring_vm: 140
   traffic_model:
     guest_default_gateway: 10.10.10.1
     guest_outbound_via_host_nat: true
@@ -81,11 +89,35 @@ observed_state:
       - nginx.lv3.org
       - docker.lv3.org
       - build.lv3.org
+  guests:
+    template:
+      vmid: 9000
+      name: debian13-cloud-template
+      exists: true
+    instances:
+      - vmid: 110
+        name: nginx-lv3
+        ipv4: 10.10.10.10
+        running: true
+      - vmid: 120
+        name: docker-runtime-lv3
+        ipv4: 10.10.10.20
+        running: true
+      - vmid: 130
+        name: docker-build-lv3
+        ipv4: 10.10.10.30
+        running: true
+      - vmid: 140
+        name: monitoring-lv3
+        ipv4: 10.10.10.40
+        running: true
+    access:
+      ssh_proxyjump_via_proxmox_host_working: true
 
 release_tracks:
   repo_versioning:
-    current: 0.5.0
+    current: 0.6.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.5.0
+    current: 0.6.0
     meaning: intended platform release for the actual server configuration

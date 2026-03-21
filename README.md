@@ -45,6 +45,18 @@ vmbr10 internal bridge on 10.10.10.1/24
 
 Host-side IPv4 forwarding and NAT are enabled for `10.10.10.0/24` guest egress.
 
+Initial guest provisioning is now implemented and applied:
+
+```text
+110 nginx-lv3            10.10.10.10
+120 docker-runtime-lv3   10.10.10.20
+130 docker-build-lv3     10.10.10.30
+140 monitoring-lv3       10.10.10.40
+9000 debian13-cloud-template
+```
+
+The private SSH jump path through the Proxmox host to the guests is working.
+
 ## Documents
 
 - [Initial access runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/initial-access.md)
@@ -63,6 +75,7 @@ Host-side IPv4 forwarding and NAT are enabled for `10.10.10.0/24` guest egress.
 - [ADR 0013: Public ingress and guest egress model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0013-public-ingress-and-guest-egress-model.md)
 - [ADR 0014: Operator access to private guest network](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0014-operator-access-to-private-guest-network.md)
 - [ADR 0015: lv3.org DNS and subdomain model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0015-lv3-org-dns-and-subdomain-model.md)
+- [ADR 0016: Provision guests from Debian 13 cloud template](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0016-provision-guests-from-debian-13-cloud-template.md)
 
 ## Versioning
 
@@ -74,8 +87,8 @@ This repo now tracks three distinct things:
 
 Current values:
 
-- `repo_version`: `0.5.0`
-- `platform_version`: `0.5.0`
+- `repo_version`: `0.6.0`
+- `platform_version`: `0.6.0`
 - `observed_os`: `Debian 13`
 - `observed_proxmox_installed`: `true`
 - `observed_pve_manager_version`: `9.1.6`
@@ -92,9 +105,9 @@ This repository is intentionally opinionated:
 ## Planned workflow
 
 1. Inspect disks, networking, and current Debian 13 base state.
-2. Create the first VM templates or base guests on `vmbr10`.
+2. Configure public ingress forwarding to the NGINX VM.
 3. Apply the Proxmox host security baseline.
-4. Establish the agent-oriented access model for SSH and API operations.
+4. Establish the steady-state operator access path, replacing the temporary jump-host-only flow.
 5. Configure storage, backups, and notifications.
 6. Commit the resulting automation and operational docs in this repo.
 
@@ -111,6 +124,8 @@ The first executable automation scaffold now exists:
 - [roles/proxmox_kernel/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_kernel/tasks/main.yml)
 - [roles/proxmox_platform/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_platform/tasks/main.yml)
 - [roles/proxmox_network/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_network/tasks/main.yml)
+- [roles/proxmox_guests/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_guests/tasks/main.yml)
 - [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/Makefile)
 - [docs/runbooks/install-proxmox.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/install-proxmox.md)
 - [docs/runbooks/configure-proxmox-network.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-proxmox-network.md)
+- [docs/runbooks/provision-guests.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/provision-guests.md)

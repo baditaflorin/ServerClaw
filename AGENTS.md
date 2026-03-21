@@ -39,9 +39,11 @@ As of 2026-03-21:
 - `pveproxy` is listening on port `8006`.
 - `vmbr0` now carries the public uplink and `vmbr10` provides the internal `10.10.10.0/24` guest network.
 - Host-side IPv4 forwarding and NAT are enabled for guest egress.
-- The next risk area is guest creation, firewall policy, and secure operator access, not package installation.
+- Template VM `9000` exists and the initial guest set (`110/120/130/140`) is provisioned and running.
+- SSH to private guests through the Proxmox host works with the bootstrap key.
+- The next risk area is ingress forwarding, firewall policy, and steady-state operator access, not base VM creation.
 
-Treat the next phase as guest creation, security, backup, and API automation work.
+Treat the next phase as ingress, security, backup, and API automation work.
 
 ## Expectations For Future Changes
 
