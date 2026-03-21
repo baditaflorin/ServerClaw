@@ -75,6 +75,7 @@ These files are integration-owned and should normally be edited only during merg
 - [roles/proxmox_api_access/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_api_access/tasks/main.yml): durable Proxmox API automation identity and token verification
 - [roles/proxmox_security/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_security/tasks/main.yml): Proxmox firewall, ACME, notifications, and TFA
 - [roles/monitoring_vm/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/monitoring_vm/tasks/main.yml): Grafana and InfluxDB convergence on the monitoring VM
+- [roles/monitoring_vm/templates/lv3-platform-overview.json.j2](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/monitoring_vm/templates/lv3-platform-overview.json.j2): managed Grafana dashboard definition for the Proxmox host and guest fleet
 - [roles/proxmox_metrics/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_metrics/tasks/main.yml): Proxmox external metric-server configuration for InfluxDB
 
 ## Change Rules
@@ -97,5 +98,4 @@ Minimum expected updates for a meaningful infrastructure change:
 These areas are planned but not yet fully implemented:
 
 - live apply of the Tailscale private access path
-- live apply and dashboard build-out for the monitoring stack on `10.10.10.40`
 - live apply of storage and backup automation

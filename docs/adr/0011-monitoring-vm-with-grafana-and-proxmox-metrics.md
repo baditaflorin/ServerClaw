@@ -1,10 +1,10 @@
 # ADR 0011: Monitoring VM With Grafana And Proxmox Metrics
 
 - Status: Accepted
-- Implementation Status: Partial
-- Implemented In Repo Version: 0.6.0
-- Implemented In Platform Version: 0.6.0
-- Implemented On: 2026-03-21
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.23.0
+- Implemented In Platform Version: 0.15.0
+- Implemented On: 2026-03-22
 - Date: 2026-03-21
 
 ## Context
@@ -60,12 +60,13 @@ This split is deliberate:
 
 ## Phase-one implementation decisions
 
-The first converged implementation keeps the monitoring stack internal-only.
+The first converged implementation keeps the monitoring stack on the dedicated monitoring VM and manages it from code.
 
-- Grafana runs on VM `140` and is reached through the existing SSH jump path.
+- Grafana runs on VM `140`.
 - InfluxDB 2 receives Proxmox metrics through the native Proxmox external metric server integration over HTTP on the private network.
 - Grafana is provisioned with an InfluxDB data source automatically from locally generated secrets on the monitoring VM.
-- Public publication of Grafana is deferred until the private-access and ingress posture is settled.
+- Grafana contains a managed dashboard, `LV3 Platform Overview`, which monitors the Proxmox host and each managed VM individually.
+- Grafana is published at `https://grafana.lv3.org` through the NGINX edge.
 
 ## Scope of the first monitoring rollout
 
@@ -107,6 +108,16 @@ This ADR defines the topology and data-flow direction. Follow-up automation shou
 - retention policy for metrics and logs
 - alert destinations
 - exact Alloy/exporter deployment strategy on each monitored guest
+
+## Implemented state
+
+The implemented dashboard currently covers:
+
+- Proxmox host load, CPU, memory, and disk usage
+- `nginx-lv3` CPU, memory, disk, and network throughput
+- `docker-runtime-lv3` CPU, memory, disk, and network throughput
+- `docker-build-lv3` CPU, memory, disk, and network throughput
+- `monitoring-lv3` CPU, memory, disk, and network throughput
 
 ## Sources
 

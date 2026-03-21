@@ -10,6 +10,20 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 - use this section on `main` for merged notes that have not yet been cut into a numbered release
 
+## 0.23.0 - 2026-03-22
+
+- added Grafana dashboard-as-code for the LV3 platform monitoring view
+- fixed `make converge-monitoring` so the monitoring VM converges through the Proxmox jump path instead of trying a direct private-IP SSH path
+- switched dashboard rollout from fragile boot-time file-provider provisioning to an API import flow after Grafana health, while still keeping the dashboard JSON in repo
+- updated ADR 0011 and the monitoring runbook to reflect the fully provisioned Grafana dashboard
+
+Platform impact:
+
+- Grafana now contains the provisioned dashboard `LV3 Platform Overview`
+- the dashboard monitors the Proxmox host and each managed VM individually
+- the live dashboard currently has `20` panels
+- Grafana health was re-verified after the dashboard import
+
 ## 0.22.0 - 2026-03-22
 
 - added IaC for public hostname publication at the NGINX edge

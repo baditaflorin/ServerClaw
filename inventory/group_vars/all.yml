@@ -103,6 +103,10 @@ monitoring_grafana_admin_password_hash_file: /var/lib/grafana/.lv3-admin-passwor
 monitoring_grafana_datasource_name: InfluxDB Proxmox
 monitoring_grafana_datasource_token_file: /etc/lv3/monitoring/grafana-reader.token
 monitoring_grafana_provisioning_file: /etc/grafana/provisioning/datasources/influxdb-proxmox.yml
+monitoring_grafana_dashboard_dir: /var/lib/grafana/dashboards/lv3
+monitoring_grafana_dashboard_file: /var/lib/grafana/dashboards/lv3/lv3-platform-overview.json
+monitoring_grafana_dashboard_uid: lv3-platform-overview
+monitoring_grafana_dashboard_title: LV3 Platform Overview
 monitoring_influxdb_url: http://127.0.0.1:8086
 monitoring_influxdb_org: lv3
 monitoring_influxdb_bucket: proxmox

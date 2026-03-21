@@ -43,7 +43,7 @@
       - --output
       - "{{ monitoring_influxdb_repo_keyring }}"
       - /tmp/influxdata-archive.key
-  changed_when: true
+    creates: "{{ monitoring_influxdb_repo_keyring }}"
 
 - name: Install InfluxData repository definition
   ansible.builtin.copy:
@@ -73,6 +73,22 @@
     owner: root
     group: grafana
     mode: "0750"
+
+- name: Ensure Grafana dashboard provisioning directory exists
+  ansible.builtin.file:
+    path: /etc/grafana/provisioning/dashboards
+    state: directory
+    owner: root
+    group: grafana
+    mode: "0750"
+
+- name: Ensure Grafana dashboard storage directory exists
+  ansible.builtin.file:
+    path: "{{ monitoring_grafana_dashboard_dir }}"
+    state: directory
+    owner: root
+    group: grafana
+    mode: "0755"
 
 - name: Generate Grafana admin password
   ansible.builtin.shell: |
@@ -447,6 +463,25 @@
   no_log: true
   notify: restart grafana
 
+- name: Remove Grafana file-provider dashboard provisioning
+  ansible.builtin.file:
+    path: /etc/grafana/provisioning/dashboards/lv3-dashboards.yml
+    state: absent
+  notify: restart grafana
+
+- name: Render LV3 platform dashboard
+  ansible.builtin.template:
+    src: lv3-platform-overview.json.j2
+    dest: "{{ monitoring_grafana_dashboard_file }}"
+    owner: root
+    group: grafana
+    mode: "0644"
+  vars:
+    host_public_hostname: "{{ hostvars[groups['proxmox_hosts'][0]].host_public_hostname }}"
+    proxmox_guests: "{{ hostvars[groups['proxmox_hosts'][0]].proxmox_guests }}"
+  register: monitoring_grafana_dashboard_file_rendered
+  notify: restart grafana
+
 - name: Enable and start Grafana
   ansible.builtin.systemd:
     name: grafana-server
@@ -535,5 +570,55 @@
     force_basic_auth: true
     status_code: 200
   register: monitoring_grafana_datasource_check
+  changed_when: false
+  no_log: true
+
+- name: Check whether LV3 platform dashboard already exists
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/{{ monitoring_grafana_dashboard_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code:
+      - 200
+      - 404
+  register: monitoring_grafana_dashboard_existing
+  changed_when: false
+  failed_when: monitoring_grafana_dashboard_existing.status not in [200, 404]
+  no_log: true
+
+- name: Read rendered LV3 platform dashboard
+  ansible.builtin.slurp:
+    src: "{{ monitoring_grafana_dashboard_file }}"
+  register: monitoring_grafana_dashboard_payload_raw
+  no_log: true
+
+- name: Import LV3 platform dashboard into Grafana
+  ansible.builtin.uri:
+    url: http://127.0.0.1:3000/api/dashboards/db
+    method: POST
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    body_format: json
+    body:
+      dashboard: "{{ monitoring_grafana_dashboard_payload_raw.content | b64decode | from_json }}"
+      overwrite: true
+    status_code: 200
+  register: monitoring_grafana_dashboard_import
+  changed_when: monitoring_grafana_dashboard_file_rendered is changed or monitoring_grafana_dashboard_existing.status == 404
+  when: monitoring_grafana_dashboard_file_rendered is changed or monitoring_grafana_dashboard_existing.status == 404
+  no_log: true
+
+- name: Verify Grafana dashboard is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/{{ monitoring_grafana_dashboard_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_grafana_dashboard_check
   changed_when: false
   no_log: true

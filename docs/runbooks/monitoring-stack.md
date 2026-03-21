@@ -7,9 +7,10 @@ This runbook converges the dedicated monitoring VM `140` at `10.10.10.40` with:
 - Grafana on port `3000`
 - InfluxDB 2 on port `8086`
 - a provisioned Grafana data source for the Proxmox metrics bucket
+- a provisioned Grafana dashboard, `LV3 Platform Overview`
 - a Proxmox external metric server that writes into InfluxDB over the private network
 
-Grafana stays internal-only in this phase. Operators reach it through the existing SSH jump path instead of public ingress.
+Grafana is available both on the private VM and at [https://grafana.lv3.org](https://grafana.lv3.org).
 
 ## Command
 
@@ -24,21 +25,26 @@ make converge-monitoring
 3. Initializes InfluxDB with the `lv3` organization and the `proxmox` bucket.
 4. Creates separate InfluxDB tokens for Proxmox metric writes and Grafana bucket reads.
 5. Provisions the Grafana InfluxDB data source automatically.
-6. Mirrors the Proxmox writer token to `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/proxmox-writer.token` on the control machine.
-7. Creates or updates the Proxmox metric server `influxdb-http` to send metrics to `10.10.10.40:8086`.
+6. Renders the managed dashboard JSON from repo and imports it into Grafana over the local Grafana API.
+7. Mirrors the Proxmox writer token to `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/proxmox-writer.token` on the control machine.
+8. Creates or updates the Proxmox metric server `influxdb-http` to send metrics to `10.10.10.40:8086`.
 
 ## Operator Access Flow
 
-Start a local SSH port forward to Grafana:
+Option 1, use the published Grafana URL:
+
+Log in at [https://grafana.lv3.org](https://grafana.lv3.org).
+
+Option 2, use a local SSH port forward to Grafana:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@65.108.75.123 ops@10.10.10.40 -L 3000:127.0.0.1:3000 -N
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 -L 3000:127.0.0.1:3000 -N
 ```
 
 Retrieve the managed Grafana admin password:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@65.108.75.123 ops@10.10.10.40 'sudo cat /etc/lv3/monitoring/grafana-admin-password'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'sudo cat /etc/lv3/monitoring/grafana-admin-password'
 ```
 
 Then log in at [http://127.0.0.1:3000](http://127.0.0.1:3000) with:
@@ -57,25 +63,31 @@ make syntax-check-monitoring
 Verify the monitoring services on VM `140`:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@65.108.75.123 ops@10.10.10.40 'systemctl is-active influxdb grafana-server'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'systemctl is-active influxdb grafana-server'
 ```
 
 Verify the Grafana health endpoint locally on the guest:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@65.108.75.123 ops@10.10.10.40 'curl -fsS http://127.0.0.1:3000/api/health'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'curl -fsS http://127.0.0.1:3000/api/health'
+```
+
+Verify the managed dashboard exists and has the expected title:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'curl -fsS -u admin:$(sudo cat /etc/lv3/monitoring/grafana-admin-password) http://127.0.0.1:3000/api/dashboards/uid/lv3-platform-overview'
 ```
 
 Verify the Proxmox metric server definition on the host:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@65.108.75.123 'sudo pvesh get /cluster/metrics/server/influxdb-http --output-format json'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo pvesh get /cluster/metrics/server/influxdb-http --output-format json'
 ```
 
 Verify that recent Proxmox metrics are arriving in InfluxDB:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@65.108.75.123 ops@10.10.10.40 'sudo influx query --host http://127.0.0.1:8086 --org lv3 --token "$(sudo cat /etc/lv3/monitoring/influxdb-operator.token)" '\''from(bucket: "proxmox") |> range(start: -15m) |> limit(n: 5)'\'''
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'sudo influx query --host http://127.0.0.1:8086 --org lv3 --token "$(sudo cat /etc/lv3/monitoring/influxdb-operator.token)" '\''from(bucket: "proxmox") |> range(start: -15m) |> limit(n: 5)'\'''
 ```
 
 ## Managed Secrets
