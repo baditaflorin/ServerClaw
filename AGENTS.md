@@ -16,13 +16,15 @@ Both ChatGPT and Claude may be used in this repo. Work as if another assistant w
 6. Keep README status and next steps current when the server state materially changes.
 7. Run parallel implementation through `workstreams.yaml` and `docs/workstreams/`, not through hidden chat context.
 8. One chat thread should normally own one workstream, one branch, and preferably one git worktree.
-9. Bump `VERSION` when work is merged to `main`, not for every branch-local change.
-10. Bump `platform_version` in `versions/stack.yaml` only when merged work is actually applied live from `main`.
-11. Update `changelog.md` whenever `VERSION` changes, and use the `Unreleased` section for merged notes that have not yet been cut into a numbered release.
-12. When a live change is actually applied, finish the turn by committing it, pushing it to GitHub, and updating the relevant release/workstream state unless explicitly blocked.
-13. Keep everything DRY: centralize shared facts, avoid repeated shell snippets, and refactor duplication early.
-14. Keep everything structurally solid: separate concerns, prefer small reversible changes, and do not mix bootstrap, security, storage, and Proxmox object management in one opaque step.
-15. Every ADR must record both decision status and implementation state, including the first repo version, first platform version, and date where implementation became true.
+9. Workstream branches must not rewrite shared release files unless the task is explicitly the integration step.
+10. The protected integration files are `VERSION`, release sections in `changelog.md`, canonical observed state in `versions/stack.yaml`, and top-level status summaries in `README.md`.
+11. Bump `VERSION` when work is merged to `main`, not for every branch-local change.
+12. Bump `platform_version` in `versions/stack.yaml` only when merged work is actually applied live from `main`.
+13. Update `changelog.md` whenever `VERSION` changes, and use the `Unreleased` section for merged notes that have not yet been cut into a numbered release.
+14. When a live change is actually applied, finish the turn by committing it, pushing it to GitHub, and updating the relevant release/workstream state unless explicitly blocked.
+15. Keep everything DRY: centralize shared facts, avoid repeated shell snippets, and refactor duplication early.
+16. Keep everything structurally solid: separate concerns, prefer small reversible changes, and do not mix bootstrap, security, storage, and Proxmox object management in one opaque step.
+17. Every ADR must record both decision status and implementation state, including the first repo version, first platform version, and date where implementation became true.
 
 ## Current Infrastructure Context
 
@@ -64,14 +66,14 @@ Treat the next phase as ingress, security, backup, and API automation work.
 
 When making meaningful infrastructure decisions, update:
 
-- `README.md`
+- `README.md` only when changing integrated `main` truth
 - `docs/adr/`
 - `docs/runbooks/`
 - `docs/workstreams/` when the change is part of an active workstream
 - `workstreams.yaml`
 - `VERSION` when merging to `main`
 - `changelog.md` when `VERSION` changes
-- `versions/stack.yaml`
+- `versions/stack.yaml` only for merged truth or verified live state
 - a Git push if the change was applied live
 
 When adding automation later, prefer a structure like:

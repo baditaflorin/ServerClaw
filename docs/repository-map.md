@@ -23,6 +23,15 @@ Read these in order when picking up the repository cold:
 - [changelog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/changelog.md): release-by-release history
 - [workstreams.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml): active branch-level implementation streams
 
+### Protected integration files
+
+These files are integration-owned and should normally be edited only during merge/release work on `main`:
+
+- [VERSION](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/VERSION)
+- [changelog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/changelog.md)
+- [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml)
+- [README.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/README.md)
+
 ### Decision history
 
 - [docs/adr](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr): architectural decisions and their implementation status
@@ -71,9 +80,9 @@ Minimum expected updates for a meaningful infrastructure change:
 - relevant runbook
 - relevant ADR if the change is architectural
 - relevant workstream file and `workstreams.yaml` if the change is in flight on a branch
-- [README.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/README.md) if the current-state summary changed
+- [README.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/README.md) if the integrated current-state summary changed
 - [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml) if `main` truth or observed state changed
-- [VERSION](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/VERSION) and [changelog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/changelog.md) when cutting a `main` release
+- [VERSION](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/VERSION) and [changelog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/changelog.md) only when cutting a `main` release
 - commit and push if the change was applied to the live platform
 
 ## Known Gaps

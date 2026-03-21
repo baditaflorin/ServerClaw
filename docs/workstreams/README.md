@@ -9,6 +9,26 @@ This directory exists to make parallel implementation safe.
 - one active workstream should usually have one dedicated branch and one dedicated git worktree
 - `workstreams.yaml` is the machine-readable registry
 - the files in this directory are the human-readable handoff documents
+- protected release files are reconciled later on `main`, not continuously on every branch
+
+## Branch Boundaries
+
+Workstream branches are expected to update:
+
+- implementation code for their own scope
+- their own ADR changes if needed
+- their own runbook material
+- their own workstream file
+- their own `workstreams.yaml` entry
+
+Workstream branches should avoid updating:
+
+- `VERSION`
+- numbered release sections in `changelog.md`
+- canonical observed-state sections in `versions/stack.yaml`
+- top-level integrated summaries in `README.md`
+
+Those are integration surfaces and should normally be updated only when work is merged to `main`.
 
 ## Required Fields Per Workstream
 

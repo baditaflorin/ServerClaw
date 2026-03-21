@@ -55,17 +55,18 @@ Use these defaults unless a runbook or break-glass situation explicitly requires
 2. Use one branch and preferably one worktree per workstream.
 3. Change the automation first when feasible.
 4. Update the workstream doc and registry while the work is in progress.
-5. Merge to `main`, then bump `VERSION`.
-6. Apply merged work live, then bump `platform_version` and refresh observed state.
+5. Leave protected integration files alone unless you are doing the merge/integration step.
+6. Merge to `main`, then bump `VERSION`.
+7. Apply merged work live, then bump `platform_version` and refresh observed state.
 
 At minimum, review whether these files need updates:
 
 - [README.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/README.md)
 - [workstreams.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml)
 - a workstream file in [docs/workstreams](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams)
-- [VERSION](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/VERSION) when merging to `main`
-- [changelog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/changelog.md) when `VERSION` changes
-- [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml)
+- [VERSION](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/VERSION) only during integration to `main`
+- [changelog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/changelog.md) only during integration to `main`
+- [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml) only for merged truth or verified live state
 - a runbook in [docs/runbooks](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks)
 - an ADR in [docs/adr](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr)
 
@@ -88,6 +89,7 @@ Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/M
 - repo and platform versioning remain separate
 - ADRs record both decision state and implementation state
 - branch workstream state lives in `workstreams.yaml` and `docs/workstreams/`
+- protected integration files are changed only during merge/integration
 - shared values stay in inventory and group vars rather than copied into many tasks
 - live one-off shell changes are either codified immediately or explicitly documented as temporary
 - secrets and ephemeral provider passwords do not get committed

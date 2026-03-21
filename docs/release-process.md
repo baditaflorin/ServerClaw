@@ -13,6 +13,7 @@ This repository now supports parallel ADR implementation. That requires a clear 
    - update the workstream document while implementation is in progress
    - do not bump `VERSION` just because a branch changes
    - do not update `versions/stack.yaml` with speculative branch-only platform state
+   - do not rewrite shared release files from a workstream branch
 2. Merge phase
    - merge the completed workstream to `main`
    - bump `VERSION` once on `main`
@@ -25,6 +26,22 @@ This repository now supports parallel ADR implementation. That requires a clear 
    - update observed state in `versions/stack.yaml`
    - mark the workstream as `live_applied: true`
 
+## Protected Integration Files
+
+These files are owned by the integration step on `main`, not by normal workstream branches:
+
+- `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/VERSION`
+- release sections in `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/changelog.md`
+- canonical observed-state and release-track sections in `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml`
+- top-level integrated status summaries in `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/README.md`
+
+Workstream branches should usually change:
+
+- their own automation and tests
+- their own ADR and runbook material
+- their own file in `docs/workstreams/`
+- their own entry in `workstreams.yaml`
+
 ## Integration Gate
 
 Before merging a workstream to `main`, confirm:
@@ -34,6 +51,12 @@ Before merging a workstream to `main`, confirm:
 - the touched ADR and runbook changes are committed
 - shared-surface conflicts are resolved
 - it is clear whether the change is repo-only or also live-applied
+
+## Integration Ownership
+
+- one human or one assistant thread should own the actual merge to `main`
+- if several workstreams are moving quickly, use a temporary `codex/integration` branch to combine and test before merging to `main`
+- do not let multiple workstream threads independently rewrite protected integration files
 
 ## Changelog Policy
 

@@ -10,6 +10,17 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 - use this section on `main` for merged notes that have not yet been cut into a numbered release
 
+## 0.16.0 - 2026-03-22
+
+- clarified branch reconciliation rules for parallel workstreams
+- marked `VERSION`, numbered changelog releases, canonical observed state, and top-level README summaries as protected integration files
+- documented that only the merge/integration step should rewrite those shared files
+- documented the option of a temporary `codex/integration` branch when several workstreams need to be combined before `main`
+
+Platform impact:
+
+- none
+
 ## 0.15.0 - 2026-03-22
 
 - added a parallel workstream model so multiple ADRs can be implemented in separate branches and chats

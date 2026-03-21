@@ -128,7 +128,7 @@ This repo now tracks three distinct things:
 
 Current values on `main`:
 
-- `repo_version`: `0.15.0`
+- `repo_version`: `0.16.0`
 - `platform_version`: `0.11.0`
 - `observed_os`: `Debian 13`
 - `observed_proxmox_installed`: `true`
@@ -152,6 +152,7 @@ This repository now supports parallel implementation:
 - active implementation is tracked in [workstreams.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml)
 - each active implementation stream gets its own file in [docs/workstreams](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams)
 - each workstream should run on its own `codex/` branch and preferably its own git worktree
+- shared release files are reconciled during integration on `main`, not rewritten independently on every workstream branch
 - `VERSION` is bumped on merge to `main`, not on every branch-local change
 - `platform_version` is bumped only after merged work is applied live from `main`
 
