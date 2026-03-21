@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.14.0
+repo_version: 0.15.0
 platform_version: 0.11.0
 
 desired_state:
@@ -158,8 +158,13 @@ observed_state:
       ssh_proxyjump_via_proxmox_host_working: true
 
 release_tracks:
+  delivery_model:
+    mode: parallel_workstreams
+    branch_prefix: codex/
+    repo_version_bump_on: merge_to_main
+    platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.14.0
+    current: 0.15.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.11.0

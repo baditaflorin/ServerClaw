@@ -45,22 +45,26 @@ Use these defaults unless a runbook or break-glass situation explicitly requires
 1. [README.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/README.md)
 2. [AGENTS.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/AGENTS.md)
 3. [docs/repository-map.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/repository-map.md)
-4. relevant ADRs in [docs/adr](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr)
-5. relevant runbooks in [docs/runbooks](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks)
+4. [workstreams.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml)
+5. relevant ADRs in [docs/adr](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr)
+6. relevant runbooks in [docs/runbooks](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks)
 
 ## How To Make A Safe Change
 
-1. Identify the architectural source of truth.
-2. Change the automation first when feasible.
-3. Apply and verify the change.
-4. Record the result in the repository in the same turn.
-5. If the change was applied live, bump the repo version and push the commit in the same turn unless blocked.
+1. Identify or create the workstream before changing code.
+2. Use one branch and preferably one worktree per workstream.
+3. Change the automation first when feasible.
+4. Update the workstream doc and registry while the work is in progress.
+5. Merge to `main`, then bump `VERSION`.
+6. Apply merged work live, then bump `platform_version` and refresh observed state.
 
 At minimum, review whether these files need updates:
 
 - [README.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/README.md)
-- [VERSION](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/VERSION)
-- [changelog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/changelog.md)
+- [workstreams.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml)
+- a workstream file in [docs/workstreams](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams)
+- [VERSION](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/VERSION) when merging to `main`
+- [changelog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/changelog.md) when `VERSION` changes
 - [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml)
 - a runbook in [docs/runbooks](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks)
 - an ADR in [docs/adr](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr)
@@ -83,6 +87,7 @@ Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/M
 
 - repo and platform versioning remain separate
 - ADRs record both decision state and implementation state
+- branch workstream state lives in `workstreams.yaml` and `docs/workstreams/`
 - shared values stay in inventory and group vars rather than copied into many tasks
 - live one-off shell changes are either codified immediately or explicitly documented as temporary
 - secrets and ephemeral provider passwords do not get committed

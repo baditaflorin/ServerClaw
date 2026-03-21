@@ -6,6 +6,21 @@ The repo uses semantic versioning for repository maturity and operating contract
 
 Historical entries before `0.10.0` are reconstructed from repository history, ADR metadata, and observed platform evolution.
 
+## Unreleased
+
+- use this section on `main` for merged notes that have not yet been cut into a numbered release
+
+## 0.15.0 - 2026-03-22
+
+- added a parallel workstream model so multiple ADRs can be implemented in separate branches and chats
+- added `workstreams.yaml` as the machine-readable implementation registry
+- added workstream docs, a template, and an explicit release process
+- updated repository rules so `VERSION` is bumped on merge to `main`, while `platform_version` is bumped only after live apply from `main`
+
+Platform impact:
+
+- none
+
 ## 0.14.0 - 2026-03-21
 
 - fully implemented ADR 0007 with a durable Proxmox API automation identity

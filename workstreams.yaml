@@ -1,0 +1,48 @@
+schema_version: 1.0.0
+
+delivery_model:
+  mode: parallel_workstreams
+  branch_prefix: codex/
+  workstream_doc_root: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams
+  registry_owner: main
+
+release_policy:
+  repo_version_bump_on: merge_to_main
+  platform_version_bump_on: live_apply_from_main
+  changelog_working_section: Unreleased
+  versions_stack_branch_policy: main_only
+
+workstreams:
+  - id: adr-0011-monitoring
+    adr: 0011
+    title: Monitoring stack rollout
+    status: ready
+    owner: unassigned
+    branch: codex/adr-0011-monitoring
+    worktree_path: ../proxmox_florin_server-monitoring
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md
+    depends_on: []
+    conflicts_with: []
+    shared_surfaces:
+      - monitoring_vm
+      - grafana_dns
+      - proxmox_metrics
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0014-tailscale
+    adr: 0014
+    title: Tailscale private access rollout
+    status: ready
+    owner: unassigned
+    branch: codex/adr-0014-tailscale
+    worktree_path: ../proxmox_florin_server-tailscale
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0014-tailscale.md
+    depends_on: []
+    conflicts_with: []
+    shared_surfaces:
+      - proxmox_host_access
+      - guest_access
+      - private_network
+    ready_to_merge: false
+    live_applied: false

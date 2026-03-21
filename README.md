@@ -91,6 +91,9 @@ ops@pam protected by TOTP
 - [Changelog](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/changelog.md)
 - [Repository map](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/repository-map.md)
 - [Assistant operator guide](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/assistant-operator-guide.md)
+- [Release process](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-process.md)
+- [Workstreams registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml)
+- [Workstreams guide](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/README.md)
 - [Initial access runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/initial-access.md)
 - [Configure public ingress runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-public-ingress.md)
 - [Complete security baseline runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/complete-security-baseline.md)
@@ -113,6 +116,7 @@ ops@pam protected by TOTP
 - [ADR 0016: Provision guests from Debian 13 cloud template](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0016-provision-guests-from-debian-13-cloud-template.md)
 - [ADR 0017: ADR lifecycle and implementation metadata](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0017-adr-lifecycle-and-implementation-metadata.md)
 - [ADR 0018: Non-root operations for host and guests](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0018-non-root-operations-for-host-and-guests.md)
+- [ADR 0019: Parallel ADR delivery with workstreams](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0019-parallel-adr-delivery-with-workstreams.md)
 
 ## Versioning
 
@@ -122,9 +126,9 @@ This repo now tracks three distinct things:
 - Desired platform and observed host state: [`versions/stack.yaml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml)
 - Versioning rules: [ADR 0008](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0008-versioning-model-for-repo-and-host.md)
 
-Current values:
+Current values on `main`:
 
-- `repo_version`: `0.14.0`
+- `repo_version`: `0.15.0`
 - `platform_version`: `0.11.0`
 - `observed_os`: `Debian 13`
 - `observed_proxmox_installed`: `true`
@@ -140,6 +144,17 @@ ADR metadata now tracks both acceptance and implementation:
 
 Repository releases are summarized in [changelog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/changelog.md).
 
+## Delivery Model
+
+This repository now supports parallel implementation:
+
+- ADRs remain the architecture truth
+- active implementation is tracked in [workstreams.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml)
+- each active implementation stream gets its own file in [docs/workstreams](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams)
+- each workstream should run on its own `codex/` branch and preferably its own git worktree
+- `VERSION` is bumped on merge to `main`, not on every branch-local change
+- `platform_version` is bumped only after merged work is applied live from `main`
+
 ## Engineering stance
 
 This repository is intentionally opinionated:
@@ -148,6 +163,11 @@ This repository is intentionally opinionated:
 - explicit versioning for repo and platform state
 - small reversible infrastructure changes
 - clear separation between bootstrap, security, storage, networking, and Proxmox object management
+
+## Active Parallel Work
+
+- [ADR 0011 monitoring workstream](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
+- [ADR 0014 Tailscale workstream](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0014-tailscale.md)
 
 ## Planned workflow
 

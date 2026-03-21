@@ -41,12 +41,14 @@ Repository version (`VERSION`):
 - bump `MAJOR` for breaking changes to automation contracts, repository structure, inventory conventions, or operating procedures
 - bump `MINOR` for backward-compatible capabilities such as new roles, new playbooks, or new documented workflows
 - bump `PATCH` for corrections that do not materially change how the platform is operated
+- cut repository version changes on `main`, not for every branch-local workstream commit
 
 Platform version (`versions/stack.yaml`):
 
 - bump `MAJOR` for disruptive platform shifts such as a new Proxmox major, storage model rewrite, or network architecture change
 - bump `MINOR` for additive infrastructure capabilities such as backups, monitoring, additional managed networks, or hardened access controls
 - bump `PATCH` for safe incremental platform adjustments and state reconciliations
+- bump only after merged work is actually applied live
 
 Observed state:
 
@@ -56,5 +58,6 @@ Observed state:
 ## Consequences
 
 - Agents and humans can discuss repository maturity separately from platform maturity.
-- Commits that change infrastructure intent should update the version files explicitly.
+- `main` becomes the release boundary for repository versioning.
+- Branch-local work should track progress in workstream docs and the workstream registry instead of forcing version churn.
 - The version registry becomes the first place to check before making changes or troubleshooting drift.
