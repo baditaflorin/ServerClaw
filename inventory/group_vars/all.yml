@@ -1,5 +1,5 @@
-repo_version: 0.8.0
-platform_version: 0.6.0
+repo_version: 0.10.0
+platform_version: 0.8.0
 
 proxmox_release_major: 9
 proxmox_suite: trixie
@@ -41,3 +41,9 @@ proxmox_snippets_storage_id: local
 proxmox_guest_ci_user: ops
 proxmox_guest_nameserver: 1.1.1.1
 proxmox_guest_searchdomain: lv3.org
+
+proxmox_host_admin_user: ops
+proxmox_host_admin_comment: LV3 Operations
+proxmox_host_admin_shell: /bin/bash
+proxmox_host_sudo_group: sudo
+proxmox_host_ssh_hardening_file: /etc/ssh/sshd_config.d/90-lv3-hardening.conf

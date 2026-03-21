@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.8.0
-platform_version: 0.6.0
+repo_version: 0.10.0
+platform_version: 0.8.0
 
 desired_state:
   host_id: proxmox_florin
@@ -59,6 +59,13 @@ observed_state:
   checked_at: 2026-03-21
   access:
     ssh_bootstrap_key_working: true
+    host_ops_user_working: true
+    host_ssh_password_authentication: false
+    root_ssh_break_glass_key_only: true
+    guest_ops_user_working_via_proxmox_jump: true
+    guest_root_ssh_disabled: true
+    guest_ssh_password_authentication: false
+    proxmox_ops_pam_user_present: true
   os:
     banner: Linux Debian-trixie-latest-amd64-base 6.17.13-2-pve
     kernel: 6.17.13-2-pve
@@ -116,8 +123,8 @@ observed_state:
 
 release_tracks:
   repo_versioning:
-    current: 0.8.0
+    current: 0.10.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.6.0
+    current: 0.8.0
     meaning: intended platform release for the actual server configuration

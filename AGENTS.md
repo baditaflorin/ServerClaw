@@ -33,7 +33,8 @@ Both ChatGPT and Claude may be used in this repo. Work as if another assistant w
 As of 2026-03-21:
 
 - Debian 13 is installed and reachable over SSH.
-- `root` login works with the dedicated repo-local bootstrap key.
+- routine host login now uses `ops` with `sudo`, not `root`.
+- `root` remains key-only break-glass on the Proxmox host.
 - Proxmox VE is installed from Debian packages.
 - Observed kernel/banner: `Linux Debian-trixie-latest-amd64-base 6.17.13-2-pve`.
 - Observed Proxmox manager version: `9.1.6`.
@@ -41,8 +42,10 @@ As of 2026-03-21:
 - `vmbr0` now carries the public uplink and `vmbr10` provides the internal `10.10.10.0/24` guest network.
 - Host-side IPv4 forwarding and NAT are enabled for guest egress.
 - Template VM `9000` exists and the initial guest set (`110/120/130/140`) is provisioned and running.
-- SSH to private guests through the Proxmox host works with the bootstrap key.
-- The next risk area is ingress forwarding, firewall policy, and steady-state operator access, not base VM creation.
+- SSH password authentication is disabled on the host.
+- Debian guests are intended to be managed as `ops` through the Proxmox jump path, not as `root`.
+- `ops@pam` exists with `PVEAdmin` for routine Proxmox administration.
+- The next risk area is ingress forwarding, firewall policy, TFA, notifications, and steady-state Tailscale access, not base VM creation.
 
 Treat the next phase as ingress, security, backup, and API automation work.
 
@@ -70,8 +73,9 @@ When implementing automation:
 - split responsibilities by concern
 - remove duplication when it appears instead of documenting around it
 
-Do not claim the server is ready for Proxmox installation until:
+Do not claim the platform is ready for routine production use until:
 
 1. The running OS is confirmed to be the intended fresh Debian 13 install.
 2. The bootstrap path is represented in version-controlled automation.
 3. The Proxmox security baseline and access model are documented and applied.
+4. Routine automation defaults to named non-root identities instead of `root`.

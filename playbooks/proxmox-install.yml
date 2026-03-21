@@ -18,6 +18,9 @@
         - repository
     - role: proxmox_kernel
     - role: proxmox_platform
+    - role: proxmox_access
+      tags:
+        - access
     - role: proxmox_network
       tags:
         - network

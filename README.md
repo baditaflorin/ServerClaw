@@ -6,12 +6,12 @@ The preferred bootstrap path is now Hetzner Rescue System plus `installimage`, n
 
 ## Current status
 
-Debian 13 is installed on the host, SSH access as `root` works with the dedicated repo-local bootstrap key, and Proxmox VE is now installed from the Debian package path.
+Debian 13 is installed on the host, Proxmox VE is installed from the Debian package path, and routine SSH/Ansible access now uses the non-root `ops` identity instead of `root`.
 
 Verified on 2026-03-21:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes root@65.108.75.123
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@65.108.75.123
 ```
 
 Observed remote kernel:
@@ -57,6 +57,17 @@ Initial guest provisioning is now implemented and applied:
 
 The private SSH jump path through the Proxmox host to the guests is working.
 
+The current access posture is:
+
+```text
+ops SSH + sudo for routine host work
+ops@pam for routine Proxmox administration
+ops SSH + sudo for guest VMs
+root key-only break-glass on the Proxmox host
+root disabled for guest SSH
+password SSH disabled on host and guests
+```
+
 ## Documents
 
 - [Initial access runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/initial-access.md)
@@ -77,6 +88,7 @@ The private SSH jump path through the Proxmox host to the guests is working.
 - [ADR 0015: lv3.org DNS and subdomain model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0015-lv3-org-dns-and-subdomain-model.md)
 - [ADR 0016: Provision guests from Debian 13 cloud template](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0016-provision-guests-from-debian-13-cloud-template.md)
 - [ADR 0017: ADR lifecycle and implementation metadata](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0017-adr-lifecycle-and-implementation-metadata.md)
+- [ADR 0018: Non-root operations for host and guests](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0018-non-root-operations-for-host-and-guests.md)
 
 ## Versioning
 
@@ -88,8 +100,8 @@ This repo now tracks three distinct things:
 
 Current values:
 
-- `repo_version`: `0.8.0`
-- `platform_version`: `0.6.0`
+- `repo_version`: `0.10.0`
+- `platform_version`: `0.8.0`
 - `observed_os`: `Debian 13`
 - `observed_proxmox_installed`: `true`
 - `observed_pve_manager_version`: `9.1.6`
@@ -115,8 +127,8 @@ This repository is intentionally opinionated:
 
 1. Inspect disks, networking, and current Debian 13 base state.
 2. Configure public ingress forwarding to the NGINX VM.
-3. Apply the Proxmox host security baseline.
-4. Establish the steady-state operator access path, replacing the temporary jump-host-only flow.
+3. Finish the remaining Proxmox host security baseline around firewall, TFA, TLS, and notifications.
+4. Establish the steady-state operator access path with Tailscale, replacing the temporary jump-host-only flow.
 5. Configure storage, backups, and notifications.
 6. Commit the resulting automation and operational docs in this repo.
 
@@ -134,7 +146,11 @@ The first executable automation scaffold now exists:
 - [roles/proxmox_platform/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_platform/tasks/main.yml)
 - [roles/proxmox_network/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_network/tasks/main.yml)
 - [roles/proxmox_guests/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_guests/tasks/main.yml)
+- [roles/linux_access/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/linux_access/tasks/main.yml)
+- [roles/proxmox_access/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_access/tasks/main.yml)
 - [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/Makefile)
 - [docs/runbooks/install-proxmox.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/install-proxmox.md)
 - [docs/runbooks/configure-proxmox-network.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-proxmox-network.md)
 - [docs/runbooks/provision-guests.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/provision-guests.md)
+- [docs/runbooks/harden-access.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/harden-access.md)
+- [playbooks/guest-access.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/guest-access.yml)
