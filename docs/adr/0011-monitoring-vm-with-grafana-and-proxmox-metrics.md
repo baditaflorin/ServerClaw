@@ -58,6 +58,15 @@ This split is deliberate:
 - Proxmox is the source of truth for virtualization/platform metrics
 - guest collectors are the source of truth for in-guest process, container, and OS metrics
 
+## Phase-one implementation decisions
+
+The first converged implementation keeps the monitoring stack internal-only.
+
+- Grafana runs on VM `140` and is reached through the existing SSH jump path.
+- InfluxDB 2 receives Proxmox metrics through the native Proxmox external metric server integration over HTTP on the private network.
+- Grafana is provisioned with an InfluxDB data source automatically from locally generated secrets on the monitoring VM.
+- Public publication of Grafana is deferred until the private-access and ingress posture is settled.
+
 ## Scope of the first monitoring rollout
 
 Phase one should cover at least:
@@ -96,7 +105,6 @@ This ADR defines the topology and data-flow direction. Follow-up automation shou
 
 - VM sizing for the monitoring node
 - retention policy for metrics and logs
-- Grafana admin/auth model
 - alert destinations
 - exact Alloy/exporter deployment strategy on each monitored guest
 

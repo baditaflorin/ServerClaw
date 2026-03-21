@@ -73,3 +73,38 @@ proxmox_api_token_acl_path: /
 proxmox_api_token_privsep: true
 proxmox_api_token_local_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-api
 proxmox_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-api/lv3-automation-primary.json
+
+monitoring_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring
+monitoring_proxmox_writer_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/proxmox-writer.token
+monitoring_grafana_repo_key_url: https://apt.grafana.com/gpg-full.key
+monitoring_grafana_repo_keyring: /etc/apt/keyrings/grafana.asc
+monitoring_grafana_repo_file: /etc/apt/sources.list.d/grafana.list
+monitoring_influxdb_repo_key_url: https://repos.influxdata.com/influxdata-archive_compat.key
+monitoring_influxdb_repo_keyring: /etc/apt/keyrings/influxdata.asc
+monitoring_influxdb_repo_file: /etc/apt/sources.list.d/influxdata.list
+monitoring_stack_packages:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gpg
+  - grafana
+  - influxdb2
+  - influxdb2-cli
+monitoring_stack_dir: /etc/lv3/monitoring
+monitoring_grafana_admin_user: admin
+monitoring_grafana_admin_password_file: /etc/lv3/monitoring/grafana-admin-password
+monitoring_grafana_admin_password_hash_file: /var/lib/grafana/.lv3-admin-password.sha256
+monitoring_grafana_datasource_name: InfluxDB Proxmox
+monitoring_grafana_datasource_token_file: /etc/lv3/monitoring/grafana-reader.token
+monitoring_grafana_provisioning_file: /etc/grafana/provisioning/datasources/influxdb-proxmox.yml
+monitoring_influxdb_url: http://127.0.0.1:8086
+monitoring_influxdb_org: lv3
+monitoring_influxdb_bucket: proxmox
+monitoring_influxdb_admin_user: lv3-monitoring-admin
+monitoring_influxdb_admin_password_file: /etc/lv3/monitoring/influxdb-admin-password
+monitoring_influxdb_operator_token_file: /etc/lv3/monitoring/influxdb-operator.token
+monitoring_influxdb_proxmox_writer_token_file: /etc/lv3/monitoring/influxdb-proxmox-writer.token
+monitoring_influxdb_proxmox_writer_description: lv3-proxmox-writer
+monitoring_influxdb_grafana_reader_description: lv3-grafana-reader
+proxmox_metrics_server_id: influxdb-http
+proxmox_metrics_token_hash_file: /root/.lv3-proxmox-metrics-token.sha256

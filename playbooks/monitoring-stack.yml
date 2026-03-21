@@ -1,0 +1,23 @@
+---
+- name: Converge monitoring VM stack
+  hosts: monitoring-lv3
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Ensure target guest is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+  roles:
+    - role: monitoring_vm
+
+- name: Wire Proxmox metrics into the monitoring stack
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: proxmox_metrics
