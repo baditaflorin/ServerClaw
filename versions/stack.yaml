@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.19.0
+repo_version: 0.20.0
 platform_version: 0.12.0
 
 desired_state:
@@ -42,8 +42,10 @@ desired_state:
       - 80
       - 443
   operator_access:
-    bootstrap_method: ssh_jump_via_proxmox_host
-    steady_state_method: tailscale_private_access
+    bootstrap_method: ssh_via_public_ipv4_or_proxmox_jump
+    steady_state_host_method: ssh_to_proxmox_over_tailscale
+    steady_state_host_target: 100.118.189.95
+    private_guest_access_method: tailscale_subnet_route_when_needed
     private_build_vm: 10.10.10.30
   automation_access:
     proxmox_api_user: lv3-automation@pve
@@ -53,7 +55,7 @@ desired_state:
     proxmox_api_secret_storage: controller_local_only
   security:
     management_sources:
-      - 90.95.35.115/32
+      - 100.64.0.0/10
       - 10.10.10.0/24
     proxmox_tfa_user: ops@pam
     proxmox_tls_hostname: proxmox.lv3.org
@@ -74,6 +76,8 @@ observed_state:
   access:
     ssh_bootstrap_key_working: true
     host_ops_user_working: true
+    host_ops_user_working_via_tailscale: false
+    host_ops_user_working_via_public_ipv4_from_current_workstation: false
     host_ssh_password_authentication: false
     root_ssh_break_glass_key_only: true
     guest_ops_user_working_via_proxmox_jump: true
@@ -114,11 +118,12 @@ observed_state:
       - 443
     management_firewall_enabled: true
     management_sources:
-      - 90.95.35.115/32
+      - 100.64.0.0/10
       - 10.10.10.0/24
     tailscale_installed: true
     tailscale_state: AuthenticatedRouteApprovalPending
     tailscale_tail_ipv4: 100.118.189.95
+    tailscale_host_admin_path_working: false
     tailscale_advertised_routes:
       - 10.10.10.0/24
     tailscale_private_subnet_route_distributed: false
@@ -181,7 +186,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.19.0
+    current: 0.20.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.12.0

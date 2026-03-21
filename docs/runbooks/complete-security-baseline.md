@@ -7,6 +7,7 @@ This runbook captures the executable path used to complete the Proxmox host secu
 ## Result
 
 - Proxmox host firewall enabled with management access restricted to declared source ranges
+- routine host administration expected over the Proxmox Tailscale IP instead of a location-specific public-IP allowlist
 - `ops@pam` protected by TOTP
 - ACME certificate issued for `proxmox.lv3.org`
 - notification endpoint and catch-all matcher configured
@@ -20,6 +21,7 @@ HETZNER_DNS_API_TOKEN=... make harden-security
 ## Current implementation details
 
 - Management firewall source ranges are defined in [inventory/group_vars/all.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/group_vars/all.yml).
+- The steady-state management source is the Tailscale CGNAT range, with the host reached on `100.118.189.95`.
 - The ACME certificate uses the Hetzner DNS plugin and the `proxmox.lv3.org` hostname.
 - Notifications currently use a sendmail endpoint to `baditaflorin@gmail.com`.
 - TOTP material for `ops@pam` is generated locally and stored outside git in:
@@ -31,6 +33,7 @@ Firewall policy:
 
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@65.108.75.123 'sudo pve-firewall status'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'hostname && sudo pve-firewall status'
 ```
 
 Certificate:

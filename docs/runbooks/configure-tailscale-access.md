@@ -2,13 +2,17 @@
 
 ## Purpose
 
-This runbook converges ADR 0014 by making the Proxmox host the Tailscale subnet router for the private guest network `10.10.10.0/24`.
+This runbook converges ADR 0014 by making the Proxmox host reachable on its Tailscale private IP for routine administration and, when approved in the tailnet, the subnet router for the private guest network `10.10.10.0/24`.
 
-The steady-state operator path is direct private-IP access over Tailscale, especially to the build VM at `10.10.10.30`.
+The steady-state operator path is:
+
+- first: direct SSH to the Proxmox host over its Tailscale IP
+- second: direct private-IP access to guests over Tailscale only when the subnet route is approved and needed
 
 ## Result
 
 - `tailscaled` is installed on `proxmox_florin`
+- operator laptops can reach the Proxmox host on its Tailscale IP from any network
 - the Proxmox host advertises `10.10.10.0/24` into the tailnet
 - operator laptops reach guests directly on `10.10.10.0/24`
 - the inventory defaults to direct guest SSH without a jump host
@@ -49,32 +53,44 @@ If the host is not already attached to the tailnet, the helper prints the Tailsc
 ## Operator Onboarding
 
 1. Install Tailscale on the operator laptop and sign in to the same tailnet as the Proxmox host.
-2. Accept the route to `10.10.10.0/24`.
-3. On Linux laptops, enable route acceptance explicitly:
+2. Verify direct host administration first:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95
+```
+
+3. Accept the route to `10.10.10.0/24` only if direct guest access is required.
+4. On Linux laptops, enable route acceptance explicitly:
 
 ```bash
 sudo tailscale up --accept-routes=true
 ```
 
-4. Reach the build VM directly over the routed private subnet:
+5. Reach the build VM directly over the routed private subnet:
 
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@10.10.10.30
 ```
 
-5. Once that works, use the normal guest inventory without a jump host override.
+6. Once that works, use the normal guest inventory without a jump host override.
 
 ## Verification
 
 Host-side verification:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@65.108.75.123
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95
 sudo tailscale ip -4
 sudo tailscale status
 ```
 
-Operator-path verification:
+Operator-path verification for the host:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'hostname'
+```
+
+Operator-path verification for direct guest access:
 
 ```bash
 ping -c 3 10.10.10.30
@@ -84,7 +100,8 @@ ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory
 
 Expected result:
 
-- the laptop reaches `10.10.10.30` directly without `ProxyJump`
+- the laptop reaches the Proxmox host over `100.118.189.95` from any network
+- when the subnet route is approved, the laptop reaches `10.10.10.30` directly without `ProxyJump`
 - guest SSH still lands on `ops`
 - the Ansible ad hoc command succeeds with the default inventory path
 

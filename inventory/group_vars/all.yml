@@ -1,4 +1,4 @@
-repo_version: 0.19.0
+repo_version: 0.20.0
 platform_version: 0.12.0
 
 proxmox_release_major: 9
@@ -54,7 +54,7 @@ proxmox_host_admin_shell: /bin/bash
 proxmox_host_sudo_group: sudo
 proxmox_host_ssh_hardening_file: /etc/ssh/sshd_config.d/90-lv3-hardening.conf
 proxmox_management_allowed_sources:
-  - 90.95.35.115/32
+  - 100.64.0.0/10
   - 10.10.10.0/24
 proxmox_notification_email: baditaflorin@gmail.com
 proxmox_notification_author: Proxmox LV3

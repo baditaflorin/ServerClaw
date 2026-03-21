@@ -1,6 +1,7 @@
 host_public_hostname: Debian-trixie-latest-amd64-base
 management_interface: enp7s0
 management_ipv4: 65.108.75.123
+management_tailscale_ipv4: 100.118.189.95
 management_ipv4_cidr: 26
 management_gateway4: 65.108.75.65
 management_ipv6: 2a01:4f9:6b:4b47::2

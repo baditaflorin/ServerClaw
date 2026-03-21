@@ -30,9 +30,11 @@ Stage one: bootstrap access
 
 Stage two: steady-state operator access
 
-- provide laptop access to `10.10.10.0/24` through a Tailscale-based private access path
+- provide stable laptop access to the Proxmox host through its Tailscale private IP from any operator network
+- treat `ssh ops@<proxmox-tail-ip>` as the primary routine host administration path
+- provide laptop access to `10.10.10.0/24` through a Tailscale-based private access path when direct guest access is actually needed
 - terminate that Tailscale access path on the Proxmox host as a subnet router for `10.10.10.0/24`
-- treat direct `ssh ops@10.10.10.30` over the routed private subnet as the normal operator path
+- treat direct `ssh ops@10.10.10.30` over the routed private subnet as an enhancement for private guest workflows, not a prerequisite for stable host administration
 - keep the Proxmox host `ProxyJump` path only as break-glass fallback
 - do not expose the Docker runtime VM, Docker build VM, or monitoring VM directly to the public internet
 - keep the build VM reachable privately for interactive remote work from approved operator machines
@@ -57,8 +59,9 @@ That means:
 
 This ADR still requires live application and verification, but the steady-state implementation model is now defined:
 
+- Routine host administration should succeed over the Proxmox host Tailscale IP even when the operator is away from the original public management IP.
 - Tailscale terminates on the Proxmox host, which advertises `10.10.10.0/24` as a subnet route.
-- Operator laptops join the same tailnet and accept the subnet route before reaching guests.
+- Operator laptops join the same tailnet; accepting the subnet route is only required for direct guest access.
 - Guest automation should default to direct private-IP access over that routed subnet.
 - The Proxmox host jump path remains documented for break-glass use during tailnet outages or route approval delays.
 

@@ -27,7 +27,8 @@ We will apply the following baseline before declaring the node ready for workloa
    - require TFA for human GUI-capable accounts
 3. Proxmox API/UI exposure
    - enable and manage Proxmox firewall rules deliberately
-   - restrict inbound management access to known management source ranges where practical
+   - restrict inbound management access to deliberate management source ranges where practical
+   - prefer Tailscale private addressing for routine host administration instead of public-IP allowlists
    - use trusted TLS certificates, ideally via ACME, before routine browser access
 4. Visibility
    - configure notifications early for host and platform events

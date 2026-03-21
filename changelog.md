@@ -10,6 +10,20 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 - use this section on `main` for merged notes that have not yet been cut into a numbered release
 
+## 0.20.0 - 2026-03-22
+
+- made the Proxmox host Tailscale IP the default routine SSH and Ansible endpoint
+- changed the declared management-source policy from the home public IP to the Tailscale management range
+- updated ADR 0006, ADR 0014, and the access/security runbooks to reflect Tailscale-first host administration
+- recorded that the live cutover is still blocked because `tailscale ping` works but TCP `22` and `8006` to `100.118.189.95` still time out from this workstation
+
+Platform impact:
+
+- the intended routine host administration target is now `100.118.189.95`
+- the public-IP home allowlist is no longer the intended steady-state management path from this repo
+- current live verification is incomplete because both public-IP SSH and Tailscale TCP management access from this workstation are blocked
+- guest subnet routing remains optional and still depends on tailnet route approval
+
 ## 0.19.0 - 2026-03-22
 
 - verified the approved Tailscale host login on the Proxmox node
