@@ -48,11 +48,12 @@ As of 2026-03-21:
 - SSH password authentication is disabled on the host.
 - Debian guests are intended to be managed as `ops` through the Proxmox jump path, not as `root`.
 - `ops@pam` exists with `PVEAdmin` for routine Proxmox administration.
+- `lv3-automation@pve` is the durable Proxmox API automation identity.
 - Proxmox host firewall is enabled with SSH and `8006` restricted to declared management sources.
 - A Let's Encrypt certificate is active for `proxmox.lv3.org`.
 - Notifications are wired through a sendmail endpoint and a catch-all matcher.
 - `ops@pam` has a TOTP factor configured.
-- The next risk area is Tailscale, monitoring, backup policy, and API-token automation, not base VM creation.
+- The next risk area is Tailscale, monitoring, and backup policy, not base VM creation.
 
 Treat the next phase as ingress, security, backup, and API automation work.
 

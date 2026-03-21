@@ -1,9 +1,9 @@
 # ADR 0007: Agent-Oriented Access Model
 
 - Status: Accepted
-- Implementation Status: Partial
-- Implemented In Repo Version: 0.10.0
-- Implemented In Platform Version: 0.8.0
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.14.0
+- Implemented In Platform Version: 0.11.0
 - Implemented On: 2026-03-21
 - Date: 2026-03-21
 
@@ -44,6 +44,7 @@ For agentic operation, every meaningful remote change must satisfy at least one 
 - The bootstrap SSH key should be treated as temporary privileged access, not the long-term operating identity.
 - Follow-up automation must create the durable non-human identity and rotate away from ad hoc direct-root workflows.
 - Proxmox API automation should be preferred for guest, storage, backup, and identity management once the platform is up.
+- The Proxmox API token secret must be stored outside git and treated as controller-local secret material.
 
 ## Sources
 

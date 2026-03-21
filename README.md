@@ -69,6 +69,7 @@ The current access posture is:
 ```text
 ops SSH + sudo for routine host work
 ops@pam for routine Proxmox administration
+lv3-automation@pve API token for durable Proxmox object management
 ops SSH + sudo for guest VMs
 root key-only break-glass on the Proxmox host
 root disabled for guest SSH
@@ -93,6 +94,7 @@ ops@pam protected by TOTP
 - [Initial access runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/initial-access.md)
 - [Configure public ingress runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-public-ingress.md)
 - [Complete security baseline runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/complete-security-baseline.md)
+- [Proxmox API automation runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/proxmox-api-automation.md)
 - [ADR 0001: Bootstrap model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0001-bootstrap-dedicated-host-with-ansible.md)
 - [ADR 0002: Target Proxmox VE 9 on Debian 13](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0002-target-proxmox-ve-9-on-debian-13.md)
 - [ADR 0003: Prefer Rescue plus installimage](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0003-prefer-hetzner-rescue-plus-installimage-for-bootstrap.md)
@@ -122,8 +124,8 @@ This repo now tracks three distinct things:
 
 Current values:
 
-- `repo_version`: `0.13.0`
-- `platform_version`: `0.10.0`
+- `repo_version`: `0.14.0`
+- `platform_version`: `0.11.0`
 - `observed_os`: `Debian 13`
 - `observed_proxmox_installed`: `true`
 - `observed_pve_manager_version`: `9.1.6`
@@ -152,8 +154,8 @@ This repository is intentionally opinionated:
 1. Inspect disks, networking, and current Debian 13 base state.
 2. Establish the steady-state operator access path with Tailscale, replacing the temporary jump-host-only flow.
 3. Implement the monitoring stack on `10.10.10.40`.
-4. Create a durable API-token-based automation identity for Proxmox object management.
-5. Configure storage, backups, and notifications.
+4. Configure storage and backups.
+5. Extend notifications beyond the host baseline where needed.
 6. Commit the resulting automation and operational docs in this repo.
 
 ## Automation
@@ -173,6 +175,7 @@ The first executable automation scaffold now exists:
 - [roles/proxmox_guests/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_guests/tasks/main.yml)
 - [roles/linux_access/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/linux_access/tasks/main.yml)
 - [roles/proxmox_access/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_access/tasks/main.yml)
+- [roles/proxmox_api_access/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_api_access/tasks/main.yml)
 - [roles/proxmox_security/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_security/tasks/main.yml)
 - [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/Makefile)
 - [docs/runbooks/install-proxmox.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/install-proxmox.md)

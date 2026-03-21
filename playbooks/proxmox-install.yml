@@ -31,3 +31,6 @@
     - role: proxmox_security
       tags:
         - security
+    - role: proxmox_api_access
+      tags:
+        - api-access

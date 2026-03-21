@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.13.0
-platform_version: 0.10.0
+repo_version: 0.14.0
+platform_version: 0.11.0
 
 desired_state:
   host_id: proxmox_florin
@@ -45,6 +45,12 @@ desired_state:
     bootstrap_method: ssh_jump_via_proxmox_host
     steady_state_method: tailscale_private_access
     private_build_vm: 10.10.10.30
+  automation_access:
+    proxmox_api_user: lv3-automation@pve
+    proxmox_api_token_id: primary
+    proxmox_api_role: PVEAdmin
+    proxmox_api_privilege_separation: true
+    proxmox_api_secret_storage: controller_local_only
   security:
     management_sources:
       - 90.95.35.115/32
@@ -75,6 +81,9 @@ observed_state:
     guest_ssh_password_authentication: false
     proxmox_ops_pam_user_present: true
     proxmox_ops_pam_tfa_enabled: true
+    proxmox_api_automation_user_present: true
+    proxmox_api_token_present: true
+    proxmox_api_token_verified: true
   os:
     banner: Linux Debian-trixie-latest-amd64-base 6.17.13-2-pve
     kernel: 6.17.13-2-pve
@@ -88,6 +97,8 @@ observed_state:
     api_ui_port: 8006
     tls_hostname: proxmox.lv3.org
     tls_issuer: Let's Encrypt R13
+    automation_api_user: lv3-automation@pve
+    automation_api_token_id: primary
   network:
     wan_bridge: vmbr0
     wan_bridge_active: true
@@ -148,8 +159,8 @@ observed_state:
 
 release_tracks:
   repo_versioning:
-    current: 0.13.0
+    current: 0.14.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.10.0
+    current: 0.11.0
     meaning: intended platform release for the actual server configuration

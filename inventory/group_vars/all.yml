@@ -1,5 +1,5 @@
-repo_version: 0.13.0
-platform_version: 0.10.0
+repo_version: 0.14.0
+platform_version: 0.11.0
 
 proxmox_release_major: 9
 proxmox_suite: trixie
@@ -63,3 +63,13 @@ proxmox_acme_plugin_id: lv3-hetzner-dns
 proxmox_acme_domain: proxmox.lv3.org
 proxmox_acme_validation_delay: 30
 proxmox_tfa_description: Primary TOTP
+proxmox_api_hostname: proxmox.lv3.org
+proxmox_api_automation_user: lv3-automation@pve
+proxmox_api_automation_comment: LV3 durable automation identity
+proxmox_api_token_id: primary
+proxmox_api_token_comment: LV3 primary automation token
+proxmox_api_token_role: PVEAdmin
+proxmox_api_token_acl_path: /
+proxmox_api_token_privsep: true
+proxmox_api_token_local_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-api
+proxmox_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-api/lv3-automation-primary.json

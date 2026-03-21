@@ -6,6 +6,19 @@ The repo uses semantic versioning for repository maturity and operating contract
 
 Historical entries before `0.10.0` are reconstructed from repository history, ADR metadata, and observed platform evolution.
 
+## 0.14.0 - 2026-03-21
+
+- fully implemented ADR 0007 with a durable Proxmox API automation identity
+- added a dedicated role to create and verify a privilege-separated Proxmox API token
+- added a runbook for token use and rotation
+- recorded the durable token path in assistant-facing repository docs
+
+Platform impact:
+
+- `lv3-automation@pve` now exists as the non-human Proxmox API identity
+- the privilege-separated token `lv3-automation@pve!primary` is present and ACLed for automation use
+- the token secret is stored only in the controller-local `.local/proxmox-api/` path
+
 ## 0.13.0 - 2026-03-21
 
 - implemented the remaining host security baseline from ADR 0006

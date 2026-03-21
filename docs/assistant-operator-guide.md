@@ -35,6 +35,7 @@ Use these defaults unless a runbook or break-glass situation explicitly requires
 - connect to the Proxmox host as `ops`
 - use `sudo` for elevated Linux operations
 - use `ops@pam` for routine Proxmox administration
+- use `lv3-automation@pve` API tokens for non-human Proxmox object management
 - treat `root` on the Proxmox host as break-glass only
 - do not use `root` for guest SSH
 - reach guests through the Proxmox jump path until Tailscale exists
@@ -76,6 +77,7 @@ Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/M
 - `make harden-access`
 - `make harden-guest-access`
 - `make harden-security`
+- `make provision-api-access`
 
 ## Things That Must Stay True
 
@@ -91,4 +93,3 @@ These are the highest-value incomplete areas:
 
 - Tailscale private access rollout
 - monitoring stack rollout
-- API-token-based automation identity

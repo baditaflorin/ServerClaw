@@ -30,6 +30,7 @@ Read these in order when picking up the repository cold:
 - [docs/runbooks](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks): operator procedures for access, install, networking, provisioning, and hardening
 - [docs/runbooks/configure-public-ingress.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-public-ingress.md): public edge forwarding from the host to the NGINX VM
 - [docs/runbooks/complete-security-baseline.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/complete-security-baseline.md): management firewall, TFA, TLS, and notifications
+- [docs/runbooks/proxmox-api-automation.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/proxmox-api-automation.md): durable Proxmox API user and token lifecycle
 
 ### Automation entry points
 
@@ -53,6 +54,7 @@ Read these in order when picking up the repository cold:
 - [roles/proxmox_guests/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_guests/tasks/main.yml): template and VM provisioning
 - [roles/linux_access/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/linux_access/tasks/main.yml): shared Linux SSH and `sudo` baseline
 - [roles/proxmox_access/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_access/tasks/main.yml): Proxmox host and `pveum` access model
+- [roles/proxmox_api_access/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_api_access/tasks/main.yml): durable Proxmox API automation identity and token verification
 - [roles/proxmox_security/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_security/tasks/main.yml): Proxmox firewall, ACME, notifications, and TFA
 
 ## Change Rules
@@ -75,4 +77,3 @@ These areas are planned but not yet fully implemented:
 
 - Tailscale private access path
 - monitoring stack on `10.10.10.40`
-- API-token-based automation identity for Proxmox object management
