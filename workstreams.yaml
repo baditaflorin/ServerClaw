@@ -16,8 +16,8 @@ workstreams:
   - id: adr-0011-monitoring
     adr: 0011
     title: Monitoring stack rollout
-    status: ready
-    owner: unassigned
+    status: ready_for_merge
+    owner: codex
     branch: codex/adr-0011-monitoring
     worktree_path: ../proxmox_florin_server-monitoring
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md
@@ -27,7 +27,7 @@ workstreams:
       - monitoring_vm
       - grafana_dns
       - proxmox_metrics
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: false
 
   - id: adr-0014-tailscale
