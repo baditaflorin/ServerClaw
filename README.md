@@ -70,7 +70,11 @@ Merged mainline automation now exists for:
 - ADR 0014 Tailscale private access rollout
 - ADR 0020 storage and backup rollout
 
-These changes are merged to `main` but not yet applied live from `main`, so the verified live-state summary below still reflects the already-applied platform.
+Current live state for those merged workstreams:
+
+- ADR 0011 monitoring is applied live on `10.10.10.40`
+- ADR 0014 Tailscale is installed on the Proxmox host but still needs tailnet login and route approval
+- ADR 0020 backups are still blocked on missing external CIFS target credentials
 
 The current access posture is:
 
@@ -92,6 +96,15 @@ SSH and port 8006 limited to declared management source ranges
 Let's Encrypt certificate active for proxmox.lv3.org
 sendmail notification endpoint and catch-all matcher configured
 ops@pam protected by TOTP
+```
+
+The current monitoring posture is:
+
+```text
+InfluxDB 2 running on 10.10.10.40:8086
+Grafana running on 10.10.10.40:3000
+Proxmox metric server influxdb-http active and writing to the proxmox bucket
+Grafana remains internal-only for now
 ```
 
 ## Documents
@@ -140,8 +153,8 @@ This repo now tracks three distinct things:
 
 Current values on `main`:
 
-- `repo_version`: `0.17.0`
-- `platform_version`: `0.11.0`
+- `repo_version`: `0.18.0`
+- `platform_version`: `0.12.0`
 - `observed_os`: `Debian 13`
 - `observed_proxmox_installed`: `true`
 - `observed_pve_manager_version`: `9.1.6`

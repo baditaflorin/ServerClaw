@@ -16,7 +16,7 @@ workstreams:
   - id: adr-0011-monitoring
     adr: 0011
     title: Monitoring stack rollout
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0011-monitoring
     worktree_path: ../proxmox_florin_server-monitoring
@@ -28,7 +28,7 @@ workstreams:
       - grafana_dns
       - proxmox_metrics
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0014-tailscale
     adr: 0014

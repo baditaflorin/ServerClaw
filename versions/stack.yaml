@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.17.0
-platform_version: 0.11.0
+repo_version: 0.18.0
+platform_version: 0.12.0
 
 desired_state:
   host_id: proxmox_florin
@@ -70,7 +70,7 @@ desired_state:
     publish_aaaa_initially: false
 
 observed_state:
-  checked_at: 2026-03-21
+  checked_at: 2026-03-22
   access:
     ssh_bootstrap_key_working: true
     host_ops_user_working: true
@@ -116,6 +116,8 @@ observed_state:
     management_sources:
       - 90.95.35.115/32
       - 10.10.10.0/24
+    tailscale_installed: true
+    tailscale_state: NeedsLogin
   notifications:
     sendmail_endpoint: lv3-ops-email
     sendmail_target_email: baditaflorin@gmail.com
@@ -156,6 +158,17 @@ observed_state:
         running: true
     access:
       ssh_proxyjump_via_proxmox_host_working: true
+  monitoring:
+    vm: 10.10.10.40
+    grafana_running: true
+    influxdb_running: true
+    grafana_internal_url: http://10.10.10.40:3000
+    influxdb_internal_url: http://10.10.10.40:8086
+    proxmox_metric_server_id: influxdb-http
+    proxmox_metrics_flow_verified: true
+  backups:
+    configured: false
+    blocker: missing_external_cifs_credentials
 
 release_tracks:
   delivery_model:
@@ -164,8 +177,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.17.0
+    current: 0.18.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.11.0
+    current: 0.12.0
     meaning: intended platform release for the actual server configuration

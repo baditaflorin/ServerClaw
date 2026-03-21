@@ -10,6 +10,20 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 - use this section on `main` for merged notes that have not yet been cut into a numbered release
 
+## 0.18.0 - 2026-03-22
+
+- fixed the InfluxData repository integration in the monitoring role for current Debian package verification
+- applied ADR 0011 live and verified Grafana, InfluxDB, and Proxmox metric ingestion
+- applied the installable portion of ADR 0014 and recorded the remaining tailnet-authentication blocker
+- recorded the external-credential blocker that still prevents ADR 0020 live apply
+
+Platform impact:
+
+- monitoring VM `140` now runs Grafana and InfluxDB
+- Proxmox external metrics now write to `10.10.10.40`
+- Tailscale is installed on the Proxmox host but still needs login and route approval
+- backups are not yet configured because the external CIFS target credentials are still missing
+
 ## 0.17.0 - 2026-03-22
 
 - merged ADR 0011 monitoring automation into `main`

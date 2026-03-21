@@ -60,3 +60,4 @@
 - do not mix backup work with Tailscale or monitoring unless a real dependency appears
 - do not bump `VERSION` or `platform_version` on this branch
 - this workstream is merged to `main` but not yet applied live
+- live apply is blocked until external CIFS target credentials are provided

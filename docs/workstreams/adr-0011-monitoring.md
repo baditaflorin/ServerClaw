@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0011](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0011-monitoring-vm-with-grafana-and-proxmox-metrics.md)
 - Title: Monitoring VM and Grafana rollout
-- Status: merged
+- Status: live_applied
 - Branch: `codex/adr-0011-monitoring`
 - Worktree: `../proxmox_florin_server-monitoring`
 - Owner: codex
@@ -74,4 +74,4 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
 - keep monitoring isolated from Tailscale changes unless there is an explicit dependency
 - do not update `platform_version` until the merged work is actually applied live from `main`
 - Grafana stays internal-only in this workstream; use SSH port-forwarding until private access and publication are merged separately
-- this workstream is merged to `main` but not yet applied live
+- this workstream is merged to `main` and applied live

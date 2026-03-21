@@ -8,7 +8,6 @@
       - gpg
       - openssl
     state: present
-    update_cache: true
 
 - name: Ensure APT keyring directory exists
   ansible.builtin.file:
@@ -32,15 +31,26 @@
 - name: Install InfluxData repository key
   ansible.builtin.get_url:
     url: "{{ monitoring_influxdb_repo_key_url }}"
-    dest: "{{ monitoring_influxdb_repo_keyring }}"
+    dest: /tmp/influxdata-archive.key
     mode: "0644"
+
+- name: Convert InfluxData repository key into a gpg keyring
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --dearmor
+      - --yes
+      - --output
+      - "{{ monitoring_influxdb_repo_keyring }}"
+      - /tmp/influxdata-archive.key
+  changed_when: true
 
 - name: Install InfluxData repository definition
   ansible.builtin.copy:
     dest: "{{ monitoring_influxdb_repo_file }}"
     mode: "0644"
     content: |
-      deb [signed-by={{ monitoring_influxdb_repo_keyring }}] https://repos.influxdata.com/debian {{ ansible_distribution_release | lower }} stable
+      deb [signed-by={{ monitoring_influxdb_repo_keyring }}] https://repos.influxdata.com/debian stable main
 
 - name: Install monitoring stack packages
   ansible.builtin.apt:

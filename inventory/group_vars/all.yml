@@ -1,5 +1,5 @@
-repo_version: 0.17.0
-platform_version: 0.11.0
+repo_version: 0.18.0
+platform_version: 0.12.0
 
 proxmox_release_major: 9
 proxmox_suite: trixie
@@ -85,8 +85,8 @@ monitoring_proxmox_writer_token_local_file: /Users/live/Documents/GITHUB_PROJECT
 monitoring_grafana_repo_key_url: https://apt.grafana.com/gpg-full.key
 monitoring_grafana_repo_keyring: /etc/apt/keyrings/grafana.asc
 monitoring_grafana_repo_file: /etc/apt/sources.list.d/grafana.list
-monitoring_influxdb_repo_key_url: https://repos.influxdata.com/influxdata-archive_compat.key
-monitoring_influxdb_repo_keyring: /etc/apt/keyrings/influxdata.asc
+monitoring_influxdb_repo_key_url: https://repos.influxdata.com/influxdata-archive.key
+monitoring_influxdb_repo_keyring: /etc/apt/keyrings/influxdata-archive.gpg
 monitoring_influxdb_repo_file: /etc/apt/sources.list.d/influxdata.list
 monitoring_stack_packages:
   - apt-transport-https

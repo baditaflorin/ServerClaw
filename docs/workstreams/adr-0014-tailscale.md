@@ -57,6 +57,7 @@
 
 ## Remaining Live Blockers
 
+- the host is installed with Tailscale but still in `NeedsLogin`
 - the host still needs to be attached to the tailnet with a valid auth flow
 - the route `10.10.10.0/24` still needs tailnet approval unless auto-approval is configured
 - post-apply verification still needs to be recorded after the change is applied from `main`
