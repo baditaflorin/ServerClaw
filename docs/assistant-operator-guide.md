@@ -38,7 +38,8 @@ Use these defaults unless a runbook or break-glass situation explicitly requires
 - use `lv3-automation@pve` API tokens for non-human Proxmox object management
 - treat `root` on the Proxmox host as break-glass only
 - do not use `root` for guest SSH
-- reach guests through the Proxmox jump path until Tailscale exists
+- reach guests directly over the Tailscale-routed `10.10.10.0/24` path once ADR 0014 is applied
+- if the tailnet path is unavailable, use the Proxmox host jump path only as break-glass
 
 ## What To Read Before Making Changes
 
@@ -78,6 +79,7 @@ Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/M
 - `make install-proxmox`
 - `make configure-network`
 - `make configure-ingress`
+- `make configure-tailscale`
 - `make provision-guests`
 - `make harden-access`
 - `make harden-guest-access`

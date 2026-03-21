@@ -14,6 +14,7 @@ This runbook captures the executable path used to reduce root-centric SSH access
 - creates `ops@pam` in Proxmox with `PVEAdmin`
 - makes `ops` the default automation identity for the Proxmox host
 - enforces key-only, no-root SSH on the guest VMs
+- retains the Proxmox host jump path only as the guest break-glass fallback after ADR 0014
 
 ## Command
 
@@ -31,7 +32,7 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
 sudo -n pveversion
 ```
 
-Guest shell via host jump:
+Guest shell via host jump break-glass fallback:
 
 ```bash
 ssh -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@65.108.75.123 -W %h:%p' \
@@ -39,6 +40,8 @@ ssh -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin
   -o IdentitiesOnly=yes \
   ops@10.10.10.30
 ```
+
+Steady-state guest access is documented in [Configure Tailscale Private Access](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-tailscale-access.md).
 
 Ansible host verification:
 

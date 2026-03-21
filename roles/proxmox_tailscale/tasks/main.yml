@@ -1,0 +1,75 @@
+---
+- name: Ensure Tailscale repository prerequisites are present
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+    state: present
+    update_cache: true
+
+- name: Ensure the Tailscale keyring directory exists
+  ansible.builtin.file:
+    path: "{{ tailscale_apt_keyring_path | dirname }}"
+    state: directory
+    mode: "0755"
+
+- name: Install the Tailscale archive key
+  ansible.builtin.get_url:
+    url: "{{ tailscale_apt_key_url }}"
+    dest: "{{ tailscale_apt_keyring_path }}"
+    mode: "0644"
+
+- name: Install the Tailscale apt repository definition
+  ansible.builtin.get_url:
+    url: "{{ tailscale_apt_repo_url }}"
+    dest: "{{ tailscale_apt_repo_file }}"
+    mode: "0644"
+  register: proxmox_tailscale_repo
+
+- name: Ensure the Tailscale package is present
+  ansible.builtin.apt:
+    name: tailscale
+    state: present
+    update_cache: "{{ proxmox_tailscale_repo.changed }}"
+
+- name: Ensure the tailscaled service is enabled and started
+  ansible.builtin.systemd:
+    name: tailscaled
+    enabled: true
+    state: started
+
+- name: Install the LV3 Tailscale helper
+  ansible.builtin.template:
+    src: lv3-tailscale-up.sh.j2
+    dest: /usr/local/sbin/lv3-tailscale-up
+    mode: "0755"
+
+- name: Check whether the host already has a Tailscale IPv4 address
+  ansible.builtin.command: tailscale ip -4
+  register: proxmox_tailscale_ipv4
+  failed_when: false
+  changed_when: false
+
+- name: Attach the Proxmox host to the tailnet with the supplied auth key
+  ansible.builtin.command: /usr/local/sbin/lv3-tailscale-up
+  environment:
+    TAILSCALE_AUTH_KEY: "{{ lookup('ansible.builtin.env', proxmox_tailscale_auth_key_env_var) | trim }}"
+  when:
+    - proxmox_tailscale_ipv4.rc != 0
+    - (lookup('ansible.builtin.env', proxmox_tailscale_auth_key_env_var) | trim) | length > 0
+  changed_when: true
+  no_log: true
+
+- name: Refresh the subnet-router settings on an authenticated host
+  ansible.builtin.command: /usr/local/sbin/lv3-tailscale-up
+  when: proxmox_tailscale_ipv4.rc == 0
+  changed_when: false
+
+- name: Show the remaining manual authentication step when no auth key was supplied
+  ansible.builtin.debug:
+    msg: >-
+      Tailscale is installed but not yet authenticated. Run sudo /usr/local/sbin/lv3-tailscale-up on the Proxmox
+      host, approve the login in the Tailscale admin console, and then approve the advertised route
+      {{ proxmox_tailscale_advertise_routes | join(', ') }} if auto-approval is not already configured.
+  when:
+    - proxmox_tailscale_ipv4.rc != 0
+    - (lookup('ansible.builtin.env', proxmox_tailscale_auth_key_env_var) | trim) | length == 0

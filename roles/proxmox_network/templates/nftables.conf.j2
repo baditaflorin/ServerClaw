@@ -13,6 +13,7 @@ table inet filter {
     policy drop;
     ct state related,established accept
     iifname "{{ proxmox_internal_bridge }}" oifname "{{ proxmox_wan_bridge }}" accept
+    iifname "tailscale0" oifname "{{ proxmox_internal_bridge }}" ip daddr {{ proxmox_internal_network }} accept
 {% if proxmox_public_edge_ipv4 is defined and proxmox_public_ingress_tcp_ports is defined %}
     iifname "{{ proxmox_wan_bridge }}" oifname "{{ proxmox_internal_bridge }}" ip daddr {{ proxmox_public_edge_ipv4 }} tcp dport { {{ proxmox_public_ingress_tcp_ports | join(', ') }} } accept
 {% endif %}

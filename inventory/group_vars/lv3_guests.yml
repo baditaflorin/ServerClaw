@@ -1,5 +1,4 @@
 ansible_user: "{{ proxmox_guest_ci_user }}"
 ansible_become: true
 ansible_become_method: sudo
-ansible_ssh_common_args: >-
-  -o ProxyCommand="ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes {{ proxmox_host_admin_user }}@{{ hostvars['proxmox_florin'].ansible_host }} -W %h:%p"
+ansible_ssh_common_args: "{{ proxmox_guest_ssh_common_args[proxmox_guest_ssh_connection_mode] | default('') }}"

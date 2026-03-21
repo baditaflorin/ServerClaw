@@ -31,6 +31,9 @@ Stage one: bootstrap access
 Stage two: steady-state operator access
 
 - provide laptop access to `10.10.10.0/24` through a Tailscale-based private access path
+- terminate that Tailscale access path on the Proxmox host as a subnet router for `10.10.10.0/24`
+- treat direct `ssh ops@10.10.10.30` over the routed private subnet as the normal operator path
+- keep the Proxmox host `ProxyJump` path only as break-glass fallback
 - do not expose the Docker runtime VM, Docker build VM, or monitoring VM directly to the public internet
 - keep the build VM reachable privately for interactive remote work from approved operator machines
 
@@ -52,9 +55,15 @@ That means:
 
 ## Follow-up requirements
 
-This ADR still requires implementation details for:
+This ADR still requires live application and verification, but the steady-state implementation model is now defined:
 
-- where Tailscale terminates in steady state
-- tailnet auth policy and device approval
-- which laptops or admin devices are allowed
-- whether the monitoring VM should also be reachable over the same access path
+- Tailscale terminates on the Proxmox host, which advertises `10.10.10.0/24` as a subnet route.
+- Operator laptops join the same tailnet and accept the subnet route before reaching guests.
+- Guest automation should default to direct private-IP access over that routed subnet.
+- The Proxmox host jump path remains documented for break-glass use during tailnet outages or route approval delays.
+
+Live access policy still requires operator-side governance for:
+
+- which laptops or admin devices are approved in the tailnet
+- whether tag-based auth keys will be used for the subnet router
+- whether route auto-approval will be enabled in the tailnet admin policy
