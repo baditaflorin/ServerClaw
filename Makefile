@@ -2,7 +2,7 @@ REPO_ROOT := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 ANSIBLE_INVENTORY := $(REPO_ROOT)/inventory/hosts.yml
 BOOTSTRAP_KEY ?= /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519
 
-.PHONY: syntax-check syntax-check-monitoring install-proxmox configure-network configure-ingress configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-monitoring
+.PHONY: syntax-check syntax-check-monitoring install-proxmox configure-network configure-ingress configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-monitoring configure-backups
 
 syntax-check:
 	ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/site.yml --syntax-check
@@ -39,3 +39,10 @@ provision-api-access:
 
 converge-monitoring:
 	ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/monitoring-stack.yml --private-key $(BOOTSTRAP_KEY)
+
+configure-backups:
+	PROXMOX_BACKUP_CIFS_SERVER=$${PROXMOX_BACKUP_CIFS_SERVER:?set PROXMOX_BACKUP_CIFS_SERVER} \
+	PROXMOX_BACKUP_CIFS_SHARE=$${PROXMOX_BACKUP_CIFS_SHARE:?set PROXMOX_BACKUP_CIFS_SHARE} \
+	PROXMOX_BACKUP_CIFS_USERNAME=$${PROXMOX_BACKUP_CIFS_USERNAME:?set PROXMOX_BACKUP_CIFS_USERNAME} \
+	PROXMOX_BACKUP_CIFS_PASSWORD=$${PROXMOX_BACKUP_CIFS_PASSWORD:?set PROXMOX_BACKUP_CIFS_PASSWORD} \
+	ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/site.yml --private-key $(BOOTSTRAP_KEY) --tags storage,backups

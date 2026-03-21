@@ -86,3 +86,38 @@ proxmox_guests:
       - lv3
     packages:
       - prometheus-node-exporter
+
+proxmox_backup_storage:
+  enabled: "{{ (lookup('ansible.builtin.env', 'PROXMOX_BACKUP_CIFS_SERVER') | trim | length) > 0 }}"
+  id: lv3-backup-cifs
+  type: cifs
+  server: "{{ lookup('ansible.builtin.env', 'PROXMOX_BACKUP_CIFS_SERVER') | trim }}"
+  share: "{{ lookup('ansible.builtin.env', 'PROXMOX_BACKUP_CIFS_SHARE') | trim }}"
+  username: "{{ lookup('ansible.builtin.env', 'PROXMOX_BACKUP_CIFS_USERNAME') | trim }}"
+  password_env: PROXMOX_BACKUP_CIFS_PASSWORD
+  domain: WORKGROUP
+  smbversion: "3"
+  subdir: /proxmox_florin
+  path: /mnt/pve/lv3-backup-cifs
+  content:
+    - backup
+  options: noserverino,echo_interval=30
+  nodes:
+    - proxmox_florin
+
+proxmox_backup_jobs:
+  - id: backup-lv3-nightly
+    enabled: "{{ proxmox_backup_storage.enabled }}"
+    storage: "{{ proxmox_backup_storage.id }}"
+    schedule: "02:30"
+    node: proxmox_florin
+    mode: snapshot
+    compress: zstd
+    notification_mode: notification-system
+    repeat_missed: true
+    vmid_list: "{{ proxmox_guests | map(attribute='vmid') | list }}"
+    prune_backups:
+      keep_last: 3
+      keep_daily: 7
+      keep_weekly: 5
+      keep_monthly: 12

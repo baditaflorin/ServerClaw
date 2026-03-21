@@ -46,3 +46,21 @@ workstreams:
       - private_network
     ready_to_merge: false
     live_applied: false
+
+  - id: adr-0020-backups
+    adr: 0020
+    title: Initial storage and backup model
+    status: ready_for_merge
+    owner: codex
+    branch: codex/adr-0020-backups
+    worktree_path: ../proxmox_florin_server-backups
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0020-backups.md
+    depends_on: []
+    conflicts_with: []
+    shared_surfaces:
+      - /etc/pve/storage.cfg
+      - /etc/pve/jobs.cfg
+      - backup_policy
+      - restore_validation
+    ready_to_merge: true
+    live_applied: false
