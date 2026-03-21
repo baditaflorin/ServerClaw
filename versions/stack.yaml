@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.3.0
-platform_version: 0.3.0
+repo_version: 0.5.0
+platform_version: 0.5.0
 
 desired_state:
   host_id: proxmox_florin
@@ -25,6 +25,27 @@ desired_state:
     docker_runtime_vm: 10.10.10.20
     docker_build_vm: 10.10.10.30
     monitoring_vm: 10.10.10.40
+  traffic_model:
+    guest_default_gateway: 10.10.10.1
+    guest_outbound_via_host_nat: true
+    public_edge_vm: 10.10.10.10
+    public_ingress_ports:
+      - 80
+      - 443
+  operator_access:
+    bootstrap_method: ssh_jump_via_proxmox_host
+    steady_state_method: wireguard_private_access
+    private_build_vm: 10.10.10.30
+  dns:
+    zone: lv3.org
+    public_ipv4_target: 65.108.75.123
+    initial_subdomains:
+      - proxmox.lv3.org
+      - grafana.lv3.org
+      - nginx.lv3.org
+      - docker.lv3.org
+      - build.lv3.org
+    publish_aaaa_initially: false
 
 observed_state:
   checked_at: 2026-03-21
@@ -49,11 +70,22 @@ observed_state:
     internal_ipv4_gateway: 10.10.10.1/24
     ipv4_forwarding: true
     outbound_nat: true
+  dns:
+    zone: lv3.org
+    root_a: 65.108.75.123
+    root_aaaa_present: true
+    root_aaaa_matches_current_host_ipv6: false
+    created_a_subdomains:
+      - proxmox.lv3.org
+      - grafana.lv3.org
+      - nginx.lv3.org
+      - docker.lv3.org
+      - build.lv3.org
 
 release_tracks:
   repo_versioning:
-    current: 0.3.0
+    current: 0.5.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.3.0
+    current: 0.5.0
     meaning: intended platform release for the actual server configuration

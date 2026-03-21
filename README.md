@@ -60,6 +60,9 @@ Host-side IPv4 forwarding and NAT are enabled for `10.10.10.0/24` guest egress.
 - [ADR 0010: Initial Proxmox VM topology](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0010-initial-proxmox-vm-topology.md)
 - [ADR 0011: Monitoring VM with Grafana and Proxmox metrics](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0011-monitoring-vm-with-grafana-and-proxmox-metrics.md)
 - [ADR 0012: Proxmox host bridge and NAT network](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0012-proxmox-host-bridge-and-nat-network.md)
+- [ADR 0013: Public ingress and guest egress model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0013-public-ingress-and-guest-egress-model.md)
+- [ADR 0014: Operator access to private guest network](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0014-operator-access-to-private-guest-network.md)
+- [ADR 0015: lv3.org DNS and subdomain model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0015-lv3-org-dns-and-subdomain-model.md)
 
 ## Versioning
 
@@ -71,8 +74,8 @@ This repo now tracks three distinct things:
 
 Current values:
 
-- `repo_version`: `0.3.0`
-- `platform_version`: `0.3.0`
+- `repo_version`: `0.5.0`
+- `platform_version`: `0.5.0`
 - `observed_os`: `Debian 13`
 - `observed_proxmox_installed`: `true`
 - `observed_pve_manager_version`: `9.1.6`
