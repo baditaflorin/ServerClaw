@@ -53,6 +53,7 @@ Use these defaults unless a runbook or break-glass situation explicitly requires
 2. Change the automation first when feasible.
 3. Apply and verify the change.
 4. Record the result in the repository in the same turn.
+5. If the change was applied live, bump the repo version and push the commit in the same turn unless blocked.
 
 At minimum, review whether these files need updates:
 
@@ -74,6 +75,7 @@ Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/M
 - `make provision-guests`
 - `make harden-access`
 - `make harden-guest-access`
+- `make harden-security`
 
 ## Things That Must Stay True
 
@@ -87,9 +89,6 @@ Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/M
 
 These are the highest-value incomplete areas:
 
-- public ingress forwarding to the NGINX VM
-- Proxmox firewall rollout
-- TFA for human GUI accounts
-- TLS and certificate management
-- notifications
 - Tailscale private access rollout
+- monitoring stack rollout
+- API-token-based automation identity

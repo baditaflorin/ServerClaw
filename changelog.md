@@ -6,6 +6,23 @@ The repo uses semantic versioning for repository maturity and operating contract
 
 Historical entries before `0.10.0` are reconstructed from repository history, ADR metadata, and observed platform evolution.
 
+## 0.13.0 - 2026-03-21
+
+- implemented the remaining host security baseline from ADR 0006
+- added Proxmox host firewall policy with management source restrictions
+- automated ACME issuance for `proxmox.lv3.org` through Hetzner DNS
+- configured notification routing to the LV3 operations mailbox
+- provisioned TOTP for `ops@pam`
+- added a dedicated security-baseline runbook
+- strengthened repository rules so live applied changes must also land as a pushed version bump
+
+Platform impact:
+
+- Proxmox firewall is enabled and management access is source-restricted
+- `proxmox.lv3.org:8006` now presents a Let's Encrypt certificate
+- `ops@pam` now requires TOTP
+- sendmail notifications are configured with a catch-all matcher
+
 ## 0.12.0 - 2026-03-21
 
 - implemented the single-edge public ingress model from ADR 0013

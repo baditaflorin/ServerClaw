@@ -16,9 +16,10 @@ Both ChatGPT and Claude may be used in this repo. Work as if another assistant w
 6. Keep README status and next steps current when the server state materially changes.
 7. Update `VERSION` and `versions/stack.yaml` whenever a change affects repository maturity, platform intent, or observed server state.
 8. Update `changelog.md` whenever `VERSION` changes.
-9. Keep everything DRY: centralize shared facts, avoid repeated shell snippets, and refactor duplication early.
-10. Keep everything structurally solid: separate concerns, prefer small reversible changes, and do not mix bootstrap, security, storage, and Proxmox object management in one opaque step.
-11. Every ADR must record both decision status and implementation state, including the first repo version, first platform version, and date where implementation became true.
+9. When a live change is actually applied, finish the turn by committing it, pushing it to GitHub, and bumping the repository version unless explicitly blocked.
+10. Keep everything DRY: centralize shared facts, avoid repeated shell snippets, and refactor duplication early.
+11. Keep everything structurally solid: separate concerns, prefer small reversible changes, and do not mix bootstrap, security, storage, and Proxmox object management in one opaque step.
+12. Every ADR must record both decision status and implementation state, including the first repo version, first platform version, and date where implementation became true.
 
 ## Current Infrastructure Context
 
@@ -47,7 +48,11 @@ As of 2026-03-21:
 - SSH password authentication is disabled on the host.
 - Debian guests are intended to be managed as `ops` through the Proxmox jump path, not as `root`.
 - `ops@pam` exists with `PVEAdmin` for routine Proxmox administration.
-- The next risk area is management firewall policy, TFA, TLS, monitoring, notifications, and steady-state Tailscale access, not base VM creation.
+- Proxmox host firewall is enabled with SSH and `8006` restricted to declared management sources.
+- A Let's Encrypt certificate is active for `proxmox.lv3.org`.
+- Notifications are wired through a sendmail endpoint and a catch-all matcher.
+- `ops@pam` has a TOTP factor configured.
+- The next risk area is Tailscale, monitoring, backup policy, and API-token automation, not base VM creation.
 
 Treat the next phase as ingress, security, backup, and API automation work.
 
@@ -61,6 +66,7 @@ When making meaningful infrastructure decisions, update:
 - `VERSION`
 - `changelog.md`
 - `versions/stack.yaml`
+- a Git push if the change was applied live
 
 When adding automation later, prefer a structure like:
 

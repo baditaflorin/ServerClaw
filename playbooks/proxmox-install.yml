@@ -28,3 +28,6 @@
     - role: proxmox_guests
       tags:
         - guests
+    - role: proxmox_security
+      tags:
+        - security

@@ -1,9 +1,9 @@
 # ADR 0006: Security Baseline For Proxmox Host
 
 - Status: Accepted
-- Implementation Status: Partial
-- Implemented In Repo Version: 0.10.0
-- Implemented In Platform Version: 0.8.0
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.13.0
+- Implemented In Platform Version: 0.10.0
 - Implemented On: 2026-03-21
 - Date: 2026-03-21
 

@@ -1,0 +1,15 @@
+[OPTIONS]
+enable: 1
+policy_in: DROP
+policy_out: ACCEPT
+policy_forward: ACCEPT
+
+[IPSET management]
+{% for source in proxmox_management_allowed_sources %}
+{{ source }}
+{% endfor %}
+
+[RULES]
+IN SSH(ACCEPT) -source +management
+IN ACCEPT -p tcp -dport 8006 -source +management
+IN Ping(ACCEPT) -source +management

@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.12.0
-platform_version: 0.9.0
+repo_version: 0.13.0
+platform_version: 0.10.0
 
 desired_state:
   host_id: proxmox_florin
@@ -45,6 +45,13 @@ desired_state:
     bootstrap_method: ssh_jump_via_proxmox_host
     steady_state_method: tailscale_private_access
     private_build_vm: 10.10.10.30
+  security:
+    management_sources:
+      - 90.95.35.115/32
+      - 10.10.10.0/24
+    proxmox_tfa_user: ops@pam
+    proxmox_tls_hostname: proxmox.lv3.org
+    notifications_email: baditaflorin@gmail.com
   dns:
     zone: lv3.org
     public_ipv4_target: 65.108.75.123
@@ -67,6 +74,7 @@ observed_state:
     guest_root_ssh_disabled: true
     guest_ssh_password_authentication: false
     proxmox_ops_pam_user_present: true
+    proxmox_ops_pam_tfa_enabled: true
   os:
     banner: Linux Debian-trixie-latest-amd64-base 6.17.13-2-pve
     kernel: 6.17.13-2-pve
@@ -78,6 +86,8 @@ observed_state:
     version: 9.1.6
     ve_version: 9.1.0
     api_ui_port: 8006
+    tls_hostname: proxmox.lv3.org
+    tls_issuer: Let's Encrypt R13
   network:
     wan_bridge: vmbr0
     wan_bridge_active: true
@@ -91,6 +101,15 @@ observed_state:
     public_ingress_forwarded_ports:
       - 80
       - 443
+    management_firewall_enabled: true
+    management_sources:
+      - 90.95.35.115/32
+      - 10.10.10.0/24
+  notifications:
+    sendmail_endpoint: lv3-ops-email
+    sendmail_target_email: baditaflorin@gmail.com
+    catch_all_matcher: lv3-all-events
+    mail_queue_empty_after_probe: true
   dns:
     zone: lv3.org
     root_a: 65.108.75.123
@@ -129,8 +148,8 @@ observed_state:
 
 release_tracks:
   repo_versioning:
-    current: 0.12.0
+    current: 0.13.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.9.0
+    current: 0.10.0
     meaning: intended platform release for the actual server configuration

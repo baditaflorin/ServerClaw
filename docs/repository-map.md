@@ -29,6 +29,7 @@ Read these in order when picking up the repository cold:
 
 - [docs/runbooks](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks): operator procedures for access, install, networking, provisioning, and hardening
 - [docs/runbooks/configure-public-ingress.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-public-ingress.md): public edge forwarding from the host to the NGINX VM
+- [docs/runbooks/complete-security-baseline.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/complete-security-baseline.md): management firewall, TFA, TLS, and notifications
 
 ### Automation entry points
 
@@ -52,6 +53,7 @@ Read these in order when picking up the repository cold:
 - [roles/proxmox_guests/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_guests/tasks/main.yml): template and VM provisioning
 - [roles/linux_access/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/linux_access/tasks/main.yml): shared Linux SSH and `sudo` baseline
 - [roles/proxmox_access/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_access/tasks/main.yml): Proxmox host and `pveum` access model
+- [roles/proxmox_security/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_security/tasks/main.yml): Proxmox firewall, ACME, notifications, and TFA
 
 ## Change Rules
 
@@ -65,14 +67,12 @@ Minimum expected updates for a meaningful infrastructure change:
 - [README.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/README.md) if the current-state summary changed
 - [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml) if desired or observed state changed
 - [VERSION](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/VERSION) and [changelog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/changelog.md) if the repository contract changed
+- commit and push if the change was applied to the live platform
 
 ## Known Gaps
 
 These areas are planned but not yet fully implemented:
 
-- public ingress forwarding to the NGINX VM
-- Proxmox firewall policy
-- TFA for human Proxmox accounts
-- ACME or other managed TLS for browser access
-- notifications and alert routing
 - Tailscale private access path
+- monitoring stack on `10.10.10.40`
+- API-token-based automation identity for Proxmox object management
