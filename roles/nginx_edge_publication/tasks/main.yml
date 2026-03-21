@@ -1,0 +1,111 @@
+---
+- name: Ensure public edge packages are present
+  ansible.builtin.apt:
+    name:
+      - nginx
+      - certbot
+    state: present
+    update_cache: true
+
+- name: Ensure public edge directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ public_edge_static_root }}"
+    - "{{ public_edge_acme_root }}"
+    - /etc/nginx/sites-available
+    - /etc/nginx/sites-enabled
+    - /etc/letsencrypt/renewal-hooks/deploy
+
+- name: Render static pages for published informational hostnames
+  ansible.builtin.template:
+    src: static-page.html.j2
+    dest: "{{ public_edge_static_root }}/{{ item.slug }}.html"
+    mode: "0644"
+  loop: "{{ public_edge_static_sites }}"
+
+- name: Check whether the public edge certificate exists
+  ansible.builtin.stat:
+    path: "/etc/letsencrypt/live/{{ public_edge_cert_name }}/fullchain.pem"
+  register: public_edge_certificate
+
+- name: Render NGINX public edge configuration
+  ansible.builtin.template:
+    src: lv3-edge.conf.j2
+    dest: /etc/nginx/sites-available/lv3-edge.conf
+    mode: "0644"
+  vars:
+    public_edge_tls_enabled: "{{ public_edge_certificate.stat.exists }}"
+
+- name: Enable the public edge site
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/lv3-edge.conf
+    dest: /etc/nginx/sites-enabled/lv3-edge.conf
+    state: link
+
+- name: Disable the default NGINX site
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: Validate NGINX configuration before issuing certificates
+  ansible.builtin.command: nginx -t
+  changed_when: false
+
+- name: Reload NGINX before certificate issuance
+  ansible.builtin.systemd:
+    name: nginx
+    state: reloaded
+
+- name: Obtain the public edge Let's Encrypt certificate
+  ansible.builtin.command:
+    argv:
+      - certbot
+      - certonly
+      - --non-interactive
+      - --agree-tos
+      - --email
+      - "{{ public_edge_certbot_email }}"
+      - --cert-name
+      - "{{ public_edge_cert_name }}"
+      - --webroot
+      - -w
+      - "{{ public_edge_acme_root }}"
+      - -d
+      - "{{ public_edge_certificate_domains | join(',') }}"
+  when: not public_edge_certificate.stat.exists
+  changed_when: true
+
+- name: Install NGINX reload hook for certificate renewal
+  ansible.builtin.copy:
+    dest: /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh
+    mode: "0755"
+    content: |
+      #!/bin/sh
+      set -eu
+      systemctl reload nginx
+
+- name: Re-check whether the public edge certificate exists
+  ansible.builtin.stat:
+    path: "/etc/letsencrypt/live/{{ public_edge_cert_name }}/fullchain.pem"
+  register: public_edge_certificate_after
+
+- name: Render final NGINX public edge configuration
+  ansible.builtin.template:
+    src: lv3-edge.conf.j2
+    dest: /etc/nginx/sites-available/lv3-edge.conf
+    mode: "0644"
+  vars:
+    public_edge_tls_enabled: "{{ public_edge_certificate_after.stat.exists }}"
+
+- name: Validate final NGINX configuration
+  ansible.builtin.command: nginx -t
+  changed_when: false
+
+- name: Enable and reload NGINX
+  ansible.builtin.systemd:
+    name: nginx
+    enabled: true
+    state: reloaded

@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.21.0
-platform_version: 0.13.0
+repo_version: 0.22.0
+platform_version: 0.14.0
 
 desired_state:
   host_id: proxmox_florin
@@ -70,6 +70,15 @@ desired_state:
       - docker.lv3.org
       - build.lv3.org
     publish_aaaa_initially: false
+  public_publication:
+    edge_vm: 10.10.10.10
+    tls_termination: nginx_edge
+    published_hostnames:
+      - nginx.lv3.org
+      - grafana.lv3.org
+      - proxmox.lv3.org
+      - docker.lv3.org
+      - build.lv3.org
 
 observed_state:
   checked_at: 2026-03-22
@@ -127,6 +136,7 @@ observed_state:
     tailscale_advertised_routes:
       - 10.10.10.0/24
     tailscale_private_subnet_route_distributed: false
+    inter_guest_connectivity_working: true
   notifications:
     sendmail_endpoint: lv3-ops-email
     sendmail_target_email: baditaflorin@gmail.com
@@ -172,9 +182,20 @@ observed_state:
     grafana_running: true
     influxdb_running: true
     grafana_internal_url: http://10.10.10.40:3000
+    grafana_public_url: https://grafana.lv3.org
     influxdb_internal_url: http://10.10.10.40:8086
     proxmox_metric_server_id: influxdb-http
     proxmox_metrics_flow_verified: true
+  public_publication:
+    edge_configured: true
+    edge_tls_certificate_present: true
+    grafana_domain_live: true
+    published_hostnames:
+      - nginx.lv3.org
+      - grafana.lv3.org
+      - proxmox.lv3.org
+      - docker.lv3.org
+      - build.lv3.org
   backups:
     configured: false
     blocker: missing_external_cifs_credentials
@@ -186,8 +207,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.21.0
+    current: 0.22.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.13.0
+    current: 0.14.0
     meaning: intended platform release for the actual server configuration

@@ -10,6 +10,20 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 - use this section on `main` for merged notes that have not yet been cut into a numbered release
 
+## 0.22.0 - 2026-03-22
+
+- added IaC for public hostname publication at the NGINX edge
+- added ADR 0021 for truthful subdomain publication rules
+- added edge publication runbook, playbook, and NGINX role with host-based routing and certificate issuance support
+- fixed the Proxmox host nftables policy so private guests on `vmbr10` can reach each other
+
+Platform impact:
+
+- `grafana.lv3.org` now serves the Grafana login page through the NGINX edge
+- `nginx.lv3.org` now serves an explicit edge landing page
+- `proxmox.lv3.org`, `docker.lv3.org`, and `build.lv3.org` now serve explicit informational pages instead of the default Debian NGINX page
+- the NGINX edge now presents a Let's Encrypt certificate for the published subdomains
+
 ## 0.21.0 - 2026-03-22
 
 - verified that the Tailscale-first host administration path is now working from the laptop

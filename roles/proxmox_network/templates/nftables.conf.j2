@@ -12,6 +12,7 @@ table inet filter {
     type filter hook forward priority 0;
     policy drop;
     ct state related,established accept
+    iifname "{{ proxmox_internal_bridge }}" oifname "{{ proxmox_internal_bridge }}" accept
     iifname "{{ proxmox_internal_bridge }}" oifname "{{ proxmox_wan_bridge }}" accept
     iifname "tailscale0" oifname "{{ proxmox_internal_bridge }}" ip daddr {{ proxmox_internal_network }} accept
 {% if proxmox_public_edge_ipv4 is defined and proxmox_public_ingress_tcp_ports is defined %}

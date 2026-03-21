@@ -69,12 +69,17 @@ Merged mainline automation now exists for:
 - ADR 0011 monitoring stack rollout
 - ADR 0014 Tailscale private access rollout
 - ADR 0020 storage and backup rollout
+- ADR 0021 public subdomain publication at the NGINX edge
 
 Current live state for those merged workstreams:
 
 - ADR 0011 monitoring is applied live on `10.10.10.40`
 - ADR 0014 now provides stable host administration over the Proxmox Tailscale IP; direct guest subnet routing is still pending tailnet route acceptance
 - ADR 0020 backups are still blocked on missing external CIFS target credentials
+
+Other current live state:
+
+- public subdomain publication is applied live on the NGINX edge at `10.10.10.10`
 
 The current access posture is:
 
@@ -106,7 +111,17 @@ The current monitoring posture is:
 InfluxDB 2 running on 10.10.10.40:8086
 Grafana running on 10.10.10.40:3000
 Proxmox metric server influxdb-http active and writing to the proxmox bucket
-Grafana remains internal-only for now
+Grafana published at https://grafana.lv3.org via the NGINX edge
+```
+
+The current public publication model is:
+
+```text
+grafana.lv3.org -> Grafana via the NGINX edge
+nginx.lv3.org   -> edge landing page
+proxmox.lv3.org -> informational page for private Proxmox access
+docker.lv3.org  -> informational page until a runtime app is intentionally published
+build.lv3.org   -> informational page until a build-related public service is intentionally published
 ```
 
 ## Documents
@@ -119,6 +134,7 @@ Grafana remains internal-only for now
 - [Workstreams guide](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/README.md)
 - [Initial access runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/initial-access.md)
 - [Configure public ingress runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-public-ingress.md)
+- [Configure edge publication runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-edge-publication.md)
 - [Complete security baseline runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/complete-security-baseline.md)
 - [Configure Tailscale private access runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-tailscale-access.md)
 - [Proxmox API automation runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/proxmox-api-automation.md)
@@ -144,6 +160,7 @@ Grafana remains internal-only for now
 - [ADR 0018: Non-root operations for host and guests](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0018-non-root-operations-for-host-and-guests.md)
 - [ADR 0019: Parallel ADR delivery with workstreams](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0019-parallel-adr-delivery-with-workstreams.md)
 - [ADR 0020: Initial storage and backup model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0020-initial-storage-and-backup-model.md)
+- [ADR 0021: Public subdomain publication at the NGINX edge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0021-public-subdomain-publication-at-the-nginx-edge.md)
 
 ## Versioning
 
@@ -155,8 +172,8 @@ This repo now tracks three distinct things:
 
 Current values on `main`:
 
-- `repo_version`: `0.18.0`
-- `platform_version`: `0.12.0`
+- `repo_version`: `0.22.0`
+- `platform_version`: `0.14.0`
 - `observed_os`: `Debian 13`
 - `observed_proxmox_installed`: `true`
 - `observed_pve_manager_version`: `9.1.6`
@@ -215,13 +232,16 @@ The first executable automation scaffold now exists:
 - [inventory/hosts.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml)
 - [inventory/host_vars/proxmox_florin.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml)
 - [playbooks/site.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/site.yml)
+- [playbooks/public-edge.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/public-edge.yml)
 - [playbooks/proxmox-install.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/proxmox-install.yml)
 - [roles/proxmox_repository/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_repository/tasks/main.yml)
 - [roles/proxmox_kernel/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_kernel/tasks/main.yml)
 - [roles/proxmox_platform/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_platform/tasks/main.yml)
 - [roles/proxmox_network/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_network/tasks/main.yml)
 - [roles/proxmox_tailscale/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_tailscale/tasks/main.yml)
+- [roles/nginx_edge_publication/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/nginx_edge_publication/tasks/main.yml)
 - [docs/runbooks/configure-public-ingress.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-public-ingress.md)
+- [docs/runbooks/configure-edge-publication.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-edge-publication.md)
 - [docs/runbooks/configure-tailscale-access.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-tailscale-access.md)
 - [roles/proxmox_guests/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_guests/tasks/main.yml)
 - [roles/linux_access/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/linux_access/tasks/main.yml)

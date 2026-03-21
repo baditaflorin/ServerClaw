@@ -1,0 +1,98 @@
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    '' close;
+}
+
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+
+    location /.well-known/acme-challenge/ {
+        root {{ public_edge_acme_root }};
+        allow all;
+        try_files $uri =404;
+    }
+
+    location / {
+{% if public_edge_tls_enabled %}
+        return 308 https://nginx.lv3.org$request_uri;
+{% else %}
+        return 302 http://nginx.lv3.org$request_uri;
+{% endif %}
+    }
+}
+
+{% for site in public_edge_sites %}
+server {
+    listen 80;
+    listen [::]:80;
+    server_name {{ site.hostname }}{% if site.aliases is defined and site.aliases | length > 0 %} {{ site.aliases | join(' ') }}{% endif %};
+
+    root {{ public_edge_static_root }};
+
+    location /.well-known/acme-challenge/ {
+        root {{ public_edge_acme_root }};
+        allow all;
+        try_files $uri =404;
+    }
+
+{% if public_edge_tls_enabled %}
+    location / {
+        return 308 https://$host$request_uri;
+    }
+{% elif site.kind == 'proxy' %}
+    location / {
+        proxy_pass {{ site.upstream }};
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_read_timeout 300s;
+    }
+{% else %}
+    location / {
+        default_type text/html;
+        try_files /{{ site.slug }}.html =404;
+    }
+{% endif %}
+}
+{% if public_edge_tls_enabled %}
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name {{ site.hostname }}{% if site.aliases is defined and site.aliases | length > 0 %} {{ site.aliases | join(' ') }}{% endif %};
+
+    ssl_certificate /etc/letsencrypt/live/{{ public_edge_cert_name }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ public_edge_cert_name }}/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers off;
+
+{% if site.kind == 'proxy' %}
+    location / {
+        proxy_pass {{ site.upstream }};
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_read_timeout 300s;
+    }
+{% else %}
+    root {{ public_edge_static_root }};
+
+    location / {
+        default_type text/html;
+        try_files /{{ site.slug }}.html =404;
+    }
+{% endif %}
+}
+{% endif %}
+
+{% endfor %}

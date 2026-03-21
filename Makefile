@@ -2,7 +2,7 @@ REPO_ROOT := $(patsubst %/,%,$(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 ANSIBLE_INVENTORY := $(REPO_ROOT)/inventory/hosts.yml
 BOOTSTRAP_KEY ?= /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519
 
-.PHONY: syntax-check syntax-check-monitoring install-proxmox configure-network configure-ingress configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-monitoring configure-backups start-workstream
+.PHONY: syntax-check syntax-check-monitoring install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-monitoring configure-backups start-workstream
 
 syntax-check:
 	ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/site.yml --syntax-check
@@ -18,6 +18,9 @@ configure-network:
 
 configure-ingress:
 	ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/site.yml --private-key $(BOOTSTRAP_KEY) --tags ingress
+
+configure-edge-publication:
+	ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/public-edge.yml --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 
 configure-tailscale:
 	ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/site.yml --private-key $(BOOTSTRAP_KEY) --tags tailscale
