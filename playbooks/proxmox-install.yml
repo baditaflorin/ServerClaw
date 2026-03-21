@@ -25,6 +25,9 @@
       tags:
         - network
         - ingress
+    - role: proxmox_tailscale
+      tags:
+        - tailscale
     - role: proxmox_guests
       tags:
         - guests

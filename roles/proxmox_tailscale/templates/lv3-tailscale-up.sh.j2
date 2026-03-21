@@ -1,0 +1,18 @@
+#!/bin/sh
+set -eu
+
+if [ -n "${TAILSCALE_AUTH_KEY:-}" ]; then
+  set -- --auth-key="${TAILSCALE_AUTH_KEY}" "$@"
+fi
+
+exec /usr/bin/tailscale up \
+  --hostname="{{ proxmox_tailscale_hostname }}" \
+  --accept-dns={{ proxmox_tailscale_accept_dns | bool | ternary('true', 'false') }} \
+  --advertise-routes="{{ proxmox_tailscale_advertise_routes | join(',') }}" \
+  --snat-subnet-routes={{ proxmox_tailscale_snat_subnet_routes | bool | ternary('true', 'false') }} \
+  --ssh={{ proxmox_tailscale_enable_ssh | bool | ternary('true', 'false') }} \
+  --stateful-filtering={{ proxmox_tailscale_stateful_filtering | bool | ternary('true', 'false') }} \
+{% if proxmox_tailscale_tags | length > 0 %}
+  --advertise-tags="{{ proxmox_tailscale_tags | join(',') }}" \
+{% endif %}
+  "$@"

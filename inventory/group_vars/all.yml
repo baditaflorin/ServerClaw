@@ -41,6 +41,12 @@ proxmox_snippets_storage_id: local
 proxmox_guest_ci_user: ops
 proxmox_guest_nameserver: 1.1.1.1
 proxmox_guest_searchdomain: lv3.org
+proxmox_guest_ssh_connection_mode: tailscale_direct
+proxmox_guest_ssh_proxy_command: >-
+  -o ProxyCommand="ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes {{ proxmox_host_admin_user }}@{{ hostvars['proxmox_florin'].ansible_host }} -W %h:%p"
+proxmox_guest_ssh_common_args:
+  tailscale_direct: ""
+  proxmox_host_jump: "{{ proxmox_guest_ssh_proxy_command }}"
 
 proxmox_host_admin_user: ops
 proxmox_host_admin_comment: LV3 Operations
@@ -73,3 +79,14 @@ proxmox_api_token_acl_path: /
 proxmox_api_token_privsep: true
 proxmox_api_token_local_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-api
 proxmox_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-api/lv3-automation-primary.json
+
+tailscale_apt_keyring_path: /usr/share/keyrings/tailscale-archive-keyring.gpg
+tailscale_apt_key_url: https://pkgs.tailscale.com/stable/debian/trixie.noarmor.gpg
+tailscale_apt_repo_file: /etc/apt/sources.list.d/tailscale.list
+tailscale_apt_repo_url: https://pkgs.tailscale.com/stable/debian/trixie.tailscale-keyring.list
+proxmox_tailscale_auth_key_env_var: TAILSCALE_AUTH_KEY
+proxmox_tailscale_accept_dns: false
+proxmox_tailscale_snat_subnet_routes: true
+proxmox_tailscale_enable_ssh: false
+proxmox_tailscale_stateful_filtering: false
+proxmox_tailscale_tags: []
