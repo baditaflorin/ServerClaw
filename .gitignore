@@ -26,6 +26,8 @@ go.work.sum
 
 # env file
 .env
+.local/
+.ansible/
 
 # Editor/IDE
 # .idea/

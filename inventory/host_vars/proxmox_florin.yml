@@ -1,0 +1,15 @@
+host_public_hostname: Debian-trixie-latest-amd64-base
+management_interface: enp7s0
+management_ipv4: 65.108.75.123
+management_ipv4_cidr: 26
+management_gateway4: 65.108.75.65
+management_ipv6: 2a01:4f9:6b:4b47::2
+management_ipv6_cidr: 64
+management_gateway6: fe80::1
+hetzner_ipv4_route_network: 65.108.75.64
+hetzner_ipv4_route_netmask: 255.255.255.192
+proxmox_wan_bridge: vmbr0
+proxmox_internal_bridge: vmbr10
+proxmox_internal_ipv4: 10.10.10.1
+proxmox_internal_cidr: 24
+proxmox_internal_network: 10.10.10.0/24

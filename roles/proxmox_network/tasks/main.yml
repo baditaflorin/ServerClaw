@@ -1,0 +1,57 @@
+---
+- name: Ensure nftables is installed
+  ansible.builtin.apt:
+    name: nftables
+    state: present
+    update_cache: true
+
+- name: Enable IPv4 forwarding
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: "1"
+    state: present
+    sysctl_set: true
+    reload: true
+
+- name: Render Proxmox host network interfaces
+  ansible.builtin.template:
+    src: interfaces.j2
+    dest: /etc/network/interfaces
+    mode: "0644"
+    validate: "ifquery -i %s -l"
+  register: proxmox_interfaces
+
+- name: Render nftables rules for VM egress
+  ansible.builtin.template:
+    src: nftables.conf.j2
+    dest: /etc/nftables.conf
+    mode: "0644"
+    validate: "nft -c -f %s"
+  register: proxmox_nftables
+
+- name: Enable and start nftables
+  ansible.builtin.systemd:
+    name: nftables
+    enabled: true
+    state: started
+
+- name: Reload nftables rules
+  ansible.builtin.command: nft -f /etc/nftables.conf
+  when: proxmox_nftables.changed
+  changed_when: true
+
+- name: Apply network changes with ifreload
+  ansible.builtin.command: ifreload -a
+  when: proxmox_interfaces.changed
+  changed_when: true
+
+- name: Wait for SSH after network reload
+  ansible.builtin.wait_for_connection:
+    timeout: 120
+    connect_timeout: 5
+    sleep: 2
+  when: proxmox_interfaces.changed
+
+- name: Refresh facts after network changes
+  ansible.builtin.setup:
+  when: proxmox_interfaces.changed

@@ -1,0 +1,59 @@
+schema_version: 1.0.0
+repo_version: 0.3.0
+platform_version: 0.3.0
+
+desired_state:
+  host_id: proxmox_florin
+  provider: hetzner-dedicated
+  management_ipv4: 65.108.75.123
+  base_os:
+    family: debian
+    major: 13
+    codename: trixie
+  proxmox:
+    major: 9
+    channel: no-subscription
+    installed: true
+  network:
+    wan_bridge: vmbr0
+    internal_bridge: vmbr10
+    internal_ipv4_gateway: 10.10.10.1/24
+    internal_subnet: 10.10.10.0/24
+    outbound_nat: true
+  guest_network_plan:
+    nginx_vm: 10.10.10.10
+    docker_runtime_vm: 10.10.10.20
+    docker_build_vm: 10.10.10.30
+    monitoring_vm: 10.10.10.40
+
+observed_state:
+  checked_at: 2026-03-21
+  access:
+    ssh_bootstrap_key_working: true
+  os:
+    banner: Linux Debian-trixie-latest-amd64-base 6.17.13-2-pve
+    kernel: 6.17.13-2-pve
+    distribution: Debian GNU/Linux
+    major: 13
+    codename: trixie
+  proxmox:
+    installed: true
+    version: 9.1.6
+    ve_version: 9.1.0
+    api_ui_port: 8006
+  network:
+    wan_bridge: vmbr0
+    wan_bridge_active: true
+    internal_bridge: vmbr10
+    internal_bridge_active: true
+    internal_ipv4_gateway: 10.10.10.1/24
+    ipv4_forwarding: true
+    outbound_nat: true
+
+release_tracks:
+  repo_versioning:
+    current: 0.3.0
+    meaning: version of this repository's automation, docs, and operational contract
+  platform_versioning:
+    current: 0.3.0
+    meaning: intended platform release for the actual server configuration

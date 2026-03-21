@@ -1,0 +1,23 @@
+---
+- name: Install Proxmox VE on Debian 13 hosts
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Ensure target host is Debian 13
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+          - ansible_distribution_major_version == "13"
+        fail_msg: "This playbook only supports Debian 13 targets."
+
+  roles:
+    - role: proxmox_repository
+      tags:
+        - repository
+    - role: proxmox_kernel
+    - role: proxmox_platform
+    - role: proxmox_network
+      tags:
+        - network
