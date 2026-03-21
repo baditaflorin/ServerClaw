@@ -34,3 +34,7 @@
     - role: proxmox_api_access
       tags:
         - api-access
+    - role: proxmox_backups
+      tags:
+        - storage
+        - backups

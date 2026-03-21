@@ -1,0 +1,19 @@
+cifs: {{ proxmox_backup_storage.id }}
+        content {{ proxmox_backup_storage.content | join(',') }}
+{% if proxmox_backup_storage.domain | default('') | length > 0 %}
+        domain {{ proxmox_backup_storage.domain }}
+{% endif %}
+        path {{ proxmox_backup_storage.path }}
+        server {{ proxmox_backup_storage.server }}
+        share {{ proxmox_backup_storage.share }}
+{% if proxmox_backup_storage.smbversion | default('') | length > 0 %}
+        smbversion {{ proxmox_backup_storage.smbversion }}
+{% endif %}
+{% if proxmox_backup_storage.subdir | default('') | length > 0 %}
+        subdir {{ proxmox_backup_storage.subdir }}
+{% endif %}
+{% if proxmox_backup_storage.options | default('') | length > 0 %}
+        options {{ proxmox_backup_storage.options }}
+{% endif %}
+        nodes {{ proxmox_backup_storage.nodes | join(',') }}
+        username {{ proxmox_backup_storage.username }}

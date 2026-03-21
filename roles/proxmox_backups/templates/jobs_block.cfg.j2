@@ -1,0 +1,16 @@
+{% for job in proxmox_enabled_backup_jobs | default([]) %}
+vzdump: {{ job.id }}
+        compress {{ job.compress }}
+        enabled {{ (job.enabled | bool) | ternary('1', '0') }}
+        mode {{ job.mode }}
+        node {{ job.node }}
+        notification-mode {{ job.notification_mode }}
+        prune-backups keep-last={{ job.prune_backups.keep_last }},keep-daily={{ job.prune_backups.keep_daily }},keep-weekly={{ job.prune_backups.keep_weekly }},keep-monthly={{ job.prune_backups.keep_monthly }}
+        repeat-missed {{ (job.repeat_missed | bool) | ternary('1', '0') }}
+        schedule {{ job.schedule }}
+        storage {{ job.storage }}
+        vmid {{ job.vmid_list | map('string') | join(',') }}
+{% if not loop.last %}
+
+{% endif %}
+{% endfor %}

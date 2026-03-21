@@ -1,0 +1,121 @@
+---
+- name: Manage Proxmox storage and backup configuration
+  when: proxmox_backup_storage.enabled | bool
+  block:
+    - name: Ensure CIFS client package is present
+      ansible.builtin.apt:
+        name:
+          - cifs-utils
+        state: present
+        update_cache: true
+
+    - name: Load external backup storage password from controller environment
+      ansible.builtin.set_fact:
+        proxmox_backup_storage_password: "{{ lookup('ansible.builtin.env', proxmox_backup_storage.password_env) | trim }}"
+      no_log: true
+
+    - name: Assert backup storage inputs are complete
+      ansible.builtin.assert:
+        that:
+          - proxmox_backup_storage.id | length > 0
+          - proxmox_backup_storage.type == "cifs"
+          - proxmox_backup_storage.server | length > 0
+          - proxmox_backup_storage.share | length > 0
+          - proxmox_backup_storage.username | length > 0
+          - proxmox_backup_storage.path | length > 0
+          - proxmox_backup_storage.content | length > 0
+          - proxmox_backup_storage.nodes | length > 0
+          - proxmox_backup_storage_password | length > 0
+        fail_msg: >-
+          External backup storage is enabled, but one or more required values are missing.
+          Set PROXMOX_BACKUP_CIFS_SERVER, PROXMOX_BACKUP_CIFS_SHARE,
+          PROXMOX_BACKUP_CIFS_USERNAME, and {{ proxmox_backup_storage.password_env }}
+          before running the backup role.
+
+    - name: Ensure Proxmox storage secret directory exists
+      ansible.builtin.file:
+        path: /etc/pve/priv/storage
+        state: directory
+        mode: "0700"
+
+    - name: Persist the CIFS storage password in the Proxmox private storage area
+      ansible.builtin.copy:
+        dest: "/etc/pve/priv/storage/{{ proxmox_backup_storage.id }}.pw"
+        mode: "0600"
+        content: "{{ proxmox_backup_storage_password }}\n"
+      no_log: true
+
+    - name: Render managed backup storage block
+      ansible.builtin.set_fact:
+        proxmox_backup_storage_block: "{{ lookup('ansible.builtin.template', 'storage_block.cfg.j2') | trim }}"
+
+    - name: Converge managed backup storage entry
+      ansible.builtin.blockinfile:
+        path: /etc/pve/storage.cfg
+        create: true
+        marker: "# {mark} ANSIBLE MANAGED BACKUP STORAGE {{ proxmox_backup_storage.id }}"
+        block: "{{ proxmox_backup_storage_block }}"
+
+    - name: Build enabled Proxmox backup job list
+      ansible.builtin.set_fact:
+        proxmox_enabled_backup_jobs: "{{ (proxmox_enabled_backup_jobs | default([])) + [item] }}"
+      loop: "{{ proxmox_backup_jobs }}"
+      loop_control:
+        label: "{{ item.id }}"
+      when: item.enabled | bool
+
+    - name: Render managed backup job block
+      ansible.builtin.set_fact:
+        proxmox_backup_jobs_block: "{{ lookup('ansible.builtin.template', 'jobs_block.cfg.j2') | trim }}"
+      when: (proxmox_enabled_backup_jobs | default([])) | length > 0
+
+    - name: Converge managed Proxmox backup jobs
+      ansible.builtin.blockinfile:
+        path: /etc/pve/jobs.cfg
+        create: true
+        marker: "# {mark} ANSIBLE MANAGED BACKUP JOBS"
+        block: "{{ proxmox_backup_jobs_block }}"
+      register: proxmox_backup_jobs_cfg
+      when: (proxmox_enabled_backup_jobs | default([])) | length > 0
+
+    - name: Restart the Proxmox scheduler if backup jobs changed
+      ansible.builtin.command: pvescheduler restart
+      when:
+        - proxmox_backup_jobs_cfg is defined
+        - proxmox_backup_jobs_cfg.changed
+      changed_when: true
+
+    - name: Read converged backup storage entry
+      ansible.builtin.command: "pvesh get /storage/{{ proxmox_backup_storage.id }} --output-format json"
+      register: proxmox_backup_storage_state
+      changed_when: false
+
+    - name: Assert the external backup storage entry exists with the expected type
+      ansible.builtin.assert:
+        that:
+          - (proxmox_backup_storage_state.stdout | from_json).storage == proxmox_backup_storage.id
+          - (proxmox_backup_storage_state.stdout | from_json).type == proxmox_backup_storage.type
+        fail_msg: "The expected Proxmox backup storage entry was not readable after configuration."
+
+    - name: Verify Proxmox can query the external backup storage
+      ansible.builtin.command: "pvesm status --storage {{ proxmox_backup_storage.id }}"
+      changed_when: false
+
+    - name: Read converged backup job definitions
+      ansible.builtin.command: "pvesh get /cluster/backup/{{ item.id }} --output-format json"
+      register: proxmox_backup_job_state
+      changed_when: false
+      loop: "{{ proxmox_enabled_backup_jobs | default([]) }}"
+      loop_control:
+        label: "{{ item.id }}"
+      when: (proxmox_enabled_backup_jobs | default([])) | length > 0
+
+    - name: Assert the expected backup jobs are readable
+      ansible.builtin.assert:
+        that:
+          - (item.stdout | from_json).id == item.item.id
+          - (item.stdout | from_json).storage == item.item.storage
+        fail_msg: "The expected Proxmox backup job was not readable after configuration."
+      loop: "{{ proxmox_backup_job_state.results if proxmox_backup_job_state is defined else [] }}"
+      loop_control:
+        label: "{{ item.item.id }}"
