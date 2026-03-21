@@ -70,6 +70,9 @@ password SSH disabled on host and guests
 
 ## Documents
 
+- [Changelog](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/changelog.md)
+- [Repository map](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/repository-map.md)
+- [Assistant operator guide](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/assistant-operator-guide.md)
 - [Initial access runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/initial-access.md)
 - [ADR 0001: Bootstrap model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0001-bootstrap-dedicated-host-with-ansible.md)
 - [ADR 0002: Target Proxmox VE 9 on Debian 13](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0002-target-proxmox-ve-9-on-debian-13.md)
@@ -100,7 +103,7 @@ This repo now tracks three distinct things:
 
 Current values:
 
-- `repo_version`: `0.10.0`
+- `repo_version`: `0.11.0`
 - `platform_version`: `0.8.0`
 - `observed_os`: `Debian 13`
 - `observed_proxmox_installed`: `true`
@@ -113,6 +116,8 @@ ADR metadata now tracks both acceptance and implementation:
 - first repo version implemented
 - first platform version implemented
 - implementation date
+
+Repository releases are summarized in [changelog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/changelog.md).
 
 ## Engineering stance
 

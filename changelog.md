@@ -1,0 +1,123 @@
+# Changelog
+
+This file records repository-level releases and the platform changes they introduced.
+
+The repo uses semantic versioning for repository maturity and operating contract. The live platform version is tracked separately in [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml).
+
+Historical entries before `0.10.0` are reconstructed from repository history, ADR metadata, and observed platform evolution.
+
+## 0.11.0 - 2026-03-21
+
+- added this changelog to make version history explicit
+- added [docs/repository-map.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/repository-map.md) as a navigation index for humans and assistants
+- added [docs/assistant-operator-guide.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/assistant-operator-guide.md) to document how to read, change, verify, and persist infrastructure work in this repo
+- updated repo guidance so future meaningful changes also update the changelog
+
+Platform impact:
+
+- none
+
+## 0.10.0 - 2026-03-21
+
+- made `ops` the default non-root automation and SSH identity for the Proxmox host
+- added a reusable Linux access baseline role
+- added guest access hardening playbook and inventory wiring for private guests through the Proxmox jump path
+- documented the operating model in ADR 0018 and the hardening runbook
+
+Platform impact:
+
+- host administration now defaults to `ops` plus `sudo`
+- guest administration now defaults to `ops` plus `sudo`
+- host SSH password auth is disabled
+- guest SSH password auth is disabled
+- direct guest root SSH is disabled
+
+## 0.9.0 - 2026-03-21
+
+- transitional repository release during the non-root access hardening rollout
+- prepared the repository-wide move from root-first workflows to `ops`-first workflows
+
+Platform impact:
+
+- no distinct standalone platform milestone beyond the access-hardening work completed in `0.10.0`
+
+## 0.8.0 - 2026-03-21
+
+- changed the intended private-guest operator access model from WireGuard to Tailscale
+- updated ADR 0014 and desired-state metadata to match the existing infrastructure direction
+
+Platform impact:
+
+- no live Tailscale deployment yet
+- platform intent changed so future private access work targets Tailscale
+
+## 0.7.0 - 2026-03-21
+
+- added ADR lifecycle metadata to track implementation status, first repo version, first platform version, and implementation date
+- backfilled existing ADRs with implementation metadata
+
+Platform impact:
+
+- none
+
+## 0.6.0 - 2026-03-21
+
+- defined the initial VM topology and monitoring model
+- implemented provisioning from a Debian 13 cloud template
+- added automation for guest creation and cloud-init bootstrap
+
+Platform impact:
+
+- template `9000` created
+- guests `110`, `120`, `130`, and `140` provisioned and running
+- internal guest SSH via the Proxmox jump path became usable
+
+## 0.5.0 - 2026-03-21
+
+- documented the `lv3.org` DNS and subdomain model
+- created initial public DNS records for `proxmox`, `grafana`, `nginx`, `docker`, and `build`
+
+Platform impact:
+
+- the Hetzner DNS zone now points those subdomains at the Proxmox host IPv4
+
+## 0.4.0 - 2026-03-21
+
+- added ADRs to define the public ingress model and private operator access model for the `10.10.10.0/24` guest network
+- clarified that the NGINX VM is the intended public edge and that non-edge guests remain private by default
+
+Platform impact:
+
+- no major live change beyond design clarification
+
+## 0.3.0 - 2026-03-21
+
+- implemented Proxmox host network convergence
+- defined `vmbr0` as the public bridge and `vmbr10` as the internal guest bridge
+- enabled IPv4 forwarding and outbound NAT for guest egress
+
+Platform impact:
+
+- the host became ready to support private guest networking on `10.10.10.0/24`
+
+## 0.2.0 - 2026-03-21
+
+- implemented the Debian-package Proxmox installation path
+- added the first executable Ansible scaffold for host bootstrap
+- documented the single-node-first platform direction and the initial security baseline
+
+Platform impact:
+
+- Proxmox VE was installed on the Hetzner host
+- the host began operating on the Proxmox kernel and management stack
+
+## 0.1.0 - 2026-03-21
+
+- established the repository, initial README, runbooks, and early ADR set
+- documented the Hetzner rescue-plus-installimage bootstrap path
+- introduced separate repository and platform version tracking
+- made DRY and solid engineering principles explicit
+
+Platform impact:
+
+- bootstrap and recovery process became documented and repeatable

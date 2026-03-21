@@ -15,9 +15,10 @@ Both ChatGPT and Claude may be used in this repo. Work as if another assistant w
 5. If a manual server change is unavoidable, document it immediately in the same turn.
 6. Keep README status and next steps current when the server state materially changes.
 7. Update `VERSION` and `versions/stack.yaml` whenever a change affects repository maturity, platform intent, or observed server state.
-8. Keep everything DRY: centralize shared facts, avoid repeated shell snippets, and refactor duplication early.
-9. Keep everything structurally solid: separate concerns, prefer small reversible changes, and do not mix bootstrap, security, storage, and Proxmox object management in one opaque step.
-10. Every ADR must record both decision status and implementation state, including the first repo version, first platform version, and date where implementation became true.
+8. Update `changelog.md` whenever `VERSION` changes.
+9. Keep everything DRY: centralize shared facts, avoid repeated shell snippets, and refactor duplication early.
+10. Keep everything structurally solid: separate concerns, prefer small reversible changes, and do not mix bootstrap, security, storage, and Proxmox object management in one opaque step.
+11. Every ADR must record both decision status and implementation state, including the first repo version, first platform version, and date where implementation became true.
 
 ## Current Infrastructure Context
 
@@ -57,6 +58,7 @@ When making meaningful infrastructure decisions, update:
 - `docs/adr/`
 - `docs/runbooks/`
 - `VERSION`
+- `changelog.md`
 - `versions/stack.yaml`
 
 When adding automation later, prefer a structure like:
