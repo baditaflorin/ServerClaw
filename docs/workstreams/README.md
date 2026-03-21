@@ -55,6 +55,20 @@ Each workstream document should record:
 - `merged`: merged to `main`
 - `live_applied`: merged and applied to the real platform
 
+## Starting A Workstream
+
+Preferred entry point:
+
+```bash
+make start-workstream WORKSTREAM=adr-0011-monitoring
+```
+
+This uses [scripts/create-workstream.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/create-workstream.sh) to:
+
+- read the branch and worktree path from [workstreams.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml)
+- create the worktree if it does not exist
+- attach it to the correct `codex/` branch
+
 ## Template
 
 Use [TEMPLATE.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/TEMPLATE.md) for new workstreams.

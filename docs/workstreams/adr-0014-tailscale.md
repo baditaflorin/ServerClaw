@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0014](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0014-operator-access-to-private-guest-network.md)
 - Title: Tailscale private guest access
-- Status: in_progress
+- Status: merged
 - Branch: `codex/adr-0014-tailscale`
 - Worktree: `../proxmox_florin_server-tailscale`
 - Owner: codex
@@ -71,3 +71,4 @@
 
 - avoid mixing host firewall redesign into this workstream unless required
 - do not update `platform_version` until merged work has been applied live from `main`
+- this workstream is merged to `main` but not yet applied live

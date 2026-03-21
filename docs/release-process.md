@@ -10,6 +10,7 @@ This repository now supports parallel ADR implementation. That requires a clear 
    - create or claim a workstream in `workstreams.yaml`
    - use one branch per workstream, with the `codex/` prefix
    - prefer one git worktree per active workstream
+   - use `make start-workstream WORKSTREAM=<id>` to create the correct worktree
    - update the workstream document while implementation is in progress
    - do not bump `VERSION` just because a branch changes
    - do not update `versions/stack.yaml` with speculative branch-only platform state
@@ -65,6 +66,13 @@ Before merging a workstream to `main`, confirm:
 - do not create fake release entries on long-lived feature branches
 
 ## Recommended Worktree Commands
+
+```bash
+make start-workstream WORKSTREAM=adr-0011-monitoring
+make start-workstream WORKSTREAM=adr-0014-tailscale
+```
+
+Equivalent raw git commands:
 
 ```bash
 git worktree add ../proxmox_florin_server-monitoring -b codex/adr-0011-monitoring

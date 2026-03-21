@@ -64,7 +64,13 @@ Initial guest provisioning is now implemented and applied:
 
 The private SSH jump path through the Proxmox host to the guests is working.
 
-ADR 0014 branch work now defines the steady-state access model as Tailscale subnet routing from the Proxmox host to `10.10.10.0/24`, with direct operator access to `10.10.10.30` and the old jump path retained only as break-glass until the merged change is applied live from `main`.
+Merged mainline automation now exists for:
+
+- ADR 0011 monitoring stack rollout
+- ADR 0014 Tailscale private access rollout
+- ADR 0020 storage and backup rollout
+
+These changes are merged to `main` but not yet applied live from `main`, so the verified live-state summary below still reflects the already-applied platform.
 
 The current access posture is:
 
@@ -134,7 +140,7 @@ This repo now tracks three distinct things:
 
 Current values on `main`:
 
-- `repo_version`: `0.16.0`
+- `repo_version`: `0.17.0`
 - `platform_version`: `0.11.0`
 - `observed_os`: `Debian 13`
 - `observed_proxmox_installed`: `true`
@@ -171,7 +177,7 @@ This repository is intentionally opinionated:
 - small reversible infrastructure changes
 - clear separation between bootstrap, security, storage, networking, and Proxmox object management
 
-## Active Parallel Work
+## Merged Workstreams
 
 - [ADR 0011 monitoring workstream](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
 - [ADR 0014 Tailscale workstream](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0014-tailscale.md)

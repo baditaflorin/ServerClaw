@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0020](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0020-initial-storage-and-backup-model.md)
 - Title: Initial storage and backup rollout
-- Status: ready_for_merge
+- Status: merged
 - Branch: `codex/adr-0020-backups`
 - Worktree: `../proxmox_florin_server-backups`
 - Owner: codex
@@ -59,3 +59,4 @@
 - keep runtime guest disks on the existing local storage until a separate migration workstream exists
 - do not mix backup work with Tailscale or monitoring unless a real dependency appears
 - do not bump `VERSION` or `platform_version` on this branch
+- this workstream is merged to `main` but not yet applied live

@@ -10,6 +10,19 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 - use this section on `main` for merged notes that have not yet been cut into a numbered release
 
+## 0.17.0 - 2026-03-22
+
+- merged ADR 0011 monitoring automation into `main`
+- merged ADR 0014 Tailscale private-access automation into `main`
+- merged ADR 0020 storage and backup automation into `main`
+- added `scripts/create-workstream.sh` and `make start-workstream` so each thread can create its own branch/worktree safely from the registry
+- marked the three completed workstreams as merged in the registry and workstream documents
+
+Platform impact:
+
+- none yet
+- these changes are merged to `main` but have not been applied live from `main`
+
 ## 0.16.0 - 2026-03-22
 
 - clarified branch reconciliation rules for parallel workstreams

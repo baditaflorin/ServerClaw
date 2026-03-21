@@ -75,6 +75,7 @@ At minimum, review whether these files need updates:
 
 Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/Makefile) instead of rebuilding long commands from memory:
 
+- `make start-workstream WORKSTREAM=adr-0011-monitoring`
 - `make syntax-check`
 - `make install-proxmox`
 - `make configure-network`
@@ -100,5 +101,6 @@ Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/M
 
 These are the highest-value incomplete areas:
 
-- Tailscale private access rollout
-- monitoring stack rollout
+- live apply of ADR 0014 Tailscale private access rollout
+- live apply and dashboard completion for ADR 0011 monitoring
+- live apply of ADR 0020 storage and backup automation
