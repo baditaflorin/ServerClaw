@@ -10,6 +10,18 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 - use this section on `main` for merged notes that have not yet been cut into a numbered release
 
+## 0.21.0 - 2026-03-22
+
+- verified that the Tailscale-first host administration path is now working from the laptop
+- confirmed that Proxmox API access on `100.118.189.95:8006` is reachable
+- confirmed that public SSH to `65.108.75.123:22` is no longer the active routine management path
+
+Platform impact:
+
+- `ssh ops@100.118.189.95` now succeeds from the operator laptop
+- `https://100.118.189.95:8006` is reachable on the Tailscale path
+- the public IPv4 management path remains blocked from this workstation, which is acceptable for the current Tailscale-first model
+
 ## 0.20.0 - 2026-03-22
 
 - made the Proxmox host Tailscale IP the default routine SSH and Ansible endpoint

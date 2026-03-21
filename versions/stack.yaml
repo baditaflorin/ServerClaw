@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.20.0
-platform_version: 0.12.0
+repo_version: 0.21.0
+platform_version: 0.13.0
 
 desired_state:
   host_id: proxmox_florin
@@ -76,7 +76,7 @@ observed_state:
   access:
     ssh_bootstrap_key_working: true
     host_ops_user_working: true
-    host_ops_user_working_via_tailscale: false
+    host_ops_user_working_via_tailscale: true
     host_ops_user_working_via_public_ipv4_from_current_workstation: false
     host_ssh_password_authentication: false
     root_ssh_break_glass_key_only: true
@@ -123,7 +123,7 @@ observed_state:
     tailscale_installed: true
     tailscale_state: AuthenticatedRouteApprovalPending
     tailscale_tail_ipv4: 100.118.189.95
-    tailscale_host_admin_path_working: false
+    tailscale_host_admin_path_working: true
     tailscale_advertised_routes:
       - 10.10.10.0/24
     tailscale_private_subnet_route_distributed: false
@@ -186,8 +186,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.20.0
+    current: 0.21.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.12.0
+    current: 0.13.0
     meaning: intended platform release for the actual server configuration

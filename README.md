@@ -6,9 +6,9 @@ The preferred bootstrap path is now Hetzner Rescue System plus `installimage`, n
 
 ## Current status
 
-Debian 13 is installed on the host, Proxmox VE is installed from the Debian package path, and the repo is now targeted toward routine SSH/Ansible access over the host Tailscale IP instead of `root` on the public IPv4.
+Debian 13 is installed on the host, Proxmox VE is installed from the Debian package path, and routine SSH/Ansible access now works over the host Tailscale IP instead of `root` on the public IPv4.
 
-Target routine host access command:
+Verified on 2026-03-22:
 
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95
@@ -73,14 +73,14 @@ Merged mainline automation now exists for:
 Current live state for those merged workstreams:
 
 - ADR 0011 monitoring is applied live on `10.10.10.40`
-- ADR 0014 is now aligned around host administration over the Proxmox Tailscale IP; direct guest subnet routing is still pending tailnet route acceptance, and direct TCP access to the host over Tailscale still needs to be fixed
+- ADR 0014 now provides stable host administration over the Proxmox Tailscale IP; direct guest subnet routing is still pending tailnet route acceptance
 - ADR 0020 backups are still blocked on missing external CIFS target credentials
 
 The current access posture is:
 
 ```text
 ops SSH + sudo for routine host work
-target routine host SSH over the Proxmox Tailscale IP
+routine host SSH over the Proxmox Tailscale IP
 ops@pam for routine Proxmox administration
 lv3-automation@pve API token for durable Proxmox object management
 ops SSH + sudo for guest VMs
@@ -94,7 +94,7 @@ The current host security posture is:
 ```text
 Proxmox firewall enabled for host management traffic
 SSH and port 8006 limited to declared management source ranges
-Tailscale is the intended primary management path for the host
+Tailscale is the primary management path for the host
 Let's Encrypt certificate active for proxmox.lv3.org
 sendmail notification endpoint and catch-all matcher configured
 ops@pam protected by TOTP
