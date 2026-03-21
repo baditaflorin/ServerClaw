@@ -12,12 +12,13 @@ The first required guests are:
 - `10.10.10.10`: NGINX VM
 - `10.10.10.20`: general Docker runtime VM for long-running containers
 - `10.10.10.30`: Docker build VM for remote interactive build work from laptops and other operator machines
+- `10.10.10.40`: monitoring VM
 
 The build VM needs materially higher compute capacity than the general runtime VM because it will be used for image builds and other bursty CPU-heavy work.
 
 ## Decision
 
-We will start with a simple three-VM topology on a private Proxmox-managed network in the `10.10.10.0/24` range.
+We will start with a simple four-VM topology on a private Proxmox-managed network in the `10.10.10.0/24` range.
 
 Initial guest roles:
 
@@ -31,6 +32,9 @@ Initial guest roles:
    - IP: `10.10.10.30`
    - purpose: remote Docker builds and other operator-driven build tasks
    - initial size target: `12` vCPU and `24 GB` RAM
+4. Monitoring VM
+   - IP: `10.10.10.40`
+   - purpose: Grafana, platform monitoring, and supporting telemetry services
 
 ## Network model
 
