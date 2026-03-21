@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Implementation Status: Partial
-- Implemented In Repo Version: 0.6.0
+- Implemented In Repo Version: 0.8.0
 - Implemented In Platform Version: 0.6.0
 - Implemented On: 2026-03-21
 - Date: 2026-03-21
@@ -30,7 +30,7 @@ Stage one: bootstrap access
 
 Stage two: steady-state operator access
 
-- provide laptop access to `10.10.10.0/24` through a WireGuard-based private access path
+- provide laptop access to `10.10.10.0/24` through a Tailscale-based private access path
 - do not expose the Docker runtime VM, Docker build VM, or monitoring VM directly to the public internet
 - keep the build VM reachable privately for interactive remote work from approved operator machines
 
@@ -48,13 +48,13 @@ That means:
 
 - We avoid weakening the private VM network just to make laptop access convenient.
 - The Proxmox host can serve as a temporary bootstrap hop without becoming the permanent user-facing access pattern.
-- WireGuard becomes part of the platform access design and should be treated as first-class infrastructure.
+- Tailscale becomes part of the platform access design and should be treated as first-class infrastructure.
 
 ## Follow-up requirements
 
 This ADR still requires implementation details for:
 
-- where WireGuard terminates in steady state
-- peer management and key rotation
+- where Tailscale terminates in steady state
+- tailnet auth policy and device approval
 - which laptops or admin devices are allowed
 - whether the monitoring VM should also be reachable over the same access path

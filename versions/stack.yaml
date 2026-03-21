@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.7.0
+repo_version: 0.8.0
 platform_version: 0.6.0
 
 desired_state:
@@ -42,7 +42,7 @@ desired_state:
       - 443
   operator_access:
     bootstrap_method: ssh_jump_via_proxmox_host
-    steady_state_method: wireguard_private_access
+    steady_state_method: tailscale_private_access
     private_build_vm: 10.10.10.30
   dns:
     zone: lv3.org
@@ -116,7 +116,7 @@ observed_state:
 
 release_tracks:
   repo_versioning:
-    current: 0.7.0
+    current: 0.8.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.6.0
