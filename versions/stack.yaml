@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.18.0
+repo_version: 0.19.0
 platform_version: 0.12.0
 
 desired_state:
@@ -117,7 +117,11 @@ observed_state:
       - 90.95.35.115/32
       - 10.10.10.0/24
     tailscale_installed: true
-    tailscale_state: NeedsLogin
+    tailscale_state: AuthenticatedRouteApprovalPending
+    tailscale_tail_ipv4: 100.118.189.95
+    tailscale_advertised_routes:
+      - 10.10.10.0/24
+    tailscale_private_subnet_route_distributed: false
   notifications:
     sendmail_endpoint: lv3-ops-email
     sendmail_target_email: baditaflorin@gmail.com
@@ -177,7 +181,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.18.0
+    current: 0.19.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.12.0

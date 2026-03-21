@@ -10,6 +10,18 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 - use this section on `main` for merged notes that have not yet been cut into a numbered release
 
+## 0.19.0 - 2026-03-22
+
+- verified the approved Tailscale host login on the Proxmox node
+- corrected repository state to reflect that ADR 0014 is blocked on subnet-route acceptance, not host authentication
+- prepared the finished workstream branches and worktrees for safe deletion after merge verification
+
+Platform impact:
+
+- the Proxmox host now has the Tailscale address `100.118.189.95`
+- the host is advertising `10.10.10.0/24` to the tailnet
+- operator clients still do not receive the private subnet route, so ADR 0014 is not fully live yet
+
 ## 0.18.0 - 2026-03-22
 
 - fixed the InfluxData repository integration in the monitoring role for current Debian package verification

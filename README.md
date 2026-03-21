@@ -73,7 +73,7 @@ Merged mainline automation now exists for:
 Current live state for those merged workstreams:
 
 - ADR 0011 monitoring is applied live on `10.10.10.40`
-- ADR 0014 Tailscale is installed on the Proxmox host but still needs tailnet login and route approval
+- ADR 0014 Tailscale is authenticated on the Proxmox host and advertising `10.10.10.0/24`, but the subnet route is still not accepted into the tailnet so operator laptops do not receive it yet
 - ADR 0020 backups are still blocked on missing external CIFS target credentials
 
 The current access posture is:

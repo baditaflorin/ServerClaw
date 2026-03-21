@@ -57,10 +57,10 @@
 
 ## Remaining Live Blockers
 
-- the host is installed with Tailscale but still in `NeedsLogin`
-- the host still needs to be attached to the tailnet with a valid auth flow
+- the Proxmox host is authenticated in the tailnet and advertising `10.10.10.0/24`
 - the route `10.10.10.0/24` still needs tailnet approval unless auto-approval is configured
-- post-apply verification still needs to be recorded after the change is applied from `main`
+- operator clients currently do not receive the private subnet route; direct SSH to `10.10.10.30` still times out from the Mac workbench
+- post-apply verification still needs to be recorded after the subnet route is accepted and tested end-to-end
 
 ## Merge Criteria
 
@@ -72,4 +72,4 @@
 
 - avoid mixing host firewall redesign into this workstream unless required
 - do not update `platform_version` until merged work has been applied live from `main`
-- this workstream is merged to `main` but not yet applied live
+- this workstream is merged to `main` and partially live on the host, but not yet complete for operator-side private guest access
