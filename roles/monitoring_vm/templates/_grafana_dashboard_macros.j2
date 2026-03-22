@@ -19,15 +19,24 @@ from(bucket: "{{ bucket }}") |> range(start: v.timeRangeStart, stop: v.timeRange
 {% macro nginx_rate_query(bucket, host_name, field_name) -%}
 from(bucket: "{{ bucket }}") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == "nginx" and r.host == "{{ host_name }}" and r._field == "{{ field_name }}") |> derivative(unit: 1s, nonNegative: true)
 {%- endmacro %}
-{% macro timeseries_panel(datasource_name, panel_id, x, y, title, unit, query, min_value=None, max_value=None) -%}
+{% macro docker_build_query(bucket, host_name, status_name=None) -%}
+from(bucket: "{{ bucket }}") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == "docker_builds" and r.host == "{{ host_name }}" and r._field == "count"{% if status_name is not none %} and r.status == "{{ status_name }}"{% endif %}) |> set(key: "command", value: "all") |> set(key: "status", value: "{{ status_name | default('all') }}") |> group(columns: ["_measurement", "_field", "host", "command", "status"])
+{%- endmacro %}
+{% macro docker_build_total_query(bucket, host_name, status_name=None) -%}
+{{ docker_build_query(bucket, host_name, status_name) }} |> sum()
+{%- endmacro %}
+{% macro docker_build_window_query(bucket, host_name, status_name=None) -%}
+{{ docker_build_query(bucket, host_name, status_name) }} |> aggregateWindow(every: v.windowPeriod, fn: sum, createEmpty: false)
+{%- endmacro %}
+{% macro timeseries_panel(datasource_name, panel_id, x, y, title, unit, query, min_value=None, max_value=None, width=6, height=8) -%}
 {
   "id": {{ panel_id }},
   "type": "timeseries",
   "title": {{ title | to_json }},
   "datasource": {{ datasource_name | to_json }},
   "gridPos": {
-    "h": 8,
-    "w": 6,
+    "h": {{ height }},
+    "w": {{ width }},
     "x": {{ x }},
     "y": {{ y }}
   },
@@ -58,15 +67,15 @@ from(bucket: "{{ bucket }}") |> range(start: v.timeRangeStart, stop: v.timeRange
   ]
 }
 {%- endmacro %}
-{% macro stat_panel(datasource_name, panel_id, x, y, title, unit, query) -%}
+{% macro stat_panel(datasource_name, panel_id, x, y, title, unit, query, width=6, height=4) -%}
 {
   "id": {{ panel_id }},
   "type": "stat",
   "title": {{ title | to_json }},
   "datasource": {{ datasource_name | to_json }},
   "gridPos": {
-    "h": 4,
-    "w": 6,
+    "h": {{ height }},
+    "w": {{ width }},
     "x": {{ x }},
     "y": {{ y }}
   },

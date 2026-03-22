@@ -39,7 +39,9 @@
     {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 21, 0, 40, "NGINX Active Connections", "short", dashboard.nginx_field_query(monitoring_influxdb_bucket, "nginx-lv3", "active"), 0, None) }},
     {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 22, 6, 40, "NGINX Requests Per Second", "reqps", dashboard.nginx_rate_query(monitoring_influxdb_bucket, "nginx-lv3", "requests"), 0, None) }},
     {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 23, 12, 40, "NGINX Accepts And Handled Per Second", "cps", "from(bucket: \"" ~ monitoring_influxdb_bucket ~ "\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"nginx\" and r.host == \"nginx-lv3\" and (r._field == \"accepts\" or r._field == \"handled\")) |> derivative(unit: 1s, nonNegative: true)", 0, None) }},
-    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 24, 18, 40, "NGINX Connection States", "short", "from(bucket: \"" ~ monitoring_influxdb_bucket ~ "\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"nginx\" and r.host == \"nginx-lv3\" and (r._field == \"reading\" or r._field == \"writing\" or r._field == \"waiting\"))", 0, None) }}
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 24, 18, 40, "NGINX Connection States", "short", "from(bucket: \"" ~ monitoring_influxdb_bucket ~ "\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"nginx\" and r.host == \"nginx-lv3\" and (r._field == \"reading\" or r._field == \"writing\" or r._field == \"waiting\"))", 0, None) }},
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 25, 0, 48, "Docker Build VM Builds (Selected Range)", "short", dashboard.docker_build_total_query(monitoring_influxdb_bucket, "docker-build-lv3")) }},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 26, 6, 48, "Docker Build VM Builds Over Time", "short", dashboard.docker_build_window_query(monitoring_influxdb_bucket, "docker-build-lv3"), 0, None, 18, 8) }}
   ],
   "refresh": "30s",
   "schemaVersion": 39,

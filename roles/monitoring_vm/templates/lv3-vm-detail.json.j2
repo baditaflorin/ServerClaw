@@ -39,7 +39,10 @@
     {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 9, 0, 12, "NGINX Active Connections", "short", dashboard.nginx_field_query(monitoring_influxdb_bucket, monitoring_dashboard_guest.name, "active"), 0, None) }},
     {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 10, 6, 12, "NGINX Requests Per Second", "reqps", dashboard.nginx_rate_query(monitoring_influxdb_bucket, monitoring_dashboard_guest.name, "requests"), 0, None) }},
     {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 11, 12, 12, "NGINX Accepts And Handled Per Second", "cps", "from(bucket: \"" ~ monitoring_influxdb_bucket ~ "\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"nginx\" and r.host == \"" ~ monitoring_dashboard_guest.name ~ "\" and (r._field == \"accepts\" or r._field == \"handled\")) |> derivative(unit: 1s, nonNegative: true)", 0, None) }},
-    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 12, 18, 12, "NGINX Connection States", "short", "from(bucket: \"" ~ monitoring_influxdb_bucket ~ "\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"nginx\" and r.host == \"" ~ monitoring_dashboard_guest.name ~ "\" and (r._field == \"reading\" or r._field == \"writing\" or r._field == \"waiting\"))", 0, None) }}{% endif %}
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 12, 18, 12, "NGINX Connection States", "short", "from(bucket: \"" ~ monitoring_influxdb_bucket ~ "\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"nginx\" and r.host == \"" ~ monitoring_dashboard_guest.name ~ "\" and (r._field == \"reading\" or r._field == \"writing\" or r._field == \"waiting\"))", 0, None) }}{% elif monitoring_dashboard_guest.role == "docker-build" %},
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 9, 0, 12, "Builds (Selected Range)", "short", dashboard.docker_build_total_query(monitoring_influxdb_bucket, monitoring_dashboard_guest.name)) }},
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 10, 6, 12, "Failed Builds (Selected Range)", "short", dashboard.docker_build_total_query(monitoring_influxdb_bucket, monitoring_dashboard_guest.name, "failure")) }},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 11, 12, 12, "Builds Over Time", "short", dashboard.docker_build_window_query(monitoring_influxdb_bucket, monitoring_dashboard_guest.name), 0, None, 12, 8) }}{% endif %}
   ],
   "refresh": "30s",
   "schemaVersion": 39,
@@ -60,6 +63,6 @@
   "timezone": "browser",
   "title": {{ ("LV3 " ~ monitoring_dashboard_guest.name ~ " Detail") | to_json }},
   "uid": {{ ("lv3-vm-" ~ monitoring_dashboard_guest.name) | to_json }},
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }

@@ -158,3 +158,22 @@ workstreams:
       - hetzner_dns
     ready_to_merge: false
     live_applied: true
+
+  - id: adr-0028-build-telemetry
+    adr: 0028
+    title: Docker build VM build telemetry
+    status: live_applied
+    owner: codex
+    branch: codex/adr-0028-build-telemetry
+    worktree_path: ../proxmox_florin_server-build-telemetry
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0028-build-telemetry.md
+    depends_on:
+      - adr-0011-monitoring
+    conflicts_with: []
+    shared_surfaces:
+      - docker-build-lv3
+      - playbooks/monitoring-stack.yml
+      - roles/docker_build_observability
+      - roles/monitoring_vm
+    ready_to_merge: false
+    live_applied: true

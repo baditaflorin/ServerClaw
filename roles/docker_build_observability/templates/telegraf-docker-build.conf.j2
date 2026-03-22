@@ -1,0 +1,17 @@
+[agent]
+  hostname = "{{ docker_build_observability_hostname }}"
+  omit_hostname = false
+
+[global_tags]
+  role = "{{ docker_build_observability_role }}"
+  service = "docker-build-telemetry"
+
+[[outputs.influxdb_v2]]
+  urls = ["{{ docker_build_observability_influx_url }}"]
+  token = "{{ lookup('file', monitoring_guest_writer_token_local_file) | trim }}"
+  organization = "{{ monitoring_influxdb_org }}"
+  bucket = "{{ monitoring_influxdb_bucket }}"
+
+[[inputs.socket_listener]]
+  service_address = "{{ docker_build_observability_socket_listener_address }}"
+  data_format = "influx"

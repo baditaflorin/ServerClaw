@@ -1,0 +1,148 @@
+---
+- name: Ensure docker build observability prerequisite packages are present
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gpg
+    state: present
+
+- name: Ensure APT keyring directory exists
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: "0755"
+
+- name: Install InfluxData repository key
+  ansible.builtin.get_url:
+    url: "{{ monitoring_influxdb_repo_key_url }}"
+    dest: /tmp/influxdata-archive.key
+    mode: "0644"
+
+- name: Convert InfluxData repository key into a gpg keyring
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --dearmor
+      - --yes
+      - --output
+      - "{{ monitoring_influxdb_repo_keyring }}"
+      - /tmp/influxdata-archive.key
+    creates: "{{ monitoring_influxdb_repo_keyring }}"
+
+- name: Install InfluxData repository definition
+  ansible.builtin.copy:
+    dest: "{{ monitoring_influxdb_repo_file }}"
+    mode: "0644"
+    content: |
+      deb [signed-by={{ monitoring_influxdb_repo_keyring }}] https://repos.influxdata.com/debian stable main
+
+- name: Install docker build observability packages
+  ansible.builtin.apt:
+    name:
+      - telegraf
+    state: present
+    update_cache: true
+
+- name: Ensure docker build observability directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: /etc/docker
+      owner: root
+      group: root
+      mode: "0755"
+    - path: "{{ docker_build_observability_dir }}"
+      owner: root
+      group: root
+      mode: "0700"
+
+- name: Ensure local guest writer token exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ monitoring_guest_writer_token_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: docker_build_observability_guest_writer_local_token
+
+- name: Fail if the guest writer token is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ monitoring_guest_writer_token_local_file }} is missing on the control machine.
+      Converge the monitoring VM first so the guest-writer token exists before enabling docker build observability.
+  when: not docker_build_observability_guest_writer_local_token.stat.exists
+
+- name: Persist guest writer token on the docker build guest
+  ansible.builtin.copy:
+    dest: "{{ docker_build_observability_writer_token_file }}"
+    content: "{{ lookup('file', monitoring_guest_writer_token_local_file) | trim }}\n"
+    owner: root
+    group: telegraf
+    mode: "0640"
+  no_log: true
+  notify: restart telegraf
+
+- name: Remove deprecated Docker daemon metrics configuration
+  ansible.builtin.file:
+    path: "{{ docker_build_observability_docker_daemon_config_file }}"
+    state: absent
+  notify: restart docker
+
+- name: Render Docker CLI telemetry wrapper
+  ansible.builtin.template:
+    src: docker-wrapper.sh.j2
+    dest: "{{ docker_build_observability_docker_wrapper_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+  notify: restart docker
+
+- name: Render Telegraf docker build observability configuration
+  ansible.builtin.template:
+    src: telegraf-docker-build.conf.j2
+    dest: "{{ docker_build_observability_telegraf_config_file }}"
+    owner: root
+    group: telegraf
+    mode: "0640"
+  no_log: true
+  notify: restart telegraf
+
+- name: Flush docker build observability handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Ensure Docker service is enabled and started
+  ansible.builtin.systemd:
+    name: docker
+    enabled: true
+    state: started
+
+- name: Verify Docker resolves to the telemetry wrapper for login shells
+  ansible.builtin.shell: bash -lc 'command -v docker'
+  register: docker_build_observability_docker_path
+  changed_when: false
+  failed_when: docker_build_observability_docker_path.stdout | trim != docker_build_observability_docker_wrapper_path
+
+- name: Ensure Telegraf service is enabled and started
+  ansible.builtin.systemd:
+    name: telegraf
+    enabled: true
+    state: started
+
+- name: Verify Telegraf socket listener configuration is rendered
+  ansible.builtin.command:
+    argv:
+      - grep
+      - -F
+      - "{{ docker_build_observability_socket_listener_address }}"
+      - "{{ docker_build_observability_telegraf_config_file }}"
+  register: docker_build_observability_listener_config
+  changed_when: false
+
+- name: Verify Telegraf service is active
+  ansible.builtin.command: systemctl is-active telegraf
+  register: docker_build_observability_telegraf_status
+  changed_when: false
