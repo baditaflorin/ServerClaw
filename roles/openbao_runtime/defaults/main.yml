@@ -21,7 +21,7 @@ openbao_runtime_uid: "100"
 openbao_runtime_gid: "1000"
 openbao_api_addr: >-
   {{
-    openbao_controller_url
+    (openbao_controller_url | default(''))
     if openbao_tls_enabled
     else 'http://127.0.0.1:' ~ (openbao_http_port | string)
   }}
