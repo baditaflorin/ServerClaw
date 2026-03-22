@@ -8,7 +8,7 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
-- use this section on `main` for merged notes that have not yet been cut into a numbered release
+- fixed the monitoring role's Grafana handler notifications so `make converge-monitoring` can rerun cleanly while importing repo-managed dashboards
 
 ## 0.42.0 - 2026-03-22
 

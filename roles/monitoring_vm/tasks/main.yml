@@ -556,7 +556,7 @@
   ansible.builtin.file:
     path: /etc/grafana/provisioning/dashboards/lv3-dashboards.yml
     state: absent
-  notify: restart grafana
+  notify: Restart Grafana
 
 - name: Render LV3 platform dashboard
   ansible.builtin.template:
@@ -569,7 +569,7 @@
     host_public_hostname: "{{ hostvars[groups['proxmox_hosts'][0]].host_public_hostname }}"
     proxmox_guests: "{{ hostvars[groups['proxmox_hosts'][0]].proxmox_guests }}"
   register: monitoring_grafana_dashboard_file_rendered
-  notify: restart grafana
+  notify: Restart Grafana
 
 - name: Enable and start Grafana
   ansible.builtin.systemd:
@@ -761,7 +761,7 @@
   loop_control:
     label: "{{ item.name }}"
   register: monitoring_grafana_vm_dashboard_files_rendered
-  notify: restart grafana
+  notify: Restart Grafana
 
 - name: Read rendered VM detail dashboards
   ansible.builtin.slurp:

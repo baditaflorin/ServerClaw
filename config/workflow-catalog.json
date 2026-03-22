@@ -420,7 +420,8 @@
         "playbooks/monitoring-stack.yml",
         "roles/monitoring_vm/tasks/main.yml",
         "roles/nginx_observability/tasks/main.yml",
-        "roles/docker_build_observability/tasks/main.yml"
+        "roles/docker_build_observability/tasks/main.yml",
+        "roles/docker_runtime_observability/tasks/main.yml"
       ],
       "outputs": [
         "Monitoring VM services converged, dashboards imported, and guest telemetry wired into InfluxDB."
