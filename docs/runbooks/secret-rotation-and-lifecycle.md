@@ -11,14 +11,14 @@ The implementation keeps one canonical catalog in `config/secret-catalog.json`, 
 Inspect the catalog:
 
 ```bash
-python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/secret_rotation.py --list
+python3 scripts/secret_rotation.py --list
 ```
 
 Validate the catalog and unit tests:
 
 ```bash
-python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/secret_rotation.py --validate
-python3 -m unittest discover -s /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests
+python3 scripts/secret_rotation.py --validate
+python3 -m unittest discover -s tests
 ```
 
 Syntax-check the rotation playbook:
@@ -57,6 +57,26 @@ Each entry in `config/secret-catalog.json` defines:
 6. the Ansible apply target that performs the live mutation without a full service reconverge
 
 The committed `last_rotated` value is a repo contract default. Live executions should treat the OpenBao KV metadata keys as the operational source of truth once the workflow is applied from `main`.
+
+## Live Preflight Checklist
+
+Before any `--apply` run:
+
+1. Run from the integrated checkout that contains the exact code you intend to apply, not from an older or partially merged worktree.
+2. Confirm `make validate`, `make syntax-check-secret-rotation`, and `make rotate-secret SECRET_ID=windmill_database_password ROTATION_ARGS="--plan"` all pass from that checkout.
+3. Confirm the controller-local prerequisites referenced by `config/controller-local-secrets.json` exist and are readable, especially the SSH key and the OpenBao init payload.
+4. Confirm `make converge-openbao` and `make converge-windmill` have been applied successfully on the target platform revision so the dedicated OpenBao paths and the seeded Windmill script exist live.
+5. Confirm the target service is healthy before rotation. For the first live apply, start with `windmill_database_password`, which is the lowest-risk candidate in this catalog.
+6. Confirm rollback posture exists before touching high-risk credentials. At minimum, know how to re-run the same secret id with an explicit value and verify the owning service health.
+7. Confirm whether the secret is low-risk or high-risk. High-risk entries require the `rotate-secret-high-risk` approval path and should not be mixed into exploratory first-live testing.
+
+## Human And Agent Notes
+
+- `playbooks/secret-rotation.yml` is expected to run from a separate worktree. It resolves the secret catalog and controller-local manifest relative to `playbook_dir`, then reads the actual OpenBao init payload path from the manifest.
+- The playbook mutates the owning service first and OpenBao second. If a run fails after the service change, treat the platform as partially rotated and reconcile by rerunning the same secret deliberately instead of inventing an ad hoc rollback.
+- The committed ADR status means the repo automation exists. It does not mean the live platform metadata is updated. Do not bump `Implemented In Platform Version` until an apply from `main` succeeds and is verified.
+- Mail-platform compatibility mirrors still exist for grouped legacy paths. A successful mail secret rotation must leave both the dedicated secret path and the compatibility bundle consistent.
+- The first live execution should stay narrow: one secret, one apply, immediate health verification, then receipt/status updates.
 
 ## Live Mutation Path
 

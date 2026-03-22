@@ -14,6 +14,9 @@ class SecretRotationTests(unittest.TestCase):
     def setUp(self) -> None:
         self.secret_manifest = {
             "secrets": {
+                "bootstrap_ssh_private_key": {
+                    "path": "/tmp/bootstrap-key",
+                },
                 "windmill_database_password": {"path": "/tmp/windmill-db"},
                 "windmill_superadmin_secret": {"path": "/tmp/windmill-superadmin"},
             }
@@ -104,9 +107,11 @@ class SecretRotationTests(unittest.TestCase):
             force=False,
             approve_high_risk=False,
             new_value=None,
+            bootstrap_key_path=secret_rotation.resolve_bootstrap_key(self.secret_manifest),
         )
         self.assertIn("secret_rotation_secret_id=windmill_database_password", command)
         self.assertIn("secret_rotation_mode=plan", command)
+        self.assertIn("/tmp/bootstrap-key", command)
         self.assertEqual(env["ANSIBLE_HOST_KEY_CHECKING"], "False")
 
     def test_build_glitchtip_event_carries_rotation_context(self) -> None:

@@ -234,6 +234,7 @@ def build_playbook_command(
     force: bool,
     approve_high_risk: bool,
     new_value: str | None,
+    bootstrap_key_path: str,
 ) -> tuple[list[str], dict[str, str]]:
     command = [
         "ansible-playbook",
@@ -241,7 +242,7 @@ def build_playbook_command(
         str(ANSIBLE_INVENTORY),
         str(SECRET_ROTATION_PLAYBOOK),
         "--private-key",
-        str(Path(os.environ.get("BOOTSTRAP_KEY", str(DEFAULT_BOOTSTRAP_KEY)))),
+        bootstrap_key_path,
         "-e",
         "proxmox_guest_ssh_connection_mode=proxmox_host_jump",
         "-e",
@@ -362,7 +363,23 @@ def show_secret(secret_id: str, secret: dict, *, now: dt.datetime) -> int:
     return 0
 
 
-def run_rotation(secret_id: str, secret: dict, *, mode: str, force: bool, approve_high_risk: bool, new_value: str | None) -> int:
+def resolve_bootstrap_key(secret_manifest: dict) -> str:
+    if os.environ.get("BOOTSTRAP_KEY"):
+        return str(Path(os.environ["BOOTSTRAP_KEY"]))
+    manifest_key_path = secret_manifest["secrets"]["bootstrap_ssh_private_key"]["path"]
+    return str(Path(manifest_key_path or DEFAULT_BOOTSTRAP_KEY))
+
+
+def run_rotation(
+    secret_id: str,
+    secret: dict,
+    *,
+    secret_manifest: dict,
+    mode: str,
+    force: bool,
+    approve_high_risk: bool,
+    new_value: str | None,
+) -> int:
     if secret["approval_mode"] == "approval_required" and not approve_high_risk:
         raise ValueError(
             f"{secret_id} is high-risk and requires the {secret['command_contract']} approval path"
@@ -374,6 +391,7 @@ def run_rotation(secret_id: str, secret: dict, *, mode: str, force: bool, approv
         force=force,
         approve_high_risk=approve_high_risk,
         new_value=new_value,
+        bootstrap_key_path=resolve_bootstrap_key(secret_manifest),
     )
     rotation_event = build_rotation_event(secret_id, secret, status="started", mode=mode, command=command)
     result = run_command(command, capture_output=True)
@@ -452,6 +470,7 @@ def main() -> int:
         return run_rotation(
             args.secret,
             secret,
+            secret_manifest=secret_manifest,
             mode="apply" if args.apply else "plan",
             force=args.force,
             approve_high_risk=args.approve_high_risk,

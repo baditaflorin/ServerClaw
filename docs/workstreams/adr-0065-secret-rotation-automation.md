@@ -60,3 +60,6 @@
 
 - start with the postgres service password as the lowest-risk rotation candidate
 - the approval gate for high-risk rotations reuses the command-catalog approval mechanism from ADR 0048
+- live apply should be executed only after `make validate`, `make syntax-check-secret-rotation`, and a `--plan` run succeed from the integrated checkout that will be applied
+- confirm controller-local prerequisites, OpenBao seeding, and Windmill seeding exist live before the first `--apply`
+- treat any failed live apply after a service mutation as a partial rotation and rerun the same secret deliberately rather than improvising rollback steps

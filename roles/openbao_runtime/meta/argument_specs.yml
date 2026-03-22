@@ -1,0 +1,26 @@
+---
+argument_specs:
+  main:
+    short_description: Converge OpenBao and seed the managed secret surfaces.
+    options:
+      openbao_image:
+        type: str
+        required: true
+      openbao_container_name:
+        type: str
+        required: true
+      openbao_site_dir:
+        type: path
+        required: true
+      openbao_config_file:
+        type: path
+        required: true
+      openbao_compose_file:
+        type: path
+        required: true
+      openbao_init_local_file:
+        type: path
+        required: true
+      openbao_postgres_host:
+        type: str
+        required: true
