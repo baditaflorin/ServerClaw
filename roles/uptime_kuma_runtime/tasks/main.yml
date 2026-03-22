@@ -1,14 +1,19 @@
 ---
 - name: Validate Uptime Kuma runtime inputs
-  ansible.builtin.assert:
-    that:
-      - uptime_kuma_site_dir | length > 0
-      - uptime_kuma_data_dir | length > 0
-      - uptime_kuma_compose_file | length > 0
-      - uptime_kuma_container_name | length > 0
-      - uptime_kuma_image | length > 0
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: assert_vars
+  vars:
+    common_assert_vars_required:
+      - uptime_kuma_site_dir
+      - uptime_kuma_data_dir
+      - uptime_kuma_compose_file
+      - uptime_kuma_container_name
+      - uptime_kuma_image
+      - uptime_kuma_port
+    common_assert_vars_expressions:
       - uptime_kuma_port | int > 0
-    fail_msg: "uptime_kuma_runtime requires compose paths, image, container name, and port inputs."
+    common_assert_vars_fail_msg: "uptime_kuma_runtime requires compose paths, image, container name, and port inputs."
 
 - name: Ensure Uptime Kuma runtime packages are present
   ansible.builtin.apt:
@@ -18,17 +23,15 @@
     update_cache: true
 
 - name: Ensure Uptime Kuma directories exist
-  ansible.builtin.file:
-    path: "{{ item.path }}"
-    state: directory
-    owner: root
-    group: root
-    mode: "{{ item.mode }}"
-  loop:
-    - path: "{{ uptime_kuma_site_dir }}"
-      mode: "0755"
-    - path: "{{ uptime_kuma_data_dir }}"
-      mode: "0755"
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: directory_tree
+  vars:
+    common_directory_tree_paths:
+      - path: "{{ uptime_kuma_site_dir }}"
+        mode: "0755"
+      - path: "{{ uptime_kuma_data_dir }}"
+        mode: "0755"
 
 - name: Render the Uptime Kuma compose file
   ansible.builtin.template:
@@ -71,11 +74,11 @@
     or 'Starting' in uptime_kuma_up.stdout
 
 - name: Wait for Uptime Kuma to listen locally
-  ansible.builtin.wait_for:
-    host: 127.0.0.1
-    port: "{{ uptime_kuma_port }}"
-    delay: 0
-    timeout: 120
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: wait_port
+  vars:
+    common_wait_port_port: "{{ uptime_kuma_port }}"
 
 - name: Verify the Uptime Kuma container is running
   ansible.builtin.command:

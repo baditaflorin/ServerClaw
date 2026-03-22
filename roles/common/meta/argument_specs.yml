@@ -1,0 +1,148 @@
+---
+argument_specs:
+  main:
+    short_description: Shared task entrypoints for reusable Ansible role patterns.
+    options: {}
+  assert_vars:
+    short_description: Validate required variables before role tasks continue.
+    options:
+      common_assert_vars_required:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description:
+          - Variable names that must be defined and non-empty.
+      common_assert_vars_expressions:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description:
+          - Additional Ansible assertion expressions to evaluate.
+      common_assert_vars_fail_msg:
+        type: str
+        required: false
+        default: Common role variable assertion failed.
+        description:
+          - Failure message used for the assertion.
+  directory_tree:
+    short_description: Ensure one or more managed directories exist with shared defaults.
+    options:
+      common_directory_tree_paths:
+        type: list
+        elements: raw
+        required: true
+        description:
+          - Directory definitions as either paths or mapping objects with path, owner, group, mode, and recurse.
+      common_directory_tree_owner:
+        type: str
+        required: false
+        default: root
+        description:
+          - Default owner applied when an item does not override it.
+      common_directory_tree_group:
+        type: str
+        required: false
+        default: root
+        description:
+          - Default group applied when an item does not override it.
+      common_directory_tree_mode:
+        type: str
+        required: false
+        default: "0755"
+        description:
+          - Default directory mode applied when an item does not override it.
+      common_directory_tree_state:
+        type: str
+        required: false
+        default: directory
+        description:
+          - File module state used for each directory item.
+      common_directory_tree_recurse:
+        type: bool
+        required: false
+        default: false
+        description:
+          - Whether ownership and mode should recurse through existing content by default.
+  systemd_unit:
+    short_description: Enable, start, and optionally verify a systemd unit.
+    options:
+      common_systemd_unit_name:
+        type: str
+        required: true
+        description:
+          - Name of the systemd unit to manage.
+      common_systemd_unit_enabled:
+        type: bool
+        required: false
+        default: true
+        description:
+          - Whether the unit should be enabled.
+      common_systemd_unit_state:
+        type: str
+        required: false
+        default: started
+        choices:
+          - started
+          - stopped
+          - restarted
+          - reloaded
+        description:
+          - Desired systemd state for the unit.
+      common_systemd_unit_daemon_reload:
+        type: bool
+        required: false
+        default: false
+        description:
+          - Whether to reload systemd units before managing the service.
+      common_systemd_unit_verify_active:
+        type: bool
+        required: false
+        default: false
+        description:
+          - Whether to verify the unit's active state after managing it.
+      common_systemd_unit_expected_active_state:
+        type: str
+        required: false
+        default: active
+        description:
+          - Expected output from `systemctl is-active` when verification is enabled.
+  wait_port:
+    short_description: Wait for a TCP listener with shared retry defaults.
+    options:
+      common_wait_port_host:
+        type: str
+        required: false
+        default: 127.0.0.1
+        description:
+          - Hostname or IP address to probe.
+      common_wait_port_port:
+        type: int
+        required: true
+        description:
+          - TCP port to wait for.
+      common_wait_port_delay:
+        type: int
+        required: false
+        default: 0
+        description:
+          - Delay before the first probe attempt.
+      common_wait_port_timeout:
+        type: int
+        required: false
+        default: 120
+        description:
+          - Total timeout in seconds.
+      common_wait_port_state:
+        type: str
+        required: false
+        default: started
+        choices:
+          - started
+          - stopped
+          - drained
+          - present
+          - absent
+        description:
+          - Expected listener state passed to `wait_for`.

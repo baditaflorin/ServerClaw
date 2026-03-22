@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.59.0
-platform_version: 0.32.0
+repo_version: 0.61.0
+platform_version: 0.33.0
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -17,6 +17,7 @@ live_apply_evidence:
     step_ca: 2026-03-22-adr-0042-step-ca-live-apply
     openbao: 2026-03-22-adr-0043-openbao-live-apply
     windmill: 2026-03-22-adr-0044-windmill-live-apply
+    mattermost: 2026-03-22-adr-0057-mattermost-live-apply
     portainer: 2026-03-22-adr-0055-portainer-live-apply
     short_lived_credentials_and_mtls: 2026-03-22-adr-0047-short-lived-credentials-live-apply
     control_plane_lanes: 2026-03-22-adr-0045-control-plane-communication-lanes-live-apply
@@ -595,6 +596,24 @@ observed_state:
     image_generation_permission: false
     code_interpreter_permission: false
     direct_tool_servers_permission: false
+  mattermost:
+    runtime_vm: 10.10.10.20
+    postgres_backend_vm: 10.10.10.50
+    host_tailscale_proxy_url: http://100.118.189.95:8066
+    private_internal_url: http://10.10.10.20:8065
+    container_running: true
+    team_name: lv3
+    channels:
+      - platform-alerts
+      - workflow-events
+      - change-approvals
+      - agent-handoffs
+      - mail-ops
+    incoming_webhooks_managed: true
+    controller_webhook_manifest_present: true
+    workflow_webhook_smoke_verified: true
+    grafana_contact_point_name: lv3-mattermost-platform-alerts
+    grafana_contact_point_present: true
   netbox:
     runtime_vm: 10.10.10.20
     postgres_backend_vm: 10.10.10.50
@@ -681,8 +700,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.59.0
+    current: 0.61.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.32.0
+    current: 0.33.0
     meaning: intended platform release for the actual server configuration

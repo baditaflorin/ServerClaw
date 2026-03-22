@@ -1,0 +1,8 @@
+---
+mattermost_database_name: mattermost
+mattermost_database_user: mattermost_admin
+mattermost_database_support_role: mattermost_user
+mattermost_postgres_secret_dir: /etc/lv3/mattermost
+mattermost_postgres_password_file: "{{ mattermost_postgres_secret_dir }}/database-password"
+mattermost_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mattermost
+mattermost_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mattermost/database-password.txt

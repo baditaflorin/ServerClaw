@@ -86,6 +86,11 @@ Current state:
 - require receipts or equivalent evidence whenever a live change is applied
 - give agents named tools and events, not generic root shells
 
+## Current Status
+
+- ADR 0057 is now implemented as a private-first Mattermost rollout on `docker-runtime-lv3` with a Proxmox-host Tailscale proxy, repo-managed channels and incoming webhooks, and Grafana alert routing into the managed collaboration surface.
+- Shared SSO for Mattermost remains follow-on work under ADR 0056 instead of a blocker for the initial private ChatOps deployment.
+
 ## Verification Targets
 
 Future implementation should be considered successful only when:

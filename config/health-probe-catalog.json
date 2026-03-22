@@ -348,6 +348,45 @@
         }
       }
     },
+    "mattermost": {
+      "service_name": "mattermost",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "mattermost_runtime",
+      "verify_file": "roles/mattermost_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The Mattermost system ping endpoint responds on the local runtime listener.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8065/api/v4/system/ping",
+        "method": "GET",
+        "expected_status": [200]
+      },
+      "readiness": {
+        "kind": "command",
+        "description": "The repo-managed Mattermost webhook manifest is rendered after bootstrap.",
+        "timeout_seconds": 30,
+        "retries": 1,
+        "delay_seconds": 0,
+        "argv": ["test", "-s", "/etc/lv3/mattermost/incoming-webhooks.json"],
+        "success_rc": 0
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Mattermost Private",
+          "type": "http",
+          "url": "http://10.10.10.20:8065/api/v4/system/ping",
+          "description": "Private Mattermost system ping endpoint on docker-runtime-lv3.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": ["200-299"]
+        }
+      }
+    },
     "netbox": {
       "service_name": "netbox",
       "owning_vm": "docker-runtime-lv3",

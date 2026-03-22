@@ -52,5 +52,5 @@
 
 ## Notes For The Next Assistant
 
-- merged on `main` as repository release `0.59.0`; no live platform apply has happened yet
+- merged on `main` as repository release `0.61.0`; no live platform apply has happened yet
 - host-provided surfaces without standalone roles (`proxmox_ui`, `docker_build`) are covered in the catalog and Uptime Kuma policy, not via new role verify files

@@ -1,0 +1,59 @@
+---
+mattermost_team_name: lv3
+mattermost_team_display_name: LV3
+mattermost_site_dir: /opt/mattermost
+mattermost_secret_dir: /etc/lv3/mattermost
+mattermost_compose_file: "{{ mattermost_site_dir }}/docker-compose.yml"
+mattermost_env_file: "{{ mattermost_site_dir }}/mattermost.env"
+mattermost_bootstrap_file: "{{ mattermost_site_dir }}/bootstrap-mattermost.py"
+mattermost_server_port: 8065
+mattermost_host_proxy_port: 8066
+mattermost_image: mattermost/mattermost-team-edition:release-10.11
+mattermost_database_name: mattermost
+mattermost_database_user: mattermost_admin
+mattermost_database_host: "{{ hostvars['postgres-lv3'].ansible_host }}"
+mattermost_database_port: 5432
+mattermost_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mattermost/database-password.txt
+mattermost_admin_username: ops
+mattermost_admin_email: "{{ proxmox_notification_email }}"
+mattermost_admin_password_remote_file: "{{ mattermost_secret_dir }}/admin-password"
+mattermost_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mattermost/admin-password.txt
+mattermost_webhooks_remote_file: "{{ mattermost_secret_dir }}/incoming-webhooks.json"
+mattermost_webhooks_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mattermost/incoming-webhooks.json
+mattermost_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mattermost
+mattermost_container_name: lv3-mattermost
+mattermost_local_mode_socket: /var/tmp/mattermost_local.socket
+mattermost_private_base_url: "http://127.0.0.1:{{ mattermost_server_port }}"
+mattermost_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ mattermost_host_proxy_port }}"
+mattermost_support_email: "{{ proxmox_notification_email }}"
+mattermost_channels:
+  - id: platform-alerts
+    name: platform-alerts
+    display_name: Platform Alerts
+    purpose: Alert acknowledgements and operational incident routing.
+    header: Repo-managed Grafana and platform alert intake for LV3 operators and agents.
+    webhook_key: alerts
+  - id: workflow-events
+    name: workflow-events
+    display_name: Workflow Events
+    purpose: Windmill job notifications and automation outcomes.
+    header: Repo-managed workflow status, completions, retries, and handoff events.
+    webhook_key: workflows
+  - id: change-approvals
+    name: change-approvals
+    display_name: Change Approvals
+    purpose: Human approval requests and change acknowledgements.
+    header: Repo-managed approvals, review prompts, and documented change coordination.
+    webhook_key: approvals
+  - id: agent-handoffs
+    name: agent-handoffs
+    display_name: Agent Handoffs
+    purpose: Findings, escalation, and operator-agent coordination.
+    header: Repo-managed operator and agent handoff surface for governed ChatOps work.
+    webhook_key: handoffs
+  - id: mail-ops
+    name: mail-ops
+    display_name: Mail Ops
+    purpose: Mail delivery health, queue issues, and sender-profile incidents.
+    header: Repo-managed mail platform status and delivery alerts.
+    webhook_key: mail

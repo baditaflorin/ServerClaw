@@ -1,0 +1,45 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the private Uptime Kuma runtime stack.
+    options:
+      uptime_kuma_site_dir:
+        type: path
+        required: true
+        description:
+          - Base directory for the managed Uptime Kuma stack.
+      uptime_kuma_data_dir:
+        type: path
+        required: true
+        description:
+          - Persistent data directory for Uptime Kuma.
+      uptime_kuma_compose_file:
+        type: path
+        required: true
+        description:
+          - Compose file path for the runtime stack.
+      uptime_kuma_container_name:
+        type: str
+        required: true
+        description:
+          - Expected running container name used for verification.
+      uptime_kuma_image:
+        type: str
+        required: true
+        description:
+          - Container image reference for Uptime Kuma.
+      uptime_kuma_port:
+        type: int
+        required: true
+        description:
+          - Local TCP port exposed by the runtime.
+      uptime_kuma_base_url:
+        type: str
+        required: false
+        description:
+          - Public base URL used by follow-on workflows.
+      uptime_kuma_hostname:
+        type: str
+        required: false
+        description:
+          - Public hostname for the runtime.

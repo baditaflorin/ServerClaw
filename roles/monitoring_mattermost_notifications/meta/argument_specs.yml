@@ -1,0 +1,30 @@
+---
+argument_specs:
+  main:
+    short_description: Configure Grafana contact points that route alerts into Mattermost.
+    options:
+      monitoring_mattermost_contact_point_name:
+        type: str
+        required: true
+        description:
+          - Name assigned to the managed Grafana contact point.
+      monitoring_mattermost_webhook_manifest_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local Mattermost webhook manifest consumed by the role.
+      monitoring_mattermost_channel_key:
+        type: str
+        required: true
+        description:
+          - Webhook manifest key used for alert routing.
+      monitoring_grafana_admin_user:
+        type: str
+        required: false
+        description:
+          - Grafana admin username used for API calls.
+      monitoring_grafana_admin_password_file:
+        type: path
+        required: false
+        description:
+          - Guest-local file that stores the Grafana admin password.

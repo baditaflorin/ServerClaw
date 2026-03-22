@@ -57,6 +57,11 @@ proxmox_tailscale_tcp_proxies:
     listen_port: "{{ windmill_host_proxy_port }}"
     upstream_host: 10.10.10.20
     upstream_port: 8000
+  - name: mattermost
+    listen_address: "{{ management_tailscale_ipv4 }}"
+    listen_port: "{{ mattermost_host_proxy_port }}"
+    upstream_host: 10.10.10.20
+    upstream_port: 8065
   - name: netbox
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ netbox_host_proxy_port }}"
@@ -404,6 +409,17 @@ lv3_service_topology:
     access:
       kind: tailscale-tcp-proxy
       url: "{{ windmill_controller_url }}"
+  mattermost:
+    service_name: mattermost
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: "{{ mattermost_controller_url }}"
   netbox:
     service_name: netbox
     owning_vm: docker-runtime-lv3

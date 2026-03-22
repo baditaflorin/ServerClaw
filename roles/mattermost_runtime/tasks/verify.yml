@@ -1,0 +1,29 @@
+---
+- name: Verify the Mattermost system ping endpoint
+  ansible.builtin.uri:
+    url: "{{ mattermost_private_base_url }}/api/v4/system/ping"
+    method: GET
+    status_code: 200
+  register: mattermost_verify_ping
+  retries: 24
+  delay: 5
+  until: mattermost_verify_ping.status == 200
+  changed_when: false
+
+- name: Assert Mattermost reports a healthy status payload
+  ansible.builtin.assert:
+    that:
+      - (mattermost_verify_ping.json.status | default('')) == 'OK'
+    fail_msg: "Mattermost responded, but the system ping payload did not report status OK."
+
+- name: Verify the Mattermost webhook manifest contains every repo-managed channel
+  ansible.builtin.assert:
+    that:
+      - "((mattermost_webhooks_raw.content | b64decode | from_json).team.name) == mattermost_team_name"
+      - >-
+        (
+          (mattermost_webhooks_raw.content | b64decode | from_json).channels.keys()
+          | sort
+        ) == (mattermost_channels | map(attribute='webhook_key') | sort)
+    fail_msg: "Mattermost started, but the repo-managed webhook manifest does not match the declared channels."
+  no_log: true
