@@ -144,37 +144,25 @@
 
 - name: Generate notification profile mailbox passwords
   ansible.builtin.shell: |
-    set -euo pipefail
-    secret_file="{{ mail_platform_profile_secret_dir }}/{{ item.id }}-mailbox-password"
-    if [ ! -s "${secret_file}" ]; then
-      umask 077
-      openssl rand -base64 24 > "${secret_file}"
-      echo changed
-    fi
+    umask 077
+    openssl rand -base64 24 > "{{ mail_platform_profile_secret_dir }}/{{ item.id }}-mailbox-password"
   args:
     executable: /bin/bash
+    creates: "{{ mail_platform_profile_secret_dir }}/{{ item.id }}-mailbox-password"
   loop: "{{ mail_platform_notification_profiles }}"
   loop_control:
     label: "{{ item.id }}"
-  register: mail_platform_profile_mailbox_password_generation
-  changed_when: "'changed' in stdout"
 
 - name: Generate notification profile gateway API keys
   ansible.builtin.shell: |
-    set -euo pipefail
-    secret_file="{{ mail_platform_profile_secret_dir }}/{{ item.id }}-gateway-api-key"
-    if [ ! -s "${secret_file}" ]; then
-      umask 077
-      openssl rand -hex 32 > "${secret_file}"
-      echo changed
-    fi
+    umask 077
+    openssl rand -hex 32 > "{{ mail_platform_profile_secret_dir }}/{{ item.id }}-gateway-api-key"
   args:
     executable: /bin/bash
+    creates: "{{ mail_platform_profile_secret_dir }}/{{ item.id }}-gateway-api-key"
   loop: "{{ mail_platform_notification_profiles }}"
   loop_control:
     label: "{{ item.id }}"
-  register: mail_platform_profile_gateway_api_key_generation
-  changed_when: "'changed' in stdout"
 
 - name: Read Stalwart admin password
   ansible.builtin.slurp:
