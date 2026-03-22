@@ -14,7 +14,7 @@ ExecStart=/usr/bin/prometheus \
   --web.console.templates=/usr/share/prometheus/consoles \
   --web.console.libraries=/usr/share/prometheus/console_libraries \
   --web.enable-remote-write-receiver \
-  --enable-feature=exemplar-storage
+  --enable-feature={{ monitoring_prometheus_enable_features | join(',') }}
 Restart=on-failure
 RestartSec=2
 
