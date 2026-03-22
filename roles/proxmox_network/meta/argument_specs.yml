@@ -1,0 +1,87 @@
+---
+argument_specs:
+  main:
+    short_description: Configure the Proxmox host bridge, NAT, and per-VM firewall policy.
+    options:
+      management_interface:
+        type: str
+        required: true
+        description:
+          - Physical management uplink interface on the Proxmox host.
+      management_ipv4:
+        type: str
+        required: true
+        description:
+          - Public management IPv4 address assigned to the host.
+      management_gateway4:
+        type: str
+        required: true
+        description:
+          - Default IPv4 gateway for the management uplink.
+      proxmox_wan_bridge:
+        type: str
+        required: true
+        description:
+          - External bridge name used for public ingress and NAT egress.
+      proxmox_internal_bridge:
+        type: str
+        required: true
+        description:
+          - Internal guest bridge name used for the private subnet.
+      proxmox_internal_ipv4:
+        type: str
+        required: true
+        description:
+          - Host IPv4 address on the internal guest bridge.
+      proxmox_internal_network:
+        type: str
+        required: true
+        description:
+          - IPv4 CIDR for the internal guest network.
+      proxmox_guests:
+        type: list
+        elements: raw
+        required: true
+        description:
+          - Canonical guest inventory entries including VM IDs, names, IPs, and MAC addresses.
+      network_policy:
+        type: dict
+        required: true
+        description:
+          - Canonical guest allow matrix used to render the Proxmox VM firewall files.
+      proxmox_network_enable_ipv4_forwarding:
+        type: bool
+        required: false
+        default: true
+        description:
+          - Whether host IPv4 forwarding should be enabled.
+      proxmox_public_ingress_tcp_forwards:
+        type: list
+        elements: raw
+        required: false
+        default: []
+        description:
+          - Explicit host TCP forward definitions for public ingress.
+      proxmox_public_edge_ipv4:
+        type: str
+        required: false
+        description:
+          - Internal destination IPv4 used by the legacy public edge forwarding contract.
+      proxmox_public_ingress_tcp_ports:
+        type: list
+        elements: int
+        required: false
+        description:
+          - Legacy public ingress ports forwarded to the public edge VM when explicit forward mappings are not used.
+      proxmox_network_conntrack_helper_path:
+        type: path
+        required: false
+        default: /usr/local/sbin/lv3-proxmox-firewall-conntrack
+        description:
+          - Managed helper path that installs the conntrack-zone rule for `fwbr+` traffic.
+      proxmox_network_conntrack_service_file:
+        type: path
+        required: false
+        default: /etc/systemd/system/lv3-proxmox-firewall-conntrack.service
+        description:
+          - Managed systemd unit that reapplies the conntrack-zone helper on boot.
