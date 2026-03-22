@@ -6,11 +6,11 @@ services:
     entrypoint:
       - /usr/local/bin/step-ca
     command:
-      - /home/step/config/ca.json
+      - {{ step_ca_home }}/config/ca.json
       - --password-file
-      - /home/step/secrets/ca-password.txt
+      - {{ step_ca_ca_password_file }}
     ports:
       - "{{ step_ca_api_port }}:{{ step_ca_api_port }}"
     volumes:
-      - {{ step_ca_home }}:/home/step
-      - {{ step_ca_password_dir }}:/home/step/secrets
+      - {{ step_ca_home }}:{{ step_ca_home }}
+      - {{ step_ca_password_dir }}:{{ step_ca_password_dir }}
