@@ -33,6 +33,17 @@
     "accepted_statuscodes": ["200-399"]
   },
   {
+    "name": "Keycloak OIDC Discovery",
+    "type": "http",
+    "url": "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration",
+    "description": "Shared SSO discovery endpoint published through the NGINX edge VM.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 5,
+    "accepted_statuscodes": ["200-299"]
+  },
+  {
     "name": "Proxmox UI Port",
     "type": "port",
     "hostname": "10.10.10.1",

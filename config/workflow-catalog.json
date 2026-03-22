@@ -802,6 +802,53 @@
         "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 -W %h:%p\" ops@10.10.10.60 'sudo systemctl status lv3-control-plane-restore-drill.timer --no-pager'"
       ]
     },
+    "converge-keycloak": {
+      "description": "Converge Keycloak on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at sso.lv3.org, and wire Grafana through the shared SSO broker.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-keycloak",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-keycloak"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "keycloak_database_password",
+          "keycloak_bootstrap_admin_password",
+          "keycloak_operator_password",
+          "keycloak_grafana_client_secret",
+          "keycloak_agent_client_secret"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-keycloak"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-keycloak.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/keycloak.yml",
+        "roles/keycloak_postgres/tasks/main.yml",
+        "roles/keycloak_runtime/tasks/main.yml",
+        "roles/grafana_sso/tasks/main.yml",
+        "roles/nginx_edge_publication/tasks/main.yml",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/uptime-kuma/monitors.json"
+      ],
+      "outputs": [
+        "A repo-managed Keycloak realm on docker-runtime-lv3 with a PostgreSQL backend, the public edge hostname sso.lv3.org, an initial named operator account, an agent confidential client, and Grafana wired to the shared OIDC login flow."
+      ],
+      "verification_commands": [
+        "make syntax-check-keycloak",
+        "curl -s https://sso.lv3.org/realms/lv3/.well-known/openid-configuration",
+        "curl -I https://grafana.lv3.org/login/generic_oauth"
+      ]
+    },
     "converge-netbox": {
       "description": "Converge private NetBox on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish the host-side Tailscale proxy, and synchronize canonical repo inventory into the API.",
       "lifecycle_status": "active",

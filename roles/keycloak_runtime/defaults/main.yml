@@ -1,0 +1,52 @@
+---
+keycloak_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('keycloak') }}"
+keycloak_image: quay.io/keycloak/keycloak:26.5.4
+keycloak_realm_name: lv3
+keycloak_realm_display_name: LV3 Control Plane
+keycloak_site_dir: /opt/keycloak
+keycloak_secret_dir: /etc/lv3/keycloak
+keycloak_compose_file: "{{ keycloak_site_dir }}/docker-compose.yml"
+keycloak_env_file: "{{ keycloak_site_dir }}/keycloak.env"
+keycloak_database_name: keycloak
+keycloak_database_user: keycloak
+keycloak_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/database-password.txt
+keycloak_internal_http_port: 8091
+keycloak_local_http_port: 18080
+keycloak_local_management_port: 19000
+keycloak_bootstrap_admin_username: lv3-bootstrap-admin
+keycloak_bootstrap_admin_password_remote_file: "{{ keycloak_secret_dir }}/bootstrap-admin-password"
+keycloak_operator_username: florin.badita
+keycloak_operator_first_name: Florin
+keycloak_operator_last_name: Badita
+keycloak_operator_email: baditaflorin@gmail.com
+keycloak_operator_password_remote_file: "{{ keycloak_secret_dir }}/florin.badita-password"
+keycloak_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak
+keycloak_bootstrap_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/bootstrap-admin-password.txt
+keycloak_operator_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/florin.badita-password.txt
+keycloak_grafana_client_id: grafana-oauth
+keycloak_grafana_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/grafana-client-secret.txt
+keycloak_agent_client_id: lv3-agent-hub
+keycloak_agent_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/lv3-agent-hub-client-secret.txt
+keycloak_grafana_groups:
+  admins: grafana-admins
+  viewers: grafana-viewers
+keycloak_realm_groups:
+  - name: lv3-platform-admins
+    attributes:
+      identity_class: human_operator
+      scope_boundary: platform_admin
+  - name: grafana-admins
+    attributes:
+      identity_class: human_operator
+      scope_boundary: grafana_admin
+  - name: grafana-viewers
+    attributes:
+      identity_class: human_operator
+      scope_boundary: grafana_readonly
+  - name: approved-agent-clients
+    attributes:
+      identity_class: agent
+      scope_boundary: agent_client_credentials
+keycloak_public_base_url: "https://{{ keycloak_service_topology.public_hostname }}"
+keycloak_local_admin_url: "http://127.0.0.1:{{ keycloak_local_http_port }}"
+keycloak_grafana_root_url: "https://{{ hostvars['proxmox_florin'].lv3_service_topology.grafana.public_hostname }}"

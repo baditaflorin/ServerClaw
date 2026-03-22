@@ -44,6 +44,7 @@ Current implementation note:
 3. standardize operator identity
    - add shared SSO before multiplying internal UIs
    - priority: ADR 0056
+   - the first live integration should broker Grafana and provide a reusable client pattern for later NetBox, Portainer, Mattermost, and Windmill work
 4. add bounded runtime control
    - expose runtime inspection and narrow action surfaces only after identity and command rules are clear
    - priority: ADR 0055
@@ -85,6 +86,7 @@ Current state:
 - make UI-based mutation the exception, not the default
 - require receipts or equivalent evidence whenever a live change is applied
 - give agents named tools and events, not generic root shells
+- prefer one realm and reusable group taxonomy over per-application ad hoc role models
 
 ## Current Status
 

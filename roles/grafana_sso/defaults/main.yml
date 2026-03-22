@@ -1,0 +1,12 @@
+---
+grafana_sso_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('grafana') }}"
+grafana_sso_keycloak_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('keycloak') }}"
+grafana_sso_client_id: grafana-oauth
+grafana_sso_client_secret: ""
+grafana_sso_realm_name: lv3
+grafana_sso_login_groups:
+  - grafana-admins
+  - grafana-viewers
+grafana_sso_root_url: "https://{{ grafana_sso_service_topology.public_hostname }}"
+grafana_sso_signout_redirect_url: >-
+  https://{{ grafana_sso_keycloak_service_topology.public_hostname }}/realms/{{ grafana_sso_realm_name }}/protocol/openid-connect/logout?post_logout_redirect_uri={{ (grafana_sso_root_url ~ '/login') | urlencode }}
