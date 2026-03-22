@@ -757,6 +757,48 @@
         "curl -s -X POST -H \"Content-Type: application/json\" -d '{\"email\":\"ops@lv3.org\",\"password\":\"'\"$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/admin-password.txt)\"'\"}' http://100.118.189.95:8008/api/v1/auths/signin"
       ]
     },
+    "converge-portainer": {
+      "description": "Converge the private Portainer runtime on docker-runtime-lv3, publish it through the Proxmox host Tailscale proxy, and persist the controller-local bootstrap auth.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-portainer",
+        "command": "make converge-portainer"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "portainer_admin_password",
+          "portainer_admin_auth"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-portainer"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-portainer.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/portainer.yml",
+        "roles/portainer_runtime",
+        "roles/proxmox_tailscale_proxy/tasks/main.yml",
+        "roles/proxmox_security/tasks/main.yml",
+        "inventory/group_vars/all.yml",
+        "inventory/host_vars/proxmox_florin.yml"
+      ],
+      "outputs": [
+        "Private Portainer runtime on docker-runtime-lv3 with a Tailscale-published controller URL on the Proxmox host and controller-local bootstrap auth persisted under .local/portainer."
+      ],
+      "verification_commands": [
+        "make syntax-check-portainer",
+        "curl -sk https://100.118.189.95:9444/api/system/status",
+        "make portainer-manage ACTION=list-containers PORTAINER_ARGS='--all'"
+      ]
+    },
     "deploy-uptime-kuma": {
       "description": "Deploy Uptime Kuma on the Docker runtime VM and publish it at uptime.lv3.org.",
       "lifecycle_status": "active",
@@ -822,6 +864,36 @@
       ],
       "verification_commands": [
         "make uptime-kuma-manage ACTION=list-monitors"
+      ]
+    },
+    "portainer-manage": {
+      "description": "Run governed Portainer API actions such as listing containers, reading logs, or restarting one container through the repo-managed wrapper.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "portainer-manage",
+        "command": "make portainer-manage ACTION=list-containers"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "portainer_admin_auth"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "external_live",
+      "owner_runbook": "docs/runbooks/configure-portainer.md",
+      "implementation_refs": [
+        "Makefile",
+        "scripts/portainer_tool.py"
+      ],
+      "outputs": [
+        "Read-mostly Portainer inspection and bounded runtime actions through the repo-managed wrapper instead of ad hoc Docker shell access."
+      ],
+      "verification_commands": [
+        "make portainer-manage ACTION=list-containers PORTAINER_ARGS='--all'"
       ]
     },
     "configure-backup-vm": {

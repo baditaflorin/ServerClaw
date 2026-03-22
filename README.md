@@ -62,6 +62,8 @@ Windmill is now live on `docker-runtime-lv3` and reachable privately at `http://
 
 The control-plane governance layer is now live on `main`: command, API, message, and event lanes are verified against the active host and mail surfaces, the current human/service/agent/break-glass principals have been re-reviewed against the identity taxonomy, and recurring live mutation is expected to use the named command catalog plus approval gates.
 
+Portainer is now live on `docker-runtime-lv3` and reachable privately at `https://100.118.189.95:9444`, with controller-local bootstrap artifacts under `.local/portainer` and a governed wrapper for read-mostly runtime inspection plus bounded restarts.
+
 <!-- BEGIN GENERATED: platform-status -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_status_docs.py). Do not edit this block by hand.
 
@@ -223,6 +225,8 @@ ops present in the local docker group on docker-runtime-lv3
 telegraf active on docker-runtime-lv3 with Docker socket access for container telemetry
 Uptime Kuma running from /opt/uptime-kuma and published at https://uptime.lv3.org
 repo-local Uptime Kuma auth and monitor management material stored under .local/uptime-kuma
+Portainer running from /opt/portainer and published privately through the Proxmox host Tailscale path at https://100.118.189.95:9444
+repo-local Portainer bootstrap and controller auth material stored under .local/portainer
 ```
 
 The current PostgreSQL posture is:
