@@ -77,8 +77,32 @@ token="$(curl -fsS --request POST --data "{\"role_id\":\"$role_id\",\"secret_id\
 curl -fsS --header "X-Vault-Token: $token" http://127.0.0.1:8201/v1/database/creds/postgres-readonly
 ```
 
+Controller-side mTLS verification for the private OpenBao API:
+
+```bash
+tmpdir="$(mktemp -d)"
+trap 'rm -rf "$tmpdir"' EXIT
+curl -fsSLo "$tmpdir/step.tar.gz" https://github.com/smallstep/cli/releases/download/v0.30.1/step_darwin_0.30.1_arm64.tar.gz
+tar -xf "$tmpdir/step.tar.gz" -C "$tmpdir"
+"$tmpdir/step_0.30.1/bin/step" ca certificate \
+  --force \
+  --provisioner services \
+  --provisioner-password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/secrets/provisioners/services-password.txt \
+  --ca-url https://100.118.189.95:9443 \
+  --root /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt \
+  --san openbao-client.lv3.internal \
+  --not-after 1h \
+  openbao-client.lv3.internal "$tmpdir/client.crt" "$tmpdir/client.key"
+curl --cert "$tmpdir/client.crt" \
+  --key "$tmpdir/client.key" \
+  --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt \
+  https://100.118.189.95:8200/v1/sys/health
+curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt \
+  https://100.118.189.95:8200/v1/sys/health
+```
+
 ## Notes
 
-- The loopback HTTP API on `127.0.0.1:8201` remains the managed automation and operator path. Use SSH port forwarding or a controlled private publication flow, not the public edge.
+- The loopback HTTP API on `127.0.0.1:8201` remains the managed automation and operator path for bootstrap, verification, and recovery-safe forwarding.
+- The external OpenBao API on `https://100.118.189.95:8200` is private-only, published through the Proxmox host Tailscale path, and requires a valid client certificate signed by `step-ca`.
 - The current implementation seeds existing mail, monitoring, and Proxmox API artifacts into OpenBao so later consumers can fetch them without reintroducing git-managed secrets.
-- A step-ca-backed TLS listener is also present on `:8200`, but the current workflow does not rely on client-certificate distribution yet. Treat the loopback HTTP listener as the supported access path until ADR 0047 defines the short-lived mTLS client model.

@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.48.0
-platform_version: 0.24.0
+repo_version: 0.49.0
+platform_version: 0.25.0
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -17,6 +17,7 @@ live_apply_evidence:
     step_ca: 2026-03-22-adr-0042-step-ca-live-apply
     openbao: 2026-03-22-adr-0043-openbao-live-apply
     windmill: 2026-03-22-adr-0044-windmill-live-apply
+    short_lived_credentials_and_mtls: 2026-03-22-adr-0047-short-lived-credentials-live-apply
 
 desired_state:
   host_id: proxmox_florin
@@ -408,12 +409,18 @@ observed_state:
     runtime_vm: 10.10.10.20
     postgres_backend_vm: 10.10.10.50
     raft_storage: true
+    host_tailscale_proxy_url: https://100.118.189.95:8200
     loopback_http_api: http://127.0.0.1:8201
     tls_listener_present: true
+    external_mtls_api_verified: true
+    external_mtls_requires_client_certificate: true
     initialized: true
     managed_unseal_verified: true
     userpass_auth_enabled: true
     approle_auth_enabled: true
+    approle_secret_ids_short_lived: true
+    approle_secret_id_ttl: 15m
+    approle_secret_id_num_uses: 1
     ops_userpass_login_verified: true
     controller_secret_read_verified: true
     mail_platform_secret_read_verified: true
@@ -478,8 +485,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.48.0
+    current: 0.49.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.24.0
+    current: 0.25.0
     meaning: intended platform release for the actual server configuration

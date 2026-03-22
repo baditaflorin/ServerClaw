@@ -56,14 +56,18 @@ The private SSH jump path through the Proxmox host to the guests is working.
 
 The private `step-ca` control plane is now live on `docker-runtime-lv3`, published only on `https://100.118.189.95:9443`, and the Proxmox host plus managed guests now trust `step-ca` for SSH host certificates and internal certificate issuance.
 
+The private OpenBao secret authority is now live on `docker-runtime-lv3`, with a loopback bootstrap API on `127.0.0.1:8201` and a `step-ca`-issued mTLS endpoint at `https://100.118.189.95:8200` that rejects clients without a valid certificate.
+
+Windmill is now live on `docker-runtime-lv3` and reachable privately at `http://100.118.189.95:8005`, with the repo-managed `lv3` workspace and seeded healthcheck script verified end to end.
+
 <!-- BEGIN GENERATED: platform-status -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_status_docs.py). Do not edit this block by hand.
 
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.48.0` |
-| Platform version | `0.24.0` |
+| Repository version | `0.49.0` |
+| Platform version | `0.25.0` |
 | Observed check date | `2026-03-22` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -105,6 +109,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `postgres_vm` | `2026-03-22-adr-0026-postgres-vm-live-apply` |
 | `public_edge_publication` | `2026-03-22-adr-0021-edge-publication-live-apply` |
 | `runtime_container_telemetry` | `2026-03-22-adr-0040-runtime-container-telemetry-live-apply` |
+| `short_lived_credentials_and_mtls` | `2026-03-22-adr-0047-short-lived-credentials-live-apply` |
 | `step_ca` | `2026-03-22-adr-0042-step-ca-live-apply` |
 | `uptime_kuma` | `2026-03-22-adr-0027-uptime-kuma-live-apply` |
 | `windmill` | `2026-03-22-adr-0044-windmill-live-apply` |
@@ -118,6 +123,7 @@ routine host SSH over the Proxmox Tailscale IP
 ops@pam for routine Proxmox administration
 lv3-automation@pve API token for durable Proxmox object management
 short-lived `step-ca` SSH certificates accepted on the Proxmox host and managed guests
+short-lived OpenBao AppRole artifacts refreshed on each converge and post-verification run
 ops SSH + sudo for guest VMs
 root key-only break-glass on the Proxmox host
 root disabled for guest SSH
@@ -373,8 +379,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.48.0` |
-| Platform version | `0.24.0` |
+| Repository version | `0.49.0` |
+| Platform version | `0.25.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -434,7 +440,7 @@ This repository is intentionally opinionated:
 | `0044` | Windmill for agent and operator workflows | `live_applied` | [adr-0044-windmill.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0044-windmill.md) |
 | `0045` | Control-plane communication lanes | `merged` | [adr-0045-communication-lanes.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0045-communication-lanes.md) |
 | `0046` | Identity classes for humans, services, agents, and break-glass | `merged` | [adr-0046-identity-classes.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0046-identity-classes.md) |
-| `0047` | Short-lived credentials and internal mTLS | `merged` | [adr-0047-short-lived-creds.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0047-short-lived-creds.md) |
+| `0047` | Short-lived credentials and internal mTLS | `live_applied` | [adr-0047-short-lived-creds.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0047-short-lived-creds.md) |
 | `0048` | Command catalog and approval gates | `merged` | [adr-0048-command-catalog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0048-command-catalog.md) |
 | `0049` | Private-first API publication model | `merged` | [adr-0049-private-api-publication.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0049-private-api-publication.md) |
 | `0050` | Transactional email and notification profiles | `merged` | [adr-0050-notification-profiles.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0050-notification-profiles.md) |

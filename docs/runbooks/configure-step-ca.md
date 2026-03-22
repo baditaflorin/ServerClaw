@@ -71,25 +71,28 @@ tar -xf "$tmpdir/step.tar.gz" -C "$tmpdir"
 "$tmpdir/step_0.30.1/bin/step" ssh certificate \
   --force \
   --no-agent \
+  --insecure \
+  --no-password \
   --provisioner humans \
   --provisioner-password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/secrets/provisioners/humans-password.txt \
-  --password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/secrets/provisioners/humans-password.txt \
   --ca-url https://100.118.189.95:9443 \
   --root /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt \
   --not-after 8h \
   ops "$tmpdir/ops-ed25519"
 ssh \
   -i "$tmpdir/ops-ed25519" \
+  -o IdentitiesOnly=yes \
   -o CertificateFile="$tmpdir/ops-ed25519-cert.pub" \
   -o UserKnownHostsFile=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/ssh/known_hosts \
   -o StrictHostKeyChecking=yes \
   ops@100.118.189.95 hostname
 ssh \
   -i "$tmpdir/ops-ed25519" \
+  -o IdentitiesOnly=yes \
   -o CertificateFile="$tmpdir/ops-ed25519-cert.pub" \
   -o UserKnownHostsFile=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/ssh/known_hosts \
   -o StrictHostKeyChecking=yes \
-  -o ProxyCommand="ssh -i $tmpdir/ops-ed25519 -o CertificateFile=$tmpdir/ops-ed25519-cert.pub -o UserKnownHostsFile=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/ssh/known_hosts -o StrictHostKeyChecking=yes ops@100.118.189.95 -W %h:%p" \
+  -o ProxyCommand="ssh -i $tmpdir/ops-ed25519 -o IdentitiesOnly=yes -o CertificateFile=$tmpdir/ops-ed25519-cert.pub -o UserKnownHostsFile=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/ssh/known_hosts -o StrictHostKeyChecking=yes ops@100.118.189.95 -W %h:%p" \
   ops@10.10.10.20 hostname
 ```
 
@@ -114,3 +117,4 @@ openssl verify -CAfile /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_serv
 - The CA stays private. There is no public-edge publication for ADR 0042.
 - The existing bootstrap SSH key remains in place as a recovery path; the CA-backed SSH path is additive.
 - The controller verification example above assumes an Apple Silicon controller because the current workstation is arm64 macOS. Use the matching `step` archive for other controller platforms.
+- The temporary SSH verification key is intentionally written unencrypted with `--insecure --no-password` so non-interactive SSH can complete during validation; remove the temporary directory immediately after use.

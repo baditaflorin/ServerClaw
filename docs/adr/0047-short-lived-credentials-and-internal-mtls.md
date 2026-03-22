@@ -1,10 +1,10 @@
 # ADR 0047: Short-Lived Credentials And Internal mTLS
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.49.0
+- Implemented In Platform Version: 0.25.0
+- Implemented On: 2026-03-22
 - Date: 2026-03-22
 
 ## Context
@@ -42,3 +42,9 @@ Internal APIs that cross trust boundaries should prefer:
 - Internal services can stop relying on broad, reusable bearer tokens where mTLS is a better fit.
 - The platform needs renewal paths, certificate distribution, and failure monitoring as first-class operations.
 
+## Implementation Notes
+
+- Short-lived human SSH certificates are now issued by `step-ca` and accepted on the Proxmox host and managed guests, with controller-side verification using an eight-hour `ops` certificate through the Tailscale host path and the Proxmox jump path.
+- OpenBao AppRole artifacts now use short-lived secret IDs that are refreshed on each converge and after end-to-end verification, reducing reuse of long-lived machine bootstrap credentials.
+- The external OpenBao API now presents a `step-ca`-issued server certificate on `https://100.118.189.95:8200` and requires client certificates signed by the same CA, while retaining a loopback-only HTTP listener on `127.0.0.1:8201` for managed bootstrap and verification traffic.
+- Operator procedures are documented in [docs/runbooks/configure-step-ca.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-step-ca.md) and [docs/runbooks/configure-openbao.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-openbao.md).

@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0047](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0047-short-lived-credentials-and-internal-mtls.md)
 - Title: Credential lifetime and mTLS policy
-- Status: merged
+- Status: live_applied
 - Branch: `codex/adr-0047-short-lived-creds`
 - Worktree: `../proxmox_florin_server-short-lived-creds`
 - Owner: codex
@@ -18,31 +18,41 @@
 
 ## Non-Goals
 
-- full implementation in this planning workstream
 - preserving long-lived static secrets as the default
 
 ## Expected Repo Surfaces
 
 - `docs/adr/0047-short-lived-credentials-and-internal-mtls.md`
 - `docs/workstreams/adr-0047-short-lived-creds.md`
-- `docs/runbooks/plan-agentic-control-plane.md`
+- `docs/runbooks/configure-step-ca.md`
+- `docs/runbooks/configure-openbao.md`
+- `inventory/group_vars/all.yml`
+- `inventory/host_vars/proxmox_florin.yml`
+- `playbooks/openbao.yml`
+- `roles/openbao_runtime/`
 - `workstreams.yaml`
 
 ## Expected Live Surfaces
 
-- short-lived SSH and API credentials for new control-plane components
-- mTLS on internal APIs that cross trust boundaries
+- short-lived human SSH certificates accepted on the Proxmox host and managed guests
+- short-lived OpenBao AppRole secret IDs refreshed during converge and post-verification
+- mTLS on the OpenBao operator and service API at `https://100.118.189.95:8200`
 
 ## Verification
 
-- `ruby -e 'require "yaml"; YAML.load_file("/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml"); puts "workstreams.yaml OK"'`
-- `test -f /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0047-short-lived-credentials-and-internal-mtls.md`
+- `make converge-step-ca`
+- `make converge-openbao`
+- issue an eight-hour `ops` SSH certificate through `step-ca` and verify login to `ops@100.118.189.95` plus `ops@10.10.10.20`
+- issue a one-hour X.509 client certificate through `step-ca` and verify `curl --cert ... --key ... --cacert ... https://100.118.189.95:8200/v1/sys/health`
+- verify the same OpenBao request fails without a client certificate
 
 ## Merge Criteria
 
-- issuer boundaries and credential lifetime intent are explicit
-- the ADR clearly prefers short-lived credentials by default
+- the repo-managed control-plane components stop depending on long-lived default SSH or API credentials for routine verification
+- the private OpenBao API requires mTLS for external access and rejects unauthenticated clients
 
-## Notes For The Next Assistant
+## Live Apply Notes
 
-- do not implement this before the identity taxonomy and issuer choices are settled
+- Live apply completed on `2026-03-22` from `main`.
+- Controller-side verification proved short-lived `ops` SSH certificate login to both the Proxmox host and `docker-runtime-lv3`.
+- Controller-side verification proved that OpenBao serves a `step-ca`-issued certificate over the Proxmox Tailscale path and rejects TLS requests that do not present a valid client certificate.

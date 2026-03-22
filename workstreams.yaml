@@ -358,7 +358,7 @@ workstreams:
   - id: adr-0047-short-lived-creds
     adr: "0047"
     title: Short-lived credentials and internal mTLS
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0047-short-lived-creds
     worktree_path: ../proxmox_florin_server-short-lived-creds
@@ -374,7 +374,7 @@ workstreams:
       - internal HTTPS
       - service authentication
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0048-command-catalog
     adr: "0048"

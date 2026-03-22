@@ -72,4 +72,4 @@ Provisioners must be separated by identity class:
 - [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json) now exposes `converge-step-ca` as the canonical entry point with explicit preflight, validation, and verification metadata.
 - [config/controller-local-secrets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/controller-local-secrets.json) now records the controller-local secret material generated and consumed by the `step-ca` workflow.
 - Operator usage is documented in [docs/runbooks/configure-step-ca.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-step-ca.md).
-- Live application is intentionally still pending, so the platform implementation metadata remains `not yet`.
+- Live application was completed from `main` on 2026-03-22, including proxied CA health verification, short-lived SSH certificate login for `ops`, and private X.509 issuance through the Tailscale-published controller URL.
