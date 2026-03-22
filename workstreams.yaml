@@ -603,10 +603,10 @@ workstreams:
   - id: adr-0059-ntopng-network-visibility
     adr: "0059"
     title: ntopng for private network flow visibility
-    status: ready
+    status: live_applied
     owner: codex
-    branch: codex/adr-0059-ntopng-network-visibility
-    worktree_path: ../proxmox_florin_server-ntopng-network-visibility
+    branch: codex/adr-0059-ntopng
+    worktree_path: ../proxmox_florin_server-ntopng
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0059-ntopng-network-visibility.md
     depends_on:
       - adr-0011-monitoring
@@ -618,8 +618,8 @@ workstreams:
       - ingress traffic
       - guest egress
       - network triage
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
 
   - id: adr-0060-open-webui-workbench
     adr: "0060"

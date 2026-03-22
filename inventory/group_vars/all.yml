@@ -1,5 +1,5 @@
-repo_version: 0.48.0
-platform_version: 0.24.0
+repo_version: 0.50.0
+platform_version: 0.26.0
 
 proxmox_release_major: 9
 proxmox_suite: trixie
@@ -129,6 +129,9 @@ openbao_proxy_port: 8200
 openbao_controller_url: "https://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ openbao_proxy_port }}"
 windmill_host_proxy_port: 8005
 windmill_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ windmill_host_proxy_port }}"
+ntopng_proxy_port: 3001
+ntopng_http_port: 3000
+ntopng_operator_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ ntopng_proxy_port }}"
 
 step_ca_version: 0.30.1
 step_ca_cli_version: 0.30.1
@@ -146,6 +149,7 @@ step_ca_remote_ssh_host_ca_file: "{{ step_ca_home }}/certs/ssh_host_ca_key.pub"
 step_ca_services_password_file: "{{ step_ca_password_dir }}/services-password.txt"
 step_ca_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca
 proxmox_management_allowed_tcp_ports:
+  - "{{ ntopng_proxy_port }}"
   - "{{ step_ca_proxy_port }}"
   - "{{ openbao_proxy_port }}"
   - "{{ windmill_host_proxy_port }}"

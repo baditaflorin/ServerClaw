@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.49.0
-platform_version: 0.25.0
+repo_version: 0.50.0
+platform_version: 0.26.0
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -369,6 +369,19 @@ observed_state:
     nginx_guest_metrics_flow_verified: true
     docker_build_metrics_flow_verified: true
     docker_build_duration_metrics_verified: true
+  ntopng:
+    host_tailscale_proxy_url: http://100.118.189.95:3001
+    local_http_url: http://127.0.0.1:3000
+    version: 6.7.260322
+    service_running: true
+    redis_running: true
+    capture_interfaces:
+      - vmbr0
+      - vmbr10
+    primary_interface: vmbr10
+    operator_api_verified: true
+    private_bridge_visibility_verified: true
+    top_hosts_api_verified: true
   docker_runtime:
     vm: 10.10.10.20
     docker_engine_running: true
@@ -485,8 +498,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.49.0
+    current: 0.50.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.25.0
+    current: 0.26.0
     meaning: intended platform release for the actual server configuration
