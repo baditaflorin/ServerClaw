@@ -341,3 +341,6 @@
 - name: Verify the PBS datastore is readable
   ansible.builtin.command: proxmox-backup-manager datastore list --output-format json-pretty
   changed_when: false
+
+- name: Verify PBS health probes
+  ansible.builtin.import_tasks: verify.yml

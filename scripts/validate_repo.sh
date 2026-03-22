@@ -16,7 +16,7 @@ export ANSIBLE_COLLECTIONS_PATH="$ANSIBLE_COLLECTIONS_DIR"
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/validate_repo.sh [all|ansible-syntax|yaml|ansible-lint|shell|json|data-models|generated-docs]...
+  scripts/validate_repo.sh [all|ansible-syntax|yaml|ansible-lint|shell|json|data-models|generated-docs|health-probes]...
 
 Examples:
   scripts/validate_repo.sh
@@ -135,6 +135,42 @@ validate_generated_docs() {
   uvx --from pyyaml python "$REPO_ROOT/scripts/generate_status_docs.py" --check >/dev/null
 }
 
+validate_health_probes() {
+  local role
+  local roles=(
+    docker_runtime
+    postgres_vm
+    monitoring_vm
+    backup_vm
+    step_ca_runtime
+    openbao_runtime
+    windmill_runtime
+    mail_platform_runtime
+    nginx_edge_publication
+    uptime_kuma_runtime
+    netbox_runtime
+    open_webui_runtime
+    portainer_runtime
+    proxmox_ntopng
+  )
+
+  echo "Health probe contract validation"
+  for role in "${roles[@]}"; do
+    local verify_file="$REPO_ROOT/roles/$role/tasks/verify.yml"
+    local main_file="$REPO_ROOT/roles/$role/tasks/main.yml"
+
+    if [[ ! -f "$verify_file" ]]; then
+      echo "Missing verify task file: roles/$role/tasks/verify.yml" >&2
+      exit 1
+    fi
+
+    if ! grep -Eq 'import_tasks: verify\.yml|include_tasks: verify\.yml' "$main_file"; then
+      echo "roles/$role/tasks/main.yml does not import verify.yml" >&2
+      exit 1
+    fi
+  done
+}
+
 if [[ $# -eq 0 ]]; then
   set -- all
 fi
@@ -147,6 +183,7 @@ for stage in "$@"; do
       validate_ansible_lint
       validate_shell
       validate_json
+      validate_health_probes
       validate_data_models
       validate_generated_docs
       ;;
@@ -167,6 +204,9 @@ for stage in "$@"; do
       ;;
     data-models)
       validate_data_models
+      ;;
+    health-probes)
+      validate_health_probes
       ;;
     generated-docs)
       validate_generated_docs

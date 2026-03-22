@@ -8,6 +8,16 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.59.0 - 2026-03-22
+
+- implemented ADR 0064 in repository automation by adding explicit `tasks/verify.yml` health contracts across the current service-owning roles and by documenting the contract in a dedicated health-probe runbook
+- added `config/health-probe-catalog.json` as the machine-readable liveness or readiness inventory for every canonical service, including catalog-only host surfaces that do not yet have standalone service roles
+- aligned `config/uptime-kuma/monitors.json` with the catalog and extended `make validate` so probe-role coverage and Uptime Kuma drift fail before merge
+
+Platform impact:
+
+- no direct live platform change in this release commit; the new probe contracts will take effect on the next live converge from `main`
+
 ## 0.58.0 - 2026-03-22
 
 - applied ADR 0054 live from `main` by converging a private NetBox runtime on `docker-runtime-lv3`, provisioning its PostgreSQL backend on `postgres-lv3`, and publishing operator and agent access through the Proxmox host Tailscale proxy on port `8004`

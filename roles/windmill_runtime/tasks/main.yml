@@ -255,3 +255,6 @@
       - windmill_healthcheck.json.job_id_present | bool
       - windmill_healthcheck.json.workspace == windmill_workspace_id
     fail_msg: "Windmill API responded, but the seeded healthcheck script did not return the expected result."
+
+- name: Verify Windmill health probes
+  ansible.builtin.import_tasks: verify.yml

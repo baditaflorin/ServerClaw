@@ -172,3 +172,6 @@
     name: nginx
     enabled: true
     state: reloaded
+
+- name: Verify NGINX edge health probes
+  ansible.builtin.import_tasks: verify.yml

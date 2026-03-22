@@ -1,0 +1,17 @@
+---
+- name: Verify Docker service is active
+  ansible.builtin.command: systemctl is-active docker
+  register: docker_runtime_service_status
+  changed_when: false
+  failed_when: docker_runtime_service_status.stdout | trim != "active"
+
+- name: Verify Docker Engine responds on the local control socket
+  ansible.builtin.command:
+    argv:
+      - docker
+      - info
+      - --format
+      - "{{ '{{' }}.ServerVersion{{ '}}' }}"
+  register: docker_runtime_info
+  changed_when: false
+  failed_when: docker_runtime_info.stdout | trim == ""

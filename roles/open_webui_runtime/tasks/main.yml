@@ -234,3 +234,6 @@
       - (open_webui_admin_signin.json.role | default('')) == 'admin'
     fail_msg: "Open WebUI started, but the repo-managed admin bootstrap could not be verified."
   no_log: true
+
+- name: Verify Open WebUI health probes
+  ansible.builtin.import_tasks: verify.yml

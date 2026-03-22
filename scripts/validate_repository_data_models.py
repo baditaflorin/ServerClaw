@@ -24,6 +24,7 @@ from workflow_catalog import (
 STACK_PATH = repo_path("versions", "stack.yaml")
 HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 UPTIME_MONITORS_PATH = repo_path("config", "uptime-kuma", "monitors.json")
+HEALTH_PROBE_CATALOG_PATH = repo_path("config", "health-probe-catalog.json")
 
 SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -42,6 +43,8 @@ DNS_RECORD_TYPES = {"A", "AAAA", "CNAME"}
 EXTRA_DNS_RECORD_TYPES = {"A", "AAAA", "CNAME", "MX", "TXT"}
 EDGE_KINDS = {"static", "proxy"}
 MONITOR_TYPES = {"http", "port"}
+PROBE_KINDS = {"http", "tcp", "command", "systemd"}
+HTTP_METHODS = {"DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"}
 IDENTITY_CLASSES = {"human_operator", "service", "agent", "break_glass"}
 IDENTITY_REQUIRED_METADATA = {
     "owner",
@@ -417,6 +420,13 @@ def validate_host_vars() -> dict[str, Any]:
         "guest_plan_keys": guest_plan_keys,
         "guest_vmids_by_key": guest_vmids_by_key,
         "guest_ips_by_key": guest_ips_by_key,
+        "topology": {
+            service_id: {
+                "service_name": service["service_name"],
+                "owning_vm": service["owning_vm"],
+            }
+            for service_id, service in topology.items()
+        },
     }
 
 
@@ -455,6 +465,122 @@ def validate_uptime_monitors() -> None:
         if name in names:
             raise ValueError(f"duplicate monitor name in config/uptime-kuma/monitors.json: {name}")
         names.add(name)
+
+
+def validate_probe_definition(probe: Any, path: str) -> None:
+    probe = require_mapping(probe, path)
+    kind = require_enum(probe.get("kind"), f"{path}.kind", PROBE_KINDS)
+    require_str(probe.get("description"), f"{path}.description")
+    require_int(probe.get("timeout_seconds"), f"{path}.timeout_seconds", 1)
+    require_int(probe.get("retries"), f"{path}.retries", 1)
+    require_int(probe.get("delay_seconds"), f"{path}.delay_seconds", 0)
+
+    if "headers" in probe:
+        headers = require_mapping(probe.get("headers"), f"{path}.headers")
+        for key, value in headers.items():
+            require_str(key, f"{path}.headers key")
+            require_str(value, f"{path}.headers.{key}")
+
+    if "validate_tls" in probe:
+        require_bool(probe.get("validate_tls"), f"{path}.validate_tls")
+
+    if kind == "http":
+        url = require_str(probe.get("url"), f"{path}.url")
+        if not (url.startswith("http://") or url.startswith("https://")):
+            raise ValueError(f"{path}.url must start with http:// or https://")
+        method = require_str(probe.get("method"), f"{path}.method").upper()
+        if method not in HTTP_METHODS:
+            raise ValueError(f"{path}.method must be one of {sorted(HTTP_METHODS)}")
+        expected_status = require_int_list(probe.get("expected_status"), f"{path}.expected_status", 100)
+        for index, status in enumerate(expected_status):
+            if status > 599:
+                raise ValueError(f"{path}.expected_status[{index}] must be <= 599")
+
+    if kind == "tcp":
+        require_str(probe.get("host"), f"{path}.host")
+        require_int(probe.get("port"), f"{path}.port", 1)
+
+    if kind == "command":
+        argv = require_string_list(probe.get("argv"), f"{path}.argv")
+        if not argv:
+            raise ValueError(f"{path}.argv must not be empty")
+        if "success_rc" in probe:
+            require_int(probe.get("success_rc"), f"{path}.success_rc", 0)
+
+    if kind == "systemd":
+        require_str(probe.get("unit"), f"{path}.unit")
+        require_str(probe.get("expected_state"), f"{path}.expected_state")
+
+
+def validate_health_probe_catalog(host_vars_context: dict[str, Any]) -> None:
+    catalog = require_mapping(
+        json.loads(HEALTH_PROBE_CATALOG_PATH.read_text()),
+        str(HEALTH_PROBE_CATALOG_PATH),
+    )
+    require_semver(catalog.get("schema_version"), "config/health-probe-catalog.json.schema_version")
+    services = require_mapping(catalog.get("services"), "config/health-probe-catalog.json.services")
+    topology = host_vars_context["topology"]
+
+    if set(services.keys()) != set(topology.keys()):
+        raise ValueError(
+            "config/health-probe-catalog.json.services must define exactly the canonical lv3_service_topology services"
+        )
+
+    expected_monitors: dict[str, dict[str, Any]] = {}
+    for service_id, topology_entry in topology.items():
+        service_path = f"config/health-probe-catalog.json.services.{service_id}"
+        service = require_mapping(services.get(service_id), service_path)
+        if require_str(service.get("service_name"), f"{service_path}.service_name") != topology_entry["service_name"]:
+            raise ValueError(f"{service_path}.service_name must match inventory/host_vars/proxmox_florin.yml")
+        if require_str(service.get("owning_vm"), f"{service_path}.owning_vm") != topology_entry["owning_vm"]:
+            raise ValueError(f"{service_path}.owning_vm must match inventory/host_vars/proxmox_florin.yml")
+
+        role = service.get("role")
+        verify_file = service.get("verify_file")
+        if role is None:
+            if verify_file is not None:
+                raise ValueError(f"{service_path}.verify_file must be null when {service_path}.role is null")
+        else:
+            require_str(role, f"{service_path}.role")
+            verify_file = require_str(verify_file, f"{service_path}.verify_file")
+            if not (REPO_ROOT / verify_file).is_file():
+                raise ValueError(f"{service_path}.verify_file does not exist: {verify_file}")
+
+        validate_probe_definition(service.get("liveness"), f"{service_path}.liveness")
+        validate_probe_definition(service.get("readiness"), f"{service_path}.readiness")
+
+        uptime_kuma = require_mapping(service.get("uptime_kuma"), f"{service_path}.uptime_kuma")
+        enabled = require_bool(uptime_kuma.get("enabled"), f"{service_path}.uptime_kuma.enabled")
+        if enabled:
+            monitor = require_mapping(uptime_kuma.get("monitor"), f"{service_path}.uptime_kuma.monitor")
+            name = validate_monitor(monitor, f"{service_path}.uptime_kuma.monitor")
+            if name in expected_monitors:
+                raise ValueError(f"duplicate Uptime Kuma monitor contract in health probe catalog: {name}")
+            expected_monitors[name] = monitor
+        elif "reason" in uptime_kuma:
+            require_str(uptime_kuma.get("reason"), f"{service_path}.uptime_kuma.reason")
+
+    actual_monitors = require_list(
+        json.loads(UPTIME_MONITORS_PATH.read_text()),
+        str(UPTIME_MONITORS_PATH),
+    )
+    actual_monitors_by_name: dict[str, dict[str, Any]] = {}
+    for index, monitor in enumerate(actual_monitors):
+        name = validate_monitor(monitor, f"config/uptime-kuma/monitors.json[{index}]")
+        if name in actual_monitors_by_name:
+            raise ValueError(f"duplicate monitor name in config/uptime-kuma/monitors.json: {name}")
+        actual_monitors_by_name[name] = monitor
+
+    if set(actual_monitors_by_name.keys()) != set(expected_monitors.keys()):
+        raise ValueError(
+            "config/uptime-kuma/monitors.json must match the enabled uptime_kuma monitors in config/health-probe-catalog.json"
+        )
+
+    for name, expected_monitor in expected_monitors.items():
+        if actual_monitors_by_name[name] != expected_monitor:
+            raise ValueError(
+                f"config/uptime-kuma/monitors.json monitor '{name}' does not match the health probe catalog contract"
+            )
 
 
 def validate_identity_taxonomy(
@@ -1071,6 +1197,7 @@ def validate_repository_data_models() -> int:
     validate_receipts()
     validate_uptime_monitors()
     host_vars_context = validate_host_vars()
+    validate_health_probe_catalog(host_vars_context)
     validate_versions_stack(host_vars_context)
     print("Repository data models OK")
     return 0

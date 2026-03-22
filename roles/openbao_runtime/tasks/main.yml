@@ -931,3 +931,6 @@
   delegate_to: localhost
   become: false
   no_log: true
+
+- name: Verify OpenBao health probes
+  ansible.builtin.import_tasks: verify.yml

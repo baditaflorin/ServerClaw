@@ -77,3 +77,6 @@
     name: docker
     enabled: true
     state: started
+
+- name: Verify Docker runtime health probes
+  ansible.builtin.import_tasks: verify.yml

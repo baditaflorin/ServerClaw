@@ -96,3 +96,6 @@
     that:
       - uptime_kuma_running.stdout_lines | select('equalto', uptime_kuma_container_name) | list | length == 1
     fail_msg: "Uptime Kuma container is not running."
+
+- name: Verify Uptime Kuma health probes
+  ansible.builtin.import_tasks: verify.yml
