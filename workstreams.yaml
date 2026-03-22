@@ -808,7 +808,7 @@ workstreams:
   - id: adr-0069-agent-tool-registry
     adr: "0069"
     title: Agent tool registry and governed tool calls
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0069-agent-tool-registry
     worktree_path: ../proxmox_florin_server-agent-tool-registry
@@ -816,14 +816,13 @@ workstreams:
     depends_on:
       - adr-0048-command-catalog
       - adr-0049-private-api-publication
-      - adr-0058-nats-event-bus
-      - adr-0066-mutation-audit-log
     conflicts_with: []
     shared_surfaces:
       - config/agent-tool-registry.json
       - config/command-catalog.json
       - config/workflow-catalog.json
-      - Open WebUI tool definitions
+      - docs/schema
+      - .local/tool-audit/agent-tool-calls.jsonl
     ready_to_merge: false
     live_applied: false
 

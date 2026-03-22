@@ -11,8 +11,9 @@ PORTAINER_ARGS ?=
 RECEIPT ?=
 COMMAND ?=
 SURFACE ?=
+TOOL ?=
 
-.PHONY: validate validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-shell validate-json validate-data-models generate-status-docs validate-generated-docs receipts receipt-info workflows workflow-info commands command-info lanes lane-info api-publication api-publication-info preflight syntax-check syntax-check-monitoring syntax-check-ntopng syntax-check-docker-runtime syntax-check-backup-vm syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-openbao syntax-check-step-ca syntax-check-windmill syntax-check-netbox syntax-check-open-webui syntax-check-mattermost syntax-check-portainer install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-monitoring converge-ntopng converge-docker-runtime converge-postgres-vm converge-mail-platform converge-openbao converge-step-ca converge-windmill converge-netbox converge-open-webui converge-mattermost converge-portainer deploy-uptime-kuma uptime-kuma-manage portainer-manage configure-backups configure-backup-vm database-dns start-workstream
+.PHONY: validate validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-shell validate-json validate-data-models generate-status-docs validate-generated-docs receipts receipt-info workflows workflow-info commands command-info lanes lane-info api-publication api-publication-info agent-tools agent-tool-info export-mcp-tools preflight syntax-check syntax-check-monitoring syntax-check-ntopng syntax-check-docker-runtime syntax-check-backup-vm syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-openbao syntax-check-step-ca syntax-check-windmill syntax-check-netbox syntax-check-open-webui syntax-check-mattermost syntax-check-portainer install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-monitoring converge-ntopng converge-docker-runtime converge-postgres-vm converge-mail-platform converge-openbao converge-step-ca converge-windmill converge-netbox converge-open-webui converge-mattermost converge-portainer deploy-uptime-kuma uptime-kuma-manage portainer-manage configure-backups configure-backup-vm database-dns start-workstream
 
 validate:
 	$(REPO_ROOT)/scripts/validate_repo.sh
@@ -78,6 +79,16 @@ api-publication:
 api-publication-info:
 	@test -n "$(SURFACE)" || (echo "set SURFACE=<surface-id>"; exit 1)
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/api_publication.py --surface $(SURFACE)
+
+agent-tools:
+	@$(REPO_ROOT)/scripts/agent_tool_registry.py --list
+
+agent-tool-info:
+	@test -n "$(TOOL)" || (echo "set TOOL=<tool-name>"; exit 1)
+	@$(REPO_ROOT)/scripts/agent_tool_registry.py --tool $(TOOL)
+
+export-mcp-tools:
+	@$(REPO_ROOT)/scripts/agent_tool_registry.py --export-mcp
 
 preflight:
 	@if [ -z "$(WORKFLOW)" ]; then \

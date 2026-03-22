@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lv3.org/schema/agent-tool-registry.json",
+  "title": "LV3 Agent Tool Registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "default_audit_log_path",
+    "tools"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "default_audit_log_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tools": {
+      "type": "array",
+      "minItems": 5,
+      "items": {
+        "type": "object"
+      }
+    }
+  }
+}

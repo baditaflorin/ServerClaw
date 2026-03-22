@@ -8,6 +8,16 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.61.0 - 2026-03-22
+
+- implemented ADR 0069 as a canonical governed tool registry with schema-backed `observe`, `report`, `execute`, and `approve` tool entries for agents and operators
+- added `scripts/agent_tool_registry.py`, MCP export wiring, controller-local governed tool dispatch, and per-call audit emission to `.local/tool-audit/agent-tool-calls.jsonl`
+- extended repository validation, operator documentation, and focused tests so tool definitions, catalog references, MCP export shape, and audit behavior all fail fast when they drift
+
+Platform impact:
+
+- no direct live platform change; this release adds a repo-managed governed tool surface and MCP export contract only
+
 ## 0.60.0 - 2026-03-22
 
 - implemented ADR 0062 to add a reusable `roles/common` task library for role input assertions, directory creation, systemd unit management, and TCP port waits
