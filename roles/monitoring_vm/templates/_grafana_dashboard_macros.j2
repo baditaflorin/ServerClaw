@@ -19,14 +19,29 @@ from(bucket: "{{ bucket }}") |> range(start: v.timeRangeStart, stop: v.timeRange
 {% macro nginx_rate_query(bucket, host_name, field_name) -%}
 from(bucket: "{{ bucket }}") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == "nginx" and r.host == "{{ host_name }}" and r._field == "{{ field_name }}") |> derivative(unit: 1s, nonNegative: true)
 {%- endmacro %}
+{% macro docker_build_field_query(bucket, host_name, field_name, status_name=None) -%}
+from(bucket: "{{ bucket }}") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == "docker_builds" and r.host == "{{ host_name }}" and r._field == "{{ field_name }}"{% if status_name is not none %} and r.status == "{{ status_name }}"{% endif %}) |> group(columns: ["_measurement", "_field", "host"])
+{%- endmacro %}
 {% macro docker_build_query(bucket, host_name, status_name=None) -%}
-from(bucket: "{{ bucket }}") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == "docker_builds" and r.host == "{{ host_name }}" and r._field == "count"{% if status_name is not none %} and r.status == "{{ status_name }}"{% endif %}) |> set(key: "command", value: "all") |> set(key: "status", value: "{{ status_name | default('all') }}") |> group(columns: ["_measurement", "_field", "host", "command", "status"])
+{{ docker_build_field_query(bucket, host_name, "count", status_name) }}
 {%- endmacro %}
 {% macro docker_build_total_query(bucket, host_name, status_name=None) -%}
 {{ docker_build_query(bucket, host_name, status_name) }} |> sum()
 {%- endmacro %}
 {% macro docker_build_window_query(bucket, host_name, status_name=None) -%}
 {{ docker_build_query(bucket, host_name, status_name) }} |> aggregateWindow(every: v.windowPeriod, fn: sum, createEmpty: false)
+{%- endmacro %}
+{% macro docker_build_duration_query(bucket, host_name, status_name=None) -%}
+{{ docker_build_field_query(bucket, host_name, "duration_ms", status_name) }}
+{%- endmacro %}
+{% macro docker_build_duration_average_query(bucket, host_name, status_name=None) -%}
+{{ docker_build_duration_query(bucket, host_name, status_name) }} |> mean()
+{%- endmacro %}
+{% macro docker_build_duration_last_query(bucket, host_name, status_name=None) -%}
+{{ docker_build_duration_query(bucket, host_name, status_name) }} |> last()
+{%- endmacro %}
+{% macro docker_build_duration_window_query(bucket, host_name, status_name=None) -%}
+{{ docker_build_duration_query(bucket, host_name, status_name) }} |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)
 {%- endmacro %}
 {% macro timeseries_panel(datasource_name, panel_id, x, y, title, unit, query, min_value=None, max_value=None, width=6, height=8) -%}
 {

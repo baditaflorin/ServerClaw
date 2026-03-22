@@ -11,7 +11,7 @@ This runbook converges the dedicated monitoring VM `140` at `10.10.10.40` with:
 - a provisioned overview dashboard, `LV3 Platform Overview`
 - a provisioned detail dashboard for each managed VM
 - guest-side NGINX telemetry from `nginx-lv3`
-- guest-side Docker build telemetry from `docker-build-lv3`
+- guest-side Docker build count and duration telemetry from `docker-build-lv3`
 - a Proxmox external metric server that writes into InfluxDB over the private network
 
 Grafana is available both on the private VM and at [https://grafana.lv3.org](https://grafana.lv3.org).
@@ -33,7 +33,7 @@ make converge-monitoring
 7. Renders the managed dashboard JSON from repo and imports the overview plus VM detail dashboards into Grafana over the local Grafana API.
 8. Creates or updates the Proxmox metric server `influxdb-http` to send metrics to `10.10.10.40:8086`.
 9. Converges `nginx-lv3` with loopback-only `stub_status` and Telegraf shipping guest and nginx service telemetry into InfluxDB.
-10. Converges `docker-build-lv3` with a repo-managed Docker CLI wrapper plus Telegraf shipping build events into InfluxDB.
+10. Converges `docker-build-lv3` with a repo-managed Docker CLI wrapper plus Telegraf shipping build count and duration events into InfluxDB.
 
 ## Operator Access Flow
 
@@ -96,10 +96,10 @@ Verify nginx guest telemetry is present in InfluxDB:
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'sudo influx query --host http://127.0.0.1:8086 --org lv3 --token "$(sudo cat /etc/lv3/monitoring/influxdb-operator.token)" '\''from(bucket: "proxmox") |> range(start: -15m) |> filter(fn: (r) => r._measurement == "nginx" and r.host == "nginx-lv3") |> limit(n: 10)'\'''
 ```
 
-Verify docker build telemetry is present in InfluxDB:
+Verify docker build count and duration telemetry is present in InfluxDB:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'sudo influx query --host http://127.0.0.1:8086 --org lv3 --token "$(sudo cat /etc/lv3/monitoring/influxdb-operator.token)" '\''from(bucket: "proxmox") |> range(start: -15m) |> filter(fn: (r) => r._measurement == "docker_builds" and r.host == "docker-build-lv3") |> limit(n: 10)'\'''
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'sudo influx query --host http://127.0.0.1:8086 --org lv3 --token "$(sudo cat /etc/lv3/monitoring/influxdb-operator.token)" '\''from(bucket: "proxmox") |> range(start: -15m) |> filter(fn: (r) => r._measurement == "docker_builds" and r.host == "docker-build-lv3" and (r._field == "count" or r._field == "duration_ms" or r._field == "start_time_ns" or r._field == "end_time_ns")) |> limit(n: 20)'\'''
 ```
 
 Verify local nginx `stub_status` on the guest:

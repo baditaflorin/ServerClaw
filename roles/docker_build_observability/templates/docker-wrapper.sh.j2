@@ -21,16 +21,21 @@ if [[ -z "${build_command}" ]]; then
   exec "${real_binary}" "$@"
 fi
 
+start_time_ns="$(date +%s%N)"
 status="success"
 exit_code=0
 
-if ! "${real_binary}" "$@"; then
+if "${real_binary}" "$@"; then
+  exit_code=0
+else
   exit_code=$?
   status="failure"
 fi
 
-timestamp_ns="$(date +%s%N)"
-printf 'docker_builds,host=%s,command=%s,status=%s count=1i,exit_code=%si %s\n' \
-  "${metric_host}" "${build_command}" "${status}" "${exit_code}" "${timestamp_ns}" >"/dev/udp/${socket_host}/${socket_port}" || true
+end_time_ns="$(date +%s%N)"
+duration_ms="$(((end_time_ns - start_time_ns) / 1000000))"
+
+printf 'docker_builds,host=%s,command=%s,status=%s count=1i,exit_code=%si,start_time_ns=%si,end_time_ns=%si,duration_ms=%si %s\n' \
+  "${metric_host}" "${build_command}" "${status}" "${exit_code}" "${start_time_ns}" "${end_time_ns}" "${duration_ms}" "${end_time_ns}" >"/dev/udp/${socket_host}/${socket_port}" || true
 
 exit "${exit_code}"

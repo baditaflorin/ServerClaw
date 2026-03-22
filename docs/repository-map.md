@@ -87,7 +87,7 @@ These files are integration-owned and should normally be edited only during merg
 - [roles/monitoring_vm/templates/lv3-vm-detail.json.j2](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/monitoring_vm/templates/lv3-vm-detail.json.j2): managed per-VM Grafana dashboard definition
 - [roles/nginx_observability/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/nginx_observability/tasks/main.yml): loopback-only `stub_status` plus Telegraf shipping for `nginx-lv3`
 - [docs/adr/0022-nginx-guest-observability-via-telegraf-and-stub-status.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0022-nginx-guest-observability-via-telegraf-and-stub-status.md): architecture decision for NGINX service-level monitoring
-- [docs/adr/0028-docker-build-vm-build-count-telemetry-via-cli-wrapper-events.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0028-docker-build-vm-build-count-telemetry-via-cli-wrapper-events.md): architecture decision for Docker build count telemetry on the build VM
+- [docs/adr/0028-docker-build-vm-build-count-telemetry-via-cli-wrapper-events.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0028-docker-build-vm-build-count-telemetry-via-cli-wrapper-events.md): architecture decision for Docker build count and duration telemetry on the build VM
 - [roles/proxmox_metrics/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_metrics/tasks/main.yml): Proxmox external metric-server configuration for InfluxDB
 
 ## Change Rules
