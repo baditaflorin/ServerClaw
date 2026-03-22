@@ -26,15 +26,25 @@
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: directory
-    owner: root
-    group: root
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
     mode: "{{ item.mode }}"
   loop:
     - path: "{{ step_ca_site_dir }}"
+      owner: root
+      group: root
       mode: "0755"
     - path: "{{ step_ca_home }}"
+      owner: "{{ step_ca_container_uid }}"
+      group: "{{ step_ca_container_gid }}"
+      mode: "0755"
+    - path: "{{ step_ca_home }}/db"
+      owner: "{{ step_ca_container_uid }}"
+      group: "{{ step_ca_container_gid }}"
       mode: "0755"
     - path: "{{ step_ca_password_dir }}"
+      owner: "{{ step_ca_container_uid }}"
+      group: "{{ step_ca_container_gid }}"
       mode: "0700"
 
 - name: Generate step-ca local password material when missing
@@ -75,6 +85,7 @@
   args:
     executable: /bin/bash
   when: step_ca_cli_version_check.rc != 0 or (step_ca_cli_version not in step_ca_cli_version_check.stdout)
+  changed_when: true
 
 - name: Check whether step-ca PKI is already initialized
   ansible.builtin.stat:
@@ -101,6 +112,7 @@
   args:
     executable: /bin/bash
   when: not step_ca_config_stat.stat.exists
+  changed_when: true
 
 - name: Check current provisioner list from the local CA config
   ansible.builtin.command:
@@ -135,6 +147,18 @@
   loop_control:
     label: "{{ item.name }}"
   when: item.name not in step_ca_provisioner_list.stdout
+  changed_when: true
+
+- name: Ensure the step-ca home and secrets are readable by the container user
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    recurse: true
+    owner: "{{ step_ca_container_uid }}"
+    group: "{{ step_ca_container_gid }}"
+  loop:
+    - "{{ step_ca_home }}"
+    - "{{ step_ca_password_dir }}"
 
 - name: Render the step-ca Compose file
   ansible.builtin.template:
@@ -251,9 +275,9 @@
   ansible.builtin.slurp:
     src: "{{ item }}"
   loop:
-    - "{{ step_ca_home }}/certs/root_ca.crt"
-    - "{{ step_ca_home }}/certs/ssh_user_key.pub"
-    - "{{ step_ca_home }}/certs/ssh_host_key.pub"
+    - "{{ step_ca_remote_root_certificate_file }}"
+    - "{{ step_ca_remote_ssh_user_ca_file }}"
+    - "{{ step_ca_remote_ssh_host_ca_file }}"
   register: step_ca_public_material
 
 - name: Read step-ca local password material

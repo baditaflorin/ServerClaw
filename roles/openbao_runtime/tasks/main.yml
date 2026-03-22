@@ -7,10 +7,18 @@
       - openbao_site_dir | length > 0
       - openbao_config_file | length > 0
       - openbao_compose_file | length > 0
+      - openbao_tls_dir | length > 0
+      - openbao_tls_server_cert_file | length > 0
+      - openbao_tls_server_key_file | length > 0
+      - openbao_tls_client_ca_file | length > 0
+      - openbao_controller_url | length > 0
       - openbao_local_artifact_dir | length > 0
       - openbao_init_local_file | length > 0
       - openbao_postgres_host | length > 0
       - openbao_postgres_admin_role | length > 0
+      - step_ca_internal_url | length > 0
+      - step_ca_services_password_file | length > 0
+      - step_ca_remote_root_certificate_file | length > 0
     fail_msg: "openbao_runtime requires image, filesystem paths, local artifact paths, and PostgreSQL backend inputs."
 
 - name: Ensure OpenBao local artifact directory exists
@@ -48,6 +56,15 @@
   become: false
   register: openbao_init_payload_local
   no_log: true
+
+- name: Reset the OpenBao data and log directories before first initialization
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ openbao_data_dir }}"
+    - "{{ openbao_log_dir }}"
+  when: not openbao_init_payload_local.stat.exists
 
 - name: Read the OpenBao userpass and rotator passwords from the control machine
   ansible.builtin.slurp:
@@ -99,10 +116,57 @@
       mode: "0700"
       owner: "{{ openbao_runtime_uid }}"
       group: "{{ openbao_runtime_gid }}"
+    - path: "{{ openbao_tls_dir }}"
+      mode: "0750"
+      owner: "{{ openbao_runtime_uid }}"
+      group: "{{ openbao_runtime_gid }}"
     - path: "{{ openbao_policy_dir }}"
       mode: "0755"
       owner: "{{ openbao_runtime_uid }}"
       group: "{{ openbao_runtime_gid }}"
+
+- name: Mirror the step-ca root certificate for OpenBao TLS trust
+  ansible.builtin.copy:
+    remote_src: true
+    src: "{{ step_ca_remote_root_certificate_file }}"
+    dest: "{{ openbao_tls_client_ca_file }}"
+    owner: "{{ openbao_runtime_uid }}"
+    group: "{{ openbao_runtime_gid }}"
+    mode: "0644"
+
+- name: Issue or renew the OpenBao external TLS certificate
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ -s "{{ openbao_tls_server_cert_file }}" ] && \
+      openssl x509 -checkend {{ openbao_tls_cert_renew_before_seconds }} -noout -in "{{ openbao_tls_server_cert_file }}" >/dev/null 2>&1; then
+      exit 0
+    fi
+
+    step ca certificate \
+      --force \
+      --no-password \
+      --insecure \
+      --provisioner services \
+      --provisioner-password-file "{{ step_ca_services_password_file }}" \
+      --ca-url "{{ step_ca_internal_url }}" \
+      --root "{{ step_ca_remote_root_certificate_file }}" \
+    {% for san in openbao_tls_server_sans %}
+      --san "{{ san }}" \
+    {% endfor %}
+      --not-after 24h \
+      "{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}" \
+      "{{ openbao_tls_server_cert_file }}" \
+      "{{ openbao_tls_server_key_file }}"
+
+    chown {{ openbao_runtime_uid }}:{{ openbao_runtime_gid }} "{{ openbao_tls_server_cert_file }}" "{{ openbao_tls_server_key_file }}"
+    chmod 0644 "{{ openbao_tls_server_cert_file }}"
+    chmod 0600 "{{ openbao_tls_server_key_file }}"
+    echo changed
+  args:
+    executable: /bin/bash
+  register: openbao_tls_certificate_issue
+  changed_when: "'changed' in openbao_tls_certificate_issue.stdout"
+  no_log: true
 
 - name: Render OpenBao policy files
   ansible.builtin.template:
@@ -154,6 +218,7 @@
       - "{{ openbao_compose_file }}"
       - up
       - -d
+      - --force-recreate
       - --remove-orphans
   args:
     chdir: "{{ openbao_site_dir }}"
@@ -633,18 +698,9 @@
   register: openbao_approle_role_ids
   no_log: true
 
-- name: Check whether AppRole local artifacts exist
-  ansible.builtin.stat:
-    path: "{{ item.local_file }}"
-  loop: "{{ openbao_approles }}"
-  delegate_to: localhost
-  become: false
-  register: openbao_approle_local_stats
-  no_log: true
-
-- name: Generate missing AppRole secret IDs
+- name: Generate fresh short-lived AppRole secret IDs
   ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/auth/approle/role/{{ item.item.name }}/secret-id"
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/auth/approle/role/{{ item.name }}/secret-id"
     method: POST
     headers:
       X-Vault-Token: "{{ openbao_init_payload.root_token }}"
@@ -652,20 +708,24 @@
     body: {}
     return_content: true
     status_code: 200
-  loop: "{{ openbao_approle_local_stats.results }}"
-  when: not item.stat.exists
+  loop: "{{ openbao_approles }}"
   register: openbao_generated_secret_ids
   no_log: true
 
-- name: Persist generated AppRole artifacts locally
+- name: Persist fresh short-lived AppRole artifacts locally
   ansible.builtin.copy:
-    dest: "{{ item.item.item.local_file }}"
+    dest: "{{ item.item.local_file }}"
     content: >-
       {{
         {
-          'role_name': item.item.item.name,
+          'role_name': item.item.name,
           'auth_path': 'approle',
-          'role_id': item.item.json.data.role_id,
+          'role_id': (
+            openbao_approle_role_ids.results
+            | selectattr('item.name', 'equalto', item.item.name)
+            | map(attribute='json.data.role_id')
+            | first
+          ),
           'secret_id': item.json.data.secret_id,
           'secret_id_accessor': item.json.data.secret_id_accessor,
           'generated_at': ansible_date_time.iso8601
@@ -674,7 +734,6 @@
       {{ '\n' }}
     mode: "0600"
   loop: "{{ openbao_generated_secret_ids.results | default([]) }}"
-  when: item is not skipped
   delegate_to: localhost
   become: false
   no_log: true

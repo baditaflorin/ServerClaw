@@ -31,7 +31,7 @@ Before running the workflow, confirm:
 The workflow manages these live surfaces:
 
 - PostgreSQL database `windmill` on `postgres-lv3`
-- PostgreSQL login role `windmill` on `postgres-lv3`
+- PostgreSQL login role `windmill_admin` plus support role `windmill_user` on `postgres-lv3`
 - Windmill runtime under `/opt/windmill` on `docker-runtime-lv3`
 - Tailscale-only operator entrypoint at `http://100.118.189.95:8005`
 - repo-managed workspace `lv3`

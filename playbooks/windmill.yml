@@ -6,6 +6,7 @@
 
   roles:
     - role: proxmox_tailscale_proxy
+    - role: proxmox_security
 
 - name: Converge PostgreSQL access for Windmill
   hosts: postgres-lv3
@@ -22,6 +23,12 @@
   roles:
     - role: postgres_vm
     - role: windmill_postgres
+
+  post_tasks:
+    - name: Restart PostgreSQL before Windmill runtime verification
+      ansible.builtin.service:
+        name: "{{ postgres_vm_postgresql_service_name }}"
+        state: restarted
 
 - name: Converge Windmill on the Docker runtime VM
   hosts: docker-runtime-lv3

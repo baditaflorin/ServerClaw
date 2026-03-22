@@ -33,6 +33,7 @@
   args:
     executable: /bin/bash
   when: step_ca_ssh_step_version.rc != 0 or (step_ca_cli_version not in step_ca_ssh_step_version.stdout)
+  changed_when: true
 
 - name: Ensure step-ca SSH trust directories exist
   ansible.builtin.file:
@@ -127,6 +128,7 @@
   args:
     executable: /bin/bash
   when: step_ca_ssh_needs_renewal.rc != 1
+  changed_when: true
 
 - name: Render the SSH CA trust drop-in
   ansible.builtin.template:

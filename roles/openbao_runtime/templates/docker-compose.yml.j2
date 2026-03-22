@@ -5,11 +5,12 @@ services:
     user: "0:0"
     command:
       - server
-      - -config=/openbao/config
     restart: unless-stopped
     ports:
-      - "{{ openbao_http_bind_address }}:{{ openbao_http_port }}:8200"
+      - "{{ openbao_tls_bind_address }}:{{ openbao_tls_port }}:{{ openbao_tls_port }}"
+      - "{{ openbao_http_bind_address }}:{{ openbao_http_port }}:{{ openbao_http_port }}"
     volumes:
       - {{ openbao_config_dir }}:/openbao/config
       - {{ openbao_data_dir }}:/openbao/data
       - {{ openbao_log_dir }}:/openbao/logs
+      - {{ openbao_tls_dir }}:/openbao/tls

@@ -1,4 +1,3 @@
----
 - name: Prepare PostgreSQL for OpenBao dynamic credentials
   hosts: postgres_guests
   become: true

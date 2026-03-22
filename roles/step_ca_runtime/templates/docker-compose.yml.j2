@@ -3,6 +3,8 @@ services:
     image: {{ step_ca_image }}
     container_name: step-ca
     restart: unless-stopped
+    entrypoint:
+      - /usr/local/bin/step-ca
     command:
       - /home/step/config/ca.json
       - --password-file
@@ -11,3 +13,4 @@ services:
       - "{{ step_ca_api_port }}:{{ step_ca_api_port }}"
     volumes:
       - {{ step_ca_home }}:/home/step
+      - {{ step_ca_password_dir }}:/home/step/secrets

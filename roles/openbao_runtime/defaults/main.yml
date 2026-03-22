@@ -1,5 +1,5 @@
 ---
-openbao_version: 2.4.4
+openbao_version: 2.5.1
 openbao_image: "openbao/openbao:{{ openbao_version }}"
 openbao_container_name: lv3-openbao
 openbao_site_dir: /opt/openbao
@@ -7,19 +7,30 @@ openbao_config_dir: "{{ openbao_site_dir }}/config"
 openbao_data_dir: "{{ openbao_site_dir }}/data"
 openbao_log_dir: "{{ openbao_site_dir }}/logs"
 openbao_policy_dir: "{{ openbao_site_dir }}/policies"
+openbao_tls_dir: "{{ openbao_site_dir }}/tls"
 openbao_compose_file: "{{ openbao_site_dir }}/docker-compose.yml"
 openbao_config_file: "{{ openbao_config_dir }}/openbao.hcl"
 openbao_http_bind_address: 127.0.0.1
-openbao_http_port: 8200
-openbao_cluster_port: 8201
+openbao_http_port: 8201
+openbao_tls_bind_address: 0.0.0.0
+openbao_tls_port: 8200
+openbao_cluster_port: 8202
+openbao_local_cluster_port: 8203
 openbao_runtime_uid: "100"
 openbao_runtime_gid: "1000"
-openbao_api_addr: "http://127.0.0.1:{{ openbao_http_port }}"
+openbao_api_addr: "{{ openbao_controller_url }}"
 openbao_cluster_addr: "http://127.0.0.1:{{ openbao_cluster_port }}"
 openbao_raft_path: /openbao/data
 openbao_raft_node_id: "{{ inventory_hostname }}"
 openbao_audit_path: "sys/audit/file-main"
 openbao_audit_file_path: /openbao/logs/audit.log
+openbao_tls_server_cert_file: "{{ openbao_tls_dir }}/server.crt"
+openbao_tls_server_key_file: "{{ openbao_tls_dir }}/server.key"
+openbao_tls_client_ca_file: "{{ openbao_tls_dir }}/root_ca.crt"
+openbao_tls_server_sans:
+  - "{{ hostvars['docker-runtime-lv3'].ansible_host }}"
+  - "{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}"
+openbao_tls_cert_renew_before_seconds: 86400
 openbao_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao
 openbao_init_local_file: "{{ openbao_local_artifact_dir }}/init.json"
 openbao_ops_password_local_file: "{{ openbao_local_artifact_dir }}/ops-password.txt"
@@ -55,20 +66,20 @@ openbao_approles:
   - name: controller-automation
     policies:
       - lv3-agent-controller
-    token_ttl: 1h
-    token_max_ttl: 24h
+    token_ttl: 15m
+    token_max_ttl: 1h
     token_num_uses: 0
-    secret_id_ttl: 0
-    secret_id_num_uses: 0
+    secret_id_ttl: 15m
+    secret_id_num_uses: 1
     local_file: "{{ openbao_controller_approle_local_file }}"
   - name: mail-platform
     policies:
       - lv3-service-mail-platform
-    token_ttl: 1h
-    token_max_ttl: 24h
+    token_ttl: 15m
+    token_max_ttl: 1h
     token_num_uses: 0
-    secret_id_ttl: 0
-    secret_id_num_uses: 0
+    secret_id_ttl: 15m
+    secret_id_num_uses: 1
     local_file: "{{ openbao_mail_platform_approle_local_file }}"
 openbao_transit_keys:
   - controller-automation

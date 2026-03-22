@@ -9,6 +9,11 @@ step_ca_site_dir: /opt/step-ca
 step_ca_home: /opt/step-ca/home
 step_ca_compose_file: /opt/step-ca/docker-compose.yml
 step_ca_password_dir: /opt/step-ca/secrets
+step_ca_container_uid: "1000"
+step_ca_container_gid: "1000"
+step_ca_remote_root_certificate_file: "{{ step_ca_home }}/certs/root_ca.crt"
+step_ca_remote_ssh_user_ca_file: "{{ step_ca_home }}/certs/ssh_user_ca_key.pub"
+step_ca_remote_ssh_host_ca_file: "{{ step_ca_home }}/certs/ssh_host_ca_key.pub"
 step_ca_ca_password_file: /opt/step-ca/secrets/ca-password.txt
 step_ca_humans_password_file: /opt/step-ca/secrets/humans-password.txt
 step_ca_agents_password_file: /opt/step-ca/secrets/agents-password.txt

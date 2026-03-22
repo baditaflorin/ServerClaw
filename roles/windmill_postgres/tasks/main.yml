@@ -4,6 +4,7 @@
     that:
       - windmill_database_name | length > 0
       - windmill_database_user | length > 0
+      - windmill_database_support_role | length > 0
       - windmill_postgres_secret_dir | length > 0
       - windmill_postgres_password_file | length > 0
       - windmill_database_password_local_file | length > 0
@@ -59,18 +60,18 @@
   become: false
   no_log: true
 
-- name: Check whether the Windmill PostgreSQL role already exists
+- name: Check whether the Windmill support role already exists
   become: true
   become_user: postgres
   ansible.builtin.command:
     argv:
       - psql
       - -Atqc
-      - "SELECT 1 FROM pg_roles WHERE rolname = '{{ windmill_database_user }}'"
-  register: windmill_postgres_role_check
+      - "SELECT 1 FROM pg_roles WHERE rolname = '{{ windmill_database_support_role }}'"
+  register: windmill_postgres_support_role_check
   changed_when: false
 
-- name: Create the Windmill PostgreSQL role
+- name: Create the Windmill support role
   become: true
   become_user: postgres
   ansible.builtin.command:
@@ -79,10 +80,48 @@
       - -v
       - ON_ERROR_STOP=1
       - -c
-      - "CREATE ROLE {{ windmill_database_user }} LOGIN PASSWORD '{{ windmill_database_password }}'"
-  when: windmill_postgres_role_check.stdout != "1"
+      - "CREATE ROLE {{ windmill_database_support_role }}"
+  when: windmill_postgres_support_role_check.stdout != "1"
+  changed_when: true
+
+- name: Check whether the Windmill admin role already exists
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT 1 FROM pg_roles WHERE rolname = '{{ windmill_database_user }}'"
+  register: windmill_postgres_admin_role_check
+  changed_when: false
+
+- name: Create the Windmill admin role
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        CREATE ROLE {{ windmill_database_user }} LOGIN BYPASSRLS
+        PASSWORD '{{ windmill_database_password }}' IN ROLE {{ windmill_database_support_role }}
+  when: windmill_postgres_admin_role_check.stdout != "1"
   changed_when: true
   no_log: true
+
+- name: Grant the Windmill support role to the admin role
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "GRANT {{ windmill_database_support_role }} TO {{ windmill_database_user }}"
+  changed_when: false
 
 - name: Check whether the Windmill PostgreSQL database already exists
   become: true
@@ -98,12 +137,78 @@
 - name: Create the Windmill PostgreSQL database
   become: true
   become_user: postgres
+  ansible.builtin.shell: >
+    psql -v ON_ERROR_STOP=1
+    -c "CREATE DATABASE {{ windmill_database_name }} OWNER {{ windmill_database_user }}"
+  args:
+    executable: /bin/bash
+  when: windmill_postgres_database_check.stdout != "1"
+  changed_when: true
+
+- name: Ensure the Windmill database owner is correct
+  become: true
+  become_user: postgres
   ansible.builtin.command:
     argv:
       - psql
       - -v
       - ON_ERROR_STOP=1
       - -c
-      - "CREATE DATABASE {{ windmill_database_name }} OWNER {{ windmill_database_user }}"
-  when: windmill_postgres_database_check.stdout != "1"
-  changed_when: true
+      - "ALTER DATABASE {{ windmill_database_name }} OWNER TO {{ windmill_database_user }}"
+  changed_when: false
+
+- name: Ensure the Windmill support role can access public tables
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "GRANT ALL ON ALL TABLES IN SCHEMA public TO {{ windmill_database_support_role }}"
+  changed_when: false
+
+- name: Ensure the Windmill support role can access public sequences
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO {{ windmill_database_support_role }}"
+  changed_when: false
+
+- name: Ensure future Windmill tables grant privileges to the support role
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO {{ windmill_database_support_role }}"
+  changed_when: false
+
+- name: Ensure future Windmill sequences grant privileges to the support role
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO {{ windmill_database_support_role }}"
+  changed_when: false
