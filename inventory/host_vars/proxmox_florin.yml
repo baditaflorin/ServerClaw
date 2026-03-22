@@ -15,6 +15,33 @@ proxmox_internal_ipv4: 10.10.10.1
 proxmox_internal_cidr: 24
 proxmox_internal_network: 10.10.10.0/24
 proxmox_public_edge_ipv4: 10.10.10.10
+platform_port_assignments:
+  monitoring_grafana_port: 3000
+  monitoring_influxdb_port: 8086
+  monitoring_loki_port: 3100
+  monitoring_prometheus_port: 9090
+  monitoring_tempo_http_port: 3200
+  monitoring_otlp_grpc_port: 4317
+  monitoring_otlp_http_port: 4318
+  mail_platform_gateway_port: 8081
+  openbao_http_port: 8201
+  openbao_proxy_port: 8200
+  windmill_server_port: 8000
+  windmill_host_proxy_port: 8005
+  mattermost_server_port: 8065
+  mattermost_host_proxy_port: 8066
+  netbox_server_port: 8082
+  netbox_host_proxy_port: 8004
+  open_webui_port: 8088
+  open_webui_host_proxy_port: 8008
+  platform_context_internal_port: 8010
+  platform_context_host_proxy_port: 8010
+  ntopng_http_port: 3000
+  ntopng_proxy_port: 3001
+  portainer_https_port: 9443
+  portainer_host_proxy_port: 9444
+  step_ca_api_port: 9000
+  step_ca_proxy_port: 9443
 proxmox_tailscale_hostname: proxmox-florin-subnet-router
 proxmox_tailscale_advertise_routes:
   - "{{ proxmox_internal_network }}"

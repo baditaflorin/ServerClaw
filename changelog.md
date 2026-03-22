@@ -8,6 +8,16 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.67.0 - 2026-03-23
+
+- implemented ADR 0063 by adding a committed generated `inventory/group_vars/platform.yml` facts library derived from canonical stack and host inputs
+- added `scripts/generate_platform_vars.py`, `filter_plugins/platform_facts.py`, `make generate-platform-vars`, `make validate-generated-vars`, and `make show-platform-facts` so operators and agents can inspect or validate resolved platform facts without scanning many role defaults
+- removed duplicated computed URLs, ports, and guest-address lookups from shared vars and current role consumers including OpenBao, Mattermost, ntopng, the private platform-context runtime, NetBox, Windmill, Open WebUI, Portainer, Step CA, and guest observability, while documenting the operating model in the platform-facts runbook
+
+Platform impact:
+
+- no direct live platform change in this release commit; this is a repository automation and documentation consolidation release
+
 ## 0.66.0 - 2026-03-23
 
 - applied ADR 0056 live by converging Keycloak on `docker-runtime-lv3`, provisioning its PostgreSQL backend on `postgres-lv3`, publishing the shared issuer at `https://sso.lv3.org`, and wiring Grafana through the shared OIDC login flow

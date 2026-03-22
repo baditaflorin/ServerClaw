@@ -155,7 +155,7 @@
       --san "{{ san }}" \
     {% endfor %}
       --not-after 24h \
-      "{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}" \
+      "{{ platform_host.management.tailscale_ipv4 }}" \
       "{{ openbao_tls_server_cert_host_file }}" \
       "{{ openbao_tls_server_key_host_file }}"
 

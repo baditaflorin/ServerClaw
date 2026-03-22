@@ -1,5 +1,5 @@
 ---
-public_edge_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology }}"
+public_edge_service_topology: "{{ platform_service_topology }}"
 public_edge_certbot_email: baditaflorin@gmail.com
 public_edge_cert_name: lv3-edge
 public_edge_static_root: /var/www/lv3-edge

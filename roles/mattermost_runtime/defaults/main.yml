@@ -6,12 +6,12 @@ mattermost_secret_dir: /etc/lv3/mattermost
 mattermost_compose_file: "{{ mattermost_site_dir }}/docker-compose.yml"
 mattermost_env_file: "{{ mattermost_site_dir }}/mattermost.env"
 mattermost_bootstrap_file: "{{ mattermost_site_dir }}/bootstrap-mattermost.py"
-mattermost_server_port: 8065
-mattermost_host_proxy_port: 8066
+mattermost_server_port: "{{ platform_service_topology | platform_service_port('mattermost', 'internal') }}"
+mattermost_host_proxy_port: "{{ platform_service_topology | platform_service_port('mattermost', 'controller') }}"
 mattermost_image: mattermost/mattermost-team-edition:release-10.11
 mattermost_database_name: mattermost
 mattermost_database_user: mattermost_admin
-mattermost_database_host: "{{ hostvars['postgres-lv3'].ansible_host }}"
+mattermost_database_host: "{{ platform_guest_catalog.by_name | platform_guest_attr('postgres-lv3', 'ipv4') }}"
 mattermost_database_port: 5432
 mattermost_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mattermost/database-password.txt
 mattermost_admin_username: ops
@@ -23,8 +23,8 @@ mattermost_webhooks_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_fl
 mattermost_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mattermost
 mattermost_container_name: lv3-mattermost
 mattermost_local_mode_socket: /var/tmp/mattermost_local.socket
-mattermost_private_base_url: "http://127.0.0.1:{{ mattermost_server_port }}"
-mattermost_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ mattermost_host_proxy_port }}"
+mattermost_private_base_url: "{{ platform_service_topology | platform_service_url('mattermost', 'internal') }}"
+mattermost_controller_url: "{{ platform_service_topology | platform_service_url('mattermost', 'controller') }}"
 mattermost_support_email: "{{ proxmox_notification_email }}"
 mattermost_channels:
   - id: platform-alerts
