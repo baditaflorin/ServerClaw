@@ -136,3 +136,169 @@ proxmox_guests:
 backup_vm_vmid: 160
 backup_vm_name: backup-lv3
 backup_vm_ipv4: 10.10.10.60
+
+lv3_service_topology:
+  nginx_edge:
+    service_name: nginx-edge
+    owning_vm: nginx-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'nginx-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: nginx.lv3.org
+    exposure_model: edge-static
+    observability:
+      guest_dashboard: true
+      service_telemetry: true
+    dns:
+      managed: true
+      visibility: public
+      name: nginx
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: static
+      slug: nginx
+      title: LV3 Edge
+      description: NGINX is the public edge for published lv3.org services on this platform.
+      meta: Use the named subdomains for the actual service entry points exposed at the edge.
+  grafana:
+    service_name: grafana
+    owning_vm: monitoring-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: grafana.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: true
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: grafana
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring-lv3') | map(attribute='ipv4') | first) }}:3000"
+  proxmox_ui:
+    service_name: proxmox-ui
+    owning_vm: proxmox_florin
+    private_ip: "{{ management_tailscale_ipv4 }}"
+    public_hostname: proxmox.lv3.org
+    exposure_model: informational-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: proxmox
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: static
+      slug: proxmox
+      title: Proxmox Administration
+      description: Proxmox administration remains private and is reached over Tailscale instead of being published directly on the public edge.
+      action_url: "https://{{ management_tailscale_ipv4 }}:8006/"
+      action_label: Open Private Proxmox UI
+      meta: Use Tailscale host access for routine Proxmox administration.
+  docker_runtime:
+    service_name: docker-runtime
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: docker.lv3.org
+    exposure_model: informational-only
+    observability:
+      guest_dashboard: true
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: docker
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: static
+      slug: docker
+      title: Docker Runtime VM
+      description: The Docker runtime VM does not currently publish a public web service at this hostname.
+      meta: Public application endpoints should be published deliberately through the NGINX edge when needed.
+  docker_build:
+    service_name: docker-build
+    owning_vm: docker-build-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-build-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: build.lv3.org
+    exposure_model: informational-only
+    observability:
+      guest_dashboard: true
+      service_telemetry: true
+    dns:
+      managed: true
+      visibility: public
+      name: build
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: static
+      slug: build
+      title: Docker Build VM
+      description: The build VM is a private operator-facing host for interactive build workflows and is not a public web workload.
+      meta: Reach the build VM through the approved operator access path rather than the public edge.
+  uptime_kuma:
+    service_name: uptime-kuma
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: uptime.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: uptime
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:3001"
+  postgres:
+    service_name: postgres
+    owning_vm: postgres-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'postgres-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: database.lv3.org
+    exposure_model: private-only
+    observability:
+      guest_dashboard: true
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: tailnet
+      name: database
+      type: A
+      target: "{{ management_tailscale_ipv4 }}"
+      ttl: 60
+  backup_pbs:
+    service_name: backup-pbs
+    owning_vm: backup-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'backup-lv3') | map(attribute='ipv4') | first) }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false

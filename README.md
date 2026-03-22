@@ -240,7 +240,7 @@ This repo now tracks three distinct things:
 
 Current values on `main`:
 
-- `repo_version`: `0.33.0`
+- `repo_version`: `0.34.0`
 - `platform_version`: `0.19.0`
 - `observed_os`: `Debian 13`
 - `observed_proxmox_installed`: `true`

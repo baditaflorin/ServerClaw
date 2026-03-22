@@ -54,6 +54,7 @@ These files are integration-owned and should normally be edited only during merg
 
 - [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/Makefile): preferred command surface for common tasks
 - [scripts/validate_repo.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_repo.sh): repository validation entry point behind `make validate`
+- [filter_plugins/service_topology.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/filter_plugins/service_topology.py): derives edge publication and DNS artifacts from the canonical service topology catalog
 - [playbooks/site.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/site.yml): main Ansible entry point for the Proxmox host
 - [playbooks/guest-access.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/guest-access.yml): guest SSH and access baseline enforcement
 - [playbooks/monitoring-stack.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/monitoring-stack.yml): monitoring VM convergence plus Proxmox metric-server wiring
@@ -66,7 +67,7 @@ These files are integration-owned and should normally be edited only during merg
 - [inventory/hosts.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml): host and guest inventory layout
 - [inventory/group_vars/all.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/group_vars/all.yml): cross-role platform facts and intentionally shared policy values
 - [inventory/group_vars/lv3_guests.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/group_vars/lv3_guests.yml): guest-side connection behavior
-- [inventory/host_vars/proxmox_florin.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml): per-host topology and guest definitions
+- [inventory/host_vars/proxmox_florin.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml): per-host topology, guest definitions, and the canonical `lv3_service_topology` catalog
 
 ### Reusable automation units
 

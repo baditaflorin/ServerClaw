@@ -10,6 +10,17 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 - use this section on `main` for merged notes that have not yet been cut into a numbered release
 
+## 0.34.0 - 2026-03-22
+
+- implemented ADR 0033 to add a canonical declarative service topology catalog for workload metadata
+- added `lv3_service_topology` under host vars plus a topology filter plugin to derive public edge and DNS artifacts programmatically
+- refactored edge publication, public DNS records, PostgreSQL tailnet DNS, and Uptime Kuma hostname defaults to consume the catalog instead of duplicating hostnames and exposure metadata
+- updated the repository map and ADR metadata to describe the new topology source of truth
+
+Platform impact:
+
+- no direct live platform change; this release centralizes repository topology metadata only
+
 ## 0.33.0 - 2026-03-22
 
 - implemented ADR 0032 to extract shared guest-local observability plumbing into a dedicated framework role

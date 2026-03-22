@@ -1,10 +1,10 @@
 # ADR 0033: Declarative Service Topology Catalog
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.34.0
+- Implemented In Platform Version: not applicable (repo-only)
+- Implemented On: 2026-03-22
 - Date: 2026-03-22
 
 ## Context
@@ -46,3 +46,9 @@ The catalog will describe, at minimum:
 - Adding a new service becomes more predictable because the same data model drives multiple outputs.
 - The first implementation must avoid over-abstracting existing working automation; the catalog should replace repetition, not hide simple behavior behind a framework for its own sake.
 
+## Implementation Notes
+
+- The canonical service catalog now lives in [inventory/host_vars/proxmox_florin.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml) as `lv3_service_topology`.
+- The catalog drives public edge certificate domains, edge static pages, and edge proxy site definitions through [filter_plugins/service_topology.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/filter_plugins/service_topology.py) and [roles/nginx_edge_publication/defaults/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/nginx_edge_publication/defaults/main.yml).
+- Public Hetzner DNS records and the private PostgreSQL tailnet DNS record are now rendered from the same catalog instead of separate hand-maintained variable blocks.
+- Uptime Kuma hostname defaults now resolve from the topology catalog so downstream runtime configuration consumes the same service identity.

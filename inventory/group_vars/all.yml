@@ -1,4 +1,4 @@
-repo_version: 0.33.0
+repo_version: 0.34.0
 platform_version: 0.19.0
 
 proxmox_release_major: 9
@@ -83,11 +83,7 @@ proxmox_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_flor
 
 hetzner_dns_api_base_url: https://dns.hetzner.com/api/v1
 hetzner_dns_zone_name: lv3.org
-hetzner_dns_records:
-  - name: uptime
-    type: A
-    value: "{{ management_ipv4 }}"
-    ttl: 60
+hetzner_dns_records: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_dns_records('public') }}"
 
 monitoring_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring
 monitoring_proxmox_writer_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/proxmox-writer.token
@@ -100,7 +96,3 @@ monitoring_influxdb_org: lv3
 monitoring_influxdb_bucket: proxmox
 hetzner_dns_api_url: https://dns.hetzner.com/api/v1
 hetzner_dns_api_token_env_var: HETZNER_DNS_API_TOKEN
-database_dns_zone_name: lv3.org
-database_dns_record_name: database
-database_dns_record_type: A
-database_dns_record_ttl: 60
