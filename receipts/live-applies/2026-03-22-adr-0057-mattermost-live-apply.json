@@ -4,8 +4,8 @@
   "applied_on": "2026-03-22",
   "recorded_on": "2026-03-22",
   "recorded_by": "codex",
-  "source_commit": "bed8774838efdf0c5c83d2a39df0d65c7a8a1c82",
-  "repo_version_context": "0.50.0",
+  "source_commit": "6c9e71a7aa541781b3ef167341ec169dc20ee141",
+  "repo_version_context": "0.55.0",
   "workflow_id": "converge-mattermost",
   "adr": "0057",
   "summary": "Applied the private Mattermost ChatOps surface live on docker-runtime-lv3, provisioned its PostgreSQL backend on postgres-lv3, published it through the Proxmox host Tailscale proxy, and verified channel bootstrap, webhook artifacts, and Grafana alert routing end to end.",
@@ -43,7 +43,7 @@
     {
       "check": "Mattermost converge from committed worktree",
       "result": "pass",
-      "observed": "make converge-mattermost completed successfully from commit bed8774838efdf0c5c83d2a39df0d65c7a8a1c82 after one transient retry when docker-runtime-lv3 briefly dropped off the Proxmox jump path immediately after a firewall reload."
+      "observed": "make converge-mattermost completed successfully after rebasing implementation commit 6c9e71a7aa541781b3ef167341ec169dc20ee141 onto the current main-line release set and rerunning the full workflow without warnings or unreachable targets."
     },
     {
       "check": "Private Mattermost ping endpoint",
@@ -70,6 +70,6 @@
   ],
   "notes": [
     "The initial bootstrap logic had to be corrected for Mattermost's actual local mmctl behavior: JSON output can be a single object or null rather than a list, webhook list results do not expose a full URL, and local mode cannot create bot tokens.",
-    "The first committed-tree rerun saw docker-runtime-lv3 become temporarily unreachable immediately after the host firewall restart; a second rerun from the same commit completed cleanly without further code changes."
+    "The integrated branch also had to classify the Mattermost API and incoming webhook surfaces in config/api-publication.json so generated status documents and publication-tier validation stayed complete after rebasing onto the newer main line."
   ]
 }
