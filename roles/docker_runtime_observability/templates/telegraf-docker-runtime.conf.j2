@@ -1,0 +1,34 @@
+[agent]
+  hostname = "{{ guest_observability_hostname }}"
+  omit_hostname = false
+
+[global_tags]
+  role = "{{ guest_observability_role }}"
+  service = "{{ guest_observability_service }}"
+
+[[outputs.influxdb_v2]]
+  urls = ["{{ guest_observability_influx_url }}"]
+  token = "{{ lookup('file', guest_observability_writer_token_local_file) | trim }}"
+  organization = "{{ monitoring_influxdb_org }}"
+  bucket = "{{ monitoring_influxdb_bucket }}"
+
+[[inputs.docker]]
+  endpoint = "{{ docker_runtime_observability_docker_socket_endpoint }}"
+  gather_services = false
+  source_tag = {{ docker_runtime_observability_source_tag | lower }}
+  container_name_include = {{ docker_runtime_observability_container_name_include | to_json }}
+  container_name_exclude = {{ docker_runtime_observability_container_name_exclude | to_json }}
+{% if docker_runtime_observability_container_state_include | length > 0 %}
+  container_state_include = {{ docker_runtime_observability_container_state_include | to_json }}
+{% endif %}
+{% if docker_runtime_observability_container_state_exclude | length > 0 %}
+  container_state_exclude = {{ docker_runtime_observability_container_state_exclude | to_json }}
+{% endif %}
+{% if docker_runtime_observability_storage_objects | length > 0 %}
+  storage_objects = {{ docker_runtime_observability_storage_objects | to_json }}
+{% endif %}
+  timeout = "{{ docker_runtime_observability_timeout }}"
+  perdevice_include = {{ docker_runtime_observability_perdevice_include | to_json }}
+  total_include = {{ docker_runtime_observability_total_include | to_json }}
+  docker_label_include = {{ docker_runtime_observability_docker_label_include | to_json }}
+  docker_label_exclude = {{ docker_runtime_observability_docker_label_exclude | to_json }}

@@ -1,0 +1,23 @@
+---
+docker_runtime_observability_state_dir: /etc/lv3/runtime-observability
+docker_runtime_observability_telegraf_config_file: /etc/telegraf/telegraf.d/lv3-docker-runtime.conf
+docker_runtime_observability_hostname: docker-runtime-lv3
+docker_runtime_observability_role: docker-runtime
+docker_runtime_observability_docker_socket_endpoint: unix:///var/run/docker.sock
+docker_runtime_observability_timeout: 5s
+docker_runtime_observability_source_tag: false
+docker_runtime_observability_container_name_include: []
+docker_runtime_observability_container_name_exclude: []
+docker_runtime_observability_container_state_include: []
+docker_runtime_observability_container_state_exclude: []
+docker_runtime_observability_perdevice_include:
+  - cpu
+docker_runtime_observability_total_include:
+  - cpu
+docker_runtime_observability_docker_label_include:
+  - com.docker.compose.project
+  - com.docker.compose.service
+  - com.docker.compose.container-number
+  - com.docker.compose.oneoff
+docker_runtime_observability_docker_label_exclude: []
+docker_runtime_observability_storage_objects: []
