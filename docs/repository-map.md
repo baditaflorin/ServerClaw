@@ -41,6 +41,7 @@ These files are integration-owned and should normally be edited only during merg
 - [docs/runbooks](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks): operator procedures for access, install, networking, provisioning, and hardening
 - [docs/runbooks/workflow-catalog-and-execution-contracts.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/workflow-catalog-and-execution-contracts.md): canonical workflow ids, preferred entry points, and execution metadata
 - [docs/runbooks/controller-local-secrets-and-preflight.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/controller-local-secrets-and-preflight.md): controller-local secret manifest usage and the standard preflight check
+- [docs/runbooks/controller-automation-toolkit.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/controller-automation-toolkit.md): shared controller-side Python helper boundary for repo-local scripts
 - [docs/runbooks/live-apply-receipts-and-verification-evidence.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/live-apply-receipts-and-verification-evidence.md): structured evidence model for real platform applies
 - [docs/runbooks/generate-status-documents.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/generate-status-documents.md): generated README status fragments and validation flow
 - [docs/release-process.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-process.md): branch, merge, and live-apply sequencing
@@ -58,6 +59,7 @@ These files are integration-owned and should normally be edited only during merg
 
 - [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/Makefile): preferred command surface for common tasks
 - [scripts/workflow_catalog.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/workflow_catalog.py): validates and renders the canonical workflow execution catalog
+- [scripts/controller_automation_toolkit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/controller_automation_toolkit.py): shared controller-side path, manifest, subprocess, and CLI helper primitives for repo-local Python scripts
 - [scripts/preflight_controller_local.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/preflight_controller_local.py): checks controller-local secret and environment prerequisites for a named workflow
 - [scripts/live_apply_receipts.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/live_apply_receipts.py): validates and renders structured live-apply receipts
 - [scripts/generate_status_docs.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_status_docs.py): renders generated README status fragments from canonical state and verifies they are current

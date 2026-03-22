@@ -3,34 +3,31 @@
 import argparse
 import json
 import re
-import subprocess
 import sys
 from pathlib import Path
 
+from controller_automation_toolkit import (
+    RECEIPTS_DIR,
+    REPO_ROOT,
+    WORKFLOW_CATALOG_PATH,
+    command_succeeds,
+    emit_cli_error,
+    load_json,
+)
 from workflow_catalog import load_workflow_catalog, load_secret_manifest, validate_secret_manifest, validate_workflow_catalog
 
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-RECEIPTS_DIR = REPO_ROOT / "receipts" / "live-applies"
-WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
 SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 ALLOWED_RESULTS = {"pass", "partial", "fail"}
 
 
 def load_receipt(path: Path) -> dict:
-    return json.loads(path.read_text())
+    return load_json(path)
 
 
 def git_commit_exists(commit: str) -> bool:
-    result = subprocess.run(
-        ["git", "rev-parse", "--verify", f"{commit}^{{commit}}"],
-        cwd=REPO_ROOT,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    return result.returncode == 0
+    return command_succeeds(["git", "rev-parse", "--verify", f"{commit}^{{commit}}"])
 
 
 def iter_receipt_paths() -> list[Path]:
@@ -213,8 +210,7 @@ def main() -> int:
             return show_receipt(args.receipt)
         return list_receipts()
     except (OSError, json.JSONDecodeError, ValueError) as exc:
-        print(f"Live apply receipt error: {exc}", file=sys.stderr)
-        return 2
+        return emit_cli_error("Live apply receipt", exc)
 
 
 if __name__ == "__main__":

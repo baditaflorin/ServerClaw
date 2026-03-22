@@ -17,6 +17,7 @@
       "owner_runbook": "docs/runbooks/validate-repository-automation.md",
       "implementation_refs": [
         "Makefile",
+        "scripts/controller_automation_toolkit.py",
         "scripts/validate_repo.sh",
         "scripts/generate_status_docs.py",
         "scripts/validate_repository_data_models.py",
@@ -49,6 +50,7 @@
       "implementation_refs": [
         "Makefile",
         "README.md",
+        "scripts/controller_automation_toolkit.py",
         "scripts/generate_status_docs.py",
         "versions/stack.yaml",
         "workstreams.yaml"

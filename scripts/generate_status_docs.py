@@ -7,24 +7,16 @@ import sys
 from pathlib import Path
 from typing import Any
 
-try:
-    import yaml
-except ModuleNotFoundError as exc:  # pragma: no cover - direct runtime guard
-    print(
-        "Missing dependency: PyYAML. Run via 'uvx --from pyyaml python ...' or 'uv run --with pyyaml ...'.",
-        file=sys.stderr,
-    )
-    raise SystemExit(2) from exc
+from controller_automation_toolkit import README_PATH, emit_cli_error, load_yaml, repo_path
 
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-README_PATH = REPO_ROOT / "README.md"
-STACK_PATH = REPO_ROOT / "versions" / "stack.yaml"
-HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
-WORKSTREAMS_PATH = REPO_ROOT / "workstreams.yaml"
-RUNBOOKS_DIR = REPO_ROOT / "docs" / "runbooks"
-ADR_DIR = REPO_ROOT / "docs" / "adr"
-WORKSTREAM_DOCS_DIR = REPO_ROOT / "docs" / "workstreams"
+REPO_ROOT = repo_path()
+STACK_PATH = repo_path("versions", "stack.yaml")
+HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
+WORKSTREAMS_PATH = repo_path("workstreams.yaml")
+RUNBOOKS_DIR = repo_path("docs", "runbooks")
+ADR_DIR = repo_path("docs", "adr")
+WORKSTREAM_DOCS_DIR = repo_path("docs", "workstreams")
 
 GENERATED_NOTICE = (
     "> Generated from canonical repository state by "
@@ -46,12 +38,6 @@ CORE_DOCUMENTS = [
     ("Workstreams registry", REPO_ROOT / "workstreams.yaml"),
     ("Workstreams guide", REPO_ROOT / "docs" / "workstreams" / "README.md"),
 ]
-
-
-def load_yaml(path: Path) -> Any:
-    return yaml.safe_load(path.read_text())
-
-
 def read_heading(path: Path) -> str:
     for line in path.read_text().splitlines():
         if line.startswith("# "):
@@ -271,9 +257,8 @@ def main() -> int:
         if args.write:
             return write_generated_docs()
         return check_generated_docs()
-    except (OSError, ValueError, yaml.YAMLError, json.JSONDecodeError) as exc:
-        print(f"Generated status doc error: {exc}", file=sys.stderr)
-        return 2
+    except (OSError, ValueError, RuntimeError, json.JSONDecodeError) as exc:
+        return emit_cli_error("Generated status doc", exc)
 
 
 if __name__ == "__main__":

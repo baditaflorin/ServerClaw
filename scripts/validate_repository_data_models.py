@@ -6,18 +6,9 @@ import ipaddress
 import json
 import re
 import sys
-from pathlib import Path
 from typing import Any
 
-try:
-    import yaml
-except ModuleNotFoundError as exc:  # pragma: no cover - direct runtime guard
-    print(
-        "Missing dependency: PyYAML. Run via 'uvx --from pyyaml python ...' or 'uv run --with pyyaml ...'.",
-        file=sys.stderr,
-    )
-    raise SystemExit(2) from exc
-
+from controller_automation_toolkit import REPO_ROOT, emit_cli_error, load_yaml, repo_path
 from live_apply_receipts import RECEIPTS_DIR, iter_receipt_paths, validate_receipts
 from workflow_catalog import (
     load_secret_manifest,
@@ -27,10 +18,9 @@ from workflow_catalog import (
 )
 
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-STACK_PATH = REPO_ROOT / "versions" / "stack.yaml"
-HOST_VARS_PATH = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
-UPTIME_MONITORS_PATH = REPO_ROOT / "config" / "uptime-kuma" / "monitors.json"
+STACK_PATH = repo_path("versions", "stack.yaml")
+HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
+UPTIME_MONITORS_PATH = repo_path("config", "uptime-kuma", "monitors.json")
 
 SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -48,12 +38,6 @@ DNS_VISIBILITIES = {"public", "tailnet"}
 DNS_RECORD_TYPES = {"A", "AAAA", "CNAME"}
 EDGE_KINDS = {"static", "proxy"}
 MONITOR_TYPES = {"http", "port"}
-
-
-def load_yaml(path: Path) -> Any:
-    return yaml.safe_load(path.read_text())
-
-
 def require_mapping(value: Any, path: str) -> dict:
     if not isinstance(value, dict):
         raise ValueError(f"{path} must be a mapping")
@@ -860,9 +844,8 @@ def main() -> int:
 
     try:
         return validate_repository_data_models()
-    except (OSError, json.JSONDecodeError, ValueError, yaml.YAMLError) as exc:
-        print(f"Repository data model error: {exc}", file=sys.stderr)
-        return 2
+    except (OSError, json.JSONDecodeError, ValueError, RuntimeError) as exc:
+        return emit_cli_error("Repository data model", exc)
 
 
 if __name__ == "__main__":

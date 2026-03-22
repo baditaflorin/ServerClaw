@@ -60,7 +60,7 @@ The private SSH jump path through the Proxmox host to the guests is working.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.41.0` |
+| Repository version | `0.42.0` |
 | Platform version | `0.19.0` |
 | Observed check date | `2026-03-22` |
 | Observed OS | `Debian 13` |
@@ -197,6 +197,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure Public Ingress Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-public-ingress.md)
 - [Configure Storage And Backups](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-storage-and-backups.md)
 - [Configure Tailscale Private Access](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-tailscale-access.md)
+- [Controller Automation Toolkit](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/controller-automation-toolkit.md)
 - [Controller-Local Secrets And Preflight Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/controller-local-secrets-and-preflight.md)
 - [Deploy Uptime Kuma](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/deploy-uptime-kuma.md)
 - [Generate Status Documents](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/generate-status-documents.md)
@@ -285,7 +286,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.41.0` |
+| Repository version | `0.42.0` |
 | Platform version | `0.19.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |

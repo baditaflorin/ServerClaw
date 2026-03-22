@@ -12,6 +12,8 @@ import time
 import urllib.parse
 from pathlib import Path
 
+from controller_automation_toolkit import load_json, write_json
+
 
 def generate_secret() -> str:
     return base64.b32encode(secrets.token_bytes(20)).decode("ascii").rstrip("=")
@@ -19,13 +21,11 @@ def generate_secret() -> str:
 
 def load_or_create_secret(state_file: Path) -> str:
     if state_file.exists():
-        data = json.loads(state_file.read_text())
+        data = load_json(state_file)
         return data["secret"]
 
-    state_file.parent.mkdir(parents=True, exist_ok=True)
     secret = generate_secret()
-    state_file.write_text(json.dumps({"secret": secret}, indent=2) + "\n")
-    os.chmod(state_file, 0o600)
+    write_json(state_file, {"secret": secret}, indent=2, mode=0o600)
     return secret
 
 
@@ -65,19 +65,17 @@ def main() -> None:
         "code": totp_code(secret),
         "state_file": str(state_file),
     }
-    state_file.write_text(
-        json.dumps(
-            {
-                "secret": secret,
-                "issuer": issuer,
-                "account": account,
-                "uri": uri,
-            },
-            indent=2,
-        )
-        + "\n"
+    write_json(
+        state_file,
+        {
+            "secret": secret,
+            "issuer": issuer,
+            "account": account,
+            "uri": uri,
+        },
+        indent=2,
+        mode=0o600,
     )
-    os.chmod(state_file, 0o600)
     print(json.dumps(payload))
 
 

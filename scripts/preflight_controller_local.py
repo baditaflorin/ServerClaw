@@ -6,6 +6,11 @@ import os
 import sys
 from pathlib import Path
 
+from controller_automation_toolkit import (
+    SECRET_MANIFEST_PATH as MANIFEST_PATH,
+    WORKFLOW_CATALOG_PATH,
+    emit_cli_error,
+)
 from workflow_catalog import (
     WORKFLOW_SECRET_FIELDS,
     load_secret_manifest,
@@ -13,10 +18,6 @@ from workflow_catalog import (
     validate_secret_manifest,
     validate_workflow_catalog,
 )
-
-REPO_ROOT = Path(__file__).resolve().parent.parent
-MANIFEST_PATH = REPO_ROOT / "config" / "controller-local-secrets.json"
-WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
 
 
 def list_workflows(catalog: dict) -> int:
@@ -117,8 +118,7 @@ def main() -> int:
         catalog = load_workflow_catalog()
         validate_workflow_catalog(catalog, secret_manifest)
     except (OSError, json.JSONDecodeError, ValueError) as exc:
-        print(f"Manifest error: {exc}", file=sys.stderr)
-        return 2
+        return emit_cli_error("Manifest", exc)
 
     if args.list or not args.workflow:
         return list_workflows(catalog)

@@ -10,6 +10,18 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 - use this section on `main` for merged notes that have not yet been cut into a numbered release
 
+## 0.42.0 - 2026-03-22
+
+- implemented ADR 0039 to add a shared controller automation toolkit for repo-local Python scripts
+- added `scripts/controller_automation_toolkit.py` for repo path resolution, JSON and YAML loading, JSON writing, Make target parsing, subprocess success checks, and consistent CLI error formatting
+- refactored the workflow catalog, preflight, live-apply receipts, repository data-model validation, generated-status-docs, Uptime Kuma, and TOTP scripts to consume the shared toolkit instead of repeating local helpers
+- added a controller automation toolkit runbook and updated the repository map, assistant guide, and ADR metadata to make the shared boundary explicit
+- updated workflow metadata so the validation and generated-status-doc workflows declare the shared toolkit as part of their implementation surface
+
+Platform impact:
+
+- no direct live platform change; this release refactors and hardens the controller-side automation contract only
+
 ## 0.41.0 - 2026-03-22
 
 - implemented ADR 0038 to generate selected README status documents from canonical repository state

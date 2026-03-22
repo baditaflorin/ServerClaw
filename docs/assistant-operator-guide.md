@@ -117,6 +117,7 @@ Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/M
 - workflow entry points stay declared in `config/workflow-catalog.json`
 - controller-local secret prerequisites stay declared in `config/controller-local-secrets.json`
 - live applies keep structured evidence under `receipts/live-applies/`
+- shared controller-side Python primitives stay centralized in `scripts/controller_automation_toolkit.py`
 - `make validate` is the minimum repository gate before merge to `main`
 
 ## Pending Areas

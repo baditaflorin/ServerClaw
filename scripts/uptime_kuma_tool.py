@@ -11,13 +11,11 @@ from pathlib import Path
 import requests
 import socketio
 
+from controller_automation_toolkit import emit_cli_error, load_json, repo_path, write_json
 
-DEFAULT_AUTH_FILE = Path(
-    "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/uptime-kuma/admin-session.json"
-)
-DEFAULT_MONITORS_FILE = Path(
-    "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/uptime-kuma/monitors.json"
-)
+
+DEFAULT_AUTH_FILE = repo_path(".local", "uptime-kuma", "admin-session.json")
+DEFAULT_MONITORS_FILE = repo_path("config", "uptime-kuma", "monitors.json")
 
 DEFAULT_MONITOR = {
     "type": "http",
@@ -55,18 +53,12 @@ READ_ONLY_MONITOR_FIELDS = {
     "forceInactive",
     "cacheBust",
 }
-
-
-def load_json(path: Path) -> dict:
-    if not path.exists():
-        return {}
-    return json.loads(path.read_text())
+def load_auth_json(path: Path) -> dict:
+    return load_json(path, default={})
 
 
 def save_json(path: Path, payload: dict) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
-    path.chmod(0o600)
+    write_json(path, payload, indent=2, sort_keys=True, mode=0o600)
 
 
 def normalize_monitor(monitor: dict) -> dict:
@@ -207,7 +199,7 @@ class UptimeKumaClient:
 
 def resolve_auth(args) -> tuple[Path, dict]:
     auth_file = Path(args.auth_file).expanduser()
-    auth = load_json(auth_file)
+    auth = load_auth_json(auth_file)
     if args.base_url:
         auth["base_url"] = args.base_url.rstrip("/")
     return auth_file, auth
@@ -391,8 +383,7 @@ def main() -> int:
     try:
         return args.func(args)
     except Exception as exc:  # noqa: BLE001
-        print(f"error: {exc}", file=sys.stderr)
-        return 1
+        return emit_cli_error("Uptime Kuma", exc, exit_code=1)
 
 
 if __name__ == "__main__":

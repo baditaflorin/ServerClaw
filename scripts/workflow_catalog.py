@@ -2,15 +2,17 @@
 
 import argparse
 import json
-import re
 import sys
 from pathlib import Path
 
-
-REPO_ROOT = Path(__file__).resolve().parent.parent
-WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
-SECRET_MANIFEST_PATH = REPO_ROOT / "config" / "controller-local-secrets.json"
-MAKEFILE_PATH = REPO_ROOT / "Makefile"
+from controller_automation_toolkit import (
+    REPO_ROOT,
+    SECRET_MANIFEST_PATH,
+    WORKFLOW_CATALOG_PATH,
+    emit_cli_error,
+    load_json,
+    parse_make_targets,
+)
 
 ALLOWED_ENTRYPOINT_KINDS = {"make_target"}
 ALLOWED_LIVE_IMPACTS = {
@@ -34,21 +36,6 @@ def load_secret_manifest() -> dict:
 
 def load_workflow_catalog() -> dict:
     return load_json(WORKFLOW_CATALOG_PATH)
-
-
-def parse_make_targets() -> set[str]:
-    targets = set()
-    pattern = re.compile(r"^([A-Za-z0-9_-]+):")
-
-    for line in MAKEFILE_PATH.read_text().splitlines():
-        match = pattern.match(line)
-        if not match:
-            continue
-        target = match.group(1)
-        if target != ".PHONY":
-            targets.add(target)
-
-    return targets
 
 
 def validate_secret_manifest(manifest: dict) -> None:
@@ -225,8 +212,7 @@ def main() -> int:
         catalog = load_workflow_catalog()
         validate_workflow_catalog(catalog, secret_manifest)
     except (OSError, json.JSONDecodeError, ValueError) as exc:
-        print(f"Workflow catalog error: {exc}", file=sys.stderr)
-        return 2
+        return emit_cli_error("Workflow catalog", exc)
 
     if args.validate:
         print(f"Workflow catalog OK: {WORKFLOW_CATALOG_PATH}")
