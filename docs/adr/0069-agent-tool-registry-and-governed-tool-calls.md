@@ -1,10 +1,10 @@
 # ADR 0069: Agent Tool Registry And Governed Tool Calls
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.59.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-22
 - Date: 2026-03-22
 
 ## Context
@@ -70,3 +70,11 @@ MCP compatibility: the registry schema is compatible with the Model Context Prot
 - The tool registry does not replace the command catalog or workflow catalog; it is the discovery and dispatch layer on top of them.
 - Tools that require break-glass access are not listed in the public registry; they are documented separately in the break-glass runbook.
 - Agent-to-agent tool calls are out of scope for the first iteration.
+
+## Implementation Notes
+
+- The canonical registry now lives in [config/agent-tool-registry.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/agent-tool-registry.json), with the entry schema documented in [docs/schema/agent-tool.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/schema/agent-tool.json).
+- [scripts/agent_tool_registry.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/agent_tool_registry.py) validates the registry, prints individual tool contracts, and exports MCP-compatible tool definitions through `make export-mcp-tools`.
+- Registry validation is now part of [scripts/validate_repository_data_models.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_repository_data_models.py) so tool entries stay aligned with workflow ids, command ids, and API lane surfaces.
+- Operator usage is documented in [docs/runbooks/agent-tool-registry.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/agent-tool-registry.md).
+- The first live-backed `observe` and `report` tools are served by the private platform-context API from ADR 0070, while `execute` tools reference existing governed converge workflows rather than broad shell access.

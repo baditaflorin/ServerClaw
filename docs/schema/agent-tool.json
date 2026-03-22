@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lv3.org/schemas/agent-tool.json",
+  "title": "Agent Tool",
+  "type": "object",
+  "required": [
+    "name",
+    "description",
+    "category",
+    "transport",
+    "auth",
+    "approval_required",
+    "audit_on_call",
+    "input_schema",
+    "output_schema"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]*$"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "category": {
+      "type": "string",
+      "enum": ["observe", "report", "execute", "approve"]
+    },
+    "transport": {
+      "type": "string",
+      "enum": ["http", "nats", "ansible"]
+    },
+    "auth": {
+      "type": "string",
+      "minLength": 1
+    },
+    "approval_required": {
+      "type": "boolean"
+    },
+    "audit_on_call": {
+      "type": "boolean"
+    },
+    "input_schema": {
+      "type": "object"
+    },
+    "output_schema": {
+      "type": "object"
+    },
+    "http": {
+      "type": "object",
+      "required": ["api_surface_ref", "method", "path"],
+      "properties": {
+        "api_surface_ref": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_-]*$"
+        },
+        "method": {
+          "type": "string",
+          "enum": ["GET", "POST"]
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^/"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ansible": {
+      "type": "object",
+      "required": ["workflow_id"],
+      "properties": {
+        "workflow_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_-]*$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "nats": {
+      "type": "object",
+      "required": ["subject"],
+      "properties": {
+        "subject": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "command_ref": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]*$"
+    }
+  },
+  "additionalProperties": false
+}

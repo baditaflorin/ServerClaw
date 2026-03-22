@@ -1,0 +1,182 @@
+{
+  "schema_version": "1.0.0",
+  "tools": [
+    {
+      "name": "get-platform-summary",
+      "description": "Return the current repo and platform summary derived from canonical stack state.",
+      "category": "observe",
+      "transport": "http",
+      "auth": "platform-context-api-token",
+      "approval_required": false,
+      "audit_on_call": true,
+      "input_schema": {
+        "type": "object",
+        "properties": {}
+      },
+      "output_schema": {
+        "type": "object"
+      },
+      "http": {
+        "api_surface_ref": "platform-context-api",
+        "method": "GET",
+        "path": "/v1/platform-summary"
+      }
+    },
+    {
+      "name": "list-recent-receipts",
+      "description": "Return the most recent live-apply receipts with workflow and ADR context.",
+      "category": "report",
+      "transport": "http",
+      "auth": "platform-context-api-token",
+      "approval_required": false,
+      "audit_on_call": true,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object"
+      },
+      "http": {
+        "api_surface_ref": "platform-context-api",
+        "method": "GET",
+        "path": "/v1/receipts/recent"
+      }
+    },
+    {
+      "name": "get-workflow-contract",
+      "description": "Return one workflow contract from the canonical workflow catalog.",
+      "category": "report",
+      "transport": "http",
+      "auth": "platform-context-api-token",
+      "approval_required": false,
+      "audit_on_call": true,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "workflow_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "workflow_id"
+        ]
+      },
+      "output_schema": {
+        "type": "object"
+      },
+      "http": {
+        "api_surface_ref": "platform-context-api",
+        "method": "GET",
+        "path": "/v1/workflows/{workflow_id}"
+      }
+    },
+    {
+      "name": "get-command-contract",
+      "description": "Return one command contract from the canonical command catalog.",
+      "category": "report",
+      "transport": "http",
+      "auth": "platform-context-api-token",
+      "approval_required": false,
+      "audit_on_call": true,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "command_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "command_id"
+        ]
+      },
+      "output_schema": {
+        "type": "object"
+      },
+      "http": {
+        "api_surface_ref": "platform-context-api",
+        "method": "GET",
+        "path": "/v1/commands/{command_id}"
+      }
+    },
+    {
+      "name": "query-platform-context",
+      "description": "Return the top-k repo-grounded context chunks for an operational question, with citations.",
+      "category": "observe",
+      "transport": "http",
+      "auth": "platform-context-api-token",
+      "approval_required": false,
+      "audit_on_call": true,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string"
+          },
+          "top_k": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10
+          }
+        },
+        "required": [
+          "question"
+        ]
+      },
+      "output_schema": {
+        "type": "object"
+      },
+      "http": {
+        "api_surface_ref": "platform-context-api",
+        "method": "POST",
+        "path": "/v1/context/query"
+      }
+    },
+    {
+      "name": "converge-open-webui",
+      "description": "Run the governed Open WebUI converge workflow.",
+      "category": "execute",
+      "transport": "ansible",
+      "auth": "bootstrap-ssh-private-key",
+      "approval_required": true,
+      "audit_on_call": true,
+      "input_schema": {
+        "type": "object",
+        "properties": {}
+      },
+      "output_schema": {
+        "type": "object"
+      },
+      "ansible": {
+        "workflow_id": "converge-open-webui"
+      },
+      "command_ref": "converge-open-webui"
+    },
+    {
+      "name": "converge-rag-context",
+      "description": "Run the governed platform context API and Qdrant converge workflow.",
+      "category": "execute",
+      "transport": "ansible",
+      "auth": "bootstrap-ssh-private-key",
+      "approval_required": true,
+      "audit_on_call": true,
+      "input_schema": {
+        "type": "object",
+        "properties": {}
+      },
+      "output_schema": {
+        "type": "object"
+      },
+      "ansible": {
+        "workflow_id": "converge-rag-context"
+      },
+      "command_ref": "converge-rag-context"
+    }
+  ]
+}

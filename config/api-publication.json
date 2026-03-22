@@ -92,6 +92,15 @@
       "approval_notes": "This conversational operator surface stays private and requires approved operator credentials; do not publish it through the public edge."
     },
     {
+      "id": "platform-context-api",
+      "title": "Platform context API",
+      "lane": "api",
+      "lane_surface_ref": "platform-context-api",
+      "publication_tier": "operator-only",
+      "reachability": "Reachable only through the Proxmox host Tailscale proxy on port 8010 and requires the controller-local bearer token.",
+      "approval_notes": "This governed retrieval and tool API remains private-first and is intended for approved operators, Open WebUI global tools, and other authenticated internal agent runtimes."
+    },
+    {
       "id": "stalwart-mail-events",
       "title": "Stalwart mail event webhook",
       "lane": "event",

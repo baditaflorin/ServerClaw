@@ -1,0 +1,22 @@
+services:
+  qdrant:
+    image: {{ platform_context_qdrant_image }}
+    container_name: qdrant-platform-context
+    restart: unless-stopped
+    volumes:
+      - {{ platform_context_data_dir }}:/qdrant/storage
+
+  platform-context-api:
+    build:
+      context: {{ platform_context_service_dir }}
+    image: {{ platform_context_api_image_name }}:latest
+    container_name: platform-context-api
+    restart: unless-stopped
+    depends_on:
+      - qdrant
+    env_file:
+      - {{ platform_context_env_file }}
+    volumes:
+      - {{ platform_context_corpus_dir }}:{{ platform_context_corpus_dir }}:ro
+    ports:
+      - "{{ platform_context_internal_port }}:8010"
