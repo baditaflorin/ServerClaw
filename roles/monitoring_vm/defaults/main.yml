@@ -59,6 +59,7 @@ monitoring_tempo_trace_retention: 168h
 monitoring_tempo_http_port: 3200
 monitoring_tempo_otlp_grpc_port: 14317
 monitoring_tempo_otlp_http_port: 14318
+monitoring_tempo_group: nogroup
 monitoring_otelcol_version: 0.148.0
 monitoring_otelcol_deb_url: https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.148.0/otelcol-contrib_0.148.0_linux_amd64.deb
 monitoring_otelcol_deb_checksum: sha256:ad521e8f121283048822463403295fd4ad0d97b50d12ac6bf5ca2cc656f061ba
