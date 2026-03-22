@@ -5,7 +5,8 @@
   gather_facts: false
 
   tasks:
-    - ansible.builtin.debug:
+    - name: Record live Gmail probe start
+      ansible.builtin.debug:
         msg: "Sending live Gmail probe through the mail gateway."
 
 - name: Send the live Gmail probe

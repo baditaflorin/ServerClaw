@@ -11,6 +11,7 @@ from controller_automation_toolkit import README_PATH, emit_cli_error, load_yaml
 
 
 REPO_ROOT = repo_path()
+CANONICAL_REPO_ROOT = Path("/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server")
 STACK_PATH = repo_path("versions", "stack.yaml")
 HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 WORKSTREAMS_PATH = repo_path("workstreams.yaml")
@@ -46,7 +47,10 @@ def read_heading(path: Path) -> str:
 
 
 def absolute_link(label: str, path: Path) -> str:
-    return f"[{label}]({path})"
+    resolved_path = path
+    if path.is_absolute() and path.is_relative_to(REPO_ROOT):
+        resolved_path = CANONICAL_REPO_ROOT / path.relative_to(REPO_ROOT)
+    return f"[{label}]({resolved_path})"
 
 
 def render_table(headers: list[str], rows: list[list[str]]) -> str:

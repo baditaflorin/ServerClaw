@@ -1,10 +1,10 @@
 # ADR 0041: Dockerized Mail Platform For Server Delivery, API Automation, And Grafana Observability
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.43.0
+- Implemented In Platform Version: 0.21.0
+- Implemented On: 2026-03-22
 - Date: 2026-03-22
 
 ## Context
@@ -34,14 +34,15 @@ The decision also has to respect operational reality:
 
 ## Decision
 
-We will standardize on a Dockerized mail platform built around Stalwart as the primary mail server, with a small relay tier in front of it for local submission durability and failover delivery.
+We will standardize on a Dockerized mail platform built around Stalwart as the primary mail server, with a private mail gateway service in front of it for application-facing send and CRUD automation and a Brevo-backed fallback delivery path.
 
 Primary runtime placement:
 
 - host: `docker-runtime-lv3`
 - stack root: `/opt/mail-platform`
 - primary mail server: Stalwart
-- local submission relay: Postfix sidecar
+- private submission and CRUD facade: FastAPI mail gateway service
+- backup resend provider: Brevo transactional email API
 
 Primary responsibilities:
 
@@ -78,35 +79,34 @@ Initial Stalwart responsibilities should include:
 
 ### 2. Stable Local Submission Path
 
-Platform services should not submit directly to the full Stalwart container.
+Platform services should not need to know Stalwart's management API or raw SMTP topology.
 
-Instead, the platform will expose a stable local relay endpoint backed by a Postfix sidecar container that only accepts mail from trusted LV3 networks and authenticated clients.
+Instead, the platform exposes a private mail gateway API on `docker-runtime-lv3` that:
 
-That relay tier provides two benefits:
-
-1. it gives the platform a small, queue-capable front door for local applications even if the Stalwart container is restarting or temporarily unhealthy
-2. it allows primary and backup next-hop policy to be changed centrally without forcing every caller to change configuration
+1. provides CRUD operations for domains and mailboxes
+2. gives internal services and agents one stable send endpoint
+3. centralizes sender policy, reply-to behavior, and fallback delivery routing
+4. keeps future local-SMTP-first behavior available without changing callers
 
 ### 3. Backup Resend And Failover Delivery
 
 Backup resend is defined as an automated secondary delivery path that is attempted after the preferred route fails, while preserving queued mail until either primary or secondary delivery succeeds or the message expires.
 
-The primary path is:
+The implemented primary send path is:
 
-- local applications -> Postfix relay sidecar -> Stalwart -> remote destination by MX
+- local applications and agents -> private mail gateway API -> Brevo transactional delivery
 
-The fallback path is:
+The implemented local receive path is:
 
-- local applications -> Postfix relay sidecar -> secondary authenticated relay
+- external senders -> `mail.lv3.org` -> Stalwart -> `server@lv3.org`
 
-Stalwart itself must also be configured with documented failover routing for outbound queue retries, so the mail platform can escalate from direct MX delivery to a relay host after repeated failures.
+The gateway also retains a local SMTP submission path to Stalwart for future direct local-first delivery, but the first live implementation intentionally forces the Brevo fallback path until sender verification and deliverability policy are known-good.
 
-This means the implementation should use two layers on purpose:
+The secondary delivery target is therefore explicit and repo-managed:
 
-1. a submission queue in front of the primary mail server
-2. a failover route inside the primary mail server for outbound retry policy
-
-The secondary relay target may be another self-hosted relay node or a third-party authenticated SMTP relay, but the first implementation must keep the policy externalized in repo-managed configuration instead of baking it into ad hoc container state.
+1. the gateway owns fallback resend policy
+2. Brevo provides the backup resend provider for real delivery when the local address fails or when direct SMTP is not the chosen send path
+3. sender identity, domain authentication, and fallback routing remain centralized instead of being spread across callers
 
 ## CRUD And Automation Model
 
@@ -245,7 +245,7 @@ Why it is not the primary choice:
 The first implementation workstream should produce, at minimum:
 
 1. a compose-managed Stalwart stack rooted under `/opt/mail-platform`
-2. a local relay endpoint for internal callers on the LV3 private network
+2. a private mail gateway API for internal callers on the LV3 private network
 3. repo-managed configuration for primary and fallback delivery policy
 4. scoped API credentials for operators, services, and agent automation
 5. Grafana dashboard provisioning for mail telemetry

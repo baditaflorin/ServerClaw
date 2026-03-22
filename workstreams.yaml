@@ -45,7 +45,7 @@ workstreams:
       - guest_access
       - private_network
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0020-backups
     adr: "0020"
@@ -239,7 +239,7 @@ workstreams:
   - id: adr-0041-email-platform-live
     adr: "0041"
     title: Dockerized mail platform live rollout
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/adr-0041-email-platform-live
     worktree_path: ../proxmox_florin_server-email-platform-live
@@ -257,4 +257,4 @@ workstreams:
       - lv3.org DNS
       - mail.lv3.org
     ready_to_merge: false
-    live_applied: false
+    live_applied: true

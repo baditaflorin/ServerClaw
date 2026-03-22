@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.42.0
-platform_version: 0.20.0
+repo_version: 0.43.0
+platform_version: 0.21.0
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -13,6 +13,7 @@ live_apply_evidence:
     build_telemetry: 2026-03-22-adr-0028-build-telemetry-live-apply
     backup_vm: 2026-03-22-adr-0029-backup-vm-live-apply
     runtime_container_telemetry: 2026-03-22-adr-0040-runtime-container-telemetry-live-apply
+    mail_platform: 2026-03-22-adr-0041-email-platform-live-apply
 
 desired_state:
   host_id: proxmox_florin
@@ -55,8 +56,11 @@ desired_state:
     public_edge_vm: 10.10.10.10
     public_edge_forwarding_enabled: true
     public_ingress_ports:
+      - 25
       - 80
       - 443
+      - 587
+      - 993
   operator_access:
     bootstrap_method: ssh_via_public_ipv4_or_proxmox_jump
     steady_state_host_method: ssh_to_proxmox_over_tailscale
@@ -80,6 +84,7 @@ desired_state:
     zone: lv3.org
     public_ipv4_target: 65.108.75.123
     initial_subdomains:
+      - mail.lv3.org
       - proxmox.lv3.org
       - grafana.lv3.org
       - nginx.lv3.org
@@ -88,6 +93,17 @@ desired_state:
       - uptime.lv3.org
       - database.lv3.org
     publish_aaaa_initially: false
+  mail:
+    domain: lv3.org
+    hostname: mail.lv3.org
+    mailbox_address: server@lv3.org
+    api_private_url: http://10.10.10.20:8081
+    fallback_delivery_provider: brevo
+    grafana_dashboard_uid: lv3-mail-platform
+    published_ports:
+      - 25
+      - 587
+      - 993
   public_publication:
     edge_vm: 10.10.10.10
     tls_termination: nginx_edge
@@ -142,8 +158,11 @@ observed_state:
     public_edge_ipv4: 10.10.10.10
     public_ingress_forwarding_enabled: true
     public_ingress_forwarded_ports:
+      - 25
       - 80
       - 443
+      - 587
+      - 993
     management_firewall_enabled: true
     management_sources:
       - 100.64.0.0/10
@@ -167,6 +186,7 @@ observed_state:
     root_aaaa_present: true
     root_aaaa_matches_current_host_ipv6: false
     created_a_subdomains:
+      - mail.lv3.org
       - proxmox.lv3.org
       - grafana.lv3.org
       - nginx.lv3.org
@@ -219,6 +239,9 @@ observed_state:
       - uid: lv3-platform-overview
         title: LV3 Platform Overview
         panels: 32
+      - uid: lv3-mail-platform
+        title: LV3 Mail Platform
+        panels: 14
       - uid: lv3-vm-nginx-lv3
         title: LV3 nginx-lv3 Detail
         panels: 12
@@ -256,6 +279,20 @@ observed_state:
     telegraf_active: true
     container_telemetry_flow_verified: true
     guest_network_recovered_after_mac_match_update: true
+  mail:
+    domain: lv3.org
+    hostname: mail.lv3.org
+    mailbox_address: server@lv3.org
+    docker_runtime_vm: 10.10.10.20
+    gateway_api_private_url: http://10.10.10.20:8081
+    stalwart_running: true
+    brevo_domain_authenticated: true
+    brevo_sender_active: server@lv3.org
+    outbound_gmail_delivery_verified: true
+    inbound_external_delivery_verified: true
+    mailbox_inbox_delivery_verified: true
+    fallback_delivery_provider: brevo
+    grafana_dashboard_uid: lv3-mail-platform
   uptime_kuma:
     vm: 10.10.10.20
     public_url: https://uptime.lv3.org
@@ -297,8 +334,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.42.0
+    current: 0.43.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.20.0
+    current: 0.21.0
     meaning: intended platform release for the actual server configuration

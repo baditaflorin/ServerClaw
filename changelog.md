@@ -10,6 +10,19 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 - fixed the monitoring role's Grafana handler notifications so `make converge-monitoring` can rerun cleanly while importing repo-managed dashboards
 
+## 0.43.0 - 2026-03-22
+
+- implemented the live Dockerized mail platform on `docker-runtime-lv3` with Stalwart, a private mail gateway API, and repo-managed Brevo fallback resend
+- added CRUD-capable domain and mailbox automation endpoints for server-side and agent use, plus dedicated mail observability collection and the `LV3 Mail Platform` Grafana dashboard
+- extended Hetzner DNS automation and host ingress policy for the mail stack, including support for multiple managed TXT records at the same name and explicit Proxmox firewall allows for published mail ports
+- authenticated `lv3.org` in Brevo, activated `server@lv3.org` as the sender identity, and documented the operational runbook and live rollout workstream
+
+Platform impact:
+
+- live mail platform is now running on `docker-runtime-lv3`
+- `server@lv3.org` now receives external mail and can send mail through the managed fallback path
+- Grafana now exposes a dedicated `LV3 Mail Platform` dashboard with live mail flow metrics
+
 ## 0.42.0 - 2026-03-22
 
 - implemented ADR 0039 to add a shared controller automation toolkit for repo-local Python scripts

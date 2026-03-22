@@ -5,7 +5,8 @@
   gather_facts: false
 
   tasks:
-    - ansible.builtin.debug:
+    - name: Record mail diagnostics start
+      ansible.builtin.debug:
         msg: "Collecting mail platform diagnostics."
 
 - name: Inspect the mail platform runtime state

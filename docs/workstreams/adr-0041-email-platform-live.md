@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0041](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0041-dockerized-mail-platform-for-server-delivery-api-and-observability.md)
 - Title: Dockerized mail platform live rollout
-- Status: in_progress
+- Status: live_applied
 - Branch: `codex/adr-0041-email-platform-live`
 - Worktree: `../proxmox_florin_server-email-platform-live`
 - Owner: codex
@@ -54,3 +54,10 @@
 - inbound and outbound mail have been tested live
 - Grafana shows fresh mail metrics
 - a live-apply receipt is recorded before final merge to `main`
+
+## Notes For The Next Assistant
+
+- Live apply completed on `2026-03-22` through `make converge-mail-platform` from `main`.
+- Verification confirmed Brevo delivered `LV3 mail platform final live test` to `baditaflorin@gmail.com` from `server@lv3.org`.
+- Verification confirmed Brevo delivered `LV3 final inbound test from default sender` to `server@lv3.org`, and the message was present in `INBOX` over IMAPS.
+- The rollout required two corrective fixes during live work: Proxmox firewall policy had to explicitly allow the published mail ports, and Brevo sender activation required authenticating `lv3.org` and verifying `server@lv3.org` through the mailbox itself.
