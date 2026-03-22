@@ -24,6 +24,10 @@ The target outcome is a platform where humans and agents can:
 - [ADR 0060](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0060-open-webui-for-operator-and-agent-workbench.md): supervised conversational workbench for operators and agents
 - [ADR 0061](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0061-glitchtip-for-application-exceptions-and-task-failures.md): exception and task-failure visibility
 
+Current implementation note:
+
+- ADR 0059 is now live as host-local `ntopng` capture on `proxmox_florin`, with operator-only access on `http://100.118.189.95:3001`
+
 ## Recommended Rollout Order
 
 1. extend visibility first
@@ -53,6 +57,7 @@ The target outcome is a platform where humans and agents can:
 The pragmatic first placement for these services is:
 
 - `monitoring-lv3` for Loki and Tempo if the monitoring VM has enough capacity
+- `proxmox_florin` for ntopng, where `vmbr10` and `vmbr0` can be observed directly without adding a mirror or `nProbe`
 - `docker-runtime-lv3` for NetBox, Portainer, Keycloak, Mattermost, NATS, Open WebUI, and GlitchTip
 - `postgres-lv3` for applications that need a dedicated relational backend
 

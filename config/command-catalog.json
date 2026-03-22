@@ -415,6 +415,40 @@
         ]
       }
     },
+    "converge-ntopng": {
+      "description": "Converge host-local ntopng capture on the Proxmox host and publish the operator-only Tailscale proxy path.",
+      "workflow_id": "converge-ntopng",
+      "scope": "proxmox_host",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key for the Proxmox host ntopng converge."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-ntopng passes",
+        "make validate passes before the apply",
+        "The operator-only access boundary and monitored bridge interfaces have been reviewed"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record runtime health, private proxy verification, and monitored-interface visibility from the managed ntopng API."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the ntop repository bootstrap, service startup, or private proxy verification fails.",
+          "Stop if the change exposes ntopng outside the intended private operator path."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good host state from version control before retrying.",
+          "Keep any emergency package or firewall rollback documented so the repo remains the source of truth."
+        ]
+      }
+    },
     "converge-docker-runtime": {
       "description": "Converge the Docker runtime VM baseline and runtime packages.",
       "workflow_id": "converge-docker-runtime",

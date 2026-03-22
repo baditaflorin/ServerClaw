@@ -5,7 +5,7 @@
   "recorded_on": "2026-03-22",
   "recorded_by": "codex",
   "source_commit": "a084edf88ec5c6ede3d0832554212ac140fd55a8",
-  "repo_version_context": "0.53.0",
+  "repo_version_context": "0.54.0",
   "workflow_id": "converge-open-webui",
   "adr": "0060",
   "summary": "Applied the private Open WebUI operator workbench live on docker-runtime-lv3, published it through the Proxmox host Tailscale proxy, and verified repo-managed bootstrap auth plus the restricted initial feature posture.",

@@ -42,6 +42,11 @@ proxmox_public_ingress_tcp_forwards:
     target_host: 10.10.10.20
     target_port: 993
 proxmox_tailscale_tcp_proxies:
+  - name: ntopng
+    listen_address: "{{ management_tailscale_ipv4 }}"
+    listen_port: "{{ ntopng_proxy_port }}"
+    upstream_host: 127.0.0.1
+    upstream_port: "{{ ntopng_http_port }}"
   - name: postgres-lv3
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: 5432
@@ -411,6 +416,17 @@ lv3_service_topology:
     access:
       kind: tailscale-tcp-proxy
       url: "{{ openbao_controller_url }}"
+  ntopng:
+    service_name: ntopng
+    owning_vm: proxmox_florin
+    private_ip: "{{ management_tailscale_ipv4 }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: true
+    access:
+      kind: tailscale-tcp-proxy
+      url: "{{ ntopng_operator_url }}"
   postgres:
     service_name: postgres
     owning_vm: postgres-lv3

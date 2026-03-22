@@ -8,7 +8,7 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
-## 0.53.0 - 2026-03-22
+## 0.54.0 - 2026-03-22
 
 - applied ADR 0060 live by converging a private Open WebUI runtime on `docker-runtime-lv3` and publishing it through the Proxmox host Tailscale proxy on port `8008`
 - added repo-managed Open WebUI automation, workflow and command contracts, controller-local bootstrap secret handling, and an operator runbook for the workbench
@@ -20,6 +20,18 @@ Platform impact:
 - Open WebUI is now live privately at `http://100.118.189.95:8008`
 - controller-local bootstrap artifacts now exist under `.local/open-webui/`
 - the first operator-and-agent workbench now exists, but governed tools and repo-grounded RAG remain follow-up work under ADR 0069 and ADR 0070
+
+## 0.53.0 - 2026-03-22
+
+- implemented ADR 0059 live by installing `ntopng` on `proxmox_florin`, capturing the private guest bridge directly from `vmbr10`, and adding edge-adjacent context from `vmbr0`
+- added a dedicated `playbooks/ntopng.yml` converge path, the new `roles/proxmox_ntopng` automation, a private-access runbook, and workflow or command catalog entries for operator-driven flow visibility
+- exposed the ntopng UI only through the Proxmox host Tailscale proxy on port `3001`, kept it off the public edge, and updated ADR or workstream metadata to mark the network-visibility rollout as live
+
+Platform impact:
+
+- ntopng is now running on `proxmox_florin` and is reachable privately at `http://100.118.189.95:3001`
+- operators now have a repo-managed flow-visibility surface for `vmbr10` private-network traffic and `vmbr0` edge context without introducing nProbe or public publication
+- the Proxmox host firewall now explicitly allows the ntopng proxy port only from declared management sources
 
 ## 0.52.0 - 2026-03-22
 
