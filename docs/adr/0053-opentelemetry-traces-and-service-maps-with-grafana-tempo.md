@@ -1,10 +1,10 @@
 # ADR 0053: OpenTelemetry Traces And Service Maps With Grafana Tempo
 
 - Status: Accepted
-- Implementation Status: Partial
-- Implemented In Repo Version: 0.52.0
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.55.0
+- Implemented In Platform Version: 0.31.0
+- Implemented On: 2026-03-22
 - Date: 2026-03-22
 
 ## Context

@@ -8,6 +8,18 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.57.0 - 2026-03-22
+
+- applied ADR 0052 live from `main` by adding Grafana Loki to `monitoring-lv3` and converging Grafana Alloy log shipping on `proxmox_florin` plus every managed guest
+- completed the live rollout of the corrected ADR 0053 monitoring-plane stack at the same time, so Prometheus, Tempo, and the shared OTLP collector now converge together with the new log plane
+- updated ADR 0052 and ADR 0053 implementation status, monitoring runbooks, workflow metadata, canonical stack state, and live-apply evidence to reflect the integrated logs-and-traces observability surface
+
+Platform impact:
+
+- `monitoring-lv3` now serves Grafana, InfluxDB, Loki, Prometheus, Tempo, and the shared OTLP collector as one integrated monitoring plane
+- Grafana now exposes the `Loki Logs`, `Prometheus Service Graphs`, and `Tempo` datasources from the private monitoring surface
+- verified logs now flow from the Proxmox host, `nginx-lv3`, and `docker-runtime-lv3`, while verified traces and service-graph metrics now flow through the shared OTLP path from the private mail gateway
+
 ## 0.56.0 - 2026-03-22
 
 - applied ADR 0055 live from `main` by converging Portainer on `docker-runtime-lv3`, publishing it privately through the Proxmox host Tailscale proxy on port `9444`, and persisting controller-local bootstrap auth under `.local/portainer`

@@ -55,7 +55,7 @@
 
 ## Live Apply Notes
 
-- Live apply completed on `2026-03-22` from `main`.
+- Live apply completed on `2026-03-22` from `main` at repo version `0.57.0` and platform version `0.31.0`.
 - `make converge-monitoring` now reruns cleanly with `ANSIBLE_HOST_KEY_CHECKING=False`, matching the existing guest-access workflows and avoiding stale guest host-key failures through the Proxmox jump path.
 - Live verification confirmed Grafana datasource provisioning, Loki service health on `monitoring-lv3`, Alloy agent health on the Proxmox host and all managed guests, NGINX access-log streams for `nginx-lv3`, and Docker container-log streams for the current `docker-runtime-lv3` control-plane applications.
 - A one-line `logger` event on the Proxmox host was used as deterministic verification evidence for host journald ingestion and should be treated as verification-only operational noise, not as application data.

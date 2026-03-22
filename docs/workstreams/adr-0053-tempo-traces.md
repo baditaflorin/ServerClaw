@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0053](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0053-opentelemetry-traces-and-service-maps-with-grafana-tempo.md)
 - Title: Distributed tracing and service maps for internal apps and workflows
-- Status: merged
+- Status: live_applied
 - Branch: `codex/adr-0053-tempo-traces`
 - Worktree: `../proxmox_florin_server-tempo-traces`
 - Owner: codex
@@ -56,3 +56,4 @@
 ## Notes For The Next Assistant
 
 - add more instrumented internal paths by pointing them at the shared OTLP endpoint on `monitoring-lv3`
+- Live apply completed on `2026-03-22` from `main` at repo version `0.57.0` and platform version `0.31.0`, with verified `mail-gateway` service names in Tempo and `traces_service_graph_request_total` present in Prometheus.

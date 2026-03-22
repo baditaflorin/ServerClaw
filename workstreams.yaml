@@ -475,13 +475,13 @@ workstreams:
       - host logs
       - guest logs
       - container logs
-    ready_to_merge: true
+    ready_to_merge: false
     live_applied: true
 
   - id: adr-0053-tempo-traces
     adr: "0053"
     title: OpenTelemetry traces and service maps with Grafana Tempo
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0053-tempo-traces
     worktree_path: ../proxmox_florin_server-tempo-traces
@@ -496,7 +496,7 @@ workstreams:
       - internal APIs
       - workflow execution
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0054-netbox-topology
     adr: "0054"
