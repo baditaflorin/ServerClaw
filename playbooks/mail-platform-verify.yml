@@ -50,7 +50,7 @@
         message = EmailMessage()
         message['From'] = 'monitor-probe@lv3.org'
         message['To'] = 'server@lv3.org'
-        message['Subject'] = 'LV3 inbound SMTP probe'
+        message['Subject'] = 'LV3 inbound SMTP probe {{ mail_platform_probe_id | default("manual") }} public'
         message.set_content('Inbound SMTP probe delivered through mail.lv3.org')
 
         with smtplib.SMTP('mail.lv3.org', 25, timeout=30) as client:
@@ -73,7 +73,7 @@
         message = EmailMessage()
         message['From'] = 'monitor-probe@lv3.org'
         message['To'] = 'server@lv3.org'
-        message['Subject'] = 'LV3 private SMTP probe'
+        message['Subject'] = 'LV3 inbound SMTP probe {{ mail_platform_probe_id | default("manual") }} private'
         message.set_content('Inbound SMTP probe delivered through 10.10.10.20')
 
         with smtplib.SMTP('10.10.10.20', 25, timeout=30) as client:
@@ -117,11 +117,51 @@
       register: mail_platform_inbox_after
       changed_when: false
 
-    - name: Assert inbox count increased
-      ansible.builtin.assert:
-        that:
-          - (mail_platform_inbox_after.stdout | int) > (mail_platform_inbox_before.stdout | int)
-        fail_msg: "The server mailbox did not receive the public SMTP probe."
+    - name: Assert the inbound SMTP probe is present in IMAP
+      ansible.builtin.shell: |
+        python3 - <<'PY'
+        import imaplib
+        from pathlib import Path
+
+        public_subject = 'LV3 inbound SMTP probe {{ mail_platform_probe_id | default("manual") }} public'
+        private_subject = 'LV3 inbound SMTP probe {{ mail_platform_probe_id | default("manual") }} private'
+
+        password = Path('/etc/lv3/mail-platform/server-mailbox-password').read_text(encoding='utf-8').strip()
+        mailbox = imaplib.IMAP4_SSL('127.0.0.1', 993)
+        mailbox.login('server', password)
+        status, data = mailbox.select('INBOX', readonly=True)
+        if status != 'OK':
+            raise SystemExit('imap select failed')
+
+        status, ids = mailbox.search(None, 'ALL')
+        if status != 'OK':
+            raise SystemExit('imap search failed')
+
+        recent_ids = ids[0].split()[-20:]
+        found_subjects = []
+        for message_id in recent_ids:
+            status, message_data = mailbox.fetch(message_id, '(BODY.PEEK[HEADER.FIELDS (SUBJECT)])')
+            if status != 'OK':
+                continue
+            header_bytes = b''.join(
+                part[1] for part in message_data if isinstance(part, tuple) and len(part) > 1
+            )
+            subject_header = header_bytes.decode('utf-8', errors='ignore')
+            if public_subject in subject_header:
+                found_subjects.append(public_subject)
+            if private_subject in subject_header:
+                found_subjects.append(private_subject)
+
+        mailbox.logout()
+        if not found_subjects:
+            raise SystemExit('probe subject not found in recent IMAP headers')
+
+        print(','.join(found_subjects))
+        PY
+      args:
+        executable: /bin/bash
+      register: mail_platform_inbound_probe_match
+      changed_when: false
 
     - name: Verify the notification profile catalog through the mail gateway
       ansible.builtin.shell: |
@@ -266,6 +306,7 @@
         msg:
           - "inbox_before={{ mail_platform_inbox_before.stdout | int }}"
           - "inbox_after={{ mail_platform_inbox_after.stdout | int }}"
+          - "inbound_match={{ mail_platform_inbound_probe_match.stdout | default('missing') }}"
           - "profile_catalog={{ mail_platform_profile_catalog.stdout_lines[1] | default('missing') }}"
           - "scope_rejection_status={{ mail_platform_profile_scope_rejection.stdout_lines[0] | default('missing') }}"
           - "outbound_profiles={{ mail_platform_outbound_probe.stdout | default('missing') }}"
