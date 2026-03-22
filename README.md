@@ -72,8 +72,8 @@ Portainer is now live on `docker-runtime-lv3` and reachable privately at `https:
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.57.0` |
-| Platform version | `0.31.0` |
+| Repository version | `0.58.0` |
+| Platform version | `0.32.0` |
 | Observed check date | `2026-03-22` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -113,7 +113,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `docker_runtime` | `2026-03-22-adr-0023-docker-runtime-live-apply` |
 | `identity_taxonomy` | `2026-03-22-adr-0046-identity-classes-live-apply` |
 | `mail_platform` | `2026-03-22-adr-0041-email-platform-live-apply` |
-| `monitoring` | `2026-03-22-adr-0011-monitoring-live-apply` |
+| `monitoring` | `2026-03-22-adr-0052-loki-live-apply` |
 | `netbox` | `2026-03-22-adr-0054-netbox-live-apply` |
 | `notification_profiles` | `2026-03-22-adr-0050-notification-profiles-live-apply` |
 | `ntopng` | `2026-03-22-adr-0059-ntopng-live-apply` |
@@ -125,6 +125,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `runtime_container_telemetry` | `2026-03-22-adr-0040-runtime-container-telemetry-live-apply` |
 | `short_lived_credentials_and_mtls` | `2026-03-22-adr-0047-short-lived-credentials-live-apply` |
 | `step_ca` | `2026-03-22-adr-0042-step-ca-live-apply` |
+| `tempo_tracing` | `2026-03-22-adr-0053-tempo-traces-live-apply` |
 | `uptime_kuma` | `2026-03-22-adr-0027-uptime-kuma-live-apply` |
 | `windmill` | `2026-03-22-adr-0044-windmill-live-apply` |
 <!-- END GENERATED: platform-status -->
@@ -446,8 +447,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.57.0` |
-| Platform version | `0.31.0` |
+| Repository version | `0.58.0` |
+| Platform version | `0.32.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -512,7 +513,8 @@ This repository is intentionally opinionated:
 | `0049` | Private-first API publication model | `merged` | [adr-0049-private-api-publication.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0049-private-api-publication.md) |
 | `0050` | Transactional email and notification profiles | `merged` | [adr-0050-notification-profiles.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0050-notification-profiles.md) |
 | `0051` | Control-plane backup, recovery, and break-glass | `merged` | [adr-0051-control-plane-recovery.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0051-control-plane-recovery.md) |
-| `0053` | OpenTelemetry traces and service maps with Grafana Tempo | `merged` | [adr-0053-tempo-traces.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0053-tempo-traces.md) |
+| `0052` | Centralized log aggregation with Grafana Loki | `live_applied` | [adr-0052-loki-logs.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0052-loki-logs.md) |
+| `0053` | OpenTelemetry traces and service maps with Grafana Tempo | `live_applied` | [adr-0053-tempo-traces.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0053-tempo-traces.md) |
 | `0054` | NetBox for topology, IPAM, and inventory | `live_applied` | [adr-0054-netbox-topology.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0054-netbox-topology.md) |
 | `0055` | Portainer for read-mostly Docker runtime operations | `live_applied` | [adr-0055-portainer-operations.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0055-portainer-operations.md) |
 | `0059` | ntopng for private network flow visibility | `live_applied` | [adr-0059-ntopng-network-visibility.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0059-ntopng-network-visibility.md) |

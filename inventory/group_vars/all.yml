@@ -1,5 +1,5 @@
-repo_version: 0.57.0
-platform_version: 0.31.0
+repo_version: 0.58.0
+platform_version: 0.32.0
 
 proxmox_release_major: 9
 proxmox_suite: trixie
@@ -86,6 +86,9 @@ hetzner_dns_zone_name: lv3.org
 hetzner_dns_records: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_dns_records('public') }}"
 
 monitoring_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring
+monitoring_grafana_repo_key_url: https://apt.grafana.com/gpg-full.key
+monitoring_grafana_repo_keyring: /etc/apt/keyrings/grafana.asc
+monitoring_grafana_repo_file: /etc/apt/sources.list.d/grafana.list
 monitoring_proxmox_writer_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/proxmox-writer.token
 monitoring_guest_writer_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/guest-writer.token
 monitoring_influxdb_repo_key_url: https://repos.influxdata.com/influxdata-archive.key
@@ -94,6 +97,8 @@ monitoring_influxdb_repo_file: /etc/apt/sources.list.d/influxdata.list
 monitoring_influxdb_url: http://127.0.0.1:8086
 monitoring_influxdb_org: lv3
 monitoring_influxdb_bucket: proxmox
+monitoring_loki_push_api_url: >-
+  http://{{ hostvars['monitoring-lv3'].ansible_host | default('10.10.10.40') }}:3100/loki/api/v1/push
 hetzner_dns_api_url: https://dns.hetzner.com/api/v1
 hetzner_dns_api_token_env_var: HETZNER_DNS_API_TOKEN
 
