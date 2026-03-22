@@ -47,6 +47,7 @@ These files are integration-owned and should normally be edited only during merg
 - [docs/runbooks/live-apply-receipts-and-verification-evidence.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/live-apply-receipts-and-verification-evidence.md): structured evidence model for real platform applies
 - [docs/runbooks/generate-status-documents.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/generate-status-documents.md): generated README status fragments and validation flow
 - [docs/runbooks/identity-taxonomy-and-managed-principals.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/identity-taxonomy-and-managed-principals.md): ADR 0046 identity classes, required metadata, and the current principal inventory
+- [docs/runbooks/configure-netbox.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-netbox.md): NetBox runtime, proxy, and repo-sync operator flow
 - [docs/release-process.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-process.md): branch, merge, and live-apply sequencing
 - [docs/workstreams/README.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/README.md): how parallel implementation is organized
 - [scripts/create-workstream.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/create-workstream.sh): creates the branch/worktree pair for a workstream
@@ -74,8 +75,10 @@ These files are integration-owned and should normally be edited only during merg
 - [playbooks/site.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/site.yml): main Ansible entry point for the Proxmox host
 - [playbooks/guest-access.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/guest-access.yml): guest SSH and access baseline enforcement
 - [playbooks/monitoring-stack.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/monitoring-stack.yml): monitoring VM convergence plus Proxmox metric-server wiring
+- [playbooks/netbox.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/netbox.yml): NetBox PostgreSQL, runtime, host proxy, and repo-sync convergence
 - [playbooks/uptime-kuma.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/uptime-kuma.yml): Uptime Kuma DNS, runtime, and edge-publication convergence
 - [scripts/uptime_kuma_tool.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/uptime_kuma_tool.py): repo-local client for Uptime Kuma bootstrap and monitor management
+- [scripts/netbox_inventory_sync.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/netbox_inventory_sync.py): repo-local NetBox API synchronizer for the canonical topology, IPAM, and governed service inventory
 - [.github/workflows/validate.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.github/workflows/validate.yml): CI path that runs the same `make validate` contract as local operators
 
 ### Shared automation inputs
@@ -120,6 +123,9 @@ These files are integration-owned and should normally be edited only during merg
 - [docs/adr/0040-docker-runtime-container-telemetry-via-telegraf-docker-input.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0040-docker-runtime-container-telemetry-via-telegraf-docker-input.md): architecture decision for Docker runtime container telemetry on the runtime VM
 - [docs/adr/0028-docker-build-vm-build-count-telemetry-via-cli-wrapper-events.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0028-docker-build-vm-build-count-telemetry-via-cli-wrapper-events.md): architecture decision for Docker build count and duration telemetry on the build VM
 - [roles/proxmox_metrics/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_metrics/tasks/main.yml): Proxmox external metric-server configuration for InfluxDB
+- [roles/netbox_postgres/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/netbox_postgres/tasks/main.yml): PostgreSQL role, database, and mirrored password handling for NetBox
+- [roles/netbox_runtime/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/netbox_runtime/tasks/main.yml): private NetBox Compose deployment and bootstrap-token verification on `docker-runtime-lv3`
+- [roles/netbox_sync/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/netbox_sync/tasks/main.yml): repo-managed synchronization of canonical topology, IPAM, and governed service inventory into NetBox
 
 ## Change Rules
 

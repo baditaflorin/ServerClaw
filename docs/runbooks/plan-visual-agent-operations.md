@@ -4,6 +4,8 @@
 
 This runbook groups the next proposed ADR set for a more visual, inspectable, and agent-friendly operations plane.
 
+ADR 0054 is now implemented live as the first delivered visual inventory surface; the remaining ADRs in this set are still planned.
+
 The target outcome is a platform where humans and agents can:
 
 - see infrastructure, runtime, network, and application state in dedicated visual tools
@@ -30,7 +32,7 @@ The target outcome is a platform where humans and agents can:
    - implement logs, traces, and network visibility before adding more mutation surfaces
    - priority: ADR 0052, ADR 0053, ADR 0059
 2. make topology browsable
-   - add NetBox once the platform already has good canonical metadata to sync
+   - NetBox is now the delivered visual topology, IPAM, and inventory plane, synchronized from canonical repo metadata
    - priority: ADR 0054
 3. standardize operator identity
    - add shared SSO before multiplying internal UIs

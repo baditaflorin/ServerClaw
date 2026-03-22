@@ -107,6 +107,19 @@
           "notes": "This is the private internal CA endpoint for SSH certificates and internal X.509 issuance."
         },
         {
+          "id": "netbox-api",
+          "kind": "service_api",
+          "endpoint": "http://100.118.189.95:8004/api/",
+          "auth": "Bootstrap NetBox API token mirrored under .local/netbox/api-token.txt until brokered identity is introduced.",
+          "service_refs": [
+            "netbox"
+          ],
+          "workflow_refs": [
+            "converge-netbox"
+          ],
+          "notes": "This is the private Tailscale-published NetBox API used for repo-managed synchronization and operator inventory browsing."
+        },
+        {
           "id": "mail-gateway-api",
           "kind": "service_api",
           "endpoint": "http://10.10.10.20:8081",

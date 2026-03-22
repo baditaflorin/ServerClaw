@@ -675,6 +675,53 @@
         "curl -s -H \"Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)\" http://100.118.189.95:8005/api/users/global/whoami"
       ]
     },
+    "converge-netbox": {
+      "description": "Converge private NetBox on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish the host-side Tailscale proxy, and synchronize canonical repo inventory into the API.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-netbox",
+        "command": "make converge-netbox"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "netbox_database_password",
+          "netbox_superuser_password",
+          "netbox_api_token"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-netbox"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-netbox.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/netbox.yml",
+        "roles/netbox_postgres",
+        "roles/netbox_runtime",
+        "roles/netbox_sync",
+        "roles/proxmox_tailscale_proxy",
+        "inventory/group_vars/all.yml",
+        "inventory/host_vars/proxmox_florin.yml",
+        "scripts/netbox_inventory_sync.py",
+        "config/control-plane-lanes.json"
+      ],
+      "outputs": [
+        "NetBox runtime deployed on docker-runtime-lv3 with a PostgreSQL backend on postgres-lv3, a private Tailscale proxy on the Proxmox host, and repo-managed topology and IPAM inventory synchronized into the NetBox API."
+      ],
+      "verification_commands": [
+        "make syntax-check-netbox",
+        "curl -s -o /dev/null -w '%{http_code}\\n' http://100.118.189.95:8004/login/",
+        "curl -s -H \"Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/netbox/api-token.txt)\" http://100.118.189.95:8004/api/virtualization/virtual-machines/?limit=20",
+        "uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/netbox_inventory_sync.py --api-url http://100.118.189.95:8004 --api-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/netbox/api-token.txt --host-vars /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml --stack /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml --lane-catalog /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/control-plane-lanes.json"
+      ]
+    },
     "deploy-uptime-kuma": {
       "description": "Deploy Uptime Kuma on the Docker runtime VM and publish it at uptime.lv3.org.",
       "lifecycle_status": "active",

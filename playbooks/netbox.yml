@@ -1,0 +1,52 @@
+---
+- name: Converge the Tailscale operator proxy for NetBox
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: proxmox_tailscale_proxy
+    - role: proxmox_security
+
+- name: Converge PostgreSQL access for NetBox
+  hosts: postgres-lv3
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Ensure target guest is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+  roles:
+    - role: postgres_vm
+      vars:
+        postgres_vm_client_allowed_sources_extra:
+          - "{{ hostvars['docker-runtime-lv3'].ansible_host }}/32"
+    - role: netbox_postgres
+
+- name: Converge NetBox on the Docker runtime VM
+  hosts: docker-runtime-lv3
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Ensure target guest is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+  roles:
+    - role: docker_runtime
+    - role: netbox_runtime
+
+- name: Synchronize canonical repo inventory into NetBox
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  roles:
+    - role: netbox_sync
