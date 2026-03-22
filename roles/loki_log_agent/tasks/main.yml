@@ -54,6 +54,34 @@
     append: true
   notify: Restart Alloy
 
+- name: Ensure extra file-scrape parent directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop: >-
+    {{
+      loki_log_agent_file_scrapes
+      | map(attribute='paths')
+      | flatten
+      | map('dirname')
+      | list
+      | unique
+    }}
+  when: loki_log_agent_file_scrapes | length > 0
+
+- name: Ensure extra file-scrape targets exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: touch
+    owner: root
+    group: adm
+    mode: "0640"
+    access_time: preserve
+    modification_time: preserve
+  loop: "{{ loki_log_agent_file_scrapes | map(attribute='paths') | flatten | list }}"
+  when: loki_log_agent_file_scrapes | length > 0
+
 - name: Render Alloy Loki log agent configuration
   ansible.builtin.template:
     src: config.alloy.j2

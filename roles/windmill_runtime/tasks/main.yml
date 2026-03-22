@@ -54,6 +54,24 @@
       - path: "{{ windmill_secret_dir }}"
         mode: "0700"
 
+- name: Ensure the platform mutation-audit directory exists
+  ansible.builtin.file:
+    path: "{{ windmill_mutation_audit_dir }}"
+    state: directory
+    owner: root
+    group: adm
+    mode: "0755"
+
+- name: Ensure the platform mutation-audit file exists
+  ansible.builtin.file:
+    path: "{{ windmill_mutation_audit_file }}"
+    state: touch
+    owner: root
+    group: adm
+    mode: "0640"
+    access_time: preserve
+    modification_time: preserve
+
 - name: Generate the Windmill superadmin secret
   ansible.builtin.shell: |
     set -euo pipefail

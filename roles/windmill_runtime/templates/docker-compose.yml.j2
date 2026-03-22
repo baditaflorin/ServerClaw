@@ -11,6 +11,7 @@ services:
       SUPERADMIN_SECRET: ${SUPERADMIN_SECRET}
       SERVER_BIND_ADDR: 0.0.0.0
     volumes:
+      - {{ windmill_mutation_audit_dir }}:/var/log/platform
       - worker_logs:/tmp/windmill/logs
 
   windmill_worker:
@@ -23,9 +24,11 @@ services:
       WORKER_GROUP: default
       NUM_WORKERS: "{{ windmill_worker_count }}"
       FAVOR_UNSHARE_PID: "true"
+      LV3_MUTATION_AUDIT_FILE: /var/log/platform/mutation-audit.jsonl
     depends_on:
       - windmill_server
     volumes:
+      - {{ windmill_mutation_audit_dir }}:/var/log/platform
       - /var/run/docker.sock:/var/run/docker.sock
       - worker_dependency_cache:/tmp/windmill/cache
       - worker_logs:/tmp/windmill/logs
@@ -40,9 +43,11 @@ services:
       NATIVE_MODE: "true"
       NUM_WORKERS: "{{ windmill_native_worker_count }}"
       SLEEP_QUEUE: "200"
+      LV3_MUTATION_AUDIT_FILE: /var/log/platform/mutation-audit.jsonl
     depends_on:
       - windmill_server
     volumes:
+      - {{ windmill_mutation_audit_dir }}:/var/log/platform
       - worker_logs:/tmp/windmill/logs
 
   windmill_extra:

@@ -126,3 +126,25 @@ loki.source.docker "containers" {
   }
 }
 {% endif %}
+{% for scrape in loki_log_agent_file_scrapes %}
+loki.source.file "{{ scrape.name }}" {
+  targets = [
+{% for log_path in scrape.paths %}
+    {
+      __path__     = "{{ log_path }}",
+      host         = "{{ loki_log_agent_hostname }}",
+      node_role    = "{{ loki_log_agent_role }}",
+      environment  = "{{ loki_log_agent_environment }}",
+      lane         = "{{ loki_log_agent_lane }}",
+{% for label_key, label_value in scrape.labels.items() %}
+      {{ label_key }} = "{{ label_value }}",
+{% endfor %}
+    },
+{% endfor %}
+  ]
+  forward_to = [loki.write.lv3.receiver]
+  file_match {
+    enabled = true
+  }
+}
+{% endfor %}

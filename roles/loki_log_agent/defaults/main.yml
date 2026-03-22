@@ -27,6 +27,7 @@ loki_log_agent_nginx_error_logs:
 loki_log_agent_docker_logs_enabled: false
 loki_log_agent_docker_host: unix:///var/run/docker.sock
 loki_log_agent_docker_refresh_interval: 30s
+loki_log_agent_file_scrapes: []
 loki_log_agent_additional_groups:
   - adm
   - systemd-journal

@@ -98,6 +98,11 @@ monitoring_influxdb_repo_file: /etc/apt/sources.list.d/influxdata.list
 monitoring_influxdb_url: http://127.0.0.1:8086
 monitoring_influxdb_org: lv3
 monitoring_influxdb_bucket: proxmox
+monitoring_loki_push_api_url: >-
+  http://{{ hostvars['monitoring-lv3'].ansible_host | default('10.10.10.40') }}:3100/loki/api/v1/push
+platform_log_dir: /var/log/platform
+mutation_audit_log_file: "{{ platform_log_dir }}/mutation-audit.jsonl"
+openbao_host_audit_log_file: /opt/openbao/logs/audit.log
 hetzner_dns_api_url: https://dns.hetzner.com/api/v1
 hetzner_dns_api_token_env_var: HETZNER_DNS_API_TOKEN
 

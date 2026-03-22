@@ -21,6 +21,8 @@ windmill_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_flori
 windmill_superadmin_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt
 windmill_private_base_url: "{{ platform_service_topology | platform_service_url('windmill', 'internal') }}"
 windmill_base_url: "{{ platform_service_topology | platform_service_url('windmill', 'controller') }}"
+windmill_mutation_audit_dir: "{{ platform_log_dir }}"
+windmill_mutation_audit_file: "{{ mutation_audit_log_file }}"
 windmill_seed_scripts:
   - path: f/lv3/windmill_healthcheck
     local_file: "{{ playbook_dir }}/../config/windmill/scripts/lv3-healthcheck.py"
