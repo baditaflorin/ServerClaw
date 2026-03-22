@@ -82,6 +82,7 @@ proxmox_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_flor
 
 monitoring_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring
 monitoring_proxmox_writer_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/proxmox-writer.token
+monitoring_guest_writer_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/guest-writer.token
 monitoring_grafana_repo_key_url: https://apt.grafana.com/gpg-full.key
 monitoring_grafana_repo_keyring: /etc/apt/keyrings/grafana.asc
 monitoring_grafana_repo_file: /etc/apt/sources.list.d/grafana.list
@@ -115,7 +116,17 @@ monitoring_influxdb_admin_password_file: /etc/lv3/monitoring/influxdb-admin-pass
 monitoring_influxdb_operator_token_file: /etc/lv3/monitoring/influxdb-operator.token
 monitoring_influxdb_proxmox_writer_token_file: /etc/lv3/monitoring/influxdb-proxmox-writer.token
 monitoring_influxdb_proxmox_writer_description: lv3-proxmox-writer
+monitoring_influxdb_guest_writer_token_file: /etc/lv3/monitoring/influxdb-guest-writer.token
+monitoring_influxdb_guest_writer_description: lv3-guest-writer
 monitoring_influxdb_grafana_reader_description: lv3-grafana-reader
+nginx_observability_dir: /etc/lv3/observability
+nginx_observability_writer_token_file: /etc/lv3/observability/influxdb-guest-writer.token
+nginx_observability_telegraf_config_file: /etc/telegraf/telegraf.d/lv3-nginx.conf
+nginx_observability_stub_status_config_file: /etc/nginx/conf.d/lv3-stub-status.conf
+nginx_observability_stub_status_url: http://127.0.0.1:8080/basic_status
+nginx_observability_influx_url: http://10.10.10.40:8086
+nginx_observability_hostname: nginx-lv3
+nginx_observability_role: nginx-edge
 proxmox_metrics_server_id: influxdb-http
 proxmox_metrics_token_hash_file: /root/.lv3-proxmox-metrics-token.sha256
 tailscale_apt_keyring_path: /usr/share/keyrings/tailscale-archive-keyring.gpg

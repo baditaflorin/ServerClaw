@@ -1,0 +1,10 @@
+---
+- name: reload nginx
+  ansible.builtin.systemd:
+    name: nginx
+    state: reloaded
+
+- name: restart telegraf
+  ansible.builtin.systemd:
+    name: telegraf
+    state: restarted

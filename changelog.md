@@ -10,6 +10,20 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 - use this section on `main` for merged notes that have not yet been cut into a numbered release
 
+## 0.24.0 - 2026-03-22
+
+- added guest-side nginx observability with Telegraf into the existing InfluxDB and Grafana path
+- added a dedicated guest-writer token flow on the monitoring VM and mirrored it locally for managed guest telemetry
+- extended the Grafana platform dashboard with nginx-specific service panels sourced from `stub_status`
+- updated the monitoring runbook, ADR 0011, and repository map to reflect nginx service monitoring
+
+Platform impact:
+
+- `nginx-lv3` now exposes `stub_status` on loopback-only `127.0.0.1:8080/basic_status`
+- Telegraf now runs on `nginx-lv3` and writes guest metrics into InfluxDB
+- the dashboard `LV3 Platform Overview` now includes nginx service panels and has `24` panels total
+- nginx measurement flow to InfluxDB was verified live
+
 ## 0.23.0 - 2026-03-22
 
 - added Grafana dashboard-as-code for the LV3 platform monitoring view

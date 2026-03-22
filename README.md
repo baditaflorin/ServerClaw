@@ -114,6 +114,8 @@ Proxmox metric server influxdb-http active and writing to the proxmox bucket
 Grafana published at https://grafana.lv3.org via the NGINX edge
 Grafana dashboard LV3 Platform Overview provisioned from repo
 Dashboard covers the Proxmox host plus nginx-lv3, docker-runtime-lv3, docker-build-lv3, and monitoring-lv3 individually
+NGINX guest telemetry now includes loopback-only stub_status plus Telegraf shipping into InfluxDB
+Dashboard now also includes nginx service panels for active connections, requests per second, accepts and handled rates, and connection states
 ```
 
 The current public publication model is:
@@ -174,8 +176,8 @@ This repo now tracks three distinct things:
 
 Current values on `main`:
 
-- `repo_version`: `0.23.0`
-- `platform_version`: `0.15.0`
+- `repo_version`: `0.24.0`
+- `platform_version`: `0.16.0`
 - `observed_os`: `Debian 13`
 - `observed_proxmox_installed`: `true`
 - `observed_pve_manager_version`: `9.1.6`

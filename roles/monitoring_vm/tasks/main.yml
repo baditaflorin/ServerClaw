@@ -319,6 +319,15 @@
           | first
         ) | default({})
       }}
+    monitoring_influxdb_guest_writer_auth: >-
+      {{
+        (
+          monitoring_influxdb_auths.stdout | from_json
+          | selectattr('description', 'equalto', monitoring_influxdb_guest_writer_description)
+          | list
+          | first
+        ) | default({})
+      }}
     monitoring_influxdb_grafana_reader_auth: >-
       {{
         (
@@ -391,6 +400,63 @@
   ansible.builtin.stat:
     path: "{{ monitoring_grafana_datasource_token_file }}"
   register: monitoring_grafana_datasource_token_stat
+
+- name: Check whether guest writer token file exists
+  ansible.builtin.stat:
+    path: "{{ monitoring_influxdb_guest_writer_token_file }}"
+  register: monitoring_influxdb_guest_writer_token_stat
+
+- name: Delete existing guest writer auth if token file is missing
+  ansible.builtin.command:
+    argv:
+      - influx
+      - auth
+      - delete
+      - --host
+      - "{{ monitoring_influxdb_url }}"
+      - --id
+      - "{{ monitoring_influxdb_guest_writer_auth.id }}"
+  environment:
+    INFLUX_TOKEN: "{{ monitoring_influxdb_operator_token }}"
+  when:
+    - monitoring_influxdb_guest_writer_auth | length > 0
+    - not monitoring_influxdb_guest_writer_token_stat.stat.exists
+  changed_when: true
+  no_log: true
+
+- name: Create guest writer auth
+  ansible.builtin.command:
+    argv:
+      - influx
+      - auth
+      - create
+      - --host
+      - "{{ monitoring_influxdb_url }}"
+      - --org
+      - "{{ monitoring_influxdb_org }}"
+      - --description
+      - "{{ monitoring_influxdb_guest_writer_description }}"
+      - --write-bucket
+      - "{{ monitoring_influxdb_bucket_record.id }}"
+      - --json
+  environment:
+    INFLUX_TOKEN: "{{ monitoring_influxdb_operator_token }}"
+  register: monitoring_influxdb_guest_writer_auth_created
+  when: >
+    monitoring_influxdb_guest_writer_auth | length == 0
+    or not monitoring_influxdb_guest_writer_token_stat.stat.exists
+  changed_when: true
+  no_log: true
+
+- name: Persist guest writer token
+  ansible.builtin.copy:
+    dest: "{{ monitoring_influxdb_guest_writer_token_file }}"
+    content: "{{ (monitoring_influxdb_guest_writer_auth_created.stdout | from_json).token }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+  when: monitoring_influxdb_guest_writer_auth_created is changed
+  no_log: true
 
 - name: Delete existing Grafana reader auth if token file is missing
   ansible.builtin.command:
@@ -552,10 +618,25 @@
   register: monitoring_influxdb_proxmox_writer_token_raw
   no_log: true
 
+- name: Read guest writer token
+  ansible.builtin.slurp:
+    src: "{{ monitoring_influxdb_guest_writer_token_file }}"
+  register: monitoring_influxdb_guest_writer_token_raw
+  no_log: true
+
 - name: Mirror proxmox writer token to the control machine
   ansible.builtin.copy:
     dest: "{{ monitoring_proxmox_writer_token_local_file }}"
     content: "{{ monitoring_influxdb_proxmox_writer_token_raw.content | b64decode }}"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Mirror guest writer token to the control machine
+  ansible.builtin.copy:
+    dest: "{{ monitoring_guest_writer_token_local_file }}"
+    content: "{{ monitoring_influxdb_guest_writer_token_raw.content | b64decode }}"
     mode: "0600"
   delegate_to: localhost
   become: false

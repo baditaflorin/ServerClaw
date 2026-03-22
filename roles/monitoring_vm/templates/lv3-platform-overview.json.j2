@@ -10,6 +10,12 @@ from(bucket: "{{ monitoring_influxdb_bucket }}") |> range(start: v.timeRangeStar
 {% macro load_query(host_name) -%}
 from(bucket: "{{ monitoring_influxdb_bucket }}") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == "cpustat" and r.object == "nodes" and r.host == "{{ host_name }}" and r._field == "avg1")
 {%- endmacro %}
+{% macro nginx_field_query(field_name) -%}
+from(bucket: "{{ monitoring_influxdb_bucket }}") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == "nginx" and r.host == "nginx-lv3" and r._field == "{{ field_name }}")
+{%- endmacro %}
+{% macro nginx_rate_query(field_name) -%}
+from(bucket: "{{ monitoring_influxdb_bucket }}") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == "nginx" and r.host == "nginx-lv3" and r._field == "{{ field_name }}") |> derivative(unit: 1s, nonNegative: true)
+{%- endmacro %}
 {% macro timeseries_panel(panel_id, x, y, title, unit, query, min_value=None, max_value=None) -%}
 {
   "id": {{ panel_id }},
@@ -79,7 +85,11 @@ from(bucket: "{{ monitoring_influxdb_bucket }}") |> range(start: v.timeRangeStar
     {{ timeseries_panel((loop.index0 * 4) + 5, 0, (loop.index0 + 1) * 8, guest.name ~ " CPU Usage", "percent", cpu_query("qemu", guest.name), 0, 100) }},
     {{ timeseries_panel((loop.index0 * 4) + 6, 6, (loop.index0 + 1) * 8, guest.name ~ " Memory Usage", "percent", ratio_query("qemu", guest.name, "mem", "maxmem"), 0, 100) }},
     {{ timeseries_panel((loop.index0 * 4) + 7, 12, (loop.index0 + 1) * 8, guest.name ~ " Disk Usage", "percent", ratio_query("qemu", guest.name, "disk", "maxdisk"), 0, 100) }},
-    {{ timeseries_panel((loop.index0 * 4) + 8, 18, (loop.index0 + 1) * 8, guest.name ~ " Network Throughput", "Bps", throughput_query("qemu", guest.name), 0, None) }}{% endfor %}
+    {{ timeseries_panel((loop.index0 * 4) + 8, 18, (loop.index0 + 1) * 8, guest.name ~ " Network Throughput", "Bps", throughput_query("qemu", guest.name), 0, None) }}{% endfor %},
+    {{ timeseries_panel(21, 0, 40, "NGINX Active Connections", "short", nginx_field_query("active"), 0, None) }},
+    {{ timeseries_panel(22, 6, 40, "NGINX Requests Per Second", "reqps", nginx_rate_query("requests"), 0, None) }},
+    {{ timeseries_panel(23, 12, 40, "NGINX Accepts And Handled Per Second", "cps", "from(bucket: \"" ~ monitoring_influxdb_bucket ~ "\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"nginx\" and r.host == \"nginx-lv3\" and (r._field == \"accepts\" or r._field == \"handled\")) |> derivative(unit: 1s, nonNegative: true)", 0, None) }},
+    {{ timeseries_panel(24, 18, 40, "NGINX Connection States", "short", "from(bucket: \"" ~ monitoring_influxdb_bucket ~ "\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"nginx\" and r.host == \"nginx-lv3\" and (r._field == \"reading\" or r._field == \"writing\" or r._field == \"waiting\"))", 0, None) }}
   ],
   "refresh": "30s",
   "schemaVersion": 39,

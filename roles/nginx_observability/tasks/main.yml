@@ -1,0 +1,123 @@
+---
+- name: Ensure nginx observability prerequisite packages are present
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gpg
+    state: present
+
+- name: Ensure APT keyring directory exists
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: "0755"
+
+- name: Install InfluxData repository key
+  ansible.builtin.get_url:
+    url: "{{ monitoring_influxdb_repo_key_url }}"
+    dest: /tmp/influxdata-archive.key
+    mode: "0644"
+
+- name: Convert InfluxData repository key into a gpg keyring
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --dearmor
+      - --yes
+      - --output
+      - "{{ monitoring_influxdb_repo_keyring }}"
+      - /tmp/influxdata-archive.key
+    creates: "{{ monitoring_influxdb_repo_keyring }}"
+
+- name: Install InfluxData repository definition
+  ansible.builtin.copy:
+    dest: "{{ monitoring_influxdb_repo_file }}"
+    mode: "0644"
+    content: |
+      deb [signed-by={{ monitoring_influxdb_repo_keyring }}] https://repos.influxdata.com/debian stable main
+
+- name: Install nginx observability packages
+  ansible.builtin.apt:
+    name:
+      - telegraf
+    state: present
+    update_cache: true
+
+- name: Ensure nginx observability secret directory exists
+  ansible.builtin.file:
+    path: "{{ nginx_observability_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Ensure local guest writer token exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ monitoring_guest_writer_token_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: nginx_observability_guest_writer_local_token
+
+- name: Fail if the guest writer token is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ monitoring_guest_writer_token_local_file }} is missing on the control machine.
+      Converge the monitoring VM first so the guest-writer token exists before enabling nginx guest observability.
+  when: not nginx_observability_guest_writer_local_token.stat.exists
+
+- name: Persist guest writer token on the nginx guest
+  ansible.builtin.copy:
+    dest: "{{ nginx_observability_writer_token_file }}"
+    content: "{{ lookup('file', monitoring_guest_writer_token_local_file) | trim }}\n"
+    owner: root
+    group: telegraf
+    mode: "0640"
+  no_log: true
+  notify: restart telegraf
+
+- name: Render NGINX stub_status loopback configuration
+  ansible.builtin.template:
+    src: lv3-stub-status.conf.j2
+    dest: "{{ nginx_observability_stub_status_config_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: reload nginx
+
+- name: Validate NGINX configuration
+  ansible.builtin.command: nginx -t
+  changed_when: false
+
+- name: Render Telegraf NGINX observability configuration
+  ansible.builtin.template:
+    src: telegraf-nginx.conf.j2
+    dest: "{{ nginx_observability_telegraf_config_file }}"
+    owner: root
+    group: telegraf
+    mode: "0640"
+  no_log: true
+  notify: restart telegraf
+
+- name: Flush nginx observability handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Ensure Telegraf is enabled and started
+  ansible.builtin.systemd:
+    name: telegraf
+    enabled: true
+    state: started
+
+- name: Verify local NGINX stub_status endpoint
+  ansible.builtin.uri:
+    url: "{{ nginx_observability_stub_status_url }}"
+    method: GET
+    status_code: 200
+  register: nginx_observability_stub_status
+  changed_when: false
+
+- name: Verify Telegraf service is active
+  ansible.builtin.command: systemctl is-active telegraf
+  register: nginx_observability_telegraf_status
+  changed_when: false

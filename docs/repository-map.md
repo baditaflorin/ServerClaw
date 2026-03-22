@@ -76,6 +76,7 @@ These files are integration-owned and should normally be edited only during merg
 - [roles/proxmox_security/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_security/tasks/main.yml): Proxmox firewall, ACME, notifications, and TFA
 - [roles/monitoring_vm/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/monitoring_vm/tasks/main.yml): Grafana and InfluxDB convergence on the monitoring VM
 - [roles/monitoring_vm/templates/lv3-platform-overview.json.j2](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/monitoring_vm/templates/lv3-platform-overview.json.j2): managed Grafana dashboard definition for the Proxmox host and guest fleet
+- [roles/nginx_observability/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/nginx_observability/tasks/main.yml): loopback-only `stub_status` plus Telegraf shipping for `nginx-lv3`
 - [roles/proxmox_metrics/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_metrics/tasks/main.yml): Proxmox external metric-server configuration for InfluxDB
 
 ## Change Rules

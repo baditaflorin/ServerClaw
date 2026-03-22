@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.23.0
-platform_version: 0.15.0
+repo_version: 0.24.0
+platform_version: 0.16.0
 
 desired_state:
   host_id: proxmox_florin
@@ -186,11 +186,13 @@ observed_state:
     grafana_public_url: https://grafana.lv3.org
     grafana_dashboard_uid: lv3-platform-overview
     grafana_dashboard_title: LV3 Platform Overview
-    grafana_dashboard_panel_count: 20
+    grafana_dashboard_panel_count: 24
     grafana_dashboard_provisioned: true
     influxdb_internal_url: http://10.10.10.40:8086
     proxmox_metric_server_id: influxdb-http
     proxmox_metrics_flow_verified: true
+    nginx_stub_status_loopback_enabled: true
+    nginx_guest_metrics_flow_verified: true
   public_publication:
     edge_configured: true
     edge_tls_certificate_present: true
@@ -212,8 +214,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.23.0
+    current: 0.24.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.15.0
+    current: 0.16.0
     meaning: intended platform release for the actual server configuration

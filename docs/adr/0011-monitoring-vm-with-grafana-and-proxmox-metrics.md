@@ -115,9 +115,15 @@ The implemented dashboard currently covers:
 
 - Proxmox host load, CPU, memory, and disk usage
 - `nginx-lv3` CPU, memory, disk, and network throughput
+- `nginx-lv3` NGINX service telemetry from loopback-only `stub_status`
 - `docker-runtime-lv3` CPU, memory, disk, and network throughput
 - `docker-build-lv3` CPU, memory, disk, and network throughput
 - `monitoring-lv3` CPU, memory, disk, and network throughput
+
+The implemented guest-level telemetry currently includes:
+
+- `nginx-lv3` Telegraf shipping guest metrics into InfluxDB
+- `nginx-lv3` NGINX active connections, accepts, handled, requests, and connection-state visibility in Grafana
 
 ## Sources
 
