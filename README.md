@@ -184,6 +184,7 @@ password SSH disabled on host and guests
 | `step-ca-api` | `internal-only` | `api` | `https://100.118.189.95:9443` | Reachable through the Proxmox host Tailscale proxy for approved controller and trust-bootstrap traffic only. |
 | `openbao-api` | `internal-only` | `api` | `https://100.118.189.95:8200` | Reachable through the Proxmox host Tailscale proxy and the runtime loopback listener, with client-certificate authentication on the external path. |
 | `windmill-api` | `operator-only` | `api` | `http://100.118.189.95:8005/api` | Reachable only through the Proxmox host Tailscale proxy on port 8005. |
+| `portainer-api` | `operator-only` | `api` | `https://100.118.189.95:9444` | Reachable only through the Proxmox host Tailscale proxy on port 9444. |
 | `mail-gateway-api` | `internal-only` | `api` | `http://10.10.10.20:8081` | Reachable only on the LV3 private guest network at docker-runtime-lv3:8081. |
 | `open-webui-operator-workbench` | `operator-only` | `api` | `http://100.118.189.95:8008` | Reachable only through the Proxmox host Tailscale proxy on port 8008. |
 | `stalwart-mail-events` | `internal-only` | `event` | `http://10.10.10.20:8081/webhooks/stalwart` | Reachable only from the private mail-platform stack on docker-runtime-lv3. |

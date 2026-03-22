@@ -56,6 +56,15 @@
       "approval_notes": "Windmill administrative and workflow APIs are operator-facing private surfaces, not public application endpoints."
     },
     {
+      "id": "portainer-api",
+      "title": "Portainer API",
+      "lane": "api",
+      "lane_surface_ref": "portainer-api",
+      "publication_tier": "operator-only",
+      "reachability": "Reachable only through the Proxmox host Tailscale proxy on port 9444.",
+      "approval_notes": "Portainer stays private-only for operator and governed wrapper use; do not publish it through public DNS or the NGINX edge."
+    },
+    {
       "id": "mail-gateway-api",
       "title": "Mail gateway API",
       "lane": "api",
