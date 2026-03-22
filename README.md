@@ -68,8 +68,8 @@ The control-plane governance layer is now live on `main`: command, API, message,
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.50.0` |
-| Platform version | `0.26.0` |
+| Repository version | `0.51.0` |
+| Platform version | `0.27.0` |
 | Observed check date | `2026-03-22` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -110,6 +110,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `identity_taxonomy` | `2026-03-22-adr-0046-identity-classes-live-apply` |
 | `mail_platform` | `2026-03-22-adr-0041-email-platform-live-apply` |
 | `monitoring` | `2026-03-22-adr-0011-monitoring-live-apply` |
+| `notification_profiles` | `2026-03-22-adr-0050-notification-profiles-live-apply` |
 | `openbao` | `2026-03-22-adr-0043-openbao-live-apply` |
 | `postgres_vm` | `2026-03-22-adr-0026-postgres-vm-live-apply` |
 | `public_edge_publication` | `2026-03-22-adr-0021-edge-publication-live-apply` |
@@ -425,8 +426,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.50.0` |
-| Platform version | `0.26.0` |
+| Repository version | `0.51.0` |
+| Platform version | `0.27.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -471,7 +472,7 @@ This repository is intentionally opinionated:
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
 | `0011` | Monitoring stack rollout | `live_applied` | [adr-0011-monitoring.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md) |
-| `0014` | Tailscale private access rollout | `merged` | [adr-0014-tailscale.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0014-tailscale.md) |
+| `0014` | Tailscale private access rollout | `live_applied` | [adr-0014-tailscale.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0014-tailscale.md) |
 | `0020` | Initial storage and backup model | `merged` | [adr-0020-backups.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0020-backups.md) |
 | `0023` | Docker runtime VM baseline | `live_applied` | [adr-0023-docker-runtime.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0023-docker-runtime.md) |
 | `0026` | Dedicated PostgreSQL VM baseline | `merged` | [adr-0026-postgres-vm.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0026-postgres-vm.md) |

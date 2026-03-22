@@ -8,6 +8,18 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.51.0 - 2026-03-22
+
+- applied ADR 0050 live by provisioning distinct operator, platform, and agent sender profiles on the managed mail platform instead of reusing one global outbound credential
+- added scoped notification-profile mailbox passwords and mail-gateway API keys, plus gateway-side profile enforcement and per-profile delivery counters
+- documented the new sender-profile operating model, added controller-local secret inventory entries, and added a focused profile verification playbook for live delivery checks
+
+Platform impact:
+
+- `alerts@lv3.org`, `platform@lv3.org`, and `agents@lv3.org` now exist as managed sender identities on `docker-runtime-lv3`
+- each sender profile now has its own scoped mail-gateway API key and mailbox password mirrored under `.local/mail-platform/profiles/`
+- the mail gateway now enforces profile-bound send identity and records per-profile request and delivery counters
+
 ## 0.50.0 - 2026-03-22
 
 - implemented ADR 0049 as a canonical API publication contract instead of leaving publication policy only in prose
