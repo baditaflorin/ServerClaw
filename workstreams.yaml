@@ -64,3 +64,24 @@ workstreams:
       - restore_validation
     ready_to_merge: false
     live_applied: false
+
+  - id: adr-0022-uptime-kuma
+    adr: 0022
+    title: Uptime Kuma rollout on the Docker runtime VM
+    status: live_applied
+    owner: codex
+    branch: codex/adr-0022-uptime-kuma
+    worktree_path: ../proxmox_florin_server-uptime-kuma
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0022-uptime-kuma.md
+    depends_on:
+      - adr-0014-tailscale
+      - adr-0021-public-subdomain-publication-at-the-nginx-edge
+    conflicts_with: []
+    shared_surfaces:
+      - docker-runtime-lv3
+      - uptime.lv3.org
+      - /opt/uptime-kuma
+      - nginx_edge
+      - hetzner_dns
+    ready_to_merge: true
+    live_applied: true

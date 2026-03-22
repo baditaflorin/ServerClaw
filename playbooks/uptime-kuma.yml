@@ -1,0 +1,37 @@
+---
+- name: Ensure Hetzner DNS publication for Uptime Kuma
+  hosts: proxmox_hosts
+  become: false
+  gather_facts: false
+
+  tasks:
+    - name: Ensure Hetzner DNS records are present
+      ansible.builtin.include_role:
+        name: hetzner_dns_records
+        apply:
+          delegate_to: localhost
+          become: false
+      run_once: true
+
+- name: Converge Uptime Kuma on the Docker runtime VM
+  hosts: docker-runtime-lv3
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Ensure target guest is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+  roles:
+    - role: uptime_kuma_runtime
+
+- name: Publish Uptime Kuma through the NGINX edge
+  hosts: nginx-lv3
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: nginx_edge_publication

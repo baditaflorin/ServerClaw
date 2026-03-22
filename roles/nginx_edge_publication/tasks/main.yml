@@ -31,6 +31,36 @@
     path: "/etc/letsencrypt/live/{{ public_edge_cert_name }}/fullchain.pem"
   register: public_edge_certificate
 
+- name: Read current public edge certificate SANs
+  ansible.builtin.command:
+    argv:
+      - openssl
+      - x509
+      - -in
+      - "/etc/letsencrypt/live/{{ public_edge_cert_name }}/fullchain.pem"
+      - -noout
+      - -ext
+      - subjectAltName
+  when: public_edge_certificate.stat.exists
+  register: public_edge_certificate_sans
+  changed_when: false
+
+- name: Derive current and missing public edge certificate domains
+  ansible.builtin.set_fact:
+    public_edge_current_certificate_domains: >-
+      {{
+        (public_edge_certificate_sans.stdout | default(''))
+        | regex_findall('DNS:([^,\\s]+)')
+      }}
+    public_edge_missing_certificate_domains: >-
+      {{
+        public_edge_certificate_domains
+        | difference(
+            (public_edge_certificate_sans.stdout | default(''))
+            | regex_findall('DNS:([^,\\s]+)')
+          )
+      }}
+
 - name: Render NGINX public edge configuration
   ansible.builtin.template:
     src: lv3-edge.conf.j2
@@ -76,6 +106,28 @@
       - -d
       - "{{ public_edge_certificate_domains | join(',') }}"
   when: not public_edge_certificate.stat.exists
+  changed_when: true
+
+- name: Expand the public edge Let's Encrypt certificate when domains were added
+  ansible.builtin.command:
+    argv:
+      - certbot
+      - certonly
+      - --non-interactive
+      - --agree-tos
+      - --expand
+      - --email
+      - "{{ public_edge_certbot_email }}"
+      - --cert-name
+      - "{{ public_edge_cert_name }}"
+      - --webroot
+      - -w
+      - "{{ public_edge_acme_root }}"
+      - -d
+      - "{{ public_edge_certificate_domains | join(',') }}"
+  when:
+    - public_edge_certificate.stat.exists
+    - public_edge_missing_certificate_domains | length > 0
   changed_when: true
 
 - name: Install NGINX reload hook for certificate renewal

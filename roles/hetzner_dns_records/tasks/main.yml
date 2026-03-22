@@ -1,0 +1,44 @@
+---
+- name: Assert Hetzner DNS API token is available
+  ansible.builtin.assert:
+    that:
+      - (lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim | length) > 0
+    fail_msg: "Set HETZNER_DNS_API_TOKEN before running the Uptime Kuma deployment."
+
+- name: Read Hetzner DNS zone information
+  ansible.builtin.uri:
+    url: "{{ hetzner_dns_api_base_url }}/zones?name={{ hetzner_dns_zone_name | urlencode }}"
+    method: GET
+    headers:
+      Auth-API-Token: "{{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}"
+    return_content: true
+  register: hetzner_dns_zone_lookup
+  changed_when: false
+  no_log: true
+
+- name: Assert the Hetzner DNS zone lookup is unambiguous
+  ansible.builtin.assert:
+    that:
+      - hetzner_dns_zone_lookup.json.zones | length == 1
+    fail_msg: "Expected exactly one Hetzner DNS zone named {{ hetzner_dns_zone_name }}."
+
+- name: Record the Hetzner DNS zone id
+  ansible.builtin.set_fact:
+    hetzner_dns_zone_id: "{{ hetzner_dns_zone_lookup.json.zones[0].id }}"
+
+- name: Read current Hetzner DNS records for the zone
+  ansible.builtin.uri:
+    url: "{{ hetzner_dns_api_base_url }}/records?zone_id={{ hetzner_dns_zone_id | urlencode }}"
+    method: GET
+    headers:
+      Auth-API-Token: "{{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}"
+    return_content: true
+  register: hetzner_dns_records_lookup
+  changed_when: false
+  no_log: true
+
+- name: Ensure desired Hetzner DNS records are present
+  ansible.builtin.include_tasks: record.yml
+  loop: "{{ hetzner_dns_records }}"
+  loop_control:
+    loop_var: hetzner_dns_record

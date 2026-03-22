@@ -80,6 +80,27 @@ proxmox_api_token_privsep: true
 proxmox_api_token_local_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-api
 proxmox_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-api/lv3-automation-primary.json
 
+hetzner_dns_api_base_url: https://dns.hetzner.com/api/v1
+hetzner_dns_zone_name: lv3.org
+hetzner_dns_records:
+  - name: uptime
+    type: A
+    value: "{{ management_ipv4 }}"
+    ttl: 60
+
+uptime_kuma_hostname: uptime.lv3.org
+uptime_kuma_base_url: https://uptime.lv3.org
+uptime_kuma_site_dir: /opt/uptime-kuma
+uptime_kuma_compose_file: /opt/uptime-kuma/docker-compose.yml
+uptime_kuma_data_dir: /opt/uptime-kuma/data
+uptime_kuma_container_name: uptime-kuma
+uptime_kuma_image: louislam/uptime-kuma:2
+uptime_kuma_port: 3001
+uptime_kuma_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/uptime-kuma
+uptime_kuma_local_auth_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/uptime-kuma/admin-session.json
+uptime_kuma_local_requirements_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/requirements/uptime-kuma-client.txt
+uptime_kuma_local_seed_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/uptime-kuma/monitors.json
+
 monitoring_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring
 monitoring_proxmox_writer_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/proxmox-writer.token
 monitoring_grafana_repo_key_url: https://apt.grafana.com/gpg-full.key
@@ -135,6 +156,7 @@ public_edge_certificate_domains:
   - proxmox.lv3.org
   - docker.lv3.org
   - build.lv3.org
+  - uptime.lv3.org
 public_edge_static_sites:
   - slug: nginx
     hostname: nginx.lv3.org
@@ -174,3 +196,6 @@ public_edge_sites:
   - hostname: build.lv3.org
     kind: static
     slug: build
+  - hostname: uptime.lv3.org
+    kind: proxy
+    upstream: http://10.10.10.20:3001

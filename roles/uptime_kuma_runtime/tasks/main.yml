@@ -1,0 +1,87 @@
+---
+- name: Ensure Uptime Kuma runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - docker-compose
+    state: present
+    update_cache: true
+
+- name: Ensure Uptime Kuma directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ uptime_kuma_site_dir }}"
+      mode: "0755"
+    - path: "{{ uptime_kuma_data_dir }}"
+      mode: "0755"
+
+- name: Render the Uptime Kuma compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ uptime_kuma_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the Uptime Kuma image
+  ansible.builtin.command:
+    argv:
+      - docker-compose
+      - -f
+      - "{{ uptime_kuma_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ uptime_kuma_site_dir }}"
+  register: uptime_kuma_pull
+  changed_when: >-
+    'Downloaded newer image' in uptime_kuma_pull.stdout
+    or 'Pull complete' in uptime_kuma_pull.stdout
+    or 'Pulling' in uptime_kuma_pull.stdout
+
+- name: Start the Uptime Kuma stack
+  ansible.builtin.command:
+    argv:
+      - docker-compose
+      - -f
+      - "{{ uptime_kuma_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ uptime_kuma_site_dir }}"
+  register: uptime_kuma_up
+  changed_when: >-
+    'Creating' in uptime_kuma_up.stdout
+    or 'Recreating' in uptime_kuma_up.stdout
+    or 'Starting' in uptime_kuma_up.stdout
+
+- name: Wait for Uptime Kuma to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ uptime_kuma_port }}"
+    delay: 0
+    timeout: 120
+
+- name: Verify the Uptime Kuma container is running
+  ansible.builtin.command:
+    argv:
+      - docker
+      - ps
+      - --filter
+      - "name={{ uptime_kuma_container_name }}"
+      - --filter
+      - status=running
+      - --format
+      - "{{ '{{' }}.Names{{ '}}' }}"
+  register: uptime_kuma_running
+  changed_when: false
+
+- name: Assert the Uptime Kuma container is running
+  ansible.builtin.assert:
+    that:
+      - uptime_kuma_running.stdout_lines | select('equalto', uptime_kuma_container_name) | list | length == 1
+    fail_msg: "Uptime Kuma container is not running."
