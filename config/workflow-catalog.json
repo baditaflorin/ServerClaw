@@ -806,6 +806,52 @@
         "curl -s -X POST -H \"Content-Type: application/json\" -d '{\"email\":\"ops@lv3.org\",\"password\":\"'\"$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/admin-password.txt)\"'\"}' http://100.118.189.95:8008/api/v1/auths/signin"
       ]
     },
+    "converge-rag-context": {
+      "description": "Deploy the private platform context API with Qdrant on docker-runtime-lv3, publish it through the Proxmox host Tailscale proxy, and seed the initial retrieval corpus.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-rag-context",
+        "command": "make converge-rag-context"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "platform_context_api_token"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-rag-context"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/rag-platform-context.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/rag-context.yml",
+        "roles/rag_context_runtime",
+        "scripts/build_rag_index.py",
+        "scripts/query_platform_context.py",
+        "scripts/platform_context_corpus.py",
+        "scripts/platform_context_service.py",
+        "config/agent-tool-registry.json",
+        "config/windmill/scripts/rebuild-rag-index.py",
+        "inventory/group_vars/all.yml",
+        "inventory/host_vars/proxmox_florin.yml"
+      ],
+      "outputs": [
+        "A private OpenAPI tool server on docker-runtime-lv3 backed by Qdrant, a local embedding model, and a repo-grounded retrieval corpus, published through the Proxmox host Tailscale proxy."
+      ],
+      "verification_commands": [
+        "make syntax-check-rag-context",
+        "curl -s http://100.118.189.95:8010/healthz",
+        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/build_rag_index.py --dry-run",
+        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/query_platform_context.py --api-url http://100.118.189.95:8010 --question 'how does step-ca issue SSH certificates'"
+      ]
+    },
     "converge-portainer": {
       "description": "Converge the private Portainer runtime on docker-runtime-lv3, publish it through the Proxmox host Tailscale proxy, and persist the controller-local bootstrap auth.",
       "lifecycle_status": "active",

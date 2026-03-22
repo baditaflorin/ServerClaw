@@ -11,8 +11,9 @@ PORTAINER_ARGS ?=
 RECEIPT ?=
 COMMAND ?=
 SURFACE ?=
+TOOL ?=
 
-.PHONY: validate validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-shell validate-json validate-data-models generate-status-docs validate-generated-docs receipts receipt-info workflows workflow-info commands command-info lanes lane-info api-publication api-publication-info preflight syntax-check syntax-check-monitoring syntax-check-ntopng syntax-check-docker-runtime syntax-check-backup-vm syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-openbao syntax-check-step-ca syntax-check-windmill syntax-check-netbox syntax-check-open-webui syntax-check-mattermost syntax-check-portainer install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-monitoring converge-ntopng converge-docker-runtime converge-postgres-vm converge-mail-platform converge-openbao converge-step-ca converge-windmill converge-netbox converge-open-webui converge-mattermost converge-portainer deploy-uptime-kuma uptime-kuma-manage portainer-manage configure-backups configure-backup-vm database-dns start-workstream
+.PHONY: validate validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-shell validate-json validate-data-models generate-status-docs validate-generated-docs receipts receipt-info workflows workflow-info commands command-info lanes lane-info api-publication api-publication-info tools tool-info export-mcp-tools preflight syntax-check syntax-check-monitoring syntax-check-ntopng syntax-check-docker-runtime syntax-check-backup-vm syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-openbao syntax-check-step-ca syntax-check-windmill syntax-check-netbox syntax-check-open-webui syntax-check-mattermost syntax-check-portainer syntax-check-rag-context install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-monitoring converge-ntopng converge-docker-runtime converge-postgres-vm converge-mail-platform converge-openbao converge-step-ca converge-windmill converge-netbox converge-open-webui converge-mattermost converge-portainer converge-rag-context deploy-uptime-kuma uptime-kuma-manage portainer-manage configure-backups configure-backup-vm database-dns start-workstream
 
 validate:
 	$(REPO_ROOT)/scripts/validate_repo.sh
@@ -79,6 +80,16 @@ api-publication-info:
 	@test -n "$(SURFACE)" || (echo "set SURFACE=<surface-id>"; exit 1)
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/api_publication.py --surface $(SURFACE)
 
+tools:
+	uvx --from pyyaml python $(REPO_ROOT)/scripts/agent_tool_registry.py --list
+
+tool-info:
+	@test -n "$(TOOL)" || (echo "set TOOL=<tool-name>"; exit 1)
+	uvx --from pyyaml python $(REPO_ROOT)/scripts/agent_tool_registry.py --tool $(TOOL)
+
+export-mcp-tools:
+	uvx --from pyyaml python $(REPO_ROOT)/scripts/agent_tool_registry.py --export-mcp
+
 preflight:
 	@if [ -z "$(WORKFLOW)" ]; then \
 		$(REPO_ROOT)/scripts/preflight_controller_local.py --list; \
@@ -129,6 +140,9 @@ syntax-check-portainer:
 
 syntax-check-mattermost:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/mattermost.yml --syntax-check
+
+syntax-check-rag-context:
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/rag-context.yml --syntax-check
 
 install-proxmox:
 	$(MAKE) preflight WORKFLOW=install-proxmox
@@ -218,6 +232,10 @@ converge-portainer:
 converge-mattermost:
 	$(MAKE) preflight WORKFLOW=converge-mattermost
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/mattermost.yml --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+
+converge-rag-context:
+	$(MAKE) preflight WORKFLOW=converge-rag-context
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/rag-context.yml --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 
 deploy-uptime-kuma:
 	$(MAKE) preflight WORKFLOW=deploy-uptime-kuma
