@@ -11,9 +11,11 @@ The target outcome is a platform where humans and agents can:
 - use governed interfaces instead of broad shell access by default
 - correlate metrics, logs, traces, events, and receipts without reconstructing everything by hand
 
+ADR 0052 is now implemented and live on `monitoring-lv3`; the remaining ADRs in this roadmap stay proposed.
+
 ## Proposed ADR Map
 
-- [ADR 0052](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0052-centralized-log-aggregation-with-grafana-loki.md): centralized log aggregation and search in Grafana
+- [ADR 0052](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0052-centralized-log-aggregation-with-grafana-loki.md): centralized log aggregation and search in Grafana, implemented on `monitoring-lv3`
 - [ADR 0053](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0053-opentelemetry-traces-and-service-maps-with-grafana-tempo.md): traces and service maps for internal apps and workflows
 - [ADR 0054](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0054-netbox-for-topology-ipam-and-inventory.md): visual topology, IPAM, and inventory plane
 - [ADR 0055](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0055-portainer-for-read-mostly-docker-runtime-operations.md): read-mostly runtime console for Docker operations
@@ -31,8 +33,8 @@ Current implementation note:
 ## Recommended Rollout Order
 
 1. extend visibility first
-   - implement logs, traces, and network visibility before adding more mutation surfaces
-   - priority: ADR 0052, ADR 0053, ADR 0059
+   - logs are now live through ADR 0052; traces and network visibility remain the next visibility priorities before adding more mutation surfaces
+   - priority: ADR 0053, ADR 0059
 2. make topology browsable
    - add NetBox once the platform already has good canonical metadata to sync
    - priority: ADR 0054

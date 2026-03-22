@@ -1,0 +1,48 @@
+auth_enabled: false
+
+server:
+  http_listen_port: {{ monitoring_loki_port }}
+
+common:
+  path_prefix: {{ monitoring_loki_data_dir }}
+  replication_factor: 1
+  ring:
+    kvstore:
+      store: inmemory
+
+schema_config:
+  configs:
+    - from: "2026-03-22"
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+storage_config:
+  tsdb_shipper:
+    active_index_directory: {{ monitoring_loki_data_dir }}/index
+    cache_location: {{ monitoring_loki_data_dir }}/index_cache
+  filesystem:
+    directory: {{ monitoring_loki_data_dir }}/chunks
+
+limits_config:
+  max_query_lookback: {{ monitoring_loki_retention_control_plane }}
+  retention_period: {{ monitoring_loki_retention_default }}
+  retention_stream:
+    - selector: '{lane="control-plane"}'
+      priority: 3
+      period: {{ monitoring_loki_retention_control_plane }}
+    - selector: '{service="nginx",log_type="access"}'
+      priority: 2
+      period: {{ monitoring_loki_retention_edge_access }}
+
+compactor:
+  working_directory: {{ monitoring_loki_data_dir }}/retention
+  compaction_interval: 10m
+  retention_enabled: true
+  delete_request_store: filesystem
+
+analytics:
+  reporting_enabled: false

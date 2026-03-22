@@ -10,6 +10,7 @@ monitoring_stack_packages:
   - grafana
   - influxdb2
   - influxdb2-cli
+  - loki
   - prometheus
 monitoring_stack_dir: /etc/lv3/monitoring
 monitoring_grafana_admin_user: admin
@@ -18,6 +19,8 @@ monitoring_grafana_admin_password_hash_file: /var/lib/grafana/.lv3-admin-passwor
 monitoring_grafana_datasource_name: InfluxDB Proxmox
 monitoring_grafana_datasource_token_file: /etc/lv3/monitoring/grafana-reader.token
 monitoring_grafana_provisioning_file: /etc/grafana/provisioning/datasources/influxdb-proxmox.yml
+monitoring_grafana_loki_datasource_name: Loki Logs
+monitoring_grafana_loki_provisioning_file: /etc/grafana/provisioning/datasources/loki-logs.yml
 monitoring_grafana_prometheus_datasource_name: Prometheus Service Graphs
 monitoring_grafana_prometheus_datasource_uid: lv3-prometheus
 monitoring_grafana_prometheus_provisioning_file: /etc/grafana/provisioning/datasources/prometheus-service-graphs.yml
@@ -42,6 +45,13 @@ monitoring_influxdb_proxmox_writer_description: lv3-proxmox-writer
 monitoring_influxdb_guest_writer_token_file: /etc/lv3/monitoring/influxdb-guest-writer.token
 monitoring_influxdb_guest_writer_description: lv3-guest-writer
 monitoring_influxdb_grafana_reader_description: lv3-grafana-reader
+monitoring_loki_config_file: /etc/loki/config.yml
+monitoring_loki_data_dir: /var/lib/loki
+monitoring_loki_http_url: http://127.0.0.1:3100
+monitoring_loki_port: 3100
+monitoring_loki_retention_default: 168h
+monitoring_loki_retention_edge_access: 72h
+monitoring_loki_retention_control_plane: 672h
 monitoring_prometheus_service_name: lv3-prometheus
 monitoring_prometheus_service_file: /etc/systemd/system/lv3-prometheus.service
 monitoring_prometheus_config_file: /etc/prometheus/prometheus.yml
