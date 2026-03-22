@@ -79,6 +79,7 @@ These files are integration-owned and should normally be edited only during merg
 - [roles/proxmox_api_access/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_api_access/tasks/main.yml): durable Proxmox API automation identity and token verification
 - [roles/proxmox_security/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_security/tasks/main.yml): Proxmox firewall, ACME, notifications, and TFA
 - [roles/monitoring_vm/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/monitoring_vm/tasks/main.yml): Grafana and InfluxDB convergence on the monitoring VM
+- [roles/docker_build_observability/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/docker_build_observability/tasks/main.yml): Docker build VM metrics collection and Telegraf shipping into InfluxDB
 - [roles/uptime_kuma_runtime/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/uptime_kuma_runtime/tasks/main.yml): Uptime Kuma Compose deployment on `docker-runtime-lv3`
 - [roles/hetzner_dns_records/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/hetzner_dns_records/tasks/main.yml): idempotent Hetzner DNS publication for repo-managed records including `uptime.lv3.org`
 - [roles/monitoring_vm/templates/_grafana_dashboard_macros.j2](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/monitoring_vm/templates/_grafana_dashboard_macros.j2): shared Grafana panel macros for the managed monitoring dashboards
@@ -86,6 +87,7 @@ These files are integration-owned and should normally be edited only during merg
 - [roles/monitoring_vm/templates/lv3-vm-detail.json.j2](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/monitoring_vm/templates/lv3-vm-detail.json.j2): managed per-VM Grafana dashboard definition
 - [roles/nginx_observability/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/nginx_observability/tasks/main.yml): loopback-only `stub_status` plus Telegraf shipping for `nginx-lv3`
 - [docs/adr/0022-nginx-guest-observability-via-telegraf-and-stub-status.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0022-nginx-guest-observability-via-telegraf-and-stub-status.md): architecture decision for NGINX service-level monitoring
+- [docs/adr/0028-docker-build-vm-build-count-telemetry-via-cli-wrapper-events.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0028-docker-build-vm-build-count-telemetry-via-cli-wrapper-events.md): architecture decision for Docker build count and duration telemetry on the build VM
 - [roles/proxmox_metrics/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_metrics/tasks/main.yml): Proxmox external metric-server configuration for InfluxDB
 
 ## Change Rules

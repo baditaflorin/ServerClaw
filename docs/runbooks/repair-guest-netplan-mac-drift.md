@@ -64,3 +64,4 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
 
 - This is a live repair, not a substitute for root-cause analysis.
 - If the MAC drift reappears, create a dedicated follow-up workstream to trace why the Proxmox guest `net0` MACs differ from the guest-side netplan files.
+- During the 2026-03-22 Docker build telemetry rollout, VMs `110`, `120`, `130`, and `140` all needed this repair again before the SSH jump path for monitoring convergence worked.

@@ -36,3 +36,18 @@
 
   roles:
     - role: nginx_observability
+
+- name: Converge docker build guest observability
+  hosts: docker-build-lv3
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Ensure target guest is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+  roles:
+    - role: docker_build_observability
