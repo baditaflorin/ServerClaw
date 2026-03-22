@@ -8,6 +8,7 @@ os.environ.setdefault("GATEWAY_API_KEY", "test-gateway-key")
 os.environ.setdefault("STALWART_ADMIN_PASSWORD", "test-admin-password")
 
 from app import app
+from telemetry import parse_resource_attributes
 
 
 def test_healthz_reports_ok():
@@ -25,3 +26,14 @@ def test_state_requires_api_key():
     response = client.get("/state")
 
     assert response.status_code == 401
+
+
+def test_parse_resource_attributes_ignores_invalid_items():
+    parsed = parse_resource_attributes(
+        "deployment.environment=lv3, service.namespace=lv3, invalid, empty=, =missing-key"
+    )
+
+    assert parsed == {
+        "deployment.environment": "lv3",
+        "service.namespace": "lv3",
+    }

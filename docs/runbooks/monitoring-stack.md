@@ -36,7 +36,7 @@ make converge-monitoring
 1. Adds the Grafana and InfluxData APT repositories on `monitoring-lv3`.
 2. Installs and starts `grafana`, `influxdb2`, `influxdb2-cli`, and `loki`.
 3. Installs Prometheus from Debian plus pinned `tempo` and `otelcol-contrib` Debian packages.
-4. Configures a managed Prometheus service with the remote-write receiver enabled for Tempo span metrics and service-graph metrics.
+4. Configures a managed Prometheus service with the remote-write receiver enabled plus the `exemplar-storage` and `native-histograms` features required by Tempo span metrics and service-graph metrics.
 5. Configures Tempo with local-block storage, a 7-day trace retention window, and metrics generation into Prometheus.
 6. Configures the OpenTelemetry collector as the shared OTLP ingestion path for internal services and automation.
 7. Initializes InfluxDB with the `lv3` organization and the `proxmox` bucket.
@@ -148,6 +148,12 @@ Verify Tempo service-graph metrics are present in Prometheus:
 
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'curl -fsS --get --data-urlencode '\''query=traces_service_graph_request_total'\'' http://127.0.0.1:9090/api/v1/query'
+```
+
+Verify Tempo span metrics are present in Prometheus:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'curl -fsS --get --data-urlencode '\''query=traces_spanmetrics_calls_total'\'' http://127.0.0.1:9090/api/v1/query'
 ```
 
 Verify nginx guest telemetry is present in InfluxDB:

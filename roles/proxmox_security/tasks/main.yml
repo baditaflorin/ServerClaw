@@ -222,6 +222,7 @@
   ansible.builtin.command: pvenode acme account list
   register: proxmox_acme_accounts
   changed_when: false
+  when: proxmox_security_manage_acme | bool
 
 - name: Register default ACME account
   ansible.builtin.shell: |
@@ -229,19 +230,23 @@
     printf 'y\n' | pvenode acme account register default "{{ proxmox_acme_contact_email }}" --directory "{{ proxmox_acme_directory }}"
   args:
     executable: /bin/bash
-  when: proxmox_acme_account_name not in proxmox_acme_accounts.stdout
+  when:
+    - proxmox_security_manage_acme | bool
+    - proxmox_acme_account_name not in proxmox_acme_accounts.stdout
   changed_when: true
 
 - name: Check existing ACME plugins
   ansible.builtin.command: pvenode acme plugin list
   register: proxmox_acme_plugins
   changed_when: false
+  when: proxmox_security_manage_acme | bool
 
 - name: Create temporary ACME DNS plugin credential file
   ansible.builtin.copy:
     dest: /root/.lv3-acme-hetzner.env
     mode: "0600"
     content: "HETZNER_Token={{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}\n"
+  when: proxmox_security_manage_acme | bool
   no_log: true
 
 - name: Create Hetzner ACME DNS plugin
@@ -259,7 +264,9 @@
       - /root/.lv3-acme-hetzner.env
       - --validation-delay
       - "{{ proxmox_acme_validation_delay | string }}"
-  when: proxmox_acme_plugin_id not in proxmox_acme_plugins.stdout
+  when:
+    - proxmox_security_manage_acme | bool
+    - proxmox_acme_plugin_id not in proxmox_acme_plugins.stdout
   changed_when: true
   no_log: true
 
@@ -277,7 +284,9 @@
       - /root/.lv3-acme-hetzner.env
       - --validation-delay
       - "{{ proxmox_acme_validation_delay | string }}"
-  when: proxmox_acme_plugin_id in proxmox_acme_plugins.stdout
+  when:
+    - proxmox_security_manage_acme | bool
+    - proxmox_acme_plugin_id in proxmox_acme_plugins.stdout
   changed_when: true
   no_log: true
 
@@ -285,11 +294,13 @@
   ansible.builtin.file:
     path: /root/.lv3-acme-hetzner.env
     state: absent
+  when: proxmox_security_manage_acme | bool
 
 - name: Read current node ACME configuration
   ansible.builtin.command: "pvesh get /nodes/{{ ansible_hostname }}/config --output-format json"
   register: proxmox_node_config
   changed_when: false
+  when: proxmox_security_manage_acme | bool
 
 - name: Configure node ACME domain binding
   ansible.builtin.command:
@@ -299,17 +310,22 @@
       - set
       - --acmedomain0
       - "{{ proxmox_acme_domain }},plugin={{ proxmox_acme_plugin_id }}"
-  when: (proxmox_node_config.stdout | from_json).acmedomain0 | default('') != proxmox_acme_domain + ",plugin=" + proxmox_acme_plugin_id
+  when:
+    - proxmox_security_manage_acme | bool
+    - (proxmox_node_config.stdout | from_json).acmedomain0 | default('') != proxmox_acme_domain + ",plugin=" + proxmox_acme_plugin_id
   changed_when: true
 
 - name: Read current certificate information
   ansible.builtin.command: pvenode cert info --output-format json
   register: proxmox_cert_info
   changed_when: false
+  when: proxmox_security_manage_acme | bool
 
 - name: Order ACME certificate for Proxmox UI
   ansible.builtin.command: pvenode acme cert order
-  when: proxmox_acme_domain not in proxmox_cert_info.stdout
+  when:
+    - proxmox_security_manage_acme | bool
+    - proxmox_acme_domain not in proxmox_cert_info.stdout
   changed_when: true
 
 - name: Provision or refresh local TOTP state for Proxmox admin

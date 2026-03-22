@@ -146,5 +146,5 @@ Run these checks after converge:
 - inbound mail for `server@lv3.org` depends on the public MX record and host NAT being active
 - outbound transactional delivery currently uses the Brevo HTTP API from the mail gateway
 - sender governance is enforced through notification-profile-specific mailbox identities and scoped API keys instead of one shared global send credential
-- the first distributed traces for this workflow come from inbound gateway requests plus outbound HTTP calls to Stalwart and Brevo
+- the first distributed traces for this workflow come from inbound gateway requests plus outbound HTTP calls to Stalwart and Brevo, with `service.namespace=lv3` and `deployment.environment=lv3` exported through `OTEL_RESOURCE_ATTRIBUTES`
 - if direct public SMTP delivery from one profile is required later, add the sender identity, DKIM, and reverse-DNS path explicitly for that profile instead of reusing broad relay assumptions

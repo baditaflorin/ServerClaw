@@ -57,6 +57,9 @@ monitoring_prometheus_service_file: /etc/systemd/system/lv3-prometheus.service
 monitoring_prometheus_config_file: /etc/prometheus/prometheus.yml
 monitoring_prometheus_data_dir: /var/lib/prometheus
 monitoring_prometheus_retention_time: 15d
+monitoring_prometheus_enable_features:
+  - exemplar-storage
+  - native-histograms
 monitoring_prometheus_remote_write_url: http://127.0.0.1:9090/api/v1/write
 monitoring_prometheus_url: http://127.0.0.1:9090
 monitoring_tempo_version: 2.10.3

@@ -519,7 +519,7 @@ workstreams:
   - id: adr-0055-portainer-operations
     adr: "0055"
     title: Portainer for read-mostly Docker runtime operations
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/adr-0055-portainer-operations
     worktree_path: ../proxmox_florin_server-portainer-operations
@@ -535,7 +535,7 @@ workstreams:
       - container logs
       - runtime controls
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0056-keycloak-sso
     adr: "0056"

@@ -18,7 +18,7 @@ ADR 0052 is now implemented and live on `monitoring-lv3`; the remaining ADRs in 
 - [ADR 0052](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0052-centralized-log-aggregation-with-grafana-loki.md): centralized log aggregation and search in Grafana, implemented on `monitoring-lv3`
 - [ADR 0053](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0053-opentelemetry-traces-and-service-maps-with-grafana-tempo.md): traces and service maps for internal apps and workflows
 - [ADR 0054](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0054-netbox-for-topology-ipam-and-inventory.md): visual topology, IPAM, and inventory plane
-- [ADR 0055](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0055-portainer-for-read-mostly-docker-runtime-operations.md): read-mostly runtime console for Docker operations
+- [ADR 0055](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0055-portainer-for-read-mostly-docker-runtime-operations.md): read-mostly runtime console for Docker operations, now live privately on `docker-runtime-lv3`
 - [ADR 0056](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0056-keycloak-for-operator-and-agent-sso.md): shared SSO for internal apps
 - [ADR 0057](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0057-mattermost-for-chatops-and-operator-agent-collaboration.md): ChatOps and collaboration surface
 - [ADR 0058](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md): internal event backbone for workflows and agents
@@ -44,6 +44,10 @@ Current implementation note:
 4. add bounded runtime control
    - expose runtime inspection and narrow action surfaces only after identity and command rules are clear
    - priority: ADR 0055
+
+## Current Implemented Step
+
+- ADR 0055 is now live as a private Portainer surface on `docker-runtime-lv3` with host-side Tailscale publication at `https://100.118.189.95:9444` and a repo-managed wrapper for read-mostly inspection plus bounded restarts.
 5. add human and agent coordination layers
    - introduce chat and event distribution for approvals, notifications, and handoffs
    - priority: ADR 0057, ADR 0058
