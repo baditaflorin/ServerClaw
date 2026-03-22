@@ -8,6 +8,22 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.51.0 - 2026-03-22
+
+- added ADRs 0082–0091 covering IaC potency, build server offload, and human ergonomics
+- defined remote build execution gateway (ADR 0082) — `scripts/remote_exec.sh` offloads all CPU-intensive checks and builds to `build-lv3` over SSH+rsync; laptop fans stay silent
+- defined Docker-based check runner (ADR 0083) — four versioned container images run ansible-lint, yamllint, mypy, trivy, and more in parallel on the build server; identical to Windmill CI
+- defined Packer VM template pipeline (ADR 0084) — four layered Packer templates reduce new VM provisioning from 15–20 min to 3–5 min; all builds on the build server
+- defined OpenTofu VM lifecycle management (ADR 0085) — declarative `tofu plan/apply` replaces ad-hoc `proxmox_kvm` Ansible tasks; plan output shows what will change before any Proxmox mutation
+- defined Ansible collection packaging (ADR 0086) — 40+ roles restructured into `lv3.platform` collection; four shared utility roles eliminate copy-pasted boilerplate across 15+ roles
+- defined repository validation gate (ADR 0087) — two-layer pre-push gate: fast local pre-commit (< 5 s) plus remote parallel check suite (< 18 s); bypass logging via `receipts/gate-bypasses/`
+- defined ephemeral infrastructure fixtures (ADR 0088) — on-demand Proxmox VMs on the `vmbr20` staging network for role testing and integration checks; auto-expired by Windmill reaper
+- defined build artifact cache (ADR 0089) — Docker layer cache (50 GB BuildKit), pip volume, apt-cacher-ng, Packer plugin cache, and Galaxy collection cache; warm `make remote-lint` in < 18 s
+- defined unified platform CLI `lv3` (ADR 0090) — 14 command groups routing each task to the correct execution target with transparent routing labels and `--dry-run` on every command
+- defined continuous drift detection (ADR 0091) — five drift sources (OpenTofu, Ansible check-mode, Docker image digests, DNS, TLS) on a 6-hour schedule; workstream-aware suppression; Grafana panel; NATS events
+- added 10 matching workstream docs and 10 new entries in `workstreams.yaml`
+- added roadmap runbook `docs/runbooks/plan-iac-potency-and-build-server.md` with dependency graph, 4-week delivery schedule, full make-target inventory, and success criteria
+
 ## 0.50.0 - 2026-03-22
 
 - added ADRs 0072–0081 covering human navigation, deployment lifecycle, DRY engineering, and production security hardening

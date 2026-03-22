@@ -1101,3 +1101,211 @@ workstreams:
       - config/agent-tool-registry.json
     ready_to_merge: false
     live_applied: false
+
+  - id: adr-0082-remote-build-gateway
+    adr: "0082"
+    title: Remote build execution gateway — offload lint, validate, and builds to the build server
+    status: ready
+    owner: codex
+    branch: codex/adr-0082-remote-build-gateway
+    worktree_path: ../proxmox_florin_server-remote-build-gateway
+    doc: docs/workstreams/adr-0082-remote-build-gateway.md
+    depends_on: []
+    conflicts_with: []
+    shared_surfaces:
+      - Makefile
+      - scripts/
+      - inventory/
+      - ansible.cfg
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0083-docker-check-runner
+    adr: "0083"
+    title: Docker-based check runners on build server for versioned, parallel lint and validation
+    status: ready
+    owner: codex
+    branch: codex/adr-0083-docker-check-runner
+    worktree_path: ../proxmox_florin_server-docker-check-runner
+    doc: docs/workstreams/adr-0083-docker-check-runner.md
+    depends_on:
+      - adr-0082-remote-build-gateway
+    conflicts_with: []
+    shared_surfaces:
+      - docker/
+      - config/check-runner-manifest.json
+      - Makefile
+      - registry.lv3.org
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0084-packer-pipeline
+    adr: "0084"
+    title: Packer VM template pipeline for fast, consistent, layered Proxmox VM provisioning
+    status: ready
+    owner: codex
+    branch: codex/adr-0084-packer-pipeline
+    worktree_path: ../proxmox_florin_server-packer-pipeline
+    doc: docs/workstreams/adr-0084-packer-pipeline.md
+    depends_on:
+      - adr-0082-remote-build-gateway
+      - adr-0083-docker-check-runner
+    conflicts_with: []
+    shared_surfaces:
+      - packer/
+      - config/vm-template-manifest.json
+      - Makefile
+      - Proxmox storage pool
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0085-opentofu-vm-lifecycle
+    adr: "0085"
+    title: OpenTofu declarative VM lifecycle replacing ad-hoc Ansible VM creation
+    status: ready
+    owner: codex
+    branch: codex/adr-0085-opentofu-vm-lifecycle
+    worktree_path: ../proxmox_florin_server-opentofu-vm-lifecycle
+    doc: docs/workstreams/adr-0085-opentofu-vm-lifecycle.md
+    depends_on:
+      - adr-0082-remote-build-gateway
+      - adr-0083-docker-check-runner
+      - adr-0084-packer-pipeline
+    conflicts_with:
+      - any workstream with community.general.proxmox_kvm create tasks
+    shared_surfaces:
+      - tofu/
+      - Makefile
+      - inventory/
+      - MinIO state backend
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0086-ansible-collections
+    adr: "0086"
+    title: lv3.platform Ansible collection with DRY shared utilities and internal Galaxy server
+    status: ready
+    owner: codex
+    branch: codex/adr-0086-ansible-collections
+    worktree_path: ../proxmox_florin_server-ansible-collections
+    doc: docs/workstreams/adr-0086-ansible-collections.md
+    depends_on:
+      - adr-0082-remote-build-gateway
+      - adr-0083-docker-check-runner
+    conflicts_with:
+      - any workstream modifying roles/
+    shared_surfaces:
+      - roles/
+      - collections/
+      - ansible.cfg
+      - requirements.yml
+      - playbooks/
+      - Makefile
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0087-validation-gate
+    adr: "0087"
+    title: Two-layer pre-push validation gate blocking broken code from reaching main
+    status: ready
+    owner: codex
+    branch: codex/adr-0087-validation-gate
+    worktree_path: ../proxmox_florin_server-validation-gate
+    doc: docs/workstreams/adr-0087-validation-gate.md
+    depends_on:
+      - adr-0082-remote-build-gateway
+      - adr-0083-docker-check-runner
+    conflicts_with: []
+    shared_surfaces:
+      - .pre-commit-config.yaml
+      - .githooks/
+      - config/validation-gate.json
+      - Makefile
+      - scripts/
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0088-ephemeral-fixtures
+    adr: "0088"
+    title: Ephemeral disposable Proxmox VMs for role testing, Packer validation, and staging integration
+    status: ready
+    owner: codex
+    branch: codex/adr-0088-ephemeral-fixtures
+    worktree_path: ../proxmox_florin_server-ephemeral-fixtures
+    doc: docs/workstreams/adr-0088-ephemeral-fixtures.md
+    depends_on:
+      - adr-0082-remote-build-gateway
+      - adr-0084-packer-pipeline
+      - adr-0085-opentofu-vm-lifecycle
+      - adr-0072-staging-environment
+    conflicts_with: []
+    shared_surfaces:
+      - tofu/
+      - tests/fixtures/
+      - Makefile
+      - vmbr20 staging network
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0089-build-cache
+    adr: "0089"
+    title: Build artifact cache — Docker layers, pip, apt, Packer plugins, Ansible collections
+    status: ready
+    owner: codex
+    branch: codex/adr-0089-build-cache
+    worktree_path: ../proxmox_florin_server-build-cache
+    doc: docs/workstreams/adr-0089-build-cache.md
+    depends_on:
+      - adr-0082-remote-build-gateway
+      - adr-0083-docker-check-runner
+    conflicts_with: []
+    shared_surfaces:
+      - scripts/remote_exec.sh
+      - config/build-cache-manifest.json
+      - roles/build_server/
+      - Makefile
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0090-platform-cli
+    adr: "0090"
+    title: Unified lv3 CLI — single entry point routing all operator tasks to the right execution target
+    status: ready
+    owner: codex
+    branch: codex/adr-0090-platform-cli
+    worktree_path: ../proxmox_florin_server-platform-cli
+    doc: docs/workstreams/adr-0090-platform-cli.md
+    depends_on:
+      - adr-0075-service-capability-catalog
+      - adr-0082-remote-build-gateway
+    conflicts_with: []
+    shared_surfaces:
+      - scripts/lv3_cli.py
+      - pyproject.toml
+      - Makefile
+      - config/
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0091-drift-detection
+    adr: "0091"
+    title: Continuous drift detection across VMs, services, images, DNS, and TLS
+    status: ready
+    owner: codex
+    branch: codex/adr-0091-drift-detection
+    worktree_path: ../proxmox_florin_server-drift-detection
+    doc: docs/workstreams/adr-0091-drift-detection.md
+    depends_on:
+      - adr-0085-opentofu-vm-lifecycle
+      - adr-0074-ops-portal
+      - adr-0075-service-capability-catalog
+      - adr-0058-nats-event-bus
+    conflicts_with: []
+    shared_surfaces:
+      - scripts/
+      - config/
+      - Windmill workflows
+      - NATS platform.drift.*
+      - Grafana dashboards
+    ready_to_merge: false
+    live_applied: false
