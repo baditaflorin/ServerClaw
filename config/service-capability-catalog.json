@@ -29,7 +29,7 @@
       "exposure": "informational-only",
       "uptime_monitor_name": "Docker Build SSH",
       "adr": "0028",
-      "runbook": "docs/runbooks/plan-iac-potency-and-build-server.md",
+      "runbook": "docs/runbooks/configure-docker-build-vm.md",
       "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-docker-build-lv3/lv3-vm-docker-build-lv3",
       "tags": ["build", "docker", "worker"]
     },

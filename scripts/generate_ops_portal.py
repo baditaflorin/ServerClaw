@@ -20,7 +20,7 @@ from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, 
 from portal_utils import PORTAL_STYLES, escape, page_template, render_badge, render_external_link
 from service_catalog import load_service_catalog, validate_service_catalog
 from subdomain_catalog import load_subdomain_catalog, validate_subdomain_catalog
-from agent_tool_registry import load_agent_tool_registry, validate_agent_tool_registry
+from agent_tool_registry import load_agent_tool_registry
 
 
 STACK_PATH = repo_path("versions", "stack.yaml")
@@ -451,13 +451,12 @@ def validate_output(output_dir: Path) -> None:
 def render_portal(output_dir: Path, health_snapshot: Path | None, probe_timeout: float) -> None:
     service_catalog = load_service_catalog()
     subdomain_catalog = load_subdomain_catalog()
-    agent_registry = load_agent_tool_registry()
+    agent_registry, _workflow_catalog = load_agent_tool_registry()
     stack = load_yaml(STACK_PATH)
     host_vars = load_yaml(HOST_VARS_PATH)
 
     validate_service_catalog(service_catalog)
     validate_subdomain_catalog(subdomain_catalog, service_catalog)
-    validate_agent_tool_registry(agent_registry)
 
     services = service_catalog["services"]
     subdomains = subdomain_catalog["subdomains"]
