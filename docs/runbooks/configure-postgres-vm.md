@@ -44,10 +44,10 @@ ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i /Users/live/Documents/GITHUB
 
 ## Publish The Tailnet DNS Name
 
-Run the DNS playbook with a Hetzner DNS API token:
+Use the Make target so the controller-local preflight runs before the DNS playbook:
 
 ```bash
-HETZNER_DNS_API_TOKEN=... ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/database-dns.yml
+HETZNER_DNS_API_TOKEN=... make database-dns
 ```
 
 This creates or updates `database.lv3.org` so it resolves to the Proxmox host Tailscale IPv4.

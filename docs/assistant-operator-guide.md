@@ -59,6 +59,7 @@ Use these defaults unless a runbook or break-glass situation explicitly requires
 5. Leave protected integration files alone unless you are doing the merge/integration step.
 6. Merge to `main`, then bump `VERSION`.
 7. Apply merged work live, then bump `platform_version` and refresh observed state.
+8. Run `make preflight WORKFLOW=<id>` before long-running workflows that depend on controller-local secrets or external tokens.
 
 At minimum, review whether these files need updates:
 
@@ -77,6 +78,7 @@ Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/M
 
 - `make start-workstream WORKSTREAM=adr-0011-monitoring`
 - `make validate`
+- `make preflight WORKFLOW=converge-monitoring`
 - `make syntax-check`
 - `make install-proxmox`
 - `make configure-network`
@@ -91,6 +93,7 @@ Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/M
 - `make converge-docker-runtime`
 - `make syntax-check-uptime-kuma`
 - `make deploy-uptime-kuma`
+- `make database-dns`
 
 ## Things That Must Stay True
 
@@ -101,6 +104,7 @@ Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/M
 - shared values stay in inventory and group vars rather than copied into many tasks
 - live one-off shell changes are either codified immediately or explicitly documented as temporary
 - secrets and ephemeral provider passwords do not get committed
+- controller-local secret prerequisites stay declared in `config/controller-local-secrets.json`
 - `make validate` is the minimum repository gate before merge to `main`
 
 ## Pending Areas

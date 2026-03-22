@@ -48,6 +48,7 @@ Workstream branches should usually change:
 Before merging a workstream to `main`, confirm:
 
 - `make validate` passes
+- if the workflow depends on controller-local secrets or external tokens, `make preflight WORKFLOW=<id>` passes for the relevant entry point
 - the workstream document is current
 - the touched ADR and runbook changes are committed
 - shared-surface conflicts are resolved

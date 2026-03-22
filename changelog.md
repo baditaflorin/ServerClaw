@@ -10,6 +10,18 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 - use this section on `main` for merged notes that have not yet been cut into a numbered release
 
+## 0.35.0 - 2026-03-22
+
+- implemented ADR 0034 to define a machine-readable controller-local secret manifest and standard workflow preflight
+- added `config/controller-local-secrets.json` to declare required, generated, and blocked local secret material for repo workflows
+- added `scripts/preflight_controller_local.py` plus `make preflight` so operators can check local prerequisites before long-running converges
+- wired common Make targets to run preflight automatically and added `make database-dns` so PostgreSQL tailnet DNS uses the same contract
+- updated the assistant guide, repository map, PostgreSQL runbook, and ADR metadata to document the new controller-local operating boundary
+
+Platform impact:
+
+- no direct live platform change; this release makes controller-local secret prerequisites explicit and fail-fast in the repository only
+
 ## 0.34.0 - 2026-03-22
 
 - implemented ADR 0033 to add a canonical declarative service topology catalog for workload metadata
