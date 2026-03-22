@@ -14,7 +14,7 @@ SURFACE ?=
 HOST ?= proxmox_florin
 TOOL ?=
 
-.PHONY: validate validate-generated-vars validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-shell validate-json validate-data-models validate-health-probes generate-platform-vars show-platform-facts generate-status-docs validate-generated-docs receipts receipt-info workflows workflow-info commands command-info lanes lane-info api-publication api-publication-info agent-tools agent-tool-info export-mcp-tools preflight syntax-check syntax-check-monitoring syntax-check-ntopng syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-openbao syntax-check-step-ca syntax-check-windmill syntax-check-netbox syntax-check-open-webui syntax-check-mattermost syntax-check-portainer syntax-check-rag-context install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-guest-network-policy converge-monitoring converge-ntopng converge-docker-runtime converge-postgres-vm converge-mail-platform converge-openbao converge-step-ca converge-windmill converge-control-plane-recovery converge-netbox converge-open-webui converge-mattermost converge-portainer converge-rag-context deploy-uptime-kuma uptime-kuma-manage portainer-manage configure-backups configure-backup-vm database-dns start-workstream
+.PHONY: validate validate-generated-vars validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-shell validate-json validate-data-models validate-health-probes generate-platform-vars show-platform-facts generate-status-docs validate-generated-docs receipts receipt-info workflows workflow-info commands command-info lanes lane-info api-publication api-publication-info agent-tools agent-tool-info export-mcp-tools preflight syntax-check syntax-check-monitoring syntax-check-ntopng syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-openbao syntax-check-step-ca syntax-check-windmill syntax-check-netbox syntax-check-open-webui syntax-check-mattermost syntax-check-portainer syntax-check-rag-context check-platform-drift install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-guest-network-policy converge-monitoring converge-ntopng converge-docker-runtime converge-postgres-vm converge-mail-platform converge-openbao converge-step-ca converge-windmill converge-control-plane-recovery converge-netbox converge-open-webui converge-mattermost converge-portainer converge-rag-context deploy-uptime-kuma uptime-kuma-manage portainer-manage configure-backups configure-backup-vm database-dns start-workstream
 
 validate:
 	$(REPO_ROOT)/scripts/validate_repo.sh
@@ -162,6 +162,9 @@ syntax-check-rag-context:
 
 syntax-check-mattermost:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/mattermost.yml --syntax-check
+
+check-platform-drift:
+	uvx --from pyyaml python $(REPO_ROOT)/scripts/platform_observation_tool.py
 
 install-proxmox:
 	$(MAKE) preflight WORKFLOW=install-proxmox

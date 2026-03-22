@@ -262,7 +262,7 @@
     "event": {
       "title": "Event Lane",
       "purpose": "Signed or explicitly trusted webhook-style callbacks for asynchronous control-plane events.",
-      "transport": "signed_http",
+      "transport": "mixed",
       "network_paths": [
         "lv3_private",
         "explicit_publication"
@@ -299,6 +299,19 @@
             "converge-mattermost"
           ],
           "notes": "These private-only webhooks route Grafana alerts, workflow notifications, approvals, and operator-agent handoffs into the managed Mattermost channels."
+        },
+        {
+          "id": "platform-finding-subjects",
+          "kind": "event_subject",
+          "endpoint": "platform.findings.*",
+          "auth": "Internal NATS publication from ADR 0071 through the private docker-runtime-lv3 event bus runtime.",
+          "owner_refs": [
+            "proxmox_florin"
+          ],
+          "workflow_refs": [
+            "check-platform-drift"
+          ],
+          "notes": "Each observation-loop check emits a structured finding on its own subject so future consumers can subscribe without scraping shell output."
         }
       ]
     }
