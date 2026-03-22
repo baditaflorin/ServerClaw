@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0065](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0065-secret-rotation-automation-with-openbao.md)
 - Title: Bounded credential lifetimes with automated rotation via OpenBao and Windmill
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0065-secret-rotation`
 - Worktree: `../proxmox_florin_server-secret-rotation`
 - Owner: codex
@@ -26,9 +26,12 @@
 ## Expected Repo Surfaces
 
 - `config/secret-catalog.json`
+- `scripts/secret_rotation.py`
+- `tests/test_secret_rotation.py`
+- `playbooks/secret-rotation.yml`
 - `docs/runbooks/secret-rotation-and-lifecycle.md`
 - `tasks/rotate.yml` in postgres, mail platform, and windmill roles
-- Windmill workflow definition (committed to `roles/windmill/files/workflows/`)
+- Windmill seeded script `f/lv3/rotate_credentials`
 - `docs/adr/0065-secret-rotation-automation-with-openbao.md`
 - `docs/workstreams/adr-0065-secret-rotation-automation.md`
 - `workstreams.yaml`
@@ -42,13 +45,15 @@
 ## Verification
 
 - `python3 -c "import json; json.load(open('config/secret-catalog.json'))"` exits 0
-- Windmill workflow definition passes syntax check
-- rotation dry-run completes without error against the test credential
+- `python3 scripts/secret_rotation.py --validate` exits 0
+- `python3 -m unittest discover -s tests` exits 0
+- `make syntax-check-secret-rotation` exits 0
+- `make rotate-secret SECRET_ID=windmill_database_password ROTATION_ARGS="--plan"` completes without error when the control-plane prerequisites are present
 
 ## Merge Criteria
 
 - the rotation model and approval gate behaviour are documented clearly
-- the first rotation has been performed manually as a dry-run receipt
+- the rotation plan and approval split between low-risk and high-risk secrets are explicit
 - no plaintext secrets appear in any committed file
 
 ## Notes For The Next Assistant

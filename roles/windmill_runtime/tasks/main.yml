@@ -220,7 +220,12 @@
       description: "{{ item.description }}"
       kind: script
       deployment_message: Repo-managed Windmill seed sync
-      content: "{{ lookup('ansible.builtin.file', item.local_file) }}"
+      content: >-
+        {{
+          lookup('ansible.builtin.template', item.template_src)
+          if item.template_src is defined
+          else lookup('ansible.builtin.file', item.local_file)
+        }}
     return_content: true
     status_code:
       - 201

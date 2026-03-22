@@ -13,6 +13,7 @@ from api_publication import load_api_publication_catalog, validate_api_publicati
 from controller_automation_toolkit import REPO_ROOT, emit_cli_error, load_yaml, repo_path
 from control_plane_lanes import load_lane_catalog
 from live_apply_receipts import RECEIPTS_DIR, iter_receipt_paths, validate_receipts
+from secret_rotation import load_secret_catalog, validate_secret_catalog
 from workflow_catalog import (
     load_secret_manifest,
     load_workflow_catalog,
@@ -1061,6 +1062,8 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
 def validate_repository_data_models() -> int:
     secret_manifest = load_secret_manifest()
     validate_secret_manifest(secret_manifest)
+    secret_catalog = load_secret_catalog()
+    validate_secret_catalog(secret_catalog, secret_manifest)
     workflow_catalog = load_workflow_catalog()
     validate_workflow_catalog(workflow_catalog, secret_manifest)
     command_catalog = load_command_catalog()

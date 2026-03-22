@@ -724,7 +724,7 @@ workstreams:
   - id: adr-0065-secret-rotation-automation
     adr: "0065"
     title: Secret rotation automation with OpenBao
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0065-secret-rotation
     worktree_path: ../proxmox_florin_server-secret-rotation
