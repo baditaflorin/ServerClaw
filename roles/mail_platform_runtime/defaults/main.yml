@@ -82,7 +82,7 @@ mail_platform_notification_profiles:
 mail_platform_gateway_trace_service_name: mail-gateway
 mail_platform_gateway_trace_service_namespace: lv3
 mail_platform_gateway_trace_environment: lv3
-mail_platform_gateway_trace_otlp_endpoint: "http://{{ hostvars['monitoring-lv3'].ansible_host }}:4318/v1/traces"
+mail_platform_gateway_trace_otlp_endpoint: "{{ platform_service_topology | platform_service_url('grafana', 'otlp_http') }}"
 mail_platform_metrics_username: prometheus
 mail_platform_webhook_events:
   - queue.queue-message-authenticated

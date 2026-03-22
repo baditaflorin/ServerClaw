@@ -16,7 +16,7 @@ export ANSIBLE_COLLECTIONS_PATH="$ANSIBLE_COLLECTIONS_DIR"
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/validate_repo.sh [all|ansible-syntax|yaml|ansible-lint|shell|json|data-models|generated-docs]...
+  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|ansible-lint|shell|json|data-models|generated-docs]...
 
 Examples:
   scripts/validate_repo.sh
@@ -61,6 +61,11 @@ validate_ansible_syntax() {
       --syntax-check \
       >/dev/null
   done
+}
+
+validate_generated_vars() {
+  echo "Generated platform vars validation"
+  uvx --from pyyaml python "$REPO_ROOT/scripts/generate_platform_vars.py" --check >/dev/null
 }
 
 validate_yaml() {
@@ -142,6 +147,7 @@ fi
 for stage in "$@"; do
   case "$stage" in
     all)
+      validate_generated_vars
       validate_ansible_syntax
       validate_yaml
       validate_ansible_lint
@@ -149,6 +155,9 @@ for stage in "$@"; do
       validate_json
       validate_data_models
       validate_generated_docs
+      ;;
+    generated-vars)
+      validate_generated_vars
       ;;
     ansible-syntax)
       validate_ansible_syntax

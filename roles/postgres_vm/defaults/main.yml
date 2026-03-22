@@ -12,7 +12,7 @@ postgres_vm_listen_addresses:
   - "{{ ansible_host }}"
 postgres_vm_ssh_allowed_sources: "{{ proxmox_management_allowed_sources }}"
 postgres_vm_client_allowed_sources_default:
-  - "{{ hostvars['proxmox_florin'].proxmox_internal_ipv4 }}/32"
+  - "{{ platform_host.network.internal_ipv4 }}/32"
 postgres_vm_client_allowed_sources_extra: []
 postgres_vm_client_allowed_sources: >-
   {{

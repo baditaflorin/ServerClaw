@@ -47,6 +47,7 @@ These files are integration-owned and should normally be edited only during merg
 - [docs/runbooks/private-first-api-publication.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/private-first-api-publication.md): ADR 0049 publication tiers and the classified API/webhook surface inventory
 - [docs/runbooks/live-apply-receipts-and-verification-evidence.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/live-apply-receipts-and-verification-evidence.md): structured evidence model for real platform applies
 - [docs/runbooks/generate-status-documents.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/generate-status-documents.md): generated README status fragments and validation flow
+- [docs/runbooks/platform-facts-library.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/platform-facts-library.md): generated platform topology facts, validation, and inventory-inspection flow
 - [docs/runbooks/identity-taxonomy-and-managed-principals.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/identity-taxonomy-and-managed-principals.md): ADR 0046 identity classes, required metadata, and the current principal inventory
 - [docs/runbooks/configure-netbox.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-netbox.md): NetBox runtime, proxy, and repo-sync operator flow
 - [docs/release-process.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-process.md): branch, merge, and live-apply sequencing
@@ -92,6 +93,7 @@ These files are integration-owned and should normally be edited only during merg
 
 - [inventory/hosts.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml): host and guest inventory layout
 - [inventory/group_vars/all.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/group_vars/all.yml): cross-role platform facts and intentionally shared policy values
+- [inventory/group_vars/platform.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/group_vars/platform.yml): generated resolved platform facts library for host, guest, service, DNS, and controller URL lookups
 - [inventory/group_vars/lv3_guests.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/group_vars/lv3_guests.yml): guest-side connection behavior
 - [inventory/host_vars/proxmox_florin.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml): per-host topology, guest definitions, and the canonical `lv3_service_topology` catalog
 - [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json): canonical machine-readable workflow catalog for preferred entry points, preflight requirements, validation targets, and runbook ownership

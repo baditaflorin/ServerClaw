@@ -20,9 +20,9 @@ step_ca_agents_password_file: /opt/step-ca/secrets/agents-password.txt
 step_ca_services_password_file: /opt/step-ca/secrets/services-password.txt
 step_ca_hosts_password_file: /opt/step-ca/secrets/hosts-password.txt
 step_ca_healthcheck_path: /health
-step_ca_api_port: 9000
-step_ca_internal_url: "https://{{ hostvars['docker-runtime-lv3'].ansible_host }}:9000"
-step_ca_controller_url: "https://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:9443"
+step_ca_api_port: "{{ platform_service_topology | platform_service_port('step_ca', 'internal') }}"
+step_ca_internal_url: "{{ platform_service_topology | platform_service_url('step_ca', 'internal') }}"
+step_ca_controller_url: "{{ platform_service_topology | platform_service_url('step_ca', 'controller') }}"
 step_ca_initial_provisioner: humans
 step_ca_provisioners:
   - name: agents
@@ -34,8 +34,8 @@ step_ca_provisioners:
 step_ca_server_names:
   - localhost
   - 127.0.0.1
-  - "{{ hostvars['docker-runtime-lv3'].ansible_host }}"
-  - "{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}"
+  - "{{ platform_service_topology | platform_service_host('step_ca') }}"
+  - "{{ platform_host.management.tailscale_ipv4 }}"
 step_ca_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca
 step_ca_local_certs_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs
 step_ca_local_ssh_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/ssh

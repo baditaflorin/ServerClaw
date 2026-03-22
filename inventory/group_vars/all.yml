@@ -1,4 +1,4 @@
-repo_version: 0.58.0
+repo_version: 0.59.0
 platform_version: 0.32.0
 
 proxmox_release_major: 9
@@ -83,7 +83,6 @@ proxmox_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_flor
 
 hetzner_dns_api_base_url: https://dns.hetzner.com/api/v1
 hetzner_dns_zone_name: lv3.org
-hetzner_dns_records: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_dns_records('public') }}"
 
 monitoring_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring
 monitoring_grafana_repo_key_url: https://apt.grafana.com/gpg-full.key
@@ -97,14 +96,10 @@ monitoring_influxdb_repo_file: /etc/apt/sources.list.d/influxdata.list
 monitoring_influxdb_url: http://127.0.0.1:8086
 monitoring_influxdb_org: lv3
 monitoring_influxdb_bucket: proxmox
-monitoring_loki_push_api_url: >-
-  http://{{ hostvars['monitoring-lv3'].ansible_host | default('10.10.10.40') }}:3100/loki/api/v1/push
 hetzner_dns_api_url: https://dns.hetzner.com/api/v1
 hetzner_dns_api_token_env_var: HETZNER_DNS_API_TOKEN
 
-mail_platform_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology.mail_platform }}"
 mail_platform_domain: lv3.org
-mail_platform_hostname: "{{ mail_platform_service_topology.public_hostname }}"
 mail_platform_mailbox_localpart: server
 mail_platform_mailbox_login: "{{ mail_platform_mailbox_localpart }}"
 mail_platform_mailbox_address: "{{ mail_platform_mailbox_localpart }}@{{ mail_platform_domain }}"
@@ -117,11 +112,9 @@ mail_platform_brevo_api_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/pr
 mail_platform_brevo_sender_email: "{{ mail_platform_mailbox_address }}"
 mail_platform_brevo_sender_name: Florin Mail Bridge
 mail_platform_reply_to_email: "{{ mail_platform_mailbox_address }}"
-openbao_postgres_host: "{{ (hostvars['proxmox_florin'].proxmox_guests | selectattr('name', 'equalto', 'postgres-lv3') | map(attribute='ipv4') | first) }}"
 openbao_postgres_admin_role: openbao_rotator
 openbao_postgres_database: postgres
 openbao_tls_enabled: true
-openbao_http_port: 8201
 openbao_database_mount_path: database
 openbao_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao
 openbao_init_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/init.json
@@ -130,45 +123,19 @@ openbao_breakglass_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/pr
 openbao_postgres_rotator_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/postgres-rotator-password.txt
 openbao_controller_approle_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/controller-automation-approle.json
 openbao_mail_platform_approle_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/mail-platform-approle.json
-openbao_proxy_port: 8200
-openbao_controller_url: "https://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ openbao_proxy_port }}"
-windmill_host_proxy_port: 8005
-windmill_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ windmill_host_proxy_port }}"
-netbox_host_proxy_port: 8004
-netbox_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ netbox_host_proxy_port }}"
 open_webui_version: 0.8.9
 open_webui_image: "ghcr.io/open-webui/open-webui:v{{ open_webui_version }}"
-open_webui_port: 8088
-open_webui_host_proxy_port: 8008
 open_webui_admin_email: ops@lv3.org
 open_webui_admin_name: Florin Badita
-open_webui_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ open_webui_host_proxy_port }}"
-ntopng_proxy_port: 3001
-ntopng_http_port: 3000
-ntopng_operator_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ ntopng_proxy_port }}"
-portainer_host_proxy_port: 9444
-portainer_controller_url: "https://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ portainer_host_proxy_port }}"
 
 step_ca_version: 0.30.1
 step_ca_cli_version: 0.30.1
 step_ca_image: "docker.io/smallstep/step-ca:{{ step_ca_version }}"
-step_ca_api_port: 9000
-step_ca_proxy_port: 9443
 step_ca_site_dir: /opt/step-ca
 step_ca_home: "{{ step_ca_site_dir }}/home"
 step_ca_password_dir: "{{ step_ca_site_dir }}/secrets"
-step_ca_internal_url: "https://{{ hostvars['docker-runtime-lv3'].ansible_host }}:{{ step_ca_api_port }}"
-step_ca_controller_url: "https://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ step_ca_proxy_port }}"
 step_ca_remote_root_certificate_file: "{{ step_ca_home }}/certs/root_ca.crt"
 step_ca_remote_ssh_user_ca_file: "{{ step_ca_home }}/certs/ssh_user_ca_key.pub"
 step_ca_remote_ssh_host_ca_file: "{{ step_ca_home }}/certs/ssh_host_ca_key.pub"
 step_ca_services_password_file: "{{ step_ca_password_dir }}/services-password.txt"
 step_ca_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca
-proxmox_management_allowed_tcp_ports:
-  - "{{ ntopng_proxy_port }}"
-  - "{{ netbox_host_proxy_port }}"
-  - "{{ step_ca_proxy_port }}"
-  - "{{ openbao_proxy_port }}"
-  - "{{ windmill_host_proxy_port }}"
-  - "{{ open_webui_host_proxy_port }}"
-  - "{{ portainer_host_proxy_port }}"

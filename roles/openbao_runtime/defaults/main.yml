@@ -12,9 +12,9 @@ openbao_compose_file: "{{ openbao_site_dir }}/docker-compose.yml"
 openbao_config_file: "{{ openbao_config_dir }}/openbao.hcl"
 openbao_tls_enabled: true
 openbao_http_bind_address: 127.0.0.1
-openbao_http_port: 8201
+openbao_http_port: "{{ platform_ports.openbao_http_port }}"
 openbao_tls_bind_address: 0.0.0.0
-openbao_tls_port: 8200
+openbao_tls_port: "{{ platform_ports.openbao_proxy_port }}"
 openbao_cluster_port: 8202
 openbao_local_cluster_port: 8203
 openbao_runtime_uid: "100"
@@ -38,8 +38,8 @@ openbao_tls_server_cert_file: "{{ openbao_tls_mount_dir }}/server.crt"
 openbao_tls_server_key_file: "{{ openbao_tls_mount_dir }}/server.key"
 openbao_tls_client_ca_file: "{{ openbao_tls_mount_dir }}/root_ca.crt"
 openbao_tls_server_sans:
-  - "{{ hostvars['docker-runtime-lv3'].ansible_host }}"
-  - "{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}"
+  - "{{ platform_service_topology | platform_service_host('openbao') }}"
+  - "{{ platform_host.management.tailscale_ipv4 }}"
 openbao_tls_cert_renew_before_seconds: 86400
 openbao_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao
 openbao_init_local_file: "{{ openbao_local_artifact_dir }}/init.json"

@@ -13,6 +13,7 @@ from api_publication import load_api_publication_catalog, validate_api_publicati
 from controller_automation_toolkit import REPO_ROOT, emit_cli_error, load_yaml, repo_path
 from control_plane_lanes import load_lane_catalog
 from live_apply_receipts import RECEIPTS_DIR, iter_receipt_paths, validate_receipts
+from generate_platform_vars import PLATFORM_VARS_PATH, PORT_KEYS, build_platform_vars
 from workflow_catalog import (
     load_secret_manifest,
     load_workflow_catalog,
@@ -50,6 +51,15 @@ IDENTITY_REQUIRED_METADATA = {
     "rotation_or_expiry",
     "credential_storage",
 }
+
+
+def require_str_int_mapping(value: Any, path: str) -> dict[str, int]:
+    value = require_mapping(value, path)
+    result: dict[str, int] = {}
+    for key, item in value.items():
+        key = require_identifier(key, f"{path} key '{key}'")
+        result[key] = require_int(item, f"{path}.{key}", 1)
+    return result
 
 
 def require_mapping(value: Any, path: str) -> dict:
@@ -393,6 +403,16 @@ def validate_host_vars() -> dict[str, Any]:
     if "mail_platform_dns_records" in host_vars:
         validate_extra_dns_records(host_vars.get("mail_platform_dns_records"), "host_vars.mail_platform_dns_records")
 
+    platform_port_assignments = require_str_int_mapping(
+        host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments"
+    )
+    missing_port_keys = sorted(set(PORT_KEYS) - set(platform_port_assignments.keys()))
+    if missing_port_keys:
+        raise ValueError(
+            "host_vars.platform_port_assignments is missing required keys: "
+            + ", ".join(missing_port_keys)
+        )
+
     topology = require_mapping(host_vars.get("lv3_service_topology"), "host_vars.lv3_service_topology")
     if not topology:
         raise ValueError("host_vars.lv3_service_topology must not be empty")
@@ -417,7 +437,17 @@ def validate_host_vars() -> dict[str, Any]:
         "guest_plan_keys": guest_plan_keys,
         "guest_vmids_by_key": guest_vmids_by_key,
         "guest_ips_by_key": guest_ips_by_key,
+        "platform_port_assignments": platform_port_assignments,
     }
+
+
+def validate_platform_vars() -> None:
+    platform_vars = require_mapping(load_yaml(PLATFORM_VARS_PATH), str(PLATFORM_VARS_PATH))
+    expected_platform_vars = build_platform_vars()
+    if platform_vars != expected_platform_vars:
+        raise ValueError(
+            "inventory/group_vars/platform.yml must match scripts/generate_platform_vars.py output"
+        )
 
 
 def validate_monitor(monitor: Any, path: str) -> str:
@@ -1072,6 +1102,7 @@ def validate_repository_data_models() -> int:
     validate_uptime_monitors()
     host_vars_context = validate_host_vars()
     validate_versions_stack(host_vars_context)
+    validate_platform_vars()
     print("Repository data models OK")
     return 0
 

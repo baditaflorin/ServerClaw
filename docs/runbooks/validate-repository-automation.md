@@ -17,6 +17,7 @@ This is the required minimum gate before merging automation changes to `main`.
 ## What The Pipeline Checks
 
 - all managed playbooks pass Ansible syntax check
+- generated platform vars are current with canonical stack and host inputs
 - repository YAML files pass `yamllint`
 - playbooks and roles pass the repo-managed `ansible-lint` policy
 - shell scripts pass `shellcheck`
@@ -42,6 +43,7 @@ The same pipeline can be run in parts:
 
 ```bash
 make validate-ansible-syntax
+make validate-generated-vars
 make validate-yaml
 make validate-ansible-lint
 make validate-shell
@@ -54,6 +56,7 @@ make validate-generated-docs
 
 - [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml)
 - [inventory/host_vars/proxmox_florin.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml)
+- [inventory/group_vars/platform.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/group_vars/platform.yml)
 - [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json)
 - [config/command-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/command-catalog.json)
 - [config/control-plane-lanes.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/control-plane-lanes.json)
@@ -65,5 +68,6 @@ make validate-generated-docs
 ## Troubleshooting
 
 - if validation fails during collection bootstrap, rerun after confirming network access to Ansible Galaxy and package indexes
+- if validation fails on generated vars, regenerate [inventory/group_vars/platform.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/group_vars/platform.yml) from the canonical inputs instead of hand-editing the file
 - if CI fails but local validation passes, rerun `make validate` from a clean working tree to catch unstaged or ignored-file drift
 - if a new file type needs validation, extend [scripts/validate_repo.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_repo.sh) and keep `make validate` as the single top-level entry point

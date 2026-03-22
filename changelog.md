@@ -8,6 +8,16 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.59.0 - 2026-03-22
+
+- implemented ADR 0063 by adding a committed generated `inventory/group_vars/platform.yml` facts library derived from canonical stack and host inputs
+- added `scripts/generate_platform_vars.py`, `filter_plugins/platform_facts.py`, and the new `make generate-platform-vars`, `make validate-generated-vars`, and `make show-platform-facts` entry points so operators and agents can inspect or validate platform facts without scanning many role defaults
+- removed duplicated computed URLs, ports, and guest-address lookups from several proof-of-concept roles and shared vars, and documented the operating model in the new platform-facts runbook
+
+Platform impact:
+
+- no direct live platform change in this release commit; this is a repository automation and documentation consolidation release
+
 ## 0.58.0 - 2026-03-22
 
 - applied ADR 0054 live from `main` by converging a private NetBox runtime on `docker-runtime-lv3`, provisioning its PostgreSQL backend on `postgres-lv3`, and publishing operator and agent access through the Proxmox host Tailscale proxy on port `8004`

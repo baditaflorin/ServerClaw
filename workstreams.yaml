@@ -685,7 +685,7 @@ workstreams:
   - id: adr-0063-platform-vars-library
     adr: "0063"
     title: Centralised vars and computed facts library
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0063-platform-vars-library
     worktree_path: ../proxmox_florin_server-platform-vars-library

@@ -16,7 +16,7 @@ loki_log_agent_hostname: "{{ inventory_hostname }}"
 loki_log_agent_role: "{{ inventory_hostname }}"
 loki_log_agent_environment: lv3
 loki_log_agent_lane: private
-loki_log_agent_loki_push_url: "{{ monitoring_loki_push_api_url }}"
+loki_log_agent_loki_push_url: "{{ platform_service_topology | platform_service_url('grafana', 'loki_push') }}"
 loki_log_agent_journal_enabled: true
 loki_log_agent_journal_max_age: 24h
 loki_log_agent_nginx_logs_enabled: false
