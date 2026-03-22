@@ -69,7 +69,7 @@ The control-plane governance layer is now live on `main`: command, API, message,
 | Field | Value |
 | --- | --- |
 | Repository version | `0.52.0` |
-| Platform version | `0.26.0` |
+| Platform version | `0.27.0` |
 | Observed check date | `2026-03-22` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -428,7 +428,7 @@ Current values on `main`:
 | Field | Value |
 | --- | --- |
 | Repository version | `0.52.0` |
-| Platform version | `0.26.0` |
+| Platform version | `0.27.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
