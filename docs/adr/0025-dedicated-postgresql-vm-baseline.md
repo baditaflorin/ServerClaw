@@ -38,8 +38,10 @@ We will manage PostgreSQL through a dedicated Debian 13 VM with these rules:
    - This ADR does not introduce containers, Patroni, streaming replication, or external package repositories.
 4. The database service remains private.
    - No public edge publication is added.
-   - No host-level DNAT rule is added for PostgreSQL.
+   - No WAN-side DNAT rule is added for PostgreSQL.
    - PostgreSQL listens only on loopback and the guest's private VM address.
+   - Tailnet clients reach the service through a TCP proxy bound to the Proxmox host Tailscale IP on TCP `5432`.
+   - `database.lv3.org` may resolve to the Proxmox host Tailscale IPv4 so tailnet clients can use a stable DNS name without exposing the database on the public Internet.
 5. Network access is deny-by-default on the guest.
    - `nftables` is enabled on the PostgreSQL VM.
    - inbound SSH is limited to declared management source ranges
@@ -60,8 +62,10 @@ We will manage PostgreSQL through a dedicated Debian 13 VM with these rules:
 
 - Database service boundaries stay clear: hypervisor, edge, runtime, build, monitoring, and database duties remain separated.
 - The guest firewall and `pg_hba.conf` make remote access explicit instead of relying on the private subnet alone.
+- `database.lv3.org` becomes a private-use DNS name that is only meaningfully reachable from the tailnet because it resolves to a Tailscale address.
 - Operators get a secure local administration path without storing reusable superuser passwords in the repository.
 - Application onboarding now requires a deliberate client allowlist update and explicit role creation, which is slower than ad hoc access but materially safer.
+- HTTP or HTTPS publication on the NGINX edge is intentionally not used for PostgreSQL because PostgreSQL clients need native TCP access on `5432`, not an HTTP reverse proxy.
 - High availability, replication, PITR tooling, TLS certificates for PostgreSQL clients, and exporter-based monitoring remain follow-up workstreams.
 
 ## Sources

@@ -80,5 +80,8 @@ workstreams:
       - playbooks/postgres-vm.yml
       - roles/postgres_vm
       - inventory/group_vars/postgres_guests.yml
+      - roles/proxmox_tailscale_proxy
+      - playbooks/database-dns.yml
+      - roles/hetzner_dns_record
     ready_to_merge: true
     live_applied: true

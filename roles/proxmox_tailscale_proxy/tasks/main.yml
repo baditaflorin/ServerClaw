@@ -1,0 +1,40 @@
+---
+- name: Ensure Proxmox Tailscale proxy systemd unit directory exists
+  ansible.builtin.file:
+    path: /etc/systemd/system
+    state: directory
+    mode: "0755"
+
+- name: Render Proxmox Tailscale proxy socket units
+  ansible.builtin.template:
+    src: lv3-tailscale-proxy.socket.j2
+    dest: "/etc/systemd/system/lv3-tailscale-proxy-{{ item.name }}.socket"
+    mode: "0644"
+  loop: "{{ proxmox_tailscale_tcp_proxies | default([]) }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: proxmox_tailscale_proxy_sockets
+  notify: reload systemd
+
+- name: Render Proxmox Tailscale proxy service units
+  ansible.builtin.template:
+    src: lv3-tailscale-proxy.service.j2
+    dest: "/etc/systemd/system/lv3-tailscale-proxy-{{ item.name }}.service"
+    mode: "0644"
+  loop: "{{ proxmox_tailscale_tcp_proxies | default([]) }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: proxmox_tailscale_proxy_services
+  notify: reload systemd
+
+- name: Flush Proxmox Tailscale proxy systemd handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Enable and start Proxmox Tailscale proxy sockets
+  ansible.builtin.systemd:
+    name: "lv3-tailscale-proxy-{{ item.name }}.socket"
+    enabled: true
+    state: started
+  loop: "{{ proxmox_tailscale_tcp_proxies | default([]) }}"
+  loop_control:
+    label: "{{ item.name }}"

@@ -1,0 +1,13 @@
+[Unit]
+Description=LV3 Tailscale TCP proxy socket for {{ item.name }}
+After=network-online.target tailscaled.service
+Wants=network-online.target
+Requires=tailscaled.service
+
+[Socket]
+ListenStream={{ item.listen_address }}:{{ item.listen_port }}
+BindToDevice=tailscale0
+NoDelay=true
+
+[Install]
+WantedBy=sockets.target

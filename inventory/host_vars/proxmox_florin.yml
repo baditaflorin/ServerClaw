@@ -22,6 +22,12 @@ proxmox_tailscale_operator_target_guest: 10.10.10.30
 proxmox_public_ingress_tcp_ports:
   - 80
   - 443
+proxmox_tailscale_tcp_proxies:
+  - name: postgres-lv3
+    listen_address: "{{ management_tailscale_ipv4 }}"
+    listen_port: 5432
+    upstream_host: 10.10.10.50
+    upstream_port: 5432
 
 proxmox_guests:
   - vmid: 110
