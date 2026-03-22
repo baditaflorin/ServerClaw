@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0062](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0062-ansible-role-composability-and-dry-defaults.md)
 - Title: Eliminate copy-paste across Ansible roles with a shared task library and argument specs
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0062-role-composability`
 - Worktree: `../proxmox_florin_server-role-composability`
 - Owner: codex
@@ -54,5 +54,6 @@
 
 ## Notes For The Next Assistant
 
-- start with `systemd_unit.yml` as it is the most widely duplicated pattern
-- do not touch the live-apply path; this is a pure repo refactor
+- implemented as a repo-only refactor with shared task entrypoints under `roles/common/` and a canonical new-role template under `roles/_template/`
+- proof-of-concept consumers now include `docker_runtime`, `proxmox_tailscale`, `uptime_kuma_runtime`, and `windmill_runtime`
+- `make validate` now includes a role-interface check that requires `meta/argument_specs.yml` on new or changed roles while leaving untouched legacy roles out of scope

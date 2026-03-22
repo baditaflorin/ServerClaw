@@ -8,6 +8,17 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.60.0 - 2026-03-22
+
+- implemented ADR 0062 to add a reusable `roles/common` task library for role input assertions, directory creation, systemd unit management, and TCP port waits
+- added `roles/_template/` plus a new `make validate` role-interface gate so new or changed roles must carry `meta/argument_specs.yml` without forcing an all-at-once backfill across untouched legacy roles
+- refactored `docker_runtime`, `proxmox_tailscale`, `uptime_kuma_runtime`, and `windmill_runtime` to consume the shared task entrypoints as proof-of-concept consumers
+- documented the new validation contract in the repository automation runbook and updated ADR/workstream metadata to mark the composability workstream as merged
+
+Platform impact:
+
+- no direct live platform change; this release refactors repository Ansible structure and role interface validation only
+
 ## 0.59.0 - 2026-03-22
 
 - applied ADR 0057 live by provisioning the Mattermost PostgreSQL backend on `postgres-lv3`, converging the private Mattermost runtime on `docker-runtime-lv3`, and publishing operator access through the Proxmox host Tailscale proxy on port `8066`

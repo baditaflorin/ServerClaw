@@ -74,7 +74,7 @@ Portainer is now live on `docker-runtime-lv3` and reachable privately at `https:
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.59.0` |
+| Repository version | `0.60.0` |
 | Platform version | `0.33.0` |
 | Observed check date | `2026-03-22` |
 | Observed OS | `Debian 13` |
@@ -455,7 +455,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.59.0` |
+| Repository version | `0.60.0` |
 | Platform version | `0.33.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -528,6 +528,7 @@ This repository is intentionally opinionated:
 | `0057` | Mattermost for ChatOps and operator-agent collaboration | `live_applied` | [adr-0057-mattermost-chatops.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0057-mattermost-chatops.md) |
 | `0059` | ntopng for private network flow visibility | `live_applied` | [adr-0059-ntopng-network-visibility.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0059-ntopng-network-visibility.md) |
 | `0060` | Open WebUI for operator and agent workbench | `live_applied` | [adr-0060-open-webui-workbench.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0060-open-webui-workbench.md) |
+| `0062` | Ansible role composability and DRY defaults | `merged` | [adr-0062-role-composability.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0062-role-composability.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

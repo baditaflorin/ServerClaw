@@ -18,6 +18,7 @@ This is the required minimum gate before merging automation changes to `main`.
 
 - all managed playbooks pass Ansible syntax check
 - repository YAML files pass `yamllint`
+- new or changed roles include `meta/argument_specs.yml`
 - playbooks and roles pass the repo-managed `ansible-lint` policy
 - shell scripts pass `shellcheck`
 - repo-managed JSON artifacts pass `jq empty`
@@ -43,12 +44,15 @@ The same pipeline can be run in parts:
 ```bash
 make validate-ansible-syntax
 make validate-yaml
+make validate-role-argument-specs
 make validate-ansible-lint
 make validate-shell
 make validate-json
 make validate-data-models
 make validate-generated-docs
 ```
+
+`make validate-role-argument-specs` enforces the ADR 0062 contract for role interfaces. It checks role directories that are new or changed relative to `origin/main`, plus any staged, unstaged, or untracked role changes in the current worktree, and fails if a touched role is missing `meta/argument_specs.yml`.
 
 `make validate-data-models` validates the canonical machine-readable repository state, including:
 

@@ -666,7 +666,7 @@ workstreams:
   - id: adr-0062-role-composability
     adr: "0062"
     title: Ansible role composability and DRY defaults
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0062-role-composability
     worktree_path: ../proxmox_florin_server-role-composability
