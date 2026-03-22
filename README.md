@@ -68,7 +68,7 @@ The control-plane governance layer is now live on `main`: command, API, message,
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.50.0` |
+| Repository version | `0.51.0` |
 | Platform version | `0.26.0` |
 | Observed check date | `2026-03-22` |
 | Observed OS | `Debian 13` |
@@ -425,7 +425,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.50.0` |
+| Repository version | `0.51.0` |
 | Platform version | `0.26.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -491,6 +491,7 @@ This repository is intentionally opinionated:
 | `0049` | Private-first API publication model | `merged` | [adr-0049-private-api-publication.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0049-private-api-publication.md) |
 | `0050` | Transactional email and notification profiles | `merged` | [adr-0050-notification-profiles.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0050-notification-profiles.md) |
 | `0051` | Control-plane backup, recovery, and break-glass | `merged` | [adr-0051-control-plane-recovery.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0051-control-plane-recovery.md) |
+| `0053` | OpenTelemetry traces and service maps with Grafana Tempo | `merged` | [adr-0053-tempo-traces.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0053-tempo-traces.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

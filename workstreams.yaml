@@ -481,7 +481,7 @@ workstreams:
   - id: adr-0053-tempo-traces
     adr: "0053"
     title: OpenTelemetry traces and service maps with Grafana Tempo
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0053-tempo-traces
     worktree_path: ../proxmox_florin_server-tempo-traces

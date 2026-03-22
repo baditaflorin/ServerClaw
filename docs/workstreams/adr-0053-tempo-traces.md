@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0053](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0053-opentelemetry-traces-and-service-maps-with-grafana-tempo.md)
 - Title: Distributed tracing and service maps for internal apps and workflows
-- Status: live_applied
+- Status: merged
 - Branch: `codex/adr-0053-tempo-traces`
 - Worktree: `../proxmox_florin_server-tempo-traces`
 - Owner: codex

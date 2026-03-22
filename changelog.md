@@ -8,6 +8,16 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.51.0 - 2026-03-22
+
+- implemented ADR 0053 in repository automation by adding pinned Tempo and `otelcol-contrib` packages plus a managed Prometheus service to the monitoring VM role
+- provisioned Grafana Prometheus and Tempo datasources, documented the shared OTLP collector contract, and instrumented the private mail-gateway service as the first traced internal API surface
+- updated the ADR, workstream, monitoring runbook, mail-platform runbook, and workflow catalog to describe the new tracing and service-map operating model
+
+Platform impact:
+
+- no direct live platform change in this release commit; the tracing stack still needs to be applied from `main`
+
 ## 0.50.0 - 2026-03-22
 
 - implemented ADR 0049 as a canonical API publication contract instead of leaving publication policy only in prose
