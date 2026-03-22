@@ -66,3 +66,4 @@ Initial trace candidates:
 - The managed Prometheus unit enables both `exemplar-storage` and `native-histograms` so Tempo's metrics generator can persist span metrics and service-graph edges without remote-write failures.
 - The first live producer is the private mail gateway on `docker-runtime-lv3`, instrumented for inbound FastAPI requests plus outbound `httpx` calls to Stalwart and Brevo.
 - Standard resource tags now include `service.name`, `service.namespace=lv3`, and `deployment.environment=lv3` for the first rollout, and the mail gateway now reads those values from `OTEL_RESOURCE_ATTRIBUTES`.
+- Live verification from `main` confirms Tempo search for `mail-gateway`, Prometheus span metrics for gateway operations, and Prometheus service-graph metrics for the first traced API edge.

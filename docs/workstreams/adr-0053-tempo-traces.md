@@ -36,7 +36,7 @@
 
 - Tempo, Prometheus, and a shared OTLP collector integrated into `monitoring-lv3`
 - Grafana Tempo and Prometheus datasources provisioned on the monitoring plane
-- mail gateway traces flowing from `docker-runtime-lv3` into Tempo with service-graph edges for Stalwart and Brevo calls
+- mail gateway traces flowing from `docker-runtime-lv3` into Tempo with searchable service names plus Prometheus-backed service-graph and span-metric series for the first traced API edge
 
 ## Verification
 
@@ -47,6 +47,7 @@
 - `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'systemctl is-active grafana-server influxdb tempo otelcol-contrib lv3-prometheus'`
 - `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'curl -fsS http://127.0.0.1:3200/api/search/tag/service.name/values'`
 - `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'curl -fsS --get --data-urlencode '\''query=traces_service_graph_request_total'\'' http://127.0.0.1:9090/api/v1/query'`
+- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'curl -fsS --get --data-urlencode '\''query=traces_spanmetrics_calls_total'\'' http://127.0.0.1:9090/api/v1/query'`
 
 ## Merge Criteria
 

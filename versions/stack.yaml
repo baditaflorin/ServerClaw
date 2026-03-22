@@ -25,6 +25,7 @@ live_apply_evidence:
     notification_profiles: 2026-03-22-adr-0050-notification-profiles-live-apply
     ntopng: 2026-03-22-adr-0059-ntopng-live-apply
     open_webui: 2026-03-22-adr-0060-open-webui-live-apply
+    tempo_tracing: 2026-03-22-adr-0053-tempo-traces-live-apply
 
 desired_state:
   host_id: proxmox_florin
