@@ -87,32 +87,14 @@
   register: control_plane_recovery_openbao_seal_status
 
 - name: Unseal OpenBao before managing backup policy state
-  ansible.builtin.shell: |
-    set -euo pipefail
-    python3 - <<'PY'
-    import json
-    import urllib.request
-
-    keys = json.loads(r'''{{ control_plane_recovery_openbao_init_payload.keys_base64[:openbao_init_key_threshold] | to_json }}''')
-    url = "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/unseal"
-
-    for key in keys:
-        data = json.dumps({"key": key}).encode()
-        request = urllib.request.Request(
-            url,
-            data=data,
-            headers={"Content-Type": "application/json"},
-            method="POST",
-        )
-        with urllib.request.urlopen(request) as response:
-            payload = json.loads(response.read().decode())
-        if payload.get("initialized") is False:
-            raise SystemExit("OpenBao reported an uninitialized state during unseal")
-
-    print("unsealed")
-    PY
+  ansible.builtin.shell: >-
+    curl -sS
+    -H 'Content-Type: application/json'
+    --data '{"key":"{{ item }}"}'
+    'http://127.0.0.1:{{ openbao_http_port }}/v1/sys/unseal'
   args:
     executable: /bin/bash
+  loop: "{{ control_plane_recovery_openbao_init_payload.keys_base64[:openbao_init_key_threshold] }}"
   when: control_plane_recovery_openbao_seal_status.json.sealed | bool
   changed_when: control_plane_recovery_openbao_seal_status.json.sealed | bool
   no_log: true
