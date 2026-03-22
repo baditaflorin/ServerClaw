@@ -8,6 +8,18 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.46.0 - 2026-03-22
+
+- applied ADR 0042 live from `main` by converging the private `step-ca` runtime on `docker-runtime-lv3`, publishing it through the Proxmox host Tailscale address, and installing CA-backed SSH host trust on the Proxmox host and managed guests
+- fixed the `step-ca` runtime so the container honors the initialized absolute path layout and validates issued service certificates against the intermediate chain during convergence
+- recorded controller-local bootstrap artifacts and a live-apply receipt for the step-ca rollout, including verified operator-side health, SSH certificate login, and proxied X.509 issuance
+
+Platform impact:
+
+- `step-ca` is now live on `docker-runtime-lv3` and reachable privately at `https://100.118.189.95:9443`
+- the Proxmox host and managed guests now trust the internal SSH CA and carry `step-ca`-issued SSH host certificates
+- internal certificate issuance for services and operators is now available through the private CA path
+
 ## 0.45.0 - 2026-03-22
 
 - implemented ADR 0042, ADR 0043, ADR 0044, ADR 0045, ADR 0046, and ADR 0048 as concrete repository control-plane contracts instead of planning-only documents

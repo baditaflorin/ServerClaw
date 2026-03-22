@@ -23,6 +23,7 @@ windmill_private_base_url: "http://{{ ansible_host }}:{{ windmill_server_port }}
 windmill_base_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ windmill_host_proxy_port }}"
 windmill_seed_scripts:
   - path: f/lv3/windmill_healthcheck
+    api_path: f/lv3/windmill_healthcheck.py
     local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/lv3-healthcheck.py
     language: python3
     summary: LV3 Windmill healthcheck

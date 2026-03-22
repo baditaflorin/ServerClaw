@@ -94,6 +94,19 @@
           "notes": "The Proxmox management API is operator-only and private-first even though proxmox.lv3.org exists as an informational hostname."
         },
         {
+          "id": "step-ca-api",
+          "kind": "service_api",
+          "endpoint": "https://100.118.189.95:9443",
+          "auth": "step-ca JWK provisioners with controller-local password material and mirrored root trust bootstrap artifacts under .local/step-ca.",
+          "service_refs": [
+            "step_ca"
+          ],
+          "workflow_refs": [
+            "converge-step-ca"
+          ],
+          "notes": "This is the private internal CA endpoint for SSH certificates and internal X.509 issuance."
+        },
+        {
           "id": "mail-gateway-api",
           "kind": "service_api",
           "endpoint": "http://10.10.10.20:8081",

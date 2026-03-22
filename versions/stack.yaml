@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.45.0
-platform_version: 0.21.0
+repo_version: 0.46.0
+platform_version: 0.22.0
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -14,6 +14,7 @@ live_apply_evidence:
     backup_vm: 2026-03-22-adr-0029-backup-vm-live-apply
     runtime_container_telemetry: 2026-03-22-adr-0040-runtime-container-telemetry-live-apply
     mail_platform: 2026-03-22-adr-0041-email-platform-live-apply
+    step_ca: 2026-03-22-adr-0042-step-ca-live-apply
 
 desired_state:
   host_id: proxmox_florin
@@ -379,6 +380,28 @@ observed_state:
     telegraf_active: true
     container_telemetry_flow_verified: true
     guest_network_recovered_after_mac_match_update: true
+  step_ca:
+    runtime_vm: 10.10.10.20
+    api_port: 9000
+    host_tailscale_proxy_url: https://100.118.189.95:9443
+    container_running: true
+    healthcheck_verified: true
+    x509_issuance_verified: true
+    ssh_host_certificates_installed: true
+    ssh_certificate_login_verified: true
+    trusted_hosts:
+      - proxmox_florin
+      - nginx-lv3
+      - docker-runtime-lv3
+      - docker-build-lv3
+      - monitoring-lv3
+      - postgres-lv3
+      - backup-lv3
+    provisioners:
+      - humans
+      - agents
+      - services
+      - hosts
   mail:
     domain: lv3.org
     hostname: mail.lv3.org
@@ -434,8 +457,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.45.0
+    current: 0.46.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.21.0
+    current: 0.22.0
     meaning: intended platform release for the actual server configuration

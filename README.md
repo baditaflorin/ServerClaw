@@ -54,14 +54,16 @@ Public ingress is now converged to the single-edge model:
 
 The private SSH jump path through the Proxmox host to the guests is working.
 
+The private `step-ca` control plane is now live on `docker-runtime-lv3`, published only on `https://100.118.189.95:9443`, and the Proxmox host plus managed guests now trust `step-ca` for SSH host certificates and internal certificate issuance.
+
 <!-- BEGIN GENERATED: platform-status -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_status_docs.py). Do not edit this block by hand.
 
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.45.0` |
-| Platform version | `0.21.0` |
+| Repository version | `0.46.0` |
+| Platform version | `0.22.0` |
 | Observed check date | `2026-03-22` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -102,6 +104,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `postgres_vm` | `2026-03-22-adr-0026-postgres-vm-live-apply` |
 | `public_edge_publication` | `2026-03-22-adr-0021-edge-publication-live-apply` |
 | `runtime_container_telemetry` | `2026-03-22-adr-0040-runtime-container-telemetry-live-apply` |
+| `step_ca` | `2026-03-22-adr-0042-step-ca-live-apply` |
 | `uptime_kuma` | `2026-03-22-adr-0027-uptime-kuma-live-apply` |
 <!-- END GENERATED: platform-status -->
 
@@ -112,6 +115,7 @@ ops SSH + sudo for routine host work
 routine host SSH over the Proxmox Tailscale IP
 ops@pam for routine Proxmox administration
 lv3-automation@pve API token for durable Proxmox object management
+short-lived `step-ca` SSH certificates accepted on the Proxmox host and managed guests
 ops SSH + sudo for guest VMs
 root key-only break-glass on the Proxmox host
 root disabled for guest SSH
@@ -127,7 +131,7 @@ password SSH disabled on host and guests
 | Lane | Title | Transport | Surfaces | Primary Rule |
 | --- | --- | --- | --- | --- |
 | `command` | Command Lane | `ssh` | 2 | Use SSH only for command-lane access. |
-| `api` | API Lane | `https` | 2 | Default new APIs to internal-only or operator-only publication. |
+| `api` | API Lane | `https` | 3 | Default new APIs to internal-only or operator-only publication. |
 | `message` | Message Lane | `authenticated_submission` | 2 | Submit platform mail through the internal mail platform rather than arbitrary external SMTP relays. |
 | `event` | Event Lane | `signed_http` | 1 | Event sinks must be documented and intentionally reachable. |
 
@@ -137,6 +141,7 @@ password SSH disabled on host and guests
 | `proxmox-host-ops-ssh` | `command` | `ssh_endpoint` | `ops@100.118.189.95` |
 | `guest-ops-ssh-via-proxmox-jump` | `command` | `ssh_endpoint` | `ops@10.10.10.0/24 via ProxyJump through ops@100.118.189.95` |
 | `proxmox-management-api` | `api` | `management_api` | `https://100.118.189.95:8006/api2/json` |
+| `step-ca-api` | `api` | `service_api` | `https://100.118.189.95:9443` |
 | `mail-gateway-api` | `api` | `service_api` | `http://10.10.10.20:8081` |
 | `mail-platform-submission` | `message` | `mail_submission` | `10.10.10.20:587` |
 | `proxmox-host-operator-notifications` | `message` | `notification_profile` | `lv3-ops-email sendmail endpoint with catch-all matcher to baditaflorin@gmail.com` |
@@ -366,8 +371,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.45.0` |
-| Platform version | `0.21.0` |
+| Repository version | `0.46.0` |
+| Platform version | `0.22.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -422,7 +427,7 @@ This repository is intentionally opinionated:
 | `0040` | Docker runtime container telemetry | `live_applied` | [adr-0040-runtime-container-telemetry.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0040-runtime-container-telemetry.md) |
 | `0041` | Dockerized mail platform with API, Grafana telemetry, and failover delivery | `merged` | [adr-0041-email-platform.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0041-email-platform.md) |
 | `0041` | Dockerized mail platform live rollout | `live_applied` | [adr-0041-email-platform-live.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0041-email-platform-live.md) |
-| `0042` | step-ca for SSH and internal TLS | `merged` | [adr-0042-step-ca.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0042-step-ca.md) |
+| `0042` | step-ca for SSH and internal TLS | `live_applied` | [adr-0042-step-ca.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0042-step-ca.md) |
 | `0043` | OpenBao for secrets, transit, and dynamic credentials | `merged` | [adr-0043-openbao.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0043-openbao.md) |
 | `0044` | Windmill for agent and operator workflows | `merged` | [adr-0044-windmill.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0044-windmill.md) |
 | `0045` | Control-plane communication lanes | `merged` | [adr-0045-communication-lanes.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0045-communication-lanes.md) |

@@ -263,7 +263,7 @@ workstreams:
   - id: adr-0042-step-ca
     adr: "0042"
     title: step-ca for SSH and internal TLS
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0042-step-ca
     worktree_path: ../proxmox_florin_server-step-ca
@@ -277,7 +277,7 @@ workstreams:
       - internal TLS
       - certificate issuance
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0043-openbao
     adr: "0043"

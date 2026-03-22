@@ -192,13 +192,23 @@
     body:
       id: "{{ windmill_workspace_id }}"
       name: "{{ windmill_workspace_name }}"
-    status_code: 201
-  when: windmill_workspace_exists.content | trim != "true"
+    return_content: true
+    status_code:
+      - 201
+      - 400
+  register: windmill_workspace_create
+  failed_when: >-
+    windmill_workspace_create.status not in [201, 400]
+    or (
+      windmill_workspace_create.status == 400
+      and 'already exists' not in (windmill_workspace_create.content | default('') | lower)
+    )
+  when: not (windmill_workspace_exists.json | default(false) | bool)
   no_log: true
 
 - name: Read current Windmill script content
   ansible.builtin.uri:
-    url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id | urlencode }}/scripts/raw/p/{{ item.path | urlencode }}"
+    url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id | urlencode }}/scripts/raw/p/{{ (item.api_path | default(item.path)) | urlencode }}"
     method: GET
     headers:
       Authorization: "Bearer {{ windmill_superadmin_secret }}"

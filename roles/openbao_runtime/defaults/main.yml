@@ -12,11 +12,11 @@ openbao_compose_file: "{{ openbao_site_dir }}/docker-compose.yml"
 openbao_config_file: "{{ openbao_config_dir }}/openbao.hcl"
 openbao_tls_enabled: false
 openbao_http_bind_address: 127.0.0.1
-openbao_http_port: 8200
+openbao_http_port: 8201
 openbao_tls_bind_address: 0.0.0.0
 openbao_tls_port: 8200
-openbao_cluster_port: 8201
-openbao_local_cluster_port: 8202
+openbao_cluster_port: 8202
+openbao_local_cluster_port: 8203
 openbao_runtime_uid: "100"
 openbao_runtime_gid: "1000"
 openbao_api_addr: >-
@@ -101,11 +101,11 @@ openbao_database_password_authentication: scram-sha-256
 openbao_database_roles:
   - name: postgres-readonly
     db_name: "{{ openbao_database_name }}"
-    creation_statements: |-
-      CREATE ROLE "{{ "{{name}}" }}" WITH LOGIN PASSWORD '{{ "{{password}}" }}' VALID UNTIL '{{ "{{expiration}}" }}';
-      GRANT pg_read_all_data TO "{{ "{{name}}" }}";
-    revocation_statements: |-
-      DROP ROLE IF EXISTS "{{ "{{name}}" }}";
+    creation_statements: !unsafe |-
+      CREATE ROLE "{{ name }}" WITH LOGIN PASSWORD '{{ password }}' VALID UNTIL '{{ expiration }}';
+      GRANT pg_read_all_data TO "{{ name }}";
+    revocation_statements: !unsafe |-
+      DROP ROLE IF EXISTS "{{ name }}";
     default_ttl: 1h
     max_ttl: 24h
 openbao_seeded_secret_paths:

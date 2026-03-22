@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0042](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0042-step-ca-for-ssh-and-internal-tls.md)
 - Title: Internal certificate authority for SSH and private TLS
-- Status: merged
+- Status: live_applied
 - Branch: `codex/adr-0042-step-ca`
 - Worktree: `../proxmox_florin_server-step-ca`
 - Owner: codex
@@ -35,22 +35,29 @@
 
 ## Expected Live Surfaces
 
-- no direct live apply in this integration step
-- a ready-to-run `step-ca` converge path for later controlled rollout
+- Compose-managed `step-ca` runtime on `docker-runtime-lv3`
+- Tailscale-published CA API on `https://100.118.189.95:9443`
+- controller-local trust bootstrap artifacts under `.local/step-ca/`
+- CA-backed SSH host trust on the Proxmox host and managed guests
+- verified human SSH certificate login through the host and guest jump path
 
 ## Verification
 
 - `make syntax-check-step-ca`
-- `make workflow-info WORKFLOW=converge-step-ca`
-- `ruby -e 'require "yaml"; YAML.load_file("/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml"); puts "workstreams.yaml OK"'`
+- `make converge-step-ca`
+- `curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt https://100.118.189.95:9443/health`
+- local `step` CLI issuance plus SSH certificate login to `ops@100.118.189.95` and `ops@10.10.10.20`
 
 ## Merge Criteria
 
 - the repo has a coherent `step-ca` converge path with documented bootstrap artifacts and trust boundaries
-- the workstream records the trusted surfaces and dependencies clearly
+- the live CA runtime is healthy and reachable through the host Tailscale path
+- SSH host trust and X.509 issuance are verified end to end
+- a live-apply receipt is recorded before final push
 
 ## Notes For The Next Assistant
 
-- keep the first implementation private-only
-- avoid mixing public edge work into the CA rollout
-- apply the workflow live only after the short-lived credential rollout and recovery expectations are explicitly approved
+- Live apply completed on `2026-03-22` through `make converge-step-ca` from `main`.
+- Verification confirmed `curl --cacert ... https://100.118.189.95:9443/health` returned `{\"status\":\"ok\"}` through the Proxmox host Tailscale proxy.
+- Verification confirmed a locally issued `ops` SSH certificate reached both `ops@100.118.189.95` and `ops@10.10.10.20` using the mirrored CA trust material under `.local/step-ca/`.
+- Verification confirmed local X.509 issuance through the proxied controller URL with the `services` provisioner.

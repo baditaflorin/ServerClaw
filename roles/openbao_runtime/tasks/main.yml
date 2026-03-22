@@ -11,14 +11,14 @@
       - openbao_init_local_file | length > 0
       - openbao_postgres_host | length > 0
       - openbao_postgres_admin_role | length > 0
-      - (not openbao_tls_enabled) or (openbao_tls_dir | length > 0)
-      - (not openbao_tls_enabled) or (openbao_tls_server_cert_file | length > 0)
-      - (not openbao_tls_enabled) or (openbao_tls_server_key_file | length > 0)
-      - (not openbao_tls_enabled) or (openbao_tls_client_ca_file | length > 0)
-      - (not openbao_tls_enabled) or (openbao_controller_url | length > 0)
-      - (not openbao_tls_enabled) or (step_ca_internal_url | length > 0)
-      - (not openbao_tls_enabled) or (step_ca_services_password_file | length > 0)
-      - (not openbao_tls_enabled) or (step_ca_remote_root_certificate_file | length > 0)
+      - (not openbao_tls_enabled) or ((openbao_tls_dir | default('')) | length > 0)
+      - (not openbao_tls_enabled) or ((openbao_tls_server_cert_file | default('')) | length > 0)
+      - (not openbao_tls_enabled) or ((openbao_tls_server_key_file | default('')) | length > 0)
+      - (not openbao_tls_enabled) or ((openbao_tls_client_ca_file | default('')) | length > 0)
+      - (not openbao_tls_enabled) or ((openbao_controller_url | default('')) | length > 0)
+      - (not openbao_tls_enabled) or ((step_ca_internal_url | default('')) | length > 0)
+      - (not openbao_tls_enabled) or ((step_ca_services_password_file | default('')) | length > 0)
+      - (not openbao_tls_enabled) or ((step_ca_remote_root_certificate_file | default('')) | length > 0)
     fail_msg: "openbao_runtime requires image, filesystem paths, local artifact paths, and PostgreSQL backend inputs."
 
 - name: Ensure OpenBao local artifact directory exists
@@ -120,13 +120,10 @@
       mode: "0750"
       owner: "{{ openbao_runtime_uid }}"
       group: "{{ openbao_runtime_gid }}"
-      when_enabled: true
     - path: "{{ openbao_policy_dir }}"
       mode: "0755"
       owner: "{{ openbao_runtime_uid }}"
       group: "{{ openbao_runtime_gid }}"
-      when_enabled: false
-  when: not (item.when_enabled | default(false)) or openbao_tls_enabled
 
 - name: Mirror the step-ca root certificate for OpenBao TLS trust
   ansible.builtin.copy:
@@ -136,7 +133,6 @@
     owner: "{{ openbao_runtime_uid }}"
     group: "{{ openbao_runtime_gid }}"
     mode: "0644"
-  when: openbao_tls_enabled
 
 - name: Issue or renew the OpenBao external TLS certificate
   ansible.builtin.shell: |
@@ -171,7 +167,6 @@
   register: openbao_tls_certificate_issue
   changed_when: "'changed' in openbao_tls_certificate_issue.stdout"
   no_log: true
-  when: openbao_tls_enabled
 
 - name: Render OpenBao policy files
   ansible.builtin.template:
@@ -560,7 +555,6 @@
       max_ttl: "{{ item.max_ttl }}"
     status_code: 204
   loop: "{{ openbao_database_roles }}"
-  no_log: true
 
 - name: Read current controller Proxmox API secret
   ansible.builtin.uri:
@@ -721,23 +715,7 @@
 - name: Persist fresh short-lived AppRole artifacts locally
   ansible.builtin.copy:
     dest: "{{ item.item.local_file }}"
-    content: >-
-      {{
-        {
-          'role_name': item.item.name,
-          'auth_path': 'approle',
-          'role_id': (
-            openbao_approle_role_ids.results
-            | selectattr('item.name', 'equalto', item.item.name)
-            | map(attribute='json.data.role_id')
-            | first
-          ),
-          'secret_id': item.json.data.secret_id,
-          'secret_id_accessor': item.json.data.secret_id_accessor,
-          'generated_at': ansible_date_time.iso8601
-        } | to_nice_json
-      }}
-      {{ '\n' }}
+    content: "{{ {'role_name': item.item.name, 'auth_path': 'approle', 'role_id': (openbao_approle_role_ids.results | selectattr('item.name', 'equalto', item.item.name) | map(attribute='json.data.role_id') | first), 'secret_id': item.json.data.secret_id, 'secret_id_accessor': item.json.data.secret_id_accessor, 'generated_at': ansible_date_time.iso8601} | to_nice_json }}\n"
     mode: "0600"
   loop: "{{ openbao_generated_secret_ids.results | default([]) }}"
   delegate_to: localhost
@@ -889,7 +867,6 @@
     return_content: true
     status_code: 200
   register: openbao_postgres_dynamic_credential
-  no_log: true
 
 - name: Assert that a PostgreSQL dynamic credential was issued
   ansible.builtin.assert:
