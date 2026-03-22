@@ -2,8 +2,8 @@
 
 - Status: Accepted
 - Implementation Status: Implemented
-- Implemented In Repo Version: 0.45.0
-- Implemented In Platform Version: not yet
+- Implemented In Repo Version: 0.48.0
+- Implemented In Platform Version: 0.24.0
 - Implemented On: 2026-03-22
 - Date: 2026-03-22
 
@@ -65,8 +65,8 @@ Authentication and authorization must be structured around narrow roles:
 
 ## Implementation Notes
 
-- The repo now defines a dedicated OpenBao automation surface through [playbooks/openbao.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/openbao.yml), [roles/openbao_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/openbao_runtime), and [roles/openbao_postgres_backend](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/openbao_postgres_backend).
-- [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json) now exposes `converge-openbao` as the canonical entry point with explicit preflight, validation, and verification metadata.
-- [config/controller-local-secrets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/controller-local-secrets.json) now records the controller-local bootstrap artifacts and scoped AppRole outputs used by the OpenBao workflow.
+- The repo defines a dedicated OpenBao automation surface through [playbooks/openbao.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/openbao.yml), [roles/openbao_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/openbao_runtime), and [roles/openbao_postgres_backend](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/openbao_postgres_backend).
+- [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json) exposes `converge-openbao` as the canonical entry point with explicit preflight, validation, and verification metadata.
+- [config/controller-local-secrets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/controller-local-secrets.json) records the controller-local bootstrap artifacts and scoped AppRole outputs used by the OpenBao workflow.
 - Operator usage is documented in [docs/runbooks/configure-openbao.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-openbao.md).
-- Live application is intentionally still pending, so the platform implementation metadata remains `not yet`.
+- OpenBao is live on `docker-runtime-lv3` with managed initialization and unseal, scoped `userpass` and `AppRole` identities, seeded controller and mail secrets, Transit verification, and verified PostgreSQL dynamic credential issuance against `postgres-lv3`.

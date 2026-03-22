@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0043](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0043-openbao-for-secrets-transit-and-dynamic-credentials.md)
 - Title: Secret authority for applications, services, and agents
-- Status: merged
+- Status: live_applied
 - Branch: `codex/adr-0043-openbao`
 - Worktree: `../proxmox_florin_server-openbao`
 - Owner: codex
@@ -35,22 +35,24 @@
 
 ## Expected Live Surfaces
 
-- no direct live apply in this integration step
-- a ready-to-run OpenBao converge path for later controlled rollout
+- `docker-runtime-lv3` runs the managed OpenBao runtime with integrated Raft storage and controller-managed init and unseal
+- `postgres-lv3` serves the managed OpenBao database backend for dynamic read-only PostgreSQL credentials
+- controller-local `.local/openbao/` artifacts hold the init payload, named operator passwords, and refreshed short-lived AppRole credentials
 
 ## Verification
 
 - `make syntax-check-openbao`
-- `make workflow-info WORKFLOW=converge-openbao`
-- `ruby -e 'require "yaml"; YAML.load_file("/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml"); puts "workstreams.yaml OK"'`
+- `make preflight WORKFLOW=converge-openbao`
+- `make validate-data-models`
+- `make converge-openbao`
 
 ## Merge Criteria
 
 - the repo has a coherent OpenBao converge path with documented bootstrap artifacts, auth boundaries, and PostgreSQL integration
-- the workstream leaves a clear path for future live rollout and recovery planning
+- the live platform proves scoped secret reads, Transit operations, and OpenBao-issued PostgreSQL credentials end to end
 
 ## Notes For The Next Assistant
 
 - keep OpenBao private-only
 - do not let it become a second default certificate authority without an explicit follow-up decision
-- live apply should wait for an explicit recovery review because init payloads and unseal artifacts become critical control-plane state
+- treat `.local/openbao/` as recovery material because it contains the init payload, named-user passwords, and refreshed AppRole credentials

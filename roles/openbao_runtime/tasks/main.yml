@@ -15,6 +15,9 @@
       - not openbao_tls_enabled or openbao_tls_server_cert_file | length > 0
       - not openbao_tls_enabled or openbao_tls_server_key_file | length > 0
       - not openbao_tls_enabled or openbao_tls_client_ca_file | length > 0
+      - not openbao_tls_enabled or openbao_tls_server_cert_host_file | length > 0
+      - not openbao_tls_enabled or openbao_tls_server_key_host_file | length > 0
+      - not openbao_tls_enabled or openbao_tls_client_ca_host_file | length > 0
       - not openbao_tls_enabled or (openbao_controller_url | default('')) | length > 0
       - not openbao_tls_enabled or (step_ca_internal_url | default('')) | length > 0
       - not openbao_tls_enabled or (step_ca_services_password_file | default('')) | length > 0
@@ -129,24 +132,21 @@
   ansible.builtin.copy:
     remote_src: true
     src: "{{ step_ca_remote_root_certificate_file }}"
-    dest: "{{ openbao_tls_client_ca_file }}"
+    dest: "{{ openbao_tls_client_ca_host_file }}"
     owner: "{{ openbao_runtime_uid }}"
     group: "{{ openbao_runtime_gid }}"
     mode: "0644"
-  when: openbao_tls_enabled
 
 - name: Issue or renew the OpenBao external TLS certificate
   ansible.builtin.shell: |
     set -euo pipefail
-    if [ -s "{{ openbao_tls_server_cert_file }}" ] && \
-      openssl x509 -checkend {{ openbao_tls_cert_renew_before_seconds }} -noout -in "{{ openbao_tls_server_cert_file }}" >/dev/null 2>&1; then
+    if [ -s "{{ openbao_tls_server_cert_host_file }}" ] && \
+      openssl x509 -checkend {{ openbao_tls_cert_renew_before_seconds }} -noout -in "{{ openbao_tls_server_cert_host_file }}" >/dev/null 2>&1; then
       exit 0
     fi
 
     step ca certificate \
       --force \
-      --no-password \
-      --insecure \
       --provisioner services \
       --provisioner-password-file "{{ step_ca_services_password_file }}" \
       --ca-url "{{ step_ca_internal_url }}" \
@@ -156,19 +156,18 @@
     {% endfor %}
       --not-after 24h \
       "{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}" \
-      "{{ openbao_tls_server_cert_file }}" \
-      "{{ openbao_tls_server_key_file }}"
+      "{{ openbao_tls_server_cert_host_file }}" \
+      "{{ openbao_tls_server_key_host_file }}"
 
-    chown {{ openbao_runtime_uid }}:{{ openbao_runtime_gid }} "{{ openbao_tls_server_cert_file }}" "{{ openbao_tls_server_key_file }}"
-    chmod 0644 "{{ openbao_tls_server_cert_file }}"
-    chmod 0600 "{{ openbao_tls_server_key_file }}"
+    chown {{ openbao_runtime_uid }}:{{ openbao_runtime_gid }} "{{ openbao_tls_server_cert_host_file }}" "{{ openbao_tls_server_key_host_file }}"
+    chmod 0644 "{{ openbao_tls_server_cert_host_file }}"
+    chmod 0600 "{{ openbao_tls_server_key_host_file }}"
     echo changed
   args:
     executable: /bin/bash
   register: openbao_tls_certificate_issue
   changed_when: "'changed' in openbao_tls_certificate_issue.stdout"
   no_log: true
-  when: openbao_tls_enabled
 
 - name: Render OpenBao policy files
   ansible.builtin.template:
@@ -355,6 +354,17 @@
     that:
       - not (openbao_unsealed_status.json.sealed | bool)
     fail_msg: "OpenBao is still sealed after the managed unseal sequence."
+
+- name: Wait for OpenBao to become the active node
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/health"
+    method: GET
+    return_content: true
+    status_code: 200
+  register: openbao_active_health
+  retries: 30
+  delay: 2
+  until: openbao_active_health.status == 200
 
 - name: Discover enabled auth methods
   ansible.builtin.uri:
@@ -897,3 +907,27 @@
       - openbao_postgres_dynamic_credential.json.data.username | default('') | length > 0
       - openbao_postgres_dynamic_credential.json.data.password | default('') | length > 0
     fail_msg: "OpenBao failed to issue a PostgreSQL dynamic credential."
+
+- name: Refresh short-lived AppRole secret IDs after managed verification
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/auth/approle/role/{{ item.name }}/secret-id"
+    method: POST
+    headers:
+      X-Vault-Token: "{{ openbao_init_payload.root_token }}"
+    body_format: json
+    body: {}
+    return_content: true
+    status_code: 200
+  loop: "{{ openbao_approles }}"
+  register: openbao_refreshed_secret_ids
+  no_log: true
+
+- name: Persist refreshed short-lived AppRole artifacts locally
+  ansible.builtin.copy:
+    dest: "{{ item.item.local_file }}"
+    content: "{{ {'role_name': item.item.name, 'auth_path': 'approle', 'role_id': (openbao_approle_role_ids.results | selectattr('item.name', 'equalto', item.item.name) | map(attribute='json.data.role_id') | first), 'secret_id': item.json.data.secret_id, 'secret_id_accessor': item.json.data.secret_id_accessor, 'generated_at': ansible_date_time.iso8601} | to_nice_json }}\n"
+    mode: "0600"
+  loop: "{{ openbao_refreshed_secret_ids.results | default([]) }}"
+  delegate_to: localhost
+  become: false
+  no_log: true

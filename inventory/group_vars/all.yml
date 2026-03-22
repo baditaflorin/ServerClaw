@@ -1,5 +1,5 @@
-repo_version: 0.45.0
-platform_version: 0.21.0
+repo_version: 0.48.0
+platform_version: 0.24.0
 
 proxmox_release_major: 9
 proxmox_suite: trixie
@@ -115,6 +115,9 @@ mail_platform_reply_to_email: "{{ mail_platform_mailbox_address }}"
 openbao_postgres_host: "{{ (hostvars['proxmox_florin'].proxmox_guests | selectattr('name', 'equalto', 'postgres-lv3') | map(attribute='ipv4') | first) }}"
 openbao_postgres_admin_role: openbao_rotator
 openbao_postgres_database: postgres
+openbao_tls_enabled: false
+openbao_http_port: 8201
+openbao_database_mount_path: database
 openbao_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao
 openbao_init_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/init.json
 openbao_ops_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/ops-password.txt

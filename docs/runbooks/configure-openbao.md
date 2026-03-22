@@ -28,7 +28,7 @@ make syntax-check-openbao
 
 1. Extends the PostgreSQL guest firewall and `pg_hba.conf` so `docker-runtime-lv3` can reach `postgres-lv3`.
 2. Creates the `openbao_rotator` PostgreSQL role with the minimum privileges needed to issue dynamic read-only credentials.
-3. Starts a Compose-managed OpenBao container under `/opt/openbao` with integrated Raft storage and a loopback-only HTTP API on `docker-runtime-lv3`.
+3. Starts a Compose-managed OpenBao container under `/opt/openbao` with integrated Raft storage, a loopback-published HTTP listener on `127.0.0.1:8201`, and a managed step-ca-backed TLS listener on `:8200`.
 4. Initializes and unseals OpenBao once, then mirrors the bootstrap init payload to `.local/openbao/init.json` on the controller.
 5. Enables `kv`, `transit`, `database`, `userpass`, and `approle` paths.
 6. Creates named human and machine identities:
@@ -58,14 +58,14 @@ Basic runtime checks:
 
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'ssh -o StrictHostKeyChecking=no ops@10.10.10.20 docker compose --file /opt/openbao/docker-compose.yml ps'
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'ssh -o StrictHostKeyChecking=no ops@10.10.10.20 curl -fsS http://127.0.0.1:8200/v1/sys/health'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'ssh -o StrictHostKeyChecking=no ops@10.10.10.20 curl -fsS http://127.0.0.1:8201/v1/sys/health'
 ```
 
 Routine operator login over an SSH port forward:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -L 8200:127.0.0.1:8200 ops@100.118.189.95 'ssh -o ExitOnForwardFailure=yes -N -L 8200:127.0.0.1:8200 ops@10.10.10.20'
-curl --request POST --data "{\"password\":\"$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/ops-password.txt)\"}" http://127.0.0.1:8200/v1/auth/userpass/login/ops
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -L 8201:127.0.0.1:8201 ops@100.118.189.95 'ssh -o ExitOnForwardFailure=yes -N -L 8201:127.0.0.1:8201 ops@10.10.10.20'
+curl --request POST --data "{\"password\":\"$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/ops-password.txt)\"}" http://127.0.0.1:8201/v1/auth/userpass/login/ops
 ```
 
 Controller AppRole login and dynamic credential fetch:
@@ -73,12 +73,12 @@ Controller AppRole login and dynamic credential fetch:
 ```bash
 role_id="$(jq -r '.role_id' /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/controller-automation-approle.json)"
 secret_id="$(jq -r '.secret_id' /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/controller-automation-approle.json)"
-token="$(curl -fsS --request POST --data "{\"role_id\":\"$role_id\",\"secret_id\":\"$secret_id\"}" http://127.0.0.1:8200/v1/auth/approle/login | jq -r '.auth.client_token')"
-curl -fsS --header "X-Vault-Token: $token" http://127.0.0.1:8200/v1/database/creds/postgres-readonly
+token="$(curl -fsS --request POST --data "{\"role_id\":\"$role_id\",\"secret_id\":\"$secret_id\"}" http://127.0.0.1:8201/v1/auth/approle/login | jq -r '.auth.client_token')"
+curl -fsS --header "X-Vault-Token: $token" http://127.0.0.1:8201/v1/database/creds/postgres-readonly
 ```
 
 ## Notes
 
-- The OpenBao API is loopback-only on `docker-runtime-lv3` by design. Use SSH port forwarding or a future private publication workflow, not the public edge.
+- The loopback HTTP API on `127.0.0.1:8201` remains the managed automation and operator path. Use SSH port forwarding or a controlled private publication flow, not the public edge.
 - The current implementation seeds existing mail, monitoring, and Proxmox API artifacts into OpenBao so later consumers can fetch them without reintroducing git-managed secrets.
-- Internal API TLS remains a follow-up under ADR 0042 and ADR 0047. This ADR establishes the secret authority and dynamic credential path first.
+- A step-ca-backed TLS listener is also present on `:8200`, but the current workflow does not rely on client-certificate distribution yet. Treat the loopback HTTP listener as the supported access path until ADR 0047 defines the short-lived mTLS client model.

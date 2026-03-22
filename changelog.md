@@ -8,6 +8,18 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.48.0 - 2026-03-22
+
+- applied ADR 0043 live from `main` by converging OpenBao on `docker-runtime-lv3`, provisioning its PostgreSQL backend inputs on `postgres-lv3`, and seeding scoped controller and mail secrets into the managed secret authority
+- hardened the OpenBao workflow so managed init and unseal, AppRole artifact refresh, active-node waiting, and PostgreSQL dynamic credential verification rerun cleanly from the integration worktree
+- recorded controller-local OpenBao bootstrap and AppRole artifact handling, a live-apply receipt, and updated ADR/workstream metadata to mark the secret authority as live
+
+Platform impact:
+
+- OpenBao is now live on `docker-runtime-lv3` with integrated Raft storage, managed init and unseal, scoped `userpass` and `AppRole` identities, verified Transit operations, and a verified PostgreSQL dynamic credential path to `postgres-lv3`
+- controller-local recovery material now includes the OpenBao init payload plus refreshed short-lived AppRole artifacts under `.local/openbao/`
+- the platform now has a private secret authority for controller automation, mail runtime secrets, and short-lived database access instead of relying only on repo-local secret files
+
 ## 0.47.0 - 2026-03-22
 
 - applied ADR 0044 live from `main` by provisioning the Windmill PostgreSQL backend on `postgres-lv3`, converging the private Windmill runtime on `docker-runtime-lv3`, and exposing operator access through the Proxmox host Tailscale proxy on port `8005`

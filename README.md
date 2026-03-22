@@ -62,8 +62,8 @@ The private `step-ca` control plane is now live on `docker-runtime-lv3`, publish
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.47.0` |
-| Platform version | `0.23.0` |
+| Repository version | `0.48.0` |
+| Platform version | `0.24.0` |
 | Observed check date | `2026-03-22` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -101,6 +101,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `docker_runtime` | `2026-03-22-adr-0023-docker-runtime-live-apply` |
 | `mail_platform` | `2026-03-22-adr-0041-email-platform-live-apply` |
 | `monitoring` | `2026-03-22-adr-0011-monitoring-live-apply` |
+| `openbao` | `2026-03-22-adr-0043-openbao-live-apply` |
 | `postgres_vm` | `2026-03-22-adr-0026-postgres-vm-live-apply` |
 | `public_edge_publication` | `2026-03-22-adr-0021-edge-publication-live-apply` |
 | `runtime_container_telemetry` | `2026-03-22-adr-0040-runtime-container-telemetry-live-apply` |
@@ -372,8 +373,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.47.0` |
-| Platform version | `0.23.0` |
+| Repository version | `0.48.0` |
+| Platform version | `0.24.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -429,7 +430,7 @@ This repository is intentionally opinionated:
 | `0041` | Dockerized mail platform with API, Grafana telemetry, and failover delivery | `merged` | [adr-0041-email-platform.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0041-email-platform.md) |
 | `0041` | Dockerized mail platform live rollout | `live_applied` | [adr-0041-email-platform-live.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0041-email-platform-live.md) |
 | `0042` | step-ca for SSH and internal TLS | `live_applied` | [adr-0042-step-ca.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0042-step-ca.md) |
-| `0043` | OpenBao for secrets, transit, and dynamic credentials | `merged` | [adr-0043-openbao.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0043-openbao.md) |
+| `0043` | OpenBao for secrets, transit, and dynamic credentials | `live_applied` | [adr-0043-openbao.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0043-openbao.md) |
 | `0044` | Windmill for agent and operator workflows | `live_applied` | [adr-0044-windmill.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0044-windmill.md) |
 | `0045` | Control-plane communication lanes | `merged` | [adr-0045-communication-lanes.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0045-communication-lanes.md) |
 | `0046` | Identity classes for humans, services, agents, and break-glass | `merged` | [adr-0046-identity-classes.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0046-identity-classes.md) |
