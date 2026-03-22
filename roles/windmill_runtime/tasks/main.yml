@@ -233,6 +233,71 @@
   changed_when: false
   no_log: true
 
+- name: Check whether repo-managed Windmill schedules already exist
+  ansible.builtin.uri:
+    url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id | urlencode }}/schedules/exists/{{ item.path | urlencode }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ windmill_superadmin_secret }}"
+    return_content: true
+    status_code: 200
+  loop: "{{ windmill_seed_schedules }}"
+  loop_control:
+    label: "{{ item.path }}"
+  register: windmill_seed_schedule_exists
+  changed_when: false
+  no_log: true
+
+- name: Create repo-managed Windmill schedules
+  ansible.builtin.uri:
+    url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id | urlencode }}/schedules/create"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ windmill_superadmin_secret }}"
+    body_format: json
+    body:
+      path: "{{ item.item.path }}"
+      schedule: "{{ item.item.schedule }}"
+      timezone: "{{ item.item.timezone }}"
+      script_path: "{{ item.item.script_path }}"
+      is_flow: false
+      args: "{{ item.item.args | default({}) }}"
+      enabled: "{{ item.item.enabled | default(false) }}"
+      summary: "{{ item.item.summary }}"
+      description: "{{ item.item.description }}"
+      no_flow_overlap: "{{ item.item.no_flow_overlap | default(true) }}"
+    return_content: true
+    status_code: 201
+  loop: "{{ windmill_seed_schedule_exists.results }}"
+  loop_control:
+    label: "{{ item.item.path }}"
+  when: not (item.json | default(false) | bool)
+  changed_when: true
+  no_log: true
+
+- name: Update existing repo-managed Windmill schedules
+  ansible.builtin.uri:
+    url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id | urlencode }}/schedules/update/{{ item.item.path | urlencode }}"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ windmill_superadmin_secret }}"
+    body_format: json
+    body:
+      schedule: "{{ item.item.schedule }}"
+      timezone: "{{ item.item.timezone }}"
+      args: "{{ item.item.args | default({}) }}"
+      summary: "{{ item.item.summary }}"
+      description: "{{ item.item.description }}"
+      no_flow_overlap: "{{ item.item.no_flow_overlap | default(true) }}"
+    return_content: true
+    status_code: 200
+  loop: "{{ windmill_seed_schedule_exists.results }}"
+  loop_control:
+    label: "{{ item.item.path }}"
+  when: item.json | default(false) | bool
+  changed_when: false
+  no_log: true
+
 - name: Run the Windmill seeded healthcheck script
   ansible.builtin.uri:
     url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id | urlencode }}/jobs/run_wait_result/p/{{ windmill_seed_scripts[0].path | urlencode }}"

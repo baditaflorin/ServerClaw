@@ -1,0 +1,161 @@
+{
+  "schema_version": "1.0.0",
+  "images": [
+    {
+      "id": "windmill-server",
+      "service_id": "windmill",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "windmill-windmill_server-1",
+      "image_reference": "ghcr.io/windmill-labs/windmill:main",
+      "source_kind": "upstream",
+      "pin_status": "unpinned",
+      "pinned_digest": null,
+      "pinned_at": null,
+      "freshness_window_days": 30
+    },
+    {
+      "id": "windmill-extra",
+      "service_id": "windmill",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "windmill-windmill_extra-1",
+      "image_reference": "ghcr.io/windmill-labs/windmill-extra:latest",
+      "source_kind": "upstream",
+      "pin_status": "unpinned",
+      "pinned_digest": null,
+      "pinned_at": null,
+      "freshness_window_days": 30
+    },
+    {
+      "id": "step-ca",
+      "service_id": "step_ca",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "step-ca",
+      "image_reference": "smallstep/step-ca:0.30.1",
+      "source_kind": "upstream",
+      "pin_status": "unpinned",
+      "pinned_digest": null,
+      "pinned_at": null,
+      "freshness_window_days": 30
+    },
+    {
+      "id": "openbao",
+      "service_id": "openbao",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "lv3-openbao",
+      "image_reference": "openbao/openbao:2.5.1",
+      "source_kind": "upstream",
+      "pin_status": "unpinned",
+      "pinned_digest": null,
+      "pinned_at": null,
+      "freshness_window_days": 30
+    },
+    {
+      "id": "open-webui",
+      "service_id": "open_webui",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "open-webui",
+      "image_reference": "ghcr.io/open-webui/open-webui:v0.8.9",
+      "source_kind": "upstream",
+      "pin_status": "unpinned",
+      "pinned_digest": null,
+      "pinned_at": null,
+      "freshness_window_days": 30
+    },
+    {
+      "id": "portainer",
+      "service_id": "portainer",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "portainer",
+      "image_reference": "portainer/portainer-ce:lts",
+      "source_kind": "upstream",
+      "pin_status": "unpinned",
+      "pinned_digest": null,
+      "pinned_at": null,
+      "freshness_window_days": 30
+    },
+    {
+      "id": "uptime-kuma",
+      "service_id": "uptime_kuma",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "uptime-kuma",
+      "image_reference": "louislam/uptime-kuma:2",
+      "source_kind": "upstream",
+      "pin_status": "unpinned",
+      "pinned_digest": null,
+      "pinned_at": null,
+      "freshness_window_days": 30
+    },
+    {
+      "id": "netbox",
+      "service_id": "netbox",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "netbox-netbox-1",
+      "image_reference": "netboxcommunity/netbox:v4.5",
+      "source_kind": "upstream",
+      "pin_status": "unpinned",
+      "pinned_digest": null,
+      "pinned_at": null,
+      "freshness_window_days": 30
+    },
+    {
+      "id": "mattermost",
+      "service_id": "mattermost",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "lv3-mattermost",
+      "image_reference": "mattermost/mattermost-team-edition:release-10.11",
+      "source_kind": "upstream",
+      "pin_status": "unpinned",
+      "pinned_digest": null,
+      "pinned_at": null,
+      "freshness_window_days": 30
+    },
+    {
+      "id": "nats-jetstream",
+      "service_id": "nats_jetstream",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "lv3-nats-jetstream",
+      "image_reference": "nats:2.11-alpine",
+      "source_kind": "upstream",
+      "pin_status": "unpinned",
+      "pinned_digest": null,
+      "pinned_at": null,
+      "freshness_window_days": 30
+    },
+    {
+      "id": "mail-stalwart",
+      "service_id": "mail_platform",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "lv3-mail-stalwart",
+      "image_reference": "stalwartlabs/stalwart:latest",
+      "source_kind": "upstream",
+      "pin_status": "unpinned",
+      "pinned_digest": null,
+      "pinned_at": null,
+      "freshness_window_days": 30
+    },
+    {
+      "id": "mail-gateway",
+      "service_id": "mail_platform",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "lv3-mail-gateway",
+      "image_reference": "mail-platform-mail-gateway",
+      "source_kind": "local_build",
+      "pin_status": "local_build",
+      "pinned_digest": null,
+      "pinned_at": "2026-03-22",
+      "freshness_window_days": 30
+    },
+    {
+      "id": "keycloak",
+      "service_id": "keycloak",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "keycloak-keycloak-1",
+      "image_reference": "quay.io/keycloak/keycloak:26.5.4",
+      "source_kind": "upstream",
+      "pin_status": "unpinned",
+      "pinned_digest": null,
+      "pinned_at": null,
+      "freshness_window_days": 30
+    }
+  ]
+}

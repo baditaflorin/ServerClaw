@@ -8,6 +8,17 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.59.0 - 2026-03-23
+
+- implemented ADR 0071 in repository automation by adding a controller-side observation loop that runs the six governed drift checks for VM state, service health, image freshness, secret ages, certificate expiry, and backup recency
+- added the new machine-readable observation contracts and routing surfaces through `config/health-probe-catalog.json`, `config/secret-catalog.json`, `config/image-catalog.json`, `docs/schema/platform-finding.json`, the controller-local secret manifest, and the control-plane lane or API publication catalogs
+- added the operator runbook, Windmill seed-script placeholders, and repository validation wiring so the observation loop can write local artifacts now and later be promoted into scheduled Windmill execution without redefining the contract
+- updated ADR 0071 and its workstream status to reflect repository implementation in `0.59.0` while keeping live activation and `platform_version` unchanged
+
+Platform impact:
+
+- no direct live platform change is claimed in this release commit; the observation tooling now detects and records current drift from the controller, but Windmill schedule activation and live alert wiring still need to be applied from `main`
+
 ## 0.58.0 - 2026-03-22
 
 - applied ADR 0054 live from `main` by converging a private NetBox runtime on `docker-runtime-lv3`, provisioning its PostgreSQL backend on `postgres-lv3`, and publishing operator and agent access through the Proxmox host Tailscale proxy on port `8004`

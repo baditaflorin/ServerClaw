@@ -27,3 +27,32 @@ windmill_seed_scripts:
     language: python3
     summary: LV3 Windmill healthcheck
     description: Repo-managed verification script for Windmill runtime and worker execution.
+  - path: f/lv3/platform_observation_loop
+    local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/platform-observation-loop.py
+    language: python3
+    summary: LV3 observation loop summary helper
+    description: Repo-managed Windmill helper for ADR 0071 observation-loop summaries and later scheduler activation.
+  - path: f/lv3/platform_findings_daily_digest
+    local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/platform-findings-daily-digest.py
+    language: python3
+    summary: LV3 findings daily digest helper
+    description: Repo-managed Windmill helper that formats ADR 0071 findings into Markdown for operator review.
+windmill_seed_schedules:
+  - path: f/lv3/platform_observation_loop_every_4h
+    schedule: "0 0 */4 * * *"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/platform_observation_loop
+    args: {}
+    enabled: false
+    summary: Disabled ADR 0071 observation-loop schedule placeholder
+    description: Repo-managed Windmill schedule definition reserved for the observation loop once controller-equivalent secret contracts are available inside Windmill.
+    no_flow_overlap: true
+  - path: f/lv3/platform_findings_daily_digest_daily
+    schedule: "0 0 8 * * *"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/platform_findings_daily_digest
+    args: {}
+    enabled: false
+    summary: Disabled ADR 0071 daily digest schedule placeholder
+    description: Repo-managed Windmill schedule definition reserved for automatic findings digests after the observation loop is promoted into Windmill.
+    no_flow_overlap: true

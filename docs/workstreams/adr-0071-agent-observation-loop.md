@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0071](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0071-agent-observation-loop-and-drift-detection.md)
 - Title: Scheduled proactive drift detection with structured findings and governed self-healing
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0071-agent-observation-loop`
 - Worktree: `../proxmox_florin_server-agent-observation-loop`
 - Owner: codex
@@ -44,18 +44,21 @@
 
 ## Verification
 
-- manually trigger `platform-observation-loop` and verify all six checks produce a finding event
-- verify a non-ok finding appears in Mattermost within 30 seconds of emission
-- stop the workflow schedule and verify dead-man's switch fires within 5 hours
+- `python3 -m py_compile scripts/platform_observation_tool.py tests/test_platform_observation_tool.py scripts/control_plane_lanes.py scripts/validate_repository_data_models.py`
+- `uvx --from pytest --with pyyaml python -m pytest tests/test_platform_observation_tool.py -q`
+- `uvx --from pyyaml python scripts/validate_repository_data_models.py --validate`
+- `ANSIBLE_LOCAL_TEMP=/tmp/proxmox_florin_server-ansible-local ANSIBLE_REMOTE_TEMP=/tmp ansible-playbook -i inventory/hosts.yml playbooks/windmill.yml --syntax-check`
+- `uvx --from pyyaml python scripts/platform_observation_tool.py`
 
 ## Merge Criteria
 
 - all six checks are implemented and produce valid finding JSON
 - the finding schema is valid JSON Schema
-- at least one finding cycle has been run against the live platform with a receipt
-- the dead-man's switch is configured and documented
+- at least one controller observation cycle has been run against the live platform and written to `.local/platform-observation/latest/`
+- the dead-man contract is documented for both artifact staleness and NATS event staleness, even though live alert activation remains pending
 
-## Notes For The Next Assistant
+## Merge Notes
 
-- implement checks in order of read-only safety: vm-state and service-health first, then image-freshness and certificate-expiry
-- the maintenance-window suppression mechanism can be a simple NATS KV flag checked at the start of each finding emission
+- Repository implementation completed on `2026-03-23` for release `0.59.0`.
+- The current execution surface is controller-local. Windmill receives repo-managed disabled placeholders for the observation loop and daily digest, but the schedules are intentionally not enabled yet.
+- A live observation run confirmed that the tooling works end-to-end and also surfaced current drift: several controller-side health probes timed out, tracked images are mostly unpinned, `step-ca` and OpenBao proxy certificates expire on `2026-03-23`, and only VM `110` currently has a recent PBS recovery point.

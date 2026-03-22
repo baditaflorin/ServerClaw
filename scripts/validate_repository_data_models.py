@@ -10,7 +10,7 @@ from typing import Any
 
 from command_catalog import load_command_catalog, validate_command_catalog
 from api_publication import load_api_publication_catalog, validate_api_publication_catalog
-from controller_automation_toolkit import REPO_ROOT, emit_cli_error, load_yaml, repo_path
+from controller_automation_toolkit import REPO_ROOT, emit_cli_error, load_json, load_yaml, repo_path
 from control_plane_lanes import load_lane_catalog
 from live_apply_receipts import RECEIPTS_DIR, iter_receipt_paths, validate_receipts
 from workflow_catalog import (
@@ -24,6 +24,10 @@ from workflow_catalog import (
 STACK_PATH = repo_path("versions", "stack.yaml")
 HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 UPTIME_MONITORS_PATH = repo_path("config", "uptime-kuma", "monitors.json")
+HEALTH_PROBE_CATALOG_PATH = repo_path("config", "health-probe-catalog.json")
+SECRET_CATALOG_PATH = repo_path("config", "secret-catalog.json")
+IMAGE_CATALOG_PATH = repo_path("config", "image-catalog.json")
+PLATFORM_FINDING_SCHEMA_PATH = repo_path("docs", "schema", "platform-finding.json")
 
 SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -43,6 +47,9 @@ EXTRA_DNS_RECORD_TYPES = {"A", "AAAA", "CNAME", "MX", "TXT"}
 EDGE_KINDS = {"static", "proxy"}
 MONITOR_TYPES = {"http", "port"}
 IDENTITY_CLASSES = {"human_operator", "service", "agent", "break_glass"}
+PROBE_RUNNERS = {"controller_local", "host_ssh", "guest_jump"}
+IMAGE_SOURCE_KINDS = {"upstream", "local_build"}
+IMAGE_PIN_STATUSES = {"pinned", "unpinned", "local_build"}
 IDENTITY_REQUIRED_METADATA = {
     "owner",
     "purpose",
@@ -455,6 +462,114 @@ def validate_uptime_monitors() -> None:
         if name in names:
             raise ValueError(f"duplicate monitor name in config/uptime-kuma/monitors.json: {name}")
         names.add(name)
+
+
+def validate_health_probe_catalog(host_vars_context: dict[str, Any]) -> None:
+    catalog = require_mapping(load_json(HEALTH_PROBE_CATALOG_PATH), str(HEALTH_PROBE_CATALOG_PATH))
+    require_semver(catalog.get("schema_version"), "config/health-probe-catalog.json.schema_version")
+    probes = require_list(catalog.get("probes"), "config/health-probe-catalog.json.probes")
+    if not probes:
+        raise ValueError("config/health-probe-catalog.json.probes must not be empty")
+    probe_ids: set[str] = set()
+    allowed_targets = {"controller", "proxmox_florin", *host_vars_context["guest_names"]}
+    for index, probe in enumerate(probes):
+        path = f"config/health-probe-catalog.json.probes[{index}]"
+        probe = require_mapping(probe, path)
+        probe_id = require_identifier(probe.get("id"), f"{path}.id")
+        if probe_id in probe_ids:
+            raise ValueError(f"duplicate health probe id: {probe_id}")
+        probe_ids.add(probe_id)
+        require_identifier(probe.get("service_id"), f"{path}.service_id")
+        runner = require_enum(probe.get("runner"), f"{path}.runner", PROBE_RUNNERS)
+        target = require_identifier(probe.get("target"), f"{path}.target")
+        if target not in allowed_targets:
+            raise ValueError(f"{path}.target must be one of {sorted(allowed_targets)}")
+        require_str(probe.get("summary"), f"{path}.summary")
+        require_str(probe.get("command"), f"{path}.command")
+        expect = require_mapping(probe.get("expect"), f"{path}.expect")
+        require_int(expect.get("exit_code"), f"{path}.expect.exit_code", 0)
+        if "stdout_contains" in expect:
+            require_string_list(expect.get("stdout_contains"), f"{path}.expect.stdout_contains")
+        if "stdout_regex" in expect:
+            require_str(expect.get("stdout_regex"), f"{path}.expect.stdout_regex")
+        if runner == "controller_local" and target != "controller":
+            raise ValueError(f"{path}.target must be controller when runner is controller_local")
+
+
+def validate_secret_catalog(secret_manifest: dict[str, Any]) -> None:
+    catalog = require_mapping(load_json(SECRET_CATALOG_PATH), str(SECRET_CATALOG_PATH))
+    require_semver(catalog.get("schema_version"), "config/secret-catalog.json.schema_version")
+    secrets = require_list(catalog.get("secrets"), "config/secret-catalog.json.secrets")
+    if not secrets:
+        raise ValueError("config/secret-catalog.json.secrets must not be empty")
+    secret_ids: set[str] = set()
+    manifest_secrets = secret_manifest["secrets"]
+    for index, secret in enumerate(secrets):
+        path = f"config/secret-catalog.json.secrets[{index}]"
+        secret = require_mapping(secret, path)
+        secret_id = require_identifier(secret.get("id"), f"{path}.id")
+        if secret_id in secret_ids:
+            raise ValueError(f"duplicate secret-catalog id: {secret_id}")
+        secret_ids.add(secret_id)
+        require_identifier(secret.get("owner_service"), f"{path}.owner_service")
+        require_str(secret.get("storage_contract"), f"{path}.storage_contract")
+        storage_ref = require_identifier(secret.get("storage_ref"), f"{path}.storage_ref")
+        if storage_ref not in manifest_secrets:
+            raise ValueError(f"{path}.storage_ref references unknown controller-local secret '{storage_ref}'")
+        require_int(secret.get("rotation_period_days"), f"{path}.rotation_period_days", 1)
+        require_int(secret.get("warning_window_days"), f"{path}.warning_window_days", 0)
+        require_date(secret.get("last_rotated_at"), f"{path}.last_rotated_at")
+        require_str(secret.get("rotation_mode"), f"{path}.rotation_mode")
+
+
+def validate_image_catalog(host_vars_context: dict[str, Any]) -> None:
+    catalog = require_mapping(load_json(IMAGE_CATALOG_PATH), str(IMAGE_CATALOG_PATH))
+    require_semver(catalog.get("schema_version"), "config/image-catalog.json.schema_version")
+    images = require_list(catalog.get("images"), "config/image-catalog.json.images")
+    if not images:
+        raise ValueError("config/image-catalog.json.images must not be empty")
+    image_ids: set[str] = set()
+    allowed_targets = host_vars_context["guest_names"]
+    for index, image in enumerate(images):
+        path = f"config/image-catalog.json.images[{index}]"
+        image = require_mapping(image, path)
+        image_id = require_identifier(image.get("id"), f"{path}.id")
+        if image_id in image_ids:
+            raise ValueError(f"duplicate image-catalog id: {image_id}")
+        image_ids.add(image_id)
+        require_identifier(image.get("service_id"), f"{path}.service_id")
+        runtime_host = require_identifier(image.get("runtime_host"), f"{path}.runtime_host")
+        if runtime_host not in allowed_targets:
+            raise ValueError(f"{path}.runtime_host must reference a managed guest")
+        require_str(image.get("container_name"), f"{path}.container_name")
+        require_str(image.get("image_reference"), f"{path}.image_reference")
+        require_enum(image.get("source_kind"), f"{path}.source_kind", IMAGE_SOURCE_KINDS)
+        pin_status = require_enum(image.get("pin_status"), f"{path}.pin_status", IMAGE_PIN_STATUSES)
+        pinned_digest = image.get("pinned_digest")
+        if pin_status == "pinned":
+            if pinned_digest is None:
+                raise ValueError(f"{path}.pinned_digest must be set when pin_status is pinned")
+            require_str(pinned_digest, f"{path}.pinned_digest")
+        elif pinned_digest is not None:
+            require_str(pinned_digest, f"{path}.pinned_digest")
+        pinned_at = image.get("pinned_at")
+        if pinned_at is not None:
+            require_date(pinned_at, f"{path}.pinned_at")
+        require_int(image.get("freshness_window_days"), f"{path}.freshness_window_days", 1)
+
+
+def validate_platform_finding_schema() -> None:
+    schema = require_mapping(load_json(PLATFORM_FINDING_SCHEMA_PATH), str(PLATFORM_FINDING_SCHEMA_PATH))
+    require_str(schema.get("$schema"), "docs/schema/platform-finding.json.$schema")
+    require_str(schema.get("$id"), "docs/schema/platform-finding.json.$id")
+    if schema.get("type") != "object":
+        raise ValueError("docs/schema/platform-finding.json.type must be object")
+    required_fields = set(require_string_list(schema.get("required"), "docs/schema/platform-finding.json.required"))
+    expected_fields = {"check", "severity", "summary", "details", "ts", "run_id"}
+    if required_fields != expected_fields:
+        raise ValueError(
+            "docs/schema/platform-finding.json.required must match the ADR 0071 finding contract"
+        )
 
 
 def validate_identity_taxonomy(
@@ -1071,6 +1186,10 @@ def validate_repository_data_models() -> int:
     validate_receipts()
     validate_uptime_monitors()
     host_vars_context = validate_host_vars()
+    validate_health_probe_catalog(host_vars_context)
+    validate_secret_catalog(secret_manifest)
+    validate_image_catalog(host_vars_context)
+    validate_platform_finding_schema()
     validate_versions_stack(host_vars_context)
     print("Repository data models OK")
     return 0

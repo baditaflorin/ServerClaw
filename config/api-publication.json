@@ -99,6 +99,15 @@
       "publication_tier": "internal-only",
       "reachability": "Reachable only from the private mail-platform stack on docker-runtime-lv3.",
       "approval_notes": "Event callbacks stay on private or container-local networks unless a future ADR approves explicit publication."
+    },
+    {
+      "id": "platform-finding-subjects",
+      "title": "Platform finding event subjects",
+      "lane": "event",
+      "lane_surface_ref": "platform-finding-subjects",
+      "publication_tier": "internal-only",
+      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "approval_notes": "ADR 0071 finding subjects stay private-first and should not be bridged outside the internal event plane without an explicit follow-up ADR."
     }
   ]
 }

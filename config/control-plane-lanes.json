@@ -228,13 +228,26 @@
             "harden-security"
           ],
           "notes": "Host-originated operator notifications already follow a named endpoint and matcher instead of ad hoc shell mailers."
+        },
+        {
+          "id": "mattermost-platform-findings-channel",
+          "kind": "chat_channel",
+          "endpoint": "Mattermost #platform-findings",
+          "auth": "Incoming webhook or bot token kept controller-local and used only for non-ok ADR 0071 findings.",
+          "owner_refs": [
+            "proxmox_florin"
+          ],
+          "workflow_refs": [
+            "check-platform-drift"
+          ],
+          "notes": "ADR 0071 routes non-ok drift findings into the private ChatOps channel when the controller-local Mattermost webhook contract is present."
         }
       ]
     },
     "event": {
       "title": "Event Lane",
-      "purpose": "Signed or explicitly trusted webhook-style callbacks for asynchronous control-plane events.",
-      "transport": "signed_http",
+      "purpose": "Signed callbacks and internal event subjects for asynchronous control-plane signals.",
+      "transport": "mixed",
       "network_paths": [
         "lv3_private",
         "explicit_publication"
@@ -258,6 +271,19 @@
             "converge-mail-platform"
           ],
           "notes": "Mail delivery, auth, and queue events already flow through a defined webhook sink for telemetry and downstream automation."
+        },
+        {
+          "id": "platform-finding-subjects",
+          "kind": "event_subject",
+          "endpoint": "platform.findings.*",
+          "auth": "Internal NATS publication from ADR 0071 through the private docker-runtime-lv3 event bus runtime.",
+          "owner_refs": [
+            "proxmox_florin"
+          ],
+          "workflow_refs": [
+            "check-platform-drift"
+          ],
+          "notes": "Each observation-loop check emits a structured finding on its own subject so future consumers can subscribe without scraping shell output."
         }
       ]
     }

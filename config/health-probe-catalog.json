@@ -1,0 +1,235 @@
+{
+  "schema_version": "1.0.0",
+  "probes": [
+    {
+      "id": "nginx-edge-public-http",
+      "service_id": "nginx_edge",
+      "runner": "controller_local",
+      "target": "controller",
+      "summary": "Public NGINX edge landing page returns HTTP 200.",
+      "command": "curl -sS -o /dev/null -w '%{http_code}' --max-time 8 https://nginx.lv3.org/",
+      "expect": {
+        "exit_code": 0,
+        "stdout_regex": "^200$"
+      }
+    },
+    {
+      "id": "grafana-api-health",
+      "service_id": "grafana",
+      "runner": "controller_local",
+      "target": "controller",
+      "summary": "Grafana API health reports the database as healthy.",
+      "command": "curl -sS --max-time 8 https://grafana.lv3.org/api/health",
+      "expect": {
+        "exit_code": 0,
+        "stdout_contains": [
+          "\"database\": \"ok\""
+        ]
+      }
+    },
+    {
+      "id": "uptime-kuma-public-home",
+      "service_id": "uptime_kuma",
+      "runner": "controller_local",
+      "target": "controller",
+      "summary": "The published Uptime Kuma home page returns HTTP 200.",
+      "command": "curl -sS -o /dev/null -w '%{http_code}' --max-time 8 https://uptime.lv3.org/",
+      "expect": {
+        "exit_code": 0,
+        "stdout_regex": "^200$"
+      }
+    },
+    {
+      "id": "windmill-api-version",
+      "service_id": "windmill",
+      "runner": "controller_local",
+      "target": "controller",
+      "summary": "Windmill responds on the private Proxmox host proxy.",
+      "command": "curl -sS --max-time 8 http://100.118.189.95:8005/api/version",
+      "expect": {
+        "exit_code": 0,
+        "stdout_regex": "^(CE|EE) v"
+      }
+    },
+    {
+      "id": "netbox-login",
+      "service_id": "netbox",
+      "runner": "controller_local",
+      "target": "controller",
+      "summary": "NetBox serves the login page on the private host proxy.",
+      "command": "curl -sS --max-time 8 http://100.118.189.95:8004/login/",
+      "expect": {
+        "exit_code": 0,
+        "stdout_contains": [
+          "data-netbox-url-name=\"login\""
+        ]
+      }
+    },
+    {
+      "id": "open-webui-home",
+      "service_id": "open_webui",
+      "runner": "controller_local",
+      "target": "controller",
+      "summary": "Open WebUI responds on the private host proxy.",
+      "command": "curl -sS -o /dev/null -w '%{http_code}' --max-time 8 http://100.118.189.95:8008/",
+      "expect": {
+        "exit_code": 0,
+        "stdout_regex": "^200$"
+      }
+    },
+    {
+      "id": "portainer-status",
+      "service_id": "portainer",
+      "runner": "controller_local",
+      "target": "controller",
+      "summary": "Portainer API status responds on the private host proxy.",
+      "command": "curl -sk --max-time 8 https://100.118.189.95:9444/api/status",
+      "expect": {
+        "exit_code": 0,
+        "stdout_contains": [
+          "\"Version\""
+        ]
+      }
+    },
+    {
+      "id": "step-ca-health",
+      "service_id": "step_ca",
+      "runner": "guest_jump",
+      "target": "docker-runtime-lv3",
+      "summary": "step-ca health endpoint reports status ok on the runtime VM.",
+      "command": "curl -sk --max-time 8 https://127.0.0.1:9000/health",
+      "expect": {
+        "exit_code": 0,
+        "stdout_contains": [
+          "\"status\":\"ok\""
+        ]
+      }
+    },
+    {
+      "id": "openbao-seal-status",
+      "service_id": "openbao",
+      "runner": "guest_jump",
+      "target": "docker-runtime-lv3",
+      "summary": "OpenBao seal status confirms the active node is unsealed.",
+      "command": "curl -sS --max-time 8 http://127.0.0.1:8201/v1/sys/seal-status",
+      "expect": {
+        "exit_code": 0,
+        "stdout_contains": [
+          "\"sealed\":false"
+        ]
+      }
+    },
+    {
+      "id": "mail-gateway-healthz",
+      "service_id": "mail_platform",
+      "runner": "guest_jump",
+      "target": "docker-runtime-lv3",
+      "summary": "The private mail gateway health endpoint returns status ok.",
+      "command": "curl -sS --max-time 8 http://127.0.0.1:8081/healthz",
+      "expect": {
+        "exit_code": 0,
+        "stdout_contains": [
+          "\"status\":\"ok\""
+        ]
+      }
+    },
+    {
+      "id": "mattermost-system-ping",
+      "service_id": "mattermost",
+      "runner": "guest_jump",
+      "target": "docker-runtime-lv3",
+      "summary": "Mattermost reports OK on the private runtime VM.",
+      "command": "curl -sS --max-time 8 http://127.0.0.1:8065/api/v4/system/ping",
+      "expect": {
+        "exit_code": 0,
+        "stdout_contains": [
+          "\"status\":\"OK\""
+        ]
+      }
+    },
+    {
+      "id": "nats-healthz",
+      "service_id": "nats_jetstream",
+      "runner": "guest_jump",
+      "target": "docker-runtime-lv3",
+      "summary": "NATS JetStream health endpoint returns status ok.",
+      "command": "curl -sS --max-time 8 http://127.0.0.1:8222/healthz",
+      "expect": {
+        "exit_code": 0,
+        "stdout_contains": [
+          "\"status\":\"ok\""
+        ]
+      }
+    },
+    {
+      "id": "prometheus-healthy",
+      "service_id": "monitoring_prometheus",
+      "runner": "guest_jump",
+      "target": "monitoring-lv3",
+      "summary": "Prometheus reports itself healthy on the monitoring VM.",
+      "command": "curl -sS --max-time 8 http://127.0.0.1:9090/-/healthy",
+      "expect": {
+        "exit_code": 0,
+        "stdout_contains": [
+          "Healthy"
+        ]
+      }
+    },
+    {
+      "id": "loki-ready",
+      "service_id": "monitoring_loki",
+      "runner": "guest_jump",
+      "target": "monitoring-lv3",
+      "summary": "Loki ready endpoint returns ready.",
+      "command": "curl -sS --max-time 8 http://127.0.0.1:3100/ready",
+      "expect": {
+        "exit_code": 0,
+        "stdout_contains": [
+          "ready"
+        ]
+      }
+    },
+    {
+      "id": "tempo-ready",
+      "service_id": "monitoring_tempo",
+      "runner": "guest_jump",
+      "target": "monitoring-lv3",
+      "summary": "Tempo ready endpoint returns ready.",
+      "command": "curl -sS --max-time 8 http://127.0.0.1:3200/ready",
+      "expect": {
+        "exit_code": 0,
+        "stdout_contains": [
+          "ready"
+        ]
+      }
+    },
+    {
+      "id": "postgres-ready",
+      "service_id": "postgres",
+      "runner": "guest_jump",
+      "target": "postgres-lv3",
+      "summary": "PostgreSQL accepts local connections on the database VM.",
+      "command": "pg_isready -h 127.0.0.1 -p 5432",
+      "expect": {
+        "exit_code": 0,
+        "stdout_contains": [
+          "accepting connections"
+        ]
+      }
+    },
+    {
+      "id": "backup-pbs-datastore",
+      "service_id": "backup_pbs",
+      "runner": "guest_jump",
+      "target": "backup-lv3",
+      "summary": "PBS exposes the proxmox datastore and the backup proxy is active.",
+      "command": "sudo proxmox-backup-manager datastore list --output-format json",
+      "expect": {
+        "exit_code": 0,
+        "stdout_contains": [
+          "\"name\":\"proxmox\""
+        ]
+      }
+    }
+  ]
+}

@@ -854,7 +854,7 @@ workstreams:
   - id: adr-0071-agent-observation-loop
     adr: "0071"
     title: Agent observation loop and autonomous drift detection
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0071-agent-observation-loop
     worktree_path: ../proxmox_florin_server-agent-observation-loop

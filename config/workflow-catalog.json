@@ -1050,6 +1050,42 @@
       "verification_commands": [
         "dig +short database.lv3.org"
       ]
+    },
+    "check-platform-drift": {
+      "description": "Run the ADR 0071 observation loop checks and emit structured findings from the controller command lane.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "check-platform-drift",
+        "command": "make check-platform-drift"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate-data-models"
+      ],
+      "live_impact": "repo_only",
+      "owner_runbook": "docs/runbooks/agent-observation-loop.md",
+      "implementation_refs": [
+        "Makefile",
+        "scripts/platform_observation_tool.py",
+        "config/health-probe-catalog.json",
+        "config/secret-catalog.json",
+        "config/image-catalog.json",
+        "docs/schema/platform-finding.json",
+        "docs/runbooks/agent-observation-loop.md"
+      ],
+      "outputs": [
+        "Structured drift findings under .local/platform-observation/latest plus an Open WebUI review digest under .local/open-webui/platform-findings-daily.md."
+      ],
+      "verification_commands": [
+        "uvx --from pyyaml python scripts/platform_observation_tool.py",
+        "test -f .local/platform-observation/latest/findings.json"
+      ]
     }
   }
 }
