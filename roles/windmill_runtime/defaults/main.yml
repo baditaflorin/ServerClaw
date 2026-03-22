@@ -27,3 +27,8 @@ windmill_seed_scripts:
     language: python3
     summary: LV3 Windmill healthcheck
     description: Repo-managed verification script for Windmill runtime and worker execution.
+  - path: f/lv3/rotate_credentials
+    template_src: lv3-secret-rotation.py.j2
+    language: python3
+    summary: LV3 secret rotation planner
+    description: Repo-managed catalog summary for the OpenBao-backed secret rotation workflow.

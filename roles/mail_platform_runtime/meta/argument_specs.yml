@@ -1,0 +1,24 @@
+---
+argument_specs:
+  main:
+    short_description: Converge and rotate the managed mail platform runtime.
+    options:
+      mail_platform_domain:
+        type: str
+        required: true
+      mail_platform_hostname:
+        type: str
+        required: true
+      mail_platform_site_dir:
+        type: path
+        required: true
+      mail_platform_compose_file:
+        type: path
+        required: true
+      mail_platform_secret_dir:
+        type: path
+        required: true
+      mail_platform_notification_profiles:
+        type: list
+        elements: dict
+        required: true

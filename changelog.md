@@ -8,6 +8,16 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.62.0 - 2026-03-22
+
+- implemented ADR 0065 as a canonical secret-rotation contract with `config/secret-catalog.json`, schema validation, focused unit tests, and a repo-managed `rotate-secret` workflow plus low-risk or high-risk command contracts
+- added `playbooks/secret-rotation.yml` with role-local `rotate.yml` entry points for Windmill PostgreSQL, Windmill runtime, and the mail platform so selected credentials can rotate without a full service reconverge
+- extended OpenBao seeding to dedicate per-secret KV paths and rotation metadata, seeded the initial Windmill `f/lv3/rotate_credentials` script, and documented the operator lifecycle in the new secret-rotation runbook
+
+Platform impact:
+
+- no direct live platform change; this release adds the repo-managed secret-rotation automation path and OpenBao or Windmill seeding contract, but it still needs to be applied from `main`
+
 ## 0.61.0 - 2026-03-22
 
 - implemented ADR 0069 as a canonical governed tool registry with schema-backed `observe`, `report`, `execute`, and `approve` tool entries for agents and operators
