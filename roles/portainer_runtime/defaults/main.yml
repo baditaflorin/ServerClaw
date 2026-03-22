@@ -1,5 +1,5 @@
 ---
-portainer_image: portainer/portainer-ce:lts
+portainer_image: "{{ container_image_catalog.images.portainer_runtime.ref }}"
 portainer_container_name: portainer
 portainer_site_dir: /opt/portainer
 portainer_data_dir: "{{ portainer_site_dir }}/data"

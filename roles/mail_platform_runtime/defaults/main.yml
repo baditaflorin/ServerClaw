@@ -17,7 +17,8 @@ mail_platform_stalwart_config_file: "{{ mail_platform_stalwart_dir }}/etc/config
 mail_platform_stalwart_bootstrap_file: "{{ mail_platform_site_dir }}/bootstrap-mail-platform.py"
 mail_platform_stalwart_container_name: lv3-mail-stalwart
 mail_platform_gateway_container_name: lv3-mail-gateway
-mail_platform_stalwart_image: stalwartlabs/stalwart:latest
+mail_platform_stalwart_image: "{{ container_image_catalog.images.mail_platform_stalwart_runtime.ref }}"
+mail_platform_gateway_base_image: "{{ container_image_catalog.images.mail_platform_gateway_python_base.ref }}"
 mail_platform_gateway_port: 8081
 mail_platform_stalwart_http_port: 8080
 mail_platform_secret_dir: /etc/lv3/mail-platform

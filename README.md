@@ -74,7 +74,7 @@ Portainer is now live on `docker-runtime-lv3` and reachable privately at `https:
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.67.0` |
+| Repository version | `0.68.0` |
 | Platform version | `0.34.0` |
 | Observed check date | `2026-03-22` |
 | Observed OS | `Debian 13` |
@@ -315,6 +315,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure Storage And Backups](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-storage-and-backups.md)
 - [Configure Tailscale Private Access](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-tailscale-access.md)
 - [Configure Windmill](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-windmill.md)
+- [Container Image Policy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/container-image-policy.md)
 - [Control-Plane Communication Lanes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/control-plane-communication-lanes.md)
 - [Controller Automation Toolkit](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/controller-automation-toolkit.md)
 - [Controller-Local Secrets And Preflight Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/controller-local-secrets-and-preflight.md)
@@ -475,7 +476,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.67.0` |
+| Repository version | `0.68.0` |
 | Platform version | `0.34.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -553,6 +554,7 @@ This repository is intentionally opinionated:
 | `0063` | Centralised vars and computed facts library | `merged` | [adr-0063-platform-vars-library.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0063-platform-vars-library.md) |
 | `0064` | Health probe contracts for all services | `merged` | [adr-0064-health-probe-contracts.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0064-health-probe-contracts.md) |
 | `0067` | Guest network policy enforcement | `live_applied` | [adr-0067-guest-network-policy.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0067-guest-network-policy.md) |
+| `0068` | Container image policy and supply chain integrity | `merged` | [adr-0068-container-image-policy.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0068-container-image-policy.md) |
 | `0069` | Agent tool registry and governed tool calls | `merged` | [adr-0069-agent-tool-registry.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0069-agent-tool-registry.md) |
 | `0070` | Retrieval-augmented context for platform queries | `merged` | [adr-0070-rag-platform-context.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0070-rag-platform-context.md) |
 | `0071` | Agent observation loop and autonomous drift detection | `merged` | [adr-0071-agent-observation-loop.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0071-agent-observation-loop.md) |

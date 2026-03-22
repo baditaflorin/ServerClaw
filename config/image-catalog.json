@@ -1,161 +1,286 @@
 {
   "schema_version": "1.0.0",
-  "images": [
-    {
-      "id": "windmill-server",
-      "service_id": "windmill",
-      "runtime_host": "docker-runtime-lv3",
-      "container_name": "windmill-windmill_server-1",
-      "image_reference": "ghcr.io/windmill-labs/windmill:main",
-      "source_kind": "upstream",
-      "pin_status": "unpinned",
-      "pinned_digest": null,
-      "pinned_at": null,
-      "freshness_window_days": 30
+  "images": {
+    "mail_platform_gateway_python_base": {
+      "kind": "build_base",
+      "registry_ref": "docker.io/library/python",
+      "tag": "3.13.12-slim-trixie",
+      "digest": "sha256:7d8999b140f22939451e00b79c0fd86f13d0bc0577b369f8212fce063101fb2a",
+      "ref": "docker.io/library/python:3.13.12-slim-trixie@sha256:7d8999b140f22939451e00b79c0fd86f13d0bc0577b369f8212fce063101fb2a",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-22",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-22-mail-platform-gateway-python-base.json",
+      "consumers": [
+        "roles/mail_platform_runtime/templates/mail-gateway.Dockerfile.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-mail-platform"
+      ]
     },
-    {
-      "id": "windmill-extra",
-      "service_id": "windmill",
-      "runtime_host": "docker-runtime-lv3",
-      "container_name": "windmill-windmill_extra-1",
-      "image_reference": "ghcr.io/windmill-labs/windmill-extra:latest",
-      "source_kind": "upstream",
-      "pin_status": "unpinned",
-      "pinned_digest": null,
-      "pinned_at": null,
-      "freshness_window_days": 30
-    },
-    {
-      "id": "step-ca",
-      "service_id": "step_ca",
-      "runtime_host": "docker-runtime-lv3",
-      "container_name": "step-ca",
-      "image_reference": "smallstep/step-ca:0.30.1",
-      "source_kind": "upstream",
-      "pin_status": "unpinned",
-      "pinned_digest": null,
-      "pinned_at": null,
-      "freshness_window_days": 30
-    },
-    {
-      "id": "openbao",
-      "service_id": "openbao",
-      "runtime_host": "docker-runtime-lv3",
-      "container_name": "lv3-openbao",
-      "image_reference": "openbao/openbao:2.5.1",
-      "source_kind": "upstream",
-      "pin_status": "unpinned",
-      "pinned_digest": null,
-      "pinned_at": null,
-      "freshness_window_days": 30
-    },
-    {
-      "id": "open-webui",
-      "service_id": "open_webui",
-      "runtime_host": "docker-runtime-lv3",
-      "container_name": "open-webui",
-      "image_reference": "ghcr.io/open-webui/open-webui:v0.8.9",
-      "source_kind": "upstream",
-      "pin_status": "unpinned",
-      "pinned_digest": null,
-      "pinned_at": null,
-      "freshness_window_days": 30
-    },
-    {
-      "id": "portainer",
-      "service_id": "portainer",
-      "runtime_host": "docker-runtime-lv3",
-      "container_name": "portainer",
-      "image_reference": "portainer/portainer-ce:lts",
-      "source_kind": "upstream",
-      "pin_status": "unpinned",
-      "pinned_digest": null,
-      "pinned_at": null,
-      "freshness_window_days": 30
-    },
-    {
-      "id": "uptime-kuma",
-      "service_id": "uptime_kuma",
-      "runtime_host": "docker-runtime-lv3",
-      "container_name": "uptime-kuma",
-      "image_reference": "louislam/uptime-kuma:2",
-      "source_kind": "upstream",
-      "pin_status": "unpinned",
-      "pinned_digest": null,
-      "pinned_at": null,
-      "freshness_window_days": 30
-    },
-    {
-      "id": "netbox",
-      "service_id": "netbox",
-      "runtime_host": "docker-runtime-lv3",
-      "container_name": "netbox-netbox-1",
-      "image_reference": "netboxcommunity/netbox:v4.5",
-      "source_kind": "upstream",
-      "pin_status": "unpinned",
-      "pinned_digest": null,
-      "pinned_at": null,
-      "freshness_window_days": 30
-    },
-    {
-      "id": "mattermost",
-      "service_id": "mattermost",
-      "runtime_host": "docker-runtime-lv3",
-      "container_name": "lv3-mattermost",
-      "image_reference": "mattermost/mattermost-team-edition:release-10.11",
-      "source_kind": "upstream",
-      "pin_status": "unpinned",
-      "pinned_digest": null,
-      "pinned_at": null,
-      "freshness_window_days": 30
-    },
-    {
-      "id": "nats-jetstream",
-      "service_id": "nats_jetstream",
-      "runtime_host": "docker-runtime-lv3",
-      "container_name": "lv3-nats-jetstream",
-      "image_reference": "nats:2.11-alpine",
-      "source_kind": "upstream",
-      "pin_status": "unpinned",
-      "pinned_digest": null,
-      "pinned_at": null,
-      "freshness_window_days": 30
-    },
-    {
-      "id": "mail-stalwart",
+    "mail_platform_stalwart_runtime": {
+      "kind": "runtime",
       "service_id": "mail_platform",
       "runtime_host": "docker-runtime-lv3",
       "container_name": "lv3-mail-stalwart",
-      "image_reference": "stalwartlabs/stalwart:latest",
-      "source_kind": "upstream",
-      "pin_status": "unpinned",
-      "pinned_digest": null,
-      "pinned_at": null,
-      "freshness_window_days": 30
+      "registry_ref": "docker.io/stalwartlabs/stalwart",
+      "tag": "v0.15.5",
+      "digest": "sha256:b6c2a04a79695136d5e2c16e9da0254135d0c3f3b1f8147873e812916b0ae8c4",
+      "ref": "docker.io/stalwartlabs/stalwart:v0.15.5@sha256:b6c2a04a79695136d5e2c16e9da0254135d0c3f3b1f8147873e812916b0ae8c4",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-22",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-22-mail-platform-stalwart-runtime.json",
+      "consumers": [
+        "roles/mail_platform_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-mail-platform"
+      ]
     },
-    {
-      "id": "mail-gateway",
-      "service_id": "mail_platform",
+    "netbox_redis_runtime": {
+      "kind": "runtime",
+      "service_id": "netbox",
       "runtime_host": "docker-runtime-lv3",
-      "container_name": "lv3-mail-gateway",
-      "image_reference": "mail-platform-mail-gateway",
-      "source_kind": "local_build",
-      "pin_status": "local_build",
-      "pinned_digest": null,
-      "pinned_at": "2026-03-22",
-      "freshness_window_days": 30
+      "container_name": "netbox-redis-1",
+      "registry_ref": "docker.io/valkey/valkey",
+      "tag": "8.1.5-alpine",
+      "digest": "sha256:092226041ca0a92c4e50d0167f315808f6d77b693c6195f145d10622701e076a",
+      "ref": "docker.io/valkey/valkey:8.1.5-alpine@sha256:092226041ca0a92c4e50d0167f315808f6d77b693c6195f145d10622701e076a",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-22",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-22-netbox-redis-runtime.json",
+      "consumers": [
+        "roles/netbox_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-netbox"
+      ]
     },
-    {
-      "id": "keycloak",
-      "service_id": "keycloak",
+    "netbox_runtime": {
+      "kind": "runtime",
+      "service_id": "netbox",
       "runtime_host": "docker-runtime-lv3",
-      "container_name": "keycloak-keycloak-1",
-      "image_reference": "quay.io/keycloak/keycloak:26.5.4",
-      "source_kind": "upstream",
-      "pin_status": "unpinned",
-      "pinned_digest": null,
-      "pinned_at": null,
-      "freshness_window_days": 30
+      "container_name": "netbox-netbox-1",
+      "registry_ref": "docker.io/netboxcommunity/netbox",
+      "tag": "v4.5.4",
+      "digest": "sha256:09e887ca591372f75205228946f4dd56f83e76a66454b4255cf33e4827f69292",
+      "ref": "docker.io/netboxcommunity/netbox:v4.5.4@sha256:09e887ca591372f75205228946f4dd56f83e76a66454b4255cf33e4827f69292",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-22",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-22-netbox-runtime.json",
+      "consumers": [
+        "roles/netbox_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-netbox"
+      ]
+    },
+    "open_webui_runtime": {
+      "kind": "runtime",
+      "service_id": "open_webui",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "open-webui",
+      "registry_ref": "ghcr.io/open-webui/open-webui",
+      "tag": "v0.8.9",
+      "digest": "sha256:c5058cf3491ee7eade6ae050ffb78701d3195fe0600215aedd92bb4ec588bfb1",
+      "ref": "ghcr.io/open-webui/open-webui:v0.8.9@sha256:c5058cf3491ee7eade6ae050ffb78701d3195fe0600215aedd92bb4ec588bfb1",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-22",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-22-open-webui-runtime.json",
+      "exception": {
+        "reason": "The current official upstream image still reports critical Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-22",
+        "review_by": "2026-04-05"
+      },
+      "consumers": [
+        "roles/open_webui_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-open-webui"
+      ]
+    },
+    "openbao_runtime": {
+      "kind": "runtime",
+      "service_id": "openbao",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "lv3-openbao",
+      "registry_ref": "docker.io/openbao/openbao",
+      "tag": "2.5.1",
+      "digest": "sha256:8843249c9bc051b0c547e53888565ee5a23a40a49079a8cd63578ef1517ba56b",
+      "ref": "docker.io/openbao/openbao:2.5.1@sha256:8843249c9bc051b0c547e53888565ee5a23a40a49079a8cd63578ef1517ba56b",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-22",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-22-openbao-runtime.json",
+      "exception": {
+        "reason": "The current official upstream image still reports critical Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-22",
+        "review_by": "2026-04-05"
+      },
+      "consumers": [
+        "roles/openbao_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-openbao"
+      ]
+    },
+    "portainer_runtime": {
+      "kind": "runtime",
+      "service_id": "portainer",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "portainer",
+      "registry_ref": "docker.io/portainer/portainer-ce",
+      "tag": "2.33.6",
+      "digest": "sha256:3d8e3d85d0653baf49ebe7875200f0e5c4da79c8ebea380acddf40896e4d59eb",
+      "ref": "docker.io/portainer/portainer-ce:2.33.6@sha256:3d8e3d85d0653baf49ebe7875200f0e5c4da79c8ebea380acddf40896e4d59eb",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-22",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-22-portainer-runtime.json",
+      "exception": {
+        "reason": "The current official upstream image still reports critical Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-22",
+        "review_by": "2026-04-05"
+      },
+      "consumers": [
+        "roles/portainer_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-portainer"
+      ]
+    },
+    "step_ca_runtime": {
+      "kind": "runtime",
+      "service_id": "step_ca",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "step-ca",
+      "registry_ref": "docker.io/smallstep/step-ca",
+      "tag": "0.30.1",
+      "digest": "sha256:fddf37513b8b00d5e3cd2ccbf997ef6cc8519060fd74eaed2cde4284e4a7cfa9",
+      "ref": "docker.io/smallstep/step-ca:0.30.1@sha256:fddf37513b8b00d5e3cd2ccbf997ef6cc8519060fd74eaed2cde4284e4a7cfa9",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-22",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-22-step-ca-runtime.json",
+      "exception": {
+        "reason": "The current official upstream image still reports critical Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-22",
+        "review_by": "2026-04-05"
+      },
+      "consumers": [
+        "roles/step_ca_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-step-ca"
+      ]
+    },
+    "uptime_kuma_runtime": {
+      "kind": "runtime",
+      "service_id": "uptime_kuma",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "uptime-kuma",
+      "registry_ref": "docker.io/louislam/uptime-kuma",
+      "tag": "2.0.0",
+      "digest": "sha256:6dc73a9b13abcaaf927fd21d693f6e78b5bac92a7831d17cebd80695047810a8",
+      "ref": "docker.io/louislam/uptime-kuma:2.0.0@sha256:6dc73a9b13abcaaf927fd21d693f6e78b5bac92a7831d17cebd80695047810a8",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-22",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-22-uptime-kuma-runtime.json",
+      "exception": {
+        "reason": "The current official upstream image still reports critical Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-22",
+        "review_by": "2026-04-05"
+      },
+      "consumers": [
+        "roles/uptime_kuma_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "deploy-uptime-kuma"
+      ]
+    },
+    "windmill_extra_runtime": {
+      "kind": "runtime",
+      "service_id": "windmill",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "windmill-windmill_extra-1",
+      "registry_ref": "ghcr.io/windmill-labs/windmill-extra",
+      "tag": "1.662.0",
+      "digest": "sha256:a87f28faa82efca84485752583f07798f863f917893cbbf91ec86d3a254b0b4c",
+      "ref": "ghcr.io/windmill-labs/windmill-extra:1.662.0@sha256:a87f28faa82efca84485752583f07798f863f917893cbbf91ec86d3a254b0b4c",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-22",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-22-windmill-extra-runtime.json",
+      "exception": {
+        "reason": "The current official upstream image still reports critical Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-22",
+        "review_by": "2026-04-05"
+      },
+      "consumers": [
+        "roles/windmill_runtime/templates/windmill.env.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-windmill"
+      ]
+    },
+    "windmill_runtime": {
+      "kind": "runtime",
+      "service_id": "windmill",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "windmill-windmill_server-1",
+      "registry_ref": "ghcr.io/windmill-labs/windmill",
+      "tag": "1.662.0",
+      "digest": "sha256:13d5456a80500822446ce0154f68d5fd5089628df82e77e2bd9cb24ff898d58d",
+      "ref": "ghcr.io/windmill-labs/windmill:1.662.0@sha256:13d5456a80500822446ce0154f68d5fd5089628df82e77e2bd9cb24ff898d58d",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-22",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-22-windmill-runtime.json",
+      "exception": {
+        "reason": "The current official upstream image still reports critical Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-22",
+        "review_by": "2026-04-05"
+      },
+      "consumers": [
+        "roles/windmill_runtime/templates/windmill.env.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-windmill"
+      ]
     }
-  ]
+  }
 }

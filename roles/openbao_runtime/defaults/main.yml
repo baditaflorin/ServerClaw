@@ -1,6 +1,6 @@
 ---
 openbao_version: 2.5.1
-openbao_image: "openbao/openbao:{{ openbao_version }}"
+openbao_image: "{{ container_image_catalog.images.openbao_runtime.ref }}"
 openbao_container_name: lv3-openbao
 openbao_site_dir: /opt/openbao
 openbao_config_dir: "{{ openbao_site_dir }}/config"

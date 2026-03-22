@@ -8,7 +8,7 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
-## 0.67.0 - 2026-03-23
+## 0.68.0 - 2026-03-23
 
 - implemented ADR 0063 by adding a committed generated `inventory/group_vars/platform.yml` facts library derived from canonical stack and host inputs
 - added `scripts/generate_platform_vars.py`, `filter_plugins/platform_facts.py`, `make generate-platform-vars`, `make validate-generated-vars`, and `make show-platform-facts` so operators and agents can inspect or validate resolved platform facts without scanning many role defaults
@@ -17,6 +17,16 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 Platform impact:
 
 - no direct live platform change in this release commit; this is a repository automation and documentation consolidation release
+
+## 0.67.0 - 2026-03-23
+
+- implemented ADR 0068 as a catalog-backed container image policy with digest-pinned runtime refs, a managed build-base pin for the mail gateway, and repo validation that now treats image pins and scan receipts as part of the canonical contract
+- added `config/image-catalog.json`, Trivy scan receipts under `receipts/image-scans/`, `make check-image-freshness`, and a controller-side `upgrade-container-image` workflow plus Windmill wrapper for governed image refreshes
+- aligned ADR 0071's observation loop with the ADR 0068 image-catalog contract so drift checks, repository validation, and Windmill seed scripts all operate on the same pinned-image source of truth
+
+Platform impact:
+
+- no direct live platform change in this release commit; the catalog, scan receipts, and converge inputs are now ready to be applied from `main`
 
 ## 0.66.0 - 2026-03-23
 

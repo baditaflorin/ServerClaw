@@ -6,7 +6,7 @@ uptime_kuma_site_dir: /opt/uptime-kuma
 uptime_kuma_compose_file: /opt/uptime-kuma/docker-compose.yml
 uptime_kuma_data_dir: /opt/uptime-kuma/data
 uptime_kuma_container_name: uptime-kuma
-uptime_kuma_image: louislam/uptime-kuma:2
+uptime_kuma_image: "{{ container_image_catalog.images.uptime_kuma_runtime.ref }}"
 uptime_kuma_port: "{{ uptime_kuma_service_topology.ports.internal }}"
 uptime_kuma_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/uptime-kuma
 uptime_kuma_local_auth_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/uptime-kuma/admin-session.json

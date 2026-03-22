@@ -1,5 +1,7 @@
-repo_version: 0.67.0
+repo_version: 0.68.0
 platform_version: 0.34.0
+container_image_catalog_path: "{{ playbook_dir }}/../config/image-catalog.json"
+container_image_catalog: "{{ lookup('file', container_image_catalog_path) | from_json }}"
 
 proxmox_release_major: 9
 proxmox_suite: trixie
@@ -131,13 +133,13 @@ windmill_site_dir: /opt/windmill
 windmill_secret_dir: /etc/lv3/windmill
 windmill_env_file: /opt/windmill/windmill.env
 open_webui_version: 0.8.9
-open_webui_image: "ghcr.io/open-webui/open-webui:v{{ open_webui_version }}"
+open_webui_image: "{{ container_image_catalog.images.open_webui_runtime.ref }}"
 open_webui_admin_email: ops@lv3.org
 open_webui_admin_name: Florin Badita
 
 step_ca_version: 0.30.1
 step_ca_cli_version: 0.30.1
-step_ca_image: "docker.io/smallstep/step-ca:{{ step_ca_version }}"
+step_ca_image: "{{ container_image_catalog.images.step_ca_runtime.ref }}"
 step_ca_site_dir: /opt/step-ca
 step_ca_home: "{{ step_ca_site_dir }}/home"
 step_ca_password_dir: "{{ step_ca_site_dir }}/secrets"

@@ -7,7 +7,7 @@ open_webui_env_file: "{{ open_webui_site_dir }}/open-webui.env"
 open_webui_container_name: open-webui
 open_webui_port: "{{ platform_service_topology | platform_service_port('open_webui', 'internal') }}"
 open_webui_host_proxy_port: "{{ platform_service_topology | platform_service_port('open_webui', 'controller') }}"
-open_webui_image: ghcr.io/open-webui/open-webui:v0.8.9
+open_webui_image: "{{ container_image_catalog.images.open_webui_runtime.ref }}"
 open_webui_admin_name: Florin Badita
 open_webui_admin_email: ops@lv3.org
 open_webui_internal_base_url: "{{ platform_service_topology | platform_service_url('open_webui', 'internal') }}"

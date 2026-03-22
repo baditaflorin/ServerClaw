@@ -1,0 +1,403 @@
+{
+  "SchemaVersion": 2,
+  "CreatedAt": "2026-03-22T21:14:11.427698375Z",
+  "ArtifactName": "docker.io/netboxcommunity/netbox:v4.5.4@sha256:09e887ca591372f75205228946f4dd56f83e76a66454b4255cf33e4827f69292",
+  "ArtifactType": "container_image",
+  "Metadata": {
+    "Size": 764918272,
+    "OS": {
+      "Family": "ubuntu",
+      "Name": "24.04"
+    },
+    "ImageID": "sha256:bced9fdd0f15515cb505fe56943d3aced45415d54322992c54e7b33e878a6f9c",
+    "DiffIDs": [
+      "sha256:f2a7f072635332d307212e318e07284948b89f4167fce5c4d7c9cfb7590b74b6",
+      "sha256:bcea761cb417b49ff4edcf6826eec5dacc54cdff2e3d0e1b714c050552f5cf7f",
+      "sha256:f505f4bf73e23c34cff70375ab6a8730e92c27ef8b04c045e58d063a0f23fe02",
+      "sha256:c220af8895a15afff5d494a951ac49a9949d9c400832fa5121abb227e12f4dfc",
+      "sha256:66f4560b0ba626b1b60923ea8a52dd34731172d40e3949a8f56e7cc137f59ac2",
+      "sha256:5b63159c9223220076cadd87bdfb24c2a67f4834573f7aea10db6098a995faad",
+      "sha256:31cea7f524560cdd79eb5feed152e57e0d70453e7d9315a57bfad93e6ada3e4d",
+      "sha256:e50b482dd6ef334c57a39f2f32cbf8317798f3904b5deb74234051cd487fab3b",
+      "sha256:59cfff24fced744b6a7642246d9504c3083db227387cd105c7b3567c90b6ca0c",
+      "sha256:ccfeb16603afa3cdc9ec830ecf9e56632ff031caf43833ec08a8e161a0847a7e",
+      "sha256:99969243747a78388b5d1a90ffa8af05bcf2edb356c313257255e8e579bf8f2a",
+      "sha256:2451ad19823d83ffe7f72924d702f4740ef341431231b7ebdac9a74cd036ebed",
+      "sha256:9c0a3e805aa6efac7baa80c98ca61574d4ff6dcc70492fc2ab99b945faa23d5a",
+      "sha256:51a2942d2c601906926780e331135f475ad1f8e3cdd3bf3d1ff02e802f8978c9",
+      "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+      "sha256:e1b5ef888c9c8d1e7c317bb3c2750caec283b1d72c095bfe4f97267f830dddbc"
+    ],
+    "RepoDigests": [
+      "netboxcommunity/netbox@sha256:09e887ca591372f75205228946f4dd56f83e76a66454b4255cf33e4827f69292"
+    ],
+    "ImageConfig": {
+      "architecture": "amd64",
+      "created": "2026-03-17T08:33:32.440060698Z",
+      "history": [
+        {
+          "created": "2026-02-23T17:17:53.377372197Z",
+          "created_by": "/bin/sh -c #(nop)  ARG RELEASE",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-02-23T17:17:53.408508506Z",
+          "created_by": "/bin/sh -c #(nop)  ARG LAUNCHPAD_BUILD_ARCH",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-02-23T17:17:53.45626953Z",
+          "created_by": "/bin/sh -c #(nop)  LABEL org.opencontainers.image.ref.name=ubuntu",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-02-23T17:17:53.486399083Z",
+          "created_by": "/bin/sh -c #(nop)  LABEL org.opencontainers.image.version=24.04",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-02-23T17:17:55.728281038Z",
+          "created_by": "/bin/sh -c #(nop) ADD file:3f78aa860931e0853077f09eb31eddbeeef8a9dd70977305b4876aa176770721 in / "
+        },
+        {
+          "created": "2026-02-23T17:17:56.132176015Z",
+          "created_by": "/bin/sh -c #(nop)  CMD [\"/bin/bash\"]",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-17T06:05:24.654944896Z",
+          "created_by": "RUN /bin/sh -c export DEBIAN_FRONTEND=noninteractive     \u0026\u0026 apt-get update -qq     \u0026\u0026 apt-get upgrade       --yes -qq --no-install-recommends     \u0026\u0026 apt-get install       --yes -qq --no-install-recommends       bzip2       ca-certificates       curl       libldap-common       libpq5       libxmlsec1-openssl       openssh-client       openssl       python3       tini     \u0026\u0026 rm -rf /var/lib/apt/lists/* # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-17T08:33:09.517845237Z",
+          "created_by": "COPY /requirements.txt /requirements-container.txt /opt/netbox/ # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-17T08:33:09.587686051Z",
+          "created_by": "COPY /usr/local/bin/uv /usr/local/bin/ # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-17T08:33:13.747995571Z",
+          "created_by": "COPY /opt/netbox/venv /opt/netbox/venv # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-17T08:33:14.57681567Z",
+          "created_by": "ARG NETBOX_PATH=.netbox",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-17T08:33:14.57681567Z",
+          "created_by": "COPY .netbox /opt/netbox # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-17T08:33:14.706341618Z",
+          "created_by": "COPY docker/configuration.docker.py /opt/netbox/netbox/netbox/configuration.py # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-17T08:33:14.823712899Z",
+          "created_by": "COPY docker/ldap_config.docker.py /opt/netbox/netbox/netbox/ldap_config.py # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-17T08:33:14.935853337Z",
+          "created_by": "COPY docker/docker-entrypoint.sh /opt/netbox/docker-entrypoint.sh # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-17T08:33:15.047472758Z",
+          "created_by": "COPY docker/launch-netbox.sh /opt/netbox/launch-netbox.sh # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-17T08:33:15.158378616Z",
+          "created_by": "COPY docker/super_user.py /opt/netbox/super_user.py # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-17T08:33:15.266908591Z",
+          "created_by": "COPY configuration/ /etc/netbox/config/ # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-17T08:33:15.378690083Z",
+          "created_by": "COPY docker/granian.py /opt/netbox/netbox/netbox/granian.py # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-17T08:33:15.490919594Z",
+          "created_by": "COPY VERSION /opt/netbox/VERSION # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-17T08:33:15.597930887Z",
+          "created_by": "WORKDIR /opt/netbox/netbox",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-17T08:33:32.440060698Z",
+          "created_by": "RUN |1 NETBOX_PATH=.netbox /bin/sh -c useradd --home-dir /opt/netbox/ --no-create-home --no-user-group --system --shell /bin/false --uid 999 --gid 0 netbox     \u0026\u0026 mkdir -p static media local     \u0026\u0026 chown -R netbox:root media reports scripts     \u0026\u0026 chmod -R g+w media reports scripts     \u0026\u0026 cd /opt/netbox/ \u0026\u0026 SECRET_KEY=\"dummyKeyWithMinimumLength-------------------------\" /opt/netbox/venv/bin/python -m mkdocs build         --config-file /opt/netbox/mkdocs.yml --site-dir /opt/netbox/netbox/project-static/docs/     \u0026\u0026 DEBUG=\"true\" SECRET_KEY=\"dummyKeyWithMinimumLength-------------------------\" /opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py collectstatic --no-input     \u0026\u0026 echo \"build: Docker-$(cat /opt/netbox/VERSION)\" \u003e /opt/netbox/netbox/local/release.yaml # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-17T08:33:32.440060698Z",
+          "created_by": "ENV LANG=C.utf8 PATH=/opt/netbox/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin VIRTUAL_ENV=/opt/netbox/venv UV_NO_CACHE=1",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-17T08:33:32.440060698Z",
+          "created_by": "ENTRYPOINT [\"/usr/bin/tini\" \"--\"]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-17T08:33:32.440060698Z",
+          "created_by": "CMD [\"/opt/netbox/docker-entrypoint.sh\" \"/opt/netbox/launch-netbox.sh\"]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-17T08:33:32.440060698Z",
+          "created_by": "LABEL netbox.original-tag= netbox.git-branch= netbox.git-ref= netbox.git-url= org.opencontainers.image.created= org.opencontainers.image.title=NetBox Docker org.opencontainers.image.description=A container based distribution of NetBox, the free and open IPAM and DCIM solution. org.opencontainers.image.licenses=Apache-2.0 org.opencontainers.image.authors=The netbox-docker contributors. org.opencontainers.image.vendor=The netbox-docker contributors. org.opencontainers.image.url=https://github.com/netbox-community/netbox-docker org.opencontainers.image.documentation=https://github.com/netbox-community/netbox-docker/wiki org.opencontainers.image.source=https://github.com/netbox-community/netbox-docker.git org.opencontainers.image.revision= org.opencontainers.image.version=",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        }
+      ],
+      "os": "linux",
+      "rootfs": {
+        "type": "layers",
+        "diff_ids": [
+          "sha256:f2a7f072635332d307212e318e07284948b89f4167fce5c4d7c9cfb7590b74b6",
+          "sha256:bcea761cb417b49ff4edcf6826eec5dacc54cdff2e3d0e1b714c050552f5cf7f",
+          "sha256:f505f4bf73e23c34cff70375ab6a8730e92c27ef8b04c045e58d063a0f23fe02",
+          "sha256:c220af8895a15afff5d494a951ac49a9949d9c400832fa5121abb227e12f4dfc",
+          "sha256:66f4560b0ba626b1b60923ea8a52dd34731172d40e3949a8f56e7cc137f59ac2",
+          "sha256:5b63159c9223220076cadd87bdfb24c2a67f4834573f7aea10db6098a995faad",
+          "sha256:31cea7f524560cdd79eb5feed152e57e0d70453e7d9315a57bfad93e6ada3e4d",
+          "sha256:e50b482dd6ef334c57a39f2f32cbf8317798f3904b5deb74234051cd487fab3b",
+          "sha256:59cfff24fced744b6a7642246d9504c3083db227387cd105c7b3567c90b6ca0c",
+          "sha256:ccfeb16603afa3cdc9ec830ecf9e56632ff031caf43833ec08a8e161a0847a7e",
+          "sha256:99969243747a78388b5d1a90ffa8af05bcf2edb356c313257255e8e579bf8f2a",
+          "sha256:2451ad19823d83ffe7f72924d702f4740ef341431231b7ebdac9a74cd036ebed",
+          "sha256:9c0a3e805aa6efac7baa80c98ca61574d4ff6dcc70492fc2ab99b945faa23d5a",
+          "sha256:51a2942d2c601906926780e331135f475ad1f8e3cdd3bf3d1ff02e802f8978c9",
+          "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+          "sha256:e1b5ef888c9c8d1e7c317bb3c2750caec283b1d72c095bfe4f97267f830dddbc"
+        ]
+      },
+      "config": {
+        "Cmd": [
+          "/opt/netbox/docker-entrypoint.sh",
+          "/opt/netbox/launch-netbox.sh"
+        ],
+        "Entrypoint": [
+          "/usr/bin/tini",
+          "--"
+        ],
+        "Env": [
+          "PATH=/opt/netbox/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+          "LANG=C.utf8",
+          "VIRTUAL_ENV=/opt/netbox/venv",
+          "UV_NO_CACHE=1"
+        ],
+        "Labels": {
+          "netbox.build-reason": "netbox-docker",
+          "netbox.git-branch": "HEAD",
+          "netbox.git-ref": "983ba4fda887b9bf79a3fca0740dbbf7cc074349",
+          "netbox.git-url": "https://github.com/netbox-community/netbox.git",
+          "netbox.last-base-image-layer": "sha256:817807f3c64e0b90b66edc7d90297f121cad2a7c2a3ee05a731557762f91e6c7",
+          "netbox.original-tag": "v4.5.4-4.0.2",
+          "org.opencontainers.image.authors": "The netbox-docker contributors.",
+          "org.opencontainers.image.created": "2026-03-17T08:30:39+00:00",
+          "org.opencontainers.image.description": "A container based distribution of NetBox, the free and open IPAM and DCIM solution.",
+          "org.opencontainers.image.documentation": "https://github.com/netbox-community/netbox-docker/wiki",
+          "org.opencontainers.image.licenses": "Apache-2.0",
+          "org.opencontainers.image.ref.name": "ubuntu",
+          "org.opencontainers.image.revision": "c6cd7ef2de050803b986c17765b8aa54282dbb3e",
+          "org.opencontainers.image.source": "https://github.com/netbox-community/netbox-docker.git",
+          "org.opencontainers.image.title": "NetBox Docker",
+          "org.opencontainers.image.url": "https://github.com/netbox-community/netbox-docker",
+          "org.opencontainers.image.vendor": "The netbox-docker contributors.",
+          "org.opencontainers.image.version": "4.0.2"
+        },
+        "WorkingDir": "/opt/netbox/netbox",
+        "ArgsEscaped": true
+      }
+    },
+    "Layers": [
+      {
+        "Size": 80651264,
+        "Digest": "sha256:817807f3c64e0b90b66edc7d90297f121cad2a7c2a3ee05a731557762f91e6c7",
+        "DiffID": "sha256:f2a7f072635332d307212e318e07284948b89f4167fce5c4d7c9cfb7590b74b6"
+      },
+      {
+        "Size": 97951232,
+        "Digest": "sha256:eef0cf0e832f03f3f4c642aff791ed772da2b46506381f589757ddfef1b55472",
+        "DiffID": "sha256:bcea761cb417b49ff4edcf6826eec5dacc54cdff2e3d0e1b714c050552f5cf7f"
+      },
+      {
+        "Size": 4608,
+        "Digest": "sha256:7a3a633f4c405460013388107bfe5bfa14ea9f86326cf9630a9cddfd24953146",
+        "DiffID": "sha256:f505f4bf73e23c34cff70375ab6a8730e92c27ef8b04c045e58d063a0f23fe02"
+      },
+      {
+        "Size": 54429184,
+        "Digest": "sha256:de8300c3d8017a42e0df446b87c65c065badb334c34fb716e6320b7a2d9b579d",
+        "DiffID": "sha256:c220af8895a15afff5d494a951ac49a9949d9c400832fa5121abb227e12f4dfc"
+      },
+      {
+        "Size": 343403008,
+        "Digest": "sha256:24edd48321943452291ae70551bc0fa054159709163b399098ca166d39bdf569",
+        "DiffID": "sha256:66f4560b0ba626b1b60923ea8a52dd34731172d40e3949a8f56e7cc137f59ac2"
+      },
+      {
+        "Size": 48956416,
+        "Digest": "sha256:2c6e1267efee867f1ef6ff5c2df85474968bc89a242e941a69061aa3243c58e1",
+        "DiffID": "sha256:5b63159c9223220076cadd87bdfb24c2a67f4834573f7aea10db6098a995faad"
+      },
+      {
+        "Size": 6144,
+        "Digest": "sha256:3ea3553fe9091db4face9b898356ede4e50c0435fd398d9f577aad784aea4d89",
+        "DiffID": "sha256:31cea7f524560cdd79eb5feed152e57e0d70453e7d9315a57bfad93e6ada3e4d"
+      },
+      {
+        "Size": 4608,
+        "Digest": "sha256:08fa6c7171a0849002d5821cc9e9ab9e26d244db821b83c55060e8416239c816",
+        "DiffID": "sha256:e50b482dd6ef334c57a39f2f32cbf8317798f3904b5deb74234051cd487fab3b"
+      },
+      {
+        "Size": 4608,
+        "Digest": "sha256:fc0da6827c948c375f024fd6ced0435ca4eea5181892b7774c770e496674fe51",
+        "DiffID": "sha256:59cfff24fced744b6a7642246d9504c3083db227387cd105c7b3567c90b6ca0c"
+      },
+      {
+        "Size": 3584,
+        "Digest": "sha256:4a0b78487280d3e4b43123a085ab4fe22c45a507451eeb9962fc6877386bb994",
+        "DiffID": "sha256:ccfeb16603afa3cdc9ec830ecf9e56632ff031caf43833ec08a8e161a0847a7e"
+      },
+      {
+        "Size": 4096,
+        "Digest": "sha256:8756442b506309e657d6762ba1ee4ab1337119d04d48d2af5b1c9d31a9c903d5",
+        "DiffID": "sha256:99969243747a78388b5d1a90ffa8af05bcf2edb356c313257255e8e579bf8f2a"
+      },
+      {
+        "Size": 39424,
+        "Digest": "sha256:21994918043473bb8a1a3c7e885bc5ef36b18a62204bb9e307a0c5af15d689bb",
+        "DiffID": "sha256:2451ad19823d83ffe7f72924d702f4740ef341431231b7ebdac9a74cd036ebed"
+      },
+      {
+        "Size": 4096,
+        "Digest": "sha256:799e0bfb271c240cc4a98f8fd2b0219ad91a38983c0547706f2a3b9fdb40ff1a",
+        "DiffID": "sha256:9c0a3e805aa6efac7baa80c98ca61574d4ff6dcc70492fc2ab99b945faa23d5a"
+      },
+      {
+        "Size": 3072,
+        "Digest": "sha256:a53dd7d9ff17a5156625511e0a0a7b0695fac7cd2e8c179e86332339821bfabf",
+        "DiffID": "sha256:51a2942d2c601906926780e331135f475ad1f8e3cdd3bf3d1ff02e802f8978c9"
+      },
+      {
+        "Size": 1024,
+        "Digest": "sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+        "DiffID": "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+      },
+      {
+        "Size": 139451904,
+        "Digest": "sha256:4b9de2462dd4625ca0b4dd6d97daaff9163042690c53f8ecf3e28eb41051756b",
+        "DiffID": "sha256:e1b5ef888c9c8d1e7c317bb3c2750caec283b1d72c095bfe4f97267f830dddbc"
+      }
+    ]
+  },
+  "Results": [
+    {
+      "Target": "docker.io/netboxcommunity/netbox:v4.5.4@sha256:09e887ca591372f75205228946f4dd56f83e76a66454b4255cf33e4827f69292 (ubuntu 24.04)",
+      "Class": "os-pkgs",
+      "Type": "ubuntu"
+    },
+    {
+      "Target": "Node.js",
+      "Class": "lang-pkgs",
+      "Type": "node-pkg"
+    },
+    {
+      "Target": "Python",
+      "Class": "lang-pkgs",
+      "Type": "python-pkg",
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2026-25673",
+          "PkgName": "Django",
+          "PkgPath": "opt/netbox/venv/lib/python3.12/site-packages/django-5.2.11.dist-info/METADATA",
+          "PkgIdentifier": {
+            "PURL": "pkg:pypi/django@5.2.11",
+            "UID": "ae021413500f9122"
+          },
+          "InstalledVersion": "5.2.11",
+          "FixedVersion": "6.0.3, 5.2.12, 4.2.29",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:24edd48321943452291ae70551bc0fa054159709163b399098ca166d39bdf569",
+            "DiffID": "sha256:66f4560b0ba626b1b60923ea8a52dd34731172d40e3949a8f56e7cc137f59ac2"
+          },
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-25673",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory pip",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Apip"
+          },
+          "Title": "django: Django: Denial of Service via slow URL normalization on Windows",
+          "Description": "An issue was discovered in 6.0 before 6.0.3, 5.2 before 5.2.12, and 4.2 before 4.2.29.\n`URLField.to_python()` in Django calls `urllib.parse.urlsplit()`, which performs NFKC normalization on Windows that is disproportionately slow for certain Unicode characters, allowing a remote attacker to cause denial of service via large URL inputs containing these characters.\nEarlier, unsupported Django series (such as 5.0.x, 4.1.x, and 3.2.x) were not evaluated and may also be affected.\nDjango would like to thank Seokchan Yoon for reporting this issue.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-400",
+            "CWE-770"
+          ],
+          "VendorSeverity": {
+            "bitnami": 3,
+            "ghsa": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-25673",
+            "https://docs.djangoproject.com/en/dev/releases/security",
+            "https://docs.djangoproject.com/en/dev/releases/security/",
+            "https://github.com/django/django",
+            "https://groups.google.com/g/django-announce",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-25673",
+            "https://www.cve.org/CVERecord?id=CVE-2026-25673",
+            "https://www.djangoproject.com/weblog/2026/mar/03/security-releases",
+            "https://www.djangoproject.com/weblog/2026/mar/03/security-releases/"
+          ],
+          "PublishedDate": "2026-03-03T15:16:19.103Z",
+          "LastModifiedDate": "2026-03-05T14:12:38.11Z"
+        }
+      ]
+    },
+    {
+      "Target": "usr/local/bin/uv",
+      "Class": "lang-pkgs",
+      "Type": "rustbinary"
+    }
+  ]
+}

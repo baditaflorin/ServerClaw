@@ -135,6 +135,65 @@ def test_check_image_freshness_flags_unpinned_and_local_build(monkeypatch):
     assert finding["details"][1]["status"] == "unpinned"
 
 
+def test_check_image_freshness_supports_pinned_mapping_catalog(monkeypatch):
+    catalog = {
+        "images": {
+            "windmill_runtime": {
+                "kind": "runtime",
+                "service_id": "windmill",
+                "runtime_host": "docker-runtime-lv3",
+                "container_name": "windmill-windmill_server-1",
+                "ref": "ghcr.io/windmill-labs/windmill:1.662.0@sha256:abc",
+                "digest": "sha256:abc",
+            },
+            "mail_platform_gateway_python_base": {
+                "kind": "build_base",
+                "ref": "docker.io/library/python:3.13.12-slim-trixie@sha256:def",
+                "digest": "sha256:def",
+            },
+        }
+    }
+
+    real_load_json = tool.load_json
+
+    def fake_load_json(path):
+        if path == tool.IMAGE_CATALOG_PATH:
+            return catalog
+        return real_load_json(path)
+
+    def fake_execute_runner(context, runner, target, command):
+        del context
+        assert runner == "guest_jump"
+        assert target == "docker-runtime-lv3"
+        assert "windmill-windmill_server-1" in command
+        return tool.CommandResult(
+            command=command,
+            returncode=0,
+            stdout="ghcr.io/windmill-labs/windmill:1.662.0@sha256:abc|sha256:abc",
+            stderr="",
+        )
+
+    monkeypatch.setattr(tool, "load_json", fake_load_json)
+    monkeypatch.setattr(tool, "execute_runner", fake_execute_runner)
+
+    finding = tool.check_image_freshness({}, "run-2")
+
+    assert finding["severity"] == "ok"
+    assert finding["outputs"]["checked_image_count"] == 1
+    assert finding["details"] == [
+        {
+            "image_id": "windmill_runtime",
+            "service_id": "windmill",
+            "container_name": "windmill-windmill_server-1",
+            "expected_reference": "ghcr.io/windmill-labs/windmill:1.662.0@sha256:abc",
+            "running_reference": "ghcr.io/windmill-labs/windmill:1.662.0@sha256:abc",
+            "running_digest": "sha256:abc",
+            "pin_status": "pinned",
+            "status": "pinned_ok",
+        }
+    ]
+
+
 def test_check_certificate_expiry_uses_tls_probe(monkeypatch):
     def fake_execute_runner(context, runner, target, command):
         del context, target, command

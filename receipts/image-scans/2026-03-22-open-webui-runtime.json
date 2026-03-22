@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "open_webui_runtime",
+  "image_ref": "ghcr.io/open-webui/open-webui:v0.8.9@sha256:c5058cf3491ee7eade6ae050ffb78701d3195fe0600215aedd92bb4ec588bfb1",
+  "scanner": "trivy",
+  "scanner_image": "docker.io/aquasec/trivy:0.63.0",
+  "scanned_on": "2026-03-22",
+  "summary": {
+    "critical": 5,
+    "high": 211
+  },
+  "targets_with_findings": [
+    {
+      "target": "ghcr.io/open-webui/open-webui:v0.8.9@sha256:c5058cf3491ee7eade6ae050ffb78701d3195fe0600215aedd92bb4ec588bfb1 (debian 12.13)",
+      "class": "os-pkgs",
+      "type": "debian",
+      "critical": 5,
+      "high": 198
+    },
+    {
+      "target": "Python",
+      "class": "lang-pkgs",
+      "type": "python-pkg",
+      "critical": 0,
+      "high": 11
+    },
+    {
+      "target": "usr/local/bin/uv",
+      "class": "lang-pkgs",
+      "type": "rustbinary",
+      "critical": 0,
+      "high": 1
+    },
+    {
+      "target": "usr/local/bin/uvx",
+      "class": "lang-pkgs",
+      "type": "rustbinary",
+      "critical": 0,
+      "high": 1
+    }
+  ],
+  "raw_report": "receipts/image-scans/2026-03-22-open-webui-runtime.trivy.json"
+}
