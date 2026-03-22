@@ -8,6 +8,18 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.66.0 - 2026-03-23
+
+- applied ADR 0056 live by converging Keycloak on `docker-runtime-lv3`, provisioning its PostgreSQL backend on `postgres-lv3`, publishing the shared issuer at `https://sso.lv3.org`, and wiring Grafana through the shared OIDC login flow
+- added repo-managed Keycloak, Grafana SSO, role verification, and controller-secret workflow contracts so the shared broker, named operator bootstrap, and approved agent client-credentials path rerun cleanly from `main`
+- recorded the live-apply receipt, ADR metadata, workstream state, identity taxonomy updates, Uptime Kuma monitor seeding, and canonical stack plus health-probe state for the first shared SSO broker rollout
+
+Platform impact:
+
+- Keycloak is now live on `docker-runtime-lv3` with the `lv3` realm, repo-managed groups, the named operator `florin.badita`, and the confidential clients `grafana-oauth` and `lv3-agent-hub`
+- `postgres-lv3` now serves the managed `keycloak` database and role required by the runtime
+- Grafana public login now redirects through Keycloak at `https://sso.lv3.org`, and the approved agent client-credentials flow is verified live against the same broker
+
 ## 0.65.0 - 2026-03-23
 
 - implemented ADR 0071 in repository automation by adding a controller-side observation loop that runs governed drift checks for VM state, service health, image freshness, secret ages, certificate expiry, and backup recency

@@ -74,7 +74,7 @@ Portainer is now live on `docker-runtime-lv3` and reachable privately at `https:
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.65.0` |
+| Repository version | `0.66.0` |
 | Platform version | `0.34.0` |
 | Observed check date | `2026-03-22` |
 | Observed OS | `Debian 13` |
@@ -474,7 +474,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.65.0` |
+| Repository version | `0.66.0` |
 | Platform version | `0.34.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
