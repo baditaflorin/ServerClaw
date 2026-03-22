@@ -168,3 +168,61 @@ def test_check_certificate_expiry_uses_tls_probe(monkeypatch):
         "proxmox-ui",
         "step-ca-proxy",
     ]
+
+
+def test_check_service_health_supports_service_catalog(monkeypatch):
+    catalog = {
+        "services": {
+            "windmill": {
+                "service_name": "windmill",
+                "owning_vm": "docker-runtime-lv3",
+                "liveness": {
+                    "kind": "command",
+                    "description": "worker process",
+                    "timeout_seconds": 10,
+                    "retries": 1,
+                    "delay_seconds": 0,
+                    "argv": ["echo", "windmill"],
+                    "success_rc": 0,
+                },
+                "readiness": {
+                    "kind": "http",
+                    "description": "api version",
+                    "timeout_seconds": 10,
+                    "retries": 1,
+                    "delay_seconds": 0,
+                    "url": "http://127.0.0.1:8000/api/version",
+                    "method": "GET",
+                    "expected_status": [200],
+                },
+            }
+        }
+    }
+    real_load_json = tool.load_json
+
+    def fake_load_json(path):
+        if path == tool.HEALTH_PROBE_CATALOG_PATH:
+            return catalog
+        return real_load_json(path)
+
+    def fake_execute_runner(context, runner, target, command):
+        del context
+        assert runner == "guest_jump"
+        assert target == "docker-runtime-lv3"
+        if "echo" in command:
+            return tool.CommandResult(command=command, returncode=0, stdout="windmill", stderr="")
+        return tool.CommandResult(
+            command=command,
+            returncode=0,
+            stdout='{"version":"1.0"}\n__STATUS__=200',
+            stderr="",
+        )
+
+    monkeypatch.setattr(tool, "load_json", fake_load_json)
+    monkeypatch.setattr(tool, "execute_runner", fake_execute_runner)
+
+    finding = tool.check_service_health({}, "run-3")
+
+    assert finding["severity"] == "ok"
+    assert finding["outputs"]["checked_probe_count"] == 2
+    assert [entry["probe_id"] for entry in finding["details"]] == ["windmill-liveness", "windmill-readiness"]

@@ -1,16 +1,19 @@
 ---
 - name: Validate Docker runtime inputs
-  ansible.builtin.assert:
-    that:
-      - docker_runtime_prereq_packages | length > 0
-      - docker_runtime_conflicting_packages | length > 0
-      - docker_runtime_engine_packages | length > 0
-      - docker_runtime_admin_users | length > 0
-      - docker_runtime_apt_key_url | length > 0
-      - docker_runtime_apt_keyring_path | length > 0
-      - docker_runtime_apt_repo_file | length > 0
-      - docker_runtime_apt_repo_uri | length > 0
-    fail_msg: "docker_runtime requires package, repository, and admin user inputs."
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: assert_vars
+  vars:
+    common_assert_vars_required:
+      - docker_runtime_prereq_packages
+      - docker_runtime_conflicting_packages
+      - docker_runtime_engine_packages
+      - docker_runtime_admin_users
+      - docker_runtime_apt_key_url
+      - docker_runtime_apt_keyring_path
+      - docker_runtime_apt_repo_file
+      - docker_runtime_apt_repo_uri
+    common_assert_vars_fail_msg: "docker_runtime requires package, repository, and admin user inputs."
 
 - name: Install Docker repository prerequisites
   ansible.builtin.apt:
@@ -18,11 +21,14 @@
     state: present
     update_cache: true
 
-- name: Ensure apt keyring directory exists
-  ansible.builtin.file:
-    path: /etc/apt/keyrings
-    state: directory
-    mode: "0755"
+- name: Ensure Docker-managed directories exist
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: directory_tree
+  vars:
+    common_directory_tree_paths:
+      - /etc/apt/keyrings
+      - /etc/docker
 
 - name: Download Docker apt key
   ansible.builtin.get_url:
@@ -59,12 +65,6 @@
     append: true
   loop: "{{ docker_runtime_admin_users }}"
 
-- name: Ensure Docker config directory exists
-  ansible.builtin.file:
-    path: /etc/docker
-    state: directory
-    mode: "0755"
-
 - name: Render Docker daemon configuration
   ansible.builtin.template:
     src: daemon.json.j2
@@ -73,7 +73,11 @@
   notify: Restart Docker
 
 - name: Ensure Docker service is enabled and running
-  ansible.builtin.systemd:
-    name: docker
-    enabled: true
-    state: started
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: systemd_unit
+  vars:
+    common_systemd_unit_name: docker
+
+- name: Verify Docker runtime health probes
+  ansible.builtin.import_tasks: verify.yml

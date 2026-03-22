@@ -1,10 +1,10 @@
 # ADR 0070: Retrieval-Augmented Context For Platform Queries
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.62.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-22
 - Date: 2026-03-22
 
 ## Context
@@ -32,16 +32,17 @@ Corpus:
 
 Index:
 
-- documents are chunked, embedded, and stored in a private vector database (initial candidate: Qdrant in a Docker container on `docker-runtime-lv3`)
-- the index is rebuilt on every merge to `main` via a Windmill workflow (`rebuild-rag-index`)
-- each chunk retains its source file path, ADR number (if applicable), and last-modified date as metadata for citation
+- documents are chunked and stored with citation metadata in a private vector database (Qdrant on `docker-runtime-lv3`)
+- embedding is performed by a local model inside the private platform-context API runtime; no external embedding API is required
+- the index can be rebuilt through the repo-managed script `scripts/build_rag_index.py` and the seeded Windmill script `rebuild_rag_index`
+- each chunk retains its source file path, ADR number (if applicable), section heading, and last-modified timestamp as metadata for citation
 
 Query tool (`query-platform-context`):
 
 - accepts a natural-language question
 - returns the top-k most relevant chunks with source citations
 - is listed in the agent tool registry (ADR 0069) under the `observe` category
-- is accessible from Open WebUI (ADR 0060) as a built-in tool and from any MCP-compatible agent runtime
+- is exposed through a private OpenAPI tool server so Open WebUI (ADR 0060) can register it as a global tool and MCP-compatible runtimes can load the registry export
 
 Access:
 
@@ -60,3 +61,12 @@ Access:
 - The RAG index is read-only context retrieval; it does not make decisions or execute actions.
 - Live metric data and real-time log streams are not indexed; they are accessed via dedicated observability tools.
 - The index does not replace canonical file reads for automated scripts; it is optimised for conversational and exploratory queries.
+
+## Implementation Notes
+
+- The private runtime now converges through [playbooks/rag-context.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/rag-context.yml) and [roles/rag_context_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/rag_context_runtime) on `docker-runtime-lv3`.
+- Qdrant and the FastAPI-based platform context API are deployed together, with a controller-local bearer token mirrored under `.local/platform-context/api-token.txt`.
+- [scripts/platform_context_corpus.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/platform_context_corpus.py) defines corpus discovery and chunking, keeping ADRs and runbooks aligned to Markdown `##` boundaries before paragraph splitting.
+- [scripts/build_rag_index.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/build_rag_index.py) now provides the canonical dry-run and upload path for corpus builds, and [scripts/query_platform_context.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/query_platform_context.py) provides a direct private query client.
+- [scripts/platform_context_service.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/platform_context_service.py) serves the private OpenAPI tool surface for `query-platform-context`, workflow or command contract lookups, recent receipt reporting, and platform summary reads.
+- Operator usage and Open WebUI global-tool integration are documented in [docs/runbooks/rag-platform-context.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/rag-platform-context.md).

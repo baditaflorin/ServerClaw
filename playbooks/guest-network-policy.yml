@@ -1,0 +1,24 @@
+---
+- name: Converge Proxmox guest network policy enforcement
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: proxmox_network
+
+- name: Converge guest nftables network policy
+  hosts: lv3_guests
+  serial: 1
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Ensure target guest is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+  roles:
+    - role: linux_guest_firewall

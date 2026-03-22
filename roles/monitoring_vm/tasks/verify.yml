@@ -1,0 +1,98 @@
+---
+- name: Verify Grafana health endpoint responds
+  ansible.builtin.uri:
+    url: http://127.0.0.1:3000/api/health
+    method: GET
+    status_code: 200
+  register: monitoring_verify_grafana_health
+  retries: 20
+  delay: 3
+  until: monitoring_verify_grafana_health.status == 200
+  changed_when: false
+
+- name: Verify Grafana datasource is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/datasources/name/{{ monitoring_grafana_datasource_name | urlencode }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_verify_grafana_datasource
+  changed_when: false
+  no_log: true
+
+- name: Verify Grafana Loki datasource is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/datasources/name/{{ monitoring_grafana_loki_datasource_name | urlencode }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_verify_grafana_loki_datasource
+  changed_when: false
+  no_log: true
+
+- name: Verify Grafana Prometheus datasource is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/datasources/uid/{{ monitoring_grafana_prometheus_datasource_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_verify_grafana_prometheus_datasource
+  changed_when: false
+  no_log: true
+
+- name: Verify Grafana Tempo datasource is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/datasources/uid/{{ monitoring_grafana_tempo_datasource_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_verify_grafana_tempo_datasource
+  changed_when: false
+  no_log: true
+
+- name: Verify LV3 platform dashboard is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/{{ monitoring_grafana_dashboard_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_verify_platform_dashboard
+  changed_when: false
+  no_log: true
+
+- name: Verify LV3 mail platform dashboard is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/{{ monitoring_grafana_mail_dashboard_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_verify_mail_dashboard
+  changed_when: false
+  no_log: true
+
+- name: Verify VM detail dashboards are provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/lv3-vm-{{ item.name }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  loop: "{{ hostvars[groups['proxmox_hosts'][0]].proxmox_guests }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: monitoring_verify_vm_dashboards
+  changed_when: false
+  no_log: true

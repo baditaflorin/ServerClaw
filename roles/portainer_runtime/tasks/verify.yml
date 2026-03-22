@@ -1,0 +1,88 @@
+---
+- name: Verify Portainer is listening on the private runtime IP
+  ansible.builtin.wait_for:
+    host: "{{ ansible_host }}"
+    port: "{{ portainer_https_port }}"
+    delay: 0
+    timeout: 180
+
+- name: Authenticate to Portainer
+  ansible.builtin.uri:
+    url: "{{ portainer_controller_url }}/api/auth"
+    method: POST
+    body_format: json
+    body:
+      username: "{{ portainer_admin_username }}"
+      password: "{{ portainer_admin_password }}"
+    status_code: 200
+    return_content: true
+    validate_certs: "{{ portainer_verify_ssl }}"
+  register: portainer_verify_auth
+  delegate_to: localhost
+  become: false
+  retries: 12
+  delay: 5
+  until:
+    - portainer_verify_auth.status == 200
+    - (portainer_verify_auth.json.jwt | default('')) | length > 0
+  changed_when: false
+  no_log: true
+
+- name: Read the Portainer environment list
+  ansible.builtin.uri:
+    url: "{{ portainer_controller_url }}/api/endpoints"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ portainer_verify_auth.json.jwt }}"
+    status_code: 200
+    return_content: true
+    validate_certs: "{{ portainer_verify_ssl }}"
+  register: portainer_verify_endpoints
+  delegate_to: localhost
+  become: false
+  changed_when: false
+  no_log: true
+
+- name: Assert the Portainer local endpoint is available
+  ansible.builtin.assert:
+    that:
+      - (portainer_verify_endpoints.json | default([])) | length > 0
+      - >-
+        (
+          (
+            portainer_verify_endpoints.json
+            | default([])
+            | selectattr('Name', 'defined')
+            | selectattr('Name', 'equalto', portainer_endpoint_name)
+            | list
+          )
+          +
+          (
+            portainer_verify_endpoints.json
+            | default([])
+            | selectattr('name', 'defined')
+            | selectattr('name', 'equalto', portainer_endpoint_name)
+            | list
+          )
+        ) | length > 0
+    fail_msg: "Portainer did not expose the expected local endpoint during verification."
+
+- name: Verify the Portainer container is running
+  ansible.builtin.command:
+    argv:
+      - docker
+      - ps
+      - --filter
+      - "name={{ portainer_container_name }}"
+      - --filter
+      - status=running
+      - --format
+      - "{{ '{{' }}.Names{{ '}}' }}"
+  register: portainer_verify_running
+  changed_when: false
+
+- name: Assert the Portainer container is running
+  ansible.builtin.assert:
+    that:
+      - portainer_verify_running.stdout_lines | select('equalto', portainer_container_name) | list | length == 1
+    fail_msg: "Portainer container is not running."

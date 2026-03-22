@@ -978,3 +978,6 @@
   register: monitoring_grafana_vm_dashboard_checks
   changed_when: false
   no_log: true
+
+- name: Verify monitoring service health probes
+  ansible.builtin.import_tasks: verify.yml

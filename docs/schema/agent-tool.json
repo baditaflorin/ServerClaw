@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lv3.org/schema/agent-tool.json",
+  "title": "LV3 Agent Tool",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "title",
+    "description",
+    "category",
+    "transport",
+    "endpoint",
+    "auth",
+    "approval_required",
+    "audit_on_call",
+    "input_schema",
+    "output_schema",
+    "implementation",
+    "runbook"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "observe",
+        "report",
+        "execute",
+        "approve"
+      ]
+    },
+    "transport": {
+      "type": "string",
+      "enum": [
+        "controller_local",
+        "http",
+        "nats",
+        "ansible"
+      ]
+    },
+    "endpoint": {
+      "type": "string",
+      "minLength": 1
+    },
+    "auth": {
+      "type": "string",
+      "minLength": 1
+    },
+    "approval_required": {
+      "type": "boolean"
+    },
+    "audit_on_call": {
+      "type": "boolean"
+    },
+    "input_schema": {
+      "type": "object"
+    },
+    "output_schema": {
+      "type": "object"
+    },
+    "implementation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "handler"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "handler"
+          ]
+        },
+        "handler": {
+          "type": "string",
+          "pattern": "^[a-z_][a-z0-9_]*$"
+        }
+      }
+    },
+    "catalog_refs": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "workflow_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_-]*$"
+        },
+        "command_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_-]*$"
+        },
+        "api_surface_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_-]*$"
+        }
+      }
+    },
+    "mcp_annotations": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "readOnlyHint": {
+          "type": "boolean"
+        },
+        "idempotentHint": {
+          "type": "boolean"
+        },
+        "destructiveHint": {
+          "type": "boolean"
+        },
+        "openWorldHint": {
+          "type": "boolean"
+        }
+      }
+    },
+    "runbook": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

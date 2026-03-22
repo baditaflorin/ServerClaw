@@ -1,0 +1,81 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the private Windmill runtime and workspace bootstrap.
+    options:
+      windmill_workspace_id:
+        type: str
+        required: true
+        description:
+          - Workspace identifier that should exist after convergence.
+      windmill_workspace_name:
+        type: str
+        required: true
+        description:
+          - Human-readable Windmill workspace name.
+      windmill_site_dir:
+        type: path
+        required: true
+        description:
+          - Base directory for the Windmill runtime stack.
+      windmill_secret_dir:
+        type: path
+        required: true
+        description:
+          - Directory that stores Windmill secrets on the guest.
+      windmill_compose_file:
+        type: path
+        required: true
+        description:
+          - Compose file path for the Windmill runtime stack.
+      windmill_env_file:
+        type: path
+        required: true
+        description:
+          - Environment file rendered for Windmill.
+      windmill_server_port:
+        type: int
+        required: true
+        description:
+          - Local TCP port exposed by the Windmill API.
+      windmill_base_url:
+        type: str
+        required: true
+        description:
+          - Operator-facing base URL for Windmill.
+      windmill_database_name:
+        type: str
+        required: true
+        description:
+          - PostgreSQL database name used by Windmill.
+      windmill_database_user:
+        type: str
+        required: true
+        description:
+          - PostgreSQL login role used by Windmill.
+      windmill_database_host:
+        type: str
+        required: true
+        description:
+          - PostgreSQL host for the Windmill runtime.
+      windmill_database_port:
+        type: int
+        required: false
+        description:
+          - PostgreSQL port for the Windmill runtime.
+      windmill_database_password_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file that stores the runtime database password.
+      windmill_seed_scripts:
+        type: list
+        elements: dict
+        required: true
+        description:
+          - Repo-managed scripts that should be present in the workspace after convergence.
+      windmill_private_base_url:
+        type: str
+        required: false
+        description:
+          - Guest-local base URL used for bootstrap verification.

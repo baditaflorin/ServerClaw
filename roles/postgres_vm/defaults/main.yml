@@ -1,21 +1,11 @@
 ---
 postgres_vm_packages:
   - acl
-  - nftables
   - postgresql
   - postgresql-contrib
+postgres_vm_port: 5432
 postgres_vm_postgresql_service_name: postgresql
-postgres_vm_nftables_config_file: /etc/nftables.conf
 postgres_vm_admin_role: "{{ proxmox_guest_ci_user }}"
 postgres_vm_listen_addresses:
   - 127.0.0.1
   - "{{ ansible_host }}"
-postgres_vm_ssh_allowed_sources: "{{ proxmox_management_allowed_sources }}"
-postgres_vm_client_allowed_sources_default:
-  - "{{ hostvars['proxmox_florin'].proxmox_internal_ipv4 }}/32"
-postgres_vm_client_allowed_sources_extra: []
-postgres_vm_client_allowed_sources: >-
-  {{
-    (postgres_vm_client_allowed_sources_default + postgres_vm_client_allowed_sources_extra)
-    | unique
-  }}

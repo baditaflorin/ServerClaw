@@ -12,6 +12,7 @@
         fail_msg: "This playbook only supports Debian guests."
 
   roles:
+    - role: linux_guest_firewall
     - role: linux_access
       vars:
         linux_access_admin_user: "{{ proxmox_guest_ci_user }}"

@@ -1,0 +1,84 @@
+---
+- name: Verify the mail gateway health endpoint
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ mail_platform_gateway_port }}/healthz"
+    method: GET
+    status_code: 200
+  register: mail_platform_verify_gateway_health
+  changed_when: false
+
+- name: Verify the mail gateway CRUD API can list domains
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ mail_platform_gateway_port }}/v1/domains"
+    method: GET
+    headers:
+      X-API-Key: "{{ mail_platform_gateway_api_key }}"
+    status_code: 200
+  register: mail_platform_verify_gateway_domains
+  changed_when: false
+  no_log: true
+
+- name: Verify the mail gateway can list notification profiles
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ mail_platform_gateway_port }}/v1/profiles"
+    method: GET
+    headers:
+      X-API-Key: "{{ mail_platform_gateway_api_key }}"
+    status_code: 200
+  register: mail_platform_verify_gateway_profiles
+  changed_when: false
+  no_log: true
+
+- name: Verify the mail domain exists in Stalwart
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ mail_platform_stalwart_http_port }}/api/principal?types=domain"
+    method: GET
+    user: admin
+    password: "{{ mail_platform_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: mail_platform_verify_domains
+  changed_when: false
+  no_log: true
+
+- name: Assert the managed mail domain is present
+  ansible.builtin.assert:
+    that:
+      - (mail_platform_verify_domains.json.data['items'] | map(attribute='name') | list) is contains(mail_platform_domain)
+    fail_msg: "Managed domain {{ mail_platform_domain }} is not present in Stalwart."
+
+- name: Verify the managed mailbox exists in Stalwart
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ mail_platform_stalwart_http_port }}/api/principal?types=individual"
+    method: GET
+    user: admin
+    password: "{{ mail_platform_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: mail_platform_verify_accounts
+  changed_when: false
+  no_log: true
+
+- name: Assert the managed mailbox accounts are present
+  ansible.builtin.assert:
+    that:
+      - >-
+        (
+          mail_platform_managed_mailboxes_runtime
+          | map(attribute='localpart')
+          | difference(mail_platform_verify_accounts.json.data['items'] | map(attribute='name') | list)
+          | length
+        ) == 0
+    fail_msg: "One or more managed mailboxes are missing from Stalwart."
+
+- name: Assert the notification profile catalog is present
+  ansible.builtin.assert:
+    that:
+      - >-
+        (
+          mail_platform_notification_profiles_runtime
+          | map(attribute='id')
+          | difference(mail_platform_verify_gateway_profiles.json['items'] | map(attribute='id') | list)
+          | length
+        ) == 0
+    fail_msg: "One or more notification profiles are missing from the mail gateway catalog."

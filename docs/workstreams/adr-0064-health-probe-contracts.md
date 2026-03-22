@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0064](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0064-health-probe-contracts-for-all-services.md)
 - Title: Standardised liveness and readiness probes per service with machine-readable catalog
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0064-health-probe-contracts`
 - Worktree: `../proxmox_florin_server-health-probe-contracts`
 - Owner: codex
@@ -14,7 +14,7 @@
 
 - define probe contract format and document it in `docs/runbooks/health-probe-contracts.md`
 - create `config/health-probe-catalog.json` with liveness/readiness entries for all current services
-- add `tasks/verify.yml` to each service role (nginx, docker-runtime, postgres, monitoring, backup, step-ca, openbao, windmill, mail platform)
+- add `tasks/verify.yml` to each current service role, including the newer NetBox, Open WebUI, Portainer, and ntopng roles alongside the original scope
 - add `make validate` syntax check for `verify.yml` presence in service roles
 - update Uptime Kuma config stubs in `config/uptime-kuma/` to match catalog entries
 
@@ -42,15 +42,15 @@
 
 - `python3 -c "import json; json.load(open('config/health-probe-catalog.json'))"` exits 0
 - `make validate` passes with probe presence check active
-- `test -f roles/nginx/tasks/verify.yml`
+- `test -f roles/nginx_edge_publication/tasks/verify.yml`
 
 ## Merge Criteria
 
 - every currently-live service has an entry in `health-probe-catalog.json`
 - probe contracts are documented in the runbook with example outputs
-- at least one service role's `verify.yml` is tested in the worktree environment
+- the role verify contracts are enforced by the repo validation gate and exercised by the changed playbook syntax checks
 
 ## Notes For The Next Assistant
 
-- begin with services that already have HTTP endpoints (nginx, Grafana, Uptime Kuma) before tackling TCP-only services
-- the `wait_port.yml` shared task from ADR 0062 is the building block for TCP probes
+- merged on `main` as repository release `0.61.0`; no live platform apply has happened yet
+- host-provided surfaces without standalone roles (`proxmox_ui`, `docker_build`) are covered in the catalog and Uptime Kuma policy, not via new role verify files

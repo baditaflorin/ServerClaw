@@ -46,8 +46,10 @@ DNS_RECORD_TYPES = {"A", "AAAA", "CNAME"}
 EXTRA_DNS_RECORD_TYPES = {"A", "AAAA", "CNAME", "MX", "TXT"}
 EDGE_KINDS = {"static", "proxy"}
 MONITOR_TYPES = {"http", "port"}
+PROBE_KINDS = {"http", "tcp", "command", "systemd"}
+HTTP_METHODS = {"DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"}
 IDENTITY_CLASSES = {"human_operator", "service", "agent", "break_glass"}
-PROBE_RUNNERS = {"controller_local", "host_ssh", "guest_jump"}
+NETWORK_POLICY_PROTOCOLS = {"tcp", "udp"}
 IMAGE_SOURCE_KINDS = {"upstream", "local_build"}
 IMAGE_PIN_STATUSES = {"pinned", "unpinned", "local_build"}
 IDENTITY_REQUIRED_METADATA = {
@@ -329,6 +331,52 @@ def validate_extra_dns_records(value: Any, path: str) -> None:
         require_int(record.get("ttl"), f"{path}[{index}].ttl", 1)
 
 
+def validate_network_policy(value: Any, path: str, guest_names: set[str]) -> None:
+    policy = require_mapping(value, path)
+    guest_management_sources = require_string_list(
+        policy.get("guest_management_sources"),
+        f"{path}.guest_management_sources",
+    )
+    if not guest_management_sources:
+        raise ValueError(f"{path}.guest_management_sources must not be empty")
+    for index, source in enumerate(guest_management_sources):
+        require_network(source, f"{path}.guest_management_sources[{index}]")
+
+    require_network(policy.get("host_source"), f"{path}.host_source")
+
+    guest_policies = require_mapping(policy.get("guests"), f"{path}.guests")
+    if set(guest_policies.keys()) != guest_names:
+        raise ValueError(f"{path}.guests must define exactly one policy entry for each managed guest")
+
+    allowed_source_tokens = {"management", "host", "public", "all_guests"}
+    for guest_name in sorted(guest_names):
+        guest_policy = require_mapping(guest_policies.get(guest_name), f"{path}.guests.{guest_name}")
+        allowed_inbound = require_list(guest_policy.get("allowed_inbound"), f"{path}.guests.{guest_name}.allowed_inbound")
+        if not allowed_inbound:
+            raise ValueError(f"{path}.guests.{guest_name}.allowed_inbound must not be empty")
+        for index, rule in enumerate(allowed_inbound):
+            rule = require_mapping(rule, f"{path}.guests.{guest_name}.allowed_inbound[{index}]")
+            source = require_str(rule.get("source"), f"{path}.guests.{guest_name}.allowed_inbound[{index}].source")
+            require_enum(
+                rule.get("protocol"),
+                f"{path}.guests.{guest_name}.allowed_inbound[{index}].protocol",
+                NETWORK_POLICY_PROTOCOLS,
+            )
+            ports = require_int_list(
+                rule.get("ports"),
+                f"{path}.guests.{guest_name}.allowed_inbound[{index}].ports",
+            )
+            if not ports:
+                raise ValueError(f"{path}.guests.{guest_name}.allowed_inbound[{index}].ports must not be empty")
+            require_str(
+                rule.get("description"),
+                f"{path}.guests.{guest_name}.allowed_inbound[{index}].description",
+            )
+            if source in allowed_source_tokens or source in guest_names:
+                continue
+            require_network(source, f"{path}.guests.{guest_name}.allowed_inbound[{index}].source")
+
+
 def validate_host_vars() -> dict[str, Any]:
     host_vars = require_mapping(load_yaml(HOST_VARS_PATH), str(HOST_VARS_PATH))
     host_id = require_identifier(HOST_VARS_PATH.stem, "host_vars host id")
@@ -400,6 +448,8 @@ def validate_host_vars() -> dict[str, Any]:
     if "mail_platform_dns_records" in host_vars:
         validate_extra_dns_records(host_vars.get("mail_platform_dns_records"), "host_vars.mail_platform_dns_records")
 
+    validate_network_policy(host_vars.get("network_policy"), "host_vars.network_policy", guest_names)
+
     topology = require_mapping(host_vars.get("lv3_service_topology"), "host_vars.lv3_service_topology")
     if not topology:
         raise ValueError("host_vars.lv3_service_topology must not be empty")
@@ -424,6 +474,13 @@ def validate_host_vars() -> dict[str, Any]:
         "guest_plan_keys": guest_plan_keys,
         "guest_vmids_by_key": guest_vmids_by_key,
         "guest_ips_by_key": guest_ips_by_key,
+        "topology": {
+            service_id: {
+                "service_name": service["service_name"],
+                "owning_vm": service["owning_vm"],
+            }
+            for service_id, service in topology.items()
+        },
     }
 
 
@@ -464,36 +521,120 @@ def validate_uptime_monitors() -> None:
         names.add(name)
 
 
+def validate_probe_definition(probe: Any, path: str) -> None:
+    probe = require_mapping(probe, path)
+    kind = require_enum(probe.get("kind"), f"{path}.kind", PROBE_KINDS)
+    require_str(probe.get("description"), f"{path}.description")
+    require_int(probe.get("timeout_seconds"), f"{path}.timeout_seconds", 1)
+    require_int(probe.get("retries"), f"{path}.retries", 1)
+    require_int(probe.get("delay_seconds"), f"{path}.delay_seconds", 0)
+
+    if "headers" in probe:
+        headers = require_mapping(probe.get("headers"), f"{path}.headers")
+        for key, value in headers.items():
+            require_str(key, f"{path}.headers key")
+            require_str(value, f"{path}.headers.{key}")
+
+    if "validate_tls" in probe:
+        require_bool(probe.get("validate_tls"), f"{path}.validate_tls")
+
+    if kind == "http":
+        url = require_str(probe.get("url"), f"{path}.url")
+        if not (url.startswith("http://") or url.startswith("https://")):
+            raise ValueError(f"{path}.url must start with http:// or https://")
+        method = require_str(probe.get("method"), f"{path}.method").upper()
+        if method not in HTTP_METHODS:
+            raise ValueError(f"{path}.method must be one of {sorted(HTTP_METHODS)}")
+        expected_status = require_int_list(probe.get("expected_status"), f"{path}.expected_status", 100)
+        for index, status in enumerate(expected_status):
+            if status > 599:
+                raise ValueError(f"{path}.expected_status[{index}] must be <= 599")
+
+    if kind == "tcp":
+        require_str(probe.get("host"), f"{path}.host")
+        require_int(probe.get("port"), f"{path}.port", 1)
+
+    if kind == "command":
+        argv = require_string_list(probe.get("argv"), f"{path}.argv")
+        if not argv:
+            raise ValueError(f"{path}.argv must not be empty")
+        if "success_rc" in probe:
+            require_int(probe.get("success_rc"), f"{path}.success_rc", 0)
+
+    if kind == "systemd":
+        require_str(probe.get("unit"), f"{path}.unit")
+        require_str(probe.get("expected_state"), f"{path}.expected_state")
+
+
 def validate_health_probe_catalog(host_vars_context: dict[str, Any]) -> None:
-    catalog = require_mapping(load_json(HEALTH_PROBE_CATALOG_PATH), str(HEALTH_PROBE_CATALOG_PATH))
+    catalog = require_mapping(
+        json.loads(HEALTH_PROBE_CATALOG_PATH.read_text()),
+        str(HEALTH_PROBE_CATALOG_PATH),
+    )
     require_semver(catalog.get("schema_version"), "config/health-probe-catalog.json.schema_version")
-    probes = require_list(catalog.get("probes"), "config/health-probe-catalog.json.probes")
-    if not probes:
-        raise ValueError("config/health-probe-catalog.json.probes must not be empty")
-    probe_ids: set[str] = set()
-    allowed_targets = {"controller", "proxmox_florin", *host_vars_context["guest_names"]}
-    for index, probe in enumerate(probes):
-        path = f"config/health-probe-catalog.json.probes[{index}]"
-        probe = require_mapping(probe, path)
-        probe_id = require_identifier(probe.get("id"), f"{path}.id")
-        if probe_id in probe_ids:
-            raise ValueError(f"duplicate health probe id: {probe_id}")
-        probe_ids.add(probe_id)
-        require_identifier(probe.get("service_id"), f"{path}.service_id")
-        runner = require_enum(probe.get("runner"), f"{path}.runner", PROBE_RUNNERS)
-        target = require_identifier(probe.get("target"), f"{path}.target")
-        if target not in allowed_targets:
-            raise ValueError(f"{path}.target must be one of {sorted(allowed_targets)}")
-        require_str(probe.get("summary"), f"{path}.summary")
-        require_str(probe.get("command"), f"{path}.command")
-        expect = require_mapping(probe.get("expect"), f"{path}.expect")
-        require_int(expect.get("exit_code"), f"{path}.expect.exit_code", 0)
-        if "stdout_contains" in expect:
-            require_string_list(expect.get("stdout_contains"), f"{path}.expect.stdout_contains")
-        if "stdout_regex" in expect:
-            require_str(expect.get("stdout_regex"), f"{path}.expect.stdout_regex")
-        if runner == "controller_local" and target != "controller":
-            raise ValueError(f"{path}.target must be controller when runner is controller_local")
+    services = require_mapping(catalog.get("services"), "config/health-probe-catalog.json.services")
+    topology = host_vars_context["topology"]
+
+    if set(services.keys()) != set(topology.keys()):
+        raise ValueError(
+            "config/health-probe-catalog.json.services must define exactly the canonical lv3_service_topology services"
+        )
+
+    expected_monitors: dict[str, dict[str, Any]] = {}
+    for service_id, topology_entry in topology.items():
+        service_path = f"config/health-probe-catalog.json.services.{service_id}"
+        service = require_mapping(services.get(service_id), service_path)
+        if require_str(service.get("service_name"), f"{service_path}.service_name") != topology_entry["service_name"]:
+            raise ValueError(f"{service_path}.service_name must match inventory/host_vars/proxmox_florin.yml")
+        if require_str(service.get("owning_vm"), f"{service_path}.owning_vm") != topology_entry["owning_vm"]:
+            raise ValueError(f"{service_path}.owning_vm must match inventory/host_vars/proxmox_florin.yml")
+
+        role = service.get("role")
+        verify_file = service.get("verify_file")
+        if role is None:
+            if verify_file is not None:
+                raise ValueError(f"{service_path}.verify_file must be null when {service_path}.role is null")
+        else:
+            require_str(role, f"{service_path}.role")
+            verify_file = require_str(verify_file, f"{service_path}.verify_file")
+            if not (REPO_ROOT / verify_file).is_file():
+                raise ValueError(f"{service_path}.verify_file does not exist: {verify_file}")
+
+        validate_probe_definition(service.get("liveness"), f"{service_path}.liveness")
+        validate_probe_definition(service.get("readiness"), f"{service_path}.readiness")
+
+        uptime_kuma = require_mapping(service.get("uptime_kuma"), f"{service_path}.uptime_kuma")
+        enabled = require_bool(uptime_kuma.get("enabled"), f"{service_path}.uptime_kuma.enabled")
+        if enabled:
+            monitor = require_mapping(uptime_kuma.get("monitor"), f"{service_path}.uptime_kuma.monitor")
+            name = validate_monitor(monitor, f"{service_path}.uptime_kuma.monitor")
+            if name in expected_monitors:
+                raise ValueError(f"duplicate Uptime Kuma monitor contract in health probe catalog: {name}")
+            expected_monitors[name] = monitor
+        elif "reason" in uptime_kuma:
+            require_str(uptime_kuma.get("reason"), f"{service_path}.uptime_kuma.reason")
+
+    actual_monitors = require_list(
+        json.loads(UPTIME_MONITORS_PATH.read_text()),
+        str(UPTIME_MONITORS_PATH),
+    )
+    actual_monitors_by_name: dict[str, dict[str, Any]] = {}
+    for index, monitor in enumerate(actual_monitors):
+        name = validate_monitor(monitor, f"config/uptime-kuma/monitors.json[{index}]")
+        if name in actual_monitors_by_name:
+            raise ValueError(f"duplicate monitor name in config/uptime-kuma/monitors.json: {name}")
+        actual_monitors_by_name[name] = monitor
+
+    if set(actual_monitors_by_name.keys()) != set(expected_monitors.keys()):
+        raise ValueError(
+            "config/uptime-kuma/monitors.json must match the enabled uptime_kuma monitors in config/health-probe-catalog.json"
+        )
+
+    for name, expected_monitor in expected_monitors.items():
+        if actual_monitors_by_name[name] != expected_monitor:
+            raise ValueError(
+                f"config/uptime-kuma/monitors.json monitor '{name}' does not match the health probe catalog contract"
+            )
 
 
 def validate_secret_catalog(secret_manifest: dict[str, Any]) -> None:
@@ -567,9 +708,7 @@ def validate_platform_finding_schema() -> None:
     required_fields = set(require_string_list(schema.get("required"), "docs/schema/platform-finding.json.required"))
     expected_fields = {"check", "severity", "summary", "details", "ts", "run_id"}
     if required_fields != expected_fields:
-        raise ValueError(
-            "docs/schema/platform-finding.json.required must match the ADR 0071 finding contract"
-        )
+        raise ValueError("docs/schema/platform-finding.json.required must match the ADR 0071 finding contract")
 
 
 def validate_identity_taxonomy(

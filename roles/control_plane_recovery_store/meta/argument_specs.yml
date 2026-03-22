@@ -1,0 +1,100 @@
+---
+argument_specs:
+  main:
+    short_description: Configure the backup-lv3 recovery store and recurring restore drills.
+    options:
+      control_plane_recovery_store_root:
+        type: path
+        required: true
+        description:
+          - Root directory for all control-plane recovery data on the backup store.
+      control_plane_recovery_store_user:
+        type: str
+        required: true
+        description:
+          - Service account that owns the recovery-store landing paths.
+      control_plane_recovery_store_group:
+        type: str
+        required: true
+        description:
+          - Group that owns the recovery-store landing paths.
+      control_plane_recovery_store_runtime_root:
+        type: path
+        required: true
+        description:
+          - Directory that stores runtime backup generations.
+      control_plane_recovery_store_controller_dir:
+        type: path
+        required: true
+        description:
+          - Directory that stores the mirrored controller recovery bundle.
+      control_plane_recovery_store_drill_dir:
+        type: path
+        required: true
+        description:
+          - Directory that stores restore-drill results.
+      control_plane_recovery_store_tmp_dir:
+        type: path
+        required: true
+        description:
+          - Temporary working directory used by restore drills.
+      control_plane_recovery_store_runtime_ssh_public_key_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local public key file trusted for runtime archive delivery.
+      control_plane_recovery_store_restore_drill_script:
+        type: path
+        required: true
+        description:
+          - Full path to the restore-drill verification script.
+      control_plane_recovery_store_restore_drill_service:
+        type: str
+        required: true
+        description:
+          - Systemd one-shot service name that runs the restore drill.
+      control_plane_recovery_store_restore_drill_timer:
+        type: str
+        required: true
+        description:
+          - Systemd timer name that schedules the restore drill.
+      control_plane_recovery_restore_drill_on_calendar:
+        type: str
+        required: true
+        description:
+          - Systemd calendar expression used for scheduled restore drills.
+      control_plane_recovery_store_restore_drill_state_file:
+        type: path
+        required: true
+        description:
+          - JSON file that records the latest restore-drill result.
+      control_plane_recovery_store_required_step_ca_paths:
+        type: list
+        elements: str
+        required: true
+        description:
+          - Required files expected inside the archived step-ca bundle.
+      control_plane_recovery_store_required_openbao_paths:
+        type: list
+        elements: str
+        required: true
+        description:
+          - Required files expected inside the archived OpenBao bundles.
+      control_plane_recovery_store_required_windmill_paths:
+        type: list
+        elements: str
+        required: true
+        description:
+          - Required files expected inside the archived Windmill bundles.
+      control_plane_recovery_store_required_mail_paths:
+        type: list
+        elements: str
+        required: true
+        description:
+          - Required files expected inside the archived mail-platform bundle.
+      control_plane_recovery_store_required_controller_bundle_paths:
+        type: list
+        elements: str
+        required: true
+        description:
+          - Required files expected inside the mirrored controller recovery bundle.

@@ -237,6 +237,162 @@ def evaluate_probe_result(probe: dict[str, Any], result: CommandResult) -> tuple
     return ok, detail
 
 
+def build_probe_execution_context(target: str) -> tuple[str, str]:
+    if target == "proxmox_florin":
+        return "host_ssh", "proxmox_florin"
+    return "guest_jump", target
+
+
+def join_argv(argv: list[str]) -> str:
+    return " ".join(shlex.quote(part) for part in argv)
+
+
+def build_http_probe_command(probe_definition: dict[str, Any]) -> str:
+    parts = [
+        "curl",
+        "-sS",
+        "--max-time",
+        str(probe_definition["timeout_seconds"]),
+        "-X",
+        probe_definition["method"],
+    ]
+    if not probe_definition.get("validate_tls", True):
+        parts.append("-k")
+    for key, value in probe_definition.get("headers", {}).items():
+        parts.extend(["-H", f"{key}: {value}"])
+    parts.extend([probe_definition["url"], "-w", "\\n__STATUS__=%{http_code}"])
+    return join_argv(parts)
+
+
+def build_tcp_probe_command(probe_definition: dict[str, Any]) -> str:
+    return (
+        "python3 - <<'PY'\n"
+        "import socket\n"
+        f"host = {probe_definition['host']!r}\n"
+        f"port = {probe_definition['port']!r}\n"
+        f"timeout = {probe_definition['timeout_seconds']!r}\n"
+        "with socket.create_connection((host, port), timeout=timeout):\n"
+        "    print('connected')\n"
+        "PY"
+    )
+
+
+def parse_http_probe_output(stdout: str) -> tuple[str, int | None]:
+    marker = "\n__STATUS__="
+    if marker not in stdout:
+        return stdout, None
+    body, _, status_text = stdout.rpartition(marker)
+    try:
+        return body, int(status_text.strip())
+    except ValueError:
+        return body, None
+
+
+def build_service_probes(catalog: dict[str, Any]) -> list[dict[str, Any]]:
+    if "probes" in catalog:
+        return catalog["probes"]
+    probes: list[dict[str, Any]] = []
+    for service_id, service in sorted(catalog["services"].items()):
+        for phase in ("liveness", "readiness"):
+            probes.append(
+                {
+                    "id": f"{service_id}-{phase}",
+                    "service_id": service_id,
+                    "runner": "structured",
+                    "target": service["owning_vm"],
+                    "phase": phase,
+                    "definition": service[phase],
+                }
+            )
+    return probes
+
+
+def execute_structured_probe(context: dict[str, Any], probe: dict[str, Any]) -> tuple[bool, dict[str, Any]]:
+    probe_definition = probe["definition"]
+    runner, target = build_probe_execution_context(probe["target"])
+    kind = probe_definition["kind"]
+
+    if kind == "systemd":
+        command = f"systemctl is-active {shlex.quote(probe_definition['unit'])}"
+        result = execute_runner(context, runner, target, command)
+        ok = result.returncode == 0 and result.stdout.strip() == probe_definition["expected_state"]
+        detail = {
+            "probe_id": probe["id"],
+            "service_id": probe["service_id"],
+            "probe_phase": probe["phase"],
+            "probe_kind": kind,
+            "runner": runner,
+            "target": target,
+            "command": result.command,
+            "returncode": result.returncode,
+            "stdout": truncate(result.stdout),
+            "stderr": truncate(result.stderr),
+            "ok": ok,
+        }
+        return ok, detail
+
+    if kind == "command":
+        command = join_argv(probe_definition["argv"])
+        result = execute_runner(context, runner, target, command)
+        ok = result.returncode == probe_definition.get("success_rc", 0)
+        detail = {
+            "probe_id": probe["id"],
+            "service_id": probe["service_id"],
+            "probe_phase": probe["phase"],
+            "probe_kind": kind,
+            "runner": runner,
+            "target": target,
+            "command": result.command,
+            "returncode": result.returncode,
+            "stdout": truncate(result.stdout),
+            "stderr": truncate(result.stderr),
+            "ok": ok,
+        }
+        return ok, detail
+
+    if kind == "http":
+        command = build_http_probe_command(probe_definition)
+        result = execute_runner(context, runner, target, command)
+        body, status_code = parse_http_probe_output(result.stdout)
+        ok = result.returncode == 0 and status_code in probe_definition["expected_status"]
+        detail = {
+            "probe_id": probe["id"],
+            "service_id": probe["service_id"],
+            "probe_phase": probe["phase"],
+            "probe_kind": kind,
+            "runner": runner,
+            "target": target,
+            "command": result.command,
+            "returncode": result.returncode,
+            "http_status": status_code,
+            "stdout": truncate(body),
+            "stderr": truncate(result.stderr),
+            "ok": ok,
+        }
+        return ok, detail
+
+    if kind == "tcp":
+        command = build_tcp_probe_command(probe_definition)
+        result = execute_runner(context, runner, target, command)
+        ok = result.returncode == 0
+        detail = {
+            "probe_id": probe["id"],
+            "service_id": probe["service_id"],
+            "probe_phase": probe["phase"],
+            "probe_kind": kind,
+            "runner": runner,
+            "target": target,
+            "command": result.command,
+            "returncode": result.returncode,
+            "stdout": truncate(result.stdout),
+            "stderr": truncate(result.stderr),
+            "ok": ok,
+        }
+        return ok, detail
+
+    raise ValueError(f"Unsupported structured probe kind: {kind}")
+
+
 def format_certificate_subject(subject: Any) -> str | None:
     if not subject:
         return None
@@ -286,15 +442,18 @@ def probe_tls_certificate(
 
 def check_service_health(context: dict[str, Any], run_id: str) -> dict[str, Any]:
     catalog = load_json(HEALTH_PROBE_CATALOG_PATH)
+    probes = build_service_probes(catalog)
     failures: list[dict[str, Any]] = []
     successes: list[dict[str, Any]] = []
 
     def run_probe(probe: dict[str, Any]) -> tuple[bool, dict[str, Any]]:
+        if probe.get("runner") == "structured":
+            return execute_structured_probe(context, probe)
         result = execute_runner(context, probe["runner"], probe["target"], probe["command"])
         return evaluate_probe_result(probe, result)
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
-        futures = [executor.submit(run_probe, probe) for probe in catalog["probes"]]
+        futures = [executor.submit(run_probe, probe) for probe in probes]
         for future in concurrent.futures.as_completed(futures):
             ok, detail = future.result()
             if ok:
@@ -306,17 +465,17 @@ def check_service_health(context: dict[str, Any], run_id: str) -> dict[str, Any]
 
     if failures:
         severity = "critical"
-        summary = f"{len(failures)} of {len(catalog['probes'])} service probes failed."
+        summary = f"{len(failures)} of {len(probes)} service probes failed."
     else:
         severity = "ok"
-        summary = f"All {len(catalog['probes'])} service probes passed."
+        summary = f"All {len(probes)} service probes passed."
     return make_finding(
         check="check-service-health",
         severity=severity,
         summary=summary,
         details=failures or successes,
         run_id=run_id,
-        outputs={"checked_probe_count": len(catalog["probes"])},
+        outputs={"checked_probe_count": len(probes)},
     )
 
 

@@ -1,0 +1,49 @@
+---
+argument_specs:
+  main:
+    short_description: Install and harden the PostgreSQL guest used by platform services.
+    options:
+      postgres_vm_packages:
+        type: list
+        elements: str
+        required: true
+        description:
+          - Packages required for the managed PostgreSQL guest.
+      postgres_vm_port:
+        type: int
+        required: true
+        description:
+          - TCP port exposed by PostgreSQL.
+      postgres_vm_postgresql_service_name:
+        type: str
+        required: true
+        description:
+          - Systemd service name used to manage PostgreSQL.
+      postgres_vm_nftables_config_file:
+        type: path
+        required: true
+        description:
+          - nftables configuration file rendered by the role.
+      postgres_vm_admin_role:
+        type: str
+        required: true
+        description:
+          - Administrative PostgreSQL role that must exist after convergence.
+      postgres_vm_listen_addresses:
+        type: list
+        elements: str
+        required: true
+        description:
+          - Address list configured in PostgreSQL for incoming connections.
+      postgres_vm_ssh_allowed_sources:
+        type: list
+        elements: str
+        required: true
+        description:
+          - Management source CIDRs allowed to SSH to the guest.
+      postgres_vm_client_allowed_sources:
+        type: list
+        elements: str
+        required: true
+        description:
+          - Client source CIDRs allowed to connect to PostgreSQL.

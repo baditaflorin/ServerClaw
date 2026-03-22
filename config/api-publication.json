@@ -83,6 +83,15 @@
       "approval_notes": "This is the sanctioned machine-facing mail automation API and must stay off the public edge."
     },
     {
+      "id": "mattermost-operator-api",
+      "title": "Mattermost operator API",
+      "lane": "api",
+      "lane_surface_ref": "mattermost-operator-api",
+      "publication_tier": "operator-only",
+      "reachability": "Reachable only through the Proxmox host Tailscale proxy on port 8066.",
+      "approval_notes": "Mattermost stays private-first and operator-only; future SSO may change authentication, not exposure."
+    },
+    {
       "id": "open-webui-operator-workbench",
       "title": "Open WebUI operator workbench",
       "lane": "api",
@@ -92,6 +101,15 @@
       "approval_notes": "This conversational operator surface stays private and requires approved operator credentials; do not publish it through the public edge."
     },
     {
+      "id": "platform-context-api",
+      "title": "Platform context API",
+      "lane": "api",
+      "lane_surface_ref": "platform-context-api",
+      "publication_tier": "operator-only",
+      "reachability": "Reachable only through the Proxmox host Tailscale proxy on port 8010 and requires the controller-local bearer token.",
+      "approval_notes": "This governed retrieval and tool API remains private-first and is intended for approved operators, Open WebUI global tools, and other authenticated internal agent runtimes."
+    },
+    {
       "id": "stalwart-mail-events",
       "title": "Stalwart mail event webhook",
       "lane": "event",
@@ -99,6 +117,15 @@
       "publication_tier": "internal-only",
       "reachability": "Reachable only from the private mail-platform stack on docker-runtime-lv3.",
       "approval_notes": "Event callbacks stay on private or container-local networks unless a future ADR approves explicit publication."
+    },
+    {
+      "id": "mattermost-incoming-webhooks",
+      "title": "Mattermost incoming webhooks",
+      "lane": "event",
+      "lane_surface_ref": "mattermost-incoming-webhooks",
+      "publication_tier": "internal-only",
+      "reachability": "Reachable on the private Mattermost runtime at docker-runtime-lv3:8065, with mirrored webhook ids retained under .local/mattermost for controlled routing.",
+      "approval_notes": "Treat these webhook ids as secret-bearing internal event sinks even though operator verification can traverse the Proxmox host Tailscale proxy."
     },
     {
       "id": "platform-finding-subjects",

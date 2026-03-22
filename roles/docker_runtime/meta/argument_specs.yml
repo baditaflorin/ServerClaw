@@ -1,0 +1,59 @@
+---
+argument_specs:
+  main:
+    short_description: Install and configure the Docker runtime on Debian guests.
+    options:
+      docker_runtime_prereq_packages:
+        type: list
+        elements: str
+        required: true
+        description:
+          - Packages required before the Docker repository can be configured.
+      docker_runtime_conflicting_packages:
+        type: list
+        elements: str
+        required: true
+        description:
+          - Packages that must be removed before installing the managed Docker engine.
+      docker_runtime_engine_packages:
+        type: list
+        elements: str
+        required: true
+        description:
+          - Managed Docker engine packages that should be installed.
+      docker_runtime_admin_users:
+        type: list
+        elements: str
+        required: true
+        description:
+          - Local users that should be added to the docker group.
+      docker_runtime_apt_key_url:
+        type: str
+        required: true
+        description:
+          - Upstream URL for the Docker APT signing key.
+      docker_runtime_apt_keyring_path:
+        type: path
+        required: true
+        description:
+          - Destination path for the Docker APT signing keyring.
+      docker_runtime_apt_repo_file:
+        type: path
+        required: true
+        description:
+          - Destination path for the Docker APT repository definition.
+      docker_runtime_apt_repo_uri:
+        type: str
+        required: true
+        description:
+          - Base URI for the Docker APT repository.
+      docker_runtime_apt_repo_component:
+        type: str
+        required: false
+        description:
+          - Repository component rendered into the APT source definition.
+      docker_runtime_daemon_config:
+        type: dict
+        required: false
+        description:
+          - Docker daemon configuration rendered into `/etc/docker/daemon.json`.

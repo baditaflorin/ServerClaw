@@ -12,15 +12,14 @@ table inet filter {
     type filter hook forward priority 0;
     policy drop;
     ct state related,established accept
-    iifname "{{ proxmox_internal_bridge }}" oifname "{{ proxmox_internal_bridge }}" accept
-    iifname "{{ proxmox_internal_bridge }}" oifname "{{ proxmox_wan_bridge }}" accept
-    iifname "tailscale0" oifname "{{ proxmox_internal_bridge }}" ip daddr {{ proxmox_internal_network }} accept
+    ip saddr {{ proxmox_internal_network }} accept
+    iifname "tailscale0" ip daddr {{ proxmox_internal_network }} accept
 {% if proxmox_public_ingress_tcp_forwards | default([]) | length > 0 %}
 {% for forward in proxmox_public_ingress_tcp_forwards %}
-    iifname "{{ proxmox_wan_bridge }}" oifname "{{ proxmox_internal_bridge }}" ip daddr {{ forward.target_host }} tcp dport {{ forward.target_port }} accept
+    iifname "{{ proxmox_wan_bridge }}" ip daddr {{ forward.target_host }} tcp dport {{ forward.target_port }} accept
 {% endfor %}
 {% elif proxmox_public_edge_ipv4 is defined and proxmox_public_ingress_tcp_ports is defined %}
-    iifname "{{ proxmox_wan_bridge }}" oifname "{{ proxmox_internal_bridge }}" ip daddr {{ proxmox_public_edge_ipv4 }} tcp dport { {{ proxmox_public_ingress_tcp_ports | join(', ') }} } accept
+    iifname "{{ proxmox_wan_bridge }}" ip daddr {{ proxmox_public_edge_ipv4 }} tcp dport { {{ proxmox_public_ingress_tcp_ports | join(', ') }} } accept
 {% endif %}
   }
 

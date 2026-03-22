@@ -1,10 +1,10 @@
 # ADR 0062: Ansible Role Composability And DRY Defaults
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.60.0
+- Implemented In Platform Version: not applicable (repo-only)
+- Implemented On: 2026-03-22
 - Date: 2026-03-22
 
 ## Context

@@ -13,9 +13,12 @@
 
 - name: Ensure nftables is installed
   ansible.builtin.apt:
-    name: nftables
+    name:
+      - nftables
+      - pve-firewall
     state: present
     update_cache: true
+    cache_valid_time: 3600
 
 - name: Enable IPv4 forwarding
   ansible.posix.sysctl:
@@ -47,6 +50,30 @@
     enabled: true
     state: started
 
+- name: Install Proxmox firewall conntrack helper
+  ansible.builtin.template:
+    src: proxmox-firewall-conntrack.sh.j2
+    dest: "{{ proxmox_network_conntrack_helper_path }}"
+    mode: "0755"
+
+- name: Install Proxmox firewall conntrack service
+  ansible.builtin.template:
+    src: proxmox-firewall-conntrack.service.j2
+    dest: "{{ proxmox_network_conntrack_service_file }}"
+    mode: "0644"
+  register: proxmox_network_conntrack_service
+
+- name: Reload systemd after conntrack service updates
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when: proxmox_network_conntrack_service.changed
+
+- name: Enable Proxmox firewall conntrack service
+  ansible.builtin.systemd:
+    name: "{{ proxmox_network_conntrack_service_file | basename }}"
+    enabled: true
+    state: started
+
 - name: Reload nftables rules
   ansible.builtin.command: nft -f /etc/nftables.conf
   when: proxmox_nftables.changed
@@ -67,3 +94,145 @@
 - name: Refresh facts after network changes
   ansible.builtin.setup:
   when: proxmox_interfaces.changed
+
+- name: Ensure Proxmox firewall configuration directory exists
+  ansible.builtin.file:
+    path: /etc/pve/firewall
+    state: directory
+    mode: "0755"
+
+- name: Read current guest configurations for firewall enablement
+  ansible.builtin.command: "qm config {{ item.vmid }}"
+  register: proxmox_network_guest_config
+  changed_when: false
+  loop: "{{ proxmox_guests }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Render per-guest Proxmox firewall policy to staging files
+  ansible.builtin.template:
+    src: vm.fw.j2
+    dest: "/root/.lv3-vm-{{ guest.vmid }}.fw"
+    mode: "0644"
+  loop: "{{ proxmox_guests }}"
+  loop_control:
+    loop_var: guest
+    label: "{{ guest.name }}"
+
+- name: Install per-guest Proxmox firewall policy
+  ansible.builtin.shell: |
+    set -euo pipefail
+    target=/etc/pve/firewall/{{ guest.vmid }}.fw
+    staged=/root/.lv3-vm-{{ guest.vmid }}.fw
+    if ! cmp -s "$staged" "$target" 2>/dev/null; then
+      cp "$staged" "$target"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: proxmox_network_guest_firewall_files
+  changed_when: "'changed' in proxmox_network_guest_firewall_files.stdout"
+  loop: "{{ proxmox_guests }}"
+  loop_control:
+    loop_var: guest
+    label: "{{ guest.name }}"
+
+- name: Enable Proxmox firewall on each guest net0 interface
+  ansible.builtin.command:
+    argv:
+      - qm
+      - set
+      - "{{ item.item.vmid | string }}"
+      - --net0
+      - >-
+        {{
+          (
+            item.stdout
+            | regex_search('(?m)^net0: .+$')
+            | regex_replace('^net0: ', '')
+          ) ~ ',firewall=1'
+        }}
+  register: proxmox_network_guest_firewall_interfaces
+  changed_when: true
+  when:
+    - "item.stdout is search('(?m)^net0: .+$')"
+    - "item.stdout is not search('(?m)^net0: .*firewall=1(?:,|$)')"
+  loop: "{{ proxmox_network_guest_config.results }}"
+  loop_control:
+    label: "{{ item.item.name }}"
+
+- name: Ensure Proxmox firewall service is enabled and started
+  ansible.builtin.systemd:
+    name: pve-firewall
+    enabled: true
+    state: started
+
+- name: Compile Proxmox firewall configuration
+  ansible.builtin.command: pve-firewall compile
+  changed_when: false
+
+- name: Restart Proxmox firewall after guest policy changes
+  ansible.builtin.command: pve-firewall restart
+  when: >
+    (
+      proxmox_network_guest_firewall_files.results | selectattr('changed') | list | length
+    ) > 0 or (
+      proxmox_network_guest_firewall_interfaces.results | default([]) | selectattr('changed') | list | length
+    ) > 0
+  changed_when: true
+
+- name: Ensure Proxmox firewall conntrack rule is active
+  ansible.builtin.command: "{{ proxmox_network_conntrack_helper_path }}"
+  changed_when: false
+
+- name: Check guest SSH reachability from the Proxmox host
+  ansible.builtin.command: "nc -z -w 2 {{ item.ipv4 }} 22"
+  register: proxmox_network_guest_ssh_reachability
+  failed_when: false
+  changed_when: false
+  loop: "{{ proxmox_guests }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Record guests that need restart after firewall activation
+  ansible.builtin.set_fact:
+    proxmox_network_guest_restart_vmids: "{{ (proxmox_network_guest_restart_vmids | default([])) + [item.item.vmid] }}"
+  when: >
+    (
+      proxmox_network_guest_firewall_interfaces.results | default([]) | selectattr('item.item.vmid', 'equalto', item.item.vmid) | selectattr('changed') | list | length
+    ) > 0 or item.rc != 0
+  loop: "{{ proxmox_network_guest_ssh_reachability.results }}"
+  loop_control:
+    label: "{{ item.item.name }}"
+
+- name: Stop guests that need firewall activation restart
+  ansible.builtin.command: "qm stop {{ item.vmid }} --skiplock 1"
+  register: proxmox_network_guest_stop
+  failed_when: proxmox_network_guest_stop.rc not in [0, 255]
+  changed_when: proxmox_network_guest_stop.rc == 0
+  when: item.vmid in (proxmox_network_guest_restart_vmids | default([]))
+  loop: "{{ proxmox_guests }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Start guests after firewall activation restart
+  ansible.builtin.command: "qm start {{ item.vmid }}"
+  register: proxmox_network_guest_start
+  failed_when: proxmox_network_guest_start.rc not in [0, 255]
+  changed_when: proxmox_network_guest_start.rc == 0
+  when: item.vmid in (proxmox_network_guest_restart_vmids | default([]))
+  loop: "{{ proxmox_guests }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Wait for guest SSH after firewall activation restart
+  ansible.builtin.wait_for:
+    host: "{{ item.ipv4 }}"
+    port: 22
+    timeout: 300
+    connect_timeout: 5
+    delay: 5
+  when: item.vmid in (proxmox_network_guest_restart_vmids | default([]))
+  loop: "{{ proxmox_guests }}"
+  loop_control:
+    label: "{{ item.name }}"

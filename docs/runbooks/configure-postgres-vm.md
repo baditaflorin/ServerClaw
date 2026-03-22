@@ -12,9 +12,9 @@ This runbook captures the branch-level automation path for provisioning and hard
 
 - PostgreSQL is private-only and is not published through the NGINX edge.
 - PostgreSQL is exposed only through a TCP proxy on the Proxmox host Tailscale IP on TCP `5432`.
-- The guest runs its own `nftables` policy with default-drop inbound behavior.
-- SSH is limited to the declared management source ranges.
-- PostgreSQL TCP access on the guest is limited to the Proxmox host internal gateway `10.10.10.1/32`, because the host-side Tailscale proxy terminates client connections and opens the upstream connection itself.
+- Guest packet filtering is enforced by the shared ADR 0067 network policy on both the Proxmox host and the guest-local `nftables` layer.
+- SSH is limited to the declared guest-management source ranges.
+- PostgreSQL TCP access on the guest is limited to the documented allow matrix, which currently permits the Proxmox host proxy path and `docker-runtime-lv3`.
 - Local administration uses the Linux `ops` account plus a matching PostgreSQL role over peer authentication.
 - `database.lv3.org` should resolve to the Proxmox host Tailscale IP, not the public NGINX edge.
 

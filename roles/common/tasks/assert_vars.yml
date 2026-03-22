@@ -1,0 +1,29 @@
+---
+- name: Validate common assert_vars entrypoint inputs
+  ansible.builtin.assert:
+    that:
+      - common_assert_vars_required | length > 0 or common_assert_vars_expressions | length > 0
+    fail_msg: "common.assert_vars requires at least one required variable name or one extra assertion expression."
+    quiet: true
+
+- name: Assert required variables are defined and non-empty
+  ansible.builtin.assert:
+    that:
+      - item in vars
+      - vars[item] is not none
+      - vars[item] is not string or (vars[item] | trim | length > 0)
+      - vars[item] is not mapping or (vars[item] | length > 0)
+      - vars[item] is not sequence or vars[item] is string or (vars[item] | length > 0)
+    fail_msg: "{{ common_assert_vars_fail_msg }}"
+    quiet: true
+  loop: "{{ common_assert_vars_required }}"
+  loop_control:
+    label: "{{ item }}"
+  when: common_assert_vars_required | length > 0
+
+- name: Assert extra validation expressions
+  ansible.builtin.assert:
+    that: "{{ common_assert_vars_expressions }}"
+    fail_msg: "{{ common_assert_vars_fail_msg }}"
+    quiet: true
+  when: common_assert_vars_expressions | length > 0

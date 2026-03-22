@@ -46,6 +46,7 @@ When the proposed ADRs are implemented together, the recommended communication p
 - [ADR 0049](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0049-private-first-api-publication-model.md): API publication policy
 - [ADR 0050](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0050-transactional-email-and-notification-profiles.md): governed sender profiles on top of ADR 0041
 - [ADR 0051](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0051-control-plane-backup-recovery-and-break-glass.md): recovery policy for the control plane
+- [Configure Control-Plane Recovery](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-control-plane-recovery.md): scheduled control-plane backup, restore-drill, and break-glass support path
 
 ## Recommended Rollout Order
 
@@ -64,7 +65,7 @@ When the proposed ADRs are implemented together, the recommended communication p
 6. API publication and mail profiles
    - implement ADR 0049 and ADR 0050 as services are exposed
 7. recovery
-   - implement ADR 0051 before treating the new control plane as durable
+   - ADR 0051 is now live with scheduled runtime exports on `docker-runtime-lv3`, a mirrored controller bundle on `backup-lv3`, and a passing recurring restore-drill path
 
 ## Placement Guidance
 
@@ -73,6 +74,7 @@ For the current single-node-first topology, the pragmatic initial placement is:
 - `docker-runtime-lv3` for `step-ca`, OpenBao, and Windmill
 - `postgres-lv3` for Windmill database state
 - the existing mail runtime defined by ADR 0041 for SMTP and mail API work
+- `backup-lv3` for control-plane recovery archives, controller bundle mirrors, and restore-drill evidence
 
 This keeps the first implementation consistent with the existing runtime boundary. If the control-plane blast radius becomes too wide later, these components can move to a dedicated security or control-plane VM in a follow-up ADR.
 
@@ -84,7 +86,7 @@ Future implementation work should be considered successful only when:
 - an agent can execute an approved routine workflow without direct root access
 - internal APIs are classified and not accidentally public
 - mail send works through documented sender profiles
-- restore guidance exists for the new control-plane components
+- restore guidance and recurring drill evidence exist for the new control-plane components
 
 ## Current ADR 0048 Surface
 
