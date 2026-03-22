@@ -103,3 +103,6 @@
       - "CREATE ROLE {{ postgres_vm_admin_role }} LOGIN CREATEDB CREATEROLE"
   when: postgres_vm_admin_role_check.stdout != "1"
   changed_when: true
+
+- name: Verify PostgreSQL health probes
+  ansible.builtin.import_tasks: verify.yml

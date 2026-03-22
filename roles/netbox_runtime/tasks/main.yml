@@ -299,3 +299,6 @@
   until: netbox_api_token_verify.status == 200
   changed_when: false
   no_log: true
+
+- name: Verify NetBox health probes
+  ansible.builtin.import_tasks: verify.yml

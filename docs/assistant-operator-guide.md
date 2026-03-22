@@ -65,7 +65,6 @@ The canonical identity classification and metadata contract lives in [docs/runbo
 9. Use `make workflows` or `make workflow-info WORKFLOW=<id>` when you need the canonical entry point instead of inferring it from prose.
 10. Use `make commands` or `make command-info COMMAND=<id>` before mutating live systems so the approval policy, expected inputs, and rollback guidance are explicit.
 11. After a real live apply, record the verification evidence in `receipts/live-applies/`.
-12. Use `make agent-tools` or `make agent-tool-info TOOL=<name>` before exposing or relying on a governed tool surface from Open WebUI or another MCP-capable runtime.
 
 At minimum, review whether these files need updates:
 
@@ -92,9 +91,6 @@ Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/M
 - `make lane-info LANE=api`
 - `make api-publication`
 - `make api-publication-info SURFACE=proxmox-management-api`
-- `make agent-tools`
-- `make agent-tool-info TOOL=get-platform-status`
-- `make export-mcp-tools`
 - `make validate`
 - `make validate-data-models`
 - `make generate-status-docs`
@@ -138,7 +134,6 @@ Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/M
 - mutating command contracts stay declared in `config/command-catalog.json`
 - control-plane communication surfaces stay declared in `config/control-plane-lanes.json`
 - API and webhook publication tiers stay declared in `config/api-publication.json`
-- governed agent tools stay declared in `config/agent-tool-registry.json`
 - controller-local secret prerequisites stay declared in `config/controller-local-secrets.json`
 - live applies keep structured evidence under `receipts/live-applies/`
 - shared controller-side Python primitives stay centralized in `scripts/controller_automation_toolkit.py`

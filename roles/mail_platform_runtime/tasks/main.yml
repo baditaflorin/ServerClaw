@@ -566,3 +566,6 @@
           | length
         ) == 0
     fail_msg: "One or more notification profiles are missing from the mail gateway catalog."
+
+- name: Verify mail platform health probes
+  ansible.builtin.import_tasks: verify.yml

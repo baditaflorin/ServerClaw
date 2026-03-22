@@ -703,7 +703,7 @@ workstreams:
   - id: adr-0064-health-probe-contracts
     adr: "0064"
     title: Health probe contracts for all services
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0064-health-probe-contracts
     worktree_path: ../proxmox_florin_server-health-probe-contracts

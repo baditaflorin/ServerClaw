@@ -278,3 +278,6 @@
           | sort
         ) == (mattermost_channels | map(attribute='webhook_key') | sort)
     fail_msg: "Mattermost bootstrap completed, but the webhook manifest does not match the desired team and channel set."
+
+- name: Run Mattermost health probe verification tasks
+  ansible.builtin.import_tasks: verify.yml

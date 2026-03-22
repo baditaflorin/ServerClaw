@@ -22,6 +22,7 @@ This is the required minimum gate before merging automation changes to `main`.
 - playbooks and roles pass the repo-managed `ansible-lint` policy
 - shell scripts pass `shellcheck`
 - repo-managed JSON artifacts pass `jq empty`
+- service-owning roles ship and import explicit `tasks/verify.yml` contracts
 - canonical repository data models pass schema validation
 - generated status documents are current for their canonical inputs
 - the workflow catalog, command catalog, control-plane lane catalog, and controller-local secret manifest cross-reference cleanly
@@ -49,6 +50,7 @@ make validate-ansible-lint
 make validate-shell
 make validate-json
 make validate-data-models
+make validate-health-probes
 make validate-generated-docs
 ```
 
@@ -63,6 +65,7 @@ make validate-generated-docs
 - [config/control-plane-lanes.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/control-plane-lanes.json)
 - [config/api-publication.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/api-publication.json)
 - [config/controller-local-secrets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/controller-local-secrets.json)
+- [config/health-probe-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/health-probe-catalog.json)
 - [config/uptime-kuma/monitors.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/uptime-kuma/monitors.json)
 - [receipts/live-applies](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/live-applies)
 

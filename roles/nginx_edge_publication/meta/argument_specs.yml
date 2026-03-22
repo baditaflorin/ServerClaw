@@ -1,0 +1,53 @@
+---
+argument_specs:
+  main:
+    short_description: Publish repo-managed public services through the NGINX edge VM.
+    options:
+      public_edge_service_topology:
+        type: dict
+        required: true
+        description:
+          - Canonical service topology used to derive edge publication state.
+      public_edge_certbot_email:
+        type: str
+        required: true
+        description:
+          - Email address registered with the ACME account.
+      public_edge_cert_name:
+        type: str
+        required: true
+        description:
+          - Certificate name used for the managed edge bundle.
+      public_edge_static_root:
+        type: path
+        required: true
+        description:
+          - Document root for repo-managed static public content.
+      public_edge_acme_root:
+        type: path
+        required: true
+        description:
+          - Webroot used for ACME HTTP-01 validation.
+      public_edge_probe_hostname:
+        type: str
+        required: true
+        description:
+          - Hostname used by the edge health probe contract.
+      public_edge_certificate_domains:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Domain set rendered into the edge certificate request.
+      public_edge_static_sites:
+        type: list
+        elements: dict
+        required: false
+        description:
+          - Static-site publication definitions derived from service topology.
+      public_edge_sites:
+        type: list
+        elements: dict
+        required: false
+        description:
+          - Full edge publication definitions rendered into NGINX.

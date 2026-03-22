@@ -78,3 +78,6 @@
     tasks_from: systemd_unit
   vars:
     common_systemd_unit_name: docker
+
+- name: Verify Docker runtime health probes
+  ansible.builtin.import_tasks: verify.yml

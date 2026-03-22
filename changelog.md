@@ -20,13 +20,13 @@ Platform impact:
 
 ## 0.61.0 - 2026-03-22
 
-- implemented ADR 0069 as a canonical governed tool registry with schema-backed `observe`, `report`, `execute`, and `approve` tool entries for agents and operators
-- added `scripts/agent_tool_registry.py`, MCP export wiring, controller-local governed tool dispatch, and per-call audit emission to `.local/tool-audit/agent-tool-calls.jsonl`
-- extended repository validation, operator documentation, and focused tests so tool definitions, catalog references, MCP export shape, and audit behavior all fail fast when they drift
+- implemented ADR 0064 in repository automation by adding explicit `tasks/verify.yml` health contracts across the current service-owning roles and by documenting the contract in a dedicated health-probe runbook
+- added `config/health-probe-catalog.json` as the machine-readable liveness or readiness inventory for every canonical service, including catalog-only host surfaces that do not yet have standalone service roles
+- aligned `config/uptime-kuma/monitors.json` with the catalog and extended `make validate` so probe-role coverage and Uptime Kuma drift fail before merge
 
 Platform impact:
 
-- no direct live platform change; this release adds a repo-managed governed tool surface and MCP export contract only
+- no direct live platform change in this release commit; the new probe contracts will take effect on the next live converge from `main`
 
 ## 0.60.0 - 2026-03-22
 

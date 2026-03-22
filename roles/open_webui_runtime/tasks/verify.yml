@@ -1,0 +1,33 @@
+---
+- name: Verify the Open WebUI HTTP surface
+  ansible.builtin.uri:
+    url: "{{ open_webui_internal_base_url }}"
+    method: GET
+    status_code: 200
+  register: open_webui_verify_http
+  retries: 24
+  delay: 5
+  until: open_webui_verify_http.status == 200
+  changed_when: false
+
+- name: Verify Open WebUI admin sign-in works
+  ansible.builtin.uri:
+    url: "{{ open_webui_internal_base_url }}/api/v1/auths/signin"
+    method: POST
+    body_format: json
+    body:
+      email: "{{ open_webui_admin_email }}"
+      password: "{{ open_webui_admin_password }}"
+    return_content: true
+    status_code: 200
+  register: open_webui_verify_admin_signin
+  changed_when: false
+  no_log: true
+
+- name: Assert Open WebUI sign-in returned the expected account
+  ansible.builtin.assert:
+    that:
+      - open_webui_verify_admin_signin.json.email == open_webui_admin_email
+      - (open_webui_verify_admin_signin.json.role | default('')) == 'admin'
+    fail_msg: "Open WebUI started, but the repo-managed admin bootstrap could not be verified."
+  no_log: true
