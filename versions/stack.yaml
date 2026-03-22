@@ -1,6 +1,6 @@
 schema_version: 1.0.0
 repo_version: 0.49.0
-platform_version: 0.25.0
+platform_version: 0.26.0
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -18,6 +18,9 @@ live_apply_evidence:
     openbao: 2026-03-22-adr-0043-openbao-live-apply
     windmill: 2026-03-22-adr-0044-windmill-live-apply
     short_lived_credentials_and_mtls: 2026-03-22-adr-0047-short-lived-credentials-live-apply
+    control_plane_lanes: 2026-03-22-adr-0045-control-plane-communication-lanes-live-apply
+    identity_taxonomy: 2026-03-22-adr-0046-identity-classes-live-apply
+    command_catalog: 2026-03-22-adr-0048-command-catalog-live-apply
 
 desired_state:
   host_id: proxmox_florin
@@ -219,6 +222,16 @@ observed_state:
     proxmox_api_automation_user_present: true
     proxmox_api_token_present: true
     proxmox_api_token_verified: true
+  control_plane:
+    reviewed_at: 2026-03-22
+    command_lane_host_ssh_certificate_verified: true
+    command_lane_guest_jump_verified: true
+    api_lane_proxmox_token_verified: true
+    api_lane_step_ca_health_verified: true
+    api_lane_mail_gateway_health_verified: true
+    message_lane_mail_submission_verified: true
+    message_lane_notification_endpoint: lv3-ops-email
+    event_lane_mail_webhook_verified: true
   identity_taxonomy:
     reviewed_at: 2026-03-22
     all_identities_documented: true
@@ -233,9 +246,18 @@ observed_state:
       - lv3-automation@pve
       - server@lv3.org
       - root
+    human_operator_access_verified: true
+    agent_identity_api_verified: true
+    service_identity_mailbox_verified: true
+    break_glass_restrictions_verified: true
     shared_credential_material:
       - ops-linux
       - proxmox-root-break-glass
+  command_catalog:
+    reviewed_at: 2026-03-22
+    catalog_validated: true
+    representative_contract: configure-network
+    representative_approval_gate_verified: true
   os:
     banner: Linux Debian-trixie-latest-amd64-base 6.17.13-2-pve
     kernel: 6.17.13-2-pve
@@ -488,5 +510,5 @@ release_tracks:
     current: 0.49.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.25.0
+    current: 0.26.0
     meaning: intended platform release for the actual server configuration

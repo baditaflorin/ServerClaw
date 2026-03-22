@@ -3,7 +3,7 @@
 - Status: Accepted
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.45.0
-- Implemented In Platform Version: not applicable (repo-only)
+- Implemented In Platform Version: 0.26.0
 - Implemented On: 2026-03-22
 - Date: 2026-03-22
 
@@ -46,3 +46,4 @@ Steady-state rules:
 - [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/Makefile) now exposes `make commands` and `make command-info COMMAND=<id>` so operators and assistants can inspect mutating command contracts without reconstructing them from prose.
 - Repository data-model validation now cross-checks the command catalog alongside the workflow catalog, receipts, control-plane lanes, and canonical stack state.
 - Operator usage is documented in [docs/runbooks/command-catalog-and-approval-gates.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/command-catalog-and-approval-gates.md).
+- Live verification from `main` on 2026-03-22 validated the command catalog and exercised the approval gate for `configure-network` as the representative recurring host mutation contract.

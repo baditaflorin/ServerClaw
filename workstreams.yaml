@@ -320,7 +320,7 @@ workstreams:
   - id: adr-0045-communication-lanes
     adr: "0045"
     title: Control-plane communication lanes
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0045-communication-lanes
     worktree_path: ../proxmox_florin_server-communication-lanes
@@ -335,12 +335,12 @@ workstreams:
       - SMTP submission
       - webhook flows
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0046-identity-classes
     adr: "0046"
     title: Identity classes for humans, services, agents, and break-glass
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0046-identity-classes
     worktree_path: ../proxmox_florin_server-identity-classes
@@ -353,7 +353,7 @@ workstreams:
       - workflow identities
       - mail senders
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0047-short-lived-creds
     adr: "0047"
@@ -379,7 +379,7 @@ workstreams:
   - id: adr-0048-command-catalog
     adr: "0048"
     title: Command catalog and approval gates
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0048-command-catalog
     worktree_path: ../proxmox_florin_server-command-catalog
@@ -394,7 +394,7 @@ workstreams:
       - workflow execution
       - runbooks
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0049-private-api-publication
     adr: "0049"

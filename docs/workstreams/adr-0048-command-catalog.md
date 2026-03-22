@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0048](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0048-command-catalog-and-approval-gates.md)
 - Title: Safe execution contracts for remote mutation
-- Status: merged
+- Status: live_applied
 - Branch: `codex/adr-0048-command-catalog`
 - Worktree: `../proxmox_florin_server-command-catalog`
 - Owner: codex
@@ -30,8 +30,9 @@
 
 ## Expected Live Surfaces
 
-- a smaller blast radius for agent-driven mutation
-- reviewable execution contracts instead of shell folklore
+- recurring live mutation governed through named command contracts instead of free-form shell folklore
+- approval attached to command ids, requester classes, and receipt planning rather than ad hoc shell review
+- operator and assistant entrypoints routed through `make commands` and `make command-info`
 
 ## Verification
 
@@ -40,14 +41,15 @@
 - `scripts/command_catalog.py --check-approval --command configure-network --requester-class human_operator --approver-classes human_operator --validation-passed --preflight-passed --receipt-planned`
 - `ruby -e 'require "yaml"; YAML.load_file("/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml"); puts "workstreams.yaml OK"'`
 - `test -f /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0048-command-catalog-and-approval-gates.md`
+- `make validate-data-models`
 
 ## Merge Criteria
 
 - the ADR makes named command contracts the steady-state model
 - dry-run and evidence expectations are explicit
 
-## Notes For The Next Assistant
+## Live Apply Notes
 
-- the repo now has a machine-readable command-contract layer separate from the broader workflow catalog
-- use this ADR before granting broader agent mutation rights
-- this workstream is implemented on `main` as a repo-only change; no live platform apply is pending
+- Live apply completed on `2026-03-22` from `main`.
+- Validation confirmed the command catalog is current on `main`, and the representative `configure-network` contract still resolves to the documented workflow, approval policy, verification path, and receipt requirement.
+- Approval-gate evaluation confirmed the intended steady-state rule: recurring live mutation proceeds only when the requester and approver classes, validation, preflight, and receipt-planning conditions are satisfied.

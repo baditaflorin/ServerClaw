@@ -60,6 +60,8 @@ The private OpenBao secret authority is now live on `docker-runtime-lv3`, with a
 
 Windmill is now live on `docker-runtime-lv3` and reachable privately at `http://100.118.189.95:8005`, with the repo-managed `lv3` workspace and seeded healthcheck script verified end to end.
 
+The control-plane governance layer is now live on `main`: command, API, message, and event lanes are verified against the active host and mail surfaces, the current human/service/agent/break-glass principals have been re-reviewed against the identity taxonomy, and recurring live mutation is expected to use the named command catalog plus approval gates.
+
 <!-- BEGIN GENERATED: platform-status -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_status_docs.py). Do not edit this block by hand.
 
@@ -67,7 +69,7 @@ Windmill is now live on `docker-runtime-lv3` and reachable privately at `http://
 | Field | Value |
 | --- | --- |
 | Repository version | `0.49.0` |
-| Platform version | `0.25.0` |
+| Platform version | `0.26.0` |
 | Observed check date | `2026-03-22` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -102,7 +104,10 @@ Template VM: `9000` `debian13-cloud-template`
 | --- | --- |
 | `backup_vm` | `2026-03-22-adr-0029-backup-vm-live-apply` |
 | `build_telemetry` | `2026-03-22-adr-0028-build-telemetry-live-apply` |
+| `command_catalog` | `2026-03-22-adr-0048-command-catalog-live-apply` |
+| `control_plane_lanes` | `2026-03-22-adr-0045-control-plane-communication-lanes-live-apply` |
 | `docker_runtime` | `2026-03-22-adr-0023-docker-runtime-live-apply` |
+| `identity_taxonomy` | `2026-03-22-adr-0046-identity-classes-live-apply` |
 | `mail_platform` | `2026-03-22-adr-0041-email-platform-live-apply` |
 | `monitoring` | `2026-03-22-adr-0011-monitoring-live-apply` |
 | `openbao` | `2026-03-22-adr-0043-openbao-live-apply` |
@@ -401,7 +406,7 @@ Current values on `main`:
 | Field | Value |
 | --- | --- |
 | Repository version | `0.49.0` |
-| Platform version | `0.25.0` |
+| Platform version | `0.26.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -459,10 +464,10 @@ This repository is intentionally opinionated:
 | `0042` | step-ca for SSH and internal TLS | `live_applied` | [adr-0042-step-ca.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0042-step-ca.md) |
 | `0043` | OpenBao for secrets, transit, and dynamic credentials | `live_applied` | [adr-0043-openbao.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0043-openbao.md) |
 | `0044` | Windmill for agent and operator workflows | `live_applied` | [adr-0044-windmill.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0044-windmill.md) |
-| `0045` | Control-plane communication lanes | `merged` | [adr-0045-communication-lanes.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0045-communication-lanes.md) |
-| `0046` | Identity classes for humans, services, agents, and break-glass | `merged` | [adr-0046-identity-classes.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0046-identity-classes.md) |
+| `0045` | Control-plane communication lanes | `live_applied` | [adr-0045-communication-lanes.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0045-communication-lanes.md) |
+| `0046` | Identity classes for humans, services, agents, and break-glass | `live_applied` | [adr-0046-identity-classes.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0046-identity-classes.md) |
 | `0047` | Short-lived credentials and internal mTLS | `live_applied` | [adr-0047-short-lived-creds.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0047-short-lived-creds.md) |
-| `0048` | Command catalog and approval gates | `merged` | [adr-0048-command-catalog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0048-command-catalog.md) |
+| `0048` | Command catalog and approval gates | `live_applied` | [adr-0048-command-catalog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0048-command-catalog.md) |
 | `0049` | Private-first API publication model | `merged` | [adr-0049-private-api-publication.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0049-private-api-publication.md) |
 | `0050` | Transactional email and notification profiles | `merged` | [adr-0050-notification-profiles.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0050-notification-profiles.md) |
 | `0051` | Control-plane backup, recovery, and break-glass | `merged` | [adr-0051-control-plane-recovery.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0051-control-plane-recovery.md) |
