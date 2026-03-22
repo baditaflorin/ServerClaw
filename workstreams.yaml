@@ -236,6 +236,7 @@ workstreams:
     ready_to_merge: false
     live_applied: false
 
+<<<<<<< HEAD
   - id: adr-0041-email-platform-live
     adr: "0041"
     title: Dockerized mail platform live rollout
@@ -247,10 +248,41 @@ workstreams:
     depends_on:
       - adr-0041-email-platform
       - adr-0011-monitoring
+=======
+  - id: adr-0042-step-ca
+    adr: "0042"
+    title: step-ca for SSH and internal TLS
+    status: merged
+    owner: codex
+    branch: codex/adr-0042-step-ca
+    worktree_path: ../proxmox_florin_server-step-ca
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0042-step-ca.md
+    depends_on:
+      - adr-0014-tailscale
+    conflicts_with: []
+    shared_surfaces:
+      - docker-runtime-lv3
+      - SSH trust
+      - internal TLS
+      - certificate issuance
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0043-openbao
+    adr: "0043"
+    title: OpenBao for secrets, transit, and dynamic credentials
+    status: merged
+    owner: codex
+    branch: codex/adr-0043-openbao
+    worktree_path: ../proxmox_florin_server-openbao
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0043-openbao.md
+    depends_on:
+>>>>>>> codex/adr-agentic-secure-control-plane
       - adr-0023-docker-runtime
     conflicts_with: []
     shared_surfaces:
       - docker-runtime-lv3
+<<<<<<< HEAD
       - monitoring-lv3
       - playbooks/mail-platform.yml
       - roles/proxmox_network
@@ -258,3 +290,171 @@ workstreams:
       - mail.lv3.org
     ready_to_merge: false
     live_applied: true
+=======
+      - secret distribution
+      - transit operations
+      - automation credentials
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0044-windmill
+    adr: "0044"
+    title: Windmill for agent and operator workflows
+    status: merged
+    owner: codex
+    branch: codex/adr-0044-windmill
+    worktree_path: ../proxmox_florin_server-windmill
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0044-windmill.md
+    depends_on:
+      - adr-0026-postgres-vm
+      - adr-0043-openbao
+    conflicts_with: []
+    shared_surfaces:
+      - docker-runtime-lv3
+      - postgres-lv3
+      - workflow APIs
+      - webhook entry points
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0045-communication-lanes
+    adr: "0045"
+    title: Control-plane communication lanes
+    status: merged
+    owner: codex
+    branch: codex/adr-0045-communication-lanes
+    worktree_path: ../proxmox_florin_server-communication-lanes
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0045-communication-lanes.md
+    depends_on:
+      - adr-0014-tailscale
+      - adr-0041-email-platform
+    conflicts_with: []
+    shared_surfaces:
+      - SSH
+      - HTTPS APIs
+      - SMTP submission
+      - webhook flows
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0046-identity-classes
+    adr: "0046"
+    title: Identity classes for humans, services, agents, and break-glass
+    status: merged
+    owner: codex
+    branch: codex/adr-0046-identity-classes
+    worktree_path: ../proxmox_florin_server-identity-classes
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0046-identity-classes.md
+    depends_on: []
+    conflicts_with: []
+    shared_surfaces:
+      - SSH users
+      - API principals
+      - workflow identities
+      - mail senders
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0047-short-lived-creds
+    adr: "0047"
+    title: Short-lived credentials and internal mTLS
+    status: merged
+    owner: codex
+    branch: codex/adr-0047-short-lived-creds
+    worktree_path: ../proxmox_florin_server-short-lived-creds
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0047-short-lived-creds.md
+    depends_on:
+      - adr-0042-step-ca
+      - adr-0043-openbao
+      - adr-0046-identity-classes
+    conflicts_with: []
+    shared_surfaces:
+      - SSH certificates
+      - API tokens
+      - internal HTTPS
+      - service authentication
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0048-command-catalog
+    adr: "0048"
+    title: Command catalog and approval gates
+    status: merged
+    owner: codex
+    branch: codex/adr-0048-command-catalog
+    worktree_path: ../proxmox_florin_server-command-catalog
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0048-command-catalog.md
+    depends_on:
+      - adr-0044-windmill
+      - adr-0046-identity-classes
+    conflicts_with: []
+    shared_surfaces:
+      - remote commands
+      - live-apply receipts
+      - workflow execution
+      - runbooks
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0049-private-api-publication
+    adr: "0049"
+    title: Private-first API publication model
+    status: merged
+    owner: codex
+    branch: codex/adr-0049-private-api-publication
+    worktree_path: ../proxmox_florin_server-private-api-publication
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0049-private-api-publication.md
+    depends_on:
+      - adr-0045-communication-lanes
+      - adr-0047-short-lived-creds
+    conflicts_with: []
+    shared_surfaces:
+      - NGINX edge
+      - private API listeners
+      - admin surfaces
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0050-notification-profiles
+    adr: "0050"
+    title: Transactional email and notification profiles
+    status: merged
+    owner: codex
+    branch: codex/adr-0050-notification-profiles
+    worktree_path: ../proxmox_florin_server-notification-profiles
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0050-notification-profiles.md
+    depends_on:
+      - adr-0041-email-platform
+      - adr-0046-identity-classes
+    conflicts_with: []
+    shared_surfaces:
+      - Stalwart
+      - SMTP submission
+      - notifications
+      - agent reports
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0051-control-plane-recovery
+    adr: "0051"
+    title: Control-plane backup, recovery, and break-glass
+    status: merged
+    owner: codex
+    branch: codex/adr-0051-control-plane-recovery
+    worktree_path: ../proxmox_florin_server-control-plane-recovery
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0051-control-plane-recovery.md
+    depends_on:
+      - adr-0029-backup-vm
+      - adr-0042-step-ca
+      - adr-0043-openbao
+      - adr-0044-windmill
+      - adr-0041-email-platform
+    conflicts_with: []
+    shared_surfaces:
+      - PBS backups
+      - recovery metadata
+      - break-glass procedures
+      - control-plane state
+    ready_to_merge: false
+    live_applied: false
+>>>>>>> codex/adr-agentic-secure-control-plane
