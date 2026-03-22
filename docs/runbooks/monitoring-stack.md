@@ -11,6 +11,7 @@ This runbook converges the dedicated monitoring VM `140` at `10.10.10.40` with:
 - a provisioned overview dashboard, `LV3 Platform Overview`
 - a provisioned detail dashboard for each managed VM
 - guest-side NGINX telemetry from `nginx-lv3`
+- guest-side Docker container telemetry from `docker-runtime-lv3`
 - guest-side Docker build count and duration telemetry from `docker-build-lv3`
 - a Proxmox external metric server that writes into InfluxDB over the private network
 
@@ -35,6 +36,7 @@ make converge-monitoring
 9. Converges shared guest observability plumbing for service-level Telegraf on managed guests that ship into InfluxDB.
 10. Converges `nginx-lv3` with loopback-only `stub_status` as a thin extension on top of that shared guest observability framework.
 11. Converges `docker-build-lv3` with a repo-managed Docker CLI wrapper plus Telegraf shipping build count and duration events as another thin extension on the same framework.
+12. Converges `docker-runtime-lv3` with Telegraf's Docker input plugin so container CPU, memory, network, status, and health data land in InfluxDB and the managed runtime detail dashboard.
 
 ## Operator Access Flow
 
@@ -101,6 +103,18 @@ Verify docker build count and duration telemetry is present in InfluxDB:
 
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'sudo influx query --host http://127.0.0.1:8086 --org lv3 --token "$(sudo cat /etc/lv3/monitoring/influxdb-operator.token)" '\''from(bucket: "proxmox") |> range(start: -15m) |> filter(fn: (r) => r._measurement == "docker_builds" and r.host == "docker-build-lv3" and (r._field == "count" or r._field == "duration_ms" or r._field == "start_time_ns" or r._field == "end_time_ns")) |> limit(n: 20)'\'''
+```
+
+Verify docker runtime container telemetry is present in InfluxDB:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'sudo influx query --host http://127.0.0.1:8086 --org lv3 --token "$(sudo cat /etc/lv3/monitoring/influxdb-operator.token)" '\''from(bucket: "proxmox") |> range(start: -15m) |> filter(fn: (r) => r.host == "docker-runtime-lv3" and (r._measurement == "docker_container_status" or r._measurement == "docker_container_cpu" or r._measurement == "docker_container_mem" or r._measurement == "docker_container_net" or r._measurement == "docker_container_health")) |> limit(n: 20)'\'''
+```
+
+Verify Telegraf has Docker socket access on the runtime guest:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'systemctl is-active telegraf && id -nG telegraf'
 ```
 
 Verify local nginx `stub_status` on the guest:

@@ -10,6 +10,17 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 - use this section on `main` for merged notes that have not yet been cut into a numbered release
 
+## 0.38.0 - 2026-03-22
+
+- implemented ADR 0040 to expose Docker runtime container detail through the existing monitoring stack
+- added `roles/docker_runtime_observability` so `docker-runtime-lv3` ships Telegraf Docker input metrics into the shared InfluxDB path
+- extended the managed `LV3 docker-runtime-lv3 Detail` dashboard with running-container counts, aggregate CPU and memory, per-container CPU and memory, network throughput, and a container snapshot table
+- updated the monitoring runbook, repository map, and workstream registry to describe the runtime telemetry convergence path
+
+Platform impact:
+
+- no direct live platform change; this release adds repo-managed runtime container telemetry and dashboard definitions that still need live convergence from `main`
+
 ## 0.37.0 - 2026-03-22
 
 - implemented ADR 0036 to add structured live-apply receipts and verification evidence to the repository

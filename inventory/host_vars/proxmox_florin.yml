@@ -217,7 +217,7 @@ lv3_service_topology:
     exposure_model: informational-only
     observability:
       guest_dashboard: true
-      service_telemetry: false
+      service_telemetry: true
     dns:
       managed: true
       visibility: public
