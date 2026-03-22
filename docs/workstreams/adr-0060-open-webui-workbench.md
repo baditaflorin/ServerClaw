@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0060](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0060-open-webui-for-operator-and-agent-workbench.md)
 - Title: Internal conversational workbench for operators and supervised agents
-- Status: ready
+- Status: live_applied
 - Branch: `codex/adr-0060-open-webui-workbench`
 - Worktree: `../proxmox_florin_server-open-webui-workbench`
 - Owner: codex
@@ -25,7 +25,14 @@
 
 - `docs/adr/0060-open-webui-for-operator-and-agent-workbench.md`
 - `docs/workstreams/adr-0060-open-webui-workbench.md`
+- `docs/runbooks/configure-open-webui.md`
 - `docs/runbooks/plan-visual-agent-operations.md`
+- `playbooks/open-webui.yml`
+- `roles/open_webui_runtime/`
+- `config/workflow-catalog.json`
+- `config/command-catalog.json`
+- `config/control-plane-lanes.json`
+- `config/controller-local-secrets.json`
 - `workstreams.yaml`
 
 ## Expected Live Surfaces
@@ -35,8 +42,11 @@
 
 ## Verification
 
-- `ruby -e 'require "yaml"; YAML.load_file("/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml"); puts "workstreams.yaml OK"'`
-- `test -f /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0060-open-webui-for-operator-and-agent-workbench.md`
+- `make syntax-check-open-webui`
+- `make converge-open-webui`
+- `curl -I http://100.118.189.95:8008/`
+- `curl -s -X POST http://100.118.189.95:8008/api/v1/auths/signin -H "Content-Type: application/json" -d "{\"email\":\"ops@lv3.org\",\"password\":\"$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/admin-password.txt)\"}"`
+- `ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml docker-runtime-lv3 -m shell -a 'docker compose --env-file /opt/open-webui/open-webui.env --file /opt/open-webui/docker-compose.yml ps' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
 
 ## Merge Criteria
 
@@ -46,3 +56,9 @@
 ## Notes For The Next Assistant
 
 - start with read-heavy capabilities before exposing mutating tools
+
+## Live Apply Notes
+
+- Live apply completed on `2026-03-22`.
+- `docker-runtime-lv3` now serves Open WebUI from `/opt/open-webui` and the Proxmox host publishes it privately on `http://100.118.189.95:8008`.
+- Repo-managed bootstrap auth is verified for `ops@lv3.org`, and the admin session shows web search, image generation, code interpreter, and direct tool servers disabled by policy.

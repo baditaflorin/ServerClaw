@@ -42,8 +42,8 @@ The target outcome is a platform where humans and agents can:
    - introduce chat and event distribution for approvals, notifications, and handoffs
    - priority: ADR 0057, ADR 0058
 6. add the conversational workbench
-   - expose read-heavy agent tooling before mutating actions
-   - priority: ADR 0060
+   - ADR 0060 is now live as a private Open WebUI workbench on `docker-runtime-lv3`
+   - keep it read-heavy until ADR 0069 and ADR 0070 add governed tools and repo-grounded context
 7. tighten application-level failure visibility
    - add exception tracking when internal apps and workflows are ready to emit structured failures
    - priority: ADR 0061

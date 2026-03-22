@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.49.0
-platform_version: 0.25.0
+repo_version: 0.50.0
+platform_version: 0.26.0
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -18,6 +18,7 @@ live_apply_evidence:
     openbao: 2026-03-22-adr-0043-openbao-live-apply
     windmill: 2026-03-22-adr-0044-windmill-live-apply
     short_lived_credentials_and_mtls: 2026-03-22-adr-0047-short-lived-credentials-live-apply
+    open_webui: 2026-03-22-adr-0060-open-webui-live-apply
 
 desired_state:
   host_id: proxmox_florin
@@ -430,6 +431,20 @@ observed_state:
       - agents/controller/proxmox-api-primary
       - agents/controller/monitoring
       - services/mail-platform/runtime
+  open_webui:
+    runtime_vm: 10.10.10.20
+    host_tailscale_proxy_url: http://100.118.189.95:8008
+    container_running: true
+    healthcheck_verified: true
+    bootstrap_admin_email: ops@lv3.org
+    bootstrap_admin_login_verified: true
+    password_auth_enabled: true
+    oidc_enabled: false
+    approved_provider_env_present: false
+    web_search_permission: false
+    image_generation_permission: false
+    code_interpreter_permission: false
+    direct_tool_servers_permission: false
   mail:
     domain: lv3.org
     hostname: mail.lv3.org
@@ -485,8 +500,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.49.0
+    current: 0.50.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.25.0
+    current: 0.26.0
     meaning: intended platform release for the actual server configuration

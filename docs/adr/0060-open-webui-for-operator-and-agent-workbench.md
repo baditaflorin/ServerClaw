@@ -1,10 +1,10 @@
 # ADR 0060: Open WebUI For Operator And Agent Workbench
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.50.0
+- Implemented In Platform Version: 0.26.0
+- Implemented On: 2026-03-22
 - Date: 2026-03-22
 
 ## Context
@@ -47,3 +47,17 @@ Initial use cases:
 - The workbench must not expose unrestricted root shell or arbitrary network egress.
 - It is an orchestration and review surface, not the source of truth for infrastructure design.
 - Any mutating action still follows the command-catalog, approval, and evidence rules.
+
+## Sources
+
+- [Open WebUI environment configuration](https://docs.openwebui.com/reference/env-configuration/)
+- [Open WebUI SSO and OAuth troubleshooting](https://docs.openwebui.com/troubleshooting/sso/)
+- [Open WebUI MCP extensibility](https://docs.openwebui.com/features/extensibility/mcp/)
+- [Open WebUI releases](https://github.com/open-webui/open-webui/releases)
+
+## Implementation Notes
+
+- The repo now deploys Open WebUI through [playbooks/open-webui.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/open-webui.yml) and [roles/open_webui_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/open_webui_runtime) on `docker-runtime-lv3`.
+- [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json), [config/command-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/command-catalog.json), and [config/control-plane-lanes.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/control-plane-lanes.json) now treat Open WebUI as a named private operator surface with an explicit converge workflow and approval contract.
+- Controller-local bootstrap artifacts live under `.local/open-webui/`, while approved model connector settings remain optional and local-only through `provider.env`.
+- The live platform now serves Open WebUI privately at `http://100.118.189.95:8008` through the Proxmox host Tailscale proxy, with repo-managed local admin bootstrap verified and direct tool servers, web search, image generation, and code interpreter disabled by policy.

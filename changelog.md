@@ -8,6 +8,19 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.50.0 - 2026-03-22
+
+- applied ADR 0060 live by converging a private Open WebUI runtime on `docker-runtime-lv3` and publishing it through the Proxmox host Tailscale proxy on port `8008`
+- added repo-managed Open WebUI automation, workflow and command contracts, controller-local bootstrap secret handling, and an operator runbook for the workbench
+- locked the initial workbench posture down to local bootstrap auth with future OIDC support, disabled public signup and community sharing, and disabled web search, image generation, code interpreter, and direct tool servers by policy
+- updated ADR 0060, workstream state, generated status docs, and live-apply evidence to reflect the new private operator workbench
+
+Platform impact:
+
+- Open WebUI is now live privately at `http://100.118.189.95:8008`
+- controller-local bootstrap artifacts now exist under `.local/open-webui/`
+- the first operator-and-agent workbench now exists, but governed tools and repo-grounded RAG remain follow-up work under ADR 0069 and ADR 0070
+
 ## 0.49.0 - 2026-03-22
 
 - applied ADR 0047 live from `main` by proving short-lived `step-ca` SSH certificates for routine operator access and by enforcing internal mTLS on the private OpenBao API

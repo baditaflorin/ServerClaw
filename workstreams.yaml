@@ -624,7 +624,7 @@ workstreams:
   - id: adr-0060-open-webui-workbench
     adr: "0060"
     title: Open WebUI for operator and agent workbench
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/adr-0060-open-webui-workbench
     worktree_path: ../proxmox_florin_server-open-webui-workbench
@@ -641,7 +641,7 @@ workstreams:
       - governed tools
       - operator sessions
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0061-glitchtip-failure-signals
     adr: "0061"
