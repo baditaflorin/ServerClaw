@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0025](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0025-dedicated-postgresql-vm-baseline.md)
 - Title: Dedicated PostgreSQL VM baseline
-- Status: in_progress
+- Status: live_applied
 - Branch: `codex/adr-0025-postgres-vm`
 - Worktree: `../proxmox_florin_server-postgres-vm`
 - Owner: codex
@@ -42,6 +42,7 @@
 - `postgresql` service enabled on the guest
 - `nftables` enforcing deny-by-default inbound policy on the guest
 - remote PostgreSQL access closed until client CIDRs are declared
+- local peer administration available through `ops` and `postgres`
 
 ## Verification
 
@@ -56,6 +57,7 @@
 - guest provisioning inventory includes the PostgreSQL VM
 - the PostgreSQL convergence playbook is idempotent
 - the guest firewall and authentication policy are documented
+- live verification confirms that undeclared sources cannot reach TCP `5432`
 - protected integration files remain untouched
 
 ## Notes For The Next Assistant
@@ -63,4 +65,5 @@
 - remote database clients are intentionally blocked until `postgres_vm_client_allowed_sources` is populated
 - do not add public DNS or ingress forwarding for PostgreSQL without a separate ADR
 - do not bump `VERSION`, `changelog.md`, `README.md`, or `versions/stack.yaml` on this branch
-- this workstream is branch-complete but not yet live-applied
+- live apply completed on `2026-03-22` from this workstream branch
+- the branch is ready to merge back to `main`
