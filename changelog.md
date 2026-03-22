@@ -8,7 +8,7 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
-## 0.56.0 - 2026-03-22
+## 0.57.0 - 2026-03-22
 
 - applied ADR 0057 live by provisioning the Mattermost PostgreSQL backend on `postgres-lv3`, converging the private Mattermost runtime on `docker-runtime-lv3`, and publishing operator access through the Proxmox host Tailscale proxy on port `8066`
 - hardened the Mattermost automation so bootstrap handles Mattermost's actual local `mmctl` JSON behavior, seeds the managed LV3 channels and incoming webhooks idempotently, and configures Grafana alert routing through the repo-managed webhook manifest
@@ -19,6 +19,19 @@ Platform impact:
 - Mattermost is now live on `docker-runtime-lv3` and reachable privately at `http://100.118.189.95:8066`
 - the repo-managed `lv3` team now includes the `platform-alerts`, `workflow-events`, `change-approvals`, `agent-handoffs`, and `mail-ops` collaboration channels with mirrored incoming webhook URLs under `.local/mattermost/incoming-webhooks.json`
 - Grafana on `monitoring-lv3` now carries the `lv3-mattermost-platform-alerts` contact point for repo-managed alert routing into Mattermost
+
+## 0.56.0 - 2026-03-22
+
+- applied ADR 0055 live from `main` by converging Portainer on `docker-runtime-lv3`, publishing it privately through the Proxmox host Tailscale proxy on port `9444`, and persisting controller-local bootstrap auth under `.local/portainer`
+- added a dedicated Portainer playbook, runtime role, runbook, controller-local secret manifest entries, and workflow plus command catalog metadata so the runtime console and governed wrapper rerun cleanly from an integration worktree
+- added the repo-managed `portainer-manage` wrapper to prove read-mostly container inspection, log access, and bounded restart actions without falling back to broad Docker shell access
+- updated ADR 0055, workstream state, canonical stack state, and live-apply evidence to mark the private Portainer operations surface as implemented
+
+Platform impact:
+
+- Portainer CE is now live on `docker-runtime-lv3` and reachable privately at `https://100.118.189.95:9444`
+- controller-local Portainer bootstrap and auth material now lives under `.local/portainer/` for repo-managed verification and governed runtime actions
+- Docker runtime inspection, container log reads, and bounded emergency restarts now have a documented Portainer-backed control surface alongside the existing repo-managed converge paths
 
 ## 0.55.0 - 2026-03-22
 
@@ -54,18 +67,6 @@ Platform impact:
 - ntopng is now running on `proxmox_florin` and is reachable privately at `http://100.118.189.95:3001`
 - operators now have a repo-managed flow-visibility surface for `vmbr10` private-network traffic and `vmbr0` edge context without introducing nProbe or public publication
 - the Proxmox host firewall now explicitly allows the ntopng proxy port only from declared management sources
-
-## 0.52.0 - 2026-03-22
-
-- applied ADR 0050 live by provisioning distinct operator, platform, and agent sender profiles on the managed mail platform instead of reusing one global outbound credential
-- added scoped notification-profile mailbox passwords and mail-gateway API keys, plus gateway-side profile enforcement and per-profile delivery counters
-- documented the new sender-profile operating model, added controller-local secret inventory entries, and added a focused profile verification playbook for live delivery checks
-
-Platform impact:
-
-- `alerts@lv3.org`, `platform@lv3.org`, and `agents@lv3.org` now exist as managed sender identities on `docker-runtime-lv3`
-- each sender profile now has its own scoped mail-gateway API key and mailbox password mirrored under `.local/mail-platform/profiles/`
-- the mail gateway now enforces profile-bound send identity and records per-profile request and delivery counters
 
 ## 0.51.0 - 2026-03-22
 

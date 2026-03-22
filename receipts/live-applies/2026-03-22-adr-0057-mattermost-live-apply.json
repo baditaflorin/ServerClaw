@@ -5,7 +5,7 @@
   "recorded_on": "2026-03-22",
   "recorded_by": "codex",
   "source_commit": "34d0fe0f94e8b82857218bb78dadd37449e25de0",
-  "repo_version_context": "0.56.0",
+  "repo_version_context": "0.57.0",
   "workflow_id": "converge-mattermost",
   "adr": "0057",
   "summary": "Applied the private Mattermost ChatOps surface live on docker-runtime-lv3, provisioned its PostgreSQL backend on postgres-lv3, published it through the Proxmox host Tailscale proxy, and verified channel bootstrap, webhook artifacts, and Grafana alert routing end to end.",
