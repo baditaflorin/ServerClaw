@@ -2,6 +2,7 @@ stream_over_http_enabled: true
 
 server:
   http_listen_port: {{ monitoring_tempo_http_port }}
+  grpc_listen_port: {{ monitoring_tempo_grpc_port }}
   log_level: info
 
 query_frontend:
@@ -28,29 +29,29 @@ ingester:
 
 compactor:
   compaction:
-    block_retention: {{ monitoring_tempo_trace_retention }}
+    block_retention: "{{ monitoring_tempo_trace_retention }}"
 
 metrics_generator:
   registry:
     external_labels:
       source: tempo
-      cluster: {{ monitoring_otel_resource_cluster }}
-      environment: {{ monitoring_otel_resource_environment }}
+      cluster: "{{ monitoring_otel_resource_cluster }}"
+      environment: "{{ monitoring_otel_resource_environment }}"
   storage:
-    path: {{ monitoring_tempo_data_dir }}/generator/wal
+    path: "{{ monitoring_tempo_data_dir }}/generator/wal"
     remote_write:
       - url: "{{ monitoring_prometheus_remote_write_url }}"
         send_exemplars: true
   traces_storage:
-    path: {{ monitoring_tempo_data_dir }}/generator/traces
+    path: "{{ monitoring_tempo_data_dir }}/generator/traces"
 
 storage:
   trace:
     backend: local
     wal:
-      path: {{ monitoring_tempo_data_dir }}/wal
+      path: "{{ monitoring_tempo_data_dir }}/wal"
     local:
-      path: {{ monitoring_tempo_data_dir }}/blocks
+      path: "{{ monitoring_tempo_data_dir }}/blocks"
 
 overrides:
   defaults:
