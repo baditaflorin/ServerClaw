@@ -56,6 +56,14 @@ Agents can query the Loki label for audit events without SSH access to reconstru
 - Every mutation surface must be instrumented; missing a surface means incomplete audit data until it is added.
 - The audit log must not contain secrets or PII; instrumentation code must scrub before emitting.
 
+## Implementation Notes
+
+- This workstream branch adds the canonical schema at [docs/schema/mutation-audit-event.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/schema/mutation-audit-event.json), a shared controller-side emitter at [scripts/mutation_audit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/mutation_audit.py), and the Ansible callback at [callback_plugins/mutation_audit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/callback_plugins/mutation_audit.py).
+- Command-catalog approval checks now emit structured events, and the Windmill converge seeds a reusable `f/lv3/mutation_audit` helper into the managed workspace.
+- Initial Ansible mutation coverage is wired for the current Windmill and OpenBao converge tasks through explicit `mutation` tags and stable action ids.
+- Live host-side sink placement at `/var/log/platform/mutation-audit.jsonl` and Loki forwarding remain pending the ADR 0052 rollout and the follow-on live apply for this workstream.
+- OpenBao still writes its native audit-device file separately; mapping that raw feed into the shared mutation stream is part of the remaining live rollout work.
+
 ## Boundaries
 
 - Read-only operations (queries, health checks, status reads) are not audited at this layer.

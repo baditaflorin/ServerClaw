@@ -27,8 +27,11 @@
 ## Expected Repo Surfaces
 
 - `docs/schema/mutation-audit-event.json`
+- `scripts/mutation_audit.py`
 - `callback_plugins/mutation_audit.py`
 - `docs/runbooks/mutation-audit-log.md`
+- `config/windmill/scripts/lv3-mutation-audit.py`
+- `ansible.cfg`
 - updated Windmill workflow template
 - updated command-catalog scripts
 - `docs/adr/0066-structured-mutation-audit-log.md`
@@ -43,6 +46,11 @@
 
 ## Verification
 
+- `scripts/mutation_audit.py --validate-schema`
+- `scripts/mutation_audit.py --emit --actor-class operator --actor-id ops --surface manual --action document.manual_change --target proxmox_florin --outcome success --evidence-ref docs/runbooks/mutation-audit-log.md`
+- `scripts/command_catalog.py --check-approval --command configure-network --requester-class human_operator --approver-classes human_operator --validation-passed --preflight-passed --receipt-planned --audit-correlation-id test-0066 --audit-actor-id ops`
+- `make syntax-check-openbao`
+- `make syntax-check-windmill`
 - trigger a test Ansible play with a `mutation`-tagged task and verify the event appears in Loki
 - `test -f /var/log/platform/mutation-audit.jsonl` on the host after first emission
 
@@ -56,3 +64,4 @@
 
 - the callback plugin must handle Ansible failure gracefully and not suppress the original error
 - scrubbing of variable values tagged `no_log: true` is inherited from Ansible's existing behaviour; verify this is working before merging
+- the current branch implements controller-side JSONL emission by default under `.local/state/mutation-audit/`; move the sink to `/var/log/platform/` only as part of the live rollout

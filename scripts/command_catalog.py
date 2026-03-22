@@ -2,10 +2,12 @@
 
 import argparse
 import json
+import os
 import sys
 from typing import Final
 
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path
+from mutation_audit import build_event, emit_event_best_effort
 from workflow_catalog import (
     ALLOWED_LIVE_IMPACTS,
     load_secret_manifest,
@@ -19,6 +21,12 @@ COMMAND_CATALOG_PATH = repo_path("config", "command-catalog.json")
 SUPPORTED_SCHEMA_VERSION: Final[str] = "1.0.0"
 ALLOWED_IDENTITY_CLASSES = {"human_operator", "service_identity", "agent", "break_glass"}
 ALLOWED_SCOPES = {"proxmox_host", "guest_runtime", "host_and_guest", "external_service"}
+MUTATION_AUDIT_ACTOR_CLASS_MAP = {
+    "human_operator": "operator",
+    "service_identity": "service",
+    "agent": "agent",
+    "break_glass": "operator",
+}
 
 
 def load_command_catalog() -> dict:
@@ -253,6 +261,28 @@ def split_csv(value: str) -> list[str]:
 
 
 def evaluate_approval(
+def emit_approval_audit_event(
+    *,
+    command_id: str,
+    requester_class: str,
+    outcome: str,
+    correlation_id: str | None,
+    actor_id: str | None,
+) -> None:
+    event = build_event(
+        actor_class=MUTATION_AUDIT_ACTOR_CLASS_MAP.get(requester_class, "operator"),
+        actor_id=actor_id or os.environ.get("USER") or "unknown",
+        surface="command-catalog",
+        action="approve.command",
+        target=command_id,
+        outcome=outcome,
+        correlation_id=correlation_id,
+        evidence_ref=f"config/command-catalog.json#commands.{command_id}",
+    )
+    emit_event_best_effort(event, context=f"command approval '{command_id}'", stderr=sys.stderr)
+
+
+def evaluate_approval(
     command_catalog: dict,
     workflow_catalog: dict,
     command_id: str,
@@ -265,6 +295,7 @@ def evaluate_approval(
     self_approve: bool,
     break_glass: bool,
 ) -> dict[str, object]:
+ ) -> dict[str, object]:
     contract = command_catalog["commands"].get(command_id)
     if contract is None:
         raise ValueError(f"Unknown command contract: {command_id}")
@@ -330,6 +361,8 @@ def check_approval(
     receipt_planned: bool,
     self_approve: bool,
     break_glass: bool,
+    audit_correlation_id: str | None,
+    audit_actor_id: str | None,
 ) -> int:
     try:
         verdict = evaluate_approval(
@@ -352,6 +385,13 @@ def check_approval(
         print(f"Command approval REJECTED: {command_id}")
         for reason in verdict["reasons"]:
             print(f"  - {reason}")
+        emit_approval_audit_event(
+            command_id=command_id,
+            requester_class=requester_class,
+            outcome="rejected",
+            correlation_id=audit_correlation_id,
+            actor_id=audit_actor_id,
+        )
         return 1
 
     print(f"Command approval OK: {command_id}")
@@ -360,6 +400,13 @@ def check_approval(
     print(f"  workflow: {verdict['workflow_id']}")
     print(f"  entrypoint: {verdict['entrypoint']}")
     print(f"  receipt_required: {verdict['receipt_required']}")
+    emit_approval_audit_event(
+        command_id=command_id,
+        requester_class=requester_class,
+        outcome="success",
+        correlation_id=audit_correlation_id,
+        actor_id=audit_actor_id,
+    )
     return 0
 
 
@@ -406,6 +453,8 @@ def main() -> int:
         action="store_true",
         help="Indicate that the request is attempting break-glass execution.",
     )
+    parser.add_argument("--audit-correlation-id", help="Override the mutation audit correlation id.")
+    parser.add_argument("--audit-actor-id", help="Override the mutation audit actor id.")
     args = parser.parse_args()
 
     try:
@@ -440,6 +489,8 @@ def main() -> int:
             receipt_planned=args.receipt_planned,
             self_approve=args.self_approve,
             break_glass=args.break_glass,
+            audit_correlation_id=args.audit_correlation_id,
+            audit_actor_id=args.audit_actor_id,
         )
 
     if args.command:

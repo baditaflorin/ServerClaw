@@ -1,6 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "LV3 mutation audit event",
+  "$id": "https://lv3.org/schema/mutation-audit-event.json",
+  "title": "LV3 Mutation Audit Event",
   "type": "object",
   "additionalProperties": false,
   "required": [

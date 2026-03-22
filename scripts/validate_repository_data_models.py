@@ -15,6 +15,7 @@ from controller_automation_toolkit import REPO_ROOT, emit_cli_error, load_json, 
 from control_plane_lanes import load_lane_catalog
 from live_apply_receipts import RECEIPTS_DIR, iter_receipt_paths, validate_receipts
 from generate_platform_vars import PLATFORM_VARS_PATH, PORT_KEYS, build_platform_vars
+from mutation_audit import load_mutation_audit_schema, validate_mutation_audit_schema
 from workflow_catalog import (
     load_secret_manifest,
     load_workflow_catalog,
@@ -1477,6 +1478,7 @@ def validate_repository_data_models() -> int:
     lane_catalog, _ = load_lane_catalog()
     api_publication_catalog, _, _ = load_api_publication_catalog()
     validate_api_publication_catalog(api_publication_catalog, lane_catalog)
+    validate_mutation_audit_schema(load_mutation_audit_schema())
     validate_receipts()
     validate_uptime_monitors()
     host_vars_context = validate_host_vars()

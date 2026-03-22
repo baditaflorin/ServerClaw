@@ -52,6 +52,21 @@ scripts/command_catalog.py \
   --receipt-planned
 ```
 
+The approval check also emits a structured mutation-audit event when ADR 0066 sink settings are configured. Override the default event identity when needed:
+
+```bash
+scripts/command_catalog.py \
+  --check-approval \
+  --command configure-network \
+  --requester-class human_operator \
+  --approver-classes human_operator \
+  --validation-passed \
+  --preflight-passed \
+  --receipt-planned \
+  --audit-correlation-id change-20260322-001 \
+  --audit-actor-id ops
+```
+
 ## Operating Rule
 
 Before a recurring live mutation is executed:

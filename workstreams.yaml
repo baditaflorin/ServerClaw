@@ -758,6 +758,8 @@ workstreams:
     conflicts_with: []
     shared_surfaces:
       - callback_plugins/
+      - docs/schema/mutation-audit-event.json
+      - scripts/mutation_audit.py
       - Loki mutation-audit label
       - Windmill workflow template
       - command-catalog scripts

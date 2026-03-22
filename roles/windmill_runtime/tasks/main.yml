@@ -98,6 +98,9 @@
   no_log: true
 
 - name: Render the Windmill environment file
+  vars:
+    mutation_audit_action: render.windmill_env
+    mutation_audit_target: windmill-runtime
   ansible.builtin.template:
     src: windmill.env.j2
     dest: "{{ windmill_env_file }}"
@@ -105,16 +108,26 @@
     group: root
     mode: "0600"
   no_log: true
+  tags:
+    - mutation
 
 - name: Render the Windmill compose file
+  vars:
+    mutation_audit_action: render.windmill_compose
+    mutation_audit_target: windmill-runtime
   ansible.builtin.template:
     src: docker-compose.yml.j2
     dest: "{{ windmill_compose_file }}"
     owner: root
     group: root
     mode: "0644"
+  tags:
+    - mutation
 
 - name: Pull the Windmill images
+  vars:
+    mutation_audit_action: pull.windmill_images
+    mutation_audit_target: windmill-runtime
   ansible.builtin.command:
     argv:
       - docker
@@ -131,8 +144,13 @@
     'Pulling' in windmill_pull.stdout
     or 'Downloaded newer image' in windmill_pull.stdout
     or 'Pull complete' in windmill_pull.stdout
+  tags:
+    - mutation
 
 - name: Start the Windmill stack
+  vars:
+    mutation_audit_action: start.windmill_stack
+    mutation_audit_target: windmill-runtime
   ansible.builtin.command:
     argv:
       - docker
@@ -151,6 +169,8 @@
     'Creating' in windmill_up.stdout
     or 'Recreating' in windmill_up.stdout
     or 'Starting' in windmill_up.stdout
+  tags:
+    - mutation
 
 - name: Wait for Windmill to listen locally
   ansible.builtin.include_role:
@@ -187,6 +207,10 @@
   no_log: true
 
 - name: Create the Windmill workspace
+  vars:
+    mutation_audit_action: create.windmill_workspace
+    mutation_audit_target: windmill-workspace
+    mutation_audit_emit_on_success: true
   ansible.builtin.uri:
     url: "{{ windmill_private_base_url }}/api/workspaces/create"
     method: POST
@@ -209,8 +233,14 @@
     )
   when: not (windmill_workspace_exists.json | default(false) | bool)
   no_log: true
+  tags:
+    - mutation
 
 - name: Sync repo-managed Windmill scripts
+  vars:
+    mutation_audit_action: sync.windmill_scripts
+    mutation_audit_target: windmill-workspace
+    mutation_audit_emit_on_success: true
   ansible.builtin.uri:
     url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id | urlencode }}/scripts/create"
     method: POST
@@ -241,6 +271,8 @@
   failed_when: false
   changed_when: false
   no_log: true
+  tags:
+    - mutation
 
 - name: Check whether repo-managed Windmill schedules already exist
   ansible.builtin.uri:

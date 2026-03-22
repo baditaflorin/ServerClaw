@@ -129,9 +129,8 @@ def validate_event(event: dict[str, Any]) -> dict[str, Any]:
     require_str(event.get("correlation_id"), "mutation audit event.correlation_id")
     require_str(event.get("evidence_ref"), "mutation audit event.evidence_ref", allow_empty=True)
 
-    unexpected = sorted(
-        set(event.keys()) - {"ts", "actor", "surface", "action", "target", "outcome", "correlation_id", "evidence_ref"}
-    )
+<<<<<<< HEAD
+    unexpected = sorted(set(event.keys()) - {"ts", "actor", "surface", "action", "target", "outcome", "correlation_id", "evidence_ref"})
     if unexpected:
         raise ValueError(f"mutation audit event contains unsupported keys: {', '.join(unexpected)}")
     return event

@@ -138,6 +138,9 @@
     mode: "0644"
 
 - name: Issue or renew the OpenBao external TLS certificate
+  vars:
+    mutation_audit_action: issue.openbao_tls_certificate
+    mutation_audit_target: openbao-runtime
   ansible.builtin.shell: |
     set -euo pipefail
     if [ -s "{{ openbao_tls_server_cert_host_file }}" ] && \
@@ -168,8 +171,13 @@
   register: openbao_tls_certificate_issue
   changed_when: "'changed' in openbao_tls_certificate_issue.stdout"
   no_log: true
+  tags:
+    - mutation
 
 - name: Render OpenBao policy files
+  vars:
+    mutation_audit_action: render.openbao_policies
+    mutation_audit_target: openbao-runtime
   ansible.builtin.template:
     src: "{{ item.src }}"
     dest: "{{ openbao_policy_dir }}/{{ item.name }}.hcl"
@@ -177,24 +185,39 @@
     group: root
     mode: "0640"
   loop: "{{ openbao_policies }}"
+  tags:
+    - mutation
 
 - name: Render OpenBao server configuration
+  vars:
+    mutation_audit_action: render.openbao_config
+    mutation_audit_target: openbao-runtime
   ansible.builtin.template:
     src: openbao.hcl.j2
     dest: "{{ openbao_config_file }}"
     owner: root
     group: root
     mode: "0644"
+  tags:
+    - mutation
 
 - name: Render the OpenBao Compose file
+  vars:
+    mutation_audit_action: render.openbao_compose
+    mutation_audit_target: openbao-runtime
   ansible.builtin.template:
     src: docker-compose.yml.j2
     dest: "{{ openbao_compose_file }}"
     owner: root
     group: root
     mode: "0644"
+  tags:
+    - mutation
 
 - name: Pull the OpenBao image
+  vars:
+    mutation_audit_action: pull.openbao_image
+    mutation_audit_target: openbao-runtime
   ansible.builtin.command:
     argv:
       - docker
@@ -209,6 +232,8 @@
     'Downloaded newer image' in openbao_pull.stdout
     or 'Pull complete' in openbao_pull.stdout
     or 'Pulling' in openbao_pull.stdout
+  tags:
+    - mutation
 
 - name: Check whether the named OpenBao container already exists
   ansible.builtin.command:
@@ -233,6 +258,9 @@
   when: openbao_container_inspect.rc == 0
 
 - name: Start the OpenBao stack
+  vars:
+    mutation_audit_action: start.openbao_stack
+    mutation_audit_target: openbao-runtime
   ansible.builtin.command:
     argv:
       - docker
@@ -249,6 +277,8 @@
     'Creating' in openbao_up.stdout
     or 'Recreating' in openbao_up.stdout
     or 'Starting' in openbao_up.stdout
+  tags:
+    - mutation
 
 - name: Wait for OpenBao to listen on loopback
   ansible.builtin.wait_for:
@@ -284,6 +314,10 @@
     - openbao_init_payload_local.stat.exists
 
 - name: Initialize OpenBao
+  vars:
+    mutation_audit_action: initialize.openbao
+    mutation_audit_target: openbao-runtime
+    mutation_audit_emit_on_success: true
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/init"
     method: POST
@@ -299,6 +333,8 @@
   register: openbao_init_response
   changed_when: true
   no_log: true
+  tags:
+    - mutation
 
 - name: Persist the OpenBao init payload locally
   ansible.builtin.copy:
@@ -377,6 +413,10 @@
   no_log: true
 
 - name: Enable userpass auth
+  vars:
+    mutation_audit_action: enable.openbao_userpass
+    mutation_audit_target: openbao-runtime
+    mutation_audit_emit_on_success: true
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/auth/userpass"
     method: POST
@@ -389,8 +429,14 @@
     status_code: 204
   when: "'userpass/' not in openbao_auth_methods.json"
   no_log: true
+  tags:
+    - mutation
 
 - name: Enable approle auth
+  vars:
+    mutation_audit_action: enable.openbao_approle
+    mutation_audit_target: openbao-runtime
+    mutation_audit_emit_on_success: true
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/auth/approle"
     method: POST
@@ -403,6 +449,8 @@
     status_code: 204
   when: "'approle/' not in openbao_auth_methods.json"
   no_log: true
+  tags:
+    - mutation
 
 - name: Discover enabled secret engines
   ansible.builtin.uri:
@@ -415,6 +463,10 @@
   no_log: true
 
 - name: Enable kv-v2 secrets engine
+  vars:
+    mutation_audit_action: enable.openbao_kv
+    mutation_audit_target: openbao-runtime
+    mutation_audit_emit_on_success: true
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/mounts/kv"
     method: POST
@@ -429,8 +481,14 @@
     status_code: 204
   when: "'kv/' not in openbao_secret_engines.json"
   no_log: true
+  tags:
+    - mutation
 
 - name: Enable transit secrets engine
+  vars:
+    mutation_audit_action: enable.openbao_transit
+    mutation_audit_target: openbao-runtime
+    mutation_audit_emit_on_success: true
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/mounts/transit"
     method: POST
@@ -443,8 +501,14 @@
     status_code: 204
   when: "'transit/' not in openbao_secret_engines.json"
   no_log: true
+  tags:
+    - mutation
 
 - name: Enable database secrets engine
+  vars:
+    mutation_audit_action: enable.openbao_database
+    mutation_audit_target: openbao-runtime
+    mutation_audit_emit_on_success: true
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/mounts/{{ openbao_database_mount_path }}"
     method: POST
@@ -457,6 +521,8 @@
     status_code: 204
   when: "(openbao_database_mount_path ~ '/') not in openbao_secret_engines.json"
   no_log: true
+  tags:
+    - mutation
 
 - name: Read rendered policy contents
   ansible.builtin.slurp:
@@ -479,6 +545,10 @@
   no_log: true
 
 - name: Upsert OpenBao policies
+  vars:
+    mutation_audit_action: upsert.openbao_policies
+    mutation_audit_target: openbao-runtime
+    mutation_audit_emit_on_success: true
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/policies/acl/{{ item.item.item.name }}"
     method: PUT
@@ -493,8 +563,14 @@
     item.status == 404
     or (item.json.data.policy | default('')) != (item.item.content | b64decode)
   no_log: true
+  tags:
+    - mutation
 
 - name: Upsert OpenBao userpass users
+  vars:
+    mutation_audit_action: upsert.openbao_userpass_users
+    mutation_audit_target: openbao-runtime
+    mutation_audit_emit_on_success: true
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/auth/userpass/users/{{ item.username }}"
     method: POST
@@ -509,8 +585,14 @@
     status_code: 204
   loop: "{{ openbao_userpass_users }}"
   no_log: true
+  tags:
+    - mutation
 
 - name: Upsert OpenBao AppRoles
+  vars:
+    mutation_audit_action: upsert.openbao_approles
+    mutation_audit_target: openbao-runtime
+    mutation_audit_emit_on_success: true
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/auth/approle/role/{{ item.name }}"
     method: POST
@@ -527,6 +609,8 @@
     status_code: 204
   loop: "{{ openbao_approles }}"
   no_log: true
+  tags:
+    - mutation
 
 - name: Read current OpenBao transit keys
   ansible.builtin.uri:
@@ -543,6 +627,10 @@
   no_log: true
 
 - name: Create missing OpenBao transit keys
+  vars:
+    mutation_audit_action: create.openbao_transit_keys
+    mutation_audit_target: openbao-runtime
+    mutation_audit_emit_on_success: true
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/transit/keys/{{ item.item }}"
     method: POST
@@ -555,8 +643,14 @@
   loop: "{{ openbao_transit_key_statuses.results }}"
   when: item.status == 404
   no_log: true
+  tags:
+    - mutation
 
 - name: Configure the PostgreSQL dynamic credential backend
+  vars:
+    mutation_audit_action: configure.openbao_database_backend
+    mutation_audit_target: openbao-runtime
+    mutation_audit_emit_on_success: true
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/{{ openbao_database_mount_path }}/config/{{ openbao_database_name }}"
     method: POST
@@ -572,8 +666,14 @@
       password_authentication: "{{ openbao_database_password_authentication }}"
     status_code: 204
   no_log: true
+  tags:
+    - mutation
 
 - name: Configure OpenBao database roles
+  vars:
+    mutation_audit_action: configure.openbao_database_roles
+    mutation_audit_target: openbao-runtime
+    mutation_audit_emit_on_success: true
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/{{ openbao_database_mount_path }}/roles/{{ item.name }}"
     method: POST
@@ -588,6 +688,8 @@
       max_ttl: "{{ item.max_ttl }}"
     status_code: 204
   loop: "{{ openbao_database_roles }}"
+  tags:
+    - mutation
 
 - name: Read current controller Proxmox API secret
   ansible.builtin.uri:
@@ -676,6 +778,10 @@
   no_log: true
 
 - name: Store controller Proxmox API secret in OpenBao
+  vars:
+    mutation_audit_action: store.openbao_controller_secret
+    mutation_audit_target: openbao-runtime
+    mutation_audit_emit_on_success: true
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/kv/data/{{ openbao_seeded_secret_paths.controller_proxmox_api }}"
     method: POST
@@ -689,8 +795,14 @@
     openbao_controller_proxmox_api_current.status == 404
     or (openbao_controller_proxmox_api_current.json.data.data | default({})) != openbao_controller_proxmox_api_secret
   no_log: true
+  tags:
+    - mutation
 
 - name: Store controller monitoring tokens in OpenBao
+  vars:
+    mutation_audit_action: store.openbao_monitoring_secret
+    mutation_audit_target: openbao-runtime
+    mutation_audit_emit_on_success: true
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/kv/data/{{ openbao_seeded_secret_paths.controller_monitoring }}"
     method: POST
@@ -704,8 +816,14 @@
     openbao_controller_monitoring_current.status == 404
     or (openbao_controller_monitoring_current.json.data.data | default({})) != openbao_controller_monitoring_secret
   no_log: true
+  tags:
+    - mutation
 
 - name: Store mail platform runtime secrets in OpenBao
+  vars:
+    mutation_audit_action: store.openbao_mail_platform_secret
+    mutation_audit_target: openbao-runtime
+    mutation_audit_emit_on_success: true
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/kv/data/{{ openbao_seeded_secret_paths.mail_platform_runtime }}"
     method: POST
@@ -719,6 +837,8 @@
     openbao_mail_platform_runtime_current.status == 404
     or (openbao_mail_platform_runtime_current.json.data.data | default({})) != openbao_mail_platform_runtime_secret
   no_log: true
+  tags:
+    - mutation
 
 - name: Load the rotatable secret catalog and controller secret manifest
   ansible.builtin.set_fact:
@@ -826,6 +946,10 @@
   no_log: true
 
 - name: Generate fresh short-lived AppRole secret IDs
+  vars:
+    mutation_audit_action: generate.openbao_approle_secret_ids
+    mutation_audit_target: openbao-runtime
+    mutation_audit_emit_on_success: true
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/auth/approle/role/{{ item.name }}/secret-id"
     method: POST
@@ -838,6 +962,8 @@
   loop: "{{ openbao_approles }}"
   register: openbao_generated_secret_ids
   no_log: true
+  tags:
+    - mutation
 
 - name: Persist fresh short-lived AppRole artifacts locally
   ansible.builtin.copy:

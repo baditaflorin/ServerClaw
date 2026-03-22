@@ -741,6 +741,7 @@
         "Makefile",
         "playbooks/windmill.yml",
         "config/windmill/scripts/lv3-healthcheck.py",
+        "config/windmill/scripts/lv3-mutation-audit.py",
         "roles/windmill_postgres/tasks/main.yml",
         "roles/windmill_runtime/tasks/main.yml",
         "roles/proxmox_tailscale_proxy/tasks/main.yml"
