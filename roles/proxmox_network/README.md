@@ -1,6 +1,6 @@
 # proxmox_network
 
-Applies the Proxmox host bridge, NAT, and nftables network baseline.
+Applies the Proxmox host bridge, NAT, nftables, and per-VM firewall baseline.
 
-Inputs: management interface settings, bridge names, internal network values, and ingress-forwarding topology.
-Outputs: `/etc/network/interfaces`, `/etc/nftables.conf`, and active forwarding/NAT state.
+Inputs: management interface settings, bridge names, internal network values, ingress-forwarding topology, guest inventory, and canonical `network_policy` rules.
+Outputs: `/etc/network/interfaces`, `/etc/nftables.conf`, `/etc/pve/firewall/<vmid>.fw`, and active forwarding/NAT plus Proxmox VM firewall state.

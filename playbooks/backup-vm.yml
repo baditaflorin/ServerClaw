@@ -52,6 +52,7 @@
       ansible.builtin.setup:
 
   roles:
+    - role: linux_guest_firewall
     - role: backup_vm
       tags:
         - backup-vm

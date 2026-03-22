@@ -133,6 +133,43 @@
         "make syntax-check"
       ]
     },
+    "converge-guest-network-policy": {
+      "description": "Converge the default-deny guest network policy on the Proxmox host and all managed guests.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-guest-network-policy",
+        "command": "make converge-guest-network-policy"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-guest-network-policy"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-guest-network-policy.md",
+      "implementation_refs": [
+        "Makefile",
+        "inventory/host_vars/proxmox_florin.yml",
+        "playbooks/guest-network-policy.yml",
+        "roles/proxmox_network/tasks/main.yml",
+        "roles/linux_guest_firewall/tasks/main.yml"
+      ],
+      "outputs": [
+        "Per-VM Proxmox firewall rules, NIC firewall enablement, and guest nftables policies converged from the canonical network policy matrix."
+      ],
+      "verification_commands": [
+        "make syntax-check-guest-network-policy",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo pve-firewall compile >/dev/null && sudo ls /etc/pve/firewall/*.fw'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'nc -z -w 2 10.10.10.50 5432'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.50 'nc -z -w 2 10.10.10.20 8080'"
+      ]
+    },
     "configure-ingress": {
       "description": "Converge public ingress forwarding from the host to the NGINX edge VM.",
       "lifecycle_status": "active",

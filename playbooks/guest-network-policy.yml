@@ -1,6 +1,15 @@
 ---
-- name: Enforce guest Linux access baseline
+- name: Converge Proxmox guest network policy enforcement
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: proxmox_network
+
+- name: Converge guest nftables network policy
   hosts: lv3_guests
+  serial: 1
   become: true
   gather_facts: true
 
@@ -13,6 +22,3 @@
 
   roles:
     - role: linux_guest_firewall
-    - role: linux_access
-      vars:
-        linux_access_admin_user: "{{ proxmox_guest_ci_user }}"

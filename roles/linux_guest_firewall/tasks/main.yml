@@ -1,0 +1,46 @@
+---
+- name: Validate guest network policy inputs
+  ansible.builtin.assert:
+    that:
+      - linux_guest_firewall_config_file | length > 0
+      - linux_guest_firewall_host_id in hostvars
+      - hostvars[linux_guest_firewall_host_id].network_policy is mapping
+      - hostvars[linux_guest_firewall_host_id].network_policy.guests is mapping
+      - inventory_hostname in hostvars[linux_guest_firewall_host_id].network_policy.guests
+    fail_msg: "linux_guest_firewall requires canonical host vars and a network policy entry for the current guest."
+
+- name: Ensure nftables is installed on the guest
+  ansible.builtin.apt:
+    name: nftables
+    state: present
+    update_cache: true
+
+- name: Render guest nftables policy
+  ansible.builtin.template:
+    src: nftables.conf.j2
+    dest: "{{ linux_guest_firewall_config_file }}"
+    mode: "0644"
+    validate: /usr/sbin/nft -c -f %s
+  register: linux_guest_firewall_config
+
+- name: Ensure nftables is enabled and started
+  ansible.builtin.systemd:
+    name: nftables
+    enabled: true
+    state: started
+
+- name: Reload guest nftables policy
+  ansible.builtin.command: "nft -f {{ linux_guest_firewall_config_file }}"
+  when: linux_guest_firewall_config.changed
+  changed_when: true
+
+- name: Reset SSH connection after nftables changes
+  ansible.builtin.meta: reset_connection
+  when: linux_guest_firewall_config.changed
+
+- name: Wait for guest SSH after nftables changes
+  ansible.builtin.wait_for_connection:
+    timeout: 120
+    connect_timeout: 5
+    sleep: 2
+  when: linux_guest_firewall_config.changed

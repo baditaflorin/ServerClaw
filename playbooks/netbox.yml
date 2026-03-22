@@ -21,10 +21,8 @@
         fail_msg: "This playbook only supports Debian guests."
 
   roles:
+    - role: linux_guest_firewall
     - role: postgres_vm
-      vars:
-        postgres_vm_client_allowed_sources_extra:
-          - "{{ hostvars['docker-runtime-lv3'].ansible_host }}/32"
     - role: netbox_postgres
 
 - name: Converge NetBox on the Docker runtime VM
@@ -40,6 +38,7 @@
         fail_msg: "This playbook only supports Debian guests."
 
   roles:
+    - role: linux_guest_firewall
     - role: docker_runtime
     - role: netbox_runtime
 

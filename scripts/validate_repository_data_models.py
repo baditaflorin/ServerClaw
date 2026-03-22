@@ -46,6 +46,7 @@ MONITOR_TYPES = {"http", "port"}
 PROBE_KINDS = {"http", "tcp", "command", "systemd"}
 HTTP_METHODS = {"DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"}
 IDENTITY_CLASSES = {"human_operator", "service", "agent", "break_glass"}
+NETWORK_POLICY_PROTOCOLS = {"tcp", "udp"}
 IDENTITY_REQUIRED_METADATA = {
     "owner",
     "purpose",
@@ -325,6 +326,52 @@ def validate_extra_dns_records(value: Any, path: str) -> None:
         require_int(record.get("ttl"), f"{path}[{index}].ttl", 1)
 
 
+def validate_network_policy(value: Any, path: str, guest_names: set[str]) -> None:
+    policy = require_mapping(value, path)
+    guest_management_sources = require_string_list(
+        policy.get("guest_management_sources"),
+        f"{path}.guest_management_sources",
+    )
+    if not guest_management_sources:
+        raise ValueError(f"{path}.guest_management_sources must not be empty")
+    for index, source in enumerate(guest_management_sources):
+        require_network(source, f"{path}.guest_management_sources[{index}]")
+
+    require_network(policy.get("host_source"), f"{path}.host_source")
+
+    guest_policies = require_mapping(policy.get("guests"), f"{path}.guests")
+    if set(guest_policies.keys()) != guest_names:
+        raise ValueError(f"{path}.guests must define exactly one policy entry for each managed guest")
+
+    allowed_source_tokens = {"management", "host", "public", "all_guests"}
+    for guest_name in sorted(guest_names):
+        guest_policy = require_mapping(guest_policies.get(guest_name), f"{path}.guests.{guest_name}")
+        allowed_inbound = require_list(guest_policy.get("allowed_inbound"), f"{path}.guests.{guest_name}.allowed_inbound")
+        if not allowed_inbound:
+            raise ValueError(f"{path}.guests.{guest_name}.allowed_inbound must not be empty")
+        for index, rule in enumerate(allowed_inbound):
+            rule = require_mapping(rule, f"{path}.guests.{guest_name}.allowed_inbound[{index}]")
+            source = require_str(rule.get("source"), f"{path}.guests.{guest_name}.allowed_inbound[{index}].source")
+            require_enum(
+                rule.get("protocol"),
+                f"{path}.guests.{guest_name}.allowed_inbound[{index}].protocol",
+                NETWORK_POLICY_PROTOCOLS,
+            )
+            ports = require_int_list(
+                rule.get("ports"),
+                f"{path}.guests.{guest_name}.allowed_inbound[{index}].ports",
+            )
+            if not ports:
+                raise ValueError(f"{path}.guests.{guest_name}.allowed_inbound[{index}].ports must not be empty")
+            require_str(
+                rule.get("description"),
+                f"{path}.guests.{guest_name}.allowed_inbound[{index}].description",
+            )
+            if source in allowed_source_tokens or source in guest_names:
+                continue
+            require_network(source, f"{path}.guests.{guest_name}.allowed_inbound[{index}].source")
+
+
 def validate_host_vars() -> dict[str, Any]:
     host_vars = require_mapping(load_yaml(HOST_VARS_PATH), str(HOST_VARS_PATH))
     host_id = require_identifier(HOST_VARS_PATH.stem, "host_vars host id")
@@ -395,6 +442,8 @@ def validate_host_vars() -> dict[str, Any]:
 
     if "mail_platform_dns_records" in host_vars:
         validate_extra_dns_records(host_vars.get("mail_platform_dns_records"), "host_vars.mail_platform_dns_records")
+
+    validate_network_policy(host_vars.get("network_policy"), "host_vars.network_policy", guest_names)
 
     topology = require_mapping(host_vars.get("lv3_service_topology"), "host_vars.lv3_service_topology")
     if not topology:
