@@ -1,10 +1,10 @@
 # ADR 0050: Transactional Email And Notification Profiles
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.52.0
+- Implemented In Platform Version: 0.27.0
+- Implemented On: 2026-03-22
 - Date: 2026-03-22
 
 ## Context
@@ -51,3 +51,9 @@ Steady-state rules:
 - Operational noise and business mail can be separated cleanly.
 - Credential leaks become easier to contain because each sender profile can be revoked independently.
 
+## Implementation Notes
+
+- The mail platform now provisions three managed notification profiles on `docker-runtime-lv3`: `alerts@lv3.org`, `platform@lv3.org`, and `agents@lv3.org`.
+- Each profile has a dedicated Stalwart mailbox identity plus a scoped mail-gateway API key mirrored under `.local/mail-platform/profiles/` on the controller and `/etc/lv3/mail-platform/profiles/` on the runtime VM.
+- The mail gateway now requires profile selection for the admin API key, binds profile-scoped keys to one sender identity, and records per-profile request and delivery counters in `state.json`.
+- Live verification proved that scoped credentials reject cross-profile sends and that all three profiles can deliver through Brevo with their intended sender addresses.

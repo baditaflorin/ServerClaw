@@ -3,7 +3,7 @@
 - Status: Accepted
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.45.0
-- Implemented In Platform Version: not applicable (repo-only)
+- Implemented In Platform Version: 0.26.0
 - Implemented On: 2026-03-22
 - Date: 2026-03-22
 
@@ -64,3 +64,4 @@ We will standardize on four control-plane communication lanes.
 - [scripts/validate_repository_data_models.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_repository_data_models.py) now enforces the lane catalog through the standard repository validation gate.
 - [docs/runbooks/control-plane-communication-lanes.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/control-plane-communication-lanes.md) records the operating procedure for inspecting and extending the lane model.
 - [README.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/README.md) now renders a generated control-plane lane summary from the canonical catalog.
+- Live verification from `main` on 2026-03-22 confirmed the governed SSH command path, the private Proxmox and step-ca APIs, the internal mail submission and operator notification surfaces, and the Stalwart webhook sink that currently implements the event lane.

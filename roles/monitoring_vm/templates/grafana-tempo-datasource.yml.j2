@@ -1,0 +1,23 @@
+apiVersion: 1
+
+datasources:
+  - name: {{ monitoring_grafana_tempo_datasource_name }}
+    uid: {{ monitoring_grafana_tempo_datasource_uid }}
+    type: tempo
+    access: proxy
+    url: http://127.0.0.1:{{ monitoring_tempo_http_port }}
+    isDefault: false
+    jsonData:
+      nodeGraph:
+        enabled: true
+      serviceMap:
+        datasourceUid: {{ monitoring_grafana_prometheus_datasource_uid }}
+      tracesToMetrics:
+        datasourceUid: {{ monitoring_grafana_prometheus_datasource_uid }}
+        spanStartTimeShift: "-5m"
+        spanEndTimeShift: "5m"
+        tags:
+          - key: service.name
+            value: service
+          - key: deployment.environment
+          - key: service.namespace

@@ -1,8 +1,8 @@
 # ADR 0053: OpenTelemetry Traces And Service Maps With Grafana Tempo
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Partial
+- Implemented In Repo Version: 0.52.0
 - Implemented In Platform Version: not yet
 - Implemented On: not yet
 - Date: 2026-03-22
@@ -50,3 +50,19 @@ Initial trace candidates:
 - Tempo is not a replacement for logs, metrics, or receipts.
 - We do not need full tracing on every existing workload before shipping the first rollout.
 - Public-facing applications must still follow the private-first API publication policy unless explicitly approved otherwise.
+
+## Sources
+
+- [Grafana Tempo configuration example](https://github.com/grafana/tempo/blob/v2.10.3/example/docker-compose/shared/tempo.yaml)
+- [OpenTelemetry Collector configuration](https://opentelemetry.io/docs/collector/configuration/)
+- [Grafana Tempo release v2.10.3](https://github.com/grafana/tempo/releases/tag/v2.10.3)
+- [OpenTelemetry Collector Contrib release v0.148.0](https://github.com/open-telemetry/opentelemetry-collector-contrib/releases/tag/v0.148.0)
+
+## Implementation Notes
+
+- `monitoring-lv3` now runs Prometheus, Tempo, and `otelcol-contrib` beside the existing Grafana and InfluxDB services.
+- Grafana is provisioned with dedicated Prometheus and Tempo datasources so operators can inspect traces in Explore and render the built-in service map.
+- The shared OTLP collector listens on `10.10.10.40:4317` and `10.10.10.40:4318` and forwards traces into the local Tempo backend.
+- The managed Prometheus unit enables both `exemplar-storage` and `native-histograms` so Tempo's metrics generator can persist span metrics and service-graph edges without remote-write failures.
+- The first live producer is the private mail gateway on `docker-runtime-lv3`, instrumented for inbound FastAPI requests plus outbound `httpx` calls to Stalwart and Brevo.
+- Standard resource tags now include `service.name`, `service.namespace=lv3`, and `deployment.environment=lv3` for the first rollout, and the mail gateway now reads those values from `OTEL_RESOURCE_ATTRIBUTES`.

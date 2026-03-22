@@ -1,0 +1,25 @@
+---
+- name: Converge the Tailscale operator proxy for Open WebUI
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: proxmox_tailscale_proxy
+    - role: proxmox_security
+
+- name: Converge Open WebUI on the Docker runtime VM
+  hosts: docker-runtime-lv3
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Ensure target guest is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+  roles:
+    - role: docker_runtime
+    - role: open_webui_runtime

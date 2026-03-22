@@ -1,0 +1,39 @@
+import os
+
+from fastapi.testclient import TestClient
+
+os.environ.setdefault("BREVO_API_KEY", "test-brevo-key")
+os.environ.setdefault("DEFAULT_FROM_EMAIL", "server@lv3.org")
+os.environ.setdefault("GATEWAY_API_KEY", "test-gateway-key")
+os.environ.setdefault("STALWART_ADMIN_PASSWORD", "test-admin-password")
+
+from app import app
+from telemetry import parse_resource_attributes
+
+
+def test_healthz_reports_ok():
+    client = TestClient(app)
+
+    response = client.get("/healthz")
+
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
+
+def test_state_requires_api_key():
+    client = TestClient(app)
+
+    response = client.get("/state")
+
+    assert response.status_code == 401
+
+
+def test_parse_resource_attributes_ignores_invalid_items():
+    parsed = parse_resource_attributes(
+        "deployment.environment=lv3, service.namespace=lv3, invalid, empty=, =missing-key"
+    )
+
+    assert parsed == {
+        "deployment.environment": "lv3",
+        "service.namespace": "lv3",
+    }

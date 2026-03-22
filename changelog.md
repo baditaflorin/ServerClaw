@@ -8,7 +8,7 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
-## 0.50.0 - 2026-03-22
+## 0.56.0 - 2026-03-22
 
 - applied ADR 0054 live from `main` by converging a private NetBox runtime on `docker-runtime-lv3`, provisioning its PostgreSQL backend on `postgres-lv3`, and publishing operator and agent access through the Proxmox host Tailscale proxy on port `8004`
 - hardened the NetBox automation so bootstrap token provisioning, NetBox 4.5 service-object sync, transient API retry handling, and repo-to-NetBox idempotency all rerun cleanly from the integration worktree
@@ -19,6 +19,74 @@ Platform impact:
 - NetBox is now live on `docker-runtime-lv3` and reachable privately at `http://100.118.189.95:8004`
 - `postgres-lv3` now serves the managed `netbox` database and bootstrap credentials required by the runtime
 - NetBox now contains synchronized site, host, VM, prefix, IP, and governed service inventory derived from canonical repository state, with idempotent re-sync verification
+
+## 0.55.0 - 2026-03-22
+
+- completed the ADR 0053 repository rollout by enabling Prometheus native histograms for Tempo's metrics generator, which unblocks persisted span-metrics and service-graph writes into the managed Prometheus receiver
+- corrected the first traced producer so the mail gateway now honors `OTEL_RESOURCE_ATTRIBUTES` in addition to `OTEL_SERVICE_NAME`, keeping `service.namespace` and `deployment.environment` aligned with the shared observability contract
+- refreshed the tracing ADR and runbooks to document the corrected Prometheus and resource-tag expectations before the live apply from `main`
+
+Platform impact:
+
+- no direct live platform change in this release commit; the corrected tracing stack still needs to be applied from `main`
+
+## 0.54.0 - 2026-03-22
+
+- applied ADR 0060 live by converging a private Open WebUI runtime on `docker-runtime-lv3` and publishing it through the Proxmox host Tailscale proxy on port `8008`
+- added repo-managed Open WebUI automation, workflow and command contracts, controller-local bootstrap secret handling, and an operator runbook for the workbench
+- locked the initial workbench posture down to local bootstrap auth with future OIDC support, disabled public signup and community sharing, and disabled web search, image generation, code interpreter, and direct tool servers by policy
+- updated ADR 0060, workstream state, generated status docs, and live-apply evidence to reflect the new private operator workbench
+
+Platform impact:
+
+- Open WebUI is now live privately at `http://100.118.189.95:8008`
+- controller-local bootstrap artifacts now exist under `.local/open-webui/`
+- the first operator-and-agent workbench now exists, but governed tools and repo-grounded RAG remain follow-up work under ADR 0069 and ADR 0070
+
+## 0.53.0 - 2026-03-22
+
+- implemented ADR 0059 live by installing `ntopng` on `proxmox_florin`, capturing the private guest bridge directly from `vmbr10`, and adding edge-adjacent context from `vmbr0`
+- added a dedicated `playbooks/ntopng.yml` converge path, the new `roles/proxmox_ntopng` automation, a private-access runbook, and workflow or command catalog entries for operator-driven flow visibility
+- exposed the ntopng UI only through the Proxmox host Tailscale proxy on port `3001`, kept it off the public edge, and updated ADR or workstream metadata to mark the network-visibility rollout as live
+
+Platform impact:
+
+- ntopng is now running on `proxmox_florin` and is reachable privately at `http://100.118.189.95:3001`
+- operators now have a repo-managed flow-visibility surface for `vmbr10` private-network traffic and `vmbr0` edge context without introducing nProbe or public publication
+- the Proxmox host firewall now explicitly allows the ntopng proxy port only from declared management sources
+
+## 0.52.0 - 2026-03-22
+
+- applied ADR 0050 live by provisioning distinct operator, platform, and agent sender profiles on the managed mail platform instead of reusing one global outbound credential
+- added scoped notification-profile mailbox passwords and mail-gateway API keys, plus gateway-side profile enforcement and per-profile delivery counters
+- documented the new sender-profile operating model, added controller-local secret inventory entries, and added a focused profile verification playbook for live delivery checks
+
+Platform impact:
+
+- `alerts@lv3.org`, `platform@lv3.org`, and `agents@lv3.org` now exist as managed sender identities on `docker-runtime-lv3`
+- each sender profile now has its own scoped mail-gateway API key and mailbox password mirrored under `.local/mail-platform/profiles/`
+- the mail gateway now enforces profile-bound send identity and records per-profile request and delivery counters
+
+## 0.51.0 - 2026-03-22
+
+- implemented ADR 0053 in repository automation by adding pinned Tempo and `otelcol-contrib` packages plus a managed Prometheus service to the monitoring VM role
+- provisioned Grafana Prometheus and Tempo datasources, documented the shared OTLP collector contract, and instrumented the private mail-gateway service as the first traced internal API surface
+- updated the ADR, workstream, monitoring runbook, mail-platform runbook, and workflow catalog to describe the new tracing and service-map operating model
+
+Platform impact:
+
+- no direct live platform change in this release commit; the tracing stack still needs to be applied from `main`
+
+## 0.50.0 - 2026-03-22
+
+- implemented ADR 0049 as a canonical API publication contract instead of leaving publication policy only in prose
+- added `config/api-publication.json` plus `scripts/api_publication.py` so publication tiers are machine-readable, inspectable, and validation-backed
+- extended the governed API lane inventory to include the live OpenBao and Windmill APIs, and classified every current API or webhook surface as internal-only, operator-only, or public-edge
+- rendered the publication-tier summary into the generated README and documented the operating procedure in a dedicated API publication runbook
+
+Platform impact:
+
+- no direct live platform change; this release makes the existing private-first API and webhook exposure model explicit, reviewable, and enforced from `main`
 
 ## 0.49.0 - 2026-03-22
 

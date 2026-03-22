@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0045](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0045-control-plane-communication-lanes.md)
 - Title: Command, API, message, and event lane policy
-- Status: merged
+- Status: live_applied
 - Branch: `codex/adr-0045-communication-lanes`
 - Worktree: `../proxmox_florin_server-communication-lanes`
 - Owner: codex
@@ -18,7 +18,6 @@
 
 ## Non-Goals
 
-- live protocol rollout in this planning workstream
 - adding new public exposure by default
 
 ## Expected Repo Surfaces
@@ -33,20 +32,27 @@
 
 ## Expected Live Surfaces
 
-- consistent command, API, message, and event paths across future apps
-- fewer one-off control paths and hidden admin channels
+- step-ca-backed `ops` SSH on the Proxmox host and the governed Proxmox jump path to guests
+- private-first control-plane APIs on the Proxmox host, step-ca, and the mail gateway
+- internal mail submission and named Proxmox notification routing as the message lane
+- the Stalwart webhook sink remaining explicit, private, and documented as the current event lane
 
 ## Verification
 
 - `python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/control_plane_lanes.py --validate`
 - `make -C /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server validate-data-models`
 - `make -C /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server generate-status-docs`
+- `curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt https://100.118.189.95:9443/health`
+- issue a short-lived `ops` SSH certificate through `step-ca` and verify login to `ops@100.118.189.95` plus `ops@10.10.10.20`
+- verify the Proxmox API version endpoint with the `lv3-automation@pve!primary` token and the private mail gateway health endpoint on `docker-runtime-lv3`
 
 ## Merge Criteria
 
 - the ADR clearly maps each communication need into one lane
 - the lane boundaries align with the current private-network-first model
 
-## Notes For The Next Assistant
+## Live Apply Notes
 
-- use [config/control-plane-lanes.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/control-plane-lanes.json) as the canonical governed-surface catalog before implementing any new control-plane app
+- Live apply completed on `2026-03-22` from `main`.
+- Verification confirmed the command lane through step-ca-backed `ops` SSH on the Proxmox host and through the governed jump path to `docker-runtime-lv3`.
+- Verification confirmed the private API lane on `pveproxy`, `step-ca`, and the mail gateway, plus the message and event lanes on SMTP submission, Proxmox notifications, and `/webhooks/stalwart`.

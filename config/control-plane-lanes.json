@@ -107,6 +107,32 @@
           "notes": "This is the private internal CA endpoint for SSH certificates and internal X.509 issuance."
         },
         {
+          "id": "openbao-api",
+          "kind": "service_api",
+          "endpoint": "https://100.118.189.95:8200",
+          "auth": "OpenBao userpass or AppRole credentials plus required step-ca-issued client certificates for the external mTLS listener.",
+          "service_refs": [
+            "openbao"
+          ],
+          "workflow_refs": [
+            "converge-openbao"
+          ],
+          "notes": "This is the private secret-authority API published through the Proxmox host Tailscale path and protected by internal mTLS."
+        },
+        {
+          "id": "windmill-api",
+          "kind": "service_api",
+          "endpoint": "http://100.118.189.95:8005/api",
+          "auth": "Windmill scoped bearer tokens and the controller-local superadmin bootstrap secret for initial verification only.",
+          "service_refs": [
+            "windmill"
+          ],
+          "workflow_refs": [
+            "converge-windmill"
+          ],
+          "notes": "This is the operator-facing workflow runtime API exposed only through the Proxmox host Tailscale proxy."
+        },
+        {
           "id": "netbox-api",
           "kind": "service_api",
           "endpoint": "http://100.118.189.95:8004/api/",
@@ -131,6 +157,19 @@
             "converge-mail-platform"
           ],
           "notes": "This is the sanctioned internal mail automation API for sends plus mailbox and domain CRUD."
+        },
+        {
+          "id": "open-webui-operator-workbench",
+          "kind": "service_api",
+          "endpoint": "http://100.118.189.95:8008",
+          "auth": "Repo-managed bootstrap admin password today; future OIDC through Keycloak once ADR 0056 is live.",
+          "service_refs": [
+            "open_webui"
+          ],
+          "workflow_refs": [
+            "converge-open-webui"
+          ],
+          "notes": "This is the private operator-and-agent workbench. Keep model connectors repo-authoritative and do not publish it through the public edge."
         }
       ]
     },

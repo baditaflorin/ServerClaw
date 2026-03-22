@@ -19,6 +19,7 @@ services:
       - {{ mail_platform_gateway_dir }}/gateway.env
     volumes:
       - {{ mail_platform_gateway_data_dir }}:/data
+      - {{ mail_platform_gateway_profiles_file }}:{{ mail_platform_gateway_profiles_container_file }}:ro
     ports:
       - "{{ mail_platform_gateway_bind_port }}:8081"
     depends_on:

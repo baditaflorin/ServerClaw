@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.50.0
-platform_version: 0.26.0
+repo_version: 0.56.0
+platform_version: 0.30.0
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -18,7 +18,13 @@ live_apply_evidence:
     openbao: 2026-03-22-adr-0043-openbao-live-apply
     windmill: 2026-03-22-adr-0044-windmill-live-apply
     short_lived_credentials_and_mtls: 2026-03-22-adr-0047-short-lived-credentials-live-apply
+    control_plane_lanes: 2026-03-22-adr-0045-control-plane-communication-lanes-live-apply
+    identity_taxonomy: 2026-03-22-adr-0046-identity-classes-live-apply
+    command_catalog: 2026-03-22-adr-0048-command-catalog-live-apply
+    notification_profiles: 2026-03-22-adr-0050-notification-profiles-live-apply
     netbox: 2026-03-22-adr-0054-netbox-live-apply
+    ntopng: 2026-03-22-adr-0059-ntopng-live-apply
+    open_webui: 2026-03-22-adr-0060-open-webui-live-apply
 
 desired_state:
   host_id: proxmox_florin
@@ -150,6 +156,42 @@ desired_state:
         surfaces:
           - stalwart_mailbox
           - mail_gateway_submission
+      - id: mail-platform-operator-alerts
+        class: service
+        principal: alerts@lv3.org
+        owner: Platform operations
+        purpose: Outbound operator alert sender profile for incident and health notifications.
+        scope_boundary: Profile-bound outbound sends through the internal mail gateway only; cannot enumerate mail objects or reuse other sender credentials.
+        rotation_or_expiry: Rotate the mailbox password and scoped gateway API key during sender-profile rotation, compromise, or ownership change.
+        credential_storage: Controller-local profile secrets under .local/mail-platform/profiles with mirrored runtime files on docker-runtime-lv3.
+        shared_credential_material: false
+        surfaces:
+          - stalwart_mailbox
+          - mail_gateway_notification_profile
+      - id: mail-platform-platform-transactional
+        class: service
+        principal: platform@lv3.org
+        owner: Platform services
+        purpose: Outbound transactional sender profile for repo-managed service notifications.
+        scope_boundary: Profile-bound outbound sends through the internal mail gateway only; not used for operator alerts or agent reporting.
+        rotation_or_expiry: Rotate the mailbox password and scoped gateway API key during sender-profile rotation, compromise, or service ownership change.
+        credential_storage: Controller-local profile secrets under .local/mail-platform/profiles with mirrored runtime files on docker-runtime-lv3.
+        shared_credential_material: false
+        surfaces:
+          - stalwart_mailbox
+          - mail_gateway_notification_profile
+      - id: mail-platform-agent-reports
+        class: agent
+        principal: agents@lv3.org
+        owner: Repository automation
+        purpose: Outbound sender profile for agent-generated reports and workflow summaries.
+        scope_boundary: Profile-bound outbound sends through the internal mail gateway only; not used for human operators or unrelated services.
+        rotation_or_expiry: Rotate the mailbox password and scoped gateway API key during sender-profile rotation, compromise, or workflow ownership change.
+        credential_storage: Controller-local profile secrets under .local/mail-platform/profiles with mirrored runtime files on docker-runtime-lv3.
+        shared_credential_material: false
+        surfaces:
+          - stalwart_mailbox
+          - mail_gateway_notification_profile
       - id: proxmox-root-break-glass
         class: break_glass
         principal: root
@@ -188,6 +230,28 @@ desired_state:
     api_private_url: http://10.10.10.20:8081
     fallback_delivery_provider: brevo
     grafana_dashboard_uid: lv3-mail-platform
+    notification_profiles:
+      - id: operator-alerts
+        sender_address: alerts@lv3.org
+        owner: Platform operations
+        credential_scope: Profile-scoped mail gateway API key and Stalwart mailbox password.
+        rate_expectation: Low volume with bursty spikes during incidents; not used for bulk mail.
+        retention_policy: Retain gateway counters and mail delivery traces under the managed observability policy.
+        observability_policy: Track request and delivery counters per profile in the mail gateway state and Grafana mail dashboard.
+      - id: platform-transactional
+        sender_address: platform@lv3.org
+        owner: Platform services
+        credential_scope: Profile-scoped mail gateway API key and Stalwart mailbox password.
+        rate_expectation: Low to moderate transactional volume for repo-managed services.
+        retention_policy: Retain gateway counters and mail delivery traces needed to audit service notifications.
+        observability_policy: Track request and delivery counters per profile in the mail gateway state and Grafana mail dashboard.
+      - id: agent-reports
+        sender_address: agents@lv3.org
+        owner: Repository automation
+        credential_scope: Profile-scoped mail gateway API key and Stalwart mailbox password.
+        rate_expectation: Low to moderate workflow-report volume with bursty audit windows.
+        retention_policy: Retain gateway counters and mail delivery traces needed to audit automated reports.
+        observability_policy: Track request and delivery counters per profile in the mail gateway state and Grafana mail dashboard.
     published_ports:
       - 25
       - 587
@@ -220,6 +284,16 @@ observed_state:
     proxmox_api_automation_user_present: true
     proxmox_api_token_present: true
     proxmox_api_token_verified: true
+  control_plane:
+    reviewed_at: 2026-03-22
+    command_lane_host_ssh_certificate_verified: true
+    command_lane_guest_jump_verified: true
+    api_lane_proxmox_token_verified: true
+    api_lane_step_ca_health_verified: true
+    api_lane_mail_gateway_health_verified: true
+    message_lane_mail_submission_verified: true
+    message_lane_notification_endpoint: lv3-ops-email
+    event_lane_mail_webhook_verified: true
   identity_taxonomy:
     reviewed_at: 2026-03-22
     all_identities_documented: true
@@ -233,10 +307,22 @@ observed_state:
       - ops@pam
       - lv3-automation@pve
       - server@lv3.org
+      - alerts@lv3.org
+      - platform@lv3.org
+      - agents@lv3.org
       - root
+    human_operator_access_verified: true
+    agent_identity_api_verified: true
+    service_identity_mailbox_verified: true
+    break_glass_restrictions_verified: true
     shared_credential_material:
       - ops-linux
       - proxmox-root-break-glass
+  command_catalog:
+    reviewed_at: 2026-03-22
+    catalog_validated: true
+    representative_contract: configure-network
+    representative_approval_gate_verified: true
   os:
     banner: Linux Debian-trixie-latest-amd64-base 6.17.13-2-pve
     kernel: 6.17.13-2-pve
@@ -370,6 +456,19 @@ observed_state:
     nginx_guest_metrics_flow_verified: true
     docker_build_metrics_flow_verified: true
     docker_build_duration_metrics_verified: true
+  ntopng:
+    host_tailscale_proxy_url: http://100.118.189.95:3001
+    local_http_url: http://127.0.0.1:3000
+    version: 6.7.260322
+    service_running: true
+    redis_running: true
+    capture_interfaces:
+      - vmbr0
+      - vmbr10
+    primary_interface: vmbr10
+    operator_api_verified: true
+    private_bridge_visibility_verified: true
+    top_hosts_api_verified: true
   docker_runtime:
     vm: 10.10.10.20
     docker_engine_running: true
@@ -431,6 +530,20 @@ observed_state:
       - agents/controller/proxmox-api-primary
       - agents/controller/monitoring
       - services/mail-platform/runtime
+  open_webui:
+    runtime_vm: 10.10.10.20
+    host_tailscale_proxy_url: http://100.118.189.95:8008
+    container_running: true
+    healthcheck_verified: true
+    bootstrap_admin_email: ops@lv3.org
+    bootstrap_admin_login_verified: true
+    password_auth_enabled: true
+    oidc_enabled: false
+    approved_provider_env_present: false
+    web_search_permission: false
+    image_generation_permission: false
+    code_interpreter_permission: false
+    direct_tool_servers_permission: false
   netbox:
     runtime_vm: 10.10.10.20
     postgres_backend_vm: 10.10.10.50
@@ -454,9 +567,26 @@ observed_state:
     stalwart_running: true
     brevo_domain_authenticated: true
     brevo_sender_active: server@lv3.org
+    verified_sender_addresses:
+      - server@lv3.org
+      - alerts@lv3.org
+      - platform@lv3.org
+      - agents@lv3.org
     outbound_gmail_delivery_verified: true
     inbound_external_delivery_verified: true
     mailbox_inbox_delivery_verified: true
+    notification_profile_catalog_verified: true
+    notification_profile_scope_rejection_verified: true
+    notification_profiles:
+      - id: operator-alerts
+        sender_address: alerts@lv3.org
+        send_verified: true
+      - id: platform-transactional
+        sender_address: platform@lv3.org
+        send_verified: true
+      - id: agent-reports
+        sender_address: agents@lv3.org
+        send_verified: true
     fallback_delivery_provider: brevo
     grafana_dashboard_uid: lv3-mail-platform
   uptime_kuma:
@@ -500,8 +630,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.50.0
+    current: 0.56.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.26.0
+    current: 0.30.0
     meaning: intended platform release for the actual server configuration

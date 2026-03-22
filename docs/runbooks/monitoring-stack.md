@@ -6,7 +6,11 @@ This runbook converges the dedicated monitoring VM `140` at `10.10.10.40` with:
 
 - Grafana on port `3000`
 - InfluxDB 2 on port `8086`
+- Prometheus on loopback port `9090`
+- Tempo on loopback port `3200`
+- a shared OpenTelemetry collector on private-network ports `4317` and `4318`
 - a provisioned Grafana data source for the Proxmox metrics bucket
+- provisioned Grafana datasources for Prometheus service-graph metrics and Tempo traces
 - a provisioned Grafana folder, `LV3`
 - a provisioned overview dashboard, `LV3 Platform Overview`
 - a provisioned detail dashboard for each managed VM
@@ -27,16 +31,21 @@ make converge-monitoring
 
 1. Adds the Grafana and InfluxData APT repositories on `monitoring-lv3`.
 2. Installs and starts `grafana`, `influxdb2`, and `influxdb2-cli`.
-3. Initializes InfluxDB with the `lv3` organization and the `proxmox` bucket.
-4. Creates separate InfluxDB tokens for Proxmox metric writes and Grafana bucket reads.
-5. Provisions the Grafana InfluxDB data source automatically.
-6. Creates a dedicated guest-writer token for guest-side telemetry and mirrors it to `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/guest-writer.token`.
-7. Renders the managed dashboard JSON from repo and imports the overview plus VM detail dashboards into Grafana over the local Grafana API.
-8. Creates or updates the Proxmox metric server `influxdb-http` to send metrics to `10.10.10.40:8086`.
-9. Converges shared guest observability plumbing for service-level Telegraf on managed guests that ship into InfluxDB.
-10. Converges `nginx-lv3` with loopback-only `stub_status` as a thin extension on top of that shared guest observability framework.
-11. Converges `docker-build-lv3` with a repo-managed Docker CLI wrapper plus Telegraf shipping build count and duration events as another thin extension on the same framework.
-12. Converges `docker-runtime-lv3` with Telegraf's Docker input plugin so container CPU, memory, network, status, and health data land in InfluxDB and the managed runtime detail dashboard.
+3. Installs Prometheus from Debian plus pinned `tempo` and `otelcol-contrib` Debian packages.
+4. Configures a managed Prometheus service with the remote-write receiver enabled plus the `exemplar-storage` and `native-histograms` features required by Tempo span metrics and service-graph metrics.
+5. Configures Tempo with local-block storage, a 7-day trace retention window, and metrics generation into Prometheus.
+6. Configures the OpenTelemetry collector as the shared OTLP ingestion path for internal services and automation.
+7. Initializes InfluxDB with the `lv3` organization and the `proxmox` bucket.
+8. Creates separate InfluxDB tokens for Proxmox metric writes and Grafana bucket reads.
+9. Provisions Grafana datasources for InfluxDB, Prometheus, and Tempo automatically.
+10. Creates a dedicated guest-writer token for guest-side telemetry and mirrors it to `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/guest-writer.token`.
+11. Renders the managed dashboard JSON from repo and imports the overview plus VM detail dashboards into Grafana over the local Grafana API.
+12. Creates or updates the Proxmox metric server `influxdb-http` to send metrics to `10.10.10.40:8086`.
+13. Converges shared guest observability plumbing for service-level Telegraf on managed guests that ship into InfluxDB.
+14. Converges `nginx-lv3` with loopback-only `stub_status` as a thin extension on top of that shared guest observability framework.
+15. Converges `docker-build-lv3` with a repo-managed Docker CLI wrapper plus Telegraf shipping build count and duration events as another thin extension on the same framework.
+16. Converges `docker-runtime-lv3` with Telegraf's Docker input plugin so container CPU, memory, network, status, and health data land in InfluxDB and the managed runtime detail dashboard.
+17. Exposes a shared OTLP endpoint for traced internal services such as the private mail gateway.
 
 ## Operator Access Flow
 
@@ -72,7 +81,7 @@ make syntax-check-monitoring
 Verify the monitoring services on VM `140`:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'systemctl is-active influxdb grafana-server'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'systemctl is-active influxdb grafana-server tempo otelcol-contrib lv3-prometheus'
 ```
 
 Verify the Grafana health endpoint locally on the guest:
@@ -91,6 +100,24 @@ Verify the full dashboard inventory:
 
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'PASS=$(sudo cat /etc/lv3/monitoring/grafana-admin-password); curl -fsS -u admin:${PASS} http://127.0.0.1:3000/api/search?query=lv3 | jq -r '\''.[] | [.uid, .title, .url] | @tsv'\'''
+```
+
+Verify Tempo has recorded service names from traced workloads:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'curl -fsS http://127.0.0.1:3200/api/search/tag/service.name/values'
+```
+
+Verify Tempo service-graph metrics are present in Prometheus:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'curl -fsS --get --data-urlencode '\''query=traces_service_graph_request_total'\'' http://127.0.0.1:9090/api/v1/query'
+```
+
+Verify Tempo span metrics are present in Prometheus:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'curl -fsS --get --data-urlencode '\''query=traces_spanmetrics_calls_total'\'' http://127.0.0.1:9090/api/v1/query'
 ```
 
 Verify nginx guest telemetry is present in InfluxDB:
@@ -156,6 +183,11 @@ The control machine keeps one mirrored token outside git for host-side Proxmox c
 
 - `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/proxmox-writer.token`
 - `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/guest-writer.token`
+
+The shared trace ingress for instrumented private services is:
+
+- OTLP gRPC: `10.10.10.40:4317`
+- OTLP HTTP: `http://10.10.10.40:4318/v1/traces`
 
 If the mirrored local token is missing, rerun `make converge-monitoring` from the control machine.
 

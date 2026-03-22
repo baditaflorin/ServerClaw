@@ -1,0 +1,16 @@
+apiVersion: 1
+
+datasources:
+  - name: {{ monitoring_grafana_prometheus_datasource_name }}
+    uid: {{ monitoring_grafana_prometheus_datasource_uid }}
+    type: prometheus
+    access: proxy
+    url: {{ monitoring_prometheus_url }}
+    isDefault: false
+    jsonData:
+      httpMethod: POST
+      manageAlerts: false
+      prometheusType: Prometheus
+      exemplarTraceIdDestinations:
+        - datasourceUid: {{ monitoring_grafana_tempo_datasource_uid }}
+          name: TraceID

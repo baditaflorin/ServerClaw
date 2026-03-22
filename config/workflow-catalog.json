@@ -396,7 +396,7 @@
       ]
     },
     "converge-monitoring": {
-      "description": "Converge the monitoring VM, guest telemetry paths, and Grafana dashboards.",
+      "description": "Converge the monitoring VM, guest telemetry paths, Grafana dashboards, Prometheus service-graph metrics, and Tempo tracing.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -428,11 +428,49 @@
         "roles/docker_runtime_observability/tasks/main.yml"
       ],
       "outputs": [
-        "Monitoring VM services converged, dashboards imported, and guest telemetry wired into InfluxDB."
+        "Monitoring VM services converged, dashboards imported, guest telemetry wired into InfluxDB, and Tempo tracing plus Prometheus service-graph metrics exposed through Grafana."
       ],
       "verification_commands": [
         "make syntax-check-monitoring",
         "curl -I https://grafana.lv3.org"
+      ]
+    },
+    "converge-ntopng": {
+      "description": "Converge host-local ntopng capture on the Proxmox bridges and expose the operator-only Tailscale proxy path.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-ntopng",
+        "command": "make converge-ntopng"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-ntopng"
+      ],
+      "live_impact": "host_live",
+      "owner_runbook": "docs/runbooks/configure-ntopng.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/ntopng.yml",
+        "roles/proxmox_ntopng",
+        "roles/proxmox_tailscale_proxy",
+        "roles/proxmox_security",
+        "inventory/group_vars/all.yml",
+        "inventory/host_vars/proxmox_florin.yml"
+      ],
+      "outputs": [
+        "Host-local ntopng capture on vmbr10 and vmbr0 plus an operator-only UI on the Proxmox host Tailscale address."
+      ],
+      "verification_commands": [
+        "make syntax-check-ntopng",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo systemctl is-active redis-server ntopng'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'PASS=$(sudo cat /etc/lv3/ntopng/admin-password); curl -fsS -u admin:${PASS} http://100.118.189.95:3001/lua/rest/v2/get/ntopng/interfaces.lua'"
       ]
     },
     "converge-docker-runtime": {
@@ -499,7 +537,7 @@
       ]
     },
     "converge-mail-platform": {
-      "description": "Converge the Dockerized mail platform, host SMTP ingress, DNS, and Grafana mail telemetry.",
+      "description": "Converge the Dockerized mail platform, host SMTP ingress, DNS, sender profiles, Grafana mail telemetry, and mail-gateway trace export.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -531,11 +569,13 @@
         "inventory/host_vars/proxmox_florin.yml"
       ],
       "outputs": [
-        "Mail DNS records, public SMTP forwarding, the Stalwart mail runtime, the private automation API, and a dedicated Grafana mail dashboard converged for LV3."
+        "Mail DNS records, public SMTP forwarding, the Stalwart mail runtime, profile-scoped sender credentials, the private automation API, the dedicated Grafana mail dashboard, and mail-gateway traces into Tempo converged for LV3."
       ],
       "verification_commands": [
         "make syntax-check-mail-platform",
         "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose --file /opt/mail-platform/docker-compose.yml ps'",
+        "curl -s -H \"X-API-Key: $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/gateway-api-key.txt)\" http://10.10.10.20:8081/v1/profiles",
+        "ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/mail-platform-notification-profiles-verify.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --limit docker-runtime-lv3",
         "curl -I https://grafana.lv3.org"
       ]
     },
@@ -673,6 +713,48 @@
         "make syntax-check-windmill",
         "curl -s http://100.118.189.95:8005/api/version",
         "curl -s -H \"Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)\" http://100.118.189.95:8005/api/users/global/whoami"
+      ]
+    },
+    "converge-open-webui": {
+      "description": "Deploy private Open WebUI on docker-runtime-lv3 with repo-managed bootstrap auth and an operator-only Tailscale proxy on the Proxmox host.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-open-webui",
+        "command": "make converge-open-webui"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "open_webui_admin_password",
+          "open_webui_secret_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-open-webui"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-open-webui.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/open-webui.yml",
+        "roles/open_webui_runtime",
+        "roles/proxmox_tailscale_proxy/tasks/main.yml",
+        "roles/proxmox_security/tasks/main.yml",
+        "inventory/group_vars/all.yml",
+        "inventory/host_vars/proxmox_florin.yml"
+      ],
+      "outputs": [
+        "A private Open WebUI runtime deployed on docker-runtime-lv3 with repo-managed admin bootstrap and an operator-only Tailscale proxy on the Proxmox host."
+      ],
+      "verification_commands": [
+        "make syntax-check-open-webui",
+        "curl -s http://100.118.189.95:8008/",
+        "curl -s -X POST -H \"Content-Type: application/json\" -d '{\"email\":\"ops@lv3.org\",\"password\":\"'\"$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/admin-password.txt)\"'\"}' http://100.118.189.95:8008/api/v1/auths/signin"
       ]
     },
     "converge-netbox": {

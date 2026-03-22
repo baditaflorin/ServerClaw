@@ -4,11 +4,14 @@ mail_platform_hostname: mail.lv3.org
 mail_platform_mailbox_localpart: server
 mail_platform_mailbox_login: "{{ mail_platform_mailbox_localpart }}"
 mail_platform_mailbox_address: "{{ mail_platform_mailbox_localpart }}@{{ mail_platform_domain }}"
+mail_platform_mailbox_description: LV3 managed server mailbox
 mail_platform_site_dir: /opt/mail-platform
 mail_platform_stalwart_dir: /opt/mail-platform/stalwart
 mail_platform_gateway_dir: /opt/mail-platform/gateway
 mail_platform_gateway_app_dir: "{{ mail_platform_gateway_dir }}/app"
 mail_platform_gateway_data_dir: "{{ mail_platform_gateway_dir }}/data"
+mail_platform_gateway_profiles_file: "{{ mail_platform_gateway_dir }}/notification-profiles.json"
+mail_platform_gateway_profiles_container_file: /config/notification-profiles.json
 mail_platform_compose_file: "{{ mail_platform_site_dir }}/docker-compose.yml"
 mail_platform_stalwart_config_file: "{{ mail_platform_stalwart_dir }}/etc/config.toml"
 mail_platform_stalwart_bootstrap_file: "{{ mail_platform_site_dir }}/bootstrap-mail-platform.py"
@@ -18,11 +21,13 @@ mail_platform_stalwart_image: stalwartlabs/stalwart:latest
 mail_platform_gateway_port: 8081
 mail_platform_stalwart_http_port: 8080
 mail_platform_secret_dir: /etc/lv3/mail-platform
+mail_platform_profile_secret_dir: "{{ mail_platform_secret_dir }}/profiles"
 mail_platform_admin_password_file: "{{ mail_platform_secret_dir }}/stalwart-admin-password"
 mail_platform_mailbox_password_file: "{{ mail_platform_secret_dir }}/server-mailbox-password"
 mail_platform_metrics_password_file: "{{ mail_platform_secret_dir }}/metrics-password"
 mail_platform_gateway_api_key_file: "{{ mail_platform_secret_dir }}/gateway-api-key"
 mail_platform_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform
+mail_platform_profile_local_artifact_dir: "{{ mail_platform_local_artifact_dir }}/profiles"
 mail_platform_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/stalwart-admin-password.txt
 mail_platform_mailbox_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/server-mailbox-password.txt
 mail_platform_metrics_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/metrics-password.txt
@@ -37,6 +42,47 @@ mail_platform_gateway_force_brevo_fallback: true
 mail_platform_gateway_attempt_local_first: false
 mail_platform_gateway_uvicorn_workers: 1
 mail_platform_gateway_api_user: mail-platform
+mail_platform_notification_profiles:
+  - id: operator-alerts
+    mailbox_localpart: alerts
+    mailbox_address: "alerts@{{ mail_platform_domain }}"
+    sender_email: "alerts@{{ mail_platform_domain }}"
+    sender_name: LV3 Operator Alerts
+    reply_to: "{{ mail_platform_mailbox_address }}"
+    description: LV3 operator alert sender
+    owner: Platform operations
+    credential_scope: Scoped gateway API key and mailbox password for operator-facing alert traffic only.
+    rate_expectation: Low volume with bursty spikes during incidents; never used for bulk campaigns.
+    retention_policy: Retain gateway counters and Stalwart delivery logs under the managed platform observability and host retention policies.
+    observability_policy: Track requests, fallback use, and delivery failures per profile in the mail gateway state and Grafana mail dashboard.
+  - id: platform-transactional
+    mailbox_localpart: platform
+    mailbox_address: "platform@{{ mail_platform_domain }}"
+    sender_email: "platform@{{ mail_platform_domain }}"
+    sender_name: LV3 Platform
+    reply_to: "{{ mail_platform_mailbox_address }}"
+    description: LV3 platform transactional sender
+    owner: Platform services
+    credential_scope: Scoped gateway API key and mailbox password for repo-managed platform services.
+    rate_expectation: Low to moderate transactional volume; message flows must stay application-driven and auditable.
+    retention_policy: Retain gateway counters and delivery traces needed to audit transactional notifications without treating the profile as a mailbox for operators.
+    observability_policy: Track profile-specific send volume and failures in the shared mail dashboard and gateway state.
+  - id: agent-reports
+    mailbox_localpart: agents
+    mailbox_address: "agents@{{ mail_platform_domain }}"
+    sender_email: "agents@{{ mail_platform_domain }}"
+    sender_name: LV3 Agent Reports
+    reply_to: "{{ mail_platform_mailbox_address }}"
+    description: LV3 agent and workflow reporting sender
+    owner: Repository automation
+    credential_scope: Scoped gateway API key and mailbox password for agents, scheduled workflows, and machine-generated reports.
+    rate_expectation: Low to moderate report volume with occasional bursts during audits or recovery workflows.
+    retention_policy: Retain gateway counters and delivery traces long enough to audit agent-generated reports and incident outputs.
+    observability_policy: Track request, success, fallback, and failure counters per agent profile in the gateway state and Grafana mail dashboard.
+mail_platform_gateway_trace_service_name: mail-gateway
+mail_platform_gateway_trace_service_namespace: lv3
+mail_platform_gateway_trace_environment: lv3
+mail_platform_gateway_trace_otlp_endpoint: "http://{{ hostvars['monitoring-lv3'].ansible_host }}:4318/v1/traces"
 mail_platform_metrics_username: prometheus
 mail_platform_webhook_events:
   - queue.queue-message-authenticated
