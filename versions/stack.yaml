@@ -27,6 +27,7 @@ live_apply_evidence:
     control_plane_recovery: 2026-03-22-adr-0051-control-plane-recovery-live-apply
     notification_profiles: 2026-03-22-adr-0050-notification-profiles-live-apply
     netbox: 2026-03-22-adr-0054-netbox-live-apply
+    keycloak: 2026-03-22-adr-0056-keycloak-live-apply
     ntopng: 2026-03-22-adr-0059-ntopng-live-apply
     open_webui: 2026-03-22-adr-0060-open-webui-live-apply
     tempo_tracing: 2026-03-22-adr-0053-tempo-traces-live-apply
@@ -162,6 +163,40 @@ desired_state:
         surfaces:
           - portainer_ui
           - portainer_api
+      - id: florin-badita-sso
+        class: human_operator
+        principal: florin.badita
+        owner: Florin Badita
+        purpose: Routine named operator login for the shared Keycloak broker and the first SSO-backed control-plane apps.
+        scope_boundary: Keycloak realm `lv3` and downstream OIDC-integrated internal control-plane apps only; not used for Linux login, Proxmox API automation, or break-glass recovery.
+        rotation_or_expiry: Rotate the bootstrap password after initial TOTP enrollment, on personnel change, or on compromise.
+        credential_storage: Controller-local bootstrap password under .local/keycloak until the first interactive login completes and the operator rotates it.
+        shared_credential_material: false
+        surfaces:
+          - keycloak_operator_login
+          - grafana_sso
+      - id: lv3-agent-hub
+        class: agent
+        principal: lv3-agent-hub
+        owner: Repository automation
+        purpose: Confidential client-credentials identity for approved LV3 agent workflows against the shared Keycloak broker.
+        scope_boundary: Keycloak token issuance for the `lv3` realm only; not used for interactive login or unrelated services.
+        rotation_or_expiry: Rotate the client secret on compromise, workflow ownership change, or broker reconfiguration.
+        credential_storage: Controller-local client secret under .local/keycloak with a mirrored runtime value on docker-runtime-lv3.
+        shared_credential_material: false
+        surfaces:
+          - keycloak_client_credentials
+      - id: grafana-oauth
+        class: service
+        principal: grafana-oauth
+        owner: Monitoring stack
+        purpose: OIDC client identity that lets Grafana delegate user authentication to Keycloak.
+        scope_boundary: Grafana login against the Keycloak `lv3` realm only; not used for Grafana admin API automation or any other application.
+        rotation_or_expiry: Rotate the client secret on compromise, Grafana reconfiguration, or broker client-policy changes.
+        credential_storage: Controller-local client secret under .local/keycloak with a mirrored value in Grafana's managed config on monitoring-lv3.
+        shared_credential_material: false
+        surfaces:
+          - grafana_oauth
       - id: mail-platform-server-mailbox
         class: service
         principal: server@lv3.org
@@ -221,6 +256,17 @@ desired_state:
         shared_credential_material: true
         surfaces:
           - proxmox_host_linux_break_glass
+      - id: keycloak-bootstrap-admin
+        class: break_glass
+        principal: lv3-bootstrap-admin
+        owner: Florin Badita
+        purpose: Emergency master-realm and realm-administration recovery for Keycloak when named operator login is unavailable.
+        scope_boundary: Keycloak recovery and bootstrap administration only; not used for routine operator sessions or non-human automation.
+        rotation_or_expiry: Rotate the bootstrap admin password after any break-glass use, compromise, or major broker recovery event.
+        credential_storage: Controller-local break-glass password under .local/keycloak; not committed to git.
+        shared_credential_material: false
+        surfaces:
+          - keycloak_master_admin
   security:
     management_sources:
       - 100.64.0.0/10
@@ -239,6 +285,7 @@ desired_state:
       - docker.lv3.org
       - build.lv3.org
       - uptime.lv3.org
+      - sso.lv3.org
       - database.lv3.org
     publish_aaaa_initially: false
   mail:
@@ -284,6 +331,7 @@ desired_state:
       - docker.lv3.org
       - build.lv3.org
       - uptime.lv3.org
+      - sso.lv3.org
 
 observed_state:
   checked_at: 2026-03-22
@@ -331,11 +379,15 @@ observed_state:
       - ops@pam
       - lv3-automation@pve
       - ops-portainer
+      - florin.badita
+      - lv3-agent-hub
+      - grafana-oauth
       - server@lv3.org
       - alerts@lv3.org
       - platform@lv3.org
       - agents@lv3.org
       - root
+      - lv3-bootstrap-admin
     human_operator_access_verified: true
     agent_identity_api_verified: true
     service_identity_mailbox_verified: true
@@ -409,6 +461,7 @@ observed_state:
       - docker.lv3.org
       - build.lv3.org
       - uptime.lv3.org
+      - sso.lv3.org
       - database.lv3.org
   guests:
     template:
@@ -453,6 +506,8 @@ observed_state:
     alloy_log_shipping_active: true
     grafana_internal_url: http://10.10.10.40:3000
     grafana_public_url: https://grafana.lv3.org
+    grafana_sso_enabled: true
+    grafana_keycloak_redirect_verified: true
     loki_internal_url: http://10.10.10.40:3100
     prometheus_internal_url: http://10.10.10.40:9090
     tempo_internal_url: http://10.10.10.40:3200
@@ -591,6 +646,25 @@ observed_state:
       - agents/controller/proxmox-api-primary
       - agents/controller/monitoring
       - services/mail-platform/runtime
+  keycloak:
+    runtime_vm: 10.10.10.20
+    postgres_backend_vm: 10.10.10.50
+    public_url: https://sso.lv3.org
+    internal_http_url: http://10.10.10.20:8091
+    realm: lv3
+    container_running: true
+    public_discovery_verified: true
+    public_dns_verified_via_authoritative_resolver: true
+    named_operator_present: true
+    named_operator_requires_totp_enrollment: true
+    break_glass_admin_present: true
+    agent_client_credentials_verified: true
+    grafana_oidc_client_verified: true
+    managed_groups:
+      - lv3-platform-admins
+      - grafana-admins
+      - grafana-viewers
+      - approved-agent-clients
   open_webui:
     runtime_vm: 10.10.10.20
     host_tailscale_proxy_url: http://100.118.189.95:8008
@@ -675,11 +749,13 @@ observed_state:
     container_running: true
     edge_published: true
     local_auth_bootstrapped: true
-    seeded_monitors: 6
+    seeded_monitors: 7
+    keycloak_discovery_monitor_verified: true
   public_publication:
     edge_configured: true
     edge_tls_certificate_present: true
     grafana_domain_live: true
+    sso_domain_live: true
     uptime_domain_live: true
     published_hostnames:
       - nginx.lv3.org
@@ -688,6 +764,7 @@ observed_state:
       - docker.lv3.org
       - build.lv3.org
       - uptime.lv3.org
+      - sso.lv3.org
   postgres:
     vm: 10.10.10.50
     service_running: true

@@ -540,7 +540,7 @@ workstreams:
   - id: adr-0056-keycloak-sso
     adr: "0056"
     title: Keycloak for operator and agent SSO
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/adr-0056-keycloak-sso
     worktree_path: ../proxmox_florin_server-keycloak-sso
@@ -556,7 +556,7 @@ workstreams:
       - agent clients
       - MFA policies
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0057-mattermost-chatops
     adr: "0057"

@@ -1,10 +1,10 @@
 # ADR 0056: Keycloak For Operator And Agent SSO
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.62.0
+- Implemented In Platform Version: 0.34.0
+- Implemented On: 2026-03-22
 - Date: 2026-03-22
 
 ## Context
@@ -52,3 +52,11 @@ Initial integration targets:
 - Keycloak does not replace OpenBao for secrets or dynamic credentials.
 - SSH certificate and internal TLS issuance still belong to `step-ca`.
 - Local break-glass accounts remain necessary where service recovery would otherwise depend on the failed identity provider itself.
+
+## Implementation Notes
+
+- Keycloak now runs on `docker-runtime-lv3` with a managed PostgreSQL backend on `postgres-lv3` and is published through the shared NGINX edge at `https://sso.lv3.org`.
+- The initial live realm is `lv3` with the groups `lv3-platform-admins`, `grafana-admins`, `grafana-viewers`, and `approved-agent-clients`.
+- The named human operator `florin.badita` is provisioned with a bootstrap password and the required action `CONFIGURE_TOTP`, while the master-realm bootstrap admin remains a break-glass recovery path only.
+- The confidential clients `grafana-oauth` and `lv3-agent-hub` are provisioned and their controller-local secrets are mirrored under `.local/keycloak/`; the agent client-credentials flow is verified live.
+- Grafana now uses Keycloak Generic OAuth for the public login path while retaining the local admin account as the documented break-glass fallback.
