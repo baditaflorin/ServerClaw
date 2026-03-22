@@ -10,6 +10,22 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 - use this section on `main` for merged notes that have not yet been cut into a numbered release
 
+## 0.28.0 - 2026-03-22
+
+- merged the Uptime Kuma workstream into `main` and renumbered its decision to ADR 0027 because ADR 0022 was already assigned on `main`
+- added Docker-runtime automation to run Uptime Kuma under `/opt/uptime-kuma`
+- added Hetzner DNS automation and NGINX edge publication for `uptime.lv3.org`
+- added a repo-local Uptime Kuma management client, seed monitor definitions, and a deployment runbook
+- documented the live guest-network repair procedure for stale netplan MAC matches discovered during rollout
+
+Platform impact:
+
+- `uptime.lv3.org` now serves Uptime Kuma through the NGINX edge
+- `docker-runtime-lv3` now runs the Uptime Kuma container from `/opt/uptime-kuma`
+- the shared edge certificate now covers `uptime.lv3.org`
+- the control machine now keeps durable Uptime Kuma auth under `.local/uptime-kuma/`
+- the initial repo-managed Uptime Kuma monitor set contains `6` checks
+
 ## 0.27.0 - 2026-03-22
 
 - merged and renumbered the PostgreSQL workstream as ADR 0026 during integration because ADR 0025 was already assigned on `main`

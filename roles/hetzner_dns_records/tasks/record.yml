@@ -1,0 +1,59 @@
+---
+- name: Select matching Hetzner DNS records
+  ansible.builtin.set_fact:
+    hetzner_dns_matching_records: >-
+      {{
+        hetzner_dns_records_lookup.json.records
+        | selectattr('name', 'equalto', hetzner_dns_record.name)
+        | selectattr('type', 'equalto', hetzner_dns_record.type)
+        | list
+      }}
+
+- name: Assert the record match is unambiguous
+  ansible.builtin.assert:
+    that:
+      - hetzner_dns_matching_records | length <= 1
+    fail_msg: >-
+      Multiple Hetzner DNS records matched {{ hetzner_dns_record.name }} {{ hetzner_dns_record.type }}.
+      Clean up duplicates before rerunning automation.
+
+- name: Create the Hetzner DNS record when it does not exist
+  ansible.builtin.uri:
+    url: "{{ hetzner_dns_api_base_url }}/records"
+    method: POST
+    headers:
+      Auth-API-Token: "{{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}"
+    body_format: json
+    body:
+      zone_id: "{{ hetzner_dns_zone_id }}"
+      name: "{{ hetzner_dns_record.name }}"
+      type: "{{ hetzner_dns_record.type }}"
+      value: "{{ hetzner_dns_record.value }}"
+      ttl: "{{ hetzner_dns_record.ttl | default(60) }}"
+    status_code:
+      - 200
+      - 201
+  when: hetzner_dns_matching_records | length == 0
+  no_log: true
+
+- name: Update the Hetzner DNS record when drift is detected
+  ansible.builtin.uri:
+    url: "{{ hetzner_dns_api_base_url }}/records/{{ hetzner_dns_matching_records[0].id }}"
+    method: PUT
+    headers:
+      Auth-API-Token: "{{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}"
+    body_format: json
+    body:
+      zone_id: "{{ hetzner_dns_zone_id }}"
+      name: "{{ hetzner_dns_record.name }}"
+      type: "{{ hetzner_dns_record.type }}"
+      value: "{{ hetzner_dns_record.value }}"
+      ttl: "{{ hetzner_dns_record.ttl | default(60) }}"
+    status_code:
+      - 200
+      - 201
+  when:
+    - hetzner_dns_matching_records | length == 1
+    - hetzner_dns_matching_records[0].value != hetzner_dns_record.value
+      or (hetzner_dns_matching_records[0].ttl | int) != (hetzner_dns_record.ttl | default(60) | int)
+  no_log: true

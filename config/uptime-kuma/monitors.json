@@ -1,0 +1,68 @@
+[
+  {
+    "name": "Uptime Kuma Public",
+    "type": "http",
+    "url": "https://uptime.lv3.org",
+    "description": "Public Uptime Kuma entrypoint through the NGINX edge.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": ["200-399"]
+  },
+  {
+    "name": "NGINX Edge Public",
+    "type": "http",
+    "url": "https://nginx.lv3.org",
+    "description": "Public landing page served by the NGINX edge VM.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": ["200-399"]
+  },
+  {
+    "name": "Grafana Public",
+    "type": "http",
+    "url": "https://grafana.lv3.org",
+    "description": "Grafana publication through the NGINX edge VM.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": ["200-399"]
+  },
+  {
+    "name": "Proxmox UI Port",
+    "type": "port",
+    "hostname": "10.10.10.1",
+    "port": 8006,
+    "description": "Internal Proxmox UI listener on the host bridge address.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "accepted_statuscodes": ["200-299"]
+  },
+  {
+    "name": "Docker Build SSH",
+    "type": "port",
+    "hostname": "10.10.10.30",
+    "port": 22,
+    "description": "SSH reachability for the Docker build VM.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "accepted_statuscodes": ["200-299"]
+  },
+  {
+    "name": "Monitoring VM Grafana Port",
+    "type": "port",
+    "hostname": "10.10.10.40",
+    "port": 3000,
+    "description": "Internal Grafana listener on the monitoring VM.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "accepted_statuscodes": ["200-299"]
+  }
+]

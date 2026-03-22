@@ -88,6 +88,8 @@ Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/M
 - `make provision-api-access`
 - `make syntax-check-docker-runtime`
 - `make converge-docker-runtime`
+- `make syntax-check-uptime-kuma`
+- `make deploy-uptime-kuma`
 
 ## Things That Must Stay True
 

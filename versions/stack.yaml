@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.27.0
-platform_version: 0.18.0
+repo_version: 0.28.0
+platform_version: 0.19.0
 
 desired_state:
   host_id: proxmox_florin
@@ -71,6 +71,7 @@ desired_state:
       - nginx.lv3.org
       - docker.lv3.org
       - build.lv3.org
+      - uptime.lv3.org
       - database.lv3.org
     publish_aaaa_initially: false
   public_publication:
@@ -82,6 +83,7 @@ desired_state:
       - proxmox.lv3.org
       - docker.lv3.org
       - build.lv3.org
+      - uptime.lv3.org
 
 observed_state:
   checked_at: 2026-03-22
@@ -156,6 +158,7 @@ observed_state:
       - nginx.lv3.org
       - docker.lv3.org
       - build.lv3.org
+      - uptime.lv3.org
       - database.lv3.org
   guests:
     template:
@@ -228,16 +231,26 @@ observed_state:
       max_files: 5
     ops_user_in_docker_group: true
     guest_network_recovered_after_mac_match_update: true
+  uptime_kuma:
+    vm: 10.10.10.20
+    public_url: https://uptime.lv3.org
+    site_dir: /opt/uptime-kuma
+    container_running: true
+    edge_published: true
+    local_auth_bootstrapped: true
+    seeded_monitors: 6
   public_publication:
     edge_configured: true
     edge_tls_certificate_present: true
     grafana_domain_live: true
+    uptime_domain_live: true
     published_hostnames:
       - nginx.lv3.org
       - grafana.lv3.org
       - proxmox.lv3.org
       - docker.lv3.org
       - build.lv3.org
+      - uptime.lv3.org
   postgres:
     vm: 10.10.10.50
     service_running: true
@@ -257,8 +270,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.27.0
+    current: 0.28.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.18.0
+    current: 0.19.0
     meaning: intended platform release for the actual server configuration
