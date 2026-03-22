@@ -19,6 +19,7 @@ This repository now supports parallel ADR implementation. That requires a clear 
    - merge the completed workstream to `main`
    - bump `VERSION` once on `main`
    - move relevant changelog notes from `Unreleased` into a versioned section
+   - if canonical status inputs changed, run `make generate-status-docs` before cutting the release
    - update `workstreams.yaml` status to reflect merge completion
 3. Live apply phase
    - apply merged automation from `main`
@@ -66,6 +67,7 @@ Before merging a workstream to `main`, confirm:
 
 - `Unreleased` is the scratch area on `main` for merged-but-not-version-cut notes
 - cut a numbered section when `VERSION` changes on `main`
+- keep generated README status blocks current before cutting the numbered section
 - do not create fake release entries on long-lived feature branches
 
 ## Recommended Worktree Commands

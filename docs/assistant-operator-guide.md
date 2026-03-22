@@ -83,6 +83,8 @@ Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/M
 - `make workflow-info WORKFLOW=converge-monitoring`
 - `make validate`
 - `make validate-data-models`
+- `make generate-status-docs`
+- `make validate-generated-docs`
 - `make receipts`
 - `make preflight WORKFLOW=converge-monitoring`
 - `make syntax-check`

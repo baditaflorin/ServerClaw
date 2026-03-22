@@ -1,10 +1,10 @@
 # ADR 0038: Generated Status Documents From Canonical State
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.41.0
+- Implemented In Platform Version: not applicable (repo-only)
+- Implemented On: 2026-03-22
 - Date: 2026-03-22
 
 ## Context
@@ -43,3 +43,11 @@ The generated surface should prioritize:
 - Assistants can update canonical sources and regenerate docs instead of editing narrative copies.
 - Documentation reviews become simpler because some sections become deterministic outputs.
 - The implementation must preserve readable hand-authored narrative and avoid turning the whole README into generated text.
+
+## Implementation Notes
+
+- [scripts/generate_status_docs.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_status_docs.py) now renders selected generated blocks in [README.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/README.md) from canonical repository state.
+- The first generated README surface covers platform status, version summary, document indexes, and merged-workstream summary blocks marked with explicit begin and end comments.
+- Canonical inputs currently include [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml), [inventory/host_vars/proxmox_florin.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml), [workstreams.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml), and the document trees under [docs/runbooks](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks), [docs/adr](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr), and [docs/workstreams](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams).
+- [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/Makefile) now exposes `make generate-status-docs` and `make validate-generated-docs`, and [scripts/validate_repo.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_repo.sh) includes generated-doc verification in the standard validation contract.
+- Operator usage is documented in [docs/runbooks/generate-status-documents.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/generate-status-documents.md).

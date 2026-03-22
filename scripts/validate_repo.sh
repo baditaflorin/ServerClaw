@@ -16,7 +16,7 @@ export ANSIBLE_COLLECTIONS_PATH="$ANSIBLE_COLLECTIONS_DIR"
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/validate_repo.sh [all|ansible-syntax|yaml|ansible-lint|shell|json|data-models]...
+  scripts/validate_repo.sh [all|ansible-syntax|yaml|ansible-lint|shell|json|data-models|generated-docs]...
 
 Examples:
   scripts/validate_repo.sh
@@ -91,6 +91,11 @@ validate_data_models() {
   uvx --from pyyaml python "$REPO_ROOT/scripts/validate_repository_data_models.py" --validate >/dev/null
 }
 
+validate_generated_docs() {
+  echo "Generated status document validation"
+  uvx --from pyyaml python "$REPO_ROOT/scripts/generate_status_docs.py" --check >/dev/null
+}
+
 if [[ $# -eq 0 ]]; then
   set -- all
 fi
@@ -104,6 +109,7 @@ for stage in "$@"; do
       validate_shell
       validate_json
       validate_data_models
+      validate_generated_docs
       ;;
     ansible-syntax)
       validate_ansible_syntax
@@ -122,6 +128,9 @@ for stage in "$@"; do
       ;;
     data-models)
       validate_data_models
+      ;;
+    generated-docs)
+      validate_generated_docs
       ;;
     -h|--help)
       usage

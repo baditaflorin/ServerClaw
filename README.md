@@ -52,48 +52,55 @@ Public ingress is now converged to the single-edge model:
 65.108.75.123:443 -> 10.10.10.10:443
 ```
 
-Initial guest provisioning is now implemented and applied:
-
-```text
-110 nginx-lv3            10.10.10.10
-120 docker-runtime-lv3   10.10.10.20
-130 docker-build-lv3     10.10.10.30
-140 monitoring-lv3       10.10.10.40
-150 postgres-lv3         10.10.10.50
-160 backup-lv3           10.10.10.60
-9000 debian13-cloud-template
-```
-
 The private SSH jump path through the Proxmox host to the guests is working.
 
-Merged mainline automation now exists for:
+<!-- BEGIN GENERATED: platform-status -->
+> Generated from canonical repository state by [`scripts/generate_status_docs.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_status_docs.py). Do not edit this block by hand.
 
-- ADR 0011 monitoring stack rollout
-- ADR 0014 Tailscale private access rollout
-- ADR 0020 storage and backup rollout
-- ADR 0021 public subdomain publication at the NGINX edge
-- ADR 0022 nginx guest observability
-- ADR 0023 Docker runtime baseline
-- ADR 0026 dedicated PostgreSQL VM baseline
-- ADR 0027 Uptime Kuma on the Docker runtime VM
-- ADR 0028 Docker build VM build telemetry
-- ADR 0029 dedicated backup VM with local PBS
+### Current Values
+| Field | Value |
+| --- | --- |
+| Repository version | `0.41.0` |
+| Platform version | `0.19.0` |
+| Observed check date | `2026-03-22` |
+| Observed OS | `Debian 13` |
+| Observed Proxmox version | `9.1.6` |
+| Observed kernel | `6.17.13-2-pve` |
 
-Current live state for those merged workstreams:
+### Managed Guests
+| VMID | Name | IPv4 | Running |
+| --- | --- | --- | --- |
+| 110 | `nginx-lv3` | `10.10.10.10` | `true` |
+| 120 | `docker-runtime-lv3` | `10.10.10.20` | `true` |
+| 130 | `docker-build-lv3` | `10.10.10.30` | `true` |
+| 140 | `monitoring-lv3` | `10.10.10.40` | `true` |
+| 150 | `postgres-lv3` | `10.10.10.50` | `true` |
+| 160 | `backup-lv3` | `10.10.10.60` | `true` |
 
-- ADR 0011 monitoring is applied live on `10.10.10.40`
-- ADR 0014 now provides stable host administration over the Proxmox Tailscale IP; direct guest subnet routing is still pending tailnet route acceptance
-- ADR 0020 remains the backup policy and retention baseline; its initial external CIFS path is still blocked and is superseded in practice by ADR 0029
-- ADR 0022 nginx guest observability is reflected in the Grafana dashboard
-- ADR 0023 Docker runtime baseline is applied live on `10.10.10.20`
-- ADR 0026 PostgreSQL baseline is applied live on `10.10.10.50` and published privately on `database.lv3.org:5432`
-- ADR 0027 Uptime Kuma is applied live on `10.10.10.20` and published at `https://uptime.lv3.org`
-- ADR 0028 Docker build telemetry is applied live on `10.10.10.30` and Grafana now shows both build counts and build durations
-- ADR 0029 backup-lv3 is live on `10.10.10.60`; the host now uses PBS storage `lv3-backup-pbs` with nightly job `backup-lv3-nightly`, but `platform_version` remains unchanged until a re-apply from `main`
+Template VM: `9000` `debian13-cloud-template`
 
-Other current live state:
+### Published Service Inventory
+| Hostname | Service | Exposure | Owner |
+| --- | --- | --- | --- |
+| `build.lv3.org` | `docker-build` | `informational-only` | `docker-build-lv3` |
+| `database.lv3.org` | `postgres` | `private-only` | `postgres-lv3` |
+| `docker.lv3.org` | `docker-runtime` | `informational-only` | `docker-runtime-lv3` |
+| `grafana.lv3.org` | `grafana` | `edge-published` | `monitoring-lv3` |
+| `nginx.lv3.org` | `nginx-edge` | `edge-static` | `nginx-lv3` |
+| `proxmox.lv3.org` | `proxmox-ui` | `informational-only` | `proxmox_florin` |
+| `uptime.lv3.org` | `uptime-kuma` | `edge-published` | `docker-runtime-lv3` |
 
-- public subdomain publication is applied live on the NGINX edge at `10.10.10.10`
+### Latest Live-Apply Evidence
+| Capability | Receipt |
+| --- | --- |
+| `backup_vm` | `2026-03-22-adr-0029-backup-vm-live-apply` |
+| `build_telemetry` | `2026-03-22-adr-0028-build-telemetry-live-apply` |
+| `docker_runtime` | `2026-03-22-adr-0023-docker-runtime-live-apply` |
+| `monitoring` | `2026-03-22-adr-0011-monitoring-live-apply` |
+| `postgres_vm` | `2026-03-22-adr-0026-postgres-vm-live-apply` |
+| `public_edge_publication` | `2026-03-22-adr-0021-edge-publication-live-apply` |
+| `uptime_kuma` | `2026-03-22-adr-0027-uptime-kuma-live-apply` |
+<!-- END GENERATED: platform-status -->
 
 The current access posture is:
 
@@ -134,17 +141,6 @@ NGINX guest telemetry now includes loopback-only stub_status plus Telegraf shipp
 Dashboard now also includes nginx service panels for active connections, requests per second, accepts and handled rates, and connection states
 ```
 
-The current public publication model is:
-
-```text
-grafana.lv3.org -> Grafana via the NGINX edge
-nginx.lv3.org   -> edge landing page
-proxmox.lv3.org -> informational page for private Proxmox access
-docker.lv3.org  -> informational page until a runtime app is intentionally published
-build.lv3.org   -> informational page until a build-related public service is intentionally published
-uptime.lv3.org  -> Uptime Kuma via the NGINX edge
-```
-
 The current Docker runtime posture is:
 
 ```text
@@ -180,58 +176,99 @@ this is still same-host recovery, not off-host disaster recovery
 
 ## Documents
 
+<!-- BEGIN GENERATED: document-index -->
+> Generated from canonical repository state by [`scripts/generate_status_docs.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_status_docs.py). Do not edit this block by hand.
+
+### Core Documents
 - [Changelog](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/changelog.md)
 - [Repository map](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/repository-map.md)
 - [Assistant operator guide](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/assistant-operator-guide.md)
 - [Release process](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-process.md)
 - [Workstreams registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml)
 - [Workstreams guide](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/README.md)
-- [Initial access runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/initial-access.md)
-- [Configure public ingress runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-public-ingress.md)
-- [Configure edge publication runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-edge-publication.md)
-- [Complete security baseline runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/complete-security-baseline.md)
-- [Configure Tailscale private access runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-tailscale-access.md)
-- [Proxmox API automation runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/proxmox-api-automation.md)
-- [Monitoring stack runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/monitoring-stack.md)
-- [Configure Docker runtime runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-docker-runtime.md)
-- [Deploy Uptime Kuma runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/deploy-uptime-kuma.md)
-- [Configure PostgreSQL VM runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-postgres-vm.md)
-- [Repair guest netplan MAC drift runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/repair-guest-netplan-mac-drift.md)
-- [Configure storage and backups runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-storage-and-backups.md)
-- [Configure backup VM runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-backup-vm.md)
-- [Workflow catalog and execution contracts runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/workflow-catalog-and-execution-contracts.md)
-- [Controller-local secrets and preflight runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/controller-local-secrets-and-preflight.md)
-- [Live apply receipts and verification evidence runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/live-apply-receipts-and-verification-evidence.md)
-- [Validate repository automation runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/validate-repository-automation.md)
-- [ADR 0001: Bootstrap model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0001-bootstrap-dedicated-host-with-ansible.md)
+
+### Runbooks
+- [Complete Security Baseline Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/complete-security-baseline.md)
+- [Configure Backup VM](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-backup-vm.md)
+- [Configure Docker Runtime Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-docker-runtime.md)
+- [Configure Edge Publication](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-edge-publication.md)
+- [Configure PostgreSQL VM Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-postgres-vm.md)
+- [Configure Proxmox Network Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-proxmox-network.md)
+- [Configure Public Ingress Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-public-ingress.md)
+- [Configure Storage And Backups](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-storage-and-backups.md)
+- [Configure Tailscale Private Access](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-tailscale-access.md)
+- [Controller-Local Secrets And Preflight Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/controller-local-secrets-and-preflight.md)
+- [Deploy Uptime Kuma](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/deploy-uptime-kuma.md)
+- [Generate Status Documents](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/generate-status-documents.md)
+- [Harden Access Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/harden-access.md)
+- [Initial Access Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/initial-access.md)
+- [Install Proxmox Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/install-proxmox.md)
+- [Live Apply Receipts And Verification Evidence](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/live-apply-receipts-and-verification-evidence.md)
+- [Monitoring Stack Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/monitoring-stack.md)
+- [Prepare Mail Platform Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/prepare-mail-platform-rollout.md)
+- [Provision Guests Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/provision-guests.md)
+- [Proxmox API Automation Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/proxmox-api-automation.md)
+- [Repair Guest Netplan MAC Drift](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/repair-guest-netplan-mac-drift.md)
+- [Validate Repository Automation Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/validate-repository-automation.md)
+- [Workflow Catalog And Execution Contracts](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/workflow-catalog-and-execution-contracts.md)
+
+### ADRs
+- [ADR 0001: Bootstrap Dedicated Host With Ansible](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0001-bootstrap-dedicated-host-with-ansible.md)
 - [ADR 0002: Target Proxmox VE 9 on Debian 13](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0002-target-proxmox-ve-9-on-debian-13.md)
-- [ADR 0003: Prefer Rescue plus installimage](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0003-prefer-hetzner-rescue-plus-installimage-for-bootstrap.md)
-- [ADR 0004: Install Proxmox VE from Debian packages](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0004-install-proxmox-ve-from-debian-packages.md)
-- [ADR 0005: Single-node first topology](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0005-single-node-first-topology.md)
-- [ADR 0006: Security baseline](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0006-security-baseline-for-proxmox-host.md)
-- [ADR 0007: Agent-oriented access model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0007-agent-oriented-access-model.md)
-- [ADR 0008: Versioning model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0008-versioning-model-for-repo-and-host.md)
-- [ADR 0009: DRY and solid engineering principles](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0009-dry-and-solid-engineering-principles.md)
-- [ADR 0010: Initial Proxmox VM topology](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0010-initial-proxmox-vm-topology.md)
-- [ADR 0011: Monitoring VM with Grafana and Proxmox metrics](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0011-monitoring-vm-with-grafana-and-proxmox-metrics.md)
-- [ADR 0012: Proxmox host bridge and NAT network](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0012-proxmox-host-bridge-and-nat-network.md)
-- [ADR 0013: Public ingress and guest egress model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0013-public-ingress-and-guest-egress-model.md)
-- [ADR 0014: Operator access to private guest network](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0014-operator-access-to-private-guest-network.md)
-- [ADR 0015: lv3.org DNS and subdomain model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0015-lv3-org-dns-and-subdomain-model.md)
-- [ADR 0016: Provision guests from Debian 13 cloud template](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0016-provision-guests-from-debian-13-cloud-template.md)
-- [ADR 0017: ADR lifecycle and implementation metadata](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0017-adr-lifecycle-and-implementation-metadata.md)
-- [ADR 0018: Non-root operations for host and guests](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0018-non-root-operations-for-host-and-guests.md)
-- [ADR 0019: Parallel ADR delivery with workstreams](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0019-parallel-adr-delivery-with-workstreams.md)
-- [ADR 0020: Initial storage and backup model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0020-initial-storage-and-backup-model.md)
-- [ADR 0021: Public subdomain publication at the NGINX edge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0021-public-subdomain-publication-at-the-nginx-edge.md)
-- [ADR 0022: NGINX guest observability via Telegraf and stub_status](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0022-nginx-guest-observability-via-telegraf-and-stub-status.md)
-- [ADR 0023: Docker runtime VM baseline](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0023-docker-runtime-vm-baseline.md)
-- [ADR 0024: Docker guest security baseline](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0024-docker-guest-security-baseline.md)
-- [ADR 0025: Compose-managed runtime stacks](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0025-compose-managed-runtime-stacks.md)
-- [ADR 0026: Dedicated PostgreSQL VM baseline](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0026-dedicated-postgresql-vm-baseline.md)
-- [ADR 0027: Uptime Kuma on the Docker runtime VM](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0027-uptime-kuma-on-the-docker-runtime-vm.md)
-- [ADR 0028: Docker build VM build count and duration telemetry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0028-docker-build-vm-build-count-telemetry-via-cli-wrapper-events.md)
-- [ADR 0029: Dedicated backup VM with local PBS](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0029-dedicated-backup-vm-with-local-pbs.md)
+- [ADR 0003: Prefer Hetzner Rescue Plus Installimage For Bootstrap](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0003-prefer-hetzner-rescue-plus-installimage-for-bootstrap.md)
+- [ADR 0004: Install Proxmox VE From Debian Packages](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0004-install-proxmox-ve-from-debian-packages.md)
+- [ADR 0005: Single-Node First Topology](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0005-single-node-first-topology.md)
+- [ADR 0006: Security Baseline For Proxmox Host](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0006-security-baseline-for-proxmox-host.md)
+- [ADR 0007: Agent-Oriented Access Model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0007-agent-oriented-access-model.md)
+- [ADR 0008: Versioning Model For Repo And Host](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0008-versioning-model-for-repo-and-host.md)
+- [ADR 0009: DRY And Solid Engineering Principles](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0009-dry-and-solid-engineering-principles.md)
+- [ADR 0010: Initial Proxmox VM Topology](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0010-initial-proxmox-vm-topology.md)
+- [ADR 0011: Monitoring VM With Grafana And Proxmox Metrics](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0011-monitoring-vm-with-grafana-and-proxmox-metrics.md)
+- [ADR 0012: Proxmox Host Bridge And NAT Network](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0012-proxmox-host-bridge-and-nat-network.md)
+- [ADR 0013: Public Ingress And Guest Egress Model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0013-public-ingress-and-guest-egress-model.md)
+- [ADR 0014: Operator Access To Private Guest Network](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0014-operator-access-to-private-guest-network.md)
+- [ADR 0015: lv3.org DNS And Subdomain Model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0015-lv3-org-dns-and-subdomain-model.md)
+- [ADR 0016: Provision Guests From Debian 13 Cloud Template](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0016-provision-guests-from-debian-13-cloud-template.md)
+- [ADR 0017: ADR Lifecycle And Implementation Metadata](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0017-adr-lifecycle-and-implementation-metadata.md)
+- [ADR 0018: Non-Root Operations For Host And Guests](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0018-non-root-operations-for-host-and-guests.md)
+- [ADR 0019: Parallel ADR Delivery With Workstreams](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0019-parallel-adr-delivery-with-workstreams.md)
+- [ADR 0020: Initial Storage And Backup Model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0020-initial-storage-and-backup-model.md)
+- [ADR 0021: Public Subdomain Publication At The NGINX Edge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0021-public-subdomain-publication-at-the-nginx-edge.md)
+- [ADR 0022: NGINX Guest Observability Via Telegraf And Stub Status](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0022-nginx-guest-observability-via-telegraf-and-stub-status.md)
+- [ADR 0023: Docker Runtime VM Baseline](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0023-docker-runtime-vm-baseline.md)
+- [ADR 0024: Docker Guest Security Baseline](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0024-docker-guest-security-baseline.md)
+- [ADR 0025: Compose-Managed Runtime Stacks](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0025-compose-managed-runtime-stacks.md)
+- [ADR 0026: Dedicated PostgreSQL VM Baseline](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0026-dedicated-postgresql-vm-baseline.md)
+- [ADR 0027: Uptime Kuma On The Docker Runtime VM](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0027-uptime-kuma-on-the-docker-runtime-vm.md)
+- [ADR 0028: Docker Build VM Build Count And Duration Telemetry Via CLI Wrapper Events](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0028-docker-build-vm-build-count-telemetry-via-cli-wrapper-events.md)
+- [ADR 0029: Dedicated Backup VM With Local PBS](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0029-dedicated-backup-vm-with-local-pbs.md)
+- [ADR 0030: Role Interface Contracts And Defaults Boundaries](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0030-role-interface-contracts-and-defaults-boundaries.md)
+- [ADR 0031: Repository Validation Pipeline For Automation Changes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0031-repository-validation-pipeline-for-automation-changes.md)
+- [ADR 0032: Shared Guest Observability Framework](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0032-shared-guest-observability-framework.md)
+- [ADR 0033: Declarative Service Topology Catalog](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0033-declarative-service-topology-catalog.md)
+- [ADR 0034: Controller-Local Secret Manifest And Preflight](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0034-controller-local-secret-manifest-and-preflight.md)
+- [ADR 0035: Workflow Catalog And Machine-Readable Execution Contracts](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0035-workflow-catalog-and-machine-readable-execution-contracts.md)
+- [ADR 0036: Live Apply Receipts And Verification Evidence](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0036-live-apply-receipts-and-verification-evidence.md)
+- [ADR 0037: Schema-Validated Repository Data Models](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0037-schema-validated-repository-data-models.md)
+- [ADR 0038: Generated Status Documents From Canonical State](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0038-generated-status-documents-from-canonical-state.md)
+- [ADR 0039: Shared Controller Automation Toolkit](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0039-shared-controller-automation-toolkit.md)
+- [ADR 0040: Docker Runtime Container Telemetry Via Telegraf Docker Input](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0040-docker-runtime-container-telemetry-via-telegraf-docker-input.md)
+- [ADR 0041: Dockerized Mail Platform For Server Delivery, API Automation, And Grafana Observability](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0041-dockerized-mail-platform-for-server-delivery-api-and-observability.md)
+
+### Workstream Documents
+- [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
+- [Workstream ADR 0014: Tailscale Private Access Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0014-tailscale.md)
+- [Workstream ADR 0020: Initial Storage And Backup Model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0020-backups.md)
+- [Workstream ADR 0023: Docker Runtime VM Baseline](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0023-docker-runtime.md)
+- [Workstream ADR 0024: Docker Guest Security Baseline](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0024-docker-security.md)
+- [Workstream ADR 0025: Compose-Managed Runtime Stacks](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0025-docker-compose-stacks.md)
+- [Workstream ADR 0026: Dedicated PostgreSQL VM Baseline](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0026-postgres-vm.md)
+- [Workstream ADR 0027: Uptime Kuma On The Docker Runtime VM](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0027-uptime-kuma.md)
+- [Workstream ADR 0028: Docker Build VM Build Count And Duration Telemetry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0028-build-telemetry.md)
+- [Workstream ADR 0029: Dedicated Backup VM With Local PBS](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0029-backup-vm.md)
+- [Workstream ADR 0040: Docker Runtime Container Telemetry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0040-runtime-container-telemetry.md)
+- [Workstream ADR 0041: Dockerized Mail Platform With API, Grafana Telemetry, And Failover Delivery](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0041-email-platform.md)
+<!-- END GENERATED: document-index -->
 
 ## Versioning
 
@@ -243,11 +280,17 @@ This repo now tracks three distinct things:
 
 Current values on `main`:
 
-- `repo_version`: `0.40.0`
-- `platform_version`: `0.19.0`
-- `observed_os`: `Debian 13`
-- `observed_proxmox_installed`: `true`
-- `observed_pve_manager_version`: `9.1.6`
+<!-- BEGIN GENERATED: version-summary -->
+> Generated from canonical repository state by [`scripts/generate_status_docs.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_status_docs.py). Do not edit this block by hand.
+
+| Field | Value |
+| --- | --- |
+| Repository version | `0.41.0` |
+| Platform version | `0.19.0` |
+| Observed OS | `Debian 13` |
+| Observed Proxmox installed | `true` |
+| Observed PVE manager version | `9.1.6` |
+<!-- END GENERATED: version-summary -->
 
 ADR metadata now tracks both acceptance and implementation:
 
@@ -282,14 +325,22 @@ This repository is intentionally opinionated:
 
 ## Merged Workstreams
 
-- [ADR 0011 monitoring workstream](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
-- [ADR 0014 Tailscale workstream](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0014-tailscale.md)
-- [ADR 0020 backups workstream](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0020-backups.md)
-- [ADR 0023 Docker runtime workstream](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0023-docker-runtime.md)
-- [ADR 0026 PostgreSQL workstream](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0026-postgres-vm.md)
-- [ADR 0027 Uptime Kuma workstream](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0027-uptime-kuma.md)
-- [ADR 0028 Docker build telemetry workstream](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0028-build-telemetry.md)
-- [ADR 0029 backup VM workstream](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0029-backup-vm.md)
+<!-- BEGIN GENERATED: merged-workstreams -->
+> Generated from canonical repository state by [`scripts/generate_status_docs.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_status_docs.py). Do not edit this block by hand.
+
+| ADR | Title | Status | Doc |
+| --- | --- | --- | --- |
+| `0011` | Monitoring stack rollout | `live_applied` | [adr-0011-monitoring.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md) |
+| `0014` | Tailscale private access rollout | `merged` | [adr-0014-tailscale.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0014-tailscale.md) |
+| `0020` | Initial storage and backup model | `merged` | [adr-0020-backups.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0020-backups.md) |
+| `0023` | Docker runtime VM baseline | `live_applied` | [adr-0023-docker-runtime.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0023-docker-runtime.md) |
+| `0026` | Dedicated PostgreSQL VM baseline | `merged` | [adr-0026-postgres-vm.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0026-postgres-vm.md) |
+| `0027` | Uptime Kuma rollout on the Docker runtime VM | `merged` | [adr-0027-uptime-kuma.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0027-uptime-kuma.md) |
+| `0028` | Docker build VM build count and duration telemetry | `live_applied` | [adr-0028-build-telemetry.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0028-build-telemetry.md) |
+| `0029` | Dedicated backup VM with local PBS | `merged` | [adr-0029-backup-vm.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0029-backup-vm.md) |
+| `0040` | Docker runtime container telemetry | `merged` | [adr-0040-runtime-container-telemetry.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0040-runtime-container-telemetry.md) |
+| `0041` | Dockerized mail platform with API, Grafana telemetry, and failover delivery | `merged` | [adr-0041-email-platform.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0041-email-platform.md) |
+<!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow
 

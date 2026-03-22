@@ -22,6 +22,7 @@ This is the required minimum gate before merging automation changes to `main`.
 - shell scripts pass `shellcheck`
 - repo-managed JSON artifacts pass `jq empty`
 - canonical repository data models pass schema validation
+- generated status documents are current for their canonical inputs
 - the workflow catalog and controller-local secret manifest cross-reference cleanly
 - structured live-apply receipts reference valid workflows, files, and git commits
 
@@ -44,6 +45,7 @@ make validate-ansible-lint
 make validate-shell
 make validate-json
 make validate-data-models
+make validate-generated-docs
 ```
 
 `make validate-data-models` validates the canonical machine-readable repository state, including:

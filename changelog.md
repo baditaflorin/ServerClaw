@@ -10,6 +10,18 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 - use this section on `main` for merged notes that have not yet been cut into a numbered release
 
+## 0.41.0 - 2026-03-22
+
+- implemented ADR 0038 to generate selected README status documents from canonical repository state
+- added `scripts/generate_status_docs.py` plus managed README markers for platform status, version summary, document indexes, and merged workstream inventory
+- added `make generate-status-docs` and `make validate-generated-docs`, and wired generated-doc verification into `make validate`
+- added a dedicated runbook for generated status documents and updated the repository map, release process, validation runbook, and assistant guide to treat generated docs as part of the standard repo contract
+- reduced README copy-maintenance by deriving repeated inventories from `versions/stack.yaml`, host vars, `workstreams.yaml`, and the document tree
+
+Platform impact:
+
+- no direct live platform change; this release makes selected documentation deterministic and validated from repo state only
+
 ## 0.40.0 - 2026-03-22
 
 - implemented ADR 0037 to add schema validation for the repository's canonical machine-readable data models

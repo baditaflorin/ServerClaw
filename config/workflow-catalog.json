@@ -18,14 +18,47 @@
       "implementation_refs": [
         "Makefile",
         "scripts/validate_repo.sh",
+        "scripts/generate_status_docs.py",
         "scripts/validate_repository_data_models.py",
         ".github/workflows/validate.yml"
       ],
       "outputs": [
-        "Repository validation result across syntax, YAML, Ansible lint, shell, JSON, and canonical data-model checks."
+        "Repository validation result across syntax, YAML, Ansible lint, shell, JSON, canonical data-model, and generated-document checks."
       ],
       "verification_commands": [
         "make validate"
+      ]
+    },
+    "generate-status-docs": {
+      "description": "Regenerate the README status fragments that are derived from canonical repository state.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "generate-status-docs",
+        "command": "make generate-status-docs"
+      },
+      "preflight": {
+        "required": false
+      },
+      "validation_targets": [
+        "validate-data-models",
+        "validate-generated-docs"
+      ],
+      "live_impact": "repo_only",
+      "owner_runbook": "docs/runbooks/generate-status-documents.md",
+      "implementation_refs": [
+        "Makefile",
+        "README.md",
+        "scripts/generate_status_docs.py",
+        "versions/stack.yaml",
+        "workstreams.yaml"
+      ],
+      "outputs": [
+        "Generated README platform status, version summary, document index, and merged-workstream sections refreshed from canonical repository state."
+      ],
+      "verification_commands": [
+        "make generate-status-docs",
+        "make validate-generated-docs"
       ]
     },
     "install-proxmox": {
