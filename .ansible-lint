@@ -1,0 +1,13 @@
+---
+exclude_paths:
+  - .ansible/
+  - .git/
+  - .local/
+skip_list:
+  - command-instead-of-module
+  - command-instead-of-shell
+  - name[play]
+  - no-handler
+  - run-once
+  - var-naming
+  - yaml

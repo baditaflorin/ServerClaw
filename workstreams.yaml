@@ -14,7 +14,7 @@ release_policy:
 
 workstreams:
   - id: adr-0011-monitoring
-    adr: 0011
+    adr: "0011"
     title: Monitoring stack rollout
     status: live_applied
     owner: codex
@@ -31,7 +31,7 @@ workstreams:
     live_applied: true
 
   - id: adr-0014-tailscale
-    adr: 0014
+    adr: "0014"
     title: Tailscale private access rollout
     status: merged
     owner: codex
@@ -48,7 +48,7 @@ workstreams:
     live_applied: false
 
   - id: adr-0020-backups
-    adr: 0020
+    adr: "0020"
     title: Initial storage and backup model
     status: merged
     owner: codex
@@ -66,7 +66,7 @@ workstreams:
     live_applied: false
 
   - id: adr-0029-backup-vm
-    adr: 0029
+    adr: "0029"
     title: Dedicated backup VM with local PBS
     status: merged
     owner: codex
@@ -86,7 +86,7 @@ workstreams:
     live_applied: false
 
   - id: adr-0023-docker-runtime
-    adr: 0023
+    adr: "0023"
     title: Docker runtime VM baseline
     status: live_applied
     owner: codex
@@ -103,7 +103,7 @@ workstreams:
     live_applied: true
 
   - id: adr-0024-docker-security
-    adr: 0024
+    adr: "0024"
     title: Docker guest security baseline
     status: ready
     owner: codex
@@ -121,7 +121,7 @@ workstreams:
     live_applied: false
 
   - id: adr-0025-docker-compose-stacks
-    adr: 0025
+    adr: "0025"
     title: Compose-managed runtime stacks
     status: ready
     owner: codex
@@ -139,7 +139,7 @@ workstreams:
     live_applied: false
 
   - id: adr-0026-postgres-vm
-    adr: 0026
+    adr: "0026"
     title: Dedicated PostgreSQL VM baseline
     status: merged
     owner: codex
@@ -159,7 +159,7 @@ workstreams:
     live_applied: true
 
   - id: adr-0027-uptime-kuma
-    adr: 0027
+    adr: "0027"
     title: Uptime Kuma rollout on the Docker runtime VM
     status: merged
     owner: codex
@@ -178,7 +178,7 @@ workstreams:
     live_applied: true
 
   - id: adr-0028-build-telemetry
-    adr: 0028
+    adr: "0028"
     title: Docker build VM build count and duration telemetry
     status: live_applied
     owner: codex

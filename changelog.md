@@ -10,6 +10,19 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 - use this section on `main` for merged notes that have not yet been cut into a numbered release
 
+## 0.32.0 - 2026-03-22
+
+- implemented ADR 0031 to define one repository validation contract for automation changes
+- added `make validate` plus staged validation targets for Ansible syntax, YAML, Ansible lint, shell scripts, and JSON artifacts
+- added repo-managed lint policy files, Ansible collection requirements, and a validation script that bootstraps tooling through `uvx`
+- added a GitHub Actions workflow that runs the same `make validate` contract used locally
+- documented the minimum merge gate in the validation runbook, release process, assistant guide, and workstream guidance
+- fixed the monitoring role's INI module FQCN and cleaned up a small set of Ansible tasks so the new lint gate passes
+
+Platform impact:
+
+- no direct live platform change; this release adds repository validation and CI guardrails only
+
 ## 0.31.0 - 2026-03-22
 
 - implemented ADR 0030 to make role interface contracts explicit across the reusable Ansible role set

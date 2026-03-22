@@ -1,10 +1,10 @@
 # ADR 0031: Repository Validation Pipeline For Automation Changes
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.32.0
+- Implemented In Platform Version: not applicable (repo-only)
+- Implemented On: 2026-03-22
 - Date: 2026-03-22
 
 ## Context
@@ -39,3 +39,9 @@ The pipeline will include:
 - Validation failures move earlier in the workflow.
 - Introducing the pipeline will require some cleanup of existing files to make them lintable on purpose instead of by exception.
 
+## Implementation Notes
+
+- `make validate` is now the top-level repository gate and fans out into syntax, YAML, Ansible lint, shell, and JSON validation stages.
+- Validation is implemented in [scripts/validate_repo.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_repo.sh) and mirrored in CI through [.github/workflows/validate.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.github/workflows/validate.yml).
+- The validation path installs required Ansible collections from [collections/requirements.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/requirements.yml) and uses repo-managed lint policies from [.ansible-lint](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.ansible-lint) and [.yamllint](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.yamllint).
+- The minimum merge gate is documented in the new validation runbook and referenced from the release and workstream guidance.

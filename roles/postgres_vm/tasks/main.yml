@@ -81,6 +81,7 @@
     state: started
 
 - name: Check whether PostgreSQL admin role already exists
+  become: true
   become_user: postgres
   ansible.builtin.command:
     argv:
@@ -91,6 +92,7 @@
   changed_when: false
 
 - name: Create PostgreSQL admin role for local peer access
+  become: true
   become_user: postgres
   ansible.builtin.command:
     argv:
@@ -100,3 +102,4 @@
       - -c
       - "CREATE ROLE {{ postgres_vm_admin_role }} LOGIN CREATEDB CREATEROLE"
   when: postgres_vm_admin_role_check.stdout != "1"
+  changed_when: true

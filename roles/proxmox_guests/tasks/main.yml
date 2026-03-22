@@ -59,6 +59,7 @@
   args:
     executable: /bin/bash
   when: proxmox_template_config.rc != 0
+  changed_when: true
 
 - name: Render cloud-init user-data snippets for guests
   ansible.builtin.template:
@@ -104,6 +105,7 @@
       - qcow2
   loop: "{{ proxmox_guest_status.results }}"
   when: item.rc != 0
+  changed_when: true
   loop_control:
     label: "{{ item.item.name }}"
 
@@ -117,6 +119,7 @@
       - "{{ item.item.disk_gb }}G"
   loop: "{{ proxmox_guest_status.results }}"
   when: item.rc != 0
+  changed_when: true
   loop_control:
     label: "{{ item.item.name }}"
 
@@ -154,6 +157,7 @@
       - --description
       - "{{ item.role }} VM for lv3.org platform"
   loop: "{{ proxmox_guests_active | default(proxmox_guests) }}"
+  changed_when: true
   loop_control:
     label: "{{ item.name }}"
 
@@ -166,6 +170,7 @@
       - "--{{ item.1.interface }}"
       - "{{ item.1.storage | default(proxmox_storage_id) }}:{{ item.1.size_gb }}"
   loop: "{{ (proxmox_guests_active | default(proxmox_guests)) | subelements('extra_disks', skip_missing=True) }}"
+  changed_when: true
   loop_control:
     label: "{{ item.0.name }} {{ item.1.interface }}"
   when: >

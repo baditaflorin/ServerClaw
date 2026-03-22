@@ -5,7 +5,25 @@ ANSIBLE_LOCAL_TEMP ?= /tmp/proxmox_florin_server-ansible-local
 ANSIBLE_REMOTE_TEMP ?= /tmp
 ANSIBLE_ENV := ANSIBLE_LOCAL_TEMP=$(ANSIBLE_LOCAL_TEMP) ANSIBLE_REMOTE_TEMP=$(ANSIBLE_REMOTE_TEMP)
 
-.PHONY: syntax-check syntax-check-monitoring syntax-check-docker-runtime syntax-check-backup-vm syntax-check-uptime-kuma install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-monitoring converge-docker-runtime deploy-uptime-kuma configure-backups configure-backup-vm start-workstream
+.PHONY: validate validate-ansible-syntax validate-yaml validate-ansible-lint validate-shell validate-json syntax-check syntax-check-monitoring syntax-check-docker-runtime syntax-check-backup-vm syntax-check-uptime-kuma install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-monitoring converge-docker-runtime deploy-uptime-kuma configure-backups configure-backup-vm start-workstream
+
+validate:
+	$(REPO_ROOT)/scripts/validate_repo.sh
+
+validate-ansible-syntax:
+	$(REPO_ROOT)/scripts/validate_repo.sh ansible-syntax
+
+validate-yaml:
+	$(REPO_ROOT)/scripts/validate_repo.sh yaml
+
+validate-ansible-lint:
+	$(REPO_ROOT)/scripts/validate_repo.sh ansible-lint
+
+validate-shell:
+	$(REPO_ROOT)/scripts/validate_repo.sh shell
+
+validate-json:
+	$(REPO_ROOT)/scripts/validate_repo.sh json
 
 syntax-check:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/site.yml --syntax-check

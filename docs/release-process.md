@@ -47,7 +47,7 @@ Workstream branches should usually change:
 
 Before merging a workstream to `main`, confirm:
 
-- syntax and validation pass
+- `make validate` passes
 - the workstream document is current
 - the touched ADR and runbook changes are committed
 - shared-surface conflicts are resolved

@@ -20,6 +20,7 @@ Workstream branches are expected to update:
 - their own runbook material
 - their own workstream file
 - their own `workstreams.yaml` entry
+- validation surfaces when their work changes the minimum merge gate
 
 Workstream branches should avoid updating:
 
@@ -29,6 +30,16 @@ Workstream branches should avoid updating:
 - top-level integrated summaries in `README.md`
 
 Those are integration surfaces and should normally be updated only when work is merged to `main`.
+
+## Minimum Merge Gate
+
+Before a workstream is merged to `main`, the minimum repository validation command is:
+
+```bash
+make validate
+```
+
+If a workstream intentionally adds a new validation stage, update the validation script, CI workflow, and the validation runbook in the same change.
 
 ## Required Fields Per Workstream
 

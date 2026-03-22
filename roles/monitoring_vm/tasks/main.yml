@@ -158,31 +158,31 @@
   no_log: true
 
 - name: Configure Grafana server binding
-  ansible.builtin.ini_file:
+  community.general.ini_file:
     path: /etc/grafana/grafana.ini
     section: server
     option: http_addr
     value: 0.0.0.0
     mode: "0640"
-  notify: restart grafana
+  notify: Restart Grafana
 
 - name: Disable Grafana self-service signup
-  ansible.builtin.ini_file:
+  community.general.ini_file:
     path: /etc/grafana/grafana.ini
     section: users
     option: allow_sign_up
     value: "false"
     mode: "0640"
-  notify: restart grafana
+  notify: Restart Grafana
 
 - name: Disable anonymous Grafana access
-  ansible.builtin.ini_file:
+  community.general.ini_file:
     path: /etc/grafana/grafana.ini
     section: auth.anonymous
     option: enabled
     value: "false"
     mode: "0640"
-  notify: restart grafana
+  notify: Restart Grafana
 
 - name: Enable and start InfluxDB
   ansible.builtin.systemd:
@@ -532,7 +532,7 @@
     mode: "0640"
   when: monitoring_influxdb_grafana_reader_auth_created is changed
   no_log: true
-  notify: restart grafana
+  notify: Restart Grafana
 
 - name: Read Grafana reader token
   ansible.builtin.slurp:
@@ -550,7 +550,7 @@
   vars:
     monitoring_grafana_datasource_token: "{{ monitoring_grafana_datasource_token_raw.content | b64decode | trim }}"
   no_log: true
-  notify: restart grafana
+  notify: Restart Grafana
 
 - name: Remove Grafana file-provider dashboard provisioning
   ansible.builtin.file:

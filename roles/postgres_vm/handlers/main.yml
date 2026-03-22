@@ -1,8 +1,10 @@
 ---
-- name: restart postgresql
+- name: Restart PostgreSQL
   ansible.builtin.service:
     name: "{{ postgres_vm_postgresql_service_name }}"
     state: restarted
 
-- name: reload nftables
-  ansible.builtin.command: nft -f "{{ postgres_vm_nftables_config_file }}"
+- name: Reload nftables
+  ansible.builtin.systemd:
+    name: nftables
+    state: reloaded

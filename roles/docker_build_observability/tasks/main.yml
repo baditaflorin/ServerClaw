@@ -96,13 +96,13 @@
     group: telegraf
     mode: "0640"
   no_log: true
-  notify: restart telegraf
+  notify: Restart Telegraf
 
 - name: Remove deprecated Docker daemon metrics configuration
   ansible.builtin.file:
     path: "{{ docker_build_observability_docker_daemon_config_file }}"
     state: absent
-  notify: restart docker
+  notify: Restart Docker
 
 - name: Render Docker CLI telemetry wrapper
   ansible.builtin.template:
@@ -111,7 +111,7 @@
     owner: root
     group: root
     mode: "0755"
-  notify: restart docker
+  notify: Restart Docker
 
 - name: Render Telegraf docker build observability configuration
   ansible.builtin.template:
@@ -121,7 +121,7 @@
     group: telegraf
     mode: "0640"
   no_log: true
-  notify: restart telegraf
+  notify: Restart Telegraf
 
 - name: Flush docker build observability handlers
   ansible.builtin.meta: flush_handlers

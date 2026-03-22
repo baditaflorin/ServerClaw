@@ -1,10 +1,10 @@
 ---
-- name: restart docker
+- name: Restart Docker
   ansible.builtin.systemd:
     name: docker
     state: restarted
 
-- name: restart telegraf
+- name: Restart Telegraf
   ansible.builtin.systemd:
     name: telegraf
     state: restarted

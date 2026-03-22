@@ -76,6 +76,7 @@ At minimum, review whether these files need updates:
 Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/Makefile) instead of rebuilding long commands from memory:
 
 - `make start-workstream WORKSTREAM=adr-0011-monitoring`
+- `make validate`
 - `make syntax-check`
 - `make install-proxmox`
 - `make configure-network`
@@ -100,6 +101,7 @@ Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/M
 - shared values stay in inventory and group vars rather than copied into many tasks
 - live one-off shell changes are either codified immediately or explicitly documented as temporary
 - secrets and ephemeral provider passwords do not get committed
+- `make validate` is the minimum repository gate before merge to `main`
 
 ## Pending Areas
 
