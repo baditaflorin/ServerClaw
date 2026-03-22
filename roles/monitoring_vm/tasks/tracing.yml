@@ -1,0 +1,145 @@
+---
+- name: Download Tempo Debian package
+  ansible.builtin.get_url:
+    url: "{{ monitoring_tempo_deb_url }}"
+    dest: "{{ monitoring_tempo_deb_file }}"
+    checksum: "{{ monitoring_tempo_deb_checksum }}"
+    mode: "0644"
+
+- name: Install Tempo from pinned Debian package
+  ansible.builtin.apt:
+    deb: "{{ monitoring_tempo_deb_file }}"
+
+- name: Download OpenTelemetry Collector Debian package
+  ansible.builtin.get_url:
+    url: "{{ monitoring_otelcol_deb_url }}"
+    dest: "{{ monitoring_otelcol_deb_file }}"
+    checksum: "{{ monitoring_otelcol_deb_checksum }}"
+    mode: "0644"
+
+- name: Install OpenTelemetry Collector from pinned Debian package
+  ansible.builtin.apt:
+    deb: "{{ monitoring_otelcol_deb_file }}"
+
+- name: Ensure Tempo storage directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: tempo
+    group: tempo
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ monitoring_tempo_data_dir }}"
+      mode: "0755"
+    - path: "{{ monitoring_tempo_data_dir }}/wal"
+      mode: "0750"
+    - path: "{{ monitoring_tempo_data_dir }}/blocks"
+      mode: "0750"
+    - path: "{{ monitoring_tempo_data_dir }}/generator"
+      mode: "0750"
+    - path: "{{ monitoring_tempo_data_dir }}/generator/wal"
+      mode: "0750"
+    - path: "{{ monitoring_tempo_data_dir }}/generator/traces"
+      mode: "0750"
+
+- name: Ensure Prometheus data directory exists
+  ansible.builtin.file:
+    path: "{{ monitoring_prometheus_data_dir }}"
+    state: directory
+    owner: prometheus
+    group: prometheus
+    mode: "0755"
+
+- name: Render Prometheus configuration
+  ansible.builtin.template:
+    src: prometheus.yml.j2
+    dest: "{{ monitoring_prometheus_config_file }}"
+    owner: root
+    group: prometheus
+    mode: "0640"
+  notify: Restart Prometheus
+
+- name: Render managed Prometheus service unit
+  ansible.builtin.template:
+    src: prometheus.service.j2
+    dest: "{{ monitoring_prometheus_service_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart Prometheus
+
+- name: Disable Debian Prometheus service in favor of the managed unit
+  ansible.builtin.systemd:
+    name: prometheus
+    enabled: false
+    state: stopped
+
+- name: Render Tempo configuration
+  ansible.builtin.template:
+    src: tempo.yml.j2
+    dest: "{{ monitoring_tempo_config_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart Tempo
+
+- name: Render OpenTelemetry Collector configuration
+  ansible.builtin.template:
+    src: otelcol-contrib-config.yaml.j2
+    dest: "{{ monitoring_otelcol_config_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart OpenTelemetry Collector
+
+- name: Enable and start Prometheus
+  ansible.builtin.systemd:
+    name: "{{ monitoring_prometheus_service_name }}"
+    enabled: true
+    state: started
+    daemon_reload: true
+
+- name: Enable and start Tempo
+  ansible.builtin.systemd:
+    name: tempo
+    enabled: true
+    state: started
+
+- name: Enable and start OpenTelemetry Collector
+  ansible.builtin.systemd:
+    name: otelcol-contrib
+    enabled: true
+    state: started
+
+- name: Flush monitoring infrastructure handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Wait for Prometheus readiness
+  ansible.builtin.uri:
+    url: "{{ monitoring_prometheus_url }}/-/ready"
+    method: GET
+    status_code: 200
+  register: monitoring_prometheus_ready
+  retries: 20
+  delay: 3
+  until: monitoring_prometheus_ready.status == 200
+
+- name: Wait for Tempo readiness
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ monitoring_tempo_http_port }}/ready"
+    method: GET
+    status_code: 200
+  register: monitoring_tempo_ready
+  retries: 20
+  delay: 3
+  until: monitoring_tempo_ready.status == 200
+
+- name: Wait for OpenTelemetry Collector health
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ monitoring_otelcol_health_port }}"
+    method: GET
+    status_code: 200
+  register: monitoring_otelcol_health
+  retries: 20
+  delay: 3
+  until: monitoring_otelcol_health.status == 200

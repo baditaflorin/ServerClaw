@@ -10,6 +10,7 @@ monitoring_stack_packages:
   - grafana
   - influxdb2
   - influxdb2-cli
+  - prometheus
 monitoring_stack_dir: /etc/lv3/monitoring
 monitoring_grafana_admin_user: admin
 monitoring_grafana_admin_password_file: /etc/lv3/monitoring/grafana-admin-password
@@ -17,6 +18,12 @@ monitoring_grafana_admin_password_hash_file: /var/lib/grafana/.lv3-admin-passwor
 monitoring_grafana_datasource_name: InfluxDB Proxmox
 monitoring_grafana_datasource_token_file: /etc/lv3/monitoring/grafana-reader.token
 monitoring_grafana_provisioning_file: /etc/grafana/provisioning/datasources/influxdb-proxmox.yml
+monitoring_grafana_prometheus_datasource_name: Prometheus Service Graphs
+monitoring_grafana_prometheus_datasource_uid: lv3-prometheus
+monitoring_grafana_prometheus_provisioning_file: /etc/grafana/provisioning/datasources/prometheus-service-graphs.yml
+monitoring_grafana_tempo_datasource_name: Tempo
+monitoring_grafana_tempo_datasource_uid: lv3-tempo
+monitoring_grafana_tempo_provisioning_file: /etc/grafana/provisioning/datasources/tempo-traces.yml
 monitoring_grafana_folder_uid: lv3
 monitoring_grafana_folder_title: LV3
 monitoring_grafana_dashboard_dir: /var/lib/grafana/dashboards/lv3
@@ -35,3 +42,31 @@ monitoring_influxdb_proxmox_writer_description: lv3-proxmox-writer
 monitoring_influxdb_guest_writer_token_file: /etc/lv3/monitoring/influxdb-guest-writer.token
 monitoring_influxdb_guest_writer_description: lv3-guest-writer
 monitoring_influxdb_grafana_reader_description: lv3-grafana-reader
+monitoring_prometheus_service_name: lv3-prometheus
+monitoring_prometheus_service_file: /etc/systemd/system/lv3-prometheus.service
+monitoring_prometheus_config_file: /etc/prometheus/prometheus.yml
+monitoring_prometheus_data_dir: /var/lib/prometheus
+monitoring_prometheus_retention_time: 15d
+monitoring_prometheus_remote_write_url: http://127.0.0.1:9090/api/v1/write
+monitoring_prometheus_url: http://127.0.0.1:9090
+monitoring_tempo_version: 2.10.3
+monitoring_tempo_deb_url: https://github.com/grafana/tempo/releases/download/v2.10.3/tempo_2.10.3_linux_amd64.deb
+monitoring_tempo_deb_checksum: sha256:574b4c4b0a30d01eca01c4f37dcee8b5161b459b770623468bbb391a375ed841
+monitoring_tempo_deb_file: /tmp/tempo_2.10.3_linux_amd64.deb
+monitoring_tempo_config_file: /etc/tempo/config.yml
+monitoring_tempo_data_dir: /var/lib/tempo
+monitoring_tempo_trace_retention: 168h
+monitoring_tempo_http_port: 3200
+monitoring_tempo_otlp_grpc_port: 14317
+monitoring_tempo_otlp_http_port: 14318
+monitoring_otelcol_version: 0.148.0
+monitoring_otelcol_deb_url: https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.148.0/otelcol-contrib_0.148.0_linux_amd64.deb
+monitoring_otelcol_deb_checksum: sha256:ad521e8f121283048822463403295fd4ad0d97b50d12ac6bf5ca2cc656f061ba
+monitoring_otelcol_deb_file: /tmp/otelcol-contrib_0.148.0_linux_amd64.deb
+monitoring_otelcol_config_file: /etc/otelcol-contrib/config.yaml
+monitoring_otelcol_grpc_port: 4317
+monitoring_otelcol_http_port: 4318
+monitoring_otelcol_health_port: 13133
+monitoring_otelcol_metrics_port: 8888
+monitoring_otel_resource_environment: lv3
+monitoring_otel_resource_cluster: lv3

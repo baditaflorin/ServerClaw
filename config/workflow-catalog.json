@@ -396,7 +396,7 @@
       ]
     },
     "converge-monitoring": {
-      "description": "Converge the monitoring VM, guest telemetry paths, and Grafana dashboards.",
+      "description": "Converge the monitoring VM, guest telemetry paths, Grafana dashboards, Prometheus service-graph metrics, and Tempo tracing.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -428,7 +428,7 @@
         "roles/docker_runtime_observability/tasks/main.yml"
       ],
       "outputs": [
-        "Monitoring VM services converged, dashboards imported, and guest telemetry wired into InfluxDB."
+        "Monitoring VM services converged, dashboards imported, guest telemetry wired into InfluxDB, and Tempo tracing plus Prometheus service-graph metrics exposed through Grafana."
       ],
       "verification_commands": [
         "make syntax-check-monitoring",
@@ -499,7 +499,7 @@
       ]
     },
     "converge-mail-platform": {
-      "description": "Converge the Dockerized mail platform, host SMTP ingress, DNS, and Grafana mail telemetry.",
+      "description": "Converge the Dockerized mail platform, host SMTP ingress, DNS, Grafana mail telemetry, and mail-gateway trace export.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -531,7 +531,7 @@
         "inventory/host_vars/proxmox_florin.yml"
       ],
       "outputs": [
-        "Mail DNS records, public SMTP forwarding, the Stalwart mail runtime, the private automation API, and a dedicated Grafana mail dashboard converged for LV3."
+        "Mail DNS records, public SMTP forwarding, the Stalwart mail runtime, the private automation API, the dedicated Grafana mail dashboard, and mail-gateway traces into Tempo converged for LV3."
       ],
       "verification_commands": [
         "make syntax-check-mail-platform",
