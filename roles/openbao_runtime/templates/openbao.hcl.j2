@@ -4,20 +4,26 @@ api_addr = "{{ openbao_api_addr }}"
 cluster_addr = "{{ openbao_cluster_addr }}"
 
 listener "tcp" {
-  address = "0.0.0.0:{{ openbao_tls_port }}"
+  address = "0.0.0.0:{{ openbao_http_port }}"
   cluster_address = "0.0.0.0:{{ openbao_cluster_port }}"
+{% if openbao_tls_enabled %}
   tls_disable = 0
   tls_cert_file = "{{ openbao_tls_server_cert_file }}"
   tls_key_file = "{{ openbao_tls_server_key_file }}"
   tls_client_ca_file = "{{ openbao_tls_client_ca_file }}"
   tls_require_and_verify_client_cert = "true"
+{% else %}
+  tls_disable = 1
+{% endif %}
 }
 
+{% if openbao_tls_enabled %}
 listener "tcp" {
   address = "0.0.0.0:{{ openbao_http_port }}"
   cluster_address = "0.0.0.0:{{ openbao_local_cluster_port }}"
   tls_disable = 1
 }
+{% endif %}
 
 storage "raft" {
   path = "{{ openbao_raft_path }}"

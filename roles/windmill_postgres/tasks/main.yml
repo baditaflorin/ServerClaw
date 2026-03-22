@@ -157,6 +157,32 @@
       - "ALTER DATABASE {{ windmill_database_name }} OWNER TO {{ windmill_database_user }}"
   changed_when: false
 
+- name: Check whether the legacy Windmill role exists
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT 1 FROM pg_roles WHERE rolname = 'windmill'"
+  register: windmill_postgres_legacy_role_check
+  changed_when: false
+
+- name: Reassign legacy Windmill-owned objects to the admin role
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "REASSIGN OWNED BY windmill TO {{ windmill_database_user }}"
+  when: windmill_postgres_legacy_role_check.stdout == "1" and windmill_database_user != "windmill"
+  changed_when: false
+
 - name: Ensure the Windmill support role can access public tables
   become: true
   become_user: postgres

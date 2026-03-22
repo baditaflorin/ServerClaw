@@ -253,6 +253,8 @@
       - verify
       - -CAfile
       - "{{ step_ca_home }}/certs/root_ca.crt"
+      - -untrusted
+      - "{{ step_ca_home }}/certs/intermediate_ca.crt"
       - "{{ step_ca_site_dir }}/service-test.crt"
   register: step_ca_service_test_verify
   changed_when: false

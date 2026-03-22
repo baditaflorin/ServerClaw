@@ -10,15 +10,21 @@ openbao_policy_dir: "{{ openbao_site_dir }}/policies"
 openbao_tls_dir: "{{ openbao_site_dir }}/tls"
 openbao_compose_file: "{{ openbao_site_dir }}/docker-compose.yml"
 openbao_config_file: "{{ openbao_config_dir }}/openbao.hcl"
+openbao_tls_enabled: false
 openbao_http_bind_address: 127.0.0.1
-openbao_http_port: 8201
+openbao_http_port: 8200
 openbao_tls_bind_address: 0.0.0.0
 openbao_tls_port: 8200
-openbao_cluster_port: 8202
-openbao_local_cluster_port: 8203
+openbao_cluster_port: 8201
+openbao_local_cluster_port: 8202
 openbao_runtime_uid: "100"
 openbao_runtime_gid: "1000"
-openbao_api_addr: "{{ openbao_controller_url }}"
+openbao_api_addr: >-
+  {{
+    openbao_controller_url
+    if openbao_tls_enabled
+    else 'http://127.0.0.1:' ~ (openbao_http_port | string)
+  }}
 openbao_cluster_addr: "http://127.0.0.1:{{ openbao_cluster_port }}"
 openbao_raft_path: /openbao/data
 openbao_raft_node_id: "{{ inventory_hostname }}"

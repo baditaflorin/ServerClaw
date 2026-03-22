@@ -7,18 +7,18 @@
       - openbao_site_dir | length > 0
       - openbao_config_file | length > 0
       - openbao_compose_file | length > 0
-      - openbao_tls_dir | length > 0
-      - openbao_tls_server_cert_file | length > 0
-      - openbao_tls_server_key_file | length > 0
-      - openbao_tls_client_ca_file | length > 0
-      - openbao_controller_url | length > 0
       - openbao_local_artifact_dir | length > 0
       - openbao_init_local_file | length > 0
       - openbao_postgres_host | length > 0
       - openbao_postgres_admin_role | length > 0
-      - step_ca_internal_url | length > 0
-      - step_ca_services_password_file | length > 0
-      - step_ca_remote_root_certificate_file | length > 0
+      - (not openbao_tls_enabled) or (openbao_tls_dir | length > 0)
+      - (not openbao_tls_enabled) or (openbao_tls_server_cert_file | length > 0)
+      - (not openbao_tls_enabled) or (openbao_tls_server_key_file | length > 0)
+      - (not openbao_tls_enabled) or (openbao_tls_client_ca_file | length > 0)
+      - (not openbao_tls_enabled) or (openbao_controller_url | length > 0)
+      - (not openbao_tls_enabled) or (step_ca_internal_url | length > 0)
+      - (not openbao_tls_enabled) or (step_ca_services_password_file | length > 0)
+      - (not openbao_tls_enabled) or (step_ca_remote_root_certificate_file | length > 0)
     fail_msg: "openbao_runtime requires image, filesystem paths, local artifact paths, and PostgreSQL backend inputs."
 
 - name: Ensure OpenBao local artifact directory exists
@@ -120,10 +120,13 @@
       mode: "0750"
       owner: "{{ openbao_runtime_uid }}"
       group: "{{ openbao_runtime_gid }}"
+      when_enabled: true
     - path: "{{ openbao_policy_dir }}"
       mode: "0755"
       owner: "{{ openbao_runtime_uid }}"
       group: "{{ openbao_runtime_gid }}"
+      when_enabled: false
+  when: not (item.when_enabled | default(false)) or openbao_tls_enabled
 
 - name: Mirror the step-ca root certificate for OpenBao TLS trust
   ansible.builtin.copy:
@@ -133,6 +136,7 @@
     owner: "{{ openbao_runtime_uid }}"
     group: "{{ openbao_runtime_gid }}"
     mode: "0644"
+  when: openbao_tls_enabled
 
 - name: Issue or renew the OpenBao external TLS certificate
   ansible.builtin.shell: |
@@ -167,6 +171,7 @@
   register: openbao_tls_certificate_issue
   changed_when: "'changed' in openbao_tls_certificate_issue.stdout"
   no_log: true
+  when: openbao_tls_enabled
 
 - name: Render OpenBao policy files
   ansible.builtin.template:
@@ -275,6 +280,7 @@
     - not (openbao_init_status.json.initialized | bool)
     - not openbao_init_payload_local.stat.exists
   register: openbao_init_response
+  changed_when: true
   no_log: true
 
 - name: Persist the OpenBao init payload locally
@@ -282,7 +288,7 @@
     dest: "{{ openbao_init_local_file }}"
     content: "{{ openbao_init_response.json | to_nice_json }}\n"
     mode: "0600"
-  when: openbao_init_response is changed
+  when: openbao_init_response is not skipped
   delegate_to: localhost
   become: false
   no_log: true
