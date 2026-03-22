@@ -257,6 +257,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Live Apply Receipts And Verification Evidence](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/live-apply-receipts-and-verification-evidence.md)
 - [Monitoring Stack Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/monitoring-stack.md)
 - [Agentic Control-Plane Roadmap](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/plan-agentic-control-plane.md)
+- [Platform Hardening And Agentic Extensibility Roadmap](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/plan-platform-hardening-and-agentic-extensibility.md)
 - [Visual And Agent Operations Roadmap](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/plan-visual-agent-operations.md)
 - [Prepare Mail Platform Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/prepare-mail-platform-rollout.md)
 - [Provision Guests Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/provision-guests.md)
@@ -327,6 +328,16 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0059: ntopng For Private Network Flow Visibility](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0059-ntopng-for-private-network-flow-visibility.md)
 - [ADR 0060: Open WebUI For Operator And Agent Workbench](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0060-open-webui-for-operator-and-agent-workbench.md)
 - [ADR 0061: GlitchTip For Application Exceptions And Task Failures](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0061-glitchtip-for-application-exceptions-and-task-failures.md)
+- [ADR 0062: Ansible Role Composability And DRY Defaults](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0062-ansible-role-composability-and-dry-defaults.md)
+- [ADR 0063: Centralised Vars And Computed Facts Library](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0063-centralised-vars-and-computed-facts-library.md)
+- [ADR 0064: Health Probe Contracts For All Services](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0064-health-probe-contracts-for-all-services.md)
+- [ADR 0065: Secret Rotation Automation With OpenBao](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0065-secret-rotation-automation-with-openbao.md)
+- [ADR 0066: Structured Mutation Audit Log](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0066-structured-mutation-audit-log.md)
+- [ADR 0067: Guest Network Policy Enforcement](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0067-guest-network-policy-enforcement.md)
+- [ADR 0068: Container Image Policy And Supply Chain Integrity](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0068-container-image-policy-and-supply-chain-integrity.md)
+- [ADR 0069: Agent Tool Registry And Governed Tool Calls](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0069-agent-tool-registry-and-governed-tool-calls.md)
+- [ADR 0070: Retrieval-Augmented Context For Platform Queries](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0070-rag-context-for-platform-queries.md)
+- [ADR 0071: Agent Observation Loop And Autonomous Drift Detection](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0071-agent-observation-loop-and-drift-detection.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -362,6 +373,16 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0059: ntopng For Private Network Flow Visibility](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0059-ntopng-network-visibility.md)
 - [Workstream ADR 0060: Open WebUI For Operator And Agent Workbench](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0060-open-webui-workbench.md)
 - [Workstream ADR 0061: GlitchTip For Application Exceptions And Task Failures](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0061-glitchtip-failure-signals.md)
+- [Workstream ADR 0062: Ansible Role Composability And DRY Defaults](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0062-role-composability.md)
+- [Workstream ADR 0063: Centralised Vars And Computed Facts Library](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0063-platform-vars-library.md)
+- [Workstream ADR 0064: Health Probe Contracts For All Services](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0064-health-probe-contracts.md)
+- [Workstream ADR 0065: Secret Rotation Automation With OpenBao](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0065-secret-rotation-automation.md)
+- [Workstream ADR 0066: Structured Mutation Audit Log](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0066-mutation-audit-log.md)
+- [Workstream ADR 0067: Guest Network Policy Enforcement](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0067-guest-network-policy.md)
+- [Workstream ADR 0068: Container Image Policy And Supply Chain Integrity](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0068-container-image-policy.md)
+- [Workstream ADR 0069: Agent Tool Registry And Governed Tool Calls](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0069-agent-tool-registry.md)
+- [Workstream ADR 0070: Retrieval-Augmented Context For Platform Queries](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0070-rag-platform-context.md)
+- [Workstream ADR 0071: Agent Observation Loop And Autonomous Drift Detection](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0071-agent-observation-loop.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
