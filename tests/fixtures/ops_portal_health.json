@@ -1,0 +1,29 @@
+{
+  "monitors": [
+    {
+      "name": "Grafana Public",
+      "status": "healthy",
+      "detail": "HTTP 200"
+    },
+    {
+      "name": "NGINX Edge Public",
+      "status": "healthy",
+      "detail": "HTTP 200"
+    },
+    {
+      "name": "Proxmox UI Port",
+      "status": "healthy",
+      "detail": "TCP 8006"
+    },
+    {
+      "name": "Docker Build SSH",
+      "status": "healthy",
+      "detail": "TCP 22"
+    },
+    {
+      "name": "Uptime Kuma Public",
+      "status": "healthy",
+      "detail": "HTTP 200"
+    }
+  ]
+}

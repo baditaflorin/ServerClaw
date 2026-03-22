@@ -1,0 +1,134 @@
+{
+  "schema_version": "1.0.0",
+  "tools": [
+    {
+      "name": "get-platform-status",
+      "description": "Return the current repository-derived platform summary and latest release evidence.",
+      "category": "observe",
+      "transport": "ansible",
+      "endpoint": "make generate-status-docs",
+      "auth": "repo-read",
+      "approval_required": false,
+      "audit_on_call": true,
+      "owner_runbook": "docs/runbooks/generate-status-documents.md",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object"
+      }
+    },
+    {
+      "name": "list-recent-receipts",
+      "description": "List live-apply receipts and inspect the most recent evidence trail.",
+      "category": "observe",
+      "transport": "ansible",
+      "endpoint": "scripts/live_apply_receipts.py --list",
+      "auth": "repo-read",
+      "approval_required": false,
+      "audit_on_call": true,
+      "owner_runbook": "docs/runbooks/live-apply-receipts-and-verification-evidence.md",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "array"
+      }
+    },
+    {
+      "name": "query-command-catalog",
+      "description": "Inspect governed mutating command contracts and their approval rules.",
+      "category": "report",
+      "transport": "ansible",
+      "endpoint": "scripts/command_catalog.py --command <id>",
+      "auth": "repo-read",
+      "approval_required": false,
+      "audit_on_call": true,
+      "owner_runbook": "docs/runbooks/command-catalog-and-approval-gates.md",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "command_id": {
+            "type": "string"
+          }
+        },
+        "required": ["command_id"],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object"
+      }
+    },
+    {
+      "name": "list-workflows",
+      "description": "Enumerate repo-managed workflows and the preferred entrypoints used to run them.",
+      "category": "report",
+      "transport": "ansible",
+      "endpoint": "scripts/workflow_catalog.py --list",
+      "auth": "repo-read",
+      "approval_required": false,
+      "audit_on_call": true,
+      "owner_runbook": "docs/runbooks/workflow-catalog-and-execution-contracts.md",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "array"
+      }
+    },
+    {
+      "name": "render-ops-portal",
+      "description": "Generate the static operations portal from the canonical catalogs and docs.",
+      "category": "report",
+      "transport": "ansible",
+      "endpoint": "make generate-ops-portal",
+      "auth": "repo-write",
+      "approval_required": false,
+      "audit_on_call": true,
+      "owner_runbook": "docs/runbooks/platform-operations-portal.md",
+      "input_schema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object"
+      }
+    },
+    {
+      "name": "execute-approved-command",
+      "description": "Trigger a governed mutation path after the documented approval gate is satisfied.",
+      "category": "execute",
+      "transport": "ansible",
+      "endpoint": "make <command-target>",
+      "auth": "controller-secrets",
+      "approval_required": true,
+      "audit_on_call": true,
+      "owner_runbook": "docs/runbooks/command-catalog-and-approval-gates.md",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "command_id": {
+            "type": "string"
+          }
+        },
+        "required": ["command_id"],
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object"
+      }
+    }
+  ]
+}

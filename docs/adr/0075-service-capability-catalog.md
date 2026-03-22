@@ -1,10 +1,10 @@
 # ADR 0075: Service Capability Catalog
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.52.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-23
 - Date: 2026-03-22
 
 ## Context
@@ -97,10 +97,9 @@ The `make validate` gate includes a schema validation step for `config/service-c
 ### Cross-reference validation
 
 A validation script (`scripts/validate_service_catalog.py`) checks that:
-- every `health_probe_id` exists in `config/health-probe-catalog.json`
-- every `image_catalog_id` exists in `config/image-catalog.json`
-- every `secret_catalog_id` exists in `config/secret-catalog.json`
+- every referenced Uptime Kuma monitor exists in `config/uptime-kuma/monitors.json`
 - every `runbook` path exists in `docs/runbooks/`
+- active services stay aligned with the canonical service topology and observed guest inventory
 
 This script runs as part of `make validate`.
 
@@ -116,3 +115,10 @@ This script runs as part of `make validate`.
 - The service catalog describes what is deployed and how to reach it. It does not replace `stack.yaml` (VM topology) or the health-probe catalog (probe mechanics).
 - The catalog is environment-agnostic by default; per-environment overrides are in the `environments` field, not separate files.
 - Service-to-service dependency graphs (which services call which) are out of scope for the first iteration; this catalog focuses on human and agent discovery, not runtime dependency management.
+
+## Implementation Notes
+
+- The first implementation ships 12 active service entries covering the current host and guest service estate.
+- `make show-service SERVICE=<id>` now prints a readable summary for operators and agents.
+- The first validation pass uses `uptime_monitor_name` parity against `config/uptime-kuma/monitors.json` because the separate health-probe catalog described in the ADR has not been merged yet.
+- Image and secret cross-reference fields remain optional until their dedicated catalogs become canonical on `main`.
