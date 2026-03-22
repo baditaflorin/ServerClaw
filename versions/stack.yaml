@@ -1,6 +1,6 @@
 schema_version: 1.0.0
 repo_version: 0.42.0
-platform_version: 0.19.0
+platform_version: 0.20.0
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -12,6 +12,7 @@ live_apply_evidence:
     uptime_kuma: 2026-03-22-adr-0027-uptime-kuma-live-apply
     build_telemetry: 2026-03-22-adr-0028-build-telemetry-live-apply
     backup_vm: 2026-03-22-adr-0029-backup-vm-live-apply
+    runtime_container_telemetry: 2026-03-22-adr-0040-runtime-container-telemetry-live-apply
 
 desired_state:
   host_id: proxmox_florin
@@ -223,7 +224,7 @@ observed_state:
         panels: 12
       - uid: lv3-vm-docker-runtime-lv3
         title: LV3 docker-runtime-lv3 Detail
-        panels: 8
+        panels: 16
       - uid: lv3-vm-docker-build-lv3
         title: LV3 docker-build-lv3 Detail
         panels: 14
@@ -252,6 +253,8 @@ observed_state:
       max_size: 10m
       max_files: 5
     ops_user_in_docker_group: true
+    telegraf_active: true
+    container_telemetry_flow_verified: true
     guest_network_recovered_after_mac_match_update: true
   uptime_kuma:
     vm: 10.10.10.20
@@ -297,5 +300,5 @@ release_tracks:
     current: 0.42.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.19.0
+    current: 0.20.0
     meaning: intended platform release for the actual server configuration

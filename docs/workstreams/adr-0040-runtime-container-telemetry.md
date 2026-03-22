@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0040](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0040-docker-runtime-container-telemetry-via-telegraf-docker-input.md)
 - Title: Docker runtime container telemetry
-- Status: merged
+- Status: live_applied
 - Branch: `codex/adr-0040-runtime-container-telemetry`
 - Worktree: `../proxmox_florin_server-runtime-container-telemetry`
 - Owner: codex
@@ -57,5 +57,6 @@
 
 ## Notes For The Next Assistant
 
-- This workstream is merged to `main` but is not live-applied yet.
-- If live convergence exposes Docker socket permission issues for `telegraf`, verify the `docker` group membership and restart `telegraf` before assuming the dashboard query is wrong.
+- Live apply completed on `2026-03-22` through `make converge-monitoring`.
+- Verification confirmed `telegraf` is active on `docker-runtime-lv3`, InfluxDB is receiving `docker_container_*` rows for `uptime-kuma`, and the runtime detail dashboard now contains `16` panels.
+- The first live rerun failed because `roles/monitoring_vm/tasks/main.yml` mixed `Restart Grafana` and `restart grafana`; commit `aad25fe` fixed the handler names before the final idempotent rerun.

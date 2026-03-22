@@ -61,7 +61,7 @@ The private SSH jump path through the Proxmox host to the guests is working.
 | Field | Value |
 | --- | --- |
 | Repository version | `0.42.0` |
-| Platform version | `0.19.0` |
+| Platform version | `0.20.0` |
 | Observed check date | `2026-03-22` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -99,6 +99,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `monitoring` | `2026-03-22-adr-0011-monitoring-live-apply` |
 | `postgres_vm` | `2026-03-22-adr-0026-postgres-vm-live-apply` |
 | `public_edge_publication` | `2026-03-22-adr-0021-edge-publication-live-apply` |
+| `runtime_container_telemetry` | `2026-03-22-adr-0040-runtime-container-telemetry-live-apply` |
 | `uptime_kuma` | `2026-03-22-adr-0027-uptime-kuma-live-apply` |
 <!-- END GENERATED: platform-status -->
 
@@ -139,6 +140,7 @@ Per-VM dashboards provisioned for nginx-lv3, docker-runtime-lv3, docker-build-lv
 Overview and VM dashboards together cover the Proxmox host plus nginx-lv3, docker-runtime-lv3, docker-build-lv3, and monitoring-lv3 individually
 NGINX guest telemetry now includes loopback-only stub_status plus Telegraf shipping into InfluxDB
 Dashboard now also includes nginx service panels for active connections, requests per second, accepts and handled rates, and connection states
+Docker runtime monitoring now includes container-level CPU, memory, network, health, and snapshot panels for docker-runtime-lv3
 ```
 
 The current Docker runtime posture is:
@@ -149,6 +151,7 @@ Docker Compose plugin v5.1.1 available through `docker compose`
 Docker live-restore enabled
 json-file logging capped at 10m with 5 retained files
 ops present in the local docker group on docker-runtime-lv3
+telegraf active on docker-runtime-lv3 with Docker socket access for container telemetry
 Uptime Kuma running from /opt/uptime-kuma and published at https://uptime.lv3.org
 repo-local Uptime Kuma auth and monitor management material stored under .local/uptime-kuma
 ```
@@ -287,7 +290,7 @@ Current values on `main`:
 | Field | Value |
 | --- | --- |
 | Repository version | `0.42.0` |
-| Platform version | `0.19.0` |
+| Platform version | `0.20.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -339,7 +342,7 @@ This repository is intentionally opinionated:
 | `0027` | Uptime Kuma rollout on the Docker runtime VM | `merged` | [adr-0027-uptime-kuma.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0027-uptime-kuma.md) |
 | `0028` | Docker build VM build count and duration telemetry | `live_applied` | [adr-0028-build-telemetry.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0028-build-telemetry.md) |
 | `0029` | Dedicated backup VM with local PBS | `merged` | [adr-0029-backup-vm.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0029-backup-vm.md) |
-| `0040` | Docker runtime container telemetry | `merged` | [adr-0040-runtime-container-telemetry.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0040-runtime-container-telemetry.md) |
+| `0040` | Docker runtime container telemetry | `live_applied` | [adr-0040-runtime-container-telemetry.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0040-runtime-container-telemetry.md) |
 | `0041` | Dockerized mail platform with API, Grafana telemetry, and failover delivery | `merged` | [adr-0041-email-platform.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0041-email-platform.md) |
 <!-- END GENERATED: merged-workstreams -->
 
