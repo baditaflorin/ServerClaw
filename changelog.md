@@ -8,7 +8,7 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
-## 0.52.0 - 2026-03-22
+## 0.53.0 - 2026-03-22
 
 - implemented ADR 0059 live by installing `ntopng` on `proxmox_florin`, capturing the private guest bridge directly from `vmbr10`, and adding edge-adjacent context from `vmbr0`
 - added a dedicated `playbooks/ntopng.yml` converge path, the new `roles/proxmox_ntopng` automation, a private-access runbook, and workflow or command catalog entries for operator-driven flow visibility
@@ -19,6 +19,18 @@ Platform impact:
 - ntopng is now running on `proxmox_florin` and is reachable privately at `http://100.118.189.95:3001`
 - operators now have a repo-managed flow-visibility surface for `vmbr10` private-network traffic and `vmbr0` edge context without introducing nProbe or public publication
 - the Proxmox host firewall now explicitly allows the ntopng proxy port only from declared management sources
+
+## 0.52.0 - 2026-03-22
+
+- applied ADR 0050 live by provisioning distinct operator, platform, and agent sender profiles on the managed mail platform instead of reusing one global outbound credential
+- added scoped notification-profile mailbox passwords and mail-gateway API keys, plus gateway-side profile enforcement and per-profile delivery counters
+- documented the new sender-profile operating model, added controller-local secret inventory entries, and added a focused profile verification playbook for live delivery checks
+
+Platform impact:
+
+- `alerts@lv3.org`, `platform@lv3.org`, and `agents@lv3.org` now exist as managed sender identities on `docker-runtime-lv3`
+- each sender profile now has its own scoped mail-gateway API key and mailbox password mirrored under `.local/mail-platform/profiles/`
+- the mail gateway now enforces profile-bound send identity and records per-profile request and delivery counters
 
 ## 0.51.0 - 2026-03-22
 

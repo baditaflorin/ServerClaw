@@ -33,7 +33,7 @@ workstreams:
   - id: adr-0014-tailscale
     adr: "0014"
     title: Tailscale private access rollout
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0014-tailscale
     worktree_path: ../proxmox_florin_server-tailscale
@@ -63,7 +63,7 @@ workstreams:
       - backup_policy
       - restore_validation
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0029-backup-vm
     adr: "0029"
