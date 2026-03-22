@@ -60,7 +60,7 @@ The private SSH jump path through the Proxmox host to the guests is working.
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.43.0` |
+| Repository version | `0.44.0` |
 | Platform version | `0.21.0` |
 | Observed check date | `2026-03-22` |
 | Observed OS | `Debian 13` |
@@ -212,6 +212,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Install Proxmox Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/install-proxmox.md)
 - [Live Apply Receipts And Verification Evidence](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/live-apply-receipts-and-verification-evidence.md)
 - [Monitoring Stack Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/monitoring-stack.md)
+- [Agentic Control-Plane Roadmap](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/plan-agentic-control-plane.md)
 - [Prepare Mail Platform Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/prepare-mail-platform-rollout.md)
 - [Provision Guests Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/provision-guests.md)
 - [Proxmox API Automation Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/proxmox-api-automation.md)
@@ -261,6 +262,16 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0039: Shared Controller Automation Toolkit](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0039-shared-controller-automation-toolkit.md)
 - [ADR 0040: Docker Runtime Container Telemetry Via Telegraf Docker Input](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0040-docker-runtime-container-telemetry-via-telegraf-docker-input.md)
 - [ADR 0041: Dockerized Mail Platform For Server Delivery, API Automation, And Grafana Observability](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0041-dockerized-mail-platform-for-server-delivery-api-and-observability.md)
+- [ADR 0042: step-ca For SSH And Internal TLS](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0042-step-ca-for-ssh-and-internal-tls.md)
+- [ADR 0043: OpenBao For Secrets, Transit, And Dynamic Credentials](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0043-openbao-for-secrets-transit-and-dynamic-credentials.md)
+- [ADR 0044: Windmill For Agent And Operator Workflows](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0044-windmill-for-agent-and-operator-workflows.md)
+- [ADR 0045: Control-Plane Communication Lanes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0045-control-plane-communication-lanes.md)
+- [ADR 0046: Identity Classes For Humans, Services, And Agents](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0046-identity-classes-for-humans-services-and-agents.md)
+- [ADR 0047: Short-Lived Credentials And Internal mTLS](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0047-short-lived-credentials-and-internal-mtls.md)
+- [ADR 0048: Command Catalog And Approval Gates](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0048-command-catalog-and-approval-gates.md)
+- [ADR 0049: Private-First API Publication Model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0049-private-first-api-publication-model.md)
+- [ADR 0050: Transactional Email And Notification Profiles](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0050-transactional-email-and-notification-profiles.md)
+- [ADR 0051: Control-Plane Backup, Recovery, And Break-Glass](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0051-control-plane-backup-recovery-and-break-glass.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -276,6 +287,16 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0040: Docker Runtime Container Telemetry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0040-runtime-container-telemetry.md)
 - [Workstream ADR 0041: Dockerized Mail Platform Live Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0041-email-platform-live.md)
 - [Workstream ADR 0041: Dockerized Mail Platform With API, Grafana Telemetry, And Failover Delivery](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0041-email-platform.md)
+- [Workstream ADR 0042: step-ca For SSH And Internal TLS](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0042-step-ca.md)
+- [Workstream ADR 0043: OpenBao For Secrets, Transit, And Dynamic Credentials](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0043-openbao.md)
+- [Workstream ADR 0044: Windmill For Agent And Operator Workflows](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0044-windmill.md)
+- [Workstream ADR 0045: Control-Plane Communication Lanes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0045-communication-lanes.md)
+- [Workstream ADR 0046: Identity Classes For Humans, Services, And Agents](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0046-identity-classes.md)
+- [Workstream ADR 0047: Short-Lived Credentials And Internal mTLS](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0047-short-lived-creds.md)
+- [Workstream ADR 0048: Command Catalog And Approval Gates](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0048-command-catalog.md)
+- [Workstream ADR 0049: Private-First API Publication Model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0049-private-api-publication.md)
+- [Workstream ADR 0050: Transactional Email And Notification Profiles](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0050-notification-profiles.md)
+- [Workstream ADR 0051: Control-Plane Backup, Recovery, And Break-Glass](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0051-control-plane-recovery.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
@@ -293,7 +314,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.43.0` |
+| Repository version | `0.44.0` |
 | Platform version | `0.21.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -349,6 +370,16 @@ This repository is intentionally opinionated:
 | `0040` | Docker runtime container telemetry | `live_applied` | [adr-0040-runtime-container-telemetry.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0040-runtime-container-telemetry.md) |
 | `0041` | Dockerized mail platform with API, Grafana telemetry, and failover delivery | `merged` | [adr-0041-email-platform.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0041-email-platform.md) |
 | `0041` | Dockerized mail platform live rollout | `live_applied` | [adr-0041-email-platform-live.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0041-email-platform-live.md) |
+| `0042` | step-ca for SSH and internal TLS | `merged` | [adr-0042-step-ca.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0042-step-ca.md) |
+| `0043` | OpenBao for secrets, transit, and dynamic credentials | `merged` | [adr-0043-openbao.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0043-openbao.md) |
+| `0044` | Windmill for agent and operator workflows | `merged` | [adr-0044-windmill.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0044-windmill.md) |
+| `0045` | Control-plane communication lanes | `merged` | [adr-0045-communication-lanes.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0045-communication-lanes.md) |
+| `0046` | Identity classes for humans, services, agents, and break-glass | `merged` | [adr-0046-identity-classes.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0046-identity-classes.md) |
+| `0047` | Short-lived credentials and internal mTLS | `merged` | [adr-0047-short-lived-creds.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0047-short-lived-creds.md) |
+| `0048` | Command catalog and approval gates | `merged` | [adr-0048-command-catalog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0048-command-catalog.md) |
+| `0049` | Private-first API publication model | `merged` | [adr-0049-private-api-publication.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0049-private-api-publication.md) |
+| `0050` | Transactional email and notification profiles | `merged` | [adr-0050-notification-profiles.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0050-notification-profiles.md) |
+| `0051` | Control-plane backup, recovery, and break-glass | `merged` | [adr-0051-control-plane-recovery.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0051-control-plane-recovery.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

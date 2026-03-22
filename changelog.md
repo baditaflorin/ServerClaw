@@ -10,6 +10,16 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 - fixed the monitoring role's Grafana handler notifications so `make converge-monitoring` can rerun cleanly while importing repo-managed dashboards
 
+## 0.44.0 - 2026-03-22
+
+- added ADRs 0042 through 0051 to define the proposed agentic control-plane model for internal CA, secrets, workflows, communication lanes, identity classes, short-lived credentials, command contracts, private API publication, notification profiles, and recovery
+- added a control-plane roadmap runbook that ties those decisions into a recommended rollout order and initial placement across `docker-runtime-lv3`, `postgres-lv3`, and the existing mail platform
+- registered the new workstreams in `workstreams.yaml` so future implementation threads can proceed with explicit dependencies and shared surfaces
+
+Platform impact:
+
+- no direct live platform change; this release integrates planning ADRs and workstream metadata only
+
 ## 0.43.0 - 2026-03-22
 
 - implemented the live Dockerized mail platform on `docker-runtime-lv3` with Stalwart, a private mail gateway API, and repo-managed Brevo fallback resend
