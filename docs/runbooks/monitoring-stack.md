@@ -32,8 +32,9 @@ make converge-monitoring
 6. Creates a dedicated guest-writer token for guest-side telemetry and mirrors it to `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/guest-writer.token`.
 7. Renders the managed dashboard JSON from repo and imports the overview plus VM detail dashboards into Grafana over the local Grafana API.
 8. Creates or updates the Proxmox metric server `influxdb-http` to send metrics to `10.10.10.40:8086`.
-9. Converges `nginx-lv3` with loopback-only `stub_status` and Telegraf shipping guest and nginx service telemetry into InfluxDB.
-10. Converges `docker-build-lv3` with a repo-managed Docker CLI wrapper plus Telegraf shipping build count and duration events into InfluxDB.
+9. Converges shared guest observability plumbing for service-level Telegraf on managed guests that ship into InfluxDB.
+10. Converges `nginx-lv3` with loopback-only `stub_status` as a thin extension on top of that shared guest observability framework.
+11. Converges `docker-build-lv3` with a repo-managed Docker CLI wrapper plus Telegraf shipping build count and duration events as another thin extension on the same framework.
 
 ## Operator Access Flow
 

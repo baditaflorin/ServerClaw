@@ -3,8 +3,3 @@
   ansible.builtin.systemd:
     name: nginx
     state: reloaded
-
-- name: Restart Telegraf
-  ansible.builtin.systemd:
-    name: telegraf
-    state: restarted

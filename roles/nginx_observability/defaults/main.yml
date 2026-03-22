@@ -1,9 +1,7 @@
 ---
-nginx_observability_dir: /etc/lv3/observability
-nginx_observability_writer_token_file: /etc/lv3/observability/influxdb-guest-writer.token
+nginx_observability_state_dir: /etc/lv3/observability
 nginx_observability_telegraf_config_file: /etc/telegraf/telegraf.d/lv3-nginx.conf
 nginx_observability_stub_status_config_file: /etc/nginx/conf.d/lv3-stub-status.conf
 nginx_observability_stub_status_url: http://127.0.0.1:8080/basic_status
-nginx_observability_influx_url: http://10.10.10.40:8086
 nginx_observability_hostname: nginx-lv3
 nginx_observability_role: nginx-edge

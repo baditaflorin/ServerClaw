@@ -1,14 +1,15 @@
+{% set service_name = guest_observability_service | default("nginx") %}
 [agent]
-  hostname = "{{ nginx_observability_hostname }}"
+  hostname = "{{ guest_observability_hostname }}"
   omit_hostname = false
 
 [global_tags]
-  role = "{{ nginx_observability_role }}"
-  service = "nginx"
+  role = "{{ guest_observability_role }}"
+  service = "{{ service_name }}"
 
 [[outputs.influxdb_v2]]
-  urls = ["{{ nginx_observability_influx_url }}"]
-  token = "{{ lookup('file', monitoring_guest_writer_token_local_file) | trim }}"
+  urls = ["{{ guest_observability_influx_url }}"]
+  token = "{{ lookup('file', guest_observability_writer_token_local_file) | trim }}"
   organization = "{{ monitoring_influxdb_org }}"
   bucket = "{{ monitoring_influxdb_bucket }}"
 

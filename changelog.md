@@ -10,6 +10,17 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 - use this section on `main` for merged notes that have not yet been cut into a numbered release
 
+## 0.33.0 - 2026-03-22
+
+- implemented ADR 0032 to extract shared guest-local observability plumbing into a dedicated framework role
+- added `roles/guest_observability` for common Telegraf installation, InfluxData repository setup, mirrored guest-writer token handling, and Telegraf verification
+- refactored the nginx and docker-build guest observability roles into thin service-specific extensions on top of the shared framework
+- updated the monitoring runbook, repository map, and ADR metadata to reflect the new shared observability boundary
+
+Platform impact:
+
+- no direct live platform change; this release refactors repository observability structure only
+
 ## 0.32.0 - 2026-03-22
 
 - implemented ADR 0031 to define one repository validation contract for automation changes

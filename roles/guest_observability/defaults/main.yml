@@ -1,0 +1,27 @@
+---
+guest_observability_prereq_packages:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gpg
+guest_observability_packages:
+  - telegraf
+guest_observability_keyring_dir: /etc/apt/keyrings
+guest_observability_influx_repo_key_url: "{{ monitoring_influxdb_repo_key_url }}"
+guest_observability_influx_repo_key_temp_file: /tmp/influxdata-archive.key
+guest_observability_influx_repo_keyring: "{{ monitoring_influxdb_repo_keyring }}"
+guest_observability_influx_repo_file: "{{ monitoring_influxdb_repo_file }}"
+guest_observability_state_dir: /etc/lv3/observability
+guest_observability_writer_token_local_file: "{{ monitoring_guest_writer_token_local_file }}"
+guest_observability_writer_token_file: "{{ guest_observability_state_dir }}/influxdb-guest-writer.token"
+guest_observability_influx_url: >-
+  http://{{ hostvars['monitoring-lv3'].ansible_host | default('10.10.10.40') }}:8086
+guest_observability_hostname: "{{ inventory_hostname }}"
+guest_observability_role: "{{ inventory_hostname }}"
+guest_observability_service: generic
+guest_observability_managed_directories:
+  - path: "{{ guest_observability_state_dir }}"
+    owner: root
+    group: root
+    mode: "0700"
+guest_observability_telegraf_service_name: telegraf

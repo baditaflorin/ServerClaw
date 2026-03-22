@@ -2,5 +2,5 @@
 
 Installs the managed Docker wrapper and Telegraf path that records build events from `docker-build-lv3`.
 
-Inputs: Docker wrapper paths, Telegraf output settings, monitoring token paths.
-Outputs: `/usr/local/bin/docker`, a Telegraf config fragment, and `docker_builds` events in InfluxDB.
+Inputs: Docker wrapper paths, socket listener settings, Telegraf config path, service identity, and the shared `guest_observability` framework inputs.
+Outputs: `/usr/local/bin/docker`, a framework-managed Telegraf path, and `docker_builds` events in InfluxDB.

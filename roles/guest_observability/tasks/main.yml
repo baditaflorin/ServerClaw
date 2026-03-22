@@ -1,0 +1,6 @@
+---
+- name: Prepare shared guest observability plumbing
+  ansible.builtin.import_tasks: setup.yml
+
+- name: Verify shared guest observability services
+  ansible.builtin.import_tasks: verify.yml
