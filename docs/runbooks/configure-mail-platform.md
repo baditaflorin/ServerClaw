@@ -11,6 +11,7 @@ It covers:
 - the Stalwart mail runtime on `docker-runtime-lv3`
 - the private mail gateway API used by platform services and automation agents
 - Telegraf and Grafana mail telemetry
+- OpenTelemetry traces from the mail gateway into the shared monitoring collector
 
 ## Preconditions
 
@@ -40,6 +41,7 @@ The workflow manages these live surfaces:
 - private mail gateway API on `docker-runtime-lv3:8081`
 - Telegraf mail telemetry collector on `docker-runtime-lv3`
 - Grafana dashboard `lv3-mail-platform` on `monitoring-lv3`
+- mail-gateway traces exported to Tempo through `http://10.10.10.40:4318/v1/traces`
 
 ## Generated Local Artifacts
 
@@ -102,9 +104,11 @@ Run these checks after converge:
 3. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'python3 /usr/local/libexec/lv3-mail-platform-metrics.py'`
 4. `curl -s -H "X-API-Key: $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/gateway-api-key.txt)" http://10.10.10.20:8081/v1/mailboxes`
 5. `curl -I https://grafana.lv3.org`
+6. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'curl -fsS http://127.0.0.1:3200/api/search/tag/service.name/values | jq -r ''.tagValues[]'' | grep mail-gateway'`
 
 ## Notes
 
 - inbound mail for `server@lv3.org` depends on the public MX record and host NAT being active
 - outbound transactional delivery currently uses the Brevo HTTP API from the mail gateway
+- the first distributed traces for this workflow come from inbound gateway requests plus outbound HTTP calls to Stalwart and Brevo
 - if direct public SMTP delivery from `server@lv3.org` is required later, add the sender identity, DKIM, and reverse-DNS path explicitly instead of reusing the Brevo relay assumptions

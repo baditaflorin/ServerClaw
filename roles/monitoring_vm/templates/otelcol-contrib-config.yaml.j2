@@ -1,0 +1,50 @@
+extensions:
+  health_check:
+    endpoint: 127.0.0.1:{{ monitoring_otelcol_health_port }}
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: "{{ ansible_host }}:{{ monitoring_otelcol_grpc_port }}"
+      http:
+        endpoint: "{{ ansible_host }}:{{ monitoring_otelcol_http_port }}"
+
+processors:
+  batch:
+  memory_limiter:
+    check_interval: 5s
+    limit_mib: 512
+    spike_limit_mib: 128
+
+exporters:
+  otlp:
+    endpoint: "127.0.0.1:{{ monitoring_tempo_otlp_grpc_port }}"
+    tls:
+      insecure: true
+
+service:
+  telemetry:
+    metrics:
+      readers:
+        - pull:
+            exporter:
+              prometheus:
+                host: 127.0.0.1
+                port: {{ monitoring_otelcol_metrics_port }}
+                without_scope_info: true
+                without_type_suffix: true
+                without_units: true
+                with_resource_constant_labels:
+                  included: []
+  extensions:
+    - health_check
+  pipelines:
+    traces:
+      receivers:
+        - otlp
+      processors:
+        - memory_limiter
+        - batch
+      exporters:
+        - otlp

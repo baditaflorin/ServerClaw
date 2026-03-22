@@ -12,6 +12,8 @@ import httpx
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response, status
 from pydantic import BaseModel, Field
 
+from telemetry import configure_telemetry
+
 
 def env_bool(name: str, default: bool) -> bool:
     value = os.getenv(name)
@@ -73,6 +75,7 @@ class MailboxUpsertRequest(BaseModel):
 
 
 app = FastAPI()
+configure_telemetry(app)
 
 
 def require_api_key(
