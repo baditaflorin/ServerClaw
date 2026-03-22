@@ -41,6 +41,7 @@ These files are integration-owned and should normally be edited only during merg
 - [docs/runbooks](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks): operator procedures for access, install, networking, provisioning, and hardening
 - [docs/runbooks/workflow-catalog-and-execution-contracts.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/workflow-catalog-and-execution-contracts.md): canonical workflow ids, preferred entry points, and execution metadata
 - [docs/runbooks/controller-local-secrets-and-preflight.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/controller-local-secrets-and-preflight.md): controller-local secret manifest usage and the standard preflight check
+- [docs/runbooks/live-apply-receipts-and-verification-evidence.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/live-apply-receipts-and-verification-evidence.md): structured evidence model for real platform applies
 - [docs/release-process.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-process.md): branch, merge, and live-apply sequencing
 - [docs/workstreams/README.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/README.md): how parallel implementation is organized
 - [scripts/create-workstream.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/create-workstream.sh): creates the branch/worktree pair for a workstream
@@ -57,6 +58,7 @@ These files are integration-owned and should normally be edited only during merg
 - [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/Makefile): preferred command surface for common tasks
 - [scripts/workflow_catalog.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/workflow_catalog.py): validates and renders the canonical workflow execution catalog
 - [scripts/preflight_controller_local.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/preflight_controller_local.py): checks controller-local secret and environment prerequisites for a named workflow
+- [scripts/live_apply_receipts.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/live_apply_receipts.py): validates and renders structured live-apply receipts
 - [scripts/validate_repo.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_repo.sh): repository validation entry point behind `make validate`
 - [filter_plugins/service_topology.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/filter_plugins/service_topology.py): derives edge publication and DNS artifacts from the canonical service topology catalog
 - [playbooks/site.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/site.yml): main Ansible entry point for the Proxmox host
@@ -74,6 +76,7 @@ These files are integration-owned and should normally be edited only during merg
 - [inventory/host_vars/proxmox_florin.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml): per-host topology, guest definitions, and the canonical `lv3_service_topology` catalog
 - [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json): canonical machine-readable workflow catalog for preferred entry points, preflight requirements, validation targets, and runbook ownership
 - [config/controller-local-secrets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/controller-local-secrets.json): machine-readable controller-local secret manifest for repo workflows and `.local/` prerequisites
+- [receipts/live-applies](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/live-applies): structured receipt set for historically applied and verified live changes
 
 ### Reusable automation units
 

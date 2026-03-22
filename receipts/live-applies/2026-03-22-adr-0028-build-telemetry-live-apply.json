@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-22-adr-0028-build-telemetry-live-apply",
+  "applied_on": "2026-03-22",
+  "recorded_on": "2026-03-22",
+  "recorded_by": "codex",
+  "source_commit": "128863c274c0d3f6aadb8c8c6af9d73cfe5cc314",
+  "repo_version_context": "0.29.0",
+  "workflow_id": "converge-monitoring",
+  "adr": "0028",
+  "summary": "Applied Docker build count and duration telemetry live for docker-build-lv3 and verified the metrics in InfluxDB and Grafana.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "docker-build-lv3",
+      "vmid": "130",
+      "address": "10.10.10.30"
+    },
+    {
+      "kind": "dashboard",
+      "name": "LV3 docker-build-lv3 Detail"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Build events written to InfluxDB",
+      "result": "pass",
+      "observed": "docker_builds measurements included count, duration_ms, start_time_ns, and end_time_ns for docker-build-lv3."
+    },
+    {
+      "check": "Grafana timing panels present",
+      "result": "pass",
+      "observed": "The build VM detail dashboard showed build counts and duration panels after convergence."
+    },
+    {
+      "check": "Smoke build captured",
+      "result": "pass",
+      "observed": "A real smoke build on the build guest produced a successful telemetry row with duration data."
+    }
+  ],
+  "evidence_refs": [
+    "docs/runbooks/monitoring-stack.md",
+    "docs/adr/0028-docker-build-vm-build-count-telemetry-via-cli-wrapper-events.md",
+    "README.md",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "This receipt was backfilled from repository history and the current recorded platform state."
+  ]
+}

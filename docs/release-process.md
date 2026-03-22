@@ -23,6 +23,7 @@ This repository now supports parallel ADR implementation. That requires a clear 
 3. Live apply phase
    - apply merged automation from `main`
    - verify the real platform state
+   - record or update a structured receipt under `receipts/live-applies/`
    - bump `platform_version` in `versions/stack.yaml`
    - update observed state in `versions/stack.yaml`
    - mark the workstream as `live_applied: true`

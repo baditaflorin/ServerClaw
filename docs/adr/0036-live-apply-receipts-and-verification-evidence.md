@@ -1,10 +1,10 @@
 # ADR 0036: Live Apply Receipts And Verification Evidence
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.37.0
+- Implemented In Platform Version: not applicable (repo-only)
+- Implemented On: 2026-03-22
 - Date: 2026-03-22
 
 ## Context
@@ -38,3 +38,11 @@ Each receipt should capture, at minimum:
 - Live-state updates in `versions/stack.yaml` become easier to audit.
 - Runbooks can point at concrete past receipts when a workflow is reapplied.
 - The receipt format must stay concise and non-secret; it should record evidence, not dump full command logs.
+
+## Implementation Notes
+
+- Structured receipts now live under [receipts/live-applies](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/live-applies).
+- [scripts/live_apply_receipts.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/live_apply_receipts.py) validates receipt schema, git commit references, workflow ids, and evidence file references.
+- [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/Makefile) now exposes `make receipts` and `make receipt-info RECEIPT=<id>` for receipt discovery.
+- [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml) now records the latest receipt ids that support the current live platform summary.
+- Historical receipts were backfilled for the current known live applies so the framework starts with actual evidence rather than an empty directory.

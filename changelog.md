@@ -10,6 +10,18 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 - use this section on `main` for merged notes that have not yet been cut into a numbered release
 
+## 0.37.0 - 2026-03-22
+
+- implemented ADR 0036 to add structured live-apply receipts and verification evidence to the repository
+- added `receipts/live-applies` plus `scripts/live_apply_receipts.py` to capture and validate applied date, source commit, workflow id, targets, verification results, and evidence references
+- added `make receipts` and `make receipt-info RECEIPT=<id>` for evidence discovery and integrated receipt validation into `make validate`
+- backfilled receipts for the current known live applies covering monitoring, edge publication, Docker runtime, PostgreSQL, Uptime Kuma, Docker build telemetry, and the backup VM
+- linked the latest receipt ids from `versions/stack.yaml` and documented the receipt lifecycle in the new runbook and release process
+
+Platform impact:
+
+- no direct live platform change; this release makes existing live evidence explicit and auditable in the repository only
+
 ## 0.36.0 - 2026-03-22
 
 - implemented ADR 0035 to define a canonical machine-readable workflow catalog for repository execution paths

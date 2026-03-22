@@ -61,6 +61,7 @@ Use these defaults unless a runbook or break-glass situation explicitly requires
 7. Apply merged work live, then bump `platform_version` and refresh observed state.
 8. Run `make preflight WORKFLOW=<id>` before long-running workflows that depend on controller-local secrets or external tokens.
 9. Use `make workflows` or `make workflow-info WORKFLOW=<id>` when you need the canonical entry point instead of inferring it from prose.
+10. After a real live apply, record the verification evidence in `receipts/live-applies/`.
 
 At minimum, review whether these files need updates:
 
@@ -81,6 +82,7 @@ Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/M
 - `make workflows`
 - `make workflow-info WORKFLOW=converge-monitoring`
 - `make validate`
+- `make receipts`
 - `make preflight WORKFLOW=converge-monitoring`
 - `make syntax-check`
 - `make install-proxmox`
@@ -111,6 +113,7 @@ Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/M
 - secrets and ephemeral provider passwords do not get committed
 - workflow entry points stay declared in `config/workflow-catalog.json`
 - controller-local secret prerequisites stay declared in `config/controller-local-secrets.json`
+- live applies keep structured evidence under `receipts/live-applies/`
 - `make validate` is the minimum repository gate before merge to `main`
 
 ## Pending Areas

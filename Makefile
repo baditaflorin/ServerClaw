@@ -7,8 +7,9 @@ ANSIBLE_ENV := ANSIBLE_LOCAL_TEMP=$(ANSIBLE_LOCAL_TEMP) ANSIBLE_REMOTE_TEMP=$(AN
 UPTIME_KUMA_PYTHON ?= $(REPO_ROOT)/.local/uptime-kuma/client-venv/bin/python
 ACTION ?= list-monitors
 UPTIME_KUMA_ARGS ?=
+RECEIPT ?=
 
-.PHONY: validate validate-ansible-syntax validate-yaml validate-ansible-lint validate-shell validate-json workflows workflow-info preflight syntax-check syntax-check-monitoring syntax-check-docker-runtime syntax-check-backup-vm syntax-check-uptime-kuma install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-monitoring converge-docker-runtime converge-postgres-vm deploy-uptime-kuma uptime-kuma-manage configure-backups configure-backup-vm database-dns start-workstream
+.PHONY: validate validate-ansible-syntax validate-yaml validate-ansible-lint validate-shell validate-json receipts receipt-info workflows workflow-info preflight syntax-check syntax-check-monitoring syntax-check-docker-runtime syntax-check-backup-vm syntax-check-uptime-kuma install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-monitoring converge-docker-runtime converge-postgres-vm deploy-uptime-kuma uptime-kuma-manage configure-backups configure-backup-vm database-dns start-workstream
 
 validate:
 	$(REPO_ROOT)/scripts/validate_repo.sh
@@ -27,6 +28,13 @@ validate-shell:
 
 validate-json:
 	$(REPO_ROOT)/scripts/validate_repo.sh json
+
+receipts:
+	$(REPO_ROOT)/scripts/live_apply_receipts.py --list
+
+receipt-info:
+	@test -n "$(RECEIPT)" || (echo "set RECEIPT=<receipt-id>"; exit 1)
+	$(REPO_ROOT)/scripts/live_apply_receipts.py --receipt $(RECEIPT)
 
 workflows:
 	$(REPO_ROOT)/scripts/workflow_catalog.py --list

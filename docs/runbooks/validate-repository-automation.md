@@ -22,6 +22,7 @@ This is the required minimum gate before merging automation changes to `main`.
 - shell scripts pass `shellcheck`
 - repo-managed JSON artifacts pass `jq empty`
 - the workflow catalog and controller-local secret manifest cross-reference cleanly
+- structured live-apply receipts reference valid workflows, files, and git commits
 
 ## Tooling Model
 
