@@ -10,6 +10,24 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 - use this section on `main` for merged notes that have not yet been cut into a numbered release
 
+## 0.26.0 - 2026-03-22
+
+- added Grafana folder-aware dashboard provisioning for a stable LV3 monitoring namespace
+- added per-VM Grafana dashboards for `nginx-lv3`, `docker-runtime-lv3`, `docker-build-lv3`, and `monitoring-lv3`
+- refactored the monitoring dashboard templates into shared macros plus a generated VM-detail template
+- updated the monitoring runbook, ADR 0011, repository map, and platform state to reflect the multi-dashboard layout
+
+Platform impact:
+
+- Grafana now contains the folder `LV3` with one high-level overview dashboard and four VM detail dashboards
+- the live dashboard inventory is:
+  - `LV3 Platform Overview` with `24` panels
+  - `LV3 nginx-lv3 Detail` with `12` panels
+  - `LV3 docker-runtime-lv3 Detail` with `8` panels
+  - `LV3 docker-build-lv3 Detail` with `8` panels
+  - `LV3 monitoring-lv3 Detail` with `8` panels
+- `make converge-monitoring` was re-verified live and reran idempotently with `changed=0`
+
 ## 0.25.0 - 2026-03-22
 
 - added ADR 0022 to codify the NGINX guest observability model as infrastructure architecture rather than implementation only

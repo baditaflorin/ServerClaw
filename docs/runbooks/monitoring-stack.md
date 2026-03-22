@@ -7,7 +7,9 @@ This runbook converges the dedicated monitoring VM `140` at `10.10.10.40` with:
 - Grafana on port `3000`
 - InfluxDB 2 on port `8086`
 - a provisioned Grafana data source for the Proxmox metrics bucket
-- a provisioned Grafana dashboard, `LV3 Platform Overview`
+- a provisioned Grafana folder, `LV3`
+- a provisioned overview dashboard, `LV3 Platform Overview`
+- a provisioned detail dashboard for each managed VM
 - guest-side NGINX telemetry from `nginx-lv3`
 - a Proxmox external metric server that writes into InfluxDB over the private network
 
@@ -27,7 +29,7 @@ make converge-monitoring
 4. Creates separate InfluxDB tokens for Proxmox metric writes and Grafana bucket reads.
 5. Provisions the Grafana InfluxDB data source automatically.
 6. Creates a dedicated guest-writer token for guest-side telemetry and mirrors it to `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/guest-writer.token`.
-7. Renders the managed dashboard JSON from repo and imports it into Grafana over the local Grafana API.
+7. Renders the managed dashboard JSON from repo and imports the overview plus VM detail dashboards into Grafana over the local Grafana API.
 8. Creates or updates the Proxmox metric server `influxdb-http` to send metrics to `10.10.10.40:8086`.
 9. Converges `nginx-lv3` with loopback-only `stub_status` and Telegraf shipping guest and nginx service telemetry into InfluxDB.
 
@@ -74,10 +76,16 @@ Verify the Grafana health endpoint locally on the guest:
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'curl -fsS http://127.0.0.1:3000/api/health'
 ```
 
-Verify the managed dashboard exists and has the expected title:
+Verify the managed overview dashboard exists and has the expected title:
 
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'curl -fsS -u admin:$(sudo cat /etc/lv3/monitoring/grafana-admin-password) http://127.0.0.1:3000/api/dashboards/uid/lv3-platform-overview'
+```
+
+Verify the full dashboard inventory:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'PASS=$(sudo cat /etc/lv3/monitoring/grafana-admin-password); curl -fsS -u admin:${PASS} http://127.0.0.1:3000/api/search?query=lv3 | jq -r '\''.[] | [.uid, .title, .url] | @tsv'\'''
 ```
 
 Verify nginx guest telemetry is present in InfluxDB:

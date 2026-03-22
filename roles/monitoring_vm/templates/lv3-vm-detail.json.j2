@@ -1,0 +1,65 @@
+{% import "_grafana_dashboard_macros.j2" as dashboard %}
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": false,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [
+    {
+      "title": "Back To Overview",
+      "type": "link",
+      "url": "/d/{{ monitoring_grafana_dashboard_uid }}/{{ monitoring_grafana_dashboard_uid }}"
+    }
+  ],
+  "panels": [
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 1, 0, 0, monitoring_dashboard_guest.name ~ " Current CPU", "percent", dashboard.cpu_query(monitoring_influxdb_bucket, "qemu", monitoring_dashboard_guest.name)) }},
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 2, 6, 0, monitoring_dashboard_guest.name ~ " Current Memory", "percent", dashboard.ratio_query(monitoring_influxdb_bucket, "qemu", monitoring_dashboard_guest.name, "mem", "maxmem")) }},
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 3, 12, 0, monitoring_dashboard_guest.name ~ " Current Disk", "percent", dashboard.ratio_query(monitoring_influxdb_bucket, "qemu", monitoring_dashboard_guest.name, "disk", "maxdisk")) }},
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 4, 18, 0, monitoring_dashboard_guest.name ~ " Uptime", "s", dashboard.uptime_query(monitoring_influxdb_bucket, "qemu", monitoring_dashboard_guest.name)) }},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 5, 0, 4, monitoring_dashboard_guest.name ~ " CPU Usage", "percent", dashboard.cpu_query(monitoring_influxdb_bucket, "qemu", monitoring_dashboard_guest.name), 0, 100) }},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 6, 6, 4, monitoring_dashboard_guest.name ~ " Memory Usage", "percent", dashboard.ratio_query(monitoring_influxdb_bucket, "qemu", monitoring_dashboard_guest.name, "mem", "maxmem"), 0, 100) }},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 7, 12, 4, monitoring_dashboard_guest.name ~ " Disk Usage", "percent", dashboard.ratio_query(monitoring_influxdb_bucket, "qemu", monitoring_dashboard_guest.name, "disk", "maxdisk"), 0, 100) }},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 8, 18, 4, monitoring_dashboard_guest.name ~ " Network Throughput", "Bps", dashboard.throughput_query(monitoring_influxdb_bucket, "qemu", monitoring_dashboard_guest.name), 0, None) }}{% if monitoring_dashboard_guest.role == "nginx" %},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 9, 0, 12, "NGINX Active Connections", "short", dashboard.nginx_field_query(monitoring_influxdb_bucket, monitoring_dashboard_guest.name, "active"), 0, None) }},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 10, 6, 12, "NGINX Requests Per Second", "reqps", dashboard.nginx_rate_query(monitoring_influxdb_bucket, monitoring_dashboard_guest.name, "requests"), 0, None) }},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 11, 12, 12, "NGINX Accepts And Handled Per Second", "cps", "from(bucket: \"" ~ monitoring_influxdb_bucket ~ "\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"nginx\" and r.host == \"" ~ monitoring_dashboard_guest.name ~ "\" and (r._field == \"accepts\" or r._field == \"handled\")) |> derivative(unit: 1s, nonNegative: true)", 0, None) }},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 12, 18, 12, "NGINX Connection States", "short", "from(bucket: \"" ~ monitoring_influxdb_bucket ~ "\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"nginx\" and r.host == \"" ~ monitoring_dashboard_guest.name ~ "\" and (r._field == \"reading\" or r._field == \"writing\" or r._field == \"waiting\"))", 0, None) }}{% endif %}
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": [
+    "lv3",
+    "vm",
+    {{ monitoring_dashboard_guest.name | to_json }}
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": {{ ("LV3 " ~ monitoring_dashboard_guest.name ~ " Detail") | to_json }},
+  "uid": {{ ("lv3-vm-" ~ monitoring_dashboard_guest.name) | to_json }},
+  "version": 1,
+  "weekStart": ""
+}

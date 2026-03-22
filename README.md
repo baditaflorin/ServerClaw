@@ -116,8 +116,10 @@ InfluxDB 2 running on 10.10.10.40:8086
 Grafana running on 10.10.10.40:3000
 Proxmox metric server influxdb-http active and writing to the proxmox bucket
 Grafana published at https://grafana.lv3.org via the NGINX edge
+Grafana folder LV3 provisioned from repo
 Grafana dashboard LV3 Platform Overview provisioned from repo
-Dashboard covers the Proxmox host plus nginx-lv3, docker-runtime-lv3, docker-build-lv3, and monitoring-lv3 individually
+Per-VM dashboards provisioned for nginx-lv3, docker-runtime-lv3, docker-build-lv3, and monitoring-lv3
+Overview and VM dashboards together cover the Proxmox host plus nginx-lv3, docker-runtime-lv3, docker-build-lv3, and monitoring-lv3 individually
 NGINX guest telemetry now includes loopback-only stub_status plus Telegraf shipping into InfluxDB
 Dashboard now also includes nginx service panels for active connections, requests per second, accepts and handled rates, and connection states
 ```
@@ -195,7 +197,7 @@ This repo now tracks three distinct things:
 
 Current values on `main`:
 
-- `repo_version`: `0.25.0`
+- `repo_version`: `0.26.0`
 - `platform_version`: `0.17.0`
 - `observed_os`: `Debian 13`
 - `observed_proxmox_installed`: `true`

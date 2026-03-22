@@ -90,6 +90,14 @@
     group: grafana
     mode: "0755"
 
+- name: Ensure Grafana VM dashboard storage directory exists
+  ansible.builtin.file:
+    path: "{{ monitoring_grafana_vm_dashboard_dir }}"
+    state: directory
+    owner: root
+    group: grafana
+    mode: "0755"
+
 - name: Generate Grafana admin password
   ansible.builtin.shell: |
     set -euo pipefail
@@ -654,6 +662,39 @@
   changed_when: false
   no_log: true
 
+- name: Ensure LV3 Grafana folder exists
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/folders/{{ monitoring_grafana_folder_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code:
+      - 200
+      - 404
+  register: monitoring_grafana_folder_existing
+  changed_when: false
+  failed_when: monitoring_grafana_folder_existing.status not in [200, 404]
+  no_log: true
+
+- name: Create LV3 Grafana folder when missing
+  ansible.builtin.uri:
+    url: http://127.0.0.1:3000/api/folders
+    method: POST
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    body_format: json
+    body:
+      uid: "{{ monitoring_grafana_folder_uid }}"
+      title: "{{ monitoring_grafana_folder_title }}"
+    status_code:
+      - 200
+      - 412
+  when: monitoring_grafana_folder_existing.status == 404
+  changed_when: monitoring_grafana_folder_existing.status == 404
+  no_log: true
+
 - name: Check whether LV3 platform dashboard already exists
   ansible.builtin.uri:
     url: "http://127.0.0.1:3000/api/dashboards/uid/{{ monitoring_grafana_dashboard_uid }}"
@@ -669,10 +710,51 @@
   failed_when: monitoring_grafana_dashboard_existing.status not in [200, 404]
   no_log: true
 
+- name: Check whether VM detail dashboards already exist
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/lv3-vm-{{ item.name }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code:
+      - 200
+      - 404
+  loop: "{{ hostvars[groups['proxmox_hosts'][0]].proxmox_guests }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: monitoring_grafana_vm_dashboards_existing
+  changed_when: false
+  no_log: true
+
 - name: Read rendered LV3 platform dashboard
   ansible.builtin.slurp:
     src: "{{ monitoring_grafana_dashboard_file }}"
   register: monitoring_grafana_dashboard_payload_raw
+  no_log: true
+
+- name: Render VM detail dashboards
+  ansible.builtin.template:
+    src: lv3-vm-detail.json.j2
+    dest: "{{ monitoring_grafana_vm_dashboard_dir }}/{{ item.name }}-detail.json"
+    owner: root
+    group: grafana
+    mode: "0644"
+  vars:
+    monitoring_dashboard_guest: "{{ item }}"
+  loop: "{{ hostvars[groups['proxmox_hosts'][0]].proxmox_guests }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: monitoring_grafana_vm_dashboard_files_rendered
+  notify: restart grafana
+
+- name: Read rendered VM detail dashboards
+  ansible.builtin.slurp:
+    src: "{{ monitoring_grafana_vm_dashboard_dir }}/{{ item.name }}-detail.json"
+  loop: "{{ hostvars[groups['proxmox_hosts'][0]].proxmox_guests }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: monitoring_grafana_vm_dashboard_payloads_raw
   no_log: true
 
 - name: Import LV3 platform dashboard into Grafana
@@ -685,11 +767,34 @@
     body_format: json
     body:
       dashboard: "{{ monitoring_grafana_dashboard_payload_raw.content | b64decode | from_json }}"
+      folderUid: "{{ monitoring_grafana_folder_uid }}"
       overwrite: true
     status_code: 200
   register: monitoring_grafana_dashboard_import
   changed_when: monitoring_grafana_dashboard_file_rendered is changed or monitoring_grafana_dashboard_existing.status == 404
   when: monitoring_grafana_dashboard_file_rendered is changed or monitoring_grafana_dashboard_existing.status == 404
+  no_log: true
+
+- name: Import VM detail dashboards into Grafana
+  ansible.builtin.uri:
+    url: http://127.0.0.1:3000/api/dashboards/db
+    method: POST
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    body_format: json
+    body:
+      dashboard: "{{ item.1.content | b64decode | from_json }}"
+      folderUid: "{{ monitoring_grafana_folder_uid }}"
+      overwrite: true
+    status_code: 200
+  loop: "{{ hostvars[groups['proxmox_hosts'][0]].proxmox_guests | zip(monitoring_grafana_vm_dashboard_payloads_raw.results, monitoring_grafana_vm_dashboard_files_rendered.results, monitoring_grafana_vm_dashboards_existing.results) | list }}"
+  loop_control:
+    label: "{{ item.0.name }}"
+  when: >
+    (item.2.changed | default(false))
+    or (item.3.status == 404)
+  changed_when: true
   no_log: true
 
 - name: Verify Grafana dashboard is provisioned
@@ -701,5 +806,20 @@
     force_basic_auth: true
     status_code: 200
   register: monitoring_grafana_dashboard_check
+  changed_when: false
+  no_log: true
+
+- name: Verify VM detail dashboards are provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/lv3-vm-{{ item.name }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  loop: "{{ hostvars[groups['proxmox_hosts'][0]].proxmox_guests }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: monitoring_grafana_vm_dashboard_checks
   changed_when: false
   no_log: true

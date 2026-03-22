@@ -65,7 +65,7 @@ The first converged implementation keeps the monitoring stack on the dedicated m
 - Grafana runs on VM `140`.
 - InfluxDB 2 receives Proxmox metrics through the native Proxmox external metric server integration over HTTP on the private network.
 - Grafana is provisioned with an InfluxDB data source automatically from locally generated secrets on the monitoring VM.
-- Grafana contains a managed dashboard, `LV3 Platform Overview`, which monitors the Proxmox host and each managed VM individually.
+- Grafana contains a managed high-level dashboard, `LV3 Platform Overview`, plus one managed detail dashboard per VM.
 - Grafana is published at `https://grafana.lv3.org` through the NGINX edge.
 
 ## Scope of the first monitoring rollout
@@ -111,7 +111,7 @@ This ADR defines the topology and data-flow direction. Follow-up automation shou
 
 ## Implemented state
 
-The implemented dashboard currently covers:
+The implemented dashboard set currently covers:
 
 - Proxmox host load, CPU, memory, and disk usage
 - `nginx-lv3` CPU, memory, disk, and network throughput
@@ -119,6 +119,15 @@ The implemented dashboard currently covers:
 - `docker-runtime-lv3` CPU, memory, disk, and network throughput
 - `docker-build-lv3` CPU, memory, disk, and network throughput
 - `monitoring-lv3` CPU, memory, disk, and network throughput
+
+The implemented Grafana structure currently includes:
+
+- folder `LV3`
+- overview dashboard `LV3 Platform Overview`
+- detail dashboard `LV3 nginx-lv3 Detail`
+- detail dashboard `LV3 docker-runtime-lv3 Detail`
+- detail dashboard `LV3 docker-build-lv3 Detail`
+- detail dashboard `LV3 monitoring-lv3 Detail`
 
 The implemented guest-level telemetry currently includes:
 

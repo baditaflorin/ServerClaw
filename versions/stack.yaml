@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.25.0
+repo_version: 0.26.0
 platform_version: 0.17.0
 
 desired_state:
@@ -184,10 +184,25 @@ observed_state:
     influxdb_running: true
     grafana_internal_url: http://10.10.10.40:3000
     grafana_public_url: https://grafana.lv3.org
-    grafana_dashboard_uid: lv3-platform-overview
-    grafana_dashboard_title: LV3 Platform Overview
-    grafana_dashboard_panel_count: 24
-    grafana_dashboard_provisioned: true
+    grafana_folder_uid: lv3
+    grafana_folder_title: LV3
+    grafana_dashboards:
+      - uid: lv3-platform-overview
+        title: LV3 Platform Overview
+        panels: 24
+      - uid: lv3-vm-nginx-lv3
+        title: LV3 nginx-lv3 Detail
+        panels: 12
+      - uid: lv3-vm-docker-runtime-lv3
+        title: LV3 docker-runtime-lv3 Detail
+        panels: 8
+      - uid: lv3-vm-docker-build-lv3
+        title: LV3 docker-build-lv3 Detail
+        panels: 8
+      - uid: lv3-vm-monitoring-lv3
+        title: LV3 monitoring-lv3 Detail
+        panels: 8
+    grafana_dashboards_provisioned: true
     influxdb_internal_url: http://10.10.10.40:8086
     proxmox_metric_server_id: influxdb-http
     proxmox_metrics_flow_verified: true
@@ -226,7 +241,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.25.0
+    current: 0.26.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.17.0

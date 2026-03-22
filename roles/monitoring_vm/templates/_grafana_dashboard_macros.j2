@@ -1,0 +1,102 @@
+{% macro cpu_query(bucket, object_name, host_name) -%}
+from(bucket: "{{ bucket }}") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == "system" and r.object == "{{ object_name }}" and r.host == "{{ host_name }}" and r._field == "cpu") |> map(fn: (r) => ({ r with _value: float(v: r._value) * 100.0 }))
+{%- endmacro %}
+{% macro ratio_query(bucket, object_name, host_name, value_field, max_field) -%}
+from(bucket: "{{ bucket }}") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == "system" and r.object == "{{ object_name }}" and r.host == "{{ host_name }}" and (r._field == "{{ value_field }}" or r._field == "{{ max_field }}")) |> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value") |> map(fn: (r) => ({ _time: r._time, _value: if exists r.{{ max_field }} and float(v: r.{{ max_field }}) > 0.0 then (float(v: r.{{ value_field }}) / float(v: r.{{ max_field }})) * 100.0 else 0.0 }))
+{%- endmacro %}
+{% macro throughput_query(bucket, object_name, host_name) -%}
+from(bucket: "{{ bucket }}") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == "system" and r.object == "{{ object_name }}" and r.host == "{{ host_name }}" and (r._field == "netin" or r._field == "netout")) |> derivative(unit: 1s, nonNegative: true)
+{%- endmacro %}
+{% macro load_query(bucket, host_name) -%}
+from(bucket: "{{ bucket }}") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == "cpustat" and r.object == "nodes" and r.host == "{{ host_name }}" and r._field == "avg1")
+{%- endmacro %}
+{% macro uptime_query(bucket, object_name, host_name) -%}
+from(bucket: "{{ bucket }}") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == "system" and r.object == "{{ object_name }}" and r.host == "{{ host_name }}" and r._field == "uptime")
+{%- endmacro %}
+{% macro nginx_field_query(bucket, host_name, field_name) -%}
+from(bucket: "{{ bucket }}") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == "nginx" and r.host == "{{ host_name }}" and r._field == "{{ field_name }}")
+{%- endmacro %}
+{% macro nginx_rate_query(bucket, host_name, field_name) -%}
+from(bucket: "{{ bucket }}") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == "nginx" and r.host == "{{ host_name }}" and r._field == "{{ field_name }}") |> derivative(unit: 1s, nonNegative: true)
+{%- endmacro %}
+{% macro timeseries_panel(datasource_name, panel_id, x, y, title, unit, query, min_value=None, max_value=None) -%}
+{
+  "id": {{ panel_id }},
+  "type": "timeseries",
+  "title": {{ title | to_json }},
+  "datasource": {{ datasource_name | to_json }},
+  "gridPos": {
+    "h": 8,
+    "w": 6,
+    "x": {{ x }},
+    "y": {{ y }}
+  },
+  "fieldConfig": {
+    "defaults": {
+      "unit": {{ unit | to_json }}{% if min_value is not none %},
+      "min": {{ min_value }}{% endif %}{% if max_value is not none %},
+      "max": {{ max_value }}{% endif %}
+    },
+    "overrides": []
+  },
+  "options": {
+    "legend": {
+      "displayMode": "list",
+      "placement": "bottom",
+      "showLegend": true
+    },
+    "tooltip": {
+      "mode": "multi",
+      "sort": "desc"
+    }
+  },
+  "targets": [
+    {
+      "refId": "A",
+      "query": {{ query | trim | to_json }}
+    }
+  ]
+}
+{%- endmacro %}
+{% macro stat_panel(datasource_name, panel_id, x, y, title, unit, query) -%}
+{
+  "id": {{ panel_id }},
+  "type": "stat",
+  "title": {{ title | to_json }},
+  "datasource": {{ datasource_name | to_json }},
+  "gridPos": {
+    "h": 4,
+    "w": 6,
+    "x": {{ x }},
+    "y": {{ y }}
+  },
+  "fieldConfig": {
+    "defaults": {
+      "unit": {{ unit | to_json }}
+    },
+    "overrides": []
+  },
+  "options": {
+    "colorMode": "value",
+    "graphMode": "area",
+    "justifyMode": "center",
+    "orientation": "auto",
+    "reduceOptions": {
+      "calcs": [
+        "lastNotNull"
+      ],
+      "fields": "",
+      "values": false
+    },
+    "showPercentChange": false,
+    "textMode": "auto",
+    "wideLayout": true
+  },
+  "targets": [
+    {
+      "refId": "A",
+      "query": {{ query | trim | to_json }}
+    }
+  ]
+}
+{%- endmacro %}
