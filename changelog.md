@@ -10,6 +10,18 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 - use this section on `main` for merged notes that have not yet been cut into a numbered release
 
+## 0.39.0 - 2026-03-22
+
+- merged the mail platform planning workstream and renumbered its decision to ADR 0041 during integration because ADR 0040 was already assigned on `main`
+- added a fully descriptive ADR for a Dockerized mail platform covering server delivery, machine-facing CRUD automation, Grafana telemetry, and failover delivery behavior
+- documented Stalwart as the recommended primary open-source mail server, with a Postfix relay sidecar for stable internal submission and backup resend policy
+- added a rollout runbook that captures the implementation order, observability requirements, cutover gate, and prerequisite DNS and reputation inputs
+- registered the mail platform workstream in `workstreams.yaml` so a later assistant can implement it without hidden chat context
+
+Platform impact:
+
+- no direct live platform change; this release records the mail platform decision and rollout plan in the repository only
+
 ## 0.38.0 - 2026-03-22
 
 - implemented ADR 0040 to expose Docker runtime container detail through the existing monitoring stack
