@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import json
+import logging
 import math
 import os
 from dataclasses import dataclass
@@ -17,6 +18,7 @@ from platform_context_corpus import build_chunks
 
 DEFAULT_COLLECTION = "platform_context"
 DEFAULT_DIMENSION = 384
+LOGGER = logging.getLogger(__name__)
 
 
 class QueryRequest(BaseModel):
@@ -92,7 +94,15 @@ class PlatformContextService:
         if self.config.embedding_backend == "token-hash":
             return TokenHashEmbedder(self.config.embedding_dimension)
         if self.config.embedding_backend == "sentence-transformers":
-            return SentenceTransformersEmbedder(self.config.embedding_model)
+            try:
+                return SentenceTransformersEmbedder(self.config.embedding_model)
+            except Exception as exc:
+                LOGGER.warning(
+                    "Falling back to token-hash embeddings because %s could not be initialized: %s",
+                    self.config.embedding_model,
+                    exc,
+                )
+                return TokenHashEmbedder(self.config.embedding_dimension)
         raise ValueError(f"unsupported embedding backend: {self.config.embedding_backend}")
 
     def ensure_collection(self) -> None:

@@ -9,6 +9,7 @@ services:
   platform-context-api:
     build:
       context: {{ platform_context_service_dir }}
+      network: host
     image: {{ platform_context_api_image_name }}:latest
     container_name: platform-context-api
     restart: unless-stopped

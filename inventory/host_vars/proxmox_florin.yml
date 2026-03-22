@@ -1,4 +1,5 @@
 host_public_hostname: Debian-trixie-latest-amd64-base
+platform_context_embedding_backend: token-hash
 management_interface: enp7s0
 management_ipv4: 65.108.75.123
 management_tailscale_ipv4: 100.118.189.95
@@ -266,6 +267,7 @@ network_policy:
           protocol: tcp
           ports:
             - 8000
+            - 8010
             - 8082
             - 8088
             - 8200

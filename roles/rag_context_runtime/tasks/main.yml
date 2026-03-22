@@ -159,6 +159,7 @@
       - --file
       - "{{ platform_context_compose_file }}"
       - pull
+      - qdrant
   args:
     chdir: "{{ platform_context_site_dir }}"
   register: platform_context_pull

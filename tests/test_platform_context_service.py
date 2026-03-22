@@ -1,6 +1,7 @@
 from pathlib import Path
 
-from platform_context_service import PlatformContextService, ServiceConfig
+import platform_context_service
+from platform_context_service import PlatformContextService, ServiceConfig, TokenHashEmbedder
 
 
 def write(path: Path, content: str) -> None:
@@ -48,3 +49,34 @@ def test_query_returns_cited_step_ca_chunk(tmp_path: Path) -> None:
     assert result["matches"]
     assert result["matches"][0]["source_path"].startswith("docs/")
     assert "SSH certificates" in result["matches"][0]["content"]
+
+
+def test_sentence_transformers_backend_falls_back_to_token_hash(tmp_path: Path, monkeypatch) -> None:
+    repo_root = make_repo(tmp_path)
+
+    class BrokenSentenceTransformersEmbedder:
+        def __init__(self, model_name: str) -> None:
+            raise RuntimeError(f"cannot load {model_name}")
+
+    monkeypatch.setattr(
+        platform_context_service,
+        "SentenceTransformersEmbedder",
+        BrokenSentenceTransformersEmbedder,
+    )
+
+    service = PlatformContextService(
+        ServiceConfig(
+            api_token="test-token",
+            corpus_root=repo_root,
+            collection_name="test",
+            qdrant_url=None,
+            qdrant_location=":memory:",
+            embedding_backend="sentence-transformers",
+            embedding_model="sentence-transformers/all-MiniLM-L6-v2",
+            embedding_dimension=384,
+        )
+    )
+
+    assert isinstance(service.embedder, TokenHashEmbedder)
+    rebuild_result = service.rebuild_from_local_corpus()
+    assert rebuild_result["indexed_chunks"] > 0
