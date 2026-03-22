@@ -8,7 +8,7 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
-## 0.51.0 - 2026-03-22
+## 0.52.0 - 2026-03-22
 
 - applied ADR 0050 live by provisioning distinct operator, platform, and agent sender profiles on the managed mail platform instead of reusing one global outbound credential
 - added scoped notification-profile mailbox passwords and mail-gateway API keys, plus gateway-side profile enforcement and per-profile delivery counters
@@ -19,6 +19,16 @@ Platform impact:
 - `alerts@lv3.org`, `platform@lv3.org`, and `agents@lv3.org` now exist as managed sender identities on `docker-runtime-lv3`
 - each sender profile now has its own scoped mail-gateway API key and mailbox password mirrored under `.local/mail-platform/profiles/`
 - the mail gateway now enforces profile-bound send identity and records per-profile request and delivery counters
+
+## 0.51.0 - 2026-03-22
+
+- implemented ADR 0053 in repository automation by adding pinned Tempo and `otelcol-contrib` packages plus a managed Prometheus service to the monitoring VM role
+- provisioned Grafana Prometheus and Tempo datasources, documented the shared OTLP collector contract, and instrumented the private mail-gateway service as the first traced internal API surface
+- updated the ADR, workstream, monitoring runbook, mail-platform runbook, and workflow catalog to describe the new tracing and service-map operating model
+
+Platform impact:
+
+- no direct live platform change in this release commit; the tracing stack still needs to be applied from `main`
 
 ## 0.50.0 - 2026-03-22
 

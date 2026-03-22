@@ -5,7 +5,7 @@
   "recorded_on": "2026-03-22",
   "recorded_by": "codex",
   "source_commit": "d2bde051df8147a998f6c7fca15f4503ca0fec4a",
-  "repo_version_context": "0.51.0",
+  "repo_version_context": "0.52.0",
   "workflow_id": "converge-mail-platform",
   "adr": "0050",
   "summary": "Applied notification profiles on the live mail platform by provisioning dedicated operator, platform, and agent sender identities, binding each to a scoped mail-gateway API key, and verifying per-profile delivery through the managed gateway.",

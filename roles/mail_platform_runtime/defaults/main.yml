@@ -79,6 +79,10 @@ mail_platform_notification_profiles:
     rate_expectation: Low to moderate report volume with occasional bursts during audits or recovery workflows.
     retention_policy: Retain gateway counters and delivery traces long enough to audit agent-generated reports and incident outputs.
     observability_policy: Track request, success, fallback, and failure counters per agent profile in the gateway state and Grafana mail dashboard.
+mail_platform_gateway_trace_service_name: mail-gateway
+mail_platform_gateway_trace_service_namespace: lv3
+mail_platform_gateway_trace_environment: lv3
+mail_platform_gateway_trace_otlp_endpoint: "http://{{ hostvars['monitoring-lv3'].ansible_host }}:4318/v1/traces"
 mail_platform_metrics_username: prometheus
 mail_platform_webhook_events:
   - queue.queue-message-authenticated
