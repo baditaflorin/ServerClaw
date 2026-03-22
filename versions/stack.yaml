@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.63.0
-platform_version: 0.33.0
+repo_version: 0.64.0
+platform_version: 0.34.0
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -12,6 +12,7 @@ live_apply_evidence:
     uptime_kuma: 2026-03-22-adr-0027-uptime-kuma-live-apply
     build_telemetry: 2026-03-22-adr-0028-build-telemetry-live-apply
     backup_vm: 2026-03-22-adr-0029-backup-vm-live-apply
+    guest_network_policy: 2026-03-22-adr-0067-guest-network-policy-live-apply
     runtime_container_telemetry: 2026-03-22-adr-0040-runtime-container-telemetry-live-apply
     mail_platform: 2026-03-22-adr-0041-email-platform-live-apply
     step_ca: 2026-03-22-adr-0042-step-ca-live-apply
@@ -68,6 +69,7 @@ desired_state:
   traffic_model:
     guest_default_gateway: 10.10.10.1
     guest_outbound_via_host_nat: true
+    guest_interconnect_policy: default_deny_with_repo_managed_allows
     public_edge_vm: 10.10.10.10
     public_edge_forwarding_enabled: true
     public_ingress_ports:
@@ -721,8 +723,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.63.0
+    current: 0.64.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.33.0
+    current: 0.34.0
     meaning: intended platform release for the actual server configuration

@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0067](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0067-guest-network-policy-enforcement.md)
 - Title: Explicit default-deny network policy between guests with managed allow rules
-- Status: ready
+- Status: live_applied
 - Branch: `codex/adr-0067-guest-network-policy`
 - Worktree: `../proxmox_florin_server-guest-network-policy`
 - Owner: codex
@@ -41,9 +41,12 @@
 
 ## Verification
 
-- `ssh ops@postgres-lv3 'nc -z docker-runtime-lv3 8080'` should fail (blocked)
-- `ssh ops@docker-runtime-lv3 'nc -z postgres-lv3 5432'` should succeed (explicitly permitted)
-- Ansible converge pass after firewall activation completes without error
+- `make converge-guest-network-policy`
+- `ansible -i inventory/hosts.yml docker-runtime-lv3 -m shell -a 'timeout 3 bash -lc "exec 3<>/dev/tcp/10.10.10.50/5432 && echo allowed && exec 3<&- && exec 3>&-"' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
+- `ansible -i inventory/hosts.yml nginx-lv3 -m shell -a 'timeout 3 bash -lc "exec 3<>/dev/tcp/10.10.10.20/3001 && echo allowed && exec 3<&- && exec 3>&-"' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
+- `ansible -i inventory/hosts.yml docker-build-lv3 -m shell -a 'timeout 3 bash -lc "exec 3<>/dev/tcp/10.10.10.40/3100 && echo allowed && exec 3<&- && exec 3>&-"' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
+- `ansible -i inventory/hosts.yml backup-lv3 -m shell -a 'timeout 3 bash -lc "exec 3<>/dev/tcp/10.10.10.50/5432 && echo unexpected-open && exec 3<&- && exec 3>&-"' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump` should fail with `rc=124`
+- `ansible -i inventory/hosts.yml postgres-lv3 -m shell -a 'timeout 3 bash -lc "exec 3<>/dev/tcp/10.10.10.20/8082 && echo unexpected-open && exec 3<&- && exec 3>&-"' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump` should fail with `rc=124`
 
 ## Merge Criteria
 
@@ -55,3 +58,4 @@
 
 - apply the Proxmox host firewall change before the guest nftables rules; the host firewall is the outer enforcement point
 - test Ansible SSH reachability to all guests immediately after enabling default-deny to avoid a lockout
+- this workstream is merged to `main` and applied live

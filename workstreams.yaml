@@ -767,7 +767,7 @@ workstreams:
   - id: adr-0067-guest-network-policy
     adr: "0067"
     title: Guest network policy enforcement
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/adr-0067-guest-network-policy
     worktree_path: ../proxmox_florin_server-guest-network-policy
@@ -781,8 +781,8 @@ workstreams:
       - Proxmox VE firewall
       - roles/proxmox/network/
       - roles/linux/guest_firewall/
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
 
   - id: adr-0068-container-image-policy
     adr: "0068"
