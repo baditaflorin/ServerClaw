@@ -237,3 +237,6 @@
       - (ntopng_interface_data_response.json.rsp.num_hosts | int) > 0
       - (ntopng_top_hosts_response.json.rsp | length) > 0
     fail_msg: "ntopng is reachable but did not report visible traffic on the primary monitored interface."
+
+- name: Verify ntopng health probes
+  ansible.builtin.import_tasks: verify.yml

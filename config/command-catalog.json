@@ -102,6 +102,40 @@
         ]
       }
     },
+    "converge-guest-network-policy": {
+      "description": "Converge the default-deny guest network policy on the Proxmox host and all managed guests.",
+      "workflow_id": "converge-guest-network-policy",
+      "scope": "host_and_guest",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used for the host and guest firewall converge."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-guest-network-policy passes",
+        "make validate passes before the apply",
+        "The canonical allow matrix in inventory/host_vars/proxmox_florin.yml is reviewed before the maintenance window"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the source commit, generated VM firewall files, SSH reconnect results, and at least one allowed-flow plus one blocked-flow verification."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if pve-firewall compile fails, guest nftables validation fails, or SSH reconnect fails after a guest policy reload.",
+          "Stop if verification shows an allowed service path is blocked or a denied lateral path is still reachable."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good firewall policy from version control before retrying the live converge.",
+          "If guest access degrades, repair from the Proxmox host jump path or documented break-glass access before changing application surfaces."
+        ]
+      }
+    },
     "configure-ingress": {
       "description": "Converge host-side public ingress forwarding to the NGINX VM.",
       "workflow_id": "configure-ingress",
@@ -722,6 +756,54 @@
         ]
       }
     },
+    "converge-control-plane-recovery": {
+      "description": "Converge scheduled control-plane backups, controller recovery bundle refresh, and restore-drill validation.",
+      "workflow_id": "converge-control-plane-recovery",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        },
+        {
+          "name": "openbao_init_payload",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "OpenBao init payload used to mint the scoped backup token for managed Raft snapshots."
+        },
+        {
+          "name": "control_plane_recovery_controller_bundle",
+          "kind": "controller_secret",
+          "required": false,
+          "source": "config/controller-local-secrets.json",
+          "description": "Generated controller recovery bundle mirrored into backup-lv3 during the workflow."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-control-plane-recovery passes",
+        "make validate passes before the apply",
+        "Break-glass dependencies and controller-local recovery references are reviewed before rotating the recovery bundle"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record timer status, archive landing, controller bundle refresh, and a passing restore drill on backup-lv3."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if runtime archive delivery, controller bundle refresh, or restore-drill verification fails.",
+          "Stop if the change would weaken the documented break-glass path or remove the only working recovery reference."
+        ],
+        "rollback_guidance": [
+          "Reapply the last known-good recovery automation before changing component runtimes again.",
+          "Preserve the prior controller bundle and backup archives until the new drill passes."
+        ]
+      }
+    },
     "converge-netbox": {
       "description": "Converge the private NetBox runtime, PostgreSQL backend, host-side proxy, and repo-managed inventory synchronization.",
       "workflow_id": "converge-netbox",
@@ -790,6 +872,40 @@
         ]
       }
     },
+    "converge-rag-context": {
+      "description": "Converge the private platform context API, Qdrant backend, host-side proxy, and initial repo-grounded retrieval corpus.",
+      "workflow_id": "converge-rag-context",
+      "scope": "host_and_guest",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-rag-context passes",
+        "make validate passes before the apply",
+        "The platform context corpus, private API publication, and Open WebUI integration boundary are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record runtime health, Qdrant readiness, token generation, index build output, and a cited retrieval query result."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the API, Qdrant backend, host-side proxy, or initial index build fails.",
+          "Stop if the service becomes reachable without the intended private token boundary."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good platform context runtime before retrying.",
+          "Do not leave ad hoc Open WebUI or Windmill integration drift behind after a failed rollout."
+        ]
+      }
+    },
     "converge-portainer": {
       "description": "Converge the private Portainer runtime, host-side Tailscale proxy, and controller-local bootstrap auth for Docker runtime operations.",
       "workflow_id": "converge-portainer",
@@ -821,6 +937,40 @@
         "rollback_guidance": [
           "Restore the last known-good Portainer runtime state before retrying.",
           "Do not compensate for a broken converge with undocumented UI changes or ad hoc Docker shell edits."
+        ]
+      }
+    },
+    "converge-mattermost": {
+      "description": "Converge the private Mattermost runtime, PostgreSQL backend, host-side proxy, Grafana alert route, and seeded collaboration channels.",
+      "workflow_id": "converge-mattermost",
+      "scope": "host_and_guest",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-mattermost passes",
+        "make validate passes before the apply",
+        "Private channel design, webhook routing, and bootstrap identity expectations are reviewed before the change"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record PostgreSQL, runtime, proxy, seeded channel, webhook, and Grafana contact-point verification together with the generated Mattermost bootstrap artifacts."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the runtime, database setup, proxy path, channel bootstrap, or Grafana webhook routing fails.",
+          "Stop if the converge would leave Mattermost reachable but without the expected repo-managed collaboration boundaries."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good Mattermost runtime and generated webhook manifest before retrying.",
+          "Do not hand-fix channel or webhook state in the UI without returning the final contract to git-managed automation."
         ]
       }
     },

@@ -8,15 +8,73 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
-## 0.59.0 - 2026-03-22
+## 0.64.0 - 2026-03-22
 
-- implemented ADR 0063 by adding a committed generated `inventory/group_vars/platform.yml` facts library derived from canonical stack and host inputs
-- added `scripts/generate_platform_vars.py`, `filter_plugins/platform_facts.py`, and the new `make generate-platform-vars`, `make validate-generated-vars`, and `make show-platform-facts` entry points so operators and agents can inspect or validate platform facts without scanning many role defaults
-- removed duplicated computed URLs, ports, and guest-address lookups from several proof-of-concept roles and shared vars, and documented the operating model in the new platform-facts runbook
+- applied ADR 0067 live from `main` by converging explicit default-deny guest network policy on the Proxmox host and every managed Debian guest
+- pinned the canonical guest MAC inventory, rendered per-VM Proxmox firewall policy from `network_policy`, and added a dedicated guest nftables role plus workflow entrypoints for repeatable convergence
+- hardened the host rollout for real Proxmox bridge behavior by managing the required `fwbr+` conntrack-zone helper and by matching guest forwarding on subnet-aware nftables rules instead of pre-firewall bridge names
+- extended guest defence in depth so the same allow matrix governs both local services and Docker-published forwards, then recorded the live-apply receipt, ADR metadata, and workstream state for the first enforced east-west policy
 
 Platform impact:
 
-- no direct live platform change in this release commit; this is a repository automation and documentation consolidation release
+- `vmbr10` now enforces default-deny inter-guest policy through Proxmox VM firewalls backed by repo-managed per-VM rules under `/etc/pve/firewall/`
+- every managed guest now carries a repo-managed nftables policy that preserves SSH management, approved east-west flows, and approved Docker-published service paths while denying unlisted traffic
+- verified live traffic now allows `docker-runtime-lv3 -> postgres-lv3:5432`, `nginx-lv3 -> docker-runtime-lv3:3001`, and `docker-build-lv3 -> monitoring-lv3:3100`, while denying `backup-lv3 -> postgres-lv3:5432` and `postgres-lv3 -> docker-runtime-lv3:8082`
+
+## 0.63.0 - 2026-03-22
+
+- applied ADR 0051 live by converging the repository-managed control-plane recovery workflow across `docker-runtime-lv3`, `backup-lv3`, and the Proxmox host backup-store firewall contract
+- hardened the recovery automation so OpenBao is unsealed explicitly for managed Raft snapshots and the runtime archive push path now depends on a repo-managed `backup-lv3` guest-firewall allow rule for `10.10.10.20/32`
+- recorded the live recovery evidence, restore-drill result, controller bundle mirror, ADR metadata, runbook updates, and canonical stack state needed to keep control-plane backup and break-glass posture current on `main`
+
+Platform impact:
+
+- control-plane recovery archives now land on `backup-lv3` under `/srv/control-plane-recovery/runtime/docker-runtime-lv3/latest`
+- the mirrored controller recovery bundle now lives under `/srv/control-plane-recovery/controller/controller-recovery-bundle.tar.zst`
+- the scheduled restore drill on `backup-lv3` last passed at `2026-03-22T21:29:48Z`
+
+## 0.62.0 - 2026-03-22
+
+- implemented ADR 0070 in repository automation by adding the private platform-context API, Qdrant-backed RAG runtime, corpus build and query scripts, and the `rag-context` playbook or runtime role
+- extended the governed tool surface with `query-platform-context`, added the Windmill rebuild script, and documented operator usage for the private RAG and OpenAPI tool-server flow
+- added focused tests for corpus chunking, the platform-context service, and the governed registry export path, including a worktree-safe agent-tool test harness
+
+Platform impact:
+
+- no direct live platform change in this release commit; the private platform-context runtime and Open WebUI global-tool registration still need to be applied from `main`
+
+## 0.61.0 - 2026-03-22
+
+- implemented ADR 0064 in repository automation by adding explicit `tasks/verify.yml` health contracts across the current service-owning roles and by documenting the contract in a dedicated health-probe runbook
+- added `config/health-probe-catalog.json` as the machine-readable liveness or readiness inventory for every canonical service, including catalog-only host surfaces that do not yet have standalone service roles
+- aligned `config/uptime-kuma/monitors.json` with the catalog and extended `make validate` so probe-role coverage and Uptime Kuma drift fail before merge
+
+Platform impact:
+
+- no direct live platform change in this release commit; the new probe contracts will take effect on the next live converge from `main`
+
+## 0.60.0 - 2026-03-22
+
+- implemented ADR 0062 to add a reusable `roles/common` task library for role input assertions, directory creation, systemd unit management, and TCP port waits
+- added `roles/_template/` plus a new `make validate` role-interface gate so new or changed roles must carry `meta/argument_specs.yml` without forcing an all-at-once backfill across untouched legacy roles
+- refactored `docker_runtime`, `proxmox_tailscale`, `uptime_kuma_runtime`, and `windmill_runtime` to consume the shared task entrypoints as proof-of-concept consumers
+- documented the new validation contract in the repository automation runbook and updated ADR/workstream metadata to mark the composability workstream as merged
+
+Platform impact:
+
+- no direct live platform change; this release refactors repository Ansible structure and role interface validation only
+
+## 0.59.0 - 2026-03-22
+
+- applied ADR 0057 live by provisioning the Mattermost PostgreSQL backend on `postgres-lv3`, converging the private Mattermost runtime on `docker-runtime-lv3`, and publishing operator access through the Proxmox host Tailscale proxy on port `8066`
+- hardened the Mattermost automation so bootstrap handles Mattermost's actual local `mmctl` JSON behavior, seeds the managed LV3 channels and incoming webhooks idempotently, and configures Grafana alert routing through the repo-managed webhook manifest
+- recorded the Mattermost controller-local artifacts, live-apply evidence, ADR metadata, workstream state, and control-plane lane updates needed for the new ChatOps surface
+
+Platform impact:
+
+- Mattermost is now live on `docker-runtime-lv3` and reachable privately at `http://100.118.189.95:8066`
+- the repo-managed `lv3` team now includes the `platform-alerts`, `workflow-events`, `change-approvals`, `agent-handoffs`, and `mail-ops` collaboration channels with mirrored incoming webhook URLs under `.local/mattermost/incoming-webhooks.json`
+- Grafana on `monitoring-lv3` now carries the `lv3-mattermost-platform-alerts` contact point for repo-managed alert routing into Mattermost
 
 ## 0.58.0 - 2026-03-22
 

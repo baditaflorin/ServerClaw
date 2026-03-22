@@ -32,10 +32,14 @@ PORT_KEYS = (
     "openbao_proxy_port",
     "windmill_server_port",
     "windmill_host_proxy_port",
+    "mattermost_server_port",
+    "mattermost_host_proxy_port",
     "netbox_server_port",
     "netbox_host_proxy_port",
     "open_webui_port",
     "open_webui_host_proxy_port",
+    "platform_context_internal_port",
+    "platform_context_host_proxy_port",
     "ntopng_http_port",
     "ntopng_proxy_port",
     "portainer_https_port",
@@ -55,7 +59,12 @@ def yaml_dump(payload: Any) -> str:
         raise RuntimeError(
             "Missing dependency: PyYAML. Run via 'uvx --from pyyaml python ...'."
         ) from exc
-    return yaml.safe_dump(payload, sort_keys=False)
+
+    class IndentedSafeDumper(yaml.SafeDumper):
+        def increase_indent(self, flow=False, indentless=False):
+            return super().increase_indent(flow, False)
+
+    return yaml.dump(payload, Dumper=IndentedSafeDumper, sort_keys=False)
 
 
 def require_mapping(value: Any, path: str) -> dict[str, Any]:
@@ -232,6 +241,11 @@ def build_service_urls(
         urls["controller"] = service_url("http", tailscale_ipv4, ports["windmill_host_proxy_port"])
         port_map["internal"] = ports["windmill_server_port"]
         port_map["controller"] = ports["windmill_host_proxy_port"]
+    elif service_id == "mattermost":
+        urls["internal"] = service_url("http", private_ip, ports["mattermost_server_port"])
+        urls["controller"] = service_url("http", tailscale_ipv4, ports["mattermost_host_proxy_port"])
+        port_map["internal"] = ports["mattermost_server_port"]
+        port_map["controller"] = ports["mattermost_host_proxy_port"]
     elif service_id == "netbox":
         urls["internal"] = service_url("http", private_ip, ports["netbox_server_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["netbox_host_proxy_port"])
@@ -247,6 +261,11 @@ def build_service_urls(
         urls["controller"] = service_url("https", tailscale_ipv4, ports["openbao_proxy_port"])
         port_map["internal"] = ports["openbao_proxy_port"]
         port_map["controller"] = ports["openbao_proxy_port"]
+    elif service_id == "platform_context_api":
+        urls["internal"] = service_url("http", private_ip, ports["platform_context_internal_port"])
+        urls["controller"] = service_url("http", tailscale_ipv4, ports["platform_context_host_proxy_port"])
+        port_map["internal"] = ports["platform_context_internal_port"]
+        port_map["controller"] = ports["platform_context_host_proxy_port"]
     elif service_id == "ntopng":
         urls["internal"] = service_url("http", "127.0.0.1", ports["ntopng_http_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["ntopng_proxy_port"])
@@ -376,9 +395,11 @@ def build_platform_vars(
     tcp_proxies = build_tcp_proxies(host_vars, resolved_ports)
     monitoring_service = service_topology["grafana"]
     mail_service = service_topology["mail_platform"]
+    mattermost_service = service_topology["mattermost"]
     netbox_service = service_topology["netbox"]
     open_webui_service = service_topology["open_webui"]
     openbao_service = service_topology["openbao"]
+    platform_context_service = service_topology["platform_context_api"]
     portainer_service = service_topology["portainer"]
     postgres_guest = guest_catalog["by_name"]["postgres-lv3"]
     step_ca_service = service_topology["step_ca"]
@@ -465,6 +486,8 @@ def build_platform_vars(
             resolved_ports["openbao_proxy_port"],
             resolved_ports["windmill_host_proxy_port"],
             resolved_ports["open_webui_host_proxy_port"],
+            resolved_ports["mattermost_host_proxy_port"],
+            resolved_ports["platform_context_host_proxy_port"],
             resolved_ports["portainer_host_proxy_port"],
         ],
         "public_edge_service_topology": copy.deepcopy(service_topology),
@@ -478,6 +501,14 @@ def build_platform_vars(
         "open_webui_controller_url": open_webui_service["urls"]["controller"],
         "ntopng_proxy_port": resolved_ports["ntopng_proxy_port"],
         "ntopng_operator_url": service_topology["ntopng"]["urls"]["controller"],
+        "mattermost_server_port": resolved_ports["mattermost_server_port"],
+        "mattermost_host_proxy_port": resolved_ports["mattermost_host_proxy_port"],
+        "mattermost_private_base_url": mattermost_service["urls"]["internal"],
+        "mattermost_controller_url": mattermost_service["urls"]["controller"],
+        "platform_context_internal_port": resolved_ports["platform_context_internal_port"],
+        "platform_context_host_proxy_port": resolved_ports["platform_context_host_proxy_port"],
+        "platform_context_private_url": platform_context_service["urls"]["internal"],
+        "platform_context_controller_url": platform_context_service["urls"]["controller"],
         "portainer_host_proxy_port": resolved_ports["portainer_host_proxy_port"],
         "portainer_controller_url": portainer_service["urls"]["controller"],
         "step_ca_api_port": resolved_ports["step_ca_api_port"],
@@ -494,6 +525,8 @@ def build_platform_vars(
             resolved_ports["openbao_proxy_port"],
             resolved_ports["windmill_host_proxy_port"],
             resolved_ports["open_webui_host_proxy_port"],
+            resolved_ports["mattermost_host_proxy_port"],
+            resolved_ports["platform_context_host_proxy_port"],
             resolved_ports["portainer_host_proxy_port"],
         ],
         "mail_platform_private_api_url": mail_service["urls"]["private_api"],

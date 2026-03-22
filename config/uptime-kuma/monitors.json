@@ -55,14 +55,115 @@
     "accepted_statuscodes": ["200-299"]
   },
   {
-    "name": "Monitoring VM Grafana Port",
+    "name": "PostgreSQL Port",
     "type": "port",
-    "hostname": "10.10.10.40",
-    "port": 3000,
-    "description": "Internal Grafana listener on the monitoring VM.",
+    "hostname": "10.10.10.50",
+    "port": 5432,
+    "description": "Private PostgreSQL listener on postgres-lv3.",
     "interval": 60,
     "retryInterval": 60,
     "maxretries": 0,
     "accepted_statuscodes": ["200-299"]
+  },
+  {
+    "name": "Backup PBS Port",
+    "type": "port",
+    "hostname": "10.10.10.60",
+    "port": 8007,
+    "description": "Private PBS listener on backup-lv3.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "accepted_statuscodes": ["200-299"]
+  },
+  {
+    "name": "Step CA Private",
+    "type": "http",
+    "url": "https://10.10.10.20:9000/health",
+    "description": "Private step-ca health endpoint on docker-runtime-lv3.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": ["200-299"],
+    "ignoreTls": true
+  },
+  {
+    "name": "Windmill Private",
+    "type": "http",
+    "url": "http://10.10.10.20:8000/api/version",
+    "description": "Private Windmill API version endpoint on docker-runtime-lv3.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": ["200-299"]
+  },
+  {
+    "name": "Mattermost Private",
+    "type": "http",
+    "url": "http://10.10.10.20:8065/api/v4/system/ping",
+    "description": "Private Mattermost system ping endpoint on docker-runtime-lv3.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": ["200-299"]
+  },
+  {
+    "name": "NetBox Private",
+    "type": "http",
+    "url": "http://10.10.10.20:8082/login/",
+    "description": "Private NetBox login surface on docker-runtime-lv3.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": ["200-299"]
+  },
+  {
+    "name": "Open WebUI Private",
+    "type": "http",
+    "url": "http://10.10.10.20:8088",
+    "description": "Private Open WebUI surface on docker-runtime-lv3.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": ["200-299"]
+  },
+  {
+    "name": "Platform Context Private",
+    "type": "http",
+    "url": "http://10.10.10.20:8010/healthz",
+    "description": "Private platform-context health endpoint on docker-runtime-lv3.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": ["200-299"]
+  },
+  {
+    "name": "Mail Platform Gateway Private",
+    "type": "http",
+    "url": "http://10.10.10.20:8081/healthz",
+    "description": "Private mail gateway health endpoint on docker-runtime-lv3.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": ["200-299"]
+  },
+  {
+    "name": "Portainer Private",
+    "type": "http",
+    "url": "https://10.10.10.20:9443/api/status",
+    "description": "Private Portainer status endpoint on docker-runtime-lv3.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": ["200-299"],
+    "ignoreTls": true
   }
 ]

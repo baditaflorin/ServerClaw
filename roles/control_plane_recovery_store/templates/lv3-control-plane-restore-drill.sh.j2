@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+runtime_root="{{ control_plane_recovery_store_runtime_root }}"
+controller_dir="{{ control_plane_recovery_store_controller_dir }}"
+tmp_root="{{ control_plane_recovery_store_tmp_dir }}"
+state_file="{{ control_plane_recovery_store_restore_drill_state_file }}"
+
+latest_runtime_dir="${runtime_root}/latest"
+latest_manifest="${latest_runtime_dir}/control-plane-backup-manifest.json"
+latest_step_ca="${latest_runtime_dir}/step-ca.tar.zst"
+latest_openbao_config="${latest_runtime_dir}/openbao-config.tar.zst"
+latest_openbao_snapshot="${latest_runtime_dir}/openbao-raft.snap"
+latest_windmill_dump="${latest_runtime_dir}/windmill-db.dump"
+latest_windmill_files="${latest_runtime_dir}/windmill-files.tar.zst"
+latest_mail_files="${latest_runtime_dir}/mail-platform.tar.zst"
+controller_manifest="${controller_dir}/control-plane-recovery-manifest.json"
+controller_bundle="${controller_dir}/controller-recovery-bundle.tar.zst"
+
+fail() {
+  echo "restore-drill: $*" >&2
+  exit 1
+}
+
+require_file() {
+  local path="$1"
+  [[ -e "${path}" ]] || fail "required path missing: ${path}"
+}
+
+require_tar_entry() {
+  local list_file="$1"
+  local expected="$2"
+  grep -Fx "${expected}" "${list_file}" >/dev/null || grep -Fx "./${expected}" "${list_file}" >/dev/null || fail "missing archive entry ${expected}"
+}
+
+require_file "${latest_runtime_dir}"
+require_file "${latest_manifest}"
+require_file "${controller_manifest}"
+require_file "${controller_bundle}"
+
+workdir="$(mktemp -d "${tmp_root}/restore-drill.XXXXXX")"
+trap 'rm -rf "${workdir}"' EXIT
+
+zstd -t "${latest_step_ca}"
+tar -tf "${latest_step_ca}" > "${workdir}/step-ca.list"
+{% for path in control_plane_recovery_store_required_step_ca_paths %}
+require_tar_entry "${workdir}/step-ca.list" "{{ path }}"
+{% endfor %}
+
+zstd -t "${latest_openbao_config}"
+tar -tf "${latest_openbao_config}" > "${workdir}/openbao.list"
+{% for path in control_plane_recovery_store_required_openbao_paths %}
+require_tar_entry "${workdir}/openbao.list" "{{ path }}"
+{% endfor %}
+
+[[ -s "${latest_openbao_snapshot}" ]] || fail "OpenBao raft snapshot is empty"
+
+pg_restore -l "${latest_windmill_dump}" >/dev/null
+zstd -t "${latest_windmill_files}"
+tar -tf "${latest_windmill_files}" > "${workdir}/windmill.list"
+{% for path in control_plane_recovery_store_required_windmill_paths %}
+require_tar_entry "${workdir}/windmill.list" "{{ path }}"
+{% endfor %}
+
+zstd -t "${latest_mail_files}"
+tar -tf "${latest_mail_files}" > "${workdir}/mail.list"
+{% for path in control_plane_recovery_store_required_mail_paths %}
+require_tar_entry "${workdir}/mail.list" "{{ path }}"
+{% endfor %}
+
+zstd -t "${controller_bundle}"
+tar -tf "${controller_bundle}" > "${workdir}/controller.list"
+{% for path in control_plane_recovery_store_required_controller_bundle_paths %}
+require_tar_entry "${workdir}/controller.list" "{{ path }}"
+{% endfor %}
+
+jq -e '(.artifacts.step_ca.sha256 | length > 0) and (.artifacts.openbao_snapshot.sha256 | length > 0) and (.artifacts.windmill_db.sha256 | length > 0) and (.artifacts.mail_platform.sha256 | length > 0)' "${latest_manifest}" >/dev/null
+jq -e '(.archived_items | length > 0) and (.external_breakglass_dependencies | length > 0)' "${controller_manifest}" >/dev/null
+
+jq -n \
+  --arg checked_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+  --arg runtime_dir "${latest_runtime_dir}" \
+  --arg controller_bundle "${controller_bundle}" \
+  '{
+    checked_at: $checked_at,
+    result: "pass",
+    runtime_dir: $runtime_dir,
+    controller_bundle: $controller_bundle
+  }' > "${state_file}"
+
+echo "restore-drill: pass"

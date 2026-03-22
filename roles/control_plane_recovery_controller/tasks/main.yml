@@ -1,0 +1,171 @@
+---
+- name: Validate controller recovery bundle inputs
+  ansible.builtin.assert:
+    that:
+      - control_plane_recovery_local_controller_dir | length > 0
+      - control_plane_recovery_local_controller_bundle_file | length > 0
+      - control_plane_recovery_local_controller_manifest_file | length > 0
+      - control_plane_recovery_store_controller_dir | length > 0
+      - control_plane_recovery_controller_bundle_sources | length > 0
+    fail_msg: "control_plane_recovery_controller requires local bundle paths and a non-empty source list."
+
+- name: Ensure the controller recovery bundle directories exist locally
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0700"
+  loop:
+    - "{{ control_plane_recovery_local_artifact_dir }}"
+    - "{{ control_plane_recovery_local_controller_dir }}"
+  delegate_to: localhost
+  become: false
+
+- name: Reset the controller recovery staging directory
+  ansible.builtin.file:
+    path: "{{ control_plane_recovery_local_controller_staging_dir }}"
+    state: absent
+  delegate_to: localhost
+  become: false
+
+- name: Create the controller recovery staging directory
+  ansible.builtin.file:
+    path: "{{ control_plane_recovery_local_controller_staging_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Stat controller bundle source paths
+  ansible.builtin.stat:
+    path: "{{ item.path }}"
+  loop: "{{ control_plane_recovery_controller_bundle_sources }}"
+  loop_control:
+    label: "{{ item.id }}"
+  delegate_to: localhost
+  become: false
+  register: control_plane_recovery_controller_source_stats
+
+- name: Assert required controller bundle sources exist
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists
+    fail_msg: "Required controller recovery source {{ item.item.path }} is missing."
+  loop: "{{ control_plane_recovery_controller_source_stats.results }}"
+  loop_control:
+    label: "{{ item.item.id }}"
+  when: item.item.required | bool
+
+- name: Ensure parent directories exist inside the controller bundle staging area
+  ansible.builtin.file:
+    path: "{{ control_plane_recovery_local_controller_staging_dir }}/{{ item.archive_name | dirname }}"
+    state: directory
+    mode: "0700"
+  loop: "{{ control_plane_recovery_controller_bundle_sources }}"
+  loop_control:
+    label: "{{ item.archive_name | dirname }}"
+  when: item.archive_name | dirname != "."
+  delegate_to: localhost
+  become: false
+
+- name: Copy controller recovery sources into the staging directory
+  ansible.builtin.copy:
+    src: "{{ item.path }}"
+    dest: "{{ control_plane_recovery_local_controller_staging_dir }}/{{ item.archive_name }}"
+    mode: preserve
+  loop: "{{ control_plane_recovery_controller_bundle_sources }}"
+  loop_control:
+    label: "{{ item.id }}"
+  delegate_to: localhost
+  become: false
+  when: >
+    (
+      control_plane_recovery_controller_source_stats.results
+      | selectattr('item.id', 'equalto', item.id)
+      | map(attribute='stat.exists')
+      | first
+    ) | bool
+
+- name: Stat controller external break-glass paths
+  ansible.builtin.stat:
+    path: "{{ item.path }}"
+  loop: "{{ control_plane_recovery_controller_external_breakglass_dependencies }}"
+  loop_control:
+    label: "{{ item.id }}"
+  delegate_to: localhost
+  become: false
+  register: control_plane_recovery_external_dependency_stats
+
+- name: Assert required external break-glass dependencies exist
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists
+    fail_msg: "Required external break-glass dependency {{ item.item.path }} is missing."
+  loop: "{{ control_plane_recovery_external_dependency_stats.results }}"
+  loop_control:
+    label: "{{ item.item.id }}"
+  when: item.item.required | bool
+
+- name: Build the controller recovery manifest payload
+  ansible.builtin.set_fact:
+    control_plane_recovery_controller_manifest_payload:
+      generated_at: "{{ ansible_date_time.iso8601 }}"
+      archived_items: >-
+        {{
+          control_plane_recovery_controller_source_stats.results
+          | map(attribute='item')
+          | list
+        }}
+      external_breakglass_dependencies: >-
+        {{
+          control_plane_recovery_external_dependency_stats.results
+          | map(attribute='item')
+          | list
+        }}
+
+- name: Write the controller recovery manifest locally
+  ansible.builtin.copy:
+    dest: "{{ control_plane_recovery_local_controller_manifest_file }}"
+    content: "{{ control_plane_recovery_controller_manifest_payload | to_nice_json }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+
+- name: Build the controller recovery bundle locally
+  ansible.builtin.command:
+    argv:
+      - tar
+      - --zstd
+      - -cpf
+      - "{{ control_plane_recovery_local_controller_bundle_file }}"
+      - -C
+      - "{{ control_plane_recovery_local_controller_staging_dir }}"
+      - .
+  environment:
+    COPYFILE_DISABLE: "1"
+  delegate_to: localhost
+  become: false
+  changed_when: true
+
+- name: Ensure the backup-store controller directory exists
+  ansible.builtin.file:
+    path: "{{ control_plane_recovery_store_controller_dir }}"
+    state: directory
+    owner: "{{ control_plane_recovery_store_user }}"
+    group: "{{ control_plane_recovery_store_group }}"
+    mode: "0750"
+
+- name: Copy the controller recovery manifest to the backup store
+  ansible.builtin.copy:
+    src: "{{ control_plane_recovery_local_controller_manifest_file }}"
+    dest: "{{ control_plane_recovery_store_controller_dir }}/control-plane-recovery-manifest.json"
+    owner: "{{ control_plane_recovery_store_user }}"
+    group: "{{ control_plane_recovery_store_group }}"
+    mode: "0640"
+
+- name: Copy the controller recovery bundle to the backup store
+  ansible.builtin.copy:
+    src: "{{ control_plane_recovery_local_controller_bundle_file }}"
+    dest: "{{ control_plane_recovery_store_controller_dir }}/controller-recovery-bundle.tar.zst"
+    owner: "{{ control_plane_recovery_store_user }}"
+    group: "{{ control_plane_recovery_store_group }}"
+    mode: "0640"

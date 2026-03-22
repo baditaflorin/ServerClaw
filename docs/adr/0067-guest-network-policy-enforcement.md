@@ -1,10 +1,10 @@
 # ADR 0067: Guest Network Policy Enforcement
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.64.0
+- Implemented In Platform Version: 0.34.0
+- Implemented On: 2026-03-22
 - Date: 2026-03-22
 
 ## Context

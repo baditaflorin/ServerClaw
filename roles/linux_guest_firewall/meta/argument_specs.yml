@@ -1,0 +1,22 @@
+---
+argument_specs:
+  main:
+    short_description: Enforce the canonical guest network policy with nftables on Debian guests.
+    options:
+      linux_guest_firewall_config_file:
+        type: path
+        required: false
+        default: /etc/nftables.conf
+        description:
+          - Destination path for the managed guest nftables policy.
+      linux_guest_firewall_host_id:
+        type: str
+        required: false
+        default: proxmox_florin
+        description:
+          - Inventory host ID that owns the canonical `network_policy` data.
+      network_policy:
+        type: dict
+        required: false
+        description:
+          - Canonical guest network policy mapping from the Proxmox host inventory.

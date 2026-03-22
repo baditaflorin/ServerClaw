@@ -1,0 +1,40 @@
+---
+argument_specs:
+  main:
+    short_description: Provision PostgreSQL roles and database state for Mattermost.
+    options:
+      mattermost_database_name:
+        type: str
+        required: true
+        description:
+          - PostgreSQL database name used by Mattermost.
+      mattermost_database_user:
+        type: str
+        required: true
+        description:
+          - PostgreSQL login role used by Mattermost.
+      mattermost_database_support_role:
+        type: str
+        required: true
+        description:
+          - Support role granted to the Mattermost login role.
+      mattermost_postgres_secret_dir:
+        type: path
+        required: true
+        description:
+          - Directory that stores Mattermost PostgreSQL secrets.
+      mattermost_postgres_password_file:
+        type: path
+        required: true
+        description:
+          - Guest-local file that stores the Mattermost database password.
+      mattermost_local_artifact_dir:
+        type: path
+        required: false
+        description:
+          - Controller-local directory for mirrored Mattermost artifacts.
+      mattermost_database_password_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file that stores the Mattermost database password.

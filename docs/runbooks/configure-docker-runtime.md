@@ -48,7 +48,7 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
 
 ## Notes
 
-- This workstream intentionally does not define Docker guest firewall rules. That belongs to ADR 0024.
+- Container-runtime hardening still belongs to ADR 0024, but guest-level network enforcement now comes from the shared ADR 0067 firewall policy.
 - This workstream intentionally does not define application stack layout or systemd-managed compose projects. That belongs to ADR 0025.
 
 ## Recovery Note

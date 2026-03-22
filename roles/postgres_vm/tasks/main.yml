@@ -4,11 +4,9 @@
     that:
       - postgres_vm_packages | length > 0
       - postgres_vm_postgresql_service_name | length > 0
-      - postgres_vm_nftables_config_file | length > 0
       - postgres_vm_listen_addresses | length > 0
-      - postgres_vm_ssh_allowed_sources | length > 0
       - postgres_vm_admin_role is match('^[a-z_][a-z0-9_]*$')
-    fail_msg: "postgres_vm requires PostgreSQL package and firewall inputs, and postgres_vm_admin_role must be a safe identifier."
+    fail_msg: "postgres_vm requires PostgreSQL package and listener inputs, and postgres_vm_admin_role must be a safe identifier."
 
 - name: Install PostgreSQL guest packages
   ansible.builtin.apt:
@@ -66,20 +64,6 @@
     mode: "0640"
   notify: Restart PostgreSQL
 
-- name: Render guest nftables policy
-  ansible.builtin.template:
-    src: nftables.conf.j2
-    dest: "{{ postgres_vm_nftables_config_file }}"
-    mode: "0644"
-    validate: /usr/sbin/nft -c -f %s
-  notify: Reload nftables
-
-- name: Ensure nftables service is enabled and started
-  ansible.builtin.service:
-    name: nftables
-    enabled: true
-    state: started
-
 - name: Check whether PostgreSQL admin role already exists
   become: true
   become_user: postgres
@@ -103,3 +87,6 @@
       - "CREATE ROLE {{ postgres_vm_admin_role }} LOGIN CREATEDB CREATEROLE"
   when: postgres_vm_admin_role_check.stdout != "1"
   changed_when: true
+
+- name: Verify PostgreSQL health probes
+  ansible.builtin.import_tasks: verify.yml

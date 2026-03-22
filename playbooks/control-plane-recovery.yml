@@ -1,0 +1,87 @@
+---
+- name: Ensure backup-lv3 allows the runtime backup source over SSH
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: control_plane_recovery_firewall
+
+- name: Converge the control-plane recovery store on backup-lv3
+  hosts: backup_guests
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Ensure target guest is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+    - name: Ensure the controller-local control-plane recovery SSH directory exists
+      ansible.builtin.file:
+        path: "{{ control_plane_recovery_runtime_ssh_private_key_local_file | dirname }}"
+        state: directory
+        mode: "0700"
+      delegate_to: localhost
+      become: false
+      run_once: true
+
+    - name: Generate the controller-local runtime backup SSH keypair when missing
+      ansible.builtin.shell: |
+        set -euo pipefail
+        if [ ! -s "{{ control_plane_recovery_runtime_ssh_private_key_local_file }}" ] || [ ! -s "{{ control_plane_recovery_runtime_ssh_public_key_local_file }}" ]; then
+          ssh-keygen -q -t ed25519 -N '' -f "{{ control_plane_recovery_runtime_ssh_private_key_local_file }}"
+          echo changed
+        fi
+      args:
+        executable: /bin/bash
+      delegate_to: localhost
+      become: false
+      run_once: true
+      register: control_plane_recovery_bootstrap_keygen
+      changed_when: "'changed' in control_plane_recovery_bootstrap_keygen.stdout"
+
+  roles:
+    - role: control_plane_recovery_store
+
+- name: Converge scheduled control-plane exports on docker-runtime-lv3
+  hosts: docker-runtime-lv3
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Ensure target guest is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+  roles:
+    - role: control_plane_recovery
+
+- name: Refresh the controller recovery bundle on backup-lv3
+  hosts: backup_guests
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: control_plane_recovery_controller
+
+  post_tasks:
+    - name: Run the restore drill immediately
+      ansible.builtin.command: /usr/local/libexec/lv3-control-plane-restore-drill.sh
+      register: control_plane_recovery_restore_drill
+      changed_when: false
+
+    - name: Read the restore-drill state file
+      ansible.builtin.slurp:
+        src: /srv/control-plane-recovery/drills/last-restore-drill.json
+      register: control_plane_recovery_restore_drill_state_raw
+
+    - name: Assert the restore drill completed successfully
+      ansible.builtin.assert:
+        that:
+          - (control_plane_recovery_restore_drill_state_raw.content | b64decode | from_json).result == "pass"
+        fail_msg: "The control-plane restore drill did not record a successful result."

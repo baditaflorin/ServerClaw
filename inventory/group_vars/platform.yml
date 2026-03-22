@@ -23,72 +23,82 @@ platform_host:
     internal_network: 10.10.10.0/24
     public_edge_ipv4: 10.10.10.10
     public_ingress_tcp_ports:
-    - 25
-    - 80
-    - 443
-    - 587
-    - 993
+      - 25
+      - 80
+      - 443
+      - 587
+      - 993
     public_ingress_tcp_forwards:
-    - listen_port: 25
-      target_host: 10.10.10.20
-      target_port: 25
-    - listen_port: 80
-      target_host: 10.10.10.10
-      target_port: 80
-    - listen_port: 443
-      target_host: 10.10.10.10
-      target_port: 443
-    - listen_port: 587
-      target_host: 10.10.10.20
-      target_port: 587
-    - listen_port: 993
-      target_host: 10.10.10.20
-      target_port: 993
+      - listen_port: 25
+        target_host: 10.10.10.20
+        target_port: 25
+      - listen_port: 80
+        target_host: 10.10.10.10
+        target_port: 80
+      - listen_port: 443
+        target_host: 10.10.10.10
+        target_port: 443
+      - listen_port: 587
+        target_host: 10.10.10.20
+        target_port: 587
+      - listen_port: 993
+        target_host: 10.10.10.20
+        target_port: 993
     tailscale_hostname: proxmox-florin-subnet-router
     tailscale_advertise_routes:
-    - 10.10.10.0/24
+      - 10.10.10.0/24
     tailscale_operator_target_guest: 10.10.10.30
     tailscale_tcp_proxies:
-    - name: ntopng
-      listen_address: 100.118.189.95
-      listen_port: 3001
-      upstream_host: 127.0.0.1
-      upstream_port: 3000
-    - name: postgres-lv3
-      listen_address: 100.118.189.95
-      listen_port: 5432
-      upstream_host: 10.10.10.50
-      upstream_port: 5432
-    - name: windmill
-      listen_address: 100.118.189.95
-      listen_port: 8005
-      upstream_host: 10.10.10.20
-      upstream_port: 8000
-    - name: netbox
-      listen_address: 100.118.189.95
-      listen_port: 8004
-      upstream_host: 10.10.10.20
-      upstream_port: 8082
-    - name: step-ca
-      listen_address: 100.118.189.95
-      listen_port: 9443
-      upstream_host: 10.10.10.20
-      upstream_port: 9000
-    - name: openbao
-      listen_address: 100.118.189.95
-      listen_port: 8200
-      upstream_host: 10.10.10.20
-      upstream_port: 8200
-    - name: open-webui
-      listen_address: 100.118.189.95
-      listen_port: 8008
-      upstream_host: 10.10.10.20
-      upstream_port: 8088
-    - name: portainer
-      listen_address: 100.118.189.95
-      listen_port: 9444
-      upstream_host: 10.10.10.20
-      upstream_port: 9443
+      - name: ntopng
+        listen_address: 100.118.189.95
+        listen_port: 3001
+        upstream_host: 127.0.0.1
+        upstream_port: 3000
+      - name: postgres-lv3
+        listen_address: 100.118.189.95
+        listen_port: 5432
+        upstream_host: 10.10.10.50
+        upstream_port: 5432
+      - name: windmill
+        listen_address: 100.118.189.95
+        listen_port: 8005
+        upstream_host: 10.10.10.20
+        upstream_port: 8000
+      - name: mattermost
+        listen_address: 100.118.189.95
+        listen_port: 8066
+        upstream_host: 10.10.10.20
+        upstream_port: 8065
+      - name: netbox
+        listen_address: 100.118.189.95
+        listen_port: 8004
+        upstream_host: 10.10.10.20
+        upstream_port: 8082
+      - name: step-ca
+        listen_address: 100.118.189.95
+        listen_port: 9443
+        upstream_host: 10.10.10.20
+        upstream_port: 9000
+      - name: openbao
+        listen_address: 100.118.189.95
+        listen_port: 8200
+        upstream_host: 10.10.10.20
+        upstream_port: 8200
+      - name: open-webui
+        listen_address: 100.118.189.95
+        listen_port: 8008
+        upstream_host: 10.10.10.20
+        upstream_port: 8088
+      - name: platform-context-api
+        listen_address: 100.118.189.95
+        listen_port: 8010
+        upstream_host: 10.10.10.20
+        upstream_port: 8010
+      - name: portainer
+        listen_address: 100.118.189.95
+        listen_port: 9444
+        upstream_host: 10.10.10.20
+        upstream_port: 9443
 platform_ports:
   monitoring_grafana_port: 3000
   monitoring_influxdb_port: 8086
@@ -102,10 +112,14 @@ platform_ports:
   openbao_proxy_port: 8200
   windmill_server_port: 8000
   windmill_host_proxy_port: 8005
+  mattermost_server_port: 8065
+  mattermost_host_proxy_port: 8066
   netbox_server_port: 8082
   netbox_host_proxy_port: 8004
   open_webui_port: 8088
   open_webui_host_proxy_port: 8008
+  platform_context_internal_port: 8010
+  platform_context_host_proxy_port: 8010
   ntopng_http_port: 3000
   ntopng_proxy_port: 3001
   portainer_https_port: 9443
@@ -114,108 +128,113 @@ platform_ports:
   step_ca_proxy_port: 9443
 platform_guest_catalog:
   list:
-  - vmid: 110
-    name: nginx-lv3
-    role: nginx
-    ipv4: 10.10.10.10
-    cidr: 24
-    gateway4: 10.10.10.1
-    cores: 2
-    memory_mb: 4096
-    disk_gb: 32
-    tags:
-    - ingress
-    - nginx
-    - lv3
-    packages:
-    - nginx
-  - vmid: 120
-    name: docker-runtime-lv3
-    role: docker-runtime
-    ipv4: 10.10.10.20
-    cidr: 24
-    gateway4: 10.10.10.1
-    cores: 4
-    memory_mb: 12288
-    disk_gb: 96
-    tags:
-    - docker
-    - runtime
-    - lv3
-    packages:
-    - docker.io
-  - vmid: 130
-    name: docker-build-lv3
-    role: docker-build
-    ipv4: 10.10.10.30
-    cidr: 24
-    gateway4: 10.10.10.1
-    cores: 12
-    memory_mb: 24576
-    disk_gb: 160
-    tags:
-    - docker
-    - build
-    - lv3
-    packages:
-    - docker.io
-    - git
-    - make
-    - build-essential
-  - vmid: 140
-    name: monitoring-lv3
-    role: monitoring
-    ipv4: 10.10.10.40
-    cidr: 24
-    gateway4: 10.10.10.1
-    cores: 4
-    memory_mb: 8192
-    disk_gb: 64
-    tags:
-    - monitoring
-    - grafana
-    - lv3
-    packages:
-    - prometheus-node-exporter
-  - vmid: 150
-    name: postgres-lv3
-    role: postgres
-    ipv4: 10.10.10.50
-    cidr: 24
-    gateway4: 10.10.10.1
-    cores: 4
-    memory_mb: 8192
-    disk_gb: 96
-    tags:
-    - postgres
-    - database
-    - lv3
-    packages:
-    - acl
-    - nftables
-    - postgresql
-    - postgresql-contrib
-  - vmid: 160
-    name: backup-lv3
-    role: backup
-    ipv4: 10.10.10.60
-    cidr: 24
-    gateway4: 10.10.10.1
-    macaddr: BC:24:11:2D:5F:37
-    cores: 4
-    memory_mb: 8192
-    disk_gb: 32
-    extra_disks:
-    - interface: scsi1
-      storage: local
-      size_gb: 640
-    tags:
-    - backup
-    - pbs
-    - lv3
-    packages:
-    - acl
-    - xfsprogs
+    - vmid: 110
+      name: nginx-lv3
+      role: nginx
+      ipv4: 10.10.10.10
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:0D:03:BB
+      cores: 2
+      memory_mb: 4096
+      disk_gb: 32
+      tags:
+        - ingress
+        - nginx
+        - lv3
+      packages:
+        - nginx
+    - vmid: 120
+      name: docker-runtime-lv3
+      role: docker-runtime
+      ipv4: 10.10.10.20
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:AA:99:7C
+      cores: 4
+      memory_mb: 24576
+      disk_gb: 96
+      tags:
+        - docker
+        - runtime
+        - lv3
+      packages:
+        - docker.io
+    - vmid: 130
+      name: docker-build-lv3
+      role: docker-build
+      ipv4: 10.10.10.30
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:0F:8A:F2
+      cores: 12
+      memory_mb: 24576
+      disk_gb: 160
+      tags:
+        - docker
+        - build
+        - lv3
+      packages:
+        - docker.io
+        - git
+        - make
+        - build-essential
+    - vmid: 140
+      name: monitoring-lv3
+      role: monitoring
+      ipv4: 10.10.10.40
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:B1:76:A0
+      cores: 4
+      memory_mb: 8192
+      disk_gb: 64
+      tags:
+        - monitoring
+        - grafana
+        - lv3
+      packages:
+        - prometheus-node-exporter
+    - vmid: 150
+      name: postgres-lv3
+      role: postgres
+      ipv4: 10.10.10.50
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:2A:2E:CA
+      cores: 4
+      memory_mb: 8192
+      disk_gb: 96
+      tags:
+        - postgres
+        - database
+        - lv3
+      packages:
+        - acl
+        - nftables
+        - postgresql
+        - postgresql-contrib
+    - vmid: 160
+      name: backup-lv3
+      role: backup
+      ipv4: 10.10.10.60
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:2D:5F:37
+      cores: 4
+      memory_mb: 8192
+      disk_gb: 32
+      extra_disks:
+        - interface: scsi1
+          storage: local
+          size_gb: 640
+      tags:
+        - backup
+        - pbs
+        - lv3
+      packages:
+        - acl
+        - xfsprogs
   by_name:
     nginx-lv3:
       vmid: 110
@@ -224,15 +243,16 @@ platform_guest_catalog:
       ipv4: 10.10.10.10
       cidr: 24
       gateway4: 10.10.10.1
+      macaddr: BC:24:11:0D:03:BB
       cores: 2
       memory_mb: 4096
       disk_gb: 32
       tags:
-      - ingress
-      - nginx
-      - lv3
+        - ingress
+        - nginx
+        - lv3
       packages:
-      - nginx
+        - nginx
     docker-runtime-lv3:
       vmid: 120
       name: docker-runtime-lv3
@@ -240,15 +260,16 @@ platform_guest_catalog:
       ipv4: 10.10.10.20
       cidr: 24
       gateway4: 10.10.10.1
+      macaddr: BC:24:11:AA:99:7C
       cores: 4
-      memory_mb: 12288
+      memory_mb: 24576
       disk_gb: 96
       tags:
-      - docker
-      - runtime
-      - lv3
+        - docker
+        - runtime
+        - lv3
       packages:
-      - docker.io
+        - docker.io
     docker-build-lv3:
       vmid: 130
       name: docker-build-lv3
@@ -256,18 +277,19 @@ platform_guest_catalog:
       ipv4: 10.10.10.30
       cidr: 24
       gateway4: 10.10.10.1
+      macaddr: BC:24:11:0F:8A:F2
       cores: 12
       memory_mb: 24576
       disk_gb: 160
       tags:
-      - docker
-      - build
-      - lv3
+        - docker
+        - build
+        - lv3
       packages:
-      - docker.io
-      - git
-      - make
-      - build-essential
+        - docker.io
+        - git
+        - make
+        - build-essential
     monitoring-lv3:
       vmid: 140
       name: monitoring-lv3
@@ -275,15 +297,16 @@ platform_guest_catalog:
       ipv4: 10.10.10.40
       cidr: 24
       gateway4: 10.10.10.1
+      macaddr: BC:24:11:B1:76:A0
       cores: 4
       memory_mb: 8192
       disk_gb: 64
       tags:
-      - monitoring
-      - grafana
-      - lv3
+        - monitoring
+        - grafana
+        - lv3
       packages:
-      - prometheus-node-exporter
+        - prometheus-node-exporter
     postgres-lv3:
       vmid: 150
       name: postgres-lv3
@@ -291,18 +314,19 @@ platform_guest_catalog:
       ipv4: 10.10.10.50
       cidr: 24
       gateway4: 10.10.10.1
+      macaddr: BC:24:11:2A:2E:CA
       cores: 4
       memory_mb: 8192
       disk_gb: 96
       tags:
-      - postgres
-      - database
-      - lv3
+        - postgres
+        - database
+        - lv3
       packages:
-      - acl
-      - nftables
-      - postgresql
-      - postgresql-contrib
+        - acl
+        - nftables
+        - postgresql
+        - postgresql-contrib
     backup-lv3:
       vmid: 160
       name: backup-lv3
@@ -315,16 +339,16 @@ platform_guest_catalog:
       memory_mb: 8192
       disk_gb: 32
       extra_disks:
-      - interface: scsi1
-        storage: local
-        size_gb: 640
+        - interface: scsi1
+          storage: local
+          size_gb: 640
       tags:
-      - backup
-      - pbs
-      - lv3
+        - backup
+        - pbs
+        - lv3
       packages:
-      - acl
-      - xfsprogs
+        - acl
+        - xfsprogs
   by_role:
     nginx:
       vmid: 110
@@ -333,15 +357,16 @@ platform_guest_catalog:
       ipv4: 10.10.10.10
       cidr: 24
       gateway4: 10.10.10.1
+      macaddr: BC:24:11:0D:03:BB
       cores: 2
       memory_mb: 4096
       disk_gb: 32
       tags:
-      - ingress
-      - nginx
-      - lv3
+        - ingress
+        - nginx
+        - lv3
       packages:
-      - nginx
+        - nginx
     docker-runtime:
       vmid: 120
       name: docker-runtime-lv3
@@ -349,15 +374,16 @@ platform_guest_catalog:
       ipv4: 10.10.10.20
       cidr: 24
       gateway4: 10.10.10.1
+      macaddr: BC:24:11:AA:99:7C
       cores: 4
-      memory_mb: 12288
+      memory_mb: 24576
       disk_gb: 96
       tags:
-      - docker
-      - runtime
-      - lv3
+        - docker
+        - runtime
+        - lv3
       packages:
-      - docker.io
+        - docker.io
     docker-build:
       vmid: 130
       name: docker-build-lv3
@@ -365,18 +391,19 @@ platform_guest_catalog:
       ipv4: 10.10.10.30
       cidr: 24
       gateway4: 10.10.10.1
+      macaddr: BC:24:11:0F:8A:F2
       cores: 12
       memory_mb: 24576
       disk_gb: 160
       tags:
-      - docker
-      - build
-      - lv3
+        - docker
+        - build
+        - lv3
       packages:
-      - docker.io
-      - git
-      - make
-      - build-essential
+        - docker.io
+        - git
+        - make
+        - build-essential
     monitoring:
       vmid: 140
       name: monitoring-lv3
@@ -384,15 +411,16 @@ platform_guest_catalog:
       ipv4: 10.10.10.40
       cidr: 24
       gateway4: 10.10.10.1
+      macaddr: BC:24:11:B1:76:A0
       cores: 4
       memory_mb: 8192
       disk_gb: 64
       tags:
-      - monitoring
-      - grafana
-      - lv3
+        - monitoring
+        - grafana
+        - lv3
       packages:
-      - prometheus-node-exporter
+        - prometheus-node-exporter
     postgres:
       vmid: 150
       name: postgres-lv3
@@ -400,18 +428,19 @@ platform_guest_catalog:
       ipv4: 10.10.10.50
       cidr: 24
       gateway4: 10.10.10.1
+      macaddr: BC:24:11:2A:2E:CA
       cores: 4
       memory_mb: 8192
       disk_gb: 96
       tags:
-      - postgres
-      - database
-      - lv3
+        - postgres
+        - database
+        - lv3
       packages:
-      - acl
-      - nftables
-      - postgresql
-      - postgresql-contrib
+        - acl
+        - nftables
+        - postgresql
+        - postgresql-contrib
     backup:
       vmid: 160
       name: backup-lv3
@@ -424,16 +453,16 @@ platform_guest_catalog:
       memory_mb: 8192
       disk_gb: 32
       extra_disks:
-      - interface: scsi1
-        storage: local
-        size_gb: 640
+        - interface: scsi1
+          storage: local
+          size_gb: 640
       tags:
-      - backup
-      - pbs
-      - lv3
+        - backup
+        - pbs
+        - lv3
       packages:
-      - acl
-      - xfsprogs
+        - acl
+        - xfsprogs
 platform_service_topology:
   nginx_edge:
     service_name: nginx-edge
@@ -676,6 +705,24 @@ platform_service_topology:
     urls:
       internal: http://10.10.10.20:8000
       controller: http://100.118.189.95:8005
+  mattermost:
+    service_name: mattermost
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.118.189.95:8066
+    service_id: mattermost
+    ports:
+      internal: 8065
+      controller: 8066
+    urls:
+      internal: http://10.10.10.20:8065
+      controller: http://100.118.189.95:8066
   netbox:
     service_name: netbox
     owning_vm: docker-runtime-lv3
@@ -712,6 +759,24 @@ platform_service_topology:
     urls:
       internal: http://10.10.10.20:8088
       controller: http://100.118.189.95:8008
+  platform_context_api:
+    service_name: platform-context-api
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.118.189.95:8010
+    service_id: platform_context_api
+    ports:
+      internal: 8010
+      controller: 8010
+    urls:
+      internal: http://10.10.10.20:8010
+      controller: http://100.118.189.95:8010
   openbao:
     service_name: openbao
     owning_vm: docker-runtime-lv3
@@ -801,75 +866,77 @@ platform_service_topology:
     urls: {}
 platform_dns_records:
   public: &id001
-  - name: nginx
-    type: A
-    value: 65.108.75.123
-    ttl: 60
-  - name: grafana
-    type: A
-    value: 65.108.75.123
-    ttl: 60
-  - name: proxmox
-    type: A
-    value: 65.108.75.123
-    ttl: 60
-  - name: docker
-    type: A
-    value: 65.108.75.123
-    ttl: 60
-  - name: build
-    type: A
-    value: 65.108.75.123
-    ttl: 60
-  - name: uptime
-    type: A
-    value: 65.108.75.123
-    ttl: 60
-  - name: mail
-    type: A
-    value: 65.108.75.123
-    ttl: 60
-  - name: mail
-    type: A
-    value: 65.108.75.123
-    ttl: 60
-  - name: '@'
-    type: MX
-    value: 10 mail.lv3.org.
-    ttl: 300
-  - name: '@'
-    type: TXT
-    value: '"v=spf1 mx include:spf.brevo.com -all"'
-    ttl: 300
-  - name: _dmarc
-    type: TXT
-    value: '"v=DMARC1; p=quarantine; rua=mailto:baditaflorin@gmail.com"'
-    ttl: 300
-  - name: brevo1._domainkey
-    type: CNAME
-    value: b1.lv3-org.dkim.brevo.com.
-    ttl: 300
-  - name: brevo2._domainkey
-    type: CNAME
-    value: b2.lv3-org.dkim.brevo.com.
-    ttl: 300
-  - name: '@'
-    type: TXT
-    value: '"brevo-code:b5e6a2e60000b8da96b912f8ea4c2e9a"'
-    ttl: 300
+    - name: nginx
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: grafana
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: proxmox
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: docker
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: build
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: uptime
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: mail
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: mail
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: '@'
+      type: MX
+      value: 10 mail.lv3.org.
+      ttl: 300
+    - name: '@'
+      type: TXT
+      value: '"v=spf1 mx include:spf.brevo.com -all"'
+      ttl: 300
+    - name: _dmarc
+      type: TXT
+      value: '"v=DMARC1; p=quarantine; rua=mailto:baditaflorin@gmail.com"'
+      ttl: 300
+    - name: brevo1._domainkey
+      type: CNAME
+      value: b1.lv3-org.dkim.brevo.com.
+      ttl: 300
+    - name: brevo2._domainkey
+      type: CNAME
+      value: b2.lv3-org.dkim.brevo.com.
+      ttl: 300
+    - name: '@'
+      type: TXT
+      value: '"brevo-code:b5e6a2e60000b8da96b912f8ea4c2e9a"'
+      ttl: 300
   tailnet:
-  - name: database
-    type: A
-    value: 100.118.189.95
-    ttl: 60
+    - name: database
+      type: A
+      value: 100.118.189.95
+      ttl: 60
 platform_management_allowed_tcp_ports:
-- 3001
-- 8004
-- 9443
-- 8200
-- 8005
-- 8008
-- 9444
+  - 3001
+  - 8004
+  - 9443
+  - 8200
+  - 8005
+  - 8008
+  - 8066
+  - 8010
+  - 9444
 public_edge_service_topology:
   nginx_edge:
     service_name: nginx-edge
@@ -1112,6 +1179,24 @@ public_edge_service_topology:
     urls:
       internal: http://10.10.10.20:8000
       controller: http://100.118.189.95:8005
+  mattermost:
+    service_name: mattermost
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.118.189.95:8066
+    service_id: mattermost
+    ports:
+      internal: 8065
+      controller: 8066
+    urls:
+      internal: http://10.10.10.20:8065
+      controller: http://100.118.189.95:8066
   netbox:
     service_name: netbox
     owning_vm: docker-runtime-lv3
@@ -1148,6 +1233,24 @@ public_edge_service_topology:
     urls:
       internal: http://10.10.10.20:8088
       controller: http://100.118.189.95:8008
+  platform_context_api:
+    service_name: platform-context-api
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.118.189.95:8010
+    service_id: platform_context_api
+    ports:
+      internal: 8010
+      controller: 8010
+    urls:
+      internal: http://10.10.10.20:8010
+      controller: http://100.118.189.95:8010
   openbao:
     service_name: openbao
     owning_vm: docker-runtime-lv3
@@ -1271,6 +1374,14 @@ open_webui_host_proxy_port: 8008
 open_webui_controller_url: http://100.118.189.95:8008
 ntopng_proxy_port: 3001
 ntopng_operator_url: http://100.118.189.95:3001
+mattermost_server_port: 8065
+mattermost_host_proxy_port: 8066
+mattermost_private_base_url: http://10.10.10.20:8065
+mattermost_controller_url: http://100.118.189.95:8066
+platform_context_internal_port: 8010
+platform_context_host_proxy_port: 8010
+platform_context_private_url: http://10.10.10.20:8010
+platform_context_controller_url: http://100.118.189.95:8010
 portainer_host_proxy_port: 9444
 portainer_controller_url: https://100.118.189.95:9444
 step_ca_api_port: 9000
@@ -1281,13 +1392,15 @@ windmill_host_proxy_port: 8005
 windmill_controller_url: http://100.118.189.95:8005
 monitoring_loki_push_api_url: http://10.10.10.40:3100/loki/api/v1/push
 proxmox_management_allowed_tcp_ports:
-- 3001
-- 8004
-- 9443
-- 8200
-- 8005
-- 8008
-- 9444
+  - 3001
+  - 8004
+  - 9443
+  - 8200
+  - 8005
+  - 8008
+  - 8066
+  - 8010
+  - 9444
 mail_platform_private_api_url: http://10.10.10.20:8081
 monitoring_grafana_port: 3000
 monitoring_influxdb_port: 8086

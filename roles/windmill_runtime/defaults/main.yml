@@ -27,3 +27,8 @@ windmill_seed_scripts:
     language: python3
     summary: LV3 Windmill healthcheck
     description: Repo-managed verification script for Windmill runtime and worker execution.
+  - path: f/lv3/rebuild_rag_index
+    local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/rebuild-rag-index.py
+    language: python3
+    summary: Rebuild the LV3 platform context index
+    description: Repo-managed Windmill script that triggers a local-corpus rebuild on the private platform context API.

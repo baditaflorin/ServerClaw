@@ -36,6 +36,7 @@
         fail_msg: "This playbook only supports Debian guests."
 
   roles:
+    - role: linux_guest_firewall
     - role: mail_platform_runtime
 
 - name: Converge mail platform observability on the Docker runtime VM
@@ -51,6 +52,7 @@
         fail_msg: "This playbook only supports Debian guests."
 
   roles:
+    - role: linux_guest_firewall
     - role: mail_platform_observability
 
 - name: Refresh the monitoring stack with the managed mail dashboard

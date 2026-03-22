@@ -1,0 +1,50 @@
+from pathlib import Path
+
+from platform_context_service import PlatformContextService, ServiceConfig
+
+
+def write(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content)
+
+
+def make_repo(tmp_path: Path) -> Path:
+    write(
+        tmp_path / "docs" / "adr" / "0042-step-ca.md",
+        "# ADR 0042\n\n## Decision\nstep-ca issues SSH certificates for humans, agents, services, and hosts.\n",
+    )
+    write(tmp_path / "docs" / "runbooks" / "configure-step-ca.md", "# Step CA\n\n## Verify\nCheck SSH certificate issuance.\n")
+    write(tmp_path / "receipts" / "live-applies" / "2026-03-22-test.json", '{"receipt_id":"r1","workflow_id":"converge-step-ca","summary":"ok","applied_on":"2026-03-22"}')
+    write(tmp_path / "config" / "workflow-catalog.json", '{"workflows":{"converge-step-ca":{"description":"d"}}}')
+    write(tmp_path / "config" / "command-catalog.json", '{"commands":{"converge-step-ca":{"description":"d"}}}')
+    write(tmp_path / "config" / "agent-tool-registry.json", '{"tools":[]}')
+    write(
+        tmp_path / "versions" / "stack.yaml",
+        "platform_version: 1.2.3\nobserved_state:\n  checked_at: 2026-03-22\n  proxmox:\n    version: 9.1.6\n  open_webui:\n    host_tailscale_proxy_url: http://100.118.189.95:8008\n  windmill:\n    host_tailscale_proxy_url: http://100.118.189.95:8005\n  netbox:\n    host_tailscale_proxy_url: http://100.118.189.95:8004\n",
+    )
+    write(tmp_path / "VERSION", "1.2.3\n")
+    write(tmp_path / "changelog.md", "# Changelog\n")
+    return tmp_path
+
+
+def test_query_returns_cited_step_ca_chunk(tmp_path: Path) -> None:
+    repo_root = make_repo(tmp_path)
+    service = PlatformContextService(
+        ServiceConfig(
+            api_token="test-token",
+            corpus_root=repo_root,
+            collection_name="test",
+            qdrant_url=None,
+            qdrant_location=":memory:",
+            embedding_backend="token-hash",
+            embedding_model="unused",
+            embedding_dimension=384,
+        )
+    )
+    rebuild_result = service.rebuild_from_local_corpus()
+    assert rebuild_result["indexed_chunks"] > 0
+
+    result = service.query("how does step-ca issue SSH certificates", 3)
+    assert result["matches"]
+    assert result["matches"][0]["source_path"].startswith("docs/")
+    assert "SSH certificates" in result["matches"][0]["content"]

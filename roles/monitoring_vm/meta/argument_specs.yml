@@ -1,0 +1,121 @@
+---
+argument_specs:
+  main:
+    short_description: Install and configure the monitoring VM service stack.
+    options:
+      monitoring_stack_packages:
+        type: list
+        elements: str
+        required: true
+        description:
+          - Packages installed for the monitoring stack.
+      monitoring_stack_dir:
+        type: path
+        required: true
+        description:
+          - Directory that stores monitoring secrets and rendered state.
+      monitoring_grafana_admin_user:
+        type: str
+        required: true
+        description:
+          - Admin username configured for Grafana.
+      monitoring_grafana_dashboard_dir:
+        type: path
+        required: false
+        description:
+          - Base directory containing managed Grafana dashboards.
+      monitoring_grafana_dashboard_uid:
+        type: str
+        required: true
+        description:
+          - UID assigned to the primary platform overview dashboard.
+      monitoring_grafana_dashboard_file:
+        type: path
+        required: true
+        description:
+          - Path where the primary platform overview dashboard is rendered.
+      monitoring_grafana_vm_dashboard_dir:
+        type: path
+        required: true
+        description:
+          - Directory that stores per-VM dashboard JSON definitions.
+      monitoring_grafana_loki_datasource_name:
+        type: str
+        required: true
+        description:
+          - Grafana datasource name used for Loki logs.
+      monitoring_grafana_prometheus_datasource_uid:
+        type: str
+        required: true
+        description:
+          - Grafana datasource UID used for Prometheus graphs.
+      monitoring_grafana_tempo_datasource_uid:
+        type: str
+        required: true
+        description:
+          - Grafana datasource UID used for Tempo traces.
+      monitoring_influxdb_url:
+        type: str
+        required: true
+        description:
+          - Base URL for the managed InfluxDB instance.
+      monitoring_influxdb_org:
+        type: str
+        required: true
+        description:
+          - InfluxDB organization name used for monitoring data.
+      monitoring_influxdb_bucket:
+        type: str
+        required: true
+        description:
+          - InfluxDB bucket used for monitoring data.
+      monitoring_loki_config_file:
+        type: path
+        required: true
+        description:
+          - Loki configuration file rendered by the role.
+      monitoring_loki_data_dir:
+        type: path
+        required: true
+        description:
+          - Persistent data directory used by Loki.
+      monitoring_loki_http_url:
+        type: str
+        required: true
+        description:
+          - Guest-local Loki HTTP base URL used for verification.
+      monitoring_prometheus_config_file:
+        type: path
+        required: true
+        description:
+          - Prometheus configuration file rendered by the role.
+      monitoring_tempo_deb_url:
+        type: str
+        required: true
+        description:
+          - Download URL for the pinned Tempo package.
+      monitoring_tempo_deb_checksum:
+        type: str
+        required: true
+        description:
+          - Checksum used to verify the pinned Tempo package.
+      monitoring_tempo_config_file:
+        type: path
+        required: true
+        description:
+          - Tempo configuration file rendered by the role.
+      monitoring_otelcol_deb_url:
+        type: str
+        required: true
+        description:
+          - Download URL for the pinned OpenTelemetry Collector package.
+      monitoring_otelcol_deb_checksum:
+        type: str
+        required: true
+        description:
+          - Checksum used to verify the pinned OpenTelemetry Collector package.
+      monitoring_otelcol_config_file:
+        type: path
+        required: true
+        description:
+          - Collector configuration file rendered by the role.

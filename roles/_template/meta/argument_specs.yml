@@ -1,0 +1,17 @@
+---
+argument_specs:
+  main:
+    short_description: Template for new repository-managed roles.
+    options:
+      example_role_required_value:
+        type: str
+        required: true
+        description:
+          - Replace this placeholder with the first required role variable.
+      example_role_optional_items:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description:
+          - Replace this placeholder with optional role inputs as needed.

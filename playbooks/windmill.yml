@@ -21,6 +21,7 @@
         fail_msg: "This playbook only supports Debian guests."
 
   roles:
+    - role: linux_guest_firewall
     - role: postgres_vm
     - role: windmill_postgres
 
@@ -43,5 +44,6 @@
         fail_msg: "This playbook only supports Debian guests."
 
   roles:
+    - role: linux_guest_firewall
     - role: docker_runtime
     - role: windmill_runtime

@@ -26,6 +26,7 @@
         fail_msg: "This playbook only supports Debian guests."
 
   roles:
+    - role: linux_guest_firewall
     - role: uptime_kuma_runtime
 
 - name: Publish Uptime Kuma through the NGINX edge
@@ -34,4 +35,5 @@
   gather_facts: true
 
   roles:
+    - role: linux_guest_firewall
     - role: nginx_edge_publication

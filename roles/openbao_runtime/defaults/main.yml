@@ -20,6 +20,8 @@ openbao_local_cluster_port: 8203
 openbao_runtime_uid: "100"
 openbao_runtime_gid: "1000"
 openbao_tls_mount_dir: /openbao/tls
+openbao_controller_url: "{{ platform_service_topology | platform_service_url('openbao', 'controller') }}"
+openbao_postgres_host: "{{ platform_guest_catalog.by_name | platform_guest_attr('postgres-lv3', 'ipv4') }}"
 openbao_api_addr: >-
   {{
     openbao_controller_url

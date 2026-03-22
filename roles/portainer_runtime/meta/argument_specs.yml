@@ -1,0 +1,85 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the Portainer runtime and bootstrap admin state.
+    options:
+      portainer_image:
+        type: str
+        required: true
+        description:
+          - Container image reference used for Portainer.
+      portainer_container_name:
+        type: str
+        required: true
+        description:
+          - Expected container name used for verification.
+      portainer_site_dir:
+        type: path
+        required: true
+        description:
+          - Base directory for the Portainer runtime stack.
+      portainer_data_dir:
+        type: path
+        required: true
+        description:
+          - Persistent data directory used by Portainer.
+      portainer_compose_file:
+        type: path
+        required: true
+        description:
+          - Compose file path for the managed Portainer stack.
+      portainer_https_port:
+        type: int
+        required: true
+        description:
+          - Guest-local HTTPS port exposed by Portainer.
+      portainer_host_proxy_port:
+        type: int
+        required: true
+        description:
+          - Host-side proxy port used for operator access.
+      portainer_endpoint_name:
+        type: str
+        required: false
+        description:
+          - Portainer endpoint name created during bootstrap.
+      portainer_endpoint_creation_type:
+        type: int
+        required: false
+        description:
+          - Portainer endpoint creation type used during bootstrap.
+      portainer_admin_username:
+        type: str
+        required: true
+        description:
+          - Bootstrap admin username created by the role.
+      portainer_local_artifact_dir:
+        type: path
+        required: false
+        description:
+          - Controller-local directory for Portainer bootstrap artifacts.
+      portainer_admin_password_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file that stores the Portainer admin password.
+      portainer_admin_auth_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file that stores Portainer authentication state.
+      portainer_controller_url:
+        type: str
+        required: true
+        description:
+          - Operator-facing URL used to reach Portainer from the controller.
+      portainer_private_url:
+        type: str
+        required: true
+        description:
+          - Guest-local URL used for Portainer verification and bootstrap.
+      portainer_verify_ssl:
+        type: bool
+        required: false
+        description:
+          - Whether TLS certificate verification is enforced for API calls.

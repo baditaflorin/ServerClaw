@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0063](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0063-centralised-vars-and-computed-facts-library.md)
 - Title: Single source of truth for platform facts with agent-queryable output
-- Status: merged
+- Status: ready
 - Branch: `codex/adr-0063-platform-vars-library`
 - Worktree: `../proxmox_florin_server-platform-vars-library`
 - Owner: codex

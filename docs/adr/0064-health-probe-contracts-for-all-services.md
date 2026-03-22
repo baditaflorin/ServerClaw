@@ -1,10 +1,10 @@
 # ADR 0064: Health Probe Contracts For All Services
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.61.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-22
 - Date: 2026-03-22
 
 ## Context
@@ -39,6 +39,7 @@ Implementation:
 - each service role gains a `tasks/verify.yml` that runs the liveness and readiness probes after convergence
 - the `make validate` gate runs a syntax check of every `verify.yml` to catch broken probe definitions before live apply
 - a new `config/health-probe-catalog.json` lists every service with its probe URL, method, expected status code, and timeout — machine-readable for agents and automation
+- services that do not yet have dedicated service roles still require catalog coverage and Uptime Kuma policy, even if their probes are enforced outside a standalone role
 
 ## Consequences
 
