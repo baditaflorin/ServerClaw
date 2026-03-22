@@ -37,6 +37,10 @@ mail_platform_gateway_force_brevo_fallback: true
 mail_platform_gateway_attempt_local_first: false
 mail_platform_gateway_uvicorn_workers: 1
 mail_platform_gateway_api_user: mail-platform
+mail_platform_gateway_trace_service_name: mail-gateway
+mail_platform_gateway_trace_service_namespace: lv3
+mail_platform_gateway_trace_environment: lv3
+mail_platform_gateway_trace_otlp_endpoint: "http://{{ hostvars['monitoring-lv3'].ansible_host }}:4318/v1/traces"
 mail_platform_metrics_username: prometheus
 mail_platform_webhook_events:
   - queue.queue-message-authenticated

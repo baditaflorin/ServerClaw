@@ -8,7 +8,7 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
-## 0.50.0 - 2026-03-22
+## 0.52.0 - 2026-03-22
 
 - implemented ADR 0059 live by installing `ntopng` on `proxmox_florin`, capturing the private guest bridge directly from `vmbr10`, and adding edge-adjacent context from `vmbr0`
 - added a dedicated `playbooks/ntopng.yml` converge path, the new `roles/proxmox_ntopng` automation, a private-access runbook, and workflow or command catalog entries for operator-driven flow visibility
@@ -19,6 +19,27 @@ Platform impact:
 - ntopng is now running on `proxmox_florin` and is reachable privately at `http://100.118.189.95:3001`
 - operators now have a repo-managed flow-visibility surface for `vmbr10` private-network traffic and `vmbr0` edge context without introducing nProbe or public publication
 - the Proxmox host firewall now explicitly allows the ntopng proxy port only from declared management sources
+
+## 0.51.0 - 2026-03-22
+
+- implemented ADR 0053 in repository automation by adding pinned Tempo and `otelcol-contrib` packages plus a managed Prometheus service to the monitoring VM role
+- provisioned Grafana Prometheus and Tempo datasources, documented the shared OTLP collector contract, and instrumented the private mail-gateway service as the first traced internal API surface
+- updated the ADR, workstream, monitoring runbook, mail-platform runbook, and workflow catalog to describe the new tracing and service-map operating model
+
+Platform impact:
+
+- no direct live platform change in this release commit; the tracing stack still needs to be applied from `main`
+
+## 0.50.0 - 2026-03-22
+
+- implemented ADR 0049 as a canonical API publication contract instead of leaving publication policy only in prose
+- added `config/api-publication.json` plus `scripts/api_publication.py` so publication tiers are machine-readable, inspectable, and validation-backed
+- extended the governed API lane inventory to include the live OpenBao and Windmill APIs, and classified every current API or webhook surface as internal-only, operator-only, or public-edge
+- rendered the publication-tier summary into the generated README and documented the operating procedure in a dedicated API publication runbook
+
+Platform impact:
+
+- no direct live platform change; this release makes the existing private-first API and webhook exposure model explicit, reviewable, and enforced from `main`
 
 ## 0.49.0 - 2026-03-22
 

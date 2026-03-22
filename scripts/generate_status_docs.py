@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from api_publication import ALLOWED_PUBLICATION_TIERS, load_api_publication_catalog
 from control_plane_lanes import ALLOWED_LANE_IDS, load_lane_catalog
 from controller_automation_toolkit import README_PATH, emit_cli_error, load_yaml, repo_path
 
@@ -131,8 +132,11 @@ def render_platform_status() -> str:
 
 def render_control_plane_lanes() -> str:
     _catalog, normalized_lanes = load_lane_catalog()
+    _publication_catalog, normalized_tiers, normalized_surfaces = load_api_publication_catalog()
     lane_rows = []
     surface_rows = []
+    tier_rows = []
+    classified_surface_rows = []
     for lane_id in ALLOWED_LANE_IDS:
         lane = normalized_lanes[lane_id]
         lane_rows.append(
@@ -154,6 +158,28 @@ def render_control_plane_lanes() -> str:
                 ]
             )
 
+    for tier_id in ALLOWED_PUBLICATION_TIERS:
+        tier = normalized_tiers[tier_id]
+        tier_rows.append(
+            [
+                f"`{tier_id}`",
+                tier["title"],
+                str(sum(1 for surface in normalized_surfaces if surface["publication_tier"] == tier_id)),
+                tier["summary"],
+            ]
+        )
+
+    for surface in normalized_surfaces:
+        classified_surface_rows.append(
+            [
+                f"`{surface['id']}`",
+                f"`{surface['publication_tier']}`",
+                f"`{surface['lane']}`",
+                f"`{surface['endpoint']}`",
+                surface["reachability"],
+            ]
+        )
+
     return "\n".join(
         [
             GENERATED_NOTICE,
@@ -163,6 +189,12 @@ def render_control_plane_lanes() -> str:
             "",
             "### Current Governed Surfaces",
             render_table(["Surface", "Lane", "Kind", "Endpoint"], surface_rows),
+            "",
+            "### API Publication Tiers",
+            render_table(["Tier", "Title", "Surfaces", "Summary"], tier_rows),
+            "",
+            "### Classified API And Webhook Surfaces",
+            render_table(["Surface", "Tier", "Lane", "Endpoint", "Reachability"], classified_surface_rows),
         ]
     ).strip()
 

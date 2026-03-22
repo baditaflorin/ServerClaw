@@ -63,6 +63,12 @@ The pragmatic first placement for these services is:
 
 This keeps the first rollout aligned with the current single-node-first topology. If the control-plane blast radius grows too large, a dedicated control-plane VM can be introduced in a later ADR.
 
+Current state:
+
+- ADR 0053 is now live with Tempo, Prometheus-backed service-graph metrics, and a shared OTLP collector on `monitoring-lv3`
+- the first instrumented internal path is the private mail gateway on `docker-runtime-lv3`
+- ADR 0052 remains the next adjacent observability gap for centralized logs
+
 ## Operating Principles
 
 - keep internal and operator-facing surfaces private-first

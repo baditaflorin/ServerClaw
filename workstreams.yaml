@@ -320,7 +320,7 @@ workstreams:
   - id: adr-0045-communication-lanes
     adr: "0045"
     title: Control-plane communication lanes
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0045-communication-lanes
     worktree_path: ../proxmox_florin_server-communication-lanes
@@ -335,12 +335,12 @@ workstreams:
       - SMTP submission
       - webhook flows
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0046-identity-classes
     adr: "0046"
     title: Identity classes for humans, services, agents, and break-glass
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0046-identity-classes
     worktree_path: ../proxmox_florin_server-identity-classes
@@ -353,7 +353,7 @@ workstreams:
       - workflow identities
       - mail senders
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0047-short-lived-creds
     adr: "0047"
@@ -379,7 +379,7 @@ workstreams:
   - id: adr-0048-command-catalog
     adr: "0048"
     title: Command catalog and approval gates
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0048-command-catalog
     worktree_path: ../proxmox_florin_server-command-catalog
@@ -394,15 +394,15 @@ workstreams:
       - workflow execution
       - runbooks
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0049-private-api-publication
     adr: "0049"
     title: Private-first API publication model
     status: merged
     owner: codex
-    branch: codex/adr-0049-private-api-publication
-    worktree_path: ../proxmox_florin_server-private-api-publication
+    branch: codex/adr-0049-private-first-api-publication-model
+    worktree_path: ../proxmox_florin_server-adr-0049
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0049-private-api-publication.md
     depends_on:
       - adr-0045-communication-lanes
@@ -481,7 +481,7 @@ workstreams:
   - id: adr-0053-tempo-traces
     adr: "0053"
     title: OpenTelemetry traces and service maps with Grafana Tempo
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0053-tempo-traces
     worktree_path: ../proxmox_florin_server-tempo-traces

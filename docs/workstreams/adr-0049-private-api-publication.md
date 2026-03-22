@@ -3,8 +3,8 @@
 - ADR: [ADR 0049](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0049-private-first-api-publication-model.md)
 - Title: Publication tiers for internal, operator-only, and public APIs
 - Status: merged
-- Branch: `codex/adr-0049-private-api-publication`
-- Worktree: `../proxmox_florin_server-private-api-publication`
+- Branch: `codex/adr-0049-private-first-api-publication-model`
+- Worktree: `../proxmox_florin_server-adr-0049`
 - Owner: codex
 - Depends On: `adr-0045-communication-lanes`, `adr-0047-short-lived-creds`
 - Conflicts With: none
@@ -18,31 +18,41 @@
 
 ## Non-Goals
 
-- publishing new APIs in this planning workstream
+- publishing a new public application API
 - treating every HTTPS endpoint as safe for the public edge
 
 ## Expected Repo Surfaces
 
+- `config/api-publication.json`
+- `scripts/api_publication.py`
 - `docs/adr/0049-private-first-api-publication-model.md`
 - `docs/workstreams/adr-0049-private-api-publication.md`
-- `docs/runbooks/plan-agentic-control-plane.md`
+- `docs/runbooks/private-first-api-publication.md`
+- `docs/runbooks/control-plane-communication-lanes.md`
+- `config/control-plane-lanes.json`
+- `scripts/generate_status_docs.py`
+- `scripts/validate_repository_data_models.py`
+- `Makefile`
 - `workstreams.yaml`
 
 ## Expected Live Surfaces
 
-- explicit exposure classes for Proxmox, mail, secret, and workflow APIs
-- fewer accidentally public admin interfaces
+- no direct live apply in this workstream
+- explicit repo-enforced exposure classes for Proxmox, mail, secret, workflow, and webhook HTTP surfaces
 
 ## Verification
 
-- `ruby -e 'require "yaml"; YAML.load_file("/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml"); puts "workstreams.yaml OK"'`
-- `test -f /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0049-private-first-api-publication-model.md`
+- `uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/api_publication.py --validate`
+- `uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/control_plane_lanes.py --validate`
+- `make validate`
 
 ## Merge Criteria
 
-- the ADR defines the three publication tiers and the default rule
-- the workstream shows how future API surfaces fit that model
+- the repo exposes a canonical publication-tier catalog with the default `internal-only` rule
+- every governed API or webhook surface in the lane catalog is classified in that catalog
+- README generation and repository validation both fail if the publication model drifts
 
 ## Notes For The Next Assistant
 
-- keep Proxmox, OpenBao, and CA APIs out of the public edge unless a future ADR says otherwise
+- keep Proxmox, OpenBao, and `step-ca` out of the public edge unless a future ADR says otherwise
+- treat public-edge publication as an explicit change to both the lane catalog and the publication catalog, not just an NGINX config change

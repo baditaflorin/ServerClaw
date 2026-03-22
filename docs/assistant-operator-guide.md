@@ -89,6 +89,8 @@ Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/M
 - `make command-info COMMAND=configure-network`
 - `make lanes`
 - `make lane-info LANE=api`
+- `make api-publication`
+- `make api-publication-info SURFACE=proxmox-management-api`
 - `make validate`
 - `make validate-data-models`
 - `make generate-status-docs`
@@ -126,6 +128,7 @@ Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/M
 - workflow entry points stay declared in `config/workflow-catalog.json`
 - mutating command contracts stay declared in `config/command-catalog.json`
 - control-plane communication surfaces stay declared in `config/control-plane-lanes.json`
+- API and webhook publication tiers stay declared in `config/api-publication.json`
 - controller-local secret prerequisites stay declared in `config/controller-local-secrets.json`
 - live applies keep structured evidence under `receipts/live-applies/`
 - shared controller-side Python primitives stay centralized in `scripts/controller_automation_toolkit.py`
