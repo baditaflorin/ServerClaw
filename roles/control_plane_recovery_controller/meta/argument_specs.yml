@@ -1,0 +1,57 @@
+---
+argument_specs:
+  main:
+    short_description: Build and mirror the controller-local control-plane recovery bundle.
+    options:
+      control_plane_recovery_local_artifact_dir:
+        type: path
+        required: true
+        description:
+          - Root directory for controller-local recovery artifacts.
+      control_plane_recovery_local_controller_dir:
+        type: path
+        required: true
+        description:
+          - Directory that stores the controller bundle and manifest.
+      control_plane_recovery_local_controller_bundle_file:
+        type: path
+        required: true
+        description:
+          - Local archive file path for the controller recovery bundle.
+      control_plane_recovery_local_controller_manifest_file:
+        type: path
+        required: true
+        description:
+          - Local manifest file path for the controller recovery bundle.
+      control_plane_recovery_local_controller_staging_dir:
+        type: path
+        required: true
+        description:
+          - Temporary staging directory used while assembling the bundle.
+      control_plane_recovery_store_controller_dir:
+        type: path
+        required: true
+        description:
+          - Backup-store directory that receives the mirrored controller bundle.
+      control_plane_recovery_store_user:
+        type: str
+        required: true
+        description:
+          - Backup-store account that owns the mirrored controller bundle.
+      control_plane_recovery_store_group:
+        type: str
+        required: true
+        description:
+          - Backup-store group that owns the mirrored controller bundle.
+      control_plane_recovery_controller_bundle_sources:
+        type: list
+        elements: dict
+        required: true
+        description:
+          - Controller-local files or directories that must be bundled for recovery.
+      control_plane_recovery_controller_external_breakglass_dependencies:
+        type: list
+        elements: dict
+        required: true
+        description:
+          - External dependencies that remain outside the archived controller bundle.

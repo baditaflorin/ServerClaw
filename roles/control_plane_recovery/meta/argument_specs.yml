@@ -1,0 +1,95 @@
+---
+argument_specs:
+  main:
+    short_description: Configure scheduled control-plane runtime backups on docker-runtime-lv3.
+    options:
+      control_plane_recovery_runtime_root:
+        type: path
+        required: true
+        description:
+          - Base directory for the runtime backup workflow.
+      control_plane_recovery_runtime_config_dir:
+        type: path
+        required: true
+        description:
+          - Directory that stores managed recovery configuration on the guest.
+      control_plane_recovery_runtime_state_dir:
+        type: path
+        required: true
+        description:
+          - Directory that stores runtime state and working files.
+      control_plane_recovery_runtime_bin_dir:
+        type: path
+        required: true
+        description:
+          - Directory that stores the managed backup script.
+      control_plane_recovery_runtime_backup_script:
+        type: path
+        required: true
+        description:
+          - Full path to the managed control-plane backup script.
+      control_plane_recovery_runtime_backup_service:
+        type: str
+        required: true
+        description:
+          - Systemd one-shot service name that runs the backup.
+      control_plane_recovery_runtime_backup_timer:
+        type: str
+        required: true
+        description:
+          - Systemd timer name that schedules the backup service.
+      control_plane_recovery_backup_on_calendar:
+        type: str
+        required: true
+        description:
+          - Systemd calendar expression used for scheduled runtime backups.
+      control_plane_recovery_backup_retention_count:
+        type: int
+        required: true
+        description:
+          - Number of archived backup generations retained on the runtime host.
+      control_plane_recovery_runtime_ssh_private_key_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local private key file used for runtime archive delivery.
+      control_plane_recovery_runtime_ssh_public_key_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local public key file paired with the runtime archive identity.
+      control_plane_recovery_runtime_openbao_backup_policy_name:
+        type: str
+        required: true
+        description:
+          - OpenBao policy name used for the scoped backup token.
+      control_plane_recovery_runtime_openbao_backup_token_remote_file:
+        type: path
+        required: true
+        description:
+          - Guest-local file that stores the managed OpenBao backup token.
+      control_plane_recovery_runtime_backup_target_host:
+        type: str
+        required: true
+        description:
+          - Backup-store host that receives the runtime archives.
+      control_plane_recovery_runtime_backup_target_user:
+        type: str
+        required: true
+        description:
+          - Remote SSH user used for archive delivery to the backup store.
+      control_plane_recovery_runtime_backup_target_dir:
+        type: path
+        required: true
+        description:
+          - Backup-store directory that receives runtime archives.
+      control_plane_recovery_runtime_backup_target_controller_dir:
+        type: path
+        required: true
+        description:
+          - Backup-store directory that receives the mirrored controller bundle.
+      control_plane_recovery_run_backup_now:
+        type: bool
+        required: true
+        description:
+          - Whether the role should run one immediate backup for verification.

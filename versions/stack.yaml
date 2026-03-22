@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.62.0
+repo_version: 0.63.0
 platform_version: 0.33.0
 
 live_apply_evidence:
@@ -23,6 +23,7 @@ live_apply_evidence:
     control_plane_lanes: 2026-03-22-adr-0045-control-plane-communication-lanes-live-apply
     identity_taxonomy: 2026-03-22-adr-0046-identity-classes-live-apply
     command_catalog: 2026-03-22-adr-0048-command-catalog-live-apply
+    control_plane_recovery: 2026-03-22-adr-0051-control-plane-recovery-live-apply
     notification_profiles: 2026-03-22-adr-0050-notification-profiles-live-apply
     netbox: 2026-03-22-adr-0054-netbox-live-apply
     ntopng: 2026-03-22-adr-0059-ntopng-live-apply
@@ -309,6 +310,12 @@ observed_state:
     message_lane_mail_submission_verified: true
     message_lane_notification_endpoint: lv3-ops-email
     event_lane_mail_webhook_verified: true
+    recovery_backup_store_ssh_source_verified: true
+    recovery_backup_timer_active: true
+    recovery_backup_latest_timestamp: 20260322T212846Z
+    recovery_restore_drill_checked_at: 2026-03-22T21:29:48Z
+    recovery_restore_drill_result: pass
+    recovery_controller_bundle_mirrored: true
   identity_taxonomy:
     reviewed_at: 2026-03-22
     all_identities_documented: true
@@ -692,6 +699,20 @@ observed_state:
     mode: snapshot
     storage_id: lv3-backup-pbs
     legacy_external_cifs_path_blocked: true
+    control_plane_recovery:
+      runtime_source_vm: docker-runtime-lv3
+      backup_store_vm: backup-lv3
+      runtime_backup_ssh_source: 10.10.10.20
+      runtime_backup_timer_active: true
+      runtime_backup_schedule_utc: "*-*-* 01,07,13,19:15:00"
+      latest_runtime_backup_timestamp: 20260322T212846Z
+      latest_runtime_backup_path: /srv/control-plane-recovery/runtime/docker-runtime-lv3/latest
+      controller_bundle_path: /srv/control-plane-recovery/controller/controller-recovery-bundle.tar.zst
+      restore_drill_timer_active: true
+      restore_drill_schedule_utc: "*-*-* 05:45:00"
+      latest_restore_drill:
+        checked_at: 2026-03-22T21:29:48Z
+        result: pass
 
 release_tracks:
   delivery_model:
@@ -700,7 +721,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.62.0
+    current: 0.63.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.33.0

@@ -28,13 +28,14 @@ make converge-control-plane-recovery
 
 ## What The Playbook Does
 
-1. Configures `backup-lv3` as the control-plane recovery store.
-2. Installs a dedicated non-human SSH landing user for runtime archive delivery.
-3. Configures `docker-runtime-lv3` to export scheduled control-plane backups.
-4. Creates a scoped OpenBao backup token used only for managed Raft snapshots.
-5. Builds a controller-local recovery bundle and mirrors it into `backup-lv3`.
-6. Enables a scheduled restore drill on `backup-lv3`.
-7. Runs one immediate backup and one immediate restore drill for verification.
+1. Updates the Proxmox-side `backup-lv3` guest firewall so `docker-runtime-lv3` can push the archived bundles over SSH.
+2. Configures `backup-lv3` as the control-plane recovery store.
+3. Installs a dedicated non-human SSH landing user for runtime archive delivery.
+4. Configures `docker-runtime-lv3` to export scheduled control-plane backups.
+5. Creates a scoped OpenBao backup token used only for managed Raft snapshots.
+6. Builds a controller-local recovery bundle and mirrors it into `backup-lv3`.
+7. Enables a scheduled restore drill on `backup-lv3`.
+8. Runs one immediate backup and one immediate restore drill for verification.
 
 ## Scheduled Policy
 
@@ -43,36 +44,38 @@ make converge-control-plane-recovery
 
 The current cadence is intentionally faster than typical VM-only backup policy because short-lived secrets and internal certificates change more often than guest disks.
 
+The backup push path depends on `backup-lv3` accepting SSH from `docker-runtime-lv3` on `10.10.10.20/32`. The workflow now manages that Proxmox guest-firewall allowance explicitly.
+
 ## Verification
 
 Check the backup timer on `docker-runtime-lv3`:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'sudo systemctl status lv3-control-plane-backup.timer --no-pager'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand="ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 -W %h:%p" ops@10.10.10.20 'sudo systemctl status lv3-control-plane-backup.timer --no-pager'
 ```
 
 Check the restore-drill timer on `backup-lv3`:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.60 'sudo systemctl status lv3-control-plane-restore-drill.timer --no-pager'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand="ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 -W %h:%p" ops@10.10.10.60 'sudo systemctl status lv3-control-plane-restore-drill.timer --no-pager'
 ```
 
 Inspect the latest runtime backup landing zone:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.60 'ls -lah /srv/control-plane-recovery/runtime/docker-runtime-lv3/latest'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand="ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 -W %h:%p" ops@10.10.10.60 'ls -lah /srv/control-plane-recovery/runtime/docker-runtime-lv3/latest'
 ```
 
 Inspect the restore-drill result:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.60 'sudo cat /srv/control-plane-recovery/drills/last-restore-drill.json'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand="ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 -W %h:%p" ops@10.10.10.60 'sudo cat /srv/control-plane-recovery/drills/last-restore-drill.json'
 ```
 
 Inspect the controller recovery bundle:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.60 'ls -lah /srv/control-plane-recovery/controller'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand="ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 -W %h:%p" ops@10.10.10.60 'ls -lah /srv/control-plane-recovery/controller'
 ```
 
 ## Break-Glass Notes

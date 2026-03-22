@@ -2,8 +2,8 @@
 
 - Status: Accepted
 - Implementation Status: Implemented
-- Implemented In Repo Version: 0.50.0
-- Implemented In Platform Version: 0.26.0
+- Implemented In Repo Version: 0.63.0
+- Implemented In Platform Version: 0.33.0
 - Implemented On: 2026-03-22
 - Date: 2026-03-22
 
@@ -48,8 +48,9 @@ Recovery policy:
 
 ## Implementation Notes
 
-- The repo now exposes a dedicated recovery workflow through [playbooks/control-plane-recovery.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/control-plane-recovery.yml), [roles/control_plane_recovery](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/control_plane_recovery), [roles/control_plane_recovery_store](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/control_plane_recovery_store), and [roles/control_plane_recovery_controller](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/control_plane_recovery_controller).
+- The repo now exposes a dedicated recovery workflow through [playbooks/control-plane-recovery.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/control-plane-recovery.yml), [roles/control_plane_recovery](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/control_plane_recovery), [roles/control_plane_recovery_store](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/control_plane_recovery_store), [roles/control_plane_recovery_controller](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/control_plane_recovery_controller), and [roles/control_plane_recovery_firewall](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/control_plane_recovery_firewall).
 - [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json) now registers `converge-control-plane-recovery` as the canonical entry point for the scheduled exports, controller bundle refresh, and restore drill.
+- The backup-store contract now explicitly includes the `backup-lv3` guest-firewall allowance required for `docker-runtime-lv3` to push the archived control-plane bundles over SSH.
 - [config/controller-local-secrets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/controller-local-secrets.json) now records the generated runtime backup SSH key and controller recovery bundle alongside the pre-existing control-plane bootstrap artifacts.
 - Operator procedure is documented in [docs/runbooks/configure-control-plane-recovery.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-control-plane-recovery.md).
-- Live application on 2026-03-22 verified scheduled runtime archives for `step-ca`, OpenBao, Windmill, and the mail platform on `backup-lv3`, plus a passing restore drill against the mirrored controller recovery bundle.
+- Live application from the 0.63.0 integration release on 2026-03-22 verified scheduled runtime archives for `step-ca`, OpenBao, Windmill, and the mail platform on `backup-lv3`, plus a passing restore drill against the mirrored controller recovery bundle.

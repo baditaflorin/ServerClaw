@@ -8,6 +8,18 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.63.0 - 2026-03-22
+
+- applied ADR 0051 live by converging the repository-managed control-plane recovery workflow across `docker-runtime-lv3`, `backup-lv3`, and the Proxmox host backup-store firewall contract
+- hardened the recovery automation so OpenBao is unsealed explicitly for managed Raft snapshots and the runtime archive push path now depends on a repo-managed `backup-lv3` guest-firewall allow rule for `10.10.10.20/32`
+- recorded the live recovery evidence, restore-drill result, controller bundle mirror, ADR metadata, runbook updates, and canonical stack state needed to keep control-plane backup and break-glass posture current on `main`
+
+Platform impact:
+
+- control-plane recovery archives now land on `backup-lv3` under `/srv/control-plane-recovery/runtime/docker-runtime-lv3/latest`
+- the mirrored controller recovery bundle now lives under `/srv/control-plane-recovery/controller/controller-recovery-bundle.tar.zst`
+- the scheduled restore drill on `backup-lv3` last passed at `2026-03-22T21:29:48Z`
+
 ## 0.62.0 - 2026-03-22
 
 - implemented ADR 0070 in repository automation by adding the private platform-context API, Qdrant-backed RAG runtime, corpus build and query scripts, and the `rag-context` playbook or runtime role
