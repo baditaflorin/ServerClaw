@@ -64,3 +64,21 @@ workstreams:
       - restore_validation
     ready_to_merge: false
     live_applied: false
+
+  - id: adr-0025-postgres-vm
+    adr: 0025
+    title: Dedicated PostgreSQL VM baseline
+    status: in_progress
+    owner: codex
+    branch: codex/adr-0025-postgres-vm
+    worktree_path: ../proxmox_florin_server-postgres-vm
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0025-postgres-vm.md
+    depends_on: []
+    conflicts_with: []
+    shared_surfaces:
+      - postgres-lv3
+      - playbooks/postgres-vm.yml
+      - roles/postgres_vm
+      - inventory/group_vars/postgres_guests.yml
+    ready_to_merge: false
+    live_applied: false

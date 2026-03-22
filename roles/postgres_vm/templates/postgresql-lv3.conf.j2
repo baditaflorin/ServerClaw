@@ -1,0 +1,3 @@
+# Managed by Ansible. Keep overrides explicit and small.
+listen_addresses = '{{ postgres_vm_listen_addresses | join(",") }}'
+password_encryption = 'scram-sha-256'
