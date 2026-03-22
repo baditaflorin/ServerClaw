@@ -70,8 +70,8 @@ Portainer is now live on `docker-runtime-lv3` and reachable privately at `https:
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.55.0` |
-| Platform version | `0.29.0` |
+| Repository version | `0.56.0` |
+| Platform version | `0.30.0` |
 | Observed check date | `2026-03-22` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -116,6 +116,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `ntopng` | `2026-03-22-adr-0059-ntopng-live-apply` |
 | `open_webui` | `2026-03-22-adr-0060-open-webui-live-apply` |
 | `openbao` | `2026-03-22-adr-0043-openbao-live-apply` |
+| `portainer` | `2026-03-22-adr-0055-portainer-live-apply` |
 | `postgres_vm` | `2026-03-22-adr-0026-postgres-vm-live-apply` |
 | `public_edge_publication` | `2026-03-22-adr-0021-edge-publication-live-apply` |
 | `runtime_container_telemetry` | `2026-03-22-adr-0040-runtime-container-telemetry-live-apply` |
@@ -162,6 +163,7 @@ password SSH disabled on host and guests
 | `step-ca-api` | `api` | `service_api` | `https://100.118.189.95:9443` |
 | `openbao-api` | `api` | `service_api` | `https://100.118.189.95:8200` |
 | `windmill-api` | `api` | `service_api` | `http://100.118.189.95:8005/api` |
+| `portainer-api` | `api` | `service_api` | `https://100.118.189.95:9444` |
 | `mail-gateway-api` | `api` | `service_api` | `http://10.10.10.20:8081` |
 | `open-webui-operator-workbench` | `api` | `service_api` | `http://100.118.189.95:8008` |
 | `mail-platform-submission` | `message` | `mail_submission` | `10.10.10.20:587` |
@@ -273,6 +275,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure ntopng Private Flow Visibility](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-ntopng.md)
 - [Configure Open WebUI](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-open-webui.md)
 - [Configure OpenBao](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-openbao.md)
+- [Configure Portainer](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-portainer.md)
 - [Configure PostgreSQL VM Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-postgres-vm.md)
 - [Configure Proxmox Network Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-proxmox-network.md)
 - [Configure Public Ingress Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-public-ingress.md)
@@ -436,8 +439,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.55.0` |
-| Platform version | `0.29.0` |
+| Repository version | `0.56.0` |
+| Platform version | `0.30.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -503,6 +506,7 @@ This repository is intentionally opinionated:
 | `0050` | Transactional email and notification profiles | `merged` | [adr-0050-notification-profiles.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0050-notification-profiles.md) |
 | `0051` | Control-plane backup, recovery, and break-glass | `merged` | [adr-0051-control-plane-recovery.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0051-control-plane-recovery.md) |
 | `0053` | OpenTelemetry traces and service maps with Grafana Tempo | `merged` | [adr-0053-tempo-traces.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0053-tempo-traces.md) |
+| `0055` | Portainer for read-mostly Docker runtime operations | `live_applied` | [adr-0055-portainer-operations.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0055-portainer-operations.md) |
 | `0059` | ntopng for private network flow visibility | `live_applied` | [adr-0059-ntopng-network-visibility.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0059-ntopng-network-visibility.md) |
 | `0060` | Open WebUI for operator and agent workbench | `live_applied` | [adr-0060-open-webui-workbench.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0060-open-webui-workbench.md) |
 <!-- END GENERATED: merged-workstreams -->
