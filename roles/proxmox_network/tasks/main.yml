@@ -1,4 +1,16 @@
 ---
+- name: Validate Proxmox network inputs
+  ansible.builtin.assert:
+    that:
+      - management_interface | length > 0
+      - management_ipv4 | length > 0
+      - management_gateway4 | length > 0
+      - proxmox_wan_bridge | length > 0
+      - proxmox_internal_bridge | length > 0
+      - proxmox_internal_ipv4 | length > 0
+      - proxmox_internal_network | length > 0
+    fail_msg: "proxmox_network requires management and internal bridge topology inputs."
+
 - name: Ensure nftables is installed
   ansible.builtin.apt:
     name: nftables

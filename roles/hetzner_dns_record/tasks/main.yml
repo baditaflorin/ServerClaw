@@ -2,6 +2,10 @@
 - name: Ensure Hetzner DNS API token is available
   ansible.builtin.assert:
     that:
+      - hetzner_dns_record_zone_name | length > 0
+      - hetzner_dns_record_name | length > 0
+      - hetzner_dns_record_type | length > 0
+      - hetzner_dns_record_value | length > 0
       - (lookup('ansible.builtin.env', hetzner_dns_api_token_env_var) | trim) | length > 0
     fail_msg: >-
       Set {{ hetzner_dns_api_token_env_var }} before running the Hetzner DNS record playbook.

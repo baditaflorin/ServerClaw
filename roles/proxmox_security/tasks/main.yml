@@ -1,4 +1,18 @@
 ---
+- name: Validate Proxmox security inputs
+  ansible.builtin.assert:
+    that:
+      - proxmox_management_allowed_sources | length > 0
+      - proxmox_notification_email | length > 0
+      - proxmox_notification_endpoint_name | length > 0
+      - proxmox_notification_matcher_name | length > 0
+      - proxmox_acme_contact_email | length > 0
+      - proxmox_acme_directory | length > 0
+      - proxmox_acme_plugin_id | length > 0
+      - proxmox_acme_domain | length > 0
+      - proxmox_tfa_description | length > 0
+    fail_msg: "proxmox_security requires firewall policy, notification, ACME, and TFA inputs."
+
 - name: Ensure security support packages are present
   ansible.builtin.apt:
     name:

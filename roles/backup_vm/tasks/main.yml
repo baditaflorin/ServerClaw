@@ -1,4 +1,18 @@
 ---
+- name: Validate backup VM role inputs
+  ansible.builtin.assert:
+    that:
+      - backup_vm_ipv4 | length > 0
+      - backup_vm_repo_file | length > 0
+      - backup_vm_datastore_name | length > 0
+      - backup_vm_datastore_disk_device | length > 0
+      - backup_vm_datastore_mountpoint | length > 0
+      - backup_vm_api_user | length > 0
+      - backup_vm_api_token_id | length > 0
+      - backup_vm_api_token_local_dir | length > 0
+      - backup_vm_api_token_local_file | length > 0
+    fail_msg: "backup_vm requires PBS datastore, API user, and token path inputs."
+
 - name: Ensure local PBS secret directory exists
   ansible.builtin.file:
     path: "{{ backup_vm_api_token_local_dir }}"

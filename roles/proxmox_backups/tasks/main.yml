@@ -1,4 +1,11 @@
 ---
+- name: Validate Proxmox backup inputs
+  ansible.builtin.assert:
+    that:
+      - proxmox_backup_storage is mapping
+      - proxmox_backup_jobs is sequence
+    fail_msg: "proxmox_backups requires a storage definition and a backup job list."
+
 - name: Manage Proxmox storage and backup configuration
   when: proxmox_backup_storage.enabled | bool
   block:

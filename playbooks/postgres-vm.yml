@@ -15,9 +15,4 @@
     - role: linux_access
       vars:
         linux_access_admin_user: "{{ proxmox_guest_ci_user }}"
-        linux_access_admin_comment: LV3 Operations
-        linux_access_admin_shell: /bin/bash
-        linux_access_sudo_group: sudo
-        linux_access_ssh_hardening_file: /etc/ssh/sshd_config.d/90-lv3-hardening.conf
-        linux_access_permit_root_login: "no"
     - role: postgres_vm

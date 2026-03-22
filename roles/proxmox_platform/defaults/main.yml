@@ -1,0 +1,9 @@
+---
+proxmox_core_packages:
+  - proxmox-ve
+  - postfix
+  - open-iscsi
+  - chrony
+proxmox_cleanup_packages:
+  - linux-image-amd64
+  - os-prober

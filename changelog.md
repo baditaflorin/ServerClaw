@@ -10,6 +10,19 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 - use this section on `main` for merged notes that have not yet been cut into a numbered release
 
+## 0.31.0 - 2026-03-22
+
+- implemented ADR 0030 to make role interface contracts explicit across the reusable Ansible role set
+- added `defaults/main.yml` and short role `README.md` files for the managed reusable roles
+- added early input validation assertions near the top of each role so missing required inputs fail fast
+- moved role-owned settings out of deleted role-local inventory files and out of shared inventory when they were not genuinely platform-global
+- simplified playbooks and role call sites to rely on role defaults instead of extra imported variable files
+- updated the repository map, PostgreSQL runbook, and workstream registry to reflect the new role-boundary model
+
+Platform impact:
+
+- no direct live platform change; this release hardens the repo contract and automation structure only
+
 ## 0.30.0 - 2026-03-22
 
 - merged and renumbered the local PBS backup workstream as ADR 0029 because ADR 0028 was already assigned on `main`

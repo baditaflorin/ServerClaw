@@ -1,0 +1,54 @@
+---
+public_edge_certbot_email: baditaflorin@gmail.com
+public_edge_cert_name: lv3-edge
+public_edge_static_root: /var/www/lv3-edge
+public_edge_acme_root: /var/www/lv3-edge-acme
+public_edge_certificate_domains:
+  - nginx.lv3.org
+  - grafana.lv3.org
+  - proxmox.lv3.org
+  - docker.lv3.org
+  - build.lv3.org
+  - uptime.lv3.org
+public_edge_static_sites:
+  - slug: nginx
+    hostname: nginx.lv3.org
+    title: LV3 Edge
+    description: NGINX is the public edge for published lv3.org services on this platform.
+    meta: Use the named subdomains for the actual service entry points exposed at the edge.
+  - slug: proxmox
+    hostname: proxmox.lv3.org
+    title: Proxmox Administration
+    description: Proxmox administration remains private and is reached over Tailscale instead of being published directly on the public edge.
+    action_url: https://100.118.189.95:8006/
+    action_label: Open Private Proxmox UI
+    meta: Use Tailscale host access for routine Proxmox administration.
+  - slug: docker
+    hostname: docker.lv3.org
+    title: Docker Runtime VM
+    description: The Docker runtime VM does not currently publish a public web service at this hostname.
+    meta: Public application endpoints should be published deliberately through the NGINX edge when needed.
+  - slug: build
+    hostname: build.lv3.org
+    title: Docker Build VM
+    description: The build VM is a private operator-facing host for interactive build workflows and is not a public web workload.
+    meta: Reach the build VM through the approved operator access path rather than the public edge.
+public_edge_sites:
+  - hostname: nginx.lv3.org
+    kind: static
+    slug: nginx
+  - hostname: grafana.lv3.org
+    kind: proxy
+    upstream: http://10.10.10.40:3000
+  - hostname: proxmox.lv3.org
+    kind: static
+    slug: proxmox
+  - hostname: docker.lv3.org
+    kind: static
+    slug: docker
+  - hostname: build.lv3.org
+    kind: static
+    slug: build
+  - hostname: uptime.lv3.org
+    kind: proxy
+    upstream: http://10.10.10.20:3001

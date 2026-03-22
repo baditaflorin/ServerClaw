@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This runbook captures the branch-level automation path for provisioning and hardening the dedicated PostgreSQL VM defined by ADR 0025.
+This runbook captures the branch-level automation path for provisioning and hardening the dedicated PostgreSQL VM defined by ADR 0026.
 
 ## Managed VM
 
@@ -21,8 +21,9 @@ This runbook captures the branch-level automation path for provisioning and hard
 ## Repo Surfaces
 
 - guest definition: [inventory/host_vars/proxmox_florin.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml)
-- Postgres host group variables: [inventory/group_vars/postgres_guests.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/group_vars/postgres_guests.yml)
 - convergence playbook: [playbooks/postgres-vm.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/postgres-vm.yml)
+- role defaults: [roles/postgres_vm/defaults/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/postgres_vm/defaults/main.yml)
+- role contract note: [roles/postgres_vm/README.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/postgres_vm/README.md)
 - DNS playbook: [playbooks/database-dns.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/database-dns.yml)
 
 ## Provision The VM

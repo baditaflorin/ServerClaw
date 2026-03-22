@@ -1,4 +1,19 @@
 ---
+- name: Validate monitoring VM inputs
+  ansible.builtin.assert:
+    that:
+      - monitoring_stack_packages | length > 0
+      - monitoring_stack_dir | length > 0
+      - monitoring_grafana_admin_user | length > 0
+      - monitoring_grafana_dashboard_uid | length > 0
+      - monitoring_grafana_dashboard_file | length > 0
+      - monitoring_grafana_vm_dashboard_dir | length > 0
+      - monitoring_influxdb_url | length > 0
+      - monitoring_influxdb_org | length > 0
+      - monitoring_influxdb_bucket | length > 0
+      - groups['proxmox_hosts'] | length > 0
+    fail_msg: "monitoring_vm requires monitoring paths plus an available proxmox_hosts inventory group."
+
 - name: Ensure monitoring prerequisite packages are present
   ansible.builtin.apt:
     name:

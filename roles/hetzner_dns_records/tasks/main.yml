@@ -2,6 +2,8 @@
 - name: Assert Hetzner DNS API token is available
   ansible.builtin.assert:
     that:
+      - hetzner_dns_zone_name | length > 0
+      - hetzner_dns_records | length > 0
       - (lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim | length) > 0
     fail_msg: "Set HETZNER_DNS_API_TOKEN before running the Uptime Kuma deployment."
 

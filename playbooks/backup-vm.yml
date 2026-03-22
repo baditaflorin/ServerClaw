@@ -40,8 +40,6 @@
   hosts: backup_guests
   become: true
   gather_facts: false
-  vars_files:
-    - ../inventory/host_vars/proxmox_florin.yml
   vars:
     proxmox_guest_ssh_connection_mode: proxmox_host_jump
 

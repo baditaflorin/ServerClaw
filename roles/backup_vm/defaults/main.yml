@@ -1,0 +1,17 @@
+---
+backup_vm_ipv4: "{{ ansible_host }}"
+backup_vm_repo_file: /etc/apt/sources.list.d/proxmox-backup.sources
+backup_vm_repo_uri: http://download.proxmox.com/debian/pbs
+backup_vm_repo_channel: pbs-no-subscription
+backup_vm_datastore_name: proxmox
+backup_vm_datastore_disk_device: /dev/sdb
+backup_vm_datastore_disk_filesystem: xfs
+backup_vm_datastore_mountpoint: /mnt/datastore/proxmox
+backup_vm_datastore_gc_schedule: "03:45"
+backup_vm_api_user: proxmox-host@pbs
+backup_vm_api_user_comment: Proxmox VE host backup client
+backup_vm_api_user_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-backup/backup-lv3-user-password.txt
+backup_vm_api_token_id: pve
+backup_vm_api_token_comment: Proxmox VE host backup token
+backup_vm_api_token_local_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-backup
+backup_vm_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-backup/backup-lv3-token.json

@@ -1,4 +1,17 @@
 ---
+- name: Validate Docker runtime inputs
+  ansible.builtin.assert:
+    that:
+      - docker_runtime_prereq_packages | length > 0
+      - docker_runtime_conflicting_packages | length > 0
+      - docker_runtime_engine_packages | length > 0
+      - docker_runtime_admin_users | length > 0
+      - docker_runtime_apt_key_url | length > 0
+      - docker_runtime_apt_keyring_path | length > 0
+      - docker_runtime_apt_repo_file | length > 0
+      - docker_runtime_apt_repo_uri | length > 0
+    fail_msg: "docker_runtime requires package, repository, and admin user inputs."
+
 - name: Install Docker repository prerequisites
   ansible.builtin.apt:
     name: "{{ docker_runtime_prereq_packages }}"

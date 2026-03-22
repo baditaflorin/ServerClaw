@@ -1,9 +1,14 @@
 ---
-- name: Validate PostgreSQL admin role name
+- name: Validate PostgreSQL role inputs
   ansible.builtin.assert:
     that:
+      - postgres_vm_packages | length > 0
+      - postgres_vm_postgresql_service_name | length > 0
+      - postgres_vm_nftables_config_file | length > 0
+      - postgres_vm_listen_addresses | length > 0
+      - postgres_vm_ssh_allowed_sources | length > 0
       - postgres_vm_admin_role is match('^[a-z_][a-z0-9_]*$')
-    fail_msg: "postgres_vm_admin_role must be a safe PostgreSQL identifier."
+    fail_msg: "postgres_vm requires PostgreSQL package and firewall inputs, and postgres_vm_admin_role must be a safe identifier."
 
 - name: Install PostgreSQL guest packages
   ansible.builtin.apt:

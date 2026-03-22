@@ -8,7 +8,7 @@
 - Owner: codex
 - Depends On: none
 - Conflicts With: none
-- Shared Surfaces: `postgres-lv3`, `playbooks/postgres-vm.yml`, `roles/postgres_vm`, `inventory/group_vars/postgres_guests.yml`, `roles/proxmox_tailscale_proxy`, `roles/hetzner_dns_record`
+- Shared Surfaces: `postgres-lv3`, `playbooks/postgres-vm.yml`, `roles/postgres_vm`, `roles/proxmox_tailscale_proxy`, `roles/hetzner_dns_record`
 
 ## Scope
 
@@ -32,7 +32,6 @@
 
 - `inventory/hosts.yml`
 - `inventory/host_vars/proxmox_florin.yml`
-- `inventory/group_vars/postgres_guests.yml`
 - `playbooks/postgres-vm.yml`
 - `playbooks/database-dns.yml`
 - `roles/postgres_vm`

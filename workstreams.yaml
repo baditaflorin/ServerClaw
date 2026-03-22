@@ -99,7 +99,6 @@ workstreams:
       - docker-runtime-lv3
       - playbooks/docker-runtime.yml
       - roles/docker_runtime
-      - inventory/vars/docker_runtime.yml
     ready_to_merge: false
     live_applied: true
 
@@ -153,7 +152,6 @@ workstreams:
       - postgres-lv3
       - playbooks/postgres-vm.yml
       - roles/postgres_vm
-      - inventory/group_vars/postgres_guests.yml
       - roles/proxmox_tailscale_proxy
       - playbooks/database-dns.yml
       - roles/hetzner_dns_record

@@ -8,7 +8,7 @@
 - Owner: codex
 - Depends On: none
 - Conflicts With: none
-- Shared Surfaces: `docker-runtime-lv3`, `playbooks/docker-runtime.yml`, `roles/docker_runtime`, `inventory/vars/docker_runtime.yml`
+- Shared Surfaces: `docker-runtime-lv3`, `playbooks/docker-runtime.yml`, `roles/docker_runtime`
 
 ## Scope
 
@@ -29,7 +29,6 @@
 
 - `playbooks/docker-runtime.yml`
 - `roles/docker_runtime/`
-- `inventory/vars/docker_runtime.yml`
 - `Makefile`
 - `docs/runbooks/configure-docker-runtime.md`
 - `docs/adr/0023-docker-runtime-vm-baseline.md`

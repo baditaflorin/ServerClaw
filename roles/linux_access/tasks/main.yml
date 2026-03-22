@@ -1,4 +1,15 @@
 ---
+- name: Validate Linux access inputs
+  ansible.builtin.assert:
+    that:
+      - linux_access_admin_user | length > 0
+      - linux_access_admin_comment | length > 0
+      - linux_access_admin_shell | length > 0
+      - linux_access_sudo_group | length > 0
+      - linux_access_ssh_hardening_file | length > 0
+      - bootstrap_authorized_key_path | length > 0
+    fail_msg: "linux_access requires admin identity, SSH hardening path, and bootstrap key inputs."
+
 - name: Ensure non-root admin user exists
   ansible.builtin.user:
     name: "{{ linux_access_admin_user }}"

@@ -3,8 +3,6 @@
   hosts: docker-runtime-lv3
   become: true
   gather_facts: true
-  vars_files:
-    - ../inventory/vars/docker_runtime.yml
 
   pre_tasks:
     - name: Ensure target guest is Debian

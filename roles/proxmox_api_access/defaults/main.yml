@@ -1,0 +1,11 @@
+---
+proxmox_api_hostname: proxmox.lv3.org
+proxmox_api_automation_user: lv3-automation@pve
+proxmox_api_automation_comment: LV3 durable automation identity
+proxmox_api_token_id: primary
+proxmox_api_token_comment: LV3 primary automation token
+proxmox_api_token_role: PVEAdmin
+proxmox_api_token_acl_path: /
+proxmox_api_token_privsep: true
+proxmox_api_token_local_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-api
+proxmox_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-api/lv3-automation-primary.json

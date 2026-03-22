@@ -1,4 +1,15 @@
 ---
+- name: Validate public edge publication inputs
+  ansible.builtin.assert:
+    that:
+      - public_edge_certbot_email | length > 0
+      - public_edge_cert_name | length > 0
+      - public_edge_static_root | length > 0
+      - public_edge_acme_root | length > 0
+      - public_edge_certificate_domains | length > 0
+      - public_edge_sites | length > 0
+    fail_msg: "nginx_edge_publication requires certificate, site, and content-path inputs."
+
 - name: Ensure public edge packages are present
   ansible.builtin.apt:
     name:

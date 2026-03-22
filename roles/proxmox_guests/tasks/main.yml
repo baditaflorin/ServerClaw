@@ -1,4 +1,16 @@
 ---
+- name: Validate Proxmox guest provisioning inputs
+  ansible.builtin.assert:
+    that:
+      - debian_cloud_image_url | length > 0
+      - debian_cloud_image_filename | length > 0
+      - debian_cloud_image_sha512 | length > 0
+      - proxmox_template_name | length > 0
+      - proxmox_storage_id | length > 0
+      - proxmox_internal_bridge | length > 0
+      - (proxmox_guests_active | default(proxmox_guests)) | length > 0
+    fail_msg: "proxmox_guests requires template, storage, bridge, and guest inventory inputs."
+
 - name: Ensure template cache directory exists
   ansible.builtin.file:
     path: /var/lib/vz/template/cache

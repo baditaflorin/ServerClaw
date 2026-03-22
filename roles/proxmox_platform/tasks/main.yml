@@ -1,4 +1,12 @@
 ---
+- name: Validate Proxmox platform inputs
+  ansible.builtin.assert:
+    that:
+      - host_public_hostname | length > 0
+      - proxmox_core_packages | length > 0
+      - proxmox_cleanup_packages | length > 0
+    fail_msg: "proxmox_platform requires hostname plus package-list inputs."
+
 - name: Preseed postfix mailname
   ansible.builtin.debconf:
     name: postfix

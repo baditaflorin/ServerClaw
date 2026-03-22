@@ -1,4 +1,15 @@
 ---
+- name: Validate Uptime Kuma runtime inputs
+  ansible.builtin.assert:
+    that:
+      - uptime_kuma_site_dir | length > 0
+      - uptime_kuma_data_dir | length > 0
+      - uptime_kuma_compose_file | length > 0
+      - uptime_kuma_container_name | length > 0
+      - uptime_kuma_image | length > 0
+      - uptime_kuma_port | int > 0
+    fail_msg: "uptime_kuma_runtime requires compose paths, image, container name, and port inputs."
+
 - name: Ensure Uptime Kuma runtime packages are present
   ansible.builtin.apt:
     name:

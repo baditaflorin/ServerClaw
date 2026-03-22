@@ -1,4 +1,10 @@
 ---
+- name: Validate Proxmox Tailscale proxy inputs
+  ansible.builtin.assert:
+    that:
+      - proxmox_tailscale_tcp_proxies is sequence
+    fail_msg: "proxmox_tailscale_proxy requires a list of TCP proxy definitions."
+
 - name: Ensure Proxmox Tailscale proxy systemd unit directory exists
   ansible.builtin.file:
     path: /etc/systemd/system

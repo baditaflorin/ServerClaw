@@ -1,4 +1,17 @@
 ---
+- name: Validate Proxmox repository inputs
+  ansible.builtin.assert:
+    that:
+      - debian_prereq_packages | length > 0
+      - proxmox_key_url | length > 0
+      - proxmox_key_checksum | length > 0
+      - proxmox_keyring_path | length > 0
+      - proxmox_repo_file | length > 0
+      - proxmox_repo_uri | length > 0
+      - proxmox_repo_channel | length > 0
+      - proxmox_suite | length > 0
+    fail_msg: "proxmox_repository requires Debian prerequisites and Proxmox repository metadata."
+
 - name: Disable enterprise repository when using no-subscription channel
   ansible.builtin.file:
     path: /etc/apt/sources.list.d/pve-enterprise.sources

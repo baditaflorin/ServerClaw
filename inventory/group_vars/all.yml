@@ -1,4 +1,4 @@
-repo_version: 0.28.0
+repo_version: 0.31.0
 platform_version: 0.19.0
 
 proxmox_release_major: 9
@@ -89,151 +89,18 @@ hetzner_dns_records:
     value: "{{ management_ipv4 }}"
     ttl: 60
 
-uptime_kuma_hostname: uptime.lv3.org
-uptime_kuma_base_url: https://uptime.lv3.org
-uptime_kuma_site_dir: /opt/uptime-kuma
-uptime_kuma_compose_file: /opt/uptime-kuma/docker-compose.yml
-uptime_kuma_data_dir: /opt/uptime-kuma/data
-uptime_kuma_container_name: uptime-kuma
-uptime_kuma_image: louislam/uptime-kuma:2
-uptime_kuma_port: 3001
-uptime_kuma_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/uptime-kuma
-uptime_kuma_local_auth_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/uptime-kuma/admin-session.json
-uptime_kuma_local_requirements_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/requirements/uptime-kuma-client.txt
-uptime_kuma_local_seed_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/uptime-kuma/monitors.json
-
 monitoring_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring
 monitoring_proxmox_writer_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/proxmox-writer.token
 monitoring_guest_writer_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/guest-writer.token
-monitoring_grafana_repo_key_url: https://apt.grafana.com/gpg-full.key
-monitoring_grafana_repo_keyring: /etc/apt/keyrings/grafana.asc
-monitoring_grafana_repo_file: /etc/apt/sources.list.d/grafana.list
 monitoring_influxdb_repo_key_url: https://repos.influxdata.com/influxdata-archive.key
 monitoring_influxdb_repo_keyring: /etc/apt/keyrings/influxdata-archive.gpg
 monitoring_influxdb_repo_file: /etc/apt/sources.list.d/influxdata.list
-monitoring_stack_packages:
-  - apt-transport-https
-  - ca-certificates
-  - curl
-  - gpg
-  - grafana
-  - influxdb2
-  - influxdb2-cli
-monitoring_stack_dir: /etc/lv3/monitoring
-monitoring_grafana_admin_user: admin
-monitoring_grafana_admin_password_file: /etc/lv3/monitoring/grafana-admin-password
-monitoring_grafana_admin_password_hash_file: /var/lib/grafana/.lv3-admin-password.sha256
-monitoring_grafana_datasource_name: InfluxDB Proxmox
-monitoring_grafana_datasource_token_file: /etc/lv3/monitoring/grafana-reader.token
-monitoring_grafana_provisioning_file: /etc/grafana/provisioning/datasources/influxdb-proxmox.yml
-monitoring_grafana_folder_uid: lv3
-monitoring_grafana_folder_title: LV3
-monitoring_grafana_dashboard_dir: /var/lib/grafana/dashboards/lv3
-monitoring_grafana_dashboard_file: /var/lib/grafana/dashboards/lv3/lv3-platform-overview.json
-monitoring_grafana_dashboard_uid: lv3-platform-overview
-monitoring_grafana_dashboard_title: LV3 Platform Overview
-monitoring_grafana_vm_dashboard_dir: /var/lib/grafana/dashboards/lv3/vms
 monitoring_influxdb_url: http://127.0.0.1:8086
 monitoring_influxdb_org: lv3
 monitoring_influxdb_bucket: proxmox
-monitoring_influxdb_admin_user: lv3-monitoring-admin
-monitoring_influxdb_admin_password_file: /etc/lv3/monitoring/influxdb-admin-password
-monitoring_influxdb_operator_token_file: /etc/lv3/monitoring/influxdb-operator.token
-monitoring_influxdb_proxmox_writer_token_file: /etc/lv3/monitoring/influxdb-proxmox-writer.token
-monitoring_influxdb_proxmox_writer_description: lv3-proxmox-writer
-monitoring_influxdb_guest_writer_token_file: /etc/lv3/monitoring/influxdb-guest-writer.token
-monitoring_influxdb_guest_writer_description: lv3-guest-writer
-monitoring_influxdb_grafana_reader_description: lv3-grafana-reader
-nginx_observability_dir: /etc/lv3/observability
-nginx_observability_writer_token_file: /etc/lv3/observability/influxdb-guest-writer.token
-nginx_observability_telegraf_config_file: /etc/telegraf/telegraf.d/lv3-nginx.conf
-nginx_observability_stub_status_config_file: /etc/nginx/conf.d/lv3-stub-status.conf
-nginx_observability_stub_status_url: http://127.0.0.1:8080/basic_status
-nginx_observability_influx_url: http://10.10.10.40:8086
-nginx_observability_hostname: nginx-lv3
-nginx_observability_role: nginx-edge
-docker_build_observability_dir: /etc/lv3/build-observability
-docker_build_observability_writer_token_file: /etc/lv3/build-observability/influxdb-guest-writer.token
-docker_build_observability_telegraf_config_file: /etc/telegraf/telegraf.d/lv3-docker-build.conf
-docker_build_observability_influx_url: http://10.10.10.40:8086
-docker_build_observability_hostname: docker-build-lv3
-docker_build_observability_role: docker-build
-docker_build_observability_docker_daemon_config_file: /etc/docker/daemon.json
-docker_build_observability_docker_wrapper_path: /usr/local/bin/docker
-docker_build_observability_docker_real_binary: /usr/bin/docker
-docker_build_observability_socket_listener_address: udp://127.0.0.1:8094
-docker_build_observability_socket_host: 127.0.0.1
-docker_build_observability_socket_port: 8094
-proxmox_metrics_server_id: influxdb-http
-proxmox_metrics_token_hash_file: /root/.lv3-proxmox-metrics-token.sha256
-tailscale_apt_keyring_path: /usr/share/keyrings/tailscale-archive-keyring.gpg
-tailscale_apt_key_url: https://pkgs.tailscale.com/stable/debian/trixie.noarmor.gpg
-tailscale_apt_repo_file: /etc/apt/sources.list.d/tailscale.list
-tailscale_apt_repo_url: https://pkgs.tailscale.com/stable/debian/trixie.tailscale-keyring.list
-proxmox_tailscale_auth_key_env_var: TAILSCALE_AUTH_KEY
-proxmox_tailscale_accept_dns: false
-proxmox_tailscale_snat_subnet_routes: true
-proxmox_tailscale_enable_ssh: false
-proxmox_tailscale_stateful_filtering: false
-proxmox_tailscale_tags: []
-
 hetzner_dns_api_url: https://dns.hetzner.com/api/v1
 hetzner_dns_api_token_env_var: HETZNER_DNS_API_TOKEN
 database_dns_zone_name: lv3.org
 database_dns_record_name: database
 database_dns_record_type: A
 database_dns_record_ttl: 60
-
-public_edge_certbot_email: baditaflorin@gmail.com
-public_edge_cert_name: lv3-edge
-public_edge_static_root: /var/www/lv3-edge
-public_edge_acme_root: /var/www/lv3-edge-acme
-public_edge_certificate_domains:
-  - nginx.lv3.org
-  - grafana.lv3.org
-  - proxmox.lv3.org
-  - docker.lv3.org
-  - build.lv3.org
-  - uptime.lv3.org
-public_edge_static_sites:
-  - slug: nginx
-    hostname: nginx.lv3.org
-    title: LV3 Edge
-    description: NGINX is the public edge for published lv3.org services on this platform.
-    meta: Use the named subdomains for the actual service entry points exposed at the edge.
-  - slug: proxmox
-    hostname: proxmox.lv3.org
-    title: Proxmox Administration
-    description: Proxmox administration remains private and is reached over Tailscale instead of being published directly on the public edge.
-    action_url: https://100.118.189.95:8006/
-    action_label: Open Private Proxmox UI
-    meta: Use Tailscale host access for routine Proxmox administration.
-  - slug: docker
-    hostname: docker.lv3.org
-    title: Docker Runtime VM
-    description: The Docker runtime VM does not currently publish a public web service at this hostname.
-    meta: Public application endpoints should be published deliberately through the NGINX edge when needed.
-  - slug: build
-    hostname: build.lv3.org
-    title: Docker Build VM
-    description: The build VM is a private operator-facing host for interactive build workflows and is not a public web workload.
-    meta: Reach the build VM through the approved operator access path rather than the public edge.
-public_edge_sites:
-  - hostname: nginx.lv3.org
-    kind: static
-    slug: nginx
-  - hostname: grafana.lv3.org
-    kind: proxy
-    upstream: http://10.10.10.40:3000
-  - hostname: proxmox.lv3.org
-    kind: static
-    slug: proxmox
-  - hostname: docker.lv3.org
-    kind: static
-    slug: docker
-  - hostname: build.lv3.org
-    kind: static
-    slug: build
-  - hostname: uptime.lv3.org
-    kind: proxy
-    upstream: http://10.10.10.20:3001

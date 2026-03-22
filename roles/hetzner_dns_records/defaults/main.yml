@@ -1,0 +1,4 @@
+---
+hetzner_dns_api_base_url: https://dns.hetzner.com/api/v1
+hetzner_dns_zone_name: ""
+hetzner_dns_records: []

@@ -1,0 +1,34 @@
+---
+monitoring_grafana_repo_key_url: https://apt.grafana.com/gpg-full.key
+monitoring_grafana_repo_keyring: /etc/apt/keyrings/grafana.asc
+monitoring_grafana_repo_file: /etc/apt/sources.list.d/grafana.list
+monitoring_stack_packages:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gpg
+  - grafana
+  - influxdb2
+  - influxdb2-cli
+monitoring_stack_dir: /etc/lv3/monitoring
+monitoring_grafana_admin_user: admin
+monitoring_grafana_admin_password_file: /etc/lv3/monitoring/grafana-admin-password
+monitoring_grafana_admin_password_hash_file: /var/lib/grafana/.lv3-admin-password.sha256
+monitoring_grafana_datasource_name: InfluxDB Proxmox
+monitoring_grafana_datasource_token_file: /etc/lv3/monitoring/grafana-reader.token
+monitoring_grafana_provisioning_file: /etc/grafana/provisioning/datasources/influxdb-proxmox.yml
+monitoring_grafana_folder_uid: lv3
+monitoring_grafana_folder_title: LV3
+monitoring_grafana_dashboard_dir: /var/lib/grafana/dashboards/lv3
+monitoring_grafana_dashboard_file: /var/lib/grafana/dashboards/lv3/lv3-platform-overview.json
+monitoring_grafana_dashboard_uid: lv3-platform-overview
+monitoring_grafana_dashboard_title: LV3 Platform Overview
+monitoring_grafana_vm_dashboard_dir: /var/lib/grafana/dashboards/lv3/vms
+monitoring_influxdb_admin_user: lv3-monitoring-admin
+monitoring_influxdb_admin_password_file: /etc/lv3/monitoring/influxdb-admin-password
+monitoring_influxdb_operator_token_file: /etc/lv3/monitoring/influxdb-operator.token
+monitoring_influxdb_proxmox_writer_token_file: /etc/lv3/monitoring/influxdb-proxmox-writer.token
+monitoring_influxdb_proxmox_writer_description: lv3-proxmox-writer
+monitoring_influxdb_guest_writer_token_file: /etc/lv3/monitoring/influxdb-guest-writer.token
+monitoring_influxdb_guest_writer_description: lv3-guest-writer
+monitoring_influxdb_grafana_reader_description: lv3-grafana-reader

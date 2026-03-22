@@ -1,4 +1,14 @@
 ---
+- name: Validate Proxmox access inputs
+  ansible.builtin.assert:
+    that:
+      - proxmox_host_admin_user | length > 0
+      - proxmox_host_admin_comment | length > 0
+      - proxmox_host_admin_shell | length > 0
+      - proxmox_host_sudo_group | length > 0
+      - proxmox_host_ssh_hardening_file | length > 0
+    fail_msg: "proxmox_access requires the Proxmox admin identity and SSH hardening inputs."
+
 - name: Apply shared Linux access baseline on Proxmox host
   ansible.builtin.include_role:
     name: linux_access
@@ -8,7 +18,7 @@
     linux_access_admin_shell: "{{ proxmox_host_admin_shell }}"
     linux_access_sudo_group: "{{ proxmox_host_sudo_group }}"
     linux_access_ssh_hardening_file: "{{ proxmox_host_ssh_hardening_file }}"
-    linux_access_permit_root_login: prohibit-password
+    linux_access_permit_root_login: "{{ proxmox_access_linux_access_permit_root_login }}"
 
 - name: Ensure Proxmox PAM user exists for host admin
   ansible.builtin.command: "pveum user add {{ proxmox_host_admin_user }}@pam --comment '{{ proxmox_host_admin_comment }}' --enable 1"

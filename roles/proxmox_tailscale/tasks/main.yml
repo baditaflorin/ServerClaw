@@ -1,4 +1,16 @@
 ---
+- name: Validate Proxmox Tailscale inputs
+  ansible.builtin.assert:
+    that:
+      - tailscale_apt_key_url | length > 0
+      - tailscale_apt_keyring_path | length > 0
+      - tailscale_apt_repo_file | length > 0
+      - tailscale_apt_repo_url | length > 0
+      - proxmox_tailscale_hostname | length > 0
+      - proxmox_tailscale_advertise_routes | length > 0
+      - proxmox_tailscale_auth_key_env_var | length > 0
+    fail_msg: "proxmox_tailscale requires repository settings plus hostname and advertised route inputs."
+
 - name: Ensure Tailscale repository prerequisites are present
   ansible.builtin.apt:
     name:

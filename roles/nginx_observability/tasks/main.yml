@@ -1,4 +1,16 @@
 ---
+- name: Validate nginx observability inputs
+  ansible.builtin.assert:
+    that:
+      - nginx_observability_dir | length > 0
+      - nginx_observability_writer_token_file | length > 0
+      - nginx_observability_telegraf_config_file | length > 0
+      - nginx_observability_stub_status_config_file | length > 0
+      - nginx_observability_stub_status_url | length > 0
+      - nginx_observability_hostname | length > 0
+      - monitoring_guest_writer_token_local_file | length > 0
+    fail_msg: "nginx_observability requires Telegraf, stub_status, and token path inputs."
+
 - name: Ensure nginx observability prerequisite packages are present
   ansible.builtin.apt:
     name:

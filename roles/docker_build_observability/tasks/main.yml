@@ -1,4 +1,16 @@
 ---
+- name: Validate docker build observability inputs
+  ansible.builtin.assert:
+    that:
+      - docker_build_observability_dir | length > 0
+      - docker_build_observability_writer_token_file | length > 0
+      - docker_build_observability_telegraf_config_file | length > 0
+      - docker_build_observability_hostname | length > 0
+      - docker_build_observability_docker_wrapper_path | length > 0
+      - docker_build_observability_socket_listener_address | length > 0
+      - monitoring_guest_writer_token_local_file | length > 0
+    fail_msg: "docker_build_observability requires wrapper, Telegraf, and token path inputs."
+
 - name: Ensure docker build observability prerequisite packages are present
   ansible.builtin.apt:
     name:

@@ -1,4 +1,15 @@
 ---
+- name: Validate Proxmox metrics inputs
+  ansible.builtin.assert:
+    that:
+      - monitoring_proxmox_writer_token_local_file | length > 0
+      - proxmox_metrics_server_id | length > 0
+      - proxmox_metrics_token_hash_file | length > 0
+      - monitoring_influxdb_org | length > 0
+      - monitoring_influxdb_bucket | length > 0
+      - hostvars['monitoring-lv3'].ansible_host is defined
+    fail_msg: "proxmox_metrics requires the mirrored writer token plus monitoring-lv3 host metadata."
+
 - name: Ensure proxmox writer token exists on the control machine
   ansible.builtin.stat:
     path: "{{ monitoring_proxmox_writer_token_local_file }}"
