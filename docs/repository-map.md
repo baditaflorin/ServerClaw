@@ -59,6 +59,7 @@ These files are integration-owned and should normally be edited only during merg
 - [docs/runbooks/monitoring-stack.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/monitoring-stack.md): VM 140 monitoring stack convergence, operator flow, and verification
 - [docs/runbooks/deploy-uptime-kuma.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/deploy-uptime-kuma.md): Uptime Kuma convergence, publication, and repo-local monitor management
 - [docs/runbooks/configure-open-webui.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-open-webui.md): private Open WebUI convergence, bootstrap auth, approved connector policy, and operator access
+- [docs/runbooks/configure-portainer.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-portainer.md): private Portainer convergence and the governed runtime-operations wrapper
 - [docs/runbooks/repair-guest-netplan-mac-drift.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/repair-guest-netplan-mac-drift.md): break-glass recovery when guest netplan MAC matches drift from Proxmox NIC state
 
 ### Automation entry points
@@ -81,8 +82,10 @@ These files are integration-owned and should normally be edited only during merg
 - [playbooks/netbox.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/netbox.yml): NetBox PostgreSQL, runtime, host proxy, and repo-sync convergence
 - [playbooks/uptime-kuma.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/uptime-kuma.yml): Uptime Kuma DNS, runtime, and edge-publication convergence
 - [playbooks/open-webui.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/open-webui.yml): private Open WebUI runtime and operator-only Tailscale proxy convergence
-- [scripts/uptime_kuma_tool.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/uptime_kuma_tool.py): repo-local client for Uptime Kuma bootstrap and monitor management
+- [playbooks/portainer.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/portainer.yml): private Portainer runtime convergence plus the host-side Tailscale proxy path
 - [scripts/netbox_inventory_sync.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/netbox_inventory_sync.py): repo-local NetBox API synchronizer for the canonical topology, IPAM, and governed service inventory
+- [scripts/uptime_kuma_tool.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/uptime_kuma_tool.py): repo-local client for Uptime Kuma bootstrap and monitor management
+- [scripts/portainer_tool.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/portainer_tool.py): governed Portainer wrapper for container inspection, logs, and bounded restart actions
 - [.github/workflows/validate.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.github/workflows/validate.yml): CI path that runs the same `make validate` contract as local operators
 
 ### Shared automation inputs
@@ -118,8 +121,12 @@ These files are integration-owned and should normally be edited only during merg
 - [roles/guest_observability/tasks/setup.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/guest_observability/tasks/setup.yml): shared guest-side Telegraf, token, and Influx repository plumbing for service telemetry
 - [roles/docker_runtime_observability/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/docker_runtime_observability/tasks/main.yml): Docker runtime VM container telemetry collection and Telegraf shipping into InfluxDB
 - [roles/docker_build_observability/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/docker_build_observability/tasks/main.yml): Docker build VM metrics collection and Telegraf shipping into InfluxDB
+- [roles/netbox_postgres/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/netbox_postgres/tasks/main.yml): PostgreSQL role, database, and mirrored password handling for NetBox
+- [roles/netbox_runtime/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/netbox_runtime/tasks/main.yml): private NetBox Compose deployment and bootstrap-token verification on `docker-runtime-lv3`
+- [roles/netbox_sync/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/netbox_sync/tasks/main.yml): repo-managed synchronization of canonical topology, IPAM, and governed service inventory into NetBox
 - [roles/uptime_kuma_runtime/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/uptime_kuma_runtime/tasks/main.yml): Uptime Kuma Compose deployment on `docker-runtime-lv3`
 - [roles/open_webui_runtime/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/open_webui_runtime/tasks/main.yml): private Open WebUI deployment and headless admin bootstrap on `docker-runtime-lv3`
+- [roles/portainer_runtime/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/portainer_runtime/tasks/main.yml): private Portainer deployment and controller-local bootstrap auth persistence on `docker-runtime-lv3`
 - [roles/hetzner_dns_records/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/hetzner_dns_records/tasks/main.yml): idempotent Hetzner DNS publication for repo-managed records including `uptime.lv3.org`
 - [roles/monitoring_vm/templates/_grafana_dashboard_macros.j2](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/monitoring_vm/templates/_grafana_dashboard_macros.j2): shared Grafana panel macros for the managed monitoring dashboards
 - [roles/monitoring_vm/templates/lv3-platform-overview.json.j2](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/monitoring_vm/templates/lv3-platform-overview.json.j2): managed high-level Grafana dashboard definition for the Proxmox host and guest fleet
@@ -129,9 +136,6 @@ These files are integration-owned and should normally be edited only during merg
 - [docs/adr/0040-docker-runtime-container-telemetry-via-telegraf-docker-input.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0040-docker-runtime-container-telemetry-via-telegraf-docker-input.md): architecture decision for Docker runtime container telemetry on the runtime VM
 - [docs/adr/0028-docker-build-vm-build-count-telemetry-via-cli-wrapper-events.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0028-docker-build-vm-build-count-telemetry-via-cli-wrapper-events.md): architecture decision for Docker build count and duration telemetry on the build VM
 - [roles/proxmox_metrics/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_metrics/tasks/main.yml): Proxmox external metric-server configuration for InfluxDB
-- [roles/netbox_postgres/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/netbox_postgres/tasks/main.yml): PostgreSQL role, database, and mirrored password handling for NetBox
-- [roles/netbox_runtime/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/netbox_runtime/tasks/main.yml): private NetBox Compose deployment and bootstrap-token verification on `docker-runtime-lv3`
-- [roles/netbox_sync/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/netbox_sync/tasks/main.yml): repo-managed synchronization of canonical topology, IPAM, and governed service inventory into NetBox
 
 ## Change Rules
 

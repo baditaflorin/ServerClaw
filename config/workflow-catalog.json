@@ -715,48 +715,6 @@
         "curl -s -H \"Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)\" http://100.118.189.95:8005/api/users/global/whoami"
       ]
     },
-    "converge-open-webui": {
-      "description": "Deploy private Open WebUI on docker-runtime-lv3 with repo-managed bootstrap auth and an operator-only Tailscale proxy on the Proxmox host.",
-      "lifecycle_status": "active",
-      "preferred_entrypoint": {
-        "kind": "make_target",
-        "target": "converge-open-webui",
-        "command": "make converge-open-webui"
-      },
-      "preflight": {
-        "required": true,
-        "required_secret_ids": [
-          "bootstrap_ssh_private_key"
-        ],
-        "generated_secret_ids": [
-          "open_webui_admin_password",
-          "open_webui_secret_key"
-        ]
-      },
-      "validation_targets": [
-        "validate",
-        "syntax-check-open-webui"
-      ],
-      "live_impact": "host_and_guest_live",
-      "owner_runbook": "docs/runbooks/configure-open-webui.md",
-      "implementation_refs": [
-        "Makefile",
-        "playbooks/open-webui.yml",
-        "roles/open_webui_runtime",
-        "roles/proxmox_tailscale_proxy/tasks/main.yml",
-        "roles/proxmox_security/tasks/main.yml",
-        "inventory/group_vars/all.yml",
-        "inventory/host_vars/proxmox_florin.yml"
-      ],
-      "outputs": [
-        "A private Open WebUI runtime deployed on docker-runtime-lv3 with repo-managed admin bootstrap and an operator-only Tailscale proxy on the Proxmox host."
-      ],
-      "verification_commands": [
-        "make syntax-check-open-webui",
-        "curl -s http://100.118.189.95:8008/",
-        "curl -s -X POST -H \"Content-Type: application/json\" -d '{\"email\":\"ops@lv3.org\",\"password\":\"'\"$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/admin-password.txt)\"'\"}' http://100.118.189.95:8008/api/v1/auths/signin"
-      ]
-    },
     "converge-netbox": {
       "description": "Converge private NetBox on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish the host-side Tailscale proxy, and synchronize canonical repo inventory into the API.",
       "lifecycle_status": "active",
@@ -802,6 +760,90 @@
         "curl -s -o /dev/null -w '%{http_code}\\n' http://100.118.189.95:8004/login/",
         "curl -s -H \"Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/netbox/api-token.txt)\" http://100.118.189.95:8004/api/virtualization/virtual-machines/?limit=20",
         "uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/netbox_inventory_sync.py --api-url http://100.118.189.95:8004 --api-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/netbox/api-token.txt --host-vars /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml --stack /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml --lane-catalog /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/control-plane-lanes.json"
+      ]
+    },
+    "converge-open-webui": {
+      "description": "Deploy private Open WebUI on docker-runtime-lv3 with repo-managed bootstrap auth and an operator-only Tailscale proxy on the Proxmox host.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-open-webui",
+        "command": "make converge-open-webui"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "open_webui_admin_password",
+          "open_webui_secret_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-open-webui"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-open-webui.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/open-webui.yml",
+        "roles/open_webui_runtime",
+        "roles/proxmox_tailscale_proxy/tasks/main.yml",
+        "roles/proxmox_security/tasks/main.yml",
+        "inventory/group_vars/all.yml",
+        "inventory/host_vars/proxmox_florin.yml"
+      ],
+      "outputs": [
+        "A private Open WebUI runtime deployed on docker-runtime-lv3 with repo-managed admin bootstrap and an operator-only Tailscale proxy on the Proxmox host."
+      ],
+      "verification_commands": [
+        "make syntax-check-open-webui",
+        "curl -s http://100.118.189.95:8008/",
+        "curl -s -X POST -H \"Content-Type: application/json\" -d '{\"email\":\"ops@lv3.org\",\"password\":\"'\"$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/admin-password.txt)\"'\"}' http://100.118.189.95:8008/api/v1/auths/signin"
+      ]
+    },
+    "converge-portainer": {
+      "description": "Converge the private Portainer runtime on docker-runtime-lv3, publish it through the Proxmox host Tailscale proxy, and persist the controller-local bootstrap auth.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-portainer",
+        "command": "make converge-portainer"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "portainer_admin_password",
+          "portainer_admin_auth"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-portainer"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-portainer.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/portainer.yml",
+        "roles/portainer_runtime",
+        "roles/proxmox_tailscale_proxy/tasks/main.yml",
+        "roles/proxmox_security/tasks/main.yml",
+        "inventory/group_vars/all.yml",
+        "inventory/host_vars/proxmox_florin.yml"
+      ],
+      "outputs": [
+        "Private Portainer runtime on docker-runtime-lv3 with a Tailscale-published controller URL on the Proxmox host and controller-local bootstrap auth persisted under .local/portainer."
+      ],
+      "verification_commands": [
+        "make syntax-check-portainer",
+        "curl -sk https://100.118.189.95:9444/api/system/status",
+        "make portainer-manage ACTION=list-containers PORTAINER_ARGS='--all'"
       ]
     },
     "deploy-uptime-kuma": {
@@ -869,6 +911,36 @@
       ],
       "verification_commands": [
         "make uptime-kuma-manage ACTION=list-monitors"
+      ]
+    },
+    "portainer-manage": {
+      "description": "Run governed Portainer API actions such as listing containers, reading logs, or restarting one container through the repo-managed wrapper.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "portainer-manage",
+        "command": "make portainer-manage ACTION=list-containers"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "portainer_admin_auth"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "external_live",
+      "owner_runbook": "docs/runbooks/configure-portainer.md",
+      "implementation_refs": [
+        "Makefile",
+        "scripts/portainer_tool.py"
+      ],
+      "outputs": [
+        "Read-mostly Portainer inspection and bounded runtime actions through the repo-managed wrapper instead of ad hoc Docker shell access."
+      ],
+      "verification_commands": [
+        "make portainer-manage ACTION=list-containers PORTAINER_ARGS='--all'"
       ]
     },
     "configure-backup-vm": {

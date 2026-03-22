@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.56.0
-platform_version: 0.30.0
+repo_version: 0.57.0
+platform_version: 0.31.0
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -17,6 +17,7 @@ live_apply_evidence:
     step_ca: 2026-03-22-adr-0042-step-ca-live-apply
     openbao: 2026-03-22-adr-0043-openbao-live-apply
     windmill: 2026-03-22-adr-0044-windmill-live-apply
+    portainer: 2026-03-22-adr-0055-portainer-live-apply
     short_lived_credentials_and_mtls: 2026-03-22-adr-0047-short-lived-credentials-live-apply
     control_plane_lanes: 2026-03-22-adr-0045-control-plane-communication-lanes-live-apply
     identity_taxonomy: 2026-03-22-adr-0046-identity-classes-live-apply
@@ -144,6 +145,18 @@ desired_state:
         shared_credential_material: false
         surfaces:
           - proxmox_api
+      - id: ops-portainer
+        class: human_operator
+        principal: ops-portainer
+        owner: Florin Badita
+        purpose: Routine read-mostly Docker runtime inspection in Portainer and bounded emergency actions through the governed Portainer surface.
+        scope_boundary: Portainer UI and API on docker-runtime-lv3 only; desired state remains repo-managed and Portainer is not the source of truth for stack definitions.
+        rotation_or_expiry: Rotate the controller-local Portainer bootstrap password on operator change, compromise, or when narrower SSO-backed identities replace the bootstrap path.
+        credential_storage: Controller-local Portainer artifacts under .local/portainer; not committed to git.
+        shared_credential_material: false
+        surfaces:
+          - portainer_ui
+          - portainer_api
       - id: mail-platform-server-mailbox
         class: service
         principal: server@lv3.org
@@ -306,6 +319,7 @@ observed_state:
       - ops
       - ops@pam
       - lv3-automation@pve
+      - ops-portainer
       - server@lv3.org
       - alerts@lv3.org
       - platform@lv3.org
@@ -483,6 +497,15 @@ observed_state:
     telegraf_active: true
     container_telemetry_flow_verified: true
     guest_network_recovered_after_mac_match_update: true
+  portainer:
+    runtime_vm: 10.10.10.20
+    host_tailscale_proxy_url: https://100.118.189.95:9444
+    endpoint_name: local
+    container_running: true
+    local_admin_bootstrapped: true
+    controller_auth_bootstrapped: true
+    governed_wrapper_verified: true
+    system_status_version: 2.39.1
   step_ca:
     runtime_vm: 10.10.10.20
     api_port: 9000
@@ -630,8 +653,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.56.0
+    current: 0.57.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.30.0
+    current: 0.31.0
     meaning: intended platform release for the actual server configuration

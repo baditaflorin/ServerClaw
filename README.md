@@ -60,9 +60,11 @@ The private OpenBao secret authority is now live on `docker-runtime-lv3`, with a
 
 Windmill is now live on `docker-runtime-lv3` and reachable privately at `http://100.118.189.95:8005`, with the repo-managed `lv3` workspace and seeded healthcheck script verified end to end.
 
+NetBox is now live on `docker-runtime-lv3` and reachable privately at `http://100.118.189.95:8004`, with repo-managed synchronization of the Hetzner site, the Proxmox host, all managed VMs, canonical prefixes and IPs, and the governed service catalog.
+
 The control-plane governance layer is now live on `main`: command, API, message, and event lanes are verified against the active host and mail surfaces, the current human/service/agent/break-glass principals have been re-reviewed against the identity taxonomy, and recurring live mutation is expected to use the named command catalog plus approval gates.
 
-NetBox is now live on `docker-runtime-lv3` and reachable privately at `http://100.118.189.95:8004`, with repo-managed synchronization of the Hetzner site, the Proxmox host, all managed VMs, canonical prefixes and IPs, and the governed service catalog.
+Portainer is now live on `docker-runtime-lv3` and reachable privately at `https://100.118.189.95:9444`, with controller-local bootstrap artifacts under `.local/portainer` and a governed wrapper for read-mostly runtime inspection plus bounded restarts.
 
 <!-- BEGIN GENERATED: platform-status -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_status_docs.py). Do not edit this block by hand.
@@ -70,8 +72,8 @@ NetBox is now live on `docker-runtime-lv3` and reachable privately at `http://10
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.56.0` |
-| Platform version | `0.30.0` |
+| Repository version | `0.57.0` |
+| Platform version | `0.31.0` |
 | Observed check date | `2026-03-22` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -117,6 +119,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `ntopng` | `2026-03-22-adr-0059-ntopng-live-apply` |
 | `open_webui` | `2026-03-22-adr-0060-open-webui-live-apply` |
 | `openbao` | `2026-03-22-adr-0043-openbao-live-apply` |
+| `portainer` | `2026-03-22-adr-0055-portainer-live-apply` |
 | `postgres_vm` | `2026-03-22-adr-0026-postgres-vm-live-apply` |
 | `public_edge_publication` | `2026-03-22-adr-0021-edge-publication-live-apply` |
 | `runtime_container_telemetry` | `2026-03-22-adr-0040-runtime-container-telemetry-live-apply` |
@@ -150,7 +153,7 @@ password SSH disabled on host and guests
 | Lane | Title | Transport | Surfaces | Primary Rule |
 | --- | --- | --- | --- | --- |
 | `command` | Command Lane | `ssh` | 2 | Use SSH only for command-lane access. |
-| `api` | API Lane | `https` | 7 | Default new APIs to internal-only or operator-only publication. |
+| `api` | API Lane | `https` | 8 | Default new APIs to internal-only or operator-only publication. |
 | `message` | Message Lane | `authenticated_submission` | 2 | Submit platform mail through the internal mail platform rather than arbitrary external SMTP relays. |
 | `event` | Event Lane | `signed_http` | 1 | Event sinks must be documented and intentionally reachable. |
 
@@ -164,6 +167,7 @@ password SSH disabled on host and guests
 | `openbao-api` | `api` | `service_api` | `https://100.118.189.95:8200` |
 | `windmill-api` | `api` | `service_api` | `http://100.118.189.95:8005/api` |
 | `netbox-api` | `api` | `service_api` | `http://100.118.189.95:8004/api/` |
+| `portainer-api` | `api` | `service_api` | `https://100.118.189.95:9444` |
 | `mail-gateway-api` | `api` | `service_api` | `http://10.10.10.20:8081` |
 | `open-webui-operator-workbench` | `api` | `service_api` | `http://100.118.189.95:8008` |
 | `mail-platform-submission` | `message` | `mail_submission` | `10.10.10.20:587` |
@@ -174,7 +178,7 @@ password SSH disabled on host and guests
 | Tier | Title | Surfaces | Summary |
 | --- | --- | --- | --- |
 | `internal-only` | Internal-Only | 4 | Reachable only from LV3 private networks, loopback paths, or explicitly trusted control-plane hosts. |
-| `operator-only` | Operator-Only | 4 | Reachable only from approved operator devices over private access such as Tailscale. |
+| `operator-only` | Operator-Only | 5 | Reachable only from approved operator devices over private access such as Tailscale. |
 | `public-edge` | Public Edge | 0 | Intentionally published on a public domain through the named edge model. |
 
 ### Classified API And Webhook Surfaces
@@ -185,6 +189,7 @@ password SSH disabled on host and guests
 | `openbao-api` | `internal-only` | `api` | `https://100.118.189.95:8200` | Reachable through the Proxmox host Tailscale proxy and the runtime loopback listener, with client-certificate authentication on the external path. |
 | `windmill-api` | `operator-only` | `api` | `http://100.118.189.95:8005/api` | Reachable only through the Proxmox host Tailscale proxy on port 8005. |
 | `netbox-api` | `operator-only` | `api` | `http://100.118.189.95:8004/api/` | Reachable only through the Proxmox host Tailscale proxy on port 8004. |
+| `portainer-api` | `operator-only` | `api` | `https://100.118.189.95:9444` | Reachable only through the Proxmox host Tailscale proxy on port 9444. |
 | `mail-gateway-api` | `internal-only` | `api` | `http://10.10.10.20:8081` | Reachable only on the LV3 private guest network at docker-runtime-lv3:8081. |
 | `open-webui-operator-workbench` | `operator-only` | `api` | `http://100.118.189.95:8008` | Reachable only through the Proxmox host Tailscale proxy on port 8008. |
 | `stalwart-mail-events` | `internal-only` | `event` | `http://10.10.10.20:8081/webhooks/stalwart` | Reachable only from the private mail-platform stack on docker-runtime-lv3. |
@@ -228,6 +233,8 @@ ops present in the local docker group on docker-runtime-lv3
 telegraf active on docker-runtime-lv3 with Docker socket access for container telemetry
 Uptime Kuma running from /opt/uptime-kuma and published at https://uptime.lv3.org
 repo-local Uptime Kuma auth and monitor management material stored under .local/uptime-kuma
+Portainer running from /opt/portainer and published privately through the Proxmox host Tailscale path at https://100.118.189.95:9444
+repo-local Portainer bootstrap and controller auth material stored under .local/portainer
 ```
 
 The current PostgreSQL posture is:
@@ -275,6 +282,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure ntopng Private Flow Visibility](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-ntopng.md)
 - [Configure Open WebUI](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-open-webui.md)
 - [Configure OpenBao](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-openbao.md)
+- [Configure Portainer](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-portainer.md)
 - [Configure PostgreSQL VM Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-postgres-vm.md)
 - [Configure Proxmox Network Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-proxmox-network.md)
 - [Configure Public Ingress Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-public-ingress.md)
@@ -438,8 +446,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.56.0` |
-| Platform version | `0.30.0` |
+| Repository version | `0.57.0` |
+| Platform version | `0.31.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -506,6 +514,7 @@ This repository is intentionally opinionated:
 | `0051` | Control-plane backup, recovery, and break-glass | `merged` | [adr-0051-control-plane-recovery.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0051-control-plane-recovery.md) |
 | `0053` | OpenTelemetry traces and service maps with Grafana Tempo | `merged` | [adr-0053-tempo-traces.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0053-tempo-traces.md) |
 | `0054` | NetBox for topology, IPAM, and inventory | `live_applied` | [adr-0054-netbox-topology.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0054-netbox-topology.md) |
+| `0055` | Portainer for read-mostly Docker runtime operations | `live_applied` | [adr-0055-portainer-operations.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0055-portainer-operations.md) |
 | `0059` | ntopng for private network flow visibility | `live_applied` | [adr-0059-ntopng-network-visibility.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0059-ntopng-network-visibility.md) |
 | `0060` | Open WebUI for operator and agent workbench | `live_applied` | [adr-0060-open-webui-workbench.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0060-open-webui-workbench.md) |
 <!-- END GENERATED: merged-workstreams -->

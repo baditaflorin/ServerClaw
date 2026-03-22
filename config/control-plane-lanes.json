@@ -57,6 +57,7 @@
             "converge-docker-runtime",
             "converge-postgres-vm",
             "converge-mail-platform",
+            "converge-portainer",
             "deploy-uptime-kuma",
             "configure-backup-vm",
             "database-dns"
@@ -144,6 +145,20 @@
             "converge-netbox"
           ],
           "notes": "This is the private Tailscale-published NetBox API used for repo-managed synchronization and operator inventory browsing."
+        },
+        {
+          "id": "portainer-api",
+          "kind": "service_api",
+          "endpoint": "https://100.118.189.95:9444",
+          "auth": "Controller-local Portainer bootstrap auth under .local/portainer; governed machine actions flow through scripts/portainer_tool.py rather than broad Docker shell access.",
+          "service_refs": [
+            "portainer"
+          ],
+          "workflow_refs": [
+            "converge-portainer",
+            "portainer-manage"
+          ],
+          "notes": "This is the private Docker runtime operations console and API published only through the Proxmox host Tailscale proxy."
         },
         {
           "id": "mail-gateway-api",

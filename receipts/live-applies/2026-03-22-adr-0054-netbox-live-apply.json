@@ -5,7 +5,7 @@
   "recorded_on": "2026-03-22",
   "recorded_by": "codex",
   "source_commit": "bd747809e261e72110d6720f3c6880b3242dd032",
-  "repo_version_context": "0.56.0",
+  "repo_version_context": "0.57.0",
   "workflow_id": "converge-netbox",
   "adr": "0054",
   "summary": "Applied the private NetBox runtime live on docker-runtime-lv3, provisioned its PostgreSQL backend on postgres-lv3, published operator and agent access through the Proxmox host Tailscale proxy, and synchronized the canonical repository topology and IPAM inventory into the NetBox API.",
