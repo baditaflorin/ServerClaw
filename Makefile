@@ -9,8 +9,9 @@ ACTION ?= list-monitors
 UPTIME_KUMA_ARGS ?=
 RECEIPT ?=
 COMMAND ?=
+SURFACE ?=
 
-.PHONY: validate validate-ansible-syntax validate-yaml validate-ansible-lint validate-shell validate-json validate-data-models generate-status-docs validate-generated-docs receipts receipt-info workflows workflow-info commands command-info lanes lane-info preflight syntax-check syntax-check-monitoring syntax-check-docker-runtime syntax-check-backup-vm syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-openbao syntax-check-step-ca syntax-check-windmill install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-monitoring converge-docker-runtime converge-postgres-vm converge-mail-platform converge-openbao converge-step-ca converge-windmill deploy-uptime-kuma uptime-kuma-manage configure-backups configure-backup-vm database-dns start-workstream
+.PHONY: validate validate-ansible-syntax validate-yaml validate-ansible-lint validate-shell validate-json validate-data-models generate-status-docs validate-generated-docs receipts receipt-info workflows workflow-info commands command-info lanes lane-info api-publication api-publication-info preflight syntax-check syntax-check-monitoring syntax-check-docker-runtime syntax-check-backup-vm syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-openbao syntax-check-step-ca syntax-check-windmill install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-monitoring converge-docker-runtime converge-postgres-vm converge-mail-platform converge-openbao converge-step-ca converge-windmill deploy-uptime-kuma uptime-kuma-manage configure-backups configure-backup-vm database-dns start-workstream
 
 validate:
 	$(REPO_ROOT)/scripts/validate_repo.sh
@@ -66,6 +67,13 @@ lanes:
 lane-info:
 	@test -n "$(LANE)" || (echo "set LANE=<command|api|message|event>"; exit 1)
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/control_plane_lanes.py --lane $(LANE)
+
+api-publication:
+	uvx --from pyyaml python $(REPO_ROOT)/scripts/api_publication.py --list
+
+api-publication-info:
+	@test -n "$(SURFACE)" || (echo "set SURFACE=<surface-id>"; exit 1)
+	uvx --from pyyaml python $(REPO_ROOT)/scripts/api_publication.py --surface $(SURFACE)
 
 preflight:
 	@if [ -z "$(WORKFLOW)" ]; then \

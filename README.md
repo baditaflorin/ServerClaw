@@ -68,7 +68,7 @@ The control-plane governance layer is now live on `main`: command, API, message,
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.49.0` |
+| Repository version | `0.50.0` |
 | Platform version | `0.26.0` |
 | Observed check date | `2026-03-22` |
 | Observed OS | `Debian 13` |
@@ -144,7 +144,7 @@ password SSH disabled on host and guests
 | Lane | Title | Transport | Surfaces | Primary Rule |
 | --- | --- | --- | --- | --- |
 | `command` | Command Lane | `ssh` | 2 | Use SSH only for command-lane access. |
-| `api` | API Lane | `https` | 3 | Default new APIs to internal-only or operator-only publication. |
+| `api` | API Lane | `https` | 5 | Default new APIs to internal-only or operator-only publication. |
 | `message` | Message Lane | `authenticated_submission` | 2 | Submit platform mail through the internal mail platform rather than arbitrary external SMTP relays. |
 | `event` | Event Lane | `signed_http` | 1 | Event sinks must be documented and intentionally reachable. |
 
@@ -155,10 +155,29 @@ password SSH disabled on host and guests
 | `guest-ops-ssh-via-proxmox-jump` | `command` | `ssh_endpoint` | `ops@10.10.10.0/24 via ProxyJump through ops@100.118.189.95` |
 | `proxmox-management-api` | `api` | `management_api` | `https://100.118.189.95:8006/api2/json` |
 | `step-ca-api` | `api` | `service_api` | `https://100.118.189.95:9443` |
+| `openbao-api` | `api` | `service_api` | `https://100.118.189.95:8200` |
+| `windmill-api` | `api` | `service_api` | `http://100.118.189.95:8005/api` |
 | `mail-gateway-api` | `api` | `service_api` | `http://10.10.10.20:8081` |
 | `mail-platform-submission` | `message` | `mail_submission` | `10.10.10.20:587` |
 | `proxmox-host-operator-notifications` | `message` | `notification_profile` | `lv3-ops-email sendmail endpoint with catch-all matcher to baditaflorin@gmail.com` |
 | `stalwart-mail-events` | `event` | `webhook` | `http://10.10.10.20:8081/webhooks/stalwart` |
+
+### API Publication Tiers
+| Tier | Title | Surfaces | Summary |
+| --- | --- | --- | --- |
+| `internal-only` | Internal-Only | 4 | Reachable only from LV3 private networks, loopback paths, or explicitly trusted control-plane hosts. |
+| `operator-only` | Operator-Only | 2 | Reachable only from approved operator devices over private access such as Tailscale. |
+| `public-edge` | Public Edge | 0 | Intentionally published on a public domain through the named edge model. |
+
+### Classified API And Webhook Surfaces
+| Surface | Tier | Lane | Endpoint | Reachability |
+| --- | --- | --- | --- | --- |
+| `proxmox-management-api` | `operator-only` | `api` | `https://100.118.189.95:8006/api2/json` | Reachable only over the Proxmox host Tailscale address on port 8006. |
+| `step-ca-api` | `internal-only` | `api` | `https://100.118.189.95:9443` | Reachable through the Proxmox host Tailscale proxy for approved controller and trust-bootstrap traffic only. |
+| `openbao-api` | `internal-only` | `api` | `https://100.118.189.95:8200` | Reachable through the Proxmox host Tailscale proxy and the runtime loopback listener, with client-certificate authentication on the external path. |
+| `windmill-api` | `operator-only` | `api` | `http://100.118.189.95:8005/api` | Reachable only through the Proxmox host Tailscale proxy on port 8005. |
+| `mail-gateway-api` | `internal-only` | `api` | `http://10.10.10.20:8081` | Reachable only on the LV3 private guest network at docker-runtime-lv3:8081. |
+| `stalwart-mail-events` | `internal-only` | `event` | `http://10.10.10.20:8081/webhooks/stalwart` | Reachable only from the private mail-platform stack on docker-runtime-lv3. |
 <!-- END GENERATED: control-plane-lanes -->
 
 The current host security posture is:
@@ -265,6 +284,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Platform Hardening And Agentic Extensibility Roadmap](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/plan-platform-hardening-and-agentic-extensibility.md)
 - [Visual And Agent Operations Roadmap](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/plan-visual-agent-operations.md)
 - [Prepare Mail Platform Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/prepare-mail-platform-rollout.md)
+- [Private-First API Publication](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/private-first-api-publication.md)
 - [Provision Guests Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/provision-guests.md)
 - [Proxmox API Automation Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/proxmox-api-automation.md)
 - [Repair Guest Netplan MAC Drift](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/repair-guest-netplan-mac-drift.md)
@@ -405,7 +425,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.49.0` |
+| Repository version | `0.50.0` |
 | Platform version | `0.26.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |

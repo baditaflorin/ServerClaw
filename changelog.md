@@ -8,6 +8,17 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.50.0 - 2026-03-22
+
+- implemented ADR 0049 as a canonical API publication contract instead of leaving publication policy only in prose
+- added `config/api-publication.json` plus `scripts/api_publication.py` so publication tiers are machine-readable, inspectable, and validation-backed
+- extended the governed API lane inventory to include the live OpenBao and Windmill APIs, and classified every current API or webhook surface as internal-only, operator-only, or public-edge
+- rendered the publication-tier summary into the generated README and documented the operating procedure in a dedicated API publication runbook
+
+Platform impact:
+
+- no direct live platform change; this release makes the existing private-first API and webhook exposure model explicit, reviewable, and enforced from `main`
+
 ## 0.49.0 - 2026-03-22
 
 - applied ADR 0047 live from `main` by proving short-lived `step-ca` SSH certificates for routine operator access and by enforcing internal mTLS on the private OpenBao API

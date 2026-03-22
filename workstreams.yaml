@@ -401,8 +401,8 @@ workstreams:
     title: Private-first API publication model
     status: merged
     owner: codex
-    branch: codex/adr-0049-private-api-publication
-    worktree_path: ../proxmox_florin_server-private-api-publication
+    branch: codex/adr-0049-private-first-api-publication-model
+    worktree_path: ../proxmox_florin_server-adr-0049
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0049-private-api-publication.md
     depends_on:
       - adr-0045-communication-lanes
