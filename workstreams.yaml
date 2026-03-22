@@ -161,7 +161,7 @@ workstreams:
 
   - id: adr-0028-build-telemetry
     adr: 0028
-    title: Docker build VM build telemetry
+    title: Docker build VM build count and duration telemetry
     status: live_applied
     owner: codex
     branch: codex/adr-0028-build-telemetry

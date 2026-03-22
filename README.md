@@ -73,6 +73,7 @@ Merged mainline automation now exists for:
 - ADR 0021 public subdomain publication at the NGINX edge
 - ADR 0022 nginx guest observability
 - ADR 0023 Docker runtime baseline
+- ADR 0028 Docker build VM build telemetry
 - ADR 0026 dedicated PostgreSQL VM baseline
 - ADR 0027 Uptime Kuma on the Docker runtime VM
 
@@ -83,6 +84,7 @@ Current live state for those merged workstreams:
 - ADR 0020 backups are still blocked on missing external CIFS target credentials
 - ADR 0022 nginx guest observability is reflected in the Grafana dashboard
 - ADR 0023 Docker runtime baseline is applied live on `10.10.10.20`
+- ADR 0028 Docker build telemetry is applied live on `10.10.10.30` and Grafana now shows both build counts and build durations
 - ADR 0027 Uptime Kuma is applied live on `10.10.10.20` and published at `https://uptime.lv3.org`
 - ADR 0026 PostgreSQL baseline is applied live on `10.10.10.50` and published privately on `database.lv3.org:5432`
 

@@ -10,6 +10,19 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 - use this section on `main` for merged notes that have not yet been cut into a numbered release
 
+## 0.29.0 - 2026-03-22
+
+- merged ADR 0028 into `main` to add Docker build count and duration telemetry for `docker-build-lv3`
+- added a managed Docker CLI wrapper plus Telegraf shipping for `docker build`, `docker buildx build`, `docker buildx bake`, and `docker compose build`
+- extended the managed Grafana dashboards with build-count and build-duration panels for the build VM
+- updated ADR 0028, the monitoring runbook, and the workstream docs to describe the live telemetry contract
+
+Platform impact:
+
+- `docker-build-lv3` now writes `docker_builds` telemetry into InfluxDB for build count, exit code, start time, end time, and duration
+- `LV3 docker-build-lv3 Detail` now has `14` panels including build timing views
+- `LV3 Platform Overview` now has `32` panels including build timing summaries for the build VM
+
 ## 0.28.0 - 2026-03-22
 
 - merged the Uptime Kuma workstream into `main` and renumbered its decision to ADR 0027 because ADR 0022 was already assigned on `main`

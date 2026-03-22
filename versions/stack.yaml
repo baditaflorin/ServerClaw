@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.28.0
+repo_version: 0.29.0
 platform_version: 0.19.0
 
 desired_state:
@@ -200,7 +200,7 @@ observed_state:
     grafana_dashboards:
       - uid: lv3-platform-overview
         title: LV3 Platform Overview
-        panels: 24
+        panels: 32
       - uid: lv3-vm-nginx-lv3
         title: LV3 nginx-lv3 Detail
         panels: 12
@@ -209,9 +209,12 @@ observed_state:
         panels: 8
       - uid: lv3-vm-docker-build-lv3
         title: LV3 docker-build-lv3 Detail
-        panels: 8
+        panels: 14
       - uid: lv3-vm-monitoring-lv3
         title: LV3 monitoring-lv3 Detail
+        panels: 8
+      - uid: lv3-vm-postgres-lv3
+        title: LV3 postgres-lv3 Detail
         panels: 8
     grafana_dashboards_provisioned: true
     influxdb_internal_url: http://10.10.10.40:8086
@@ -219,6 +222,8 @@ observed_state:
     proxmox_metrics_flow_verified: true
     nginx_stub_status_loopback_enabled: true
     nginx_guest_metrics_flow_verified: true
+    docker_build_metrics_flow_verified: true
+    docker_build_duration_metrics_verified: true
   docker_runtime:
     vm: 10.10.10.20
     docker_engine_running: true

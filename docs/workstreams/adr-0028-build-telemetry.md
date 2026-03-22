@@ -1,7 +1,7 @@
-# Workstream ADR 0028: Docker Build VM Build Telemetry
+# Workstream ADR 0028: Docker Build VM Build Count And Duration Telemetry
 
 - ADR: [ADR 0028](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0028-docker-build-vm-build-count-telemetry-via-cli-wrapper-events.md)
-- Title: Docker build VM build telemetry
+- Title: Docker build VM build count and duration telemetry
 - Status: live_applied
 - Branch: `codex/adr-0028-build-telemetry`
 - Worktree: `../proxmox_florin_server-build-telemetry`
@@ -62,4 +62,5 @@
 ## Notes For The Next Assistant
 
 - Live apply on `2026-03-22` required another guest-agent netplan MAC repair on VMs `110`, `120`, `130`, and `140` before the SSH jump path returned; the repair flow is documented in [/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/repair-guest-netplan-mac-drift.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/repair-guest-netplan-mac-drift.md).
+- This workstream is merged to `main` and applied live.
 - This work intentionally tracks build counts and durations, not per-project build metadata.
