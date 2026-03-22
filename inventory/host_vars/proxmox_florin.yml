@@ -111,36 +111,78 @@ proxmox_guests:
       - nftables
       - postgresql
       - postgresql-contrib
+  - vmid: 160
+    name: backup-lv3
+    role: backup
+    ipv4: 10.10.10.60
+    cidr: 24
+    gateway4: 10.10.10.1
+    macaddr: BC:24:11:2D:5F:37
+    cores: 4
+    memory_mb: 8192
+    disk_gb: 32
+    extra_disks:
+      - interface: scsi1
+        storage: local
+        size_gb: 640
+    tags:
+      - backup
+      - pbs
+      - lv3
+    packages:
+      - acl
+      - xfsprogs
+
+backup_vm_vmid: 160
+backup_vm_name: backup-lv3
+backup_vm_ipv4: 10.10.10.60
+backup_vm_repo_file: /etc/apt/sources.list.d/proxmox-backup.sources
+backup_vm_repo_uri: http://download.proxmox.com/debian/pbs
+backup_vm_repo_channel: pbs-no-subscription
+backup_vm_datastore_name: proxmox
+backup_vm_datastore_disk_device: /dev/sdb
+backup_vm_datastore_disk_filesystem: xfs
+backup_vm_datastore_mountpoint: /mnt/datastore/proxmox
+backup_vm_datastore_gc_schedule: "03:45"
+backup_vm_api_user: proxmox-host@pbs
+backup_vm_api_user_comment: Proxmox VE host backup client
+backup_vm_api_user_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-backup/backup-lv3-user-password.txt
+backup_vm_api_token_id: pve
+backup_vm_api_token_comment: Proxmox VE host backup token
+backup_vm_api_token_local_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-backup
+backup_vm_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-backup/backup-lv3-token.json
+
+proxmox_backup_protected_vmids:
+  - 110
+  - 120
+  - 130
+  - 140
+  - 150
 
 proxmox_backup_storage:
-  enabled: "{{ (lookup('ansible.builtin.env', 'PROXMOX_BACKUP_CIFS_SERVER') | trim | length) > 0 }}"
-  id: lv3-backup-cifs
-  type: cifs
-  server: "{{ lookup('ansible.builtin.env', 'PROXMOX_BACKUP_CIFS_SERVER') | trim }}"
-  share: "{{ lookup('ansible.builtin.env', 'PROXMOX_BACKUP_CIFS_SHARE') | trim }}"
-  username: "{{ lookup('ansible.builtin.env', 'PROXMOX_BACKUP_CIFS_USERNAME') | trim }}"
-  password_env: PROXMOX_BACKUP_CIFS_PASSWORD
-  domain: WORKGROUP
-  smbversion: "3"
-  subdir: /proxmox_florin
-  path: /mnt/pve/lv3-backup-cifs
+  enabled: "{{ proxmox_backup_storage_enabled_override | default(false) }}"
+  id: lv3-backup-pbs
+  type: pbs
+  server: "{{ backup_vm_ipv4 }}"
+  port: 8007
+  datastore: "{{ backup_vm_datastore_name }}"
+  api_token_local_file: "{{ backup_vm_api_token_local_file }}"
   content:
     - backup
-  options: noserverino,echo_interval=30
   nodes:
-    - proxmox_florin
+    - "{{ host_public_hostname }}"
 
 proxmox_backup_jobs:
   - id: backup-lv3-nightly
     enabled: "{{ proxmox_backup_storage.enabled }}"
     storage: "{{ proxmox_backup_storage.id }}"
     schedule: "02:30"
-    node: proxmox_florin
+    node: "{{ host_public_hostname }}"
     mode: snapshot
     compress: zstd
     notification_mode: notification-system
     repeat_missed: true
-    vmid_list: "{{ proxmox_guests | map(attribute='vmid') | list }}"
+    vmid_list: "{{ proxmox_backup_protected_vmids }}"
     prune_backups:
       keep_last: 3
       keep_daily: 7

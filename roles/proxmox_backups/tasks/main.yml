@@ -2,19 +2,27 @@
 - name: Manage Proxmox storage and backup configuration
   when: proxmox_backup_storage.enabled | bool
   block:
-    - name: Ensure CIFS client package is present
+    - name: Ensure CIFS client package is present when using a CIFS target
       ansible.builtin.apt:
         name:
           - cifs-utils
         state: present
         update_cache: true
+      when: proxmox_backup_storage.type == "cifs"
 
-    - name: Load external backup storage password from controller environment
+    - name: Load the CIFS backup storage password from controller environment
       ansible.builtin.set_fact:
         proxmox_backup_storage_password: "{{ lookup('ansible.builtin.env', proxmox_backup_storage.password_env) | trim }}"
+      when: proxmox_backup_storage.type == "cifs"
       no_log: true
 
-    - name: Assert backup storage inputs are complete
+    - name: Load the PBS token payload from the controller-local secret file
+      ansible.builtin.set_fact:
+        proxmox_backup_storage_token_payload: "{{ lookup('ansible.builtin.file', proxmox_backup_storage.api_token_local_file) | from_json }}"
+      when: proxmox_backup_storage.type == "pbs"
+      no_log: true
+
+    - name: Assert CIFS backup storage inputs are complete
       ansible.builtin.assert:
         that:
           - proxmox_backup_storage.id | length > 0
@@ -31,6 +39,22 @@
           Set PROXMOX_BACKUP_CIFS_SERVER, PROXMOX_BACKUP_CIFS_SHARE,
           PROXMOX_BACKUP_CIFS_USERNAME, and {{ proxmox_backup_storage.password_env }}
           before running the backup role.
+      when: proxmox_backup_storage.type == "cifs"
+
+    - name: Assert PBS backup storage inputs are complete
+      ansible.builtin.assert:
+        that:
+          - proxmox_backup_storage.id | length > 0
+          - proxmox_backup_storage.type == "pbs"
+          - proxmox_backup_storage.server | length > 0
+          - proxmox_backup_storage.datastore | length > 0
+          - proxmox_backup_storage_token_payload.auth_id | length > 0
+          - proxmox_backup_storage_token_payload.value | length > 0
+          - proxmox_backup_storage_token_payload.fingerprint | length > 0
+        fail_msg: >-
+          PBS backup storage is enabled, but the controller-local token payload is missing or incomplete.
+          Run the backup VM playbook first so {{ proxmox_backup_storage.api_token_local_file }} exists.
+      when: proxmox_backup_storage.type == "pbs"
 
     - name: Ensure Proxmox storage secret directory exists
       ansible.builtin.file:
@@ -43,18 +67,72 @@
         dest: "/etc/pve/priv/storage/{{ proxmox_backup_storage.id }}.pw"
         mode: "0600"
         content: "{{ proxmox_backup_storage_password }}\n"
+        unsafe_writes: true
+      when: proxmox_backup_storage.type == "cifs"
+      no_log: true
+
+    - name: Persist the PBS API token secret in the Proxmox private storage area
+      ansible.builtin.copy:
+        dest: "/etc/pve/priv/storage/{{ proxmox_backup_storage.id }}.pw"
+        mode: "0600"
+        content: "{{ proxmox_backup_storage_token_payload.value }}\n"
+        unsafe_writes: true
+      when: proxmox_backup_storage.type == "pbs"
       no_log: true
 
     - name: Render managed backup storage block
       ansible.builtin.set_fact:
         proxmox_backup_storage_block: "{{ lookup('ansible.builtin.template', 'storage_block.cfg.j2') | trim }}"
 
-    - name: Converge managed backup storage entry
-      ansible.builtin.blockinfile:
-        path: /etc/pve/storage.cfg
-        create: true
-        marker: "# {mark} ANSIBLE MANAGED BACKUP STORAGE {{ proxmox_backup_storage.id }}"
-        block: "{{ proxmox_backup_storage_block }}"
+    - name: Stage managed backup storage block locally on the Proxmox host
+      ansible.builtin.copy:
+        dest: "/root/.lv3-{{ proxmox_backup_storage.id }}-storage.cfg.block"
+        mode: "0600"
+        content: "{{ proxmox_backup_storage_block }}\n"
+
+    - name: Converge managed backup storage entry through a staged pmxcfs copy
+      ansible.builtin.shell: |
+        set -euo pipefail
+        target=/etc/pve/storage.cfg
+        current=/root/.lv3-storage.cfg.current
+        stripped=/root/.lv3-storage.cfg.stripped
+        desired=/root/.lv3-storage.cfg.desired
+        block=/root/.lv3-{{ proxmox_backup_storage.id }}-storage.cfg.block
+        begin='# BEGIN ANSIBLE MANAGED BACKUP STORAGE {{ proxmox_backup_storage.id }}'
+        end='# END ANSIBLE MANAGED BACKUP STORAGE {{ proxmox_backup_storage.id }}'
+
+        if [ -f "$target" ]; then
+          cp "$target" "$current"
+        else
+          : > "$current"
+        fi
+
+        awk -v begin="$begin" -v end="$end" '
+          $0 == begin { skip=1; next }
+          $0 == end { skip=0; next }
+          !skip { print }
+        ' "$current" > "$stripped"
+
+        {
+          cat "$stripped"
+          if [ -s "$stripped" ]; then
+            printf '\n'
+          fi
+          printf '%s\n' "$begin"
+          cat "$block"
+          printf '%s\n' "$end"
+        } > "$desired"
+
+        if [ ! -f "$target" ] || ! cmp -s "$desired" "$target"; then
+          cp "$desired" "$target"
+          echo changed
+        else
+          echo ok
+        fi
+      args:
+        executable: /bin/bash
+      register: proxmox_backup_storage_cfg
+      changed_when: "'changed' in proxmox_backup_storage_cfg.stdout"
 
     - name: Build enabled Proxmox backup job list
       ansible.builtin.set_fact:
@@ -69,13 +147,56 @@
         proxmox_backup_jobs_block: "{{ lookup('ansible.builtin.template', 'jobs_block.cfg.j2') | trim }}"
       when: (proxmox_enabled_backup_jobs | default([])) | length > 0
 
-    - name: Converge managed Proxmox backup jobs
-      ansible.builtin.blockinfile:
-        path: /etc/pve/jobs.cfg
-        create: true
-        marker: "# {mark} ANSIBLE MANAGED BACKUP JOBS"
-        block: "{{ proxmox_backup_jobs_block }}"
+    - name: Stage managed backup job block locally on the Proxmox host
+      ansible.builtin.copy:
+        dest: /root/.lv3-jobs.cfg.block
+        mode: "0600"
+        content: "{{ proxmox_backup_jobs_block }}\n"
+      when: (proxmox_enabled_backup_jobs | default([])) | length > 0
+
+    - name: Converge managed Proxmox backup jobs through a staged pmxcfs copy
+      ansible.builtin.shell: |
+        set -euo pipefail
+        target=/etc/pve/jobs.cfg
+        current=/root/.lv3-jobs.cfg.current
+        stripped=/root/.lv3-jobs.cfg.stripped
+        desired=/root/.lv3-jobs.cfg.desired
+        block=/root/.lv3-jobs.cfg.block
+        begin='# BEGIN ANSIBLE MANAGED BACKUP JOBS'
+        end='# END ANSIBLE MANAGED BACKUP JOBS'
+
+        if [ -f "$target" ]; then
+          cp "$target" "$current"
+        else
+          : > "$current"
+        fi
+
+        awk -v begin="$begin" -v end="$end" '
+          $0 == begin { skip=1; next }
+          $0 == end { skip=0; next }
+          !skip { print }
+        ' "$current" > "$stripped"
+
+        {
+          cat "$stripped"
+          if [ -s "$stripped" ]; then
+            printf '\n'
+          fi
+          printf '%s\n' "$begin"
+          cat "$block"
+          printf '%s\n' "$end"
+        } > "$desired"
+
+        if [ ! -f "$target" ] || ! cmp -s "$desired" "$target"; then
+          cp "$desired" "$target"
+          echo changed
+        else
+          echo ok
+        fi
+      args:
+        executable: /bin/bash
       register: proxmox_backup_jobs_cfg
+      changed_when: "'changed' in proxmox_backup_jobs_cfg.stdout"
       when: (proxmox_enabled_backup_jobs | default([])) | length > 0
 
     - name: Restart the Proxmox scheduler if backup jobs changed

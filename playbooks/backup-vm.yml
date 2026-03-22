@@ -1,0 +1,73 @@
+---
+- name: Ensure the backup VM is provisioned on the Proxmox host
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  vars:
+    proxmox_guests_active: >-
+      {{
+        proxmox_guests
+        | selectattr('vmid', 'equalto', backup_vm_vmid)
+        | list
+      }}
+
+  roles:
+    - role: proxmox_guests
+      tags:
+        - guests
+        - backup-vm
+
+  post_tasks:
+    - name: Stop the backup VM from Proxmox after qm set changes
+      ansible.builtin.command: "qm stop {{ backup_vm_vmid }} --skiplock 1"
+      register: backup_vm_stop
+      failed_when: backup_vm_stop.rc not in [0, 255]
+      changed_when: true
+      tags:
+        - guests
+        - backup-vm
+
+    - name: Start the backup VM from Proxmox after the forced stop
+      ansible.builtin.command: "qm start {{ backup_vm_vmid }}"
+      register: backup_vm_start_after_stop
+      failed_when: backup_vm_start_after_stop.rc not in [0, 255]
+      changed_when: backup_vm_start_after_stop.rc == 0
+      tags:
+        - guests
+        - backup-vm
+
+- name: Configure the backup VM guest
+  hosts: backup_guests
+  become: true
+  gather_facts: false
+  vars_files:
+    - ../inventory/host_vars/proxmox_florin.yml
+  vars:
+    proxmox_guest_ssh_connection_mode: proxmox_host_jump
+
+  pre_tasks:
+    - name: Wait for the backup VM SSH service to be reachable
+      ansible.builtin.wait_for_connection:
+        timeout: 300
+
+    - name: Gather facts after SSH is ready
+      ansible.builtin.setup:
+
+  roles:
+    - role: backup_vm
+      tags:
+        - backup-vm
+        - pbs
+
+- name: Configure Proxmox host backups against the PBS target
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  vars:
+    proxmox_backup_storage_enabled_override: true
+
+  roles:
+    - role: proxmox_backups
+      tags:
+        - backups
+        - storage

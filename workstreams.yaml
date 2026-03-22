@@ -65,6 +65,26 @@ workstreams:
     ready_to_merge: false
     live_applied: false
 
+  - id: adr-0026-backup-vm
+    adr: 0026
+    title: Dedicated backup VM with local PBS
+    status: ready_for_merge
+    owner: codex
+    branch: codex/adr-0026-backup-vm
+    worktree_path: ../proxmox_florin_server-backup-vm
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0026-backup-vm.md
+    depends_on:
+      - adr-0020-backups
+    conflicts_with: []
+    shared_surfaces:
+      - backup-lv3
+      - /etc/pve/storage.cfg
+      - /etc/pve/jobs.cfg
+      - backup_policy
+      - guest_provisioning
+    ready_to_merge: true
+    live_applied: false
+
   - id: adr-0023-docker-runtime
     adr: 0023
     title: Docker runtime VM baseline

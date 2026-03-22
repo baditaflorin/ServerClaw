@@ -39,6 +39,7 @@ proxmox_template_name: debian13-cloud-template
 proxmox_storage_id: local
 proxmox_snippets_storage_id: local
 proxmox_guest_ci_user: ops
+ansible_remote_tmp: /tmp
 proxmox_guest_nameserver: 1.1.1.1
 proxmox_guest_searchdomain: lv3.org
 proxmox_guest_ssh_connection_mode: tailscale_direct

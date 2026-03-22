@@ -1,19 +1,35 @@
-cifs: {{ proxmox_backup_storage.id }}
+{{ proxmox_backup_storage.type }}: {{ proxmox_backup_storage.id }}
         content {{ proxmox_backup_storage.content | join(',') }}
-{% if proxmox_backup_storage.domain | default('') | length > 0 %}
+{% if proxmox_backup_storage.type == 'cifs' and proxmox_backup_storage.domain | default('') | length > 0 %}
         domain {{ proxmox_backup_storage.domain }}
 {% endif %}
+{% if proxmox_backup_storage.type == 'cifs' %}
         path {{ proxmox_backup_storage.path }}
+{% endif %}
+{% if proxmox_backup_storage.type == 'pbs' %}
+        datastore {{ proxmox_backup_storage.datastore }}
+        fingerprint {{ proxmox_backup_storage_token_payload.fingerprint }}
+{% endif %}
         server {{ proxmox_backup_storage.server }}
+{% if proxmox_backup_storage.type == 'cifs' %}
         share {{ proxmox_backup_storage.share }}
-{% if proxmox_backup_storage.smbversion | default('') | length > 0 %}
+{% endif %}
+{% if proxmox_backup_storage.type == 'cifs' and proxmox_backup_storage.smbversion | default('') | length > 0 %}
         smbversion {{ proxmox_backup_storage.smbversion }}
 {% endif %}
-{% if proxmox_backup_storage.subdir | default('') | length > 0 %}
+{% if proxmox_backup_storage.type == 'cifs' and proxmox_backup_storage.subdir | default('') | length > 0 %}
         subdir {{ proxmox_backup_storage.subdir }}
 {% endif %}
-{% if proxmox_backup_storage.options | default('') | length > 0 %}
+{% if proxmox_backup_storage.type == 'cifs' and proxmox_backup_storage.options | default('') | length > 0 %}
         options {{ proxmox_backup_storage.options }}
 {% endif %}
+{% if proxmox_backup_storage.type == 'pbs' %}
+        port {{ proxmox_backup_storage.port }}
+{% endif %}
         nodes {{ proxmox_backup_storage.nodes | join(',') }}
+{% if proxmox_backup_storage.type == 'cifs' %}
         username {{ proxmox_backup_storage.username }}
+{% endif %}
+{% if proxmox_backup_storage.type == 'pbs' %}
+        username {{ proxmox_backup_storage_token_payload.auth_id }}
+{% endif %}
