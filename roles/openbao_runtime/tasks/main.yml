@@ -211,6 +211,28 @@
     or 'Pull complete' in openbao_pull.stdout
     or 'Pulling' in openbao_pull.stdout
 
+- name: Check whether the named OpenBao container already exists
+  ansible.builtin.command:
+    argv:
+      - docker
+      - container
+      - inspect
+      - "{{ openbao_container_name }}"
+  register: openbao_container_inspect
+  changed_when: false
+  failed_when: openbao_container_inspect.rc not in [0, 1]
+
+- name: Remove the existing named OpenBao container before compose up
+  ansible.builtin.command:
+    argv:
+      - docker
+      - rm
+      - -f
+      - "{{ openbao_container_name }}"
+  register: openbao_container_remove
+  changed_when: openbao_container_remove.rc == 0
+  when: openbao_container_inspect.rc == 0
+
 - name: Start the OpenBao stack
   ansible.builtin.command:
     argv:
@@ -220,7 +242,6 @@
       - "{{ openbao_compose_file }}"
       - up
       - -d
-      - --force-recreate
       - --remove-orphans
   args:
     chdir: "{{ openbao_site_dir }}"
