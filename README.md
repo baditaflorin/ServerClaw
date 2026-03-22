@@ -165,6 +165,7 @@ build.lv3.org   -> informational page until a build-related public service is in
 - [ADR 0019: Parallel ADR delivery with workstreams](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0019-parallel-adr-delivery-with-workstreams.md)
 - [ADR 0020: Initial storage and backup model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0020-initial-storage-and-backup-model.md)
 - [ADR 0021: Public subdomain publication at the NGINX edge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0021-public-subdomain-publication-at-the-nginx-edge.md)
+- [ADR 0022: NGINX guest observability via Telegraf and stub_status](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0022-nginx-guest-observability-via-telegraf-and-stub-status.md)
 
 ## Versioning
 
@@ -176,7 +177,7 @@ This repo now tracks three distinct things:
 
 Current values on `main`:
 
-- `repo_version`: `0.24.0`
+- `repo_version`: `0.25.0`
 - `platform_version`: `0.16.0`
 - `observed_os`: `Debian 13`
 - `observed_proxmox_installed`: `true`

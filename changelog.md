@@ -10,6 +10,15 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 - use this section on `main` for merged notes that have not yet been cut into a numbered release
 
+## 0.25.0 - 2026-03-22
+
+- added ADR 0022 to codify the NGINX guest observability model as infrastructure architecture rather than implementation only
+- linked the new ADR into the main repository docs and maps
+
+Platform impact:
+
+- none beyond the already applied `0.24.0` NGINX observability rollout
+
 ## 0.24.0 - 2026-03-22
 
 - added guest-side nginx observability with Telegraf into the existing InfluxDB and Grafana path
