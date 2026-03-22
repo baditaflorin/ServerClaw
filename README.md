@@ -199,6 +199,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Repair guest netplan MAC drift runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/repair-guest-netplan-mac-drift.md)
 - [Configure storage and backups runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-storage-and-backups.md)
 - [Configure backup VM runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-backup-vm.md)
+- [Workflow catalog and execution contracts runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/workflow-catalog-and-execution-contracts.md)
 - [Controller-local secrets and preflight runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/controller-local-secrets-and-preflight.md)
 - [Validate repository automation runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/validate-repository-automation.md)
 - [ADR 0001: Bootstrap model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0001-bootstrap-dedicated-host-with-ansible.md)
@@ -241,7 +242,7 @@ This repo now tracks three distinct things:
 
 Current values on `main`:
 
-- `repo_version`: `0.35.0`
+- `repo_version`: `0.36.0`
 - `platform_version`: `0.19.0`
 - `observed_os`: `Debian 13`
 - `observed_proxmox_installed`: `true`

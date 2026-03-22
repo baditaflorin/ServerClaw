@@ -60,6 +60,7 @@ Use these defaults unless a runbook or break-glass situation explicitly requires
 6. Merge to `main`, then bump `VERSION`.
 7. Apply merged work live, then bump `platform_version` and refresh observed state.
 8. Run `make preflight WORKFLOW=<id>` before long-running workflows that depend on controller-local secrets or external tokens.
+9. Use `make workflows` or `make workflow-info WORKFLOW=<id>` when you need the canonical entry point instead of inferring it from prose.
 
 At minimum, review whether these files need updates:
 
@@ -77,6 +78,8 @@ At minimum, review whether these files need updates:
 Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/Makefile) instead of rebuilding long commands from memory:
 
 - `make start-workstream WORKSTREAM=adr-0011-monitoring`
+- `make workflows`
+- `make workflow-info WORKFLOW=converge-monitoring`
 - `make validate`
 - `make preflight WORKFLOW=converge-monitoring`
 - `make syntax-check`
@@ -91,8 +94,10 @@ Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/M
 - `make provision-api-access`
 - `make syntax-check-docker-runtime`
 - `make converge-docker-runtime`
+- `make converge-postgres-vm`
 - `make syntax-check-uptime-kuma`
 - `make deploy-uptime-kuma`
+- `make uptime-kuma-manage ACTION=list-monitors`
 - `make database-dns`
 
 ## Things That Must Stay True
@@ -104,6 +109,7 @@ Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/M
 - shared values stay in inventory and group vars rather than copied into many tasks
 - live one-off shell changes are either codified immediately or explicitly documented as temporary
 - secrets and ephemeral provider passwords do not get committed
+- workflow entry points stay declared in `config/workflow-catalog.json`
 - controller-local secret prerequisites stay declared in `config/controller-local-secrets.json`
 - `make validate` is the minimum repository gate before merge to `main`
 

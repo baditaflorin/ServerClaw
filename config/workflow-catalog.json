@@ -1,0 +1,634 @@
+{
+  "schema_version": "1.0.0",
+  "workflows": {
+    "validate": {
+      "description": "Run the repository validation pipeline used before merge to main.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "validate",
+        "command": "make validate"
+      },
+      "preflight": {
+        "required": false
+      },
+      "validation_targets": [],
+      "live_impact": "repo_only",
+      "owner_runbook": "docs/runbooks/validate-repository-automation.md",
+      "implementation_refs": [
+        "Makefile",
+        "scripts/validate_repo.sh",
+        ".github/workflows/validate.yml"
+      ],
+      "outputs": [
+        "Repository validation result across syntax, YAML, Ansible lint, shell, and JSON checks."
+      ],
+      "verification_commands": [
+        "make validate"
+      ]
+    },
+    "install-proxmox": {
+      "description": "Install Proxmox VE on the Debian host from the repo-managed package path.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "install-proxmox",
+        "command": "make install-proxmox"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check"
+      ],
+      "live_impact": "host_live",
+      "owner_runbook": "docs/runbooks/install-proxmox.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/site.yml",
+        "roles/proxmox_repository/tasks/main.yml",
+        "roles/proxmox_platform/tasks/main.yml"
+      ],
+      "outputs": [
+        "Proxmox package repositories and core platform packages converged on the host."
+      ],
+      "verification_commands": [
+        "make syntax-check",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'pveversion'"
+      ]
+    },
+    "configure-network": {
+      "description": "Converge the host bridge and NAT network model for guest connectivity.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "configure-network",
+        "command": "make configure-network"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check"
+      ],
+      "live_impact": "host_live",
+      "owner_runbook": "docs/runbooks/configure-proxmox-network.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/site.yml",
+        "roles/proxmox_network/tasks/main.yml"
+      ],
+      "outputs": [
+        "vmbr0, vmbr10, IPv4 forwarding, and guest NAT policy converged on the host."
+      ],
+      "verification_commands": [
+        "make syntax-check"
+      ]
+    },
+    "configure-ingress": {
+      "description": "Converge public ingress forwarding from the host to the NGINX edge VM.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "configure-ingress",
+        "command": "make configure-ingress"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check"
+      ],
+      "live_impact": "host_live",
+      "owner_runbook": "docs/runbooks/configure-public-ingress.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/site.yml",
+        "roles/proxmox_network/tasks/main.yml"
+      ],
+      "outputs": [
+        "TCP 80 and 443 forwarding from the public host IP to nginx-lv3."
+      ],
+      "verification_commands": [
+        "make syntax-check"
+      ]
+    },
+    "configure-edge-publication": {
+      "description": "Publish repo-managed public hostnames at the NGINX edge.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "configure-edge-publication",
+        "command": "make configure-edge-publication"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-edge-publication.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/public-edge.yml",
+        "roles/nginx_edge_publication/tasks/main.yml"
+      ],
+      "outputs": [
+        "NGINX virtual hosts, proxy routes, and edge certificate domains updated on nginx-lv3."
+      ],
+      "verification_commands": [
+        "curl -I https://grafana.lv3.org",
+        "curl -I https://nginx.lv3.org"
+      ]
+    },
+    "configure-tailscale": {
+      "description": "Converge host Tailscale installation and subnet-router settings.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "configure-tailscale",
+        "command": "make configure-tailscale"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check"
+      ],
+      "live_impact": "host_live",
+      "owner_runbook": "docs/runbooks/configure-tailscale-access.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/site.yml",
+        "roles/proxmox_tailscale/tasks/main.yml"
+      ],
+      "outputs": [
+        "Tailscale package, auth state helpers, and advertised guest subnet routing on the host."
+      ],
+      "verification_commands": [
+        "make syntax-check"
+      ]
+    },
+    "provision-guests": {
+      "description": "Provision the Debian cloud template and declared guest VMs on Proxmox.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "provision-guests",
+        "command": "make provision-guests"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/provision-guests.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/site.yml",
+        "roles/proxmox_guests/tasks/main.yml"
+      ],
+      "outputs": [
+        "Template VM 9000 and declared guest instances created or updated on the Proxmox host."
+      ],
+      "verification_commands": [
+        "make syntax-check"
+      ]
+    },
+    "harden-access": {
+      "description": "Converge the host access baseline for routine non-root operations.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "harden-access",
+        "command": "make harden-access"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check"
+      ],
+      "live_impact": "host_live",
+      "owner_runbook": "docs/runbooks/harden-access.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/site.yml",
+        "roles/proxmox_access/tasks/main.yml"
+      ],
+      "outputs": [
+        "Host-side SSH, sudo, and Proxmox access baseline enforced for routine operations."
+      ],
+      "verification_commands": [
+        "make syntax-check"
+      ]
+    },
+    "harden-guest-access": {
+      "description": "Converge the Linux guest access baseline for the managed VM fleet.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "harden-guest-access",
+        "command": "make harden-guest-access"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/harden-access.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/guest-access.yml",
+        "roles/linux_access/tasks/main.yml"
+      ],
+      "outputs": [
+        "Guest SSH and sudo baseline enforced across the managed Linux VMs."
+      ],
+      "verification_commands": [
+        "make validate"
+      ]
+    },
+    "harden-security": {
+      "description": "Converge the Proxmox host security baseline including firewall, notifications, ACME, and TOTP.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "harden-security",
+        "command": "HETZNER_DNS_API_TOKEN=... make harden-security"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "proxmox_ops_pam_totp_state"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check"
+      ],
+      "live_impact": "host_live",
+      "owner_runbook": "docs/runbooks/complete-security-baseline.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/site.yml",
+        "roles/proxmox_security/tasks/main.yml"
+      ],
+      "outputs": [
+        "Firewall, ACME certificate, notifications, and TOTP state converged on the Proxmox host."
+      ],
+      "verification_commands": [
+        "HETZNER_DNS_API_TOKEN=... make harden-security"
+      ]
+    },
+    "provision-api-access": {
+      "description": "Create and verify the durable Proxmox API automation identity and token.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "provision-api-access",
+        "command": "make provision-api-access"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "proxmox_api_token_payload"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check"
+      ],
+      "live_impact": "host_live",
+      "owner_runbook": "docs/runbooks/proxmox-api-automation.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/site.yml",
+        "roles/proxmox_api_access/tasks/main.yml"
+      ],
+      "outputs": [
+        "Durable Proxmox API automation user and locally mirrored token payload."
+      ],
+      "verification_commands": [
+        "make syntax-check"
+      ]
+    },
+    "converge-monitoring": {
+      "description": "Converge the monitoring VM, guest telemetry paths, and Grafana dashboards.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-monitoring",
+        "command": "make converge-monitoring"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "monitoring_proxmox_writer_token",
+          "monitoring_guest_writer_token"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-monitoring"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/monitoring-stack.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/monitoring-stack.yml",
+        "roles/monitoring_vm/tasks/main.yml",
+        "roles/nginx_observability/tasks/main.yml",
+        "roles/docker_build_observability/tasks/main.yml"
+      ],
+      "outputs": [
+        "Monitoring VM services converged, dashboards imported, and guest telemetry wired into InfluxDB."
+      ],
+      "verification_commands": [
+        "make syntax-check-monitoring",
+        "curl -I https://grafana.lv3.org"
+      ]
+    },
+    "converge-docker-runtime": {
+      "description": "Converge the Docker runtime baseline on docker-runtime-lv3.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-docker-runtime",
+        "command": "make converge-docker-runtime"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-docker-runtime"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-docker-runtime.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/docker-runtime.yml",
+        "roles/docker_runtime/tasks/main.yml"
+      ],
+      "outputs": [
+        "Docker Engine, Compose plugin, daemon baseline, and ops group access on docker-runtime-lv3."
+      ],
+      "verification_commands": [
+        "make syntax-check-docker-runtime"
+      ]
+    },
+    "converge-postgres-vm": {
+      "description": "Converge the dedicated PostgreSQL guest baseline on postgres-lv3.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-postgres-vm",
+        "command": "make converge-postgres-vm"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-postgres-vm.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/postgres-vm.yml",
+        "roles/postgres_vm/tasks/main.yml"
+      ],
+      "outputs": [
+        "PostgreSQL runtime, guest firewall policy, and local admin baseline converged on postgres-lv3."
+      ],
+      "verification_commands": [
+        "psql \"host=database.lv3.org port=5432 dbname=postgres user=ops sslmode=prefer\""
+      ]
+    },
+    "deploy-uptime-kuma": {
+      "description": "Deploy Uptime Kuma on the Docker runtime VM and publish it at uptime.lv3.org.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "deploy-uptime-kuma",
+        "command": "HETZNER_DNS_API_TOKEN=... make deploy-uptime-kuma"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-uptime-kuma"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/deploy-uptime-kuma.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/uptime-kuma.yml",
+        "roles/uptime_kuma_runtime/tasks/main.yml",
+        "roles/hetzner_dns_records/tasks/main.yml",
+        "roles/nginx_edge_publication/tasks/main.yml"
+      ],
+      "outputs": [
+        "Uptime Kuma runtime, public DNS publication, and edge proxy configuration for uptime.lv3.org."
+      ],
+      "verification_commands": [
+        "make syntax-check-uptime-kuma",
+        "curl -I https://uptime.lv3.org"
+      ]
+    },
+    "uptime-kuma-manage": {
+      "description": "Run repo-local Uptime Kuma client actions such as bootstrap, ensure-monitors, or list-monitors.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "uptime-kuma-manage",
+        "command": "make uptime-kuma-manage ACTION=list-monitors"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "uptime_kuma_admin_session"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "external_live",
+      "owner_runbook": "docs/runbooks/deploy-uptime-kuma.md",
+      "implementation_refs": [
+        "Makefile",
+        "scripts/uptime_kuma_tool.py",
+        "config/uptime-kuma/monitors.json"
+      ],
+      "outputs": [
+        "Repo-managed Uptime Kuma auth bootstrap or monitor state reconciliation against the live service."
+      ],
+      "verification_commands": [
+        "make uptime-kuma-manage ACTION=list-monitors"
+      ]
+    },
+    "configure-backup-vm": {
+      "description": "Converge the dedicated backup VM and host-side PBS backup integration.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "configure-backup-vm",
+        "command": "make configure-backup-vm"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "backup_vm_api_user_password",
+          "backup_vm_api_token_payload"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-backup-vm"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-backup-vm.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/backup-vm.yml",
+        "roles/backup_vm/tasks/main.yml",
+        "roles/proxmox_backups/tasks/main.yml"
+      ],
+      "outputs": [
+        "backup-lv3 guest, PBS datastore, local API credentials, and Proxmox host backup target configuration."
+      ],
+      "verification_commands": [
+        "make syntax-check-backup-vm"
+      ]
+    },
+    "configure-backups": {
+      "description": "Retained legacy external CIFS backup workflow from ADR 0020.",
+      "lifecycle_status": "blocked",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "configure-backups",
+        "command": "make configure-backups"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "blocked_secret_ids": [
+          "proxmox_backup_cifs_server",
+          "proxmox_backup_cifs_share",
+          "proxmox_backup_cifs_username",
+          "proxmox_backup_cifs_password"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check"
+      ],
+      "live_impact": "host_live",
+      "owner_runbook": "docs/runbooks/configure-storage-and-backups.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/site.yml",
+        "roles/proxmox_backups/tasks/main.yml"
+      ],
+      "outputs": [
+        "Legacy CIFS backup configuration path retained only as a documented blocked workflow."
+      ],
+      "verification_commands": [
+        "make preflight WORKFLOW=configure-backups"
+      ]
+    },
+    "database-dns": {
+      "description": "Publish the private database.lv3.org DNS record toward the Proxmox Tailscale address.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "database-dns",
+        "command": "HETZNER_DNS_API_TOKEN=... make database-dns"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "hetzner_dns_api_token"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "external_live",
+      "owner_runbook": "docs/runbooks/configure-postgres-vm.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/database-dns.yml",
+        "roles/hetzner_dns_record/tasks/main.yml"
+      ],
+      "outputs": [
+        "database.lv3.org DNS record updated to the private Proxmox host Tailscale address."
+      ],
+      "verification_commands": [
+        "dig +short database.lv3.org"
+      ]
+    }
+  }
+}

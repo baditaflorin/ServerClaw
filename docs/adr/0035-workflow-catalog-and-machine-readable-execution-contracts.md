@@ -1,10 +1,10 @@
 # ADR 0035: Workflow Catalog And Machine-Readable Execution Contracts
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.36.0
+- Implemented In Platform Version: not applicable (repo-only)
+- Implemented On: 2026-03-22
 - Date: 2026-03-22
 
 ## Context
@@ -44,3 +44,11 @@ The catalog will describe, at minimum:
 - Drift between Make targets, preflight ids, and runbooks becomes easier to detect automatically.
 - Future generated docs or CLIs can render workflow help from the same source of truth.
 - The first implementation must stay descriptive and avoid turning the catalog into a second orchestration engine.
+
+## Implementation Notes
+
+- The canonical workflow execution catalog now lives in [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json).
+- [scripts/workflow_catalog.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/workflow_catalog.py) validates the catalog against the Makefile, runbook paths, implementation references, and controller-local secret ids.
+- [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/Makefile) now exposes `make workflows` and `make workflow-info WORKFLOW=<id>` for machine-readable workflow discovery, plus managed wrappers for PostgreSQL convergence and Uptime Kuma repo-local management.
+- [scripts/preflight_controller_local.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/preflight_controller_local.py) now reads workflow metadata from the workflow catalog instead of maintaining a second workflow registry in the secret manifest.
+- Operator usage is documented in [docs/runbooks/workflow-catalog-and-execution-contracts.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/workflow-catalog-and-execution-contracts.md).

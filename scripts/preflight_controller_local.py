@@ -6,35 +6,26 @@ import os
 import sys
 from pathlib import Path
 
+from workflow_catalog import (
+    WORKFLOW_SECRET_FIELDS,
+    load_secret_manifest,
+    load_workflow_catalog,
+    validate_secret_manifest,
+    validate_workflow_catalog,
+)
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 MANIFEST_PATH = REPO_ROOT / "config" / "controller-local-secrets.json"
+WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
 
 
-def load_manifest() -> dict:
-    return json.loads(MANIFEST_PATH.read_text())
-
-
-def validate_manifest(manifest: dict) -> None:
-    secrets = manifest.get("secrets", {})
-    workflows = manifest.get("workflows", {})
-
-    if not isinstance(secrets, dict) or not isinstance(workflows, dict):
-        raise ValueError("manifest must define object-valued 'secrets' and 'workflows'")
-
-    for workflow_id, workflow in workflows.items():
-        for field in ("required_secret_ids", "generated_secret_ids", "blocked_secret_ids"):
-            for secret_id in workflow.get(field, []):
-                if secret_id not in secrets:
-                    raise ValueError(
-                        f"workflow '{workflow_id}' references unknown secret '{secret_id}' in '{field}'"
-                    )
-
-
-def list_workflows(manifest: dict) -> int:
+def list_workflows(catalog: dict) -> int:
     print(f"Manifest: {MANIFEST_PATH}")
-    print("Available workflows:")
-    for workflow_id, workflow in sorted(manifest["workflows"].items()):
+    print(f"Workflow catalog: {WORKFLOW_CATALOG_PATH}")
+    print("Available preflight workflows:")
+    for workflow_id, workflow in sorted(catalog["workflows"].items()):
+        if not workflow["preflight"]["required"]:
+            continue
         print(f"  - {workflow_id}: {workflow['description']}")
     return 0
 
@@ -62,9 +53,9 @@ def check_secret(secret_id: str, secret: dict) -> tuple[bool, str]:
     return False, f"FAIL {secret_id}: unsupported secret kind {kind}"
 
 
-def report_generated(manifest: dict, workflow: dict) -> None:
-    for secret_id in workflow.get("generated_secret_ids", []):
-        secret = manifest["secrets"][secret_id]
+def report_generated(secret_manifest: dict, workflow: dict) -> None:
+    for secret_id in workflow["preflight"].get("generated_secret_ids", []):
+        secret = secret_manifest["secrets"][secret_id]
         if secret["kind"] == "file":
             path = Path(secret["path"]).expanduser()
             state = "present" if path.is_file() and path.stat().st_size > 0 else "absent"
@@ -75,8 +66,8 @@ def report_generated(manifest: dict, workflow: dict) -> None:
             print(f"INFO generated {secret_id}: {state} in {name}")
 
 
-def run_workflow(manifest: dict, workflow_id: str) -> int:
-    workflow = manifest["workflows"].get(workflow_id)
+def run_workflow(secret_manifest: dict, catalog: dict, workflow_id: str) -> int:
+    workflow = catalog["workflows"].get(workflow_id)
     if workflow is None:
         print(f"Unknown workflow: {workflow_id}", file=sys.stderr)
         return 2
@@ -85,20 +76,24 @@ def run_workflow(manifest: dict, workflow_id: str) -> int:
     print(f"Description: {workflow['description']}")
 
     failed = False
+    preflight = workflow["preflight"]
 
-    for secret_id in workflow.get("required_secret_ids", []):
-        ok, message = check_secret(secret_id, manifest["secrets"][secret_id])
+    if not preflight["required"]:
+        print("INFO no controller-local secret preflight required for this workflow")
+
+    for secret_id in preflight.get("required_secret_ids", []):
+        ok, message = check_secret(secret_id, secret_manifest["secrets"][secret_id])
         print(message)
         if not ok:
             failed = True
 
-    for secret_id in workflow.get("blocked_secret_ids", []):
-        ok, message = check_secret(secret_id, manifest["secrets"][secret_id])
+    for secret_id in preflight.get("blocked_secret_ids", []):
+        ok, message = check_secret(secret_id, secret_manifest["secrets"][secret_id])
         print(message)
         if not ok:
             failed = True
 
-    report_generated(manifest, workflow)
+    report_generated(secret_manifest, workflow)
 
     if failed:
         print(f"Result: FAIL ({workflow_id})", file=sys.stderr)
@@ -117,16 +112,18 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
-        manifest = load_manifest()
-        validate_manifest(manifest)
+        secret_manifest = load_secret_manifest()
+        validate_secret_manifest(secret_manifest)
+        catalog = load_workflow_catalog()
+        validate_workflow_catalog(catalog, secret_manifest)
     except (OSError, json.JSONDecodeError, ValueError) as exc:
         print(f"Manifest error: {exc}", file=sys.stderr)
         return 2
 
     if args.list or not args.workflow:
-        return list_workflows(manifest)
+        return list_workflows(catalog)
 
-    return run_workflow(manifest, args.workflow)
+    return run_workflow(secret_manifest, catalog, args.workflow)
 
 
 if __name__ == "__main__":

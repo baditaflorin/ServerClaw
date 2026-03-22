@@ -10,6 +10,18 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 - use this section on `main` for merged notes that have not yet been cut into a numbered release
 
+## 0.36.0 - 2026-03-22
+
+- implemented ADR 0035 to define a canonical machine-readable workflow catalog for repository execution paths
+- added `config/workflow-catalog.json` plus `scripts/workflow_catalog.py` to declare and validate preferred entry points, preflight requirements, validation targets, live-impact classification, runbooks, and verification commands
+- moved workflow ownership out of `config/controller-local-secrets.json` so the secret manifest remains a pure secret inventory while preflight reads workflow metadata from the catalog
+- added `make workflows` and `make workflow-info WORKFLOW=<id>` for workflow discovery, plus new managed entry points for PostgreSQL convergence and repo-local Uptime Kuma management
+- updated operator runbooks, the repository map, and ADR metadata to document the new execution contract surface
+
+Platform impact:
+
+- no direct live platform change; this release makes workflow discovery and execution metadata explicit in the repository only
+
 ## 0.35.0 - 2026-03-22
 
 - implemented ADR 0034 to define a machine-readable controller-local secret manifest and standard workflow preflight

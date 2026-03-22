@@ -84,6 +84,7 @@ validate_json() {
   while IFS= read -r -d '' json_file; do
     jq empty "$json_file"
   done < <(find "$REPO_ROOT/config" -type f -name '*.json' -print0)
+  "$REPO_ROOT/scripts/workflow_catalog.py" --validate >/dev/null
 }
 
 if [[ $# -eq 0 ]]; then

@@ -39,7 +39,7 @@ ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/
 Use the Proxmox host jump path until direct private guest routing is the normal operator path:
 
 ```bash
-ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/postgres-vm.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+make converge-postgres-vm
 ```
 
 ## Publish The Tailnet DNS Name

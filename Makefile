@@ -4,8 +4,11 @@ BOOTSTRAP_KEY ?= /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.lo
 ANSIBLE_LOCAL_TEMP ?= /tmp/proxmox_florin_server-ansible-local
 ANSIBLE_REMOTE_TEMP ?= /tmp
 ANSIBLE_ENV := ANSIBLE_LOCAL_TEMP=$(ANSIBLE_LOCAL_TEMP) ANSIBLE_REMOTE_TEMP=$(ANSIBLE_REMOTE_TEMP)
+UPTIME_KUMA_PYTHON ?= $(REPO_ROOT)/.local/uptime-kuma/client-venv/bin/python
+ACTION ?= list-monitors
+UPTIME_KUMA_ARGS ?=
 
-.PHONY: validate validate-ansible-syntax validate-yaml validate-ansible-lint validate-shell validate-json preflight syntax-check syntax-check-monitoring syntax-check-docker-runtime syntax-check-backup-vm syntax-check-uptime-kuma install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-monitoring converge-docker-runtime deploy-uptime-kuma configure-backups configure-backup-vm database-dns start-workstream
+.PHONY: validate validate-ansible-syntax validate-yaml validate-ansible-lint validate-shell validate-json workflows workflow-info preflight syntax-check syntax-check-monitoring syntax-check-docker-runtime syntax-check-backup-vm syntax-check-uptime-kuma install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-monitoring converge-docker-runtime converge-postgres-vm deploy-uptime-kuma uptime-kuma-manage configure-backups configure-backup-vm database-dns start-workstream
 
 validate:
 	$(REPO_ROOT)/scripts/validate_repo.sh
@@ -24,6 +27,13 @@ validate-shell:
 
 validate-json:
 	$(REPO_ROOT)/scripts/validate_repo.sh json
+
+workflows:
+	$(REPO_ROOT)/scripts/workflow_catalog.py --list
+
+workflow-info:
+	@test -n "$(WORKFLOW)" || (echo "set WORKFLOW=<workflow-id>"; exit 1)
+	$(REPO_ROOT)/scripts/workflow_catalog.py --workflow $(WORKFLOW)
 
 preflight:
 	@if [ -z "$(WORKFLOW)" ]; then \
@@ -97,10 +107,19 @@ converge-docker-runtime:
 	$(MAKE) preflight WORKFLOW=converge-docker-runtime
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/docker-runtime.yml --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 
+converge-postgres-vm:
+	$(MAKE) preflight WORKFLOW=converge-postgres-vm
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/postgres-vm.yml --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+
 deploy-uptime-kuma:
 	$(MAKE) preflight WORKFLOW=deploy-uptime-kuma
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
 	ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/uptime-kuma.yml --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+
+uptime-kuma-manage:
+	$(MAKE) preflight WORKFLOW=uptime-kuma-manage
+	@test -n "$(ACTION)" || (echo "set ACTION=<bootstrap|ensure-monitors|list-monitors>"; exit 1)
+	$(UPTIME_KUMA_PYTHON) $(REPO_ROOT)/scripts/uptime_kuma_tool.py $(ACTION) $(UPTIME_KUMA_ARGS)
 
 configure-backups:
 	$(MAKE) preflight WORKFLOW=configure-backups

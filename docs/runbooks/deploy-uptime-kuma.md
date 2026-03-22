@@ -33,21 +33,21 @@ Bootstrap the first durable local auth file and seed the initial monitors:
 
 ```bash
 cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
-.local/uptime-kuma/client-venv/bin/python scripts/uptime_kuma_tool.py bootstrap --base-url https://uptime.lv3.org
+make uptime-kuma-manage ACTION=bootstrap UPTIME_KUMA_ARGS="--base-url https://uptime.lv3.org"
 ```
 
 Re-apply the repo-managed monitor seed later:
 
 ```bash
 cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
-.local/uptime-kuma/client-venv/bin/python scripts/uptime_kuma_tool.py ensure-monitors
+make uptime-kuma-manage ACTION=ensure-monitors
 ```
 
 List the current monitors from the repo client:
 
 ```bash
 cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
-.local/uptime-kuma/client-venv/bin/python scripts/uptime_kuma_tool.py list-monitors
+make uptime-kuma-manage ACTION=list-monitors
 ```
 
 ## Verification
@@ -68,7 +68,7 @@ curl -I https://nginx.lv3.org
 Verify the seeded monitors are visible:
 
 ```bash
-.local/uptime-kuma/client-venv/bin/python scripts/uptime_kuma_tool.py list-monitors
+make uptime-kuma-manage ACTION=list-monitors
 ```
 
 ## Notes
