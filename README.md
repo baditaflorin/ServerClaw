@@ -74,7 +74,7 @@ Portainer is now live on `docker-runtime-lv3` and reachable privately at `https:
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.60.0` |
+| Repository version | `0.62.0` |
 | Platform version | `0.33.0` |
 | Observed check date | `2026-03-22` |
 | Observed OS | `Debian 13` |
@@ -157,7 +157,7 @@ password SSH disabled on host and guests
 | Lane | Title | Transport | Surfaces | Primary Rule |
 | --- | --- | --- | --- | --- |
 | `command` | Command Lane | `ssh` | 2 | Use SSH only for command-lane access. |
-| `api` | API Lane | `https` | 9 | Default new APIs to internal-only or operator-only publication. |
+| `api` | API Lane | `https` | 10 | Default new APIs to internal-only or operator-only publication. |
 | `message` | Message Lane | `authenticated_submission` | 2 | Submit platform mail through the internal mail platform rather than arbitrary external SMTP relays. |
 | `event` | Event Lane | `signed_http` | 2 | Event sinks must be documented and intentionally reachable. |
 
@@ -175,6 +175,7 @@ password SSH disabled on host and guests
 | `mail-gateway-api` | `api` | `service_api` | `http://10.10.10.20:8081` |
 | `mattermost-operator-api` | `api` | `service_api` | `http://100.118.189.95:8066/api/v4` |
 | `open-webui-operator-workbench` | `api` | `service_api` | `http://100.118.189.95:8008` |
+| `platform-context-api` | `api` | `service_api` | `http://100.118.189.95:8010` |
 | `mail-platform-submission` | `message` | `mail_submission` | `10.10.10.20:587` |
 | `proxmox-host-operator-notifications` | `message` | `notification_profile` | `lv3-ops-email sendmail endpoint with catch-all matcher to baditaflorin@gmail.com` |
 | `stalwart-mail-events` | `event` | `webhook` | `http://10.10.10.20:8081/webhooks/stalwart` |
@@ -184,7 +185,7 @@ password SSH disabled on host and guests
 | Tier | Title | Surfaces | Summary |
 | --- | --- | --- | --- |
 | `internal-only` | Internal-Only | 5 | Reachable only from LV3 private networks, loopback paths, or explicitly trusted control-plane hosts. |
-| `operator-only` | Operator-Only | 6 | Reachable only from approved operator devices over private access such as Tailscale. |
+| `operator-only` | Operator-Only | 7 | Reachable only from approved operator devices over private access such as Tailscale. |
 | `public-edge` | Public Edge | 0 | Intentionally published on a public domain through the named edge model. |
 
 ### Classified API And Webhook Surfaces
@@ -199,6 +200,7 @@ password SSH disabled on host and guests
 | `mail-gateway-api` | `internal-only` | `api` | `http://10.10.10.20:8081` | Reachable only on the LV3 private guest network at docker-runtime-lv3:8081. |
 | `mattermost-operator-api` | `operator-only` | `api` | `http://100.118.189.95:8066/api/v4` | Reachable only through the Proxmox host Tailscale proxy on port 8066. |
 | `open-webui-operator-workbench` | `operator-only` | `api` | `http://100.118.189.95:8008` | Reachable only through the Proxmox host Tailscale proxy on port 8008. |
+| `platform-context-api` | `operator-only` | `api` | `http://100.118.189.95:8010` | Reachable only through the Proxmox host Tailscale proxy on port 8010 and requires the controller-local bearer token. |
 | `stalwart-mail-events` | `internal-only` | `event` | `http://10.10.10.20:8081/webhooks/stalwart` | Reachable only from the private mail-platform stack on docker-runtime-lv3. |
 | `mattermost-incoming-webhooks` | `internal-only` | `event` | `http://10.10.10.20:8065/hooks/<managed-id>` | Reachable on the private Mattermost runtime at docker-runtime-lv3:8065, with mirrored webhook ids retained under .local/mattermost for controlled routing. |
 <!-- END GENERATED: control-plane-lanes -->
@@ -280,6 +282,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstreams guide](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/README.md)
 
 ### Runbooks
+- [Agent Tool Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/agent-tool-registry.md)
 - [Command Catalog And Approval Gates](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/command-catalog-and-approval-gates.md)
 - [Complete Security Baseline Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/complete-security-baseline.md)
 - [Configure Backup VM](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-backup-vm.md)
@@ -317,6 +320,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Private-First API Publication](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/private-first-api-publication.md)
 - [Provision Guests Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/provision-guests.md)
 - [Proxmox API Automation Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/proxmox-api-automation.md)
+- [RAG Platform Context](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/rag-platform-context.md)
 - [Repair Guest Netplan MAC Drift](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/repair-guest-netplan-mac-drift.md)
 - [Validate Repository Automation Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/validate-repository-automation.md)
 - [Workflow Catalog And Execution Contracts](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/workflow-catalog-and-execution-contracts.md)
@@ -455,7 +459,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.60.0` |
+| Repository version | `0.62.0` |
 | Platform version | `0.33.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -529,6 +533,8 @@ This repository is intentionally opinionated:
 | `0059` | ntopng for private network flow visibility | `live_applied` | [adr-0059-ntopng-network-visibility.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0059-ntopng-network-visibility.md) |
 | `0060` | Open WebUI for operator and agent workbench | `live_applied` | [adr-0060-open-webui-workbench.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0060-open-webui-workbench.md) |
 | `0062` | Ansible role composability and DRY defaults | `merged` | [adr-0062-role-composability.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0062-role-composability.md) |
+| `0069` | Agent tool registry and governed tool calls | `merged` | [adr-0069-agent-tool-registry.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0069-agent-tool-registry.md) |
+| `0070` | Retrieval-augmented context for platform queries | `merged` | [adr-0070-rag-platform-context.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0070-rag-platform-context.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

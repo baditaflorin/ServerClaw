@@ -8,9 +8,9 @@ import re
 import sys
 from typing import Any
 
-from agent_tool_registry import load_registry as load_agent_tool_registry
-from api_publication import load_api_publication_catalog, validate_api_publication_catalog
 from command_catalog import load_command_catalog, validate_command_catalog
+from agent_tool_registry import load_api_surface_ids, load_registry, validate_agent_tool_registry
+from api_publication import load_api_publication_catalog, validate_api_publication_catalog
 from controller_automation_toolkit import REPO_ROOT, emit_cli_error, load_yaml, repo_path
 from control_plane_lanes import load_lane_catalog
 from live_apply_receipts import RECEIPTS_DIR, iter_receipt_paths, validate_receipts
@@ -1066,10 +1066,16 @@ def validate_repository_data_models() -> int:
     validate_workflow_catalog(workflow_catalog, secret_manifest)
     command_catalog = load_command_catalog()
     validate_command_catalog(command_catalog, workflow_catalog, secret_manifest)
-    load_agent_tool_registry()
     lane_catalog, _ = load_lane_catalog()
     api_publication_catalog, _, _ = load_api_publication_catalog()
     validate_api_publication_catalog(api_publication_catalog, lane_catalog)
+    agent_tool_registry = load_registry()
+    validate_agent_tool_registry(
+        agent_tool_registry,
+        workflow_catalog,
+        command_catalog,
+        load_api_surface_ids(),
+    )
     validate_receipts()
     validate_uptime_monitors()
     host_vars_context = validate_host_vars()

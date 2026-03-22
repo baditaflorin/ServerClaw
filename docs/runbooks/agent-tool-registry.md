@@ -2,48 +2,110 @@
 
 ## Purpose
 
-This runbook documents the canonical agent tool registry introduced by ADR 0069.
+This runbook defines the canonical governed tool registry for agents and operators.
 
-The registry is the machine-readable discovery layer for governed read and execute surfaces. It does not replace the workflow catalog, command catalog, or private API publication model.
+The registry adds a self-describing tool surface on top of the existing workflow, command, receipt, and publication catalogs so agents do not need broad shell access just to discover or call approved operations.
 
-## Canonical Files
+## Canonical Sources
 
-- `config/agent-tool-registry.json`
-- `docs/schema/agent-tool.json`
-- `scripts/agent_tool_registry.py`
+- tool registry: [config/agent-tool-registry.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/agent-tool-registry.json)
+- tool schema: [docs/schema/agent-tool.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/schema/agent-tool.json)
+- registry schema: [docs/schema/agent-tool-registry.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/schema/agent-tool-registry.json)
+- audit event schema: [docs/schema/governed-tool-call-audit-event.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/schema/governed-tool-call-audit-event.json)
+- registry CLI: [scripts/agent_tool_registry.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/agent_tool_registry.py)
+- workflow catalog: [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json)
+- command catalog: [config/command-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/command-catalog.json)
+- API publication catalog: [config/api-publication.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/api-publication.json)
 
-## Commands
+## Current Transport Model
 
-Inspect the registered tools:
+The current implementation uses two governed transport shapes:
 
-```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
-uvx --from pyyaml python scripts/agent_tool_registry.py --list
-```
+- `controller_local`: repo-local script and catalog-backed calls on the controller for repo-grounded observe, report, approval, and governed command dispatch
+- `http`: authenticated private API calls for live-backed retrieval through the platform-context surface from ADR 0070
 
-Inspect one tool definition:
+`nats` and `ansible` remain valid registry values for future live-backed tool entries.
 
-```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
-uvx --from pyyaml python scripts/agent_tool_registry.py --tool query-platform-context
-```
+## Primary Commands
 
-Validate the registry:
-
-```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
-uvx --from pyyaml python scripts/agent_tool_registry.py --validate
-```
-
-Export MCP-compatible tool definitions:
+List the governed tools:
 
 ```bash
-cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
-make export-mcp-tools
+make agent-tools
 ```
 
-## Operating Notes
+Show one tool contract:
 
-- `http` tools must point at a documented API lane surface from `config/control-plane-lanes.json`.
-- `execute` tools stay aligned with the workflow catalog and command catalog; approval policy still comes from the command contract, not from chat context.
-- The first registry intentionally favors read-heavy tools. `query-platform-context` is the main grounded retrieval surface, while execute-category tools reference governed converge workflows rather than broad shell access.
+```bash
+make agent-tool-info TOOL=get-platform-status
+```
+
+Validate the registry directly:
+
+```bash
+scripts/agent_tool_registry.py --validate
+```
+
+Export the MCP-compatible tool definitions:
+
+```bash
+make export-mcp-tools > /tmp/lv3-mcp-tools.json
+```
+
+Call a read-only observe tool:
+
+```bash
+uvx --from pyyaml python scripts/agent_tool_registry.py \
+  --call get-platform-status \
+  --args-json '{}'
+```
+
+Evaluate a command approval gate:
+
+```bash
+scripts/agent_tool_registry.py \
+  --call check-command-approval \
+  --args-json '{"command_id":"configure-network","requester_class":"human_operator","approver_classes":["human_operator"],"preflight_passed":true,"validation_passed":true,"receipt_planned":true}'
+```
+
+Prepare a governed command execution without actually running it:
+
+```bash
+scripts/agent_tool_registry.py \
+  --call run-governed-command \
+  --args-json '{"command_id":"configure-network","requester_class":"human_operator","approver_classes":["human_operator"],"preflight_passed":true,"validation_passed":true,"receipt_planned":true,"dry_run":true}'
+
+Call the private RAG query tool:
+
+```bash
+scripts/agent_tool_registry.py \
+  --call query-platform-context \
+  --args-json '{"question":"how does step-ca issue SSH certificates","top_k":3}'
+```
+```
+
+## Audit Events
+
+Every tool call appends one governed-tool-call audit event to the controller-local JSON-lines stream:
+
+- default path: `.local/tool-audit/agent-tool-calls.jsonl`
+- override path: set `LV3_AGENT_TOOL_AUDIT_LOG_PATH=/absolute/path/to/file.jsonl`
+
+This is the bounded ADR 0069 tool-call audit stream. It does not claim to replace the broader multi-surface mutation audit work planned under ADR 0066.
+
+For `query-platform-context`, the bearer token path defaults to `.local/platform-context/api-token.txt`.
+Set `LV3_PLATFORM_CONTEXT_API_TOKEN_FILE=/absolute/path/to/api-token.txt` to override it for nonstandard controller layouts.
+
+## Operating Rule
+
+When adding or changing a governed tool:
+
+1. update [config/agent-tool-registry.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/agent-tool-registry.json)
+2. keep the input and output schemas MCP-compatible
+3. cross-reference the owning workflow, command, or API publication surface where applicable
+4. keep `audit_on_call` enabled
+5. rerun `scripts/agent_tool_registry.py --validate`
+6. rerun `make export-mcp-tools`
+7. rerun `make validate`
+
+If a recurring agent action is not represented in the tool registry, it is not yet an approved governed tool surface.

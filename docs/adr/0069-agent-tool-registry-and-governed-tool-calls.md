@@ -2,8 +2,8 @@
 
 - Status: Accepted
 - Implementation Status: Implemented
-- Implemented In Repo Version: 0.59.0
-- Implemented In Platform Version: not yet
+- Implemented In Repo Version: 0.61.0
+- Implemented In Platform Version: not applicable (repo-only)
 - Implemented On: 2026-03-22
 - Date: 2026-03-22
 
@@ -52,6 +52,7 @@ Tool categories:
 
 Tool transport options:
 
+- `controller_local` — repo-local script or catalog-backed call on the controller for repo-grounded observe, report, approval, and bounded execution flows
 - `http` — REST or GraphQL call to an internal API (Windmill, NetBox, Grafana)
 - `nats` — publish a request event and receive a reply
 - `ansible` — invoke a named Ansible workflow via the workflow catalog
@@ -73,8 +74,10 @@ MCP compatibility: the registry schema is compatible with the Model Context Prot
 
 ## Implementation Notes
 
-- The canonical registry now lives in [config/agent-tool-registry.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/agent-tool-registry.json), with the entry schema documented in [docs/schema/agent-tool.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/schema/agent-tool.json).
-- [scripts/agent_tool_registry.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/agent_tool_registry.py) validates the registry, prints individual tool contracts, and exports MCP-compatible tool definitions through `make export-mcp-tools`.
-- Registry validation is now part of [scripts/validate_repository_data_models.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_repository_data_models.py) so tool entries stay aligned with workflow ids, command ids, and API lane surfaces.
-- Operator usage is documented in [docs/runbooks/agent-tool-registry.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/agent-tool-registry.md).
-- The first live-backed `observe` and `report` tools are served by the private platform-context API from ADR 0070, while `execute` tools reference existing governed converge workflows rather than broad shell access.
+- [config/agent-tool-registry.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/agent-tool-registry.json) is now the canonical machine-readable registry for governed `observe`, `report`, `execute`, and `approve` tools.
+- [docs/schema/agent-tool.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/schema/agent-tool.json), [docs/schema/agent-tool-registry.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/schema/agent-tool-registry.json), and [docs/schema/governed-tool-call-audit-event.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/schema/governed-tool-call-audit-event.json) now define the registry and audit event contract.
+- [scripts/agent_tool_registry.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/agent_tool_registry.py) validates the registry, exports MCP-compatible tool definitions, dispatches bounded controller-local tool calls, and emits one audit event for every tool call to `.local/tool-audit/agent-tool-calls.jsonl` by default.
+- [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/Makefile) now exposes `make agent-tools`, `make agent-tool-info TOOL=<name>`, and `make export-mcp-tools` as the preferred operator entry points.
+- [scripts/validate_repository_data_models.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_repository_data_models.py) now fails validation if the governed tool registry drifts from its schema or references missing workflow, command, or API publication entries.
+- [docs/runbooks/agent-tool-registry.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/agent-tool-registry.md) records the operating procedure for discovery, MCP export, audit-log location, and governed command dispatch.
+- ADR 0070 extends the governed surface with `query-platform-context`, an authenticated `http` observe tool backed by the private platform-context API on the operator-only API lane.
