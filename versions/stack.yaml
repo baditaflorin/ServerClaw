@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.26.0
-platform_version: 0.17.0
+repo_version: 0.27.0
+platform_version: 0.18.0
 
 desired_state:
   host_id: proxmox_florin
@@ -25,6 +25,7 @@ desired_state:
     docker_runtime_vm: 10.10.10.20
     docker_build_vm: 10.10.10.30
     monitoring_vm: 10.10.10.40
+    postgres_vm: 10.10.10.50
   guest_provisioning:
     template_vmid: 9000
     template_name: debian13-cloud-template
@@ -33,6 +34,7 @@ desired_state:
       docker_runtime_vm: 120
       docker_build_vm: 130
       monitoring_vm: 140
+      postgres_vm: 150
   traffic_model:
     guest_default_gateway: 10.10.10.1
     guest_outbound_via_host_nat: true
@@ -69,6 +71,7 @@ desired_state:
       - nginx.lv3.org
       - docker.lv3.org
       - build.lv3.org
+      - database.lv3.org
     publish_aaaa_initially: false
   public_publication:
     edge_vm: 10.10.10.10
@@ -153,6 +156,7 @@ observed_state:
       - nginx.lv3.org
       - docker.lv3.org
       - build.lv3.org
+      - database.lv3.org
   guests:
     template:
       vmid: 9000
@@ -174,6 +178,10 @@ observed_state:
       - vmid: 140
         name: monitoring-lv3
         ipv4: 10.10.10.40
+        running: true
+      - vmid: 150
+        name: postgres-lv3
+        ipv4: 10.10.10.50
         running: true
     access:
       ssh_proxyjump_via_proxmox_host_working: true
@@ -230,6 +238,14 @@ observed_state:
       - proxmox.lv3.org
       - docker.lv3.org
       - build.lv3.org
+  postgres:
+    vm: 10.10.10.50
+    service_running: true
+    guest_firewall_enabled: true
+    tailscale_proxy_host: 100.118.189.95:5432
+    dns_name: database.lv3.org
+    dns_resolves_to_tailscale_ip: true
+    public_ipv4_reachable: false
   backups:
     configured: false
     blocker: missing_external_cifs_credentials
@@ -241,8 +257,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.26.0
+    current: 0.27.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.17.0
+    current: 0.18.0
     meaning: intended platform release for the actual server configuration

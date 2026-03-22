@@ -22,6 +22,12 @@ proxmox_tailscale_operator_target_guest: 10.10.10.30
 proxmox_public_ingress_tcp_ports:
   - 80
   - 443
+proxmox_tailscale_tcp_proxies:
+  - name: postgres-lv3
+    listen_address: "{{ management_tailscale_ipv4 }}"
+    listen_port: 5432
+    upstream_host: 10.10.10.50
+    upstream_port: 5432
 
 proxmox_guests:
   - vmid: 110
@@ -87,6 +93,24 @@ proxmox_guests:
       - lv3
     packages:
       - prometheus-node-exporter
+  - vmid: 150
+    name: postgres-lv3
+    role: postgres
+    ipv4: 10.10.10.50
+    cidr: 24
+    gateway4: 10.10.10.1
+    cores: 4
+    memory_mb: 8192
+    disk_gb: 96
+    tags:
+      - postgres
+      - database
+      - lv3
+    packages:
+      - acl
+      - nftables
+      - postgresql
+      - postgresql-contrib
 
 proxmox_backup_storage:
   enabled: "{{ (lookup('ansible.builtin.env', 'PROXMOX_BACKUP_CIFS_SERVER') | trim | length) > 0 }}"

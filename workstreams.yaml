@@ -118,3 +118,24 @@ workstreams:
       - docs/runbooks/deploy-docker-compose-stack.md
     ready_to_merge: false
     live_applied: false
+
+  - id: adr-0026-postgres-vm
+    adr: 0026
+    title: Dedicated PostgreSQL VM baseline
+    status: merged
+    owner: codex
+    branch: codex/adr-0025-postgres-vm
+    worktree_path: ../proxmox_florin_server-postgres-vm
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0026-postgres-vm.md
+    depends_on: []
+    conflicts_with: []
+    shared_surfaces:
+      - postgres-lv3
+      - playbooks/postgres-vm.yml
+      - roles/postgres_vm
+      - inventory/group_vars/postgres_guests.yml
+      - roles/proxmox_tailscale_proxy
+      - playbooks/database-dns.yml
+      - roles/hetzner_dns_record
+    ready_to_merge: false
+    live_applied: true

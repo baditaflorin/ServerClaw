@@ -59,6 +59,7 @@ Initial guest provisioning is now implemented and applied:
 120 docker-runtime-lv3   10.10.10.20
 130 docker-build-lv3     10.10.10.30
 140 monitoring-lv3       10.10.10.40
+150 postgres-lv3         10.10.10.50
 9000 debian13-cloud-template
 ```
 
@@ -72,6 +73,7 @@ Merged mainline automation now exists for:
 - ADR 0021 public subdomain publication at the NGINX edge
 - ADR 0022 nginx guest observability
 - ADR 0023 Docker runtime baseline
+- ADR 0026 dedicated PostgreSQL VM baseline
 
 Current live state for those merged workstreams:
 
@@ -80,6 +82,7 @@ Current live state for those merged workstreams:
 - ADR 0020 backups are still blocked on missing external CIFS target credentials
 - ADR 0022 nginx guest observability is reflected in the Grafana dashboard
 - ADR 0023 Docker runtime baseline is applied live on `10.10.10.20`
+- ADR 0026 PostgreSQL baseline is applied live on `10.10.10.50` and published privately on `database.lv3.org:5432`
 
 Other current live state:
 
@@ -144,6 +147,16 @@ json-file logging capped at 10m with 5 retained files
 ops present in the local docker group on docker-runtime-lv3
 ```
 
+The current PostgreSQL posture is:
+
+```text
+PostgreSQL running on postgres-lv3 at 10.10.10.50
+database.lv3.org resolves to the Proxmox host Tailscale IP 100.118.189.95
+database access is proxied only on Tailscale port 5432
+65.108.75.123:5432 remains closed on the public IPv4
+guest firewall only accepts proxied PostgreSQL traffic from 10.10.10.1/32
+```
+
 ## Documents
 
 - [Changelog](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/changelog.md)
@@ -160,6 +173,7 @@ ops present in the local docker group on docker-runtime-lv3
 - [Proxmox API automation runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/proxmox-api-automation.md)
 - [Monitoring stack runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/monitoring-stack.md)
 - [Configure Docker runtime runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-docker-runtime.md)
+- [Configure PostgreSQL VM runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-postgres-vm.md)
 - [Configure storage and backups runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-storage-and-backups.md)
 - [ADR 0001: Bootstrap model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0001-bootstrap-dedicated-host-with-ansible.md)
 - [ADR 0002: Target Proxmox VE 9 on Debian 13](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0002-target-proxmox-ve-9-on-debian-13.md)
@@ -186,6 +200,7 @@ ops present in the local docker group on docker-runtime-lv3
 - [ADR 0023: Docker runtime VM baseline](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0023-docker-runtime-vm-baseline.md)
 - [ADR 0024: Docker guest security baseline](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0024-docker-guest-security-baseline.md)
 - [ADR 0025: Compose-managed runtime stacks](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0025-compose-managed-runtime-stacks.md)
+- [ADR 0026: Dedicated PostgreSQL VM baseline](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0026-dedicated-postgresql-vm-baseline.md)
 
 ## Versioning
 
@@ -197,8 +212,8 @@ This repo now tracks three distinct things:
 
 Current values on `main`:
 
-- `repo_version`: `0.26.0`
-- `platform_version`: `0.17.0`
+- `repo_version`: `0.27.0`
+- `platform_version`: `0.18.0`
 - `observed_os`: `Debian 13`
 - `observed_proxmox_installed`: `true`
 - `observed_pve_manager_version`: `9.1.6`
@@ -240,6 +255,7 @@ This repository is intentionally opinionated:
 - [ADR 0014 Tailscale workstream](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0014-tailscale.md)
 - [ADR 0020 backups workstream](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0020-backups.md)
 - [ADR 0023 Docker runtime workstream](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0023-docker-runtime.md)
+- [ADR 0026 PostgreSQL workstream](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0026-postgres-vm.md)
 
 ## Planned workflow
 

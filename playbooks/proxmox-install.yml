@@ -28,6 +28,9 @@
     - role: proxmox_tailscale
       tags:
         - tailscale
+    - role: proxmox_tailscale_proxy
+      tags:
+        - tailscale
     - role: proxmox_guests
       tags:
         - guests
