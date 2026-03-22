@@ -4,7 +4,7 @@
   "applied_on": "2026-03-22",
   "recorded_on": "2026-03-22",
   "recorded_by": "codex",
-  "source_commit": "e63bd94fa4e0f82dad800d0acd4e4fe1c32ca020",
+  "source_commit": "f43aabb052a8738ff587204f336da6181fb15377",
   "repo_version_context": "0.62.0",
   "workflow_id": "converge-keycloak",
   "adr": "0056",
