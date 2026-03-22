@@ -8,7 +8,7 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
-## 0.57.0 - 2026-03-22
+## 0.59.0 - 2026-03-22
 
 - applied ADR 0057 live by provisioning the Mattermost PostgreSQL backend on `postgres-lv3`, converging the private Mattermost runtime on `docker-runtime-lv3`, and publishing operator access through the Proxmox host Tailscale proxy on port `8066`
 - hardened the Mattermost automation so bootstrap handles Mattermost's actual local `mmctl` JSON behavior, seeds the managed LV3 channels and incoming webhooks idempotently, and configures Grafana alert routing through the repo-managed webhook manifest
@@ -19,6 +19,30 @@ Platform impact:
 - Mattermost is now live on `docker-runtime-lv3` and reachable privately at `http://100.118.189.95:8066`
 - the repo-managed `lv3` team now includes the `platform-alerts`, `workflow-events`, `change-approvals`, `agent-handoffs`, and `mail-ops` collaboration channels with mirrored incoming webhook URLs under `.local/mattermost/incoming-webhooks.json`
 - Grafana on `monitoring-lv3` now carries the `lv3-mattermost-platform-alerts` contact point for repo-managed alert routing into Mattermost
+
+## 0.58.0 - 2026-03-22
+
+- applied ADR 0054 live from `main` by converging a private NetBox runtime on `docker-runtime-lv3`, provisioning its PostgreSQL backend on `postgres-lv3`, and publishing operator and agent access through the Proxmox host Tailscale proxy on port `8004`
+- hardened the NetBox automation so bootstrap token provisioning, NetBox 4.5 service-object sync, transient API retry handling, and repo-to-NetBox idempotency all rerun cleanly from the integration worktree
+- added the NetBox playbook, runtime and sync roles, controller-local secret contracts, configure-NetBox runbook, and live-apply evidence to make topology, IPAM, and governed service inventory a first-class repo-managed surface
+
+Platform impact:
+
+- NetBox is now live on `docker-runtime-lv3` and reachable privately at `http://100.118.189.95:8004`
+- `postgres-lv3` now serves the managed `netbox` database and bootstrap credentials required by the runtime
+- NetBox now contains synchronized site, host, VM, prefix, IP, and governed service inventory derived from canonical repository state, with idempotent re-sync verification
+
+## 0.57.0 - 2026-03-22
+
+- applied ADR 0052 live from `main` by adding Grafana Loki to `monitoring-lv3` and converging Grafana Alloy log shipping on `proxmox_florin` plus every managed guest
+- completed the live rollout of the corrected ADR 0053 monitoring-plane stack at the same time, so Prometheus, Tempo, and the shared OTLP collector now converge together with the new log plane
+- updated ADR 0052 and ADR 0053 implementation status, monitoring runbooks, workflow metadata, canonical stack state, and live-apply evidence to reflect the integrated logs-and-traces observability surface
+
+Platform impact:
+
+- `monitoring-lv3` now serves Grafana, InfluxDB, Loki, Prometheus, Tempo, and the shared OTLP collector as one integrated monitoring plane
+- Grafana now exposes the `Loki Logs`, `Prometheus Service Graphs`, and `Tempo` datasources from the private monitoring surface
+- verified logs now flow from the Proxmox host, `nginx-lv3`, and `docker-runtime-lv3`, while verified traces and service-graph metrics now flow through the shared OTLP path from the private mail gateway
 
 ## 0.56.0 - 2026-03-22
 

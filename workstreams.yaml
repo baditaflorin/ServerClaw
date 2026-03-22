@@ -461,7 +461,7 @@ workstreams:
   - id: adr-0052-loki-logs
     adr: "0052"
     title: Centralized log aggregation with Grafana Loki
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/adr-0052-loki-logs
     worktree_path: ../proxmox_florin_server-loki-logs
@@ -476,12 +476,12 @@ workstreams:
       - guest logs
       - container logs
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0053-tempo-traces
     adr: "0053"
     title: OpenTelemetry traces and service maps with Grafana Tempo
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0053-tempo-traces
     worktree_path: ../proxmox_florin_server-tempo-traces
@@ -496,12 +496,12 @@ workstreams:
       - internal APIs
       - workflow execution
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0054-netbox-topology
     adr: "0054"
     title: NetBox for topology, IPAM, and inventory
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/adr-0054-netbox-topology
     worktree_path: ../proxmox_florin_server-netbox-topology
@@ -514,7 +514,7 @@ workstreams:
       - IP addressing
       - ownership metadata
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0055-portainer-operations
     adr: "0055"

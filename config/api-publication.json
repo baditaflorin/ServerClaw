@@ -56,6 +56,15 @@
       "approval_notes": "Windmill administrative and workflow APIs are operator-facing private surfaces, not public application endpoints."
     },
     {
+      "id": "netbox-api",
+      "title": "NetBox API",
+      "lane": "api",
+      "lane_surface_ref": "netbox-api",
+      "publication_tier": "operator-only",
+      "reachability": "Reachable only through the Proxmox host Tailscale proxy on port 8004.",
+      "approval_notes": "This is the private visual inventory plane for operators and repo-managed sync; do not publish it through public DNS or the NGINX edge."
+    },
+    {
       "id": "portainer-api",
       "title": "Portainer API",
       "lane": "api",

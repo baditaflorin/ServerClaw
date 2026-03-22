@@ -1,0 +1,83 @@
+services:
+  netbox:
+    image: "{{ netbox_image }}"
+    restart: unless-stopped
+    user: "netbox:root"
+    env_file:
+      - "{{ netbox_env_file }}"
+    depends_on:
+      - redis
+      - redis-cache
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - curl -f http://localhost:8080/login/ || exit 1
+      start_period: 90s
+      timeout: 3s
+      interval: 15s
+    ports:
+      - "{{ netbox_server_port }}:8080"
+    volumes:
+      - netbox-media:/opt/netbox/netbox/media
+      - netbox-reports:/opt/netbox/netbox/reports
+      - netbox-scripts:/opt/netbox/netbox/scripts
+
+  netbox-worker:
+    image: "{{ netbox_image }}"
+    restart: unless-stopped
+    user: "netbox:root"
+    env_file:
+      - "{{ netbox_env_file }}"
+    depends_on:
+      netbox:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      redis-cache:
+        condition: service_started
+    command:
+      - /opt/netbox/venv/bin/python
+      - /opt/netbox/netbox/manage.py
+      - rqworker
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - ps -aux | grep -v grep | grep -q rqworker || exit 1
+      start_period: 20s
+      timeout: 3s
+      interval: 15s
+    volumes:
+      - netbox-media:/opt/netbox/netbox/media
+      - netbox-reports:/opt/netbox/netbox/reports
+      - netbox-scripts:/opt/netbox/netbox/scripts
+
+  redis:
+    image: "{{ netbox_redis_image }}"
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: "{{ netbox_redis_password }}"
+    command:
+      - /bin/sh
+      - -ec
+      - exec valkey-server --save 60 1 --loglevel warning --requirepass "$${REDIS_PASSWORD}"
+    volumes:
+      - netbox-redis:/data
+
+  redis-cache:
+    image: "{{ netbox_redis_image }}"
+    restart: unless-stopped
+    environment:
+      REDIS_CACHE_PASSWORD: "{{ netbox_redis_cache_password }}"
+    command:
+      - /bin/sh
+      - -ec
+      - exec valkey-server --save "" --appendonly no --loglevel warning --requirepass "$${REDIS_CACHE_PASSWORD}"
+    volumes:
+      - netbox-redis-cache:/data
+
+volumes:
+  netbox-media: null
+  netbox-reports: null
+  netbox-scripts: null
+  netbox-redis: null
+  netbox-redis-cache: null

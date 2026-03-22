@@ -1,11 +1,11 @@
 schema_version: 1.0.0
-repo_version: 0.57.0
-platform_version: 0.31.0
+repo_version: 0.59.0
+platform_version: 0.33.0
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
   latest_receipts:
-    monitoring: 2026-03-22-adr-0011-monitoring-live-apply
+    monitoring: 2026-03-22-adr-0052-loki-live-apply
     public_edge_publication: 2026-03-22-adr-0021-edge-publication-live-apply
     docker_runtime: 2026-03-22-adr-0023-docker-runtime-live-apply
     postgres_vm: 2026-03-22-adr-0026-postgres-vm-live-apply
@@ -24,8 +24,10 @@ live_apply_evidence:
     identity_taxonomy: 2026-03-22-adr-0046-identity-classes-live-apply
     command_catalog: 2026-03-22-adr-0048-command-catalog-live-apply
     notification_profiles: 2026-03-22-adr-0050-notification-profiles-live-apply
+    netbox: 2026-03-22-adr-0054-netbox-live-apply
     ntopng: 2026-03-22-adr-0059-ntopng-live-apply
     open_webui: 2026-03-22-adr-0060-open-webui-live-apply
+    tempo_tracing: 2026-03-22-adr-0053-tempo-traces-live-apply
 
 desired_state:
   host_id: proxmox_florin
@@ -436,8 +438,16 @@ observed_state:
     grafana_running: true
     grafana_version: 12.4.1
     influxdb_running: true
+    loki_running: true
+    prometheus_running: true
+    tempo_running: true
+    alloy_log_shipping_active: true
     grafana_internal_url: http://10.10.10.40:3000
     grafana_public_url: https://grafana.lv3.org
+    loki_internal_url: http://10.10.10.40:3100
+    prometheus_internal_url: http://10.10.10.40:9090
+    tempo_internal_url: http://10.10.10.40:3200
+    loki_datasource_name: Loki Logs
     grafana_folder_uid: lv3
     grafana_folder_title: LV3
     grafana_dashboards:
@@ -466,10 +476,29 @@ observed_state:
     influxdb_internal_url: http://10.10.10.40:8086
     proxmox_metric_server_id: influxdb-http
     proxmox_metrics_flow_verified: true
+    traces_flow_verified: true
+    prometheus_service_graph_metrics_verified: true
     nginx_stub_status_loopback_enabled: true
     nginx_guest_metrics_flow_verified: true
     docker_build_metrics_flow_verified: true
     docker_build_duration_metrics_verified: true
+    proxmox_host_log_flow_verified: true
+    nginx_log_flow_verified: true
+    docker_runtime_log_flow_verified: true
+    log_label_dimensions:
+      - host
+      - node_role
+      - environment
+      - lane
+      - source
+    log_host_labels:
+      - backup-lv3
+      - docker-build-lv3
+      - docker-runtime-lv3
+      - monitoring-lv3
+      - nginx-lv3
+      - postgres-lv3
+      - proxmox_florin
   ntopng:
     host_tailscale_proxy_url: http://100.118.189.95:3001
     local_http_url: http://127.0.0.1:3000
@@ -585,6 +614,20 @@ observed_state:
     workflow_webhook_smoke_verified: true
     grafana_contact_point_name: lv3-mattermost-platform-alerts
     grafana_contact_point_present: true
+  netbox:
+    runtime_vm: 10.10.10.20
+    postgres_backend_vm: 10.10.10.50
+    host_tailscale_proxy_url: http://100.118.189.95:8004
+    local_http_url: http://10.10.10.20:8082
+    container_running: true
+    api_token_verified: true
+    repo_sync_verified: true
+    repo_sync_idempotent: true
+    synchronized_site: LV3 Hetzner
+    synchronized_device: proxmox_florin
+    synchronized_vm_count: 6
+    synchronized_prefix_count: 2
+    synchronized_service_count: 11
   mail:
     domain: lv3.org
     hostname: mail.lv3.org
@@ -657,8 +700,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.57.0
+    current: 0.59.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.31.0
+    current: 0.33.0
     meaning: intended platform release for the actual server configuration

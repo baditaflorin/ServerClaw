@@ -722,6 +722,40 @@
         ]
       }
     },
+    "converge-netbox": {
+      "description": "Converge the private NetBox runtime, PostgreSQL backend, host-side proxy, and repo-managed inventory synchronization.",
+      "workflow_id": "converge-netbox",
+      "scope": "host_and_guest",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-netbox passes",
+        "make validate passes before the apply",
+        "The repo-to-NetBox source-of-truth boundary and private API exposure are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record PostgreSQL, runtime, proxy, and repo-sync verification together with generated bootstrap-artifact state."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the runtime, database setup, host-side proxy, or repo-managed sync verification fails.",
+          "Stop if NetBox comes up but the synchronized inventory does not match the canonical repository shape."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good NetBox runtime state before retrying.",
+          "Do not compensate for failed synchronization with manual UI drift that leaves inventory truth ambiguous."
+        ]
+      }
+    },
     "converge-open-webui": {
       "description": "Converge the private Open WebUI runtime, host-side proxy, and repo-managed bootstrap auth state.",
       "workflow_id": "converge-open-webui",

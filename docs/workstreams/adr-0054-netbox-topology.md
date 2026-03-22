@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0054](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0054-netbox-for-topology-ipam-and-inventory.md)
 - Title: Visual infrastructure inventory and IPAM plane
-- Status: ready
+- Status: live_applied
 - Branch: `codex/adr-0054-netbox-topology`
 - Worktree: `../proxmox_florin_server-netbox-topology`
 - Owner: codex
@@ -25,24 +25,36 @@
 
 - `docs/adr/0054-netbox-for-topology-ipam-and-inventory.md`
 - `docs/workstreams/adr-0054-netbox-topology.md`
+- `docs/runbooks/configure-netbox.md`
 - `docs/runbooks/plan-visual-agent-operations.md`
+- `playbooks/netbox.yml`
+- `roles/netbox_postgres/`
+- `roles/netbox_runtime/`
+- `roles/netbox_sync/`
+- `scripts/netbox_inventory_sync.py`
 - `workstreams.yaml`
 
 ## Expected Live Surfaces
 
-- a private NetBox deployment
-- synchronized site, host, VM, and network inventory views
+- private NetBox runtime on `docker-runtime-lv3`
+- PostgreSQL database `netbox` on `postgres-lv3`
+- Tailscale operator and agent entrypoint at `http://100.118.189.95:8004`
+- synchronized site, host, VM, prefix, IP, and governed service inventory views
 
 ## Verification
 
-- `ruby -e 'require "yaml"; YAML.load_file("/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml"); puts "workstreams.yaml OK"'`
-- `test -f /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0054-netbox-for-topology-ipam-and-inventory.md`
+- `make syntax-check-netbox`
+- `make converge-netbox`
+- `curl -s -o /dev/null -w '%{http_code}\n' http://100.118.189.95:8004/login/`
+- `curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/netbox/api-token.txt)" http://100.118.189.95:8004/api/virtualization/virtual-machines/?limit=20`
+- `uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/netbox_inventory_sync.py --api-url http://100.118.189.95:8004 --api-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/netbox/api-token.txt --host-vars /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml --stack /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml --lane-catalog /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/control-plane-lanes.json`
 
 ## Merge Criteria
 
-- the ADR makes the source-of-truth boundary explicit
-- topology, IPAM, and ownership scope are clearly defined
+- the repo-managed NetBox converge path applies cleanly from `main`
+- the private API, synchronized topology inventory, and idempotent re-sync path are verified live
 
 ## Notes For The Next Assistant
 
 - keep repo-to-NetBox synchronization narrower than full bidirectional sync at first
+- prefer importing new inventory classes from canonical repo metadata before allowing direct UI-side edits
