@@ -8,6 +8,22 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.50.0 - 2026-03-22
+
+- added ADRs 0072–0081 covering human navigation, deployment lifecycle, DRY engineering, and production security hardening
+- defined staging and production environment topology (ADR 0072) with a second internal bridge `vmbr20` and disposable staging VMs
+- defined environment promotion gate (ADR 0073) — Windmill `deploy-and-promote` workflow with staging receipt, health-check gate, and operator approval before any production change
+- defined platform operations portal (ADR 0074) — generated static site at `ops.lv3.org` answering "where does everything live?" with service map, VM inventory, DNS map, runbook index, and ADR log
+- defined service capability catalog (ADR 0075) — `config/service-capability-catalog.json` as the single source of truth for every service: URL, VM, health probe, images, secrets, runbook
+- defined subdomain governance model (ADR 0076) — catalog-backed naming, TLS provisioning rules, and `make provision-subdomain` automation
+- defined Compose runtime secrets injection (ADR 0077) — OpenBao Agent sidecar pattern replaces `.env` files with RAM-only `tmpfs` delivery; secrets rotate live without container restarts
+- defined service scaffold generator (ADR 0078) — `make scaffold-service` creates all 12 artifacts for a new service in one command
+- defined playbook decomposition model (ADR 0079) — group playbooks, shared preflight/post-verify tasks, and full environment-awareness via `--extra-vars "env=staging"`
+- defined maintenance window protocol (ADR 0080) — NATS KV-backed windows with multi-surface suppression; integrated into the deploy pipeline to eliminate planned-outage alert noise
+- defined deployment history portal (ADR 0081) — generated `changelog.lv3.org` timeline from receipts, promotions, and audit events
+- added 10 matching workstream docs and updated `workstreams.yaml` with all new workstream entries
+- added roadmap runbook `docs/runbooks/plan-human-navigation-and-deployment-lifecycle.md` with dependency graph, parallel delivery lanes, new make targets, and success criteria
+
 ## 0.49.0 - 2026-03-22
 
 - applied ADR 0047 live from `main` by proving short-lived `step-ca` SSH certificates for routine operator access and by enforcing internal mTLS on the private OpenBao API

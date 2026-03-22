@@ -876,3 +876,228 @@ workstreams:
       - Open WebUI daily digest
     ready_to_merge: false
     live_applied: false
+
+  - id: adr-0072-staging-environment
+    adr: "0072"
+    title: Staging and production environment topology
+    status: ready
+    owner: codex
+    branch: codex/adr-0072-staging-environment
+    worktree_path: ../proxmox_florin_server-staging-environment
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0072-staging-environment.md
+    depends_on:
+      - adr-0063-platform-vars-library
+      - adr-0042-step-ca
+      - adr-0043-openbao
+    conflicts_with: []
+    shared_surfaces:
+      - versions/stack.yaml
+      - inventory/group_vars/platform.yml
+      - Proxmox vmbr20 bridge
+      - inventory/staging/
+      - filter_plugins/platform_facts.py
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0073-promotion-pipeline
+    adr: "0073"
+    title: Environment promotion gate and deployment pipeline
+    status: ready
+    owner: codex
+    branch: codex/adr-0073-promotion-pipeline
+    worktree_path: ../proxmox_florin_server-promotion-pipeline
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0073-promotion-pipeline.md
+    depends_on:
+      - adr-0072-staging-environment
+      - adr-0044-windmill
+      - adr-0048-command-catalog
+      - adr-0064-health-probe-contracts
+      - adr-0066-mutation-audit-log
+    conflicts_with: []
+    shared_surfaces:
+      - config/command-catalog.json
+      - receipts/live-applies/staging/
+      - receipts/promotions/
+      - Windmill deploy-and-promote workflow
+      - Makefile
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0074-ops-portal
+    adr: "0074"
+    title: Platform operations portal
+    status: ready
+    owner: codex
+    branch: codex/adr-0074-ops-portal
+    worktree_path: ../proxmox_florin_server-ops-portal
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0074-ops-portal.md
+    depends_on:
+      - adr-0075-service-capability-catalog
+      - adr-0076-subdomain-governance
+      - adr-0056-keycloak-sso
+    conflicts_with: []
+    shared_surfaces:
+      - scripts/generate_ops_portal.py
+      - build/ops-portal/
+      - NGINX edge config
+      - ops.lv3.org
+      - Makefile
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0075-service-capability-catalog
+    adr: "0075"
+    title: Service capability catalog
+    status: ready
+    owner: codex
+    branch: codex/adr-0075-service-capability-catalog
+    worktree_path: ../proxmox_florin_server-service-capability-catalog
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0075-service-capability-catalog.md
+    depends_on:
+      - adr-0064-health-probe-contracts
+      - adr-0068-container-image-policy
+      - adr-0065-secret-rotation-automation
+    conflicts_with: []
+    shared_surfaces:
+      - config/service-capability-catalog.json
+      - docs/schema/service-capability-catalog.schema.json
+      - scripts/validate_service_catalog.py
+      - make validate
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0076-subdomain-governance
+    adr: "0076"
+    title: Subdomain governance and DNS lifecycle
+    status: ready
+    owner: codex
+    branch: codex/adr-0076-subdomain-governance
+    worktree_path: ../proxmox_florin_server-subdomain-governance
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0076-subdomain-governance.md
+    depends_on:
+      - adr-0042-step-ca
+      - adr-0072-staging-environment
+    conflicts_with: []
+    shared_surfaces:
+      - config/subdomain-catalog.json
+      - roles/hetzner_dns_record
+      - roles/nginx_edge_publication
+      - Makefile
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0077-compose-secrets-injection
+    adr: "0077"
+    title: Compose runtime secrets injection via OpenBao agent
+    status: ready
+    owner: codex
+    branch: codex/adr-0077-compose-secrets-injection
+    worktree_path: ../proxmox_florin_server-compose-secrets-injection
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0077-compose-secrets-injection.md
+    depends_on:
+      - adr-0043-openbao
+      - adr-0025-docker-compose-stacks
+      - adr-0047-short-lived-creds
+      - adr-0065-secret-rotation-automation
+    conflicts_with: []
+    shared_surfaces:
+      - roles/docker_compose_stack
+      - all Compose stack templates on docker-runtime-lv3
+      - config/image-catalog.json
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0078-service-scaffold
+    adr: "0078"
+    title: Service scaffold generator
+    status: ready
+    owner: codex
+    branch: codex/adr-0078-service-scaffold
+    worktree_path: ../proxmox_florin_server-service-scaffold
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0078-service-scaffold.md
+    depends_on:
+      - adr-0062-role-composability
+      - adr-0075-service-capability-catalog
+      - adr-0076-subdomain-governance
+      - adr-0077-compose-secrets-injection
+    conflicts_with: []
+    shared_surfaces:
+      - scripts/scaffold_service.py
+      - roles/_template/
+      - all catalog files
+      - Makefile
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0079-playbook-decomposition
+    adr: "0079"
+    title: Playbook decomposition and shared execution model
+    status: ready
+    owner: codex
+    branch: codex/adr-0079-playbook-decomposition
+    worktree_path: ../proxmox_florin_server-playbook-decomposition
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0079-playbook-decomposition.md
+    depends_on:
+      - adr-0062-role-composability
+      - adr-0063-platform-vars-library
+      - adr-0072-staging-environment
+      - adr-0064-health-probe-contracts
+      - adr-0066-mutation-audit-log
+    conflicts_with: []
+    shared_surfaces:
+      - playbooks/
+      - playbooks/tasks/
+      - playbooks/groups/
+      - Makefile
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0080-maintenance-windows
+    adr: "0080"
+    title: Maintenance window and change suppression protocol
+    status: ready
+    owner: codex
+    branch: codex/adr-0080-maintenance-windows
+    worktree_path: ../proxmox_florin_server-maintenance-windows
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0080-maintenance-windows.md
+    depends_on:
+      - adr-0058-nats-event-bus
+      - adr-0057-mattermost-chatops
+      - adr-0044-windmill
+      - adr-0071-agent-observation-loop
+      - adr-0027-uptime-kuma
+    conflicts_with: []
+    shared_surfaces:
+      - NATS KV maintenance-windows bucket
+      - config/command-catalog.json
+      - Uptime Kuma API
+      - Grafana alert API
+      - Makefile
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0081-changelog-portal
+    adr: "0081"
+    title: Platform changelog and deployment history portal
+    status: ready
+    owner: codex
+    branch: codex/adr-0081-changelog-portal
+    worktree_path: ../proxmox_florin_server-changelog-portal
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0081-changelog-portal.md
+    depends_on:
+      - adr-0074-ops-portal
+      - adr-0073-promotion-pipeline
+      - adr-0066-mutation-audit-log
+      - adr-0052-loki-logs
+      - adr-0075-service-capability-catalog
+    conflicts_with: []
+    shared_surfaces:
+      - scripts/generate_changelog_portal.py
+      - build/changelog-portal/
+      - NGINX edge config
+      - changelog.lv3.org
+      - receipts/
+      - changelog.md
+      - config/agent-tool-registry.json
+    ready_to_merge: false
+    live_applied: false
