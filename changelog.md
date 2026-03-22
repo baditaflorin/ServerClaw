@@ -8,6 +8,18 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.50.0 - 2026-03-22
+
+- applied ADR 0054 live from `main` by converging a private NetBox runtime on `docker-runtime-lv3`, provisioning its PostgreSQL backend on `postgres-lv3`, and publishing operator and agent access through the Proxmox host Tailscale proxy on port `8004`
+- hardened the NetBox automation so bootstrap token provisioning, NetBox 4.5 service-object sync, transient API retry handling, and repo-to-NetBox idempotency all rerun cleanly from the integration worktree
+- added the NetBox playbook, runtime and sync roles, controller-local secret contracts, configure-NetBox runbook, and live-apply evidence to make topology, IPAM, and governed service inventory a first-class repo-managed surface
+
+Platform impact:
+
+- NetBox is now live on `docker-runtime-lv3` and reachable privately at `http://100.118.189.95:8004`
+- `postgres-lv3` now serves the managed `netbox` database and bootstrap credentials required by the runtime
+- NetBox now contains synchronized site, host, VM, prefix, IP, and governed service inventory derived from canonical repository state, with idempotent re-sync verification
+
 ## 0.49.0 - 2026-03-22
 
 - applied ADR 0047 live from `main` by proving short-lived `step-ca` SSH certificates for routine operator access and by enforcing internal mTLS on the private OpenBao API

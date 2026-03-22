@@ -501,7 +501,7 @@ workstreams:
   - id: adr-0054-netbox-topology
     adr: "0054"
     title: NetBox for topology, IPAM, and inventory
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/adr-0054-netbox-topology
     worktree_path: ../proxmox_florin_server-netbox-topology
@@ -514,7 +514,7 @@ workstreams:
       - IP addressing
       - ownership metadata
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0055-portainer-operations
     adr: "0055"
