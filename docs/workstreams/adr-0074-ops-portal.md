@@ -55,9 +55,9 @@
 - all six portal views render from repo-managed inputs
 - portal generation is wired into repo validation and status generation
 - generated-static edge publication support is present without claiming live rollout
-- ADR and workstream metadata show repository implementation in release `0.68.0`
+- ADR and workstream metadata show repository implementation in release `0.69.0`
 
 ## Notes For The Next Assistant
 
-- repository implementation is merged by `0.68.0`
+- repository implementation is merged by `0.69.0`
 - a later live apply from `main` should publish `ops.lv3.org`, verify TLS, and record the first platform version where it becomes true

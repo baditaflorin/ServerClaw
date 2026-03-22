@@ -52,9 +52,9 @@
 - live-applied services are represented in the catalog
 - monitor names, runbooks, and topology links validate cleanly
 - validation is wired into the repository gate
-- ADR metadata shows repository implementation in release `0.68.0`
+- ADR metadata shows repository implementation in release `0.69.0`
 
 ## Notes For The Next Assistant
 
-- repository implementation is merged by `0.68.0`
+- repository implementation is merged by `0.69.0`
 - image and secret catalog references remain optional until those dedicated catalogs become canonical on `main`
