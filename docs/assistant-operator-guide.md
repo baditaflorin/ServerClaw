@@ -9,7 +9,7 @@ This repository manages one Hetzner dedicated server that runs:
 - Debian 13 as the base operating system
 - Proxmox VE 9 as the hypervisor
 - an internal guest network on `10.10.10.0/24`
-- four initial VMs for ingress, Docker runtime, Docker builds, and monitoring
+- six managed VMs for ingress, Docker runtime, Docker builds, monitoring, PostgreSQL, and backups
 
 The repository is not only documentation. It is intended to be the operating contract for the live platform.
 
@@ -82,6 +82,7 @@ Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/M
 - `make workflows`
 - `make workflow-info WORKFLOW=converge-monitoring`
 - `make validate`
+- `make validate-data-models`
 - `make receipts`
 - `make preflight WORKFLOW=converge-monitoring`
 - `make syntax-check`

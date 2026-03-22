@@ -10,6 +10,18 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 - use this section on `main` for merged notes that have not yet been cut into a numbered release
 
+## 0.40.0 - 2026-03-22
+
+- implemented ADR 0037 to add schema validation for the repository's canonical machine-readable data models
+- added `scripts/validate_repository_data_models.py` to validate `versions/stack.yaml`, canonical host vars, workflow and secret manifests, Uptime Kuma monitors, and live-apply receipts
+- added `make validate-data-models` and integrated the new schema stage into `make validate`
+- tightened `versions/stack.yaml` so the managed guest fleet and backup state now match the canonical host inventory and current repository truth
+- updated the validation runbook, repository map, assistant guide, and ADR metadata to document the schema-backed contract
+
+Platform impact:
+
+- no direct live platform change; this release hardens the repository contract and canonical state validation only
+
 ## 0.39.0 - 2026-03-22
 
 - merged the mail platform planning workstream and renumbered its decision to ADR 0041 during integration because ADR 0040 was already assigned on `main`

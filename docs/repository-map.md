@@ -59,6 +59,7 @@ These files are integration-owned and should normally be edited only during merg
 - [scripts/workflow_catalog.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/workflow_catalog.py): validates and renders the canonical workflow execution catalog
 - [scripts/preflight_controller_local.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/preflight_controller_local.py): checks controller-local secret and environment prerequisites for a named workflow
 - [scripts/live_apply_receipts.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/live_apply_receipts.py): validates and renders structured live-apply receipts
+- [scripts/validate_repository_data_models.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_repository_data_models.py): validates canonical repository data models and cross-checks stack state against host vars
 - [scripts/validate_repo.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_repo.sh): repository validation entry point behind `make validate`
 - [filter_plugins/service_topology.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/filter_plugins/service_topology.py): derives edge publication and DNS artifacts from the canonical service topology catalog
 - [playbooks/site.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/site.yml): main Ansible entry point for the Proxmox host
@@ -76,6 +77,7 @@ These files are integration-owned and should normally be edited only during merg
 - [inventory/host_vars/proxmox_florin.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml): per-host topology, guest definitions, and the canonical `lv3_service_topology` catalog
 - [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json): canonical machine-readable workflow catalog for preferred entry points, preflight requirements, validation targets, and runbook ownership
 - [config/controller-local-secrets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/controller-local-secrets.json): machine-readable controller-local secret manifest for repo workflows and `.local/` prerequisites
+- [config/uptime-kuma/monitors.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/uptime-kuma/monitors.json): canonical repo-managed Uptime Kuma monitor definitions
 - [receipts/live-applies](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/live-applies): structured receipt set for historically applied and verified live changes
 
 ### Reusable automation units

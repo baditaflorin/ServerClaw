@@ -9,7 +9,7 @@ ACTION ?= list-monitors
 UPTIME_KUMA_ARGS ?=
 RECEIPT ?=
 
-.PHONY: validate validate-ansible-syntax validate-yaml validate-ansible-lint validate-shell validate-json receipts receipt-info workflows workflow-info preflight syntax-check syntax-check-monitoring syntax-check-docker-runtime syntax-check-backup-vm syntax-check-uptime-kuma install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-monitoring converge-docker-runtime converge-postgres-vm deploy-uptime-kuma uptime-kuma-manage configure-backups configure-backup-vm database-dns start-workstream
+.PHONY: validate validate-ansible-syntax validate-yaml validate-ansible-lint validate-shell validate-json validate-data-models receipts receipt-info workflows workflow-info preflight syntax-check syntax-check-monitoring syntax-check-docker-runtime syntax-check-backup-vm syntax-check-uptime-kuma install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-monitoring converge-docker-runtime converge-postgres-vm deploy-uptime-kuma uptime-kuma-manage configure-backups configure-backup-vm database-dns start-workstream
 
 validate:
 	$(REPO_ROOT)/scripts/validate_repo.sh
@@ -28,6 +28,9 @@ validate-shell:
 
 validate-json:
 	$(REPO_ROOT)/scripts/validate_repo.sh json
+
+validate-data-models:
+	$(REPO_ROOT)/scripts/validate_repo.sh data-models
 
 receipts:
 	$(REPO_ROOT)/scripts/live_apply_receipts.py --list

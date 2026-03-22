@@ -18,10 +18,11 @@
       "implementation_refs": [
         "Makefile",
         "scripts/validate_repo.sh",
+        "scripts/validate_repository_data_models.py",
         ".github/workflows/validate.yml"
       ],
       "outputs": [
-        "Repository validation result across syntax, YAML, Ansible lint, shell, and JSON checks."
+        "Repository validation result across syntax, YAML, Ansible lint, shell, JSON, and canonical data-model checks."
       ],
       "verification_commands": [
         "make validate"

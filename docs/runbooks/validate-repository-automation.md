@@ -21,12 +21,14 @@ This is the required minimum gate before merging automation changes to `main`.
 - playbooks and roles pass the repo-managed `ansible-lint` policy
 - shell scripts pass `shellcheck`
 - repo-managed JSON artifacts pass `jq empty`
+- canonical repository data models pass schema validation
 - the workflow catalog and controller-local secret manifest cross-reference cleanly
 - structured live-apply receipts reference valid workflows, files, and git commits
 
 ## Tooling Model
 
 - validation uses `uvx` to run `ansible-core`, `ansible-lint`, and `yamllint`
+- validation uses `uvx --from pyyaml python ...` for the repository data-model validator
 - required Ansible collections are installed from [collections/requirements.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/requirements.yml)
 - validation collections are cached under `.ansible/validation/collections`
 - CI runs the same contract through `make validate`
@@ -41,7 +43,17 @@ make validate-yaml
 make validate-ansible-lint
 make validate-shell
 make validate-json
+make validate-data-models
 ```
+
+`make validate-data-models` validates the canonical machine-readable repository state, including:
+
+- [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml)
+- [inventory/host_vars/proxmox_florin.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml)
+- [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json)
+- [config/controller-local-secrets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/controller-local-secrets.json)
+- [config/uptime-kuma/monitors.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/uptime-kuma/monitors.json)
+- [receipts/live-applies](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/live-applies)
 
 ## Troubleshooting
 

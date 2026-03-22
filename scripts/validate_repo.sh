@@ -16,7 +16,7 @@ export ANSIBLE_COLLECTIONS_PATH="$ANSIBLE_COLLECTIONS_DIR"
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/validate_repo.sh [all|ansible-syntax|yaml|ansible-lint|shell|json]...
+  scripts/validate_repo.sh [all|ansible-syntax|yaml|ansible-lint|shell|json|data-models]...
 
 Examples:
   scripts/validate_repo.sh
@@ -84,8 +84,11 @@ validate_json() {
   while IFS= read -r -d '' json_file; do
     jq empty "$json_file"
   done < <(find "$REPO_ROOT/config" "$REPO_ROOT/receipts" -type f -name '*.json' -print0)
-  "$REPO_ROOT/scripts/workflow_catalog.py" --validate >/dev/null
-  "$REPO_ROOT/scripts/live_apply_receipts.py" --validate >/dev/null
+}
+
+validate_data_models() {
+  echo "Repository data model validation"
+  uvx --from pyyaml python "$REPO_ROOT/scripts/validate_repository_data_models.py" --validate >/dev/null
 }
 
 if [[ $# -eq 0 ]]; then
@@ -100,6 +103,7 @@ for stage in "$@"; do
       validate_ansible_lint
       validate_shell
       validate_json
+      validate_data_models
       ;;
     ansible-syntax)
       validate_ansible_syntax
@@ -115,6 +119,9 @@ for stage in "$@"; do
       ;;
     json)
       validate_json
+      ;;
+    data-models)
+      validate_data_models
       ;;
     -h|--help)
       usage

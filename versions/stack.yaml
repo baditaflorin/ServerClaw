@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.38.0
+repo_version: 0.40.0
 platform_version: 0.19.0
 
 live_apply_evidence:
@@ -37,6 +37,7 @@ desired_state:
     docker_build_vm: 10.10.10.30
     monitoring_vm: 10.10.10.40
     postgres_vm: 10.10.10.50
+    backup_vm: 10.10.10.60
   guest_provisioning:
     template_vmid: 9000
     template_name: debian13-cloud-template
@@ -46,6 +47,7 @@ desired_state:
       docker_build_vm: 130
       monitoring_vm: 140
       postgres_vm: 150
+      backup_vm: 160
   traffic_model:
     guest_default_gateway: 10.10.10.1
     guest_outbound_via_host_nat: true
@@ -197,6 +199,10 @@ observed_state:
         name: postgres-lv3
         ipv4: 10.10.10.50
         running: true
+      - vmid: 160
+        name: backup-lv3
+        ipv4: 10.10.10.60
+        running: true
     access:
       ssh_proxyjump_via_proxmox_host_working: true
   monitoring:
@@ -276,8 +282,10 @@ observed_state:
     dns_resolves_to_tailscale_ip: true
     public_ipv4_reachable: false
   backups:
-    configured: false
-    blocker: missing_external_cifs_credentials
+    configured: true
+    mode: snapshot
+    storage_id: lv3-backup-pbs
+    legacy_external_cifs_path_blocked: true
 
 release_tracks:
   delivery_model:
@@ -286,7 +294,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.28.0
+    current: 0.40.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.19.0
