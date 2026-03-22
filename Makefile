@@ -12,7 +12,7 @@ RECEIPT ?=
 COMMAND ?=
 SURFACE ?=
 
-.PHONY: validate validate-ansible-syntax validate-yaml validate-ansible-lint validate-shell validate-json validate-data-models generate-status-docs validate-generated-docs receipts receipt-info workflows workflow-info commands command-info lanes lane-info api-publication api-publication-info preflight syntax-check syntax-check-monitoring syntax-check-ntopng syntax-check-docker-runtime syntax-check-backup-vm syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-openbao syntax-check-step-ca syntax-check-windmill syntax-check-netbox syntax-check-open-webui syntax-check-portainer install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-monitoring converge-ntopng converge-docker-runtime converge-postgres-vm converge-mail-platform converge-openbao converge-step-ca converge-windmill converge-netbox converge-open-webui converge-portainer deploy-uptime-kuma uptime-kuma-manage portainer-manage configure-backups configure-backup-vm database-dns start-workstream
+.PHONY: validate validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-shell validate-json validate-data-models generate-status-docs validate-generated-docs receipts receipt-info workflows workflow-info commands command-info lanes lane-info api-publication api-publication-info preflight syntax-check syntax-check-monitoring syntax-check-ntopng syntax-check-docker-runtime syntax-check-backup-vm syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-openbao syntax-check-step-ca syntax-check-windmill syntax-check-netbox syntax-check-open-webui syntax-check-portainer install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-monitoring converge-ntopng converge-docker-runtime converge-postgres-vm converge-mail-platform converge-openbao converge-step-ca converge-windmill converge-netbox converge-open-webui converge-portainer deploy-uptime-kuma uptime-kuma-manage portainer-manage configure-backups configure-backup-vm database-dns start-workstream
 
 validate:
 	$(REPO_ROOT)/scripts/validate_repo.sh
@@ -22,6 +22,9 @@ validate-ansible-syntax:
 
 validate-yaml:
 	$(REPO_ROOT)/scripts/validate_repo.sh yaml
+
+validate-role-argument-specs:
+	$(REPO_ROOT)/scripts/validate_repo.sh role-argument-specs
 
 validate-ansible-lint:
 	$(REPO_ROOT)/scripts/validate_repo.sh ansible-lint

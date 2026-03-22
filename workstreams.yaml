@@ -679,7 +679,7 @@ workstreams:
       - filter_plugins/
       - make validate
       - role argument specs
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: false
 
   - id: adr-0063-platform-vars-library

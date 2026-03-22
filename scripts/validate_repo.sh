@@ -16,11 +16,11 @@ export ANSIBLE_COLLECTIONS_PATH="$ANSIBLE_COLLECTIONS_DIR"
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/validate_repo.sh [all|ansible-syntax|yaml|ansible-lint|shell|json|data-models|generated-docs]...
+  scripts/validate_repo.sh [all|ansible-syntax|yaml|role-argument-specs|ansible-lint|shell|json|data-models|generated-docs]...
 
 Examples:
   scripts/validate_repo.sh
-  scripts/validate_repo.sh ansible-syntax ansible-lint
+  scripts/validate_repo.sh ansible-syntax role-argument-specs ansible-lint
 EOF
 }
 
@@ -86,7 +86,7 @@ validate_ansible_lint() {
     tracked_files 'playbooks/*.yml' 'roles/*/*' |
       awk -F/ '
         $1 == "playbooks" && $NF ~ /\.yml$/ { print; next }
-        $1 == "roles" && $2 != "" { print $1 "/" $2 }
+        $1 == "roles" && $2 != "" && $2 != "_template" { print $1 "/" $2 }
       ' |
       awk '!seen[$0]++'
   )
@@ -97,6 +97,10 @@ validate_ansible_lint() {
     cd "$REPO_ROOT"
     "${ANSIBLE_LINT_CMD[@]}" "${lint_targets[@]}"
   )
+}
+
+validate_role_argument_specs() {
+  "$REPO_ROOT/scripts/check_role_argument_specs.sh"
 }
 
 validate_shell() {
@@ -144,6 +148,7 @@ for stage in "$@"; do
     all)
       validate_ansible_syntax
       validate_yaml
+      validate_role_argument_specs
       validate_ansible_lint
       validate_shell
       validate_json
@@ -155,6 +160,9 @@ for stage in "$@"; do
       ;;
     yaml)
       validate_yaml
+      ;;
+    role-argument-specs)
+      validate_role_argument_specs
       ;;
     ansible-lint)
       validate_ansible_lint

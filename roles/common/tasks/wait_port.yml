@@ -1,0 +1,17 @@
+---
+- name: Validate common wait_port entrypoint inputs
+  ansible.builtin.assert:
+    that:
+      - common_wait_port_port | int > 0
+      - common_wait_port_timeout | int > 0
+      - common_wait_port_delay | int >= 0
+    fail_msg: "common.wait_port requires a positive TCP port and timeout."
+    quiet: true
+
+- name: Wait for the managed TCP listener
+  ansible.builtin.wait_for:
+    host: "{{ common_wait_port_host }}"
+    port: "{{ common_wait_port_port }}"
+    delay: "{{ common_wait_port_delay }}"
+    timeout: "{{ common_wait_port_timeout }}"
+    state: "{{ common_wait_port_state }}"

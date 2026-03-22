@@ -1,0 +1,9 @@
+---
+- name: Validate template role inputs
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: assert_vars
+  vars:
+    common_assert_vars_required:
+      - example_role_required_value
+    common_assert_vars_fail_msg: "Replace the template argument spec and task validation with real role inputs."
