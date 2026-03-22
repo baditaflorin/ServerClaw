@@ -214,3 +214,24 @@ workstreams:
       - roles/monitoring_vm
     ready_to_merge: false
     live_applied: false
+
+  - id: adr-0041-email-platform
+    adr: "0041"
+    title: Dockerized mail platform with API, Grafana telemetry, and failover delivery
+    status: merged
+    owner: codex
+    branch: codex/adr-0040-email-platform
+    worktree_path: ../proxmox_florin_server-email-platform
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0041-email-platform.md
+    depends_on:
+      - adr-0011-monitoring
+      - adr-0023-docker-runtime
+    conflicts_with: []
+    shared_surfaces:
+      - docker-runtime-lv3
+      - monitoring-lv3
+      - mail transport and DNS
+      - Stalwart management API
+      - Grafana mail dashboards
+    ready_to_merge: false
+    live_applied: false
