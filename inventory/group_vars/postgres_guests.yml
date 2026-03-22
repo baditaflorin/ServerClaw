@@ -1,0 +1,3 @@
+---
+postgres_vm_client_allowed_sources_extra:
+  - "{{ (hostvars['proxmox_florin'].proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}/32"

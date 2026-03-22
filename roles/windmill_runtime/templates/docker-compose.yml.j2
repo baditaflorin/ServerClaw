@@ -1,0 +1,67 @@
+services:
+  windmill_server:
+    image: ${WM_IMAGE}
+    restart: unless-stopped
+    ports:
+      - "{{ windmill_server_port }}:8000"
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      MODE: server
+      BASE_URL: ${BASE_URL}
+      SUPERADMIN_SECRET: ${SUPERADMIN_SECRET}
+      SERVER_BIND_ADDR: 0.0.0.0
+    volumes:
+      - worker_logs:/tmp/windmill/logs
+
+  windmill_worker:
+    image: ${WM_IMAGE}
+    restart: unless-stopped
+    privileged: true
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      MODE: worker
+      WORKER_GROUP: default
+      NUM_WORKERS: "{{ windmill_worker_count }}"
+      FAVOR_UNSHARE_PID: "true"
+    depends_on:
+      - windmill_server
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - worker_dependency_cache:/tmp/windmill/cache
+      - worker_logs:/tmp/windmill/logs
+
+  windmill_worker_native:
+    image: ${WM_IMAGE}
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      MODE: worker
+      WORKER_GROUP: native
+      NATIVE_MODE: "true"
+      NUM_WORKERS: "{{ windmill_native_worker_count }}"
+      SLEEP_QUEUE: "200"
+    depends_on:
+      - windmill_server
+    volumes:
+      - worker_logs:/tmp/windmill/logs
+
+  windmill_extra:
+    image: ${WM_EXTRA_IMAGE}
+    restart: unless-stopped
+    environment:
+      ENABLE_LSP: "true"
+      ENABLE_MULTIPLAYER: "false"
+      ENABLE_DEBUGGER: "true"
+      DEBUGGER_PORT: "3003"
+      ENABLE_NSJAIL: "false"
+      REQUIRE_SIGNED_DEBUG_REQUESTS: "false"
+      WINDMILL_BASE_URL: http://windmill_server:8000
+    depends_on:
+      - windmill_server
+    volumes:
+      - lsp_cache:/pyls/.cache
+
+volumes:
+  worker_dependency_cache: null
+  worker_logs: null
+  lsp_cache: null

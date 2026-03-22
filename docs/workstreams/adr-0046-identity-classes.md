@@ -15,6 +15,7 @@
 - define the identity classes used across the platform
 - remove ambiguity around human, service, agent, and break-glass credentials
 - give future access reviews a stable vocabulary
+- encode the taxonomy in canonical repository state and validation
 
 ## Non-Goals
 
@@ -25,24 +26,34 @@
 
 - `docs/adr/0046-identity-classes-for-humans-services-and-agents.md`
 - `docs/workstreams/adr-0046-identity-classes.md`
+- `docs/runbooks/identity-taxonomy-and-managed-principals.md`
 - `docs/runbooks/plan-agentic-control-plane.md`
+- `docs/repository-map.md`
+- `docs/assistant-operator-guide.md`
+- `scripts/validate_repository_data_models.py`
+- `versions/stack.yaml`
 - `workstreams.yaml`
 
 ## Expected Live Surfaces
 
+- no direct live change in this workstream
 - consistent naming and scoping rules across future credentials
 - clearer ownership for human, service, and agent access
 
 ## Verification
 
+- `make validate-data-models`
+- `make validate-generated-docs`
 - `ruby -e 'require "yaml"; YAML.load_file("/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml"); puts "workstreams.yaml OK"'`
 - `test -f /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0046-identity-classes-for-humans-services-and-agents.md`
 
 ## Merge Criteria
 
 - the ADR defines the four identity classes and required metadata
+- the taxonomy is represented in canonical state and enforced in validation
 - the workstream records where the taxonomy affects future integrations
 
 ## Notes For The Next Assistant
 
 - use this taxonomy when naming future API users, mail senders, and workflow principals
+- shared `ops` and `root` SSH key material is now explicit debt; ADR 0047 should remove that overlap instead of ignoring it

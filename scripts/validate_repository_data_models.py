@@ -8,7 +8,9 @@ import re
 import sys
 from typing import Any
 
+from command_catalog import load_command_catalog, validate_command_catalog
 from controller_automation_toolkit import REPO_ROOT, emit_cli_error, load_yaml, repo_path
+from control_plane_lanes import load_lane_catalog
 from live_apply_receipts import RECEIPTS_DIR, iter_receipt_paths, validate_receipts
 from workflow_catalog import (
     load_secret_manifest,
@@ -39,6 +41,14 @@ DNS_RECORD_TYPES = {"A", "AAAA", "CNAME"}
 EXTRA_DNS_RECORD_TYPES = {"A", "AAAA", "CNAME", "MX", "TXT"}
 EDGE_KINDS = {"static", "proxy"}
 MONITOR_TYPES = {"http", "port"}
+IDENTITY_CLASSES = {"human_operator", "service", "agent", "break_glass"}
+IDENTITY_REQUIRED_METADATA = {
+    "owner",
+    "purpose",
+    "scope_boundary",
+    "rotation_or_expiry",
+    "credential_storage",
+}
 
 
 def require_mapping(value: Any, path: str) -> dict:
@@ -71,6 +81,15 @@ def require_int(value: Any, path: str, minimum: int | None = None) -> int:
     if minimum is not None and value < minimum:
         raise ValueError(f"{path} must be >= {minimum}")
     return value
+
+
+def require_int_or_template(value: Any, path: str, minimum: int | None = None) -> int | str:
+    if isinstance(value, str):
+        value = require_str(value, path)
+        if value.startswith("{{") and value.endswith("}}"):
+            return value
+        raise ValueError(f"{path} must be an integer or a Jinja template expression")
+    return require_int(value, path, minimum)
 
 
 def require_semver(value: Any, path: str) -> str:
@@ -362,9 +381,13 @@ def validate_host_vars() -> dict[str, Any]:
         proxy = require_mapping(proxy, f"host_vars.proxmox_tailscale_tcp_proxies[{index}]")
         require_hostname(proxy.get("name"), f"host_vars.proxmox_tailscale_tcp_proxies[{index}].name")
         require_str(proxy.get("listen_address"), f"host_vars.proxmox_tailscale_tcp_proxies[{index}].listen_address")
-        require_int(proxy.get("listen_port"), f"host_vars.proxmox_tailscale_tcp_proxies[{index}].listen_port", 1)
+        require_int_or_template(
+            proxy.get("listen_port"), f"host_vars.proxmox_tailscale_tcp_proxies[{index}].listen_port", 1
+        )
         require_ipv4(proxy.get("upstream_host"), f"host_vars.proxmox_tailscale_tcp_proxies[{index}].upstream_host")
-        require_int(proxy.get("upstream_port"), f"host_vars.proxmox_tailscale_tcp_proxies[{index}].upstream_port", 1)
+        require_int_or_template(
+            proxy.get("upstream_port"), f"host_vars.proxmox_tailscale_tcp_proxies[{index}].upstream_port", 1
+        )
 
     if "mail_platform_dns_records" in host_vars:
         validate_extra_dns_records(host_vars.get("mail_platform_dns_records"), "host_vars.mail_platform_dns_records")
@@ -431,6 +454,182 @@ def validate_uptime_monitors() -> None:
         if name in names:
             raise ValueError(f"duplicate monitor name in config/uptime-kuma/monitors.json: {name}")
         names.add(name)
+
+
+def validate_identity_taxonomy(
+    desired_state: dict[str, Any],
+    observed_state: dict[str, Any],
+) -> None:
+    identity_taxonomy = require_mapping(
+        desired_state.get("identity_taxonomy"), "versions/stack.yaml.desired_state.identity_taxonomy"
+    )
+    classes = require_mapping(
+        identity_taxonomy.get("classes"), "versions/stack.yaml.desired_state.identity_taxonomy.classes"
+    )
+    if set(classes.keys()) != IDENTITY_CLASSES:
+        raise ValueError(
+            "versions/stack.yaml.desired_state.identity_taxonomy.classes must define exactly the four identity classes"
+        )
+    for class_name in sorted(IDENTITY_CLASSES):
+        class_def = require_mapping(
+            classes.get(class_name),
+            f"versions/stack.yaml.desired_state.identity_taxonomy.classes.{class_name}",
+        )
+        require_str(
+            class_def.get("description"),
+            f"versions/stack.yaml.desired_state.identity_taxonomy.classes.{class_name}.description",
+        )
+        require_str(
+            class_def.get("interactive_use"),
+            f"versions/stack.yaml.desired_state.identity_taxonomy.classes.{class_name}.interactive_use",
+        )
+        require_str(
+            class_def.get("automation_use"),
+            f"versions/stack.yaml.desired_state.identity_taxonomy.classes.{class_name}.automation_use",
+        )
+
+    required_metadata = set(
+        require_string_list(
+            identity_taxonomy.get("required_metadata"),
+            "versions/stack.yaml.desired_state.identity_taxonomy.required_metadata",
+        )
+    )
+    if required_metadata != IDENTITY_REQUIRED_METADATA:
+        raise ValueError(
+            "versions/stack.yaml.desired_state.identity_taxonomy.required_metadata must match the ADR 0046 contract"
+        )
+
+    managed_identities = require_list(
+        identity_taxonomy.get("managed_identities"),
+        "versions/stack.yaml.desired_state.identity_taxonomy.managed_identities",
+    )
+    if not managed_identities:
+        raise ValueError(
+            "versions/stack.yaml.desired_state.identity_taxonomy.managed_identities must not be empty"
+        )
+
+    identity_ids: set[str] = set()
+    principals: set[str] = set()
+    classes_in_use: set[str] = set()
+    shared_credential_material: set[str] = set()
+    principal_classes: dict[str, str] = {}
+    for index, identity in enumerate(managed_identities):
+        path = f"versions/stack.yaml.desired_state.identity_taxonomy.managed_identities[{index}]"
+        identity = require_mapping(identity, path)
+        identity_id = require_identifier(identity.get("id"), f"{path}.id")
+        identity_class = require_enum(identity.get("class"), f"{path}.class", IDENTITY_CLASSES)
+        principal = require_str(identity.get("principal"), f"{path}.principal")
+        require_str(identity.get("owner"), f"{path}.owner")
+        require_str(identity.get("purpose"), f"{path}.purpose")
+        require_str(identity.get("scope_boundary"), f"{path}.scope_boundary")
+        require_str(identity.get("rotation_or_expiry"), f"{path}.rotation_or_expiry")
+        require_str(identity.get("credential_storage"), f"{path}.credential_storage")
+        require_bool(identity.get("shared_credential_material"), f"{path}.shared_credential_material")
+        surfaces = require_string_list(identity.get("surfaces"), f"{path}.surfaces")
+        if not surfaces:
+            raise ValueError(f"{path}.surfaces must not be empty")
+        if identity_id in identity_ids:
+            raise ValueError(f"duplicate identity id in versions/stack.yaml: {identity_id}")
+        if principal in principals:
+            raise ValueError(f"duplicate identity principal in versions/stack.yaml: {principal}")
+        identity_ids.add(identity_id)
+        principals.add(principal)
+        classes_in_use.add(identity_class)
+        principal_classes[principal] = identity_class
+        if identity["shared_credential_material"]:
+            shared_credential_material.add(identity_id)
+
+    if classes_in_use != IDENTITY_CLASSES:
+        raise ValueError(
+            "versions/stack.yaml.desired_state.identity_taxonomy.managed_identities must exercise all four identity classes"
+        )
+
+    if principal_classes.get("ops") != "human_operator":
+        raise ValueError("identity principal 'ops' must be classified as a human_operator")
+    if principal_classes.get("ops@pam") != "human_operator":
+        raise ValueError("identity principal 'ops@pam' must be classified as a human_operator")
+    if principal_classes.get("lv3-automation@pve") != "agent":
+        raise ValueError("identity principal 'lv3-automation@pve' must be classified as an agent")
+    if principal_classes.get("server@lv3.org") != "service":
+        raise ValueError("identity principal 'server@lv3.org' must be classified as a service")
+    if principal_classes.get("root") != "break_glass":
+        raise ValueError("identity principal 'root' must be classified as break_glass")
+
+    observed_identity_taxonomy = require_mapping(
+        observed_state.get("identity_taxonomy"), "versions/stack.yaml.observed_state.identity_taxonomy"
+    )
+    require_date(
+        observed_identity_taxonomy.get("reviewed_at"),
+        "versions/stack.yaml.observed_state.identity_taxonomy.reviewed_at",
+    )
+    require_bool(
+        observed_identity_taxonomy.get("all_identities_documented"),
+        "versions/stack.yaml.observed_state.identity_taxonomy.all_identities_documented",
+    )
+    observed_classes = set(
+        require_string_list(
+            observed_identity_taxonomy.get("classes_in_use"),
+            "versions/stack.yaml.observed_state.identity_taxonomy.classes_in_use",
+        )
+    )
+    if observed_classes != classes_in_use:
+        raise ValueError(
+            "versions/stack.yaml.observed_state.identity_taxonomy.classes_in_use must match the desired managed identity classes"
+        )
+
+    reviewed_principals = set(
+        require_string_list(
+            observed_identity_taxonomy.get("reviewed_principals"),
+            "versions/stack.yaml.observed_state.identity_taxonomy.reviewed_principals",
+        )
+    )
+    if reviewed_principals != principals:
+        raise ValueError(
+            "versions/stack.yaml.observed_state.identity_taxonomy.reviewed_principals must match the desired identity principals"
+        )
+
+    reviewed_shared_credential_material = set(
+        require_string_list(
+            observed_identity_taxonomy.get("shared_credential_material"),
+            "versions/stack.yaml.observed_state.identity_taxonomy.shared_credential_material",
+        )
+    )
+    if reviewed_shared_credential_material != shared_credential_material:
+        raise ValueError(
+            "versions/stack.yaml.observed_state.identity_taxonomy.shared_credential_material must match the identities that share credential material"
+        )
+
+    automation_access = require_mapping(
+        desired_state.get("automation_access"), "versions/stack.yaml.desired_state.automation_access"
+    )
+    if automation_access.get("proxmox_api_user") not in principals:
+        raise ValueError(
+            "versions/stack.yaml.desired_state.automation_access.proxmox_api_user must be declared in the identity taxonomy"
+        )
+
+    security = require_mapping(desired_state.get("security"), "versions/stack.yaml.desired_state.security")
+    if security.get("proxmox_tfa_user") not in principals:
+        raise ValueError(
+            "versions/stack.yaml.desired_state.security.proxmox_tfa_user must be declared in the identity taxonomy"
+        )
+
+    mail = require_mapping(desired_state.get("mail"), "versions/stack.yaml.desired_state.mail")
+    if mail.get("mailbox_address") not in principals:
+        raise ValueError(
+            "versions/stack.yaml.desired_state.mail.mailbox_address must be declared in the identity taxonomy"
+        )
+
+    proxmox_state = require_mapping(observed_state.get("proxmox"), "versions/stack.yaml.observed_state.proxmox")
+    if proxmox_state.get("automation_api_user") not in principals:
+        raise ValueError(
+            "versions/stack.yaml.observed_state.proxmox.automation_api_user must be declared in the identity taxonomy"
+        )
+
+    mail_state = require_mapping(observed_state.get("mail"), "versions/stack.yaml.observed_state.mail")
+    if mail_state.get("mailbox_address") not in principals:
+        raise ValueError(
+            "versions/stack.yaml.observed_state.mail.mailbox_address must be declared in the identity taxonomy"
+        )
 
 
 def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
@@ -644,6 +843,7 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
 
     observed_state = require_mapping(stack.get("observed_state"), "versions/stack.yaml.observed_state")
     require_date(observed_state.get("checked_at"), "versions/stack.yaml.observed_state.checked_at")
+    validate_identity_taxonomy(desired_state, observed_state)
 
     access = require_mapping(observed_state.get("access"), "versions/stack.yaml.observed_state.access")
     for field in (
@@ -862,6 +1062,9 @@ def validate_repository_data_models() -> int:
     validate_secret_manifest(secret_manifest)
     workflow_catalog = load_workflow_catalog()
     validate_workflow_catalog(workflow_catalog, secret_manifest)
+    command_catalog = load_command_catalog()
+    validate_command_catalog(command_catalog, workflow_catalog, secret_manifest)
+    load_lane_catalog()
     validate_receipts()
     validate_uptime_monitors()
     host_vars_context = validate_host_vars()

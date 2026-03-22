@@ -1,10 +1,10 @@
 # ADR 0045: Control-Plane Communication Lanes
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.45.0
+- Implemented In Platform Version: not applicable (repo-only)
+- Implemented On: 2026-03-22
 - Date: 2026-03-22
 
 ## Context
@@ -57,3 +57,10 @@ We will standardize on four control-plane communication lanes.
 - Each lane can be governed with different credentials, rate limits, audit expectations, and publication rules.
 - Future apps must declare which lane they use rather than inventing their own one-off control path.
 
+## Implementation Notes
+
+- [config/control-plane-lanes.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/control-plane-lanes.json) is now the canonical machine-readable catalog for the four lanes plus the currently governed command, API, message, and event surfaces.
+- [scripts/control_plane_lanes.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/control_plane_lanes.py) validates the catalog against the workflow catalog and canonical service topology, and exposes inspection commands for operators and assistants.
+- [scripts/validate_repository_data_models.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_repository_data_models.py) now enforces the lane catalog through the standard repository validation gate.
+- [docs/runbooks/control-plane-communication-lanes.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/control-plane-communication-lanes.md) records the operating procedure for inspecting and extending the lane model.
+- [README.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/README.md) now renders a generated control-plane lane summary from the canonical catalog.

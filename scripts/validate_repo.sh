@@ -31,6 +31,10 @@ require_command() {
   fi
 }
 
+tracked_files() {
+  git -C "$REPO_ROOT" ls-files -- "$@"
+}
+
 install_collections() {
   mkdir -p "$ANSIBLE_COLLECTIONS_DIR"
   "${ANSIBLE_GALAXY_CMD[@]}" collection install \
@@ -41,10 +45,15 @@ install_collections() {
 
 validate_ansible_syntax() {
   local playbook
+  local playbooks=()
 
   install_collections
+  mapfile -t playbooks < <(tracked_files 'playbooks/*.yml')
+  if [[ ${#playbooks[@]} -eq 0 ]]; then
+    return 0
+  fi
 
-  for playbook in "$REPO_ROOT"/playbooks/*.yml; do
+  for playbook in "${playbooks[@]}"; do
     echo "Syntax check: ${playbook#"$REPO_ROOT"/}"
     "${ANSIBLE_PLAYBOOK_CMD[@]}" \
       -i "$REPO_ROOT/inventory/hosts.yml" \
@@ -55,35 +64,65 @@ validate_ansible_syntax() {
 }
 
 validate_yaml() {
+  local yaml_files=()
+
   echo "YAML lint"
+  mapfile -t yaml_files < <(tracked_files '*.yml' '*.yaml')
+  if [[ ${#yaml_files[@]} -eq 0 ]]; then
+    return 0
+  fi
   (
     cd "$REPO_ROOT"
-    "${YAMLLINT_CMD[@]}" -c .yamllint .
+    "${YAMLLINT_CMD[@]}" -c .yamllint "${yaml_files[@]}"
   )
 }
 
 validate_ansible_lint() {
+  local lint_targets=()
+
   echo "Ansible lint"
   install_collections
+  mapfile -t lint_targets < <(
+    tracked_files 'playbooks/*.yml' 'roles/*/*' |
+      awk -F/ '
+        $1 == "playbooks" && $NF ~ /\.yml$/ { print; next }
+        $1 == "roles" && $2 != "" { print $1 "/" $2 }
+      ' |
+      awk '!seen[$0]++'
+  )
+  if [[ ${#lint_targets[@]} -eq 0 ]]; then
+    return 0
+  fi
   (
     cd "$REPO_ROOT"
-    "${ANSIBLE_LINT_CMD[@]}" playbooks/*.yml roles
+    "${ANSIBLE_LINT_CMD[@]}" "${lint_targets[@]}"
   )
 }
 
 validate_shell() {
+  local shell_files=()
+
   echo "Shell lint"
   require_command shellcheck
-  shellcheck "$REPO_ROOT"/scripts/*.sh
+  mapfile -t shell_files < <(tracked_files 'scripts/*.sh')
+  if [[ ${#shell_files[@]} -eq 0 ]]; then
+    return 0
+  fi
+  (
+    cd "$REPO_ROOT"
+    shellcheck "${shell_files[@]}"
+  )
 }
 
 validate_json() {
   local json_file
+  local json_files=()
 
   echo "JSON validation"
-  while IFS= read -r -d '' json_file; do
+  mapfile -t json_files < <(tracked_files '*.json')
+  for json_file in "${json_files[@]}"; do
     jq empty "$json_file"
-  done < <(find "$REPO_ROOT/config" "$REPO_ROOT/receipts" -type f -name '*.json' -print0)
+  done
 }
 
 validate_data_models() {

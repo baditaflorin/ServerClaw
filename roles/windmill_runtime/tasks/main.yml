@@ -1,0 +1,263 @@
+---
+- name: Validate Windmill runtime inputs
+  ansible.builtin.assert:
+    that:
+      - windmill_workspace_id | length > 0
+      - windmill_workspace_name | length > 0
+      - windmill_site_dir | length > 0
+      - windmill_secret_dir | length > 0
+      - windmill_compose_file | length > 0
+      - windmill_env_file | length > 0
+      - windmill_server_port | int > 0
+      - windmill_base_url | length > 0
+      - windmill_database_name | length > 0
+      - windmill_database_user | length > 0
+      - windmill_database_host | length > 0
+      - windmill_database_password_local_file | length > 0
+      - windmill_seed_scripts | length > 0
+    fail_msg: "windmill_runtime requires workspace, database, compose, and seed script inputs."
+
+- name: Ensure the Windmill database password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ windmill_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: windmill_database_password_local
+
+- name: Fail if the Windmill database password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ windmill_database_password_local_file }} is missing on the control machine.
+      Run the Windmill PostgreSQL converge first so the runtime can connect to postgres-lv3.
+  when: not windmill_database_password_local.stat.exists
+
+- name: Ensure the Windmill runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - openssl
+    state: present
+    update_cache: true
+
+- name: Ensure the Windmill directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ windmill_site_dir }}"
+      mode: "0755"
+    - path: "{{ windmill_secret_dir }}"
+      mode: "0700"
+
+- name: Generate the Windmill superadmin secret
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ windmill_superadmin_secret_remote_file }}" ]; then
+      umask 077
+      openssl rand -hex 32 > "{{ windmill_superadmin_secret_remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: windmill_superadmin_secret_generation
+  changed_when: "'changed' in windmill_superadmin_secret_generation.stdout"
+  no_log: true
+
+- name: Read the Windmill superadmin secret
+  ansible.builtin.slurp:
+    src: "{{ windmill_superadmin_secret_remote_file }}"
+  register: windmill_superadmin_secret_raw
+  no_log: true
+
+- name: Record the Windmill superadmin secret
+  ansible.builtin.set_fact:
+    windmill_superadmin_secret: "{{ windmill_superadmin_secret_raw.content | b64decode | trim }}"
+    windmill_database_password: "{{ lookup('ansible.builtin.file', windmill_database_password_local_file) | trim }}"
+  no_log: true
+
+- name: Ensure the local Windmill artifact directory exists
+  ansible.builtin.file:
+    path: "{{ windmill_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Mirror the Windmill superadmin secret to the control machine
+  ansible.builtin.copy:
+    dest: "{{ windmill_superadmin_secret_local_file }}"
+    content: "{{ windmill_superadmin_secret }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Render the Windmill environment file
+  ansible.builtin.template:
+    src: windmill.env.j2
+    dest: "{{ windmill_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Render the Windmill compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ windmill_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the Windmill images
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --env-file
+      - "{{ windmill_env_file }}"
+      - --file
+      - "{{ windmill_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ windmill_site_dir }}"
+  register: windmill_pull
+  changed_when: >-
+    'Pulling' in windmill_pull.stdout
+    or 'Downloaded newer image' in windmill_pull.stdout
+    or 'Pull complete' in windmill_pull.stdout
+
+- name: Start the Windmill stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --env-file
+      - "{{ windmill_env_file }}"
+      - --file
+      - "{{ windmill_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ windmill_site_dir }}"
+  register: windmill_up
+  changed_when: >-
+    'Creating' in windmill_up.stdout
+    or 'Recreating' in windmill_up.stdout
+    or 'Starting' in windmill_up.stdout
+
+- name: Wait for Windmill to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ windmill_server_port }}"
+    delay: 0
+    timeout: 180
+
+- name: Wait for the Windmill API version endpoint
+  ansible.builtin.uri:
+    url: "{{ windmill_private_base_url }}/api/version"
+    method: GET
+    status_code: 200
+  register: windmill_version
+  retries: 18
+  delay: 5
+  until: windmill_version.status == 200
+  changed_when: false
+
+- name: Check whether the Windmill workspace already exists
+  ansible.builtin.uri:
+    url: "{{ windmill_private_base_url }}/api/workspaces/exists"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ windmill_superadmin_secret }}"
+    body_format: json
+    body:
+      id: "{{ windmill_workspace_id }}"
+    return_content: true
+    status_code: 200
+  register: windmill_workspace_exists
+  changed_when: false
+  no_log: true
+
+- name: Create the Windmill workspace
+  ansible.builtin.uri:
+    url: "{{ windmill_private_base_url }}/api/workspaces/create"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ windmill_superadmin_secret }}"
+    body_format: json
+    body:
+      id: "{{ windmill_workspace_id }}"
+      name: "{{ windmill_workspace_name }}"
+    status_code: 201
+  when: windmill_workspace_exists.content | trim != "true"
+  no_log: true
+
+- name: Read current Windmill script content
+  ansible.builtin.uri:
+    url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id | urlencode }}/scripts/raw/p/{{ item.path | urlencode }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ windmill_superadmin_secret }}"
+    return_content: true
+    status_code:
+      - 200
+      - 404
+  loop: "{{ windmill_seed_scripts }}"
+  loop_control:
+    label: "{{ item.path }}"
+  register: windmill_seed_script_current
+  changed_when: false
+  no_log: true
+
+- name: Sync repo-managed Windmill scripts
+  ansible.builtin.uri:
+    url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id | urlencode }}/scripts/create"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ windmill_superadmin_secret }}"
+    body_format: json
+    body:
+      path: "{{ item.path }}"
+      language: "{{ item.language }}"
+      summary: "{{ item.summary }}"
+      description: "{{ item.description }}"
+      kind: script
+      deployment_message: Repo-managed Windmill seed sync
+      content: "{{ lookup('ansible.builtin.file', item.local_file) }}"
+    status_code: 201
+  loop: "{{ windmill_seed_scripts }}"
+  loop_control:
+    index_var: windmill_seed_script_index
+    label: "{{ item.path }}"
+  when: >-
+    windmill_seed_script_current.results[windmill_seed_script_index].status != 200
+    or (windmill_seed_script_current.results[windmill_seed_script_index].content | default(''))
+    != lookup('ansible.builtin.file', item.local_file)
+  no_log: true
+
+- name: Run the Windmill seeded healthcheck script
+  ansible.builtin.uri:
+    url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id | urlencode }}/jobs/run_wait_result/p/{{ windmill_seed_scripts[0].path | urlencode }}"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ windmill_superadmin_secret }}"
+    body_format: json
+    body:
+      probe: live-verify
+    return_content: true
+    status_code: 200
+  register: windmill_healthcheck
+  changed_when: false
+  no_log: true
+
+- name: Assert the Windmill seeded healthcheck result
+  ansible.builtin.assert:
+    that:
+      - windmill_healthcheck.json.probe == "live-verify"
+      - windmill_healthcheck.json.job_id_present | bool
+      - windmill_healthcheck.json.workspace == windmill_workspace_id
+    fail_msg: "Windmill API responded, but the seeded healthcheck script did not return the expected result."

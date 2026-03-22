@@ -17,7 +17,9 @@
       "owner_runbook": "docs/runbooks/validate-repository-automation.md",
       "implementation_refs": [
         "Makefile",
+        "config/control-plane-lanes.json",
         "scripts/controller_automation_toolkit.py",
+        "scripts/control_plane_lanes.py",
         "scripts/validate_repo.sh",
         "scripts/generate_status_docs.py",
         "scripts/validate_repository_data_models.py",
@@ -50,13 +52,15 @@
       "implementation_refs": [
         "Makefile",
         "README.md",
+        "config/control-plane-lanes.json",
         "scripts/controller_automation_toolkit.py",
+        "scripts/control_plane_lanes.py",
         "scripts/generate_status_docs.py",
         "versions/stack.yaml",
         "workstreams.yaml"
       ],
       "outputs": [
-        "Generated README platform status, version summary, document index, and merged-workstream sections refreshed from canonical repository state."
+        "Generated README platform status, control-plane lane summary, version summary, document index, and merged-workstream sections refreshed from canonical repository state."
       ],
       "verification_commands": [
         "make generate-status-docs",
@@ -533,6 +537,142 @@
         "make syntax-check-mail-platform",
         "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose --file /opt/mail-platform/docker-compose.yml ps'",
         "curl -I https://grafana.lv3.org"
+      ]
+    },
+    "converge-openbao": {
+      "description": "Deploy private OpenBao on docker-runtime-lv3, seed scoped secrets, configure Transit, and enable PostgreSQL dynamic credentials.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-openbao",
+        "command": "make converge-openbao"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "mail_platform_brevo_api_key",
+          "proxmox_api_token_payload",
+          "monitoring_proxmox_writer_token",
+          "monitoring_guest_writer_token"
+        ],
+        "generated_secret_ids": [
+          "openbao_init_payload",
+          "openbao_ops_password",
+          "openbao_breakglass_password",
+          "openbao_postgres_rotator_password",
+          "openbao_controller_approle",
+          "openbao_mail_platform_approle"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-openbao"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-openbao.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/openbao.yml",
+        "roles/openbao_runtime",
+        "roles/openbao_postgres_backend",
+        "roles/postgres_vm",
+        "inventory/group_vars/all.yml"
+      ],
+      "outputs": [
+        "A private OpenBao deployment on docker-runtime-lv3 with controller-local bootstrap artifacts, scoped human and machine auth identities, seeded platform secrets, Transit keys, and PostgreSQL dynamic credentials."
+      ],
+      "verification_commands": [
+        "make syntax-check-openbao",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'ssh -o StrictHostKeyChecking=no ops@10.10.10.20 docker compose --file /opt/openbao/docker-compose.yml ps'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'ssh -o StrictHostKeyChecking=no ops@10.10.10.20 curl -fsS http://127.0.0.1:8200/v1/sys/health'"
+      ]
+    },
+    "converge-step-ca": {
+      "description": "Deploy the private step-ca runtime, expose it over the host Tailscale path, and enable SSH CA trust on the Proxmox host and managed guests.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-step-ca",
+        "command": "make converge-step-ca"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "step_ca_password",
+          "step_ca_humans_provisioner_password",
+          "step_ca_agents_provisioner_password",
+          "step_ca_services_provisioner_password",
+          "step_ca_hosts_provisioner_password"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-step-ca"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-step-ca.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/step-ca.yml",
+        "roles/step_ca_runtime",
+        "roles/step_ca_ssh_trust",
+        "roles/proxmox_security",
+        "roles/proxmox_tailscale_proxy",
+        "inventory/group_vars/all.yml",
+        "inventory/host_vars/proxmox_florin.yml"
+      ],
+      "outputs": [
+        "A private step-ca deployment on docker-runtime-lv3, a Tailscale-published CA API on the Proxmox host, controller-local bootstrap artifacts, and CA-backed SSH trust on the Proxmox host and managed guests."
+      ],
+      "verification_commands": [
+        "make syntax-check-step-ca",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose --file /opt/step-ca/docker-compose.yml ps'",
+        "curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt https://100.118.189.95:9443/health"
+      ]
+    },
+    "converge-windmill": {
+      "description": "Converge Windmill on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and expose the operator-only Tailscale proxy on the Proxmox host.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-windmill",
+        "command": "make converge-windmill"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "windmill_database_password",
+          "windmill_superadmin_secret"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-windmill"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-windmill.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/windmill.yml",
+        "config/windmill/scripts/lv3-healthcheck.py",
+        "roles/windmill_postgres/tasks/main.yml",
+        "roles/windmill_runtime/tasks/main.yml",
+        "roles/proxmox_tailscale_proxy/tasks/main.yml"
+      ],
+      "outputs": [
+        "Windmill runtime deployed on docker-runtime-lv3 with a PostgreSQL backend on postgres-lv3 and an operator-only Tailscale proxy on the Proxmox host."
+      ],
+      "verification_commands": [
+        "make syntax-check-windmill",
+        "curl -s http://100.118.189.95:8005/api/version",
+        "curl -s -H \"Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)\" http://100.118.189.95:8005/api/users/global/whoami"
       ]
     },
     "deploy-uptime-kuma": {

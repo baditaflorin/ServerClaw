@@ -1,0 +1,51 @@
+---
+- name: Converge private step-ca access on the Proxmox host
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: proxmox_tailscale_proxy
+    - role: proxmox_security
+
+- name: Converge the private step-ca runtime on docker-runtime-lv3
+  hosts: docker-runtime-lv3
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Ensure target guest is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+  roles:
+    - role: step_ca_runtime
+
+- name: Converge SSH CA trust on the Proxmox host
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: step_ca_ssh_trust
+      vars:
+        step_ca_ssh_host_principals_extra:
+          - "{{ management_ipv4 }}"
+          - "{{ management_tailscale_ipv4 }}"
+
+- name: Converge SSH CA trust on managed guests
+  hosts: lv3_guests
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Ensure target guest is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+  roles:
+    - role: step_ca_ssh_trust

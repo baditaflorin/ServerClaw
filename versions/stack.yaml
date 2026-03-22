@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.44.0
+repo_version: 0.45.0
 platform_version: 0.21.0
 
 live_apply_evidence:
@@ -73,6 +73,89 @@ desired_state:
     proxmox_api_role: PVEAdmin
     proxmox_api_privilege_separation: true
     proxmox_api_secret_storage: controller_local_only
+  identity_taxonomy:
+    classes:
+      human_operator:
+        description: Named human used for interactive administration, review, and approval.
+        interactive_use: required
+        automation_use: forbidden
+      service:
+        description: Non-human identity used by one long-running service or stack.
+        interactive_use: forbidden
+        automation_use: service_only
+      agent:
+        description: Non-human identity used by controller automation, workflow runners, or approved tooling.
+        interactive_use: forbidden
+        automation_use: approved_workflows_only
+      break_glass:
+        description: Recovery-only identity reserved for outages, lockouts, or emergency repair.
+        interactive_use: emergency_only
+        automation_use: forbidden
+    required_metadata:
+      - owner
+      - purpose
+      - scope_boundary
+      - rotation_or_expiry
+      - credential_storage
+    managed_identities:
+      - id: ops-linux
+        class: human_operator
+        principal: ops
+        owner: Florin Badita
+        purpose: Routine Linux administration on the Proxmox host and managed Debian guests.
+        scope_boundary: Linux shell access with sudo on the Proxmox host and managed guests; not used for Proxmox API tokens.
+        rotation_or_expiry: Rotate the shared bootstrap SSH key on personnel change or compromise and replace it with short-lived SSH certificates under ADR 0047.
+        credential_storage: Controller-local SSH key material under .local/ssh plus authorized_keys deployment on the managed nodes.
+        shared_credential_material: true
+        surfaces:
+          - proxmox_host_linux
+          - managed_guest_linux
+      - id: ops-proxmox-pam
+        class: human_operator
+        principal: ops@pam
+        owner: Florin Badita
+        purpose: Routine Proxmox UI and CLI administration with TOTP.
+        scope_boundary: Proxmox administrative APIs and UI only; not used for direct Linux login or non-human automation.
+        rotation_or_expiry: Rotate the password and TOTP seed on personnel change, compromise, or recovery events.
+        credential_storage: Controller-local TOTP state under .local/tfa; password is provisioned during access hardening and retained outside git.
+        shared_credential_material: false
+        surfaces:
+          - proxmox_ui
+          - proxmox_cli
+      - id: lv3-automation-proxmox
+        class: agent
+        principal: lv3-automation@pve
+        owner: Repository automation
+        purpose: Non-human Proxmox object management from repo workflows and controlled automation.
+        scope_boundary: Proxmox API only with a privilege-separated token; no interactive Linux login and no break-glass usage.
+        rotation_or_expiry: Revoke and recreate the token on controller compromise, workflow ownership change, or explicit secret rotation.
+        credential_storage: Controller-local token payload under .local/proxmox-api.
+        shared_credential_material: false
+        surfaces:
+          - proxmox_api
+      - id: mail-platform-server-mailbox
+        class: service
+        principal: server@lv3.org
+        owner: Mail platform runtime
+        purpose: Authenticated mailbox and submission identity for the managed LV3 mail platform.
+        scope_boundary: Mailbox access and SMTP submission on the internal mail platform only; not used for host, guest, or Proxmox administration.
+        rotation_or_expiry: Rotate the mailbox password and gateway API key during mail-platform rotation, credential compromise, or sender-profile changes.
+        credential_storage: Controller-local mail secrets under .local/mail-platform with mirrored runtime files on docker-runtime-lv3.
+        shared_credential_material: false
+        surfaces:
+          - stalwart_mailbox
+          - mail_gateway_submission
+      - id: proxmox-root-break-glass
+        class: break_glass
+        principal: root
+        owner: Florin Badita
+        purpose: Emergency recovery of the Proxmox host when named operator access is unavailable.
+        scope_boundary: Proxmox host Linux only; not used for routine guest administration, API automation, or scheduled workflows.
+        rotation_or_expiry: Rotate the SSH key immediately after any break-glass use or compromise.
+        credential_storage: Controller-local SSH key material under .local/ssh until ADR 0047 replaces the shared key path.
+        shared_credential_material: true
+        surfaces:
+          - proxmox_host_linux_break_glass
   security:
     management_sources:
       - 100.64.0.0/10
@@ -132,6 +215,23 @@ observed_state:
     proxmox_api_automation_user_present: true
     proxmox_api_token_present: true
     proxmox_api_token_verified: true
+  identity_taxonomy:
+    reviewed_at: 2026-03-22
+    all_identities_documented: true
+    classes_in_use:
+      - human_operator
+      - service
+      - agent
+      - break_glass
+    reviewed_principals:
+      - ops
+      - ops@pam
+      - lv3-automation@pve
+      - server@lv3.org
+      - root
+    shared_credential_material:
+      - ops-linux
+      - proxmox-root-break-glass
   os:
     banner: Linux Debian-trixie-latest-amd64-base 6.17.13-2-pve
     kernel: 6.17.13-2-pve
@@ -334,7 +434,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.44.0
+    current: 0.45.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.21.0

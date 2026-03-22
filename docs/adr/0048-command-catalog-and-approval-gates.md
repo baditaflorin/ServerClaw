@@ -1,10 +1,10 @@
 # ADR 0048: Command Catalog And Approval Gates
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.45.0
+- Implemented In Platform Version: not applicable (repo-only)
+- Implemented On: 2026-03-22
 - Date: 2026-03-22
 
 ## Context
@@ -39,3 +39,10 @@ Steady-state rules:
 - Sensitive commands become reviewable artifacts instead of folklore.
 - Approval can be attached to operation names and scopes instead of trying to judge raw shell text every time.
 
+## Implementation Notes
+
+- The canonical command-contract catalog now lives in [config/command-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/command-catalog.json).
+- [scripts/command_catalog.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/command_catalog.py) validates the catalog, renders one contract, and evaluates approval gates against workflow lifecycle, requester class, approvals, preflight, validation, and receipt-planning inputs.
+- [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/Makefile) now exposes `make commands` and `make command-info COMMAND=<id>` so operators and assistants can inspect mutating command contracts without reconstructing them from prose.
+- Repository data-model validation now cross-checks the command catalog alongside the workflow catalog, receipts, control-plane lanes, and canonical stack state.
+- Operator usage is documented in [docs/runbooks/command-catalog-and-approval-gates.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/command-catalog-and-approval-gates.md).

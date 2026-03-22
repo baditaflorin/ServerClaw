@@ -35,6 +35,9 @@
 
 ## Verification
 
+- `scripts/command_catalog.py --validate`
+- `scripts/command_catalog.py --command configure-network`
+- `scripts/command_catalog.py --check-approval --command configure-network --requester-class human_operator --approver-classes human_operator --validation-passed --preflight-passed --receipt-planned`
 - `ruby -e 'require "yaml"; YAML.load_file("/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml"); puts "workstreams.yaml OK"'`
 - `test -f /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0048-command-catalog-and-approval-gates.md`
 
@@ -45,4 +48,6 @@
 
 ## Notes For The Next Assistant
 
+- the repo now has a machine-readable command-contract layer separate from the broader workflow catalog
 - use this ADR before granting broader agent mutation rights
+- this workstream is implemented on `main` as a repo-only change; no live platform apply is pending

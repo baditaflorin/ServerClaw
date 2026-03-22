@@ -308,7 +308,6 @@ workstreams:
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0044-windmill.md
     depends_on:
       - adr-0026-postgres-vm
-      - adr-0043-openbao
     conflicts_with: []
     shared_surfaces:
       - docker-runtime-lv3
@@ -456,5 +455,211 @@ workstreams:
       - recovery metadata
       - break-glass procedures
       - control-plane state
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0052-loki-logs
+    adr: "0052"
+    title: Centralized log aggregation with Grafana Loki
+    status: ready
+    owner: codex
+    branch: codex/adr-0052-loki-logs
+    worktree_path: ../proxmox_florin_server-loki-logs
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0052-loki-logs.md
+    depends_on:
+      - adr-0011-monitoring
+    conflicts_with: []
+    shared_surfaces:
+      - monitoring-lv3
+      - Grafana
+      - host logs
+      - guest logs
+      - container logs
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0053-tempo-traces
+    adr: "0053"
+    title: OpenTelemetry traces and service maps with Grafana Tempo
+    status: ready
+    owner: codex
+    branch: codex/adr-0053-tempo-traces
+    worktree_path: ../proxmox_florin_server-tempo-traces
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0053-tempo-traces.md
+    depends_on:
+      - adr-0011-monitoring
+      - adr-0052-loki-logs
+    conflicts_with: []
+    shared_surfaces:
+      - monitoring-lv3
+      - Grafana
+      - internal APIs
+      - workflow execution
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0054-netbox-topology
+    adr: "0054"
+    title: NetBox for topology, IPAM, and inventory
+    status: ready
+    owner: codex
+    branch: codex/adr-0054-netbox-topology
+    worktree_path: ../proxmox_florin_server-netbox-topology
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0054-netbox-topology.md
+    depends_on: []
+    conflicts_with: []
+    shared_surfaces:
+      - topology catalog
+      - VM inventory
+      - IP addressing
+      - ownership metadata
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0055-portainer-operations
+    adr: "0055"
+    title: Portainer for read-mostly Docker runtime operations
+    status: ready
+    owner: codex
+    branch: codex/adr-0055-portainer-operations
+    worktree_path: ../proxmox_florin_server-portainer-operations
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0055-portainer-operations.md
+    depends_on:
+      - adr-0023-docker-runtime
+      - adr-0025-docker-compose-stacks
+      - adr-0048-command-catalog
+    conflicts_with: []
+    shared_surfaces:
+      - docker-runtime-lv3
+      - Compose stacks
+      - container logs
+      - runtime controls
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0056-keycloak-sso
+    adr: "0056"
+    title: Keycloak for operator and agent SSO
+    status: ready
+    owner: codex
+    branch: codex/adr-0056-keycloak-sso
+    worktree_path: ../proxmox_florin_server-keycloak-sso
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0056-keycloak-sso.md
+    depends_on:
+      - adr-0046-identity-classes
+      - adr-0047-short-lived-creds
+      - adr-0049-private-api-publication
+    conflicts_with: []
+    shared_surfaces:
+      - internal app auth
+      - operator sessions
+      - agent clients
+      - MFA policies
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0057-mattermost-chatops
+    adr: "0057"
+    title: Mattermost for ChatOps and operator-agent collaboration
+    status: ready
+    owner: codex
+    branch: codex/adr-0057-mattermost-chatops
+    worktree_path: ../proxmox_florin_server-mattermost-chatops
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0057-mattermost-chatops.md
+    depends_on:
+      - adr-0045-communication-lanes
+      - adr-0050-notification-profiles
+      - adr-0056-keycloak-sso
+    conflicts_with: []
+    shared_surfaces:
+      - alerts
+      - workflow notifications
+      - approvals
+      - bot identities
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0058-nats-event-bus
+    adr: "0058"
+    title: NATS JetStream for internal event bus and agent coordination
+    status: ready
+    owner: codex
+    branch: codex/adr-0058-nats-event-bus
+    worktree_path: ../proxmox_florin_server-nats-event-bus
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0058-nats-event-bus.md
+    depends_on:
+      - adr-0045-communication-lanes
+      - adr-0046-identity-classes
+      - adr-0047-short-lived-creds
+    conflicts_with: []
+    shared_surfaces:
+      - workflow events
+      - alert events
+      - agent handoffs
+      - internal consumers
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0059-ntopng-network-visibility
+    adr: "0059"
+    title: ntopng for private network flow visibility
+    status: ready
+    owner: codex
+    branch: codex/adr-0059-ntopng-network-visibility
+    worktree_path: ../proxmox_florin_server-ntopng-network-visibility
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0059-ntopng-network-visibility.md
+    depends_on:
+      - adr-0011-monitoring
+      - adr-0012-proxmox-host-bridge-and-nat-network
+      - adr-0049-private-api-publication
+    conflicts_with: []
+    shared_surfaces:
+      - vmbr10
+      - ingress traffic
+      - guest egress
+      - network triage
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0060-open-webui-workbench
+    adr: "0060"
+    title: Open WebUI for operator and agent workbench
+    status: ready
+    owner: codex
+    branch: codex/adr-0060-open-webui-workbench
+    worktree_path: ../proxmox_florin_server-open-webui-workbench
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0060-open-webui-workbench.md
+    depends_on:
+      - adr-0044-windmill
+      - adr-0048-command-catalog
+      - adr-0056-keycloak-sso
+    conflicts_with: []
+    shared_surfaces:
+      - workflow catalog
+      - receipts
+      - status docs
+      - governed tools
+      - operator sessions
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0061-glitchtip-failure-signals
+    adr: "0061"
+    title: GlitchTip for application exceptions and task failures
+    status: ready
+    owner: codex
+    branch: codex/adr-0061-glitchtip-failure-signals
+    worktree_path: ../proxmox_florin_server-glitchtip-failure-signals
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0061-glitchtip-failure-signals.md
+    depends_on:
+      - adr-0026-postgres-vm
+      - adr-0049-private-api-publication
+      - adr-0053-tempo-traces
+    conflicts_with: []
+    shared_surfaces:
+      - application errors
+      - workflow failures
+      - issue notifications
+      - release regressions
     ready_to_merge: false
     live_applied: false

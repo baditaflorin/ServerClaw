@@ -8,7 +8,22 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.45.0 - 2026-03-22
+
+- implemented ADR 0042, ADR 0043, ADR 0044, ADR 0045, ADR 0046, and ADR 0048 as concrete repository control-plane contracts instead of planning-only documents
+- added repo-managed `step-ca`, OpenBao, and Windmill playbooks, roles, workflow-catalog entries, runbooks, and controller-local bootstrap artifact contracts so those control-plane components can be converged from `main`
+- added a canonical control-plane lane catalog, CLI inspector, generated README summary, and validation wiring for the command, API, message, and event lanes
+- added a canonical identity taxonomy and managed-principal inventory to `versions/stack.yaml` covering the current human, service, agent, and break-glass identities
+- added a canonical command catalog plus approval-gate CLI for mutating workflows, with explicit requester classes, input contracts, evidence expectations, and rollback guidance
+- extended the repository data-model validator so identity classes, required metadata, and principal cross-references fail fast during `make validate`
+- added lane, identity, command-catalog, `step-ca`, OpenBao, and Windmill runbooks and updated the assistant/operator discovery docs so future control-plane surfaces and credentials extend one documented model instead of inventing ad hoc paths
+- added ADRs 0052 through 0061 plus a visual operations roadmap runbook to capture the next planned observability, identity, ChatOps, eventing, and operator-workbench workstreams
+- tightened the validation script so YAML, Ansible lint, shell, and JSON stages operate on tracked repository files instead of unrelated local work-in-progress
 - fixed the monitoring role's Grafana handler notifications so `make converge-monitoring` can rerun cleanly while importing repo-managed dashboards
+
+Platform impact:
+
+- no direct live platform change; this release hardens repository truth and reviewability around control-plane lanes, managed identities, command approval gates, and the next control-plane automation backlog
 
 ## 0.44.0 - 2026-03-22
 

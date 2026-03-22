@@ -1,0 +1,102 @@
+---
+- name: Prepare PostgreSQL for OpenBao dynamic credentials
+  hosts: postgres_guests
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Ensure target guest is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+  roles:
+    - role: postgres_vm
+      vars:
+        postgres_vm_client_allowed_sources_extra:
+          - "{{ (hostvars['proxmox_florin'].proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}/32"
+    - role: openbao_postgres_backend
+
+- name: Converge OpenBao on the Docker runtime VM
+  hosts: docker-runtime-lv3
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Ensure target guest is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+  roles:
+    - role: openbao_runtime
+
+- name: Verify PostgreSQL dynamic credentials end to end
+  hosts: postgres_guests
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Read the controller AppRole artifact
+      ansible.builtin.slurp:
+        src: "{{ openbao_controller_approle_local_file }}"
+      delegate_to: localhost
+      become: false
+      register: openbao_verify_controller_approle_raw
+      no_log: true
+
+    - name: Record controller AppRole verification facts
+      ansible.builtin.set_fact:
+        openbao_verify_controller_approle: "{{ openbao_verify_controller_approle_raw.content | b64decode | from_json }}"
+      no_log: true
+
+    - name: Login to OpenBao as the controller AppRole
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ openbao_http_port }}/v1/auth/approle/login"
+        method: POST
+        body_format: json
+        body:
+          role_id: "{{ openbao_verify_controller_approle.role_id }}"
+          secret_id: "{{ openbao_verify_controller_approle.secret_id }}"
+        return_content: true
+        status_code: 200
+      delegate_to: docker-runtime-lv3
+      register: openbao_verify_controller_login
+      no_log: true
+
+    - name: Request a PostgreSQL dynamic credential
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ openbao_http_port }}/v1/{{ openbao_database_mount_path }}/creds/postgres-readonly"
+        method: GET
+        headers:
+          X-Vault-Token: "{{ openbao_verify_controller_login.json.auth.client_token }}"
+        return_content: true
+        status_code: 200
+      delegate_to: docker-runtime-lv3
+      register: openbao_verify_postgres_dynamic_credential
+      no_log: true
+
+    - name: Verify the issued PostgreSQL credential against the local database
+      ansible.builtin.shell: |
+        set -euo pipefail
+        PGPASSWORD='{{ openbao_verify_postgres_dynamic_credential.json.data.password }}' \
+        psql \
+          --host 127.0.0.1 \
+          --username '{{ openbao_verify_postgres_dynamic_credential.json.data.username }}' \
+          --dbname '{{ openbao_postgres_database }}' \
+          --tuples-only \
+          --no-align \
+          --command 'select current_user'
+      args:
+        executable: /bin/bash
+      register: openbao_verify_postgres_login
+      changed_when: false
+      no_log: true
+
+    - name: Assert the issued PostgreSQL credential works
+      ansible.builtin.assert:
+        that:
+          - openbao_verify_postgres_login.stdout | trim == openbao_verify_postgres_dynamic_credential.json.data.username
+        fail_msg: "The OpenBao-issued PostgreSQL dynamic credential could not authenticate successfully."

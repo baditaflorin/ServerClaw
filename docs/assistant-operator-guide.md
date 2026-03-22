@@ -41,6 +41,8 @@ Use these defaults unless a runbook or break-glass situation explicitly requires
 - reach guests directly over the Tailscale-routed `10.10.10.0/24` path once ADR 0014 is applied
 - if the tailnet path is unavailable, use the Proxmox host jump path only as break-glass
 
+The canonical identity classification and metadata contract lives in [docs/runbooks/identity-taxonomy-and-managed-principals.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/identity-taxonomy-and-managed-principals.md) and [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml).
+
 ## What To Read Before Making Changes
 
 1. [README.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/README.md)
@@ -61,7 +63,8 @@ Use these defaults unless a runbook or break-glass situation explicitly requires
 7. Apply merged work live, then bump `platform_version` and refresh observed state.
 8. Run `make preflight WORKFLOW=<id>` before long-running workflows that depend on controller-local secrets or external tokens.
 9. Use `make workflows` or `make workflow-info WORKFLOW=<id>` when you need the canonical entry point instead of inferring it from prose.
-10. After a real live apply, record the verification evidence in `receipts/live-applies/`.
+10. Use `make commands` or `make command-info COMMAND=<id>` before mutating live systems so the approval policy, expected inputs, and rollback guidance are explicit.
+11. After a real live apply, record the verification evidence in `receipts/live-applies/`.
 
 At minimum, review whether these files need updates:
 
@@ -73,6 +76,7 @@ At minimum, review whether these files need updates:
 - [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml) only for merged truth or verified live state
 - a runbook in [docs/runbooks](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks)
 - an ADR in [docs/adr](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr)
+- [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml) if an identity inventory, owner, scope boundary, or credential-storage contract changed
 
 ## Commands To Prefer
 
@@ -81,6 +85,10 @@ Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/M
 - `make start-workstream WORKSTREAM=adr-0011-monitoring`
 - `make workflows`
 - `make workflow-info WORKFLOW=converge-monitoring`
+- `make commands`
+- `make command-info COMMAND=configure-network`
+- `make lanes`
+- `make lane-info LANE=api`
 - `make validate`
 - `make validate-data-models`
 - `make generate-status-docs`
@@ -111,10 +119,13 @@ Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/M
 - ADRs record both decision state and implementation state
 - branch workstream state lives in `workstreams.yaml` and `docs/workstreams/`
 - protected integration files are changed only during merge/integration
+- every named human, service, agent, and break-glass principal is classified in ADR 0046 terms before more automation is added
 - shared values stay in inventory and group vars rather than copied into many tasks
 - live one-off shell changes are either codified immediately or explicitly documented as temporary
 - secrets and ephemeral provider passwords do not get committed
 - workflow entry points stay declared in `config/workflow-catalog.json`
+- mutating command contracts stay declared in `config/command-catalog.json`
+- control-plane communication surfaces stay declared in `config/control-plane-lanes.json`
 - controller-local secret prerequisites stay declared in `config/controller-local-secrets.json`
 - live applies keep structured evidence under `receipts/live-applies/`
 - shared controller-side Python primitives stay centralized in `scripts/controller_automation_toolkit.py`

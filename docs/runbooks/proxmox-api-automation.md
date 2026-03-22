@@ -4,6 +4,8 @@
 
 This runbook captures the durable, non-human API identity used for Proxmox object management.
 
+Under [ADR 0046](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0046-identity-classes-for-humans-services-and-agents.md), `lv3-automation@pve` is classified as an `agent` identity rather than a human or break-glass path.
+
 ## Result
 
 - creates the dedicated Proxmox API user `lv3-automation@pve`

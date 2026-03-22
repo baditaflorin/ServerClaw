@@ -23,7 +23,7 @@ This is the required minimum gate before merging automation changes to `main`.
 - repo-managed JSON artifacts pass `jq empty`
 - canonical repository data models pass schema validation
 - generated status documents are current for their canonical inputs
-- the workflow catalog and controller-local secret manifest cross-reference cleanly
+- the workflow catalog, command catalog, control-plane lane catalog, and controller-local secret manifest cross-reference cleanly
 - structured live-apply receipts reference valid workflows, files, and git commits
 
 ## Tooling Model
@@ -32,6 +32,7 @@ This is the required minimum gate before merging automation changes to `main`.
 - validation uses `uvx --from pyyaml python ...` for the repository data-model validator
 - required Ansible collections are installed from [collections/requirements.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/requirements.yml)
 - validation collections are cached under `.ansible/validation/collections`
+- lint-oriented stages operate on tracked repository files so unrelated local work-in-progress does not fail the repo gate
 - CI runs the same contract through `make validate`
 
 ## Optional Stage Commands
@@ -53,6 +54,8 @@ make validate-generated-docs
 - [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml)
 - [inventory/host_vars/proxmox_florin.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml)
 - [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json)
+- [config/command-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/command-catalog.json)
+- [config/control-plane-lanes.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/control-plane-lanes.json)
 - [config/controller-local-secrets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/controller-local-secrets.json)
 - [config/uptime-kuma/monitors.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/uptime-kuma/monitors.json)
 - [receipts/live-applies](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/live-applies)

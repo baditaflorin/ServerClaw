@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from control_plane_lanes import ALLOWED_LANE_IDS, load_lane_catalog
 from controller_automation_toolkit import README_PATH, emit_cli_error, load_yaml, repo_path
 
 
@@ -27,6 +28,7 @@ GENERATED_NOTICE = (
 )
 MARKERS = {
     "platform-status": "platform-status",
+    "control-plane-lanes": "control-plane-lanes",
     "document-index": "document-index",
     "version-summary": "version-summary",
     "merged-workstreams": "merged-workstreams",
@@ -127,6 +129,44 @@ def render_platform_status() -> str:
     return "\n".join(parts).strip()
 
 
+def render_control_plane_lanes() -> str:
+    _catalog, normalized_lanes = load_lane_catalog()
+    lane_rows = []
+    surface_rows = []
+    for lane_id in ALLOWED_LANE_IDS:
+        lane = normalized_lanes[lane_id]
+        lane_rows.append(
+            [
+                f"`{lane_id}`",
+                lane["title"],
+                f"`{lane['transport']}`",
+                str(len(lane["current_surfaces"])),
+                lane["steady_state_rules"][0],
+            ]
+        )
+        for surface in lane["current_surfaces"]:
+            surface_rows.append(
+                [
+                    f"`{surface['id']}`",
+                    f"`{lane_id}`",
+                    f"`{surface['kind']}`",
+                    f"`{surface['endpoint']}`",
+                ]
+            )
+
+    return "\n".join(
+        [
+            GENERATED_NOTICE,
+            "",
+            "### Lane Summary",
+            render_table(["Lane", "Title", "Transport", "Surfaces", "Primary Rule"], lane_rows),
+            "",
+            "### Current Governed Surfaces",
+            render_table(["Surface", "Lane", "Kind", "Endpoint"], surface_rows),
+        ]
+    ).strip()
+
+
 def render_document_links(paths: list[Path]) -> list[str]:
     return [f"- {absolute_link(read_heading(path), path)}" for path in paths]
 
@@ -215,6 +255,7 @@ def render_readme() -> str:
     readme_text = README_PATH.read_text()
     rendered_sections = {
         MARKERS["platform-status"]: render_platform_status(),
+        MARKERS["control-plane-lanes"]: render_control_plane_lanes(),
         MARKERS["document-index"]: render_document_index(),
         MARKERS["version-summary"]: render_version_summary(),
         MARKERS["merged-workstreams"]: render_merged_workstreams(),

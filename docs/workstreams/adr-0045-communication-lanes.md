@@ -25,6 +25,9 @@
 
 - `docs/adr/0045-control-plane-communication-lanes.md`
 - `docs/workstreams/adr-0045-communication-lanes.md`
+- `config/control-plane-lanes.json`
+- `scripts/control_plane_lanes.py`
+- `docs/runbooks/control-plane-communication-lanes.md`
 - `docs/runbooks/plan-agentic-control-plane.md`
 - `workstreams.yaml`
 
@@ -35,8 +38,9 @@
 
 ## Verification
 
-- `ruby -e 'require "yaml"; YAML.load_file("/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml"); puts "workstreams.yaml OK"'`
-- `test -f /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0045-control-plane-communication-lanes.md`
+- `python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/control_plane_lanes.py --validate`
+- `make -C /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server validate-data-models`
+- `make -C /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server generate-status-docs`
 
 ## Merge Criteria
 
@@ -45,4 +49,4 @@
 
 ## Notes For The Next Assistant
 
-- use this ADR as the framing doc before implementing any new control-plane app
+- use [config/control-plane-lanes.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/control-plane-lanes.json) as the canonical governed-surface catalog before implementing any new control-plane app

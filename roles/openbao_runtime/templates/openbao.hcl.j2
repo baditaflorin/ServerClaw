@@ -1,0 +1,26 @@
+ui = true
+disable_mlock = true
+api_addr = "{{ openbao_api_addr }}"
+cluster_addr = "{{ openbao_cluster_addr }}"
+
+listener "tcp" {
+  address = "0.0.0.0:8200"
+  cluster_address = "0.0.0.0:8201"
+  tls_disable = 1
+}
+
+storage "raft" {
+  path = "{{ openbao_raft_path }}"
+  node_id = "{{ openbao_raft_node_id }}"
+}
+
+audit "file" "main" {
+  path = "{{ openbao_audit_path }}"
+  description = "LV3 OpenBao audit log"
+
+  options {
+    file_path = "{{ openbao_audit_file_path }}"
+    log_raw = "false"
+    mode = "0600"
+  }
+}

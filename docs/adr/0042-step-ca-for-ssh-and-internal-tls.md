@@ -1,10 +1,10 @@
 # ADR 0042: step-ca For SSH And Internal TLS
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.45.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-22
 - Date: 2026-03-22
 
 ## Context
@@ -66,3 +66,10 @@ Provisioners must be separated by identity class:
 - [Getting Started with step-ca](https://smallstep.com/docs/step-ca/getting-started/)
 - [Basic Certificate Authority Operations](https://smallstep.com/docs/step-ca/basic-certificate-authority-operations)
 
+## Implementation Notes
+
+- The repo now defines a dedicated `step-ca` automation surface through [playbooks/step-ca.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/step-ca.yml), [roles/step_ca_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/step_ca_runtime), and [roles/step_ca_ssh_trust](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/step_ca_ssh_trust).
+- [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json) now exposes `converge-step-ca` as the canonical entry point with explicit preflight, validation, and verification metadata.
+- [config/controller-local-secrets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/controller-local-secrets.json) now records the controller-local secret material generated and consumed by the `step-ca` workflow.
+- Operator usage is documented in [docs/runbooks/configure-step-ca.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-step-ca.md).
+- Live application is intentionally still pending, so the platform implementation metadata remains `not yet`.

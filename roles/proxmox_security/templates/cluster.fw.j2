@@ -12,6 +12,9 @@ policy_forward: ACCEPT
 [RULES]
 IN SSH(ACCEPT) -source +management
 IN ACCEPT -p tcp -dport 8006 -source +management
+{% for port in proxmox_management_allowed_tcp_ports %}
+IN ACCEPT -p tcp -dport {{ port }} -source +management
+{% endfor %}
 IN Ping(ACCEPT) -source +management
 {% if proxmox_public_ingress_tcp_ports is defined %}
 {% for port in proxmox_public_ingress_tcp_ports %}

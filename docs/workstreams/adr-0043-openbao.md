@@ -18,33 +18,39 @@
 
 ## Non-Goals
 
-- live rollout in this planning workstream
 - storing secrets in git-managed files
 
 ## Expected Repo Surfaces
 
 - `docs/adr/0043-openbao-for-secrets-transit-and-dynamic-credentials.md`
 - `docs/workstreams/adr-0043-openbao.md`
+- `docs/runbooks/configure-openbao.md`
 - `docs/runbooks/plan-agentic-control-plane.md`
+- `playbooks/openbao.yml`
+- `roles/openbao_runtime/`
+- `roles/openbao_postgres_backend/`
+- `config/controller-local-secrets.json`
+- `config/workflow-catalog.json`
 - `workstreams.yaml`
 
 ## Expected Live Surfaces
 
-- a private OpenBao deployment on `docker-runtime-lv3`
-- scoped auth roles for humans, agents, and services
-- secret retrieval and transit APIs for internal automation
+- no direct live apply in this integration step
+- a ready-to-run OpenBao converge path for later controlled rollout
 
 ## Verification
 
+- `make syntax-check-openbao`
+- `make workflow-info WORKFLOW=converge-openbao`
 - `ruby -e 'require "yaml"; YAML.load_file("/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml"); puts "workstreams.yaml OK"'`
-- `test -f /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0043-openbao-for-secrets-transit-and-dynamic-credentials.md`
 
 ## Merge Criteria
 
-- the ADR defines OpenBao responsibilities and boundaries clearly
-- the workstream leaves a clear path for future implementation and recovery planning
+- the repo has a coherent OpenBao converge path with documented bootstrap artifacts, auth boundaries, and PostgreSQL integration
+- the workstream leaves a clear path for future live rollout and recovery planning
 
 ## Notes For The Next Assistant
 
 - keep OpenBao private-only
 - do not let it become a second default certificate authority without an explicit follow-up decision
+- live apply should wait for an explicit recovery review because init payloads and unseal artifacts become critical control-plane state

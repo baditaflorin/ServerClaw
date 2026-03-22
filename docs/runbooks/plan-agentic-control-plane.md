@@ -9,6 +9,11 @@ This runbook ties the next control-plane ADR set into one operating model for:
 - API access
 - agent and operator workflows
 
+ADR 0045 now has a concrete repository implementation through the canonical lane catalog and operator runbook:
+
+- [Control-Plane Communication Lanes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/control-plane-communication-lanes.md)
+- [config/control-plane-lanes.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/control-plane-lanes.json)
+
 ## Result
 
 When the proposed ADRs are implemented together, the recommended communication paths become:
@@ -26,6 +31,7 @@ When the proposed ADRs are implemented together, the recommended communication p
    - private APIs default to internal-only publication
    - internal credentials come from OpenBao or short-lived certificates
    - operator and agent automation can use Windmill for scheduled or event-driven execution instead of raw shell access
+   - the first live Windmill rollout now exists, but it is intentionally limited to repo-managed bootstrap scripts that do not depend on third-party long-lived secrets
 
 ## Proposed ADR Map
 
@@ -34,6 +40,7 @@ When the proposed ADRs are implemented together, the recommended communication p
 - [ADR 0044](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0044-windmill-for-agent-and-operator-workflows.md): workflow runtime for agent and operator jobs
 - [ADR 0045](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0045-control-plane-communication-lanes.md): communication lanes for command, API, message, and event traffic
 - [ADR 0046](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0046-identity-classes-for-humans-services-and-agents.md): identity taxonomy for humans, services, agents, and break-glass users
+- [Identity Taxonomy And Managed Principals](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/identity-taxonomy-and-managed-principals.md): current enforced principal inventory and extension rules for ADR 0046
 - [ADR 0047](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0047-short-lived-credentials-and-internal-mtls.md): short-lived credential policy
 - [ADR 0048](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0048-command-catalog-and-approval-gates.md): safe execution contracts for remote mutation
 - [ADR 0049](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0049-private-first-api-publication-model.md): API publication policy
@@ -43,15 +50,17 @@ When the proposed ADRs are implemented together, the recommended communication p
 ## Recommended Rollout Order
 
 1. identity taxonomy and communication lanes
-   - adopt ADR 0045 and ADR 0046 first so new app work has clear boundaries
+   - ADR 0046 is now implemented in repository state and validation, so new app work should extend that inventory instead of inventing ad hoc identities
+   - adopt ADR 0045 next so new app work has both identity and lane boundaries
 2. trust and secrets
    - implement ADR 0042 and ADR 0043 before expanding agent access
 3. credential policy
    - implement ADR 0047 so new services default to short-lived credentials
 4. workflow runtime
-   - implement ADR 0044 once secrets and identities exist
+   - ADR 0044 is now live with repo-managed bootstrap and private operator access
+   - keep secret-bearing workflows constrained until ADR 0043 and ADR 0047 exist
 5. command safety
-   - implement ADR 0048 before giving agents broader mutation powers
+   - ADR 0048 is now implemented through the repo-managed command catalog and approval gate checks
 6. API publication and mail profiles
    - implement ADR 0049 and ADR 0050 as services are exposed
 7. recovery
@@ -76,3 +85,13 @@ Future implementation work should be considered successful only when:
 - internal APIs are classified and not accidentally public
 - mail send works through documented sender profiles
 - restore guidance exists for the new control-plane components
+
+## Current ADR 0048 Surface
+
+The command-safety layer now lives in:
+
+- [config/command-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/command-catalog.json)
+- [scripts/command_catalog.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/command_catalog.py)
+- [docs/runbooks/command-catalog-and-approval-gates.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/command-catalog-and-approval-gates.md)
+
+That implementation keeps mutating command contracts separate from the broader workflow catalog while still cross-validating against workflow metadata, preflight requirements, and live-apply evidence expectations.

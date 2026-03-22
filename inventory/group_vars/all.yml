@@ -1,5 +1,5 @@
-repo_version: 0.42.0
-platform_version: 0.19.0
+repo_version: 0.45.0
+platform_version: 0.21.0
 
 proxmox_release_major: 9
 proxmox_suite: trixie
@@ -112,3 +112,24 @@ mail_platform_brevo_api_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/pr
 mail_platform_brevo_sender_email: "{{ mail_platform_mailbox_address }}"
 mail_platform_brevo_sender_name: Florin Mail Bridge
 mail_platform_reply_to_email: "{{ mail_platform_mailbox_address }}"
+openbao_postgres_host: "{{ (hostvars['proxmox_florin'].proxmox_guests | selectattr('name', 'equalto', 'postgres-lv3') | map(attribute='ipv4') | first) }}"
+openbao_postgres_admin_role: openbao_rotator
+openbao_postgres_database: postgres
+openbao_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao
+openbao_init_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/init.json
+openbao_ops_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/ops-password.txt
+openbao_breakglass_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/breakglass-password.txt
+openbao_postgres_rotator_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/postgres-rotator-password.txt
+openbao_controller_approle_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/controller-automation-approle.json
+openbao_mail_platform_approle_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/mail-platform-approle.json
+
+step_ca_version: 0.30.1
+step_ca_cli_version: 0.30.1
+step_ca_image: "docker.io/smallstep/step-ca:{{ step_ca_version }}"
+step_ca_api_port: 9000
+step_ca_proxy_port: 9443
+step_ca_internal_url: "https://{{ hostvars['docker-runtime-lv3'].ansible_host }}:{{ step_ca_api_port }}"
+step_ca_controller_url: "https://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ step_ca_proxy_port }}"
+step_ca_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca
+proxmox_management_allowed_tcp_ports:
+  - "{{ step_ca_proxy_port }}"

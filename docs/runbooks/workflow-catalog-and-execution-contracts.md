@@ -8,6 +8,7 @@ This runbook defines the canonical machine-readable workflow catalog for reposit
 
 - workflow catalog: [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json)
 - catalog CLI: [scripts/workflow_catalog.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/workflow_catalog.py)
+- command catalog overlay: [config/command-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/command-catalog.json)
 - preferred command surface: [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/Makefile)
 
 The workflow catalog is the source of truth for:
@@ -18,6 +19,8 @@ The workflow catalog is the source of truth for:
 - validation expectations
 - live-impact classification
 - owning runbooks and verification commands
+
+Approval policy, operator inputs, evidence planning, and failure guidance for mutating workflows now live in the separate [command catalog runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/command-catalog-and-approval-gates.md).
 
 ## Primary Commands
 

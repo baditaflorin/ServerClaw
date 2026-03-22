@@ -1,0 +1,40 @@
+---
+- name: Converge the Tailscale operator proxy for Windmill
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: proxmox_tailscale_proxy
+
+- name: Converge PostgreSQL access for Windmill
+  hosts: postgres-lv3
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Ensure target guest is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+  roles:
+    - role: postgres_vm
+    - role: windmill_postgres
+
+- name: Converge Windmill on the Docker runtime VM
+  hosts: docker-runtime-lv3
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Ensure target guest is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+  roles:
+    - role: docker_runtime
+    - role: windmill_runtime

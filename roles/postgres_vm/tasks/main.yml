@@ -55,7 +55,7 @@
     src: postgresql-lv3.conf.j2
     dest: "{{ postgres_vm_managed_conf_path }}"
     mode: "0644"
-  notify: restart postgresql
+  notify: Restart PostgreSQL
 
 - name: Render PostgreSQL host-based authentication policy
   ansible.builtin.template:
@@ -64,7 +64,7 @@
     owner: root
     group: postgres
     mode: "0640"
-  notify: restart postgresql
+  notify: Restart PostgreSQL
 
 - name: Render guest nftables policy
   ansible.builtin.template:
@@ -72,7 +72,7 @@
     dest: "{{ postgres_vm_nftables_config_file }}"
     mode: "0644"
     validate: /usr/sbin/nft -c -f %s
-  notify: reload nftables
+  notify: Reload nftables
 
 - name: Ensure nftables service is enabled and started
   ansible.builtin.service:

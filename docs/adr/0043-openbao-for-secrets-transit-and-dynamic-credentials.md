@@ -1,10 +1,10 @@
 # ADR 0043: OpenBao For Secrets, Transit, And Dynamic Credentials
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.45.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-22
 - Date: 2026-03-22
 
 ## Context
@@ -63,3 +63,10 @@ Authentication and authorization must be structured around narrow roles:
 - [Transit secrets engine](https://openbao.org/docs/secrets/transit/)
 - [PKI secrets engine API](https://openbao.org/api-docs/secret/pki/)
 
+## Implementation Notes
+
+- The repo now defines a dedicated OpenBao automation surface through [playbooks/openbao.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/openbao.yml), [roles/openbao_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/openbao_runtime), and [roles/openbao_postgres_backend](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/openbao_postgres_backend).
+- [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json) now exposes `converge-openbao` as the canonical entry point with explicit preflight, validation, and verification metadata.
+- [config/controller-local-secrets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/controller-local-secrets.json) now records the controller-local bootstrap artifacts and scoped AppRole outputs used by the OpenBao workflow.
+- Operator usage is documented in [docs/runbooks/configure-openbao.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-openbao.md).
+- Live application is intentionally still pending, so the platform implementation metadata remains `not yet`.
