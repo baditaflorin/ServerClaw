@@ -8,6 +8,16 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.55.0 - 2026-03-22
+
+- completed the ADR 0053 repository rollout by enabling Prometheus native histograms for Tempo's metrics generator, which unblocks persisted span-metrics and service-graph writes into the managed Prometheus receiver
+- corrected the first traced producer so the mail gateway now honors `OTEL_RESOURCE_ATTRIBUTES` in addition to `OTEL_SERVICE_NAME`, keeping `service.namespace` and `deployment.environment` aligned with the shared observability contract
+- refreshed the tracing ADR and runbooks to document the corrected Prometheus and resource-tag expectations before the live apply from `main`
+
+Platform impact:
+
+- no direct live platform change in this release commit; the corrected tracing stack still needs to be applied from `main`
+
 ## 0.54.0 - 2026-03-22
 
 - applied ADR 0060 live by converging a private Open WebUI runtime on `docker-runtime-lv3` and publishing it through the Proxmox host Tailscale proxy on port `8008`
