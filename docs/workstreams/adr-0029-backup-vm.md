@@ -1,8 +1,8 @@
-# Workstream ADR 0026: Dedicated Backup VM With Local PBS
+# Workstream ADR 0029: Dedicated Backup VM With Local PBS
 
-- ADR: [ADR 0026](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0026-dedicated-backup-vm-with-local-pbs.md)
+- ADR: [ADR 0029](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0029-dedicated-backup-vm-with-local-pbs.md)
 - Title: Dedicated backup VM rollout
-- Status: ready_for_merge
+- Status: merged
 - Branch: `codex/adr-0026-backup-vm`
 - Worktree: `../proxmox_florin_server-backup-vm`
 - Owner: codex
@@ -32,7 +32,7 @@
 - `roles/backup_vm`
 - `playbooks/backup-vm.yml`
 - `docs/runbooks/`
-- `docs/adr/0026-dedicated-backup-vm-with-local-pbs.md`
+- `docs/adr/0029-dedicated-backup-vm-with-local-pbs.md`
 - `README.md`
 
 ## Expected Live Surfaces
@@ -61,5 +61,6 @@
 
 - this workstream intentionally improves restore operations without claiming off-host disaster recovery
 - a later follow-up should add replication or a second-site copy
-- do not bump `VERSION` or `platform_version` on this branch
 - live validation on 2026-03-22 succeeded for VM `160`, storage `lv3-backup-pbs`, job `backup-lv3-nightly`, and an ad hoc backup artifact for VM `110`
+- the implementation branch remained `codex/adr-0026-backup-vm`, but the ADR and workstream were renumbered to `0029` during integration because `0028` was already assigned on `main`
+- the workstream is merged, but `live_applied` remains `false` in the registry until the merged automation is re-applied from `main`

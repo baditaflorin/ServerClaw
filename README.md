@@ -60,6 +60,7 @@ Initial guest provisioning is now implemented and applied:
 130 docker-build-lv3     10.10.10.30
 140 monitoring-lv3       10.10.10.40
 150 postgres-lv3         10.10.10.50
+160 backup-lv3           10.10.10.60
 9000 debian13-cloud-template
 ```
 
@@ -73,20 +74,22 @@ Merged mainline automation now exists for:
 - ADR 0021 public subdomain publication at the NGINX edge
 - ADR 0022 nginx guest observability
 - ADR 0023 Docker runtime baseline
-- ADR 0028 Docker build VM build telemetry
 - ADR 0026 dedicated PostgreSQL VM baseline
 - ADR 0027 Uptime Kuma on the Docker runtime VM
+- ADR 0028 Docker build VM build telemetry
+- ADR 0029 dedicated backup VM with local PBS
 
 Current live state for those merged workstreams:
 
 - ADR 0011 monitoring is applied live on `10.10.10.40`
 - ADR 0014 now provides stable host administration over the Proxmox Tailscale IP; direct guest subnet routing is still pending tailnet route acceptance
-- ADR 0020 backups are still blocked on missing external CIFS target credentials
+- ADR 0020 remains the backup policy and retention baseline; its initial external CIFS path is still blocked and is superseded in practice by ADR 0029
 - ADR 0022 nginx guest observability is reflected in the Grafana dashboard
 - ADR 0023 Docker runtime baseline is applied live on `10.10.10.20`
-- ADR 0028 Docker build telemetry is applied live on `10.10.10.30` and Grafana now shows both build counts and build durations
-- ADR 0027 Uptime Kuma is applied live on `10.10.10.20` and published at `https://uptime.lv3.org`
 - ADR 0026 PostgreSQL baseline is applied live on `10.10.10.50` and published privately on `database.lv3.org:5432`
+- ADR 0027 Uptime Kuma is applied live on `10.10.10.20` and published at `https://uptime.lv3.org`
+- ADR 0028 Docker build telemetry is applied live on `10.10.10.30` and Grafana now shows both build counts and build durations
+- ADR 0029 backup-lv3 is live on `10.10.10.60`; the host now uses PBS storage `lv3-backup-pbs` with nightly job `backup-lv3-nightly`, but `platform_version` remains unchanged until a re-apply from `main`
 
 Other current live state:
 
@@ -164,6 +167,17 @@ database access is proxied only on Tailscale port 5432
 guest firewall only accepts proxied PostgreSQL traffic from 10.10.10.1/32
 ```
 
+The current backup posture is:
+
+```text
+backup-lv3 runs Proxmox Backup Server on 10.10.10.60
+PBS datastore proxmox is mounted at /mnt/datastore/proxmox on the dedicated backup disk
+Proxmox storage lv3-backup-pbs points to 10.10.10.60:8007
+nightly job backup-lv3-nightly protects VMIDs 110, 120, 130, 140, and 150 at 02:30
+restore-oriented verification is documented and includes artifact listing plus test backup validation
+this is still same-host recovery, not off-host disaster recovery
+```
+
 ## Documents
 
 - [Changelog](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/changelog.md)
@@ -184,6 +198,7 @@ guest firewall only accepts proxied PostgreSQL traffic from 10.10.10.1/32
 - [Configure PostgreSQL VM runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-postgres-vm.md)
 - [Repair guest netplan MAC drift runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/repair-guest-netplan-mac-drift.md)
 - [Configure storage and backups runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-storage-and-backups.md)
+- [Configure backup VM runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-backup-vm.md)
 - [ADR 0001: Bootstrap model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0001-bootstrap-dedicated-host-with-ansible.md)
 - [ADR 0002: Target Proxmox VE 9 on Debian 13](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0002-target-proxmox-ve-9-on-debian-13.md)
 - [ADR 0003: Prefer Rescue plus installimage](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0003-prefer-hetzner-rescue-plus-installimage-for-bootstrap.md)
@@ -211,6 +226,8 @@ guest firewall only accepts proxied PostgreSQL traffic from 10.10.10.1/32
 - [ADR 0025: Compose-managed runtime stacks](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0025-compose-managed-runtime-stacks.md)
 - [ADR 0026: Dedicated PostgreSQL VM baseline](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0026-dedicated-postgresql-vm-baseline.md)
 - [ADR 0027: Uptime Kuma on the Docker runtime VM](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0027-uptime-kuma-on-the-docker-runtime-vm.md)
+- [ADR 0028: Docker build VM build count and duration telemetry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0028-docker-build-vm-build-count-telemetry-via-cli-wrapper-events.md)
+- [ADR 0029: Dedicated backup VM with local PBS](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0029-dedicated-backup-vm-with-local-pbs.md)
 
 ## Versioning
 
@@ -222,7 +239,7 @@ This repo now tracks three distinct things:
 
 Current values on `main`:
 
-- `repo_version`: `0.28.0`
+- `repo_version`: `0.30.0`
 - `platform_version`: `0.19.0`
 - `observed_os`: `Debian 13`
 - `observed_proxmox_installed`: `true`
@@ -267,6 +284,8 @@ This repository is intentionally opinionated:
 - [ADR 0023 Docker runtime workstream](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0023-docker-runtime.md)
 - [ADR 0026 PostgreSQL workstream](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0026-postgres-vm.md)
 - [ADR 0027 Uptime Kuma workstream](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0027-uptime-kuma.md)
+- [ADR 0028 Docker build telemetry workstream](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0028-build-telemetry.md)
+- [ADR 0029 backup VM workstream](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0029-backup-vm.md)
 
 ## Planned workflow
 
@@ -288,6 +307,7 @@ The first executable automation scaffold now exists:
 - [playbooks/public-edge.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/public-edge.yml)
 - [playbooks/proxmox-install.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/proxmox-install.yml)
 - [playbooks/docker-runtime.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/docker-runtime.yml)
+- [playbooks/backup-vm.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/backup-vm.yml)
 - [playbooks/uptime-kuma.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/uptime-kuma.yml)
 - [roles/proxmox_repository/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_repository/tasks/main.yml)
 - [roles/proxmox_kernel/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_kernel/tasks/main.yml)
@@ -301,6 +321,7 @@ The first executable automation scaffold now exists:
 - [roles/proxmox_guests/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_guests/tasks/main.yml)
 - [roles/linux_access/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/linux_access/tasks/main.yml)
 - [roles/docker_runtime/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/docker_runtime/tasks/main.yml)
+- [roles/backup_vm/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/backup_vm/tasks/main.yml)
 - [roles/uptime_kuma_runtime/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/uptime_kuma_runtime/tasks/main.yml)
 - [roles/proxmox_access/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_access/tasks/main.yml)
 - [roles/proxmox_api_access/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_api_access/tasks/main.yml)

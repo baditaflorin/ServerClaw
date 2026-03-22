@@ -1,10 +1,10 @@
-# ADR 0026: Dedicated Backup VM With Local PBS
+# ADR 0029: Dedicated Backup VM With Local PBS
 
 - Status: Accepted
-- Implementation Status: Partial
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.30.0
+- Implemented In Platform Version: 0.19.0
+- Implemented On: 2026-03-22
 - Date: 2026-03-22
 
 ## Context
@@ -45,6 +45,7 @@ Initial shape:
 - Restore operations become materially better because PBS provides a native Proxmox backup target and a clear datastore model.
 - This is still the same failure domain as the hypervisor and its local storage, so it is not an off-host or disaster-recovery-grade solution.
 - ADR 0020 remains relevant for retention policy, restore expectations, and scope boundaries, but its initial external-target implementation is superseded for the immediate rollout path.
+- The live platform now has this backup path in place, but `platform_version` is intentionally unchanged until the merged automation is re-applied from `main`.
 - A follow-up ADR is still required for true off-host replication, a second PBS node, object storage export, or any other cross-failure-domain design.
 
 ## Sources
