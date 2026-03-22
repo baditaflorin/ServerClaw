@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.46.0
-platform_version: 0.22.0
+repo_version: 0.47.0
+platform_version: 0.23.0
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -15,6 +15,7 @@ live_apply_evidence:
     runtime_container_telemetry: 2026-03-22-adr-0040-runtime-container-telemetry-live-apply
     mail_platform: 2026-03-22-adr-0041-email-platform-live-apply
     step_ca: 2026-03-22-adr-0042-step-ca-live-apply
+    windmill: 2026-03-22-adr-0044-windmill-live-apply
 
 desired_state:
   host_id: proxmox_florin
@@ -457,8 +458,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.46.0
+    current: 0.47.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.22.0
+    current: 0.23.0
     meaning: intended platform release for the actual server configuration

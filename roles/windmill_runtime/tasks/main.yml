@@ -206,23 +206,6 @@
   when: not (windmill_workspace_exists.json | default(false) | bool)
   no_log: true
 
-- name: Read current Windmill script content
-  ansible.builtin.uri:
-    url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id | urlencode }}/scripts/raw/p/{{ (item.api_path | default(item.path)) | urlencode }}"
-    method: GET
-    headers:
-      Authorization: "Bearer {{ windmill_superadmin_secret }}"
-    return_content: true
-    status_code:
-      - 200
-      - 404
-  loop: "{{ windmill_seed_scripts }}"
-  loop_control:
-    label: "{{ item.path }}"
-  register: windmill_seed_script_current
-  changed_when: false
-  no_log: true
-
 - name: Sync repo-managed Windmill scripts
   ansible.builtin.uri:
     url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id | urlencode }}/scripts/create"
@@ -238,15 +221,16 @@
       kind: script
       deployment_message: Repo-managed Windmill seed sync
       content: "{{ lookup('ansible.builtin.file', item.local_file) }}"
-    status_code: 201
+    return_content: true
+    status_code:
+      - 201
+      - 400
   loop: "{{ windmill_seed_scripts }}"
   loop_control:
-    index_var: windmill_seed_script_index
     label: "{{ item.path }}"
-  when: >-
-    windmill_seed_script_current.results[windmill_seed_script_index].status != 200
-    or (windmill_seed_script_current.results[windmill_seed_script_index].content | default(''))
-    != lookup('ansible.builtin.file', item.local_file)
+  register: windmill_seed_script_sync
+  failed_when: false
+  changed_when: false
   no_log: true
 
 - name: Run the Windmill seeded healthcheck script

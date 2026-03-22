@@ -2,8 +2,8 @@
 
 - Status: Accepted
 - Implementation Status: Implemented
-- Implemented In Repo Version: 0.45.0
-- Implemented In Platform Version: not yet
+- Implemented In Repo Version: 0.47.0
+- Implemented In Platform Version: 0.23.0
 - Implemented On: 2026-03-22
 - Date: 2026-03-22
 
@@ -63,4 +63,4 @@ Initial placement:
 - [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json) now exposes `converge-windmill` as the canonical entry point with explicit preflight, validation, and verification metadata.
 - [config/controller-local-secrets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/controller-local-secrets.json) now records the controller-local Windmill bootstrap artifacts consumed by the workflow.
 - Operator usage is documented in [docs/runbooks/configure-windmill.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-windmill.md).
-- Live application is intentionally still pending, so the platform implementation metadata remains `not yet`.
+- Live application is now verified from `main` through the private Tailscale proxy at `http://100.118.189.95:8005`, with the repo-managed `lv3` workspace and healthcheck script synced and executed successfully.

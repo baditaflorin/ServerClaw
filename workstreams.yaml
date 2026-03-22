@@ -301,7 +301,7 @@ workstreams:
   - id: adr-0044-windmill
     adr: "0044"
     title: Windmill for agent and operator workflows
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0044-windmill
     worktree_path: ../proxmox_florin_server-windmill
@@ -315,7 +315,7 @@ workstreams:
       - workflow APIs
       - webhook entry points
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0045-communication-lanes
     adr: "0045"

@@ -62,8 +62,8 @@ The private `step-ca` control plane is now live on `docker-runtime-lv3`, publish
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.46.0` |
-| Platform version | `0.22.0` |
+| Repository version | `0.47.0` |
+| Platform version | `0.23.0` |
 | Observed check date | `2026-03-22` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -106,6 +106,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `runtime_container_telemetry` | `2026-03-22-adr-0040-runtime-container-telemetry-live-apply` |
 | `step_ca` | `2026-03-22-adr-0042-step-ca-live-apply` |
 | `uptime_kuma` | `2026-03-22-adr-0027-uptime-kuma-live-apply` |
+| `windmill` | `2026-03-22-adr-0044-windmill-live-apply` |
 <!-- END GENERATED: platform-status -->
 
 The current access posture is:
@@ -371,8 +372,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.46.0` |
-| Platform version | `0.22.0` |
+| Repository version | `0.47.0` |
+| Platform version | `0.23.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -429,7 +430,7 @@ This repository is intentionally opinionated:
 | `0041` | Dockerized mail platform live rollout | `live_applied` | [adr-0041-email-platform-live.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0041-email-platform-live.md) |
 | `0042` | step-ca for SSH and internal TLS | `live_applied` | [adr-0042-step-ca.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0042-step-ca.md) |
 | `0043` | OpenBao for secrets, transit, and dynamic credentials | `merged` | [adr-0043-openbao.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0043-openbao.md) |
-| `0044` | Windmill for agent and operator workflows | `merged` | [adr-0044-windmill.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0044-windmill.md) |
+| `0044` | Windmill for agent and operator workflows | `live_applied` | [adr-0044-windmill.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0044-windmill.md) |
 | `0045` | Control-plane communication lanes | `merged` | [adr-0045-communication-lanes.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0045-communication-lanes.md) |
 | `0046` | Identity classes for humans, services, agents, and break-glass | `merged` | [adr-0046-identity-classes.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0046-identity-classes.md) |
 | `0047` | Short-lived credentials and internal mTLS | `merged` | [adr-0047-short-lived-creds.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0047-short-lived-creds.md) |

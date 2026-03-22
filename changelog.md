@@ -8,6 +8,18 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.47.0 - 2026-03-22
+
+- applied ADR 0044 live from `main` by provisioning the Windmill PostgreSQL backend on `postgres-lv3`, converging the private Windmill runtime on `docker-runtime-lv3`, and exposing operator access through the Proxmox host Tailscale proxy on port `8005`
+- hardened the Windmill automation so workspace bootstrap, database ownership, and repo-managed seed-script sync rerun cleanly against Windmill's actual API behavior and prior partial state
+- recorded controller-local Windmill bootstrap artifacts and a live-apply receipt, and updated ADR/workstream metadata to mark the workflow runtime as live
+
+Platform impact:
+
+- Windmill is now live on `docker-runtime-lv3` and reachable privately at `http://100.118.189.95:8005`
+- `postgres-lv3` now serves the managed `windmill` database with the `windmill_admin` and `windmill_user` roles required by the runtime
+- the repo-managed `lv3` workspace and `f/lv3/windmill_healthcheck` script now provide a verified bootstrap workflow surface for agents and operators
+
 ## 0.46.0 - 2026-03-22
 
 - applied ADR 0042 live from `main` by converging the private `step-ca` runtime on `docker-runtime-lv3`, publishing it through the Proxmox host Tailscale address, and installing CA-backed SSH host trust on the Proxmox host and managed guests

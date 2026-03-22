@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0044](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0044-windmill-for-agent-and-operator-workflows.md)
 - Title: On-platform workflow runtime for agents and operators
-- Status: merged
+- Status: live_applied
 - Branch: `codex/adr-0044-windmill`
 - Worktree: `../proxmox_florin_server-windmill`
 - Owner: codex
@@ -35,22 +35,26 @@
 
 ## Expected Live Surfaces
 
-- no direct live apply in this integration step
-- a ready-to-run Windmill converge path for later controlled rollout
+- private Windmill runtime on `docker-runtime-lv3`
+- PostgreSQL database `windmill` on `postgres-lv3`
+- Tailscale operator entrypoint at `http://100.118.189.95:8005`
+- repo-managed workspace `lv3` with seeded script `f/lv3/windmill_healthcheck`
 
 ## Verification
 
 - `make syntax-check-windmill`
-- `make workflow-info WORKFLOW=converge-windmill`
-- `test -f /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/lv3-healthcheck.py`
+- `make converge-windmill`
+- `curl -s http://100.118.189.95:8005/api/version`
+- `curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" http://100.118.189.95:8005/api/users/whoami`
+- `curl -s -X POST -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" -H "Content-Type: application/json" -d '{"probe":"manual-run"}' http://100.118.189.95:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fwindmill_healthcheck`
 
 ## Merge Criteria
 
-- the repo has a coherent Windmill converge path with documented bootstrap artifacts and seeded script sync
-- secret handling and private publication expectations remain explicit
+- the repo-managed Windmill converge path applies cleanly from `main`
+- private operator access, workspace bootstrap, and seeded healthcheck execution are verified live
 
 ## Notes For The Next Assistant
 
 - keep new Windmill scripts under repo-managed files and sync them through automation
 - treat OpenBao integration and narrower Windmill identities as follow-up work, not as reasons to hand-edit secrets into Windmill
-- validate the host-side proxy and API path live before changing this workstream back to `live_applied`
+- keep secret-bearing workflows constrained until ADR 0043 and ADR 0047 are live

@@ -1,0 +1,69 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-22-adr-0044-windmill-live-apply",
+  "applied_on": "2026-03-22",
+  "recorded_on": "2026-03-22",
+  "recorded_by": "codex",
+  "source_commit": "3412728762b7b41f1f5d375bce776e10a4a0b9dc",
+  "repo_version_context": "0.47.0",
+  "workflow_id": "converge-windmill",
+  "adr": "0044",
+  "summary": "Applied the private Windmill runtime live on docker-runtime-lv3, provisioned its PostgreSQL backend on postgres-lv3, published it through the Proxmox host Tailscale proxy, and verified workspace bootstrap and job execution end to end.",
+  "targets": [
+    {
+      "kind": "vm",
+      "name": "docker-runtime-lv3",
+      "vmid": "120",
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "vm",
+      "name": "postgres-lv3",
+      "vmid": "150",
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "windmill",
+      "address": "100.118.189.95:8005"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Windmill converge from main",
+      "result": "pass",
+      "observed": "make converge-windmill completed successfully from the main integration worktree after aligning the workspace and seed-script API handling with Windmill's live behavior."
+    },
+    {
+      "check": "Private Windmill API version endpoint",
+      "result": "pass",
+      "observed": "curl returned CE v1.662.0-3-g911df958e7 from http://100.118.189.95:8005/api/version."
+    },
+    {
+      "check": "Superadmin identity verification",
+      "result": "pass",
+      "observed": "curl to /api/users/whoami returned superadmin_secret@windmill.dev with super_admin=true through the Proxmox host Tailscale proxy."
+    },
+    {
+      "check": "Repo-managed healthcheck execution",
+      "result": "pass",
+      "observed": "POST to /api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fwindmill_healthcheck returned the expected probe value, workspace lv3, and job_id_present=true."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0044-windmill-for-agent-and-operator-workflows.md",
+    "docs/runbooks/configure-windmill.md",
+    "docs/workstreams/adr-0044-windmill.md",
+    "README.md",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "The live rollout had to account for Windmill API quirks: workspace existence returns a JSON boolean, the script create endpoint stores the path without an extension, and script execution resolves that stored path directly.",
+    "One initial healthcheck script version was created manually through the Windmill API during rollout debugging to confirm the path semantics; the final converge from main now resubmits the same repo-managed definition idempotently."
+  ]
+}
