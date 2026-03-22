@@ -1,10 +1,10 @@
 # ADR 0051: Control-Plane Backup, Recovery, And Break-Glass
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.50.0
+- Implemented In Platform Version: 0.26.0
+- Implemented On: 2026-03-22
 - Date: 2026-03-22
 
 ## Context
@@ -46,3 +46,10 @@ Recovery policy:
 - Backup scope becomes more explicit than "the VM is backed up."
 - Break-glass stops being a vague promise and becomes part of the architecture.
 
+## Implementation Notes
+
+- The repo now exposes a dedicated recovery workflow through [playbooks/control-plane-recovery.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/control-plane-recovery.yml), [roles/control_plane_recovery](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/control_plane_recovery), [roles/control_plane_recovery_store](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/control_plane_recovery_store), and [roles/control_plane_recovery_controller](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/control_plane_recovery_controller).
+- [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json) now registers `converge-control-plane-recovery` as the canonical entry point for the scheduled exports, controller bundle refresh, and restore drill.
+- [config/controller-local-secrets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/controller-local-secrets.json) now records the generated runtime backup SSH key and controller recovery bundle alongside the pre-existing control-plane bootstrap artifacts.
+- Operator procedure is documented in [docs/runbooks/configure-control-plane-recovery.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-control-plane-recovery.md).
+- Live application on 2026-03-22 verified scheduled runtime archives for `step-ca`, OpenBao, Windmill, and the mail platform on `backup-lv3`, plus a passing restore drill against the mirrored controller recovery bundle.

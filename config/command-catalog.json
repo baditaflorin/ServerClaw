@@ -722,6 +722,54 @@
         ]
       }
     },
+    "converge-control-plane-recovery": {
+      "description": "Converge scheduled control-plane backups, controller recovery bundle refresh, and restore-drill validation.",
+      "workflow_id": "converge-control-plane-recovery",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        },
+        {
+          "name": "openbao_init_payload",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "OpenBao init payload used to mint the scoped backup token for managed Raft snapshots."
+        },
+        {
+          "name": "control_plane_recovery_controller_bundle",
+          "kind": "controller_secret",
+          "required": false,
+          "source": "config/controller-local-secrets.json",
+          "description": "Generated controller recovery bundle mirrored into backup-lv3 during the workflow."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-control-plane-recovery passes",
+        "make validate passes before the apply",
+        "Break-glass dependencies and controller-local recovery references are reviewed before rotating the recovery bundle"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record timer status, archive landing, controller bundle refresh, and a passing restore drill on backup-lv3."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if runtime archive delivery, controller bundle refresh, or restore-drill verification fails.",
+          "Stop if the change would weaken the documented break-glass path or remove the only working recovery reference."
+        ],
+        "rollback_guidance": [
+          "Reapply the last known-good recovery automation before changing component runtimes again.",
+          "Preserve the prior controller bundle and backup archives until the new drill passes."
+        ]
+      }
+    },
     "converge-netbox": {
       "description": "Converge the private NetBox runtime, PostgreSQL backend, host-side proxy, and repo-managed inventory synchronization.",
       "workflow_id": "converge-netbox",

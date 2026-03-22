@@ -1,0 +1,19 @@
+---
+control_plane_recovery_runtime_root: /opt/control-plane-recovery
+control_plane_recovery_runtime_config_dir: /etc/lv3/control-plane-recovery
+control_plane_recovery_runtime_state_dir: /var/lib/control-plane-recovery
+control_plane_recovery_runtime_bin_dir: "{{ control_plane_recovery_runtime_root }}/bin"
+control_plane_recovery_runtime_backup_script: "{{ control_plane_recovery_runtime_bin_dir }}/lv3-control-plane-backup.sh"
+control_plane_recovery_runtime_backup_service: lv3-control-plane-backup.service
+control_plane_recovery_runtime_backup_timer: lv3-control-plane-backup.timer
+control_plane_recovery_backup_on_calendar: "*-*-* 01,07,13,19:15:00"
+control_plane_recovery_backup_retention_count: 28
+control_plane_recovery_runtime_ssh_private_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-plane-recovery/ssh/docker-runtime-backup.id_ed25519
+control_plane_recovery_runtime_ssh_public_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-plane-recovery/ssh/docker-runtime-backup.id_ed25519.pub
+control_plane_recovery_runtime_openbao_backup_policy_name: lv3-control-plane-backup
+control_plane_recovery_runtime_openbao_backup_token_remote_file: "{{ control_plane_recovery_runtime_config_dir }}/openbao-backup-token.json"
+control_plane_recovery_runtime_backup_target_host: "{{ hostvars['backup-lv3'].ansible_host }}"
+control_plane_recovery_runtime_backup_target_user: lv3-control-plane-backup
+control_plane_recovery_runtime_backup_target_dir: /srv/control-plane-recovery/runtime/docker-runtime-lv3
+control_plane_recovery_runtime_backup_target_controller_dir: /srv/control-plane-recovery/controller
+control_plane_recovery_run_backup_now: true

@@ -1,0 +1,10 @@
+[Unit]
+Description=LV3 control-plane restore drill
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User={{ control_plane_recovery_store_user }}
+Group={{ control_plane_recovery_store_group }}
+ExecStart={{ control_plane_recovery_store_restore_drill_script }}

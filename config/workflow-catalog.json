@@ -717,6 +717,54 @@
         "curl -s -H \"Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)\" http://100.118.189.95:8005/api/users/global/whoami"
       ]
     },
+    "converge-control-plane-recovery": {
+      "description": "Converge scheduled control-plane backups on docker-runtime-lv3, stage controller recovery references, and validate recurring restore drills on backup-lv3.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-control-plane-recovery",
+        "command": "make converge-control-plane-recovery"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "proxmox_api_token_payload",
+          "proxmox_ops_pam_totp_state",
+          "mail_platform_brevo_api_key",
+          "step_ca_password",
+          "windmill_database_password",
+          "windmill_superadmin_secret",
+          "openbao_init_payload"
+        ],
+        "generated_secret_ids": [
+          "control_plane_recovery_runtime_ssh_private_key",
+          "control_plane_recovery_controller_bundle"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-control-plane-recovery"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-control-plane-recovery.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/control-plane-recovery.yml",
+        "roles/control_plane_recovery",
+        "roles/control_plane_recovery_store",
+        "roles/control_plane_recovery_controller",
+        "inventory/group_vars/all.yml"
+      ],
+      "outputs": [
+        "Scheduled runtime exports for step-ca, OpenBao, Windmill, and the mail platform on docker-runtime-lv3 plus backup-lv3 restore drills and a mirrored controller recovery bundle."
+      ],
+      "verification_commands": [
+        "make syntax-check-control-plane-recovery",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'sudo systemctl status lv3-control-plane-backup.timer --no-pager'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.60 'sudo systemctl status lv3-control-plane-restore-drill.timer --no-pager'"
+      ]
+    },
     "converge-netbox": {
       "description": "Converge private NetBox on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish the host-side Tailscale proxy, and synchronize canonical repo inventory into the API.",
       "lifecycle_status": "active",

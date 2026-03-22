@@ -1,0 +1,240 @@
+---
+- name: Validate control-plane recovery runtime inputs
+  ansible.builtin.assert:
+    that:
+      - control_plane_recovery_runtime_root | length > 0
+      - control_plane_recovery_runtime_backup_script | length > 0
+      - control_plane_recovery_runtime_ssh_private_key_local_file | length > 0
+      - control_plane_recovery_runtime_openbao_backup_token_remote_file | length > 0
+      - control_plane_recovery_runtime_backup_target_host | length > 0
+      - control_plane_recovery_runtime_backup_target_user | length > 0
+      - control_plane_recovery_runtime_backup_target_dir | length > 0
+      - control_plane_recovery_runtime_openbao_backup_policy_name | length > 0
+      - openbao_init_local_file | length > 0
+      - step_ca_home | length > 0
+      - step_ca_password_dir | length > 0
+      - openbao_config_dir | length > 0
+      - openbao_tls_dir | length > 0
+      - openbao_policy_dir | length > 0
+      - windmill_site_dir | length > 0
+      - windmill_secret_dir | length > 0
+      - mail_platform_site_dir | length > 0
+      - mail_platform_secret_dir | length > 0
+    fail_msg: "control_plane_recovery requires runtime paths, the controller-local SSH keypair, and control-plane component paths."
+
+- name: Ensure controller-local control-plane recovery directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0700"
+  loop:
+    - "{{ control_plane_recovery_runtime_ssh_private_key_local_file | dirname }}"
+  delegate_to: localhost
+  become: false
+
+- name: Generate the controller-local runtime backup SSH keypair when missing
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ control_plane_recovery_runtime_ssh_private_key_local_file }}" ] || [ ! -s "{{ control_plane_recovery_runtime_ssh_public_key_local_file }}" ]; then
+      ssh-keygen -q -t ed25519 -N '' -f "{{ control_plane_recovery_runtime_ssh_private_key_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: control_plane_recovery_runtime_keygen
+  changed_when: "'changed' in control_plane_recovery_runtime_keygen.stdout"
+
+- name: Read the controller-local runtime backup private key
+  ansible.builtin.slurp:
+    src: "{{ control_plane_recovery_runtime_ssh_private_key_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: control_plane_recovery_runtime_private_key_raw
+  no_log: true
+
+- name: Read the controller-local OpenBao init payload
+  ansible.builtin.slurp:
+    src: "{{ openbao_init_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: control_plane_recovery_openbao_init_payload_raw
+  no_log: true
+
+- name: Record the OpenBao init payload facts for recovery automation
+  ansible.builtin.set_fact:
+    control_plane_recovery_openbao_init_payload: "{{ control_plane_recovery_openbao_init_payload_raw.content | b64decode | from_json }}"
+  no_log: true
+
+- name: Install control-plane recovery runtime packages
+  ansible.builtin.apt:
+    name:
+      - curl
+      - jq
+      - openssh-client
+      - postgresql-client
+      - rsync
+      - zstd
+    state: present
+    update_cache: true
+
+- name: Ensure the control-plane recovery runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ control_plane_recovery_runtime_root }}"
+      mode: "0755"
+    - path: "{{ control_plane_recovery_runtime_bin_dir }}"
+      mode: "0755"
+    - path: "{{ control_plane_recovery_runtime_config_dir }}"
+      mode: "0700"
+    - path: "{{ control_plane_recovery_runtime_state_dir }}"
+      mode: "0700"
+    - path: "{{ control_plane_recovery_runtime_state_dir }}/staging"
+      mode: "0700"
+    - path: /root/.ssh
+      mode: "0700"
+
+- name: Install the runtime backup SSH private key on docker-runtime-lv3
+  ansible.builtin.copy:
+    dest: "{{ control_plane_recovery_runtime_config_dir }}/docker-runtime-backup.id_ed25519"
+    content: "{{ control_plane_recovery_runtime_private_key_raw.content | b64decode }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Capture the backup VM SSH host key from docker-runtime-lv3
+  ansible.builtin.command:
+    argv:
+      - ssh-keyscan
+      - -H
+      - "{{ control_plane_recovery_runtime_backup_target_host }}"
+  register: control_plane_recovery_runtime_hostkey
+  changed_when: false
+
+- name: Record the backup VM SSH host key for runtime pushes
+  ansible.builtin.copy:
+    dest: /root/.ssh/known_hosts
+    content: "{{ control_plane_recovery_runtime_hostkey.stdout }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+
+- name: Read the currently deployed OpenBao backup token artifact if it exists
+  ansible.builtin.stat:
+    path: "{{ control_plane_recovery_runtime_openbao_backup_token_remote_file }}"
+  register: control_plane_recovery_openbao_backup_token_remote
+
+- name: Read the existing OpenBao backup token artifact
+  ansible.builtin.slurp:
+    src: "{{ control_plane_recovery_runtime_openbao_backup_token_remote_file }}"
+  when: control_plane_recovery_openbao_backup_token_remote.stat.exists
+  register: control_plane_recovery_openbao_existing_token_raw
+  no_log: true
+
+- name: Record the existing OpenBao backup token artifact
+  ansible.builtin.set_fact:
+    control_plane_recovery_openbao_existing_token: "{{ control_plane_recovery_openbao_existing_token_raw.content | b64decode | from_json }}"
+  when: control_plane_recovery_openbao_backup_token_remote.stat.exists
+  no_log: true
+
+- name: Ensure the OpenBao backup policy exists
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/policies/acl/{{ control_plane_recovery_runtime_openbao_backup_policy_name }}"
+    method: PUT
+    headers:
+      X-Vault-Token: "{{ control_plane_recovery_openbao_init_payload.root_token }}"
+    body_format: json
+    body:
+      policy: |
+        path "sys/storage/raft/snapshot" {
+          capabilities = ["read", "create", "update", "sudo"]
+        }
+    status_code: 204
+  no_log: true
+
+- name: Revoke the previously deployed OpenBao backup token accessor
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/auth/token/revoke-accessor"
+    method: POST
+    headers:
+      X-Vault-Token: "{{ control_plane_recovery_openbao_init_payload.root_token }}"
+    body_format: json
+    body:
+      accessor: "{{ control_plane_recovery_openbao_existing_token.accessor }}"
+    status_code: 204
+  when:
+    - control_plane_recovery_openbao_existing_token is defined
+    - (control_plane_recovery_openbao_existing_token.accessor | default('')) | length > 0
+  failed_when: false
+  no_log: true
+
+- name: Create a refreshed OpenBao backup token
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/auth/token/create"
+    method: POST
+    headers:
+      X-Vault-Token: "{{ control_plane_recovery_openbao_init_payload.root_token }}"
+    body_format: json
+    body:
+      display_name: lv3-control-plane-backup
+      renewable: false
+      no_parent: true
+      policies:
+        - "{{ control_plane_recovery_runtime_openbao_backup_policy_name }}"
+    return_content: true
+    status_code: 200
+  register: control_plane_recovery_openbao_backup_token_response
+  no_log: true
+
+- name: Persist the OpenBao backup token artifact for the runtime backup script
+  ansible.builtin.copy:
+    dest: "{{ control_plane_recovery_runtime_openbao_backup_token_remote_file }}"
+    content: "{{ {'token': control_plane_recovery_openbao_backup_token_response.json.auth.client_token, 'accessor': control_plane_recovery_openbao_backup_token_response.json.auth.accessor, 'policy': control_plane_recovery_runtime_openbao_backup_policy_name, 'generated_at': ansible_date_time.iso8601} | to_nice_json }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Render the runtime backup script
+  ansible.builtin.template:
+    src: lv3-control-plane-backup.sh.j2
+    dest: "{{ control_plane_recovery_runtime_backup_script }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Render the runtime backup systemd service
+  ansible.builtin.template:
+    src: lv3-control-plane-backup.service.j2
+    dest: "/etc/systemd/system/{{ control_plane_recovery_runtime_backup_service }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the runtime backup systemd timer
+  ansible.builtin.template:
+    src: lv3-control-plane-backup.timer.j2
+    dest: "/etc/systemd/system/{{ control_plane_recovery_runtime_backup_timer }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Enable and start the runtime backup timer
+  ansible.builtin.systemd:
+    name: "{{ control_plane_recovery_runtime_backup_timer }}"
+    enabled: true
+    state: started
+    daemon_reload: true
+
+- name: Run the control-plane backup script immediately
+  ansible.builtin.command: "{{ control_plane_recovery_runtime_backup_script }}"
+  register: control_plane_recovery_runtime_backup_now
+  changed_when: true
+  when: control_plane_recovery_run_backup_now | bool

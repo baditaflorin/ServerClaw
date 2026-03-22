@@ -1,0 +1,10 @@
+[Unit]
+Description=Run the LV3 control-plane backup export on schedule
+
+[Timer]
+OnCalendar={{ control_plane_recovery_backup_on_calendar }}
+Persistent=true
+Unit={{ control_plane_recovery_runtime_backup_service }}
+
+[Install]
+WantedBy=timers.target
