@@ -675,6 +675,48 @@
         "curl -s -H \"Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)\" http://100.118.189.95:8005/api/users/global/whoami"
       ]
     },
+    "converge-open-webui": {
+      "description": "Deploy private Open WebUI on docker-runtime-lv3 with repo-managed bootstrap auth and an operator-only Tailscale proxy on the Proxmox host.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-open-webui",
+        "command": "make converge-open-webui"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "open_webui_admin_password",
+          "open_webui_secret_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-open-webui"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-open-webui.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/open-webui.yml",
+        "roles/open_webui_runtime",
+        "roles/proxmox_tailscale_proxy/tasks/main.yml",
+        "roles/proxmox_security/tasks/main.yml",
+        "inventory/group_vars/all.yml",
+        "inventory/host_vars/proxmox_florin.yml"
+      ],
+      "outputs": [
+        "A private Open WebUI runtime deployed on docker-runtime-lv3 with repo-managed admin bootstrap and an operator-only Tailscale proxy on the Proxmox host."
+      ],
+      "verification_commands": [
+        "make syntax-check-open-webui",
+        "curl -s http://100.118.189.95:8008/",
+        "curl -s -X POST -H \"Content-Type: application/json\" -d '{\"email\":\"ops@lv3.org\",\"password\":\"'\"$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/admin-password.txt)\"'\"}' http://100.118.189.95:8008/api/v1/auths/signin"
+      ]
+    },
     "deploy-uptime-kuma": {
       "description": "Deploy Uptime Kuma on the Docker runtime VM and publish it at uptime.lv3.org.",
       "lifecycle_status": "active",

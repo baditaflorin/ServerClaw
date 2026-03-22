@@ -139,7 +139,7 @@ password SSH disabled on host and guests
 | Lane | Title | Transport | Surfaces | Primary Rule |
 | --- | --- | --- | --- | --- |
 | `command` | Command Lane | `ssh` | 2 | Use SSH only for command-lane access. |
-| `api` | API Lane | `https` | 3 | Default new APIs to internal-only or operator-only publication. |
+| `api` | API Lane | `https` | 4 | Default new APIs to internal-only or operator-only publication. |
 | `message` | Message Lane | `authenticated_submission` | 2 | Submit platform mail through the internal mail platform rather than arbitrary external SMTP relays. |
 | `event` | Event Lane | `signed_http` | 1 | Event sinks must be documented and intentionally reachable. |
 
@@ -151,6 +151,7 @@ password SSH disabled on host and guests
 | `proxmox-management-api` | `api` | `management_api` | `https://100.118.189.95:8006/api2/json` |
 | `step-ca-api` | `api` | `service_api` | `https://100.118.189.95:9443` |
 | `mail-gateway-api` | `api` | `service_api` | `http://10.10.10.20:8081` |
+| `open-webui-operator-workbench` | `api` | `service_api` | `http://100.118.189.95:8008` |
 | `mail-platform-submission` | `message` | `mail_submission` | `10.10.10.20:587` |
 | `proxmox-host-operator-notifications` | `message` | `notification_profile` | `lv3-ops-email sendmail endpoint with catch-all matcher to baditaflorin@gmail.com` |
 | `stalwart-mail-events` | `event` | `webhook` | `http://10.10.10.20:8081/webhooks/stalwart` |
@@ -237,6 +238,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure Docker Runtime Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-docker-runtime.md)
 - [Configure Edge Publication](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-edge-publication.md)
 - [Configure Mail Platform](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-mail-platform.md)
+- [Configure Open WebUI](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-open-webui.md)
 - [Configure OpenBao](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-openbao.md)
 - [Configure PostgreSQL VM Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-postgres-vm.md)
 - [Configure Proxmox Network Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-proxmox-network.md)

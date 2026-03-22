@@ -109,6 +109,8 @@ Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/M
 - `make converge-docker-runtime`
 - `make converge-postgres-vm`
 - `make syntax-check-uptime-kuma`
+- `make syntax-check-open-webui`
+- `make converge-open-webui`
 - `make deploy-uptime-kuma`
 - `make uptime-kuma-manage ACTION=list-monitors`
 - `make database-dns`
