@@ -36,8 +36,11 @@ SERVICE_EXPOSURE_MODELS = {
 }
 DNS_VISIBILITIES = {"public", "tailnet"}
 DNS_RECORD_TYPES = {"A", "AAAA", "CNAME"}
+EXTRA_DNS_RECORD_TYPES = {"A", "AAAA", "CNAME", "MX", "TXT"}
 EDGE_KINDS = {"static", "proxy"}
 MONITOR_TYPES = {"http", "port"}
+
+
 def require_mapping(value: Any, path: str) -> dict:
     if not isinstance(value, dict):
         raise ValueError(f"{path} must be a mapping")
@@ -272,15 +275,48 @@ def validate_service_topology_entry(
     return service_name, public_hostname
 
 
+def validate_public_ingress_forwards(value: Any, path: str, allowed_ports: list[int]) -> None:
+    forwards = require_list(value, path)
+    seen_ports: set[int] = set()
+    for index, forward in enumerate(forwards):
+        forward = require_mapping(forward, f"{path}[{index}]")
+        listen_port = require_int(forward.get("listen_port"), f"{path}[{index}].listen_port", 1)
+        require_ipv4(forward.get("target_host"), f"{path}[{index}].target_host")
+        require_int(forward.get("target_port"), f"{path}[{index}].target_port", 1)
+        if listen_port in seen_ports:
+            raise ValueError(f"{path}[{index}].listen_port duplicates an earlier public ingress forward")
+        if listen_port not in allowed_ports:
+            raise ValueError(f"{path}[{index}].listen_port must be declared in proxmox_public_ingress_tcp_ports")
+        seen_ports.add(listen_port)
+    if set(allowed_ports) != seen_ports:
+        raise ValueError(f"{path} must define exactly one forward for each public ingress port")
+
+
+def validate_extra_dns_records(value: Any, path: str) -> None:
+    records = require_list(value, path)
+    for index, record in enumerate(records):
+        record = require_mapping(record, f"{path}[{index}]")
+        require_str(record.get("name"), f"{path}[{index}].name")
+        require_enum(record.get("type"), f"{path}[{index}].type", EXTRA_DNS_RECORD_TYPES)
+        require_str(record.get("value"), f"{path}[{index}].value")
+        require_int(record.get("ttl"), f"{path}[{index}].ttl", 1)
+
+
 def validate_host_vars() -> dict[str, Any]:
     host_vars = require_mapping(load_yaml(HOST_VARS_PATH), str(HOST_VARS_PATH))
     host_id = require_identifier(HOST_VARS_PATH.stem, "host_vars host id")
     require_ipv4(host_vars.get("management_ipv4"), "host_vars.management_ipv4")
     require_ipv4(host_vars.get("management_tailscale_ipv4"), "host_vars.management_tailscale_ipv4")
-    require_int_list(
+    public_ingress_ports = require_int_list(
         host_vars.get("proxmox_public_ingress_tcp_ports"),
         "host_vars.proxmox_public_ingress_tcp_ports",
     )
+    if "proxmox_public_ingress_tcp_forwards" in host_vars:
+        validate_public_ingress_forwards(
+            host_vars.get("proxmox_public_ingress_tcp_forwards"),
+            "host_vars.proxmox_public_ingress_tcp_forwards",
+            public_ingress_ports,
+        )
 
     proxmox_guests = require_list(host_vars.get("proxmox_guests"), "host_vars.proxmox_guests")
     guest_vmids: set[int] = set()
@@ -329,6 +365,9 @@ def validate_host_vars() -> dict[str, Any]:
         require_int(proxy.get("listen_port"), f"host_vars.proxmox_tailscale_tcp_proxies[{index}].listen_port", 1)
         require_ipv4(proxy.get("upstream_host"), f"host_vars.proxmox_tailscale_tcp_proxies[{index}].upstream_host")
         require_int(proxy.get("upstream_port"), f"host_vars.proxmox_tailscale_tcp_proxies[{index}].upstream_port", 1)
+
+    if "mail_platform_dns_records" in host_vars:
+        validate_extra_dns_records(host_vars.get("mail_platform_dns_records"), "host_vars.mail_platform_dns_records")
 
     topology = require_mapping(host_vars.get("lv3_service_topology"), "host_vars.lv3_service_topology")
     if not topology:

@@ -1,0 +1,17 @@
+---
+mail_platform_observability_state_dir: /etc/lv3/mail-platform-observability
+mail_platform_observability_telegraf_config_file: /etc/telegraf/telegraf.d/lv3-mail-platform.conf
+mail_platform_observability_metrics_script: /usr/local/libexec/lv3-mail-platform-metrics.py
+mail_platform_observability_hostname: docker-runtime-lv3
+mail_platform_observability_role: docker-runtime
+mail_platform_observability_service: mail-platform
+mail_platform_observability_gateway_state_file: /opt/mail-platform/gateway/data/state.json
+mail_platform_observability_stalwart_api_url: http://127.0.0.1:8080
+mail_platform_observability_stalwart_metrics_url: http://127.0.0.1:8080/metrics/prometheus
+mail_platform_observability_stalwart_admin_user: admin
+mail_platform_observability_stalwart_admin_password_file: /etc/lv3/mail-platform/stalwart-admin-password
+mail_platform_observability_mailbox_login: "{{ mail_platform_mailbox_login }}"
+mail_platform_observability_mailbox_address: "{{ mail_platform_mailbox_address }}"
+mail_platform_observability_mailbox_password_file: /etc/lv3/mail-platform/server-mailbox-password
+mail_platform_observability_metrics_username: prometheus
+mail_platform_observability_metrics_password_file: /etc/lv3/mail-platform/metrics-password

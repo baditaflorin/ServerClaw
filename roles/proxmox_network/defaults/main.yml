@@ -1,2 +1,3 @@
 ---
 proxmox_network_enable_ipv4_forwarding: true
+proxmox_public_ingress_tcp_forwards: []

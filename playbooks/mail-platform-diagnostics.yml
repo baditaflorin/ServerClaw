@@ -1,0 +1,99 @@
+---
+- name: Warm the host graph for guest jump access
+  hosts: proxmox_hosts
+  become: false
+  gather_facts: false
+
+  tasks:
+    - ansible.builtin.debug:
+        msg: "Collecting mail platform diagnostics."
+
+- name: Inspect the mail platform runtime state
+  hosts: docker-runtime-lv3
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Read mail stack container state
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - /opt/mail-platform/docker-compose.yml
+          - ps
+      register: mail_platform_compose_ps
+      changed_when: false
+
+    - name: Read recent Stalwart logs
+      ansible.builtin.command:
+        argv:
+          - docker
+          - logs
+          - --tail
+          - "120"
+          - lv3-mail-stalwart
+      register: mail_platform_stalwart_logs
+      changed_when: false
+
+    - name: Read recent mail gateway logs
+      ansible.builtin.command:
+        argv:
+          - docker
+          - logs
+          - --tail
+          - "120"
+          - lv3-mail-gateway
+      register: mail_platform_gateway_logs
+      changed_when: false
+
+    - name: Read current Stalwart queue state
+      ansible.builtin.shell: |
+        python3 - <<'PY'
+        import base64
+        import json
+        import urllib.request
+        from pathlib import Path
+
+        password = Path('/etc/lv3/mail-platform/stalwart-admin-password').read_text(encoding='utf-8').strip()
+        token = base64.b64encode(f'admin:{password}'.encode('utf-8')).decode('ascii')
+        request = urllib.request.Request(
+            'http://127.0.0.1:8080/api/queue/messages?limit=20&max-total=100&page=0',
+            headers={'Authorization': f'Basic {token}', 'Accept': 'application/json'},
+        )
+        with urllib.request.urlopen(request, timeout=30) as response:
+            print(response.read().decode('utf-8'))
+        PY
+      args:
+        executable: /bin/bash
+      register: mail_platform_queue_state
+      changed_when: false
+
+    - name: Read current mail gateway state
+      ansible.builtin.command:
+        argv:
+          - cat
+          - /opt/mail-platform/gateway/data/state.json
+      register: mail_platform_gateway_state
+      changed_when: false
+      failed_when: false
+
+    - name: Show compose state
+      ansible.builtin.debug:
+        var: mail_platform_compose_ps.stdout_lines
+
+    - name: Show queue state
+      ansible.builtin.debug:
+        var: mail_platform_queue_state.stdout
+
+    - name: Show mail gateway state
+      ansible.builtin.debug:
+        var: mail_platform_gateway_state.stdout
+
+    - name: Show recent Stalwart logs
+      ansible.builtin.debug:
+        var: mail_platform_stalwart_logs.stderr_lines
+
+    - name: Show recent mail gateway logs
+      ansible.builtin.debug:
+        var: mail_platform_gateway_logs.stderr_lines

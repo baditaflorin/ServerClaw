@@ -20,8 +20,27 @@ proxmox_tailscale_advertise_routes:
   - "{{ proxmox_internal_network }}"
 proxmox_tailscale_operator_target_guest: 10.10.10.30
 proxmox_public_ingress_tcp_ports:
+  - 25
   - 80
   - 443
+  - 587
+  - 993
+proxmox_public_ingress_tcp_forwards:
+  - listen_port: 25
+    target_host: 10.10.10.20
+    target_port: 25
+  - listen_port: 80
+    target_host: 10.10.10.10
+    target_port: 80
+  - listen_port: 443
+    target_host: 10.10.10.10
+    target_port: 443
+  - listen_port: 587
+    target_host: 10.10.10.20
+    target_port: 587
+  - listen_port: 993
+    target_host: 10.10.10.20
+    target_port: 993
 proxmox_tailscale_tcp_proxies:
   - name: postgres-lv3
     listen_address: "{{ management_tailscale_ipv4 }}"
@@ -136,6 +155,40 @@ proxmox_guests:
 backup_vm_vmid: 160
 backup_vm_name: backup-lv3
 backup_vm_ipv4: 10.10.10.60
+
+mail_platform_dns_records:
+  - name: mail
+    type: A
+    value: "{{ management_ipv4 }}"
+    ttl: 60
+  - name: "@"
+    type: MX
+    value: "10 mail.lv3.org."
+    ttl: 300
+  - name: "@"
+    type: TXT
+    value: '"v=spf1 mx include:spf.brevo.com -all"'
+    value_match_regex: '^"v=spf1 '
+    ttl: 300
+  - name: _dmarc
+    type: TXT
+    value: '"v=DMARC1; p=quarantine; rua=mailto:baditaflorin@gmail.com"'
+    ttl: 300
+  - name: brevo1._domainkey
+    type: CNAME
+    value: b1.lv3-org.dkim.brevo.com.
+    value_match_regex: '^b1\\.lv3-org\\.dkim\\.brevo\\.com\\.?$'
+    ttl: 300
+  - name: brevo2._domainkey
+    type: CNAME
+    value: b2.lv3-org.dkim.brevo.com.
+    value_match_regex: '^b2\\.lv3-org\\.dkim\\.brevo\\.com\\.?$'
+    ttl: 300
+  - name: "@"
+    type: TXT
+    value: '"brevo-code:b5e6a2e60000b8da96b912f8ea4c2e9a"'
+    value_match_regex: '^"brevo-code:'
+    ttl: 300
 
 lv3_service_topology:
   nginx_edge:
@@ -278,6 +331,22 @@ lv3_service_topology:
       tls: true
       kind: proxy
       upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:3001"
+  mail_platform:
+    service_name: mail-platform
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: mail.lv3.org
+    exposure_model: informational-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: true
+    dns:
+      managed: true
+      visibility: public
+      name: mail
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
   postgres:
     service_name: postgres
     owning_vm: postgres-lv3

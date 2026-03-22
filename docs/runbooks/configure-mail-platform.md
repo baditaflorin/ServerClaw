@@ -1,0 +1,110 @@
+# Configure Mail Platform
+
+## Purpose
+
+This runbook converges the LV3 mail platform defined by ADR 0041.
+
+It covers:
+
+- public DNS for `mail.lv3.org` and the `lv3.org` MX record
+- host-side SMTP and IMAPS forwarding on the Proxmox host
+- the Stalwart mail runtime on `docker-runtime-lv3`
+- the private mail gateway API used by platform services and automation agents
+- Telegraf and Grafana mail telemetry
+
+## Preconditions
+
+Before running the workflow, confirm:
+
+1. `server@lv3.org` is the desired managed mailbox
+2. the public IP `65.108.75.123` can receive SMTP traffic on TCP `25`, `587`, and `993`
+3. `HETZNER_DNS_API_TOKEN` is set on the controller
+4. `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/brevo-api-key.txt` exists and contains the Brevo transactional API key
+5. the sender configured in Brevo is valid for transactional sends
+
+## Entrypoints
+
+- syntax check: `make syntax-check-mail-platform`
+- preflight: `make preflight WORKFLOW=converge-mail-platform`
+- converge: `HETZNER_DNS_API_TOKEN=... make converge-mail-platform`
+
+## Delivered Surfaces
+
+The workflow manages these live surfaces:
+
+- `mail.lv3.org` A record
+- `lv3.org` MX record pointing at `mail.lv3.org`
+- SPF and DMARC TXT records for `lv3.org`
+- Proxmox host NAT forwards for TCP `25`, `587`, and `993` to `docker-runtime-lv3`
+- Stalwart mail server on `docker-runtime-lv3`
+- private mail gateway API on `docker-runtime-lv3:8081`
+- Telegraf mail telemetry collector on `docker-runtime-lv3`
+- Grafana dashboard `lv3-mail-platform` on `monitoring-lv3`
+
+## Generated Local Artifacts
+
+After a successful converge, these controller-local files should exist:
+
+- `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/stalwart-admin-password.txt`
+- `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/server-mailbox-password.txt`
+- `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/metrics-password.txt`
+- `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/gateway-api-key.txt`
+
+## Private Mail API
+
+The mail gateway is the stable automation entrypoint for sends plus mailbox and domain CRUD.
+
+Base URL from the private LV3 network:
+
+- `http://10.10.10.20:8081`
+
+Authentication:
+
+- header: `X-API-Key: $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/gateway-api-key.txt)`
+
+Useful operations:
+
+1. Send mail
+
+```sh
+curl -s \
+  -H "X-API-Key: $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/gateway-api-key.txt)" \
+  -H "Content-Type: application/json" \
+  -d '{"to":["baditaflorin@gmail.com"],"subject":"LV3 mail test","text":"mail platform is live"}' \
+  http://10.10.10.20:8081/send
+```
+
+2. List domains
+
+```sh
+curl -s \
+  -H "X-API-Key: $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/gateway-api-key.txt)" \
+  http://10.10.10.20:8081/v1/domains
+```
+
+3. Ensure the managed mailbox exists
+
+```sh
+curl -s \
+  -X PUT \
+  -H "X-API-Key: $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/gateway-api-key.txt)" \
+  -H "Content-Type: application/json" \
+  -d '{"emails":["server@lv3.org"]}' \
+  http://10.10.10.20:8081/v1/mailboxes/server
+```
+
+## Verification
+
+Run these checks after converge:
+
+1. `make syntax-check-mail-platform`
+2. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose --file /opt/mail-platform/docker-compose.yml ps'`
+3. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'python3 /usr/local/libexec/lv3-mail-platform-metrics.py'`
+4. `curl -s -H "X-API-Key: $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/gateway-api-key.txt)" http://10.10.10.20:8081/v1/mailboxes`
+5. `curl -I https://grafana.lv3.org`
+
+## Notes
+
+- inbound mail for `server@lv3.org` depends on the public MX record and host NAT being active
+- outbound transactional delivery currently uses the Brevo HTTP API from the mail gateway
+- if direct public SMTP delivery from `server@lv3.org` is required later, add the sender identity, DKIM, and reverse-DNS path explicitly instead of reusing the Brevo relay assumptions
