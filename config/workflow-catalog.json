@@ -757,6 +757,52 @@
         "curl -s -X POST -H \"Content-Type: application/json\" -d '{\"email\":\"ops@lv3.org\",\"password\":\"'\"$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/admin-password.txt)\"'\"}' http://100.118.189.95:8008/api/v1/auths/signin"
       ]
     },
+    "converge-mattermost": {
+      "description": "Converge Mattermost on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, expose the operator-only Tailscale proxy on the Proxmox host, and seed the repo-managed collaboration channels and incoming webhooks.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-mattermost",
+        "command": "make converge-mattermost"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "mattermost_database_password",
+          "mattermost_admin_password",
+          "mattermost_incoming_webhooks"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-mattermost"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-mattermost.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/mattermost.yml",
+        "roles/mattermost_postgres",
+        "roles/mattermost_runtime",
+        "roles/monitoring_mattermost_notifications",
+        "roles/proxmox_tailscale_proxy",
+        "roles/proxmox_security",
+        "inventory/group_vars/all.yml",
+        "inventory/host_vars/proxmox_florin.yml"
+      ],
+      "outputs": [
+        "Mattermost runtime deployed on docker-runtime-lv3 with a PostgreSQL backend on postgres-lv3, a Tailscale operator entrypoint on the Proxmox host, seeded LV3 collaboration channels, and incoming webhook routes for alerts and workflow events."
+      ],
+      "verification_commands": [
+        "make syntax-check-mattermost",
+        "curl -s http://100.118.189.95:8066/api/v4/system/ping",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker exec lv3-mattermost /mattermost/bin/mmctl --local team search lv3 --json'",
+        "python -m json.tool /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mattermost/incoming-webhooks.json"
+      ]
+    },
     "deploy-uptime-kuma": {
       "description": "Deploy Uptime Kuma on the Docker runtime VM and publish it at uptime.lv3.org.",
       "lifecycle_status": "active",

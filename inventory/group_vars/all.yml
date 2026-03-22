@@ -139,6 +139,8 @@ open_webui_controller_url: "http://{{ hostvars['proxmox_florin'].management_tail
 ntopng_proxy_port: 3001
 ntopng_http_port: 3000
 ntopng_operator_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ ntopng_proxy_port }}"
+mattermost_host_proxy_port: 8066
+mattermost_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ mattermost_host_proxy_port }}"
 
 step_ca_version: 0.30.1
 step_ca_cli_version: 0.30.1
@@ -160,4 +162,6 @@ proxmox_management_allowed_tcp_ports:
   - "{{ step_ca_proxy_port }}"
   - "{{ openbao_proxy_port }}"
   - "{{ windmill_host_proxy_port }}"
+  - "{{ open_webui_host_proxy_port }}"
+  - "{{ mattermost_host_proxy_port }}"
   - "{{ open_webui_host_proxy_port }}"

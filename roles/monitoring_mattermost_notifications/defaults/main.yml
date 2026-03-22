@@ -1,0 +1,6 @@
+---
+monitoring_mattermost_contact_point_name: lv3-mattermost-platform-alerts
+monitoring_mattermost_webhook_manifest_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mattermost/incoming-webhooks.json
+monitoring_mattermost_channel_key: alerts
+monitoring_grafana_admin_user: admin
+monitoring_grafana_admin_password_file: /etc/lv3/monitoring/grafana-admin-password

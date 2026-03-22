@@ -756,6 +756,40 @@
         ]
       }
     },
+    "converge-mattermost": {
+      "description": "Converge the private Mattermost runtime, PostgreSQL backend, host-side proxy, Grafana alert route, and seeded collaboration channels.",
+      "workflow_id": "converge-mattermost",
+      "scope": "host_and_guest",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-mattermost passes",
+        "make validate passes before the apply",
+        "Private channel design, webhook routing, and bootstrap identity expectations are reviewed before the change"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record PostgreSQL, runtime, proxy, seeded channel, webhook, and Grafana contact-point verification together with the generated Mattermost bootstrap artifacts."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the runtime, database setup, proxy path, channel bootstrap, or Grafana webhook routing fails.",
+          "Stop if the converge would leave Mattermost reachable but without the expected repo-managed collaboration boundaries."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good Mattermost runtime and generated webhook manifest before retrying.",
+          "Do not hand-fix channel or webhook state in the UI without returning the final contract to git-managed automation."
+        ]
+      }
+    },
     "uptime-kuma-manage": {
       "description": "Perform repo-managed Uptime Kuma API actions such as bootstrap or monitor reconciliation.",
       "workflow_id": "uptime-kuma-manage",
