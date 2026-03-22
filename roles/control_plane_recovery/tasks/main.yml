@@ -97,6 +97,7 @@
   loop: "{{ control_plane_recovery_openbao_init_payload.keys_base64[:openbao_init_key_threshold] }}"
   when: control_plane_recovery_openbao_seal_status.json.sealed | bool
   changed_when: control_plane_recovery_openbao_seal_status.json.sealed | bool
+  failed_when: false
   no_log: true
 
 - name: Confirm OpenBao is unsealed for recovery automation

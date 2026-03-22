@@ -1,0 +1,31 @@
+---
+- name: Validate control-plane recovery firewall inputs
+  ansible.builtin.assert:
+    that:
+      - backup_vm_vmid | string | length > 0
+      - control_plane_recovery_backup_vm_firewall_file | length > 0
+      - control_plane_recovery_backup_vm_ssh_sources | length > 0
+    fail_msg: "control_plane_recovery_firewall requires the backup VM ID, firewall file path, and allowed SSH sources."
+
+- name: Render the backup VM firewall policy for control-plane recovery
+  ansible.builtin.template:
+    src: backup-vm.fw.j2
+    dest: "/root/.lv3-backup-vm-control-plane-recovery.fw"
+    mode: "0644"
+
+- name: Install the backup VM firewall policy when it changed
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if ! cmp -s /root/.lv3-backup-vm-control-plane-recovery.fw "{{ control_plane_recovery_backup_vm_firewall_file }}" 2>/dev/null; then
+      cp /root/.lv3-backup-vm-control-plane-recovery.fw "{{ control_plane_recovery_backup_vm_firewall_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: control_plane_recovery_backup_vm_firewall_install
+  changed_when: "'changed' in control_plane_recovery_backup_vm_firewall_install.stdout"
+
+- name: Restart Proxmox firewall when the backup VM policy changed
+  ansible.builtin.command: pve-firewall restart
+  when: control_plane_recovery_backup_vm_firewall_install.changed
+  changed_when: true
