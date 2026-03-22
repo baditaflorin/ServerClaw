@@ -16,7 +16,7 @@ export ANSIBLE_COLLECTIONS_PATH="$ANSIBLE_COLLECTIONS_DIR"
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/validate_repo.sh [all|ansible-syntax|yaml|ansible-lint|shell|json|data-models|generated-docs]...
+  scripts/validate_repo.sh [all|ansible-syntax|yaml|ansible-lint|shell|json|data-models|generated-docs|generated-portals]...
 
 Examples:
   scripts/validate_repo.sh
@@ -128,11 +128,19 @@ validate_json() {
 validate_data_models() {
   echo "Repository data model validation"
   uvx --from pyyaml python "$REPO_ROOT/scripts/validate_repository_data_models.py" --validate >/dev/null
+  uvx --from pyyaml python "$REPO_ROOT/scripts/service_catalog.py" --validate >/dev/null
+  python3 "$REPO_ROOT/scripts/subdomain_catalog.py" --validate >/dev/null
+  python3 "$REPO_ROOT/scripts/agent_tool_registry.py" --validate >/dev/null
 }
 
 validate_generated_docs() {
   echo "Generated status document validation"
   uvx --from pyyaml python "$REPO_ROOT/scripts/generate_status_docs.py" --check >/dev/null
+}
+
+validate_generated_portals() {
+  echo "Generated portal validation"
+  uvx --from pyyaml python "$REPO_ROOT/scripts/generate_ops_portal.py" --check >/dev/null
 }
 
 if [[ $# -eq 0 ]]; then
@@ -149,6 +157,7 @@ for stage in "$@"; do
       validate_json
       validate_data_models
       validate_generated_docs
+      validate_generated_portals
       ;;
     ansible-syntax)
       validate_ansible_syntax
@@ -170,6 +179,9 @@ for stage in "$@"; do
       ;;
     generated-docs)
       validate_generated_docs
+      ;;
+    generated-portals)
+      validate_generated_portals
       ;;
     -h|--help)
       usage

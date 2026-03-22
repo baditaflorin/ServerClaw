@@ -41,6 +41,12 @@ server {
     location / {
         return 308 https://$host$request_uri;
     }
+{% elif site.kind == 'static_dir' %}
+    root {{ public_edge_generated_static_root }}/{{ site.source_dir }};
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
 {% elif site.kind == 'proxy' %}
     location / {
         proxy_pass {{ site.upstream }};
@@ -83,6 +89,12 @@ server {
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
         proxy_read_timeout 300s;
+    }
+{% elif site.kind == 'static_dir' %}
+    root {{ public_edge_generated_static_root }}/{{ site.source_dir }};
+
+    location / {
+        try_files $uri $uri/ /index.html;
     }
 {% else %}
     root {{ public_edge_static_root }};

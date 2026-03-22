@@ -9,8 +9,9 @@ ACTION ?= list-monitors
 UPTIME_KUMA_ARGS ?=
 RECEIPT ?=
 COMMAND ?=
+SERVICE ?=
 
-.PHONY: validate validate-ansible-syntax validate-yaml validate-ansible-lint validate-shell validate-json validate-data-models generate-status-docs validate-generated-docs receipts receipt-info workflows workflow-info commands command-info lanes lane-info preflight syntax-check syntax-check-monitoring syntax-check-docker-runtime syntax-check-backup-vm syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-openbao syntax-check-step-ca syntax-check-windmill install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-monitoring converge-docker-runtime converge-postgres-vm converge-mail-platform converge-openbao converge-step-ca converge-windmill deploy-uptime-kuma uptime-kuma-manage configure-backups configure-backup-vm database-dns start-workstream
+.PHONY: validate validate-ansible-syntax validate-yaml validate-ansible-lint validate-shell validate-json validate-data-models generate-status-docs generate-status generate-ops-portal deploy-ops-portal validate-generated-docs validate-generated-portals receipts receipt-info workflows workflow-info commands command-info lanes lane-info preflight syntax-check syntax-check-monitoring syntax-check-docker-runtime syntax-check-backup-vm syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-openbao syntax-check-step-ca syntax-check-windmill install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-monitoring converge-docker-runtime converge-postgres-vm converge-mail-platform converge-openbao converge-step-ca converge-windmill deploy-uptime-kuma uptime-kuma-manage configure-backups configure-backup-vm database-dns show-service export-mcp-tools start-workstream
 
 validate:
 	$(REPO_ROOT)/scripts/validate_repo.sh
@@ -36,8 +37,19 @@ validate-data-models:
 generate-status-docs:
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/generate_status_docs.py --write
 
+generate-ops-portal:
+	uvx --from pyyaml python $(REPO_ROOT)/scripts/generate_ops_portal.py --write
+
+deploy-ops-portal: generate-ops-portal
+	$(MAKE) configure-edge-publication
+
+generate-status: generate-status-docs generate-ops-portal
+
 validate-generated-docs:
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/generate_status_docs.py --check
+
+validate-generated-portals:
+	uvx --from pyyaml python $(REPO_ROOT)/scripts/generate_ops_portal.py --check
 
 receipts:
 	$(REPO_ROOT)/scripts/live_apply_receipts.py --list
@@ -59,6 +71,13 @@ commands:
 command-info:
 	@test -n "$(COMMAND)" || (echo "set COMMAND=<command-id>"; exit 1)
 	$(REPO_ROOT)/scripts/command_catalog.py --command $(COMMAND)
+
+show-service:
+	@test -n "$(SERVICE)" || (echo "set SERVICE=<service-id>"; exit 1)
+	uvx --from pyyaml python $(REPO_ROOT)/scripts/service_catalog.py --service $(SERVICE)
+
+export-mcp-tools:
+	python3 $(REPO_ROOT)/scripts/agent_tool_registry.py --export-mcp
 
 lanes:
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/control_plane_lanes.py --list

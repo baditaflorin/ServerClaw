@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/schema/agent-tool.schema.json",
+  "title": "Agent Tool Registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "tools"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "tools": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "description",
+          "category",
+          "transport",
+          "approval_required",
+          "audit_on_call",
+          "input_schema",
+          "output_schema"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]*$"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "category": {
+            "type": "string",
+            "enum": ["observe", "report", "execute", "approve"]
+          },
+          "transport": {
+            "type": "string",
+            "enum": ["http", "nats", "ansible"]
+          },
+          "endpoint": {
+            "type": "string"
+          },
+          "auth": {
+            "type": "string"
+          },
+          "approval_required": {
+            "type": "boolean"
+          },
+          "audit_on_call": {
+            "type": "boolean"
+          },
+          "owner_runbook": {
+            "type": "string"
+          },
+          "input_schema": {
+            "type": "object"
+          },
+          "output_schema": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}
