@@ -18,6 +18,7 @@ live_apply_evidence:
     openbao: 2026-03-22-adr-0043-openbao-live-apply
     windmill: 2026-03-22-adr-0044-windmill-live-apply
     short_lived_credentials_and_mtls: 2026-03-22-adr-0047-short-lived-credentials-live-apply
+    ntopng: 2026-03-22-adr-0059-ntopng-live-apply
 
 desired_state:
   host_id: proxmox_florin

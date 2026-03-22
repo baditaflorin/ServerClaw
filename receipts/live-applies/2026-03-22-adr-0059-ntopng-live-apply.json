@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-22-adr-0059-ntopng-live-apply",
+  "applied_on": "2026-03-22",
+  "recorded_on": "2026-03-22",
+  "recorded_by": "codex",
+  "source_commit": "11581a5b203a8ba04d85df9de24c19c8ca1d03ce",
+  "repo_version_context": "0.50.0",
+  "workflow_id": "converge-ntopng",
+  "adr": "0059",
+  "summary": "Applied ntopng live on the Proxmox host with direct bridge capture on vmbr10 and vmbr0 plus an operator-only Tailscale proxy on port 3001.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.118.189.95"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "ntopng-ui",
+      "address": "100.118.189.95:3001"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Host services and listeners",
+      "result": "pass",
+      "observed": "redis-server and ntopng were both active, ntopng listened on 127.0.0.1:3000, and the operator-facing proxy listened only on 100.118.189.95:3001 on tailscale0."
+    },
+    {
+      "check": "Operator API over the Tailscale path",
+      "result": "pass",
+      "observed": "The proxied interfaces endpoint at http://100.118.189.95:3001/lua/rest/v2/get/ntopng/interfaces.lua authenticated with the managed admin password and returned both vmbr0 and vmbr10."
+    },
+    {
+      "check": "Private bridge traffic visibility",
+      "result": "pass",
+      "observed": "After generating probe traffic to 10.10.10.10, the vmbr10 interface API reported visible packets, bytes, flows, and hosts, including 283 active flows and 28 hosts at the time of verification."
+    },
+    {
+      "check": "Top hosts on the private bridge",
+      "result": "pass",
+      "observed": "The vmbr10 top-hosts API returned active talkers including 10.10.10.1, 10.10.10.20, 10.10.10.50, grafana.lv3.org, and 10.10.10.30."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0059-ntopng-for-private-network-flow-visibility.md",
+    "docs/runbooks/configure-ntopng.md",
+    "docs/workstreams/adr-0059-ntopng-network-visibility.md",
+    "README.md",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "The first implementation keeps ntopng on the Proxmox host because ntopng itself is not a NetFlow collector and the main requirement was direct visibility into vmbr10.",
+    "The operator path intentionally stays private on the Tailscale address and is not published through DNS or the public NGINX edge."
+  ]
+}

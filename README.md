@@ -105,6 +105,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `docker_runtime` | `2026-03-22-adr-0023-docker-runtime-live-apply` |
 | `mail_platform` | `2026-03-22-adr-0041-email-platform-live-apply` |
 | `monitoring` | `2026-03-22-adr-0011-monitoring-live-apply` |
+| `ntopng` | `2026-03-22-adr-0059-ntopng-live-apply` |
 | `openbao` | `2026-03-22-adr-0043-openbao-live-apply` |
 | `postgres_vm` | `2026-03-22-adr-0026-postgres-vm-live-apply` |
 | `public_edge_publication` | `2026-03-22-adr-0021-edge-publication-live-apply` |
