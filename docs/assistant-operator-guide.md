@@ -103,6 +103,8 @@ Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/M
 
 These are the highest-value incomplete areas:
 
-- live apply of ADR 0014 Tailscale private access rollout
 - guest-level exporter and alert expansion beyond the current Grafana plus Proxmox-metrics baseline
 - live apply of ADR 0020 storage and backup automation
+- guest subnet-route completion for ADR 0014 private guest access
+- ADR 0024 Docker guest security baseline
+- ADR 0025 compose-managed runtime stacks

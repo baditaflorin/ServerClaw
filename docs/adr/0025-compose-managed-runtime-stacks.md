@@ -1,4 +1,4 @@
-# ADR 0024: Compose-Managed Runtime Stacks
+# ADR 0025: Compose-Managed Runtime Stacks
 
 - Status: Accepted
 - Implementation Status: Not Implemented

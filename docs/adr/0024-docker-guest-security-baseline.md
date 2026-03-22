@@ -1,4 +1,4 @@
-# ADR 0023: Docker Guest Security Baseline
+# ADR 0024: Docker Guest Security Baseline
 
 - Status: Accepted
 - Implementation Status: Not Implemented
@@ -9,7 +9,7 @@
 
 ## Context
 
-ADR 0022 defines how the Docker runtime VM gets a supported Docker Engine baseline, but installing Docker is not the same thing as hardening a Docker guest for production use.
+ADR 0023 defines how the Docker runtime VM gets a supported Docker Engine baseline, but installing Docker is not the same thing as hardening a Docker guest for production use.
 
 Docker has special networking behavior that can bypass naive host firewall expectations, and the current platform still needs an explicit guest-level security contract for:
 

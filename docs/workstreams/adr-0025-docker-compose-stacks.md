@@ -1,9 +1,9 @@
-# Workstream ADR 0024: Compose-Managed Runtime Stacks
+# Workstream ADR 0025: Compose-Managed Runtime Stacks
 
-- ADR: [ADR 0024](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0024-compose-managed-runtime-stacks.md)
+- ADR: [ADR 0025](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0025-compose-managed-runtime-stacks.md)
 - Title: Compose-managed runtime stacks
 - Status: ready
-- Branch: `codex/adr-0024-docker-compose-stacks`
+- Branch: `codex/adr-0025-docker-compose-stacks`
 - Worktree: `../proxmox_florin_server-docker-compose-stacks`
 - Owner: codex
 - Depends On: none
@@ -28,8 +28,8 @@
 - `roles/docker_compose_stack/`
 - `inventory/vars/docker_compose_stacks.yml`
 - `docs/runbooks/deploy-docker-compose-stack.md`
-- `docs/adr/0024-compose-managed-runtime-stacks.md`
-- `docs/workstreams/adr-0024-docker-compose-stacks.md`
+- `docs/adr/0025-compose-managed-runtime-stacks.md`
+- `docs/workstreams/adr-0025-docker-compose-stacks.md`
 - `workstreams.yaml`
 
 ## Expected Live Surfaces

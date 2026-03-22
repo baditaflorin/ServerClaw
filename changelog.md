@@ -14,10 +14,19 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 - added ADR 0022 to codify the NGINX guest observability model as infrastructure architecture rather than implementation only
 - linked the new ADR into the main repository docs and maps
+- added ADR 0023, ADR 0024, and ADR 0025 to split Docker runtime, Docker security, and Compose stack work into parallel-safe tracks
+- added Docker runtime automation for `docker-runtime-lv3` with Docker's official Debian repository, Compose v2, `live-restore`, and bounded JSON log rotation
+- added a dedicated Docker runtime runbook and make targets for syntax check and convergence
+- fixed the Docker runtime rollout after live verification exposed an unhandled distro `docker-buildx` package conflict
+- documented the manual guest-network recovery that was required when VM `120` was found with a stale netplan MAC match
 
 Platform impact:
 
-- none beyond the already applied `0.24.0` NGINX observability rollout
+- `docker-runtime-lv3` now runs Docker Engine `29.3.0`
+- `docker-runtime-lv3` now has Docker Compose plugin `v5.1.1`
+- Docker daemon on `10.10.10.20` now has `live-restore` enabled with `json-file` log rotation at `10m` and `5` files
+- `ops` is now present in the local `docker` group on the runtime VM
+- VM `120` guest networking was recovered live by correcting the stale MAC match in `/etc/netplan/50-cloud-init.yaml`
 
 ## 0.24.0 - 2026-03-22
 

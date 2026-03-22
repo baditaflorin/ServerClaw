@@ -1,6 +1,6 @@
 schema_version: 1.0.0
 repo_version: 0.25.0
-platform_version: 0.16.0
+platform_version: 0.17.0
 
 desired_state:
   host_id: proxmox_florin
@@ -193,6 +193,18 @@ observed_state:
     proxmox_metrics_flow_verified: true
     nginx_stub_status_loopback_enabled: true
     nginx_guest_metrics_flow_verified: true
+  docker_runtime:
+    vm: 10.10.10.20
+    docker_engine_running: true
+    docker_engine_version: 29.3.0
+    docker_compose_plugin_version: 5.1.1
+    live_restore_enabled: true
+    logging_driver: json-file
+    log_rotation:
+      max_size: 10m
+      max_files: 5
+    ops_user_in_docker_group: true
+    guest_network_recovered_after_mac_match_update: true
   public_publication:
     edge_configured: true
     edge_tls_certificate_present: true
@@ -217,5 +229,5 @@ release_tracks:
     current: 0.25.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.16.0
+    current: 0.17.0
     meaning: intended platform release for the actual server configuration

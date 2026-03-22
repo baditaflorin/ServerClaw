@@ -1,9 +1,9 @@
-# Workstream ADR 0022: Docker Runtime VM Baseline
+# Workstream ADR 0023: Docker Runtime VM Baseline
 
-- ADR: [ADR 0022](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0022-docker-runtime-vm-baseline.md)
+- ADR: [ADR 0023](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0023-docker-runtime-vm-baseline.md)
 - Title: Docker runtime VM baseline
-- Status: in_progress
-- Branch: `codex/adr-0022-docker-runtime`
+- Status: live_applied
+- Branch: `codex/adr-0023-docker-runtime`
 - Worktree: `../proxmox_florin_server-docker-runtime`
 - Owner: codex
 - Depends On: none
@@ -32,8 +32,8 @@
 - `inventory/vars/docker_runtime.yml`
 - `Makefile`
 - `docs/runbooks/configure-docker-runtime.md`
-- `docs/adr/0022-docker-runtime-vm-baseline.md`
-- `docs/workstreams/adr-0022-docker-runtime.md`
+- `docs/adr/0023-docker-runtime-vm-baseline.md`
+- `docs/workstreams/adr-0023-docker-runtime.md`
 - `workstreams.yaml`
 
 ## Expected Live Surfaces
@@ -47,7 +47,7 @@
 
 - `make syntax-check-docker-runtime`
 - `make converge-docker-runtime`
-- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@65.108.75.123 ops@10.10.10.20 'docker version && docker compose version && sudo cat /etc/docker/daemon.json'`
+- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker version && docker compose version && sudo cat /etc/docker/daemon.json'`
 
 ## Merge Criteria
 
@@ -59,6 +59,7 @@
 ## Notes For The Next Assistant
 
 - keep this workstream limited to the runtime host baseline
-- move firewall policy into ADR 0023 instead of expanding this role ad hoc
-- move stack/systemd deployment behavior into ADR 0024 instead of embedding application assumptions here
-- do not bump `VERSION` or `platform_version` on this branch
+- move firewall policy into ADR 0024 instead of expanding this role ad hoc
+- move stack/systemd deployment behavior into ADR 0025 instead of embedding application assumptions here
+- this workstream is merged to `main` and applied live
+- live rollout required one manual recovery step because VM `120` had a stale netplan MAC match; that procedure is documented in the Docker runtime runbook

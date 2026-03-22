@@ -1,9 +1,9 @@
-# Workstream ADR 0023: Docker Guest Security Baseline
+# Workstream ADR 0024: Docker Guest Security Baseline
 
-- ADR: [ADR 0023](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0023-docker-guest-security-baseline.md)
+- ADR: [ADR 0024](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0024-docker-guest-security-baseline.md)
 - Title: Docker guest security baseline
 - Status: ready
-- Branch: `codex/adr-0023-docker-security`
+- Branch: `codex/adr-0024-docker-security`
 - Worktree: `../proxmox_florin_server-docker-security`
 - Owner: codex
 - Depends On: none
@@ -29,8 +29,8 @@
 - `roles/docker_guest_security/`
 - `inventory/vars/docker_security.yml`
 - `docs/runbooks/harden-docker-guests.md`
-- `docs/adr/0023-docker-guest-security-baseline.md`
-- `docs/workstreams/adr-0023-docker-security.md`
+- `docs/adr/0024-docker-guest-security-baseline.md`
+- `docs/workstreams/adr-0024-docker-security.md`
 - `workstreams.yaml`
 
 ## Expected Live Surfaces

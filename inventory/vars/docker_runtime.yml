@@ -4,6 +4,7 @@ docker_runtime_prereq_packages:
 
 docker_runtime_conflicting_packages:
   - docker.io
+  - docker-buildx
   - docker-compose
   - docker-doc
   - podman-docker

@@ -65,14 +65,14 @@ workstreams:
     ready_to_merge: false
     live_applied: false
 
-  - id: adr-0022-docker-runtime
-    adr: 0022
+  - id: adr-0023-docker-runtime
+    adr: 0023
     title: Docker runtime VM baseline
-    status: in_progress
+    status: live_applied
     owner: codex
-    branch: codex/adr-0022-docker-runtime
+    branch: codex/adr-0023-docker-runtime
     worktree_path: ../proxmox_florin_server-docker-runtime
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0022-docker-runtime.md
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0023-docker-runtime.md
     depends_on: []
     conflicts_with: []
     shared_surfaces:
@@ -81,16 +81,16 @@ workstreams:
       - roles/docker_runtime
       - inventory/vars/docker_runtime.yml
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
-  - id: adr-0023-docker-security
-    adr: 0023
+  - id: adr-0024-docker-security
+    adr: 0024
     title: Docker guest security baseline
     status: ready
     owner: codex
-    branch: codex/adr-0023-docker-security
+    branch: codex/adr-0024-docker-security
     worktree_path: ../proxmox_florin_server-docker-security
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0023-docker-security.md
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0024-docker-security.md
     depends_on: []
     conflicts_with: []
     shared_surfaces:
@@ -101,14 +101,14 @@ workstreams:
     ready_to_merge: false
     live_applied: false
 
-  - id: adr-0024-docker-compose-stacks
-    adr: 0024
+  - id: adr-0025-docker-compose-stacks
+    adr: 0025
     title: Compose-managed runtime stacks
     status: ready
     owner: codex
-    branch: codex/adr-0024-docker-compose-stacks
+    branch: codex/adr-0025-docker-compose-stacks
     worktree_path: ../proxmox_florin_server-docker-compose-stacks
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0024-docker-compose-stacks.md
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0025-docker-compose-stacks.md
     depends_on: []
     conflicts_with: []
     shared_surfaces:
