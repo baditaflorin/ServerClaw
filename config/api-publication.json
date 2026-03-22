@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0.0",
+  "default_publication_tier": "internal-only",
+  "tiers": {
+    "internal-only": {
+      "title": "Internal-Only",
+      "summary": "Reachable only from LV3 private networks, loopback paths, or explicitly trusted control-plane hosts.",
+      "approval_rule": "This is the default tier for new APIs and HTTP callbacks. Do not publish these surfaces through public DNS or the public edge."
+    },
+    "operator-only": {
+      "title": "Operator-Only",
+      "summary": "Reachable only from approved operator devices over private access such as Tailscale.",
+      "approval_rule": "These surfaces may be discoverable through an informational hostname, but the live API must stay private and require operator credentials."
+    },
+    "public-edge": {
+      "title": "Public Edge",
+      "summary": "Intentionally published on a public domain through the named edge model.",
+      "approval_rule": "Public API publication requires an explicit ADR or approved implementation record plus a declared public hostname."
+    }
+  },
+  "surfaces": [
+    {
+      "id": "proxmox-management-api",
+      "title": "Proxmox management API",
+      "lane": "api",
+      "lane_surface_ref": "proxmox-management-api",
+      "publication_tier": "operator-only",
+      "reachability": "Reachable only over the Proxmox host Tailscale address on port 8006.",
+      "approval_notes": "The public proxmox.lv3.org hostname remains informational only; routine administration stays on the private operator path."
+    },
+    {
+      "id": "step-ca-api",
+      "title": "step-ca API",
+      "lane": "api",
+      "lane_surface_ref": "step-ca-api",
+      "publication_tier": "internal-only",
+      "reachability": "Reachable through the Proxmox host Tailscale proxy for approved controller and trust-bootstrap traffic only.",
+      "approval_notes": "Keep the CA endpoint off the public edge and limit callers to trusted control-plane actors."
+    },
+    {
+      "id": "openbao-api",
+      "title": "OpenBao API",
+      "lane": "api",
+      "lane_surface_ref": "openbao-api",
+      "publication_tier": "internal-only",
+      "reachability": "Reachable through the Proxmox host Tailscale proxy and the runtime loopback listener, with client-certificate authentication on the external path.",
+      "approval_notes": "This secret-authority API stays private even though it has a host-level proxy; do not publish it through public DNS or NGINX."
+    },
+    {
+      "id": "windmill-api",
+      "title": "Windmill API",
+      "lane": "api",
+      "lane_surface_ref": "windmill-api",
+      "publication_tier": "operator-only",
+      "reachability": "Reachable only through the Proxmox host Tailscale proxy on port 8005.",
+      "approval_notes": "Windmill administrative and workflow APIs are operator-facing private surfaces, not public application endpoints."
+    },
+    {
+      "id": "mail-gateway-api",
+      "title": "Mail gateway API",
+      "lane": "api",
+      "lane_surface_ref": "mail-gateway-api",
+      "publication_tier": "internal-only",
+      "reachability": "Reachable only on the LV3 private guest network at docker-runtime-lv3:8081.",
+      "approval_notes": "This is the sanctioned machine-facing mail automation API and must stay off the public edge."
+    },
+    {
+      "id": "open-webui-operator-workbench",
+      "title": "Open WebUI operator workbench",
+      "lane": "api",
+      "lane_surface_ref": "open-webui-operator-workbench",
+      "publication_tier": "operator-only",
+      "reachability": "Reachable only through the Proxmox host Tailscale proxy on port 8008.",
+      "approval_notes": "This conversational operator surface stays private and requires approved operator credentials; do not publish it through the public edge."
+    },
+    {
+      "id": "stalwart-mail-events",
+      "title": "Stalwart mail event webhook",
+      "lane": "event",
+      "lane_surface_ref": "stalwart-mail-events",
+      "publication_tier": "internal-only",
+      "reachability": "Reachable only from the private mail-platform stack on docker-runtime-lv3.",
+      "approval_notes": "Event callbacks stay on private or container-local networks unless a future ADR approves explicit publication."
+    }
+  ]
+}

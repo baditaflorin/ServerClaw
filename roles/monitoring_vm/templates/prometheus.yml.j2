@@ -1,0 +1,30 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: {{ monitoring_otel_resource_cluster }}
+    environment: {{ monitoring_otel_resource_environment }}
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets:
+          - 127.0.0.1:9090
+        labels:
+          service: prometheus
+
+  - job_name: tempo
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - 127.0.0.1:{{ monitoring_tempo_http_port }}
+        labels:
+          service: tempo
+
+  - job_name: otelcol-contrib
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - 127.0.0.1:{{ monitoring_otelcol_metrics_port }}
+        labels:
+          service: otel-collector
