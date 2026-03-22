@@ -663,3 +663,216 @@ workstreams:
       - release regressions
     ready_to_merge: false
     live_applied: false
+
+  - id: adr-0062-role-composability
+    adr: "0062"
+    title: Ansible role composability and DRY defaults
+    status: ready
+    owner: codex
+    branch: codex/adr-0062-role-composability
+    worktree_path: ../proxmox_florin_server-role-composability
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0062-role-composability.md
+    depends_on: []
+    conflicts_with: []
+    shared_surfaces:
+      - roles/common/
+      - filter_plugins/
+      - make validate
+      - role argument specs
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0063-platform-vars-library
+    adr: "0063"
+    title: Centralised vars and computed facts library
+    status: ready
+    owner: codex
+    branch: codex/adr-0063-platform-vars-library
+    worktree_path: ../proxmox_florin_server-platform-vars-library
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0063-platform-vars-library.md
+    depends_on:
+      - adr-0062-role-composability
+    conflicts_with: []
+    shared_surfaces:
+      - inventory/group_vars/
+      - versions/stack.yaml
+      - filter_plugins/
+      - Makefile
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0064-health-probe-contracts
+    adr: "0064"
+    title: Health probe contracts for all services
+    status: ready
+    owner: codex
+    branch: codex/adr-0064-health-probe-contracts
+    worktree_path: ../proxmox_florin_server-health-probe-contracts
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0064-health-probe-contracts.md
+    depends_on:
+      - adr-0027-uptime-kuma
+      - adr-0062-role-composability
+    conflicts_with: []
+    shared_surfaces:
+      - service role verify tasks
+      - config/health-probe-catalog.json
+      - config/uptime-kuma/
+      - make validate
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0065-secret-rotation-automation
+    adr: "0065"
+    title: Secret rotation automation with OpenBao
+    status: ready
+    owner: codex
+    branch: codex/adr-0065-secret-rotation
+    worktree_path: ../proxmox_florin_server-secret-rotation
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0065-secret-rotation-automation.md
+    depends_on:
+      - adr-0043-openbao
+      - adr-0044-windmill
+      - adr-0047-short-lived-creds
+      - adr-0048-command-catalog
+    conflicts_with: []
+    shared_surfaces:
+      - OpenBao KV
+      - config/secret-catalog.json
+      - Windmill workflows
+      - NATS events
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0066-mutation-audit-log
+    adr: "0066"
+    title: Structured mutation audit log
+    status: ready
+    owner: codex
+    branch: codex/adr-0066-mutation-audit-log
+    worktree_path: ../proxmox_florin_server-mutation-audit-log
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0066-mutation-audit-log.md
+    depends_on:
+      - adr-0052-loki-logs
+      - adr-0048-command-catalog
+      - adr-0044-windmill
+      - adr-0043-openbao
+    conflicts_with: []
+    shared_surfaces:
+      - callback_plugins/
+      - Loki mutation-audit label
+      - Windmill workflow template
+      - command-catalog scripts
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0067-guest-network-policy
+    adr: "0067"
+    title: Guest network policy enforcement
+    status: ready
+    owner: codex
+    branch: codex/adr-0067-guest-network-policy
+    worktree_path: ../proxmox_florin_server-guest-network-policy
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0067-guest-network-policy.md
+    depends_on:
+      - adr-0012-proxmox-host-bridge-and-nat-network
+      - adr-0013-public-ingress
+    conflicts_with: []
+    shared_surfaces:
+      - inventory/host_vars/proxmox_florin.yml
+      - Proxmox VE firewall
+      - roles/proxmox/network/
+      - roles/linux/guest_firewall/
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0068-container-image-policy
+    adr: "0068"
+    title: Container image policy and supply chain integrity
+    status: ready
+    owner: codex
+    branch: codex/adr-0068-container-image-policy
+    worktree_path: ../proxmox_florin_server-container-image-policy
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0068-container-image-policy.md
+    depends_on:
+      - adr-0023-docker-runtime
+      - adr-0025-docker-compose-stacks
+      - adr-0044-windmill
+    conflicts_with: []
+    shared_surfaces:
+      - Docker Compose files
+      - config/image-catalog.json
+      - receipts/image-scans/
+      - docker-build-lv3 role
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0069-agent-tool-registry
+    adr: "0069"
+    title: Agent tool registry and governed tool calls
+    status: ready
+    owner: codex
+    branch: codex/adr-0069-agent-tool-registry
+    worktree_path: ../proxmox_florin_server-agent-tool-registry
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0069-agent-tool-registry.md
+    depends_on:
+      - adr-0048-command-catalog
+      - adr-0049-private-api-publication
+      - adr-0058-nats-event-bus
+      - adr-0066-mutation-audit-log
+    conflicts_with: []
+    shared_surfaces:
+      - config/agent-tool-registry.json
+      - config/command-catalog.json
+      - config/workflow-catalog.json
+      - Open WebUI tool definitions
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0070-rag-platform-context
+    adr: "0070"
+    title: Retrieval-augmented context for platform queries
+    status: ready
+    owner: codex
+    branch: codex/adr-0070-rag-platform-context
+    worktree_path: ../proxmox_florin_server-rag-platform-context
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0070-rag-platform-context.md
+    depends_on:
+      - adr-0044-windmill
+      - adr-0049-private-api-publication
+      - adr-0060-open-webui-workbench
+      - adr-0069-agent-tool-registry
+    conflicts_with: []
+    shared_surfaces:
+      - docs/ corpus
+      - config/ catalogs
+      - versions/stack.yaml
+      - receipts/
+      - Open WebUI tools
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0071-agent-observation-loop
+    adr: "0071"
+    title: Agent observation loop and autonomous drift detection
+    status: ready
+    owner: codex
+    branch: codex/adr-0071-agent-observation-loop
+    worktree_path: ../proxmox_florin_server-agent-observation-loop
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0071-agent-observation-loop.md
+    depends_on:
+      - adr-0044-windmill
+      - adr-0057-mattermost-chatops
+      - adr-0058-nats-event-bus
+      - adr-0061-glitchtip-failure-signals
+      - adr-0064-health-probe-contracts
+      - adr-0065-secret-rotation-automation
+      - adr-0068-container-image-policy
+    conflicts_with: []
+    shared_surfaces:
+      - Windmill workflows
+      - NATS platform.findings.*
+      - Mattermost platform-findings channel
+      - GlitchTip issue tracking
+      - Open WebUI daily digest
+    ready_to_merge: false
+    live_applied: false
