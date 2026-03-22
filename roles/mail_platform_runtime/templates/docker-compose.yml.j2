@@ -1,0 +1,25 @@
+services:
+  stalwart:
+    image: {{ mail_platform_stalwart_image }}
+    container_name: {{ mail_platform_stalwart_container_name }}
+    restart: unless-stopped
+    volumes:
+      - {{ mail_platform_stalwart_dir }}:/opt/stalwart
+    ports:
+      - "25:25"
+      - "587:587"
+      - "993:993"
+      - "8080:8080"
+
+  mail-gateway:
+    build: {{ mail_platform_gateway_app_dir }}
+    container_name: {{ mail_platform_gateway_container_name }}
+    restart: unless-stopped
+    env_file:
+      - {{ mail_platform_gateway_dir }}/gateway.env
+    volumes:
+      - {{ mail_platform_gateway_data_dir }}:/data
+    ports:
+      - "{{ mail_platform_gateway_bind_port }}:8081"
+    depends_on:
+      - stalwart

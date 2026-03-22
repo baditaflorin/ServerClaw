@@ -1,0 +1,151 @@
+#!/usr/bin/env python3
+
+import imaplib
+import json
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+from base64 import b64encode
+from pathlib import Path
+
+
+GATEWAY_STATE_FILE = Path("{{ mail_platform_observability_gateway_state_file }}")
+API_BASE_URL = "{{ mail_platform_observability_stalwart_api_url }}"
+METRICS_URL = "{{ mail_platform_observability_stalwart_metrics_url }}"
+ADMIN_USER = "{{ mail_platform_observability_stalwart_admin_user }}"
+ADMIN_PASSWORD = "{{ lookup('file', mail_platform_admin_password_local_file) | trim }}"
+MAILBOX_LOGIN = "{{ mail_platform_observability_mailbox_login }}"
+MAILBOX_ADDRESS = "{{ mail_platform_observability_mailbox_address }}"
+MAILBOX_PASSWORD = "{{ lookup('file', mail_platform_mailbox_password_local_file) | trim }}"
+METRICS_USER = "{{ mail_platform_observability_metrics_username }}"
+METRICS_PASSWORD = "{{ lookup('file', mail_platform_metrics_password_local_file) | trim }}"
+HOSTNAME = "{{ guest_observability_hostname }}"
+SERVICE = "{{ guest_observability_service }}"
+
+
+def http_json(url: str, username: str, password: str) -> dict:
+    token = b64encode(f"{username}:{password}".encode("utf-8")).decode("ascii")
+    request = urllib.request.Request(url, headers={"Authorization": f"Basic {token}", "Accept": "application/json"})
+    with urllib.request.urlopen(request, timeout=10) as response:
+        return json.loads(response.read().decode("utf-8"))
+
+
+def http_text(url: str, username: str, password: str) -> str:
+    token = b64encode(f"{username}:{password}".encode("utf-8")).decode("ascii")
+    request = urllib.request.Request(url, headers={"Authorization": f"Basic {token}", "Accept": "text/plain"})
+    with urllib.request.urlopen(request, timeout=10) as response:
+        return response.read().decode("utf-8")
+
+
+def parse_prometheus_metrics(body: str) -> dict[str, float]:
+    values: dict[str, float] = {}
+    for line in body.splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "{" in line:
+            continue
+        name, raw_value = line.split(None, 1)
+        try:
+            values[name] = float(raw_value)
+        except ValueError:
+            continue
+    return values
+
+
+def load_gateway_state() -> dict:
+    if not GATEWAY_STATE_FILE.exists():
+        return {"event_counters": {}, "send_counters": {}}
+    try:
+        return json.loads(GATEWAY_STATE_FILE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {"event_counters": {}, "send_counters": {}}
+
+
+def queue_metrics() -> tuple[int, float, int]:
+    try:
+        response = http_json(f"{API_BASE_URL}/api/queue/messages?limit=100&max-total=1000&page=0", ADMIN_USER, ADMIN_PASSWORD)
+    except (OSError, urllib.error.URLError, urllib.error.HTTPError):
+        return 0, 0.0, 0
+    items = response.get("data", {}).get("items", [])
+    total = int(response.get("data", {}).get("total", 0))
+    now = time.time()
+    oldest = 0.0
+    for item in items:
+        for key in ("createdAt", "nextRetry"):
+            value = item.get(key)
+            if not value:
+                continue
+            try:
+                timestamp = time.strptime(value.replace("Z", "+0000"), "%Y-%m-%dT%H:%M:%S%z")
+                seconds = max(0.0, now - time.mktime(timestamp))
+                oldest = max(oldest, seconds)
+            except ValueError:
+                continue
+    return total, oldest, 1
+
+
+def inbox_metrics() -> tuple[int, int]:
+    try:
+        mailbox = imaplib.IMAP4_SSL("127.0.0.1", 993)
+        mailbox.login(MAILBOX_LOGIN, MAILBOX_PASSWORD)
+        status, data = mailbox.select("INBOX", readonly=True)
+        mailbox.logout()
+        if status != "OK":
+            return 0, 0
+        return int(data[0]), 1
+    except Exception:
+        return 0, 0
+
+
+gateway_state = load_gateway_state()
+event_counters = gateway_state.get("event_counters", {})
+send_counters = gateway_state.get("send_counters", {})
+
+try:
+    prom_body = http_text(METRICS_URL, METRICS_USER, METRICS_PASSWORD)
+    prom_metrics = parse_prometheus_metrics(prom_body)
+    prom_up = 1
+except (OSError, urllib.error.URLError, urllib.error.HTTPError):
+    prom_metrics = {}
+    prom_up = 0
+
+queue_total, queue_oldest_seconds, queue_api_up = queue_metrics()
+mailbox_inbox_count, imap_up = inbox_metrics()
+
+fields = {
+    "webhook_events_total": int(gateway_state.get("webhook_events_total", 0)),
+    "submitted_total": int(event_counters.get("queue.queue-message-authenticated", 0)),
+    "delivered_total": int(event_counters.get("delivery.delivered", 0)),
+    "failed_total": int(event_counters.get("delivery.failed", 0)),
+    "rejected_total": int(event_counters.get("delivery.message-rejected", 0)),
+    "auth_failed_total": int(event_counters.get("auth.failed", 0)),
+    "auth_success_total": int(event_counters.get("auth.success", 0)),
+    "smtp_session_total": int(event_counters.get("smtp.connection-start", 0)),
+    "send_requests_total": int(send_counters.get("requests_total", 0)),
+    "local_smtp_success_total": int(send_counters.get("local_smtp_success_total", 0)),
+    "local_smtp_failure_total": int(send_counters.get("local_smtp_failure_total", 0)),
+    "brevo_success_total": int(send_counters.get("brevo_success_total", 0)),
+    "brevo_failure_total": int(send_counters.get("brevo_failure_total", 0)),
+    "fallback_total": int(send_counters.get("fallback_total", 0)),
+    "queue_total": int(queue_total),
+    "queue_oldest_seconds": float(queue_oldest_seconds),
+    "mailbox_inbox_count": int(mailbox_inbox_count),
+    "prometheus_up": int(prom_up),
+    "queue_api_up": int(queue_api_up),
+    "imap_up": int(imap_up),
+    "smtp_active_connections": float(prom_metrics.get("smtp_active_connections", 0)),
+    "delivery_active_connections": float(prom_metrics.get("delivery_active_connections", 0)),
+    "imap_active_connections": float(prom_metrics.get("imap_active_connections", 0)),
+    "server_memory_bytes": float(prom_metrics.get("server_memory", 0)),
+    "domain_count": float(prom_metrics.get("domain_count", 0)),
+    "user_count": float(prom_metrics.get("user_count", 0)),
+}
+
+field_parts = []
+for key, value in fields.items():
+    if isinstance(value, int):
+        field_parts.append(f"{key}={value}i")
+    else:
+        field_parts.append(f"{key}={value}")
+
+print(f"mail_platform,host={HOSTNAME},service={SERVICE} " + ",".join(field_parts))

@@ -1,0 +1,360 @@
+---
+- name: Validate mail platform runtime inputs
+  ansible.builtin.assert:
+    that:
+      - mail_platform_domain | length > 0
+      - mail_platform_hostname | length > 0
+      - mail_platform_mailbox_address | length > 0
+      - mail_platform_site_dir | length > 0
+      - mail_platform_stalwart_dir | length > 0
+      - mail_platform_gateway_dir | length > 0
+      - mail_platform_compose_file | length > 0
+      - mail_platform_brevo_sender_email | length > 0
+      - mail_platform_brevo_api_key_local_file | length > 0
+    fail_msg: "mail_platform_runtime requires mail hostnames, paths, mailbox identity, and the Brevo API key path."
+
+- name: Ensure the Brevo API key exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ mail_platform_brevo_api_key_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: mail_platform_brevo_api_key_local
+
+- name: Fail if the Brevo API key is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ mail_platform_brevo_api_key_local_file }} is missing on the control machine.
+      Create the file with the Brevo transactional API key before converging the mail platform.
+  when: not mail_platform_brevo_api_key_local.stat.exists
+
+- name: Ensure mail platform prerequisite packages are present
+  ansible.builtin.apt:
+    name:
+      - python3
+      - openssl
+    state: present
+    update_cache: true
+
+- name: Ensure mail platform directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ mail_platform_site_dir }}"
+      mode: "0755"
+    - path: "{{ mail_platform_stalwart_dir }}"
+      mode: "0755"
+    - path: "{{ mail_platform_stalwart_dir }}/etc"
+      mode: "0755"
+    - path: "{{ mail_platform_gateway_dir }}"
+      mode: "0755"
+    - path: "{{ mail_platform_gateway_app_dir }}"
+      mode: "0755"
+    - path: "{{ mail_platform_gateway_data_dir }}"
+      mode: "0755"
+    - path: "{{ mail_platform_secret_dir }}"
+      mode: "0700"
+
+- name: Generate Stalwart admin password
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ mail_platform_admin_password_file }}" ]; then
+      umask 077
+      openssl rand -base64 24 > "{{ mail_platform_admin_password_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: mail_platform_admin_password_generation
+  changed_when: "'changed' in mail_platform_admin_password_generation.stdout"
+
+- name: Generate mailbox password
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ mail_platform_mailbox_password_file }}" ]; then
+      umask 077
+      openssl rand -base64 24 > "{{ mail_platform_mailbox_password_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: mail_platform_mailbox_password_generation
+  changed_when: "'changed' in mail_platform_mailbox_password_generation.stdout"
+
+- name: Generate mail metrics password
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ mail_platform_metrics_password_file }}" ]; then
+      umask 077
+      openssl rand -base64 24 > "{{ mail_platform_metrics_password_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: mail_platform_metrics_password_generation
+  changed_when: "'changed' in mail_platform_metrics_password_generation.stdout"
+
+- name: Generate mail gateway API key
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ mail_platform_gateway_api_key_file }}" ]; then
+      umask 077
+      openssl rand -hex 32 > "{{ mail_platform_gateway_api_key_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: mail_platform_gateway_api_key_generation
+  changed_when: "'changed' in mail_platform_gateway_api_key_generation.stdout"
+
+- name: Read Stalwart admin password
+  ansible.builtin.slurp:
+    src: "{{ mail_platform_admin_password_file }}"
+  register: mail_platform_admin_password_raw
+  no_log: true
+
+- name: Read mailbox password
+  ansible.builtin.slurp:
+    src: "{{ mail_platform_mailbox_password_file }}"
+  register: mail_platform_mailbox_password_raw
+  no_log: true
+
+- name: Read mail metrics password
+  ansible.builtin.slurp:
+    src: "{{ mail_platform_metrics_password_file }}"
+  register: mail_platform_metrics_password_raw
+  no_log: true
+
+- name: Read mail gateway API key
+  ansible.builtin.slurp:
+    src: "{{ mail_platform_gateway_api_key_file }}"
+  register: mail_platform_gateway_api_key_raw
+  no_log: true
+
+- name: Record mail platform secret facts
+  ansible.builtin.set_fact:
+    mail_platform_admin_password: "{{ mail_platform_admin_password_raw.content | b64decode | trim }}"
+    mail_platform_mailbox_password: "{{ mail_platform_mailbox_password_raw.content | b64decode | trim }}"
+    mail_platform_metrics_password: "{{ mail_platform_metrics_password_raw.content | b64decode | trim }}"
+    mail_platform_gateway_api_key: "{{ mail_platform_gateway_api_key_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Ensure local mail platform artifact directory exists
+  ansible.builtin.file:
+    path: "{{ mail_platform_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Mirror Stalwart admin password to the control machine
+  ansible.builtin.copy:
+    dest: "{{ mail_platform_admin_password_local_file }}"
+    content: "{{ mail_platform_admin_password }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Mirror mailbox password to the control machine
+  ansible.builtin.copy:
+    dest: "{{ mail_platform_mailbox_password_local_file }}"
+    content: "{{ mail_platform_mailbox_password }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Mirror mail metrics password to the control machine
+  ansible.builtin.copy:
+    dest: "{{ mail_platform_metrics_password_local_file }}"
+    content: "{{ mail_platform_metrics_password }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Mirror mail gateway API key to the control machine
+  ansible.builtin.copy:
+    dest: "{{ mail_platform_gateway_api_key_local_file }}"
+    content: "{{ mail_platform_gateway_api_key }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Render the Stalwart configuration file
+  ansible.builtin.template:
+    src: stalwart-config.toml.j2
+    dest: "{{ mail_platform_stalwart_config_file }}"
+    owner: root
+    group: root
+    mode: "0640"
+  no_log: true
+
+- name: Render the mail platform bootstrap script
+  ansible.builtin.template:
+    src: bootstrap-mail-platform.py.j2
+    dest: "{{ mail_platform_stalwart_bootstrap_file }}"
+    owner: root
+    group: root
+    mode: "0750"
+  no_log: true
+
+- name: Copy the mail gateway application files
+  ansible.builtin.copy:
+    src: mail-gateway/
+    dest: "{{ mail_platform_gateway_app_dir }}/"
+    owner: root
+    group: root
+    mode: preserve
+
+- name: Render the mail gateway environment file
+  ansible.builtin.template:
+    src: mail-gateway.env.j2
+    dest: "{{ mail_platform_gateway_dir }}/gateway.env"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Render the mail platform Compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ mail_platform_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the Stalwart image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ mail_platform_compose_file }}"
+      - pull
+      - stalwart
+  args:
+    chdir: "{{ mail_platform_site_dir }}"
+  register: mail_platform_pull
+  changed_when: >-
+    'Downloaded newer image' in mail_platform_pull.stdout
+    or 'Pull complete' in mail_platform_pull.stdout
+    or 'Pulling' in mail_platform_pull.stdout
+
+- name: Build the mail gateway image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ mail_platform_compose_file }}"
+      - build
+      - mail-gateway
+  args:
+    chdir: "{{ mail_platform_site_dir }}"
+  register: mail_platform_gateway_build
+  changed_when: >-
+    'Successfully tagged' in mail_platform_gateway_build.stdout
+    or 'writing image sha256' in mail_platform_gateway_build.stdout
+    or 'exporting to image' in mail_platform_gateway_build.stdout
+
+- name: Start the mail platform stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ mail_platform_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ mail_platform_site_dir }}"
+  register: mail_platform_up
+  changed_when: >-
+    'Creating' in mail_platform_up.stdout
+    or 'Recreating' in mail_platform_up.stdout
+    or 'Starting' in mail_platform_up.stdout
+
+- name: Wait for the Stalwart management API to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ mail_platform_stalwart_http_port }}"
+    delay: 0
+    timeout: 120
+
+- name: Wait for the local mail gateway API to listen
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ mail_platform_gateway_port }}"
+    delay: 0
+    timeout: 120
+
+- name: Bootstrap mail principals inside Stalwart
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ mail_platform_stalwart_bootstrap_file }}"
+  register: mail_platform_bootstrap
+  changed_when: "'changed' in mail_platform_bootstrap.stdout"
+  no_log: true
+
+- name: Verify the mail gateway health endpoint
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ mail_platform_gateway_port }}/healthz"
+    method: GET
+    status_code: 200
+  register: mail_platform_gateway_health
+  changed_when: false
+
+- name: Verify the mail gateway CRUD API can list domains
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ mail_platform_gateway_port }}/v1/domains"
+    method: GET
+    headers:
+      X-API-Key: "{{ mail_platform_gateway_api_key }}"
+    status_code: 200
+  register: mail_platform_gateway_domains
+  changed_when: false
+  no_log: true
+
+- name: Verify the mail domain exists in Stalwart
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ mail_platform_stalwart_http_port }}/api/principal?types=domain"
+    method: GET
+    user: admin
+    password: "{{ mail_platform_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: mail_platform_domains
+  changed_when: false
+  no_log: true
+
+- name: Assert the managed mail domain is present
+  ansible.builtin.assert:
+    that:
+      - (mail_platform_domains.json.data['items'] | map(attribute='name') | list) is contains(mail_platform_domain)
+    fail_msg: "Managed domain {{ mail_platform_domain }} is not present in Stalwart."
+
+- name: Verify the managed mailbox exists in Stalwart
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ mail_platform_stalwart_http_port }}/api/principal?types=individual"
+    method: GET
+    user: admin
+    password: "{{ mail_platform_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: mail_platform_accounts
+  changed_when: false
+  no_log: true
+
+- name: Assert the managed mailbox account is present
+  ansible.builtin.assert:
+    that:
+      - (mail_platform_accounts.json.data['items'] | map(attribute='name') | list) is contains(mail_platform_mailbox_localpart)
+    fail_msg: "Managed mailbox {{ mail_platform_mailbox_localpart }} is not present in Stalwart."

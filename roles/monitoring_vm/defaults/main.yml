@@ -24,6 +24,9 @@ monitoring_grafana_dashboard_file: /var/lib/grafana/dashboards/lv3/lv3-platform-
 monitoring_grafana_dashboard_uid: lv3-platform-overview
 monitoring_grafana_dashboard_title: LV3 Platform Overview
 monitoring_grafana_vm_dashboard_dir: /var/lib/grafana/dashboards/lv3/vms
+monitoring_grafana_mail_dashboard_file: /var/lib/grafana/dashboards/lv3/lv3-mail-platform.json
+monitoring_grafana_mail_dashboard_uid: lv3-mail-platform
+monitoring_grafana_mail_dashboard_title: LV3 Mail Platform
 monitoring_influxdb_admin_user: lv3-monitoring-admin
 monitoring_influxdb_admin_password_file: /etc/lv3/monitoring/influxdb-admin-password
 monitoring_influxdb_operator_token_file: /etc/lv3/monitoring/influxdb-operator.token

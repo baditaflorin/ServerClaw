@@ -1,0 +1,76 @@
+{% import "_grafana_dashboard_macros.j2" as dashboard %}
+{% set host_name = "docker-runtime-lv3" %}
+{% set service_name = "mail-platform" %}
+{% set total_query = 'from(bucket: "' ~ monitoring_influxdb_bucket ~ '") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == "mail_platform" and r.host == "' ~ host_name ~ '" and r.service == "' ~ service_name ~ '") |> group(columns: ["_field"])' %}
+{% set rate_query = total_query ~ ' |> derivative(unit: 1s, nonNegative: true)' %}
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": false,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [
+    {
+      "title": "Back To Overview",
+      "type": "link",
+      "url": "/d/{{ monitoring_grafana_dashboard_uid }}/{{ monitoring_grafana_dashboard_uid }}"
+    },
+    {
+      "title": "Docker Runtime Detail",
+      "type": "link",
+      "url": "/d/lv3-vm-docker-runtime-lv3/lv3-vm-docker-runtime-lv3"
+    }
+  ],
+  "panels": [
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 1, 0, 0, "Submitted", "short", total_query ~ ' |> filter(fn: (r) => r._field == "submitted_total") |> last()') }},
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 2, 6, 0, "Delivered", "short", total_query ~ ' |> filter(fn: (r) => r._field == "delivered_total") |> last()') }},
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 3, 12, 0, "Failed", "short", total_query ~ ' |> filter(fn: (r) => r._field == "failed_total") |> last()') }},
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 4, 18, 0, "Queue Depth", "short", total_query ~ ' |> filter(fn: (r) => r._field == "queue_total") |> last()') }},
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 5, 0, 4, "Inbox Messages", "short", total_query ~ ' |> filter(fn: (r) => r._field == "mailbox_inbox_count") |> last()') }},
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 6, 6, 4, "Fallback Sends", "short", total_query ~ ' |> filter(fn: (r) => r._field == "fallback_total") |> last()') }},
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 7, 12, 4, "Queue Oldest Age", "s", total_query ~ ' |> filter(fn: (r) => r._field == "queue_oldest_seconds") |> last()') }},
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 8, 18, 4, "Mail APIs Healthy", "short", total_query ~ ' |> filter(fn: (r) => r._field == "prometheus_up" or r._field == "queue_api_up" or r._field == "imap_up") |> last() |> sum()') }},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 9, 0, 8, "Mail Volume Totals", "short", total_query ~ ' |> filter(fn: (r) => r._field == "submitted_total" or r._field == "delivered_total" or r._field == "failed_total" or r._field == "rejected_total")', 0, None, 12, 8) }},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 10, 12, 8, "Gateway Delivery Rates", "short", rate_query ~ ' |> filter(fn: (r) => r._field == "brevo_success_total" or r._field == "local_smtp_success_total" or r._field == "fallback_total")', 0, None, 12, 8) }},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 11, 0, 16, "Queue Depth And Inbox Count", "short", total_query ~ ' |> filter(fn: (r) => r._field == "queue_total" or r._field == "mailbox_inbox_count")', 0, None, 12, 8) }},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 12, 12, 16, "Active Mail Connections", "short", total_query ~ ' |> filter(fn: (r) => r._field == "smtp_active_connections" or r._field == "delivery_active_connections" or r._field == "imap_active_connections")', 0, None, 12, 8) }},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 13, 0, 24, "Submission And SMTP Session Rates", "short", rate_query ~ ' |> filter(fn: (r) => r._field == "send_requests_total" or r._field == "smtp_session_total")', 0, None, 12, 8) }},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 14, 12, 24, "Mail API Health Signals", "short", total_query ~ ' |> filter(fn: (r) => r._field == "prometheus_up" or r._field == "queue_api_up" or r._field == "imap_up")', 0, 1, 12, 8) }}
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": [
+    "lv3",
+    "mail",
+    "stalwart"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": {{ monitoring_grafana_mail_dashboard_title | to_json }},
+  "uid": {{ monitoring_grafana_mail_dashboard_uid | to_json }},
+  "version": 1,
+  "weekStart": ""
+}

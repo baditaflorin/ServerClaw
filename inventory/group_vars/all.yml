@@ -96,3 +96,19 @@ monitoring_influxdb_org: lv3
 monitoring_influxdb_bucket: proxmox
 hetzner_dns_api_url: https://dns.hetzner.com/api/v1
 hetzner_dns_api_token_env_var: HETZNER_DNS_API_TOKEN
+
+mail_platform_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology.mail_platform }}"
+mail_platform_domain: lv3.org
+mail_platform_hostname: "{{ mail_platform_service_topology.public_hostname }}"
+mail_platform_mailbox_localpart: server
+mail_platform_mailbox_login: "{{ mail_platform_mailbox_localpart }}"
+mail_platform_mailbox_address: "{{ mail_platform_mailbox_localpart }}@{{ mail_platform_domain }}"
+mail_platform_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform
+mail_platform_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/stalwart-admin-password.txt
+mail_platform_mailbox_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/server-mailbox-password.txt
+mail_platform_metrics_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/metrics-password.txt
+mail_platform_gateway_api_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/gateway-api-key.txt
+mail_platform_brevo_api_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/brevo-api-key.txt
+mail_platform_brevo_sender_email: "{{ mail_platform_mailbox_address }}"
+mail_platform_brevo_sender_name: Florin Mail Bridge
+mail_platform_reply_to_email: "{{ mail_platform_mailbox_address }}"

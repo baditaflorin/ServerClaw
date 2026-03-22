@@ -41,14 +41,40 @@
   register: hetzner_dns_records_query
   no_log: true
 
-- name: Select matching Hetzner DNS record
+- name: Select existing Hetzner DNS records with the same name and type
   ansible.builtin.set_fact:
-    hetzner_dns_matching_records: >-
+    hetzner_dns_same_name_type_records: >-
       {{
         hetzner_dns_records_query.json.records
         | selectattr('name', 'equalto', hetzner_dns_record_name)
         | selectattr('type', 'equalto', hetzner_dns_record_type)
         | list
+      }}
+
+- name: Select exact Hetzner DNS record matches by value
+  ansible.builtin.set_fact:
+    hetzner_dns_exact_records: >-
+      {{
+        hetzner_dns_same_name_type_records
+        | selectattr('value', 'equalto', hetzner_dns_record_value)
+        | list
+      }}
+
+- name: Select managed Hetzner DNS records by value identity
+  ansible.builtin.set_fact:
+    hetzner_dns_matching_records: >-
+      {{
+        hetzner_dns_exact_records
+        if (hetzner_dns_exact_records | length > 0)
+        else (
+          (
+            hetzner_dns_same_name_type_records
+            | selectattr('value', 'search', hetzner_dns_record_value_match_regex)
+            | list
+          )
+          if (hetzner_dns_record_value_match_regex | default('') | length > 0)
+          else hetzner_dns_exact_records
+        )
       }}
 
 - name: Create Hetzner DNS record when absent
@@ -97,4 +123,5 @@
     that:
       - hetzner_dns_matching_records | length <= 1
     fail_msg: >-
-      Multiple Hetzner DNS records matched {{ hetzner_dns_record_name }} {{ hetzner_dns_record_type }}.
+      Multiple Hetzner DNS records matched {{ hetzner_dns_record_name }} {{ hetzner_dns_record_type }}
+      for managed identity {{ hetzner_dns_record_value_match_regex | default(hetzner_dns_record_value) }}.
