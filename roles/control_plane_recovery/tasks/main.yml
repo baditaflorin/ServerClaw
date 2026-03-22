@@ -67,6 +67,18 @@
     control_plane_recovery_openbao_init_payload: "{{ control_plane_recovery_openbao_init_payload_raw.content | b64decode | from_json }}"
   no_log: true
 
+- name: Install control-plane recovery runtime packages
+  ansible.builtin.apt:
+    name:
+      - curl
+      - jq
+      - openssh-client
+      - postgresql-client
+      - rsync
+      - zstd
+    state: present
+    update_cache: true
+
 - name: Read OpenBao seal status for recovery automation
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/seal-status"
@@ -75,15 +87,34 @@
   register: control_plane_recovery_openbao_seal_status
 
 - name: Unseal OpenBao before managing backup policy state
-  ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/unseal"
-    method: POST
-    body_format: json
-    body:
-      key: "{{ item }}"
-    status_code: 200
-  loop: "{{ control_plane_recovery_openbao_init_payload.keys_base64[:openbao_init_key_threshold] }}"
+  ansible.builtin.shell: |
+    set -euo pipefail
+    python3 - <<'PY'
+    import json
+    import urllib.request
+
+    keys = json.loads(r'''{{ control_plane_recovery_openbao_init_payload.keys_base64[:openbao_init_key_threshold] | to_json }}''')
+    url = "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/unseal"
+
+    for key in keys:
+        data = json.dumps({"key": key}).encode()
+        request = urllib.request.Request(
+            url,
+            data=data,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(request) as response:
+            payload = json.loads(response.read().decode())
+        if payload.get("initialized") is False:
+            raise SystemExit("OpenBao reported an uninitialized state during unseal")
+
+    print("unsealed")
+    PY
+  args:
+    executable: /bin/bash
   when: control_plane_recovery_openbao_seal_status.json.sealed | bool
+  changed_when: control_plane_recovery_openbao_seal_status.json.sealed | bool
   no_log: true
 
 - name: Confirm OpenBao is unsealed for recovery automation
@@ -109,18 +140,6 @@
   retries: 30
   delay: 2
   until: control_plane_recovery_openbao_active_health.status == 200
-
-- name: Install control-plane recovery runtime packages
-  ansible.builtin.apt:
-    name:
-      - curl
-      - jq
-      - openssh-client
-      - postgresql-client
-      - rsync
-      - zstd
-    state: present
-    update_cache: true
 
 - name: Ensure the control-plane recovery runtime directories exist
   ansible.builtin.file:
