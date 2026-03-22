@@ -1,7 +1,7 @@
 ---
-netbox_image_tag: v4.5
-netbox_image: "docker.io/netboxcommunity/netbox:{{ netbox_image_tag }}"
-netbox_redis_image: docker.io/valkey/valkey:8.1-alpine
+netbox_image_tag: v4.5.4
+netbox_image: "{{ container_image_catalog.images.netbox_runtime.ref }}"
+netbox_redis_image: "{{ container_image_catalog.images.netbox_redis_runtime.ref }}"
 netbox_site_dir: /opt/netbox
 netbox_secret_dir: /etc/lv3/netbox
 netbox_compose_file: "{{ netbox_site_dir }}/docker-compose.yml"

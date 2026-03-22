@@ -8,6 +8,16 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.67.0 - 2026-03-23
+
+- implemented ADR 0068 as a catalog-backed container image policy with digest-pinned runtime refs, a managed build-base pin for the mail gateway, and repo validation that now treats image pins and scan receipts as part of the canonical contract
+- added `config/image-catalog.json`, Trivy scan receipts under `receipts/image-scans/`, `make check-image-freshness`, and a controller-side `upgrade-container-image` workflow plus Windmill wrapper for governed image refreshes
+- aligned ADR 0071's observation loop with the ADR 0068 image-catalog contract so drift checks, repository validation, and Windmill seed scripts all operate on the same pinned-image source of truth
+
+Platform impact:
+
+- no direct live platform change in this release commit; the catalog, scan receipts, and converge inputs are now ready to be applied from `main`
+
 ## 0.66.0 - 2026-03-23
 
 - applied ADR 0056 live by converging Keycloak on `docker-runtime-lv3`, provisioning its PostgreSQL backend on `postgres-lv3`, publishing the shared issuer at `https://sso.lv3.org`, and wiring Grafana through the shared OIDC login flow

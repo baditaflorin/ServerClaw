@@ -1,5 +1,7 @@
-repo_version: 0.66.0
+repo_version: 0.67.0
 platform_version: 0.34.0
+container_image_catalog_path: "{{ playbook_dir }}/../config/image-catalog.json"
+container_image_catalog: "{{ lookup('file', container_image_catalog_path) | from_json }}"
 
 proxmox_release_major: 9
 proxmox_suite: trixie
@@ -144,7 +146,7 @@ windmill_env_file: /opt/windmill/windmill.env
 netbox_host_proxy_port: 8004
 netbox_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ netbox_host_proxy_port }}"
 open_webui_version: 0.8.9
-open_webui_image: "ghcr.io/open-webui/open-webui:v{{ open_webui_version }}"
+open_webui_image: "{{ container_image_catalog.images.open_webui_runtime.ref }}"
 open_webui_port: 8088
 open_webui_host_proxy_port: 8008
 open_webui_admin_email: ops@lv3.org
@@ -162,7 +164,7 @@ portainer_controller_url: "https://{{ hostvars['proxmox_florin'].management_tail
 
 step_ca_version: 0.30.1
 step_ca_cli_version: 0.30.1
-step_ca_image: "docker.io/smallstep/step-ca:{{ step_ca_version }}"
+step_ca_image: "{{ container_image_catalog.images.step_ca_runtime.ref }}"
 step_ca_api_port: 9000
 step_ca_proxy_port: 9443
 step_ca_site_dir: /opt/step-ca

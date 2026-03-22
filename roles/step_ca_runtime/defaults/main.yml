@@ -2,7 +2,7 @@
 step_ca_name: LV3 Internal CA
 step_ca_version: 0.30.1
 step_ca_cli_version: 0.30.1
-step_ca_image: "docker.io/smallstep/step-ca:{{ step_ca_version }}"
+step_ca_image: "{{ container_image_catalog.images.step_ca_runtime.ref }}"
 step_ca_cli_download_url: >-
   https://github.com/smallstep/cli/releases/download/v{{ step_ca_cli_version }}/step_linux_{{ step_ca_cli_version }}_amd64.tar.gz
 step_ca_site_dir: /opt/step-ca

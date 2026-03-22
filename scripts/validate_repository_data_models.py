@@ -10,6 +10,7 @@ from typing import Any
 
 from command_catalog import load_command_catalog, validate_command_catalog
 from api_publication import load_api_publication_catalog, validate_api_publication_catalog
+from container_image_policy import load_image_catalog, validate_image_catalog as validate_container_image_catalog
 from controller_automation_toolkit import REPO_ROOT, emit_cli_error, load_json, load_yaml, repo_path
 from control_plane_lanes import load_lane_catalog
 from live_apply_receipts import RECEIPTS_DIR, iter_receipt_paths, validate_receipts
@@ -663,7 +664,7 @@ def validate_secret_catalog(secret_manifest: dict[str, Any]) -> None:
         require_str(secret.get("rotation_mode"), f"{path}.rotation_mode")
 
 
-def validate_image_catalog(host_vars_context: dict[str, Any]) -> None:
+def validate_legacy_image_catalog(host_vars_context: dict[str, Any]) -> None:
     catalog = require_mapping(load_json(IMAGE_CATALOG_PATH), str(IMAGE_CATALOG_PATH))
     require_semver(catalog.get("schema_version"), "config/image-catalog.json.schema_version")
     images = require_list(catalog.get("images"), "config/image-catalog.json.images")
@@ -1319,6 +1320,7 @@ def validate_repository_data_models() -> int:
     validate_workflow_catalog(workflow_catalog, secret_manifest)
     command_catalog = load_command_catalog()
     validate_command_catalog(command_catalog, workflow_catalog, secret_manifest)
+    validate_container_image_catalog(load_image_catalog())
     lane_catalog, _ = load_lane_catalog()
     api_publication_catalog, _, _ = load_api_publication_catalog()
     validate_api_publication_catalog(api_publication_catalog, lane_catalog)
@@ -1327,7 +1329,6 @@ def validate_repository_data_models() -> int:
     host_vars_context = validate_host_vars()
     validate_health_probe_catalog(host_vars_context)
     validate_secret_catalog(secret_manifest)
-    validate_image_catalog(host_vars_context)
     validate_platform_finding_schema()
     validate_versions_stack(host_vars_context)
     print("Repository data models OK")

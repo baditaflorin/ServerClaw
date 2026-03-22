@@ -787,7 +787,7 @@ workstreams:
   - id: adr-0068-container-image-policy
     adr: "0068"
     title: Container image policy and supply chain integrity
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0068-container-image-policy
     worktree_path: ../proxmox_florin_server-container-image-policy

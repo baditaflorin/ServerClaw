@@ -77,6 +77,36 @@ def normalize_image_reference(reference: str) -> str:
     return normalized
 
 
+def iter_observation_images(catalog: dict[str, Any]) -> list[dict[str, Any]]:
+    images = catalog["images"]
+    if isinstance(images, list):
+        return images
+    if not isinstance(images, dict):
+        raise ValueError("config/image-catalog.json.images must be a list or object")
+
+    normalized: list[dict[str, Any]] = []
+    for image_id, image in sorted(images.items()):
+        if image.get("kind") != "runtime":
+            continue
+        runtime_host = image.get("runtime_host")
+        container_name = image.get("container_name")
+        if not runtime_host or not container_name:
+            continue
+        normalized.append(
+            {
+                "id": image_id,
+                "service_id": image.get("service_id", image_id),
+                "runtime_host": runtime_host,
+                "container_name": container_name,
+                "image_reference": image["ref"],
+                "source_kind": "upstream",
+                "pin_status": "pinned",
+                "pinned_digest": image["digest"],
+            }
+        )
+    return normalized
+
+
 def load_observation_context() -> dict[str, Any]:
     host_vars = load_yaml(HOST_VARS_PATH)
     group_vars = load_yaml(GROUP_VARS_PATH)
@@ -539,6 +569,7 @@ def check_vm_state(context: dict[str, Any], run_id: str) -> dict[str, Any]:
 
 def check_image_freshness(context: dict[str, Any], run_id: str) -> dict[str, Any]:
     catalog = load_json(IMAGE_CATALOG_PATH)
+    images = iter_observation_images(catalog)
     details: list[dict[str, Any]] = []
     severity_rank = {"ok": 0, "warning": 1, "critical": 2}
     severity = "ok"
@@ -551,7 +582,7 @@ def check_image_freshness(context: dict[str, Any], run_id: str) -> dict[str, Any
         return image, execute_runner(context, "guest_jump", image["runtime_host"], inspect_command)
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
-        futures = [executor.submit(inspect_image, image) for image in catalog["images"]]
+        futures = [executor.submit(inspect_image, image) for image in images]
         for future in concurrent.futures.as_completed(futures):
             image, result = future.result()
             if result.returncode != 0:
@@ -617,7 +648,7 @@ def check_image_freshness(context: dict[str, Any], run_id: str) -> dict[str, Any
         summary=summary,
         details=details,
         run_id=run_id,
-        outputs={"checked_image_count": len(catalog["images"])},
+        outputs={"checked_image_count": len(images)},
     )
 
 
