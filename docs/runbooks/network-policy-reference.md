@@ -35,5 +35,5 @@ Anything not listed here is denied by default between guests.
 
 ## Related Surfaces
 
-- host enforcement: [roles/proxmox_network/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-guest-network-policy/roles/proxmox_network/tasks/main.yml)
-- guest enforcement: [roles/linux_guest_firewall/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-guest-network-policy/roles/linux_guest_firewall/tasks/main.yml)
+- host enforcement: [roles/proxmox_network/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_network/tasks/main.yml)
+- guest enforcement: [roles/linux_guest_firewall/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/linux_guest_firewall/tasks/main.yml)

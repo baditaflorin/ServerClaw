@@ -24,15 +24,16 @@ This runbook converges ADR 0067 by enforcing the canonical guest network policy 
 
 1. Renders one Proxmox firewall file per managed VM under `/etc/pve/firewall/<vmid>.fw`.
 2. Enables `firewall=1` on each VM `net0` interface without rewriting unrelated VM hardware settings.
-3. Compiles and restarts `pve-firewall` on the Proxmox host when the per-VM policy changes.
-4. Renders `/etc/nftables.conf` on each guest from the same canonical `network_policy` data.
-5. Reloads guest `nftables` and verifies that SSH reconnects cleanly after the policy change.
+3. Maintains the Proxmox host conntrack-zone helper needed for `fwbr+` bridge traffic to preserve NATed guest egress after VM firewalls are enabled.
+4. Compiles and restarts `pve-firewall` on the Proxmox host when the per-VM policy changes.
+5. Renders `/etc/nftables.conf` on each guest from the same canonical `network_policy` data for both local services and Docker-published forwards.
+6. Reloads guest `nftables` and verifies that SSH reconnects cleanly after the policy change.
 
 ## Canonical Policy Source
 
-- policy source: [inventory/host_vars/proxmox_florin.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-guest-network-policy/inventory/host_vars/proxmox_florin.yml)
-- flow reference: [docs/runbooks/network-policy-reference.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-guest-network-policy/docs/runbooks/network-policy-reference.md)
-- playbook: [playbooks/guest-network-policy.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-guest-network-policy/playbooks/guest-network-policy.yml)
+- policy source: [inventory/host_vars/proxmox_florin.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml)
+- flow reference: [docs/runbooks/network-policy-reference.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/network-policy-reference.md)
+- playbook: [playbooks/guest-network-policy.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/guest-network-policy.yml)
 
 ## Verification
 
