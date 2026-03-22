@@ -86,6 +86,8 @@ Use the [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/M
 - `make harden-guest-access`
 - `make harden-security`
 - `make provision-api-access`
+- `make syntax-check-docker-runtime`
+- `make converge-docker-runtime`
 
 ## Things That Must Stay True
 
