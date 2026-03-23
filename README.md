@@ -74,8 +74,8 @@ Portainer is now live on `docker-runtime-lv3` and reachable privately at `https:
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.77.0` |
-| Platform version | `0.36.0` |
+| Repository version | `0.78.0` |
+| Platform version | `0.37.0` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -121,6 +121,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `mail_platform` | `2026-03-22-adr-0041-email-platform-live-apply` |
 | `mattermost` | `2026-03-22-adr-0057-mattermost-live-apply` |
 | `monitoring` | `2026-03-22-adr-0052-loki-live-apply` |
+| `mutation_audit` | `2026-03-23-adr-0066-mutation-audit-live-apply` |
 | `netbox` | `2026-03-22-adr-0054-netbox-live-apply` |
 | `notification_profiles` | `2026-03-22-adr-0050-notification-profiles-live-apply` |
 | `ntopng` | `2026-03-22-adr-0059-ntopng-live-apply` |
@@ -332,8 +333,8 @@ this is still same-host recovery, not off-host disaster recovery
 - [Live Apply Receipts And Verification Evidence](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/live-apply-receipts-and-verification-evidence.md)
 - [LLM Implementation Prompts — ADRs 0082–0091](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/llm-implementation-prompts.md)
 - [Monitoring Stack Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/monitoring-stack.md)
-- [Network Policy Reference](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/network-policy-reference.md)
 - [Mutation Audit Log](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/mutation-audit-log.md)
+- [Network Policy Reference](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/network-policy-reference.md)
 - [Agentic Control-Plane Roadmap](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/plan-agentic-control-plane.md)
 - [Plan: Human Navigation, Deployment Lifecycle, And Platform Hardening (ADRs 0072–0081)](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/plan-human-navigation-and-deployment-lifecycle.md)
 - [Roadmap Runbook: IaC Potency, Build Server Offload, and User Ergonomics](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/plan-iac-potency-and-build-server.md)
@@ -529,8 +530,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.77.0` |
-| Platform version | `0.36.0` |
+| Repository version | `0.78.0` |
+| Platform version | `0.37.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -578,6 +579,7 @@ This repository is intentionally opinionated:
 | `0014` | Tailscale private access rollout | `live_applied` | [adr-0014-tailscale.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0014-tailscale.md) |
 | `0020` | Initial storage and backup model | `merged` | [adr-0020-backups.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0020-backups.md) |
 | `0023` | Docker runtime VM baseline | `live_applied` | [adr-0023-docker-runtime.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0023-docker-runtime.md) |
+| `0024` | Docker guest security baseline | `live_applied` | [adr-0024-docker-security.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0024-docker-security.md) |
 | `0026` | Dedicated PostgreSQL VM baseline | `merged` | [adr-0026-postgres-vm.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0026-postgres-vm.md) |
 | `0027` | Uptime Kuma rollout on the Docker runtime VM | `merged` | [adr-0027-uptime-kuma.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0027-uptime-kuma.md) |
 | `0028` | Docker build VM build count and duration telemetry | `live_applied` | [adr-0028-build-telemetry.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0028-build-telemetry.md) |

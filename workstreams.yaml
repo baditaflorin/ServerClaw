@@ -105,7 +105,7 @@ workstreams:
   - id: adr-0024-docker-security
     adr: "0024"
     title: Docker guest security baseline
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/adr-0024-docker-security
     worktree_path: ../proxmox_florin_server-docker-security
@@ -117,8 +117,8 @@ workstreams:
       - docker-build-lv3
       - playbooks/docker-security.yml
       - roles/docker_guest_security
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
 
   - id: adr-0025-docker-compose-stacks
     adr: "0025"

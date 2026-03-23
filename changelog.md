@@ -8,6 +8,16 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.78.0 - 2026-03-23
+
+- completed ADR 0066 on current `main` by validating the structured mutation-audit schema, Ansible callback emission, command-catalog audit events, the seeded Windmill helper, and the host-side `/var/log/platform/mutation-audit.jsonl` sinks now shipped through ADR 0052
+- wired the current ADR 0079 service playbooks to scrape the structured mutation-audit sink on `proxmox_florin` and both the structured sink plus OpenBao native audit file on `docker-runtime-lv3`
+- repaired current-main execution regressions discovered during the live integration by deduplicating `ansible.cfg` callback settings, teaching shared preflight to resolve inventory patterns, switching generic Grafana and Windmill readiness probes to unauthenticated endpoints, and removing an unnecessary apt cache refresh from `linux_guest_firewall`
+
+Platform impact:
+
+- the live platform is now on `0.37.0`, with `/var/log/platform/mutation-audit.jsonl` verified on `proxmox_florin` and `docker-runtime-lv3`, Alloy scraping both the structured sink and `/opt/openbao/logs/audit.log`, and the Windmill helper `f/lv3/mutation_audit_emit` verified end to end with correlation id `windmill:emit.mutation_audit_event:20260323T084527Z`
+
 ## 0.77.0 - 2026-03-23
 
 - completed ADR 0079 on current `main` by decomposing the playbook layer into group and service entry points backed by shared preflight, verification, and notification tasks

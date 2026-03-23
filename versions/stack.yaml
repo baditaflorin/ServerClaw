@@ -1,11 +1,12 @@
 schema_version: 1.0.0
-repo_version: 0.77.0
-platform_version: 0.36.0
+repo_version: 0.78.0
+platform_version: 0.37.0
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
   latest_receipts:
     monitoring: 2026-03-22-adr-0052-loki-live-apply
+    mutation_audit: 2026-03-23-adr-0066-mutation-audit-live-apply
     public_edge_publication: 2026-03-22-adr-0021-edge-publication-live-apply
     docker_runtime: 2026-03-22-adr-0023-docker-runtime-live-apply
     postgres_vm: 2026-03-22-adr-0026-postgres-vm-live-apply
@@ -565,6 +566,18 @@ observed_state:
       - nginx-lv3
       - postgres-lv3
       - proxmox_florin
+  mutation_audit:
+    sink_file: /var/log/platform/mutation-audit.jsonl
+    loki_job_label: mutation-audit
+    live_hosts:
+      - proxmox_florin
+      - docker-runtime-lv3
+    host_file_verified: true
+    windmill_helper_path: f/lv3/mutation_audit_emit
+    windmill_helper_verified: true
+    latest_windmill_verification_correlation_id: windmill:emit.mutation_audit_event:20260323T084527Z
+    openbao_native_audit_file: /opt/openbao/logs/audit.log
+    openbao_native_audit_scrape_verified: true
   ntopng:
     host_tailscale_proxy_url: http://100.118.189.95:3001
     local_http_url: http://127.0.0.1:3000
@@ -814,8 +827,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.77.0
+    current: 0.78.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.36.0
+    current: 0.37.0
     meaning: intended platform release for the actual server configuration

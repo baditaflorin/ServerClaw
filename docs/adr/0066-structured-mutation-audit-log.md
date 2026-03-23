@@ -1,9 +1,9 @@
 # ADR 0066: Structured Mutation Audit Log
 
 - Status: Accepted
-- Implementation Status: Partial
-- Implemented In Repo Version: 0.77.0
-- Implemented In Platform Version: not yet
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.78.0
+- Implemented In Platform Version: 0.37.0
 - Implemented On: 2026-03-23
 - Date: 2026-03-22
 
@@ -59,10 +59,10 @@ Agents can query the Loki label for audit events without SSH access to reconstru
 ## Implementation Notes
 
 - This workstream branch adds the canonical schema at [docs/schema/mutation-audit-event.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/schema/mutation-audit-event.json), a shared controller-side emitter at [scripts/mutation_audit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/mutation_audit.py), and the Ansible callback at [callback_plugins/mutation_audit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/callback_plugins/mutation_audit.py).
-- Command-catalog approval checks now emit structured events, and the Windmill converge seeds a reusable `f/lv3/mutation_audit` helper into the managed workspace.
-- Initial Ansible mutation coverage is wired for the current Windmill and OpenBao converge tasks through explicit `mutation` tags and stable action ids.
-- Live host-side sink placement at `/var/log/platform/mutation-audit.jsonl` and Loki forwarding remain pending the ADR 0052 rollout and the follow-on live apply for this workstream.
-- OpenBao still writes its native audit-device file separately; mapping that raw feed into the shared mutation stream is part of the remaining live rollout work.
+- Repo automation ships the canonical schema at [docs/schema/mutation-audit-event.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/schema/mutation-audit-event.json), the shared controller-side emitter at [scripts/mutation_audit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/mutation_audit.py), and the Ansible callback at [callback_plugins/mutation_audit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/callback_plugins/mutation_audit.py).
+- Command-catalog approval checks emit structured events, and the Windmill converge now seeds and verifies the reusable `f/lv3/mutation_audit_emit` helper in the managed workspace.
+- Host-local JSONL sinks at `/var/log/platform/mutation-audit.jsonl` are verified live on both `proxmox_florin` and `docker-runtime-lv3`, and ADR 0052 ships those files into Loki under the `mutation-audit` job.
+- OpenBao's native audit-device file remains its own raw feed at `/opt/openbao/logs/audit.log`, but ADR 0052 now scrapes that file through the same mutation-audit log-shipping path on `docker-runtime-lv3`.
 
 ## Boundaries
 
