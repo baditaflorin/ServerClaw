@@ -124,6 +124,7 @@ proxmox_guests:
   - vmid: 110
     name: nginx-lv3
     role: nginx
+    proxmox_firewall_enabled: false
     template_key: lv3-debian-base
     ipv4: 10.10.10.10
     cidr: 24
@@ -286,6 +287,11 @@ network_policy:
           ports:
             - 3001
           description: Reverse proxy access to Uptime Kuma
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
+            - 8091
+          description: Edge and oauth2-proxy access to Keycloak
     docker-build-lv3:
       allow_container_forwarding: true
       allowed_inbound:

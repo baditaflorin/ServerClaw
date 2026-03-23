@@ -327,6 +327,49 @@
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
 
+    - name: Ensure the operations portal OAuth client exists
+      community.general.keycloak_client:
+        realm: "{{ keycloak_realm_name }}"
+        client_id: "{{ keycloak_ops_portal_client_id }}"
+        name: Platform Operations Portal
+        description: Repo-managed OIDC client for the operations portal auth proxy.
+        enabled: true
+        protocol: openid-connect
+        public_client: false
+        client_authenticator_type: client-secret
+        standard_flow_enabled: true
+        implicit_flow_enabled: false
+        direct_access_grants_enabled: false
+        service_accounts_enabled: false
+        full_scope_allowed: false
+        root_url: "{{ keycloak_ops_portal_root_url }}"
+        base_url: "{{ keycloak_ops_portal_root_url }}"
+        admin_url: "{{ keycloak_ops_portal_root_url }}"
+        redirect_uris:
+          - "{{ keycloak_ops_portal_root_url }}/oauth2/callback"
+        valid_post_logout_redirect_uris:
+          - "{{ keycloak_ops_portal_root_url }}/"
+          - "{{ keycloak_ops_portal_root_url }}"
+        web_origins:
+          - "{{ keycloak_ops_portal_root_url }}"
+        protocol_mappers:
+          - name: groups
+            protocol: openid-connect
+            protocolMapper: oidc-group-membership-mapper
+            config:
+              claim.name: groups
+              full.path: "true"
+              id.token.claim: "true"
+              access.token.claim: "true"
+              userinfo.token.claim: "true"
+        state: present
+        auth_client_id: admin-cli
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
+        auth_realm: master
+        auth_username: "{{ keycloak_bootstrap_admin_username }}"
+        auth_password: "{{ keycloak_bootstrap_admin_password }}"
+        validate_certs: false
+
     - name: Ensure the agent service client exists
       community.general.keycloak_client:
         realm: "{{ keycloak_realm_name }}"
@@ -363,6 +406,19 @@
       register: keycloak_grafana_client_secret_info
       no_log: true
 
+    - name: Read the operations portal client secret
+      community.general.keycloak_clientsecret_info:
+        realm: "{{ keycloak_realm_name }}"
+        client_id: "{{ keycloak_ops_portal_client_id }}"
+        auth_client_id: admin-cli
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
+        auth_realm: master
+        auth_username: "{{ keycloak_bootstrap_admin_username }}"
+        auth_password: "{{ keycloak_bootstrap_admin_password }}"
+        validate_certs: false
+      register: keycloak_ops_portal_client_secret_info
+      no_log: true
+
     - name: Read the agent client secret
       community.general.keycloak_clientsecret_info:
         realm: "{{ keycloak_realm_name }}"
@@ -379,6 +435,7 @@
 - name: Record the Keycloak client secrets
   ansible.builtin.set_fact:
     keycloak_grafana_client_secret: "{{ keycloak_grafana_client_secret_info.clientsecret_info.value }}"
+    keycloak_ops_portal_client_secret: "{{ keycloak_ops_portal_client_secret_info.clientsecret_info.value }}"
     keycloak_agent_client_secret: "{{ keycloak_agent_client_secret_info.clientsecret_info.value }}"
   no_log: true
 
@@ -386,6 +443,15 @@
   ansible.builtin.copy:
     dest: "{{ keycloak_grafana_client_secret_local_file }}"
     content: "{{ keycloak_grafana_client_secret }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Mirror the operations portal client secret to the control machine
+  ansible.builtin.copy:
+    dest: "{{ keycloak_ops_portal_client_secret_local_file }}"
+    content: "{{ keycloak_ops_portal_client_secret }}\n"
     mode: "0600"
   delegate_to: localhost
   become: false

@@ -71,3 +71,8 @@ argument_specs:
         required: false
         description:
           - Full edge publication definitions rendered into NGINX.
+      public_edge_authenticated_sites:
+        type: dict
+        required: false
+        description:
+          - Hostname-indexed auth-gate definitions applied by NGINX before serving protected sites.

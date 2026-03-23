@@ -1,0 +1,132 @@
+---
+argument_specs:
+  main:
+    short_description: Run the public-edge OIDC auth proxy used to protect the operations portal.
+    options:
+      public_edge_oidc_auth_version:
+        type: str
+        required: true
+        description:
+          - Pinned oauth2-proxy release version.
+      public_edge_oidc_auth_download_url:
+        type: str
+        required: true
+        description:
+          - Release archive URL for the pinned oauth2-proxy build.
+      public_edge_oidc_auth_binary_path:
+        type: path
+        required: true
+        description:
+          - Install path for the oauth2-proxy binary.
+      public_edge_oidc_auth_service_name:
+        type: str
+        required: true
+        description:
+          - Systemd unit name for the auth proxy service.
+      public_edge_oidc_auth_http_address:
+        type: str
+        required: true
+        description:
+          - Loopback listen address for the auth proxy.
+      public_edge_oidc_auth_config_dir:
+        type: path
+        required: true
+        description:
+          - Remote directory containing the auth proxy configuration.
+      public_edge_oidc_auth_config_file:
+        type: path
+        required: true
+        description:
+          - Remote configuration file rendered for oauth2-proxy.
+      public_edge_oidc_auth_cookie_secret_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file used to mirror the cookie secret for session continuity.
+      public_edge_oidc_auth_cookie_name:
+        type: str
+        required: true
+        description:
+          - Cookie name issued by the auth proxy.
+      public_edge_oidc_auth_client_id:
+        type: str
+        required: true
+        description:
+          - OIDC client id registered in Keycloak for the operations portal.
+      public_edge_oidc_auth_client_secret_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file used to mirror the Keycloak client secret.
+      public_edge_oidc_auth_issuer_url:
+        type: str
+        required: true
+        description:
+          - OIDC issuer URL used by the auth proxy.
+      public_edge_oidc_auth_public_login_url:
+        type: str
+        required: true
+        description:
+          - Public Keycloak authorization endpoint used for browser redirects.
+      public_edge_oidc_auth_internal_base_url:
+        type: str
+        required: true
+        description:
+          - Private Keycloak base URL used by the auth proxy for server-side token and JWKS calls.
+      public_edge_oidc_auth_redirect_url:
+        type: str
+        required: true
+        description:
+          - Callback URL registered for the auth proxy client.
+      public_edge_oidc_auth_allowed_groups:
+        type: list
+        elements: str
+        required: true
+        description:
+          - Keycloak groups that may authenticate to the protected portal.
+      public_edge_oidc_auth_email_domains:
+        type: list
+        elements: str
+        required: true
+        description:
+          - Allowed email domain filters enforced by the auth proxy.
+      public_edge_oidc_auth_scope:
+        type: str
+        required: true
+        description:
+          - OIDC scopes requested by the auth proxy.
+      public_edge_oidc_auth_cookie_domain:
+        type: str
+        required: true
+        description:
+          - Cookie domain used for the protected hostname.
+      public_edge_oidc_auth_cookie_expire:
+        type: str
+        required: true
+        description:
+          - Session cookie max lifetime.
+      public_edge_oidc_auth_cookie_refresh:
+        type: str
+        required: true
+        description:
+          - Session refresh interval.
+      public_edge_oidc_auth_redeem_url:
+        type: str
+        required: true
+        description:
+          - Private Keycloak token endpoint used by the auth proxy.
+      public_edge_oidc_auth_profile_url:
+        type: str
+        required: true
+        description:
+          - Private Keycloak userinfo endpoint used by the auth proxy.
+      public_edge_oidc_auth_validate_url:
+        type: str
+        required: true
+        description:
+          - Private Keycloak validation endpoint used by the auth proxy.
+      public_edge_oidc_auth_jwks_url:
+        type: str
+        required: true
+        description:
+          - Private Keycloak JWKS endpoint used by the auth proxy.

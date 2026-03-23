@@ -9,6 +9,7 @@
       - public_edge_acme_root | length > 0
       - public_edge_certificate_domains | length > 0
       - public_edge_sites | length > 0
+      - public_edge_authenticated_sites is mapping
     fail_msg: "nginx_edge_publication requires certificate, site, and content-path inputs."
 
 - name: Ensure public edge packages are present

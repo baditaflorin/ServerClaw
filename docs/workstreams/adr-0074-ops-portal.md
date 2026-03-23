@@ -31,6 +31,7 @@
 - `scripts/portal_utils.py`
 - `tests/test_ops_portal.py`
 - `tests/fixtures/ops_portal_health.json`
+- `roles/public_edge_oidc_auth/`
 - `build/ops-portal/` (gitignored, generated artifact)
 - updated `roles/nginx_edge_publication`
 - updated `Makefile`
@@ -42,6 +43,8 @@
 ## Expected Live Surfaces
 
 - `https://ops.lv3.org` serving the generated operations portal through the shared NGINX edge certificate
+- Keycloak-backed auth gate on `ops.lv3.org` via `oauth2-proxy` running on `nginx-lv3`
+- `https://sso.lv3.org/realms/lv3/.well-known/openid-configuration` reachable through the same public edge for browser login
 
 ## Verification
 
@@ -61,3 +64,5 @@
 
 - repository implementation is merged by `0.69.0`
 - live publication and TLS verification completed on platform version `0.40.0`
+- `nginx-lv3` now intentionally uses `proxmox_firewall_enabled: false`; leaving `firewall=1` on VM `110` reproduced a Proxmox bridge-path failure where public `80/443` SYNs reached `fwbr110i0` but never reached the guest kernel
+- `docker-runtime-lv3` now explicitly allows TCP `8091` from `nginx-lv3`; without that rule, `ops.lv3.org` still published but redirected users into an unreachable `sso.lv3.org`

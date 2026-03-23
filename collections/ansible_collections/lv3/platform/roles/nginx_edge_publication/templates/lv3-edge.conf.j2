@@ -24,6 +24,7 @@ server {
 }
 
 {% for site in public_edge_sites %}
+{% set protected_site = public_edge_authenticated_sites.get(site.hostname) %}
 server {
     listen 80;
     listen [::]:80;
@@ -37,7 +38,7 @@ server {
         try_files $uri =404;
     }
 
-{% if public_edge_tls_enabled %}
+{% if public_edge_tls_enabled or protected_site %}
     location / {
         return 308 https://$host$request_uri;
     }
@@ -80,6 +81,37 @@ server {
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_prefer_server_ciphers off;
 
+{% if protected_site %}
+    location /oauth2/ {
+        proxy_pass {{ protected_site.auth_proxy_upstream }};
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Uri $request_uri;
+        proxy_set_header X-Auth-Request-Redirect $scheme://$host$request_uri;
+    }
+
+    location = /oauth2/auth {
+        proxy_pass {{ protected_site.auth_proxy_upstream }};
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Uri $request_uri;
+        proxy_set_header Content-Length "";
+        proxy_pass_request_body off;
+    }
+
+    location @oauth2_signin {
+        return 302 /oauth2/sign_in?rd=$scheme://$host$request_uri;
+    }
+{% endif %}
+
 {% if site.kind == 'proxy' %}
     location / {
         proxy_pass {{ site.upstream }};
@@ -98,12 +130,20 @@ server {
     root {{ public_edge_generated_static_root }}/{{ site.source_dir }};
 
     location / {
+{% if protected_site %}
+        auth_request /oauth2/auth;
+        error_page 401 = @oauth2_signin;
+{% endif %}
         try_files $uri $uri/ /index.html;
     }
 {% else %}
     root {{ public_edge_static_root }};
 
     location / {
+{% if protected_site %}
+        auth_request /oauth2/auth;
+        error_page 401 = @oauth2_signin;
+{% endif %}
         default_type text/html;
         try_files /{{ site.slug }}.html =404;
     }

@@ -1,0 +1,29 @@
+---
+public_edge_oidc_auth_version: 7.13.0
+public_edge_oidc_auth_download_url: >-
+  https://github.com/oauth2-proxy/oauth2-proxy/releases/download/v{{ public_edge_oidc_auth_version }}/oauth2-proxy-v{{ public_edge_oidc_auth_version }}.linux-amd64.tar.gz
+public_edge_oidc_auth_binary_path: /usr/local/bin/oauth2-proxy
+public_edge_oidc_auth_service_name: lv3-ops-portal-oauth2-proxy
+public_edge_oidc_auth_http_address: 127.0.0.1:4180
+public_edge_oidc_auth_config_dir: /etc/lv3/oauth2-proxy
+public_edge_oidc_auth_config_file: "{{ public_edge_oidc_auth_config_dir }}/ops-portal.cfg"
+public_edge_oidc_auth_cookie_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ops-portal/oauth2-proxy-cookie-secret.txt
+public_edge_oidc_auth_cookie_name: _lv3_ops_portal_proxy
+public_edge_oidc_auth_client_id: ops-portal-oauth
+public_edge_oidc_auth_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/ops-portal-client-secret.txt
+public_edge_oidc_auth_issuer_url: https://sso.lv3.org/realms/lv3
+public_edge_oidc_auth_public_login_url: https://sso.lv3.org/realms/lv3/protocol/openid-connect/auth
+public_edge_oidc_auth_internal_base_url: "http://{{ hostvars['proxmox_florin'].lv3_service_topology.keycloak.private_ip }}:8091"
+public_edge_oidc_auth_redirect_url: https://ops.lv3.org/oauth2/callback
+public_edge_oidc_auth_allowed_groups:
+  - /lv3-platform-admins
+public_edge_oidc_auth_email_domains:
+  - "*"
+public_edge_oidc_auth_scope: openid profile email groups
+public_edge_oidc_auth_cookie_domain: ops.lv3.org
+public_edge_oidc_auth_cookie_expire: 8h
+public_edge_oidc_auth_cookie_refresh: 1h
+public_edge_oidc_auth_redeem_url: "{{ public_edge_oidc_auth_internal_base_url }}/realms/lv3/protocol/openid-connect/token"
+public_edge_oidc_auth_profile_url: "{{ public_edge_oidc_auth_internal_base_url }}/realms/lv3/protocol/openid-connect/userinfo"
+public_edge_oidc_auth_validate_url: "{{ public_edge_oidc_auth_internal_base_url }}/realms/lv3/protocol/openid-connect/userinfo"
+public_edge_oidc_auth_jwks_url: "{{ public_edge_oidc_auth_internal_base_url }}/realms/lv3/protocol/openid-connect/certs"

@@ -1,0 +1,180 @@
+---
+- name: Validate public edge OIDC auth inputs
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: assert_vars
+  vars:
+    common_assert_vars_required:
+      - public_edge_oidc_auth_version
+      - public_edge_oidc_auth_download_url
+      - public_edge_oidc_auth_binary_path
+      - public_edge_oidc_auth_service_name
+      - public_edge_oidc_auth_http_address
+      - public_edge_oidc_auth_config_dir
+      - public_edge_oidc_auth_config_file
+      - public_edge_oidc_auth_cookie_secret_local_file
+      - public_edge_oidc_auth_cookie_name
+      - public_edge_oidc_auth_client_id
+      - public_edge_oidc_auth_client_secret_local_file
+      - public_edge_oidc_auth_issuer_url
+      - public_edge_oidc_auth_public_login_url
+      - public_edge_oidc_auth_internal_base_url
+      - public_edge_oidc_auth_redirect_url
+      - public_edge_oidc_auth_allowed_groups
+      - public_edge_oidc_auth_email_domains
+      - public_edge_oidc_auth_scope
+      - public_edge_oidc_auth_cookie_domain
+      - public_edge_oidc_auth_cookie_expire
+      - public_edge_oidc_auth_cookie_refresh
+      - public_edge_oidc_auth_redeem_url
+      - public_edge_oidc_auth_profile_url
+      - public_edge_oidc_auth_validate_url
+      - public_edge_oidc_auth_jwks_url
+    common_assert_vars_fail_msg: >-
+      public_edge_oidc_auth requires the oauth2-proxy install settings, Keycloak client material,
+      and cookie/session configuration.
+
+- name: Ensure the local ops portal artifact directory exists
+  ansible.builtin.file:
+    path: "{{ public_edge_oidc_auth_cookie_secret_local_file | dirname }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Generate the local ops portal cookie secret when missing
+  ansible.builtin.shell: |
+    set -euo pipefail
+    current_length=0
+    if [ -s "{{ public_edge_oidc_auth_cookie_secret_local_file }}" ]; then
+      current_length="$(wc -c < "{{ public_edge_oidc_auth_cookie_secret_local_file }}" | tr -d '[:space:]')"
+    fi
+    if [ "$current_length" != "16" ] && [ "$current_length" != "24" ] && [ "$current_length" != "32" ]; then
+      umask 077
+      openssl rand -hex 16 | tr -d '\n' > "{{ public_edge_oidc_auth_cookie_secret_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: public_edge_oidc_auth_cookie_secret_generation
+  changed_when: "'changed' in public_edge_oidc_auth_cookie_secret_generation.stdout"
+  no_log: true
+
+- name: Check the operations portal Keycloak client secret on the control machine
+  ansible.builtin.stat:
+    path: "{{ public_edge_oidc_auth_client_secret_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: public_edge_oidc_auth_client_secret_local
+
+- name: Fail when the operations portal Keycloak client secret is missing
+  ansible.builtin.fail:
+    msg: >-
+      {{ public_edge_oidc_auth_client_secret_local_file }} is missing on the control machine.
+      Run the Keycloak converge first so the auth proxy can use the repo-managed client.
+  when: not public_edge_oidc_auth_client_secret_local.stat.exists
+
+- name: Ensure public edge OIDC auth prerequisite packages are present
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - curl
+      - tar
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure public edge OIDC auth directories exist
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: directory_tree
+  vars:
+    common_directory_tree_paths:
+      - path: "{{ public_edge_oidc_auth_config_dir }}"
+        owner: root
+        group: root
+        mode: "0700"
+      - path: /etc/systemd/system
+        owner: root
+        group: root
+        mode: "0755"
+
+- name: Check the installed oauth2-proxy version
+  ansible.builtin.command:
+    argv:
+      - "{{ public_edge_oidc_auth_binary_path }}"
+      - --version
+  register: public_edge_oidc_auth_installed_version
+  changed_when: false
+  failed_when: false
+
+- name: Install the pinned oauth2-proxy binary
+  ansible.builtin.shell: |
+    set -euo pipefail
+    workdir="$(mktemp -d)"
+    trap 'rm -rf "$workdir"' EXIT
+    cd "$workdir"
+    curl -fsSLo oauth2-proxy.tar.gz "{{ public_edge_oidc_auth_download_url }}"
+    tar -xf oauth2-proxy.tar.gz
+    install -m 0755 "oauth2-proxy-v{{ public_edge_oidc_auth_version }}.linux-amd64/oauth2-proxy" "{{ public_edge_oidc_auth_binary_path }}"
+  args:
+    executable: /bin/bash
+  when: >-
+    public_edge_oidc_auth_installed_version.rc != 0
+    or ('v' ~ public_edge_oidc_auth_version) not in public_edge_oidc_auth_installed_version.stdout
+  register: public_edge_oidc_auth_binary_install
+  changed_when: true
+
+- name: Render the public edge OIDC auth proxy configuration
+  ansible.builtin.template:
+    src: oauth2-proxy.cfg.j2
+    dest: "{{ public_edge_oidc_auth_config_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  register: public_edge_oidc_auth_config
+  no_log: true
+
+- name: Render the public edge OIDC auth proxy systemd unit
+  ansible.builtin.template:
+    src: lv3-ops-portal-oauth2-proxy.service.j2
+    dest: "/etc/systemd/system/{{ public_edge_oidc_auth_service_name }}.service"
+    owner: root
+    group: root
+    mode: "0644"
+  register: public_edge_oidc_auth_unit
+
+- name: Restart the public edge OIDC auth proxy when inputs changed
+  ansible.builtin.systemd_service:
+    name: "{{ public_edge_oidc_auth_service_name }}"
+    enabled: true
+    state: restarted
+    daemon_reload: true
+  when: public_edge_oidc_auth_binary_install is changed or public_edge_oidc_auth_config.changed or public_edge_oidc_auth_unit.changed
+
+- name: Ensure the public edge OIDC auth proxy is enabled and started
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: systemd_unit
+  vars:
+    common_systemd_unit_name: "{{ public_edge_oidc_auth_service_name }}"
+    common_systemd_unit_enabled: true
+    common_systemd_unit_state: started
+    common_systemd_unit_daemon_reload: false
+    common_systemd_unit_expected_active_state: active
+
+- name: Verify the public edge OIDC auth proxy answers unauthenticated auth checks
+  ansible.builtin.uri:
+    url: "http://{{ public_edge_oidc_auth_http_address }}/oauth2/auth"
+    method: GET
+    headers:
+      Host: "{{ public_edge_oidc_auth_cookie_domain }}"
+      X-Forwarded-Proto: https
+      X-Forwarded-Host: "{{ public_edge_oidc_auth_cookie_domain }}"
+      X-Forwarded-Uri: /
+      X-Real-IP: 127.0.0.1
+    status_code: 401
+  register: public_edge_oidc_auth_verify
+  changed_when: false

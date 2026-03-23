@@ -145,19 +145,33 @@
       - set
       - "{{ item.item.vmid | string }}"
       - --net0
-      - >-
-        {{
-          (
-            item.stdout
-            | regex_search('(?m)^net0: .+$')
-            | regex_replace('^net0: ', '')
-          ) ~ ',firewall=1'
-        }}
+      - "{{ proxmox_network_desired_net0 }}"
   register: proxmox_network_guest_firewall_interfaces
   changed_when: true
+  vars:
+    proxmox_network_guest_firewall_enabled: "{{ item.item.proxmox_firewall_enabled | default(true) | bool }}"
+    proxmox_network_current_net0: >-
+      {{
+        item.stdout
+        | regex_search('(?m)^net0: .+$')
+        | regex_replace('^net0: ', '')
+      }}
+    proxmox_network_current_net0_without_firewall: >-
+      {{
+        proxmox_network_current_net0
+        | regex_replace('(^|,)firewall=(?:0|1)(?=,|$)', '')
+        | regex_replace(',,+', ',')
+        | regex_replace(',$', '')
+      }}
+    proxmox_network_desired_net0: >-
+      {{
+        proxmox_network_current_net0_without_firewall
+        ~ ',firewall='
+        ~ ('1' if proxmox_network_guest_firewall_enabled else '0')
+      }}
   when:
     - "item.stdout is search('(?m)^net0: .+$')"
-    - "item.stdout is not search('(?m)^net0: .*firewall=1(?:,|$)')"
+    - "proxmox_network_current_net0 != proxmox_network_desired_net0"
   loop: "{{ proxmox_network_guest_config.results }}"
   loop_control:
     label: "{{ item.item.name }}"

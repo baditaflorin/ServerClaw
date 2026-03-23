@@ -1,0 +1,26 @@
+[Unit]
+Description=LV3 Operations Portal oauth2-proxy
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart={{ public_edge_oidc_auth_binary_path }} --config {{ public_edge_oidc_auth_config_file }}
+Restart=on-failure
+RestartSec=5s
+AmbientCapabilities=
+CapabilityBoundingSet=
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+ReadWritePaths={{ public_edge_oidc_auth_config_dir }}
+WorkingDirectory={{ public_edge_oidc_auth_config_dir }}
+
+[Install]
+WantedBy=multi-user.target

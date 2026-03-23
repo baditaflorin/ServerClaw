@@ -20,6 +20,9 @@ public_edge_extra_sites:
   - hostname: ops.lv3.org
     kind: static_dir
     source_dir: ops-portal
+public_edge_authenticated_sites:
+  ops.lv3.org:
+    auth_proxy_upstream: http://127.0.0.1:4180
 public_edge_certificate_domains: >-
   {{
     (
