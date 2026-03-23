@@ -1,0 +1,68 @@
+# {{ service.name }}
+
+{{ service.description }}
+
+## Summary
+
+| Field | Value |
+| --- | --- |
+| Service ID | `{{ service.id }}` |
+| Category | `{{ service.category }}` |
+| Lifecycle | `{{ service.lifecycle_status }}` |
+| Exposure | `{{ service.exposure }}` |
+| Runtime VM | `{{ service.vm }}` |
+{% if service.get("vmid") %}| VMID | `{{ service.vmid }}` |
+{% endif %}{% if service.get("public_url") %}| Public URL | [{{ service.public_url }}]({{ service.public_url }}) |
+{% endif %}{% if service.get("internal_url") %}| Internal URL | `{{ service.internal_url }}` |
+{% endif %}{% if service.get("dashboard_url") %}| Dashboard | [{{ service.dashboard_url }}]({{ service.dashboard_url }}) |
+{% endif %}{% if service.get("runbook_link") %}| Runbook | [{{ service.runbook_title }}]({{ service.runbook_link }}) |
+{% endif %}{% if service.get("adr_link") %}| ADR | [ADR {{ service.adr }}]({{ service.adr_link }}) |
+{% endif %}
+
+{% if service.ports %}
+## Ports
+
+| Surface | Port | Source |
+| --- | --- | --- |
+{% for row in service.ports -%}
+| {{ row.surface }} | `{{ row.port }}` | {{ row.source }} |
+{% endfor %}
+{% endif %}
+
+{% if service.environments %}
+## Environments
+
+| Environment | Status | URL | Notes |
+| --- | --- | --- | --- |
+{% for env in service.environments -%}
+| {{ env.environment }} | {{ env.status }} | {% if env.url %}[{{ env.url }}]({{ env.url }}){% else %}n/a{% endif %} | {{ env.notes }} |
+{% endfor %}
+{% endif %}
+
+{% if service.subdomains %}
+## Published Hostnames
+
+| Hostname | Status | Exposure | TLS | Notes |
+| --- | --- | --- | --- | --- |
+{% for row in service.subdomains -%}
+| `{{ row.fqdn }}` | {{ row.status }} | {{ row.exposure }} | {{ row.tls_provider }} | {{ row.notes }} |
+{% endfor %}
+{% endif %}
+
+{% if service.secret_refs %}
+## Secret Contracts
+
+| Secret ID | Storage Contract | Rotation |
+| --- | --- | --- |
+{% for row in service.secret_refs -%}
+| `{{ row.id }}` | `{{ row.storage_contract }}` | {{ row.rotation_summary }} |
+{% endfor %}
+{% endif %}
+
+{% if service.tags %}
+## Tags
+
+{% for tag in service.tags -%}
+- `{{ tag }}`
+{% endfor %}
+{% endif %}

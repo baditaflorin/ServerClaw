@@ -80,7 +80,7 @@ The repository now also ships continuous drift detection across OpenTofu, Ansibl
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.96.0` |
+| Repository version | `0.97.0` |
 | Platform version | `0.40.0` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -306,9 +306,11 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstreams guide](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/README.md)
 
 ### Runbooks
+- [Add a New Service](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/add-a-new-service.md)
 - [Agent Observation Loop](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/agent-observation-loop.md)
 - [Agent Tool Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/agent-tool-registry.md)
 - [Ansible Collection Development](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/ansible-collection-development.md)
+- [Break-Glass Recovery](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/break-glass-recovery.md)
 - [Command Catalog And Approval Gates](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/command-catalog-and-approval-gates.md)
 - [Complete Security Baseline Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/complete-security-baseline.md)
 - [Compose Runtime Secrets Injection](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/compose-secrets-injection.md)
@@ -338,8 +340,10 @@ this is still same-host recovery, not off-host disaster recovery
 - [Control-Plane Communication Lanes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/control-plane-communication-lanes.md)
 - [Controller Automation Toolkit](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/controller-automation-toolkit.md)
 - [Controller-Local Secrets And Preflight Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/controller-local-secrets-and-preflight.md)
+- [Deploy a Service](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/deploy-a-service.md)
 - [Deploy Uptime Kuma](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/deploy-uptime-kuma.md)
 - [Deployment History Portal](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/deployment-history-portal.md)
+- [Developer Portal](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/developer-portal.md)
 - [Docker Check Runners](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/docker-check-runners.md)
 - [Drift Detection](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/drift-detection.md)
 - [Environment Promotion Pipeline](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/environment-promotion-pipeline.md)
@@ -373,6 +377,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [RAG Platform Context](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/rag-platform-context.md)
 - [Remote Build Gateway](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/remote-build-gateway.md)
 - [Repair Guest Netplan MAC Drift](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/repair-guest-netplan-mac-drift.md)
+- [Rotate Certificates](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/rotate-certificates.md)
 - [Scaffold A New Service](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/scaffold-new-service.md)
 - [Secret Rotation And Lifecycle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/secret-rotation-and-lifecycle.md)
 - [Service Capability Catalog](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/service-capability-catalog.md)
@@ -476,6 +481,26 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0089: Build Artifact Cache and Layer Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0089-build-artifact-cache.md)
 - [ADR 0090: Unified Platform CLI (`lv3`)](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0090-unified-platform-cli.md)
 - [ADR 0091: Continuous Drift Detection and Reconciliation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0091-continuous-drift-detection.md)
+- [ADR 0092: Unified Platform API Gateway](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0092-unified-platform-api-gateway.md)
+- [ADR 0093: Interactive Ops Portal with Live Actions](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0093-interactive-ops-portal.md)
+- [ADR 0094: Developer Portal and Service Documentation Site](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0094-developer-portal-and-documentation-site.md)
+- [ADR 0095: Unified Search Across Platform Services](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0095-unified-platform-search.md)
+- [ADR 0096: SLO Definitions and Error Budget Tracking](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0096-slo-definitions-and-error-budget-tracking.md)
+- [ADR 0097: Alerting Routing and On-Call Runbook Model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0097-alerting-routing-and-oncall-runbook-model.md)
+- [ADR 0098: Postgres High Availability and Automated Failover](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0098-postgres-high-availability.md)
+- [ADR 0099: Automated Backup Restore Verification](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0099-automated-backup-restore-verification.md)
+- [ADR 0100: Formal RTO/RPO Targets and Disaster Recovery Playbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0100-rto-rpo-targets-and-disaster-recovery-playbook.md)
+- [ADR 0101: Automated Certificate Lifecycle Management](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0101-automated-certificate-lifecycle-management.md)
+- [ADR 0102: Security Posture Reporting and Benchmark Drift](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0102-security-posture-reporting.md)
+- [ADR 0103: Data Classification and Retention Policy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0103-data-classification-and-retention-policy.md)
+- [ADR 0104: Service Dependency Graph and Failure Propagation Model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0104-service-dependency-graph.md)
+- [ADR 0105: Platform Capacity Model and Resource Quota Enforcement](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0105-platform-capacity-model.md)
+- [ADR 0106: Ephemeral Environment Lifecycle and Teardown Policy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0106-ephemeral-environment-lifecycle-policy.md)
+- [ADR 0107: Platform Extension Model for Adding New Services](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0107-platform-extension-model.md)
+- [ADR 0108: Operator Onboarding and Off-boarding Workflow](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0108-operator-onboarding-and-offboarding.md)
+- [ADR 0109: Public Status Page](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0109-public-status-page.md)
+- [ADR 0110: Platform Versioning, Release Notes, and Upgrade Path](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0110-platform-versioning-and-upgrade-path.md)
+- [ADR 0111: End-to-End Integration Test Suite](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0111-end-to-end-integration-test-suite.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -542,6 +567,26 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0089: Build Artifact Cache and Layer Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0089-build-cache.md)
 - [Workstream ADR 0090: Unified Platform CLI (`lv3`)](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0090-platform-cli.md)
 - [Workstream ADR 0091: Continuous Drift Detection and Reconciliation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0091-drift-detection.md)
+- [Workstream ADR 0092: Unified Platform API Gateway](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0092-platform-api-gateway.md)
+- [Workstream ADR 0093: Interactive Ops Portal with Live Actions](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0093-interactive-ops-portal.md)
+- [Workstream ADR 0094: Developer Portal and Service Documentation Site](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0094-developer-portal.md)
+- [Workstream ADR 0095: Unified Search Across Platform Services](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0095-unified-search.md)
+- [Workstream ADR 0096: SLO Definitions and Error Budget Tracking](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0096-slo-tracking.md)
+- [Workstream ADR 0097: Alerting Routing and On-Call Runbook Model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0097-alerting-routing.md)
+- [Workstream ADR 0098: Postgres High Availability and Automated Failover](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0098-postgres-ha.md)
+- [Workstream ADR 0099: Automated Backup Restore Verification](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0099-backup-restore-verification.md)
+- [Workstream ADR 0100: RTO/RPO Targets and Disaster Recovery Playbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0100-disaster-recovery-playbook.md)
+- [Workstream ADR 0101: Automated Certificate Lifecycle Management](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0101-certificate-lifecycle.md)
+- [Workstream ADR 0102: Security Posture Reporting and Benchmark Drift](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0102-security-posture-reporting.md)
+- [Workstream ADR 0103: Data Classification and Retention Policy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0103-data-retention-policy.md)
+- [Workstream ADR 0104: Service Dependency Graph and Failure Propagation Model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0104-dependency-graph.md)
+- [Workstream ADR 0105: Platform Capacity Model and Resource Quota Enforcement](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0105-capacity-model.md)
+- [Workstream ADR 0106: Ephemeral Environment Lifecycle and Teardown Policy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0106-ephemeral-lifecycle.md)
+- [Workstream ADR 0107: Platform Extension Model for Adding New Services](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0107-extension-model.md)
+- [Workstream ADR 0108: Operator Onboarding and Off-boarding Workflow](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0108-operator-onboarding.md)
+- [Workstream ADR 0109: Public Status Page](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0109-public-status-page.md)
+- [Workstream ADR 0110: Platform Versioning, Release Notes, and Upgrade Path](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0110-platform-versioning.md)
+- [Workstream ADR 0111: End-to-End Integration Test Suite](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0111-integration-test-suite.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
@@ -559,7 +604,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.96.0` |
+| Repository version | `0.97.0` |
 | Platform version | `0.40.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -664,6 +709,7 @@ This repository is intentionally opinionated:
 | `0090` | Unified platform CLI | `merged` | [adr-0090-platform-cli.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0090-platform-cli.md) |
 | `0091` | Continuous drift detection and reconciliation | `merged` | [adr-0091-drift-detection.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0091-drift-detection.md) |
 | `0091` | Continuous drift detection and reconciliation | `merged` | [adr-0091-drift-detection.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0091-drift-detection.md) |
+| `0094` | Developer portal and service documentation site | `merged` | [adr-0094-developer-portal.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0094-developer-portal.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

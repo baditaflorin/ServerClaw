@@ -30,6 +30,10 @@ server {
     listen [::]:80;
     server_name {{ site.hostname }}{% if site.aliases is defined and site.aliases | length > 0 %} {{ site.aliases | join(' ') }}{% endif %};
 
+{% if site.noindex | default(false) %}
+    add_header X-Robots-Tag "noindex" always;
+{% endif %}
+
     root {{ public_edge_static_root }};
 
     location /.well-known/acme-challenge/ {
@@ -75,6 +79,10 @@ server {
     listen [::]:443 ssl;
     http2 on;
     server_name {{ site.hostname }}{% if site.aliases is defined and site.aliases | length > 0 %} {{ site.aliases | join(' ') }}{% endif %};
+
+{% if site.noindex | default(false) %}
+    add_header X-Robots-Tag "noindex" always;
+{% endif %}
 
     ssl_certificate /etc/letsencrypt/live/{{ public_edge_cert_name }}/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/{{ public_edge_cert_name }}/privkey.pem;

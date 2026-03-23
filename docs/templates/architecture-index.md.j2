@@ -1,0 +1,15 @@
+# Architecture Decisions
+
+This index is generated from `docs/adr/`.
+
+## Summary
+
+- Total ADRs: **{{ totals.total }}**
+- Implemented: **{{ totals.implemented }}**
+- Proposed: **{{ totals.proposed }}**
+
+| ADR | Title | Status | Implementation |
+| --- | --- | --- | --- |
+{% for adr in adrs -%}
+| [{{ adr.id }}]({{ adr.link }}) | {{ adr.title }} | {{ adr.status }} | {{ adr.implementation_status }} |
+{% endfor %}

@@ -445,6 +445,32 @@
       }
     },
     {
+      "id": "docs_portal",
+      "name": "Developer Portal",
+      "description": "Generated public documentation site for services, ADRs, runbooks, release notes, and platform reference data.",
+      "category": "access",
+      "lifecycle_status": "planned",
+      "vm": "nginx-lv3",
+      "vmid": 110,
+      "public_url": "https://docs.lv3.org",
+      "subdomain": "docs.lv3.org",
+      "exposure": "edge-published",
+      "adr": "0094",
+      "runbook": "docs/runbooks/developer-portal.md",
+      "tags": [
+        "portal",
+        "documentation",
+        "developer-experience"
+      ],
+      "environments": {
+        "production": {
+          "status": "planned",
+          "url": "https://docs.lv3.org",
+          "subdomain": "docs.lv3.org"
+        }
+      }
+    },
+    {
       "id": "platform_context_api",
       "name": "Platform Context API",
       "description": "Private retrieval-augmented query API for repository and platform context.",

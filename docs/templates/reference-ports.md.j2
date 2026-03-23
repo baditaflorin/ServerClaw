@@ -1,0 +1,7 @@
+# Port Reference
+
+| Service | Surface | Port | Endpoint |
+| --- | --- | --- | --- |
+{% for row in rows -%}
+| [{{ row.service_name }}]({{ row.service_link }}) | {{ row.surface }} | `{{ row.port }}` | `{{ row.endpoint }}` |
+{% endfor %}

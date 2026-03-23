@@ -8,6 +8,14 @@
       "notes": "Reserved for the generated operations portal and its staged hostname."
     },
     {
+      "prefix": "docs",
+      "owner_adr": "0094",
+      "allowed_fqdns": [
+        "docs.lv3.org"
+      ],
+      "notes": "Reserved for the generated developer portal and documentation site."
+    },
+    {
       "prefix": "internal",
       "owner_adr": "0076",
       "notes": "Reserved for future internal-only routing or split-horizon publication."
@@ -79,6 +87,22 @@
       "target": "65.108.75.123",
       "target_port": 443,
       "owner_adr": "0081",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Repository automation is ready; live publication still requires apply from main."
+    },
+    {
+      "fqdn": "docs.lv3.org",
+      "service_id": "docs_portal",
+      "environment": "production",
+      "status": "planned",
+      "exposure": "edge-published",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0094",
       "tls": {
         "provider": "letsencrypt",
         "cert_path": "/etc/letsencrypt/live/lv3-edge/",

@@ -29,6 +29,7 @@ class SubdomainCatalogTests(unittest.TestCase):
         )
 
         reserved_prefixes = {item["prefix"] for item in self.catalog["reserved_prefixes"]}
+        self.assertIn("docs", reserved_prefixes)
         self.assertIn("ops", reserved_prefixes)
         self.assertIn("mail", reserved_prefixes)
 
@@ -88,6 +89,18 @@ class SubdomainCatalogTests(unittest.TestCase):
             self.public_edge_defaults,
         )
         entry = subdomain_catalog.get_subdomain_entry(self.catalog, "ops.lv3.org")
+
+        self.assertEqual(
+            subdomain_catalog.validate_provisionable_subdomain(entry, edge_route_hostnames),
+            "edge",
+        )
+
+    def test_docs_route_mode_is_edge(self) -> None:
+        edge_route_hostnames = subdomain_catalog.collect_edge_route_hostnames(
+            self.host_vars,
+            self.public_edge_defaults,
+        )
+        entry = subdomain_catalog.get_subdomain_entry(self.catalog, "docs.lv3.org")
 
         self.assertEqual(
             subdomain_catalog.validate_provisionable_subdomain(entry, edge_route_hostnames),

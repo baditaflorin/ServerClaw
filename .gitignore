@@ -42,3 +42,5 @@ build/
 .terraform/
 *.tfplan
 *.plan.json
+docs/site-generated/*
+!docs/site-generated/.gitkeep

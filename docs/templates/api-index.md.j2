@@ -1,0 +1,22 @@
+# API Reference
+
+The platform API documentation is assembled from the API publication catalog and the gateway OpenAPI snapshot.
+
+{% if catalog_missing %}
+!!! warning
+
+    `config/api-gateway-catalog.json` is not present on this branch yet, so this section currently uses the canonical API publication catalog and the best available OpenAPI snapshot.
+{% endif %}
+
+## Publication Surfaces
+
+| Surface | Tier | Lane | Endpoint | Public Hostnames |
+| --- | --- | --- | --- | --- |
+{% for row in surfaces -%}
+| `{{ row.id }}` | {{ row.publication_tier }} | {{ row.lane }} | `{{ row.endpoint }}` | {{ row.public_hostnames }} |
+{% endfor %}
+
+## OpenAPI Snapshot
+
+- Snapshot source: `{{ openapi_source }}`
+- Rendered page: [OpenAPI browser](openapi.md)

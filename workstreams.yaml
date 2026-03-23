@@ -1445,7 +1445,7 @@ workstreams:
   - id: adr-0094-developer-portal
     adr: "0094"
     title: Developer portal and service documentation site
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0094-developer-portal
     worktree_path: ../proxmox_florin_server-developer-portal

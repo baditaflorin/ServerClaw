@@ -60,7 +60,7 @@ CHECK_RUNNER_PYTHON_IMAGE ?= $(CHECK_RUNNER_REGISTRY)/python:$(CHECK_RUNNER_PYTH
 CHECK_RUNNER_INFRA_IMAGE ?= $(CHECK_RUNNER_REGISTRY)/infra:$(CHECK_RUNNER_INFRA_TAG)
 CHECK_RUNNER_SECURITY_IMAGE ?= $(CHECK_RUNNER_REGISTRY)/security:$(CHECK_RUNNER_SECURITY_TAG)
 
-.PHONY: validate validate-generated-vars validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-shell validate-json validate-compose-runtime-envs validate-data-models validate-health-probes validate-tofu generate-platform-vars show-platform-facts generate-status-docs generate-status generate-ops-portal generate-changelog-portal deploy-ops-portal deploy-changelog-portal validate-generated-docs validate-generated-portals receipts receipt-info workflows workflow-info commands command-info services show-service environments environment-info lanes lane-info api-publication api-publication-info agent-tools agent-tool-info export-mcp-tools check-image-freshness upgrade-container-image pin-image scaffold-service install-hooks pre-push-gate gate-status post-merge-gate setup preflight syntax-check syntax-check-monitoring syntax-check-ntopng syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-openbao syntax-check-step-ca syntax-check-windmill syntax-check-keycloak syntax-check-netbox syntax-check-open-webui syntax-check-mattermost syntax-check-portainer syntax-check-rag-context syntax-check-secret-rotation collection-sync collection-build collection-publish collection-install check-platform-drift drift-report open-maintenance-window close-maintenance-window install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-guest-network-policy converge-monitoring converge-ntopng converge-docker-runtime converge-postgres-vm converge-mail-platform converge-openbao converge-step-ca converge-windmill converge-control-plane-recovery converge-keycloak converge-netbox converge-open-webui converge-mattermost converge-portainer converge-rag-context rotate-secret deploy-uptime-kuma uptime-kuma-manage portainer-manage configure-backups configure-backup-vm database-dns provision-subdomain start-workstream promote live-apply-group live-apply-service live-apply-site build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-reaper install-cli update-cli validate-packer remote-packer-validate packer-template-rebuild remote-tofu-plan remote-tofu-apply tofu-drift tofu-import
+.PHONY: validate validate-generated-vars validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-shell validate-json validate-compose-runtime-envs validate-data-models validate-health-probes validate-tofu generate-platform-vars show-platform-facts generate-status-docs generate-status generate-ops-portal generate-changelog-portal docs deploy-ops-portal deploy-changelog-portal deploy-docs-portal validate-generated-docs validate-generated-portals receipts receipt-info workflows workflow-info commands command-info services show-service environments environment-info lanes lane-info api-publication api-publication-info agent-tools agent-tool-info export-mcp-tools check-image-freshness upgrade-container-image pin-image scaffold-service install-hooks pre-push-gate gate-status post-merge-gate setup preflight syntax-check syntax-check-monitoring syntax-check-ntopng syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-openbao syntax-check-step-ca syntax-check-windmill syntax-check-keycloak syntax-check-netbox syntax-check-open-webui syntax-check-mattermost syntax-check-portainer syntax-check-rag-context syntax-check-secret-rotation collection-sync collection-build collection-publish collection-install check-platform-drift drift-report open-maintenance-window close-maintenance-window install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-guest-network-policy converge-monitoring converge-ntopng converge-docker-runtime converge-postgres-vm converge-mail-platform converge-openbao converge-step-ca converge-windmill converge-control-plane-recovery converge-keycloak converge-netbox converge-open-webui converge-mattermost converge-portainer converge-rag-context rotate-secret deploy-uptime-kuma uptime-kuma-manage portainer-manage configure-backups configure-backup-vm database-dns provision-subdomain start-workstream promote live-apply-group live-apply-service live-apply-site build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-reaper install-cli update-cli validate-packer remote-packer-validate packer-template-rebuild remote-tofu-plan remote-tofu-apply tofu-drift tofu-import
 
 validate:
 	$(REPO_ROOT)/scripts/validate_repo.sh
@@ -208,13 +208,20 @@ generate-ops-portal:
 generate-changelog-portal:
 	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/generate_changelog_portal.py --write
 
+docs:
+	uv run --with-requirements $(REPO_ROOT)/requirements/docs.txt python $(REPO_ROOT)/scripts/generate_docs_site.py --write
+	uv run --with-requirements $(REPO_ROOT)/requirements/docs.txt mkdocs build --strict --config-file $(REPO_ROOT)/mkdocs.yml --site-dir $(REPO_ROOT)/build/docs-portal
+
 deploy-ops-portal: generate-ops-portal
 	$(MAKE) configure-edge-publication
 
 deploy-changelog-portal: generate-changelog-portal
 	$(MAKE) configure-edge-publication
 
-generate-status: generate-status-docs generate-ops-portal generate-changelog-portal
+deploy-docs-portal: docs
+	$(MAKE) configure-edge-publication
+
+generate-status: generate-status-docs generate-ops-portal generate-changelog-portal docs
 
 validate-generated-docs:
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/generate_status_docs.py --check
@@ -222,6 +229,7 @@ validate-generated-docs:
 validate-generated-portals:
 	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/generate_ops_portal.py --check
 	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/generate_changelog_portal.py --check
+	$(MAKE) docs
 
 receipts:
 	$(REPO_ROOT)/scripts/live_apply_receipts.py --list

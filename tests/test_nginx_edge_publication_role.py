@@ -35,6 +35,13 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
             task_names,
         )
 
+    def test_defaults_include_public_docs_site(self) -> None:
+        docs_site = next(
+            site for site in self.defaults["public_edge_extra_sites"] if site["hostname"] == "docs.lv3.org"
+        )
+        self.assertEqual(docs_site["source_dir"], "docs-portal")
+        self.assertTrue(docs_site["noindex"])
+
 
 if __name__ == "__main__":
     unittest.main()

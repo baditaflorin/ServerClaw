@@ -1,10 +1,10 @@
 # ADR 0094: Developer Portal and Service Documentation Site
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.97.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-23
 - Date: 2026-03-23
 
 ## Context

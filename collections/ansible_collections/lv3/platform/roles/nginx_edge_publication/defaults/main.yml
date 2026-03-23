@@ -17,6 +17,10 @@ public_edge_extra_sites:
   - hostname: changelog.lv3.org
     kind: static_dir
     source_dir: changelog-portal
+  - hostname: docs.lv3.org
+    kind: static_dir
+    source_dir: docs-portal
+    noindex: true
   - hostname: ops.lv3.org
     kind: static_dir
     source_dir: ops-portal

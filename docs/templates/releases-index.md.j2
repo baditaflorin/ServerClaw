@@ -1,0 +1,7 @@
+# Release Notes
+
+| Release | Date |
+| --- | --- |
+{% for row in releases -%}
+| [{{ row.version }}]({{ row.link }}) | {{ row.date }} |
+{% endfor %}

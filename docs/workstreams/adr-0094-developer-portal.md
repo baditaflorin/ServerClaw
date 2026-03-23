@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0094](../adr/0094-developer-portal-and-documentation-site.md)
 - Title: MkDocs Material static site generated from platform catalogs and ADR corpus, published publicly at docs.lv3.org
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0094-developer-portal`
 - Worktree: `../proxmox_florin_server-developer-portal`
 - Owner: codex
@@ -64,6 +64,13 @@
 - Site is live at `https://docs.lv3.org`
 - At minimum: index, services directory, ADR index, one runbook, and port reference are all rendered correctly
 - No sensitive information (IPs, secret values, internal credentials) appears in the generated site
+
+## Outcome
+
+- repository implementation is complete on `main` in repo release `0.97.0`
+- the docs site now builds from canonical catalogs, copied ADRs, copied runbooks, release notes, and a generated OpenAPI snapshot into `build/docs-portal/`
+- `docs.lv3.org` is represented in the service and subdomain catalogs plus the shared edge publication defaults with a temporary `X-Robots-Tag: noindex` header
+- no live platform version change is claimed yet; public publication still requires an apply from `main`
 
 ## Notes For The Next Assistant
 

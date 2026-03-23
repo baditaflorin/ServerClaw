@@ -1,0 +1,17 @@
+# Runbooks
+
+These pages are copied from `docs/runbooks/` and rewritten for the published documentation site.
+
+{% if featured %}
+## Starter Runbooks
+
+{% for item in featured -%}
+- [{{ item.title }}]({{ item.link }})
+{% endfor %}
+{% endif %}
+
+## Full Index
+
+{% for item in runbooks -%}
+- [{{ item.title }}]({{ item.link }})
+{% endfor %}
