@@ -21,7 +21,7 @@ make install-hooks
 make pre-push-gate
 ```
 
-See [docs/runbooks/validation-gate.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-validation-gate/docs/runbooks/validation-gate.md) for the hook installation, bypass, and post-merge workflow details.
+See [docs/runbooks/validation-gate.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/validation-gate.md) for the hook installation, bypass, and post-merge workflow details.
 
 ## What The Pipeline Checks
 

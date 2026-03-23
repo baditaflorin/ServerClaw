@@ -151,6 +151,18 @@ def build_docker_command(
             if host_path:
                 mount_args.extend(["-v", f"{Path(host_path).resolve()}:/var/lib/trivy"])
                 env_args.extend(["-e", "TRIVY_CACHE_DIR=/var/lib/trivy"])
+        elif cache_mount == "packer_plugins":
+            host_path = os.environ.get("LV3_PACKER_PLUGIN_CACHE_DIR")
+            if host_path:
+                mount_args.extend(["-v", f"{Path(host_path).resolve()}:/root/.packer.d"])
+                env_args.extend(
+                    [
+                        "-e",
+                        "PACKER_CACHE_ROOT=/root/.packer.d",
+                        "-e",
+                        "PACKER_PLUGIN_PATH=/root/.packer.d/plugins",
+                    ]
+                )
 
     return [
         docker_binary,

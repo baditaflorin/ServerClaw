@@ -44,7 +44,7 @@ uvx --from pre-commit pre-commit run --all-files
 
 ## Gate Definition
 
-The authoritative gate manifest is [config/validation-gate.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-validation-gate/config/validation-gate.json).
+The authoritative gate manifest is [config/validation-gate.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/validation-gate.json).
 
 It defines these eight blocking checks:
 
@@ -57,7 +57,7 @@ It defines these eight blocking checks:
 - `packer-validate`
 - `security-scan`
 
-`scripts/run_gate.py` reads that manifest and executes the checks in parallel via [scripts/parallel_check.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-validation-gate/scripts/parallel_check.py).
+`scripts/run_gate.py` reads that manifest and executes the checks in parallel via [scripts/parallel_check.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/parallel_check.py).
 
 ## Bypass Model
 
@@ -67,7 +67,7 @@ The supported audited bypass is:
 SKIP_REMOTE_GATE=1 git push
 ```
 
-That path records a receipt under [receipts/gate-bypasses](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-validation-gate/receipts/gate-bypasses).
+That path records a receipt under [receipts/gate-bypasses](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/gate-bypasses).
 
 `git push --no-verify` still skips both hook layers, but native Git hooks cannot observe that bypass after the fact. Treat it as break-glass only and record the reason in the change notes if it is used.
 
@@ -97,5 +97,6 @@ That workflow re-runs the same `config/validation-gate.json` manifest after merg
 
 - if `make install-hooks` fails during `pre-commit` bootstrap, rerun it with working internet access so `pre-commit` can fetch hook environments
 - if the build server is unreachable, rerun `make pre-push-gate`; the wrapper already falls back to local Docker execution
+- if `packer-validate` falls back locally, inspect the build-worker plugin cache under `/opt/builds/.packer.d`; the remote gate expects the `github.com/hashicorp/proxmox` plugin to be prewarmed there when outbound GitHub access is unavailable
 - if a local fallback fails because Docker is unavailable, fix the local Docker daemon or restore build-server reachability before pushing
 - if `make gate-status` shows no results, run `make pre-push-gate` once to seed the local status file

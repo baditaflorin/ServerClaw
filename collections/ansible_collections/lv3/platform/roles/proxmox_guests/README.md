@@ -1,6 +1,6 @@
 # proxmox_guests
 
-Creates the Debian cloud template and the managed guest VM set.
+Clones the managed guest VM set from the repo-managed Proxmox template catalog.
 
-Inputs: cloud image metadata, Proxmox template/storage settings, bridge settings, and the `proxmox_guests` inventory data.
-Outputs: a template VM, cloud-init snippets, and converged guest VM hardware and network settings.
+Inputs: Proxmox template metadata, storage and bridge settings, and the `proxmox_guests` inventory data.
+Outputs: cloud-init snippets plus converged guest VM hardware and network settings cloned from the declared template source.

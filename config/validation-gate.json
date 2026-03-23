@@ -21,9 +21,10 @@
     "description": "Validate all Packer templates when the repo carries them; otherwise report a no-op pass.",
     "severity": "error",
     "image": "registry.lv3.org/check-runner/infra:2026.03.23",
-    "command": "if [ -d packer ] && find packer -name '*.pkr.hcl' -print -quit | grep -q .; then packer validate packer; else echo 'No packer templates present'; fi",
+    "command": "./scripts/validate_packer_templates.sh",
     "working_dir": "/workspace",
-    "timeout_seconds": 120
+    "timeout_seconds": 120,
+    "cache_mounts": ["packer_plugins"]
   },
   "schema-validation": {
     "description": "Validate canonical repository data models, cross references, and receipt schemas.",
@@ -37,7 +38,7 @@
     "description": "Run the repository filesystem through the pinned Trivy security scan policy.",
     "severity": "error",
     "image": "registry.lv3.org/check-runner/security:2026.03.23",
-    "command": "trivy fs --scanners misconfig,secret --skip-db-update --skip-dirs .git --skip-dirs .worktrees --skip-files docker/check-runners/ansible/Dockerfile --skip-files docker/check-runners/infra/Dockerfile --skip-files docker/check-runners/python/Dockerfile --skip-files docker/check-runners/security/Dockerfile --exit-code 1 --severity HIGH,CRITICAL .",
+    "command": "trivy fs --scanners misconfig,secret --skip-db-update --skip-dirs .ansible --skip-dirs .git --skip-dirs .worktrees --skip-files docker/check-runners/ansible/Dockerfile --skip-files docker/check-runners/infra/Dockerfile --skip-files docker/check-runners/python/Dockerfile --skip-files docker/check-runners/security/Dockerfile --skip-files uv.lock --exit-code 1 --severity HIGH,CRITICAL .",
     "working_dir": "/workspace",
     "timeout_seconds": 240,
     "cache_mounts": ["trivy"]

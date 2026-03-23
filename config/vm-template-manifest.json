@@ -1,0 +1,40 @@
+{
+  "templates": {
+    "lv3-debian-base": {
+      "vmid": 9000,
+      "name": "lv3-debian-base",
+      "source_template": "debian13-cloud-template",
+      "build_date": null,
+      "version": null,
+      "digest": null,
+      "packer_commit": null
+    },
+    "lv3-docker-host": {
+      "vmid": 9001,
+      "name": "lv3-docker-host",
+      "source_template": "lv3-debian-base",
+      "build_date": null,
+      "version": null,
+      "digest": null,
+      "packer_commit": null
+    },
+    "lv3-postgres-host": {
+      "vmid": 9002,
+      "name": "lv3-postgres-host",
+      "source_template": "lv3-debian-base",
+      "build_date": null,
+      "version": null,
+      "digest": null,
+      "packer_commit": null
+    },
+    "lv3-ops-base": {
+      "vmid": 9003,
+      "name": "lv3-ops-base",
+      "source_template": "lv3-debian-base",
+      "build_date": null,
+      "version": null,
+      "digest": null,
+      "packer_commit": null
+    }
+  }
+}

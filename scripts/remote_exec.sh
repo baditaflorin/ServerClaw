@@ -190,14 +190,31 @@ timeout_prefix() {
   fi
 }
 
+forwarded_dynamic_env_names() {
+  "$PYTHON_BIN" - <<'PY'
+import os
+
+prefixes = ("OPENBAO_", "PACKER_", "PKR_VAR_", "PROXMOX_")
+for name in sorted(os.environ):
+    if any(name.startswith(prefix) for prefix in prefixes):
+        print(name)
+PY
+}
+
 remote_env_exports() {
   local prefix=""
   local name=""
+  local dynamic_name=""
   for name in COMMAND IMAGE SERVICE ENV ENVIRONMENT HOST WORKFLOW; do
     if [[ -n "${!name:-}" ]]; then
       printf -v prefix "%sexport %s=%q; " "$prefix" "$name" "${!name}"
     fi
   done
+  while IFS= read -r dynamic_name; do
+    [[ -n "$dynamic_name" ]] || continue
+    [[ -n "${!dynamic_name:-}" ]] || continue
+    printf -v prefix "%sexport %s=%q; " "$prefix" "$dynamic_name" "${!dynamic_name}"
+  done < <(forwarded_dynamic_env_names)
   if [[ -n "$BUILD_SERVER_PACKER_PLUGIN_CACHE" ]]; then
     printf -v prefix "%sexport PACKER_PLUGIN_PATH=%q; " "$prefix" "${BUILD_SERVER_PACKER_PLUGIN_CACHE}/plugins"
   fi
@@ -210,11 +227,17 @@ remote_env_exports() {
 remote_docker_env_args() {
   local args=()
   local name=""
+  local dynamic_name=""
   for name in COMMAND IMAGE SERVICE ENV ENVIRONMENT HOST WORKFLOW; do
     if [[ -n "${!name:-}" ]]; then
       args+=("-e" "$name=${!name}")
     fi
   done
+  while IFS= read -r dynamic_name; do
+    [[ -n "$dynamic_name" ]] || continue
+    [[ -n "${!dynamic_name:-}" ]] || continue
+    args+=("-e" "$dynamic_name=${!dynamic_name}")
+  done < <(forwarded_dynamic_env_names)
   if [[ -n "$BUILD_SERVER_APT_PROXY_URL" ]]; then
     args+=("-e" "APT_PROXY_URL=$BUILD_SERVER_APT_PROXY_URL")
   fi
@@ -310,7 +333,7 @@ sync_workspace() {
 
 run_local_command() {
   [[ -n "$LOCAL_COMMAND" ]] || fail "no local fallback command configured for $COMMAND_LABEL"
-  echo "remote_exec: build server unreachable, running local fallback for $COMMAND_LABEL" >&2
+  echo "remote_exec: running local fallback for $COMMAND_LABEL" >&2
   (
     cd "$REPO_ROOT"
     bash -lc "$LOCAL_COMMAND"
@@ -343,8 +366,23 @@ run_remote_command() {
     return 0
   fi
 
-  ensure_remote_workspace
-  sync_workspace false
+  if ! ensure_remote_workspace; then
+    if [[ "$LOCAL_FALLBACK" == "true" ]]; then
+      echo "remote_exec: remote workspace preparation failed, falling back locally for $COMMAND_LABEL" >&2
+      run_local_command
+      return $?
+    fi
+    return 1
+  fi
+
+  if ! sync_workspace false; then
+    if [[ "$LOCAL_FALLBACK" == "true" ]]; then
+      echo "remote_exec: remote sync failed, falling back locally for $COMMAND_LABEL" >&2
+      run_local_command
+      return $?
+    fi
+    return 1
+  fi
 
   if [[ "$SKIP_DOCKER" == "true" || -z "$DOCKER_IMAGE" ]]; then
     printf -v remote_payload "cd %q && %sbash -lc %q" \
@@ -384,7 +422,15 @@ run_remote_command() {
   fi
 
   "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "$remote_payload" || rc=$?
-  sync_remote_gate_status_back
+  if [[ "$rc" -eq 0 ]]; then
+    sync_remote_gate_status_back
+    return 0
+  fi
+  if [[ "$rc" -ne 0 && "$LOCAL_FALLBACK" == "true" ]]; then
+    echo "remote_exec: remote command failed, falling back locally for $COMMAND_LABEL" >&2
+    run_local_command
+    return $?
+  fi
   return "$rc"
 }
 

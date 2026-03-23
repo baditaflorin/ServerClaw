@@ -98,10 +98,13 @@ def test_build_docker_command_mounts_declared_caches(
 ) -> None:
     parallel_check = load_parallel_check_module()
     collections_dir = tmp_path / "collections-cache"
+    packer_dir = tmp_path / "packer-cache"
     trivy_dir = tmp_path / "trivy-cache"
     collections_dir.mkdir()
+    packer_dir.mkdir()
     trivy_dir.mkdir()
     monkeypatch.setenv("LV3_ANSIBLE_COLLECTIONS_DIR", str(collections_dir))
+    monkeypatch.setenv("LV3_PACKER_PLUGIN_CACHE_DIR", str(packer_dir))
     monkeypatch.setenv("LV3_TRIVY_CACHE_DIR", str(trivy_dir))
 
     check = parallel_check.CheckDefinition(
@@ -110,13 +113,16 @@ def test_build_docker_command_mounts_declared_caches(
         command="trivy fs .",
         working_dir="/workspace",
         timeout_seconds=30,
-        cache_mounts=("ansible_collections", "trivy"),
+        cache_mounts=("ansible_collections", "packer_plugins", "trivy"),
     )
 
     command = parallel_check.build_docker_command(check, tmp_path, "docker")
 
     assert f"{collections_dir.resolve()}:/opt/lv3/ansible-collections" in command
     assert "LV3_ANSIBLE_COLLECTIONS_DIR=/opt/lv3/ansible-collections" in command
+    assert f"{packer_dir.resolve()}:/root/.packer.d" in command
+    assert "PACKER_CACHE_ROOT=/root/.packer.d" in command
+    assert "PACKER_PLUGIN_PATH=/root/.packer.d/plugins" in command
     assert f"{trivy_dir.resolve()}:/var/lib/trivy" in command
     assert "TRIVY_CACHE_DIR=/var/lib/trivy" in command
 
