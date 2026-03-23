@@ -8,6 +8,16 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.73.0 - 2026-03-23
+
+- restored ADR 0065 on current `main` by reintroducing the governed `rotate-secret` workflow, command contracts, secret-rotation playbook, role-local rotate tasks, and the Windmill/OpenBao secret-rotation seed surfaces
+- adapted ADR 0065 to the current list-based `config/secret-catalog.json` contract by layering `rotation_metadata` and `rotation_contracts` on top of the observation-loop secret inventory instead of replacing it
+- hardened the secret-rotation execution path for separate worktrees by resolving controller-local secret paths from the manifest, wiring the missing Makefile targets, and extending repository validation for the richer secret-rotation schema
+
+Platform impact:
+
+- no direct live platform change is claimed in this release commit; the repo-managed secret-rotation path is ready for a deliberate live apply from `main`
+
 ## 0.72.0 - 2026-03-23
 
 - completed ADR 0075 on current `main` by expanding the service capability catalog to the full 19-service health-probe-backed estate and by adding cross-references to the canonical health-probe, image, and secret catalogs
