@@ -1,0 +1,8 @@
+{
+  "docker_images": [],
+  "pip_cache_size_mb": 0,
+  "packer_plugins": [],
+  "ansible_collections": [],
+  "last_warmed": null,
+  "warnings": []
+}

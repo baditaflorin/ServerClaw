@@ -54,6 +54,11 @@ windmill_seed_scripts:
     language: python3
     summary: LV3 mutation audit helper
     description: Repo-managed helper that emits a structured mutation audit event from a Windmill job.
+  - path: f/lv3/warm_build_cache
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/warm-build-cache.py"
+    language: python3
+    summary: Warm the LV3 build caches
+    description: Repo-managed helper that refreshes Docker, pip, Packer, and Ansible collection caches and rewrites config/build-cache-manifest.json.
 windmill_seed_schedules:
   - path: f/lv3/platform_observation_loop_every_4h
     schedule: "0 0 */4 * * *"
@@ -72,4 +77,13 @@ windmill_seed_schedules:
     enabled: false
     summary: Disabled ADR 0071 daily digest schedule placeholder
     description: Repo-managed Windmill schedule definition reserved for automatic findings digests after the observation loop is promoted into Windmill.
+    no_flow_overlap: true
+  - path: f/lv3/warm_build_cache_nightly
+    schedule: "0 0 3 * * *"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/warm_build_cache
+    args: {}
+    enabled: false
+    summary: Disabled ADR 0089 nightly cache warming placeholder
+    description: Repo-managed nightly cache warmer reserved until ADR 0082 and ADR 0083 land the remote execution and check-runner surfaces.
     no_flow_overlap: true

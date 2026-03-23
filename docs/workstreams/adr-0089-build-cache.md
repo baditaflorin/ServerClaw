@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0089](../adr/0089-build-artifact-cache.md)
 - Title: Persistent Docker layer, pip, apt, and Ansible collection caches on the build server for sub-20-second check runs
-- Status: ready
+- Status: in_progress
 - Branch: `codex/adr-0089-build-cache`
 - Worktree: `../proxmox_florin_server-build-cache`
 - Owner: codex
@@ -39,6 +39,10 @@
 - `docs/adr/0089-build-artifact-cache.md`
 - `docs/workstreams/adr-0089-build-cache.md`
 - `workstreams.yaml`
+- `docs/runbooks/configure-build-artifact-cache.md`
+- `playbooks/build-artifact-cache.yml`
+- `playbooks/services/build-artifact-cache.yml`
+- `scripts/cache_status.py`
 
 ## Expected Live Surfaces
 
@@ -63,5 +67,5 @@
 ## Notes For The Next Assistant
 
 - apt-cacher-ng requires the Packer provisioner scripts to inject the proxy config before any `apt-get install`; verify this is in `base-hardening.sh` before running a Packer build
-- BuildKit daemon config is at `/etc/buildkit/buildkitd.toml`; set `[worker.containerd] gc = true` and `gcpolicy = [{keepDuration = "336h", keepBytes = 53687091200}]` (14 days, 50 GB)
-- the Galaxy collection cache SHA-gate logic: `sha256sum requirements.yml > /opt/builds/.ansible/requirements.sha`; if the file hasn't changed since last install, skip the `ansible-galaxy` call entirely
+- This branch now owns the non-overlapping repo surfaces: `roles/build_server/`, the dedicated playbook, `config/build-cache-manifest.json`, `config/windmill/scripts/warm-build-cache.py`, `scripts/cache_status.py`, and the cache runbook.
+- Final integration into `scripts/remote_exec.sh`, `config/check-runner-manifest.json`, and the user-facing `Makefile` targets must wait for the active ADR 0082 and ADR 0083 branches to merge.

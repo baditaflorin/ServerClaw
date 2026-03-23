@@ -1,7 +1,7 @@
 # ADR 0089: Build Artifact Cache and Layer Registry
 
-- Status: Proposed
-- Implementation Status: Not Implemented
+- Status: Accepted
+- Implementation Status: Partial
 - Implemented In Repo Version: not yet
 - Implemented In Platform Version: not yet
 - Implemented On: not yet
@@ -133,6 +133,12 @@ The workflow pulls all images, runs a no-op `pip install`, pre-downloads Packer 
 - apt-cacher-ng is a new service on `build-lv3`; it must be provisioned as part of the build server role
 - Cache warming workflow adds ~5 minutes of build server CPU/network work per `main` merge
 - Docker volume and disk space management is an ongoing operational concern on `build-lv3`
+
+## Implementation Notes
+
+- This workstream branch now adds the repo-managed `build_server` role, a dedicated cache converge playbook, the cache manifest skeleton, the Windmill `warm-build-cache` helper, and an operator runbook for the cache host.
+- Wiring the cache hooks into `scripts/remote_exec.sh`, `config/check-runner-manifest.json`, and the final `Makefile` targets is intentionally deferred until ADR 0082 and ADR 0083 finish, because those branches currently own those shared surfaces.
+- Until ADR 0082 and ADR 0083 land, the cache warmer records warnings and skips Docker check-runner image warming when the upstream manifest is absent.
 
 ## Alternatives Considered
 

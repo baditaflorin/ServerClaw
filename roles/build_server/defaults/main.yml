@@ -1,0 +1,59 @@
+---
+build_server_packages:
+  - apt-cacher-ng
+build_server_ops_user: ops
+build_server_ops_group: ops
+build_server_workspace: /opt/builds/proxmox_florin_server
+build_server_cache_root: /opt/builds
+build_server_packer_plugin_cache: /opt/builds/.packer.d
+build_server_ansible_collection_cache: /opt/builds/.ansible/collections
+build_server_ansible_requirements_sha_file: /opt/builds/.ansible/requirements.sha
+build_server_pip_cache_volume: pip-cache
+build_server_apt_cacher_port: 3142
+build_server_apt_cacher_report_url: http://127.0.0.1:3142/acng-report.html
+build_server_apt_proxy_url: http://10.10.10.30:3142
+build_server_buildkit_service_name: lv3-buildkitd
+build_server_buildkit_container_name: lv3-buildkitd
+build_server_buildkit_image: moby/buildkit:buildx-stable-1
+build_server_buildkit_builder_name: lv3-cache
+build_server_buildkit_config_dir: /etc/buildkit
+build_server_buildkit_config_file: /etc/buildkit/buildkitd.toml
+build_server_buildkit_socket_dir: /run/buildkit
+build_server_buildkit_socket_file: /run/buildkit/buildkitd.sock
+build_server_buildkit_cache_dir: /opt/builds/.buildkit-cache
+build_server_buildkit_cache_gb: 50
+build_server_buildkit_keep_duration_hours: 336
+build_server_buildkit_keep_bytes: "{{ build_server_buildkit_cache_gb | int * 1024 * 1024 * 1024 }}"
+build_server_managed_directories:
+  - path: "{{ build_server_cache_root }}"
+    owner: "{{ build_server_ops_user }}"
+    group: "{{ build_server_ops_group }}"
+    mode: "0755"
+  - path: "{{ build_server_workspace }}"
+    owner: "{{ build_server_ops_user }}"
+    group: "{{ build_server_ops_group }}"
+    mode: "0755"
+  - path: "{{ build_server_packer_plugin_cache }}"
+    owner: "{{ build_server_ops_user }}"
+    group: "{{ build_server_ops_group }}"
+    mode: "0755"
+  - path: "{{ build_server_ansible_collection_cache }}"
+    owner: "{{ build_server_ops_user }}"
+    group: "{{ build_server_ops_group }}"
+    mode: "0755"
+  - path: "{{ build_server_ansible_requirements_sha_file | dirname }}"
+    owner: "{{ build_server_ops_user }}"
+    group: "{{ build_server_ops_group }}"
+    mode: "0755"
+  - path: "{{ build_server_buildkit_config_dir }}"
+    owner: root
+    group: root
+    mode: "0755"
+  - path: "{{ build_server_buildkit_socket_dir }}"
+    owner: root
+    group: root
+    mode: "0755"
+  - path: "{{ build_server_buildkit_cache_dir }}"
+    owner: root
+    group: root
+    mode: "0755"
