@@ -1,0 +1,5 @@
+opentofu 1.10.6
+packer 1.13.1
+trivy 0.68.2
+yamllint 1.37.1
+jsonschema 4.25.1

@@ -39,6 +39,12 @@ This is the required minimum gate before merging automation changes to `main`.
 - lint-oriented stages operate on tracked repository files so unrelated local work-in-progress does not fail the repo gate
 - CI runs the same contract through `make validate`
 
+ADR 0083 adds an alternative containerised execution path for the heavier lint and validation commands:
+
+- `make build-check-runners` builds the pinned runner images under `docker/check-runners/`
+- `make run-checks` executes manifest-backed Docker checks from [config/check-runner-manifest.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/check-runner-manifest.json)
+- [docs/runbooks/docker-check-runners.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/docker-check-runners.md) records the image rebuild and publication procedure
+
 ## Optional Stage Commands
 
 The same pipeline can be run in parts:
