@@ -24,3 +24,8 @@
     name: "{{ monitoring_prometheus_service_name }}"
     state: restarted
     daemon_reload: true
+
+- name: Restart Blackbox Exporter
+  ansible.builtin.systemd:
+    name: "{{ monitoring_blackbox_exporter_service_name }}"
+    state: restarted

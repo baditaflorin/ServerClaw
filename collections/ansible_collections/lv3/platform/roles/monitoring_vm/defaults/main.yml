@@ -12,7 +12,9 @@ monitoring_stack_packages:
   - influxdb2-cli
   - loki
   - prometheus
+  - prometheus-blackbox-exporter
 monitoring_stack_dir: /etc/lv3/monitoring
+monitoring_repo_root: "{{ lookup('env', 'PWD') }}"
 monitoring_grafana_admin_user: admin
 monitoring_grafana_admin_password_file: /etc/lv3/monitoring/grafana-admin-password
 monitoring_grafana_admin_password_hash_file: /var/lib/grafana/.lv3-admin-password.sha256
@@ -37,6 +39,10 @@ monitoring_grafana_vm_dashboard_dir: /var/lib/grafana/dashboards/lv3/vms
 monitoring_grafana_mail_dashboard_file: /var/lib/grafana/dashboards/lv3/lv3-mail-platform.json
 monitoring_grafana_mail_dashboard_uid: lv3-mail-platform
 monitoring_grafana_mail_dashboard_title: LV3 Mail Platform
+monitoring_grafana_slo_dashboard_file: /var/lib/grafana/dashboards/lv3/lv3-slo-overview.json
+monitoring_grafana_slo_dashboard_uid: lv3-slo-overview
+monitoring_grafana_slo_dashboard_title: LV3 SLO Overview
+monitoring_grafana_slo_dashboard_source_file: "{{ monitoring_repo_root }}/config/grafana/dashboards/slo-overview.json"
 monitoring_influxdb_admin_user: lv3-monitoring-admin
 monitoring_influxdb_admin_password_file: /etc/lv3/monitoring/influxdb-admin-password
 monitoring_influxdb_operator_token_file: /etc/lv3/monitoring/influxdb-operator.token
@@ -57,12 +63,25 @@ monitoring_prometheus_service_name: lv3-prometheus
 monitoring_prometheus_service_file: /etc/systemd/system/lv3-prometheus.service
 monitoring_prometheus_config_file: /etc/prometheus/prometheus.yml
 monitoring_prometheus_data_dir: /var/lib/prometheus
+monitoring_prometheus_rules_dir: /etc/prometheus/rules
+monitoring_prometheus_file_sd_dir: /etc/prometheus/file_sd
+monitoring_prometheus_slo_rules_file: /etc/prometheus/rules/slo-rules.yml
+monitoring_prometheus_slo_rules_source_file: "{{ monitoring_repo_root }}/config/prometheus/rules/slo_rules.yml"
+monitoring_prometheus_slo_alerts_file: /etc/prometheus/rules/slo-alerts.yml
+monitoring_prometheus_slo_alerts_source_file: "{{ monitoring_repo_root }}/config/prometheus/rules/slo_alerts.yml"
+monitoring_prometheus_slo_targets_file: /etc/prometheus/file_sd/slo-targets.yml
+monitoring_prometheus_slo_targets_source_file: "{{ monitoring_repo_root }}/config/prometheus/file_sd/slo_targets.yml"
 monitoring_prometheus_retention_time: 15d
 monitoring_prometheus_enable_features:
   - exemplar-storage
   - native-histograms
 monitoring_prometheus_remote_write_url: http://127.0.0.1:9090/api/v1/write
 monitoring_prometheus_url: http://127.0.0.1:9090
+monitoring_blackbox_exporter_service_name: prometheus-blackbox-exporter
+monitoring_blackbox_exporter_env_file: /etc/default/prometheus-blackbox-exporter
+monitoring_blackbox_exporter_config_file: /etc/prometheus/blackbox.yml
+monitoring_blackbox_exporter_source_file: "{{ monitoring_repo_root }}/config/blackbox/blackbox.yml"
+monitoring_blackbox_exporter_port: 9115
 monitoring_tempo_version: 2.10.3
 monitoring_tempo_deb_url: https://github.com/grafana/tempo/releases/download/v2.10.3/tempo_2.10.3_linux_amd64.deb
 monitoring_tempo_deb_checksum: sha256:574b4c4b0a30d01eca01c4f37dcee8b5161b459b770623468bbb391a375ed841

@@ -1490,10 +1490,10 @@ workstreams:
   - id: adr-0096-slo-tracking
     adr: "0096"
     title: SLO definitions and error budget tracking
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0096-slo-tracking
-    worktree_path: ../proxmox_florin_server-slo-tracking
+    worktree_path: .worktrees/adr-0096
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0096-slo-tracking.md
     depends_on:
       - adr-0011-monitoring
@@ -1502,9 +1502,14 @@ workstreams:
       - adr-0092-platform-api-gateway
     conflicts_with: []
     shared_surfaces:
-      - config/grafana/
+      - config/slo-catalog.json
+      - config/prometheus/
+      - config/grafana/dashboards/
+      - scripts/slo_tracking.py
       - scripts/promotion_pipeline.py
-      - monitoring-lv3 Prometheus config
+      - scripts/platform_context_service.py
+      - scripts/generate_ops_portal.py
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/
     ready_to_merge: false
     live_applied: false
 

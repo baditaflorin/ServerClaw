@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import os
 import shlex
 import sys
 import uuid
@@ -29,6 +30,7 @@ from live_apply_receipts import (
     validate_receipt,
 )
 from mutation_audit import build_event, emit_event_best_effort, utc_now_iso
+from slo_tracking import build_slo_status_entries, default_prometheus_url, find_budget_breaches
 from workflow_catalog import (
     load_secret_manifest,
     load_workflow_catalog,
@@ -184,6 +186,50 @@ def recorded_at_for_receipt(receipt: dict[str, Any]) -> dt.datetime:
     return dt.datetime.fromisoformat(f"{receipt['recorded_on']}T00:00:00+00:00")
 
 
+def evaluate_slo_gate(prometheus_url: str | None = None) -> dict[str, Any]:
+    effective_prometheus_url = prometheus_url or os.environ.get("PROMOTION_PROMETHEUS_URL") or default_prometheus_url()
+    if not effective_prometheus_url:
+        return {
+            "checked": False,
+            "prometheus_url": None,
+            "entries": [],
+            "blocking": [],
+            "reason": "Prometheus URL is not configured for SLO evaluation",
+        }
+
+    entries = build_slo_status_entries(prometheus_url=effective_prometheus_url)
+    metric_errors = [entry for entry in entries if entry.get("metrics_error")]
+    metric_gaps = [
+        entry for entry in entries
+        if not entry.get("metrics_error") and not entry.get("metrics_available")
+    ]
+    if metric_errors:
+        return {
+            "checked": False,
+            "prometheus_url": effective_prometheus_url,
+            "entries": entries,
+            "blocking": [],
+            "reason": "failed to query Prometheus for SLO status: "
+            + "; ".join(f"{entry['id']}: {entry['metrics_error']}" for entry in metric_errors),
+        }
+    if metric_gaps:
+        return {
+            "checked": False,
+            "prometheus_url": effective_prometheus_url,
+            "entries": entries,
+            "blocking": [],
+            "reason": "missing SLO metric samples for: " + ", ".join(entry["id"] for entry in metric_gaps),
+        }
+    blocking = find_budget_breaches(entries, threshold=0.10)
+    return {
+        "checked": True,
+        "prometheus_url": effective_prometheus_url,
+        "entries": entries,
+        "blocking": blocking,
+        "reason": None,
+    }
+
+
 def check_promotion_gate(
     *,
     service_id: str,
@@ -241,6 +287,18 @@ def check_promotion_gate(
     if blocking_findings:
         reasons.append(f"open critical findings exist for service '{service_id}'")
 
+    slo_gate = evaluate_slo_gate()
+    if not slo_gate["checked"]:
+        reasons.append(f"SLO gate could not evaluate: {slo_gate['reason']}")
+    elif slo_gate["blocking"]:
+        reasons.append(
+            "SLO error budget below 10%: "
+            + ", ".join(
+                f"{entry['id']} ({entry['metrics']['budget_remaining']:.2%} remaining)"
+                for entry in slo_gate["blocking"]
+            )
+        )
+
     return {
         "service": service_id,
         "playbook": service_id,
@@ -248,6 +306,7 @@ def check_promotion_gate(
         "staging_health_check": stage_health,
         "approval": approval,
         "blocking_findings": blocking_findings,
+        "slo_gate": slo_gate,
         "gate_decision": "approved" if not reasons else "rejected",
         "reasons": reasons,
     }

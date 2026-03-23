@@ -74,6 +74,7 @@ The repository now also ships the repo-managed `lv3` operator CLI for terminal-f
 OpenTofu VM lifecycle automation is now implemented under `tofu/`, the six production VMs are imported into OpenTofu state through the build-server path, and `make tofu-drift ENV=production` now verifies the current production guest declarations without planned changes.
 The repository now also ships continuous drift detection across OpenTofu, Ansible check mode, runtime Docker image digests, DNS records, and TLS posture, with receipts under `receipts/drift-reports/`, an ops-portal Drift Status panel, and `lv3 diff` routed to `make drift-report`; the live schedule and dashboard metric feed still require apply from `main`.
 The repository now also ships ADR 0100 disaster-recovery targets, a structured recovery runbook, and `make dr-status` / `lv3 release status` readiness views; the live off-site copy of `backup-lv3` is still pending external storage credentials.
+The repository now also ships ADR 0096 SLO tracking: a canonical SLO catalog, generated Prometheus rules and blackbox targets, a Grafana SLO dashboard, an ops-portal SLO section, a `/v1/platform/slos` API surface, and promotion-gate enforcement for low remaining error budget.
 
 <!-- BEGIN GENERATED: platform-status -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_status_docs.py). Do not edit this block by hand.
@@ -401,6 +402,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Scaffold A New Service](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/scaffold-new-service.md)
 - [Secret Rotation And Lifecycle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/secret-rotation-and-lifecycle.md)
 - [Service Capability Catalog](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/service-capability-catalog.md)
+- [SLO Tracking](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/slo-tracking.md)
 - [Staging And Production Topology](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/staging-and-production-topology.md)
 - [Subdomain Governance](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/subdomain-governance.md)
 - [OpenTofu VM Import](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/tofu-vm-import.md)
@@ -732,6 +734,8 @@ This repository is intentionally opinionated:
 | `0091` | Continuous drift detection and reconciliation | `merged` | [adr-0091-drift-detection.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0091-drift-detection.md) |
 | `0093` | Interactive ops portal with live actions | `merged` | [adr-0093-interactive-ops-portal.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0093-interactive-ops-portal.md) |
 | `0094` | Developer portal and service documentation site | `merged` | [adr-0094-developer-portal.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0094-developer-portal.md) |
+| `0098` | Postgres high availability and automated failover | `merged` | [adr-0098-postgres-ha.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0098-postgres-ha.md) |
+| `0096` | SLO definitions and error budget tracking | `merged` | [adr-0096-slo-tracking.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0096-slo-tracking.md) |
 | `0098` | Postgres high availability and automated failover | `merged` | [adr-0098-postgres-ha.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0098-postgres-ha.md) |
 | `0099` | Automated backup restore verification | `merged` | [adr-0099-backup-restore-verification.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0099-backup-restore-verification.md) |
 | `0100` | RTO/RPO targets and disaster recovery playbook | `merged` | [adr-0100-disaster-recovery-playbook.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0100-disaster-recovery-playbook.md) |

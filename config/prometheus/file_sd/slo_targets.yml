@@ -1,0 +1,63 @@
+- targets:
+  - https://grafana.lv3.org
+  labels:
+    service_id: grafana
+    slo_id: grafana-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
+  - https://sso.lv3.org/realms/lv3/.well-known/openid-configuration
+  labels:
+    service_id: keycloak
+    slo_id: keycloak-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
+  - https://sso.lv3.org/realms/lv3/.well-known/openid-configuration
+  labels:
+    service_id: keycloak
+    slo_id: keycloak-latency
+    indicator: latency
+    probe_module: http_2xx_follow_redirects
+- targets:
+  - https://uptime.lv3.org
+  labels:
+    service_id: uptime_kuma
+    slo_id: uptime-kuma-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
+  - https://nginx.lv3.org
+  labels:
+    service_id: nginx_edge
+    slo_id: nginx-edge-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
+  - http://10.10.10.20:8088
+  labels:
+    service_id: open_webui
+    slo_id: open-webui-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
+  - http://10.10.10.20:8000/api/version
+  labels:
+    service_id: windmill
+    slo_id: windmill-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
+  - http://10.10.10.20:8082/login/
+  labels:
+    service_id: netbox
+    slo_id: netbox-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
+  - http://10.10.10.20:8010/healthz
+  labels:
+    service_id: platform_context_api
+    slo_id: platform-context-api-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects

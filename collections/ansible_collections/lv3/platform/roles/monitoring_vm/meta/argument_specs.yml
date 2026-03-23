@@ -39,6 +39,11 @@ argument_specs:
         required: true
         description:
           - Directory that stores per-VM dashboard JSON definitions.
+      monitoring_grafana_slo_dashboard_file:
+        type: path
+        required: true
+        description:
+          - Path where the generated SLO overview dashboard is copied before import.
       monitoring_grafana_loki_datasource_name:
         type: str
         required: true
@@ -109,6 +114,26 @@ argument_specs:
         required: true
         description:
           - Prometheus configuration file rendered by the role.
+      monitoring_prometheus_rules_dir:
+        type: path
+        required: true
+        description:
+          - Directory where Prometheus rule files are copied.
+      monitoring_prometheus_file_sd_dir:
+        type: path
+        required: true
+        description:
+          - Directory where Prometheus file-based service discovery definitions are copied.
+      monitoring_blackbox_exporter_config_file:
+        type: path
+        required: true
+        description:
+          - Blackbox exporter configuration file copied by the role.
+      monitoring_blackbox_exporter_env_file:
+        type: path
+        required: true
+        description:
+          - Environment file used to pin blackbox exporter runtime arguments.
       monitoring_tempo_deb_url:
         type: str
         required: true

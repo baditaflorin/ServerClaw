@@ -22,6 +22,15 @@ from mutation_audit import load_mutation_audit_schema, validate_mutation_audit_s
 from operator_manager import ROSTER_PATH, validate_operator_roster
 from promotion_pipeline import validate_promotion_receipts
 from validate_ephemeral_vmid import validate_ephemeral_vmid_ranges
+from generate_slo_rules import outputs_match as slo_outputs_match
+from slo_tracking import (
+    GRAFANA_DASHBOARD_PATH,
+    PROMETHEUS_ALERTS_PATH,
+    PROMETHEUS_RULES_PATH,
+    PROMETHEUS_TARGETS_PATH,
+    SLO_CATALOG_PATH,
+    load_slo_catalog,
+)
 from workflow_catalog import (
     load_secret_manifest,
     load_workflow_catalog,
@@ -1924,6 +1933,21 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
         )
 
 
+def validate_slo_catalog_assets() -> None:
+    catalog = load_slo_catalog(SLO_CATALOG_PATH)
+    for path in (
+        SLO_CATALOG_PATH,
+        PROMETHEUS_RULES_PATH,
+        PROMETHEUS_ALERTS_PATH,
+        PROMETHEUS_TARGETS_PATH,
+        GRAFANA_DASHBOARD_PATH,
+    ):
+        if not path.exists():
+            raise ValueError(f"missing SLO artifact: {path}")
+    if not slo_outputs_match(catalog):
+        raise ValueError("generated SLO artifacts are out of date")
+
+
 def validate_repository_data_models() -> int:
     secret_manifest = load_secret_manifest()
     validate_secret_manifest(secret_manifest)
@@ -1945,6 +1969,7 @@ def validate_repository_data_models() -> int:
     validate_certificate_catalog(host_vars_context)
     validate_health_probe_catalog(host_vars_context)
     validate_data_catalog(load_data_catalog())
+    validate_slo_catalog_assets()
     validate_secret_catalog(secret_manifest)
     validate_version_semantics()
     validate_workstreams_release_policy()

@@ -14,6 +14,7 @@ from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, PointStruct, VectorParams
 
 from platform_context_corpus import build_chunks
+from slo_tracking import build_slo_status_entries, default_grafana_url, default_prometheus_url
 
 
 DEFAULT_COLLECTION = "platform_context"
@@ -76,6 +77,8 @@ class ServiceConfig:
     embedding_backend: str
     embedding_model: str
     embedding_dimension: int
+    prometheus_url: str | None = None
+    grafana_url: str | None = None
 
 
 class PlatformContextService:
@@ -223,6 +226,19 @@ class PlatformContextService:
             raise KeyError(command_id)
         return {"command_id": command_id, "contract": command}
 
+    def slo_status(self) -> dict[str, Any]:
+        return {
+            "grafana_url": self.config.grafana_url,
+            "prometheus_url": self.config.prometheus_url,
+            "slos": build_slo_status_entries(
+                prometheus_url=self.config.prometheus_url,
+                grafana_url=self.config.grafana_url,
+                catalog_path=self.config.corpus_root / "config" / "slo-catalog.json",
+                service_catalog_path=self.config.corpus_root / "config" / "service-capability-catalog.json",
+                stack_path=self.config.corpus_root / "versions" / "stack.yaml",
+            ),
+        }
+
 
 def load_yaml(path: Path) -> Any:
     import yaml
@@ -245,6 +261,8 @@ def build_config() -> ServiceConfig:
         embedding_dimension=int(
             os.environ.get("PLATFORM_CONTEXT_EMBEDDING_DIMENSION", str(DEFAULT_DIMENSION))
         ),
+        prometheus_url=os.environ.get("PLATFORM_CONTEXT_PROMETHEUS_URL", default_prometheus_url()),
+        grafana_url=os.environ.get("PLATFORM_CONTEXT_GRAFANA_URL", default_grafana_url()),
     )
 
 
@@ -299,6 +317,11 @@ def command_contract(command_id: str) -> dict[str, Any]:
         return get_service().command_contract(command_id)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=f"Unknown command: {command_id}") from exc
+
+
+@app.get("/v1/platform/slos", dependencies=[Depends(require_auth)])
+def platform_slos() -> dict[str, Any]:
+    return get_service().slo_status()
 
 
 @app.post("/v1/context/query", dependencies=[Depends(require_auth)])

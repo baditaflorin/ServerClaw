@@ -18,6 +18,14 @@ def make_repo(tmp_path: Path) -> Path:
     write(tmp_path / "receipts" / "live-applies" / "2026-03-22-test.json", '{"receipt_id":"r1","workflow_id":"converge-step-ca","summary":"ok","applied_on":"2026-03-22"}')
     write(tmp_path / "config" / "workflow-catalog.json", '{"workflows":{"converge-step-ca":{"description":"d"}}}')
     write(tmp_path / "config" / "command-catalog.json", '{"commands":{"converge-step-ca":{"description":"d"}}}')
+    write(
+        tmp_path / "config" / "service-capability-catalog.json",
+        '{"services":[{"id":"grafana","name":"Grafana","vm":"monitoring-lv3","public_url":"https://grafana.lv3.org"}]}',
+    )
+    write(
+        tmp_path / "config" / "slo-catalog.json",
+        '{"schema_version":"1.0.0","review_note":"review later","slos":[{"id":"grafana-availability","service_id":"grafana","indicator":"availability","objective_percent":99.5,"window_days":30,"target_url":"https://grafana.lv3.org","probe_module":"http_2xx_follow_redirects","description":"Grafana stays up."}]}',
+    )
     write(tmp_path / "config" / "agent-tool-registry.json", '{"tools":[]}')
     write(
         tmp_path / "versions" / "stack.yaml",
@@ -80,3 +88,26 @@ def test_sentence_transformers_backend_falls_back_to_token_hash(tmp_path: Path, 
     assert isinstance(service.embedder, TokenHashEmbedder)
     rebuild_result = service.rebuild_from_local_corpus()
     assert rebuild_result["indexed_chunks"] > 0
+
+
+def test_platform_slos_return_catalog_entries(tmp_path: Path) -> None:
+    repo_root = make_repo(tmp_path)
+    service = PlatformContextService(
+        ServiceConfig(
+            api_token="test-token",
+            corpus_root=repo_root,
+            collection_name="test",
+            qdrant_url=None,
+            qdrant_location=":memory:",
+            embedding_backend="token-hash",
+            embedding_model="unused",
+            embedding_dimension=384,
+            prometheus_url="",
+            grafana_url="https://grafana.lv3.org",
+        )
+    )
+
+    payload = service.slo_status()
+    assert payload["slos"]
+    assert payload["slos"][0]["id"] == "grafana-availability"
+    assert payload["slos"][0]["metrics_available"] is False

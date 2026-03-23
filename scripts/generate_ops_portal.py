@@ -11,6 +11,7 @@ import tempfile
 from collections import defaultdict
 from dataclasses import dataclass
 from functools import lru_cache
+import os
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -25,6 +26,7 @@ from environment_topology import (
 from portal_utils import PORTAL_STYLES, escape, page_template, render_badge, render_external_link
 from release_manager import build_release_status_snapshot
 from service_catalog import load_service_catalog, validate_service_catalog
+from slo_tracking import build_slo_status_entries
 from subdomain_catalog import load_subdomain_catalog, validate_subdomain_catalog
 from agent_tool_registry import load_agent_tool_registry
 
@@ -398,6 +400,45 @@ def render_ephemeral_vm_panel() -> str:
     )
 
 
+def render_slo_panel(prometheus_url: str | None = None) -> str:
+    entries = build_slo_status_entries(prometheus_url=prometheus_url)
+    rows = []
+    for entry in entries:
+        budget = entry["metrics"]["budget_remaining"]
+        compliance = entry["metrics"]["success_ratio_30d"]
+        burn_rate = entry["metrics"]["burn_rate_1h"]
+        exhaustion = entry["metrics"]["time_to_budget_exhaustion_days"]
+        rows.append(
+            "<tr>"
+            f"<td>{escape(entry['id'])}</td>"
+            f"<td>{escape(entry['service_id'])}</td>"
+            f"<td>{render_badge(entry['status'], 'ok' if entry['status'] == 'healthy' else 'warn' if entry['status'] == 'warning' else 'danger' if entry['status'] == 'critical' else 'neutral')}</td>"
+            f"<td>{escape(f'{compliance * 100:.2f}%' if compliance is not None else 'unknown')}</td>"
+            f"<td>{escape(f'{budget * 100:.2f}%' if budget is not None else 'unknown')}</td>"
+            f"<td>{escape(f'{burn_rate:.2f}x' if burn_rate is not None else 'unknown')}</td>"
+            f"<td>{escape(f'{exhaustion:.1f}' if exhaustion is not None else 'unknown')}</td>"
+            f"<td>{render_external_link(entry['dashboard_url'], 'Grafana')}</td>"
+            "</tr>"
+        )
+    note = (
+        '<p class="muted">Prometheus-backed SLO metrics are only shown when the generator can reach the monitoring API.</p>'
+        if not prometheus_url
+        else '<p class="muted">Current SLO budget state queried from Prometheus.</p>'
+    )
+    return (
+        '<section class="panel">'
+        '<div class="card-head">'
+        '<div><h2>SLO Status</h2><p class="muted">Error budget posture for the ADR 0096 service-level objectives.</p></div>'
+        f"<div>{render_badge(str(len(entries)), 'neutral')}</div>"
+        "</div>"
+        + note
+        + '<div class="table-scroll"><table>'
+        "<thead><tr><th>SLO</th><th>Service</th><th>Status</th><th>30d</th><th>Budget</th><th>Burn</th><th>Days Left</th><th>Dashboard</th></tr></thead>"
+        + f"<tbody>{''.join(rows)}</tbody></table></div>"
+        + "</section>"
+    )
+
+
 def render_service_cards(services: list[dict[str, Any]], health: dict[str, HealthState]) -> str:
     groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for service in services:
@@ -731,6 +772,7 @@ def render_portal(
     tools = agent_registry["tools"]
     snapshot = load_health_snapshot(health_snapshot)
     health = resolve_health(services, snapshot, probe_timeout)
+    slo_prometheus_url = os.environ.get("OPS_PORTAL_PROMETHEUS_URL", "")
     guest_roles = {
         guest["name"]: guest["role"]
         for guest in host_vars["proxmox_guests"]
@@ -746,6 +788,7 @@ def render_portal(
         "Platform Operations Portal",
         "Generated operator map of services, health, and ownership across the current LV3 estate.",
         render_summary(services, subdomains, tools, environments)
+        + render_slo_panel(slo_prometheus_url)
         + render_drift_panel()
         + render_release_panel()
         + render_ephemeral_vm_panel()

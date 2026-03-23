@@ -63,6 +63,7 @@ class OpsPortalRenderTests(unittest.TestCase):
 
             self.assertIn("Platform Operations Portal", index_html)
             self.assertIn("Release Readiness", index_html)
+            self.assertIn("SLO Status", index_html)
             self.assertIn("Grafana", index_html)
             self.assertIn("healthy", index_html)
             self.assertIn("Drift Status", index_html)

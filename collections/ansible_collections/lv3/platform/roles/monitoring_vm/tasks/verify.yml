@@ -10,6 +10,14 @@
   until: monitoring_verify_grafana_health.status == 200
   changed_when: false
 
+- name: Verify blackbox exporter metrics endpoint responds
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ monitoring_blackbox_exporter_port }}/metrics"
+    method: GET
+    status_code: 200
+  register: monitoring_verify_blackbox_exporter_health
+  changed_when: false
+
 - name: Verify Grafana datasource is provisioned
   ansible.builtin.uri:
     url: "http://127.0.0.1:3000/api/datasources/name/{{ monitoring_grafana_datasource_name | urlencode }}"
@@ -81,6 +89,31 @@
   register: monitoring_verify_mail_dashboard
   changed_when: false
   no_log: true
+
+- name: Verify LV3 SLO dashboard is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/{{ monitoring_grafana_slo_dashboard_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_verify_slo_dashboard
+  changed_when: false
+  no_log: true
+
+- name: Verify Prometheus SLO rules are loaded
+  ansible.builtin.uri:
+    url: "{{ monitoring_prometheus_url }}/api/v1/rules"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: monitoring_verify_prometheus_rules
+  changed_when: false
+  failed_when: >
+    monitoring_verify_prometheus_rules.status != 200
+    or 'slo_recording_rules' not in (monitoring_verify_prometheus_rules.content | default(''))
+    or 'slo_alert_rules' not in (monitoring_verify_prometheus_rules.content | default(''))
 
 - name: Verify VM detail dashboards are provisioned
   ansible.builtin.uri:

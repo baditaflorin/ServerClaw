@@ -1,204 +1,108 @@
 # ADR 0096: SLO Definitions and Error Budget Tracking
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.106.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-23
 - Date: 2026-03-23
 
 ## Context
 
-The platform has comprehensive monitoring (Grafana, Loki, Tempo) and health probes for every service (ADR 0064), but no formal definition of what "good" looks like. As a result:
+The platform has monitoring, dashboards, and health probe contracts, but it still lacked a machine-readable definition of acceptable reliability. Operators could tell whether a service was healthy right now, but not whether it had been reliable over a rolling window or whether a recent incident had consumed most of the platform's remaining error budget.
 
-- An alert fires when a service is down, but there is no target to measure against. Is one minute of Keycloak downtime per month acceptable? Per week? There is no answer.
-- The environment promotion gate (ADR 0073) checks that services are healthy at a point in time before promotion, but does not ask whether they have been reliably healthy over a rolling window.
-- Incident retrospectives have no baseline to measure regression against: was this month worse than last month? Nobody knows.
-- Operators routinely make configuration changes without knowing whether those changes degraded reliability. There is no burn rate signal to indicate "you are consuming your error budget faster than you are earning it."
+That gap showed up in three places:
 
-Service Level Objectives (SLOs) are the standard tool for answering these questions. An SLO defines: for a given service and indicator, what fraction of time must it meet a defined threshold? The complement — the fraction of time it may fail — is the **error budget**. The burn rate of the error budget is the primary signal for whether reliability is improving or degrading.
+- Grafana and health probes exposed current status but not an explicit reliability target.
+- The promotion gate in ADR 0073 checked staged health and approval state, but not whether the platform was already operating with a nearly exhausted error budget.
+- The operator surface had no single catalog that tied service objectives, Prometheus expressions, alerts, and dashboards together.
 
 ## Decision
 
-We will define SLOs for all edge-published and control-plane services, implement recording rules in Prometheus/Grafana to track compliance in real time, and expose error budget status in the ops portal and the promotion gate.
+We will define SLOs in a canonical catalog, derive Prometheus rules and Grafana dashboard assets from that catalog, probe the declared SLO targets with a local blackbox exporter on the monitoring VM, and surface error budget posture through both the promotion gate and the platform context API.
 
-### SLO definitions
+### Canonical SLO catalog
 
-SLOs are defined in `config/slo-catalog.json`:
+SLOs live in [`config/slo-catalog.json`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/slo-catalog.json). Each entry binds:
 
-```json
-{
-  "slos": [
-    {
-      "id": "keycloak-availability",
-      "service": "keycloak",
-      "indicator": "uptime",
-      "objective_percent": 99.5,
-      "window_days": 30,
-      "probe": "http_probe_success{job='keycloak'}",
-      "description": "Keycloak SSO is available (HTTP 200) 99.5% of the time over a 30-day rolling window"
-    },
-    {
-      "id": "keycloak-latency",
-      "service": "keycloak",
-      "indicator": "latency",
-      "objective_percent": 95.0,
-      "threshold_ms": 500,
-      "window_days": 30,
-      "probe": "http_probe_duration_seconds{job='keycloak'} < 0.5",
-      "description": "95% of Keycloak probes complete in under 500ms over a 30-day rolling window"
-    },
-    {
-      "id": "grafana-availability",
-      "service": "grafana",
-      "indicator": "uptime",
-      "objective_percent": 99.0,
-      "window_days": 30,
-      "probe": "http_probe_success{job='grafana'}"
-    },
-    {
-      "id": "ops-portal-availability",
-      "service": "ops-portal",
-      "indicator": "uptime",
-      "objective_percent": 99.0,
-      "window_days": 30,
-      "probe": "http_probe_success{job='ops-portal'}"
-    },
-    {
-      "id": "uptime-kuma-availability",
-      "service": "uptime-kuma",
-      "indicator": "uptime",
-      "objective_percent": 99.9,
-      "window_days": 30,
-      "probe": "http_probe_success{job='uptime-kuma'}"
-    },
-    {
-      "id": "api-gateway-availability",
-      "service": "api-gateway",
-      "indicator": "uptime",
-      "objective_percent": 99.5,
-      "window_days": 30,
-      "probe": "http_probe_success{job='api-gateway'}"
-    }
-  ]
-}
-```
+- a `service_id`
+- an `indicator` (`availability` or `latency`)
+- an `objective_percent`
+- a rolling `window_days`
+- a `target_url` for the blackbox probe
+- a `probe_module`
+- an optional `latency_threshold_ms`
 
-### SLI recording rules
+The initial catalog covers the public and control-plane-adjacent surfaces that already have clear health contracts: Grafana, Keycloak availability and latency, Uptime Kuma, NGINX edge, Open WebUI, Windmill, NetBox, and the platform context API.
 
-A `scripts/generate_slo_rules.py` script reads `config/slo-catalog.json` and generates Prometheus recording rules written to `config/grafana/provisioning/rules/slo_rules.yml`:
+### Generated Prometheus assets
 
-```yaml
-groups:
-  - name: slo_recording_rules
-    interval: 60s
-    rules:
-      # Error rate over 5-minute window (short burn rate)
-      - record: slo:keycloak_availability:error_rate_5m
-        expr: 1 - avg_over_time(http_probe_success{job="keycloak"}[5m])
+[`scripts/generate_slo_rules.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_slo_rules.py) reads the catalog and commits four generated assets:
 
-      # Error rate over 1-hour window (medium burn rate)
-      - record: slo:keycloak_availability:error_rate_1h
-        expr: 1 - avg_over_time(http_probe_success{job="keycloak"}[1h])
+- [`config/prometheus/rules/slo_rules.yml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/prometheus/rules/slo_rules.yml)
+- [`config/prometheus/rules/slo_alerts.yml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/prometheus/rules/slo_alerts.yml)
+- [`config/prometheus/file_sd/slo_targets.yml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/prometheus/file_sd/slo_targets.yml)
+- [`config/grafana/dashboards/slo-overview.json`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/grafana/dashboards/slo-overview.json)
 
-      # Error budget remaining (fraction, 0–1)
-      - record: slo:keycloak_availability:budget_remaining
-        expr: |
-          1 - (
-            sum_over_time((1 - http_probe_success{job="keycloak"})[30d:1m])
-            /
-            (30 * 24 * 60)
-            /
-            (1 - 0.995)
-          )
-```
+The monitoring role now copies those assets to the monitoring VM, enables a local `prometheus-blackbox-exporter`, and configures Prometheus to:
 
-### Burn rate alerts
+- probe the catalog targets via file-based service discovery
+- record rolling success ratios, error rates, error-budget remaining, burn rate, and projected budget exhaustion
+- publish burn-rate and low-budget alerts as Prometheus-native alerting rules
 
-The SLO rules drive two burn rate alerts per SLO — multi-window, multi-burn-rate (MWMB) as defined by the Google SRE Workbook:
+### Dashboard and operator surfaces
 
-```yaml
-# Fast burn: consuming error budget 14× faster than sustainable → page in 1h
-- alert: SLOFastBurn_keycloak_availability
-  expr: |
-    slo:keycloak_availability:error_rate_5m > (14 * (1 - 0.995))
-    and
-    slo:keycloak_availability:error_rate_1h > (14 * (1 - 0.995))
-  for: 2m
-  labels:
-    severity: critical
-    slo: keycloak-availability
-  annotations:
-    summary: "Keycloak availability SLO fast burn (14× rate)"
+Grafana now imports a dedicated `LV3 SLO Overview` dashboard built from the same catalog. Each SLO gets:
 
-# Slow burn: consuming at 3× rate → ticket within 6 hours
-- alert: SLOSlowBurn_keycloak_availability
-  expr: |
-    slo:keycloak_availability:error_rate_1h > (3 * (1 - 0.995))
-  for: 60m
-  labels:
-    severity: warning
-    slo: keycloak-availability
-```
+- a 30-day compliance stat
+- error budget remaining
+- 1-hour burn rate
+- projected days to budget exhaustion
 
-These alerts are generated for every SLO entry in the catalog by `scripts/generate_slo_rules.py`.
-
-### Grafana SLO dashboard
-
-A dedicated **SLO Overview** Grafana dashboard is generated from the catalog, with one row per service:
-
-| Column | Metric |
-|---|---|
-| Current availability (30d) | `1 - slo:<id>:error_rate_30d` |
-| Error budget remaining | `slo:<id>:budget_remaining` as percent |
-| Budget burn rate (1h) | Normalised error rate vs target |
-| Time to budget exhaustion | Projected days at current burn rate |
-| Status | RAG colour based on budget remaining (>50% green, 10–50% yellow, <10% red) |
+The static ops portal generator now renders an `SLO Status` section, and the platform context service exposes [`/v1/platform/slos`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/platform_context_service.py) so the ADR 0093 interactive portal can consume the same machine-readable view.
 
 ### Promotion gate integration
 
-The environment promotion gate (ADR 0073) is updated to check SLO status before approving a promotion from staging to production:
+[`scripts/promotion_pipeline.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/promotion_pipeline.py) now evaluates SLO posture before approving a production promotion. The gate rejects when:
 
-```python
-def check_slo_gate(env: str) -> GateResult:
-    for slo in load_slo_catalog():
-        budget = query_prometheus(f"slo:{slo['id']}:budget_remaining")
-        if budget < 0.10:  # Less than 10% error budget remaining
-            return GateResult.FAIL(f"SLO {slo['id']} has less than 10% error budget remaining")
-    return GateResult.PASS
-```
+- the SLO query path cannot be evaluated
+- required SLO metric samples are missing
+- any SLO reports less than 10% error budget remaining
 
-Promotions are blocked when any SLO has less than 10% error budget remaining, preventing a degraded platform from receiving new deployments that could make it worse.
-
-### Ops portal integration
-
-The ops portal (ADR 0093) displays an **SLO Status** section with the same RAG indicators. Clicking an SLO opens the Grafana SLO dashboard deep-linked to that service.
+This keeps the promotion contract aligned with platform reliability instead of only point-in-time health.
 
 ## Consequences
 
 **Positive**
-- Platform reliability has a defined, measurable baseline for the first time; incidents can be measured against it
-- Burn rate alerts give early warning (6+ hours) before a complete SLO breach — reactive paging becomes proactive
-- The promotion gate blocking on low error budget prevents deploying into a degraded platform
-- The SLO catalog is machine-readable and drives code generation; adding a new service requires adding one JSON object
+
+- Reliability targets are now explicit, versioned, and generated from one source of truth.
+- Adding or changing an SLO updates Prometheus rules, probe targets, and the Grafana dashboard together.
+- Promotion decisions can now block on exhausted error budgets instead of only on failed staging receipts.
+- The operator portals and API surfaces can talk about reliability with concrete numbers instead of prose.
 
 **Negative / Trade-offs**
-- The initial SLO targets (99.5% for Keycloak, etc.) are estimates; they will need to be calibrated against 30 days of actual data before they are meaningful
-- Multi-window burn rate alerts (MWMB) have a learning curve; operators must understand what "14× burn rate" means to act correctly on it
-- The recording rules add ~20 Prometheus series per SLO; for six SLOs that is 120 additional series — well within the capacity of a single Prometheus on the monitoring VM
+
+- The new rule set adds blackbox probe traffic and additional Prometheus series on the monitoring VM.
+- Initial objective percentages are still estimates and should be reviewed after a sustained production data window.
+- The promotion gate is now stricter; if the SLO query path is unavailable, promotion is rejected rather than silently bypassed.
 
 ## Alternatives Considered
 
-- **Uptime Kuma status percentages**: Uptime Kuma already tracks uptime percentages; but it has no burn rate concept, no error budget, no promotion gate integration, and no machine-readable SLO definition — it measures the same underlying signal but cannot answer "how fast are we burning the budget?"
-- **External SLO service (Nobl9, Pyrra)**: SaaS or separate operator; over-engineered for a homelab; Pyrra (open-source) could work but adds a new service for a problem solvable with Prometheus recording rules
-- **Informal SLOs as comments**: documenting targets in ADRs without enforcement; humans forget and the targets drift from what is actually measured
+- **Uptime Kuma percentages alone**: useful for raw uptime history, but insufficient for burn-rate alerting, code generation, and promotion-gate enforcement.
+- **A separate SLO platform such as Pyrra or Nobl9**: richer, but additional moving parts for a small single-site platform where Prometheus-native rules are sufficient.
+- **Document-only targets in ADR text**: easy to write, but impossible to validate or consume automatically.
 
 ## Related ADRs
 
-- ADR 0011: Monitoring VM (Prometheus recording rules run here)
-- ADR 0064: Health probe contracts (probes are the SLI data source)
-- ADR 0073: Environment promotion gate (blocked on low error budget)
-- ADR 0091: Continuous drift detection (drift can be an SLO-impacting event)
-- ADR 0092: Unified platform API gateway (API gateway has its own SLO)
-- ADR 0093: Interactive ops portal (SLO status section)
-- ADR 0097: Alerting routing (burn rate alerts route through this model)
+- ADR 0011: Monitoring VM with Grafana and Proxmox metrics
+- ADR 0064: Health probe contracts for all services
+- ADR 0073: Environment promotion gate and deployment pipeline
+- ADR 0092: Unified platform API gateway
+- ADR 0093: Interactive ops portal
+- ADR 0097: Alerting routing and on-call runbook model
+
+## Outcome
+
+- repository implementation is complete on `main` in repo release `0.106.0`
+- the repo now ships the SLO catalog, generated Prometheus rule and target files, the generated Grafana dashboard, monitoring-role convergence for blackbox probing, the `/v1/platform/slos` API surface, the ops-portal SLO summary, and promotion-gate enforcement
+- no live platform version bump is claimed yet; monitoring convergence and alert routing still require apply from `main`
