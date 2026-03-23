@@ -59,6 +59,14 @@
     "working_dir": "/workspace",
     "timeout_seconds": 180
   },
+  "integration-tests": {
+    "description": "Run the ADR 0111 non-destructive integration suite against staging if active, or record a repo-managed skip if no integration target is currently available.",
+    "severity": "error",
+    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "command": "python scripts/integration_suite.py --mode gate --environment staging --report-file .local/integration-tests/gate-last-run.json",
+    "working_dir": "/workspace",
+    "timeout_seconds": 300
+  },
   "yaml-lint": {
     "description": "Run full-repository yamllint across tracked YAML files.",
     "severity": "error",
