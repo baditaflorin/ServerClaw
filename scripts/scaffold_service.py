@@ -806,17 +806,17 @@ def update_api_gateway_catalog(path: Path, spec: ServiceSpec) -> None:
     catalog = load_json(path)
     catalog["services"].append(
         {
-            "service_id": spec.service_id,
+            "id": spec.service_id,
+            "name": spec.display_name,
             "gateway_prefix": f"/v1/{spec.name_slug}",
             "upstream": spec.internal_url,
-            "auth": "keycloak_jwt" if spec.requires_oidc else "none",
+            "auth": "keycloak_jwt",
             "required_role": "platform-operator" if spec.requires_oidc else "platform-read",
             "strip_prefix": True,
             "timeout_seconds": 30,
-            "notes": f"TODO: confirm the gateway route contract for {spec.display_name}.",
         }
     )
-    catalog["services"] = sorted(catalog["services"], key=lambda item: item["service_id"])
+    catalog["services"] = sorted(catalog["services"], key=lambda item: item["id"])
     write_json(path, catalog)
 
 
@@ -849,13 +849,14 @@ def update_slo_catalog(path: Path, spec: ServiceSpec) -> None:
     catalog = load_json(path)
     catalog["slos"].append(
         {
-            "id": f"{spec.service_id}_availability",
-            "service": spec.service_id,
-            "indicator": "uptime",
+            "id": f"{spec.name_slug}-availability",
+            "service_id": spec.service_id,
+            "indicator": "availability",
             "objective_percent": 99.5,
             "window_days": 30,
-            "probe": f"http_probe_success{{job='{spec.service_name}'}}",
-            "description": f"TODO: confirm the {spec.display_name} availability objective and measurement query.",
+            "target_url": spec.public_url or spec.internal_url,
+            "probe_module": "http_2xx_follow_redirects",
+            "description": f"TODO: confirm the {spec.display_name} availability objective and measurement path.",
         }
     )
     catalog["slos"] = sorted(catalog["slos"], key=lambda item: item["id"])

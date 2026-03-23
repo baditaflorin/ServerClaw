@@ -203,7 +203,10 @@ def load_context() -> dict[str, Any]:
     seen_gateway_services: set[str] = set()
     for index, entry in enumerate(gateway_services):
         entry = require_mapping(entry, f"config/api-gateway-catalog.json.services[{index}]")
-        service_id = require_string(entry.get("service_id"), f"config/api-gateway-catalog.json.services[{index}].service_id")
+        service_id = require_string(
+            entry.get("id", entry.get("service_id")),
+            f"config/api-gateway-catalog.json.services[{index}].id",
+        )
         if service_id in seen_gateway_services:
             raise ValueError(f"duplicate API gateway service entry for {service_id}")
         seen_gateway_services.add(service_id)
@@ -246,7 +249,7 @@ def load_context() -> dict[str, Any]:
         if slo_id in seen_slo_ids:
             raise ValueError(f"duplicate SLO id '{slo_id}'")
         seen_slo_ids.add(slo_id)
-        require_string(slo.get("service"), f"config/slo-catalog.json.slos[{index}].service")
+        require_string(slo.get("service_id", slo.get("service")), f"config/slo-catalog.json.slos[{index}].service_id")
 
     data_catalog = require_mapping(load_json(DATA_CATALOG_PATH), str(DATA_CATALOG_PATH))
     data_stores = require_list(data_catalog.get("data_stores"), "config/data-catalog.json.data_stores")
@@ -360,9 +363,11 @@ def evaluate_service(service_id: str, *, today: dt.date | None = None, context: 
     }
     secret_entries = [secret for secret in context["secret_entries"] if secret.get("owner_service") == service_id]
     subdomain_entries = [entry for entry in context["subdomains"] if entry.get("service_id") == service_id]
-    api_gateway_entries = [entry for entry in context["api_gateway_services"] if entry.get("service_id") == service_id]
+    api_gateway_entries = [
+        entry for entry in context["api_gateway_services"] if entry.get("id", entry.get("service_id")) == service_id
+    ]
     dependency_nodes = [node for node in context["dependency_nodes"] if node.get("id") == service_id]
-    slo_entries = [entry for entry in context["slos"] if entry.get("service") == service_id]
+    slo_entries = [entry for entry in context["slos"] if entry.get("service_id", entry.get("service")) == service_id]
     data_entries = [entry for entry in context["data_stores"] if entry.get("service") == service_id]
 
     compose_secrets_present = False

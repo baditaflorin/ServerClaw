@@ -97,21 +97,30 @@ def write_release_artifacts(
     released_on: str | None = None,
 ) -> str:
     release_date = released_on or date.today().isoformat()
-    upgrade_guide = "docs/upgrade/v1.md" if Path(repo_path("docs", "upgrade", "v1.md")).exists() else None
-    rendered = render_release_notes(
+    has_upgrade_guide = Path(repo_path("docs", "upgrade", "v1.md")).exists()
+    root_upgrade_guide = "docs/upgrade/v1.md" if has_upgrade_guide else None
+    versioned_upgrade_guide = "../upgrade/v1.md" if has_upgrade_guide else None
+    root_rendered = render_release_notes(
         version,
         released_on=release_date,
         notes=notes,
         platform_impact=platform_impact,
-        upgrade_guide_path=upgrade_guide,
+        upgrade_guide_path=root_upgrade_guide,
     )
-    ROOT_RELEASE_NOTES_PATH.write_text(rendered)
+    versioned_rendered = render_release_notes(
+        version,
+        released_on=release_date,
+        notes=notes,
+        platform_impact=platform_impact,
+        upgrade_guide_path=versioned_upgrade_guide,
+    )
+    ROOT_RELEASE_NOTES_PATH.write_text(root_rendered)
     RELEASE_NOTES_DIR.mkdir(parents=True, exist_ok=True)
-    (RELEASE_NOTES_DIR / f"{version}.md").write_text(rendered)
+    (RELEASE_NOTES_DIR / f"{version}.md").write_text(versioned_rendered)
     RELEASE_NOTES_INDEX_PATH.write_text(
         update_release_notes_index(RELEASE_NOTES_INDEX_PATH.read_text(), version)
     )
-    return rendered
+    return versioned_rendered
 
 
 def build_parser() -> argparse.ArgumentParser:

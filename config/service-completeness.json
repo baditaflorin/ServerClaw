@@ -21,6 +21,14 @@
     }
   },
   "services": {
+    "api_gateway": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": true,
+      "requires_secrets": false,
+      "requires_compose_secrets": true,
+      "suppression_preset": "legacy-service"
+    },
     "backup_pbs": {
       "service_type": "vm-service",
       "requires_subdomain": false,
@@ -176,6 +184,14 @@
     "step_ca": {
       "service_type": "compose",
       "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_secrets": false,
+      "requires_compose_secrets": true,
+      "suppression_preset": "legacy-service"
+    },
+    "status_page": {
+      "service_type": "compose",
+      "requires_subdomain": true,
       "requires_oidc": false,
       "requires_secrets": false,
       "requires_compose_secrets": true,

@@ -4,7 +4,7 @@
   "title": "SLO Catalog",
   "type": "object",
   "additionalProperties": false,
-  "required": ["$schema", "schema_version", "slos"],
+  "required": ["$schema", "schema_version", "review_note", "slos"],
   "properties": {
     "$schema": {
       "const": "docs/schema/slo-catalog.schema.json"
@@ -23,11 +23,12 @@
         "additionalProperties": false,
         "required": [
           "id",
-          "service",
+          "service_id",
           "indicator",
           "objective_percent",
           "window_days",
-          "probe",
+          "target_url",
+          "probe_module",
           "description"
         ],
         "properties": {
@@ -35,20 +36,20 @@
             "type": "string",
             "pattern": "^[a-z0-9][a-z0-9_-]*$"
           },
-          "service": {
+          "service_id": {
             "type": "string",
             "pattern": "^[a-z0-9][a-z0-9_-]*$"
           },
           "indicator": {
             "type": "string",
-            "enum": ["uptime", "latency", "freshness"]
+            "enum": ["availability", "latency"]
           },
           "objective_percent": {
             "type": "number",
-            "minimum": 0,
-            "maximum": 100
+            "minimum": 0.01,
+            "maximum": 99.999
           },
-          "threshold_ms": {
+          "latency_threshold_ms": {
             "type": "integer",
             "minimum": 1
           },
@@ -56,7 +57,11 @@
             "type": "integer",
             "minimum": 1
           },
-          "probe": {
+          "target_url": {
+            "type": "string",
+            "pattern": "^https?://.+"
+          },
+          "probe_module": {
             "type": "string",
             "minLength": 1
           },

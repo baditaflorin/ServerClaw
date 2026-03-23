@@ -359,13 +359,14 @@ class ScaffoldServiceTests(unittest.TestCase):
             self.assertEqual(image_catalog["images"]["test_echo_runtime"]["tag"], "TODO-pin-tag")
 
             api_gateway_catalog = json.loads((root / "config" / "api-gateway-catalog.json").read_text())
-            self.assertEqual(api_gateway_catalog["services"][0]["service_id"], "test_echo")
+            self.assertEqual(api_gateway_catalog["services"][0]["id"], "test_echo")
+            self.assertEqual(api_gateway_catalog["services"][0]["name"], "Test Echo")
 
             dependency_graph = json.loads((root / "config" / "dependency-graph.json").read_text())
             self.assertEqual(dependency_graph["nodes"][0]["id"], "test_echo")
 
             slo_catalog = json.loads((root / "config" / "slo-catalog.json").read_text())
-            self.assertEqual(slo_catalog["slos"][0]["service"], "test_echo")
+            self.assertEqual(slo_catalog["slos"][0]["service_id"], "test_echo")
 
             data_catalog = json.loads((root / "config" / "data-catalog.json").read_text())
             self.assertEqual(data_catalog["data_stores"][0]["service"], "test_echo")
