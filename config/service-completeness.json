@@ -53,6 +53,14 @@
       "requires_compose_secrets": false,
       "suppression_preset": "legacy-service"
     },
+    "docs_portal": {
+      "service_type": "nginx-plugin",
+      "requires_subdomain": true,
+      "requires_oidc": false,
+      "requires_secrets": false,
+      "requires_compose_secrets": false,
+      "suppression_preset": "legacy-service"
+    },
     "grafana": {
       "service_type": "vm-service",
       "requires_subdomain": true,
