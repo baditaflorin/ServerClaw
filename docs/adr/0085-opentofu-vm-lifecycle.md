@@ -1,10 +1,10 @@
 # ADR 0085: OpenTofu IaC for VM Lifecycle Management
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.92.0
+- Implemented In Platform Version: 0.39.0
+- Implemented On: 2026-03-23
 - Date: 2026-03-22
 
 ## Context
@@ -60,7 +60,7 @@ tofu/
 
 ### Remote state backend
 
-State is stored in the internal S3-compatible object store (`minio.lv3.org`) under `tofu-state/<environment>/`. State locking uses DynamoDB-compatible table in MinIO. This keeps state inside the private network and avoids external dependencies.
+State configuration is committed in `tofu/environments/*/backend.tf` and targets the internal S3-compatible object store at `https://minio.lv3.org` with `use_lockfile = true`. The execution wrapper automatically uses the remote backend when `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` are provided at runtime; otherwise it falls back to build-server local state under `~/.cache/lv3-tofu-plans/` so validation, import, and drift checks still work without storing backend credentials in git.
 
 ### `proxmox-vm` module interface
 
@@ -85,6 +85,8 @@ module "docker_runtime" {
 
 OpenTofu authenticates to Proxmox using a short-lived API token issued via OpenBao (ADR 0047). The token is injected at plan/apply time by `make remote-tofu-plan` / `make remote-tofu-apply` via the remote execution gateway (ADR 0082). Tokens are never stored in the repository or state file.
 
+Current implementation detail: remote `tofu` runs execute inside the pinned infra check-runner image with Docker host networking enabled on `build-lv3`, because the container path could not reliably resolve `proxmox.lv3.org` over the default bridge network during live import verification.
+
 ### make targets
 
 | Target | Action |
@@ -99,6 +101,16 @@ OpenTofu authenticates to Proxmox using a short-lived API token issued via OpenB
 
 Existing VMs are imported into the OpenTofu state using `make tofu-import` before any new resources are declared. This produces a state file that matches reality without destroying and recreating VMs. The import process is documented in `docs/runbooks/tofu-vm-import.md`.
 
+## Implementation Notes
+
+- `tofu/modules/proxmox-vm/` is implemented and used by both `production` and `staging`.
+- `make remote-tofu-plan`, `make remote-tofu-apply`, `make tofu-drift`, and `make tofu-import` are implemented through `scripts/tofu_exec.sh` and `scripts/tofu_remote_command.py`.
+- Production currently tracks the six live guest VMs `110`, `120`, `130`, `140`, `150`, and `160`.
+- `make tofu-import ENV=production VM=<name>` was verified for all six production VMs on `build-lv3`.
+- `make tofu-drift ENV=production` was verified against the imported production state and returns `No changes`.
+- `make remote-tofu-plan ENV=staging` was verified on `build-lv3` and returns a create-only plan for the staging VMs.
+- Because the `bpg/proxmox` provider does not round-trip every imported field cleanly, the module ignores import-only drift on `clone`, `node_name`, `keyboard_layout`, and `agent.type` to keep imported production VMs stable under drift checks.
+
 ## Consequences
 
 **Positive**
@@ -109,10 +121,11 @@ Existing VMs are imported into the OpenTofu state using `make tofu-import` befor
 - VM resizing is now a declarative PR: change `memory_mb` in `main.tf`, open PR, review plan output, merge
 
 **Negative / Trade-offs**
-- Importing all existing VMs into state is a one-time migration effort (~4 hours)
+- Importing existing VMs into state is a one-time migration effort and depends on provider import quality
 - OpenTofu state in MinIO is a new dependency; MinIO must be available for any `tofu` operation
 - Operators need basic HCL familiarity; a short onboarding doc is required
 - `bpg/proxmox` provider occasionally lags behind Proxmox API changes; pin provider version strictly
+- Imported Proxmox VMs currently require a small ignore list for provider-populated fields that otherwise cause false drift or forced replacement after import
 
 ## Alternatives Considered
 

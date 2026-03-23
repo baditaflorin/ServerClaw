@@ -1152,6 +1152,30 @@ workstreams:
     ready_to_merge: false
     live_applied: false
 
+  - id: adr-0085-opentofu-vm-lifecycle
+    adr: "0085"
+    title: Declarative VM provisioning with OpenTofu
+    status: merged
+    owner: codex
+    branch: codex/adr-0085-opentofu-vm-lifecycle
+    worktree_path: ../proxmox_florin_server-opentofu-vm-lifecycle
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0085-opentofu-vm-lifecycle.md
+    depends_on:
+      - adr-0082-remote-build-gateway
+      - adr-0083-docker-check-runner
+      - adr-0084-packer-pipeline
+    conflicts_with:
+      - roles that contain community.general.proxmox_kvm create tasks
+    shared_surfaces:
+      - Makefile
+      - inventory/
+      - config/
+      - tofu/
+      - MinIO state backend
+      - Proxmox API
+    ready_to_merge: false
+    live_applied: true
+
   - id: adr-0086-ansible-collections
     adr: "0086"
     title: Ansible collection packaging

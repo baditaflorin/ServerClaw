@@ -5,6 +5,7 @@ receipts/
 .git/
 .ansible/
 .ansible/validation/
+.mypy_cache/
 .claude/
 .worktrees/
 .mypy_cache/
@@ -13,6 +14,5 @@ receipts/
 tofu/
 __pycache__/
 *.pyc
-.terraform/
 .packer_cache/
 config/build-cache-manifest.json

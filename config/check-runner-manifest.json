@@ -35,7 +35,7 @@
   },
   "tofu-validate": {
     "image": "registry.lv3.org/check-runner/infra:2026.03.23",
-    "command": "if [ -d tofu ]; then tofu -chdir=tofu validate; else echo 'No tofu configuration present'; fi",
+    "command": "if [ -d tofu ]; then tofu -chdir=tofu/environments/production init -backend=false -input=false >/dev/null && tofu -chdir=tofu/environments/production validate && tofu -chdir=tofu/environments/staging init -backend=false -input=false >/dev/null && tofu -chdir=tofu/environments/staging validate; else echo 'No tofu configuration present'; fi",
     "working_dir": "/workspace",
     "timeout_seconds": 120,
     "cache_mounts": ["packer_plugins"]
