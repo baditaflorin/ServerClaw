@@ -18,6 +18,24 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
 
     def test_defaults_enable_pinned_dns_hetzner_acme(self) -> None:
         self.assertEqual(self.defaults["public_edge_acme_challenge_method"], "dns-hetzner")
+        self.assertEqual(self.defaults["public_edge_control_plane_host"], "{{ groups['proxmox_hosts'][0] }}")
+        self.assertEqual(
+            self.defaults["proxmox_guests"],
+            "{{ hostvars[public_edge_control_plane_host].proxmox_guests }}",
+        )
+        self.assertEqual(
+            self.defaults["management_tailscale_ipv4"],
+            "{{ hostvars[public_edge_control_plane_host].management_tailscale_ipv4 }}",
+        )
+        self.assertEqual(
+            self.defaults["platform_port_assignments"],
+            "{{ hostvars[public_edge_control_plane_host].platform_port_assignments }}",
+        )
+        self.assertEqual(
+            self.defaults["postgres_ha"],
+            "{{ hostvars[public_edge_control_plane_host].postgres_ha }}",
+        )
+        self.assertEqual(self.defaults["public_edge_service_topology"], "{{ platform_service_topology }}")
         self.assertEqual(self.defaults["public_edge_dns_hetzner_plugin_version"], "3.0.0")
         self.assertEqual(
             self.defaults["public_edge_dns_hetzner_credentials_file"],

@@ -14,6 +14,9 @@ REPO_ROOT = next(
     for candidate in Path(__file__).resolve().parents
     if (candidate / "scripts" / "mutation_audit.py").exists()
 )
+SCRIPTS_PATH = REPO_ROOT / "scripts"
+if str(SCRIPTS_PATH) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_PATH))
 MUTATION_AUDIT_PATH = REPO_ROOT / "scripts" / "mutation_audit.py"
 MUTATION_AUDIT_SPEC = spec_from_file_location("lv3_mutation_audit", MUTATION_AUDIT_PATH)
 if MUTATION_AUDIT_SPEC is None or MUTATION_AUDIT_SPEC.loader is None:

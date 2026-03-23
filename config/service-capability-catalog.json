@@ -7,7 +7,7 @@
       "name": "Platform API Gateway",
       "description": "Unified authenticated gateway for operator and automation access to platform HTTP APIs.",
       "category": "automation",
-      "lifecycle_status": "planned",
+      "lifecycle_status": "active",
       "vm": "docker-runtime-lv3",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:8080",
@@ -27,7 +27,7 @@
       ],
       "environments": {
         "production": {
-          "status": "planned",
+        "status": "active",
           "url": "https://api.lv3.org",
           "subdomain": "api.lv3.org",
           "notes": "Repository automation is ready; live publication still requires apply from main."

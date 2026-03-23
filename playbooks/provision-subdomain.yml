@@ -54,14 +54,7 @@
             '@'
             if selected_subdomain.fqdn == hetzner_dns_zone_name
             else (
-              selected_subdomain.fqdn
-              | regex_replace(
-                  '\\.' ~ (
-                    hetzner_dns_zone_name
-                    | replace('.', '\\.')
-                  ) ~ '$',
-                  ''
-                )
+              selected_subdomain.fqdn.rsplit('.' ~ hetzner_dns_zone_name, 1)[0]
             )
           }}
 

@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0094](../adr/0094-developer-portal-and-documentation-site.md)
 - Title: MkDocs Material static site generated from platform catalogs and ADR corpus, published publicly at docs.lv3.org
-- Status: merged
+- Status: live_applied
 - Branch: `codex/adr-0094-developer-portal`
 - Worktree: `../proxmox_florin_server-developer-portal`
 - Owner: codex
@@ -71,8 +71,9 @@
 - the docs site now builds from canonical catalogs, copied ADRs, copied runbooks, release notes, and a generated OpenAPI snapshot into `build/docs-portal/`
 - `docs.lv3.org` is represented in the service and subdomain catalogs plus the shared edge publication defaults with a temporary `X-Robots-Tag: noindex` header
 - repo release `0.105.0` hardens shared edge publication by building all portal artifacts before apply, fixes TLS SAN parsing for hostnames such as `ops.lv3.org`, and restores the collection-scoped mutation audit callback import path
-- edge publication was verified directly against `65.108.75.123` with `--resolve` and serves the docs portal with the expected `X-Robots-Tag: noindex` header, but public DNS for `docs.lv3.org` still needs to resolve before this workstream can be marked `live_applied`
-- no live platform version change is claimed yet; public publication still requires an apply from `main`
+- `docs.lv3.org` now resolves publicly to `65.108.75.123` from both `1.1.1.1` and the Hetzner authoritative nameserver
+- HTTPS verification against the live edge returns `HTTP/2 200` for both `https://docs.lv3.org/` and `https://docs.lv3.org/services/keycloak/`, with the expected `X-Robots-Tag: noindex, nofollow, noarchive` header
+- platform version `0.105.0` is now the first live platform version where ADR 0094 is true
 
 ## Notes For The Next Assistant
 

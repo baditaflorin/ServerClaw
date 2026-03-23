@@ -84,7 +84,7 @@ The repository now also ships ADR 0096 SLO tracking: a canonical SLO catalog, ge
 | Field | Value |
 | --- | --- |
 | Repository version | `0.109.0` |
-| Platform version | `0.40.0` |
+| Platform version | `0.105.0` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -143,7 +143,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `platform_context` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
 | `portainer` | `2026-03-22-adr-0055-portainer-live-apply` |
 | `postgres_vm` | `2026-03-22-adr-0026-postgres-vm-live-apply` |
-| `public_edge_publication` | `2026-03-23-adr-0021-edge-publication-portal-hostnames-live-apply` |
+| `public_edge_publication` | `2026-03-24-adr-0094-developer-portal-live-apply` |
 | `remote_build_gateway` | `2026-03-23-adr-0082-remote-build-gateway-live-apply` |
 | `runtime_container_telemetry` | `2026-03-22-adr-0040-runtime-container-telemetry-live-apply` |
 | `secret_rotation` | `2026-03-23-adr-0065-secret-rotation-live-apply` |
@@ -528,6 +528,16 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0109: Public Status Page](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0109-public-status-page.md)
 - [ADR 0110: Platform Versioning, Release Notes, and Upgrade Path](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0110-platform-versioning-and-upgrade-path.md)
 - [ADR 0111: End-to-End Integration Test Suite](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0111-end-to-end-integration-test-suite.md)
+- [ADR 0112: Deterministic Goal Compiler](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0112-deterministic-goal-compiler.md)
+- [ADR 0113: World-State Materializer](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0113-world-state-materializer.md)
+- [ADR 0114: Rule-Based Incident Triage Engine](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0114-rule-based-incident-triage-engine.md)
+- [ADR 0115: Event-Sourced Mutation Ledger](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0115-event-sourced-mutation-ledger.md)
+- [ADR 0116: Change Risk Scoring Without LLMs](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0116-change-risk-scoring.md)
+- [ADR 0117: Service Dependency Graph As First-Class Runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0117-service-dependency-graph-runtime.md)
+- [ADR 0118: Replayable Failure Case Library](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0118-replayable-failure-case-library.md)
+- [ADR 0119: Budgeted Workflow Scheduler](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0119-budgeted-workflow-scheduler.md)
+- [ADR 0120: Dry-Run Semantic Diff Engine](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0120-dry-run-semantic-diff-engine.md)
+- [ADR 0121: Local Search and Indexing Fabric](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0121-local-search-and-indexing-fabric.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -614,6 +624,16 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0109: Public Status Page](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0109-public-status-page.md)
 - [Workstream ADR 0110: Platform Versioning, Release Notes, and Upgrade Path](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0110-platform-versioning.md)
 - [Workstream ADR 0111: End-to-End Integration Test Suite](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0111-integration-test-suite.md)
+- [Workstream ADR 0112: Deterministic Goal Compiler](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0112-goal-compiler.md)
+- [Workstream ADR 0113: World-State Materializer](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0113-world-state-materializer.md)
+- [Workstream ADR 0114: Rule-Based Incident Triage Engine](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0114-incident-triage-engine.md)
+- [Workstream ADR 0115: Event-Sourced Mutation Ledger](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0115-mutation-ledger.md)
+- [Workstream ADR 0116: Change Risk Scoring Without LLMs](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0116-change-risk-scoring.md)
+- [Workstream ADR 0117: Service Dependency Graph As First-Class Runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0117-dependency-graph-runtime.md)
+- [Workstream ADR 0118: Replayable Failure Case Library](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0118-failure-case-library.md)
+- [Workstream ADR 0119: Budgeted Workflow Scheduler](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0119-budgeted-workflow-scheduler.md)
+- [Workstream ADR 0120: Dry-Run Semantic Diff Engine](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0120-dry-run-diff-engine.md)
+- [Workstream ADR 0121: Local Search and Indexing Fabric](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0121-search-indexing-fabric.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
@@ -632,7 +652,7 @@ Current values on `main`:
 | Field | Value |
 | --- | --- |
 | Repository version | `0.109.0` |
-| Platform version | `0.40.0` |
+| Platform version | `0.105.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -736,7 +756,7 @@ This repository is intentionally opinionated:
 | `0091` | Continuous drift detection and reconciliation | `merged` | [adr-0091-drift-detection.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0091-drift-detection.md) |
 | `0091` | Continuous drift detection and reconciliation | `merged` | [adr-0091-drift-detection.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0091-drift-detection.md) |
 | `0093` | Interactive ops portal with live actions | `merged` | [adr-0093-interactive-ops-portal.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0093-interactive-ops-portal.md) |
-| `0094` | Developer portal and service documentation site | `merged` | [adr-0094-developer-portal.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0094-developer-portal.md) |
+| `0094` | Developer portal and service documentation site | `live_applied` | [adr-0094-developer-portal.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0094-developer-portal.md) |
 | `0096` | SLO definitions and error budget tracking | `merged` | [adr-0096-slo-tracking.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0096-slo-tracking.md) |
 | `0098` | Postgres high availability and automated failover | `merged` | [adr-0098-postgres-ha.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0098-postgres-ha.md) |
 | `0099` | Automated backup restore verification | `merged` | [adr-0099-backup-restore-verification.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0099-backup-restore-verification.md) |

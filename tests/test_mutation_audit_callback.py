@@ -43,6 +43,7 @@ def test_callback_loads_mutation_audit_helpers_from_repo_root() -> None:
         spec.loader.exec_module(module)
 
         assert module.REPO_ROOT == REPO_ROOT
+        assert str(REPO_ROOT / "scripts") in sys.path
         assert module.MUTATION_AUDIT_PATH == REPO_ROOT / "scripts" / "mutation_audit.py"
         assert module.build_event.__module__ == "lv3_mutation_audit"
         assert module.emit_event_best_effort.__module__ == "lv3_mutation_audit"

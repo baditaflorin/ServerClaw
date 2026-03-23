@@ -53,7 +53,7 @@
       "fqdn": "api.lv3.org",
       "service_id": "api_gateway",
       "environment": "production",
-      "status": "planned",
+      "status": "active",
       "exposure": "edge-published",
       "target": "65.108.75.123",
       "target_port": 443,
@@ -63,7 +63,7 @@
         "cert_path": "/etc/letsencrypt/live/lv3-edge/",
         "auto_renew": true
       },
-      "notes": "Repository automation is ready; live publication still requires apply from main."
+      "notes": "Published publicly through the shared NGINX edge and verified live from current main."
     },
     {
       "fqdn": "build.lv3.org",

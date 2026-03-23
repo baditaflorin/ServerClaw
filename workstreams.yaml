@@ -137,7 +137,7 @@ workstreams:
       - roles/docker_compose_stack
       - docs/runbooks/deploy-docker-compose-stack.md
     ready_to_merge: true
-    live_applied: false
+    live_applied: true
 
   - id: adr-0026-postgres-vm
     adr: "0026"
@@ -235,7 +235,7 @@ workstreams:
       - Stalwart management API
       - Grafana mail dashboards
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0041-email-platform-live
     adr: "0041"
@@ -1446,7 +1446,7 @@ workstreams:
   - id: adr-0094-developer-portal
     adr: "0094"
     title: Developer portal and service documentation site
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0094-developer-portal
     worktree_path: ../proxmox_florin_server-developer-portal
@@ -1464,7 +1464,7 @@ workstreams:
       - changelog.md
       - nginx edge config
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0095-unified-search
     adr: "0095"
