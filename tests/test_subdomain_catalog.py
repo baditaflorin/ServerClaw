@@ -107,6 +107,18 @@ class SubdomainCatalogTests(unittest.TestCase):
             "edge",
         )
 
+    def test_status_page_route_mode_is_edge(self) -> None:
+        edge_route_hostnames = subdomain_catalog.collect_edge_route_hostnames(
+            self.host_vars,
+            self.public_edge_defaults,
+        )
+        entry = subdomain_catalog.get_subdomain_entry(self.catalog, "status.lv3.org")
+
+        self.assertEqual(
+            subdomain_catalog.validate_provisionable_subdomain(entry, edge_route_hostnames),
+            "edge",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

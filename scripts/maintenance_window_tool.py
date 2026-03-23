@@ -23,6 +23,8 @@ HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 GROUP_VARS_PATH = repo_path("inventory", "group_vars", "all.yml")
 SECRET_MANIFEST_PATH = repo_path("config", "controller-local-secrets.json")
 SCHEMA_PATH = repo_path("docs", "schema", "maintenance-window.json")
+SERVICE_CATALOG_PATH = repo_path("config", "service-capability-catalog.json")
+STATUS_PAGE_CONFIG_PATH = repo_path("config", "uptime-kuma", "status-page.json")
 
 MAINTENANCE_BUCKET = "maintenance-windows"
 MAINTENANCE_BUCKET_MAX_AGE_SECONDS = 2 * 60 * 60
@@ -528,6 +530,89 @@ def emit_mutation_audit_event(action: str, target: str, actor_class: str, actor_
     )
 
 
+def load_service_catalog() -> dict[str, Any]:
+    payload = load_json(SERVICE_CATALOG_PATH)
+    services = payload.get("services")
+    if not isinstance(services, list):
+        raise ValueError("config/service-capability-catalog.json.services must be a list")
+    return {service["id"]: service for service in services}
+
+
+def load_status_page_monitor_names() -> list[str]:
+    payload = load_json(STATUS_PAGE_CONFIG_PATH)
+    groups = payload.get("groups", [])
+    monitor_names: list[str] = []
+    for group in groups:
+        for monitor_name in group.get("monitor_names", []):
+            if monitor_name not in monitor_names:
+                monitor_names.append(monitor_name)
+    return monitor_names
+
+
+def status_page_maintenance_title(window: dict[str, Any], service_catalog: dict[str, Any]) -> str:
+    if window["service_id"] == "all":
+        return "Planned maintenance: all public services"
+    service = service_catalog.get(window["service_id"], {})
+    service_name = service.get("name", window["service_id"])
+    return f"Planned maintenance: {service_name}"
+
+
+def resolve_status_page_monitor_names(window: dict[str, Any], service_catalog: dict[str, Any]) -> list[str]:
+    if window["service_id"] == "all":
+        return load_status_page_monitor_names()
+    service = service_catalog.get(window["service_id"], {})
+    monitor_name = service.get("uptime_monitor_name")
+    if isinstance(monitor_name, str) and monitor_name.strip():
+        return [monitor_name]
+    return []
+
+
+def sync_status_page_maintenance(window: dict[str, Any], *, remove: bool) -> dict[str, Any]:
+    try:
+        from uptime_kuma_tool import (
+            UptimeKumaClient,
+            delete_status_page_maintenance,
+            load_auth_json,
+            save_json,
+            upsert_status_page_maintenance,
+            ensure_logged_in,
+        )
+    except ModuleNotFoundError as exc:
+        return {"status": "skipped", "reason": str(exc)}
+
+    auth = load_auth_json(Path(repo_path(".local", "uptime-kuma", "admin-session.json")))
+    base_url = auth.get("base_url")
+    if not isinstance(base_url, str) or not base_url.strip():
+        return {"status": "skipped", "reason": "uptime_kuma_admin_session base_url is unavailable"}
+
+    service_catalog = load_service_catalog()
+    title = status_page_maintenance_title(window, service_catalog)
+    monitor_names = resolve_status_page_monitor_names(window, service_catalog)
+
+    client = UptimeKumaClient(base_url=base_url, verify_ssl=True)
+    try:
+        client.connect()
+        auth = ensure_logged_in(client, auth, None, None)
+        save_json(Path(repo_path(".local", "uptime-kuma", "admin-session.json")), auth)
+        if remove:
+            result = delete_status_page_maintenance(client, title=title)
+        else:
+            result = upsert_status_page_maintenance(
+                client,
+                title=title,
+                description=window["reason"],
+                start_at=window["opened_at"],
+                end_at=window["auto_close_at"],
+                status_page_slug="lv3-platform",
+                monitor_names=monitor_names,
+            )
+        return {"status": "ok", **result, "title": title}
+    except Exception as exc:  # noqa: BLE001
+        return {"status": "warning", "reason": str(exc), "title": title}
+    finally:
+        client.disconnect()
+
+
 def list_active_windows(context: dict[str, Any] | None = None) -> dict[str, dict[str, Any]]:
     if state_file_path() is not None:
         return load_local_state()
@@ -579,6 +664,7 @@ def open_window(
         with nats_tunnel(context) as local_port:
             result = asyncio.run(open_window_async(f"nats://127.0.0.1:{local_port}", window, credentials))
 
+    result["uptime_kuma_status_page"] = sync_status_page_maintenance(window, remove=False)
     emit_mutation_audit_event("maintenance.open", service_id, opened_by_class, opened_by_id)
     return result
 
@@ -622,6 +708,10 @@ def close_window(
                 )
             )
 
+    if result.get("windows"):
+        result["uptime_kuma_status_page"] = [
+            sync_status_page_maintenance(window, remove=True) for window in result["windows"]
+        ]
     emit_mutation_audit_event(
         "maintenance.force_close" if force else "maintenance.close",
         service_id,

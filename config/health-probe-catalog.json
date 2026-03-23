@@ -356,6 +356,40 @@
         }
       }
     },
+    "status_page": {
+      "service_name": "status-page",
+      "owning_vm": "docker-runtime-lv3",
+      "role": null,
+      "verify_file": null,
+      "liveness": {
+        "kind": "http",
+        "description": "The Uptime Kuma status page slug responds on the local runtime listener.",
+        "timeout_seconds": 30,
+        "retries": 1,
+        "delay_seconds": 0,
+        "url": "http://127.0.0.1:3001/status/lv3-platform",
+        "method": "GET",
+        "expected_status": [200]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The public status page route responds through the shared edge host header.",
+        "timeout_seconds": 30,
+        "retries": 1,
+        "delay_seconds": 0,
+        "url": "https://127.0.0.1/",
+        "method": "GET",
+        "expected_status": [200],
+        "headers": {
+          "Host": "status.lv3.org"
+        },
+        "validate_tls": false
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "The status page should not recursively monitor itself from the same Uptime Kuma instance; independent coverage is delegated to Uptime Robot."
+      }
+    },
     "mail_platform": {
       "service_name": "mail-platform",
       "owning_vm": "docker-runtime-lv3",

@@ -1794,10 +1794,10 @@ workstreams:
   - id: adr-0109-public-status-page
     adr: "0109"
     title: Public status page
-    status: ready
+    status: merged
     owner: codex
-    branch: codex/adr-0109-public-status-page
-    worktree_path: ../proxmox_florin_server-public-status-page
+    branch: codex/adr-0109-implementation
+    worktree_path: .worktrees/adr-0109
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0109-public-status-page.md
     depends_on:
       - adr-0015-dns-subdomains
@@ -1810,8 +1810,12 @@ workstreams:
     conflicts_with: []
     shared_surfaces:
       - scripts/maintenance_window_tool.py
+      - scripts/uptime_kuma_tool.py
+      - scripts/uptime_robot_tool.py
       - nginx edge config
       - config/subdomain-catalog.json
+      - config/service-capability-catalog.json
+      - config/health-probe-catalog.json
     ready_to_merge: false
     live_applied: false
 

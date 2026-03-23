@@ -1448,7 +1448,7 @@
       ]
     },
     "uptime-kuma-manage": {
-      "description": "Run repo-local Uptime Kuma client actions such as bootstrap, ensure-monitors, or list-monitors.",
+      "description": "Run repo-local Uptime Kuma client actions such as bootstrap, monitor reconciliation, status-page reconciliation, or maintenance inspection.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -1469,13 +1469,50 @@
       "implementation_refs": [
         "Makefile",
         "scripts/uptime_kuma_tool.py",
-        "config/uptime-kuma/monitors.json"
+        "config/uptime-kuma/monitors.json",
+        "config/uptime-kuma/status-page.json",
+        "scripts/maintenance_window_tool.py"
       ],
       "outputs": [
-        "Repo-managed Uptime Kuma auth bootstrap or monitor state reconciliation against the live service."
+        "Repo-managed Uptime Kuma auth bootstrap plus monitor, status-page, and maintenance-state reconciliation against the live service."
       ],
       "verification_commands": [
-        "make uptime-kuma-manage ACTION=list-monitors"
+        "make uptime-kuma-manage ACTION=list-monitors",
+        "make uptime-kuma-manage ACTION=ensure-status-page",
+        "make uptime-kuma-manage ACTION=list-maintenances"
+      ]
+    },
+    "uptime-robot-manage": {
+      "description": "Run repo-local Uptime Robot automation for independent public status monitoring contacts and monitors.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "uptime-robot-manage",
+        "command": "make uptime-robot-manage ACTION=ensure"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "uptime_robot_api_key",
+          "uptime_robot_mattermost_webhook"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "external_live",
+      "owner_runbook": "docs/runbooks/public-status-page.md",
+      "implementation_refs": [
+        "Makefile",
+        "scripts/uptime_robot_tool.py",
+        "config/uptime-robot/public-status-monitoring.json"
+      ],
+      "outputs": [
+        "Repo-managed Uptime Robot alert contacts and 5-minute external monitors for the public status surface."
+      ],
+      "verification_commands": [
+        "make uptime-robot-manage ACTION=ensure",
+        "make uptime-robot-manage ACTION=list-monitors"
       ]
     },
     "portainer-manage": {

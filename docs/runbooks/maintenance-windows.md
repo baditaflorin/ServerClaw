@@ -22,8 +22,9 @@ The current implementation covers:
 - observation-loop suppression for non-security findings
 - internal NATS events on `maintenance.opened`, `maintenance.closed`, and `maintenance.force_closed`
 - an agent-tool query surface for active windows
+- best-effort publication of matching maintenances into the Uptime Kuma public status page
 
-The current implementation does not yet automate Uptime Kuma, Grafana, or GlitchTip maintenance APIs. Those remain follow-on integrations.
+The current implementation does not yet automate Grafana or GlitchTip maintenance APIs. Those remain follow-on integrations.
 
 ## Current Live Platform Gap
 
@@ -44,6 +45,7 @@ The command:
 - writes `maintenance/<service-id>` with the ADR 0080 JSON payload
 - sets per-message TTL so the key expires at `auto_close_at`
 - emits `maintenance.opened` on the internal NATS event plane
+- attempts to create or update a matching Uptime Kuma maintenance bound to the public status page
 
 ## Close A Window
 
@@ -59,7 +61,7 @@ Force-close every active window:
 make close-maintenance-window SERVICE=all FORCE=true
 ```
 
-The close command deletes the active KV entry and emits either `maintenance.closed` or `maintenance.force_closed`.
+The close command deletes the active KV entry, emits either `maintenance.closed` or `maintenance.force_closed`, and attempts to remove the matching Uptime Kuma maintenance entry.
 
 ## Query Active Windows
 
@@ -116,7 +118,7 @@ main(action="close", service_id="grafana")
 Repository-level verification:
 
 ```bash
-python3 -m py_compile scripts/maintenance_window_tool.py scripts/platform_observation_tool.py
+python3 -m py_compile scripts/maintenance_window_tool.py scripts/platform_observation_tool.py scripts/uptime_kuma_tool.py
 uvx --from pyyaml python scripts/validate_repository_data_models.py --validate
 uvx --from pytest --with pyyaml --with nats-py python -m pytest tests/test_maintenance_window_tool.py tests/test_platform_observation_tool.py tests/test_agent_tool_registry.py -q
 ```
@@ -126,8 +128,9 @@ Live verification:
 1. `make open-maintenance-window SERVICE=grafana REASON="test" DURATION_MINUTES=2`
 2. `uv run --with pyyaml --with nats-py python scripts/maintenance_window_tool.py list`
 3. `uvx --from pyyaml python scripts/platform_observation_tool.py --checks check-service-health`
-4. Confirm any grafana-only service-health failure is written as `suppressed` and is not routed to Mattermost.
-5. `make close-maintenance-window SERVICE=grafana`
+4. `make uptime-kuma-manage ACTION=list-maintenances`
+5. Confirm any grafana-only service-health failure is written as `suppressed`, is not routed to Mattermost, and the Uptime Kuma maintenance exists with the expected title.
+6. `make close-maintenance-window SERVICE=grafana`
 
 ## Test Harness Override
 
