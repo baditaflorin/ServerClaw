@@ -20,6 +20,7 @@
     name: "{{ docker_runtime_prereq_packages }}"
     state: present
     update_cache: true
+    force_apt_get: true
 
 - name: Ensure Docker-managed directories exist
   ansible.builtin.include_role:
@@ -52,6 +53,7 @@
     name: "{{ docker_runtime_engine_packages }}"
     state: present
     update_cache: true
+    force_apt_get: true
 
 - name: Ensure docker admin group exists
   ansible.builtin.group:

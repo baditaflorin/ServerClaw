@@ -20,6 +20,7 @@
       - ca-certificates
     state: present
     update_cache: true
+    force_apt_get: true
 
 - name: Ensure the Tailscale keyring directory exists
   ansible.builtin.include_role:

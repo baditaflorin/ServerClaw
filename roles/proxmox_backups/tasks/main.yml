@@ -15,6 +15,7 @@
           - cifs-utils
         state: present
         update_cache: true
+        force_apt_get: true
       when: proxmox_backup_storage.type == "cifs"
 
     - name: Load the CIFS backup storage password from controller environment

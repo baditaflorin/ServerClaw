@@ -13,6 +13,7 @@
     name: "{{ postgres_vm_packages }}"
     state: present
     update_cache: true
+    force_apt_get: true
 
 - name: Ensure PostgreSQL service is enabled and started
   ansible.builtin.service:

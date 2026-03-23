@@ -42,6 +42,7 @@
       - openssl
     state: present
     update_cache: true
+    force_apt_get: true
 
 - name: Ensure the Windmill directories exist
   ansible.builtin.include_role:

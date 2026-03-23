@@ -10,6 +10,7 @@
     name: "{{ proxmox_kernel_packages }}"
     state: present
     update_cache: true
+    force_apt_get: true
 
 - name: Reboot into Proxmox kernel if not already running
   ansible.builtin.reboot:

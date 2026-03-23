@@ -17,6 +17,7 @@
       - certbot
     state: present
     update_cache: true
+    force_apt_get: true
 
 - name: Ensure public edge directories exist
   ansible.builtin.file:

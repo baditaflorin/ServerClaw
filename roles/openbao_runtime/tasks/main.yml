@@ -94,6 +94,7 @@
       - curl
     state: present
     update_cache: true
+    force_apt_get: true
 
 - name: Ensure OpenBao runtime directories exist
   ansible.builtin.file:

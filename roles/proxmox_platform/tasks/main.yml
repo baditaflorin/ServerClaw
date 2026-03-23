@@ -26,6 +26,7 @@
     name: "{{ proxmox_core_packages }}"
     state: present
     update_cache: true
+    force_apt_get: true
 
 - name: Remove Debian kernel meta package and os-prober
   ansible.builtin.apt:

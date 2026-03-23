@@ -21,6 +21,7 @@
       - docker-compose
     state: present
     update_cache: true
+    force_apt_get: true
 
 - name: Ensure Uptime Kuma directories exist
   ansible.builtin.include_role:

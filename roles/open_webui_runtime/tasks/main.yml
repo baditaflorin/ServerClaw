@@ -50,6 +50,7 @@
       - openssl
     state: present
     update_cache: true
+    force_apt_get: true
 
 - name: Ensure the Open WebUI directories exist
   ansible.builtin.file:

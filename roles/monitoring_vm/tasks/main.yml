@@ -85,6 +85,7 @@
     name: "{{ monitoring_stack_packages }}"
     state: present
     update_cache: true
+    force_apt_get: true
 
 - name: Ensure monitoring secret directory exists
   ansible.builtin.file:

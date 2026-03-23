@@ -78,6 +78,7 @@
       - zstd
     state: present
     update_cache: true
+    force_apt_get: true
 
 - name: Read OpenBao seal status for recovery automation
   ansible.builtin.uri:

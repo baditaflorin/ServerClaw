@@ -23,6 +23,7 @@
       - openssl
     state: present
     update_cache: true
+    force_apt_get: true
 
 - name: Ensure the platform context directories exist
   ansible.builtin.file:

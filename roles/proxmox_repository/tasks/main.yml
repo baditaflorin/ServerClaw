@@ -23,6 +23,7 @@
     name: "{{ debian_prereq_packages }}"
     state: present
     update_cache: true
+    force_apt_get: true
 
 - name: Download Proxmox archive keyring
   ansible.builtin.get_url:
@@ -40,6 +41,7 @@
 - name: Update apt cache after repository changes
   ansible.builtin.apt:
     update_cache: true
+    force_apt_get: true
 
 - name: Fully upgrade Debian base packages
   ansible.builtin.apt:

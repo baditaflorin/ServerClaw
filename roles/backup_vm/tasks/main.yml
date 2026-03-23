@@ -46,6 +46,7 @@
       - wget
     state: present
     update_cache: true
+    force_apt_get: true
 
 - name: Ensure the Proxmox archive keyring directory exists
   ansible.builtin.file:
@@ -73,6 +74,7 @@
       - xfsprogs
     state: present
     update_cache: true
+    force_apt_get: true
 
 - name: Read configured PBS filesystem mounts
   ansible.builtin.command: proxmox-backup-manager disk fs list --output-format json

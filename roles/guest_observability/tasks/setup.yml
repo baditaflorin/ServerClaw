@@ -59,6 +59,7 @@
     name: "{{ guest_observability_packages }}"
     state: present
     update_cache: true
+    force_apt_get: true
 
 - name: Ensure guest observability directories exist
   ansible.builtin.file:

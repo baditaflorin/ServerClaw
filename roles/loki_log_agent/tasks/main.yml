@@ -46,6 +46,7 @@
     name: "{{ loki_log_agent_packages }}"
     state: present
     update_cache: true
+    force_apt_get: true
 
 - name: Ensure alloy can read required log sources
   ansible.builtin.user:

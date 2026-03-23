@@ -38,6 +38,7 @@
       - zstd
     state: present
     update_cache: true
+    force_apt_get: true
 
 - name: Ensure the control-plane recovery group exists
   ansible.builtin.group:

@@ -21,6 +21,7 @@
     name: "{{ step_ca_runtime_packages }}"
     state: present
     update_cache: true
+    force_apt_get: true
 
 - name: Ensure step-ca directories exist
   ansible.builtin.file:

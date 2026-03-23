@@ -41,6 +41,7 @@
       - openssl
     state: present
     update_cache: true
+    force_apt_get: true
 
 - name: Ensure the Mattermost directories exist
   ansible.builtin.file:

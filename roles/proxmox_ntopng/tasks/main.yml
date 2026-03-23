@@ -27,6 +27,7 @@
       - wget
     state: present
     update_cache: true
+    force_apt_get: true
 
 - name: Download the ntop repository bootstrap package
   ansible.builtin.get_url:
@@ -43,6 +44,7 @@
     name: "{{ ntopng_packages }}"
     state: present
     update_cache: true
+    force_apt_get: true
 
 - name: Ensure ntopng state directory exists
   ansible.builtin.file:
