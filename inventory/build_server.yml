@@ -3,7 +3,11 @@ all:
     build_server:
       hosts:
         build-lv3:
-          # Replace this placeholder with the real build-server Tailscale IPv4.
-          ansible_host: 100.64.0.1
+          ansible_host: 10.10.10.30
           ansible_user: ops
-          ansible_ssh_private_key_file: ~/.ssh/id_ed25519
+          ansible_ssh_private_key_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519
+          ansible_ssh_common_args: >-
+            -o IdentitiesOnly=yes
+            -o StrictHostKeyChecking=accept-new
+            -o UserKnownHostsFile=/dev/null
+            -o ProxyCommand="ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@100.118.189.95 -W %h:%p"

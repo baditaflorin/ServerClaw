@@ -27,6 +27,7 @@ TIMEOUT_SECONDS=""
 SKIP_DOCKER="false"
 MOUNT_DOCKER_SOCKET="false"
 BUILTIN_ACTION=""
+SSH_OPTIONS_NL=""
 
 SSH_BASE_CMD=()
 
@@ -125,6 +126,10 @@ shell_assign("SSH_KEY_PATH", os.path.expanduser(config.get("ssh_key", "")))
 shell_assign("WORKSPACE_ROOT", config["workspace_root"])
 shell_assign("DEFAULT_TIMEOUT_SECONDS", config.get("default_timeout_seconds", 900))
 shell_assign("DOCKER_SOCKET", config.get("docker_socket", ""))
+shell_assign(
+    "SSH_OPTIONS_NL",
+    "\n".join(str(item) for item in config.get("ssh_options", [])),
+)
 shell_assign("REMOTE_COMMAND", command_spec.get("command", normalize_command(runner_spec.get("command"))))
 shell_assign("LOCAL_COMMAND", command_spec.get("local_fallback_command", command_spec.get("command", "")))
 shell_assign("DOCKER_IMAGE", image)
@@ -145,6 +150,12 @@ build_ssh_command() {
   SSH_BASE_CMD=("$SSH_BIN" "-o" "ConnectTimeout=$CONNECT_TIMEOUT" "-o" "BatchMode=yes")
   if [[ -n "$SSH_KEY_PATH" ]]; then
     SSH_BASE_CMD+=("-i" "$SSH_KEY_PATH")
+  fi
+  if [[ -n "$SSH_OPTIONS_NL" ]]; then
+    while IFS= read -r option; do
+      [[ -n "$option" ]] || continue
+      SSH_BASE_CMD+=("$option")
+    done <<< "$SSH_OPTIONS_NL"
   fi
 }
 
@@ -196,19 +207,29 @@ ensure_remote_workspace() {
 
 sync_workspace() {
   local dry_run="${1:-false}"
-  local ssh_transport=""
+  local rc=0
+  local ssh_wrapper=""
   local rsync_args=("--archive" "--checksum" "--delete" "--exclude-from=$RSYNC_EXCLUDE_FILE")
 
   [[ "$dry_run" == "true" ]] && rsync_args+=("--dry-run" "--verbose")
 
-  printf -v ssh_transport "%q " "${SSH_BASE_CMD[@]}"
-  ssh_transport="${ssh_transport% }"
+  ssh_wrapper="$(mktemp "${TMPDIR:-/tmp}/remote-exec-ssh.XXXXXX")"
+  {
+    printf '%s\n' '#!/usr/bin/env bash'
+    printf 'exec '
+    printf '%q ' "${SSH_BASE_CMD[@]}"
+    printf '%s\n' '"$@"'
+  } > "$ssh_wrapper"
+  chmod 700 "$ssh_wrapper"
 
   "$RSYNC_BIN" \
     "${rsync_args[@]}" \
-    -e "$ssh_transport" \
+    -e "$ssh_wrapper" \
     "$REPO_ROOT/" \
-    "$REMOTE_HOST:$WORKSPACE_ROOT/"
+    "$REMOTE_HOST:$WORKSPACE_ROOT/" || rc=$?
+
+  rm -f "$ssh_wrapper"
+  return "$rc"
 }
 
 run_local_command() {

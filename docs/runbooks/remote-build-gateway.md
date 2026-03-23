@@ -17,7 +17,7 @@ The laptop remains the editor and orchestrator. The build server becomes the CPU
 ## Prerequisites
 
 1. The build server is reachable over SSH as `ops`.
-2. `config/build-server.json` points at the correct host and key path.
+2. `config/build-server.json` points at the correct host, key path, and jump-path SSH options.
 3. `.rsync-exclude` is reviewed so secrets never leave the controller.
 4. The build server has `rsync`, `bash`, and whichever toolchain the selected command needs.
 5. If you want containerized execution, the corresponding runner image metadata exists in `config/check-runner-manifest.json`.
@@ -30,6 +30,13 @@ Update the build-server host settings:
 $EDITOR config/build-server.json
 $EDITOR inventory/build_server.yml
 ```
+
+On the current live platform the build VM does not have a controller-reachable Tailscale IP of its own. The verified route is:
+
+- controller bootstrap key: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519`
+- jump host: `ops@100.118.189.95`
+- build VM target: `ops@10.10.10.30`
+- remote workspace root: `/home/ops/builds/proxmox_florin_server`
 
 Confirm the gateway can reach the server and dry-run a workspace sync:
 
@@ -99,6 +106,7 @@ Review `.rsync-exclude` before adding any new local secret material.
 | Symptom | Likely cause | Action |
 |---|---|---|
 | `build server ... is unreachable` | wrong host, key, or Tailscale path | run `make check-build-server`, then verify `config/build-server.json` |
+| host is reachable but the build VM is not | missing or broken ProxyCommand jump path | verify the Proxmox host hop to `100.118.189.95` and the guest target `10.10.10.30` |
 | rsync fails before SSH starts | missing `rsync` locally or remotely | install `rsync` on both ends |
 | command runs remotely but not in Docker | runner manifest missing for that label | add `config/check-runner-manifest.json` in ADR 0083 or keep using shell mode |
 | local fallback runs unexpectedly | SSH connectivity probe failed | inspect key permissions, host reachability, and `ConnectTimeout=5` behavior |

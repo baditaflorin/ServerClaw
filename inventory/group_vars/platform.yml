@@ -179,6 +179,7 @@ platform_guest_catalog:
         - git
         - make
         - build-essential
+        - rsync
     - vmid: 140
       name: monitoring-lv3
       role: monitoring
@@ -290,6 +291,7 @@ platform_guest_catalog:
         - git
         - make
         - build-essential
+        - rsync
     monitoring-lv3:
       vmid: 140
       name: monitoring-lv3
@@ -404,6 +406,7 @@ platform_guest_catalog:
         - git
         - make
         - build-essential
+        - rsync
     monitoring:
       vmid: 140
       name: monitoring-lv3
