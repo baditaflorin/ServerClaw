@@ -64,6 +64,6 @@
 
 ## Outcome
 
-- repository implementation is complete on `main` in repo release `0.91.0`
+- repository implementation is complete on `main` in repo release `0.93.0`
 - the hook install path, remote-first pre-push gate, explicit bypass receipts, and Windmill post-merge workflow all now share the same `config/validation-gate.json` manifest
 - no live platform version change is claimed; this workstream is repository-only

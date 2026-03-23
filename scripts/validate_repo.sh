@@ -17,7 +17,7 @@ export ANSIBLE_COLLECTIONS_PATH="$REPO_ROOT/collections:$ANSIBLE_COLLECTIONS_DIR
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|shell|json|compose-runtime-envs|data-models|generated-docs|generated-portals|health-probes]...
+  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|shell|json|compose-runtime-envs|data-models|generated-docs|generated-portals|health-probes|tofu]...
 
 Examples:
   scripts/validate_repo.sh
@@ -236,6 +236,13 @@ validate_health_probes() {
   done
 }
 
+validate_tofu() {
+  if [[ -d "$REPO_ROOT/tofu" ]]; then
+    echo "OpenTofu validation"
+    "$REPO_ROOT/scripts/tofu_exec.sh" validate all >/dev/null
+  fi
+}
+
 if [[ $# -eq 0 ]]; then
   set -- all
 fi
@@ -252,6 +259,7 @@ for stage in "$@"; do
       validate_json
       validate_compose_runtime_envs
       validate_health_probes
+      validate_tofu
       validate_data_models
       validate_generated_docs
       validate_generated_portals
@@ -285,6 +293,9 @@ for stage in "$@"; do
       ;;
     health-probes)
       validate_health_probes
+      ;;
+    tofu)
+      validate_tofu
       ;;
     generated-docs)
       validate_generated_docs

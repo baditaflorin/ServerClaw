@@ -39,3 +39,6 @@ __pycache__/
 .cache/
 .packer.d/
 build/
+.terraform/
+*.tfplan
+*.plan.json

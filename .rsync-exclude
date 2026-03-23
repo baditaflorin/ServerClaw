@@ -4,16 +4,14 @@
 .git/
 .ansible/
 .ansible/validation/
+.mypy_cache/
 .claude/
 .worktrees/
 .mypy_cache/
 .pytest_cache/
 .venv/
-tofu/
 __pycache__/
 *.pyc
-.mypy_cache/
-.pytest_cache/
 .ruff_cache/
 .terraform/
 .packer_cache/
