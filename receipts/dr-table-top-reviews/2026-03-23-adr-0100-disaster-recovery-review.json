@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0.0",
+  "review_id": "2026-03-23-adr-0100-disaster-recovery-review",
+  "adr": "0100",
+  "reviewed_on": "2026-03-23",
+  "reviewer": "codex",
+  "result": "completed_with_gaps",
+  "scope": [
+    "repo-managed recovery targets",
+    "current PBS storage layout",
+    "current Proxmox backup job coverage",
+    "current absence of off-site backup storage"
+  ],
+  "evidence": [
+    "pvesh get /storage on proxmox_florin",
+    "pvesh get /cluster/backup on proxmox_florin",
+    "qm config 160 on proxmox_florin",
+    "proxmox-backup-manager remote list on backup-lv3",
+    "proxmox-backup-manager sync-job list on backup-lv3"
+  ],
+  "findings": [
+    "The current platform has local PBS storage and a nightly VM backup job for 110,120,130,140,150.",
+    "backup-lv3 includes the dedicated 640G datastore disk and remains the correct recovery anchor VM.",
+    "No PBS remotes or PBS sync jobs are configured on backup-lv3.",
+    "No off-site Proxmox storage is currently configured, so the total-host-loss recovery path remains repo-managed but not yet applied live."
+  ]
+}

@@ -193,6 +193,39 @@ control_plane_recovery_backup_store_user: lv3-control-plane-backup
 control_plane_recovery_backup_on_calendar: "*-*-* 01,07,13,19:15:00"
 control_plane_recovery_restore_drill_on_calendar: "*-*-* 05:45:00"
 
+dr_offsite_backup_storage:
+  enabled: "{{ (lookup('ansible.builtin.env', 'PROXMOX_DR_OFFSITE_ENABLED') | default('false', true)) | bool }}"
+  id: lv3-backup-offsite
+  type: cifs
+  server: "{{ lookup('ansible.builtin.env', 'PROXMOX_DR_OFFSITE_SERVER') | default('', true) }}"
+  share: "{{ lookup('ansible.builtin.env', 'PROXMOX_DR_OFFSITE_SHARE') | default('', true) }}"
+  username: "{{ lookup('ansible.builtin.env', 'PROXMOX_DR_OFFSITE_USERNAME') | default('', true) }}"
+  password_env: PROXMOX_DR_OFFSITE_PASSWORD
+  path: /mnt/pve/lv3-backup-offsite
+  content:
+    - backup
+  nodes:
+    - "{{ host_public_hostname }}"
+  smbversion: "3.0"
+
+dr_offsite_backup_jobs:
+  - id: backup-lv3-offsite
+    enabled: "{{ dr_offsite_backup_storage.enabled }}"
+    storage: "{{ dr_offsite_backup_storage.id }}"
+    schedule: "04:00"
+    node: "{{ host_public_hostname }}"
+    mode: snapshot
+    compress: zstd
+    notification_mode: notification-system
+    repeat_missed: true
+    vmid_list:
+      - "{{ backup_vm_vmid }}"
+    prune_backups:
+      keep_last: 3
+      keep_daily: 7
+      keep_weekly: 5
+      keep_monthly: 12
+
 proxmox_management_allowed_tcp_ports:
   - "{{ step_ca_proxy_port }}"
   - "{{ openbao_proxy_port }}"

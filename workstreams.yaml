@@ -1580,10 +1580,10 @@ workstreams:
   - id: adr-0100-disaster-recovery
     adr: "0100"
     title: RTO/RPO targets and disaster recovery playbook
-    status: ready
+    status: merged
     owner: codex
-    branch: codex/adr-0100-disaster-recovery
-    worktree_path: ../proxmox_florin_server-disaster-recovery
+    branch: codex/adr-0100-dr-playbook
+    worktree_path: .worktrees/adr-0100
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0100-disaster-recovery-playbook.md
     depends_on:
       - adr-0020-backups
@@ -1596,7 +1596,8 @@ workstreams:
     conflicts_with: []
     shared_surfaces:
       - docs/runbooks/
-      - backup-lv3 PBS config
+      - playbooks/backup-vm.yml
+      - roles/proxmox_backups
       - Windmill workflows
     ready_to_merge: false
     live_applied: false

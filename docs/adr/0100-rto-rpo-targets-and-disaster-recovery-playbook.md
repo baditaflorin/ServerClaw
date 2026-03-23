@@ -1,174 +1,155 @@
 # ADR 0100: Formal RTO/RPO Targets and Disaster Recovery Playbook
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.97.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-23
 - Date: 2026-03-23
 
 ## Context
 
-ADR 0051 defined the concept of backup, recovery, and break-glass procedures for the control plane, but without measurable targets. As the platform matures and becomes the operator's primary tool for all other operations, the question "how long would it take to recover the full platform from a total loss event?" has no documented answer.
+ADR 0051 introduced control-plane backup, restore drills, and break-glass references, but it still left the platform without a measurable answer to the most important outage question:
 
-A total loss event could be:
-- Proxmox host hardware failure (disk, motherboard, network)
-- Hetzner datacenter-level incident
-- Catastrophic operator error (accidental `rm -rf /var/lib/vz/`)
-- Ransomware encrypting the host (unlikely but possible given public exposure)
-- PBS backup VM failure coinciding with a host failure
+> how long does full-platform recovery take after a total host loss?
 
-Without an RTO/RPO definition, there is also no way to verify whether current backup and HA investments (ADR 0020, ADR 0098) actually achieve the platform's recovery goals, and there is no ordered recovery procedure that would allow a fresh operator (or the original operator in a panic) to rebuild the platform systematically.
+The draft answer that existed before this ADR had two serious problems:
+
+1. it described recovery order from memory instead of from the platform's actual VM layout
+2. it assumed PBS could natively sync to a Hetzner Storage Box, which is not how PBS remotes work in practice
+
+The current platform reality is:
+
+- `backup-lv3` is the local PBS anchor VM on `10.10.10.60`
+- its datastore lives on a dedicated 640 GB secondary disk attached to VM `160`
+- the nightly host-side PBS backup job currently protects VMs `110`, `120`, `130`, `140`, and `150`
+- no PBS remotes or PBS sync jobs are currently configured on `backup-lv3`
+- no off-site copy of `backup-lv3` is currently recorded in live state
+
+Without explicit targets, machine-readable readiness, and a documented tier order that matches the real topology, recovery remains partly improvised.
 
 ## Decision
 
-We will define formal **Recovery Time Objective (RTO)** and **Recovery Point Objective (RPO)** targets for the platform, document the ordered recovery sequence as an executable Windmill runbook, and publish it as the primary disaster recovery playbook in the docs site (ADR 0094).
+We will define formal platform RTO/RPO targets, store them in machine-readable repo data, publish the ordered disaster recovery playbook, and expose a repo-managed readiness report.
+
+The off-site recovery anchor is the **backup-lv3 PBS VM itself**:
+
+- Proxmox keeps taking nightly guest backups into local PBS on `backup-lv3`
+- a second, optional off-site Proxmox backup stores VM `160` on Hetzner Storage Box-backed external storage
+- after a total host loss, the operator restores VM `160` first
+- once PBS is back, the remaining VMs are restored from PBS in dependency order
+
+This replaces the earlier incorrect idea of "PBS remote sync to Storage Box".
 
 ### Targets
 
 | Scenario | RTO | RPO | Notes |
 |---|---|---|---|
-| Single service failure (container crash) | < 5 min | 0 | Docker restart policy handles this automatically |
-| VM failure (Postgres, with HA in ADR 0098) | < 1 min | 0 committed transactions | Patroni automatic failover |
-| VM failure (stateless: nginx, monitoring) | < 30 min | 0 | Reprovisioned from IaC; no data loss |
-| VM failure (stateful, no HA: docker-runtime) | < 2 h | < 24 h | Restore from last nightly PBS snapshot |
-| Full host recovery from PBS off-site backup | < 4 h | < 24 h | Full re-provision required |
-| Full host recovery from total loss (no backup) | < 8 h | unbounded | IaC rebuild from repo; data lost |
+| Single service failure | < 5 min | 0 | Docker restart or targeted converge |
+| VM failure with Postgres HA | < 1 min | 0 committed transactions | ADR 0098 target state |
+| Stateless VM failure | < 30 min | 0 | nginx-lv3 or monitoring-lv3 reprovision/restore |
+| Stateful VM failure without HA | < 2 h | < 24 h | docker-runtime-lv3 or backup-lv3 restore path |
+| Full host recovery with off-site backup-lv3 copy | < 4 h | < 24 h | restore VM 160 first, then restore remaining VMs from PBS |
+| Full host recovery with no backup | < 8 h | unbounded | repo-only rebuild; stateful data lost |
 
-**Platform-wide RTO: < 4 hours.** The platform is fully functional, serving all edge-published services, within 4 hours of a total host loss given the nightly PBS backup is available.
+**Platform-wide RTO: < 4 hours.**
 
-**Platform-wide RPO: < 24 hours.** No more than 24 hours of operational data is lost in the worst case (single nightly backup cadence). Postgres data loss is bounded at < 24 h for unplanned failures; 0 transactions for planned failover with ADR 0098 in place.
+**Platform-wide RPO: < 24 hours.**
 
 ### Recovery tiers
 
-Recovery is ordered by dependency: a service cannot be recovered before the service it depends on.
+#### Tier 0: Host reprovision
+1. Reinstall Debian 13 on replacement Hetzner hardware
+2. Reinstall Proxmox VE from Debian packages
+3. Verify `pvesh get /version` works
 
-#### Tier 0: Host re-provision (if hardware replaced)
-1. Provision fresh Hetzner dedicated server with Debian 13 via `installimage` (ADR 0003)
-2. Install Proxmox VE from Debian packages (ADR 0004)
-3. Restore PBS backup VM from off-site backup (Hetzner Storage Box or similar)
-4. Proceed to Tier 1
+#### Tier 1: Restore `backup-lv3`
+1. Mount or reconnect the off-site storage target
+2. Restore VM `160` (`backup-lv3`) from the latest off-site Proxmox backup
+3. Verify PBS datastore visibility on `backup-lv3`
 
-#### Tier 1: Identity and secrets (< 30 min from PBS restore)
-Services that all other services depend on must be recovered first.
+#### Tier 2: Restore stateful data services
+1. Restore VM `150` (`postgres-lv3`) from PBS
+2. Restore VM `120` (`docker-runtime-lv3`) from PBS
+3. Verify `step-ca` and OpenBao health
 
-```
-1. restore_vm(vmid=160)          # backup-lv3 (PBS) — restores backup catalog
-2. restore_vm(vmid=150)          # postgres-lv3 — database for identity services
-3. start_service("step-ca")      # TLS and SSH certificates (ADR 0042)
-4. start_service("openbao")      # Secrets and dynamic credentials (ADR 0043)
-5. verify: step-ca issues a test certificate
-6. verify: openbao is unsealed and /v1/sys/health returns 200
-```
+#### Tier 3: Restore edge and observability
+1. Restore VM `140` (`monitoring-lv3`) from PBS
+2. Restore VM `110` (`nginx-lv3`) from PBS
+3. Verify Grafana and Keycloak through the edge
 
-OpenBao unseal keys are stored in the break-glass procedure from ADR 0051.
+#### Tier 4: Restore build infrastructure
+1. Restore VM `130` (`docker-build-lv3`) from PBS
+2. Verify the build gateway path
 
-#### Tier 2: Identity services (< 60 min)
-```
-7. start_service("keycloak")     # SSO (ADR 0056)
-8. verify: https://sso.lv3.org/health/ready returns 200
-```
+#### Tier 5: Platform verification sweep
+1. Run `make dr-status`
+2. Run `lv3 release status`
+3. Run a service-health sweep from the operator CLI
 
-#### Tier 3: Platform services (< 90 min)
-```
-9.  restore_vm(vmid=120)         # docker-runtime-lv3
-10. start_services([             # in parallel:
-      "windmill",                # Workflow engine (ADR 0044)
-      "netbox",                  # IPAM and inventory (ADR 0054)
-      "mattermost",              # ChatOps (ADR 0057)
-      "nats",                    # Event bus (ADR 0058)
-    ])
-11. verify: each service health probe returns 200
-```
+### Repo implementation
 
-#### Tier 4: Observability and access (< 2 h)
-```
-12. restore_vm(vmid=140)         # monitoring-lv3
-13. restore_vm(vmid=110)         # nginx-lv3
-14. start_services([
-      "grafana", "loki", "tempo", # Observability (ADR 0052, 0053)
-    ])
-15. verify: https://grafana.lv3.org is accessible
-16. verify: https://ops.lv3.org is accessible
-```
+This ADR is implemented in repository automation by:
 
-#### Tier 5: Build infrastructure (< 4 h)
-```
-17. restore_vm(vmid=130)         # docker-build-lv3
-18. verify: remote build gateway responds (ADR 0082)
-19. run: make health-check-all   # full platform health sweep
-```
+- [config/disaster-recovery-targets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/disaster-recovery-targets.json) for machine-readable targets and tier deadlines
+- [scripts/disaster_recovery_runbook.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/disaster_recovery_runbook.py) for the structured recovery plan
+- [config/windmill/scripts/disaster-recovery-runbook.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/disaster-recovery-runbook.py) for the Windmill wrapper
+- [scripts/generate_dr_report.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_dr_report.py) plus `make dr-status` for current DR readiness
+- [scripts/lv3_cli.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/lv3_cli.py) `release status` output for the DR review criterion in ADR 0110
+- [playbooks/backup-vm.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/backup-vm.yml) plus [roles/proxmox_backups](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/ansible_collections/lv3/platform/roles/proxmox_backups) for the optional off-site backup of VM `160`
+- [docs/runbooks/disaster-recovery.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/disaster-recovery.md) and [docs/runbooks/break-glass.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/break-glass.md) for the operator path
 
-### Windmill runbook
+### Off-site backup model
 
-Each tier is implemented as a Windmill workflow step in `disaster-recovery-runbook`:
+The off-site copy uses Proxmox-managed external storage and protects the whole `backup-lv3` VM.
 
-```python
-@windmill_step(name="tier_1_identity_secrets")
-def recover_tier_1(proxmox_api: ProxmoxAPI, pbs_api: PbsAPI) -> StepResult:
-    pbs_api.restore_vm(vmid=160, target_node="florin", timeout=600)
-    pbs_api.restore_vm(vmid=150, target_node="florin", timeout=600)
-    wait_for_service("step-ca", "https://ca.internal.lv3:9443/health", timeout=120)
-    wait_for_service("openbao", "http://openbao:8200/v1/sys/health", timeout=120)
-    return StepResult.ok(message="Tier 1 recovered: step-ca and OpenBao are healthy")
-```
+Why this model:
 
-The runbook can be triggered from Windmill's UI or `lv3 runbook disaster-recovery --tier all`. It records each step result in the mutation audit log (ADR 0066) with timestamps.
+- it matches the actual architecture, where PBS runs inside VM `160`
+- restoring VM `160` restores the PBS catalog and datastore together
+- Hetzner Storage Box can be consumed through Proxmox-managed CIFS storage
+- PBS native remote sync requires another PBS endpoint, so it is not the right Storage Box path
 
-### Off-site backup
+The repo therefore treats the off-site copy as:
 
-The current PBS instance backs up to local disk on `backup-lv3`. For a total host loss, the backup itself is gone. Off-site backup is therefore required:
+- storage id: `lv3-backup-offsite`
+- schedule: `04:00`
+- protected VM: `160`
+- retention: keep last `3`, daily `7`, weekly `5`, monthly `12`
 
-We will configure PBS to sync the most recent 7 backup snapshots of each VM to a **Hetzner Storage Box** (external NFS/SFTP endpoint) using the PBS remote sync job. Storage Box sync runs daily at 04:00 UTC.
+### Recovery drill policy
 
-Total off-site storage required: ~7 × (sum of VM disk sizes) ≈ 7 × 340 GB = ~2.4 TB deduped (PBS deduplication significantly reduces this in practice).
+- table-top review: once per quarter
+- live off-site recovery drill: once per year
 
-### Break-glass documentation
-
-A physical printed card (and an encrypted PDF in a personal password manager) contains:
-- Hetzner account credentials for server reinstallation
-- OpenBao unseal keys (ADR 0051)
-- Hetzner Storage Box credentials for off-site backup access
-- step-ca root certificate fingerprint
-- Proxmox `root@pam` emergency credential
-
-This information is documented in `docs/runbooks/break-glass.md` with instructions to keep the physical copy up-to-date when credentials change.
-
-### Recovery drill
-
-The recovery procedure is tested once per quarter as a table-top exercise:
-- Walk through each tier step by step
-- Verify that every credential and tool referenced in the runbook is still valid
-- Record any deviations from the documented procedure in the mutation audit log
-
-A full live recovery drill (restoring from off-site backup to a temporary Hetzner server) is performed annually.
+Table-top completion is recorded under [receipts/dr-table-top-reviews](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/dr-table-top-reviews).
 
 ## Consequences
 
 **Positive**
-- The platform has a defined, measurable recovery commitment for the first time; `< 4 h RTO, < 24 h RPO` is a statement of design intent and operational preparation
-- The ordered recovery sequence prevents the "which service do I start first?" paralysis during an actual incident
-- Off-site PBS sync to Hetzner Storage Box closes the total host loss gap in the backup strategy
-- The Windmill runbook makes the recovery procedure executable, not just documented
+
+- The platform now has explicit recovery targets instead of an implied backup story.
+- The recovery order now matches the current VM topology.
+- The repo exposes a first-class readiness report instead of making operators infer DR posture from multiple ADRs.
+- The off-site strategy is technically correct for the current architecture.
 
 **Negative / Trade-offs**
-- Hetzner Storage Box for off-site backup adds a monthly cost (~€3–8/month for the required capacity)
-- The < 4 h RTO assumes the operator has access to the break-glass credentials and can provision a fresh Hetzner server immediately; in a true emergency, delays in any of these prerequisites extend the RTO
-- PBS to Storage Box sync adds nightly network traffic; on a shared Hetzner uplink this may impact other services between 04:00 and 05:00 UTC
+
+- The off-site path is still pending live credential provisioning for the Storage Box-backed target.
+- The < 4 h RTO still assumes operator access to Hetzner reinstall and break-glass materials.
+- Recovery remains operator-initiated; the repo provides execution guidance and readiness, not autonomous failover.
 
 ## Alternatives Considered
 
-- **No formal RTO/RPO; rely on PBS snapshots**: the current state; a disaster recovery attempt would be improvised, slow, and error-prone
-- **Replicate all VMs to a second Hetzner server in real time**: full active-standby; eliminates the recovery time but costs ~2× the monthly hosting budget; disproportionate for a homelab
-- **Use Restic for off-site backup instead of PBS sync**: Restic is flexible and supports multiple backends; but PBS's native sync to a PBS-compatible remote is better integrated with the existing backup workflow and supports incremental sync efficiently
+- **Keep DR informal**: rejected because the platform already has enough moving parts for recovery order mistakes to matter.
+- **Use PBS native sync to Storage Box**: rejected because PBS native remotes target PBS endpoints, not Storage Box CIFS or SFTP.
+- **Replicate to a second Hetzner server**: rejected for now as disproportionate for the current budget and operating model.
 
 ## Related ADRs
 
-- ADR 0020: Storage and backup model (PBS backups are the source)
-- ADR 0029: Backup VM (PBS runs on backup-lv3)
-- ADR 0042: step-ca (first Tier 1 dependency to recover)
-- ADR 0043: OpenBao (first Tier 1 dependency to recover)
-- ADR 0051: Control-plane backup and break-glass (this ADR supersedes it with concrete targets)
-- ADR 0094: Developer portal (recovery runbook is published here)
-- ADR 0098: Postgres HA (eliminates the most common unplanned recovery scenario)
-- ADR 0099: Backup restore verification (provides evidence that the recovery path works)
+- ADR 0020: Initial storage and backup model
+- ADR 0029: Dedicated backup VM with local PBS
+- ADR 0051: Control-plane backup, recovery, and break-glass
+- ADR 0098: Postgres HA
+- ADR 0099: Automated backup restore verification
+- ADR 0110: Platform versioning and release readiness

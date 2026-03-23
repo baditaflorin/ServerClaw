@@ -1509,7 +1509,7 @@
       ]
     },
     "configure-backup-vm": {
-      "description": "Converge the dedicated backup VM and host-side PBS backup integration.",
+      "description": "Converge the dedicated backup VM, host-side PBS integration, and the optional ADR 0100 off-site copy of backup-lv3.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -1539,10 +1539,44 @@
         "roles/proxmox_backups/tasks/main.yml"
       ],
       "outputs": [
-        "backup-lv3 guest, PBS datastore, local API credentials, and Proxmox host backup target configuration."
+        "backup-lv3 guest, PBS datastore, local API credentials, Proxmox host PBS target configuration, and an optional off-site backup of VM 160 when PROXMOX_DR_OFFSITE_* inputs are supplied."
       ],
       "verification_commands": [
         "make syntax-check-backup-vm"
+      ]
+    },
+    "disaster-recovery-runbook": {
+      "description": "Render the ADR 0100 ordered recovery plan, current DR evidence summary, and table-top review state.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "dr-runbook",
+        "command": "make dr-runbook"
+      },
+      "preflight": {
+        "required": false
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-backup-vm"
+      ],
+      "live_impact": "repo_only",
+      "owner_runbook": "docs/runbooks/disaster-recovery.md",
+      "implementation_refs": [
+        "config/disaster-recovery-targets.json",
+        "scripts/disaster_recovery_runbook.py",
+        "scripts/generate_dr_report.py",
+        "config/windmill/scripts/disaster-recovery-runbook.py",
+        "docs/runbooks/disaster-recovery.md",
+        "docs/runbooks/break-glass.md"
+      ],
+      "outputs": [
+        "Structured tier-by-tier recovery plan for the current LV3 VM layout plus a DR readiness summary."
+      ],
+      "verification_commands": [
+        "python3 scripts/disaster_recovery_runbook.py --format json",
+        "python3 scripts/generate_dr_report.py",
+        "python3 scripts/lv3_cli.py release status"
       ]
     },
     "configure-backups": {
