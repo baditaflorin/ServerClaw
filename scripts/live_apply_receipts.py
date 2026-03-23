@@ -19,6 +19,7 @@ from workflow_catalog import load_workflow_catalog, load_secret_manifest, valida
 
 SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+COMMIT_HASH_PATTERN = re.compile(r"^[0-9a-f]{7,64}$")
 ALLOWED_RESULTS = {"pass", "partial", "fail"}
 ALLOWED_ENVIRONMENTS = {"production", "staging"}
 
@@ -29,6 +30,24 @@ def load_receipt(path: Path) -> dict:
 
 def git_commit_exists(commit: str) -> bool:
     return command_succeeds(["git", "rev-parse", "--verify", f"{commit}^{{commit}}"])
+
+
+def git_metadata_available() -> bool:
+    return (REPO_ROOT / ".git").exists() and command_succeeds(
+        ["git", "rev-parse", "--is-inside-work-tree"]
+    )
+
+
+def validate_source_commit(commit: str, path: Path) -> None:
+    if git_metadata_available():
+        if not git_commit_exists(commit):
+            raise ValueError(f"{path.name}: source_commit '{commit}' is not a valid git commit")
+        return
+
+    if not COMMIT_HASH_PATTERN.fullmatch(commit):
+        raise ValueError(
+            f"{path.name}: source_commit '{commit}' must look like a git commit hash when .git metadata is unavailable"
+        )
 
 
 def iter_receipt_paths() -> list[Path]:
@@ -101,8 +120,7 @@ def validate_receipt(receipt: dict, path: Path, workflow_catalog: dict) -> None:
             f"{path.name}: workflow_id '{receipt['workflow_id']}' is not in {WORKFLOW_CATALOG_PATH.name}"
         )
 
-    if not git_commit_exists(receipt["source_commit"]):
-        raise ValueError(f"{path.name}: source_commit '{receipt['source_commit']}' is not a valid git commit")
+    validate_source_commit(receipt["source_commit"], path)
 
     targets = receipt.get("targets")
     if not isinstance(targets, list) or not targets:
