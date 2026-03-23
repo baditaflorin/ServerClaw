@@ -70,7 +70,7 @@
 - repository implementation is complete on `main` in repo release `0.97.0`
 - the docs site now builds from canonical catalogs, copied ADRs, copied runbooks, release notes, and a generated OpenAPI snapshot into `build/docs-portal/`
 - `docs.lv3.org` is represented in the service and subdomain catalogs plus the shared edge publication defaults with a temporary `X-Robots-Tag: noindex` header
-- repo release `0.104.0` hardens shared edge publication by building all portal artifacts before apply, fixes TLS SAN parsing for hostnames such as `ops.lv3.org`, and restores the collection-scoped mutation audit callback import path
+- repo release `0.105.0` hardens shared edge publication by building all portal artifacts before apply, fixes TLS SAN parsing for hostnames such as `ops.lv3.org`, and restores the collection-scoped mutation audit callback import path
 - edge publication was verified directly against `65.108.75.123` with `--resolve` and serves the docs portal with the expected `X-Robots-Tag: noindex` header, but public DNS for `docs.lv3.org` still needs to resolve before this workstream can be marked `live_applied`
 - no live platform version change is claimed yet; public publication still requires an apply from `main`
 

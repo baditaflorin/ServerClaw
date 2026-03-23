@@ -81,7 +81,7 @@ The repository now also ships ADR 0100 disaster-recovery targets, a structured r
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.104.0` |
+| Repository version | `0.105.0` |
 | Platform version | `0.40.0` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -621,7 +621,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.104.0` |
+| Repository version | `0.105.0` |
 | Platform version | `0.40.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
