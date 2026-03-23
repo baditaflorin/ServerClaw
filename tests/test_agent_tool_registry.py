@@ -61,8 +61,45 @@ class AgentToolRegistryTests(unittest.TestCase):
         tool_names = {tool["name"] for tool in payload["tools"]}
         self.assertGreaterEqual(len(tool_names), 5)
         self.assertIn("get-platform-status", tool_names)
+        self.assertIn("get-maintenance-windows", tool_names)
         self.assertIn("query-platform-context", tool_names)
         self.assertIn("run-governed-command", tool_names)
+
+    def test_get_maintenance_windows_uses_local_state_override(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            audit_path = Path(temp_dir) / "audit.jsonl"
+            state_path = Path(temp_dir) / "maintenance-windows.json"
+            state_path.write_text(
+                json.dumps(
+                    {
+                        "maintenance/grafana": {
+                            "window_id": "44444444-4444-4444-4444-444444444444",
+                            "service_id": "grafana",
+                            "reason": "deploy",
+                            "opened_by": {"class": "operator", "id": "ops-linux"},
+                            "opened_at": "2026-03-23T09:50:00Z",
+                            "expected_duration_minutes": 30,
+                            "auto_close_at": "2099-03-23T10:20:00Z",
+                            "correlation_id": "deploy:grafana"
+                        }
+                    }
+                )
+            )
+            process = self.run_registry_with_pyyaml(
+                "--call",
+                "get-maintenance-windows",
+                "--args-json",
+                "{}",
+                env={
+                    "LV3_AGENT_TOOL_AUDIT_LOG_PATH": str(audit_path),
+                    "LV3_MAINTENANCE_WINDOWS_FILE": str(state_path),
+                },
+            )
+            self.assertEqual(process.returncode, 0, process.stderr)
+            payload = json.loads(process.stdout)
+            self.assertEqual(payload["result"]["tool"], "get-maintenance-windows")
+            self.assertEqual(payload["result"]["structuredContent"]["count"], 1)
+            self.assertEqual(payload["result"]["structuredContent"]["windows"][0]["service_id"], "grafana")
 
     def test_observe_call_emits_audit_event(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

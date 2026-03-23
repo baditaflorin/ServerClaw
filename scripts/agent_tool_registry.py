@@ -22,6 +22,7 @@ from command_catalog import (
 )
 from controller_automation_toolkit import REPO_ROOT, emit_cli_error, load_json, load_yaml, repo_path
 from live_apply_receipts import iter_receipt_paths, load_receipt, validate_receipts
+from maintenance_window_tool import list_active_windows_best_effort
 from workflow_catalog import (
     load_secret_manifest,
     load_workflow_catalog,
@@ -438,6 +439,20 @@ def tool_query_platform_context(tool: dict[str, Any], args: dict[str, Any]) -> d
         raise ValueError(f"platform-context API query failed: {exc.reason}") from exc
 
 
+def tool_get_maintenance_windows(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    service_id = args.get("service_id")
+    if service_id is not None:
+        service_id = require_str(service_id, "arguments.service_id")
+    windows = list_active_windows_best_effort()
+    payload = [windows[key] for key in sorted(windows)]
+    if service_id:
+        payload = [window for window in payload if window["service_id"] in {service_id, "all"}]
+    return {
+        "count": len(payload),
+        "windows": payload,
+    }
+
+
 def normalize_approval_args(args: dict[str, Any]) -> dict[str, Any]:
     requester_class = require_str(args.get("requester_class"), "arguments.requester_class")
     if requester_class not in ALLOWED_IDENTITY_CLASSES:
@@ -536,6 +551,7 @@ HANDLERS: Final[dict[str, Any]] = {
     "get_workflow_contract": tool_get_workflow_contract,
     "get_command_contract": tool_get_command_contract,
     "get_api_publication_surface": tool_get_api_publication_surface,
+    "get_maintenance_windows": tool_get_maintenance_windows,
     "export_mcp_tools": tool_export_mcp_tools,
     "query_platform_context": tool_query_platform_context,
     "check_command_approval": tool_check_command_approval,

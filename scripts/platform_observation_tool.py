@@ -20,6 +20,7 @@ from pathlib import Path
 from typing import Any
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path, write_json
+from maintenance_window_tool import list_active_windows_best_effort, suppress_findings_for_maintenance
 
 
 HEALTH_PROBE_CATALOG_PATH = repo_path("config", "health-probe-catalog.json")
@@ -34,7 +35,7 @@ DEFAULT_DIGEST_PATH = repo_path(".local", "open-webui", "platform-findings-daily
 
 
 RUNNER_VALUES = {"controller_local", "host_ssh", "guest_jump"}
-SEVERITY_VALUES = {"ok", "warning", "critical"}
+SEVERITY_VALUES = {"ok", "warning", "critical", "suppressed"}
 
 
 @dataclass
@@ -1016,6 +1017,7 @@ def run_checks(args: argparse.Namespace) -> int:
     run_id = str(uuid.uuid4())
     checks = args.checks or list(CHECK_HANDLERS)
     findings = [CHECK_HANDLERS[check](context, run_id) for check in checks]
+    findings = suppress_findings_for_maintenance(findings, list_active_windows_best_effort(context))
 
     output_dir = Path(args.output_dir).expanduser()
     digest_path = Path(args.digest_path).expanduser()
@@ -1030,7 +1032,7 @@ def run_checks(args: argparse.Namespace) -> int:
     )
     if mattermost_url:
         for finding in findings:
-            if finding["severity"] == "ok":
+            if finding["severity"] in {"ok", "suppressed"}:
                 continue
             post_json_webhook(
                 mattermost_url,
@@ -1044,7 +1046,7 @@ def run_checks(args: argparse.Namespace) -> int:
     )
     if glitchtip_url:
         for finding in findings:
-            if finding["severity"] == "ok":
+            if finding["severity"] in {"ok", "suppressed"}:
                 continue
             post_json_webhook(
                 glitchtip_url,

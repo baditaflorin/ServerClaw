@@ -294,6 +294,58 @@
       "runbook": "docs/runbooks/rag-platform-context.md"
     },
     {
+      "name": "get-maintenance-windows",
+      "title": "Get Maintenance Windows",
+      "description": "Return the currently active ADR 0080 maintenance windows from the private NATS KV bucket through the governed controller query surface.",
+      "category": "observe",
+      "transport": "controller_local",
+      "endpoint": "repo://scripts/maintenance_window_tool.py list",
+      "auth": "bootstrap-ssh-jump to private NATS runtime",
+      "approval_required": false,
+      "audit_on_call": true,
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "service_id": {
+            "type": "string"
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "count",
+          "windows"
+        ],
+        "properties": {
+          "count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "windows": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "get_maintenance_windows"
+      },
+      "catalog_refs": {
+        "workflow_id": "open-maintenance-window"
+      },
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "runbook": "docs/runbooks/maintenance-windows.md"
+    },
+    {
       "name": "export-mcp-tools",
       "title": "Export MCP Tools",
       "description": "Export the governed tool registry as MCP-compatible tool definitions.",

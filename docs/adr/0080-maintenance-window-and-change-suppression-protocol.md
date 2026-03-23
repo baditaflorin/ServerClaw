@@ -1,10 +1,10 @@
 # ADR 0080: Maintenance Window And Change Suppression Protocol
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Partial
+- Implemented In Repo Version: 0.79.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-23
 - Date: 2026-03-22
 
 ## Context
@@ -53,11 +53,11 @@ make open-maintenance-window \
   DURATION_MINUTES=30
 ```
 
-**Automated (as part of the deploy pipeline, ADR 0073):**
-The `deploy-and-promote` Windmill workflow opens a maintenance window for the affected service at the start of the `prod-apply` step and closes it after `post-verify` completes. Duration is set to 2× the historical P99 apply duration for that playbook.
+**Automated:**
+A shared Windmill wrapper is provided so future workflows can open and close maintenance windows without re-embedding the protocol.
 
 **Broadcast:**
-On window open, a `maintenance.opened` event is published to NATS and forwarded to Mattermost `#platform-ops`:
+On window open, a `maintenance.opened` event is published on the private NATS event plane:
 ```
 [MAINTENANCE OPEN] grafana — upgrading grafana to 11.x
   Opened by: operator/ops-linux
@@ -70,15 +70,14 @@ On window open, a `maintenance.opened` event is published to NATS and forwarded 
 Every component that emits alerts or findings checks the maintenance window state before routing:
 
 - **Observation loop (ADR 0071):** at the start of finding emission, check `maintenance/<service-id>` and `maintenance/all` in NATS KV; if a key exists, downgrade the finding's severity to `suppressed` and omit Mattermost notification
-- **Uptime Kuma:** Uptime Kuma's "maintenance mode" API is called by the same open/close workflow to pause the affected monitor
-- **Grafana alerts:** alert rules for the service are silenced via the Grafana API for the window duration
-- **GlitchTip:** inbound errors during the window are tagged `maintenance=true` and excluded from the default issue view
+- **GlitchTip:** in the first iteration, controller-side GlitchTip forwarding is omitted for `suppressed` findings
+- **Mattermost:** in the first iteration, controller-side Mattermost forwarding is omitted for `suppressed` findings
 
-All suppressed findings are still written to Loki (ADR 0052) and the mutation audit log (ADR 0066) with a `suppressed: true` flag for post-incident review.
+All suppressed findings are still written to the observation-loop JSON output and NATS finding subjects with a `suppressed` marker for post-incident review.
 
 ### Closing a window
 
-**Automatic close:** the `auto_close_at` timestamp triggers a Windmill scheduled job that deletes the NATS KV key, resumes Uptime Kuma monitors, and unsuppresses Grafana alerts.
+**Automatic close:** the `auto_close_at` timestamp is enforced with NATS per-message TTL so the KV entry disappears without a separate scheduler.
 
 **Manual early close:**
 ```bash
@@ -94,25 +93,26 @@ make close-maintenance-window SERVICE=grafana
 
 ### Emergency override
 
-If a window is accidentally left open (`maintenance/all` key), an operator can force-close all windows:
+If a window is accidentally left open, an operator can force-close all active windows:
 ```bash
 make close-maintenance-window SERVICE=all FORCE=true
 ```
-This emits a `maintenance.force_closed` audit event and sends a Mattermost alert.
+This emits `maintenance.force_closed` on the private event plane.
 
 ### Catalog
 
-Active and historical windows are queryable via the agent tool registry (ADR 0069) as a `get-maintenance-windows` observe tool.
+Active windows are queryable via the agent tool registry (ADR 0069) as a `get-maintenance-windows` observe tool.
 
 ## Consequences
 
 - Planned maintenance no longer generates alert noise; operators can deploy with confidence that `#platform-findings` will not be spammed.
 - Every maintenance window is auditable: who opened it, why, for how long, and whether it correlated with a specific deployment.
-- Automated windows via the deploy pipeline mean most deployments require no manual window management.
 - A window left open accidentally suppresses real alerts for up to the configured maximum window duration (default: 2 hours); the emergency override and the NATS KV TTL (set to the window's `auto_close_at`) mitigate this.
+- The repository now contains the complete first-iteration contract, but the current live NATS principal set still needs a writer identity that can publish to `$KV.maintenance-windows.>` before routine live use is possible from the controller.
 
 ## Boundaries
 
 - Maintenance windows suppress routing of findings and alerts; they do not stop health probes from executing. Probes continue to run during a window so that the return-to-health signal is immediate when the window closes.
 - Security alerts (from the observation loop's `check-certificate-expiry`, `check-secret-ages`) are not suppressible by maintenance windows; they route regardless of window state.
-- Multi-service windows (e.g. maintenance on the entire docker-runtime-lv3 VM) are supported via a list of `service_id` values or the special value `all`.
+- The first iteration supports one service id or the special value `all`, not arbitrary multi-service lists.
+- Native Uptime Kuma, Grafana, and GlitchTip maintenance-mode API integrations remain follow-on work after the core NATS KV and observation-loop protocol.

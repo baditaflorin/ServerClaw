@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lv3.org/schema/maintenance-window.json",
+  "title": "Maintenance Window",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "window_id",
+    "service_id",
+    "reason",
+    "opened_by",
+    "opened_at",
+    "expected_duration_minutes",
+    "auto_close_at"
+  ],
+  "properties": {
+    "window_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "service_id": {
+      "type": "string",
+      "pattern": "^(all|[a-z0-9][a-z0-9-]*)$"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "opened_by": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "class",
+        "id"
+      ],
+      "properties": {
+        "class": {
+          "type": "string",
+          "enum": [
+            "operator",
+            "agent"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "opened_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expected_duration_minutes": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "auto_close_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

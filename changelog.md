@@ -8,6 +8,16 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.79.0 - 2026-03-23
+
+- implemented the ADR 0080 repository contract by adding the NATS KV-backed maintenance-window controller tool, maintenance-window schema, governed workflow and command catalog entries, event-lane registration, a Windmill wrapper, and an active-window observe tool in the agent registry
+- wired the ADR 0071 observation loop to read active maintenance windows, mark planned non-security findings as `suppressed`, and omit Mattermost or GlitchTip forwarding while preserving structured outputs and NATS publication
+- recorded the current live blocker explicitly: the controller can authenticate to the live NATS runtime and create or read the `maintenance-windows` bucket, but the current live principal set still rejects publishes to `$KV.maintenance-windows.>` so opening or closing live windows remains blocked pending a platform-side permission update
+
+Platform impact:
+
+- no direct live platform change is claimed in this release commit; ADR 0080 is merged in repository automation on top of the current live `0.37.0` platform, with the remaining live gap narrowed to NATS publish permissions for maintenance-window writes
+
 ## 0.78.0 - 2026-03-23
 
 - completed ADR 0066 on current `main` by validating the structured mutation-audit schema, Ansible callback emission, command-catalog audit events, the seeded Windmill helper, and the host-side `/var/log/platform/mutation-audit.jsonl` sinks now shipped through ADR 0052

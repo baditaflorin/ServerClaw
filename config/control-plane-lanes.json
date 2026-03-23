@@ -312,6 +312,20 @@
             "check-platform-drift"
           ],
           "notes": "Each observation-loop check emits a structured finding on its own subject so future consumers can subscribe without scraping shell output."
+        },
+        {
+          "id": "maintenance-window-subjects",
+          "kind": "event_subject",
+          "endpoint": "maintenance.*",
+          "auth": "Internal NATS publication for ADR 0080 maintenance.opened, maintenance.closed, and maintenance.force_closed events through the private docker-runtime-lv3 event bus runtime.",
+          "owner_refs": [
+            "proxmox_florin"
+          ],
+          "workflow_refs": [
+            "open-maintenance-window",
+            "close-maintenance-window"
+          ],
+          "notes": "Maintenance-window state changes are published on named internal subjects so operators and future automation can see when alert suppression begins or ends."
         }
       ]
     }
