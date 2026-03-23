@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0099](../adr/0099-automated-backup-restore-verification.md)
 - Title: Weekly Windmill workflow restoring postgres-lv3, docker-runtime-lv3, and backup-lv3 into ephemeral VMs and running smoke tests
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0099-backup-restore-verification`
 - Worktree: `../proxmox_florin_server-backup-restore-verification`
 - Owner: codex
@@ -76,5 +76,7 @@
 
 ## Outcome
 
-- repository implementation is complete on the ADR 0099 workstream branch with the restore-verification script, smoke-test helpers, Windmill wrapper, workflow catalog entry, runbook, receipt directory, dashboard summary metrics, and targeted tests
+- repository implementation is complete on `main` in repo release `0.99.0`
+- the restore-verification workflow now restores recent PBS snapshots for `postgres-lv3`, `docker-runtime-lv3`, and `backup-lv3` into the staged fixture network, runs service-specific smoke tests, emits receipts, and can publish notifications plus audit events
+- the repository now ships the Windmill wrapper, command and workflow catalog entries, dashboard summary metrics, and targeted test coverage for the restore-verification path
 - live rollout still requires enabling the workflow from `main`, verifying the staging bridge path on the Proxmox host, and confirming the external notification variables in the execution environment

@@ -1555,7 +1555,7 @@ workstreams:
   - id: adr-0099-backup-restore-verification
     adr: "0099"
     title: Automated backup restore verification
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0099-backup-restore-verification
     worktree_path: ../proxmox_florin_server-backup-restore-verification
@@ -1573,7 +1573,7 @@ workstreams:
       - scripts/
       - Windmill workflows
       - receipts/
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: false
 
   - id: adr-0100-disaster-recovery
