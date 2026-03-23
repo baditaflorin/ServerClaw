@@ -1916,7 +1916,7 @@ workstreams:
   - id: adr-0114-incident-triage
     adr: "0114"
     title: Rule-based incident triage engine
-    status: in_progress
+    status: merged
     owner: codex
     branch: codex/adr-0114-incident-triage
     worktree_path: .worktrees/adr-0114
@@ -1940,5 +1940,5 @@ workstreams:
       - config/windmill/scripts/
       - config/workflow-catalog.json
       - docs/runbooks/incident-triage-engine.md
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: false
