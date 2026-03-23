@@ -71,9 +71,9 @@ proxmox_public_ingress_tcp_forwards:
 proxmox_tailscale_tcp_proxies:
   - name: ntopng
     listen_address: "{{ management_tailscale_ipv4 }}"
-    listen_port: "{{ ntopng_proxy_port }}"
+    listen_port: "{{ platform_port_assignments.ntopng_proxy_port }}"
     upstream_host: 127.0.0.1
-    upstream_port: "{{ ntopng_http_port }}"
+    upstream_port: "{{ platform_port_assignments.ntopng_http_port }}"
   - name: postgres-lv3
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: 5432
@@ -81,42 +81,42 @@ proxmox_tailscale_tcp_proxies:
     upstream_port: 5432
   - name: windmill
     listen_address: "{{ management_tailscale_ipv4 }}"
-    listen_port: "{{ windmill_host_proxy_port }}"
+    listen_port: "{{ platform_port_assignments.windmill_host_proxy_port }}"
     upstream_host: 10.10.10.20
     upstream_port: 8000
   - name: mattermost
     listen_address: "{{ management_tailscale_ipv4 }}"
-    listen_port: "{{ mattermost_host_proxy_port }}"
+    listen_port: "{{ platform_port_assignments.mattermost_host_proxy_port }}"
     upstream_host: 10.10.10.20
     upstream_port: 8065
   - name: netbox
     listen_address: "{{ management_tailscale_ipv4 }}"
-    listen_port: "{{ netbox_host_proxy_port }}"
+    listen_port: "{{ platform_port_assignments.netbox_host_proxy_port }}"
     upstream_host: 10.10.10.20
     upstream_port: 8082
   - name: step-ca
     listen_address: "{{ management_tailscale_ipv4 }}"
-    listen_port: "{{ step_ca_proxy_port }}"
+    listen_port: "{{ platform_port_assignments.step_ca_proxy_port }}"
     upstream_host: 10.10.10.20
-    upstream_port: "{{ step_ca_api_port }}"
+    upstream_port: "{{ platform_port_assignments.step_ca_api_port }}"
   - name: openbao
     listen_address: "{{ management_tailscale_ipv4 }}"
-    listen_port: "{{ openbao_proxy_port }}"
+    listen_port: "{{ platform_port_assignments.openbao_proxy_port }}"
     upstream_host: 10.10.10.20
-    upstream_port: "{{ openbao_proxy_port }}"
+    upstream_port: "{{ platform_port_assignments.openbao_proxy_port }}"
   - name: open-webui
     listen_address: "{{ management_tailscale_ipv4 }}"
-    listen_port: "{{ open_webui_host_proxy_port }}"
+    listen_port: "{{ platform_port_assignments.open_webui_host_proxy_port }}"
     upstream_host: 10.10.10.20
-    upstream_port: "{{ open_webui_port }}"
+    upstream_port: "{{ platform_port_assignments.open_webui_port }}"
   - name: platform-context-api
     listen_address: "{{ management_tailscale_ipv4 }}"
-    listen_port: "{{ platform_context_host_proxy_port }}"
+    listen_port: "{{ platform_port_assignments.platform_context_host_proxy_port }}"
     upstream_host: 10.10.10.20
     upstream_port: 8010
   - name: portainer
     listen_address: "{{ management_tailscale_ipv4 }}"
-    listen_port: "{{ portainer_host_proxy_port }}"
+    listen_port: "{{ platform_port_assignments.portainer_host_proxy_port }}"
     upstream_host: 10.10.10.20
     upstream_port: 9443
 

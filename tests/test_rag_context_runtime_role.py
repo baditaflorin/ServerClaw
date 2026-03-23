@@ -6,6 +6,7 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[1]
 ROLE_TASKS = REPO_ROOT / "roles" / "rag_context_runtime" / "tasks" / "main.yml"
 COMPOSE_TEMPLATE = REPO_ROOT / "roles" / "rag_context_runtime" / "templates" / "docker-compose.yml.j2"
+ROLE_DEFAULTS = REPO_ROOT / "roles" / "rag_context_runtime" / "defaults" / "main.yml"
 
 
 def load_tasks() -> list[dict]:
@@ -41,3 +42,8 @@ def test_role_restores_docker_nat_chain_before_recreate() -> None:
     )
     assert check_task["ansible.builtin.command"]["argv"] == ["iptables", "-t", "nat", "-S", "DOCKER"]
     assert restore_task["ansible.builtin.service"]["name"] == "docker"
+
+
+def test_role_defaults_do_not_depend_on_platform_service_topology() -> None:
+    defaults = ROLE_DEFAULTS.read_text()
+    assert "platform_service_topology" not in defaults

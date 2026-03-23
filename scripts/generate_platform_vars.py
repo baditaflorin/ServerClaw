@@ -341,7 +341,7 @@ def resolve_tcp_proxy_port(value: Any, ports: dict[str, int]) -> int:
     if isinstance(value, int):
         return value
     value = require_string(value, "proxy port template")
-    match = re.fullmatch(r"{{\s*([a-z0-9_]+)\s*}}", value)
+    match = re.fullmatch(r"{{\s*(?:platform_port_assignments\.)?([a-z0-9_]+)\s*}}", value)
     if match is None:
         raise ValueError(f"unsupported proxy port template: {value}")
     key = match.group(1)
