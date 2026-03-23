@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0114](../adr/0114-rule-based-incident-triage-engine.md)
 - Title: CPU-only triage engine triggered on every firing alert — assembles signals from world state, evaluates ranked rules, posts hypotheses and cheapest first action to Mattermost before any operator acts
-- Status: in_progress
+- Status: merged
 - Branch: `codex/adr-0114-incident-triage`
 - Worktree: `.worktrees/adr-0114`
 - Owner: codex
