@@ -36,6 +36,7 @@ MARKERS = {
 }
 CORE_DOCUMENTS = [
     ("Changelog", REPO_ROOT / "changelog.md"),
+    ("Release notes", REPO_ROOT / "docs" / "release-notes" / "README.md"),
     ("Repository map", REPO_ROOT / "docs" / "repository-map.md"),
     ("Assistant operator guide", REPO_ROOT / "docs" / "assistant-operator-guide.md"),
     ("Release process", REPO_ROOT / "docs" / "release-process.md"),

@@ -9,6 +9,9 @@ public_edge_probe_hostname: "{{ public_edge_service_topology.nginx_edge.public_h
 public_edge_generated_build_root: "{{ playbook_dir }}/../build"
 public_edge_static_sites: "{{ public_edge_service_topology | service_topology_edge_static_sites }}"
 public_edge_extra_sites:
+  - hostname: changelog.lv3.org
+    kind: static_dir
+    source_dir: changelog-portal
   - hostname: ops.lv3.org
     kind: static_dir
     source_dir: ops-portal

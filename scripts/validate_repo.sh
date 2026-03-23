@@ -156,6 +156,7 @@ validate_generated_docs() {
 validate_generated_portals() {
   echo "Generated portal validation"
   uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/generate_ops_portal.py" --check >/dev/null
+  uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/generate_changelog_portal.py" --check >/dev/null
 }
 
 validate_health_probes() {
