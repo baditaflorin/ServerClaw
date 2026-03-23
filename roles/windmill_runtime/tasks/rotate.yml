@@ -64,8 +64,6 @@
     argv:
       - docker
       - compose
-      - --env-file
-      - "{{ windmill_env_file }}"
       - --file
       - "{{ windmill_compose_file }}"
       - up

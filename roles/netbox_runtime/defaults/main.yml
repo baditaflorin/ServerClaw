@@ -5,7 +5,14 @@ netbox_redis_image: "{{ container_image_catalog.images.netbox_redis_runtime.ref 
 netbox_site_dir: /opt/netbox
 netbox_secret_dir: /etc/lv3/netbox
 netbox_compose_file: "{{ netbox_site_dir }}/docker-compose.yml"
-netbox_env_file: "{{ netbox_site_dir }}/netbox.env"
+netbox_env_file: "{{ compose_runtime_secret_root }}/netbox/runtime.env"
+netbox_legacy_env_file: "{{ netbox_site_dir }}/netbox.env"
+netbox_openbao_agent_dir: "{{ netbox_site_dir }}/openbao"
+netbox_openbao_agent_image: "{{ openbao_agent_image }}"
+netbox_openbao_agent_container_name: netbox-openbao-agent
+netbox_openbao_secret_path: services/netbox/runtime-env
+netbox_openbao_policy_name: lv3-service-netbox-runtime
+netbox_openbao_approle_name: netbox-runtime
 netbox_server_port: "{{ platform_service_topology | platform_service_port('netbox', 'internal') }}"
 netbox_host_proxy_port: "{{ platform_service_topology | platform_service_port('netbox', 'controller') }}"
 netbox_controller_url: "{{ platform_service_topology | platform_service_url('netbox', 'controller') }}"

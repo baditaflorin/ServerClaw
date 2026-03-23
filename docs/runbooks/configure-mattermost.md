@@ -55,7 +55,7 @@ Treat the entire `.local/mattermost/` subtree as operational secret material and
 Run these checks after converge:
 
 1. `make syntax-check-mattermost`
-2. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose --env-file /opt/mattermost/mattermost.env --file /opt/mattermost/docker-compose.yml ps'`
+2. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose --file /opt/mattermost/docker-compose.yml ps && sudo ls -l /opt/mattermost/openbao /run/lv3-secrets/mattermost && sudo test ! -e /opt/mattermost/mattermost.env'`
 3. `curl -s http://100.118.189.95:8066/api/v4/system/ping`
 4. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker exec lv3-mattermost /mattermost/bin/mmctl --local team search lv3 --json'`
 5. `python -m json.tool /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mattermost/incoming-webhooks.json`

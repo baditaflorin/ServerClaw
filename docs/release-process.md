@@ -18,7 +18,7 @@ This repository now supports parallel ADR implementation. That requires a clear 
 2. Merge phase
    - merge the completed workstream to `main`
    - bump `VERSION` once on `main`
-   - move relevant changelog notes from `Unreleased` into a versioned section
+   - move relevant changelog notes from `Unreleased` into `docs/release-notes/<version>.md`
    - if canonical status inputs changed, run `make generate-status-docs` before cutting the release
    - update `workstreams.yaml` status to reflect merge completion
 3. Live apply phase
@@ -34,7 +34,8 @@ This repository now supports parallel ADR implementation. That requires a clear 
 These files are owned by the integration step on `main`, not by normal workstream branches:
 
 - `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/VERSION`
-- release sections in `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/changelog.md`
+- `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/changelog.md`
+- `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/`
 - canonical observed-state and release-track sections in `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml`
 - top-level integrated status summaries in `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/README.md`
 
@@ -66,8 +67,9 @@ Before merging a workstream to `main`, confirm:
 ## Changelog Policy
 
 - `Unreleased` is the scratch area on `main` for merged-but-not-version-cut notes
-- cut a numbered section when `VERSION` changes on `main`
-- keep generated README status blocks current before cutting the numbered section
+- cut a versioned file in `docs/release-notes/` when `VERSION` changes on `main`
+- keep `changelog.md` as the portal-first index and scratchpad, not the detailed release archive
+- keep generated README status blocks current before cutting the versioned release-note file
 - do not create fake release entries on long-lived feature branches
 
 ## Recommended Worktree Commands

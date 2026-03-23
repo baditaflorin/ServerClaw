@@ -66,7 +66,7 @@ python3 scripts/build_rag_index.py --dry-run
 1. `curl -s http://100.118.189.95:8010/healthz`
 2. `python3 scripts/build_rag_index.py --dry-run`
 3. `python3 scripts/query_platform_context.py --api-url http://100.118.189.95:8010 --question "how does step-ca issue SSH certificates"`
-4. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose --env-file /opt/platform-context/platform-context.env --file /opt/platform-context/docker-compose.yml ps'`
+4. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose --file /opt/platform-context/docker-compose.yml ps && sudo ls -l /opt/platform-context/openbao /run/lv3-secrets/platform-context && sudo test ! -e /opt/platform-context/platform-context.env'`
 
 ## Open WebUI Integration
 

@@ -1,0 +1,10 @@
+.local/
+*.vault
+.env
+receipts/
+.git/
+__pycache__/
+*.pyc
+.terraform/
+.packer_cache/
+config/build-cache-manifest.json

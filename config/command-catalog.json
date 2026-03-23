@@ -36,6 +36,22 @@
       "allow_self_approval": true,
       "allow_break_glass": false
     },
+    "operator_approved": {
+      "description": "A promotion or controlled live change that may be requested by an agent or operator, but still requires an explicit human-operator approval before execution.",
+      "allowed_requester_classes": [
+        "human_operator",
+        "agent"
+      ],
+      "allowed_approver_classes": [
+        "human_operator"
+      ],
+      "minimum_approvals": 1,
+      "require_preflight": true,
+      "require_validation": true,
+      "require_receipt_plan": true,
+      "allow_self_approval": false,
+      "allow_break_glass": false
+    },
     "sensitive_live_change": {
       "description": "Higher-risk host, provisioning, security, or boundary-changing mutation that must stay operator-initiated and human-approved.",
       "allowed_requester_classes": [
@@ -1318,6 +1334,54 @@
         "rollback_guidance": [
           "Reapply the last known-good DNS state from the repo before retrying.",
           "Keep private database publication changes under the managed playbook instead of manual provider edits."
+        ]
+      }
+    },
+    "promote-to-production": {
+      "description": "Promote a staged service change into production only after the ADR 0073 validation, staging-evidence, and operator approval gates pass.",
+      "workflow_id": "deploy-and-promote",
+      "scope": "guest_runtime",
+      "approval_policy": "operator_approved",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used by the underlying production live apply."
+        },
+        {
+          "name": "branch",
+          "kind": "string",
+          "required": true,
+          "source": "git",
+          "description": "The codex/ or operator/ branch that produced the staged receipt being promoted."
+        },
+        {
+          "name": "staging_receipt",
+          "kind": "artifact_ref",
+          "required": true,
+          "source": "receipts/live-applies/staging",
+          "description": "Repo-relative path to the staging live-apply receipt that proves recent staged verification."
+        }
+      ],
+      "expected_preconditions": [
+        "make validate passes on the exact repo state being promoted",
+        "The referenced staging receipt exists under receipts/live-applies/staging and is less than 24 hours old",
+        "At least one human operator approval is recorded for the promotion request before production execution"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the staging receipt, the approved gate outcome, the production live-apply receipt, and the linked promotion receipt under receipts/promotions/."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the staging receipt is stale, incomplete, or shows any non-pass verification result.",
+          "Stop if command-catalog approval is missing or if the observation loop reports open critical findings for the affected service."
+        ],
+        "rollback_guidance": [
+          "Do not continue into production until a fresh staging apply and clean gate pass exist.",
+          "If production fails after an approved promotion starts, record the failed evidence and revert with the last known-good repo state through the normal live-apply path."
         ]
       }
     },

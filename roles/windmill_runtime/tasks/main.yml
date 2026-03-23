@@ -97,6 +97,10 @@
   ansible.builtin.set_fact:
     windmill_superadmin_secret: "{{ windmill_superadmin_secret_raw.content | b64decode | trim }}"
     windmill_database_password: "{{ lookup('ansible.builtin.file', windmill_database_password_local_file) | trim }}"
+    windmill_runtime_secret_payload:
+      DATABASE_URL: >-
+        postgres://{{ windmill_database_user }}:{{ windmill_database_password | urlencode | replace('/', '%2F') }}@{{ windmill_database_host }}:{{ windmill_database_port }}/{{ windmill_database_name }}?sslmode=disable
+      SUPERADMIN_SECRET: "{{ windmill_superadmin_secret }}"
   no_log: true
 
 - name: Ensure the local Windmill artifact directory exists
@@ -114,6 +118,41 @@
     mode: "0600"
   delegate_to: localhost
   become: false
+  no_log: true
+
+- name: Prepare OpenBao agent runtime secret injection for Windmill
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: windmill
+    common_openbao_compose_env_agent_dir: "{{ windmill_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ windmill_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ windmill_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ windmill_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ windmill_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ windmill_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ windmill_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ windmill_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ windmill_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ windmill_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ windmill_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: windmill.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ windmill_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ windmill_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ windmill_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ windmill_legacy_env_file }}"
   no_log: true
 
 - name: Render the Windmill environment file
@@ -151,8 +190,6 @@
     argv:
       - docker
       - compose
-      - --env-file
-      - "{{ windmill_env_file }}"
       - --file
       - "{{ windmill_compose_file }}"
       - pull
@@ -199,8 +236,6 @@
         argv:
           - docker
           - compose
-          - --env-file
-          - "{{ windmill_env_file }}"
           - --file
           - "{{ windmill_compose_file }}"
           - up
@@ -228,8 +263,6 @@
         argv:
           - docker
           - compose
-          - --env-file
-          - "{{ windmill_env_file }}"
           - --file
           - "{{ windmill_compose_file }}"
           - rm
@@ -247,8 +280,6 @@
         argv:
           - docker
           - compose
-          - --env-file
-          - "{{ windmill_env_file }}"
           - --file
           - "{{ windmill_compose_file }}"
           - up

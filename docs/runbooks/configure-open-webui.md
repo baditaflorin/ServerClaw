@@ -58,7 +58,7 @@ make converge-open-webui
 Verify the runtime container and local files on `docker-runtime-lv3`:
 
 ```bash
-ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml docker-runtime-lv3 -m shell -a 'docker compose --env-file /opt/open-webui/open-webui.env --file /opt/open-webui/docker-compose.yml ps && sudo ls -ld /opt/open-webui /opt/open-webui/data /etc/lv3/open-webui' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml docker-runtime-lv3 -m shell -a 'docker compose --file /opt/open-webui/docker-compose.yml ps && sudo ls -ld /opt/open-webui /opt/open-webui/data /etc/lv3/open-webui /opt/open-webui/openbao /run/lv3-secrets/open-webui && sudo test ! -e /opt/open-webui/open-webui.env' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 ```
 
 Verify the private operator entrypoint is reachable:

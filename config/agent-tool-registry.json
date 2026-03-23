@@ -122,6 +122,177 @@
       "runbook": "docs/runbooks/agent-tool-registry.md"
     },
     {
+      "name": "get-deployment-history",
+      "title": "Get Deployment History",
+      "description": "Return recent platform deployments filtered by service, environment, or date range.",
+      "category": "observe",
+      "transport": "controller_local",
+      "endpoint": "repo://receipts/live-applies",
+      "auth": "repo-read",
+      "approval_required": false,
+      "audit_on_call": true,
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "service_id": {
+            "type": "string"
+          },
+          "environment": {
+            "type": "string",
+            "enum": [
+              "production",
+              "staging"
+            ]
+          },
+          "days": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "service_id",
+          "environment",
+          "days",
+          "count",
+          "warnings",
+          "entries"
+        ],
+        "properties": {
+          "service_id": {
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          },
+          "days": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "change_type",
+                "timestamp",
+                "timestamp_precision",
+                "date_label",
+                "actor",
+                "actor_class",
+                "environment",
+                "outcome",
+                "service_ids",
+                "service_names",
+                "vm_names",
+                "targets",
+                "summary",
+                "link_path",
+                "source",
+                "metadata"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "change_type": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string"
+                },
+                "timestamp_precision": {
+                  "type": "string"
+                },
+                "date_label": {
+                  "type": "string"
+                },
+                "actor": {
+                  "type": "string"
+                },
+                "actor_class": {
+                  "type": "string"
+                },
+                "environment": {
+                  "type": "string"
+                },
+                "outcome": {
+                  "type": "string"
+                },
+                "service_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "service_names": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "vm_names": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "targets": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "summary": {
+                  "type": "string"
+                },
+                "link_path": {
+                  "type": "string"
+                },
+                "source": {
+                  "type": "string"
+                },
+                "workflow_id": {
+                  "type": "string"
+                },
+                "adr": {
+                  "type": "string"
+                },
+                "metadata": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "get_deployment_history"
+      },
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "runbook": "docs/runbooks/agent-tool-registry.md"
+    },
+    {
       "name": "get-workflow-contract",
       "title": "Get Workflow Contract",
       "description": "Return one workflow execution contract from the canonical workflow catalog.",

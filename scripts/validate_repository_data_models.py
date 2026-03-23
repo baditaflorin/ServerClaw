@@ -16,6 +16,7 @@ from control_plane_lanes import load_lane_catalog
 from live_apply_receipts import RECEIPTS_DIR, iter_receipt_paths, validate_receipts
 from generate_platform_vars import PLATFORM_VARS_PATH, PORT_KEYS, build_platform_vars
 from mutation_audit import load_mutation_audit_schema, validate_mutation_audit_schema
+from promotion_pipeline import validate_promotion_receipts
 from workflow_catalog import (
     load_secret_manifest,
     load_workflow_catalog,
@@ -1511,6 +1512,7 @@ def validate_repository_data_models() -> int:
     validate_api_publication_catalog(api_publication_catalog, lane_catalog)
     validate_mutation_audit_schema(load_mutation_audit_schema())
     validate_receipts()
+    validate_promotion_receipts()
     validate_uptime_monitors()
     host_vars_context = validate_host_vars()
     validate_health_probe_catalog(host_vars_context)

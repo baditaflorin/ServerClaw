@@ -1,10 +1,10 @@
 # ADR 0077: Compose Runtime Secrets Injection Via OpenBao Agent
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.83.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-23
 - Date: 2026-03-22
 
 ## Context
@@ -29,52 +29,27 @@ Each Compose stack that requires secrets will include an `openbao-agent` sidecar
 
 1. authenticates to OpenBao using the VM's AppRole credential (provisioned once by Ansible)
 2. fetches the required secrets from the configured OpenBao paths
-3. renders them into a shared in-memory `tmpfs` volume as either:
-   - a `.env` file consumed by other services via `env_file:` (format: `KEY=VALUE`)
-   - or individual files consumed via `secrets:` (format: one value per file)
-4. re-fetches and re-renders on TTL expiry so running containers see rotated credentials without restart
+3. renders them into a host `tmpfs` path under `/run/lv3-secrets/<service>/runtime.env` (format: `KEY=VALUE`)
+4. re-fetches and re-renders on TTL expiry so the next controlled container recreate uses the updated values without a playbook rewrite
 
 ### Compose structure
 
-```yaml
-services:
-  openbao-agent:
-    image: openbao/openbao-agent:latest@sha256:<digest>
-    volumes:
-      - secrets:/run/secrets
-      - ./openbao-agent.hcl:/etc/openbao-agent/agent.hcl:ro
-    tmpfs:
-      - /run/secrets:mode=0700,uid=1000
-    restart: unless-stopped
+The current implementation uses the host `/run` mount, which is already `tmpfs` on Debian. Each stack:
 
-  app:
-    image: myapp:latest@sha256:<digest>
-    env_file:
-      - /run/secrets/.env
-    depends_on:
-      openbao-agent:
-        condition: service_healthy
-    volumes:
-      - secrets:/run/secrets:ro
+- keeps its agent config and AppRole material under `/opt/<service>/openbao/`
+- writes the runtime env file to `/run/lv3-secrets/<service>/runtime.env`
+- points the application service `env_file:` at that `/run/...` path
+- removes any legacy `/opt/<service>/*.env` file after converge
 
-volumes:
-  secrets:
-    driver: local
-    driver_opts:
-      type: tmpfs
-      device: tmpfs
-      o: mode=0700,uid=1000
-```
-
-The `secrets` volume is `tmpfs` — it lives in RAM only and is never written to disk.
+This preserves RAM-only secret delivery while remaining compatible with Docker Compose, which reads `env_file` from the host filesystem rather than from another container volume.
 
 ### Agent configuration template
 
-`roles/docker_compose_stack/templates/openbao-agent.hcl.j2`:
+`roles/common/templates/openbao-agent.hcl.j2`:
 
 ```hcl
 vault {
-  address = "{{ openbao_addr }}"
+  address = "http://127.0.0.1:{{ openbao_http_port }}"
 }
 
 auto_auth {
@@ -87,42 +62,38 @@ auto_auth {
 }
 
 template {
-  source      = "/etc/openbao-agent/env.tpl"
-  destination = "/run/secrets/.env"
+  source      = "/openbao-agent/runtime.env.ctmpl"
+  destination = "/run/lv3-secrets/<service>/runtime.env"
   perms       = "0600"
 }
 ```
 
-The `role_id` and `secret_id` files are written once by Ansible to a restricted directory; they are the only secrets that remain on disk, and they grant access only to the secrets scoped to this stack's policy.
+The `role_id` and `secret_id` files are written by Ansible to `/opt/<service>/openbao/` with `0600` permissions. They are the only secret bootstrap artifacts left on disk, and they grant access only to the single `kv/data/services/<service>/runtime-env` path scoped to that stack.
 
 ### Ansible role update
 
-`roles/docker_compose_stack` is updated to:
-- template and deploy the `openbao-agent.hcl` configuration
-- write the AppRole `role_id` and `secret_id` to `/opt/<stack>/openbao/` with `mode: 0600, owner: root`
+The current mainline implementation uses service-specific roles plus the shared `roles/common/tasks/openbao_compose_env.yml` helper to:
+
+- seed the service runtime payload in OpenBao
+- template and deploy the `openbao-agent.hcl` configuration plus the runtime env template
+- write the AppRole `role_id` and `secret_id` to `/opt/<service>/openbao/` with `0600` permissions
 - remove any existing `.env` file from the compose directory
-- add a `make validate` check that no `*.env` files exist in compose directories on the controller (they should not be committed)
+- make `make validate` fail if any `*.env` file exists inside the repository checkout
 
 ### Secret path convention
 
-All secrets for a Compose stack are under `secret/<env>/<stack-name>/`:
-
-- `secret/prod/grafana/admin_password`
-- `secret/prod/windmill/database_url`
-- `secret/staging/grafana/admin_password`
-
-The environment prefix (`prod/` vs `staging/`) aligns with ADR 0072 environment topology.
+All secrets for a migrated Compose stack are stored under `kv/data/services/<service>/runtime-env` as fielded payloads used by the sidecar-rendered runtime env.
 
 ## Consequences
 
-- No plaintext secrets on disk within compose directories; the attack surface for secret theft via file-system access is eliminated.
-- Secret rotation in OpenBao (ADR 0065) is reflected in running containers within one TTL cycle (default: 5 minutes) without a playbook re-run.
-- The `openbao-agent` sidecar must be healthy before the application container starts; failed secret fetches block the stack from starting rather than starting with stale or missing credentials.
-- Any Compose stack that needs secrets now has a mandatory sidecar; this adds one container per stack.
-- Debugging becomes slightly more complex: secret fetch errors appear in the agent sidecar logs, not in the application logs.
+- No plaintext secrets remain under `/opt/<service>/` compose directories; the remaining runtime env file lives only under `/run`.
+- Secret rotation in OpenBao (ADR 0065) now updates the runtime env source of truth without rewriting repo-managed files on disk.
+- Services that only consume environment variables at process start still need a controlled restart to ingest changed values; the agent refreshes the host runtime env, not the process environment of an already-running container.
+- Each migrated stack now has a mandatory sidecar; this adds one container per stack.
+- Debugging moves into the sidecar logs and the `/run/lv3-secrets/<service>/runtime.env` render state.
 
 ## Boundaries
 
-- This model applies to Compose stacks on `docker-runtime-lv3`. Secrets for Ansible-managed services that do not run as containers continue to be injected by Ansible at apply time using the OpenBao lookup plugin (ADR 0043).
+- This model applies to Compose-managed runtimes on `docker-runtime-lv3`. Grafana is not part of the current implementation because ADR 0011 converged it as a package-managed service on `monitoring-lv3`, not a Compose stack.
 - The AppRole credentials (`role_id`, `secret_id`) are intentionally stored on disk — they are low-privilege bootstrap credentials that grant access only to a scoped policy. Their compromise allows reading secrets but not writing them or accessing other stacks.
-- Container-to-container secret sharing within the same Compose network (e.g. passing a database password between two containers) is handled by the shared `tmpfs` volume, not by environment variable inheritance.
+- This ADR is implemented on current `main` for Windmill, Keycloak, Mattermost, Open WebUI, NetBox, the private platform-context API, and the mail-platform gateway.
