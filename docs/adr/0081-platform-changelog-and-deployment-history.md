@@ -1,10 +1,10 @@
 # ADR 0081: Platform Changelog And Deployment History Portal
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.81.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-23
 - Date: 2026-03-22
 
 ## Context
@@ -101,6 +101,13 @@ This allows agents to answer "what changed in production in the last 7 days?" wi
 - Post-incident reviews have a structured timeline to reconstruct what changed before an incident, generated from the same receipts used for verification.
 - The Loki dependency for the audit log means the full changelog requires Loki to be running at generation time; if Loki is unavailable, the changelog falls back to receipts-only (structural changes only, no command catalog events).
 - `changelog.md` losing its detailed history role requires updating any processes or runbooks that reference it as an authoritative history.
+
+## Implementation Notes
+
+- Repository automation now ships [scripts/deployment_history.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/deployment_history.py) as the shared history loader for live-apply receipts, promotion receipts, and mutation-audit events.
+- The generated portal lives under [build/changelog-portal/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/build/changelog-portal/) through [scripts/generate_changelog_portal.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_changelog_portal.py) and is wired into `make generate-status` plus repository validation.
+- Repo-managed publication wiring now includes the planned `changelog.lv3.org` static edge site, the `changelog_portal` service catalog entry, and the governed `get-deployment-history` observe tool.
+- The repository release model now stores numbered notes under [docs/release-notes/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/) while leaving [changelog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/changelog.md) as the portal-first scratchpad and index.
 
 ## Boundaries
 

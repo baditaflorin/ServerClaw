@@ -60,6 +60,14 @@ uvx --from pyyaml python scripts/agent_tool_registry.py \
   --args-json '{}'
 ```
 
+Query recent deployment history for one service:
+
+```bash
+uvx --from pyyaml python scripts/agent_tool_registry.py \
+  --call get-deployment-history \
+  --args-json '{"service_id":"grafana","days":30}'
+```
+
 Evaluate a command approval gate:
 
 ```bash
@@ -74,6 +82,7 @@ Prepare a governed command execution without actually running it:
 scripts/agent_tool_registry.py \
   --call run-governed-command \
   --args-json '{"command_id":"configure-network","requester_class":"human_operator","approver_classes":["human_operator"],"preflight_passed":true,"validation_passed":true,"receipt_planned":true,"dry_run":true}'
+```
 
 Call the private RAG query tool:
 

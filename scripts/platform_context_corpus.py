@@ -20,6 +20,7 @@ DEFAULT_OVERLAP_CHARS = 240
 
 CORPUS_PATHS: tuple[str, ...] = (
     "docs/adr",
+    "docs/release-notes",
     "docs/runbooks",
     "receipts/live-applies",
     "receipts/promotions",
@@ -79,6 +80,8 @@ def document_kind_for_path(relative_path: str) -> str:
         return "adr"
     if relative_path.startswith("docs/runbooks/"):
         return "runbook"
+    if relative_path.startswith("docs/release-notes/"):
+        return "release_note"
     if relative_path.startswith("receipts/live-applies/"):
         return "receipt"
     if relative_path.startswith("receipts/promotions/"):
