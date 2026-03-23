@@ -1,0 +1,5 @@
+schema_version: "1.0.0"
+allowed_check_types:
+  - cert_check
+  - log_query
+  - metric_query
