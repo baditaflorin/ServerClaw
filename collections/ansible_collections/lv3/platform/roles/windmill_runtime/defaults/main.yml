@@ -20,7 +20,7 @@ windmill_worker_count: 2
 windmill_native_worker_count: 4
 windmill_database_name: windmill
 windmill_database_user: windmill_admin
-windmill_database_host: "{{ platform_guest_catalog.by_name | platform_guest_attr('postgres-lv3', 'ipv4') }}"
+windmill_database_host: "{{ (hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('postgres')).public_hostname }}"
 windmill_database_port: 5432
 windmill_database_password_local_file: "{{ playbook_dir }}/../.local/windmill/database-password.txt"
 windmill_superadmin_secret_remote_file: "{{ windmill_secret_dir }}/superadmin-secret"

@@ -1,8 +1,8 @@
 # ADR 0098: Postgres High Availability and Automated Failover
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented in Repo
+- Implemented In Repo Version: 0.97.0
 - Implemented In Platform Version: not yet
 - Implemented On: not yet
 - Date: 2026-03-23
@@ -27,7 +27,7 @@ The platform has the Proxmox infrastructure to provision a second VM (`postgres-
 
 ## Decision
 
-We will provision a second PostgreSQL VM (`postgres-replica-lv3`, VMID 151) and implement **Patroni-managed streaming replication** with automatic failover, keeping `postgres-lv3` as the primary and `postgres-replica-lv3` as a hot standby. A virtual IP (VIP) managed by the Ansible `linux_keepalived` role provides a stable connection endpoint that services do not need to reconfigure on failover.
+We will provision a second PostgreSQL VM (`postgres-replica-lv3`, VMID 151) and implement **Patroni-managed streaming replication** with automatic failover, keeping `postgres-lv3` as the initial primary and `postgres-replica-lv3` as a hot standby. A virtual IP (VIP) managed by the Ansible `linux_keepalived` role provides a stable connection endpoint that services do not need to reconfigure on failover.
 
 ### Topology
 
@@ -45,17 +45,17 @@ We will provision a second PostgreSQL VM (`postgres-replica-lv3`, VMID 151) and 
                     WAL shipping (synchronous)
 ```
 
-Services connect to `postgres.internal.lv3` which resolves to `10.10.10.55` (the VIP). On automatic failover, keepalived moves the VIP to the replica without any service reconfiguration.
+Services connect to `database.lv3.org`, which now resolves to `10.10.10.55` (the VIP). On automatic failover, keepalived moves the VIP to the replica without any service reconfiguration.
 
 ### Patroni
 
-Patroni is deployed on both VMs and manages the leader election and automatic failover. It requires a distributed consensus store; we use **etcd** rather than Consul or ZooKeeper because etcd is already a reasonable dependency at this scale:
+Patroni is deployed on both PostgreSQL VMs and manages leader election and automatic failover. It requires a distributed consensus store; we use **etcd** rather than Consul or ZooKeeper because etcd is already a reasonable dependency at this scale:
 
 ```
-etcd is deployed as a single-node instance on postgres-lv3.
+etcd is deployed as a three-member quorum on postgres-lv3, postgres-replica-lv3, and monitoring-lv3.
 ```
 
-Single-node etcd does not provide etcd HA, but its sole purpose is Patroni leader election. If etcd fails and the primary is still healthy, Patroni enters "pause mode" (no automatic failover, primary continues serving). Automatic failover only occurs when Postgres on the primary is genuinely unreachable. This is the correct behaviour for a two-node cluster: automatic failover requires confidence that the primary is actually down, not just that etcd is slow.
+This is the minimum quorum that allows Patroni to keep automatic failover working when either PostgreSQL VM is lost. A single-node etcd colocated only with the primary would have failed with the primary and would not have satisfied the automatic failover requirement.
 
 ### Patroni configuration extract
 
@@ -64,8 +64,8 @@ Single-node etcd does not provide etcd HA, but its sole purpose is Patroni leade
 scope: postgres-ha
 name: "{{ inventory_hostname }}"
 
-etcd:
-  host: 10.10.10.50:2379
+etcd3:
+  hosts: 10.10.10.50:2379,10.10.10.51:2379,10.10.10.40:2379
 
 bootstrap:
   dcs:
@@ -121,11 +121,11 @@ The `check_patroni_leader.sh` script returns 0 if the local node is the Patroni 
 
 ### Service connection strings
 
-All services are updated to connect to the VIP DNS name `postgres.internal.lv3` rather than the bare IP or VM name:
+All services are updated to connect to the VIP DNS name `database.lv3.org` rather than the bare node IP:
 
 ```ini
 # Example: Keycloak connection string (Ansible-templated)
-KC_DB_URL=jdbc:postgresql://postgres.internal.lv3:5432/keycloak
+KC_DB_URL=jdbc:postgresql://database.lv3.org:5432/keycloak
 ```
 
 This change is applied to: Keycloak, Mattermost, NetBox, OpenBao, Windmill.
@@ -137,8 +137,9 @@ This change is applied to: Keycloak, Mattermost, NetBox, OpenBao, Windmill.
 ### Ansible roles
 
 - New role `postgres_ha` — installs and configures Patroni + etcd on the primary and replica
-- New role `keepalived_vip` — manages the keepalived configuration and VIP
-- Existing role `postgres_lv3` is updated to deploy via `postgres_ha` on both VMs
+- New role `linux_keepalived` — manages the keepalived configuration and VIP
+- New role `etcd_cluster_member` — manages the three-member etcd quorum used by Patroni
+- The `postgres-vm` playbook is updated to deploy `postgres_ha` on both VMs
 
 ### Failover procedure
 
@@ -173,7 +174,7 @@ Switchover completes in < 5 seconds with zero transaction loss.
 **Negative / Trade-offs**
 - A second Postgres VM (`postgres-replica-lv3`) requires 8 GB RAM and 80 GB disk — a significant resource commitment on a single-host Proxmox node
 - Patroni adds configuration complexity; the `patronictl` command must be used for Postgres maintenance instead of `pg_ctl`
-- Single-node etcd means etcd failure pauses automatic failover (but does not break the primary); this is an acceptable trade-off at this scale rather than running a three-node etcd cluster
+- A third etcd quorum member now runs on `monitoring-lv3`, which expands the operational footprint beyond the original two PostgreSQL VMs
 - `synchronous_commit: on` adds ~1–2ms latency to all Postgres writes; acceptable for the application workloads in this platform
 
 ## Alternatives Considered

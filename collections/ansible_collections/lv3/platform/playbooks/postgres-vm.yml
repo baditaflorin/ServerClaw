@@ -1,5 +1,33 @@
 ---
-- name: Converge PostgreSQL VM baseline
+- name: Converge the etcd quorum member on the monitoring VM
+  hosts: "{{ 'monitoring-staging-lv3' if (env | default('production')) == 'staging' else 'monitoring-lv3' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - data
+    - service-postgres
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.monitoring[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.etcd_cluster_member
+      vars:
+        etcd_cluster_member_name: "{{ inventory_hostname }}"
+        etcd_cluster_member_host: "{{ ansible_host }}"
+        etcd_cluster_member_client_port: "{{ hostvars['proxmox_florin'].postgres_ha.dcs.client_port }}"
+        etcd_cluster_member_peer_port: "{{ hostvars['proxmox_florin'].postgres_ha.dcs.peer_port }}"
+        etcd_cluster_member_initial_cluster_token: "{{ hostvars['proxmox_florin'].postgres_ha.dcs.token }}"
+        etcd_cluster_member_cluster: "{{ hostvars['proxmox_florin'].postgres_ha.dcs.members }}"
+
+- name: Converge PostgreSQL HA
   hosts: "{{ 'postgres_guests:&staging' if (env | default('production')) == 'staging' else 'postgres_guests:&production' }}"
   become: true
   gather_facts: true
@@ -22,4 +50,12 @@
     - role: lv3.platform.linux_access
       vars:
         linux_access_admin_user: "{{ proxmox_guest_ci_user }}"
-    - role: lv3.platform.postgres_vm
+    - role: lv3.platform.etcd_cluster_member
+      vars:
+        etcd_cluster_member_name: "{{ inventory_hostname }}"
+        etcd_cluster_member_host: "{{ ansible_host }}"
+        etcd_cluster_member_client_port: "{{ hostvars['proxmox_florin'].postgres_ha.dcs.client_port }}"
+        etcd_cluster_member_peer_port: "{{ hostvars['proxmox_florin'].postgres_ha.dcs.peer_port }}"
+        etcd_cluster_member_initial_cluster_token: "{{ hostvars['proxmox_florin'].postgres_ha.dcs.token }}"
+        etcd_cluster_member_cluster: "{{ hostvars['proxmox_florin'].postgres_ha.dcs.members }}"
+    - role: lv3.platform.postgres_ha

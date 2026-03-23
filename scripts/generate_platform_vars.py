@@ -277,7 +277,9 @@ def build_service_urls(
         port_map["internal"] = ports["portainer_https_port"]
         port_map["controller"] = ports["portainer_host_proxy_port"]
     elif service_id == "postgres":
+        urls["internal"] = service_url("postgresql", service.get("public_hostname", private_ip), 5432)
         urls["controller"] = service_url("postgresql", tailscale_ipv4, 5432)
+        port_map["internal"] = 5432
         port_map["controller"] = 5432
     elif service_id == "proxmox_ui":
         urls["controller"] = service_url("https", tailscale_ipv4, 8006, "/")
@@ -305,7 +307,13 @@ def build_service_topology(
         raw_service = require_mapping(raw_service, f"host_vars.lv3_service_topology.{service_id}")
         service = copy.deepcopy(raw_service)
         owning_vm = require_string(service.get("owning_vm"), f"host_vars.lv3_service_topology.{service_id}.owning_vm")
-        private_ip = tailscale_ipv4 if owning_vm == host_id else guest_ipv4_by_name[owning_vm]
+        if "private_ip" in service:
+            private_ip = require_string(
+                service.get("private_ip"),
+                f"host_vars.lv3_service_topology.{service_id}.private_ip",
+            )
+        else:
+            private_ip = tailscale_ipv4 if owning_vm == host_id else guest_ipv4_by_name[owning_vm]
         service["service_id"] = service_id
         service["private_ip"] = private_ip
 
@@ -401,7 +409,7 @@ def build_platform_vars(
     openbao_service = service_topology["openbao"]
     platform_context_service = service_topology["platform_context_api"]
     portainer_service = service_topology["portainer"]
-    postgres_guest = guest_catalog["by_name"]["postgres-lv3"]
+    postgres_service = service_topology["postgres"]
     step_ca_service = service_topology["step_ca"]
     uptime_kuma_service = service_topology["uptime_kuma"]
     windmill_service = service_topology["windmill"]
@@ -493,7 +501,8 @@ def build_platform_vars(
         "public_edge_service_topology": copy.deepcopy(service_topology),
         "uptime_kuma_service_topology": copy.deepcopy(uptime_kuma_service),
         "hetzner_dns_records": dns_records["public"],
-        "openbao_postgres_host": postgres_guest["ipv4"],
+        "platform_postgres_host": postgres_service["public_hostname"],
+        "openbao_postgres_host": postgres_service["public_hostname"],
         "openbao_controller_url": openbao_service["urls"]["controller"],
         "netbox_host_proxy_port": resolved_ports["netbox_host_proxy_port"],
         "netbox_controller_url": netbox_service["urls"]["controller"],

@@ -60,6 +60,7 @@ desired_state:
     docker_build_vm: 10.10.10.30
     monitoring_vm: 10.10.10.40
     postgres_vm: 10.10.10.50
+    postgres_replica_vm: 10.10.10.51
     backup_vm: 10.10.10.60
   guest_provisioning:
     template_vmid: 9000
@@ -70,6 +71,7 @@ desired_state:
       docker_build_vm: 130
       monitoring_vm: 140
       postgres_vm: 150
+      postgres_replica_vm: 151
       backup_vm: 160
   traffic_model:
     guest_default_gateway: 10.10.10.1
@@ -497,6 +499,10 @@ observed_state:
         name: postgres-lv3
         ipv4: 10.10.10.50
         running: true
+      - vmid: 151
+        name: postgres-replica-lv3
+        ipv4: 10.10.10.51
+        running: false
       - vmid: 160
         name: backup-lv3
         ipv4: 10.10.10.60
@@ -803,7 +809,7 @@ observed_state:
     guest_firewall_enabled: true
     tailscale_proxy_host: 100.118.189.95:5432
     dns_name: database.lv3.org
-    dns_resolves_to_tailscale_ip: true
+    dns_resolves_to_tailscale_ip: false
     public_ipv4_reachable: false
   backups:
     configured: true

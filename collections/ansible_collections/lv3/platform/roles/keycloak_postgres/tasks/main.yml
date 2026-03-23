@@ -17,31 +17,6 @@
     group: postgres
     mode: "0750"
 
-- name: Generate the Keycloak database password
-  ansible.builtin.shell: |
-    set -euo pipefail
-    if [ ! -s "{{ keycloak_postgres_password_file }}" ]; then
-      umask 077
-      openssl rand -base64 24 | tr -d '\n' > "{{ keycloak_postgres_password_file }}"
-      echo changed
-    fi
-  args:
-    executable: /bin/bash
-  register: keycloak_postgres_password_generation
-  changed_when: "'changed' in keycloak_postgres_password_generation.stdout"
-  no_log: true
-
-- name: Read the Keycloak database password
-  ansible.builtin.slurp:
-    src: "{{ keycloak_postgres_password_file }}"
-  register: keycloak_postgres_password_raw
-  no_log: true
-
-- name: Record the Keycloak database password
-  ansible.builtin.set_fact:
-    keycloak_database_password: "{{ keycloak_postgres_password_raw.content | b64decode | trim }}"
-  no_log: true
-
 - name: Ensure the local Keycloak artifact directory exists
   ansible.builtin.file:
     path: "{{ keycloak_local_artifact_dir }}"
@@ -49,6 +24,35 @@
     mode: "0700"
   delegate_to: localhost
   become: false
+
+- name: Generate the Keycloak database password
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ keycloak_database_password_local_file }}" ]; then
+      umask 077
+      openssl rand -base64 24 | tr -d '\n' > "{{ keycloak_database_password_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: keycloak_postgres_password_generation
+  changed_when: "'changed' in keycloak_postgres_password_generation.stdout"
+  no_log: true
+
+- name: Read the Keycloak database password
+  ansible.builtin.slurp:
+    src: "{{ keycloak_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: keycloak_postgres_password_raw
+  no_log: true
+
+- name: Record the Keycloak database password
+  ansible.builtin.set_fact:
+    keycloak_database_password: "{{ keycloak_postgres_password_raw.content | b64decode | trim }}"
+  no_log: true
 
 - name: Mirror the Keycloak database password to the control machine
   ansible.builtin.copy:
@@ -58,6 +62,26 @@
   delegate_to: localhost
   become: false
   no_log: true
+
+- name: Persist the Keycloak database password on the current guest
+  ansible.builtin.copy:
+    dest: "{{ keycloak_postgres_password_file }}"
+    content: "{{ keycloak_database_password }}\n"
+    owner: root
+    group: postgres
+    mode: "0640"
+  no_log: true
+
+- name: Check whether the local PostgreSQL member is writable
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT CASE WHEN pg_is_in_recovery() THEN 0 ELSE 1 END"
+  register: keycloak_postgres_writable_check
+  changed_when: false
 
 - name: Check whether the Keycloak database role already exists
   become: true
@@ -69,6 +93,7 @@
       - "SELECT 1 FROM pg_roles WHERE rolname = '{{ keycloak_database_user }}'"
   register: keycloak_postgres_role_check
   changed_when: false
+  when: keycloak_postgres_writable_check.stdout | trim == "1"
 
 - name: Create the Keycloak database role
   become: true
@@ -80,9 +105,11 @@
       - ON_ERROR_STOP=1
       - -c
       - "CREATE ROLE {{ keycloak_database_user }} LOGIN PASSWORD '{{ keycloak_database_password }}'"
-  when: keycloak_postgres_role_check.stdout != "1"
   changed_when: true
   no_log: true
+  when:
+    - keycloak_postgres_writable_check.stdout | trim == "1"
+    - keycloak_postgres_role_check.stdout != "1"
 
 - name: Check whether the Keycloak PostgreSQL database already exists
   become: true
@@ -94,6 +121,7 @@
       - "SELECT 1 FROM pg_database WHERE datname = '{{ keycloak_database_name }}'"
   register: keycloak_postgres_database_check
   changed_when: false
+  when: keycloak_postgres_writable_check.stdout | trim == "1"
 
 - name: Create the Keycloak PostgreSQL database
   become: true
@@ -105,7 +133,9 @@
       - ON_ERROR_STOP=1
       - -c
       - "CREATE DATABASE {{ keycloak_database_name }} OWNER {{ keycloak_database_user }}"
-  when: keycloak_postgres_database_check.stdout != "1"
+  when:
+    - keycloak_postgres_writable_check.stdout | trim == "1"
+    - keycloak_postgres_database_check.stdout != "1"
   changed_when: true
 
 - name: Ensure the Keycloak database owner is correct
@@ -119,3 +149,4 @@
       - -c
       - "ALTER DATABASE {{ keycloak_database_name }} OWNER TO {{ keycloak_database_user }}"
   changed_when: false
+  when: keycloak_postgres_writable_check.stdout | trim == "1"

@@ -1498,7 +1498,7 @@
       ]
     },
     "database-dns": {
-      "description": "Publish the private database.lv3.org DNS record toward the Proxmox Tailscale address.",
+      "description": "Publish the private database.lv3.org DNS record toward the Patroni-managed PostgreSQL VIP.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -1515,14 +1515,14 @@
         "validate"
       ],
       "live_impact": "external_live",
-      "owner_runbook": "docs/runbooks/configure-postgres-vm.md",
+      "owner_runbook": "docs/runbooks/postgres-failover.md",
       "implementation_refs": [
         "Makefile",
         "playbooks/database-dns.yml",
         "roles/hetzner_dns_record/tasks/main.yml"
       ],
       "outputs": [
-        "database.lv3.org DNS record updated to the private Proxmox host Tailscale address."
+        "database.lv3.org DNS record updated to the private PostgreSQL VIP."
       ],
       "verification_commands": [
         "dig +short database.lv3.org"

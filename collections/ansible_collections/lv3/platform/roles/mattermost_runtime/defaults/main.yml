@@ -18,7 +18,7 @@ mattermost_host_proxy_port: "{{ platform_service_topology | platform_service_por
 mattermost_image: mattermost/mattermost-team-edition:release-10.11
 mattermost_database_name: mattermost
 mattermost_database_user: mattermost_admin
-mattermost_database_host: "{{ platform_guest_catalog.by_name | platform_guest_attr('postgres-lv3', 'ipv4') }}"
+mattermost_database_host: "{{ (hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('postgres')).public_hostname }}"
 mattermost_database_port: 5432
 mattermost_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mattermost/database-password.txt
 mattermost_admin_username: ops

@@ -1,0 +1,73 @@
+scope: {{ postgres_ha_cluster.scope | to_json }}
+name: {{ inventory_hostname | to_json }}
+
+restapi:
+  listen: "0.0.0.0:{{ postgres_ha_cluster.patroni_rest_port }}"
+  connect_address: "{{ ansible_host }}:{{ postgres_ha_cluster.patroni_rest_port }}"
+
+etcd3:
+  hosts: {{ postgres_ha_etcd_hosts | to_json }}
+
+bootstrap:
+  dcs:
+    ttl: {{ postgres_ha_cluster.patroni.ttl }}
+    loop_wait: {{ postgres_ha_cluster.patroni.loop_wait }}
+    retry_timeout: {{ postgres_ha_cluster.patroni.retry_timeout }}
+    maximum_lag_on_failover: {{ postgres_ha_cluster.patroni.maximum_lag_on_failover }}
+    synchronous_mode: {{ postgres_ha_cluster.patroni.synchronous_mode | to_json }}
+    synchronous_mode_strict: {{ postgres_ha_cluster.patroni.synchronous_mode_strict | to_json }}
+    postgresql:
+      use_pg_rewind: true
+      parameters:
+        wal_level: replica
+        hot_standby: "on"
+        max_wal_senders: 10
+        max_replication_slots: 10
+        synchronous_commit: "on"
+        synchronous_standby_names: "*"
+  initdb:
+    - auth-host: scram-sha-256
+    - auth-local: peer
+    - data-checksums
+  users:
+    {{ postgres_ha_cluster.users.superuser }}:
+      password: {{ postgres_ha_superuser_password | to_json }}
+      options:
+        - createrole
+        - createdb
+
+postgresql:
+  listen: "0.0.0.0:{{ postgres_ha_cluster.postgres_port }}"
+  connect_address: "{{ ansible_host }}:{{ postgres_ha_cluster.postgres_port }}"
+  data_dir: {{ postgres_ha_pg_data_dir | to_json }}
+  bin_dir: {{ postgres_ha_pg_bin_dir | to_json }}
+  config_dir: {{ postgres_ha_cluster_conf_dir | to_json }}
+  pgpass: "{{ postgres_ha_state_dir }}/pgpass"
+  authentication:
+    superuser:
+      username: {{ postgres_ha_cluster.users.superuser | to_json }}
+      password: {{ postgres_ha_superuser_password | to_json }}
+    replication:
+      username: {{ postgres_ha_cluster.users.replicator | to_json }}
+      password: {{ postgres_ha_replicator_password | to_json }}
+  parameters:
+    wal_level: replica
+    hot_standby: "on"
+    max_wal_senders: 10
+    max_replication_slots: 10
+    synchronous_commit: "on"
+    synchronous_standby_names: "*"
+  pg_hba:
+    - local   all             postgres                                    peer
+    - local   all             {{ proxmox_guest_ci_user }}                 peer
+    - local   all             all                                         peer
+    - host    all             all             127.0.0.1/32                scram-sha-256
+    - host    all             all             ::1/128                     scram-sha-256
+    - host    replication     {{ postgres_ha_cluster.users.replicator }}  {{ platform_host.network.internal_network }}  scram-sha-256
+    - host    all             all             {{ platform_host.network.internal_network }}  scram-sha-256
+
+tags:
+  nofailover: false
+  noloadbalance: false
+  clonefrom: false
+  nosync: false

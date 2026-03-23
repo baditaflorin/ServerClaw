@@ -1,0 +1,59 @@
+#!/usr/bin/env python3
+import json
+import sys
+import urllib.request
+
+URL = "http://127.0.0.1:{{ postgres_ha_cluster.patroni_rest_port }}/patroni"
+HOST = "{{ inventory_hostname }}"
+CLUSTER = "{{ postgres_ha_cluster.scope }}"
+
+
+def metric_line(fields):
+    rendered = []
+    for key, value in fields.items():
+        if isinstance(value, bool):
+            rendered.append(f"{key}={1 if value else 0}i")
+        elif isinstance(value, int):
+            rendered.append(f"{key}={value}i")
+        elif isinstance(value, float):
+            rendered.append(f"{key}={value}")
+        else:
+            rendered.append(f'{key}="{value}"')
+    return f"postgres_ha,host={HOST},cluster={CLUSTER} " + ",".join(rendered)
+
+
+def main():
+    try:
+        with urllib.request.urlopen(URL, timeout=2) as response:
+            payload = json.load(response)
+    except Exception:
+        print(metric_line({"reachable": 0, "leader": 0, "replica": 0, "lag_bytes": 0, "state": "down"}))
+        return 0
+
+    role = payload.get("role", "unknown")
+    state = payload.get("state", "unknown")
+    xlog = payload.get("xlog", {})
+    lag_bytes = 0
+    if isinstance(payload.get("replication"), list) and payload["replication"]:
+        lag_bytes = int(payload["replication"][0].get("lag", 0))
+    elif "received_location" in xlog and "replayed_location" in xlog:
+        lag_bytes = 0
+
+    print(
+        metric_line(
+            {
+                "reachable": 1,
+                "leader": role == "leader",
+                "replica": role == "replica",
+                "lag_bytes": lag_bytes,
+                "pending_restart": bool(payload.get("pending_restart", False)),
+                "state": state,
+                "role": role,
+            }
+        )
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

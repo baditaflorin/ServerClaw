@@ -1,0 +1,45 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the LV3 Patroni-based PostgreSQL HA pair.
+    options:
+      postgres_ha_packages:
+        type: list
+        elements: str
+        required: true
+      postgres_ha_state_dir:
+        type: path
+        required: true
+      postgres_ha_patroni_config_file:
+        type: path
+        required: true
+      postgres_ha_patroni_service_name:
+        type: str
+        required: true
+      postgres_ha_patroni_service_file:
+        type: path
+        required: true
+      postgres_ha_telegraf_config_file:
+        type: path
+        required: true
+      postgres_ha_metrics_script:
+        type: path
+        required: true
+      postgres_ha_local_artifact_dir:
+        type: path
+        required: true
+      postgres_ha_superuser_password_local_file:
+        type: path
+        required: true
+      postgres_ha_replicator_password_local_file:
+        type: path
+        required: true
+      postgres_ha_superuser_password_file:
+        type: path
+        required: true
+      postgres_ha_replicator_password_file:
+        type: path
+        required: true
+      postgres_ha_postgresql_service_name:
+        type: str
+        required: true
