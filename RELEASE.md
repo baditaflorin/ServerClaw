@@ -1,13 +1,13 @@
-# Release 0.110.0
+# Release 0.112.0
 
 - Date: 2026-03-24
 
 ## Summary
-- implemented ADR 0115 on current mainline with the `ledger.events` Postgres migration, the `platform.ledger` writer/reader/replay package, the `windmill/ledger/migrate-audit-log.py` migration helper, and optional dual-write from `scripts/mutation_audit.py` when `LV3_LEDGER_DSN` is configured
-- added the mutation-ledger operator runbook, registered the ADR 0115 workstream in `workstreams.yaml`, and marked ADR 0115 plus its workstream as implemented in repo version `0.110.0`
+- Added ADR 0116 deterministic workflow risk scoring, compiled intent output, and `AUTO` / `SOFT` / `HARD` / `BLOCK` gating to `lv3 run`.
+- Added repo-managed risk scoring weights, fallback overrides, and a Windmill-compatible calibration script for tuning false positive and false negative rates.
 
 ## Platform Impact
-- no live platform version bump; this release updates repository automation, release metadata, and operator tooling only
+- Added deterministic workflow risk scoring and lv3 run approval gates.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Implementation Status: Implemented
-- Implemented In Repo Version: 0.112.0
+- Implemented In Repo Version: 0.113.0
 - Implemented In Platform Version: not yet
 - Implemented On: 2026-03-24
 - Date: 2026-03-24
@@ -118,7 +118,7 @@ The client is available to Windmill workflows, the platform CLI, and the agent o
 
 ## Implementation Notes
 
-- Repository implementation landed in `0.112.0` with the shared [platform/world_state/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/world_state) package, the Postgres schema migration at [migrations/0010_world_state_schema.sql](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/migrations/0010_world_state_schema.sql), the seeded Windmill workers under [config/windmill/scripts/world-state/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/world-state), and schedule registration through [collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml).
+- Repository implementation landed in `0.113.0` with the shared [platform/world_state/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/world_state) package, the Postgres schema migration at [migrations/0010_world_state_schema.sql](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/migrations/0010_world_state_schema.sql), the seeded Windmill workers under [config/windmill/scripts/world-state/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/world-state), and schedule registration through [collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml).
 - The repository now seeds all ADR 0113 workers and schedules, but live Windmill enablement and the first Postgres migration/apply remain platform-version work and therefore do not bump `platform_version` yet.
 
 ## Consequences

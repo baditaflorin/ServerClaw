@@ -23,8 +23,14 @@ from pathlib import Path
 from typing import Any, Iterable
 
 from dependency_graph import dependency_summary, load_dependency_graph
+import yaml
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from scripts.risk_scorer import ExecutionIntent, assemble_context, compile_workflow_intent, score_intent
+
 CLI_VERSION = "0.1.0"
 DEFAULT_STATUS_TIMEOUT_SECONDS = 3.0
 DEFAULT_LOG_LINES = 20
@@ -460,14 +466,71 @@ def parse_kv_pairs(pairs: list[str]) -> dict[str, Any]:
     return payload
 
 
-def run_windmill_workflow(workflow_name: str, args: list[str], *, dry_run: bool, explain: bool, no_color: bool) -> int:
+def build_execution_intent(workflow_name: str, args: list[str]) -> ExecutionIntent:
+    payload = parse_kv_pairs(args)
+    compiled = compile_workflow_intent(workflow_name, payload, repo_root=REPO_ROOT)
+    context = assemble_context(compiled, repo_root=REPO_ROOT)
+    risk = score_intent(compiled, context, repo_root=REPO_ROOT)
+    return ExecutionIntent(
+        workflow_id=compiled["workflow_id"],
+        workflow_description=compiled["workflow_description"],
+        arguments=payload,
+        live_impact=compiled["live_impact"],
+        target_service_id=compiled["target_service_id"],
+        target_vm=compiled["target_vm"],
+        rule_risk_class=compiled["rule_risk_class"],
+        computed_risk_class=risk.risk_class,
+        final_risk_class=risk.final_risk_class,
+        requires_approval=risk.approval_gate in {"HARD", "BLOCK"},
+        rollback_verified=compiled["rollback_verified"],
+        expected_change_count=compiled["expected_change_count"],
+        scoring_context=context.as_dict(),
+        risk_score=risk,
+    )
+
+
+def print_compiled_intent(intent: ExecutionIntent) -> None:
+    print("Compiled intent:")
+    print(yaml.safe_dump(intent.as_dict(), sort_keys=False, default_flow_style=False).rstrip())
+
+
+def enforce_risk_gate(intent: ExecutionIntent, *, approve_risk: bool, risk_override: bool) -> int:
+    if intent.risk_score.approval_gate == "BLOCK" and not risk_override:
+        print(
+            f"Risk gate BLOCK: {intent.workflow_id} scored {intent.risk_score.score:.1f} "
+            f"({intent.final_risk_class.value}). Re-run with --risk-override to proceed.",
+            file=sys.stderr,
+        )
+        return 2
+    if intent.risk_score.approval_gate == "HARD" and not approve_risk:
+        print(
+            f"Risk gate HARD: {intent.workflow_id} scored {intent.risk_score.score:.1f} "
+            f"({intent.final_risk_class.value}). Re-run with --approve-risk to proceed.",
+            file=sys.stderr,
+        )
+        return 2
+    return 0
+
+
+def run_windmill_workflow(
+    workflow_name: str,
+    args: list[str],
+    *,
+    dry_run: bool,
+    explain: bool,
+    no_color: bool,
+    approve_risk: bool = False,
+    risk_override: bool = False,
+) -> int:
     service_map = load_service_map()
     base_url = windmill_url(service_map)
     token = load_secret_file("windmill_superadmin_secret")
     script_path = workflow_name if "/" in workflow_name else f"f/lv3/{workflow_name}"
     encoded_path = urllib.parse.quote(script_path, safe="")
     url = f"{base_url}/api/w/lv3/jobs/run_wait_result/p/{encoded_path}"
-    payload = json.dumps(parse_kv_pairs(args)).encode("utf-8")
+    intent = build_execution_intent(workflow_name, args)
+    payload = json.dumps(intent.arguments).encode("utf-8")
+    print_compiled_intent(intent)
     plan = CommandPlan(
         label=f"run {workflow_name}",
         route="controller -> Windmill API",
@@ -487,6 +550,9 @@ def run_windmill_workflow(workflow_name: str, args: list[str], *, dry_run: bool,
     print_plan(plan, no_color=no_color)
     if dry_run or explain:
         return 0
+    blocked = enforce_risk_gate(intent, approve_risk=approve_risk, risk_override=risk_override)
+    if blocked:
+        return blocked
 
     request = urllib.request.Request(
         url,
@@ -1059,6 +1125,8 @@ def build_parser() -> argparse.ArgumentParser:
     run = subparsers.add_parser("run", help="Trigger one Windmill workflow.")
     run.add_argument("workflow")
     run.add_argument("--args", nargs="*", default=[])
+    run.add_argument("--approve-risk", action="store_true", help="Acknowledge a HIGH risk score and proceed.")
+    run.add_argument("--risk-override", action="store_true", help="Override a BLOCK gate for a CRITICAL risk score.")
     run.add_argument("--dry-run", action="store_true")
     run.add_argument("--explain", action="store_true")
 
@@ -1199,7 +1267,15 @@ def main(argv: list[str] | None = None) -> int:
             no_color=no_color,
         )
     if args.command == "run":
-        return run_windmill_workflow(args.workflow, args.args, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
+        return run_windmill_workflow(
+            args.workflow,
+            args.args,
+            dry_run=args.dry_run,
+            explain=args.explain,
+            no_color=no_color,
+            approve_risk=args.approve_risk,
+            risk_override=args.risk_override,
+        )
     if args.command == "logs":
         return logs_command(args.service, tail=args.tail, since=args.since, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
     if args.command == "ssh":

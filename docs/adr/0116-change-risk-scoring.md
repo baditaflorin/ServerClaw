@@ -1,10 +1,10 @@
 # ADR 0116: Change Risk Scoring Without LLMs
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.112.0
+- Implemented In Platform Version: not applicable (repo-only)
+- Implemented On: 2026-03-24
 - Date: 2026-03-24
 
 ## Context
@@ -20,7 +20,9 @@ Risk scoring is critical for two platform capabilities:
 
 ## Decision
 
-We will implement a **deterministic change risk scoring engine** as a Python module `platform/risk_scorer/` that computes a numeric risk score (0–100) and a derived `RiskClass` (LOW / MEDIUM / HIGH / CRITICAL) for every compiled `ExecutionIntent`.
+We will implement a **deterministic change risk scoring engine** as a Python module at `scripts/risk_scorer/` that computes a numeric risk score (0–100) and a derived `RiskClass` (LOW / MEDIUM / HIGH / CRITICAL) for every compiled `ExecutionIntent`.
+
+The ADR originally proposed a top-level Python package named `platform/`. In this repository that would shadow Python's standard-library `platform` module under normal test and CLI execution. The implemented path therefore uses `scripts/risk_scorer/` while keeping the scoring contract, weights, and context model described below.
 
 ### Scoring dimensions
 
@@ -40,7 +42,7 @@ Each dimension contributes a weighted sub-score. Weights are configured in `conf
 ### Scoring formula
 
 ```python
-# platform/risk_scorer/engine.py
+# scripts/risk_scorer/engine.py
 
 def score_intent(intent: ExecutionIntent, ctx: ScoringContext) -> RiskScore:
     weights = load_weights("config/risk-scoring-weights.yaml")
@@ -67,11 +69,21 @@ def score_intent(intent: ExecutionIntent, ctx: ScoringContext) -> RiskScore:
     )
 ```
 
-The score is deterministic for the same input context. A scoring context snapshot is embedded in the `ExecutionIntent` before compilation completes so that risk scores are reproducible during audit and replay.
+The score is deterministic for the same input context. A scoring context snapshot is embedded in the compiled `ExecutionIntent` summary so that risk scores are reproducible during audit and replay.
 
-### Integration with the goal compiler
+### Integration with `lv3 run`
 
-After compilation, the goal compiler calls the risk scorer with the assembled context. If the scorer returns a higher risk class than the static rule table assigned, the scorer's value wins. The intent is updated with both the `rule_risk_class` (from the rule table) and the `computed_risk_class` (from the scorer); both are recorded in the ledger.
+The current repository does not yet ship the ADR 0112 goal-compiler runtime. The implemented integration point is therefore the existing `lv3 run <workflow>` CLI path from ADR 0090.
+
+Before the CLI calls the Windmill API, it now:
+
+1. builds a typed `ExecutionIntent` for the requested workflow invocation
+2. assembles a deterministic scoring context from repo-managed catalogs, live-apply receipts, and maintenance-window state
+3. computes both the static rule risk class and the numeric risk score
+4. displays the compiled intent YAML including the scoring context and risk breakdown
+5. enforces the stricter of the rule-derived and computed risk classes before submitting the workflow
+
+If the scorer returns a higher risk class than the rule table assigned from `live_impact`, the scorer's value wins. The compiled summary records both `rule_risk_class` and `computed_risk_class`.
 
 ### Approval thresholds
 
@@ -86,12 +98,12 @@ approval_thresholds:
 
 ### Score calibration
 
-A weekly Windmill workflow queries the ledger for all changes executed in the past 30 days, joins them with their risk scores, and computes:
+A Windmill-compatible calibration script at `config/windmill/scripts/calibrate-risk-scoring.py` queries recent live-apply receipts from the repository, recomputes their scores, and computes:
 
 - **False negative rate**: fraction of LOW-scored changes that resulted in an incident.
 - **False positive rate**: fraction of CRITICAL-scored changes that succeeded without incident.
 
-These rates are posted to Mattermost `#platform-ops` and used by the operator to adjust weights. Weight adjustments are committed to `config/risk-scoring-weights.yaml` via the normal ADR/PR process.
+These rates can be posted to Mattermost `#platform-ops` and are used by the operator to adjust weights. Weight adjustments are committed to `config/risk-scoring-weights.yaml` via the normal ADR/PR process.
 
 ## Consequences
 
@@ -105,13 +117,13 @@ These rates are posted to Mattermost `#platform-ops` and used by the operator to
 **Negative / Trade-offs**
 
 - Initial scoring weights will be wrong. The first 30–60 days of operation will require regular weight tuning as false positive and negative rates surface.
-- The mutation surface dimension (number of expected changes) depends on the dry-run diff engine (ADR 0120), which may not have complete adapters at launch; missing adapters default to a mid-range score contribution.
-- If the world-state materializer (ADR 0113) has stale data, the scoring context will be stale and risk scores may be under-estimated. The scorer must mark scores as `stale: true` when the input context is stale.
+- The mutation surface dimension (number of expected changes) still depends on ADR 0120 for exact semantic diffs. Until that runtime exists, the scorer uses repo-managed defaults and workflow-specific overrides.
+- The dependency fanout dimension still depends on ADR 0117 for live graph traversal. Until that runtime exists, the scorer uses `config/risk-scoring-overrides.yaml` fallback counts and marks the context as stale when a canonical signal is unavailable.
 
 ## Boundaries
 
 - The risk scorer is a pure function of its input context. It does not modify any platform state.
-- It does not call any external API at scoring time; all data is pre-assembled by the goal compiler from the world-state materializer.
+- It does not call the Windmill API or mutate target services while scoring. Context is assembled from repository data, local receipt history, and the maintenance-window query surface.
 - It does not use any LLM or statistical model. Scores are computed by weighted arithmetic over well-defined scalar inputs.
 
 ## Related ADRs

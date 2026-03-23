@@ -156,6 +156,8 @@ all:
             {
                 "workflows": {
                     "windmill_healthcheck": {"description": "Healthcheck"},
+                    "operator-onboard": {"description": "Operator onboarding", "live_impact": "guest_live"},
+                    "operator-offboard": {"description": "Operator offboarding", "live_impact": "guest_live"},
                     "disaster-recovery-runbook": {"description": "DR runbook"},
                 }
             },
