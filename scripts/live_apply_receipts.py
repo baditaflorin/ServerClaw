@@ -20,6 +20,7 @@ from workflow_catalog import load_workflow_catalog, load_secret_manifest, valida
 SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 COMMIT_HASH_PATTERN = re.compile(r"^[0-9a-f]{7,64}$")
+LEGACY_WORKFLOW_ID_PATTERN = re.compile(r"^adr-\d{4}-[a-z0-9-]+-live-apply$")
 ALLOWED_RESULTS = {"pass", "partial", "fail"}
 ALLOWED_ENVIRONMENTS = {"production", "staging"}
 
@@ -115,7 +116,10 @@ def validate_receipt(receipt: dict, path: Path, workflow_catalog: dict) -> None:
             f"{path.name}: environment '{environment}' does not match receipt path environment '{derived_environment}'"
         )
 
-    if receipt["workflow_id"] not in workflow_catalog["workflows"]:
+    if (
+        receipt["workflow_id"] not in workflow_catalog["workflows"]
+        and not LEGACY_WORKFLOW_ID_PATTERN.fullmatch(receipt["workflow_id"])
+    ):
         raise ValueError(
             f"{path.name}: workflow_id '{receipt['workflow_id']}' is not in {WORKFLOW_CATALOG_PATH.name}"
         )

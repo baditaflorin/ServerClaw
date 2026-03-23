@@ -371,6 +371,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Staging And Production Topology](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/staging-and-production-topology.md)
 - [Subdomain Governance](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/subdomain-governance.md)
 - [Validate Repository Automation Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/validate-repository-automation.md)
+- [Validation Gate Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/validation-gate.md)
 - [Workflow Catalog And Execution Contracts](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/workflow-catalog-and-execution-contracts.md)
 
 ### ADRs
@@ -644,6 +645,7 @@ This repository is intentionally opinionated:
 | `0082` | Remote build execution gateway | `live_applied` | [adr-0082-remote-build-gateway.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0082-remote-build-gateway.md) |
 | `0083` | Docker-based check runner | `merged` | [adr-0083-docker-check-runner.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0083-docker-check-runner.md) |
 | `0086` | Ansible collection packaging | `merged` | [adr-0086-ansible-collections.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0086-ansible-collections.md) |
+| `0087` | Repository validation gate | `merged` | [adr-0087-validation-gate.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0087-validation-gate.md) |
 | `0089` | Build artifact cache and layer registry | `merged` | [adr-0089-build-cache.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0089-build-cache.md) |
 | `0090` | Unified platform CLI | `merged` | [adr-0090-platform-cli.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0090-platform-cli.md) |
 <!-- END GENERATED: merged-workstreams -->

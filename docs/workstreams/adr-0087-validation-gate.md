@@ -2,12 +2,12 @@
 
 - ADR: [ADR 0087](../adr/0087-repository-validation-gate.md)
 - Title: Two-layer push gate — fast local pre-commit + remote parallel check suite — blocking broken code from reaching main
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0087-validation-gate`
 - Worktree: `../proxmox_florin_server-validation-gate`
 - Owner: codex
 - Depends On: `adr-0082-remote-build-gateway`, `adr-0083-docker-check-runner`
-- Conflicts With: `.pre-commit-config.yaml` changes in other open branches
+- Conflicts With: none
 - Shared Surfaces: `.pre-commit-config.yaml`, `Makefile`, `scripts/`, `config/`
 
 ## Scope
@@ -62,8 +62,8 @@
 - the gate blocks at least one known-bad input (tested with synthetic violations)
 - `config/validation-gate.json` covers all 8 checks documented in the ADR
 
-## Notes For The Next Assistant
+## Outcome
 
-- `gitleaks` needs a `.gitleaks.toml` config file to exclude known false-positive patterns (Ansible vault ciphertext headers, test fixture API keys); write this alongside the `.pre-commit-config.yaml` update
-- the `run_gate.py` parallel runner should print a live progress indicator (spinner per check) so the operator sees checks are running, not hanging
-- `make gate-status` should read the last `receipts/gate-bypasses/` entry and the last Windmill `post-merge-gate` run result, so the operator can see the current health of the gate in one command
+- repository implementation is complete on `main` in repo release `0.91.0`
+- the hook install path, remote-first pre-push gate, explicit bypass receipts, and Windmill post-merge workflow all now share the same `config/validation-gate.json` manifest
+- no live platform version change is claimed; this workstream is repository-only

@@ -1,1 +1,1 @@
-"""Repository script package."""
+"""Repository scripts package."""

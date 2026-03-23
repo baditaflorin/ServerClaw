@@ -1,10 +1,10 @@
 # ADR 0087: Repository Validation Gate (Pre-Push and CI)
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.91.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-23
 - Date: 2026-03-22
 
 ## Context
@@ -87,11 +87,11 @@ Installs the pre-push hook and verifies connectivity to `build-lv3`. Run once af
 ### Bypass escape hatch
 
 ```bash
-git push --no-verify       # skips pre-commit AND pre-push gate
+git push --no-verify         # skips pre-commit AND pre-push gate
 SKIP_REMOTE_GATE=1 git push  # skips remote gate only (pre-commit still runs)
 ```
 
-Both bypasses are logged: the bypass is recorded in `receipts/gate-bypasses/YYYY-MM-DD-<hash>.json` via a `post-commit` hook that detects the skip flag. This creates an audit trail without blocking emergency deployments.
+`SKIP_REMOTE_GATE=1` is logged explicitly in `receipts/gate-bypasses/`. Native Git hooks cannot observe `git push --no-verify` after the fact, so that path remains unaudited break-glass and must be recorded manually in the change notes when used.
 
 ### Windmill post-merge CI
 
@@ -123,11 +123,12 @@ This file is the authoritative definition consumed by both `scripts/remote_exec.
 - Every push to any branch is validated before it reaches `main`; broken state on `main` becomes an exception, not the norm
 - Two-layer design keeps the local pre-commit hook near-instant (< 5 s) while the thorough checks run remotely (< 18 s)
 - `config/validation-gate.json` ensures the pre-push gate and Windmill CI are identical — no "passes locally, fails in CI" class of bugs
-- Bypass logging provides an audit trail for emergency bypasses without blocking them
+- Explicit `SKIP_REMOTE_GATE=1` bypass logging provides an audit trail without blocking emergency pushes
 
 **Negative / Trade-offs**
 - `make install-hooks` must be run after cloning; it is not automatic; a new contributor can push without the gate until they run `make setup`
 - `SKIP_REMOTE_GATE=1` is an honour-system bypass; a determined person can always skip it — this is acceptable for a small team
+- `git push --no-verify` cannot be audit-logged by native hooks; the repo documents that limitation instead of pretending it is solved
 - Build server reachability is required for the full gate; fallback to local Docker is slower but available
 
 ## Alternatives Considered

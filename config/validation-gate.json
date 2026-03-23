@@ -1,0 +1,70 @@
+{
+  "ansible-lint": {
+    "description": "Run the repo-managed ansible-lint policy against playbooks and the packaged collection.",
+    "severity": "error",
+    "image": "registry.lv3.org/check-runner/ansible:2.17.10",
+    "command": "export ANSIBLE_CONFIG=/workspace/ansible.cfg; export ANSIBLE_COLLECTIONS_PATH=/workspace/collections${LV3_ANSIBLE_COLLECTIONS_DIR:+:$LV3_ANSIBLE_COLLECTIONS_DIR}; ANSIBLE_LINT_NODEPS=1 ansible-lint playbooks collections/ansible_collections/lv3/platform",
+    "working_dir": "/workspace",
+    "timeout_seconds": 300,
+    "cache_mounts": ["ansible_collections"]
+  },
+  "ansible-syntax": {
+    "description": "Syntax check every tracked playbook outside the shared playbook task includes.",
+    "severity": "error",
+    "image": "registry.lv3.org/check-runner/ansible:2.17.10",
+    "command": "export ANSIBLE_CONFIG=/workspace/ansible.cfg; export ANSIBLE_COLLECTIONS_PATH=/workspace/collections${LV3_ANSIBLE_COLLECTIONS_DIR:+:$LV3_ANSIBLE_COLLECTIONS_DIR}; for playbook in $(git -C /workspace ls-files 'playbooks/*.yml' 'playbooks/groups/*.yml' 'playbooks/services/*.yml' | awk -F/ '$1 == \"playbooks\" && $2 != \"tasks\" { print }'); do ansible-playbook -i inventory/hosts.yml \"$playbook\" --syntax-check >/dev/null; done",
+    "working_dir": "/workspace",
+    "timeout_seconds": 300,
+    "cache_mounts": ["ansible_collections"]
+  },
+  "packer-validate": {
+    "description": "Validate all Packer templates when the repo carries them; otherwise report a no-op pass.",
+    "severity": "error",
+    "image": "registry.lv3.org/check-runner/infra:2026.03.23",
+    "command": "if [ -d packer ] && find packer -name '*.pkr.hcl' -print -quit | grep -q .; then packer validate packer; else echo 'No packer templates present'; fi",
+    "working_dir": "/workspace",
+    "timeout_seconds": 120
+  },
+  "schema-validation": {
+    "description": "Validate canonical repository data models, cross references, and receipt schemas.",
+    "severity": "error",
+    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "command": "python scripts/validate_repository_data_models.py --validate >/dev/null && python scripts/service_catalog.py --validate >/dev/null && python scripts/environment_topology.py --validate >/dev/null && python scripts/subdomain_catalog.py --validate >/dev/null && ./scripts/agent_tool_registry.py --export-mcp >/dev/null && python scripts/mutation_audit.py --validate-schema >/dev/null",
+    "working_dir": "/workspace",
+    "timeout_seconds": 180
+  },
+  "security-scan": {
+    "description": "Run the repository filesystem through the pinned Trivy security scan policy.",
+    "severity": "error",
+    "image": "registry.lv3.org/check-runner/security:2026.03.23",
+    "command": "trivy fs --scanners misconfig,secret --skip-db-update --skip-dirs .git --skip-dirs .worktrees --skip-files docker/check-runners/ansible/Dockerfile --skip-files docker/check-runners/infra/Dockerfile --skip-files docker/check-runners/python/Dockerfile --skip-files docker/check-runners/security/Dockerfile --exit-code 1 --severity HIGH,CRITICAL .",
+    "working_dir": "/workspace",
+    "timeout_seconds": 240,
+    "cache_mounts": ["trivy"]
+  },
+  "tofu-validate": {
+    "description": "Validate OpenTofu configuration if the repo carries a tofu root; otherwise report a no-op pass.",
+    "severity": "error",
+    "image": "registry.lv3.org/check-runner/infra:2026.03.23",
+    "command": "if [ -d tofu ]; then tofu -chdir=tofu validate; else echo 'No tofu configuration present'; fi",
+    "working_dir": "/workspace",
+    "timeout_seconds": 120
+  },
+  "type-check": {
+    "description": "Type check the gate orchestration code and the manifest-backed Docker runner surfaces.",
+    "severity": "error",
+    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "command": "mypy --cache-dir /tmp/mypy-cache scripts/parallel_check.py scripts/run_gate.py scripts/gate_status.py scripts/log_gate_bypass.py config/windmill/scripts/post-merge-gate.py tests/test_parallel_check.py tests/test_validation_gate.py",
+    "working_dir": "/workspace",
+    "timeout_seconds": 180
+  },
+  "yaml-lint": {
+    "description": "Run full-repository yamllint across tracked YAML files.",
+    "severity": "error",
+    "image": "registry.lv3.org/check-runner/ansible:2.17.10",
+    "command": "find . -path ./.git -prune -o -type f \\( -name '*.yml' -o -name '*.yaml' \\) -print0 | xargs -0 yamllint -c .yamllint",
+    "working_dir": "/workspace",
+    "timeout_seconds": 120,
+    "cache_mounts": ["ansible_collections"]
+  }
+}

@@ -1,0 +1,101 @@
+# Validation Gate Runbook
+
+## Purpose
+
+ADR 0087 adds a push-time repository validation gate on top of the existing `make validate` contract.
+
+The gate has two layers:
+
+- fast local `pre-commit` hooks for syntax and secret hygiene
+- a remote-first `pre-push` gate that runs the heavier parallel check suite on `build-lv3`, with local Docker fallback when the build server is unavailable
+
+## Initial Setup
+
+Install both hook layers after cloning the repository:
+
+```bash
+make install-hooks
+```
+
+This target:
+
+- installs the repo-managed `pre-push` hook from `.githooks/pre-push`
+- installs the `pre-commit` hook from `.pre-commit-config.yaml` through `pre-commit`
+
+## Manual Commands
+
+Run the full push gate without pushing:
+
+```bash
+make pre-push-gate
+```
+
+Inspect the configured checks and the last recorded outcomes:
+
+```bash
+make gate-status
+```
+
+Run the fast local hook set across the whole checkout:
+
+```bash
+uvx --from pre-commit pre-commit run --all-files
+```
+
+## Gate Definition
+
+The authoritative gate manifest is [config/validation-gate.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-validation-gate/config/validation-gate.json).
+
+It defines these eight blocking checks:
+
+- `ansible-lint`
+- `yaml-lint`
+- `type-check`
+- `schema-validation`
+- `ansible-syntax`
+- `tofu-validate`
+- `packer-validate`
+- `security-scan`
+
+`scripts/run_gate.py` reads that manifest and executes the checks in parallel via [scripts/parallel_check.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-validation-gate/scripts/parallel_check.py).
+
+## Bypass Model
+
+The supported audited bypass is:
+
+```bash
+SKIP_REMOTE_GATE=1 git push
+```
+
+That path records a receipt under [receipts/gate-bypasses](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-validation-gate/receipts/gate-bypasses).
+
+`git push --no-verify` still skips both hook layers, but native Git hooks cannot observe that bypass after the fact. Treat it as break-glass only and record the reason in the change notes if it is used.
+
+## Status Files
+
+The gate writes the last local or remote-triggered run to:
+
+- `.local/validation-gate/last-run.json`
+
+The Windmill post-merge gate writes its most recent result to:
+
+- `.local/validation-gate/post-merge-last-run.json`
+
+`make gate-status` reads both files when present.
+
+## Windmill Post-Merge Gate
+
+Windmill should call:
+
+```bash
+python3 config/windmill/scripts/post-merge-gate.py --repo-path /srv/proxmox_florin_server
+```
+
+That workflow re-runs the same `config/validation-gate.json` manifest after merge on `main` and records the result in the worker checkout.
+
+## Troubleshooting
+
+- if `make install-hooks` fails during `pre-commit` bootstrap, rerun it with working internet access so `pre-commit` can fetch hook environments
+- if the build server is unreachable, rerun `make pre-push-gate`; the wrapper already falls back to local Docker execution
+- if a local fallback fails because Docker is unavailable, fix the local Docker daemon or restore build-server reachability before pushing
+- if `make gate-status` shows no results, run `make pre-push-gate` once to seed the local status file
