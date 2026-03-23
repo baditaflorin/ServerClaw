@@ -8,6 +8,16 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.72.0 - 2026-03-23
+
+- completed ADR 0075 on current `main` by expanding the service capability catalog to the full 19-service health-probe-backed estate and by adding cross-references to the canonical health-probe, image, and secret catalogs
+- upgraded the service catalog validator and operator query surface so `make services`, `make show-service`, and the repository validation gate all enforce schema, monitor, topology, and cross-catalog consistency
+- corrected the ADR 0075 workstream metadata, operator runbook, and generated status surfaces so the repository now records the current-main completion of the catalog contract
+
+Platform impact:
+
+- no direct live platform change is claimed in this release commit; this is a repository-only contract and validation completion on top of the current live `0.35.0` platform
+
 ## 0.71.0 - 2026-03-23
 
 - finalized the ADR 0070 live-apply path on current `main` by resolving Proxmox Tailscale proxy definitions from canonical platform data, fixing host inventory proxy-port templates to use `platform_port_assignments`, and extending the proxy role contract plus regression coverage

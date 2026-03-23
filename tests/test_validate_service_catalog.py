@@ -1,0 +1,45 @@
+import io
+import sys
+import unittest
+from contextlib import redirect_stdout
+from pathlib import Path
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+SCRIPTS_DIR = REPO_ROOT / "scripts"
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
+
+import service_catalog  # noqa: E402
+
+
+class ValidateServiceCatalogTest(unittest.TestCase):
+    def test_repo_catalog_validates(self) -> None:
+        catalog = service_catalog.load_service_catalog()
+        service_catalog.validate_service_catalog(catalog)
+
+        service_ids = {item["id"] for item in catalog["services"]}
+        self.assertIn("grafana", service_ids)
+        self.assertEqual(len(service_ids), 19)
+
+    def test_invalid_health_probe_fixture_fails(self) -> None:
+        fixture_path = REPO_ROOT / "tests" / "fixtures" / "service-catalog-invalid-health-probe.json"
+        catalog = service_catalog.load_json(fixture_path)
+
+        with self.assertRaisesRegex(ValueError, "unknown health probe 'missing_probe'"):
+            service_catalog.validate_service_catalog(catalog)
+
+    def test_show_service_renders_expected_summary(self) -> None:
+        catalog = service_catalog.load_service_catalog()
+        buffer = io.StringIO()
+        with redirect_stdout(buffer):
+            exit_code = service_catalog.show_service(catalog, "grafana")
+        output = buffer.getvalue()
+
+        self.assertEqual(exit_code, 0)
+        self.assertIn("Service: grafana", output)
+        self.assertIn("Runbook: docs/runbooks/monitoring-stack.md", output)
+
+
+if __name__ == "__main__":
+    unittest.main()

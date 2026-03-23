@@ -1,4 +1,5 @@
 {
+  "$schema": "docs/schema/service-capability-catalog.schema.json",
   "schema_version": "1.0.0",
   "services": [
     {
@@ -11,9 +12,18 @@
       "vmid": 160,
       "internal_url": "https://10.10.10.60:8007",
       "exposure": "private-only",
+      "uptime_monitor_name": "Backup PBS Port",
+      "health_probe_id": "backup_pbs",
+      "secret_catalog_ids": [
+        "backup_vm_api_token_payload"
+      ],
       "adr": "0029",
       "runbook": "docs/runbooks/configure-backup-vm.md",
-      "tags": ["backup", "pbs", "snapshots"]
+      "tags": [
+        "backup",
+        "pbs",
+        "snapshots"
+      ]
     },
     {
       "id": "docker_build",
@@ -28,10 +38,15 @@
       "subdomain": "build.lv3.org",
       "exposure": "informational-only",
       "uptime_monitor_name": "Docker Build SSH",
+      "health_probe_id": "docker_build",
       "adr": "0028",
       "runbook": "docs/runbooks/configure-docker-build-vm.md",
       "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-docker-build-lv3/lv3-vm-docker-build-lv3",
-      "tags": ["build", "docker", "worker"]
+      "tags": [
+        "build",
+        "docker",
+        "worker"
+      ]
     },
     {
       "id": "docker_runtime",
@@ -45,10 +60,15 @@
       "public_url": "https://docker.lv3.org",
       "subdomain": "docker.lv3.org",
       "exposure": "informational-only",
+      "health_probe_id": "docker_runtime",
       "adr": "0023",
       "runbook": "docs/runbooks/configure-docker-runtime.md",
       "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-docker-runtime-lv3/lv3-vm-docker-runtime-lv3",
-      "tags": ["docker", "runtime", "control-plane"]
+      "tags": [
+        "docker",
+        "runtime",
+        "control-plane"
+      ]
     },
     {
       "id": "grafana",
@@ -63,10 +83,41 @@
       "subdomain": "grafana.lv3.org",
       "exposure": "edge-published",
       "uptime_monitor_name": "Grafana Public",
+      "health_probe_id": "grafana",
+      "secret_catalog_ids": [
+        "monitoring_guest_writer_token",
+        "monitoring_proxmox_writer_token"
+      ],
       "adr": "0011",
       "runbook": "docs/runbooks/monitoring-stack.md",
       "dashboard_url": "https://grafana.lv3.org/d/lv3-platform-overview/lv3-platform-overview",
-      "tags": ["metrics", "dashboards", "observability"]
+      "tags": [
+        "metrics",
+        "dashboards",
+        "observability"
+      ]
+    },
+    {
+      "id": "keycloak",
+      "name": "Keycloak",
+      "description": "Shared SSO and OIDC broker for operator-facing and approved agent-facing applications.",
+      "category": "access",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:18080",
+      "public_url": "https://sso.lv3.org",
+      "subdomain": "sso.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Keycloak OIDC Discovery",
+      "health_probe_id": "keycloak",
+      "adr": "0056",
+      "tags": [
+        "identity",
+        "oidc",
+        "sso",
+        "tokens"
+      ]
     },
     {
       "id": "mail_platform",
@@ -80,10 +131,75 @@
       "public_url": "https://mail.lv3.org",
       "subdomain": "mail.lv3.org",
       "exposure": "informational-only",
+      "uptime_monitor_name": "Mail Platform Gateway Private",
+      "health_probe_id": "mail_platform",
+      "image_catalog_ids": [
+        "mail_platform_stalwart_runtime"
+      ],
+      "secret_catalog_ids": [
+        "mail_platform_agent_reports_gateway_api_key",
+        "mail_platform_gateway_admin_api_key",
+        "mail_platform_operator_alerts_gateway_api_key",
+        "mail_platform_platform_transactional_gateway_api_key",
+        "mail_platform_server_mailbox_password"
+      ],
       "adr": "0041",
       "runbook": "docs/runbooks/configure-mail-platform.md",
       "dashboard_url": "https://grafana.lv3.org/d/lv3-mail-platform/lv3-mail-platform",
-      "tags": ["mail", "smtp", "imap", "delivery"]
+      "tags": [
+        "mail",
+        "smtp",
+        "imap",
+        "delivery"
+      ]
+    },
+    {
+      "id": "mattermost",
+      "name": "Mattermost",
+      "description": "Private operator and agent collaboration surface for ChatOps workflows.",
+      "category": "communication",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://100.118.189.95:8066",
+      "exposure": "private-only",
+      "uptime_monitor_name": "Mattermost Private",
+      "health_probe_id": "mattermost",
+      "adr": "0057",
+      "runbook": "docs/runbooks/configure-mattermost.md",
+      "tags": [
+        "chatops",
+        "collaboration",
+        "private"
+      ]
+    },
+    {
+      "id": "netbox",
+      "name": "NetBox",
+      "description": "Private topology, IPAM, and inventory system for the platform.",
+      "category": "data",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://100.118.189.95:8004",
+      "exposure": "private-only",
+      "uptime_monitor_name": "NetBox Private",
+      "health_probe_id": "netbox",
+      "image_catalog_ids": [
+        "netbox_redis_runtime",
+        "netbox_runtime"
+      ],
+      "secret_catalog_ids": [
+        "netbox_api_token",
+        "netbox_superuser_password"
+      ],
+      "adr": "0054",
+      "runbook": "docs/runbooks/configure-netbox.md",
+      "tags": [
+        "inventory",
+        "ipam",
+        "topology"
+      ]
     },
     {
       "id": "nginx_edge",
@@ -98,10 +214,61 @@
       "subdomain": "nginx.lv3.org",
       "exposure": "edge-static",
       "uptime_monitor_name": "NGINX Edge Public",
+      "health_probe_id": "nginx_edge",
       "adr": "0021",
       "runbook": "docs/runbooks/configure-edge-publication.md",
       "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-nginx-lv3/lv3-vm-nginx-lv3",
-      "tags": ["nginx", "edge", "tls", "ingress"]
+      "tags": [
+        "nginx",
+        "edge",
+        "tls",
+        "ingress"
+      ]
+    },
+    {
+      "id": "ntopng",
+      "name": "ntopng",
+      "description": "Private flow-visibility and traffic-inspection surface for the platform network.",
+      "category": "observability",
+      "lifecycle_status": "active",
+      "vm": "proxmox_florin",
+      "internal_url": "http://100.118.189.95:3001",
+      "exposure": "private-only",
+      "health_probe_id": "ntopng",
+      "adr": "0059",
+      "runbook": "docs/runbooks/configure-ntopng.md",
+      "tags": [
+        "flows",
+        "network",
+        "traffic"
+      ]
+    },
+    {
+      "id": "open_webui",
+      "name": "Open WebUI",
+      "description": "Private operator and agent workbench for governed platform interactions.",
+      "category": "access",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://100.118.189.95:8008",
+      "exposure": "private-only",
+      "uptime_monitor_name": "Open WebUI Private",
+      "health_probe_id": "open_webui",
+      "image_catalog_ids": [
+        "open_webui_runtime"
+      ],
+      "secret_catalog_ids": [
+        "open_webui_admin_password",
+        "open_webui_secret_key"
+      ],
+      "adr": "0060",
+      "runbook": "docs/runbooks/configure-open-webui.md",
+      "tags": [
+        "agents",
+        "operators",
+        "workbench"
+      ]
     },
     {
       "id": "openbao",
@@ -113,9 +280,68 @@
       "vmid": 120,
       "internal_url": "https://100.118.189.95:8200",
       "exposure": "private-only",
+      "health_probe_id": "openbao",
+      "image_catalog_ids": [
+        "openbao_runtime"
+      ],
+      "secret_catalog_ids": [
+        "openbao_controller_approle",
+        "openbao_mail_platform_approle"
+      ],
       "adr": "0043",
       "runbook": "docs/runbooks/configure-openbao.md",
-      "tags": ["secrets", "vault", "pki"]
+      "tags": [
+        "secrets",
+        "vault",
+        "pki"
+      ]
+    },
+    {
+      "id": "platform_context_api",
+      "name": "Platform Context API",
+      "description": "Private retrieval-augmented query API for repository and platform context.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://100.118.189.95:8010",
+      "exposure": "private-only",
+      "uptime_monitor_name": "Platform Context Private",
+      "health_probe_id": "platform_context_api",
+      "adr": "0070",
+      "runbook": "docs/runbooks/rag-platform-context.md",
+      "tags": [
+        "api",
+        "context",
+        "rag",
+        "search"
+      ]
+    },
+    {
+      "id": "portainer",
+      "name": "Portainer",
+      "description": "Private read-mostly Docker runtime operations UI and API.",
+      "category": "access",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "https://100.118.189.95:9444",
+      "exposure": "private-only",
+      "uptime_monitor_name": "Portainer Private",
+      "health_probe_id": "portainer",
+      "image_catalog_ids": [
+        "portainer_runtime"
+      ],
+      "secret_catalog_ids": [
+        "portainer_admin_password"
+      ],
+      "adr": "0055",
+      "runbook": "docs/runbooks/configure-portainer.md",
+      "tags": [
+        "docker",
+        "operations",
+        "runtime"
+      ]
     },
     {
       "id": "postgres",
@@ -128,10 +354,16 @@
       "internal_url": "postgres://database.lv3.org:5432",
       "subdomain": "database.lv3.org",
       "exposure": "private-only",
+      "uptime_monitor_name": "PostgreSQL Port",
+      "health_probe_id": "postgres",
       "adr": "0026",
       "runbook": "docs/runbooks/configure-postgres-vm.md",
       "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3",
-      "tags": ["postgres", "database", "sql"]
+      "tags": [
+        "postgres",
+        "database",
+        "sql"
+      ]
     },
     {
       "id": "proxmox_ui",
@@ -145,9 +377,17 @@
       "subdomain": "proxmox.lv3.org",
       "exposure": "informational-only",
       "uptime_monitor_name": "Proxmox UI Port",
+      "health_probe_id": "proxmox_ui",
+      "secret_catalog_ids": [
+        "proxmox_api_token_payload"
+      ],
       "adr": "0004",
       "runbook": "docs/runbooks/initial-access.md",
-      "tags": ["proxmox", "host", "management"]
+      "tags": [
+        "proxmox",
+        "host",
+        "management"
+      ]
     },
     {
       "id": "step_ca",
@@ -159,9 +399,19 @@
       "vmid": 120,
       "internal_url": "https://100.118.189.95:9443",
       "exposure": "private-only",
+      "uptime_monitor_name": "Step CA Private",
+      "health_probe_id": "step_ca",
+      "image_catalog_ids": [
+        "step_ca_runtime"
+      ],
       "adr": "0042",
       "runbook": "docs/runbooks/configure-step-ca.md",
-      "tags": ["ca", "certificates", "ssh", "tls"]
+      "tags": [
+        "ca",
+        "certificates",
+        "ssh",
+        "tls"
+      ]
     },
     {
       "id": "uptime_kuma",
@@ -176,9 +426,17 @@
       "subdomain": "uptime.lv3.org",
       "exposure": "edge-published",
       "uptime_monitor_name": "Uptime Kuma Public",
+      "health_probe_id": "uptime_kuma",
+      "image_catalog_ids": [
+        "uptime_kuma_runtime"
+      ],
       "adr": "0027",
       "runbook": "docs/runbooks/deploy-uptime-kuma.md",
-      "tags": ["monitoring", "synthetics", "health"]
+      "tags": [
+        "monitoring",
+        "synthetics",
+        "health"
+      ]
     },
     {
       "id": "windmill",
@@ -190,9 +448,23 @@
       "vmid": 120,
       "internal_url": "http://100.118.189.95:8005",
       "exposure": "private-only",
+      "uptime_monitor_name": "Windmill Private",
+      "health_probe_id": "windmill",
+      "image_catalog_ids": [
+        "windmill_extra_runtime",
+        "windmill_runtime"
+      ],
+      "secret_catalog_ids": [
+        "windmill_database_password",
+        "windmill_superadmin_secret"
+      ],
       "adr": "0044",
       "runbook": "docs/runbooks/configure-windmill.md",
-      "tags": ["workflow", "automation", "jobs"]
+      "tags": [
+        "workflow",
+        "automation",
+        "jobs"
+      ]
     }
   ]
 }

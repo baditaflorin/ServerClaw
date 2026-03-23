@@ -3,7 +3,7 @@
 - Status: Accepted
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.69.0
-- Implemented In Platform Version: not yet
+- Implemented In Platform Version: not applicable (repo-only)
 - Implemented On: 2026-03-23
 - Date: 2026-03-22
 
@@ -97,9 +97,14 @@ The `make validate` gate includes a schema validation step for `config/service-c
 ### Cross-reference validation
 
 A validation script (`scripts/validate_service_catalog.py`) checks that:
+- the catalog matches `docs/schema/service-capability-catalog.schema.json`
+- every referenced health probe exists in `config/health-probe-catalog.json`
+- every referenced image exists in `config/image-catalog.json`
+- every referenced secret exists in `config/secret-catalog.json`
 - every referenced Uptime Kuma monitor exists in `config/uptime-kuma/monitors.json`
 - every `runbook` path exists in `docs/runbooks/`
 - active services stay aligned with the canonical service topology and observed guest inventory
+- the catalog covers exactly the services declared in `config/health-probe-catalog.json`
 
 This script runs as part of `make validate`.
 
@@ -118,7 +123,7 @@ This script runs as part of `make validate`.
 
 ## Implementation Notes
 
-- The first implementation ships 12 active service entries covering the current host and guest service estate.
-- `make show-service SERVICE=<id>` now prints a readable summary for operators and agents.
-- The first validation pass uses `uptime_monitor_name` parity against `config/uptime-kuma/monitors.json` because the separate health-probe catalog described in the ADR has not been merged yet.
-- Image and secret cross-reference fields remain optional until their dedicated catalogs become canonical on `main`.
+- The original repository implementation was recorded in `0.69.0`; current-main completion and validation against the now-canonical health-probe, image, and secret catalogs are finalized in `0.72.0`.
+- The current catalog covers all 19 services declared in [config/health-probe-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/health-probe-catalog.json).
+- `make services` and `make show-service SERVICE=<id>` now provide the operator and agent query surface on top of the validated catalog.
+- Validation now resolves [config/health-probe-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/health-probe-catalog.json), [config/image-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/image-catalog.json), [config/secret-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/secret-catalog.json), [config/uptime-kuma/monitors.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/uptime-kuma/monitors.json), and live topology inputs before merge.

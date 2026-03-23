@@ -1,10 +1,10 @@
 # Workstream ADR 0075: Service Capability Catalog
 
 - ADR: [ADR 0075](../adr/0075-service-capability-catalog.md)
-- Title: Machine-readable index of every platform service with URLs, ownership, health monitors, and runbook links
+- Title: Machine-readable index of every platform service with URLs, ownership, health probes, and runbook links
 - Status: merged
-- Branch: `codex/adr-0074-ops-portal`
-- Worktree: `../proxmox_florin_server__adr_0074`
+- Branch: `codex/adr-0075-service-capability-catalog`
+- Worktree: `../proxmox_florin_server-service-capability-catalog`
 - Owner: codex
 - Depends On: `adr-0064-health-probe-contracts`, `adr-0068-container-image-policy`, `adr-0065-secret-rotation-automation`
 - Conflicts With: none
@@ -14,16 +14,14 @@
 
 - define a canonical schema for the service capability catalog
 - populate the catalog with the current platform service estate
-- validate runbook paths, monitor references, and topology alignment
-- add operator and agent query affordances through `make show-service`
+- validate runbook paths, health-probe references, image references, secret references, and topology alignment
+- add operator and agent query affordances through `make services` and `make show-service`
 - document maintenance and validation in a dedicated runbook
 
 ## Non-Goals
 
 - service-to-service dependency graphs
 - automatic runtime discovery that mutates the catalog
-- requiring image or secret references before those catalogs are canonical on `main`
-
 ## Expected Repo Surfaces
 
 - `config/service-capability-catalog.json`
@@ -42,19 +40,22 @@
 
 ## Verification
 
+- `make services`
 - `make show-service SERVICE=grafana`
-- `uvx --from pyyaml python scripts/service_catalog.py --validate`
-- `uvx --from pyyaml python -m unittest discover -s tests -p 'test_*.py'`
+- `uv run --with pyyaml --with jsonschema python scripts/service_catalog.py --validate`
+- `uv run --with pyyaml --with jsonschema python -m unittest tests/test_validate_service_catalog.py`
 - `make validate`
 
 ## Merge Criteria
 
-- live-applied services are represented in the catalog
-- monitor names, runbooks, and topology links validate cleanly
+- all 19 health-probe-catalog services are represented in the catalog
+- monitor names, runbooks, topology links, and cross-catalog references validate cleanly
 - validation is wired into the repository gate
-- ADR metadata shows repository implementation in release `0.69.0`
+- ADR metadata records the original repository implementation in `0.69.0` and the current-main completion in `0.72.0`
 
-## Notes For The Next Assistant
+## Delivered
 
-- repository implementation is merged by `0.69.0`
-- image and secret catalog references remain optional until those dedicated catalogs become canonical on `main`
+- extended `config/service-capability-catalog.json` to cover the current 19 health-probe-backed services on `main`
+- upgraded `scripts/service_catalog.py` to validate the JSON Schema plus health-probe, image, secret, monitor, runbook, and topology cross-references
+- added `make services`, focused service-catalog regression tests, and a negative broken-health-probe fixture
+- updated the ADR, runbook, workstream metadata, and release files to reflect the current-main completion in `0.72.0`

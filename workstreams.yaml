@@ -902,8 +902,8 @@ workstreams:
     title: Service capability catalog
     status: merged
     owner: codex
-    branch: codex/adr-0074-ops-portal
-    worktree_path: ../proxmox_florin_server__adr_0074
+    branch: codex/adr-0075-service-capability-catalog
+    worktree_path: ../proxmox_florin_server-service-capability-catalog
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0075-service-capability-catalog.md
     depends_on:
       - adr-0064-health-probe-contracts
@@ -913,7 +913,9 @@ workstreams:
     shared_surfaces:
       - config/service-capability-catalog.json
       - docs/schema/service-capability-catalog.schema.json
+      - scripts/service_catalog.py
       - scripts/validate_service_catalog.py
-      - make validate
+      - docs/runbooks/service-capability-catalog.md
+      - Makefile
     ready_to_merge: false
     live_applied: false
