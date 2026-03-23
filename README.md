@@ -82,7 +82,7 @@ The repository now also ships ADR 0096 SLO tracking: a canonical SLO catalog, ge
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.105.0` |
+| Repository version | `0.106.0` |
 | Platform version | `0.40.0` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -626,7 +626,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.105.0` |
+| Repository version | `0.106.0` |
 | Platform version | `0.40.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -734,7 +734,6 @@ This repository is intentionally opinionated:
 | `0091` | Continuous drift detection and reconciliation | `merged` | [adr-0091-drift-detection.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0091-drift-detection.md) |
 | `0093` | Interactive ops portal with live actions | `merged` | [adr-0093-interactive-ops-portal.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0093-interactive-ops-portal.md) |
 | `0094` | Developer portal and service documentation site | `merged` | [adr-0094-developer-portal.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0094-developer-portal.md) |
-| `0098` | Postgres high availability and automated failover | `merged` | [adr-0098-postgres-ha.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0098-postgres-ha.md) |
 | `0096` | SLO definitions and error budget tracking | `merged` | [adr-0096-slo-tracking.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0096-slo-tracking.md) |
 | `0098` | Postgres high availability and automated failover | `merged` | [adr-0098-postgres-ha.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0098-postgres-ha.md) |
 | `0099` | Automated backup restore verification | `merged` | [adr-0099-backup-restore-verification.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0099-backup-restore-verification.md) |

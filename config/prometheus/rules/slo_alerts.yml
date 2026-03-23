@@ -2,6 +2,46 @@ groups:
   - name: slo_alert_rules
     interval: 1m
     rules:
+      - alert: SLOFastBurn_status_page_availability
+        expr: (slo:status_page_availability:error_rate_5m > (14 * 0.001000)) and (slo:status_page_availability:error_rate_1h
+          > (14 * 0.001000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: status_page
+          slo_id: status-page-availability
+          indicator: availability
+        annotations:
+          summary: status-page-availability is burning its error budget at 14x
+          description: The public status page remains externally reachable as the
+            last-resort platform signal.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_status_page_availability
+        expr: slo:status_page_availability:error_rate_1h > (3 * 0.001000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: status_page
+          slo_id: status-page-availability
+          indicator: availability
+        annotations:
+          summary: status-page-availability is burning its error budget at 3x
+          description: The public status page remains externally reachable as the
+            last-resort platform signal.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_status_page_availability
+        expr: slo:status_page_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: status_page
+          slo_id: status-page-availability
+          indicator: availability
+        annotations:
+          summary: status-page-availability has less than 10% error budget remaining
+          description: The public status page remains externally reachable as the
+            last-resort platform signal.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_grafana_availability
         expr: (slo:grafana_availability:error_rate_5m > (14 * 0.005000)) and (slo:grafana_availability:error_rate_1h
           > (14 * 0.005000))

@@ -1,4 +1,11 @@
 - targets:
+    - https://status.lv3.org
+  labels:
+    service_id: status_page
+    slo_id: status-page-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
     - https://grafana.lv3.org
   labels:
     service_id: grafana
