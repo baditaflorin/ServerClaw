@@ -41,6 +41,8 @@ PLATFORM_FINDING_SCHEMA_PATH = repo_path("docs", "schema", "platform-finding.jso
 MAINTENANCE_WINDOW_SCHEMA_PATH = repo_path("docs", "schema", "maintenance-window.json")
 VM_TEMPLATE_MANIFEST_PATH = repo_path("config", "vm-template-manifest.json")
 CAPACITY_MODEL_PATH = repo_path("config", "capacity-model.json")
+VERSION_SEMANTICS_PATH = repo_path("config", "version-semantics.json")
+WORKSTREAMS_PATH = repo_path("workstreams.yaml")
 
 SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -1138,6 +1140,179 @@ def validate_capacity_model() -> None:
         raise ValueError("; ".join(violations))
 
 
+def validate_version_semantics() -> None:
+    payload = load_json(VERSION_SEMANTICS_PATH)
+    require_semver(payload.get("schema_version"), "config/version-semantics.json.schema_version")
+
+    repository_versioning = require_mapping(
+        payload.get("repository_versioning"), "config/version-semantics.json.repository_versioning"
+    )
+    for level in ("major", "minor", "patch"):
+        level_payload = require_mapping(
+            repository_versioning.get(level),
+            f"config/version-semantics.json.repository_versioning.{level}",
+        )
+        require_str(
+            level_payload.get("meaning"),
+            f"config/version-semantics.json.repository_versioning.{level}.meaning",
+        )
+        require_string_list(
+            level_payload.get("triggers"),
+            f"config/version-semantics.json.repository_versioning.{level}.triggers",
+        )
+
+    criteria = require_list(
+        payload.get("breaking_change_criteria"),
+        "config/version-semantics.json.breaking_change_criteria",
+    )
+    for index, criterion in enumerate(criteria):
+        criterion = require_mapping(criterion, f"config/version-semantics.json.breaking_change_criteria[{index}]")
+        require_identifier(
+            criterion.get("id"),
+            f"config/version-semantics.json.breaking_change_criteria[{index}].id",
+        )
+        require_str(
+            criterion.get("surface"),
+            f"config/version-semantics.json.breaking_change_criteria[{index}].surface",
+        )
+        require_str(
+            criterion.get("description"),
+            f"config/version-semantics.json.breaking_change_criteria[{index}].description",
+        )
+
+    release_artifacts = require_mapping(
+        payload.get("release_artifacts"), "config/version-semantics.json.release_artifacts"
+    )
+    for field in (
+        "working_section",
+        "version_file",
+        "changelog_path",
+        "root_release_notes",
+        "release_notes_dir",
+        "release_notes_index",
+        "upgrade_guides_dir",
+        "git_tag_prefix",
+    ):
+        require_str(release_artifacts.get(field), f"config/version-semantics.json.release_artifacts.{field}")
+
+    release_gates = require_mapping(payload.get("release_gates"), "config/version-semantics.json.release_gates")
+    require_string_list(
+        release_gates.get("blocking_workstream_statuses"),
+        "config/version-semantics.json.release_gates.blocking_workstream_statuses",
+    )
+
+    upgrade_policy = require_mapping(payload.get("upgrade_policy"), "config/version-semantics.json.upgrade_policy")
+    require_bool(
+        upgrade_policy.get("minor_version_skip_supported"),
+        "config/version-semantics.json.upgrade_policy.minor_version_skip_supported",
+    )
+    require_bool(
+        upgrade_policy.get("major_version_skip_supported"),
+        "config/version-semantics.json.upgrade_policy.major_version_skip_supported",
+    )
+    rules = require_list(upgrade_policy.get("rules"), "config/version-semantics.json.upgrade_policy.rules")
+    for index, rule in enumerate(rules):
+        rule = require_mapping(rule, f"config/version-semantics.json.upgrade_policy.rules[{index}]")
+        require_str(rule.get("source"), f"config/version-semantics.json.upgrade_policy.rules[{index}].source")
+        require_str(rule.get("target"), f"config/version-semantics.json.upgrade_policy.rules[{index}].target")
+        require_bool(
+            rule.get("operator_action_required"),
+            f"config/version-semantics.json.upgrade_policy.rules[{index}].operator_action_required",
+        )
+        require_str(rule.get("notes"), f"config/version-semantics.json.upgrade_policy.rules[{index}].notes")
+
+    readiness_targets = require_mapping(
+        payload.get("readiness_targets"), "config/version-semantics.json.readiness_targets"
+    )
+    readiness = require_mapping(
+        readiness_targets.get("1.0.0"),
+        "config/version-semantics.json.readiness_targets.1.0.0",
+    )
+    adr_window = require_mapping(
+        readiness.get("adr_window"),
+        "config/version-semantics.json.readiness_targets.1.0.0.adr_window",
+    )
+    require_int(adr_window.get("start"), "config/version-semantics.json.readiness_targets.1.0.0.adr_window.start", 1)
+    require_int(adr_window.get("end"), "config/version-semantics.json.readiness_targets.1.0.0.adr_window.end", 1)
+    require_string_list(
+        adr_window.get("required_statuses"),
+        "config/version-semantics.json.readiness_targets.1.0.0.adr_window.required_statuses",
+    )
+    require_string_list(
+        adr_window.get("required_implementation_statuses"),
+        "config/version-semantics.json.readiness_targets.1.0.0.adr_window.required_implementation_statuses",
+    )
+
+    services = require_list(
+        readiness.get("required_services"),
+        "config/version-semantics.json.readiness_targets.1.0.0.required_services",
+    )
+    for index, service in enumerate(services):
+        service = require_mapping(service, f"config/version-semantics.json.readiness_targets.1.0.0.required_services[{index}]")
+        require_str(
+            service.get("id"),
+            f"config/version-semantics.json.readiness_targets.1.0.0.required_services[{index}].id",
+        )
+        require_str(
+            service.get("label"),
+            f"config/version-semantics.json.readiness_targets.1.0.0.required_services[{index}].label",
+        )
+        require_str(
+            service.get("url"),
+            f"config/version-semantics.json.readiness_targets.1.0.0.required_services[{index}].url",
+        )
+
+    slos = require_list(readiness.get("required_slos"), "config/version-semantics.json.readiness_targets.1.0.0.required_slos")
+    for index, slo in enumerate(slos):
+        slo = require_mapping(slo, f"config/version-semantics.json.readiness_targets.1.0.0.required_slos[{index}]")
+        require_identifier(
+            slo.get("service_id"),
+            f"config/version-semantics.json.readiness_targets.1.0.0.required_slos[{index}].service_id",
+        )
+        minimum = slo.get("minimum_error_budget_remaining_percent")
+        if not isinstance(minimum, (int, float)):
+            raise ValueError(
+                f"config/version-semantics.json.readiness_targets.1.0.0.required_slos[{index}].minimum_error_budget_remaining_percent must be numeric"
+            )
+
+    require_str(
+        readiness.get("slo_report_path"),
+        "config/version-semantics.json.readiness_targets.1.0.0.slo_report_path",
+    )
+    restore = require_mapping(
+        readiness.get("restore_verification"),
+        "config/version-semantics.json.readiness_targets.1.0.0.restore_verification",
+    )
+    require_str(
+        restore.get("receipt_dir"),
+        "config/version-semantics.json.readiness_targets.1.0.0.restore_verification.receipt_dir",
+    )
+    require_int(
+        restore.get("required_consecutive_passes"),
+        "config/version-semantics.json.readiness_targets.1.0.0.restore_verification.required_consecutive_passes",
+        1,
+    )
+    dr_review = require_mapping(
+        readiness.get("dr_table_top_review"),
+        "config/version-semantics.json.readiness_targets.1.0.0.dr_table_top_review",
+    )
+    require_str(
+        dr_review.get("receipt_dir"),
+        "config/version-semantics.json.readiness_targets.1.0.0.dr_table_top_review.receipt_dir",
+    )
+
+
+def validate_workstreams_release_policy() -> None:
+    registry = load_yaml(WORKSTREAMS_PATH)
+    release_policy = require_mapping(registry.get("release_policy"), "workstreams.yaml.release_policy")
+    breaking_change_path = require_str(
+        release_policy.get("breaking_change_criteria"),
+        "workstreams.yaml.release_policy.breaking_change_criteria",
+    )
+    if not breaking_change_path.endswith("/config/version-semantics.json"):
+        raise ValueError("workstreams.yaml.release_policy.breaking_change_criteria must point to config/version-semantics.json")
+
+
 def validate_identity_taxonomy(
     desired_state: dict[str, Any],
     observed_state: dict[str, Any],
@@ -1761,6 +1936,8 @@ def validate_repository_data_models() -> int:
     validate_health_probe_catalog(host_vars_context)
     validate_data_catalog(load_data_catalog())
     validate_secret_catalog(secret_manifest)
+    validate_version_semantics()
+    validate_workstreams_release_policy()
     validate_platform_finding_schema()
     validate_maintenance_window_schema()
     validate_capacity_model()

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import sys
+import types
 from pathlib import Path
 
 import pytest
@@ -296,10 +298,15 @@ def test_fixture_destroy_dry_run_accepts_vmid(
     assert "make fixture-down" in captured.out
     assert "VMID=910" in captured.out
 
+def test_release_status_is_forwarded_to_release_manager(
+    minimal_repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    calls: list[list[str]] = []
 
-def test_release_status_uses_dr_report(capsys: pytest.CaptureFixture[str], minimal_repo: Path) -> None:
-    exit_code = lv3_cli.main(["release", "status"])
-    captured = capsys.readouterr()
+    fake_module = types.SimpleNamespace(main=lambda argv: calls.append(argv) or 0)
+    monkeypatch.setitem(sys.modules, "release_manager", fake_module)
+
+    exit_code = lv3_cli.main(["release", "status", "--json"])
+
     assert exit_code == 0
-    assert "Platform 1.0.0 readiness" in captured.out
-    assert "DR table-top review: complete" in captured.out
+    assert calls == [["status", "--json"]]

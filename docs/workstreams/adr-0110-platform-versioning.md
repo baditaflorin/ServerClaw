@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0110](../adr/0110-platform-versioning-and-upgrade-path.md)
 - Title: Semantic versioning semantics definition, lv3 release command, structured RELEASE.md generation, and machine-checkable 1.0.0 readiness criteria
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0110-platform-versioning`
 - Worktree: `../proxmox_florin_server-platform-versioning`
 - Owner: codex
@@ -18,8 +18,8 @@
 - write `docs/upgrade/v1.md` — upgrade guide for moving to v1.0.0 from any v0.x (no migration steps required; just lists what changed)
 - update `scripts/lv3_cli.py` — add `release` and `release status` subcommands
 - update `workstreams.yaml` release_policy section — add `breaking_change_criteria` reference to `config/version-semantics.json`
-- add `lv3 release status` output to the ops portal (ADR 0093 integration: show 1.0.0 readiness as a panel)
-- write `docs/release-notes/v0.93.0.md` — backfill the current version's release notes as a baseline
+- add `lv3 release status` output to the existing generated ops portal so the readiness signal is visible before ADR 0093 replaces the static portal
+- align the implementation with the current mainline release layout (`docs/release-notes/<version>.md`, current repo version `0.101.0`, and explicit post-commit tagging)
 
 ## Non-Goals
 
@@ -33,7 +33,7 @@
 - `scripts/release_manager.py`
 - `scripts/generate_release_notes.py`
 - `docs/upgrade/v1.md`
-- `docs/release-notes/v0.93.0.md`
+- `docs/runbooks/platform-release-management.md`
 - `scripts/lv3_cli.py` (patched: `lv3 release` subcommand)
 - `docs/adr/0110-platform-versioning-and-upgrade-path.md`
 - `docs/workstreams/adr-0110-platform-versioning.md`
@@ -54,13 +54,11 @@
 ## Merge Criteria
 
 - `lv3 release status` works and reports current 1.0.0 readiness based on implemented ADRs and live platform state
-- `lv3 release --bump patch` works (test with a patch bump; then manually revert the tag if the bump was not intended to be permanent)
+- `lv3 release --bump patch` works in a disposable repository copy and updates the release artifacts consistently
 - Breaking change criteria defined in `config/version-semantics.json`
 - Upgrade guide for v1.0.0 committed
 
-## Notes For The Next Assistant
+## Outcome
 
-- `lv3 release status` needs to check: (1) count of ADRs with `Implementation Status: Implemented` vs. total; (2) current SLO error budget from Prometheus (via the API gateway); (3) last backup restore verification result from `receipts/restore-verifications/`; (4) whether ops portal, status page, and docs site are reachable; (5) whether a DR table-top review receipt exists
-- Store the DR table-top review completion as a receipt in `receipts/dr-table-top-reviews/` with a date file; `lv3 release status` checks for the most recent one
-- The `lv3 release --bump` command must use `python-semantic-release` conventions for changelog formatting, or follow the existing `changelog.md` format exactly (check what format the existing changelog uses before implementing)
-- Git tag signing: if GPG signing is configured in `.gitconfig`, the tag creation should use `git tag -s`; if not, use `git tag -a`; check and match the user's git config
+- implementation shipped in repo release `0.102.0`
+- the current mainline release model is narrower than the original draft, so the implementation follows the existing changelog and release-note surfaces instead of inventing a second archive format

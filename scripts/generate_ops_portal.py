@@ -23,6 +23,7 @@ from environment_topology import (
     validate_environment_topology,
 )
 from portal_utils import PORTAL_STYLES, escape, page_template, render_badge, render_external_link
+from release_manager import build_release_status_snapshot
 from service_catalog import load_service_catalog, validate_service_catalog
 from subdomain_catalog import load_subdomain_catalog, validate_subdomain_catalog
 from agent_tool_registry import load_agent_tool_registry
@@ -297,6 +298,50 @@ def render_drift_panel() -> str:
         + f'<div class="chip-row">{receipt_link}</div>'
         + table
         + "</section>"
+    )
+
+
+def render_release_panel() -> str:
+    try:
+        snapshot = build_release_status_snapshot(timeout=0.5)
+    except Exception as exc:  # noqa: BLE001
+        return (
+            '<section class="panel">'
+            '<div class="card-head"><div><h2>Release Readiness</h2><p class="muted">Unable to render release readiness.</p></div>'
+            f"<div>{render_badge('unknown', 'neutral')}</div></div>"
+            f'<p class="muted">{escape(str(exc))}</p>'
+            "</section>"
+        )
+
+    summary = snapshot["summary"]
+    blockers = snapshot["release_blockers"]
+    badge = render_badge("ready" if summary["ready"] else "pending", "ok" if summary["ready"] else "warn")
+    rows = []
+    for criterion in snapshot["criteria"]:
+        tone = "ok" if criterion["met"] else "warn"
+        rows.append(
+            "<tr>"
+            f"<td>{escape(criterion['label'])}</td>"
+            f"<td>{render_badge(criterion['status'], tone)}</td>"
+            f"<td>{escape(criterion['detail'])}</td>"
+            "</tr>"
+        )
+    return (
+        '<section class="panel">'
+        '<div class="card-head">'
+        '<div><h2>Release Readiness</h2><p class="muted">Machine-checkable status for the ADR 0110 release policy and `1.0.0` target.</p></div>'
+        f"<div>{badge}</div>"
+        "</div>"
+        '<div class="meta-list">'
+        f"<div><strong>Repository</strong><span>{escape(snapshot['repo_version'])}</span></div>"
+        f"<div><strong>Platform</strong><span>{escape(snapshot['platform_version'])}</span></div>"
+        f"<div><strong>Blockers</strong><span>{escape(blockers['detail'])}</span></div>"
+        f"<div><strong>Criteria</strong><span>{escape(summary['met'])}/{escape(summary['total'])} ({escape(summary['percent'])}%)</span></div>"
+        "</div>"
+        '<div class="table-scroll"><table>'
+        "<thead><tr><th>Criterion</th><th>Status</th><th>Detail</th></tr></thead>"
+        f"<tbody>{''.join(rows)}</tbody></table></div>"
+        "</section>"
     )
 
 
@@ -702,6 +747,7 @@ def render_portal(
         "Generated operator map of services, health, and ownership across the current LV3 estate.",
         render_summary(services, subdomains, tools, environments)
         + render_drift_panel()
+        + render_release_panel()
         + render_ephemeral_vm_panel()
         + render_service_cards(services, health),
     )

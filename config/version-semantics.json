@@ -1,0 +1,151 @@
+{
+  "schema_version": "1.0.0",
+  "repository_versioning": {
+    "major": {
+      "meaning": "A change that requires operator action before the repository contract or managed platform can continue to function correctly.",
+      "triggers": [
+        "Service removal from config/service-capability-catalog.json",
+        "Breaking API publication contract change in config/api-publication.json",
+        "OpenBao secret path or format change consumed at service startup",
+        "Managed VM network addressing change",
+        "One-time manual operator action that cannot be automated safely"
+      ]
+    },
+    "minor": {
+      "meaning": "A backward-compatible capability addition or new operator-visible workflow.",
+      "triggers": [
+        "New ADR implemented",
+        "New service, dashboard, workflow, or CLI command added",
+        "New runbook-backed operational surface added without breaking an existing contract"
+      ]
+    },
+    "patch": {
+      "meaning": "A correction that does not materially change the operating contract.",
+      "triggers": [
+        "Bug fix",
+        "Configuration correction",
+        "Documentation-only update",
+        "Safe package or image pin refresh with no operator-facing contract change"
+      ]
+    }
+  },
+  "breaking_change_criteria": [
+    {
+      "id": "service_catalog_removal",
+      "surface": "config/service-capability-catalog.json",
+      "description": "Removing a managed service from the service capability catalog is a major release."
+    },
+    {
+      "id": "api_publication_break",
+      "surface": "config/api-publication.json",
+      "description": "Removing or renaming an existing published API or webhook contract is a major release."
+    },
+    {
+      "id": "secret_contract_change",
+      "surface": "config/secret-catalog.json",
+      "description": "Changing the path or startup format of a secret consumed by a managed service is a major release."
+    },
+    {
+      "id": "network_identity_change",
+      "surface": "inventory/host_vars/proxmox_florin.yml",
+      "description": "Changing the declared IP addressing or other deterministic guest identity inputs is a major release."
+    },
+    {
+      "id": "manual_operator_step",
+      "surface": "docs/runbooks/",
+      "description": "If the upgrade requires a one-time manual operator action that cannot be automated safely, the release is major."
+    }
+  ],
+  "release_artifacts": {
+    "working_section": "Unreleased",
+    "version_file": "VERSION",
+    "changelog_path": "changelog.md",
+    "root_release_notes": "RELEASE.md",
+    "release_notes_dir": "docs/release-notes",
+    "release_notes_index": "docs/release-notes/README.md",
+    "upgrade_guides_dir": "docs/upgrade",
+    "git_tag_prefix": "v"
+  },
+  "release_gates": {
+    "blocking_workstream_statuses": [
+      "in_progress"
+    ]
+  },
+  "upgrade_policy": {
+    "minor_version_skip_supported": true,
+    "major_version_skip_supported": false,
+    "rules": [
+      {
+        "source": "0.x",
+        "target": "0.x",
+        "operator_action_required": false,
+        "notes": "All 0.x repository releases remain additive unless explicitly called out as major."
+      },
+      {
+        "source": "0.x",
+        "target": "1.0.0",
+        "operator_action_required": false,
+        "notes": "Version 1.0.0 is a stabilisation milestone with a zero-step upgrade guide."
+      },
+      {
+        "source": "1.x",
+        "target": "2.0.0",
+        "operator_action_required": true,
+        "notes": "Follow the dedicated v2 upgrade guide before applying the release."
+      }
+    ]
+  },
+  "readiness_targets": {
+    "1.0.0": {
+      "adr_window": {
+        "start": 1,
+        "end": 111,
+        "required_statuses": [
+          "Accepted"
+        ],
+        "required_implementation_statuses": [
+          "Implemented"
+        ]
+      },
+      "required_services": [
+        {
+          "id": "ops_portal",
+          "label": "Ops portal",
+          "url": "https://ops.lv3.org"
+        },
+        {
+          "id": "status_page",
+          "label": "Status page",
+          "url": "https://status.lv3.org"
+        },
+        {
+          "id": "docs_portal",
+          "label": "Docs site",
+          "url": "https://docs.lv3.org"
+        }
+      ],
+      "required_slos": [
+        {
+          "service_id": "keycloak",
+          "minimum_error_budget_remaining_percent": 99.0
+        },
+        {
+          "service_id": "api_gateway",
+          "minimum_error_budget_remaining_percent": 99.0
+        },
+        {
+          "service_id": "status_page",
+          "minimum_error_budget_remaining_percent": 99.0
+        }
+      ],
+      "slo_report_path": "receipts/slo-reports/latest.json",
+      "restore_verification": {
+        "receipt_dir": "receipts/restore-verifications",
+        "required_consecutive_passes": 2
+      },
+      "dr_table_top_review": {
+        "receipt_dir": "receipts/dr-table-top-reviews"
+      }
+    }
+  }
+}

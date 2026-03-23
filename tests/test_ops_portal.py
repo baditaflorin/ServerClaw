@@ -24,6 +24,7 @@ class OpsPortalRenderTests(unittest.TestCase):
     def test_render_portal_writes_expected_pages(self) -> None:
         temp_dir = Path(tempfile.mkdtemp(prefix="ops-portal-test-"))
         original_receipts = ops_portal.active_ephemeral_receipts
+        original_release_snapshot = ops_portal.build_release_status_snapshot
         snapshot_file = temp_dir / "ops-portal-snapshot.html"
         try:
             ops_portal.active_ephemeral_receipts = lambda: [
@@ -36,6 +37,20 @@ class OpsPortalRenderTests(unittest.TestCase):
                     "status": "active",
                 }
             ]
+            ops_portal.build_release_status_snapshot = lambda timeout=0.5: {
+                "repo_version": "0.102.0",
+                "platform_version": "0.40.0",
+                "release_blockers": {"detail": "0 workstreams in progress"},
+                "summary": {"ready": False, "met": 1, "total": 6, "percent": 16.67},
+                "criteria": [
+                    {
+                        "label": "ADR window 0001-0111",
+                        "status": "pending",
+                        "detail": "89/111 implemented",
+                        "met": False,
+                    }
+                ],
+            }
             ops_portal.render_portal(
                 temp_dir,
                 REPO_ROOT / "tests" / "fixtures" / "ops_portal_health.json",
@@ -47,6 +62,7 @@ class OpsPortalRenderTests(unittest.TestCase):
             agents_html = (temp_dir / "agents" / "index.html").read_text()
 
             self.assertIn("Platform Operations Portal", index_html)
+            self.assertIn("Release Readiness", index_html)
             self.assertIn("Grafana", index_html)
             self.assertIn("healthy", index_html)
             self.assertIn("Drift Status", index_html)
@@ -57,6 +73,7 @@ class OpsPortalRenderTests(unittest.TestCase):
             self.assertEqual(snapshot_file.read_text(), index_html)
         finally:
             ops_portal.active_ephemeral_receipts = original_receipts
+            ops_portal.build_release_status_snapshot = original_release_snapshot
             shutil.rmtree(temp_dir)
 
     def test_render_portal_includes_drift_receipt_summary(self) -> None:
