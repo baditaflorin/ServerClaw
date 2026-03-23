@@ -22,7 +22,6 @@ control_plane_recovery_store_required_openbao_paths:
   - opt/openbao/policies/lv3-agent-controller.hcl
 control_plane_recovery_store_required_windmill_paths:
   - opt/windmill/docker-compose.yml
-  - opt/windmill/windmill.env
   - etc/lv3/windmill/superadmin-secret
 control_plane_recovery_store_required_mail_paths:
   - opt/mail-platform/docker-compose.yml

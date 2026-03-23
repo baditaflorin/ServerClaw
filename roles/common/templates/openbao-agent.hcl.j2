@@ -1,0 +1,33 @@
+pid_file = "/tmp/openbao-agent.pid"
+
+vault {
+  address = "http://127.0.0.1:{{ openbao_http_port }}"
+}
+
+auto_auth {
+  method "approle" {
+    mount_path = "auth/approle"
+
+    config = {
+      role_id_file_path                   = "/openbao-agent/role_id"
+      secret_id_file_path                 = "/openbao-agent/secret_id"
+      remove_secret_id_file_after_reading = false
+    }
+  }
+}
+
+template_config {
+  exit_on_retry_failure      = true
+  static_secret_render_interval = "5m"
+}
+
+template {
+  source               = "/openbao-agent/runtime.env.ctmpl"
+  destination          = "{{ common_openbao_compose_env_env_file }}"
+  create_dest_dirs     = true
+  perms                = "0600"
+  backup               = false
+  error_on_missing_key = true
+  left_delimiter       = "[["
+  right_delimiter      = "]]"
+}

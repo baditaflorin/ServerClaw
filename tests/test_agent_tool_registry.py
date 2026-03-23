@@ -60,6 +60,7 @@ class AgentToolRegistryTests(unittest.TestCase):
         payload = json.loads(process.stdout)
         tool_names = {tool["name"] for tool in payload["tools"]}
         self.assertGreaterEqual(len(tool_names), 5)
+        self.assertIn("get-deployment-history", tool_names)
         self.assertIn("get-platform-status", tool_names)
         self.assertIn("query-platform-context", tool_names)
         self.assertIn("run-governed-command", tool_names)
@@ -101,6 +102,24 @@ class AgentToolRegistryTests(unittest.TestCase):
             events = self.read_audit_events(audit_path)
             self.assertEqual(events[0]["tool"], "export-mcp-tools")
             self.assertEqual(events[0]["category"], "report")
+
+    def test_deployment_history_call_returns_filtered_entries(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            audit_path = Path(temp_dir) / "audit.jsonl"
+            process = self.run_registry_with_pyyaml(
+                "--call",
+                "get-deployment-history",
+                "--args-json",
+                json.dumps({"service_id": "grafana", "days": 30}),
+                env={"LV3_AGENT_TOOL_AUDIT_LOG_PATH": str(audit_path)},
+            )
+            self.assertEqual(process.returncode, 0, process.stderr)
+            payload = json.loads(process.stdout)
+            result = payload["result"]["structuredContent"]
+            self.assertGreaterEqual(result["count"], 1)
+            self.assertTrue(all("grafana" in entry["service_ids"] for entry in result["entries"]))
+            events = self.read_audit_events(audit_path)
+            self.assertEqual(events[0]["tool"], "get-deployment-history")
 
     def test_approve_call_emits_audit_event(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

@@ -163,6 +163,7 @@
 
 - name: Reload nftables after forward compatibility patch
   ansible.builtin.command: "nft -f {{ docker_runtime_nftables_config_file }}"
+  changed_when: docker_runtime_nftables_forward_patch.changed
   when:
     - docker_runtime_container_forward_compat_enabled | bool
     - docker_runtime_nftables_config_stat.stat.exists

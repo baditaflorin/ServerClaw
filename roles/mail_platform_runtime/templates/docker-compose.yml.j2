@@ -1,4 +1,23 @@
 services:
+  openbao-agent:
+    image: {{ mail_platform_openbao_agent_image }}
+    container_name: {{ mail_platform_openbao_agent_container_name }}
+    command:
+      - agent
+      - -config=/openbao-agent/agent.hcl
+    network_mode: host
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -s {{ mail_platform_gateway_env_file }}
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    volumes:
+      - {{ mail_platform_openbao_agent_dir }}:/openbao-agent:ro
+      - {{ mail_platform_gateway_env_file | dirname }}:{{ mail_platform_gateway_env_file | dirname }}
+
   stalwart:
     image: {{ mail_platform_stalwart_image }}
     container_name: {{ mail_platform_stalwart_container_name }}
@@ -16,11 +35,14 @@ services:
     container_name: {{ mail_platform_gateway_container_name }}
     restart: unless-stopped
     env_file:
-      - {{ mail_platform_gateway_dir }}/gateway.env
+      - {{ mail_platform_gateway_env_file }}
     volumes:
       - {{ mail_platform_gateway_data_dir }}:/data
       - {{ mail_platform_gateway_profiles_file }}:{{ mail_platform_gateway_profiles_container_file }}:ro
     ports:
       - "{{ mail_platform_gateway_bind_port }}:8081"
     depends_on:
-      - stalwart
+      openbao-agent:
+        condition: service_healthy
+      stalwart:
+        condition: service_started

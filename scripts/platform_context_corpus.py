@@ -20,14 +20,17 @@ DEFAULT_OVERLAP_CHARS = 240
 
 CORPUS_PATHS: tuple[str, ...] = (
     "docs/adr",
+    "docs/release-notes",
     "docs/runbooks",
     "receipts/live-applies",
+    "receipts/promotions",
 )
 CORPUS_FILES: tuple[str, ...] = (
     "versions/stack.yaml",
     "config/workflow-catalog.json",
     "config/command-catalog.json",
     "config/agent-tool-registry.json",
+    "docs/schema/promotion-receipt.json",
     "changelog.md",
     "VERSION",
 )
@@ -36,6 +39,7 @@ MIRRORED_PATH_PREFIXES: tuple[str, ...] = (
     "docs/adr",
     "docs/runbooks",
     "receipts/live-applies",
+    "receipts/promotions",
 )
 
 
@@ -76,8 +80,12 @@ def document_kind_for_path(relative_path: str) -> str:
         return "adr"
     if relative_path.startswith("docs/runbooks/"):
         return "runbook"
+    if relative_path.startswith("docs/release-notes/"):
+        return "release_note"
     if relative_path.startswith("receipts/live-applies/"):
         return "receipt"
+    if relative_path.startswith("receipts/promotions/"):
+        return "promotion"
     if relative_path == "versions/stack.yaml":
         return "stack"
     if relative_path.startswith("config/"):

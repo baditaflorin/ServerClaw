@@ -387,6 +387,32 @@
       }
     },
     {
+      "id": "changelog_portal",
+      "name": "Deployment History Portal",
+      "description": "Generated portal for browsing live applies, promotions, and mutation audit history.",
+      "category": "access",
+      "lifecycle_status": "planned",
+      "vm": "nginx-lv3",
+      "vmid": 110,
+      "public_url": "https://changelog.lv3.org",
+      "subdomain": "changelog.lv3.org",
+      "exposure": "edge-published",
+      "adr": "0081",
+      "runbook": "docs/runbooks/deployment-history-portal.md",
+      "tags": [
+        "portal",
+        "history",
+        "deployments"
+      ],
+      "environments": {
+        "production": {
+          "status": "planned",
+          "url": "https://changelog.lv3.org",
+          "subdomain": "changelog.lv3.org"
+        }
+      }
+    },
+    {
       "id": "ops_portal",
       "name": "Platform Operations Portal",
       "description": "Generated operator-facing static portal for service, runbook, ADR, and environment navigation.",

@@ -58,7 +58,7 @@ Treat the entire `.local/keycloak/` subtree as recovery material and keep it out
 Run these checks after converge:
 
 1. `make syntax-check-keycloak`
-2. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose --env-file /opt/keycloak/keycloak.env --file /opt/keycloak/docker-compose.yml ps'`
+2. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose --file /opt/keycloak/docker-compose.yml ps && sudo ls -l /opt/keycloak/openbao /run/lv3-secrets/keycloak && sudo test ! -e /opt/keycloak/keycloak.env'`
 3. `curl -s https://sso.lv3.org/realms/lv3/.well-known/openid-configuration`
 4. `curl -I https://grafana.lv3.org/login/generic_oauth`
 5. `curl -s --data "grant_type=client_credentials&client_id=lv3-agent-hub&client_secret=$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/lv3-agent-hub-client-secret.txt)" https://sso.lv3.org/realms/lv3/protocol/openid-connect/token`

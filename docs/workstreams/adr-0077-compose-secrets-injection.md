@@ -1,23 +1,23 @@
 # Workstream ADR 0077: Compose Runtime Secrets Injection Via OpenBao Agent
 
 - ADR: [ADR 0077](../adr/0077-compose-runtime-secrets-injection.md)
-- Title: Replace .env file secrets in Docker Compose stacks with OpenBao Agent sidecar injection via tmpfs
-- Status: ready
+- Title: Replace compose-directory .env secrets with OpenBao Agent sidecar injection backed by host tmpfs
+- Status: merged
 - Branch: `codex/adr-0077-compose-secrets-injection`
-- Worktree: `../proxmox_florin_server-compose-secrets-injection`
+- Worktree: `.worktrees/adr-0077`
 - Owner: codex
 - Depends On: `adr-0043-openbao`, `adr-0025-docker-compose-stacks`, `adr-0047-short-lived-creds`, `adr-0065-secret-rotation-automation`
 - Conflicts With: any workstream that writes new `.env` files to compose directories
-- Shared Surfaces: `roles/docker_compose_stack`, all Compose stack templates on `docker-runtime-lv3`, `config/image-catalog.json`
+- Shared Surfaces: `roles/common/tasks/openbao_compose_env.yml`, Compose stack templates on `docker-runtime-lv3`, `config/image-catalog.json`, `scripts/validate_repo.sh`
 
 ## Scope
 
-- add `openbao-agent` sidecar service to the `roles/docker_compose_stack` role template
-- template `openbao-agent.hcl.j2` for configurable secret paths and env file output
-- update `roles/docker_compose_stack` to: provision AppRole credentials in OpenBao, write `role_id` and `secret_id` to restricted paths, remove existing `.env` files
-- migrate the following Compose stacks to sidecar injection (priority order): grafana, windmill, mattermost, keycloak, open-webui
-- add `make validate` check that no `*.env` files exist in the compose directory on the controller
-- add `config/image-catalog.json` entry for `openbao/openbao-agent`
+- add a shared OpenBao Agent helper under `roles/common/`
+- template `openbao-agent.hcl.j2` for configurable AppRole auth and runtime env output under `/run/lv3-secrets/<service>/runtime.env`
+- provision per-service AppRole credentials, write `role_id` and `secret_id` to `/opt/<service>/openbao/`, and remove legacy compose-directory `.env` files
+- migrate the current Compose-managed secret consumers on `docker-runtime-lv3`: windmill, mattermost, keycloak, open-webui, netbox, platform-context, and the mail-platform gateway
+- add a `make validate` guard that fails when any `*.env` file is present in the repository checkout
+- reuse the pinned `openbao_runtime` image contract for the OpenBao Agent sidecars
 - document the migration guide in `docs/runbooks/compose-secrets-injection.md`
 
 ## Non-Goals
@@ -27,10 +27,10 @@
 
 ## Expected Repo Surfaces
 
-- `roles/docker_compose_stack/templates/openbao-agent.hcl.j2`
-- updated `roles/docker_compose_stack/tasks/main.yml`
-- updated Compose templates for grafana, windmill, mattermost, keycloak, open-webui
-- updated `config/image-catalog.json` (openbao-agent image)
+- `roles/common/templates/openbao-agent.hcl.j2`
+- `roles/common/tasks/openbao_compose_env.yml`
+- updated Compose templates and runtime roles for windmill, mattermost, keycloak, open-webui, netbox, platform-context, and mail-platform
+- updated `config/image-catalog.json` usage for the shared OpenBao server/agent image contract
 - `docs/runbooks/compose-secrets-injection.md`
 - `docs/adr/0077-compose-runtime-secrets-injection.md`
 - `docs/workstreams/adr-0077-compose-secrets-injection.md`
@@ -38,27 +38,32 @@
 
 ## Expected Live Surfaces
 
-- grafana, windmill, mattermost, keycloak, and open-webui Compose stacks running with OpenBao Agent sidecar
-- no `.env` files in `/opt/<stack>/` directories on `docker-runtime-lv3`
+- windmill, mattermost, keycloak, open-webui, netbox, platform-context, and the mail-platform gateway running with OpenBao Agent sidecars once applied
+- no legacy `.env` files in `/opt/<service>/` compose directories on `docker-runtime-lv3`
 - AppRole credentials at `/opt/<stack>/openbao/` (mode 0600, root only)
-- secrets visible via `vault kv get secret/prod/<stack>/` after rotation
+- runtime env files present only under `/run/lv3-secrets/<service>/runtime.env`
 
 ## Verification
 
-- `ls /opt/grafana/*.env` returns no files on `docker-runtime-lv3`
-- `docker logs grafana-openbao-agent-1` shows successful secret fetch and render
-- rotate `secret/prod/grafana/admin_password` in OpenBao; within 5 minutes, Grafana container reflects the new password without restart
+- `make validate`
+- `make syntax-check-windmill`
+- `make syntax-check-keycloak`
+- `make syntax-check-mattermost`
+- `make syntax-check-open-webui`
+- `make syntax-check-netbox`
+- `make syntax-check-rag-context`
+- `make syntax-check-mail-platform`
 - `make validate` fails if a `.env` file is committed to the repo
 
 ## Merge Criteria
 
-- all five priority stacks are migrated and healthy on staging before production migration
+- all current Compose-managed secret consumers on `docker-runtime-lv3` are migrated in repository automation
 - secret rotation test passes for at least one migrated stack
 - the `.env` validation gate is integrated into `make validate`
 - migration runbook is complete and reviewed
 
 ## Notes For The Next Assistant
 
-- migrate grafana first — it is the least security-critical and easiest to verify (admin password change is immediately visible)
-- the AppRole provisioning in OpenBao must use per-stack policies; do not share a single AppRole across all stacks
-- test the tmpfs volume behaviour on container restart: verify secrets are re-fetched by the agent, not cached in a dead tmpfs
+- Grafana is intentionally not part of the final implementation because the current mainline still runs it as a package-managed service on `monitoring-lv3`
+- each service now has a dedicated AppRole and a dedicated `kv/data/services/<service>/runtime-env` payload
+- the implementation uses host `/run` rather than a Docker named volume because Compose resolves `env_file` on the host filesystem
