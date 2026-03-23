@@ -32,6 +32,120 @@
         "make validate"
       ]
     },
+    "install-hooks": {
+      "description": "Install the repo-managed pre-commit and pre-push hook layers for this checkout.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "install-hooks",
+        "command": "make install-hooks"
+      },
+      "preflight": {
+        "required": false
+      },
+      "validation_targets": [],
+      "live_impact": "repo_only",
+      "owner_runbook": "docs/runbooks/validation-gate.md",
+      "implementation_refs": [
+        "Makefile",
+        ".pre-commit-config.yaml",
+        ".githooks/pre-push",
+        "docs/runbooks/validation-gate.md"
+      ],
+      "outputs": [
+        "Git hooks installed for the current checkout, including the fast local pre-commit set and the remote-first pre-push gate."
+      ],
+      "verification_commands": [
+        "make install-hooks",
+        "git rev-parse --git-path hooks"
+      ]
+    },
+    "pre-push-gate": {
+      "description": "Run the ADR 0087 repository validation gate through the build server with local Docker fallback.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "pre-push-gate",
+        "command": "make pre-push-gate"
+      },
+      "preflight": {
+        "required": false
+      },
+      "validation_targets": [],
+      "live_impact": "repo_only",
+      "owner_runbook": "docs/runbooks/validation-gate.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/build-server.json",
+        "config/validation-gate.json",
+        "scripts/remote_exec.sh",
+        "scripts/run_gate.py",
+        "scripts/parallel_check.py",
+        ".githooks/pre-push"
+      ],
+      "outputs": [
+        "A blocking pass or fail result across the eight configured pre-push validation checks, together with a recorded last-run status payload."
+      ],
+      "verification_commands": [
+        "make pre-push-gate",
+        "make gate-status"
+      ]
+    },
+    "gate-status": {
+      "description": "Show the configured validation gate checks plus the last local, bypass, and post-merge results.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "gate-status",
+        "command": "make gate-status"
+      },
+      "preflight": {
+        "required": false
+      },
+      "validation_targets": [],
+      "live_impact": "repo_only",
+      "owner_runbook": "docs/runbooks/validation-gate.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/validation-gate.json",
+        "scripts/gate_status.py",
+        "scripts/log_gate_bypass.py",
+        "receipts/gate-bypasses/.gitkeep"
+      ],
+      "outputs": [
+        "A human-readable summary of enabled validation checks, the last local gate run, the last post-merge gate run, and the latest explicit bypass receipt."
+      ],
+      "verification_commands": [
+        "make gate-status"
+      ]
+    },
+    "post-merge-gate": {
+      "description": "Re-run the ADR 0087 validation manifest after merge to main from the Windmill worker checkout.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "post-merge-gate",
+        "command": "make post-merge-gate"
+      },
+      "preflight": {
+        "required": false
+      },
+      "validation_targets": [],
+      "live_impact": "repo_only",
+      "owner_runbook": "docs/runbooks/validation-gate.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/validation-gate.json",
+        "config/windmill/scripts/post-merge-gate.py",
+        "scripts/run_gate.py"
+      ],
+      "outputs": [
+        "A post-merge pass or fail result for the same validation manifest used by the interactive pre-push gate."
+      ],
+      "verification_commands": [
+        "make post-merge-gate"
+      ]
+    },
     "generate-status-docs": {
       "description": "Regenerate the README status fragments that are derived from canonical repository state.",
       "lifecycle_status": "active",

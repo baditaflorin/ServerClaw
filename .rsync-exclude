@@ -1,13 +1,15 @@
 .local/
 *.vault
 .env
-receipts/
 .git/
 .ansible/validation/
 .claude/
 .worktrees/
 __pycache__/
 *.pyc
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
 .terraform/
 .packer_cache/
 config/build-cache-manifest.json

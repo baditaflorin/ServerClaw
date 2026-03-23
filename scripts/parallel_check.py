@@ -26,6 +26,7 @@ class CheckDefinition:
     command: str
     working_dir: str
     timeout_seconds: int
+    cache_mounts: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -87,6 +88,7 @@ def load_manifest(manifest_path: Path) -> dict[str, CheckDefinition]:
             command=str(config["command"]),
             working_dir=str(config.get("working_dir", "/workspace")),
             timeout_seconds=int(config.get("timeout_seconds", 300)),
+            cache_mounts=tuple(str(item) for item in config.get("cache_mounts", [])),
         )
     return checks
 
@@ -117,6 +119,7 @@ def build_docker_command(
     docker_binary: str,
 ) -> list[str]:
     mount_args = ["-v", f"{workspace.resolve()}:/workspace"]
+    env_args: list[str] = []
     git_metadata_file = workspace / ".git"
     if git_metadata_file.is_file():
         gitdir_line = git_metadata_file.read_text(encoding="utf-8").strip()
@@ -129,12 +132,33 @@ def build_docker_command(
             for path in sorted(extra_mounts):
                 mount_args.extend(["-v", f"{path}:{path}:ro"])
 
+    for cache_mount in check.cache_mounts:
+        if cache_mount == "ansible_collections":
+            host_path = os.environ.get("LV3_ANSIBLE_COLLECTIONS_DIR")
+            if host_path:
+                mount_args.extend(["-v", f"{Path(host_path).resolve()}:/opt/lv3/ansible-collections"])
+                env_args.extend(["-e", "LV3_ANSIBLE_COLLECTIONS_DIR=/opt/lv3/ansible-collections"])
+            sha_file = os.environ.get("LV3_ANSIBLE_COLLECTIONS_SHA_FILE")
+            if sha_file:
+                env_args.extend(["-e", f"LV3_ANSIBLE_COLLECTIONS_SHA_FILE={sha_file}"])
+        elif cache_mount == "pip":
+            host_path = os.environ.get("LV3_PIP_CACHE_DIR")
+            if host_path:
+                mount_args.extend(["-v", f"{Path(host_path).resolve()}:/root/.cache/pip"])
+                env_args.extend(["-e", "PIP_CACHE_DIR=/root/.cache/pip"])
+        elif cache_mount == "trivy":
+            host_path = os.environ.get("LV3_TRIVY_CACHE_DIR")
+            if host_path:
+                mount_args.extend(["-v", f"{Path(host_path).resolve()}:/var/lib/trivy"])
+                env_args.extend(["-e", "TRIVY_CACHE_DIR=/var/lib/trivy"])
+
     return [
         docker_binary,
         "run",
         "--rm",
         "--cpus=4",
         *mount_args,
+        *env_args,
         "-w",
         check.working_dir,
         check.image,

@@ -34,10 +34,15 @@
       "command": "./scripts/validate_repo.sh generated-vars ansible-syntax role-argument-specs shell json health-probes data-models generated-docs generated-portals",
       "local_fallback_command": "./scripts/validate_repo.sh generated-vars ansible-syntax role-argument-specs shell json health-probes data-models generated-docs generated-portals"
     },
+    "pre-push-gate": {
+      "skip_docker": true,
+      "command": "mkdir -p .local/validation-gate .local/trivy-cache && LV3_ANSIBLE_COLLECTIONS_DIR=/opt/builds/.ansible/collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/opt/builds/.ansible/requirements.sha LV3_TRIVY_CACHE_DIR=.local/trivy-cache python3 scripts/run_gate.py --workspace . --status-file .local/validation-gate/last-run.json --source build-server",
+      "local_fallback_command": "mkdir -p .local/validation-gate .local/trivy-cache .ansible/validation/collections && LV3_ANSIBLE_COLLECTIONS_DIR=.ansible/validation/collections LV3_TRIVY_CACHE_DIR=.local/trivy-cache python3 scripts/run_gate.py --workspace . --status-file .local/validation-gate/last-run.json --source local-fallback"
+    },
     "remote-pre-push": {
-      "runner_label": "pre-push-gate",
-      "command": "./scripts/validate_repo.sh && pytest -q",
-      "local_fallback_command": "./scripts/validate_repo.sh && pytest -q"
+      "skip_docker": true,
+      "command": "mkdir -p .local/validation-gate .local/trivy-cache && LV3_ANSIBLE_COLLECTIONS_DIR=/opt/builds/.ansible/collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/opt/builds/.ansible/requirements.sha LV3_TRIVY_CACHE_DIR=.local/trivy-cache python3 scripts/run_gate.py --workspace . --status-file .local/validation-gate/last-run.json --source build-server",
+      "local_fallback_command": "mkdir -p .local/validation-gate .local/trivy-cache .ansible/validation/collections && LV3_ANSIBLE_COLLECTIONS_DIR=.ansible/validation/collections LV3_TRIVY_CACHE_DIR=.local/trivy-cache python3 scripts/run_gate.py --workspace . --status-file .local/validation-gate/last-run.json --source local-fallback"
     },
     "remote-packer-build": {
       "runner_label": "packer-validate",

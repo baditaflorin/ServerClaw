@@ -1,0 +1,8 @@
+[allowlist]
+description = "Repo-managed placeholders and encrypted artifacts"
+regexes = [
+  '''\$ANSIBLE_VAULT;''',
+]
+paths = [
+  '''tests/fixtures/.*''',
+]

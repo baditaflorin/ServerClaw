@@ -258,6 +258,25 @@ remote_reachable() {
   "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "true" >/dev/null 2>&1
 }
 
+sync_remote_gate_status_back() {
+  local remote_status=""
+  local local_status=""
+
+  case "$COMMAND_LABEL" in
+    pre-push-gate|remote-pre-push)
+      ;;
+    *)
+      return 0
+      ;;
+  esac
+
+  remote_status="$WORKSPACE_ROOT/.local/validation-gate/last-run.json"
+  local_status="$REPO_ROOT/.local/validation-gate/last-run.json"
+  mkdir -p "$(dirname "$local_status")"
+
+  "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "cat $(quote_shell "$remote_status")" > "$local_status" 2>/dev/null || true
+}
+
 ensure_remote_workspace() {
   "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "mkdir -p $(quote_shell "$WORKSPACE_ROOT")" >/dev/null
 }
@@ -314,6 +333,7 @@ run_remote_command() {
   local remote_payload=""
   local remote_prefix=""
   local timeout_cmd=""
+  local rc=0
 
   remote_prefix="$(remote_env_exports)"
   timeout_cmd="$(timeout_prefix)"
@@ -363,7 +383,9 @@ run_remote_command() {
     fi
   fi
 
-  "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "$remote_payload"
+  "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "$remote_payload" || rc=$?
+  sync_remote_gate_status_back
+  return "$rc"
 }
 
 main() {

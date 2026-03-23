@@ -14,6 +14,15 @@ make validate
 
 This is the required minimum gate before merging automation changes to `main`.
 
+ADR 0087 adds an operator-facing push gate on top of this baseline:
+
+```bash
+make install-hooks
+make pre-push-gate
+```
+
+See [docs/runbooks/validation-gate.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-validation-gate/docs/runbooks/validation-gate.md) for the hook installation, bypass, and post-merge workflow details.
+
 ## What The Pipeline Checks
 
 - all managed playbooks pass Ansible syntax check

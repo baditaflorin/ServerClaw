@@ -33,6 +33,9 @@ fi
 if [[ "$*" == *" && pwd"* ]]; then
   printf '%s\n' "${REMOTE_EXEC_WORKSPACE_ROOT:?}"
 fi
+if [[ "$*" == *".local/validation-gate/last-run.json"* ]]; then
+  printf '%s' "${REMOTE_EXEC_STATUS_PAYLOAD:-}"
+fi
 """,
     )
 
@@ -77,6 +80,11 @@ def build_config(
             "remote-validate": {
                 "runner_label": "validate-schemas",
                 "command": "printf remote-validate",
+                "local_fallback_command": local_command,
+            },
+            "pre-push-gate": {
+                "skip_docker": True,
+                "command": "printf remote-pre-push",
                 "local_fallback_command": local_command,
             },
             "remote-packer-validate": {
@@ -155,6 +163,7 @@ def run_remote_exec(
             "REMOTE_EXEC_RSYNC_LOG": str(rsync_log),
             "REMOTE_EXEC_WORKSPACE_ROOT": "/opt/builds/proxmox_florin_server",
             "REMOTE_EXEC_MARKER": str(marker),
+            "REMOTE_EXEC_STATUS_PAYLOAD": '{"status":"passed","source":"build-server"}\n',
         }
     )
     if extra_env:
@@ -270,3 +279,14 @@ def test_remote_exec_mounts_packer_cache_for_infra_runners(tmp_path: Path) -> No
 
     assert completed.returncode == 0, completed.stderr
     assert "/opt/builds/.packer.d:/root/.packer.d" in completed.stderr
+
+
+def test_remote_exec_syncs_remote_gate_status_back_to_local_checkout(tmp_path: Path) -> None:
+    status_path = REPO_ROOT / ".local" / "validation-gate" / "last-run.json"
+    status_path.unlink(missing_ok=True)
+
+    completed = run_remote_exec(tmp_path, "pre-push-gate")
+
+    assert completed.returncode == 0, completed.stderr
+    assert status_path.exists()
+    assert '"status":"passed"' in status_path.read_text()
