@@ -37,15 +37,15 @@
   run_once: true
   changed_when: false
 
-- name: Assert required host selectors are present in the inventory
+- name: Assert required host selectors resolve in the inventory
   ansible.builtin.assert:
     that:
-      - (required_hosts | default([])) | difference((groups.keys() | list) + (groups['all'] | default([]))) | length == 0
+      - query('inventory_hostnames', item) | length > 0
     fail_msg: >-
-      Missing inventory hosts or groups:
-      {{ (required_hosts | default([])) | difference((groups.keys() | list) + (groups['all'] | default([]))) | join(', ') }}.
+      Inventory selector '{{ item }}' did not resolve to any hosts.
   delegate_to: localhost
   become: false
+  loop: "{{ required_hosts | default([]) }}"
   run_once: true
   changed_when: false
 
@@ -63,7 +63,7 @@
       {{
         (
           playbook_execution_resolved_required_hosts
-          + (groups[item] if item in groups else [item])
+          + query('inventory_hostnames', item)
         ) | unique
       }}
   delegate_to: localhost

@@ -233,8 +233,8 @@ playbook_execution_required_hosts:
     production: proxmox_florin
     staging: proxmox_florin
   lv3_guests:
-    production: lv3_guests
-    staging: lv3_guests
+    production: "lv3_guests:&production"
+    staging: "lv3_guests:&staging"
   nginx_edge:
     production: nginx-lv3
     staging: nginx-staging-lv3

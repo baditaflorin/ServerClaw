@@ -53,6 +53,32 @@
         loki_log_agent_lane: "{{ monitoring_stack_guest_lane }}"
         loki_log_agent_nginx_logs_enabled: "{{ monitoring_stack_guest_role == 'nginx' }}"
         loki_log_agent_docker_logs_enabled: "{{ monitoring_stack_guest_role == 'docker-runtime' }}"
+        loki_log_agent_file_scrapes: >-
+          {{
+            [
+              {
+                'name': 'mutation_audit',
+                'paths': [mutation_audit_log_file],
+                'labels': {
+                  'job': 'mutation-audit',
+                  'service': 'platform',
+                  'source': 'file',
+                  'log_type': 'structured'
+                }
+              },
+              {
+                'name': 'openbao_audit',
+                'paths': [openbao_host_audit_log_file],
+                'labels': {
+                  'job': 'mutation-audit',
+                  'surface': 'openbao',
+                  'service': 'openbao',
+                  'source': 'file',
+                  'log_type': 'native-audit'
+                }
+              }
+            ] if monitoring_stack_guest_role == 'docker-runtime' else []
+          }}
 
   post_tasks:
     - name: Run shared completion notifications

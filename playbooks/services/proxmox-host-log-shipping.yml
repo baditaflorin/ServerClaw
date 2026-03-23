@@ -22,6 +22,15 @@
       vars:
         loki_log_agent_role: proxmox-host
         loki_log_agent_lane: management
+        loki_log_agent_file_scrapes:
+          - name: mutation_audit
+            paths:
+              - "{{ mutation_audit_log_file }}"
+            labels:
+              job: mutation-audit
+              service: platform
+              source: file
+              log_type: structured
 
   post_tasks:
     - name: Run shared completion notifications

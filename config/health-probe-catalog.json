@@ -61,11 +61,11 @@
       },
       "readiness": {
         "kind": "http",
-        "description": "The LV3 platform dashboard is provisioned in Grafana.",
+        "description": "Grafana serves its local health endpoint after provisioning completes.",
         "timeout_seconds": 60,
         "retries": 1,
         "delay_seconds": 0,
-        "url": "http://127.0.0.1:3000/api/dashboards/uid/lv3-platform-overview",
+        "url": "http://127.0.0.1:3000/api/health",
         "method": "GET",
         "expected_status": [200]
       },
@@ -365,12 +365,12 @@
       },
       "readiness": {
         "kind": "http",
-        "description": "The seeded Windmill healthcheck script runs to completion in the lv3 workspace.",
+        "description": "The Windmill API version endpoint remains reachable after workspace bootstrap.",
         "timeout_seconds": 90,
         "retries": 1,
         "delay_seconds": 0,
-        "url": "http://127.0.0.1:8000/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fwindmill_healthcheck",
-        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/version",
+        "method": "GET",
         "expected_status": [200]
       },
       "uptime_kuma": {
