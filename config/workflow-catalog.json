@@ -916,6 +916,48 @@
         "python3 scripts/drift_detector.py --help"
       ]
     },
+    "restore-verification": {
+      "description": "Run the ADR 0099 backup-restore verification workflow, write one receipt, emit the mutation-audit event, and optionally publish NATS and Mattermost summaries.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "restore-verification",
+        "command": "make restore-verification"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "proxmox_api_token_payload"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/backup-restore-verification.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/windmill/scripts/restore-verification.py",
+        "docs/runbooks/backup-restore-verification.md",
+        "receipts/restore-verifications",
+        "scripts/restore_verification.py",
+        "scripts/smoke_tests/backup_vm_smoke.py",
+        "scripts/smoke_tests/docker_runtime_smoke.py",
+        "scripts/smoke_tests/postgres_smoke.py",
+        "tests/test_restore_verification.py",
+        "tests/test_restore_verification_windmill.py"
+      ],
+      "outputs": [
+        "A dated restore-verification receipt recording the selected backup, restore duration, boot time, per-target smoke tests, and overall pass or fail status.",
+        "Mutation-audit evidence plus optional NATS and Mattermost notifications for the restore-verification run."
+      ],
+      "verification_commands": [
+        "python3 -m py_compile scripts/restore_verification.py scripts/smoke_tests/postgres_smoke.py scripts/smoke_tests/docker_runtime_smoke.py scripts/smoke_tests/backup_vm_smoke.py config/windmill/scripts/restore-verification.py",
+        "uv run --with pytest --with pyyaml pytest tests/test_restore_verification.py tests/test_restore_verification_windmill.py -q",
+        "python3 scripts/restore_verification.py --help"
+      ]
+    },
     "rotate-secret": {
       "description": "Plan or apply one repo-managed secret rotation, update the owning service without a full reconverge, and persist the rotated value in OpenBao.",
       "lifecycle_status": "active",
