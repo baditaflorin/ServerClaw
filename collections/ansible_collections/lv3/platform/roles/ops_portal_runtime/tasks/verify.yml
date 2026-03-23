@@ -1,0 +1,36 @@
+---
+- name: Verify the ops portal container is running
+  ansible.builtin.command:
+    argv:
+      - docker
+      - ps
+      - --filter
+      - "name={{ ops_portal_container_name }}"
+      - --filter
+      - status=running
+      - --format
+      - "{{ '{{' }}.Names{{ '}}' }}"
+  register: ops_portal_verify_running
+  changed_when: false
+
+- name: Assert the ops portal container is running
+  ansible.builtin.assert:
+    that:
+      - ops_portal_verify_running.stdout_lines | select('equalto', ops_portal_container_name) | list | length == 1
+    fail_msg: "Ops portal container is not running."
+
+- name: Verify the ops portal health endpoint responds locally
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ ops_portal_internal_port }}/health"
+    method: GET
+    status_code: 200
+  register: ops_portal_verify_health
+  changed_when: false
+
+- name: Verify the ops portal root page renders locally
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ ops_portal_internal_port }}/"
+    method: GET
+    status_code: 200
+  register: ops_portal_verify_root
+  changed_when: false

@@ -44,6 +44,17 @@
     "accepted_statuscodes": ["200-299"]
   },
   {
+    "name": "Ops Portal Public",
+    "type": "http",
+    "url": "https://ops.lv3.org/health",
+    "description": "Interactive ops portal health endpoint published through the NGINX edge VM.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 5,
+    "accepted_statuscodes": ["200-299"]
+  },
+  {
     "name": "Proxmox UI Port",
     "type": "port",
     "hostname": "10.10.10.1",

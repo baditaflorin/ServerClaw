@@ -124,6 +124,46 @@
         }
       }
     },
+    "ops_portal": {
+      "service_name": "ops-portal",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "ops_portal_runtime",
+      "verify_file": "roles/ops_portal_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The interactive ops portal health endpoint responds on the local listener.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8090/health",
+        "method": "GET",
+        "expected_status": [200]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The interactive ops portal renders its dashboard shell locally after startup.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8090/",
+        "method": "GET",
+        "expected_status": [200]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Ops Portal Public",
+          "type": "http",
+          "url": "https://ops.lv3.org/health",
+          "description": "Interactive ops portal health endpoint published through the NGINX edge VM.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": ["200-299"]
+        }
+      }
+    },
     "proxmox_ui": {
       "service_name": "proxmox-ui",
       "owning_vm": "proxmox_florin",

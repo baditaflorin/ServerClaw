@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0.0",
+  "services": [
+    {
+      "id": "platform",
+      "upstream": "local",
+      "gateway_prefix": "/v1/platform",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-read",
+      "strip_prefix": false,
+      "timeout_seconds": 20,
+      "consumers": [
+        "ops_portal"
+      ]
+    },
+    {
+      "id": "ops_portal",
+      "upstream": "http://ops-portal:8090",
+      "gateway_prefix": "/v1/ops-portal",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 20,
+      "description": "Interactive operator portal frontend consuming the platform action surface."
+    }
+  ]
+}
