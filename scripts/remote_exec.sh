@@ -28,6 +28,12 @@ SKIP_DOCKER="false"
 MOUNT_DOCKER_SOCKET="false"
 BUILTIN_ACTION=""
 SSH_OPTIONS_NL=""
+BUILD_SERVER_PIP_CACHE_VOLUME=""
+BUILD_SERVER_PACKER_PLUGIN_CACHE=""
+BUILD_SERVER_ANSIBLE_COLLECTION_CACHE=""
+BUILD_SERVER_ANSIBLE_REQUIREMENTS_SHA_FILE=""
+BUILD_SERVER_APT_PROXY_URL=""
+RUNNER_CACHE_MOUNTS_NL=""
 
 SSH_BASE_CMD=()
 
@@ -126,6 +132,11 @@ shell_assign("SSH_KEY_PATH", os.path.expanduser(config.get("ssh_key", "")))
 shell_assign("WORKSPACE_ROOT", config["workspace_root"])
 shell_assign("DEFAULT_TIMEOUT_SECONDS", config.get("default_timeout_seconds", 900))
 shell_assign("DOCKER_SOCKET", config.get("docker_socket", ""))
+shell_assign("BUILD_SERVER_PIP_CACHE_VOLUME", config.get("pip_cache_volume", ""))
+shell_assign("BUILD_SERVER_PACKER_PLUGIN_CACHE", config.get("packer_plugin_cache", ""))
+shell_assign("BUILD_SERVER_ANSIBLE_COLLECTION_CACHE", config.get("ansible_collection_cache", ""))
+shell_assign("BUILD_SERVER_ANSIBLE_REQUIREMENTS_SHA_FILE", config.get("ansible_requirements_sha_file", ""))
+shell_assign("BUILD_SERVER_APT_PROXY_URL", config.get("apt_proxy_url", ""))
 shell_assign(
     "SSH_OPTIONS_NL",
     "\n".join(str(item) for item in config.get("ssh_options", [])),
@@ -138,6 +149,10 @@ shell_assign("TIMEOUT_SECONDS", timeout_seconds)
 shell_assign("SKIP_DOCKER", "true" if command_spec.get("skip_docker", False) else "false")
 shell_assign("MOUNT_DOCKER_SOCKET", "true" if command_spec.get("mount_docker_socket", False) else "false")
 shell_assign("BUILTIN_ACTION", command_spec.get("builtin", ""))
+shell_assign(
+    "RUNNER_CACHE_MOUNTS_NL",
+    "\n".join(str(item) for item in runner_spec.get("cache_mounts", [])),
+)
 PY
   )"
 
@@ -183,6 +198,12 @@ remote_env_exports() {
       printf -v prefix "%sexport %s=%q; " "$prefix" "$name" "${!name}"
     fi
   done
+  if [[ -n "$BUILD_SERVER_PACKER_PLUGIN_CACHE" ]]; then
+    printf -v prefix "%sexport PACKER_PLUGIN_PATH=%q; " "$prefix" "${BUILD_SERVER_PACKER_PLUGIN_CACHE}/plugins"
+  fi
+  if [[ -n "$BUILD_SERVER_APT_PROXY_URL" ]]; then
+    printf -v prefix "%sexport APT_PROXY_URL=%q; " "$prefix" "$BUILD_SERVER_APT_PROXY_URL"
+  fi
   echo "$prefix"
 }
 
@@ -194,6 +215,42 @@ remote_docker_env_args() {
       args+=("-e" "$name=${!name}")
     fi
   done
+  if [[ -n "$BUILD_SERVER_APT_PROXY_URL" ]]; then
+    args+=("-e" "APT_PROXY_URL=$BUILD_SERVER_APT_PROXY_URL")
+  fi
+  printf "%s\n" "${args[@]}"
+}
+
+remote_runner_cache_args() {
+  local args=()
+  local cache_mount=""
+
+  if [[ -n "$RUNNER_CACHE_MOUNTS_NL" ]]; then
+    while IFS= read -r cache_mount; do
+      [[ -n "$cache_mount" ]] || continue
+      case "$cache_mount" in
+        pip)
+          [[ -n "$BUILD_SERVER_PIP_CACHE_VOLUME" ]] || continue
+          args+=("-v" "${BUILD_SERVER_PIP_CACHE_VOLUME}:/root/.cache/pip" "-e" "PIP_CACHE_DIR=/root/.cache/pip")
+          ;;
+        packer_plugins)
+          [[ -n "$BUILD_SERVER_PACKER_PLUGIN_CACHE" ]] || continue
+          args+=("-v" "${BUILD_SERVER_PACKER_PLUGIN_CACHE}:/root/.packer.d")
+          ;;
+        ansible_collections)
+          [[ -n "$BUILD_SERVER_ANSIBLE_COLLECTION_CACHE" ]] || continue
+          args+=(
+            "-v" "${BUILD_SERVER_ANSIBLE_COLLECTION_CACHE}:${BUILD_SERVER_ANSIBLE_COLLECTION_CACHE}"
+            "-e" "LV3_ANSIBLE_COLLECTIONS_DIR=${BUILD_SERVER_ANSIBLE_COLLECTION_CACHE}"
+            "-e" "LV3_ANSIBLE_COLLECTIONS_SHA_FILE=${BUILD_SERVER_ANSIBLE_REQUIREMENTS_SHA_FILE}"
+            "-e" "ANSIBLE_COLLECTIONS_PATH=${BUILD_SERVER_ANSIBLE_COLLECTION_CACHE}"
+            "-e" "ANSIBLE_COLLECTIONS_PATHS=${BUILD_SERVER_ANSIBLE_COLLECTION_CACHE}"
+          )
+          ;;
+      esac
+    done <<< "$RUNNER_CACHE_MOUNTS_NL"
+  fi
+
   printf "%s\n" "${args[@]}"
 }
 
@@ -282,14 +339,19 @@ run_remote_command() {
     )
     local docker_socket_path=""
     local docker_env_args=()
+    local docker_cache_args=()
 
     mapfile -t docker_env_args < <(remote_docker_env_args)
+    mapfile -t docker_cache_args < <(remote_runner_cache_args)
     if [[ -n "$DOCKER_SOCKET" && "$MOUNT_DOCKER_SOCKET" == "true" ]]; then
       docker_socket_path="${DOCKER_SOCKET#unix://}"
       docker_cmd+=("-v" "$docker_socket_path:$docker_socket_path" "-e" "DOCKER_HOST=$DOCKER_SOCKET")
     fi
     if [[ ${#docker_env_args[@]} -gt 0 ]]; then
       docker_cmd+=("${docker_env_args[@]}")
+    fi
+    if [[ ${#docker_cache_args[@]} -gt 0 ]]; then
+      docker_cmd+=("${docker_cache_args[@]}")
     fi
     docker_cmd+=("$DOCKER_IMAGE" "bash" "-lc" "$REMOTE_COMMAND")
 

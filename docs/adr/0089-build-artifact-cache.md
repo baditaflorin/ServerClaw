@@ -136,9 +136,9 @@ The workflow pulls all images, runs a no-op `pip install`, pre-downloads Packer 
 
 ## Implementation Notes
 
-- This workstream branch now adds the repo-managed `build_server` role, a dedicated cache converge playbook, the cache manifest skeleton, the Windmill `warm-build-cache` helper, and an operator runbook for the cache host.
-- Wiring the cache hooks into `scripts/remote_exec.sh`, `config/check-runner-manifest.json`, and the final `Makefile` targets is intentionally deferred until ADR 0082 and ADR 0083 finish, because those branches currently own those shared surfaces.
-- Until ADR 0082 and ADR 0083 land, the cache warmer records warnings and skips Docker check-runner image warming when the upstream manifest is absent.
+- This workstream branch now adds the repo-managed `build_server` role, a dedicated cache converge playbook, the cache manifest skeleton, the Windmill `warm-build-cache` and weekly cache-maintenance helpers, and the operator runbook for the cache host.
+- The branch also wires the cache hooks into `scripts/remote_exec.sh`, `config/check-runner-manifest.json`, `scripts/validate_repo.sh`, and the user-facing `Makefile` targets so the shared pip, Packer, and Ansible cache surfaces are available to the build-server execution path.
+- Live verification of warm-cache timing and the scheduled Windmill jobs still depends on merging from `main` and applying the build-server role to `docker-build-lv3`.
 
 ## Alternatives Considered
 

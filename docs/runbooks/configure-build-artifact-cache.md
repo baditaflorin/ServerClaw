@@ -17,6 +17,7 @@ ADR 0089 moves the expensive build-time downloads for the private build VM onto 
 - cache manifest: `config/build-cache-manifest.json`
 - operator summary helper: `scripts/cache_status.py`
 - Windmill warming helper: `config/windmill/scripts/warm-build-cache.py`
+- Windmill maintenance helper: `config/windmill/scripts/build-cache-maintenance.py`
 
 ## Converge The Build Host
 
@@ -69,16 +70,17 @@ The repo-side summary helper reads the canonical manifest:
 python3 scripts/cache_status.py --manifest config/build-cache-manifest.json
 ```
 
-The Windmill helper script can be run manually on a worker with the repo mounted at `/srv/proxmox_florin_server`:
+The Windmill warm-cache helper can be run manually on a worker with the repo mounted at `/srv/proxmox_florin_server`:
 
 ```bash
 python3 config/windmill/scripts/warm-build-cache.py
 ```
 
-Current dependency note:
+The weekly cache-maintenance helper can also be run manually:
 
-- `scripts/remote_exec.sh` and `config/check-runner-manifest.json` are owned by ADR 0082 and ADR 0083.
-- Until those branches land, the warm-cache helper will record warnings and skip Docker image warming when the manifest is absent.
+```bash
+python3 config/windmill/scripts/build-cache-maintenance.py
+```
 
 ## Operational Notes
 

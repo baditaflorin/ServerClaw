@@ -71,6 +71,11 @@ windmill_seed_scripts:
     language: python3
     summary: Warm the LV3 build caches
     description: Repo-managed helper that refreshes Docker, pip, Packer, and Ansible collection caches and rewrites config/build-cache-manifest.json.
+  - path: f/lv3/build_cache_maintenance
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/build-cache-maintenance.py"
+    language: python3
+    summary: Maintain the LV3 build caches
+    description: Repo-managed helper that purges the shared pip cache and checks the apt-cacher-ng report endpoint on the build server.
 windmill_seed_schedules:
   - path: f/lv3/platform_observation_loop_every_4h
     schedule: "0 0 */4 * * *"
@@ -97,5 +102,14 @@ windmill_seed_schedules:
     args: {}
     enabled: false
     summary: Disabled ADR 0089 nightly cache warming placeholder
-    description: Repo-managed nightly cache warmer reserved until ADR 0082 and ADR 0083 land the remote execution and check-runner surfaces.
+    description: Repo-managed nightly cache warmer definition for the build-cache workflow; enable it after the cache host is applied live from main.
+    no_flow_overlap: true
+  - path: f/lv3/build_cache_maintenance_weekly
+    schedule: "0 0 4 * * 0"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/build_cache_maintenance
+    args: {}
+    enabled: false
+    summary: Disabled ADR 0089 weekly cache maintenance placeholder
+    description: Repo-managed weekly cache maintenance definition that purges the shared pip cache and checks apt-cacher-ng after the cache host is applied live from main.
     no_flow_overlap: true

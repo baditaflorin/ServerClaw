@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0089](../adr/0089-build-artifact-cache.md)
 - Title: Persistent Docker layer, pip, apt, and Ansible collection caches on the build server for sub-20-second check runs
-- Status: in_progress
+- Status: ready
 - Branch: `codex/adr-0089-build-cache`
 - Worktree: `../proxmox_florin_server-build-cache`
 - Owner: codex
@@ -35,6 +35,7 @@
 - updated `scripts/remote_exec.sh` (pip-cache volume mount, Packer plugin cache mount, Galaxy cache logic)
 - `config/build-cache-manifest.json` (initially empty; populated by first `warm-build-cache` run)
 - Windmill script `config/windmill/scripts/warm-build-cache.py`
+- Windmill script `config/windmill/scripts/build-cache-maintenance.py`
 - updated `Makefile` (`warm-cache`, `cache-status`)
 - `docs/adr/0089-build-artifact-cache.md`
 - `docs/workstreams/adr-0089-build-cache.md`
@@ -67,5 +68,5 @@
 ## Notes For The Next Assistant
 
 - apt-cacher-ng requires the Packer provisioner scripts to inject the proxy config before any `apt-get install`; verify this is in `base-hardening.sh` before running a Packer build
-- This branch now owns the non-overlapping repo surfaces: `roles/build_server/`, the dedicated playbook, `config/build-cache-manifest.json`, `config/windmill/scripts/warm-build-cache.py`, `scripts/cache_status.py`, and the cache runbook.
-- Final integration into `scripts/remote_exec.sh`, `config/check-runner-manifest.json`, and the user-facing `Makefile` targets must wait for the active ADR 0082 and ADR 0083 branches to merge.
+- The repo-side implementation is complete on this branch, including the `remote_exec.sh`, runner-manifest, and `validate_repo.sh` cache hooks that were previously deferred.
+- Remaining work is the integration step only: merge from `main`, bump the repo version, and apply the cache host live so the timing-based verification and Windmill schedules can be marked true.

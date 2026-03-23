@@ -3,8 +3,9 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-VALIDATION_CACHE_DIR="$REPO_ROOT/.ansible/validation"
-ANSIBLE_COLLECTIONS_DIR="$VALIDATION_CACHE_DIR/collections"
+VALIDATION_CACHE_DIR="${LV3_VALIDATION_CACHE_DIR:-$REPO_ROOT/.ansible/validation}"
+ANSIBLE_COLLECTIONS_DIR="${LV3_ANSIBLE_COLLECTIONS_DIR:-$VALIDATION_CACHE_DIR/collections}"
+ANSIBLE_COLLECTIONS_SHA_FILE="${LV3_ANSIBLE_COLLECTIONS_SHA_FILE:-$VALIDATION_CACHE_DIR/requirements.sha}"
 ANSIBLE_PLAYBOOK_CMD=(uvx --from ansible-core ansible-playbook)
 ANSIBLE_GALAXY_CMD=(uvx --from ansible-core ansible-galaxy)
 ANSIBLE_LINT_CMD=(uvx --from ansible-lint ansible-lint)
@@ -36,11 +37,29 @@ tracked_files() {
 }
 
 install_collections() {
+  local requirements_file="$REPO_ROOT/collections/requirements.yml"
+  local current_sha_file=""
+
+  [[ -f "$requirements_file" ]] || return 0
+
   mkdir -p "$ANSIBLE_COLLECTIONS_DIR"
+  mkdir -p "$(dirname "$ANSIBLE_COLLECTIONS_SHA_FILE")"
+
+  current_sha_file="$(mktemp)"
+  sha256sum "$requirements_file" > "$current_sha_file"
+  if [[ -s "$ANSIBLE_COLLECTIONS_SHA_FILE" ]] && find "$ANSIBLE_COLLECTIONS_DIR" -mindepth 1 -print -quit | grep -q .; then
+    if cmp -s "$current_sha_file" "$ANSIBLE_COLLECTIONS_SHA_FILE"; then
+      rm -f "$current_sha_file"
+      return 0
+    fi
+  fi
+
   "${ANSIBLE_GALAXY_CMD[@]}" collection install \
-    -r "$REPO_ROOT/collections/requirements.yml" \
+    -r "$requirements_file" \
     -p "$ANSIBLE_COLLECTIONS_DIR" \
     >/dev/null
+  cp "$current_sha_file" "$ANSIBLE_COLLECTIONS_SHA_FILE"
+  rm -f "$current_sha_file"
 }
 
 validate_ansible_syntax() {

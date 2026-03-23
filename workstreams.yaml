@@ -1111,7 +1111,7 @@ workstreams:
   - id: adr-0089-build-cache
     adr: "0089"
     title: Build artifact cache and layer registry
-    status: in_progress
+    status: ready
     owner: codex
     branch: codex/adr-0089-build-cache
     worktree_path: ../proxmox_florin_server-build-cache
@@ -1128,7 +1128,7 @@ workstreams:
       - config/windmill/scripts/warm-build-cache.py
       - scripts/cache_status.py
       - docs/runbooks/configure-build-artifact-cache.md
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: false
 
   - id: adr-0083-docker-check-runner
