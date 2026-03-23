@@ -1,0 +1,11 @@
+debug = false
+root = "{{ build_server_buildkit_cache_dir }}"
+
+[worker.oci]
+  enabled = true
+  gc = true
+
+[[worker.oci.gcpolicy]]
+  all = true
+  keepDuration = "{{ build_server_buildkit_keep_duration_hours }}h"
+  keepBytes = {{ build_server_buildkit_keep_bytes }}

@@ -62,11 +62,26 @@ def build_config(
         "workspace_root": workspace_root,
         "default_timeout_seconds": 120,
         "docker_socket": "unix:///var/run/docker.sock",
+        "pip_cache_volume": "pip-cache",
+        "packer_plugin_cache": "/opt/builds/.packer.d",
+        "ansible_collection_cache": "/opt/builds/.ansible/collections",
+        "ansible_requirements_sha_file": "/opt/builds/.ansible/requirements.sha",
+        "apt_proxy_url": "http://10.10.10.30:3142",
         "registry_base": "registry.lv3.org",
         "commands": {
             "remote-lint": {
                 "runner_label": "lint-ansible",
                 "command": "printf remote-lint",
+                "local_fallback_command": local_command,
+            },
+            "remote-validate": {
+                "runner_label": "validate-schemas",
+                "command": "printf remote-validate",
+                "local_fallback_command": local_command,
+            },
+            "remote-packer-validate": {
+                "runner_label": "packer-validate",
+                "command": "printf remote-packer-validate",
                 "local_fallback_command": local_command,
             },
             "check-build-server": {
@@ -84,7 +99,22 @@ def build_manifest(path: Path) -> None:
             "command": ["./scripts/validate_repo.sh", "yaml", "ansible-lint"],
             "working_dir": "/workspace",
             "timeout_seconds": 180,
-        }
+            "cache_mounts": ["ansible_collections"],
+        },
+        "validate-schemas": {
+            "image": "registry.lv3.org/check-runner/python:0.1.0",
+            "command": "python scripts/validate_repository_data_models.py --validate",
+            "working_dir": "/workspace",
+            "timeout_seconds": 180,
+            "cache_mounts": ["pip"],
+        },
+        "packer-validate": {
+            "image": "registry.lv3.org/check-runner/infra:0.1.0",
+            "command": "packer validate packer",
+            "working_dir": "/workspace",
+            "timeout_seconds": 180,
+            "cache_mounts": ["packer_plugins"],
+        },
     }
     path.write_text(json.dumps(payload, indent=2) + "\n")
 
@@ -150,6 +180,8 @@ def test_remote_exec_uses_docker_runner_metadata(tmp_path: Path) -> None:
     assert completed.returncode == 0, completed.stderr
     assert "Remote docker command:" in completed.stderr
     assert "registry.lv3.org/check-runner/ansible:0.1.0" in completed.stderr
+    assert "/opt/builds/.ansible/collections:/opt/builds/.ansible/collections" in completed.stderr
+    assert "LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/opt/builds/.ansible/requirements.sha" in completed.stderr
     assert "docker run" in completed.ssh_log.read_text()  # type: ignore[attr-defined]
     assert "--checksum" in completed.rsync_log.read_text()  # type: ignore[attr-defined]
 
@@ -223,3 +255,18 @@ def test_remote_exec_applies_configured_ssh_options(tmp_path: Path) -> None:
 
     assert completed.returncode == 0, completed.stderr
     assert "ProxyCommand=ssh jump.example -W %h:%p" in ssh_log.read_text()
+
+
+def test_remote_exec_mounts_pip_cache_for_python_runners(tmp_path: Path) -> None:
+    completed = run_remote_exec(tmp_path, "remote-validate", extra_env={"REMOTE_EXEC_VERBOSE": "1"})
+
+    assert completed.returncode == 0, completed.stderr
+    assert "pip-cache:/root/.cache/pip" in completed.stderr
+    assert "PIP_CACHE_DIR=/root/.cache/pip" in completed.stderr
+
+
+def test_remote_exec_mounts_packer_cache_for_infra_runners(tmp_path: Path) -> None:
+    completed = run_remote_exec(tmp_path, "remote-packer-validate", extra_env={"REMOTE_EXEC_VERBOSE": "1"})
+
+    assert completed.returncode == 0, completed.stderr
+    assert "/opt/builds/.packer.d:/root/.packer.d" in completed.stderr

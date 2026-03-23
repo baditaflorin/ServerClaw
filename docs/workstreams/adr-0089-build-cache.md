@@ -35,10 +35,15 @@
 - updated `scripts/remote_exec.sh` (pip-cache volume mount, Packer plugin cache mount, Galaxy cache logic)
 - `config/build-cache-manifest.json` (initially empty; populated by first `warm-build-cache` run)
 - Windmill script `config/windmill/scripts/warm-build-cache.py`
+- Windmill script `config/windmill/scripts/build-cache-maintenance.py`
 - updated `Makefile` (`warm-cache`, `cache-status`)
 - `docs/adr/0089-build-artifact-cache.md`
 - `docs/workstreams/adr-0089-build-cache.md`
 - `workstreams.yaml`
+- `docs/runbooks/configure-build-artifact-cache.md`
+- `playbooks/build-artifact-cache.yml`
+- `playbooks/services/build-artifact-cache.yml`
+- `scripts/cache_status.py`
 
 ## Expected Live Surfaces
 
@@ -63,5 +68,5 @@
 ## Notes For The Next Assistant
 
 - apt-cacher-ng requires the Packer provisioner scripts to inject the proxy config before any `apt-get install`; verify this is in `base-hardening.sh` before running a Packer build
-- BuildKit daemon config is at `/etc/buildkit/buildkitd.toml`; set `[worker.containerd] gc = true` and `gcpolicy = [{keepDuration = "336h", keepBytes = 53687091200}]` (14 days, 50 GB)
-- the Galaxy collection cache SHA-gate logic: `sha256sum requirements.yml > /opt/builds/.ansible/requirements.sha`; if the file hasn't changed since last install, skip the `ansible-galaxy` call entirely
+- The repo-side implementation is complete on this branch, including the `remote_exec.sh`, runner-manifest, and `validate_repo.sh` cache hooks that were previously deferred.
+- Remaining work is the integration step only: merge from `main`, bump the repo version, and apply the cache host live so the timing-based verification and Windmill schedules can be marked true.

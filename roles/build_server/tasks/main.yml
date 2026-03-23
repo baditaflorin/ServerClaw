@@ -1,0 +1,183 @@
+---
+- name: Validate build server inputs
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: assert_vars
+  vars:
+    common_assert_vars_required:
+      - build_server_workspace
+      - build_server_packer_plugin_cache
+      - build_server_ansible_collection_cache
+      - build_server_ansible_requirements_sha_file
+      - build_server_pip_cache_volume
+      - build_server_apt_cacher_report_url
+      - build_server_buildkit_service_name
+      - build_server_buildkit_builder_name
+      - build_server_buildkit_config_file
+      - build_server_buildkit_socket_file
+      - build_server_buildkit_cache_dir
+    common_assert_vars_expressions:
+      - build_server_buildkit_cache_gb | int > 0
+      - build_server_buildkit_keep_duration_hours | int > 0
+      - build_server_apt_cacher_port | int > 0
+    common_assert_vars_fail_msg: >-
+      build_server requires cache directories, the BuildKit daemon settings,
+      and apt-cacher-ng endpoints to be defined.
+
+- name: Ensure build server packages are present
+  ansible.builtin.apt:
+    name: "{{ build_server_packages }}"
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure build server cache directories exist
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: directory_tree
+  vars:
+    common_directory_tree_paths: "{{ build_server_managed_directories }}"
+
+- name: Render BuildKit daemon configuration
+  ansible.builtin.template:
+    src: buildkitd.toml.j2
+    dest: "{{ build_server_buildkit_config_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: build_server_buildkit_config
+
+- name: Render BuildKit systemd unit
+  ansible.builtin.template:
+    src: lv3-buildkitd.service.j2
+    dest: "/etc/systemd/system/{{ build_server_buildkit_service_name }}.service"
+    owner: root
+    group: root
+    mode: "0644"
+  register: build_server_buildkit_unit
+
+- name: Ensure apt-cacher-ng is enabled and started
+  ansible.builtin.systemd_service:
+    name: apt-cacher-ng
+    enabled: true
+    state: started
+
+- name: Ensure BuildKit daemon is enabled and running
+  ansible.builtin.systemd_service:
+    name: "{{ build_server_buildkit_service_name }}"
+    enabled: true
+    daemon_reload: "{{ build_server_buildkit_unit.changed }}"
+    state: "{{ 'restarted' if (build_server_buildkit_config.changed or build_server_buildkit_unit.changed) else 'started' }}"
+
+- name: Wait for the BuildKit socket to appear
+  ansible.builtin.command:
+    argv:
+      - test
+      - -S
+      - "{{ build_server_buildkit_socket_file }}"
+  register: build_server_buildkit_socket
+  changed_when: false
+  retries: 12
+  delay: 5
+  until: build_server_buildkit_socket.rc == 0
+
+- name: Verify Docker buildx is available on the build server
+  ansible.builtin.command:
+    argv:
+      - docker
+      - buildx
+      - version
+  register: build_server_buildx_version
+  changed_when: false
+
+- name: Check whether the managed buildx builder already exists
+  ansible.builtin.command:
+    argv:
+      - docker
+      - buildx
+      - inspect
+      - "{{ build_server_buildkit_builder_name }}"
+  register: build_server_buildx_builder
+  changed_when: false
+  failed_when: false
+
+- name: Remove the managed buildx builder before refreshing it
+  ansible.builtin.command:
+    argv:
+      - docker
+      - buildx
+      - rm
+      - "{{ build_server_buildkit_builder_name }}"
+  when:
+    - build_server_buildx_builder.rc == 0
+    - build_server_buildkit_config.changed or build_server_buildkit_unit.changed
+  register: build_server_buildx_remove
+  changed_when: build_server_buildx_remove.rc == 0
+
+- name: Create the managed buildx builder
+  ansible.builtin.command:
+    argv:
+      - docker
+      - buildx
+      - create
+      - --name
+      - "{{ build_server_buildkit_builder_name }}"
+      - --driver
+      - remote
+      - "unix://{{ build_server_buildkit_socket_file }}"
+      - --use
+  when:
+    - build_server_buildx_builder.rc != 0 or build_server_buildkit_config.changed or build_server_buildkit_unit.changed
+  register: build_server_buildx_create
+  changed_when: build_server_buildx_create.rc == 0
+
+- name: Bootstrap the managed buildx builder
+  ansible.builtin.command:
+    argv:
+      - docker
+      - buildx
+      - inspect
+      - "{{ build_server_buildkit_builder_name }}"
+      - --bootstrap
+  register: build_server_buildx_bootstrap
+  changed_when: false
+
+- name: Ensure the pip cache Docker volume exists
+  ansible.builtin.command:
+    argv:
+      - docker
+      - volume
+      - inspect
+      - "{{ build_server_pip_cache_volume }}"
+  register: build_server_pip_cache_volume_inspect
+  changed_when: false
+  failed_when: false
+
+- name: Create the pip cache Docker volume
+  ansible.builtin.command:
+    argv:
+      - docker
+      - volume
+      - create
+      - "{{ build_server_pip_cache_volume }}"
+  when: build_server_pip_cache_volume_inspect.rc != 0
+  register: build_server_pip_cache_volume_create
+  changed_when: build_server_pip_cache_volume_create.rc == 0
+
+- name: Ensure the Ansible collection SHA marker file exists
+  ansible.builtin.file:
+    path: "{{ build_server_ansible_requirements_sha_file }}"
+    state: touch
+    owner: "{{ build_server_ops_user }}"
+    group: "{{ build_server_ops_group }}"
+    mode: "0644"
+    access_time: preserve
+    modification_time: preserve
+
+- name: Verify apt-cacher-ng serves the local report page
+  ansible.builtin.uri:
+    url: "{{ build_server_apt_cacher_report_url }}"
+    method: GET
+    status_code: 200
+  register: build_server_apt_cacher_report
+  changed_when: false
