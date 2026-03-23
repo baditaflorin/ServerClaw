@@ -1,36 +1,35 @@
 # ADR 0078: Service Scaffold Generator
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.94.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-23
 - Date: 2026-03-22
 
 ## Context
 
-Adding a new service to the platform currently requires a human to manually:
+Adding a new service to the platform had become a multi-file manual process:
 
-1. write an ADR
-2. create a workstream doc and update `workstreams.yaml`
-3. create an Ansible role (copying and adapting boilerplate from an existing role)
-4. write a playbook
-5. write or adapt a Docker Compose file
-6. register the service in `config/health-probe-catalog.json`
-7. register container images in `config/image-catalog.json`
-8. register secrets in `config/secret-catalog.json`
-9. add the service to `config/service-capability-catalog.json` (ADR 0075)
-10. add a subdomain entry to `config/subdomain-catalog.json` (ADR 0076)
-11. write a runbook
-12. configure the OpenBao Agent for secrets injection (ADR 0077)
+1. write the ADR and workstream documents
+2. create the collection-backed runtime role and playbook entry points
+3. register the service across topology, health, service, subdomain, image, and secret catalogs
+4. remember the controller-local secret manifest and the operator runbook
 
-This is 12 manual steps with no validation that any of them are done. Services introduced over the last year have inconsistent catalog registrations — some are missing health probes, some lack image-catalog entries, and several have no runbooks.
+The result was drift. New services were often missing one or more contracts, and the current mainline validators only caught some of those omissions after the fact.
 
-ADR 0062 introduced a role template. This ADR extends that concept to the full service onboarding surface.
+The repository also changed shape after the original ADR draft:
+
+- roles now live under `collections/ansible_collections/lv3/platform/roles/`
+- `config/service-capability-catalog.json`, `config/subdomain-catalog.json`, and `config/health-probe-catalog.json` already enforce stronger cross-references
+- `inventory/host_vars/proxmox_florin.yml.lv3_service_topology` is part of the canonical service contract
+- controller-local secret storage and image scan receipts are explicit catalog surfaces
+
+So the scaffold generator has to target the current collection layout and those stricter data models, not the older root-role layout.
 
 ## Decision
 
-We will implement a service scaffold generator as a `make` target that creates the complete skeleton for a new service from a single command.
+We will implement `make scaffold-service` as the canonical repo-local generator for new service skeletons.
 
 ### Invocation
 
@@ -40,132 +39,65 @@ make scaffold-service \
   DESCRIPTION="One-line description" \
   CATEGORY=automation \
   VM=docker-runtime-lv3 \
-  VMID=120 \
   PORT=8080 \
   SUBDOMAIN=my-service.lv3.org \
-  EXPOSURE=edge-published \
+  EXPOSURE=private-only \
   IMAGE=docker.io/vendor/image:latest
 ```
 
+Only `NAME` is strictly required. The target derives defaults for the other inputs so the CLI wrapper from ADR 0090 can keep using it with just a service name.
+
 ### Generated artifacts
 
-The generator (`scripts/scaffold_service.py`) creates the following files, with all NAME/VMID/PORT placeholders substituted:
+The current implementation writes all of the repo surfaces required for a service scaffold on main:
 
-| File | Description |
-|---|---|
-| `docs/adr/XXXX-<name>.md` | ADR stub (next available number, Status: Proposed) |
-| `docs/workstreams/adr-XXXX-<name>.md` | Workstream doc stub |
-| `docs/runbooks/<name>.md` | Operational runbook stub |
-| `roles/<name>_runtime/` | Full role directory from `roles/_template/` |
-| `roles/<name>_runtime/templates/docker-compose.yml.j2` | Compose template with OpenBao agent sidecar |
-| `roles/<name>_runtime/templates/openbao-agent.hcl.j2` | Pre-configured OpenBao agent |
-| `playbooks/<name>.yml` | Playbook targeting the correct VM and role |
+- `docs/adr/<next>-<name>.md`
+- `docs/workstreams/adr-<next>-<name>.md`
+- `docs/runbooks/configure-<name>.md`
+- `collections/ansible_collections/lv3/platform/roles/<name>_runtime/`
+- `playbooks/<name>.yml`
+- `playbooks/services/<name>.yml`
+- `inventory/host_vars/proxmox_florin.yml` service-topology entry
+- `config/service-capability-catalog.json`
+- `config/subdomain-catalog.json` when a scaffolded hostname is declared
+- `config/health-probe-catalog.json`
+- `config/secret-catalog.json`
+- `config/controller-local-secrets.json`
+- `config/image-catalog.json`
+- placeholder image scan receipt under `receipts/image-scans/`
+- `workstreams.yaml`
 
-### Catalog entries appended by the generator
+The runtime role scaffold is rendered from collection-backed template assets under `collections/ansible_collections/lv3/platform/roles/_template/service_scaffold/`.
 
-The generator appends structured entries to four catalog files, leaving `TODO` markers for fields requiring human input:
+### Scaffold defaults
 
-**`config/health-probe-catalog.json`:**
-```json
-{
-  "id": "<name>",
-  "url": "http://<vm-ip>:<port>/health",
-  "method": "GET",
-  "expected_status": 200,
-  "timeout_seconds": 5,
-  "TODO": "confirm actual health endpoint path"
-}
-```
+The generator intentionally writes a *planned* service contract:
 
-**`config/image-catalog.json`:**
-```json
-{
-  "id": "<name>",
-  "image": "<IMAGE>",
-  "pinned_digest": "TODO: run make pin-image IMAGE=<IMAGE>",
-  "scan_receipt": null,
-  "last_updated": "TODO"
-}
-```
+- `service-capability-catalog` entries default to `lifecycle_status: planned`
+- health probes are scaffolded immediately so the probe contract exists early
+- Uptime Kuma monitoring is disabled by default with a scaffold placeholder reason
+- image entries use a placeholder digest-pinned ref and receipt skeleton
+- controller-local secret and secret-catalog entries are created together
 
-**`config/secret-catalog.json`:**
-```json
-{
-  "id": "<name>-admin",
-  "description": "TODO: describe this secret",
-  "openbao_path": "secret/prod/<name>/",
-  "rotation_period_days": 90,
-  "last_rotated": null
-}
-```
+This keeps the new service internally consistent while still making the unfinished parts explicit.
 
-**`config/service-capability-catalog.json`:**
-```json
-{
-  "id": "<name>",
-  "name": "<NAME>",
-  "description": "<DESCRIPTION>",
-  "category": "<CATEGORY>",
-  "vm": "<VM>",
-  "vmid": <VMID>,
-  "internal_url": "http://<vm-ip>:<PORT>",
-  "subdomain": "<SUBDOMAIN>",
-  "exposure": "<EXPOSURE>",
-  "health_probe_id": "<name>",
-  "image_catalog_ids": ["<name>"],
-  "secret_catalog_ids": ["<name>-admin"],
-  "adr": "XXXX",
-  "runbook": "docs/runbooks/<name>.md",
-  "tags": ["TODO"]
-}
-```
+### Validation guard
 
-**`config/subdomain-catalog.json`** (if EXPOSURE is not `private-only`):
-```json
-{
-  "fqdn": "<SUBDOMAIN>",
-  "service_id": "<name>",
-  "environment": "production",
-  "exposure": "<EXPOSURE>",
-  "target": "<vm-ip>",
-  "target_port": <PORT>,
-  "tls": { "provider": "letsencrypt", "auto_renew": true },
-  "created": "<today>",
-  "owner_adr": "XXXX"
-}
-```
+`scripts/validate_repository_data_models.py` now fails when any scaffolded catalog or topology value still contains a `TODO` placeholder marker.
 
-### Workstreams.yaml update
+That gives the desired workflow:
 
-The generator appends a new workstream entry to `workstreams.yaml` with `status: ready`, `live_applied: false`, and `depends_on: []` (operator fills in dependencies).
+1. `make scaffold-service` succeeds and writes a complete skeleton
+2. generated playbooks and role structure are syntactically valid
+3. `make validate-data-models` fails until the operator replaces the scaffold placeholders
 
-### Post-generation checklist
+### Image pin helper
 
-The generator prints a checklist of actions the developer must complete manually:
-
-```
-Scaffold created for 'my-service'. Required next steps:
-  [ ] Fill in ADR context and consequences: docs/adr/XXXX-my-service.md
-  [ ] Pin container image digest: make pin-image IMAGE=docker.io/vendor/image:latest
-  [ ] Register secrets in OpenBao: vault kv put secret/prod/my-service/ ...
-  [ ] Update TODO fields in catalog entries
-  [ ] Declare workstream dependencies in workstreams.yaml
-  [ ] Run make validate to confirm all catalog cross-references resolve
-```
-
-### Validation gate update
-
-`make validate` will error if any catalog entry contains a `TODO` string value. This ensures scaffolded entries are completed before they reach main.
+The scaffold checklist points at `make pin-image IMAGE=<registry/repository:tag>`, which resolves the remote digest and prints a digest-pinned image reference for catalog completion.
 
 ## Consequences
 
-- Service onboarding is consistent and complete; missing catalog entries become a validation error, not a future discovery.
-- Agent-assisted onboarding becomes feasible: an agent can run the scaffold command, fill in the TODO fields from context, and propose the resulting commit.
-- The generator is itself a maintained script; it must be updated when new catalog files are introduced.
-- The generated ADR stub must be substantively written by a human or agent before the workstream is considered `ready`; the scaffold creates the skeleton, not the decision.
-
-## Boundaries
-
-- The generator creates files and catalog entries. It does not run Ansible, provision DNS, or interact with OpenBao. Those happen in the normal live-apply flow.
-- Infrastructure-level additions (new VMs, new bridges) are not covered by this scaffold; they require host-level ADRs and playbooks that are not service-scoped.
-- The generator assumes Docker Compose deployment on `docker-runtime-lv3`. Services deployed as native systemd units or as Proxmox VMs use the existing role template (ADR 0062) without the Compose-specific artifacts.
+- Service onboarding is now collection-native and aligned with the current catalog schemas.
+- Planned services can declare probe contracts before live rollout, which required relaxing the old service-catalog assumption that only active services could participate in the health-probe set.
+- The repository has an explicit completion boundary: scaffold placeholders are allowed only immediately after generation and are blocked by validation before merge.
+- The generator itself is now a maintained contract surface. When service catalogs, topology, or runtime-role expectations change, `_template/service_scaffold/` and `scripts/scaffold_service.py` must change with them.

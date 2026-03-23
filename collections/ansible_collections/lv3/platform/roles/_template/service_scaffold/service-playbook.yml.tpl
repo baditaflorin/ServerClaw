@@ -1,0 +1,2 @@
+---
+- import_playbook: ../@@PLAYBOOK_FILENAME@@

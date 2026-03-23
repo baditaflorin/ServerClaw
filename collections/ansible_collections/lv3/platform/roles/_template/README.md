@@ -10,3 +10,5 @@ Minimum expectations for a new role:
 - validate required inputs early in `tasks/main.yml`
 
 Copy this directory to the new role name and replace the example placeholders before wiring the role into a playbook.
+
+ADR 0078 service scaffolds keep the runtime-role templates under `_template/service_scaffold/`. Update those scaffold assets alongside the generic template when the service onboarding contract changes.

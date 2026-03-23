@@ -1326,5 +1326,67 @@ workstreams:
       - scripts/generate_ops_portal.py
       - scripts/lv3_cli.py
       - docs/runbooks/drift-detection.md
+  - id: adr-0078-service-scaffold
+    adr: "0078"
+    title: Service scaffold generator
+    status: merged
+    owner: codex
+    branch: codex/adr-0078-mainline-rebuild
+    worktree_path: .worktrees/adr-0078-mainline-rebuild
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0078-service-scaffold.md
+    depends_on:
+      - adr-0062-role-composability
+      - adr-0075-service-capability-catalog
+      - adr-0076-subdomain-governance
+      - adr-0077-compose-secrets-injection
+    conflicts_with: []
+    shared_surfaces:
+      - scripts/scaffold_service.py
+      - scripts/pin_image_ref.py
+      - scripts/service_catalog.py
+      - scripts/validate_repository_data_models.py
+      - Makefile
+      - collections/ansible_collections/lv3/platform/roles/_template/
+      - docs/runbooks/scaffold-new-service.md
+      - config/service-capability-catalog.json
+      - config/subdomain-catalog.json
+      - config/health-probe-catalog.json
+      - config/secret-catalog.json
+      - config/image-catalog.json
+      - config/controller-local-secrets.json
+      - inventory/host_vars/proxmox_florin.yml
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0091-drift-detection
+    adr: "0091"
+    title: Continuous drift detection and reconciliation
+    status: merged
+    owner: codex
+    branch: codex/adr-0091-drift-detection
+    worktree_path: ../proxmox_florin_server-drift-detection
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0091-drift-detection.md
+    depends_on:
+      - adr-0058-nats-event-bus
+      - adr-0074-ops-portal
+      - adr-0075-service-capability-catalog
+      - adr-0085-opentofu-vm-lifecycle
+      - adr-0090-platform-cli
+    conflicts_with: []
+    shared_surfaces:
+      - scripts/drift_detector.py
+      - scripts/parse_ansible_drift.py
+      - scripts/docker_image_drift.py
+      - scripts/dns_drift.py
+      - scripts/tls_cert_drift.py
+      - config/windmill/scripts/continuous-drift-detection.py
+      - config/workflow-catalog.json
+      - config/control-plane-lanes.json
+      - config/command-catalog.json
+      - receipts/drift-reports
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/lv3-platform-overview.json.j2
+      - scripts/generate_ops_portal.py
+      - scripts/lv3_cli.py
+      - docs/runbooks/drift-detection.md
     ready_to_merge: false
     live_applied: false

@@ -201,6 +201,7 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
     seen_ids: set[str] = set()
     seen_names: set[str] = set()
     active_service_ids: set[str] = set()
+    declared_probe_service_ids: set[str] = set()
 
     for index, service in enumerate(services):
         service = require_mapping(service, f"services[{index}]")
@@ -282,6 +283,7 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
                 service.get("health_probe_id"),
                 f"services[{index}].health_probe_id",
             )
+            declared_probe_service_ids.add(service_id)
             if health_probe_id not in probe_service_ids:
                 raise ValueError(
                     f"services[{index}].health_probe_id references unknown health probe '{health_probe_id}'"
@@ -327,16 +329,16 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
                         f"'{topology_entry.get('exposure_model')}'"
                     )
 
-    if active_service_ids != probe_service_ids:
-        missing = sorted(probe_service_ids - active_service_ids)
-        extra = sorted(active_service_ids - probe_service_ids)
+    if declared_probe_service_ids != probe_service_ids:
+        missing = sorted(probe_service_ids - declared_probe_service_ids)
+        extra = sorted(declared_probe_service_ids - probe_service_ids)
         details = []
         if missing:
             details.append(f"missing services: {', '.join(missing)}")
         if extra:
             details.append(f"extra services: {', '.join(extra)}")
         raise ValueError(
-            "service capability catalog must cover exactly the health-probe catalog services: "
+            "service capability catalog entries that declare health probes must cover exactly the health-probe catalog services: "
             + "; ".join(details)
         )
 

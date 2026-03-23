@@ -59,6 +59,7 @@ IDENTITY_CLASSES = {"human_operator", "service", "agent", "break_glass"}
 NETWORK_POLICY_PROTOCOLS = {"tcp", "udp"}
 IMAGE_SOURCE_KINDS = {"upstream", "local_build"}
 IMAGE_PIN_STATUSES = {"pinned", "unpinned", "local_build"}
+SCAFFOLD_PLACEHOLDER_MARKER = "TODO"
 IDENTITY_REQUIRED_METADATA = {
     "owner",
     "purpose",
@@ -187,6 +188,42 @@ def require_enum(value: Any, path: str, allowed: set[str]) -> str:
     if value not in allowed:
         raise ValueError(f"{path} must be one of {sorted(allowed)}")
     return value
+
+
+def validate_placeholder_free(value: Any, path: str) -> None:
+    if isinstance(value, str):
+        if SCAFFOLD_PLACEHOLDER_MARKER in value:
+            raise ValueError(
+                f"{path} contains scaffold placeholder marker '{SCAFFOLD_PLACEHOLDER_MARKER}'"
+            )
+        return
+    if isinstance(value, list):
+        for index, item in enumerate(value):
+            validate_placeholder_free(item, f"{path}[{index}]")
+        return
+    if isinstance(value, dict):
+        for key, item in value.items():
+            validate_placeholder_free(item, f"{path}.{key}")
+
+
+def validate_no_scaffold_placeholders() -> None:
+    structured_paths = {
+        HEALTH_PROBE_CATALOG_PATH: load_json(HEALTH_PROBE_CATALOG_PATH),
+        SECRET_CATALOG_PATH: load_json(SECRET_CATALOG_PATH),
+        IMAGE_CATALOG_PATH: load_json(IMAGE_CATALOG_PATH),
+        repo_path("config", "service-capability-catalog.json"): load_json(
+            repo_path("config", "service-capability-catalog.json")
+        ),
+        repo_path("config", "subdomain-catalog.json"): load_json(
+            repo_path("config", "subdomain-catalog.json")
+        ),
+        repo_path("config", "controller-local-secrets.json"): load_json(
+            repo_path("config", "controller-local-secrets.json")
+        ),
+        HOST_VARS_PATH: load_yaml(HOST_VARS_PATH),
+    }
+    for path, payload in structured_paths.items():
+        validate_placeholder_free(payload, str(path))
 
 
 def guest_plan_key(role: str) -> str:
@@ -1595,6 +1632,7 @@ def validate_repository_data_models() -> int:
     validate_vm_template_manifest(host_vars_context["proxmox_vm_templates"])
     validate_versions_stack(host_vars_context)
     validate_platform_vars()
+    validate_no_scaffold_placeholders()
     print("Repository data models OK")
     return 0
 
