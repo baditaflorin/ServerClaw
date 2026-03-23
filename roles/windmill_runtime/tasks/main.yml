@@ -165,6 +165,29 @@
   tags:
     - mutation
 
+- name: Check whether Docker nat chain exists before Windmill startup
+  ansible.builtin.command: iptables -t nat -S DOCKER
+  register: windmill_docker_nat_chain_check
+  changed_when: false
+  failed_when: windmill_docker_nat_chain_check.rc not in [0, 1]
+
+- name: Restart Docker when the nat chain is missing before Windmill startup
+  ansible.builtin.systemd:
+    name: docker
+    state: restarted
+  when: windmill_docker_nat_chain_check.rc == 1
+
+- name: Recheck Docker nat chain before Windmill startup
+  ansible.builtin.command: iptables -t nat -S DOCKER
+  register: windmill_docker_nat_chain_recheck
+  changed_when: false
+
+- name: Assert Docker nat chain is present before Windmill startup
+  ansible.builtin.assert:
+    that:
+      - windmill_docker_nat_chain_recheck.rc == 0
+    fail_msg: "Docker is running but the nat DOCKER chain is missing; Windmill published ports will fail."
+
 - name: Start Windmill and wait for the API socket
   block:
     - name: Start the Windmill stack
