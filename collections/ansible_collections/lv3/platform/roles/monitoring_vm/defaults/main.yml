@@ -82,7 +82,6 @@ monitoring_blackbox_exporter_env_file: /etc/default/prometheus-blackbox-exporter
 monitoring_blackbox_exporter_config_file: /etc/prometheus/blackbox.yml
 monitoring_blackbox_exporter_source_file: "{{ monitoring_repo_root }}/config/blackbox/blackbox.yml"
 monitoring_blackbox_exporter_port: 9115
-monitoring_prometheus_rules_dir: /etc/prometheus/rules
 monitoring_prometheus_rule_files:
   - /etc/prometheus/rules/*.yml
 monitoring_prometheus_alertmanager_targets:
