@@ -8,6 +8,18 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.70.0 - 2026-03-23
+
+- applied ADR 0070 live by converging the private platform-context API and Qdrant on `docker-runtime-lv3`, publishing the service through the Proxmox host Tailscale proxy on `http://100.118.189.95:8010`, and rebuilding the live index from the mirrored platform corpus
+- hardened the RAG runtime convergence so build-only images are not pulled from registries, Docker builds use host networking for dependency resolution, missing Docker nat chains are repaired before published-port recreates, and mirrored corpus paths are normalized back to repo-true citations
+- switched the deployed platform-context embedding backend to the offline-safe `token-hash` mode for this platform, added sentence-transformer fallback behavior for unreachable model downloads, and extended regression coverage for the live apply path, firewall policy, and citation normalization
+
+Platform impact:
+
+- the private platform context API is now live at `http://100.118.189.95:8010` with authenticated query and rebuild operations
+- `docker-runtime-lv3` now permits the Proxmox host proxy path to reach guest port `8010`, so controller-originated queries succeed through the declared private access surface
+- live queries now return normalized citations such as `docs/adr/0042-step-ca-for-ssh-and-internal-tls.md` and `docs/runbooks/rag-platform-context.md` instead of mirrored-path duplicates
+
 ## 0.69.0 - 2026-03-23
 
 - implemented ADR 0074 in repository automation by generating a six-view static operations portal from canonical service, subdomain, ADR, runbook, stack, and agent-tool inputs

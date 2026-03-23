@@ -829,7 +829,7 @@ workstreams:
   - id: adr-0070-rag-platform-context
     adr: "0070"
     title: Retrieval-augmented context for platform queries
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0070-rag-platform-context
     worktree_path: ../proxmox_florin_server-rag-platform-context
@@ -847,7 +847,7 @@ workstreams:
       - receipts/
       - Open WebUI tools
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0071-agent-observation-loop
     adr: "0071"

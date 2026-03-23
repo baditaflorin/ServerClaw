@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-23-adr-0070-rag-platform-context-live-apply",
+  "applied_on": "2026-03-23",
+  "recorded_on": "2026-03-23",
+  "recorded_by": "codex",
+  "source_commit": "1156f875ccfe30ed2470e7459eb040e4b6ef4a3d",
+  "repo_version_context": "0.70.0",
+  "workflow_id": "converge-rag-context",
+  "adr": "0070",
+  "summary": "Applied the private platform-context API and Qdrant runtime on docker-runtime-lv3, exposed it through the Proxmox host Tailscale proxy on port 8010, and rebuilt the live retrieval corpus with normalized repo-path citations.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.118.189.95"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "address": "10.10.10.20"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Workflow convergence",
+      "result": "pass",
+      "observed": "`make converge-rag-context` completed successfully after hardening the role for build-only images, offline-safe embeddings, mirrored corpus path normalization, and Docker nat-chain recovery before published-port recreates."
+    },
+    {
+      "check": "Controller-facing private API health",
+      "result": "pass",
+      "observed": "`curl -sS -m 20 -D - http://100.118.189.95:8010/healthz` returned `HTTP/1.1 200 OK` with `{\"status\":\"ok\",\"collection\":\"platform_context\"}` after `make converge-guest-network-policy` opened host-to-guest port `8010` on `docker-runtime-lv3`."
+    },
+    {
+      "check": "Authenticated grounded query",
+      "result": "pass",
+      "observed": "`python3 scripts/query_platform_context.py --api-url http://100.118.189.95:8010 --api-token-file .local/platform-context/api-token.txt --question \"how does step-ca issue SSH certificates\" --top-k 3` returned cited matches including `docs/adr/0042-step-ca-for-ssh-and-internal-tls.md` and `docs/runbooks/rag-platform-context.md`."
+    },
+    {
+      "check": "Corpus build dry run",
+      "result": "pass",
+      "observed": "`python3 scripts/build_rag_index.py --dry-run` reported `source_count: 150` and `chunk_count: 923` from the repository corpus."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0070-rag-context-for-platform-queries.md",
+    "docs/runbooks/rag-platform-context.md",
+    "docs/workstreams/adr-0070-rag-platform-context.md",
+    "README.md",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "The deployed runtime now uses the offline-safe `token-hash` embedding backend on this platform because outbound Hugging Face model downloads are not reliably reachable from docker-runtime-lv3.",
+    "Guest-network-policy convergence had to allow `10.10.10.1 -> 10.10.10.20:8010` so the Proxmox host socket proxy could reach the private API on the runtime VM."
+  ]
+}

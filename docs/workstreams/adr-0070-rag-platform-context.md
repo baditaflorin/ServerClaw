@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0070](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0070-rag-context-for-platform-queries.md)
 - Title: Vector-indexed platform corpus for grounded agent and operator queries
-- Status: merged
+- Status: live_applied
 - Branch: `codex/adr-0070-rag-platform-context`
 - Worktree: `../proxmox_florin_server-rag-platform-context`
 - Owner: codex
@@ -61,5 +61,5 @@
 ## Repo Implementation Notes
 
 - Repo implementation completed on `2026-03-22` for release `0.62.0`.
-- The repo now carries the `rag-context` playbook, `roles/rag_context_runtime`, the private platform-context API service code, Qdrant-backed runtime definitions, and the supporting runbook or tests.
-- Live apply is still pending because this release commit does not by itself change the running platform.
+- Live apply completed on `2026-03-23` for platform version `0.35.0`.
+- The running platform now serves the private platform-context API and Qdrant through the Proxmox host Tailscale proxy, with offline-safe `token-hash` embeddings and normalized source citations.

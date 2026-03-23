@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.69.0
-platform_version: 0.34.0
+repo_version: 0.70.0
+platform_version: 0.35.0
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -28,6 +28,7 @@ live_apply_evidence:
     notification_profiles: 2026-03-22-adr-0050-notification-profiles-live-apply
     netbox: 2026-03-22-adr-0054-netbox-live-apply
     keycloak: 2026-03-22-adr-0056-keycloak-live-apply
+    platform_context: 2026-03-23-adr-0070-rag-platform-context-live-apply
     ntopng: 2026-03-22-adr-0059-ntopng-live-apply
     open_webui: 2026-03-22-adr-0060-open-webui-live-apply
     tempo_tracing: 2026-03-22-adr-0053-tempo-traces-live-apply
@@ -334,7 +335,7 @@ desired_state:
       - sso.lv3.org
 
 observed_state:
-  checked_at: 2026-03-22
+  checked_at: 2026-03-23
   access:
     ssh_bootstrap_key_working: true
     host_ops_user_working: true
@@ -679,6 +680,18 @@ observed_state:
     image_generation_permission: false
     code_interpreter_permission: false
     direct_tool_servers_permission: false
+  platform_context_api:
+    runtime_vm: 10.10.10.20
+    host_tailscale_proxy_url: http://100.118.189.95:8010
+    private_http_url: http://10.10.10.20:8010
+    container_running: true
+    qdrant_container_running: true
+    healthcheck_verified: true
+    rebuild_verified: true
+    query_verified: true
+    embedding_backend: token-hash
+    indexed_chunk_count: 923
+    corpus_source_count: 150
   mattermost:
     runtime_vm: 10.10.10.20
     postgres_backend_vm: 10.10.10.50
@@ -800,8 +813,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.69.0
+    current: 0.70.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.34.0
+    current: 0.35.0
     meaning: intended platform release for the actual server configuration

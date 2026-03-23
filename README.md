@@ -74,9 +74,9 @@ Portainer is now live on `docker-runtime-lv3` and reachable privately at `https:
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.69.0` |
-| Platform version | `0.34.0` |
-| Observed check date | `2026-03-22` |
+| Repository version | `0.70.0` |
+| Platform version | `0.35.0` |
+| Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
 | Observed kernel | `6.17.13-2-pve` |
@@ -126,6 +126,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `ntopng` | `2026-03-22-adr-0059-ntopng-live-apply` |
 | `open_webui` | `2026-03-22-adr-0060-open-webui-live-apply` |
 | `openbao` | `2026-03-22-adr-0043-openbao-live-apply` |
+| `platform_context` | `2026-03-23-adr-0070-rag-platform-context-live-apply` |
 | `portainer` | `2026-03-22-adr-0055-portainer-live-apply` |
 | `postgres_vm` | `2026-03-22-adr-0026-postgres-vm-live-apply` |
 | `public_edge_publication` | `2026-03-22-adr-0021-edge-publication-live-apply` |
@@ -483,8 +484,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.69.0` |
-| Platform version | `0.34.0` |
+| Repository version | `0.70.0` |
+| Platform version | `0.35.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -563,7 +564,7 @@ This repository is intentionally opinionated:
 | `0067` | Guest network policy enforcement | `live_applied` | [adr-0067-guest-network-policy.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0067-guest-network-policy.md) |
 | `0068` | Container image policy and supply chain integrity | `merged` | [adr-0068-container-image-policy.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0068-container-image-policy.md) |
 | `0069` | Agent tool registry and governed tool calls | `merged` | [adr-0069-agent-tool-registry.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0069-agent-tool-registry.md) |
-| `0070` | Retrieval-augmented context for platform queries | `merged` | [adr-0070-rag-platform-context.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0070-rag-platform-context.md) |
+| `0070` | Retrieval-augmented context for platform queries | `live_applied` | [adr-0070-rag-platform-context.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0070-rag-platform-context.md) |
 | `0071` | Agent observation loop and autonomous drift detection | `merged` | [adr-0071-agent-observation-loop.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0071-agent-observation-loop.md) |
 | `0074` | Platform operations portal | `merged` | [adr-0074-ops-portal.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0074-ops-portal.md) |
 | `0075` | Service capability catalog | `merged` | [adr-0075-service-capability-catalog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0075-service-capability-catalog.md) |
