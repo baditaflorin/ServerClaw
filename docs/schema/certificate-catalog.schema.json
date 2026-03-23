@@ -1,0 +1,187 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lv3.org/schema/certificate-catalog.schema.json",
+  "title": "LV3 Certificate Catalog",
+  "type": "object",
+  "required": [
+    "$schema",
+    "schema_version",
+    "certificates"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "certificates": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "service_id",
+          "status",
+          "summary",
+          "expected_issuer",
+          "endpoint",
+          "policy",
+          "renewal"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$"
+          },
+          "service_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_]*$"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "planned"
+            ]
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 1
+          },
+          "expected_issuer": {
+            "type": "string",
+            "enum": [
+              "any",
+              "letsencrypt",
+              "self-signed",
+              "step-ca"
+            ]
+          },
+          "endpoint": {
+            "type": "object",
+            "required": [
+              "host",
+              "port",
+              "server_name"
+            ],
+            "properties": {
+              "host": {
+                "type": "string",
+                "minLength": 1
+              },
+              "port": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 65535
+              },
+              "server_name": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": false
+          },
+          "policy": {
+            "type": "object",
+            "required": [
+              "warn_days",
+              "critical_days"
+            ],
+            "properties": {
+              "warn_days": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "critical_days": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "additionalProperties": false
+          },
+          "renewal": {
+            "type": "object",
+            "required": [
+              "agent",
+              "managed_by_repo"
+            ],
+            "properties": {
+              "agent": {
+                "type": "string",
+                "minLength": 1
+              },
+              "managed_by_repo": {
+                "type": "boolean"
+              },
+              "host": {
+                "type": "string"
+              },
+              "unit_name": {
+                "type": "string"
+              },
+              "on_calendar": {
+                "type": "string"
+              },
+              "randomized_delay_seconds": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "reload_command": {
+                "type": "string"
+              },
+              "notes": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "material": {
+            "type": "object",
+            "properties": {
+              "bundle_path": {
+                "type": "string"
+              },
+              "certificate_file": {
+                "type": "string"
+              },
+              "key_file": {
+                "type": "string"
+              },
+              "root_file": {
+                "type": "string"
+              },
+              "subject": {
+                "type": "string"
+              },
+              "sans": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "ca_url": {
+                "type": "string"
+              },
+              "provisioner": {
+                "type": "string"
+              },
+              "password_file": {
+                "type": "string"
+              },
+              "not_after": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

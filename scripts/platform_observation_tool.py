@@ -21,6 +21,7 @@ from typing import Any
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path, write_json
 from maintenance_window_tool import list_active_windows_best_effort, suppress_findings_for_maintenance
+from tls_cert_probe import collect_certificate_results
 
 
 HEALTH_PROBE_CATALOG_PATH = repo_path("config", "health-probe-catalog.json")
@@ -731,105 +732,27 @@ def parse_not_after(payload: str) -> tuple[str | None, datetime | None]:
 
 
 def check_certificate_expiry(context: dict[str, Any], run_id: str) -> dict[str, Any]:
-    targets = [
-        {
-            "id": "proxmox-ui",
-            "runner": "host_ssh",
-            "target": "proxmox_florin",
-            "summary": "Proxmox UI TLS certificate",
-            "command": "sudo openssl x509 -in /etc/pve/local/pveproxy-ssl.pem -noout -subject -enddate",
-        },
-        {
-            "id": "step-ca-proxy",
-            "runner": "controller_tls",
-            "summary": "step-ca private proxy certificate",
-            "host": "100.118.189.95",
-            "port": 9443,
-            "server_name": "100.118.189.95",
-        },
-        {
-            "id": "openbao-proxy",
-            "runner": "controller_tls",
-            "summary": "OpenBao private proxy certificate",
-            "host": "100.118.189.95",
-            "port": 8200,
-            "server_name": "100.118.189.95",
-        },
-        {
-            "id": "portainer-proxy",
-            "runner": "controller_tls",
-            "summary": "Portainer private proxy certificate",
-            "host": "100.118.189.95",
-            "port": 9444,
-            "server_name": "100.118.189.95",
-        },
-    ]
-    details: list[dict[str, Any]] = []
+    del context
     severity_rank = {"ok": 0, "warning": 1, "critical": 2}
     severity = "ok"
-    now = utc_now()
-
-    for target in targets:
-        try:
-            if target["runner"] == "controller_tls":
-                subject, expires = probe_tls_certificate(
-                    target["host"],
-                    target["port"],
-                    server_name=target.get("server_name"),
-                )
-            else:
-                result = execute_runner(context, target["runner"], target["target"], target["command"])
-                if result.returncode != 0:
-                    details.append(
-                        {
-                            "certificate_id": target["id"],
-                            "status": "probe_failed",
-                            "stderr": truncate(result.stderr),
-                        }
-                    )
-                    severity = "critical"
-                    continue
-
-                subject, expires = parse_not_after(result.stdout)
-                if expires is None:
-                    details.append(
-                        {
-                            "certificate_id": target["id"],
-                            "status": "unparsed",
-                            "stdout": truncate(result.stdout),
-                        }
-                    )
-                    severity = "critical"
-                    continue
-        except (OSError, RuntimeError, ValueError, ssl.SSLError) as exc:
-            details.append(
-                {
-                    "certificate_id": target["id"],
-                    "status": "probe_failed",
-                    "error": truncate(str(exc)),
-                }
-            )
-            severity = "critical"
-            continue
-
-        days_remaining = math.floor((expires - now).total_seconds() / 86400)
+    details: list[dict[str, Any]] = []
+    for result in collect_certificate_results(now=utc_now()):
         detail = {
-            "certificate_id": target["id"],
-            "subject": subject,
-            "not_after": isoformat(expires),
-            "days_remaining": days_remaining,
+            "certificate_id": result["certificate_id"],
+            "status": result["status"],
         }
-        if days_remaining <= 14:
-            detail["status"] = "expiring_soon"
-            severity = "critical" if severity_rank[severity] < severity_rank["critical"] else severity
-        else:
-            detail["status"] = "ok"
+        for field in ("subject", "issuer", "not_after", "days_remaining", "expected_issuer", "error"):
+            if field in result:
+                detail[field] = result[field]
         details.append(detail)
-    details.sort(key=lambda item: item["certificate_id"])
+        if severity_rank[result["severity"]] > severity_rank[severity]:
+            severity = result["severity"]
 
-    summary = "All tracked certificates are more than 14 days from expiry."
-    if severity == "critical":
-        summary = "One or more tracked certificates expire within 14 days or could not be verified."
+    summary = "All tracked certificates are within the configured renewal policy."
+    if severity == "warning":
+        summary = "One or more tracked certificates need renewal attention soon."
+    elif severity == "critical":
+        summary = "One or more tracked certificates are expired, near expiry, or could not be verified."
     return make_finding(
         check="check-certificate-expiry",
         severity=severity,

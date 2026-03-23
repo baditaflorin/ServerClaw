@@ -135,7 +135,7 @@ workstreams:
       - playbooks/docker-compose-stacks.yml
       - roles/docker_compose_stack
       - docs/runbooks/deploy-docker-compose-stack.md
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: false
 
   - id: adr-0026-postgres-vm
@@ -1603,7 +1603,7 @@ workstreams:
   - id: adr-0101-certificate-lifecycle
     adr: "0101"
     title: Automated certificate lifecycle management
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0101-certificate-lifecycle
     worktree_path: ../proxmox_florin_server-certificate-lifecycle
@@ -1618,8 +1618,9 @@ workstreams:
     conflicts_with: []
     shared_surfaces:
       - config/health-probe-catalog.json
-      - all Compose stacks
-      - systemd unit files
+      - config/certificate-catalog.json
+      - TLS-owning service roles
+      - systemd unit files on VMs
     ready_to_merge: false
     live_applied: false
 

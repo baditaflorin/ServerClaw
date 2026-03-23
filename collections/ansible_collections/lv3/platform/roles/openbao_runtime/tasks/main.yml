@@ -158,8 +158,8 @@
     {% for san in openbao_tls_server_sans %}
       --san "{{ san }}" \
     {% endfor %}
-      --not-after 24h \
-      "{{ platform_host.management.tailscale_ipv4 }}" \
+      --not-after "{{ openbao_tls_certificate_not_after }}" \
+      "{{ openbao_tls_certificate_subject }}" \
       "{{ openbao_tls_server_cert_host_file }}" \
       "{{ openbao_tls_server_key_host_file }}"
 
@@ -280,6 +280,43 @@
     or 'Starting' in openbao_up.stdout
   tags:
     - mutation
+
+- name: Install the OpenBao TLS renewal timer
+  ansible.builtin.include_role:
+    name: lv3.platform.cert_renewal_timer
+  vars:
+    cert_renewal_timer_name: "{{ openbao_tls_renewal_timer_name }}"
+    cert_renewal_timer_description: OpenBao TLS certificate renewal
+    cert_renewal_timer_script_path: "{{ openbao_tls_renewal_script_path }}"
+    cert_renewal_timer_service_path: "{{ openbao_tls_renewal_service_path }}"
+    cert_renewal_timer_timer_path: "{{ openbao_tls_renewal_timer_path }}"
+    cert_renewal_timer_on_calendar: "{{ openbao_tls_renewal_on_calendar }}"
+    cert_renewal_timer_randomized_delay_seconds: "{{ openbao_tls_renewal_randomized_delay_seconds }}"
+    cert_renewal_timer_issue_command: |
+      if [ -s "{{ openbao_tls_server_cert_host_file }}" ] && \
+        openssl x509 -checkend {{ openbao_tls_cert_renew_before_seconds }} -noout -in "{{ openbao_tls_server_cert_host_file }}" >/dev/null 2>&1; then
+        exit 0
+      fi
+
+      step ca certificate \
+        --force \
+        --provisioner services \
+        --provisioner-password-file "{{ step_ca_services_password_file }}" \
+        --ca-url "{{ step_ca_internal_url }}" \
+        --root "{{ step_ca_remote_root_certificate_file }}" \
+      {% for san in openbao_tls_server_sans %}
+        --san "{{ san }}" \
+      {% endfor %}
+        --not-after "{{ openbao_tls_certificate_not_after }}" \
+        "{{ openbao_tls_certificate_subject }}" \
+        "{{ openbao_tls_server_cert_host_file }}" \
+        "{{ openbao_tls_server_key_host_file }}"
+
+      chown {{ openbao_runtime_uid }}:{{ openbao_runtime_gid }} "{{ openbao_tls_server_cert_host_file }}" "{{ openbao_tls_server_key_host_file }}"
+      chmod 0644 "{{ openbao_tls_server_cert_host_file }}"
+      chmod 0600 "{{ openbao_tls_server_key_host_file }}"
+      echo changed
+    cert_renewal_timer_reload_command: "{{ openbao_tls_reload_command }}"
 
 - name: Wait for OpenBao to listen on loopback
   ansible.builtin.wait_for:

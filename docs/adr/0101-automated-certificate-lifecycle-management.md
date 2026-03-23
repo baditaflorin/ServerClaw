@@ -1,10 +1,10 @@
 # ADR 0101: Automated Certificate Lifecycle Management
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.98.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-23
 - Date: 2026-03-23
 
 ## Context
@@ -23,61 +23,29 @@ The drift detection catches expiry within 7–14 days, but catching a problem 7 
 
 ## Decision
 
-We will implement a **three-layer certificate lifecycle** covering issuance, automated renewal, and expiry alerting, using `step-ca`'s ACME provisioner and the `step` agent for renewal, with health probe integration to verify certificate validity.
+We will implement a **three-layer certificate lifecycle** covering inventory, automated renewal where this repository actually owns the renewal path, and expiry detection from the same machine-readable contract.
 
-### Layer 1: Short-lived certificates with `step` renewal agent
+### Layer 1: Renewal automation where current `main` owns the certificate
 
-Every service that holds a TLS certificate is configured to run `step ca renew` in daemon mode via a systemd timer or a sidecar container. The `step` agent renews the certificate when it reaches 2/3 of its lifetime (configurable) without any operator involvement.
+The current platform topology does **not** terminate TLS inside every Compose stack. Most operator-facing services remain HTTP-only behind the shared NGINX edge certificate or a private Tailscale proxy. The certificate lifecycle therefore distinguishes between:
 
-**For VM-hosted services** (step-ca, OpenBao):
+- repo-managed renewal paths, where the repository renders both the certificate material and the renewal mechanism
+- externally managed renewal paths, where the repository inventories the certificate and probes it but does not replace the issuer's own renewal flow
 
-```ini
-# /etc/systemd/system/step-renew-openbao.timer
-[Unit]
-Description=Renew TLS certificate for OpenBao
+The first repository-managed renewal path on current `main` is OpenBao:
 
-[Timer]
-OnCalendar=*:0/5  # check every 5 minutes
-RandomizedDelaySec=60
+- the role now renders a dedicated systemd timer and service via `lv3.platform.cert_renewal_timer`
+- the timer reissues the short-lived OpenBao server certificate from step-ca before expiry using the existing `services` provisioner credentials
+- the timer only restarts the OpenBao container when the certificate actually changed
 
-[Install]
-WantedBy=timers.target
-```
+For external paths that already renew outside this role:
 
-```bash
-# /usr/local/bin/renew-openbao-cert.sh (Ansible-templated)
-#!/usr/bin/env bash
-step ca renew \
-  --ca-url https://ca.internal.lv3:9443 \
-  --root /etc/step-ca/certs/root_ca.crt \
-  --force-term-on-change \
-  /etc/ssl/openbao/cert.pem \
-  /etc/ssl/openbao/key.pem \
-  && systemctl reload openbao
-```
+- the shared NGINX edge bundle remains Certbot-managed on `nginx-lv3`
+- the Proxmox manager certificate remains Proxmox ACME-managed on the host
+- step-ca's own bootstrap certificate is explicitly inventoried as a special case, not silently ignored
+- Portainer and PBS are inventoried and probed even though they still use their own local certificate lifecycle
 
-The `--force-term-on-change` flag causes `step ca renew` to exit with a non-zero code if the certificate chain changed, which triggers the `&& systemctl reload openbao` to apply the new certificate without a full restart.
-
-**For Docker Compose services** (Keycloak, Windmill, NetBox, Mattermost):
-
-A shared `cert-renewer` sidecar container runs in each Compose stack:
-
-```yaml
-cert-renewer:
-  image: smallstep/step-ca:latest
-  entrypoint: >
-    step ca renew
-      --daemon
-      --ca-url https://ca.internal.lv3:9443
-      --root /certs/root_ca.crt
-      --exec "kill -HUP $(cat /var/run/nginx.pid)"
-      /certs/service.crt /certs/service.key
-  volumes:
-    - cert-volume:/certs
-  restart: unless-stopped
-```
-
-The `--daemon` mode runs continuously, sleeping between renewal checks. The `--exec` command reloads the consuming service when a new certificate is issued.
+The repository now also carries a reusable `cert_renewer_sidecar` role for future TLS-owning Compose services, but it is **not** attached to the current HTTP-only control-plane stacks just to satisfy the ADR mechanically.
 
 ### Layer 2: Certificate validity health probe
 
@@ -97,48 +65,46 @@ def probe_cert_validity(host: str, port: int, days_warn: int = 21, days_critical
     return ProbeResult.OK(f"TLS cert valid for {days_remaining} days")
 ```
 
-This probe runs on the same schedule as the other health probes (every 5 minutes) and feeds into:
-- Grafana alert rules (via Prometheus metrics from Telegraf)
-- SLO burn rate tracking (ADR 0096) — a critical cert failure is an SLO event
-- Drift detection (ADR 0091) — cert drift is a `critical` drift event
+This probe now exists as `scripts/tls_cert_probe.py`, backed by the certificate catalog. It feeds into:
+- the platform observation loop via `check-certificate-expiry`
+- drift detection via `scripts/tls_cert_drift.py`
+- the health-probe contract by way of `tls_certificate_ids` attached to services with HTTPS endpoints
+- future alert routing via the committed `config/alertmanager/rules/platform.yml` rule group
 
 ### Layer 3: Certificate inventory
 
-A `config/certificate-catalog.json` tracks every certificate issued by step-ca:
+A `config/certificate-catalog.json` now tracks every active HTTPS endpoint on current `main`, including:
 
 ```json
 {
   "certificates": [
     {
-      "id": "openbao-internal",
-      "service": "openbao",
-      "cn": "openbao.internal.lv3",
-      "issuer": "step-ca",
-      "renewal_agent": "systemd-timer",
-      "probe_host": "openbao",
-      "probe_port": 8200,
-      "lifetime_days": 90,
-      "renew_at_percent": 66
+      "id": "openbao-proxy",
+      "service_id": "openbao",
+      "expected_issuer": "step-ca",
+      "renewal": {
+        "agent": "systemd-step-issue",
+        "managed_by_repo": true
+      }
     },
     {
-      "id": "keycloak-internal",
-      "service": "keycloak",
-      "cn": "sso.lv3.org",
-      "issuer": "lets-encrypt",
-      "renewal_agent": "certbot-acme",
-      "probe_host": "sso.lv3.org",
-      "probe_port": 443,
-      "lifetime_days": 90,
-      "renew_at_percent": 66
+      "id": "grafana-edge",
+      "service_id": "grafana",
+      "expected_issuer": "letsencrypt",
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false
+      }
     }
   ]
 }
 ```
 
-This catalog is the source of truth for:
-- Generating systemd timers and sidecar renewal configurations (Ansible)
-- Populating the health probe schedule
-- The docs site reference page (ADR 0094) — which certificates exist and who manages them
+This catalog is now the source of truth for:
+- the operator-facing TLS probe script
+- certificate drift detection
+- the OpenBao renewal execution plan generated by `scripts/generate_cert_renewal_config.py`
+- health-probe references for services that own HTTPS endpoints
 
 ### Let's Encrypt certificates (external services)
 
@@ -146,18 +112,18 @@ For `sso.lv3.org`, `grafana.lv3.org`, `ops.lv3.org`, and other edge-published su
 
 ### Alert routing for certificate events
 
-Using the alerting model from ADR 0097:
+Using the alerting model from ADR 0097, the repository now carries the certificate alert rule group under `config/alertmanager/rules/platform.yml`:
 
 | Condition | Severity | Destination |
 |---|---|---|
 | Certificate expiry in < 21 days | `warning` | Mattermost `#platform-alerts` |
-| Certificate expiry in < 7 days | `critical` | Ntfy (phone) + Mattermost `#platform-alerts-critical` |
+| Certificate expiry in < 14 days | `critical` | Ntfy (phone) + Mattermost `#platform-alerts-critical` |
 | Renewal agent failed (cert not renewed after 80% lifetime) | `critical` | Ntfy + Mattermost |
 | Unexpected issuer (not step-ca or Let's Encrypt) | `warning` | Mattermost |
 
 ### Rotation runbook
 
-When automated renewal fails (step-ca unreachable, certificate store corrupted), the manual rotation runbook in the docs site (ADR 0094) provides:
+When automated renewal fails (step-ca unreachable, certificate store corrupted), the repository runbook `docs/runbooks/cert-expired.md` provides:
 
 ```bash
 # Emergency manual certificate renewal
@@ -170,17 +136,26 @@ step ca certificate \
 systemctl reload openbao
 ```
 
+## Implementation Notes
+
+- `config/certificate-catalog.json` is implemented and validated as a canonical data model.
+- `scripts/tls_cert_probe.py` is implemented and now backs both drift detection and the observation-loop certificate check.
+- `config/health-probe-catalog.json` now links HTTPS-owning services to the certificate catalog through `tls_certificate_ids`.
+- `lv3.platform.cert_renewal_timer` is implemented and is used by `openbao_runtime` to keep the OpenBao proxy certificate fresh.
+- `lv3.platform.cert_renewer_sidecar` is implemented as the future reusable path for TLS-owning Compose stacks, but current `main` intentionally does not force it into HTTP-only stacks.
+- `config/alertmanager/rules/platform.yml` now carries the repo-managed certificate expiry alert rule group for the later ADR 0097 runtime.
+
 ## Consequences
 
 **Positive**
-- Certificate expiry becomes an infrastructure-monitored metric, not a calendar reminder; the drift toward "certificates expire in production" is eliminated
-- The cert-renewer sidecar pattern is reusable; every new Compose service added to the platform inherits automated renewal by including the sidecar
-- The certificate catalog provides a complete inventory of every certificate in the platform — essential for incident response and compliance
+- Certificate expiry becomes a governed repository surface instead of a private operator memory problem.
+- The repository finally distinguishes between certificates it actively renews and certificates it only inventories and probes.
+- The certificate catalog provides a complete inventory of the current HTTPS estate — essential for incident response and compliance.
 
 **Negative / Trade-offs**
-- The cert-renewer sidecar adds one container to every Compose stack; small resource overhead (~10 MB RAM) multiplied across stacks
-- step-ca is now a hard runtime dependency for all internal services (it already was at issuance time; now it is also required at renewal time every 60 days); if step-ca is down for more than 60 days, certificates will expire — the step-ca SLO must be high
-- The `--exec "kill -HUP"` approach for Compose services requires that the consuming service supports SIGHUP for cert reload; services that require full restart on cert change (some Java services) need a different approach
+- OpenBao renewal currently reissues and restarts the container rather than doing an in-process certificate hot reload.
+- The shared edge, PBS, Portainer, and step-ca bootstrap certificate remain externally managed; the repo now detects expiry risk there but does not yet remediate it.
+- The alert rules are committed before the full Alertmanager runtime exists on current `main`, so the repo contract is ahead of the live alert pipeline.
 
 ## Alternatives Considered
 

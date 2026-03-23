@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+output="$(
+  {
+{{ cert_renewal_timer_issue_command | indent(4, true) }}
+  }
+)"
+printf '%s\n' "$output"
+{% if cert_renewal_timer_reload_command | length > 0 %}
+if printf '%s\n' "$output" | grep -qx 'changed'; then
+{{ cert_renewal_timer_reload_command }}
+fi
+{% endif %}

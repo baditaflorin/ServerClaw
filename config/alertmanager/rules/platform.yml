@@ -1,0 +1,22 @@
+groups:
+  - name: lv3-certificate-lifecycle
+    rules:
+      - alert: LV3CertificateExpiryWarning
+        expr: lv3_certificate_days_remaining < 21 and lv3_certificate_days_remaining >= 14
+        for: 15m
+        labels:
+          severity: warning
+          runbook_url: docs/runbooks/cert-expired.md
+        annotations:
+          summary: TLS certificate enters the warning renewal window
+          description: One or more tracked certificates have fewer than 21 days remaining.
+
+      - alert: LV3CertificateExpiryCritical
+        expr: lv3_certificate_days_remaining < 14
+        for: 15m
+        labels:
+          severity: critical
+          runbook_url: docs/runbooks/cert-expired.md
+        annotations:
+          summary: TLS certificate enters the critical expiry window
+          description: One or more tracked certificates have fewer than 14 days remaining or renewal automation has stalled.

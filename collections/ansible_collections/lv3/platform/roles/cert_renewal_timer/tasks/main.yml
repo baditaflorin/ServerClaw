@@ -1,0 +1,49 @@
+---
+- name: Validate certificate renewal timer inputs
+  ansible.builtin.assert:
+    that:
+      - cert_renewal_timer_name | length > 0
+      - cert_renewal_timer_script_path | length > 0
+      - cert_renewal_timer_service_path | length > 0
+      - cert_renewal_timer_timer_path | length > 0
+      - cert_renewal_timer_issue_command | length > 0
+    fail_msg: "cert_renewal_timer requires unit names, output paths, and a renewal command."
+
+- name: Ensure the certificate renewal script directory exists
+  ansible.builtin.file:
+    path: "{{ cert_renewal_timer_script_path | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Render the certificate renewal script
+  ansible.builtin.template:
+    src: cert-renew.sh.j2
+    dest: "{{ cert_renewal_timer_script_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Render the certificate renewal systemd service
+  ansible.builtin.template:
+    src: cert-renew.service.j2
+    dest: "{{ cert_renewal_timer_service_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the certificate renewal systemd timer
+  ansible.builtin.template:
+    src: cert-renew.timer.j2
+    dest: "{{ cert_renewal_timer_timer_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Enable and start the certificate renewal timer
+  ansible.builtin.systemd:
+    name: "{{ cert_renewal_timer_name }}.timer"
+    enabled: true
+    state: started
+    daemon_reload: true
