@@ -2,6 +2,9 @@ services:
   openbao-agent:
     image: {{ netbox_openbao_agent_image }}
     container_name: {{ netbox_openbao_agent_container_name }}
+    user: "0:0"
+    environment:
+      BAO_SKIP_DROP_ROOT: "true"
     command:
       - agent
       - -config=/openbao-agent/agent.hcl

@@ -124,6 +124,10 @@
   ansible.builtin.set_fact:
     mattermost_admin_password: "{{ mattermost_admin_password_raw.content | b64decode | trim }}"
     mattermost_database_password: "{{ lookup('ansible.builtin.file', mattermost_database_password_local_file) | trim }}"
+  no_log: true
+
+- name: Build Mattermost runtime secret payload
+  ansible.builtin.set_fact:
     mattermost_runtime_secret_payload:
       MM_SQLSETTINGS_DATASOURCE: >-
         postgres://{{ mattermost_database_user }}:{{ mattermost_database_password | urlencode | replace('/', '%2F') }}@{{ mattermost_database_host }}:{{ mattermost_database_port }}/{{ mattermost_database_name }}?sslmode=disable&connect_timeout=10

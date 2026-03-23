@@ -46,14 +46,31 @@ def test_migrated_role_tasks_no_longer_shell_out_with_env_file_flag() -> None:
         assert "--env-file" not in tasks_text
 
 
+def test_runtime_secret_payloads_are_built_in_follow_up_tasks() -> None:
+    windmill_tasks = (REPO_ROOT / "roles" / "windmill_runtime" / "tasks" / "main.yml").read_text()
+    mattermost_tasks = (REPO_ROOT / "roles" / "mattermost_runtime" / "tasks" / "main.yml").read_text()
+    assert "- name: Build the Windmill runtime secret payload" in windmill_tasks
+    assert "- name: Build Mattermost runtime secret payload" in mattermost_tasks
+
+
 def test_migrated_compose_templates_include_openbao_agent_sidecars() -> None:
     compose_roles = list(ROLE_RUNTIME_PATHS) + ["mail_platform_runtime"]
     for role_name in compose_roles:
         template_text = (REPO_ROOT / "roles" / role_name / "templates" / "docker-compose.yml.j2").read_text()
         assert "openbao-agent:" in template_text
+        assert 'user: "0:0"' in template_text
+        assert 'BAO_SKIP_DROP_ROOT: "true"' in template_text
         assert "-config=/openbao-agent/agent.hcl" in template_text
 
 
 def test_control_plane_recovery_no_longer_requires_windmill_env_file() -> None:
     defaults_text = (REPO_ROOT / "roles" / "control_plane_recovery_store" / "defaults" / "main.yml").read_text()
     assert "opt/windmill/windmill.env" not in defaults_text
+
+
+def test_mail_gateway_image_includes_telemetry_module() -> None:
+    dockerfile_text = (REPO_ROOT / "roles" / "mail_platform_runtime" / "templates" / "mail-gateway.Dockerfile.j2").read_text()
+    app_text = (REPO_ROOT / "roles" / "mail_platform_runtime" / "files" / "mail-gateway" / "app.py").read_text()
+    assert "from telemetry import configure_telemetry" in app_text
+    assert "COPY telemetry.py ./" in dockerfile_text
+    assert "uvicorn app:app --host 0.0.0.0 --port 8081" in dockerfile_text
