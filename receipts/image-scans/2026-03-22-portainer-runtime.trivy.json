@@ -1,0 +1,1042 @@
+{
+  "SchemaVersion": 2,
+  "CreatedAt": "2026-03-22T21:32:16.837254376Z",
+  "ArtifactName": "docker.io/portainer/portainer-ce:2.33.6@sha256:3d8e3d85d0653baf49ebe7875200f0e5c4da79c8ebea380acddf40896e4d59eb",
+  "ArtifactType": "container_image",
+  "Metadata": {
+    "Size": 183978496,
+    "ImageID": "sha256:2622931a6f420d9c80c84f6b17cce4b0fb5a0d67b23eb2baf44eae774ff5a9ac",
+    "DiffIDs": [
+      "sha256:96afbb5e0a5bff3e6b9024696407382b148b11e6bb4c223139d452717d77b755",
+      "sha256:8edca047fc5064d9822c55ca32c3eb68eaed4da2723720298ca8c00b7167316a",
+      "sha256:c930190cdb5d98f324cdc8417c7b19486274dcbb4bc360cb45aad6dd49ea83f6",
+      "sha256:eb78937fd90b05f16e44ba64e269e69430e5b2da53f920a19fc8be10c0684a0a",
+      "sha256:525048fd8fb5efe400ee56f9381f7e69f9c652dcd4f846df0e2b9abf3658cd8f",
+      "sha256:215ae1152d72d06b9343725226e1b5a72454cf87fb4e8e3594e0408d7600e0df",
+      "sha256:6817d77c09e3d8d2b92ab6e3e019eb81a874404219d153166dc4e99751358a8c",
+      "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+    ],
+    "RepoDigests": [
+      "portainer/portainer-ce@sha256:3d8e3d85d0653baf49ebe7875200f0e5c4da79c8ebea380acddf40896e4d59eb"
+    ],
+    "ImageConfig": {
+      "architecture": "amd64",
+      "created": "2025-12-17T01:43:49.292205429Z",
+      "history": [
+        {
+          "created": "2025-12-17T00:25:02.462115215Z",
+          "created_by": "COPY /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2025-12-17T00:25:02.507651721Z",
+          "created_by": "COPY /buildtmp /tmp # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2025-12-17T01:43:48.868906371Z",
+          "created_by": "LABEL org.opencontainers.image.title=Portainer org.opencontainers.image.description=Docker container management made simple, with the world’s most popular GUI-based container management platform. org.opencontainers.image.vendor=Portainer.io com.docker.desktop.extension.api.version=\u003e= 0.2.2 com.docker.desktop.extension.icon=https://portainer-io-assets.sfo2.cdn.digitaloceanspaces.com/logos/portainer.png com.docker.extension.screenshots=[{\"alt\": \"screenshot one\", \"url\": \"https://portainer-io-assets.sfo2.digitaloceanspaces.com/screenshots/docker-extension-1.png\"},{\"alt\": \"screenshot two\", \"url\": \"https://portainer-io-assets.sfo2.digitaloceanspaces.com/screenshots/docker-extension-2.png\"},{\"alt\": \"screenshot three\", \"url\": \"https://portainer-io-assets.sfo2.digitaloceanspaces.com/screenshots/docker-extension-3.png\"},{\"alt\": \"screenshot four\", \"url\": \"https://portainer-io-assets.sfo2.digitaloceanspaces.com/screenshots/docker-extension-4.png\"},{\"alt\": \"screenshot five\", \"url\": \"https://portainer-io-assets.sfo2.digitaloceanspaces.com/screenshots/docker-extension-5.png\"},{\"alt\": \"screenshot six\", \"url\": \"https://portainer-io-assets.sfo2.digitaloceanspaces.com/screenshots/docker-extension-6.png\"},{\"alt\": \"screenshot seven\", \"url\": \"https://portainer-io-assets.sfo2.digitaloceanspaces.com/screenshots/docker-extension-7.png\"},{\"alt\": \"screenshot eight\", \"url\": \"https://portainer-io-assets.sfo2.digitaloceanspaces.com/screenshots/docker-extension-8.png\"},{\"alt\": \"screenshot nine\", \"url\": \"https://portainer-io-assets.sfo2.digitaloceanspaces.com/screenshots/docker-extension-9.png\"}] com.docker.extension.detailed-description=\u003cp data-renderer-start-pos=\"226\"\u003ePortainer\u0026rsquo;s Docker Desktop extension gives you access to all of Portainer\u0026rsquo;s rich management functionality within your docker desktop experience.\u003c/p\u003e\u003ch2 data-renderer-start-pos=\"374\"\u003eWith Portainer you can:\u003c/h2\u003e\u003cul\u003e\u003cli\u003eSee all your running containers\u003c/li\u003e\u003cli\u003eEasily view all of your container logs\u003c/li\u003e\u003cli\u003eConsole into containers\u003c/li\u003e\u003cli\u003eEasily deploy your code into containers using a simple form\u003c/li\u003e\u003cli\u003eTurn your YAML into custom templates for easy reuse\u003c/li\u003e\u003c/ul\u003e\u003ch2 data-renderer-start-pos=\"660\"\u003eAbout Portainer\u0026nbsp;\u003c/h2\u003e\u003cp data-renderer-start-pos=\"680\"\u003ePortainer is the worlds\u0026rsquo; most popular universal container management platform with more than 650,000 active monthly users. Portainer can be used to manage Docker Standalone, Kubernetes and Docker Swarm environments through a single common interface. It includes a simple GitOps automation engine and a Kube API.\u0026nbsp;\u003c/p\u003e\u003cp data-renderer-start-pos=\"1006\"\u003ePortainer Business Edition is our fully supported commercial grade product for business-wide use. It includes all the functionality that businesses need to manage containers at scale. Visit \u003ca class=\"sc-jKJlTe dPfAtb\" href=\"http://portainer.io/\" title=\"http://Portainer.io\" data-renderer-mark=\"true\"\u003ePortainer.io\u003c/a\u003e to learn more about Portainer Business and \u003ca class=\"sc-jKJlTe dPfAtb\" href=\"http://portainer.io/take-3?utm_campaign=DockerCon\u0026amp;utm_source=Docker%20Desktop\" title=\"http://portainer.io/take-3?utm_campaign=DockerCon\u0026amp;utm_source=Docker%20Desktop\" data-renderer-mark=\"true\"\u003eget 3 free nodes.\u003c/a\u003e\u003c/p\u003e com.docker.extension.publisher-url=https://www.portainer.io com.docker.extension.additional-urls=[{\"title\":\"Website\",\"url\":\"https://www.portainer.io?utm_campaign=DockerCon\u0026utm_source=DockerDesktop\"},{\"title\":\"Documentation\",\"url\":\"https://docs.portainer.io\"},{\"title\":\"Support\",\"url\":\"https://join.slack.com/t/portainer/shared_invite/zt-txh3ljab-52QHTyjCqbe5RibC2lcjKA\"}]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2025-12-17T01:43:48.868906371Z",
+          "created_by": "COPY dist/docker / # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2025-12-17T01:43:48.931814241Z",
+          "created_by": "COPY dist/mustache-templates /mustache-templates/ # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2025-12-17T01:43:49.119736766Z",
+          "created_by": "COPY dist/portainer / # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2025-12-17T01:43:49.275491866Z",
+          "created_by": "COPY dist/public /public/ # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2025-12-17T01:43:49.28470765Z",
+          "created_by": "COPY build/docker-extension / # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2025-12-17T01:43:49.292205429Z",
+          "created_by": "COPY dist/storybook* /storybook/ # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2025-12-17T01:43:49.292205429Z",
+          "created_by": "VOLUME [/data]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2025-12-17T01:43:49.292205429Z",
+          "created_by": "WORKDIR /",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2025-12-17T01:43:49.292205429Z",
+          "created_by": "EXPOSE map[9000/tcp:{}]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2025-12-17T01:43:49.292205429Z",
+          "created_by": "EXPOSE map[9443/tcp:{}]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2025-12-17T01:43:49.292205429Z",
+          "created_by": "EXPOSE map[8000/tcp:{}]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2025-12-17T01:43:49.292205429Z",
+          "created_by": "LABEL io.portainer.server=true",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2025-12-17T01:43:49.292205429Z",
+          "created_by": "ENTRYPOINT [\"/portainer\"]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        }
+      ],
+      "os": "linux",
+      "rootfs": {
+        "type": "layers",
+        "diff_ids": [
+          "sha256:96afbb5e0a5bff3e6b9024696407382b148b11e6bb4c223139d452717d77b755",
+          "sha256:8edca047fc5064d9822c55ca32c3eb68eaed4da2723720298ca8c00b7167316a",
+          "sha256:c930190cdb5d98f324cdc8417c7b19486274dcbb4bc360cb45aad6dd49ea83f6",
+          "sha256:eb78937fd90b05f16e44ba64e269e69430e5b2da53f920a19fc8be10c0684a0a",
+          "sha256:525048fd8fb5efe400ee56f9381f7e69f9c652dcd4f846df0e2b9abf3658cd8f",
+          "sha256:215ae1152d72d06b9343725226e1b5a72454cf87fb4e8e3594e0408d7600e0df",
+          "sha256:6817d77c09e3d8d2b92ab6e3e019eb81a874404219d153166dc4e99751358a8c",
+          "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+        ]
+      },
+      "config": {
+        "Entrypoint": [
+          "/portainer"
+        ],
+        "Env": [
+          "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+        ],
+        "Labels": {
+          "com.docker.desktop.extension.api.version": "\u003e= 0.2.2",
+          "com.docker.desktop.extension.icon": "https://portainer-io-assets.sfo2.cdn.digitaloceanspaces.com/logos/portainer.png",
+          "com.docker.extension.additional-urls": "[{\"title\":\"Website\",\"url\":\"https://www.portainer.io?utm_campaign=DockerCon\u0026utm_source=DockerDesktop\"},{\"title\":\"Documentation\",\"url\":\"https://docs.portainer.io\"},{\"title\":\"Support\",\"url\":\"https://join.slack.com/t/portainer/shared_invite/zt-txh3ljab-52QHTyjCqbe5RibC2lcjKA\"}]",
+          "com.docker.extension.detailed-description": "\u003cp data-renderer-start-pos=\"226\"\u003ePortainer\u0026rsquo;s Docker Desktop extension gives you access to all of Portainer\u0026rsquo;s rich management functionality within your docker desktop experience.\u003c/p\u003e\u003ch2 data-renderer-start-pos=\"374\"\u003eWith Portainer you can:\u003c/h2\u003e\u003cul\u003e\u003cli\u003eSee all your running containers\u003c/li\u003e\u003cli\u003eEasily view all of your container logs\u003c/li\u003e\u003cli\u003eConsole into containers\u003c/li\u003e\u003cli\u003eEasily deploy your code into containers using a simple form\u003c/li\u003e\u003cli\u003eTurn your YAML into custom templates for easy reuse\u003c/li\u003e\u003c/ul\u003e\u003ch2 data-renderer-start-pos=\"660\"\u003eAbout Portainer\u0026nbsp;\u003c/h2\u003e\u003cp data-renderer-start-pos=\"680\"\u003ePortainer is the worlds\u0026rsquo; most popular universal container management platform with more than 650,000 active monthly users. Portainer can be used to manage Docker Standalone, Kubernetes and Docker Swarm environments through a single common interface. It includes a simple GitOps automation engine and a Kube API.\u0026nbsp;\u003c/p\u003e\u003cp data-renderer-start-pos=\"1006\"\u003ePortainer Business Edition is our fully supported commercial grade product for business-wide use. It includes all the functionality that businesses need to manage containers at scale. Visit \u003ca class=\"sc-jKJlTe dPfAtb\" href=\"http://portainer.io/\" title=\"http://Portainer.io\" data-renderer-mark=\"true\"\u003ePortainer.io\u003c/a\u003e to learn more about Portainer Business and \u003ca class=\"sc-jKJlTe dPfAtb\" href=\"http://portainer.io/take-3?utm_campaign=DockerCon\u0026amp;utm_source=Docker%20Desktop\" title=\"http://portainer.io/take-3?utm_campaign=DockerCon\u0026amp;utm_source=Docker%20Desktop\" data-renderer-mark=\"true\"\u003eget 3 free nodes.\u003c/a\u003e\u003c/p\u003e",
+          "com.docker.extension.publisher-url": "https://www.portainer.io",
+          "com.docker.extension.screenshots": "[{\"alt\": \"screenshot one\", \"url\": \"https://portainer-io-assets.sfo2.digitaloceanspaces.com/screenshots/docker-extension-1.png\"},{\"alt\": \"screenshot two\", \"url\": \"https://portainer-io-assets.sfo2.digitaloceanspaces.com/screenshots/docker-extension-2.png\"},{\"alt\": \"screenshot three\", \"url\": \"https://portainer-io-assets.sfo2.digitaloceanspaces.com/screenshots/docker-extension-3.png\"},{\"alt\": \"screenshot four\", \"url\": \"https://portainer-io-assets.sfo2.digitaloceanspaces.com/screenshots/docker-extension-4.png\"},{\"alt\": \"screenshot five\", \"url\": \"https://portainer-io-assets.sfo2.digitaloceanspaces.com/screenshots/docker-extension-5.png\"},{\"alt\": \"screenshot six\", \"url\": \"https://portainer-io-assets.sfo2.digitaloceanspaces.com/screenshots/docker-extension-6.png\"},{\"alt\": \"screenshot seven\", \"url\": \"https://portainer-io-assets.sfo2.digitaloceanspaces.com/screenshots/docker-extension-7.png\"},{\"alt\": \"screenshot eight\", \"url\": \"https://portainer-io-assets.sfo2.digitaloceanspaces.com/screenshots/docker-extension-8.png\"},{\"alt\": \"screenshot nine\", \"url\": \"https://portainer-io-assets.sfo2.digitaloceanspaces.com/screenshots/docker-extension-9.png\"}]",
+          "io.portainer.server": "true",
+          "org.opencontainers.image.description": "Docker container management made simple, with the world’s most popular GUI-based container management platform.",
+          "org.opencontainers.image.title": "Portainer",
+          "org.opencontainers.image.vendor": "Portainer.io"
+        },
+        "Volumes": {
+          "/data": {}
+        },
+        "WorkingDir": "/",
+        "ExposedPorts": {
+          "8000/tcp": {},
+          "9000/tcp": {},
+          "9443/tcp": {}
+        }
+      }
+    },
+    "Layers": [
+      {
+        "Size": 225280,
+        "Digest": "sha256:09866042805c57ba09f35ddba7cfc3a87d8e23430d19120968a6300585cdc5fc",
+        "DiffID": "sha256:96afbb5e0a5bff3e6b9024696407382b148b11e6bb4c223139d452717d77b755"
+      },
+      {
+        "Size": 1536,
+        "Digest": "sha256:8e6d62697c09582d07f32c844732edcaf4a7b9fac93c676ec6387ecf42c29428",
+        "DiffID": "sha256:8edca047fc5064d9822c55ca32c3eb68eaed4da2723720298ca8c00b7167316a"
+      },
+      {
+        "Size": 41150976,
+        "Digest": "sha256:97d46cc86f33a2d332eb6294abf23a07c9fee9dceeb746b5d1a3111e8d974b5c",
+        "DiffID": "sha256:c930190cdb5d98f324cdc8417c7b19486274dcbb4bc360cb45aad6dd49ea83f6"
+      },
+      {
+        "Size": 3072,
+        "Digest": "sha256:1b6da1229ec5e13ce71b7c30039d56d8aebab97c32865f1bc0974e0a8c66bd45",
+        "DiffID": "sha256:eb78937fd90b05f16e44ba64e269e69430e5b2da53f920a19fc8be10c0684a0a"
+      },
+      {
+        "Size": 95094784,
+        "Digest": "sha256:37dcf0e5163d1cd63ab1c031311979492365a4401c16557f01179e75791ba068",
+        "DiffID": "sha256:525048fd8fb5efe400ee56f9381f7e69f9c652dcd4f846df0e2b9abf3658cd8f"
+      },
+      {
+        "Size": 47491584,
+        "Digest": "sha256:5f39d7b36694eed2cf96a4637acd5ab6ba80dd9ef3d9dfb6e29dea520201d9cb",
+        "DiffID": "sha256:215ae1152d72d06b9343725226e1b5a72454cf87fb4e8e3594e0408d7600e0df"
+      },
+      {
+        "Size": 10240,
+        "Digest": "sha256:4dc5fe4c57e282b1914a7a57b9a7193aa90d680d5113830bce587ae31c78abc1",
+        "DiffID": "sha256:6817d77c09e3d8d2b92ab6e3e019eb81a874404219d153166dc4e99751358a8c"
+      },
+      {
+        "Size": 1024,
+        "Digest": "sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+        "DiffID": "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+      }
+    ]
+  },
+  "Results": [
+    {
+      "Target": "docker",
+      "Class": "lang-pkgs",
+      "Type": "gobinary",
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2025-68121",
+          "PkgID": "stdlib@v1.25.5",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.25.5",
+            "UID": "dbccfa9f8fe27cca"
+          },
+          "InstalledVersion": "v1.25.5",
+          "FixedVersion": "1.24.13, 1.25.7, 1.26.0-rc.3",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:97d46cc86f33a2d332eb6294abf23a07c9fee9dceeb746b5d1a3111e8d974b5c",
+            "DiffID": "sha256:c930190cdb5d98f324cdc8417c7b19486274dcbb4bc360cb45aad6dd49ea83f6"
+          },
+          "SeveritySource": "nvd",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-68121",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Title": "crypto/tls: Unexpected session resumption in crypto/tls",
+          "Description": "During session resumption in crypto/tls, if the underlying Config has its ClientCAs or RootCAs fields mutated between the initial handshake and the resumed handshake, the resumed handshake may succeed when it should have failed. This may happen when a user calls Config.Clone and mutates the returned Config, or uses Config.GetConfigForClient. This can cause a client to resume a session with a server that it would not have resumed with during the initial handshake, or cause a server to resume a session with a client that it would not have resumed with during the initial handshake.",
+          "Severity": "CRITICAL",
+          "CweIDs": [
+            "CWE-295"
+          ],
+          "VendorSeverity": {
+            "alma": 3,
+            "amazon": 2,
+            "azure": 2,
+            "bitnami": 4,
+            "cbl-mariner": 2,
+            "nvd": 4,
+            "oracle-oval": 3,
+            "photon": 4,
+            "redhat": 2,
+            "rocky": 3
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+              "V3Score": 10
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+              "V3Score": 10
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+              "V3Score": 7.4
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:4177",
+            "https://access.redhat.com/security/cve/CVE-2025-68121",
+            "https://bugzilla.redhat.com/2434432",
+            "https://bugzilla.redhat.com/2437111",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2434432",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2437111",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-61726",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-68121",
+            "https://errata.almalinux.org/9/ALSA-2026-4177.html",
+            "https://errata.rockylinux.org/RLSA-2026:4177",
+            "https://go.dev/cl/737700",
+            "https://go.dev/issue/77217",
+            "https://groups.google.com/g/golang-announce/c/K09ubi9FQFk",
+            "https://linux.oracle.com/cve/CVE-2025-68121.html",
+            "https://linux.oracle.com/errata/ELSA-2026-4672.html",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-68121",
+            "https://pkg.go.dev/vuln/GO-2026-4337",
+            "https://www.cve.org/CVERecord?id=CVE-2025-68121"
+          ],
+          "PublishedDate": "2026-02-05T18:16:10.857Z",
+          "LastModifiedDate": "2026-02-20T17:25:50.303Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-61726",
+          "PkgID": "stdlib@v1.25.5",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.25.5",
+            "UID": "dbccfa9f8fe27cca"
+          },
+          "InstalledVersion": "v1.25.5",
+          "FixedVersion": "1.24.12, 1.25.6",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:97d46cc86f33a2d332eb6294abf23a07c9fee9dceeb746b5d1a3111e8d974b5c",
+            "DiffID": "sha256:c930190cdb5d98f324cdc8417c7b19486274dcbb4bc360cb45aad6dd49ea83f6"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-61726",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Title": "golang: net/url: Memory exhaustion in query parameter parsing in net/url",
+          "Description": "The net/url package does not set a limit on the number of query parameters in a query. While the maximum size of query parameters in URLs is generally limited by the maximum request header size, the net/http.Request.ParseForm method can parse large URL-encoded forms. Parsing a large form containing many unique query parameters can cause excessive memory consumption.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-770"
+          ],
+          "VendorSeverity": {
+            "alma": 3,
+            "amazon": 2,
+            "azure": 2,
+            "bitnami": 3,
+            "cbl-mariner": 2,
+            "oracle-oval": 3,
+            "photon": 3,
+            "redhat": 3,
+            "rocky": 3
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:4177",
+            "https://access.redhat.com/security/cve/CVE-2025-61726",
+            "https://bugzilla.redhat.com/2434432",
+            "https://bugzilla.redhat.com/2437111",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2434432",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2437111",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-61726",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-68121",
+            "https://errata.almalinux.org/9/ALSA-2026-4177.html",
+            "https://errata.rockylinux.org/RLSA-2026:4177",
+            "https://go.dev/cl/736712",
+            "https://go.dev/issue/77101",
+            "https://groups.google.com/g/golang-announce/c/Vd2tYVM8eUc",
+            "https://linux.oracle.com/cve/CVE-2025-61726.html",
+            "https://linux.oracle.com/errata/ELSA-2026-4672.html",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-61726",
+            "https://pkg.go.dev/vuln/GO-2026-4341",
+            "https://www.cve.org/CVERecord?id=CVE-2025-61726"
+          ],
+          "PublishedDate": "2026-01-28T20:16:09.713Z",
+          "LastModifiedDate": "2026-02-06T18:47:34.52Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-61728",
+          "PkgID": "stdlib@v1.25.5",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.25.5",
+            "UID": "dbccfa9f8fe27cca"
+          },
+          "InstalledVersion": "v1.25.5",
+          "FixedVersion": "1.24.12, 1.25.6",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:97d46cc86f33a2d332eb6294abf23a07c9fee9dceeb746b5d1a3111e8d974b5c",
+            "DiffID": "sha256:c930190cdb5d98f324cdc8417c7b19486274dcbb4bc360cb45aad6dd49ea83f6"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-61728",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Title": "golang: archive/zip: Excessive CPU consumption when building archive index in archive/zip",
+          "Description": "archive/zip uses a super-linear file name indexing algorithm that is invoked the first time a file in an archive is opened. This can lead to a denial of service when consuming a maliciously constructed ZIP archive.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-770"
+          ],
+          "VendorSeverity": {
+            "alma": 3,
+            "amazon": 2,
+            "azure": 2,
+            "bitnami": 2,
+            "oracle-oval": 3,
+            "photon": 2,
+            "redhat": 2,
+            "rocky": 3
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+              "V3Score": 6.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "http://www.openwall.com/lists/oss-security/2026/01/15/4",
+            "https://access.redhat.com/errata/RHSA-2026:3753",
+            "https://access.redhat.com/security/cve/CVE-2025-61728",
+            "https://bugzilla.redhat.com/2418462",
+            "https://bugzilla.redhat.com/2434431",
+            "https://bugzilla.redhat.com/2434432",
+            "https://bugzilla.redhat.com/2437111",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2418462",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2434431",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2434432",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2437111",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-61726",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-61728",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-61729",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-68121",
+            "https://errata.almalinux.org/9/ALSA-2026-3753.html",
+            "https://errata.rockylinux.org/RLSA-2026:3337",
+            "https://go.dev/cl/736713",
+            "https://go.dev/issue/77102",
+            "https://groups.google.com/g/golang-announce/c/Vd2tYVM8eUc",
+            "https://linux.oracle.com/cve/CVE-2025-61728.html",
+            "https://linux.oracle.com/errata/ELSA-2026-4672.html",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-61728",
+            "https://pkg.go.dev/vuln/GO-2026-4342",
+            "https://www.cve.org/CVERecord?id=CVE-2025-61728"
+          ],
+          "PublishedDate": "2026-01-28T20:16:09.83Z",
+          "LastModifiedDate": "2026-02-06T18:45:10.42Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-25679",
+          "PkgID": "stdlib@v1.25.5",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.25.5",
+            "UID": "dbccfa9f8fe27cca"
+          },
+          "InstalledVersion": "v1.25.5",
+          "FixedVersion": "1.25.8, 1.26.1",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:97d46cc86f33a2d332eb6294abf23a07c9fee9dceeb746b5d1a3111e8d974b5c",
+            "DiffID": "sha256:c930190cdb5d98f324cdc8417c7b19486274dcbb4bc360cb45aad6dd49ea83f6"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-25679",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Title": "net/url: Incorrect parsing of IPv6 host literals in net/url",
+          "Description": "url.Parse insufficiently validated the host/authority component and accepted some invalid URLs.",
+          "Severity": "HIGH",
+          "VendorSeverity": {
+            "bitnami": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-25679",
+            "https://go.dev/cl/752180",
+            "https://go.dev/issue/77578",
+            "https://groups.google.com/g/golang-announce/c/EdhZqrQ98hk",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-25679",
+            "https://pkg.go.dev/vuln/GO-2026-4601",
+            "https://www.cve.org/CVERecord?id=CVE-2026-25679"
+          ],
+          "PublishedDate": "2026-03-06T22:16:00.72Z",
+          "LastModifiedDate": "2026-03-10T18:18:37.74Z"
+        }
+      ]
+    },
+    {
+      "Target": "portainer",
+      "Class": "lang-pkgs",
+      "Type": "gobinary",
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2025-15558",
+          "PkgID": "github.com/docker/cli@v28.5.1+incompatible",
+          "PkgName": "github.com/docker/cli",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/github.com/docker/cli@v28.5.1%2Bincompatible",
+            "UID": "50b53835a7f47d23"
+          },
+          "InstalledVersion": "v28.5.1+incompatible",
+          "FixedVersion": "29.2.0",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:37dcf0e5163d1cd63ab1c031311979492365a4401c16557f01179e75791ba068",
+            "DiffID": "sha256:525048fd8fb5efe400ee56f9381f7e69f9c652dcd4f846df0e2b9abf3658cd8f"
+          },
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-15558",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Go",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Ago"
+          },
+          "Title": "docker/cli: Docker CLI for Windows: Privilege escalation via malicious plugin binaries",
+          "Description": "Docker CLI for Windows searches for plugin binaries in C:\\ProgramData\\Docker\\cli-plugins, a directory that does not exist by default. A low-privileged attacker can create this directory and place malicious CLI plugin binaries (docker-compose.exe, docker-buildx.exe, etc.) that are executed when a victim user opens Docker Desktop or invokes Docker CLI plugin features, and allow privilege-escalation if the docker CLI is executed as a privileged user.\n\nThis issue affects Docker CLI: through 29.1.5 and Windows binaries acting as a CLI-plugin manager using the  github.com/docker/cli/cli-plugins/manager https://pkg.go.dev/github.com/docker/cli@v29.1.5+incompatible/cli-plugins/manager  package, such as Docker Compose.\n\nThis issue does not impact non-Windows binaries, and projects not using the plugin-manager code.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-427"
+          ],
+          "VendorSeverity": {
+            "bitnami": 3,
+            "ghsa": 3,
+            "nvd": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "bitnami": {
+              "V40Vector": "CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:P/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/AU:N/R:U",
+              "V40Score": 7
+            },
+            "ghsa": {
+              "V40Vector": "CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:P/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N",
+              "V40Score": 7
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:U/C:H/I:H/A:H",
+              "V3Score": 8
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:R/S:U/C:H/I:H/A:H",
+              "V3Score": 7.3
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2025-15558",
+            "https://docs.docker.com/desktop/release-notes",
+            "https://docs.docker.com/desktop/release-notes/",
+            "https://github.com/docker/cli",
+            "https://github.com/docker/cli/commit/13759330b1f7e7cb0d67047ea42c5482548ba7fa",
+            "https://github.com/docker/cli/pull/6713",
+            "https://github.com/docker/cli/security/advisories/GHSA-p436-gjf2-799p",
+            "https://github.com/docker/compose/pull/12300",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-15558",
+            "https://www.cve.org/CVERecord?id=CVE-2025-15558",
+            "https://www.zerodayinitiative.com/advisories/ZDI-CAN-28304",
+            "https://www.zerodayinitiative.com/advisories/ZDI-CAN-28304/"
+          ],
+          "PublishedDate": "2026-03-04T17:16:14.763Z",
+          "LastModifiedDate": "2026-03-09T17:38:15.95Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-15558",
+          "PkgID": "github.com/docker/compose/v2@v2.40.2",
+          "PkgName": "github.com/docker/compose/v2",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/github.com/docker/compose/v2@v2.40.2",
+            "UID": "d223fc11a5e83051"
+          },
+          "InstalledVersion": "v2.40.2",
+          "Status": "affected",
+          "Layer": {
+            "Digest": "sha256:37dcf0e5163d1cd63ab1c031311979492365a4401c16557f01179e75791ba068",
+            "DiffID": "sha256:525048fd8fb5efe400ee56f9381f7e69f9c652dcd4f846df0e2b9abf3658cd8f"
+          },
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-15558",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Go",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Ago"
+          },
+          "Title": "docker/cli: Docker CLI for Windows: Privilege escalation via malicious plugin binaries",
+          "Description": "Docker CLI for Windows searches for plugin binaries in C:\\ProgramData\\Docker\\cli-plugins, a directory that does not exist by default. A low-privileged attacker can create this directory and place malicious CLI plugin binaries (docker-compose.exe, docker-buildx.exe, etc.) that are executed when a victim user opens Docker Desktop or invokes Docker CLI plugin features, and allow privilege-escalation if the docker CLI is executed as a privileged user.\n\nThis issue affects Docker CLI: through 29.1.5 and Windows binaries acting as a CLI-plugin manager using the  github.com/docker/cli/cli-plugins/manager https://pkg.go.dev/github.com/docker/cli@v29.1.5+incompatible/cli-plugins/manager  package, such as Docker Compose.\n\nThis issue does not impact non-Windows binaries, and projects not using the plugin-manager code.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-427"
+          ],
+          "VendorSeverity": {
+            "bitnami": 3,
+            "ghsa": 3,
+            "nvd": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "bitnami": {
+              "V40Vector": "CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:P/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/AU:N/R:U",
+              "V40Score": 7
+            },
+            "ghsa": {
+              "V40Vector": "CVSS:4.0/AV:L/AC:L/AT:N/PR:L/UI:P/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N",
+              "V40Score": 7
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:U/C:H/I:H/A:H",
+              "V3Score": 8
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:R/S:U/C:H/I:H/A:H",
+              "V3Score": 7.3
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2025-15558",
+            "https://docs.docker.com/desktop/release-notes",
+            "https://docs.docker.com/desktop/release-notes/",
+            "https://github.com/docker/cli",
+            "https://github.com/docker/cli/commit/13759330b1f7e7cb0d67047ea42c5482548ba7fa",
+            "https://github.com/docker/cli/pull/6713",
+            "https://github.com/docker/cli/security/advisories/GHSA-p436-gjf2-799p",
+            "https://github.com/docker/compose/pull/12300",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-15558",
+            "https://www.cve.org/CVERecord?id=CVE-2025-15558",
+            "https://www.zerodayinitiative.com/advisories/ZDI-CAN-28304",
+            "https://www.zerodayinitiative.com/advisories/ZDI-CAN-28304/"
+          ],
+          "PublishedDate": "2026-03-04T17:16:14.763Z",
+          "LastModifiedDate": "2026-03-09T17:38:15.95Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2024-33662",
+          "PkgID": "github.com/portainer/portainer@v0.0.0-20251217002334-044034bf5fde+dirty",
+          "PkgName": "github.com/portainer/portainer",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/github.com/portainer/portainer@v0.0.0-20251217002334-044034bf5fde%2Bdirty",
+            "UID": "f0368ab0c2a680b8"
+          },
+          "InstalledVersion": "v0.0.0-20251217002334-044034bf5fde+dirty",
+          "FixedVersion": "2.20.2",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:37dcf0e5163d1cd63ab1c031311979492365a4401c16557f01179e75791ba068",
+            "DiffID": "sha256:525048fd8fb5efe400ee56f9381f7e69f9c652dcd4f846df0e2b9abf3658cd8f"
+          },
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2024-33662",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Go",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Ago"
+          },
+          "Title": "Portainer improperly uses an encryption algorithm in the AesEncrypt function",
+          "Description": "Portainer before 2.20.2 improperly uses an encryption algorithm in the AesEncrypt function.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-326"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+              "V40Vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N",
+              "V3Score": 7.5,
+              "V40Score": 8.7
+            }
+          },
+          "References": [
+            "https://github.com/portainer/portainer",
+            "https://github.com/portainer/portainer/compare/2.20.1...2.20.2",
+            "https://github.com/portainer/portainer/issues/11737",
+            "https://github.com/search?q=repo%3Aportainer%2Fportainer+EE-6764\u0026type=pullrequests",
+            "https://nvd.nist.gov/vuln/detail/CVE-2024-33662",
+            "https://pkg.go.dev/vuln/GO-2024-3172",
+            "https://www.portainer.io"
+          ],
+          "PublishedDate": "2024-10-02T05:15:11.643Z",
+          "LastModifiedDate": "2025-05-21T18:07:02.313Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-24051",
+          "PkgID": "go.opentelemetry.io/otel/sdk@v1.36.0",
+          "PkgName": "go.opentelemetry.io/otel/sdk",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/go.opentelemetry.io/otel/sdk@v1.36.0",
+            "UID": "f63baf1e56146a0e"
+          },
+          "InstalledVersion": "v1.36.0",
+          "FixedVersion": "1.40.0",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:37dcf0e5163d1cd63ab1c031311979492365a4401c16557f01179e75791ba068",
+            "DiffID": "sha256:525048fd8fb5efe400ee56f9381f7e69f9c652dcd4f846df0e2b9abf3658cd8f"
+          },
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-24051",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Go",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Ago"
+          },
+          "Title": "OpenTelemetry Go SDK Vulnerable to Arbitrary Code Execution via PATH Hijacking",
+          "Description": "OpenTelemetry-Go is the Go implementation of OpenTelemetry. The OpenTelemetry Go SDK in version v1.20.0-1.39.0 is vulnerable to Path Hijacking (Untrusted Search Paths) on macOS/Darwin systems. The resource detection code in sdk/resource/host_id.go executes the ioreg system command using a search path. An attacker with the ability to locally modify the PATH environment variable can achieve Arbitrary Code Execution (ACE) within the context of the application. A fix was released with v1.40.0.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-426"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:H",
+              "V3Score": 7
+            }
+          },
+          "References": [
+            "https://github.com/open-telemetry/opentelemetry-go",
+            "https://github.com/open-telemetry/opentelemetry-go/commit/d45961bcda453fcbdb6469c22d6e88a1f9970a53",
+            "https://github.com/open-telemetry/opentelemetry-go/security/advisories/GHSA-9h8m-3fm2-qjrq",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-24051",
+            "https://pkg.go.dev/vuln/GO-2026-4394"
+          ],
+          "PublishedDate": "2026-02-02T23:16:07.963Z",
+          "LastModifiedDate": "2026-02-27T20:32:10.693Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-33186",
+          "PkgID": "google.golang.org/grpc@v1.74.2",
+          "PkgName": "google.golang.org/grpc",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/google.golang.org/grpc@v1.74.2",
+            "UID": "7ad74067a9f3be99"
+          },
+          "InstalledVersion": "v1.74.2",
+          "FixedVersion": "1.79.3",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:37dcf0e5163d1cd63ab1c031311979492365a4401c16557f01179e75791ba068",
+            "DiffID": "sha256:525048fd8fb5efe400ee56f9381f7e69f9c652dcd4f846df0e2b9abf3658cd8f"
+          },
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-33186",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Go",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Ago"
+          },
+          "Title": "gRPC-Go has an authorization bypass via missing leading slash in :path",
+          "Description": "### Impact\n_What kind of vulnerability is it? Who is impacted?_\n\nIt is an **Authorization Bypass** resulting from **Improper Input Validation** of the HTTP/2 `:path` pseudo-header.\n\nThe gRPC-Go server was too lenient in its routing logic, accepting requests where the `:path` omitted the mandatory leading slash (e.g., `Service/Method` instead of `/Service/Method`). While the server successfully routed these requests to the correct handler, authorization interceptors (including the official `grpc/authz` package) evaluated the raw, non-canonical path string. Consequently, \"deny\" rules defined using canonical paths (starting with `/`) failed to match the incoming request, allowing it to bypass the policy if a fallback \"allow\" rule was present.\n\n**Who is impacted?**\nThis affects gRPC-Go servers that meet both of the following criteria:\n1. They use path-based authorization interceptors, such as the official RBAC implementation in `google.golang.org/grpc/authz` or custom interceptors relying on `info.FullMethod` or `grpc.Method(ctx)`.\n2. Their security policy contains specific \"deny\" rules for canonical paths but allows other requests by default (a fallback \"allow\" rule).\n\nThe vulnerability is exploitable by an attacker who can send raw HTTP/2 frames with malformed `:path` headers directly to the gRPC server.\n\n### Patches\n_Has the problem been patched? What versions should users upgrade to?_\n\nYes, the issue has been patched. The fix ensures that any request with a `:path` that does not start with a leading slash is immediately rejected with a `codes.Unimplemented` error, preventing it from reaching authorization interceptors or handlers with a non-canonical path string.\n\nUsers should upgrade to the following versions (or newer):\n* **v1.79.3**\n* The latest **master** branch.\n\nIt is recommended that all users employing path-based authorization (especially `grpc/authz`) upgrade as soon as the patch is available in a tagged release.\n\n### Workarounds\n_Is there a way for users to fix or remediate the vulnerability without upgrading?_\n\nWhile upgrading is the most secure and recommended path, users can mitigate the vulnerability using one of the following methods:\n\n#### 1. Use a Validating Interceptor (Recommended Mitigation)\nAdd an \"outermost\" interceptor to your server that validates the path before any other authorization logic runs:\n\n```go\nfunc pathValidationInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {\n    if info.FullMethod == \"\" || info.FullMethod[0] != '/' {\n        return nil, status.Errorf(codes.Unimplemented, \"malformed method name\")\n    }   \n    return handler(ctx, req)\n}\n\n// Ensure this is the FIRST interceptor in your chain\ns := grpc.NewServer(\n    grpc.ChainUnaryInterceptor(pathValidationInterceptor, authzInterceptor),\n)\n```\n\n#### 2. Infrastructure-Level Normalization\nIf your gRPC server is behind a reverse proxy or load balancer (such as Envoy, NGINX, or an L7 Cloud Load Balancer), ensure it is configured to enforce strict HTTP/2 compliance for pseudo-headers and reject or normalize requests where the `:path` header does not start with a leading slash.\n\n#### 3. Policy Hardening\nSwitch to a \"default deny\" posture in your authorization policies (explicitly listing all allowed paths and denying everything else) to reduce the risk of bypasses via malformed inputs.",
+          "Severity": "CRITICAL",
+          "VendorSeverity": {
+            "ghsa": 4
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+              "V3Score": 9.1
+            }
+          },
+          "References": [
+            "https://github.com/grpc/grpc-go",
+            "https://github.com/grpc/grpc-go/security/advisories/GHSA-p77j-4mvh-x3m3"
+          ]
+        },
+        {
+          "VulnerabilityID": "CVE-2025-68121",
+          "PkgID": "stdlib@v1.24.11",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.24.11",
+            "UID": "3f7a9fa88c819e54"
+          },
+          "InstalledVersion": "v1.24.11",
+          "FixedVersion": "1.24.13, 1.25.7, 1.26.0-rc.3",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:37dcf0e5163d1cd63ab1c031311979492365a4401c16557f01179e75791ba068",
+            "DiffID": "sha256:525048fd8fb5efe400ee56f9381f7e69f9c652dcd4f846df0e2b9abf3658cd8f"
+          },
+          "SeveritySource": "nvd",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-68121",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Title": "crypto/tls: Unexpected session resumption in crypto/tls",
+          "Description": "During session resumption in crypto/tls, if the underlying Config has its ClientCAs or RootCAs fields mutated between the initial handshake and the resumed handshake, the resumed handshake may succeed when it should have failed. This may happen when a user calls Config.Clone and mutates the returned Config, or uses Config.GetConfigForClient. This can cause a client to resume a session with a server that it would not have resumed with during the initial handshake, or cause a server to resume a session with a client that it would not have resumed with during the initial handshake.",
+          "Severity": "CRITICAL",
+          "CweIDs": [
+            "CWE-295"
+          ],
+          "VendorSeverity": {
+            "alma": 3,
+            "amazon": 2,
+            "azure": 2,
+            "bitnami": 4,
+            "cbl-mariner": 2,
+            "nvd": 4,
+            "oracle-oval": 3,
+            "photon": 4,
+            "redhat": 2,
+            "rocky": 3
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+              "V3Score": 10
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+              "V3Score": 10
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+              "V3Score": 7.4
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:4177",
+            "https://access.redhat.com/security/cve/CVE-2025-68121",
+            "https://bugzilla.redhat.com/2434432",
+            "https://bugzilla.redhat.com/2437111",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2434432",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2437111",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-61726",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-68121",
+            "https://errata.almalinux.org/9/ALSA-2026-4177.html",
+            "https://errata.rockylinux.org/RLSA-2026:4177",
+            "https://go.dev/cl/737700",
+            "https://go.dev/issue/77217",
+            "https://groups.google.com/g/golang-announce/c/K09ubi9FQFk",
+            "https://linux.oracle.com/cve/CVE-2025-68121.html",
+            "https://linux.oracle.com/errata/ELSA-2026-4672.html",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-68121",
+            "https://pkg.go.dev/vuln/GO-2026-4337",
+            "https://www.cve.org/CVERecord?id=CVE-2025-68121"
+          ],
+          "PublishedDate": "2026-02-05T18:16:10.857Z",
+          "LastModifiedDate": "2026-02-20T17:25:50.303Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-61726",
+          "PkgID": "stdlib@v1.24.11",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.24.11",
+            "UID": "3f7a9fa88c819e54"
+          },
+          "InstalledVersion": "v1.24.11",
+          "FixedVersion": "1.24.12, 1.25.6",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:37dcf0e5163d1cd63ab1c031311979492365a4401c16557f01179e75791ba068",
+            "DiffID": "sha256:525048fd8fb5efe400ee56f9381f7e69f9c652dcd4f846df0e2b9abf3658cd8f"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-61726",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Title": "golang: net/url: Memory exhaustion in query parameter parsing in net/url",
+          "Description": "The net/url package does not set a limit on the number of query parameters in a query. While the maximum size of query parameters in URLs is generally limited by the maximum request header size, the net/http.Request.ParseForm method can parse large URL-encoded forms. Parsing a large form containing many unique query parameters can cause excessive memory consumption.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-770"
+          ],
+          "VendorSeverity": {
+            "alma": 3,
+            "amazon": 2,
+            "azure": 2,
+            "bitnami": 3,
+            "cbl-mariner": 2,
+            "oracle-oval": 3,
+            "photon": 3,
+            "redhat": 3,
+            "rocky": 3
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:4177",
+            "https://access.redhat.com/security/cve/CVE-2025-61726",
+            "https://bugzilla.redhat.com/2434432",
+            "https://bugzilla.redhat.com/2437111",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2434432",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2437111",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-61726",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-68121",
+            "https://errata.almalinux.org/9/ALSA-2026-4177.html",
+            "https://errata.rockylinux.org/RLSA-2026:4177",
+            "https://go.dev/cl/736712",
+            "https://go.dev/issue/77101",
+            "https://groups.google.com/g/golang-announce/c/Vd2tYVM8eUc",
+            "https://linux.oracle.com/cve/CVE-2025-61726.html",
+            "https://linux.oracle.com/errata/ELSA-2026-4672.html",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-61726",
+            "https://pkg.go.dev/vuln/GO-2026-4341",
+            "https://www.cve.org/CVERecord?id=CVE-2025-61726"
+          ],
+          "PublishedDate": "2026-01-28T20:16:09.713Z",
+          "LastModifiedDate": "2026-02-06T18:47:34.52Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2025-61728",
+          "PkgID": "stdlib@v1.24.11",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.24.11",
+            "UID": "3f7a9fa88c819e54"
+          },
+          "InstalledVersion": "v1.24.11",
+          "FixedVersion": "1.24.12, 1.25.6",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:37dcf0e5163d1cd63ab1c031311979492365a4401c16557f01179e75791ba068",
+            "DiffID": "sha256:525048fd8fb5efe400ee56f9381f7e69f9c652dcd4f846df0e2b9abf3658cd8f"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2025-61728",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Title": "golang: archive/zip: Excessive CPU consumption when building archive index in archive/zip",
+          "Description": "archive/zip uses a super-linear file name indexing algorithm that is invoked the first time a file in an archive is opened. This can lead to a denial of service when consuming a maliciously constructed ZIP archive.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-770"
+          ],
+          "VendorSeverity": {
+            "alma": 3,
+            "amazon": 2,
+            "azure": 2,
+            "bitnami": 2,
+            "oracle-oval": 3,
+            "photon": 2,
+            "redhat": 2,
+            "rocky": 3
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+              "V3Score": 6.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "http://www.openwall.com/lists/oss-security/2026/01/15/4",
+            "https://access.redhat.com/errata/RHSA-2026:3753",
+            "https://access.redhat.com/security/cve/CVE-2025-61728",
+            "https://bugzilla.redhat.com/2418462",
+            "https://bugzilla.redhat.com/2434431",
+            "https://bugzilla.redhat.com/2434432",
+            "https://bugzilla.redhat.com/2437111",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2418462",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2434431",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2434432",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2437111",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-61726",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-61728",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-61729",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2025-68121",
+            "https://errata.almalinux.org/9/ALSA-2026-3753.html",
+            "https://errata.rockylinux.org/RLSA-2026:3337",
+            "https://go.dev/cl/736713",
+            "https://go.dev/issue/77102",
+            "https://groups.google.com/g/golang-announce/c/Vd2tYVM8eUc",
+            "https://linux.oracle.com/cve/CVE-2025-61728.html",
+            "https://linux.oracle.com/errata/ELSA-2026-4672.html",
+            "https://nvd.nist.gov/vuln/detail/CVE-2025-61728",
+            "https://pkg.go.dev/vuln/GO-2026-4342",
+            "https://www.cve.org/CVERecord?id=CVE-2025-61728"
+          ],
+          "PublishedDate": "2026-01-28T20:16:09.83Z",
+          "LastModifiedDate": "2026-02-06T18:45:10.42Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-25679",
+          "PkgID": "stdlib@v1.24.11",
+          "PkgName": "stdlib",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/stdlib@v1.24.11",
+            "UID": "3f7a9fa88c819e54"
+          },
+          "InstalledVersion": "v1.24.11",
+          "FixedVersion": "1.25.8, 1.26.1",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:37dcf0e5163d1cd63ab1c031311979492365a4401c16557f01179e75791ba068",
+            "DiffID": "sha256:525048fd8fb5efe400ee56f9381f7e69f9c652dcd4f846df0e2b9abf3658cd8f"
+          },
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-25679",
+          "DataSource": {
+            "ID": "govulndb",
+            "Name": "The Go Vulnerability Database",
+            "URL": "https://pkg.go.dev/vuln/"
+          },
+          "Title": "net/url: Incorrect parsing of IPv6 host literals in net/url",
+          "Description": "url.Parse insufficiently validated the host/authority component and accepted some invalid URLs.",
+          "Severity": "HIGH",
+          "VendorSeverity": {
+            "bitnami": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "bitnami": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-25679",
+            "https://go.dev/cl/752180",
+            "https://go.dev/issue/77578",
+            "https://groups.google.com/g/golang-announce/c/EdhZqrQ98hk",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-25679",
+            "https://pkg.go.dev/vuln/GO-2026-4601",
+            "https://www.cve.org/CVERecord?id=CVE-2026-25679"
+          ],
+          "PublishedDate": "2026-03-06T22:16:00.72Z",
+          "LastModifiedDate": "2026-03-10T18:18:37.74Z"
+        }
+      ]
+    }
+  ]
+}

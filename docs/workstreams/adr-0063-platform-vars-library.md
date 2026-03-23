@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0063](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0063-centralised-vars-and-computed-facts-library.md)
 - Title: Single source of truth for platform facts with agent-queryable output
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0063-platform-vars-library`
 - Worktree: `../proxmox_florin_server-platform-vars-library`
 - Owner: codex
@@ -30,6 +30,7 @@
 - `scripts/generate_platform_vars.py`
 - `filter_plugins/platform_facts.py`
 - updated `Makefile` with `show-platform-facts` and updated `validate` target
+- `docs/runbooks/platform-facts-library.md`
 - `docs/adr/0063-centralised-vars-and-computed-facts-library.md`
 - `docs/workstreams/adr-0063-platform-vars-library.md`
 - `workstreams.yaml`
@@ -40,13 +41,17 @@
 
 ## Verification
 
+- `make generate-platform-vars`
+- `make validate-generated-vars`
+- `make validate-data-models`
+- `make validate-ansible-syntax`
 - `make validate` passes including `platform.yml` consistency check
 - `make show-platform-facts` outputs a valid YAML dump without errors
-- `python3 scripts/generate_platform_vars.py --dry-run` exits 0
+- `uvx --from pyyaml python scripts/generate_platform_vars.py --dry-run >/dev/null`
 
 ## Merge Criteria
 
-- `platform.yml` is reproducible from `stack.yaml` alone
+- `platform.yml` is reproducible from `stack.yaml` plus canonical host vars
 - the filter plugin is covered by at least one role that uses it
 - no duplicate variable declarations remain in the three proof-of-concept roles
 

@@ -133,6 +133,43 @@
         "make syntax-check"
       ]
     },
+    "converge-guest-network-policy": {
+      "description": "Converge the default-deny guest network policy on the Proxmox host and all managed guests.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-guest-network-policy",
+        "command": "make converge-guest-network-policy"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-guest-network-policy"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-guest-network-policy.md",
+      "implementation_refs": [
+        "Makefile",
+        "inventory/host_vars/proxmox_florin.yml",
+        "playbooks/guest-network-policy.yml",
+        "roles/proxmox_network/tasks/main.yml",
+        "roles/linux_guest_firewall/tasks/main.yml"
+      ],
+      "outputs": [
+        "Per-VM Proxmox firewall rules, NIC firewall enablement, and guest nftables policies converged from the canonical network policy matrix."
+      ],
+      "verification_commands": [
+        "make syntax-check-guest-network-policy",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo pve-firewall compile >/dev/null && sudo ls /etc/pve/firewall/*.fw'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'nc -z -w 2 10.10.10.50 5432'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.50 'nc -z -w 2 10.10.10.20 8080'"
+      ]
+    },
     "configure-ingress": {
       "description": "Converge public ingress forwarding from the host to the NGINX edge VM.",
       "lifecycle_status": "active",
@@ -604,8 +641,7 @@
           "openbao_breakglass_password",
           "openbao_postgres_rotator_password",
           "openbao_controller_approle",
-          "openbao_mail_platform_approle",
-          "openbao_secret_rotation_approle"
+          "openbao_mail_platform_approle"
         ]
       },
       "validation_targets": [
@@ -718,49 +754,99 @@
         "curl -s -H \"Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)\" http://100.118.189.95:8005/api/users/global/whoami"
       ]
     },
-    "rotate-secret": {
-      "description": "Plan or apply one repo-managed secret rotation, update the owning service without a full reconverge, and persist the rotated value in OpenBao.",
+    "converge-control-plane-recovery": {
+      "description": "Converge scheduled control-plane backups on docker-runtime-lv3, stage controller recovery references, and validate recurring restore drills on backup-lv3.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
-        "target": "rotate-secret",
-        "command": "make rotate-secret SECRET_ID=windmill_database_password ROTATION_ARGS=\"--plan\""
+        "target": "converge-control-plane-recovery",
+        "command": "make converge-control-plane-recovery"
       },
       "preflight": {
         "required": true,
         "required_secret_ids": [
           "bootstrap_ssh_private_key",
+          "proxmox_api_token_payload",
+          "proxmox_ops_pam_totp_state",
+          "mail_platform_brevo_api_key",
+          "step_ca_password",
+          "windmill_database_password",
+          "windmill_superadmin_secret",
           "openbao_init_payload"
+        ],
+        "generated_secret_ids": [
+          "control_plane_recovery_runtime_ssh_private_key",
+          "control_plane_recovery_controller_bundle"
         ]
       },
       "validation_targets": [
         "validate",
-        "validate-python-tests",
-        "syntax-check-secret-rotation"
+        "syntax-check-control-plane-recovery"
       ],
       "live_impact": "guest_live",
-      "owner_runbook": "docs/runbooks/secret-rotation-and-lifecycle.md",
+      "owner_runbook": "docs/runbooks/configure-control-plane-recovery.md",
       "implementation_refs": [
         "Makefile",
-        "config/secret-catalog.json",
-        "config/controller-local-secrets.json",
-        "playbooks/secret-rotation.yml",
-        "roles/openbao_runtime/tasks/main.yml",
-        "roles/windmill_postgres/tasks/rotate.yml",
-        "roles/windmill_runtime/tasks/rotate.yml",
-        "roles/mail_platform_runtime/tasks/rotate.yml",
-        "roles/windmill_runtime/templates/lv3-secret-rotation.py.j2",
-        "scripts/secret_rotation.py",
-        "tests/test_secret_rotation.py"
+        "playbooks/control-plane-recovery.yml",
+        "roles/control_plane_recovery",
+        "roles/control_plane_recovery_store",
+        "roles/control_plane_recovery_controller",
+        "inventory/group_vars/all.yml"
       ],
       "outputs": [
-        "One named secret rotation planned or applied through the canonical catalog, the owning role-local rotate task, and the dedicated OpenBao path plus metadata."
+        "Scheduled runtime exports for step-ca, OpenBao, Windmill, and the mail platform on docker-runtime-lv3 plus backup-lv3 restore drills and a mirrored controller recovery bundle."
       ],
       "verification_commands": [
-        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/secret_rotation.py --validate",
-        "python3 -m unittest discover -s /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests",
-        "make syntax-check-secret-rotation",
-        "make rotate-secret SECRET_ID=windmill_database_password ROTATION_ARGS=\"--plan\""
+        "make syntax-check-control-plane-recovery",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 -W %h:%p\" ops@10.10.10.20 'sudo systemctl status lv3-control-plane-backup.timer --no-pager'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 -W %h:%p\" ops@10.10.10.60 'sudo systemctl status lv3-control-plane-restore-drill.timer --no-pager'"
+      ]
+    },
+    "converge-keycloak": {
+      "description": "Converge Keycloak on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at sso.lv3.org, and wire Grafana through the shared SSO broker.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-keycloak",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-keycloak"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "keycloak_database_password",
+          "keycloak_bootstrap_admin_password",
+          "keycloak_operator_password",
+          "keycloak_grafana_client_secret",
+          "keycloak_agent_client_secret"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-keycloak"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-keycloak.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/keycloak.yml",
+        "roles/keycloak_postgres/tasks/main.yml",
+        "roles/keycloak_runtime/tasks/main.yml",
+        "roles/grafana_sso/tasks/main.yml",
+        "roles/nginx_edge_publication/tasks/main.yml",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/uptime-kuma/monitors.json"
+      ],
+      "outputs": [
+        "A repo-managed Keycloak realm on docker-runtime-lv3 with a PostgreSQL backend, the public edge hostname sso.lv3.org, an initial named operator account, an agent confidential client, and Grafana wired to the shared OIDC login flow."
+      ],
+      "verification_commands": [
+        "make syntax-check-keycloak",
+        "curl -s https://sso.lv3.org/realms/lv3/.well-known/openid-configuration",
+        "curl -I https://grafana.lv3.org/login/generic_oauth"
       ]
     },
     "converge-netbox": {
@@ -852,6 +938,52 @@
         "curl -s -X POST -H \"Content-Type: application/json\" -d '{\"email\":\"ops@lv3.org\",\"password\":\"'\"$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/admin-password.txt)\"'\"}' http://100.118.189.95:8008/api/v1/auths/signin"
       ]
     },
+    "converge-rag-context": {
+      "description": "Deploy the private platform context API with Qdrant on docker-runtime-lv3, publish it through the Proxmox host Tailscale proxy, and seed the initial retrieval corpus.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-rag-context",
+        "command": "make converge-rag-context"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "platform_context_api_token"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-rag-context"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/rag-platform-context.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/rag-context.yml",
+        "roles/rag_context_runtime",
+        "scripts/build_rag_index.py",
+        "scripts/query_platform_context.py",
+        "scripts/platform_context_corpus.py",
+        "scripts/platform_context_service.py",
+        "config/agent-tool-registry.json",
+        "config/windmill/scripts/rebuild-rag-index.py",
+        "inventory/group_vars/all.yml",
+        "inventory/host_vars/proxmox_florin.yml"
+      ],
+      "outputs": [
+        "A private OpenAPI tool server on docker-runtime-lv3 backed by Qdrant, a local embedding model, and a repo-grounded retrieval corpus, published through the Proxmox host Tailscale proxy."
+      ],
+      "verification_commands": [
+        "make syntax-check-rag-context",
+        "curl -s http://100.118.189.95:8010/healthz",
+        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/build_rag_index.py --dry-run",
+        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/query_platform_context.py --api-url http://100.118.189.95:8010 --question 'how does step-ca issue SSH certificates'"
+      ]
+    },
     "converge-portainer": {
       "description": "Converge the private Portainer runtime on docker-runtime-lv3, publish it through the Proxmox host Tailscale proxy, and persist the controller-local bootstrap auth.",
       "lifecycle_status": "active",
@@ -892,6 +1024,52 @@
         "make syntax-check-portainer",
         "curl -sk https://100.118.189.95:9444/api/system/status",
         "make portainer-manage ACTION=list-containers PORTAINER_ARGS='--all'"
+      ]
+    },
+    "converge-mattermost": {
+      "description": "Converge Mattermost on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, expose the operator-only Tailscale proxy on the Proxmox host, and seed the repo-managed collaboration channels and incoming webhooks.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-mattermost",
+        "command": "make converge-mattermost"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "mattermost_database_password",
+          "mattermost_admin_password",
+          "mattermost_incoming_webhooks"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-mattermost"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-mattermost.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/mattermost.yml",
+        "roles/mattermost_postgres",
+        "roles/mattermost_runtime",
+        "roles/monitoring_mattermost_notifications",
+        "roles/proxmox_tailscale_proxy",
+        "roles/proxmox_security",
+        "inventory/group_vars/all.yml",
+        "inventory/host_vars/proxmox_florin.yml"
+      ],
+      "outputs": [
+        "Mattermost runtime deployed on docker-runtime-lv3 with a PostgreSQL backend on postgres-lv3, a Tailscale operator entrypoint on the Proxmox host, seeded LV3 collaboration channels, and incoming webhook routes for alerts and workflow events."
+      ],
+      "verification_commands": [
+        "make syntax-check-mattermost",
+        "curl -s http://100.118.189.95:8066/api/v4/system/ping",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker exec lv3-mattermost /mattermost/bin/mmctl --local team search lv3 --json'",
+        "python -m json.tool /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mattermost/incoming-webhooks.json"
       ]
     },
     "deploy-uptime-kuma": {
@@ -1095,6 +1273,42 @@
       ],
       "verification_commands": [
         "dig +short database.lv3.org"
+      ]
+    },
+    "check-platform-drift": {
+      "description": "Run the ADR 0071 observation loop checks and emit structured findings from the controller command lane.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "check-platform-drift",
+        "command": "make check-platform-drift"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate-data-models"
+      ],
+      "live_impact": "repo_only",
+      "owner_runbook": "docs/runbooks/agent-observation-loop.md",
+      "implementation_refs": [
+        "Makefile",
+        "scripts/platform_observation_tool.py",
+        "config/health-probe-catalog.json",
+        "config/secret-catalog.json",
+        "config/image-catalog.json",
+        "docs/schema/platform-finding.json",
+        "docs/runbooks/agent-observation-loop.md"
+      ],
+      "outputs": [
+        "Structured drift findings under .local/platform-observation/latest plus an Open WebUI review digest under .local/open-webui/platform-findings-daily.md."
+      ],
+      "verification_commands": [
+        "uvx --from pyyaml python scripts/platform_observation_tool.py",
+        "test -f .local/platform-observation/latest/findings.json"
       ]
     }
   }

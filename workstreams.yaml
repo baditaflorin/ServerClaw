@@ -438,10 +438,10 @@ workstreams:
   - id: adr-0051-control-plane-recovery
     adr: "0051"
     title: Control-plane backup, recovery, and break-glass
-    status: merged
+    status: live_applied
     owner: codex
-    branch: codex/adr-0051-control-plane-recovery
-    worktree_path: ../proxmox_florin_server-control-plane-recovery
+    branch: codex/adr-0051-control-plane-backup-recovery-break-glass
+    worktree_path: ../proxmox_florin_server-adr-0051
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0051-control-plane-recovery.md
     depends_on:
       - adr-0029-backup-vm
@@ -456,7 +456,7 @@ workstreams:
       - break-glass procedures
       - control-plane state
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0052-loki-logs
     adr: "0052"
@@ -540,7 +540,7 @@ workstreams:
   - id: adr-0056-keycloak-sso
     adr: "0056"
     title: Keycloak for operator and agent SSO
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/adr-0056-keycloak-sso
     worktree_path: ../proxmox_florin_server-keycloak-sso
@@ -556,12 +556,12 @@ workstreams:
       - agent clients
       - MFA policies
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0057-mattermost-chatops
     adr: "0057"
     title: Mattermost for ChatOps and operator-agent collaboration
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/adr-0057-mattermost-chatops
     worktree_path: ../proxmox_florin_server-mattermost-chatops
@@ -569,15 +569,14 @@ workstreams:
     depends_on:
       - adr-0045-communication-lanes
       - adr-0050-notification-profiles
-      - adr-0056-keycloak-sso
     conflicts_with: []
     shared_surfaces:
       - alerts
       - workflow notifications
       - approvals
-      - bot identities
+      - incoming webhooks
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0058-nats-event-bus
     adr: "0058"
@@ -667,7 +666,7 @@ workstreams:
   - id: adr-0062-role-composability
     adr: "0062"
     title: Ansible role composability and DRY defaults
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0062-role-composability
     worktree_path: ../proxmox_florin_server-role-composability
@@ -685,7 +684,7 @@ workstreams:
   - id: adr-0063-platform-vars-library
     adr: "0063"
     title: Centralised vars and computed facts library
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0063-platform-vars-library
     worktree_path: ../proxmox_florin_server-platform-vars-library
@@ -704,7 +703,7 @@ workstreams:
   - id: adr-0064-health-probe-contracts
     adr: "0064"
     title: Health probe contracts for all services
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0064-health-probe-contracts
     worktree_path: ../proxmox_florin_server-health-probe-contracts
@@ -768,7 +767,7 @@ workstreams:
   - id: adr-0067-guest-network-policy
     adr: "0067"
     title: Guest network policy enforcement
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/adr-0067-guest-network-policy
     worktree_path: ../proxmox_florin_server-guest-network-policy
@@ -782,13 +781,13 @@ workstreams:
       - Proxmox VE firewall
       - roles/proxmox/network/
       - roles/linux/guest_firewall/
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
 
   - id: adr-0068-container-image-policy
     adr: "0068"
     title: Container image policy and supply chain integrity
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0068-container-image-policy
     worktree_path: ../proxmox_florin_server-container-image-policy
@@ -809,7 +808,7 @@ workstreams:
   - id: adr-0069-agent-tool-registry
     adr: "0069"
     title: Agent tool registry and governed tool calls
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0069-agent-tool-registry
     worktree_path: ../proxmox_florin_server-agent-tool-registry
@@ -817,21 +816,20 @@ workstreams:
     depends_on:
       - adr-0048-command-catalog
       - adr-0049-private-api-publication
-      - adr-0058-nats-event-bus
-      - adr-0066-mutation-audit-log
     conflicts_with: []
     shared_surfaces:
       - config/agent-tool-registry.json
       - config/command-catalog.json
       - config/workflow-catalog.json
-      - Open WebUI tool definitions
+      - docs/schema
+      - .local/tool-audit/agent-tool-calls.jsonl
     ready_to_merge: false
     live_applied: false
 
   - id: adr-0070-rag-platform-context
     adr: "0070"
     title: Retrieval-augmented context for platform queries
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/adr-0070-rag-platform-context
     worktree_path: ../proxmox_florin_server-rag-platform-context
@@ -849,12 +847,12 @@ workstreams:
       - receipts/
       - Open WebUI tools
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0071-agent-observation-loop
     adr: "0071"
     title: Agent observation loop and autonomous drift detection
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0071-agent-observation-loop
     worktree_path: ../proxmox_florin_server-agent-observation-loop
@@ -874,5 +872,48 @@ workstreams:
       - Mattermost platform-findings channel
       - GlitchTip issue tracking
       - Open WebUI daily digest
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0074-ops-portal
+    adr: "0074"
+    title: Platform operations portal
+    status: merged
+    owner: codex
+    branch: codex/adr-0074-ops-portal
+    worktree_path: ../proxmox_florin_server__adr_0074
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0074-ops-portal.md
+    depends_on:
+      - adr-0075-service-capability-catalog
+      - adr-0076-subdomain-governance
+      - adr-0056-keycloak-sso
+    conflicts_with: []
+    shared_surfaces:
+      - scripts/generate_ops_portal.py
+      - build/ops-portal/
+      - NGINX edge config
+      - ops.lv3.org
+      - Makefile
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0075-service-capability-catalog
+    adr: "0075"
+    title: Service capability catalog
+    status: merged
+    owner: codex
+    branch: codex/adr-0074-ops-portal
+    worktree_path: ../proxmox_florin_server__adr_0074
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0075-service-capability-catalog.md
+    depends_on:
+      - adr-0064-health-probe-contracts
+      - adr-0068-container-image-policy
+      - adr-0065-secret-rotation-automation
+    conflicts_with: []
+    shared_surfaces:
+      - config/service-capability-catalog.json
+      - docs/schema/service-capability-catalog.schema.json
+      - scripts/validate_service_catalog.py
+      - make validate
     ready_to_merge: false
     live_applied: false

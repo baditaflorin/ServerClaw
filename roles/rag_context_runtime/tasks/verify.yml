@@ -1,0 +1,55 @@
+---
+- name: Wait for the platform context API to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ platform_context_internal_port }}"
+    delay: 0
+    timeout: 300
+
+- name: Wait for the platform context health endpoint
+  ansible.builtin.uri:
+    url: "{{ platform_context_private_url }}/healthz"
+    method: GET
+    status_code: 200
+  register: platform_context_health
+  retries: 24
+  delay: 5
+  until: platform_context_health.status == 200
+  changed_when: false
+
+- name: Rebuild the platform context index from the remote mirrored corpus
+  ansible.builtin.uri:
+    url: "{{ platform_context_private_url }}/v1/admin/rebuild-local"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ platform_context_api_token }}"
+    body_format: json
+    body: {}
+    status_code: 200
+    return_content: true
+  register: platform_context_rebuild
+  changed_when: false
+  no_log: true
+
+- name: Verify the platform context query endpoint
+  ansible.builtin.uri:
+    url: "{{ platform_context_private_url }}/v1/context/query"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ platform_context_api_token }}"
+    body_format: json
+    body:
+      question: how does step-ca issue SSH certificates
+      top_k: 3
+    status_code: 200
+    return_content: true
+  register: platform_context_query
+  changed_when: false
+  no_log: true
+
+- name: Assert the platform context query returned cited results
+  ansible.builtin.assert:
+    that:
+      - (platform_context_query.json.matches | default([])) | length > 0
+      - (platform_context_query.json.matches[0].source_path | default('')) | length > 0
+    fail_msg: "Platform context API responded, but the query did not return cited matches."

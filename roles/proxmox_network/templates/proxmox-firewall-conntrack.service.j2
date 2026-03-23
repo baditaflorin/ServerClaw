@@ -1,0 +1,12 @@
+[Unit]
+Description=Ensure conntrack zone for Proxmox firewall bridge traffic
+After=network-online.target pve-firewall.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart={{ proxmox_network_conntrack_helper_path }}
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

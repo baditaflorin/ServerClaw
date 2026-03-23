@@ -1,9 +1,22 @@
 ---
-public_edge_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology }}"
+public_edge_service_topology: "{{ platform_service_topology }}"
 public_edge_certbot_email: baditaflorin@gmail.com
 public_edge_cert_name: lv3-edge
 public_edge_static_root: /var/www/lv3-edge
+public_edge_generated_static_root: /var/www/lv3-generated
 public_edge_acme_root: /var/www/lv3-edge-acme
-public_edge_certificate_domains: "{{ public_edge_service_topology | service_topology_edge_certificate_domains }}"
+public_edge_probe_hostname: "{{ public_edge_service_topology.nginx_edge.public_hostname }}"
+public_edge_generated_build_root: "{{ playbook_dir }}/../build"
 public_edge_static_sites: "{{ public_edge_service_topology | service_topology_edge_static_sites }}"
-public_edge_sites: "{{ public_edge_service_topology | service_topology_edge_sites }}"
+public_edge_extra_sites:
+  - hostname: ops.lv3.org
+    kind: static_dir
+    source_dir: ops-portal
+public_edge_certificate_domains: >-
+  {{
+    (
+      (public_edge_service_topology | service_topology_edge_certificate_domains)
+      + (public_edge_extra_sites | map(attribute='hostname') | list)
+    ) | unique
+  }}
+public_edge_sites: "{{ (public_edge_service_topology | service_topology_edge_sites) + public_edge_extra_sites }}"

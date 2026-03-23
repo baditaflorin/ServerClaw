@@ -1,0 +1,27 @@
+---
+argument_specs:
+  main:
+    short_description: Converge Grafana Alloy log shipping for managed hosts and guests.
+    options:
+      loki_log_agent_packages:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description:
+          - Packages installed for the Loki log agent runtime.
+      loki_log_agent_config_file:
+        type: path
+        required: true
+        description:
+          - Rendered Alloy configuration file path.
+      loki_log_agent_loki_push_url:
+        type: str
+        required: true
+        description:
+          - Loki push API endpoint used by the log agent.
+      loki_log_agent_service_name:
+        type: str
+        required: true
+        description:
+          - Service name for the managed Alloy agent.

@@ -1,5 +1,7 @@
-repo_version: 0.58.0
-platform_version: 0.32.0
+repo_version: 0.68.0
+platform_version: 0.34.0
+container_image_catalog_path: "{{ playbook_dir }}/../config/image-catalog.json"
+container_image_catalog: "{{ lookup('file', container_image_catalog_path) | from_json }}"
 
 proxmox_release_major: 9
 proxmox_suite: trixie
@@ -46,8 +48,8 @@ proxmox_guest_ssh_connection_mode: tailscale_direct
 proxmox_guest_ssh_proxy_command: >-
   -o ProxyCommand="ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes {{ proxmox_host_admin_user }}@{{ hostvars['proxmox_florin'].ansible_host }} -W %h:%p"
 proxmox_guest_ssh_common_args:
-  tailscale_direct: ""
-  proxmox_host_jump: "{{ proxmox_guest_ssh_proxy_command }}"
+  tailscale_direct: "-o IdentitiesOnly=yes"
+  proxmox_host_jump: "-o IdentitiesOnly=yes {{ proxmox_guest_ssh_proxy_command }}"
 
 proxmox_host_admin_user: ops
 proxmox_host_admin_comment: LV3 Operations
@@ -83,7 +85,6 @@ proxmox_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_flor
 
 hetzner_dns_api_base_url: https://dns.hetzner.com/api/v1
 hetzner_dns_zone_name: lv3.org
-hetzner_dns_records: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_dns_records('public') }}"
 
 monitoring_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring
 monitoring_grafana_repo_key_url: https://apt.grafana.com/gpg-full.key
@@ -97,14 +98,10 @@ monitoring_influxdb_repo_file: /etc/apt/sources.list.d/influxdata.list
 monitoring_influxdb_url: http://127.0.0.1:8086
 monitoring_influxdb_org: lv3
 monitoring_influxdb_bucket: proxmox
-monitoring_loki_push_api_url: >-
-  http://{{ hostvars['monitoring-lv3'].ansible_host | default('10.10.10.40') }}:3100/loki/api/v1/push
 hetzner_dns_api_url: https://dns.hetzner.com/api/v1
 hetzner_dns_api_token_env_var: HETZNER_DNS_API_TOKEN
 
-mail_platform_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology.mail_platform }}"
 mail_platform_domain: lv3.org
-mail_platform_hostname: "{{ mail_platform_service_topology.public_hostname }}"
 mail_platform_mailbox_localpart: server
 mail_platform_mailbox_login: "{{ mail_platform_mailbox_localpart }}"
 mail_platform_mailbox_address: "{{ mail_platform_mailbox_localpart }}@{{ mail_platform_domain }}"
@@ -117,11 +114,9 @@ mail_platform_brevo_api_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/pr
 mail_platform_brevo_sender_email: "{{ mail_platform_mailbox_address }}"
 mail_platform_brevo_sender_name: Florin Mail Bridge
 mail_platform_reply_to_email: "{{ mail_platform_mailbox_address }}"
-openbao_postgres_host: "{{ (hostvars['proxmox_florin'].proxmox_guests | selectattr('name', 'equalto', 'postgres-lv3') | map(attribute='ipv4') | first) }}"
 openbao_postgres_admin_role: openbao_rotator
 openbao_postgres_database: postgres
 openbao_tls_enabled: true
-openbao_http_port: 8201
 openbao_database_mount_path: database
 openbao_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao
 openbao_init_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/init.json
@@ -130,45 +125,51 @@ openbao_breakglass_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/pr
 openbao_postgres_rotator_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/postgres-rotator-password.txt
 openbao_controller_approle_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/controller-automation-approle.json
 openbao_mail_platform_approle_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/mail-platform-approle.json
-openbao_proxy_port: 8200
-openbao_controller_url: "https://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ openbao_proxy_port }}"
-windmill_host_proxy_port: 8005
-windmill_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ windmill_host_proxy_port }}"
-netbox_host_proxy_port: 8004
-netbox_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ netbox_host_proxy_port }}"
+openbao_site_dir: /opt/openbao
+openbao_config_dir: /opt/openbao/config
+openbao_policy_dir: /opt/openbao/policies
+openbao_tls_dir: /opt/openbao/tls
+windmill_site_dir: /opt/windmill
+windmill_secret_dir: /etc/lv3/windmill
+windmill_env_file: /opt/windmill/windmill.env
 open_webui_version: 0.8.9
-open_webui_image: "ghcr.io/open-webui/open-webui:v{{ open_webui_version }}"
-open_webui_port: 8088
-open_webui_host_proxy_port: 8008
+open_webui_image: "{{ container_image_catalog.images.open_webui_runtime.ref }}"
 open_webui_admin_email: ops@lv3.org
 open_webui_admin_name: Florin Badita
 open_webui_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ open_webui_host_proxy_port }}"
+platform_context_host_proxy_port: 8010
+platform_context_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ platform_context_host_proxy_port }}"
+platform_context_embedding_backend: token-hash
 ntopng_proxy_port: 3001
 ntopng_http_port: 3000
 ntopng_operator_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ ntopng_proxy_port }}"
+mattermost_host_proxy_port: 8066
+mattermost_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ mattermost_host_proxy_port }}"
 portainer_host_proxy_port: 9444
 portainer_controller_url: "https://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ portainer_host_proxy_port }}"
 
 step_ca_version: 0.30.1
 step_ca_cli_version: 0.30.1
-step_ca_image: "docker.io/smallstep/step-ca:{{ step_ca_version }}"
-step_ca_api_port: 9000
-step_ca_proxy_port: 9443
+step_ca_image: "{{ container_image_catalog.images.step_ca_runtime.ref }}"
 step_ca_site_dir: /opt/step-ca
 step_ca_home: "{{ step_ca_site_dir }}/home"
 step_ca_password_dir: "{{ step_ca_site_dir }}/secrets"
-step_ca_internal_url: "https://{{ hostvars['docker-runtime-lv3'].ansible_host }}:{{ step_ca_api_port }}"
-step_ca_controller_url: "https://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ step_ca_proxy_port }}"
 step_ca_remote_root_certificate_file: "{{ step_ca_home }}/certs/root_ca.crt"
 step_ca_remote_ssh_user_ca_file: "{{ step_ca_home }}/certs/ssh_user_ca_key.pub"
 step_ca_remote_ssh_host_ca_file: "{{ step_ca_home }}/certs/ssh_host_ca_key.pub"
 step_ca_services_password_file: "{{ step_ca_password_dir }}/services-password.txt"
 step_ca_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca
-proxmox_management_allowed_tcp_ports:
-  - "{{ ntopng_proxy_port }}"
-  - "{{ netbox_host_proxy_port }}"
-  - "{{ step_ca_proxy_port }}"
-  - "{{ openbao_proxy_port }}"
-  - "{{ windmill_host_proxy_port }}"
-  - "{{ open_webui_host_proxy_port }}"
-  - "{{ portainer_host_proxy_port }}"
+mail_platform_site_dir: /opt/mail-platform
+mail_platform_secret_dir: /etc/lv3/mail-platform
+
+control_plane_recovery_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-plane-recovery
+control_plane_recovery_local_ssh_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-plane-recovery/ssh
+control_plane_recovery_local_controller_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-plane-recovery/controller
+control_plane_recovery_runtime_ssh_private_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-plane-recovery/ssh/docker-runtime-backup.id_ed25519
+control_plane_recovery_runtime_ssh_public_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-plane-recovery/ssh/docker-runtime-backup.id_ed25519.pub
+control_plane_recovery_local_controller_bundle_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-plane-recovery/controller/controller-recovery-bundle.tar.zst
+control_plane_recovery_local_controller_manifest_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-plane-recovery/controller/control-plane-recovery-manifest.json
+control_plane_recovery_backup_store_root: /srv/control-plane-recovery
+control_plane_recovery_backup_store_user: lv3-control-plane-backup
+control_plane_recovery_backup_on_calendar: "*-*-* 01,07,13,19:15:00"
+control_plane_recovery_restore_drill_on_calendar: "*-*-* 05:45:00"

@@ -1,0 +1,12 @@
+services:
+  keycloak:
+    image: ${KEYCLOAK_IMAGE}
+    restart: unless-stopped
+    command:
+      - start
+    env_file:
+      - {{ keycloak_env_file }}
+    ports:
+      - "{{ ansible_host }}:{{ keycloak_internal_http_port }}:8080"
+      - "127.0.0.1:{{ keycloak_local_http_port }}:8080"
+      - "127.0.0.1:{{ keycloak_local_management_port }}:9000"

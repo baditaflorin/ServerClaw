@@ -1,0 +1,27 @@
+---
+argument_specs:
+  main:
+    short_description: Converge shared guest observability packages and Telegraf forwarding.
+    options:
+      guest_observability_packages:
+        type: list
+        elements: str
+        required: false
+        default: []
+        description:
+          - Packages installed for guest observability.
+      guest_observability_writer_token_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file that stores the guest InfluxDB writer token.
+      guest_observability_influx_url:
+        type: str
+        required: true
+        description:
+          - InfluxDB endpoint used by guest Telegraf agents.
+      guest_observability_service:
+        type: str
+        required: true
+        description:
+          - Service label emitted with guest observability metrics.

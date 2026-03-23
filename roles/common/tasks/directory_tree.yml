@@ -1,0 +1,17 @@
+---
+- name: Validate common directory_tree entrypoint inputs
+  ansible.builtin.assert:
+    that:
+      - common_directory_tree_paths | length > 0
+    fail_msg: "common.directory_tree requires at least one directory definition."
+    quiet: true
+
+- name: Ensure managed directory tree entries exist
+  ansible.builtin.file:
+    path: "{{ item.path if item is mapping else item }}"
+    state: "{{ item.state | default(common_directory_tree_state) if item is mapping else common_directory_tree_state }}"
+    owner: "{{ item.owner | default(common_directory_tree_owner) if item is mapping else common_directory_tree_owner }}"
+    group: "{{ item.group | default(common_directory_tree_group) if item is mapping else common_directory_tree_group }}"
+    mode: "{{ item.mode | default(common_directory_tree_mode) if item is mapping else common_directory_tree_mode }}"
+    recurse: "{{ item.recurse | default(common_directory_tree_recurse) if item is mapping else common_directory_tree_recurse }}"
+  loop: "{{ common_directory_tree_paths }}"

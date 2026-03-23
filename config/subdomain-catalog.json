@@ -1,0 +1,140 @@
+{
+  "schema_version": "1.0.0",
+  "subdomains": [
+    {
+      "fqdn": "build.lv3.org",
+      "service_id": "docker_build",
+      "environment": "production",
+      "status": "active",
+      "exposure": "informational-only",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0028",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      }
+    },
+    {
+      "fqdn": "database.lv3.org",
+      "service_id": "postgres",
+      "environment": "production",
+      "status": "active",
+      "exposure": "private-only",
+      "target": "100.118.189.95",
+      "target_port": 5432,
+      "owner_adr": "0026",
+      "tls": {
+        "provider": "none",
+        "auto_renew": false
+      },
+      "notes": "Tailnet-only TCP proxy through the Proxmox host."
+    },
+    {
+      "fqdn": "docker.lv3.org",
+      "service_id": "docker_runtime",
+      "environment": "production",
+      "status": "active",
+      "exposure": "informational-only",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0023",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      }
+    },
+    {
+      "fqdn": "grafana.lv3.org",
+      "service_id": "grafana",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0011",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      }
+    },
+    {
+      "fqdn": "mail.lv3.org",
+      "service_id": "mail_platform",
+      "environment": "production",
+      "status": "active",
+      "exposure": "informational-only",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0041",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      }
+    },
+    {
+      "fqdn": "nginx.lv3.org",
+      "service_id": "nginx_edge",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0021",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      }
+    },
+    {
+      "fqdn": "ops.lv3.org",
+      "environment": "production",
+      "status": "planned",
+      "exposure": "edge-published",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0074",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Repository automation is ready; live publication still requires apply from main."
+    },
+    {
+      "fqdn": "proxmox.lv3.org",
+      "service_id": "proxmox_ui",
+      "environment": "production",
+      "status": "active",
+      "exposure": "informational-only",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0004",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      }
+    },
+    {
+      "fqdn": "uptime.lv3.org",
+      "service_id": "uptime_kuma",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0027",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      }
+    }
+  ]
+}

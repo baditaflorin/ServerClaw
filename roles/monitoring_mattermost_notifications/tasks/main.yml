@@ -1,0 +1,134 @@
+---
+- name: Validate Grafana Mattermost notification inputs
+  ansible.builtin.assert:
+    that:
+      - monitoring_mattermost_contact_point_name | length > 0
+      - monitoring_mattermost_webhook_manifest_local_file | length > 0
+      - monitoring_mattermost_channel_key | length > 0
+    fail_msg: "monitoring_mattermost_notifications requires a contact point name and local Mattermost webhook manifest."
+
+- name: Ensure the local Mattermost webhook manifest exists
+  ansible.builtin.stat:
+    path: "{{ monitoring_mattermost_webhook_manifest_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: monitoring_mattermost_manifest_local
+
+- name: Fail if the local Mattermost webhook manifest is missing
+  ansible.builtin.fail:
+    msg: >-
+      {{ monitoring_mattermost_webhook_manifest_local_file }} is missing on the control machine.
+      Converge Mattermost first so Grafana can route to a repo-managed incoming webhook.
+  when: not monitoring_mattermost_manifest_local.stat.exists
+
+- name: Read the Grafana admin password
+  ansible.builtin.slurp:
+    src: "{{ monitoring_grafana_admin_password_file }}"
+  register: monitoring_mattermost_grafana_admin_password_raw
+  no_log: true
+
+- name: Read the local Mattermost webhook manifest
+  ansible.builtin.set_fact:
+    monitoring_mattermost_grafana_admin_password: "{{ monitoring_mattermost_grafana_admin_password_raw.content | b64decode | trim }}"
+    monitoring_mattermost_webhook_manifest: "{{ lookup('ansible.builtin.file', monitoring_mattermost_webhook_manifest_local_file) | from_json }}"
+  no_log: true
+
+- name: Read existing Grafana contact points
+  ansible.builtin.uri:
+    url: http://127.0.0.1:3000/api/v1/provisioning/contact-points
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_mattermost_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_mattermost_contact_points
+  changed_when: false
+  no_log: true
+
+- name: Record the existing Mattermost Grafana contact point
+  ansible.builtin.set_fact:
+    monitoring_mattermost_contact_point_existing: >-
+      {{
+        (
+          monitoring_mattermost_contact_points.json
+          | selectattr('name', 'equalto', monitoring_mattermost_contact_point_name)
+          | list
+          | first
+        ) | default({})
+      }}
+  no_log: true
+
+- name: Create the Mattermost Grafana contact point
+  ansible.builtin.uri:
+    url: http://127.0.0.1:3000/api/v1/provisioning/contact-points
+    method: POST
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_mattermost_grafana_admin_password }}"
+    force_basic_auth: true
+    body_format: json
+    body:
+      name: "{{ monitoring_mattermost_contact_point_name }}"
+      type: webhook
+      settings:
+        url: "{{ monitoring_mattermost_webhook_manifest.webhooks[monitoring_mattermost_channel_key].internal_url }}"
+        httpMethod: POST
+      disableResolveMessage: false
+    status_code:
+      - 202
+      - 200
+  when: monitoring_mattermost_contact_point_existing == {}
+  changed_when: true
+  no_log: true
+
+- name: Update the Mattermost Grafana contact point when drifted
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/v1/provisioning/contact-points/{{ monitoring_mattermost_contact_point_existing.uid }}"
+    method: PUT
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_mattermost_grafana_admin_password }}"
+    force_basic_auth: true
+    body_format: json
+    body:
+      uid: "{{ monitoring_mattermost_contact_point_existing.uid }}"
+      name: "{{ monitoring_mattermost_contact_point_name }}"
+      type: webhook
+      settings:
+        url: "{{ monitoring_mattermost_webhook_manifest.webhooks[monitoring_mattermost_channel_key].internal_url }}"
+        httpMethod: POST
+      disableResolveMessage: false
+    status_code:
+      - 202
+      - 200
+  when:
+    - monitoring_mattermost_contact_point_existing != {}
+    - >-
+      (
+        monitoring_mattermost_contact_point_existing.settings.url | default('')
+      ) != monitoring_mattermost_webhook_manifest.webhooks[monitoring_mattermost_channel_key].internal_url
+      or (monitoring_mattermost_contact_point_existing.type | default('')) != 'webhook'
+  changed_when: true
+  no_log: true
+
+- name: Re-read Grafana contact points after Mattermost routing converge
+  ansible.builtin.uri:
+    url: http://127.0.0.1:3000/api/v1/provisioning/contact-points
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_mattermost_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_mattermost_contact_points_after
+  changed_when: false
+  no_log: true
+
+- name: Verify the Mattermost Grafana contact point is present
+  ansible.builtin.assert:
+    that:
+      - >-
+        (
+          monitoring_mattermost_contact_points_after.json
+          | selectattr('name', 'equalto', monitoring_mattermost_contact_point_name)
+          | list
+          | length
+        ) == 1
+    fail_msg: "Grafana did not retain the repo-managed Mattermost contact point."

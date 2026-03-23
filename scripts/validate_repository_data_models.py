@@ -10,10 +10,11 @@ from typing import Any
 
 from command_catalog import load_command_catalog, validate_command_catalog
 from api_publication import load_api_publication_catalog, validate_api_publication_catalog
-from controller_automation_toolkit import REPO_ROOT, emit_cli_error, load_yaml, repo_path
+from container_image_policy import load_image_catalog, validate_image_catalog as validate_container_image_catalog
+from controller_automation_toolkit import REPO_ROOT, emit_cli_error, load_json, load_yaml, repo_path
 from control_plane_lanes import load_lane_catalog
 from live_apply_receipts import RECEIPTS_DIR, iter_receipt_paths, validate_receipts
-from secret_rotation import load_secret_catalog, validate_secret_catalog
+from generate_platform_vars import PLATFORM_VARS_PATH, PORT_KEYS, build_platform_vars
 from workflow_catalog import (
     load_secret_manifest,
     load_workflow_catalog,
@@ -25,6 +26,10 @@ from workflow_catalog import (
 STACK_PATH = repo_path("versions", "stack.yaml")
 HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 UPTIME_MONITORS_PATH = repo_path("config", "uptime-kuma", "monitors.json")
+HEALTH_PROBE_CATALOG_PATH = repo_path("config", "health-probe-catalog.json")
+SECRET_CATALOG_PATH = repo_path("config", "secret-catalog.json")
+IMAGE_CATALOG_PATH = repo_path("config", "image-catalog.json")
+PLATFORM_FINDING_SCHEMA_PATH = repo_path("docs", "schema", "platform-finding.json")
 
 SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -43,7 +48,12 @@ DNS_RECORD_TYPES = {"A", "AAAA", "CNAME"}
 EXTRA_DNS_RECORD_TYPES = {"A", "AAAA", "CNAME", "MX", "TXT"}
 EDGE_KINDS = {"static", "proxy"}
 MONITOR_TYPES = {"http", "port"}
+PROBE_KINDS = {"http", "tcp", "command", "systemd"}
+HTTP_METHODS = {"DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"}
 IDENTITY_CLASSES = {"human_operator", "service", "agent", "break_glass"}
+NETWORK_POLICY_PROTOCOLS = {"tcp", "udp"}
+IMAGE_SOURCE_KINDS = {"upstream", "local_build"}
+IMAGE_PIN_STATUSES = {"pinned", "unpinned", "local_build"}
 IDENTITY_REQUIRED_METADATA = {
     "owner",
     "purpose",
@@ -51,6 +61,15 @@ IDENTITY_REQUIRED_METADATA = {
     "rotation_or_expiry",
     "credential_storage",
 }
+
+
+def require_str_int_mapping(value: Any, path: str) -> dict[str, int]:
+    value = require_mapping(value, path)
+    result: dict[str, int] = {}
+    for key, item in value.items():
+        key = require_identifier(key, f"{path} key '{key}'")
+        result[key] = require_int(item, f"{path}.{key}", 1)
+    return result
 
 
 def require_mapping(value: Any, path: str) -> dict:
@@ -323,6 +342,52 @@ def validate_extra_dns_records(value: Any, path: str) -> None:
         require_int(record.get("ttl"), f"{path}[{index}].ttl", 1)
 
 
+def validate_network_policy(value: Any, path: str, guest_names: set[str]) -> None:
+    policy = require_mapping(value, path)
+    guest_management_sources = require_string_list(
+        policy.get("guest_management_sources"),
+        f"{path}.guest_management_sources",
+    )
+    if not guest_management_sources:
+        raise ValueError(f"{path}.guest_management_sources must not be empty")
+    for index, source in enumerate(guest_management_sources):
+        require_network(source, f"{path}.guest_management_sources[{index}]")
+
+    require_network(policy.get("host_source"), f"{path}.host_source")
+
+    guest_policies = require_mapping(policy.get("guests"), f"{path}.guests")
+    if set(guest_policies.keys()) != guest_names:
+        raise ValueError(f"{path}.guests must define exactly one policy entry for each managed guest")
+
+    allowed_source_tokens = {"management", "host", "public", "all_guests"}
+    for guest_name in sorted(guest_names):
+        guest_policy = require_mapping(guest_policies.get(guest_name), f"{path}.guests.{guest_name}")
+        allowed_inbound = require_list(guest_policy.get("allowed_inbound"), f"{path}.guests.{guest_name}.allowed_inbound")
+        if not allowed_inbound:
+            raise ValueError(f"{path}.guests.{guest_name}.allowed_inbound must not be empty")
+        for index, rule in enumerate(allowed_inbound):
+            rule = require_mapping(rule, f"{path}.guests.{guest_name}.allowed_inbound[{index}]")
+            source = require_str(rule.get("source"), f"{path}.guests.{guest_name}.allowed_inbound[{index}].source")
+            require_enum(
+                rule.get("protocol"),
+                f"{path}.guests.{guest_name}.allowed_inbound[{index}].protocol",
+                NETWORK_POLICY_PROTOCOLS,
+            )
+            ports = require_int_list(
+                rule.get("ports"),
+                f"{path}.guests.{guest_name}.allowed_inbound[{index}].ports",
+            )
+            if not ports:
+                raise ValueError(f"{path}.guests.{guest_name}.allowed_inbound[{index}].ports must not be empty")
+            require_str(
+                rule.get("description"),
+                f"{path}.guests.{guest_name}.allowed_inbound[{index}].description",
+            )
+            if source in allowed_source_tokens or source in guest_names:
+                continue
+            require_network(source, f"{path}.guests.{guest_name}.allowed_inbound[{index}].source")
+
+
 def validate_host_vars() -> dict[str, Any]:
     host_vars = require_mapping(load_yaml(HOST_VARS_PATH), str(HOST_VARS_PATH))
     host_id = require_identifier(HOST_VARS_PATH.stem, "host_vars host id")
@@ -394,6 +459,17 @@ def validate_host_vars() -> dict[str, Any]:
     if "mail_platform_dns_records" in host_vars:
         validate_extra_dns_records(host_vars.get("mail_platform_dns_records"), "host_vars.mail_platform_dns_records")
 
+    platform_port_assignments = require_str_int_mapping(
+        host_vars.get("platform_port_assignments"), "host_vars.platform_port_assignments"
+    )
+    missing_port_keys = sorted(set(PORT_KEYS) - set(platform_port_assignments.keys()))
+    if missing_port_keys:
+        raise ValueError(
+            "host_vars.platform_port_assignments is missing required keys: "
+            + ", ".join(missing_port_keys)
+        )
+    validate_network_policy(host_vars.get("network_policy"), "host_vars.network_policy", guest_names)
+
     topology = require_mapping(host_vars.get("lv3_service_topology"), "host_vars.lv3_service_topology")
     if not topology:
         raise ValueError("host_vars.lv3_service_topology must not be empty")
@@ -418,7 +494,24 @@ def validate_host_vars() -> dict[str, Any]:
         "guest_plan_keys": guest_plan_keys,
         "guest_vmids_by_key": guest_vmids_by_key,
         "guest_ips_by_key": guest_ips_by_key,
+        "platform_port_assignments": platform_port_assignments,
+        "topology": {
+            service_id: {
+                "service_name": service["service_name"],
+                "owning_vm": service["owning_vm"],
+            }
+            for service_id, service in topology.items()
+        },
     }
+
+
+def validate_platform_vars() -> None:
+    platform_vars = require_mapping(load_yaml(PLATFORM_VARS_PATH), str(PLATFORM_VARS_PATH))
+    expected_platform_vars = build_platform_vars()
+    if platform_vars != expected_platform_vars:
+        raise ValueError(
+            "inventory/group_vars/platform.yml must match scripts/generate_platform_vars.py output"
+        )
 
 
 def validate_monitor(monitor: Any, path: str) -> str:
@@ -456,6 +549,196 @@ def validate_uptime_monitors() -> None:
         if name in names:
             raise ValueError(f"duplicate monitor name in config/uptime-kuma/monitors.json: {name}")
         names.add(name)
+
+
+def validate_probe_definition(probe: Any, path: str) -> None:
+    probe = require_mapping(probe, path)
+    kind = require_enum(probe.get("kind"), f"{path}.kind", PROBE_KINDS)
+    require_str(probe.get("description"), f"{path}.description")
+    require_int(probe.get("timeout_seconds"), f"{path}.timeout_seconds", 1)
+    require_int(probe.get("retries"), f"{path}.retries", 1)
+    require_int(probe.get("delay_seconds"), f"{path}.delay_seconds", 0)
+
+    if "headers" in probe:
+        headers = require_mapping(probe.get("headers"), f"{path}.headers")
+        for key, value in headers.items():
+            require_str(key, f"{path}.headers key")
+            require_str(value, f"{path}.headers.{key}")
+
+    if "validate_tls" in probe:
+        require_bool(probe.get("validate_tls"), f"{path}.validate_tls")
+
+    if kind == "http":
+        url = require_str(probe.get("url"), f"{path}.url")
+        if not (url.startswith("http://") or url.startswith("https://")):
+            raise ValueError(f"{path}.url must start with http:// or https://")
+        method = require_str(probe.get("method"), f"{path}.method").upper()
+        if method not in HTTP_METHODS:
+            raise ValueError(f"{path}.method must be one of {sorted(HTTP_METHODS)}")
+        expected_status = require_int_list(probe.get("expected_status"), f"{path}.expected_status", 100)
+        for index, status in enumerate(expected_status):
+            if status > 599:
+                raise ValueError(f"{path}.expected_status[{index}] must be <= 599")
+
+    if kind == "tcp":
+        require_str(probe.get("host"), f"{path}.host")
+        require_int(probe.get("port"), f"{path}.port", 1)
+
+    if kind == "command":
+        argv = require_string_list(probe.get("argv"), f"{path}.argv")
+        if not argv:
+            raise ValueError(f"{path}.argv must not be empty")
+        if "success_rc" in probe:
+            require_int(probe.get("success_rc"), f"{path}.success_rc", 0)
+
+    if kind == "systemd":
+        require_str(probe.get("unit"), f"{path}.unit")
+        require_str(probe.get("expected_state"), f"{path}.expected_state")
+
+
+def validate_health_probe_catalog(host_vars_context: dict[str, Any]) -> None:
+    catalog = require_mapping(
+        json.loads(HEALTH_PROBE_CATALOG_PATH.read_text()),
+        str(HEALTH_PROBE_CATALOG_PATH),
+    )
+    require_semver(catalog.get("schema_version"), "config/health-probe-catalog.json.schema_version")
+    services = require_mapping(catalog.get("services"), "config/health-probe-catalog.json.services")
+    topology = host_vars_context["topology"]
+
+    if set(services.keys()) != set(topology.keys()):
+        raise ValueError(
+            "config/health-probe-catalog.json.services must define exactly the canonical lv3_service_topology services"
+        )
+
+    expected_monitors: dict[str, dict[str, Any]] = {}
+    for service_id, topology_entry in topology.items():
+        service_path = f"config/health-probe-catalog.json.services.{service_id}"
+        service = require_mapping(services.get(service_id), service_path)
+        if require_str(service.get("service_name"), f"{service_path}.service_name") != topology_entry["service_name"]:
+            raise ValueError(f"{service_path}.service_name must match inventory/host_vars/proxmox_florin.yml")
+        if require_str(service.get("owning_vm"), f"{service_path}.owning_vm") != topology_entry["owning_vm"]:
+            raise ValueError(f"{service_path}.owning_vm must match inventory/host_vars/proxmox_florin.yml")
+
+        role = service.get("role")
+        verify_file = service.get("verify_file")
+        if role is None:
+            if verify_file is not None:
+                raise ValueError(f"{service_path}.verify_file must be null when {service_path}.role is null")
+        else:
+            require_str(role, f"{service_path}.role")
+            verify_file = require_str(verify_file, f"{service_path}.verify_file")
+            if not (REPO_ROOT / verify_file).is_file():
+                raise ValueError(f"{service_path}.verify_file does not exist: {verify_file}")
+
+        validate_probe_definition(service.get("liveness"), f"{service_path}.liveness")
+        validate_probe_definition(service.get("readiness"), f"{service_path}.readiness")
+
+        uptime_kuma = require_mapping(service.get("uptime_kuma"), f"{service_path}.uptime_kuma")
+        enabled = require_bool(uptime_kuma.get("enabled"), f"{service_path}.uptime_kuma.enabled")
+        if enabled:
+            monitor = require_mapping(uptime_kuma.get("monitor"), f"{service_path}.uptime_kuma.monitor")
+            name = validate_monitor(monitor, f"{service_path}.uptime_kuma.monitor")
+            if name in expected_monitors:
+                raise ValueError(f"duplicate Uptime Kuma monitor contract in health probe catalog: {name}")
+            expected_monitors[name] = monitor
+        elif "reason" in uptime_kuma:
+            require_str(uptime_kuma.get("reason"), f"{service_path}.uptime_kuma.reason")
+
+    actual_monitors = require_list(
+        json.loads(UPTIME_MONITORS_PATH.read_text()),
+        str(UPTIME_MONITORS_PATH),
+    )
+    actual_monitors_by_name: dict[str, dict[str, Any]] = {}
+    for index, monitor in enumerate(actual_monitors):
+        name = validate_monitor(monitor, f"config/uptime-kuma/monitors.json[{index}]")
+        if name in actual_monitors_by_name:
+            raise ValueError(f"duplicate monitor name in config/uptime-kuma/monitors.json: {name}")
+        actual_monitors_by_name[name] = monitor
+
+    if set(actual_monitors_by_name.keys()) != set(expected_monitors.keys()):
+        raise ValueError(
+            "config/uptime-kuma/monitors.json must match the enabled uptime_kuma monitors in config/health-probe-catalog.json"
+        )
+
+    for name, expected_monitor in expected_monitors.items():
+        if actual_monitors_by_name[name] != expected_monitor:
+            raise ValueError(
+                f"config/uptime-kuma/monitors.json monitor '{name}' does not match the health probe catalog contract"
+            )
+
+
+def validate_secret_catalog(secret_manifest: dict[str, Any]) -> None:
+    catalog = require_mapping(load_json(SECRET_CATALOG_PATH), str(SECRET_CATALOG_PATH))
+    require_semver(catalog.get("schema_version"), "config/secret-catalog.json.schema_version")
+    secrets = require_list(catalog.get("secrets"), "config/secret-catalog.json.secrets")
+    if not secrets:
+        raise ValueError("config/secret-catalog.json.secrets must not be empty")
+    secret_ids: set[str] = set()
+    manifest_secrets = secret_manifest["secrets"]
+    for index, secret in enumerate(secrets):
+        path = f"config/secret-catalog.json.secrets[{index}]"
+        secret = require_mapping(secret, path)
+        secret_id = require_identifier(secret.get("id"), f"{path}.id")
+        if secret_id in secret_ids:
+            raise ValueError(f"duplicate secret-catalog id: {secret_id}")
+        secret_ids.add(secret_id)
+        require_identifier(secret.get("owner_service"), f"{path}.owner_service")
+        require_str(secret.get("storage_contract"), f"{path}.storage_contract")
+        storage_ref = require_identifier(secret.get("storage_ref"), f"{path}.storage_ref")
+        if storage_ref not in manifest_secrets:
+            raise ValueError(f"{path}.storage_ref references unknown controller-local secret '{storage_ref}'")
+        require_int(secret.get("rotation_period_days"), f"{path}.rotation_period_days", 1)
+        require_int(secret.get("warning_window_days"), f"{path}.warning_window_days", 0)
+        require_date(secret.get("last_rotated_at"), f"{path}.last_rotated_at")
+        require_str(secret.get("rotation_mode"), f"{path}.rotation_mode")
+
+
+def validate_legacy_image_catalog(host_vars_context: dict[str, Any]) -> None:
+    catalog = require_mapping(load_json(IMAGE_CATALOG_PATH), str(IMAGE_CATALOG_PATH))
+    require_semver(catalog.get("schema_version"), "config/image-catalog.json.schema_version")
+    images = require_list(catalog.get("images"), "config/image-catalog.json.images")
+    if not images:
+        raise ValueError("config/image-catalog.json.images must not be empty")
+    image_ids: set[str] = set()
+    allowed_targets = host_vars_context["guest_names"]
+    for index, image in enumerate(images):
+        path = f"config/image-catalog.json.images[{index}]"
+        image = require_mapping(image, path)
+        image_id = require_identifier(image.get("id"), f"{path}.id")
+        if image_id in image_ids:
+            raise ValueError(f"duplicate image-catalog id: {image_id}")
+        image_ids.add(image_id)
+        require_identifier(image.get("service_id"), f"{path}.service_id")
+        runtime_host = require_identifier(image.get("runtime_host"), f"{path}.runtime_host")
+        if runtime_host not in allowed_targets:
+            raise ValueError(f"{path}.runtime_host must reference a managed guest")
+        require_str(image.get("container_name"), f"{path}.container_name")
+        require_str(image.get("image_reference"), f"{path}.image_reference")
+        require_enum(image.get("source_kind"), f"{path}.source_kind", IMAGE_SOURCE_KINDS)
+        pin_status = require_enum(image.get("pin_status"), f"{path}.pin_status", IMAGE_PIN_STATUSES)
+        pinned_digest = image.get("pinned_digest")
+        if pin_status == "pinned":
+            if pinned_digest is None:
+                raise ValueError(f"{path}.pinned_digest must be set when pin_status is pinned")
+            require_str(pinned_digest, f"{path}.pinned_digest")
+        elif pinned_digest is not None:
+            require_str(pinned_digest, f"{path}.pinned_digest")
+        pinned_at = image.get("pinned_at")
+        if pinned_at is not None:
+            require_date(pinned_at, f"{path}.pinned_at")
+        require_int(image.get("freshness_window_days"), f"{path}.freshness_window_days", 1)
+
+
+def validate_platform_finding_schema() -> None:
+    schema = require_mapping(load_json(PLATFORM_FINDING_SCHEMA_PATH), str(PLATFORM_FINDING_SCHEMA_PATH))
+    require_str(schema.get("$schema"), "docs/schema/platform-finding.json.$schema")
+    require_str(schema.get("$id"), "docs/schema/platform-finding.json.$id")
+    if schema.get("type") != "object":
+        raise ValueError("docs/schema/platform-finding.json.type must be object")
+    required_fields = set(require_string_list(schema.get("required"), "docs/schema/platform-finding.json.required"))
+    expected_fields = {"check", "severity", "summary", "details", "ts", "run_id"}
+    if required_fields != expected_fields:
+        raise ValueError("docs/schema/platform-finding.json.required must match the ADR 0071 finding contract")
 
 
 def validate_identity_taxonomy(
@@ -1062,19 +1345,22 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
 def validate_repository_data_models() -> int:
     secret_manifest = load_secret_manifest()
     validate_secret_manifest(secret_manifest)
-    secret_catalog = load_secret_catalog()
-    validate_secret_catalog(secret_catalog, secret_manifest)
     workflow_catalog = load_workflow_catalog()
     validate_workflow_catalog(workflow_catalog, secret_manifest)
     command_catalog = load_command_catalog()
     validate_command_catalog(command_catalog, workflow_catalog, secret_manifest)
+    validate_container_image_catalog(load_image_catalog())
     lane_catalog, _ = load_lane_catalog()
     api_publication_catalog, _, _ = load_api_publication_catalog()
     validate_api_publication_catalog(api_publication_catalog, lane_catalog)
     validate_receipts()
     validate_uptime_monitors()
     host_vars_context = validate_host_vars()
+    validate_health_probe_catalog(host_vars_context)
+    validate_secret_catalog(secret_manifest)
+    validate_platform_finding_schema()
     validate_versions_stack(host_vars_context)
+    validate_platform_vars()
     print("Repository data models OK")
     return 0
 

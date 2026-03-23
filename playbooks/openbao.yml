@@ -11,10 +11,8 @@
         fail_msg: "This playbook only supports Debian guests."
 
   roles:
+    - role: linux_guest_firewall
     - role: postgres_vm
-      vars:
-        postgres_vm_client_allowed_sources_extra:
-          - "{{ (hostvars['proxmox_florin'].proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}/32"
     - role: openbao_postgres_backend
 
 - name: Converge OpenBao on the Docker runtime VM
@@ -30,6 +28,7 @@
         fail_msg: "This playbook only supports Debian guests."
 
   roles:
+    - role: linux_guest_firewall
     - role: openbao_runtime
 
 - name: Verify PostgreSQL dynamic credentials end to end

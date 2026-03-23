@@ -1,0 +1,34 @@
+---
+- name: Verify the Windmill API version endpoint
+  ansible.builtin.uri:
+    url: "{{ windmill_private_base_url }}/api/version"
+    method: GET
+    status_code: 200
+  register: windmill_verify_version
+  retries: 18
+  delay: 5
+  until: windmill_verify_version.status == 200
+  changed_when: false
+
+- name: Run the Windmill seeded healthcheck script
+  ansible.builtin.uri:
+    url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id | urlencode }}/jobs/run_wait_result/p/{{ windmill_seed_scripts[0].path | urlencode }}"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ windmill_superadmin_secret }}"
+    body_format: json
+    body:
+      probe: live-verify
+    return_content: true
+    status_code: 200
+  register: windmill_verify_healthcheck
+  changed_when: false
+  no_log: true
+
+- name: Assert the Windmill seeded healthcheck result
+  ansible.builtin.assert:
+    that:
+      - windmill_verify_healthcheck.json.probe == "live-verify"
+      - windmill_verify_healthcheck.json.job_id_present | bool
+      - windmill_verify_healthcheck.json.workspace == windmill_workspace_id
+    fail_msg: "Windmill API responded, but the seeded healthcheck script did not return the expected result."

@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lv3.org/schema/platform-finding.json",
+  "title": "Platform Finding",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "check",
+    "severity",
+    "summary",
+    "details",
+    "ts",
+    "run_id"
+  ],
+  "properties": {
+    "check": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "ok",
+        "warning",
+        "critical"
+      ]
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "details": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "run_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "outputs": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

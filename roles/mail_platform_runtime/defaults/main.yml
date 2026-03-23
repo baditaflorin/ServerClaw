@@ -17,7 +17,8 @@ mail_platform_stalwart_config_file: "{{ mail_platform_stalwart_dir }}/etc/config
 mail_platform_stalwart_bootstrap_file: "{{ mail_platform_site_dir }}/bootstrap-mail-platform.py"
 mail_platform_stalwart_container_name: lv3-mail-stalwart
 mail_platform_gateway_container_name: lv3-mail-gateway
-mail_platform_stalwart_image: stalwartlabs/stalwart:latest
+mail_platform_stalwart_image: "{{ container_image_catalog.images.mail_platform_stalwart_runtime.ref }}"
+mail_platform_gateway_base_image: "{{ container_image_catalog.images.mail_platform_gateway_python_base.ref }}"
 mail_platform_gateway_port: 8081
 mail_platform_stalwart_http_port: 8080
 mail_platform_secret_dir: /etc/lv3/mail-platform
@@ -82,7 +83,7 @@ mail_platform_notification_profiles:
 mail_platform_gateway_trace_service_name: mail-gateway
 mail_platform_gateway_trace_service_namespace: lv3
 mail_platform_gateway_trace_environment: lv3
-mail_platform_gateway_trace_otlp_endpoint: "http://{{ hostvars['monitoring-lv3'].ansible_host }}:4318/v1/traces"
+mail_platform_gateway_trace_otlp_endpoint: "{{ platform_service_topology | platform_service_url('grafana', 'otlp_http') }}"
 mail_platform_metrics_username: prometheus
 mail_platform_webhook_events:
   - queue.queue-message-authenticated

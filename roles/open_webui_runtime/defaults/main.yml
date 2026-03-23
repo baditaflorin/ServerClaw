@@ -5,13 +5,13 @@ open_webui_secret_dir: /etc/lv3/open-webui
 open_webui_compose_file: "{{ open_webui_site_dir }}/docker-compose.yml"
 open_webui_env_file: "{{ open_webui_site_dir }}/open-webui.env"
 open_webui_container_name: open-webui
-open_webui_port: 8088
-open_webui_host_proxy_port: 8008
-open_webui_image: ghcr.io/open-webui/open-webui:v0.8.9
+open_webui_port: "{{ platform_service_topology | platform_service_port('open_webui', 'internal') }}"
+open_webui_host_proxy_port: "{{ platform_service_topology | platform_service_port('open_webui', 'controller') }}"
+open_webui_image: "{{ container_image_catalog.images.open_webui_runtime.ref }}"
 open_webui_admin_name: Florin Badita
 open_webui_admin_email: ops@lv3.org
-open_webui_internal_base_url: "http://127.0.0.1:{{ open_webui_port }}"
-open_webui_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ open_webui_host_proxy_port }}"
+open_webui_internal_base_url: "{{ platform_service_topology | platform_service_url('open_webui', 'internal') }}"
+open_webui_controller_url: "{{ platform_service_topology | platform_service_url('open_webui', 'controller') }}"
 open_webui_webui_url: "{{ open_webui_controller_url }}"
 open_webui_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui
 open_webui_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/admin-password.txt

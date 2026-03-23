@@ -36,3 +36,5 @@ go.work.sum
 # Python cache
 __pycache__/
 *.pyc
+.cache/
+build/

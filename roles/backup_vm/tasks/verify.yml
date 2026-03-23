@@ -1,0 +1,30 @@
+---
+- name: Verify the PBS proxy listener is reachable
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ backup_vm_api_port }}"
+    delay: 0
+    timeout: 60
+
+- name: Verify the managed PBS datastore is present
+  ansible.builtin.command:
+    argv:
+      - proxmox-backup-manager
+      - datastore
+      - list
+      - --output-format
+      - json
+  register: backup_vm_datastore_verify
+  changed_when: false
+
+- name: Assert the managed PBS datastore is readable
+  ansible.builtin.assert:
+    that:
+      - >-
+        (
+          backup_vm_datastore_verify.stdout | from_json
+          | selectattr('name', 'equalto', backup_vm_datastore_name)
+          | list
+          | length
+        ) == 1
+    fail_msg: "Managed PBS datastore {{ backup_vm_datastore_name }} is not readable."

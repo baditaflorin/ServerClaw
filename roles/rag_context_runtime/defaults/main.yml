@@ -1,0 +1,49 @@
+---
+platform_context_site_dir: /opt/platform-context
+platform_context_service_dir: "{{ platform_context_site_dir }}/service"
+platform_context_corpus_dir: "{{ platform_context_site_dir }}/corpus"
+platform_context_data_dir: "{{ platform_context_site_dir }}/qdrant"
+platform_context_secret_dir: /etc/lv3/platform-context
+platform_context_compose_file: "{{ platform_context_site_dir }}/docker-compose.yml"
+platform_context_env_file: "{{ platform_context_site_dir }}/platform-context.env"
+platform_context_api_token_remote_file: "{{ platform_context_secret_dir }}/api-token.txt"
+platform_context_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context
+platform_context_api_token_local_file: "{{ platform_context_local_artifact_dir }}/api-token.txt"
+platform_context_internal_port: 8010
+platform_context_host_proxy_port: 8010
+platform_context_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ platform_context_host_proxy_port }}"
+platform_context_private_url: "http://{{ ansible_host }}:{{ platform_context_internal_port }}"
+platform_context_qdrant_image: qdrant/qdrant:v1.15.1
+platform_context_api_image_name: lv3-platform-context-api
+platform_context_qdrant_collection: platform_context
+platform_context_embedding_backend: sentence-transformers
+platform_context_embedding_model: sentence-transformers/all-MiniLM-L6-v2
+platform_context_embedding_dimension: 384
+platform_context_repo_root: "{{ playbook_dir | dirname }}"
+platform_context_corpus_sources:
+  - src: "{{ platform_context_repo_root }}/docs/adr"
+    dest: docs/adr
+  - src: "{{ platform_context_repo_root }}/docs/runbooks"
+    dest: docs/runbooks
+  - src: "{{ platform_context_repo_root }}/receipts/live-applies"
+    dest: receipts/live-applies
+  - src: "{{ platform_context_repo_root }}/versions/stack.yaml"
+    dest: versions/stack.yaml
+  - src: "{{ platform_context_repo_root }}/config/workflow-catalog.json"
+    dest: config/workflow-catalog.json
+  - src: "{{ platform_context_repo_root }}/config/command-catalog.json"
+    dest: config/command-catalog.json
+  - src: "{{ platform_context_repo_root }}/config/agent-tool-registry.json"
+    dest: config/agent-tool-registry.json
+  - src: "{{ platform_context_repo_root }}/changelog.md"
+    dest: changelog.md
+  - src: "{{ platform_context_repo_root }}/VERSION"
+    dest: VERSION
+platform_context_service_sources:
+  - src: "{{ platform_context_repo_root }}/scripts/platform_context_corpus.py"
+    dest: platform_context_corpus.py
+  - src: "{{ platform_context_repo_root }}/scripts/platform_context_service.py"
+    dest: platform_context_service.py
+  - src: "{{ platform_context_repo_root }}/requirements/platform-context-api.txt"
+    dest: requirements.txt
+platform_context_local_rebuild_script: "{{ platform_context_repo_root }}/scripts/build_rag_index.py"

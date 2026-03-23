@@ -1,0 +1,70 @@
+---
+- name: Verify the local ntopng HTTP endpoint responds
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ ntopng_http_port }}/"
+    method: GET
+    status_code:
+      - 200
+      - 302
+  register: ntopng_verify_local_http
+  retries: 20
+  delay: 3
+  until: ntopng_verify_local_http.status in [200, 302]
+  changed_when: false
+
+- name: Query ntopng interfaces over the operator access path
+  ansible.builtin.uri:
+    url: "{{ ntopng_operator_url }}/lua/rest/v2/get/ntopng/interfaces.lua"
+    method: GET
+    force_basic_auth: true
+    url_username: admin
+    url_password: "{{ ntopng_admin_password }}"
+    return_content: true
+    status_code: 200
+  register: ntopng_verify_interfaces_response
+  retries: 20
+  delay: 3
+  until: ntopng_verify_interfaces_response.status == 200
+  changed_when: false
+  no_log: true
+
+- name: Record the monitored ntopng interfaces
+  ansible.builtin.set_fact:
+    ntopng_verify_monitored_interfaces: "{{ ntopng_verify_interfaces_response.json.rsp }}"
+    ntopng_verify_primary_interface_id: >-
+      {{
+        (
+          ntopng_verify_interfaces_response.json.rsp
+          | selectattr('ifname', 'equalto', ntopng_interfaces[0])
+          | map(attribute='ifid')
+          | first
+        )
+      }}
+
+- name: Assert ntopng exposes the configured interfaces
+  ansible.builtin.assert:
+    that:
+      - ntopng_verify_monitored_interfaces | length > 0
+      - ntopng_interfaces | difference(ntopng_verify_monitored_interfaces | map(attribute='ifname') | list) | length == 0
+      - ntopng_verify_primary_interface_id is not none
+    fail_msg: "ntopng did not expose the expected monitored interfaces over the operator access path."
+
+- name: Query primary interface counters over the operator access path
+  ansible.builtin.uri:
+    url: "{{ ntopng_operator_url }}/lua/rest/v2/get/interface/data.lua?ifid={{ ntopng_verify_primary_interface_id }}"
+    method: GET
+    force_basic_auth: true
+    url_username: admin
+    url_password: "{{ ntopng_admin_password }}"
+    return_content: true
+    status_code: 200
+  register: ntopng_verify_interface_data_response
+  changed_when: false
+  no_log: true
+
+- name: Assert ntopng sees private-network traffic
+  ansible.builtin.assert:
+    that:
+      - (ntopng_verify_interface_data_response.json.rsp.bytes | int) > 0
+      - (ntopng_verify_interface_data_response.json.rsp.num_hosts | int) > 0
+    fail_msg: "ntopng is reachable but did not report visible traffic on the primary monitored interface."

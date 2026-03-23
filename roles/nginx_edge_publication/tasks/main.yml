@@ -25,6 +25,7 @@
     mode: "0755"
   loop:
     - "{{ public_edge_static_root }}"
+    - "{{ public_edge_generated_static_root }}"
     - "{{ public_edge_acme_root }}"
     - /etc/nginx/sites-available
     - /etc/nginx/sites-enabled
@@ -36,6 +37,14 @@
     dest: "{{ public_edge_static_root }}/{{ item.slug }}.html"
     mode: "0644"
   loop: "{{ public_edge_static_sites }}"
+
+- name: Publish generated static site directories
+  ansible.builtin.copy:
+    src: "{{ public_edge_generated_build_root }}/{{ item.source_dir }}/"
+    dest: "{{ public_edge_generated_static_root }}/{{ item.source_dir }}/"
+    mode: "0644"
+    directory_mode: "0755"
+  loop: "{{ public_edge_extra_sites | selectattr('kind', 'equalto', 'static_dir') | list }}"
 
 - name: Check whether the public edge certificate exists
   ansible.builtin.stat:
@@ -172,3 +181,6 @@
     name: nginx
     enabled: true
     state: reloaded
+
+- name: Verify NGINX edge health probes
+  ansible.builtin.import_tasks: verify.yml

@@ -1,0 +1,35 @@
+---
+argument_specs:
+  main:
+    short_description: Synchronize canonical repository inventory into NetBox.
+    options:
+      netbox_controller_url:
+        type: str
+        required: true
+        description:
+          - Operator-facing NetBox API base URL used for synchronization.
+      netbox_superuser_api_token_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file that stores the NetBox API token.
+      netbox_sync_script_path:
+        type: path
+        required: true
+        description:
+          - Sync script executed by the role.
+      netbox_sync_host_vars_path:
+        type: path
+        required: true
+        description:
+          - Canonical host vars file used as sync input.
+      netbox_sync_stack_path:
+        type: path
+        required: true
+        description:
+          - Canonical stack state file used as sync input.
+      netbox_sync_lane_catalog_path:
+        type: path
+        required: true
+        description:
+          - Control-plane lane catalog consumed during sync.

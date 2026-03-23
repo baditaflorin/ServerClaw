@@ -272,3 +272,6 @@
     that:
       - portainer_running.stdout_lines | select('equalto', portainer_container_name) | list | length == 1
     fail_msg: "Portainer container is not running."
+
+- name: Verify Portainer health probes
+  ansible.builtin.import_tasks: verify.yml

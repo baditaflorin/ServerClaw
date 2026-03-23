@@ -1,10 +1,10 @@
 # ADR 0063: Centralised Vars And Computed Facts Library
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.68.0
+- Implemented In Platform Version: not applicable (repo-only)
+- Implemented On: 2026-03-23
 - Date: 2026-03-22
 
 ## Context
@@ -47,3 +47,11 @@ Resolution precedence (highest to lowest):
 - Secrets are never stored in the vars library; they come from OpenBao or `controller-local-secrets.json` at runtime.
 - The `platform.yml` file is generated output and must not be hand-edited; its source is always `stack.yaml` plus `host_vars`.
 - Per-environment overrides are out of scope; this is a single-environment platform.
+
+## Implementation Notes
+
+- [scripts/generate_platform_vars.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_platform_vars.py) now generates and validates the committed [inventory/group_vars/platform.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/group_vars/platform.yml) facts library from canonical stack and host inputs.
+- [filter_plugins/platform_facts.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/filter_plugins/platform_facts.py) now provides service and guest lookup helpers so roles can consume the generated catalog without repeating `hostvars[...]` derivations inline.
+- [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/Makefile) now exposes `make generate-platform-vars`, `make validate-generated-vars`, and `make show-platform-facts HOST=<host>`.
+- [scripts/validate_repo.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_repo.sh) and [scripts/validate_repository_data_models.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_repository_data_models.py) now fail when the committed generated facts file drifts from [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml) or [inventory/host_vars/proxmox_florin.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml).
+- Current consumers now read generated platform facts in [roles/netbox_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/netbox_runtime), [roles/windmill_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/windmill_runtime), [roles/open_webui_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/open_webui_runtime), [roles/openbao_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/openbao_runtime), [roles/mattermost_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/mattermost_runtime), [roles/proxmox_ntopng](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_ntopng), [roles/rag_context_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/rag_context_runtime), [roles/portainer_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/portainer_runtime), and the shared observability or publication defaults that formerly duplicated computed URLs.

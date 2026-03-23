@@ -8,6 +8,8 @@
       - mail_platform_site_dir | length > 0
       - mail_platform_stalwart_dir | length > 0
       - mail_platform_gateway_dir | length > 0
+      - mail_platform_stalwart_image | length > 0
+      - mail_platform_gateway_base_image | length > 0
       - mail_platform_compose_file | length > 0
       - mail_platform_brevo_sender_email | length > 0
       - mail_platform_brevo_api_key_local_file | length > 0
@@ -382,6 +384,14 @@
     group: root
     mode: preserve
 
+- name: Render the mail gateway Dockerfile
+  ansible.builtin.template:
+    src: mail-gateway.Dockerfile.j2
+    dest: "{{ mail_platform_gateway_app_dir }}/Dockerfile"
+    owner: root
+    group: root
+    mode: "0644"
+
 - name: Render the mail gateway environment file
   ansible.builtin.template:
     src: mail-gateway.env.j2
@@ -566,3 +576,6 @@
           | length
         ) == 0
     fail_msg: "One or more notification profiles are missing from the mail gateway catalog."
+
+- name: Verify mail platform health probes
+  ansible.builtin.import_tasks: verify.yml

@@ -1,0 +1,282 @@
+#!/usr/bin/env python3
+
+import json
+import os
+import shlex
+import subprocess
+import urllib.request
+
+
+BASE_URL = "{{ mattermost_private_base_url }}"
+INTERNAL_WEBHOOK_BASE_URL = "http://{{ ansible_host }}:{{ mattermost_server_port }}"
+EXTERNAL_WEBHOOK_BASE_URL = "{{ mattermost_controller_url }}"
+MMCTL = "/mattermost/bin/mmctl"
+CONTAINER = "{{ mattermost_container_name }}"
+TEAM_NAME = "{{ mattermost_team_name }}"
+TEAM_DISPLAY_NAME = "{{ mattermost_team_display_name }}"
+ADMIN_USERNAME = "{{ mattermost_admin_username }}"
+ADMIN_EMAIL = "{{ mattermost_admin_email }}"
+ADMIN_PASSWORD = "{{ mattermost_admin_password }}"
+WEBHOOKS_FILE = "{{ mattermost_webhooks_remote_file }}"
+CHANNELS = {{ mattermost_channels | to_json }}
+JSON_DECODER = json.JSONDecoder()
+
+
+def run_mmctl(*args, json_output=False, check=True):
+    cmd = ["docker", "exec", CONTAINER, MMCTL, "--local", "--strict", "--disable-pager"]
+    if json_output:
+        cmd.append("--json")
+    cmd += list(args)
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if check and result.returncode != 0:
+        raise RuntimeError(
+            f"mmctl command failed ({' '.join(shlex.quote(part) for part in cmd)}): {result.stderr.strip()}"
+        )
+    return result
+
+
+def maybe_create_admin():
+    for user in load_users():
+        if user.get("username") == ADMIN_USERNAME:
+            return False
+
+    create = run_mmctl(
+        "user",
+        "create",
+        "--email",
+        ADMIN_EMAIL,
+        "--username",
+        ADMIN_USERNAME,
+        "--password",
+        ADMIN_PASSWORD,
+        "--system-admin",
+        "--email-verified",
+        check=False,
+    )
+    if create.returncode == 0:
+        run_mmctl("user", "verify", ADMIN_USERNAME, check=False)
+        return True
+    stderr = create.stderr.lower()
+    if "already exists" in stderr or "username is already taken" in stderr or "email is already taken" in stderr:
+        return False
+    raise RuntimeError(create.stderr.strip())
+
+
+def ensure_admin_password():
+    try:
+        return ensure_admin_token(), False
+    except Exception:
+        run_mmctl("user", "change-password", ADMIN_USERNAME, "--password", ADMIN_PASSWORD)
+        run_mmctl("user", "verify", ADMIN_USERNAME, check=False)
+        return ensure_admin_token(), True
+
+
+def parse_mmctl_json(raw_text):
+    payload, _ = JSON_DECODER.raw_decode((raw_text or "").lstrip())
+    return payload
+
+
+def load_json_command(*args):
+    result = run_mmctl(*args, json_output=True)
+    return parse_mmctl_json(result.stdout or "")
+
+
+def ensure_list(payload):
+    if payload is None:
+        return []
+    if isinstance(payload, list):
+        return payload
+    if isinstance(payload, dict):
+        return [payload]
+    raise RuntimeError(f"Unexpected mmctl JSON payload type: {type(payload).__name__}")
+
+
+def load_users():
+    return ensure_list(load_json_command("user", "list", "--all"))
+
+
+def load_teams():
+    return ensure_list(load_json_command("team", "list"))
+
+
+def load_channels():
+    return ensure_list(load_json_command("channel", "list", TEAM_NAME))
+
+
+def first_matching(items, key, value):
+    for item in items:
+        if item.get(key) == value:
+            return item
+    return None
+
+
+def ensure_team():
+    teams = load_teams()
+    team = first_matching(teams, "name", TEAM_NAME)
+    if team:
+        return team, False
+    run_mmctl(
+        "team",
+        "create",
+        "--name",
+        TEAM_NAME,
+        "--display-name",
+        TEAM_DISPLAY_NAME,
+    )
+    run_mmctl("team", "users", "add", TEAM_NAME, ADMIN_USERNAME, check=False)
+    teams = load_teams()
+    team = first_matching(teams, "name", TEAM_NAME)
+    if not team:
+        raise RuntimeError("Mattermost team bootstrap succeeded but the team could not be queried afterward.")
+    return team, True
+
+
+def ensure_channel(channel):
+    channels = load_channels()
+    existing = first_matching(channels, "name", channel["name"])
+    if existing:
+        return existing, False
+    run_mmctl(
+        "channel",
+        "create",
+        "--team",
+        TEAM_NAME,
+        "--name",
+        channel["name"],
+        "--display-name",
+        channel["display_name"],
+        "--purpose",
+        channel["purpose"],
+        "--header",
+        channel["header"],
+    )
+    channels = load_channels()
+    existing = first_matching(channels, "name", channel["name"])
+    if not existing:
+        raise RuntimeError(f"Mattermost channel {channel['name']} was not found after creation.")
+    return existing, True
+
+
+def api_request(method, path, token, payload=None):
+    data = None
+    headers = {"Authorization": f"Bearer {token}"}
+    if payload is not None:
+        data = json.dumps(payload).encode("utf-8")
+        headers["Content-Type"] = "application/json"
+    request = urllib.request.Request(
+        f"{BASE_URL}{path}",
+        data=data,
+        headers=headers,
+        method=method,
+    )
+    with urllib.request.urlopen(request) as response:
+        content = response.read().decode("utf-8")
+        return json.loads(content) if content else None
+
+
+def ensure_admin_token():
+    request = urllib.request.Request(
+        f"{BASE_URL}/api/v4/users/login",
+        data=json.dumps({"login_id": ADMIN_USERNAME, "password": ADMIN_PASSWORD}).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    with urllib.request.urlopen(request) as response:
+        token = response.headers.get("Token")
+        if not token:
+            raise RuntimeError("Mattermost login succeeded but no Token header was returned.")
+        return token
+
+
+def ensure_incoming_webhook(admin_token, owner_user_id, channel_id, display_name, description):
+    hooks = api_request(
+        "GET",
+        f"/api/v4/hooks/incoming?channel_id={channel_id}",
+        admin_token,
+    ) or []
+    for hook in hooks:
+        if hook.get("display_name") == display_name:
+            return hook, False
+    hook = api_request(
+        "POST",
+        "/api/v4/hooks/incoming",
+        admin_token,
+        {
+            "channel_id": channel_id,
+            "user_id": owner_user_id,
+            "display_name": display_name,
+            "description": description,
+            "lock_to_channel": True,
+        },
+    )
+    return hook, True
+
+
+def main():
+    changed = False
+    if first_matching(load_users(), "username", ADMIN_USERNAME) is None:
+        changed |= maybe_create_admin()
+    admin_token, password_changed = ensure_admin_password()
+    changed |= password_changed
+    team, team_changed = ensure_team()
+    changed |= team_changed
+    run_mmctl("team", "users", "add", TEAM_NAME, ADMIN_USERNAME, check=False)
+
+    users = load_users()
+    admin_user = first_matching(users, "username", ADMIN_USERNAME)
+    if not admin_user:
+        raise RuntimeError("Mattermost admin user exists but could not be queried for webhook ownership.")
+
+    channels_manifest = {}
+    webhooks_manifest = {}
+
+    for channel in CHANNELS:
+        channel_record, channel_changed = ensure_channel(channel)
+        changed |= channel_changed
+        channels_manifest[channel["webhook_key"]] = {
+            "id": channel_record["id"],
+            "name": channel_record["name"],
+            "display_name": channel_record["display_name"],
+        }
+        webhook, webhook_changed = ensure_incoming_webhook(
+            admin_token,
+            admin_user["id"],
+            channel_record["id"],
+            f"LV3 {channel['display_name']}",
+            channel["purpose"],
+        )
+        changed |= webhook_changed
+        webhooks_manifest[channel["webhook_key"]] = {
+            "id": webhook["id"],
+            "channel_id": webhook["channel_id"],
+            "channel_name": channel_record["name"],
+            "internal_url": f"{INTERNAL_WEBHOOK_BASE_URL}/hooks/{webhook['id']}",
+            "external_url": f"{EXTERNAL_WEBHOOK_BASE_URL}/hooks/{webhook['id']}",
+        }
+
+    manifest = {
+        "team": {
+            "id": team["id"],
+            "name": team["name"],
+            "display_name": team["display_name"],
+        },
+        "channels": channels_manifest,
+        "webhooks": webhooks_manifest,
+    }
+
+    existing = None
+    if os.path.exists(WEBHOOKS_FILE):
+        with open(WEBHOOKS_FILE, "r", encoding="utf-8") as handle:
+            existing = handle.read()
+    rendered = json.dumps(manifest, indent=2, sort_keys=True) + "\n"
+    if existing != rendered:
+        with open(WEBHOOKS_FILE, "w", encoding="utf-8") as handle:
+            handle.write(rendered)
+        os.chmod(WEBHOOKS_FILE, 0o600)
+        changed = True
+
+    print(f"BOOTSTRAP_CHANGED={'true' if changed else 'false'}")
+
+
+if __name__ == "__main__":
+    main()

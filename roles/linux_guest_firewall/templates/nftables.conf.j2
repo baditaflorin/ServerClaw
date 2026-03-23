@@ -1,0 +1,54 @@
+#!/usr/sbin/nft -f
+
+flush ruleset
+
+{% set policy = hostvars[linux_guest_firewall_host_id].network_policy %}
+{% set guest_ip_map = dict(hostvars[linux_guest_firewall_host_id].proxmox_guests | map(attribute='name') | zip(hostvars[linux_guest_firewall_host_id].proxmox_guests | map(attribute='ipv4'))) %}
+{% set guest_policy = policy.guests[inventory_hostname] %}
+{% macro render_rule(rule) -%}
+{% set ports = rule.ports | join(', ') %}
+{% if rule.source == 'public' %}
+    {{ rule.protocol }} dport { {{ ports }} } accept
+{% elif rule.source == 'management' %}
+{% for source in policy.guest_management_sources %}
+    ip saddr {{ source }} {{ rule.protocol }} dport { {{ ports }} } accept
+{% endfor %}
+{% elif rule.source == 'host' %}
+    ip saddr {{ policy.host_source }} {{ rule.protocol }} dport { {{ ports }} } accept
+{% elif rule.source == 'all_guests' %}
+{% for guest_name, guest_ip in guest_ip_map.items() | sort if guest_name != inventory_hostname %}
+    ip saddr {{ guest_ip }}/32 {{ rule.protocol }} dport { {{ ports }} } accept
+{% endfor %}
+{% elif rule.source in guest_ip_map %}
+    ip saddr {{ guest_ip_map[rule.source] }}/32 {{ rule.protocol }} dport { {{ ports }} } accept
+{% else %}
+    ip saddr {{ rule.source }} {{ rule.protocol }} dport { {{ ports }} } accept
+{% endif %}
+{%- endmacro %}
+
+table inet filter {
+  chain input {
+    type filter hook input priority 0;
+    policy drop;
+
+    iifname "lo" accept
+    ct state established,related accept
+{% for rule in guest_policy.allowed_inbound %}
+{{ render_rule(rule) }}
+{% endfor %}
+  }
+
+  chain forward {
+    type filter hook forward priority 0;
+    policy drop;
+    ct state established,related accept
+{% for rule in guest_policy.allowed_inbound %}
+{{ render_rule(rule) }}
+{% endfor %}
+  }
+
+  chain output {
+    type filter hook output priority 0;
+    policy accept;
+  }
+}

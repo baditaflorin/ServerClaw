@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0068](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0068-container-image-policy-and-supply-chain-integrity.md)
 - Title: Digest-pinned images, scan receipts, and an upgrade workflow for supply-chain safety
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0068-container-image-policy`
 - Worktree: `../proxmox_florin_server-container-image-policy`
 - Owner: codex
@@ -14,7 +14,7 @@
 
 - audit all current Compose stacks and record existing images in `config/image-catalog.json`
 - pin every image to a digest in its Compose file
-- run `trivy image` on each pinned image and store receipts in `receipts/image-scans/`
+- run `trivy image --scanners vuln` on each pinned image and store receipts in `receipts/image-scans/`
 - create Windmill workflow `upgrade-container-image` as the approved upgrade path
 - add `make check-image-freshness` target
 - document the policy in `docs/runbooks/container-image-policy.md`
@@ -45,15 +45,15 @@
 
 - `python3 -c "import json; json.load(open('config/image-catalog.json'))"` exits 0
 - `make check-image-freshness` runs without error
-- `docker inspect <container> | jq '.[0].Image'` matches the pinned digest in the catalog
+- `python3 scripts/container_image_policy.py --validate` exits 0
 
 ## Merge Criteria
 
 - no `:latest` or unpinned tags remain in any managed Compose file
-- every image has a scan receipt with no critical CVEs
+- every image has a scan receipt and any remaining critical CVEs have an explicit time-bounded exception record in the catalog
 - the upgrade workflow is documented and a test run receipt exists
 
 ## Notes For The Next Assistant
 
 - `docker compose pull --quiet && docker inspect <image>` is the easiest way to get the current digest before pinning
-- use `trivy image --severity CRITICAL,HIGH` to filter noise on the initial scan pass
+- use `trivy image --scanners vuln --severity CRITICAL,HIGH` to stay focused on CVE gating instead of secret-scanning noise

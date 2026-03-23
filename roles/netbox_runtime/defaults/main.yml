@@ -1,18 +1,18 @@
 ---
-netbox_image_tag: v4.5
-netbox_image: "docker.io/netboxcommunity/netbox:{{ netbox_image_tag }}"
-netbox_redis_image: docker.io/valkey/valkey:8.1-alpine
+netbox_image_tag: v4.5.4
+netbox_image: "{{ container_image_catalog.images.netbox_runtime.ref }}"
+netbox_redis_image: "{{ container_image_catalog.images.netbox_redis_runtime.ref }}"
 netbox_site_dir: /opt/netbox
 netbox_secret_dir: /etc/lv3/netbox
 netbox_compose_file: "{{ netbox_site_dir }}/docker-compose.yml"
 netbox_env_file: "{{ netbox_site_dir }}/netbox.env"
-netbox_server_port: 8082
-netbox_host_proxy_port: 8004
-netbox_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ netbox_host_proxy_port }}"
-netbox_private_base_url: "http://127.0.0.1:{{ netbox_server_port }}"
+netbox_server_port: "{{ platform_service_topology | platform_service_port('netbox', 'internal') }}"
+netbox_host_proxy_port: "{{ platform_service_topology | platform_service_port('netbox', 'controller') }}"
+netbox_controller_url: "{{ platform_service_topology | platform_service_url('netbox', 'controller') }}"
+netbox_private_base_url: "{{ platform_service_topology | platform_service_url('netbox', 'internal') }}"
 netbox_database_name: netbox
 netbox_database_user: netbox
-netbox_database_host: "{{ hostvars['postgres-lv3'].ansible_host }}"
+netbox_database_host: "{{ platform_guest_catalog.by_name | platform_guest_attr('postgres-lv3', 'ipv4') }}"
 netbox_database_port: 5432
 netbox_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/netbox/database-password.txt
 netbox_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/netbox

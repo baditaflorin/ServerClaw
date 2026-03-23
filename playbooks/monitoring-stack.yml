@@ -12,6 +12,7 @@
         fail_msg: "This playbook only supports Debian guests."
 
   roles:
+    - role: linux_guest_firewall
     - role: monitoring_vm
 
 - name: Wire Proxmox metrics into the monitoring stack
@@ -46,6 +47,7 @@
         fail_msg: "This playbook only supports Debian guests."
 
   roles:
+    - role: linux_guest_firewall
     - role: nginx_observability
 
 - name: Converge docker build guest observability
@@ -61,6 +63,7 @@
         fail_msg: "This playbook only supports Debian guests."
 
   roles:
+    - role: linux_guest_firewall
     - role: docker_build_observability
 
 - name: Converge docker runtime guest observability
@@ -76,6 +79,7 @@
         fail_msg: "This playbook only supports Debian guests."
 
   roles:
+    - role: linux_guest_firewall
     - role: docker_runtime_observability
 
 - name: Converge guest log shipping

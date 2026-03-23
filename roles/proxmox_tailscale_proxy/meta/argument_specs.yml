@@ -1,0 +1,17 @@
+---
+argument_specs:
+  main:
+    short_description: Configure socket-activated Tailscale TCP proxies on the Proxmox host.
+    options:
+      proxmox_tailscale_tcp_proxies:
+        type: list
+        elements: raw
+        required: false
+        default: []
+        description:
+          - Legacy proxy definitions rendered directly from inventory host variables.
+      platform_host:
+        type: dict
+        required: false
+        description:
+          - Generated platform topology data. When present, the role prefers `platform_host.network.tailscale_tcp_proxies` as the resolved proxy catalog.

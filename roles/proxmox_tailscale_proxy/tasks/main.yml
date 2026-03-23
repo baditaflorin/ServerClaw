@@ -1,8 +1,21 @@
 ---
+- name: Resolve Proxmox Tailscale proxy inputs
+  ansible.builtin.set_fact:
+    proxmox_tailscale_effective_tcp_proxies: >-
+      {{
+        platform_host.network.tailscale_tcp_proxies
+        if (
+          platform_host is defined and
+          platform_host.network is defined and
+          platform_host.network.tailscale_tcp_proxies is defined
+        )
+        else (proxmox_tailscale_tcp_proxies | default([]))
+      }}
+
 - name: Validate Proxmox Tailscale proxy inputs
   ansible.builtin.assert:
     that:
-      - proxmox_tailscale_tcp_proxies is sequence
+      - proxmox_tailscale_effective_tcp_proxies is sequence
     fail_msg: "proxmox_tailscale_proxy requires a list of TCP proxy definitions."
 
 - name: Ensure Proxmox Tailscale proxy systemd unit directory exists
@@ -16,7 +29,7 @@
     src: lv3-tailscale-proxy.socket.j2
     dest: "/etc/systemd/system/lv3-tailscale-proxy-{{ item.name }}.socket"
     mode: "0644"
-  loop: "{{ proxmox_tailscale_tcp_proxies | default([]) }}"
+  loop: "{{ proxmox_tailscale_effective_tcp_proxies }}"
   loop_control:
     label: "{{ item.name }}"
   register: proxmox_tailscale_proxy_sockets
@@ -27,7 +40,7 @@
     src: lv3-tailscale-proxy.service.j2
     dest: "/etc/systemd/system/lv3-tailscale-proxy-{{ item.name }}.service"
     mode: "0644"
-  loop: "{{ proxmox_tailscale_tcp_proxies | default([]) }}"
+  loop: "{{ proxmox_tailscale_effective_tcp_proxies }}"
   loop_control:
     label: "{{ item.name }}"
   register: proxmox_tailscale_proxy_services
@@ -41,6 +54,6 @@
     name: "lv3-tailscale-proxy-{{ item.name }}.socket"
     enabled: true
     state: started
-  loop: "{{ proxmox_tailscale_tcp_proxies | default([]) }}"
+  loop: "{{ proxmox_tailscale_effective_tcp_proxies }}"
   loop_control:
     label: "{{ item.name }}"

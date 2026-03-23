@@ -1,0 +1,212 @@
+---
+- name: Validate platform context runtime inputs
+  ansible.builtin.assert:
+    that:
+      - platform_context_site_dir | length > 0
+      - platform_context_service_dir | length > 0
+      - platform_context_corpus_dir | length > 0
+      - platform_context_data_dir | length > 0
+      - platform_context_secret_dir | length > 0
+      - platform_context_compose_file | length > 0
+      - platform_context_env_file | length > 0
+      - platform_context_local_artifact_dir | length > 0
+      - platform_context_api_token_local_file | length > 0
+      - platform_context_internal_port | int > 0
+      - platform_context_qdrant_image | length > 0
+      - platform_context_service_sources | length > 0
+      - platform_context_corpus_sources | length > 0
+    fail_msg: "rag_context_runtime requires compose paths, repo source paths, image settings, and token paths."
+
+- name: Ensure the platform context runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - openssl
+    state: present
+    update_cache: true
+
+- name: Ensure the platform context directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ platform_context_site_dir }}"
+      mode: "0755"
+    - path: "{{ platform_context_service_dir }}"
+      mode: "0755"
+    - path: "{{ platform_context_corpus_dir }}"
+      mode: "0755"
+    - path: "{{ platform_context_data_dir }}"
+      mode: "0755"
+    - path: "{{ platform_context_secret_dir }}"
+      mode: "0700"
+
+- name: Generate the platform context API token
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ platform_context_api_token_remote_file }}" ]; then
+      umask 077
+      openssl rand -hex 32 > "{{ platform_context_api_token_remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: platform_context_token_generation
+  changed_when: "'changed' in platform_context_token_generation.stdout"
+  no_log: true
+
+- name: Read the platform context API token
+  ansible.builtin.slurp:
+    src: "{{ platform_context_api_token_remote_file }}"
+  register: platform_context_api_token_raw
+  no_log: true
+
+- name: Record the platform context API token
+  ansible.builtin.set_fact:
+    platform_context_api_token: "{{ platform_context_api_token_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Ensure the local platform context artifact directory exists
+  ansible.builtin.file:
+    path: "{{ platform_context_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Mirror the platform context API token to the control machine
+  ansible.builtin.copy:
+    dest: "{{ platform_context_api_token_local_file }}"
+    content: "{{ platform_context_api_token }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Render the platform context environment file
+  ansible.builtin.template:
+    src: platform-context.env.j2
+    dest: "{{ platform_context_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Render the platform context compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ platform_context_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the platform context API Dockerfile
+  ansible.builtin.copy:
+    dest: "{{ platform_context_service_dir }}/Dockerfile"
+    content: |
+      FROM python:3.12-slim
+      WORKDIR /app
+      COPY requirements.txt ./requirements.txt
+      RUN pip install --no-cache-dir -r requirements.txt
+      COPY platform_context_corpus.py ./platform_context_corpus.py
+      COPY platform_context_service.py ./platform_context_service.py
+      EXPOSE 8010
+      CMD ["uvicorn", "platform_context_service:app", "--host", "0.0.0.0", "--port", "8010"]
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Sync the platform context service sources
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ platform_context_service_dir }}/{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ platform_context_service_sources }}"
+
+- name: Ensure platform context corpus parent directories exist
+  ansible.builtin.file:
+    path: "{{ platform_context_corpus_dir }}/{{ item.dest | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ platform_context_corpus_sources }}"
+  loop_control:
+    label: "{{ item.dest }}"
+
+- name: Sync the platform context corpus files
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ platform_context_corpus_dir }}/{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ platform_context_corpus_sources }}"
+  loop_control:
+    label: "{{ item.dest }}"
+
+- name: Pull the platform context images
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --env-file
+      - "{{ platform_context_env_file }}"
+      - --file
+      - "{{ platform_context_compose_file }}"
+      - pull
+      - qdrant
+  args:
+    chdir: "{{ platform_context_site_dir }}"
+  register: platform_context_pull
+  changed_when: >-
+    'Pulling' in platform_context_pull.stdout
+    or 'Downloaded newer image' in platform_context_pull.stdout
+    or 'Pull complete' in platform_context_pull.stdout
+
+- name: Check whether the Docker nat chain exists before recreating published ports
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: platform_context_docker_nat_chain
+  changed_when: false
+  failed_when: false
+
+- name: Restore Docker networking when the nat chain is missing
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+  when: platform_context_docker_nat_chain.rc != 0
+
+- name: Build and start the platform context stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --env-file
+      - "{{ platform_context_env_file }}"
+      - --file
+      - "{{ platform_context_compose_file }}"
+      - up
+      - -d
+      - --build
+      - --remove-orphans
+  args:
+    chdir: "{{ platform_context_site_dir }}"
+  register: platform_context_up
+  changed_when: >-
+    'Creating' in platform_context_up.stdout
+    or 'Recreating' in platform_context_up.stdout
+    or 'Starting' in platform_context_up.stdout
+    or 'Building' in platform_context_up.stdout
+
+- name: Verify the platform context runtime
+  ansible.builtin.import_tasks: verify.yml
