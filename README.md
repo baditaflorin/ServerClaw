@@ -83,7 +83,7 @@ The repository now also ships ADR 0096 SLO tracking: a canonical SLO catalog, ge
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.108.0` |
+| Repository version | `0.109.0` |
 | Platform version | `0.40.0` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -180,7 +180,7 @@ password SSH disabled on host and guests
 | `command` | Command Lane | `ssh` | 2 | Use SSH only for command-lane access. |
 | `api` | API Lane | `https` | 11 | Default new APIs to internal-only or operator-only publication. |
 | `message` | Message Lane | `authenticated_submission` | 2 | Submit platform mail through the internal mail platform rather than arbitrary external SMTP relays. |
-| `event` | Event Lane | `mixed` | 5 | Event sinks must be documented and intentionally reachable. |
+| `event` | Event Lane | `mixed` | 6 | Event sinks must be documented and intentionally reachable. |
 
 ### Current Governed Surfaces
 | Surface | Lane | Kind | Endpoint |
@@ -204,12 +204,13 @@ password SSH disabled on host and guests
 | `mattermost-incoming-webhooks` | `event` | `webhook` | `http://10.10.10.20:8065/hooks/<managed-id>` |
 | `platform-finding-subjects` | `event` | `event_subject` | `platform.findings.*` |
 | `platform-drift-subjects` | `event` | `event_subject` | `platform.drift.*` |
+| `platform-security-subjects` | `event` | `event_subject` | `platform.security.*` |
 | `maintenance-window-subjects` | `event` | `event_subject` | `maintenance.*` |
 
 ### API Publication Tiers
 | Tier | Title | Surfaces | Summary |
 | --- | --- | --- | --- |
-| `internal-only` | Internal-Only | 8 | Reachable only from LV3 private networks, loopback paths, or explicitly trusted control-plane hosts. |
+| `internal-only` | Internal-Only | 9 | Reachable only from LV3 private networks, loopback paths, or explicitly trusted control-plane hosts. |
 | `operator-only` | Operator-Only | 7 | Reachable only from approved operator devices over private access such as Tailscale. |
 | `public-edge` | Public Edge | 1 | Intentionally published on a public domain through the named edge model. |
 
@@ -231,6 +232,7 @@ password SSH disabled on host and guests
 | `mattermost-incoming-webhooks` | `internal-only` | `event` | `http://10.10.10.20:8065/hooks/<managed-id>` | Reachable on the private Mattermost runtime at docker-runtime-lv3:8065, with mirrored webhook ids retained under .local/mattermost for controlled routing. |
 | `platform-finding-subjects` | `internal-only` | `event` | `platform.findings.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
 | `platform-drift-subjects` | `internal-only` | `event` | `platform.drift.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
+| `platform-security-subjects` | `internal-only` | `event` | `platform.security.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
 | `maintenance-window-subjects` | `internal-only` | `event` | `maintenance.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
 <!-- END GENERATED: control-plane-lanes -->
 
@@ -403,6 +405,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Rotate Certificates](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/rotate-certificates.md)
 - [Scaffold A New Service](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/scaffold-new-service.md)
 - [Secret Rotation And Lifecycle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/secret-rotation-and-lifecycle.md)
+- [Security Posture Reporting](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/security-posture-reporting.md)
 - [Service Capability Catalog](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/service-capability-catalog.md)
 - [SLO Tracking](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/slo-tracking.md)
 - [Staging And Production Topology](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/staging-and-production-topology.md)
@@ -628,7 +631,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.108.0` |
+| Repository version | `0.109.0` |
 | Platform version | `0.40.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -739,6 +742,7 @@ This repository is intentionally opinionated:
 | `0099` | Automated backup restore verification | `merged` | [adr-0099-backup-restore-verification.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0099-backup-restore-verification.md) |
 | `0100` | RTO/RPO targets and disaster recovery playbook | `merged` | [adr-0100-disaster-recovery-playbook.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0100-disaster-recovery-playbook.md) |
 | `0101` | Automated certificate lifecycle management | `merged` | [adr-0101-certificate-lifecycle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0101-certificate-lifecycle.md) |
+| `0102` | Security posture reporting and benchmark drift | `merged` | [adr-0102-security-posture-reporting.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0102-security-posture-reporting.md) |
 | `0103` | Data classification and retention policy | `merged` | [adr-0103-data-retention-policy.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0103-data-retention-policy.md) |
 | `0104` | Service dependency graph and failure propagation model | `merged` | [adr-0104-dependency-graph.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0104-dependency-graph.md) |
 | `0106` | Ephemeral environment lifecycle and teardown policy | `merged` | [adr-0106-ephemeral-lifecycle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0106-ephemeral-lifecycle.md) |

@@ -1,0 +1,4 @@
+hardening_index=72
+warning[]=AUTH-9208|Set a password hashing iteration count
+warning[]=PKGS-7392|Apply the latest Debian security updates
+suggestion[]=KRNL-6000|Consider enabling additional kernel hardening

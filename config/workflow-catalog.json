@@ -1002,6 +1002,52 @@
         "python3 scripts/restore_verification.py --help"
       ]
     },
+    "security-posture-scan": {
+      "description": "Run the ADR 0102 Lynis and Trivy security posture workflow, store a receipt, and publish security events.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "security-posture-report",
+        "command": "make security-posture-report ENV=production"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "nats_jetstream_admin_password"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "validate-generated-portals"
+      ],
+      "live_impact": "repo_only",
+      "owner_runbook": "docs/runbooks/security-posture-reporting.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/tasks/security-scan.yml",
+        "config/control-plane-lanes.json",
+        "config/api-publication.json",
+        "config/workflow-catalog.json",
+        "config/windmill/scripts/security-posture-scan.py",
+        "config/lynis-suppressions.json",
+        "scripts/parse_lynis_report.py",
+        "scripts/trivy_scan_running_images.sh",
+        "scripts/security_posture_report.py",
+        "scripts/generate_ops_portal.py",
+        "receipts/security-reports",
+        "collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/_grafana_dashboard_macros.j2",
+        "collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/lv3-platform-overview.json.j2"
+      ],
+      "outputs": [
+        "A timestamped security posture receipt covering Lynis hardening scores, new host findings, and HIGH or CRITICAL runtime image CVEs, together with optional NATS, Mattermost, GlitchTip, and Influx outputs."
+      ],
+      "verification_commands": [
+        "python3 -m py_compile scripts/parse_lynis_report.py scripts/security_posture_report.py config/windmill/scripts/security-posture-scan.py",
+        "python3 scripts/parse_lynis_report.py tests/fixtures/security_posture_docker_runtime.dat",
+        "python3 scripts/security_posture_report.py --help"
+      ]
+    },
     "rotate-secret": {
       "description": "Plan or apply one repo-managed secret rotation, update the owning service without a full reconverge, and persist the rotated value in OpenBao.",
       "lifecycle_status": "active",

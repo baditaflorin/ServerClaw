@@ -40,6 +40,7 @@ BUILD_DIR = repo_path("build", "ops-portal")
 SNAPSHOT_PATH = repo_path("receipts", "ops-portal-snapshot.html")
 DRIFT_RECEIPTS_DIR = repo_path("receipts", "drift-reports")
 FIXTURE_RECEIPTS_DIR = repo_path("receipts", "fixtures")
+SECURITY_RECEIPTS_DIR = repo_path("receipts", "security-reports")
 
 NAV = [
     ("index.html", "Service Map"),
@@ -250,6 +251,20 @@ def latest_drift_report() -> tuple[Path | None, dict[str, Any] | None]:
     return None, None
 
 
+def latest_security_report() -> tuple[Path | None, dict[str, Any] | None]:
+    reports = sorted(
+        SECURITY_RECEIPTS_DIR.glob("*.json"),
+        key=lambda path: path.stat().st_mtime,
+        reverse=True,
+    )
+    for report in reports:
+        try:
+            return report, load_json(report)
+        except Exception:  # noqa: BLE001
+            continue
+    return None, None
+
+
 def render_drift_panel() -> str:
     path, payload = latest_drift_report()
     if not path or not isinstance(payload, dict):
@@ -295,6 +310,62 @@ def render_drift_panel() -> str:
         '<section class="panel">'
         '<div class="card-head">'
         '<div><h2>Drift Status</h2><p class="muted">Latest multi-source drift report from the ADR 0091 receipt stream.</p></div>'
+        f"<div>{render_badge(status, badge_tone)}</div>"
+        "</div>"
+        + status_metrics
+        + f'<div class="chip-row">{receipt_link}</div>'
+        + table
+        + "</section>"
+    )
+
+
+def render_security_panel() -> str:
+    path, payload = latest_security_report()
+    if not path or not isinstance(payload, dict):
+        return (
+            '<section class="panel">'
+            '<div class="card-head"><div><h2>Security Posture</h2><p class="muted">No security posture receipt is committed yet.</p></div>'
+            f"<div>{render_badge('unknown', 'neutral')}</div></div>"
+            "</section>"
+        )
+
+    summary = payload.get("summary", {})
+    status = str(summary.get("status", "unknown"))
+    badge_tone = "ok" if status == "clean" else "warn" if status == "warn" else "danger"
+    hosts = payload.get("hosts", [])
+    images = payload.get("images", [])
+    top_rows = []
+    for host in hosts[:5]:
+        delta = host.get("hardening_index_delta")
+        delta_text = "n/a" if delta is None else f"{delta:+d}"
+        top_rows.append(
+            "<tr>"
+            f"<td>{escape(host.get('host', 'n/a'))}</td>"
+            f"<td>{escape(host.get('hardening_index', 'n/a'))}</td>"
+            f"<td>{escape(delta_text)}</td>"
+            f"<td>{escape(host.get('new_findings_since_last_scan', 0))}</td>"
+            "</tr>"
+        )
+    receipt_link = render_external_link(repo_view_link(path), "Latest Receipt")
+    generated_at = escape(str(payload.get("generated_at", "unknown")))
+    status_metrics = (
+        '<div class="meta-list">'
+        f"<div><strong>Run</strong><span>{generated_at}</span></div>"
+        f"<div><strong>Critical CVEs</strong><span>{escape(summary.get('total_critical_cves', 0))}</span></div>"
+        f"<div><strong>High CVEs</strong><span>{escape(summary.get('total_high_cves', 0))}</span></div>"
+        f"<div><strong>Lowest Hardening</strong><span>{escape(summary.get('lowest_hardening_index', 'n/a'))}</span></div>"
+        f"<div><strong>Scanned Images</strong><span>{escape(len(images))}</span></div>"
+        "</div>"
+    )
+    table = (
+        '<div class="table-scroll"><table>'
+        "<thead><tr><th>Host</th><th>Index</th><th>Delta</th><th>New Findings</th></tr></thead>"
+        f"<tbody>{''.join(top_rows) if top_rows else '<tr><td colspan=\"4\">No host scan data.</td></tr>'}</tbody></table></div>"
+    )
+    return (
+        '<section class="panel">'
+        '<div class="card-head">'
+        '<div><h2>Security Posture</h2><p class="muted">Latest ADR 0102 receipt covering host hardening and runtime image CVEs.</p></div>'
         f"<div>{render_badge(status, badge_tone)}</div>"
         "</div>"
         + status_metrics
@@ -749,6 +820,16 @@ def render_agents(tools: list[dict[str, Any]]) -> str:
     return f'<section class="card-grid">{"".join(cards)}</section>'
 
 
+def load_agent_registry_best_effort() -> tuple[dict[str, Any], dict[str, Any]]:
+    try:
+        return load_agent_tool_registry()
+    except Exception:  # noqa: BLE001
+        return (
+            load_json(repo_path("config", "agent-tool-registry.json")),
+            load_json(repo_path("config", "workflow-catalog.json")),
+        )
+
+
 def write_page(output_dir: Path, relative_path: str, title: str, subtitle: str, body: str) -> None:
     target = output_dir / relative_path
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -789,7 +870,7 @@ def render_portal(
     environment_catalog = load_environment_topology()
     service_catalog = load_service_catalog()
     subdomain_catalog = load_subdomain_catalog()
-    agent_registry, _workflow_catalog = load_agent_tool_registry()
+    agent_registry, _workflow_catalog = load_agent_registry_best_effort()
     stack = load_yaml(STACK_PATH)
     host_vars = load_yaml(HOST_VARS_PATH)
 
@@ -827,6 +908,7 @@ def render_portal(
         render_summary(services, subdomains, tools, environments)
         + render_slo_panel(slo_prometheus_url)
         + render_drift_panel()
+        + render_security_panel()
         + render_release_panel()
         + render_ephemeral_vm_panel()
         + render_service_cards(services, health, dependency_summaries),

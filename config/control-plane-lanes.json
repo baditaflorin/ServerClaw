@@ -338,6 +338,19 @@
           "notes": "Each scheduled drift run publishes per-record warn, critical, and unreachable events so portal, alerting, and future reconciliation workflows can subscribe to platform state divergence directly."
         },
         {
+          "id": "platform-security-subjects",
+          "kind": "event_subject",
+          "endpoint": "platform.security.*",
+          "auth": "Internal NATS publication from ADR 0102 through the private docker-runtime-lv3 event bus runtime.",
+          "owner_refs": [
+            "proxmox_florin"
+          ],
+          "workflow_refs": [
+            "security-posture-scan"
+          ],
+          "notes": "Each scheduled security posture run publishes a summary event plus critical findings so operators and future automation can react without polling the receipt directory."
+        },
+        {
           "id": "maintenance-window-subjects",
           "kind": "event_subject",
           "endpoint": "maintenance.*",

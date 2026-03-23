@@ -101,6 +101,56 @@ class OpsPortalRenderTests(unittest.TestCase):
             ops_portal.latest_drift_report = original
             shutil.rmtree(temp_dir)
 
+    def test_render_portal_includes_security_receipt_summary(self) -> None:
+        temp_dir = Path(tempfile.mkdtemp(prefix="ops-portal-test-"))
+        original = ops_portal.latest_security_report
+        try:
+            security_receipt = temp_dir / "latest-security.json"
+            security_receipt.write_text(
+                json.dumps(
+                    {
+                        "generated_at": "2026-03-23T20:00:00Z",
+                        "summary": {
+                            "status": "warn",
+                            "total_critical_cves": 0,
+                            "total_high_cves": 3,
+                            "lowest_hardening_index": 68,
+                            "new_lynis_findings": 1,
+                        },
+                        "hosts": [
+                            {
+                                "host": "docker-runtime-lv3",
+                                "hardening_index": 68,
+                                "hardening_index_delta": -2,
+                                "new_findings_since_last_scan": 1,
+                            }
+                        ],
+                        "images": [
+                            {
+                                "host": "docker-runtime-lv3",
+                                "image": "ghcr.io/example/app:1.0.0",
+                            }
+                        ],
+                    }
+                )
+            )
+            ops_portal.latest_security_report = lambda: (
+                security_receipt,
+                json.loads(security_receipt.read_text()),
+            )
+            ops_portal.render_portal(
+                temp_dir,
+                REPO_ROOT / "tests" / "fixtures" / "ops_portal_health.json",
+                0,
+            )
+            index_html = (temp_dir / "index.html").read_text()
+            self.assertIn("Security Posture", index_html)
+            self.assertIn("Lowest Hardening", index_html)
+            self.assertIn("docker-runtime-lv3", index_html)
+        finally:
+            ops_portal.latest_security_report = original
+            shutil.rmtree(temp_dir)
+
 
 if __name__ == "__main__":
     unittest.main()

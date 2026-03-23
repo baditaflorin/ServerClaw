@@ -1,10 +1,10 @@
 # ADR 0102: Security Posture Reporting and Benchmark Drift
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.109.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-24
 - Date: 2026-03-23
 
 ## Context
@@ -21,7 +21,7 @@ Without a continuous security scan, the platform's security posture degrades sil
 
 ## Decision
 
-We will implement a **weekly automated security posture report** using two complementary tools — Lynis for host/guest OS-level hardening checks and Trivy for container image vulnerability scanning — with results written to the ops portal (ADR 0093), GlitchTip (ADR 0061) for critical findings, and the mutation audit log (ADR 0066).
+We will implement a **weekly automated security posture report** using two complementary tools — Lynis for host or guest OS-level hardening checks and Trivy for container image vulnerability scanning — with results written to committed receipts, surfaced in the current ops portal (ADR 0074) and Grafana dashboard, and optionally forwarded to Mattermost, GlitchTip, NATS, and the mutation audit log.
 
 ### Tool selection
 
@@ -36,49 +36,46 @@ Trivy is run on: all running containers on `docker-runtime-lv3` and `docker-buil
 
 ### Weekly scan workflow
 
-A Windmill workflow `security-posture-scan` runs every Monday at 01:00 UTC:
+A Windmill wrapper `security-posture-scan` runs the controller-side report workflow on a weekly schedule:
 
 ```python
-@windmill_flow(name="security-posture-scan", schedule="0 1 * * 1")
 def run_security_scan():
-    # Run Lynis on each VM via Ansible
-    lynis_results = run_ansible_playbook(
-        playbook="playbooks/tasks/security-scan.yml",
-        hosts=["proxmox_host", "docker-runtime-lv3", "postgres-lv3", "nginx-lv3", "monitoring-lv3"]
+    subprocess.run(
+        [
+            "python3",
+            "scripts/security_posture_report.py",
+            "--env",
+            "production",
+            "--audit-surface",
+            "windmill",
+            "--publish-nats",
+        ],
+        check=True,
     )
-
-    # Run Trivy against all running images
-    trivy_results = run_remote(
-        host="docker-build-lv3",
-        command="scripts/trivy_scan_running_images.sh"
-    )
-
-    report = SecurityPostureReport(lynis=lynis_results, trivy=trivy_results)
-    write_report(report, path=f"receipts/security-reports/{today()}.json")
-    post_to_mattermost(format_summary(report), channel="#platform-security")
-
-    for finding in report.critical_findings():
-        create_glitchtip_issue(finding)
-        emit_nats_event("platform.security.critical-finding", finding)
 ```
 
 ### Lynis integration
 
-Lynis is installed on each VM via the Ansible `security_baseline` role. The scan is run remotely via `ansible-playbook`:
+Lynis is installed on-demand by the dedicated scan playbook and its report files are fetched back to the controller checkout:
 
 ```yaml
 # playbooks/tasks/security-scan.yml
 - name: Run Lynis security audit
-  hosts: "{{ target_hosts }}"
+  hosts: all
+  become: true
   tasks:
-    - name: Run Lynis
-      command: lynis audit system --quiet --report-file /tmp/lynis-report.dat
-      become: yes
+    - name: Ensure Lynis is installed
+      apt:
+        name: lynis
+        state: present
 
-    - name: Fetch Lynis report
+    - name: Run Lynis
+      command: lynis audit system --cronjob --quiet --report-file /var/tmp/lv3-security-posture/{{ inventory_hostname }}-lynis-report.dat
+
+    - name: Fetch the generated Lynis report
       fetch:
-        src: /tmp/lynis-report.dat
-        dest: "/tmp/lynis-reports/{{ inventory_hostname }}.dat"
+        src: "/var/tmp/lv3-security-posture/{{ inventory_hostname }}-lynis-report.dat"
+        dest: ".local/security-posture/lynis/"
         flat: yes
 ```
 
@@ -99,20 +96,23 @@ The `scripts/parse_lynis_report.py` script parses the `.dat` report into structu
 }
 ```
 
-A finding that appears in the current report but not in the previous week's report is a **new finding** and creates a GlitchTip issue.
+A finding that appears in the current report but not in the previous receipt is a **new finding** and is counted in the report summary. Critical findings may also be forwarded to GlitchTip and NATS when those integrations are configured.
 
 ### Trivy integration
 
-Trivy runs on the build server against the remote Docker daemons:
+Trivy runs as a container on each Docker host and scans the set of currently running images:
 
 ```bash
 #!/usr/bin/env bash
 # scripts/trivy_scan_running_images.sh
 
-DOCKER_HOST=tcp://docker-runtime-lv3:2376 docker ps -q | while read cid; do
-  image=$(docker inspect "$cid" --format '{{.Config.Image}}')
-  trivy image --severity HIGH,CRITICAL --format json "$image"
-done | jq -s '.'
+docker ps --format '{{.Image}}' | sort -u | while read image; do
+  docker run --rm \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v /var/tmp/lv3-trivy-cache:/root/.cache/trivy \
+    docker.io/aquasec/trivy:0.63.0 \
+    image --format json --scanners vuln --severity HIGH,CRITICAL "$image"
+done
 ```
 
 Results include CVE ID, package name, installed version, fixed version, and severity. Only HIGH and CRITICAL CVEs are reported; MEDIUM and LOW are suppressed to avoid noise.
@@ -154,15 +154,15 @@ Results include CVE ID, package name, installed version, fixed version, and seve
 }
 ```
 
-### Ops portal integration
+### Status surface integration
 
-The ops portal (ADR 0093) displays a **Security Posture** panel showing:
-- Lynis hardening index per host (bar chart)
-- Total HIGH/CRITICAL CVEs across all images
-- Trend: better/worse/same vs last week
-- Link to the full report
+The current generated ops portal (ADR 0074) displays a **Security Posture** panel showing:
+- the latest committed receipt link
+- total HIGH and CRITICAL CVEs across the scanned runtime images
+- the lowest current hardening index
+- per-host hardening index deltas and new finding counts
 
-A Grafana alert fires if the hardening index of any host drops more than 10 points below its previous value (unexpected hardening regression).
+The managed Grafana platform overview dashboard also exposes security posture panels backed by the `platform_security_posture_*` Influx measurements when the workflow is configured to write metrics.
 
 ### Response policy
 
@@ -200,5 +200,6 @@ A Grafana alert fires if the hardening index of any host drops more than 10 poin
 - ADR 0066: Mutation audit log (scan results recorded here)
 - ADR 0068: Container image policy (Trivy validates the image policy)
 - ADR 0087: Repository validation gate (Gitleaks already covers secrets in code)
-- ADR 0093: Interactive ops portal (security posture panel)
+- ADR 0074: Platform operations portal (security posture receipt panel)
+- ADR 0093: Interactive ops portal (future interactive surface for this data)
 - ADR 0097: Alerting routing (critical security findings alert through this model)
