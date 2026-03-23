@@ -20,6 +20,16 @@
   },
   "surfaces": [
     {
+      "id": "platform-api-gateway",
+      "title": "Platform API gateway",
+      "lane": "api",
+      "lane_surface_ref": "platform-api-gateway",
+      "publication_tier": "public-edge",
+      "public_hostnames": ["api.lv3.org"],
+      "reachability": "Reachable on https://api.lv3.org through the NGINX edge, with Keycloak bearer-token authentication enforced by the gateway itself.",
+      "approval_notes": "ADR 0092 approves this single public-edge gateway surface so downstream service APIs can stay internal implementation detail."
+    },
+    {
       "id": "proxmox-management-api",
       "title": "Proxmox management API",
       "lane": "api",

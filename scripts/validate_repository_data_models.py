@@ -9,6 +9,7 @@ import sys
 from typing import Any
 
 from command_catalog import load_command_catalog, validate_command_catalog
+from api_gateway_catalog import load_api_gateway_catalog, validate_api_gateway_catalog
 from api_publication import load_api_publication_catalog, validate_api_publication_catalog
 from container_image_policy import load_image_catalog, validate_image_catalog as validate_container_image_catalog
 from controller_automation_toolkit import REPO_ROOT, emit_cli_error, load_json, load_yaml, repo_path
@@ -217,6 +218,9 @@ def validate_no_scaffold_placeholders() -> None:
         IMAGE_CATALOG_PATH: load_json(IMAGE_CATALOG_PATH),
         repo_path("config", "service-capability-catalog.json"): load_json(
             repo_path("config", "service-capability-catalog.json")
+        ),
+        repo_path("config", "api-gateway-catalog.json"): load_json(
+            repo_path("config", "api-gateway-catalog.json")
         ),
         repo_path("config", "subdomain-catalog.json"): load_json(
             repo_path("config", "subdomain-catalog.json")
@@ -1717,6 +1721,8 @@ def validate_repository_data_models() -> int:
     command_catalog = load_command_catalog()
     validate_command_catalog(command_catalog, workflow_catalog, secret_manifest)
     validate_container_image_catalog(load_image_catalog())
+    api_gateway_catalog, _ = load_api_gateway_catalog()
+    validate_api_gateway_catalog(api_gateway_catalog)
     lane_catalog, _ = load_lane_catalog()
     api_publication_catalog, _, _ = load_api_publication_catalog()
     validate_api_publication_catalog(api_publication_catalog, lane_catalog)

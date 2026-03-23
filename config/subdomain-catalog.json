@@ -28,6 +28,7 @@
     {
       "prefix": "api",
       "owner_adr": "0049",
+      "allowed_fqdns": ["api.lv3.org"],
       "notes": "Reserved for a future governed API gateway surface."
     },
     {
@@ -48,6 +49,22 @@
     }
   ],
   "subdomains": [
+    {
+      "fqdn": "api.lv3.org",
+      "service_id": "api_gateway",
+      "environment": "production",
+      "status": "planned",
+      "exposure": "edge-published",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0092",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Repository automation is ready; live publication still requires apply from main."
+    },
     {
       "fqdn": "build.lv3.org",
       "service_id": "docker_build",

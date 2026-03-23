@@ -54,11 +54,11 @@ class SubdomainCatalogTests(unittest.TestCase):
 
     def test_reserved_prefix_requires_allowlist(self) -> None:
         broken_catalog = copy.deepcopy(self.catalog)
-        broken_catalog["subdomains"][0]["fqdn"] = "api.lv3.org"
+        broken_catalog["subdomains"][0]["fqdn"] = "internal.lv3.org"
 
         with self.assertRaisesRegex(
             ValueError,
-            "uses reserved prefix 'api' without an explicit allowlist entry",
+            "uses reserved prefix 'internal' without an explicit allowlist entry",
         ):
             subdomain_catalog.validate_subdomain_catalog(
                 broken_catalog,

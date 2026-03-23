@@ -412,7 +412,7 @@
       "description": "Query the private platform-context API for cited RAG matches grounded in ADRs, runbooks, receipts, and platform catalogs.",
       "category": "observe",
       "transport": "http",
-      "endpoint": "http://100.118.189.95:8010/v1/context/query",
+      "endpoint": "https://api.lv3.org/v1/platform-context/v1/context/query",
       "auth": "platform-context-api-token",
       "approval_required": false,
       "audit_on_call": true,

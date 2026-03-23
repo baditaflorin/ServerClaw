@@ -20,7 +20,7 @@ class ValidateServiceCatalogTest(unittest.TestCase):
 
         service_ids = {item["id"] for item in catalog["services"]}
         self.assertIn("grafana", service_ids)
-        self.assertEqual(len(service_ids), 21)
+        self.assertEqual(len(service_ids), 23)
 
     def test_invalid_health_probe_fixture_fails(self) -> None:
         fixture_path = REPO_ROOT / "tests" / "fixtures" / "service-catalog-invalid-health-probe.json"

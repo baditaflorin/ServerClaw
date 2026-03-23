@@ -1,0 +1,43 @@
+---
+api_gateway_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('api_gateway') }}"
+api_gateway_repo_root: "{{ inventory_dir | dirname }}"
+api_gateway_site_dir: /opt/api-gateway
+api_gateway_service_dir: "{{ api_gateway_site_dir }}/service"
+api_gateway_config_dir: "{{ api_gateway_site_dir }}/config"
+api_gateway_data_dir: "{{ api_gateway_site_dir }}/data"
+api_gateway_compose_file: "{{ api_gateway_site_dir }}/docker-compose.yml"
+api_gateway_env_file: "{{ api_gateway_site_dir }}/api-gateway.env"
+api_gateway_image_name: lv3-platform-api-gateway
+api_gateway_container_name: api-gateway
+api_gateway_internal_port: 8080
+api_gateway_local_artifact_dir: "{{ api_gateway_repo_root }}/.local/api-gateway"
+api_gateway_gateway_catalog_src: "{{ api_gateway_repo_root }}/config/api-gateway-catalog.json"
+api_gateway_service_catalog_src: "{{ api_gateway_repo_root }}/config/service-capability-catalog.json"
+api_gateway_workflow_catalog_src: "{{ api_gateway_repo_root }}/config/workflow-catalog.json"
+api_gateway_platform_vars_src: "{{ api_gateway_repo_root }}/inventory/group_vars/platform.yml"
+api_gateway_drift_receipts_glob: "{{ api_gateway_repo_root }}/receipts/drift-reports/*.json"
+api_gateway_platform_context_token_local_file: "{{ api_gateway_repo_root }}/.local/platform-context/api-token.txt"
+api_gateway_sources:
+  - src: "{{ api_gateway_repo_root }}/scripts/api_gateway_catalog.py"
+    dest: api_gateway_catalog.py
+  - src: "{{ api_gateway_repo_root }}/scripts/api_gateway/__init__.py"
+    dest: api_gateway/__init__.py
+  - src: "{{ api_gateway_repo_root }}/scripts/api_gateway/main.py"
+    dest: api_gateway/main.py
+  - src: "{{ api_gateway_repo_root }}/requirements/api-gateway.txt"
+    dest: requirements.txt
+api_gateway_config_sources:
+  - src: "{{ api_gateway_gateway_catalog_src }}"
+    dest: api-gateway-catalog.json
+  - src: "{{ api_gateway_service_catalog_src }}"
+    dest: service-capability-catalog.json
+  - src: "{{ api_gateway_workflow_catalog_src }}"
+    dest: workflow-catalog.json
+  - src: "{{ api_gateway_platform_vars_src }}"
+    dest: platform.yml
+api_gateway_keycloak_jwks_url: https://sso.lv3.org/realms/lv3/protocol/openid-connect/certs
+api_gateway_keycloak_issuer_url: https://sso.lv3.org/realms/lv3
+api_gateway_nats_url: ""
+api_gateway_deploy_webhook_url: ""
+api_gateway_secret_rotation_webhook_url: ""
+api_gateway_include_upstream_openapi: false
