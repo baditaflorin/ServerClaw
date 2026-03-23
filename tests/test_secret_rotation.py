@@ -23,7 +23,29 @@ class SecretRotationTests(unittest.TestCase):
         }
         self.catalog = {
             "schema_version": "1.0.0",
-            "metadata": {
+            "secrets": [
+                {
+                    "id": "windmill_database_password",
+                    "owner_service": "windmill",
+                    "storage_contract": "controller-local-secrets",
+                    "storage_ref": "windmill_database_password",
+                    "rotation_period_days": 30,
+                    "warning_window_days": 7,
+                    "last_rotated_at": "2026-03-01",
+                    "rotation_mode": "repo_automated",
+                },
+                {
+                    "id": "windmill_superadmin_secret",
+                    "owner_service": "windmill",
+                    "storage_contract": "controller-local-secrets",
+                    "storage_ref": "windmill_superadmin_secret",
+                    "rotation_period_days": 30,
+                    "warning_window_days": 7,
+                    "last_rotated_at": "2026-03-01",
+                    "rotation_mode": "repo_automated",
+                },
+            ],
+            "rotation_metadata": {
                 "state_source": "openbao_kv_metadata",
                 "value_field": "value",
                 "last_rotated_metadata_key": "lv3_last_rotated",
@@ -31,7 +53,7 @@ class SecretRotationTests(unittest.TestCase):
                 "default_event_subject": "credentials.rotated",
                 "default_glitchtip_component": "secret-rotation",
             },
-            "secrets": {
+            "rotation_contracts": {
                 "windmill_database_password": {
                     "owner": "Windmill PostgreSQL runtime",
                     "service": "windmill",
@@ -77,10 +99,10 @@ class SecretRotationTests(unittest.TestCase):
     def test_validate_secret_catalog_rejects_high_risk_auto_secret(self) -> None:
         invalid = {
             **self.catalog,
-            "secrets": {
-                **self.catalog["secrets"],
+            "rotation_contracts": {
+                **self.catalog["rotation_contracts"],
                 "windmill_superadmin_secret": {
-                    **self.catalog["secrets"]["windmill_superadmin_secret"],
+                    **self.catalog["rotation_contracts"]["windmill_superadmin_secret"],
                     "approval_mode": "auto",
                 },
             },
@@ -91,13 +113,19 @@ class SecretRotationTests(unittest.TestCase):
     def test_rotation_due_uses_warning_window_threshold(self) -> None:
         now = dt.datetime(2026, 3, 25, tzinfo=dt.timezone.utc)
         self.assertTrue(
-            secret_rotation.rotation_due(self.catalog["secrets"]["windmill_database_password"], now=now)
+            secret_rotation.rotation_due(
+                self.catalog["rotation_contracts"]["windmill_database_password"],
+                now=now,
+            )
         )
 
     def test_rotation_due_without_last_rotated_requires_initial_rotation(self) -> None:
         now = dt.datetime(2026, 3, 2, tzinfo=dt.timezone.utc)
         self.assertTrue(
-            secret_rotation.rotation_due(self.catalog["secrets"]["windmill_superadmin_secret"], now=now)
+            secret_rotation.rotation_due(
+                self.catalog["rotation_contracts"]["windmill_superadmin_secret"],
+                now=now,
+            )
         )
 
     def test_build_playbook_command_sets_expected_vars(self) -> None:
@@ -117,14 +145,14 @@ class SecretRotationTests(unittest.TestCase):
     def test_build_glitchtip_event_carries_rotation_context(self) -> None:
         rotation_event = secret_rotation.build_rotation_event(
             "windmill_superadmin_secret",
-            self.catalog["secrets"]["windmill_superadmin_secret"],
+            self.catalog["rotation_contracts"]["windmill_superadmin_secret"],
             status="failed",
             mode="apply",
             command=["ansible-playbook", "playbooks/secret-rotation.yml"],
         )
         event = secret_rotation.build_glitchtip_event(
             "windmill_superadmin_secret",
-            self.catalog["secrets"]["windmill_superadmin_secret"],
+            self.catalog["rotation_contracts"]["windmill_superadmin_secret"],
             rotation_event,
             "example failure",
         )

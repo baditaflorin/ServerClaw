@@ -20,6 +20,14 @@ SECRET_ROTATION_PLAYBOOK = repo_path("playbooks", "secret-rotation.yml")
 ANSIBLE_INVENTORY = repo_path("inventory", "hosts.yml")
 DEFAULT_BOOTSTRAP_KEY = repo_path(".local", "ssh", "hetzner_llm_agents_ed25519")
 SUPPORTED_SCHEMA_VERSION = "1.0.0"
+REQUIRED_ROTATION_METADATA_KEYS = {
+    "state_source",
+    "value_field",
+    "last_rotated_metadata_key",
+    "rotated_by_metadata_key",
+    "default_event_subject",
+    "default_glitchtip_component",
+}
 ALLOWED_SECRET_TYPES = {
     "admin_password",
     "admin_token",
@@ -41,6 +49,20 @@ ALLOWED_APPLY_TARGETS = {
 
 def load_secret_catalog() -> dict:
     return load_json(SECRET_CATALOG_PATH)
+
+
+def normalize_rotation_contract(catalog: dict) -> tuple[dict, dict]:
+    if "rotation_contracts" in catalog:
+        metadata = require_mapping(catalog.get("rotation_metadata"), "rotation_metadata")
+        secrets = require_mapping(catalog.get("rotation_contracts"), "rotation_contracts")
+    else:
+        metadata = require_mapping(catalog.get("metadata"), "metadata")
+        secrets = require_mapping(catalog.get("secrets"), "secrets")
+
+    for key in REQUIRED_ROTATION_METADATA_KEYS:
+        if key not in metadata:
+            raise ValueError(f"rotation metadata must define {key}")
+    return metadata, secrets
 
 
 def require_mapping(value: Any, path: str) -> dict:
@@ -96,7 +118,7 @@ def validate_secret_catalog(catalog: dict, secret_manifest: dict) -> None:
             f"secret catalog must declare schema_version '{SUPPORTED_SCHEMA_VERSION}'"
         )
 
-    metadata = require_mapping(catalog.get("metadata"), "metadata")
+    metadata, secrets = normalize_rotation_contract(catalog)
     require_str(metadata.get("state_source"), "metadata.state_source")
     require_str(metadata.get("value_field"), "metadata.value_field")
     require_str(metadata.get("last_rotated_metadata_key"), "metadata.last_rotated_metadata_key")
@@ -104,7 +126,6 @@ def validate_secret_catalog(catalog: dict, secret_manifest: dict) -> None:
     require_str(metadata.get("default_event_subject"), "metadata.default_event_subject")
     require_str(metadata.get("default_glitchtip_component"), "metadata.default_glitchtip_component")
 
-    secrets = require_mapping(catalog.get("secrets"), "secrets")
     if not secrets:
         raise ValueError("secrets must not be empty")
 
@@ -334,9 +355,10 @@ def maybe_emit_failure(rotation_event: dict, glitchtip_event: dict) -> None:
 
 
 def list_catalog(catalog: dict, *, now: dt.datetime) -> int:
+    _, secrets = normalize_rotation_contract(catalog)
     print(f"Secret catalog: {SECRET_CATALOG_PATH}")
     print("Managed secrets:")
-    for secret_id, secret in sorted(catalog["secrets"].items()):
+    for secret_id, secret in sorted(secrets.items()):
         due = "due" if rotation_due(secret, now=now) else "scheduled"
         next_due = next_rotation_due(secret) or "initial rotation required"
         print(
@@ -445,6 +467,7 @@ def main() -> int:
         validate_secret_manifest(secret_manifest)
         catalog = load_secret_catalog()
         validate_secret_catalog(catalog, secret_manifest)
+        _, rotation_contracts = normalize_rotation_contract(catalog)
         now = normalized_now(args.now)
     except (OSError, ValueError, RuntimeError) as exc:
         return emit_cli_error("Secret rotation", exc)
@@ -459,7 +482,7 @@ def main() -> int:
     if not args.secret:
         parser.error("--secret is required for show, --plan, or --apply")
 
-    secret = catalog["secrets"].get(args.secret)
+    secret = rotation_contracts.get(args.secret)
     if secret is None:
         return emit_cli_error("Secret rotation", ValueError(f"Unknown secret id: {args.secret}"))
 

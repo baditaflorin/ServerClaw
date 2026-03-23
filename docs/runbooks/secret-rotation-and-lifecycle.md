@@ -4,7 +4,7 @@
 
 This runbook describes the repo-managed secret rotation contract introduced by ADR 0065.
 
-The implementation keeps one canonical catalog in `config/secret-catalog.json`, applies live mutations through `playbooks/secret-rotation.yml`, and uses OpenBao as the authoritative KV store for dedicated rotatable secret paths plus their rotation metadata.
+The implementation keeps one canonical catalog in `config/secret-catalog.json`, with the general secret inventory in `secrets` and the ADR 0065 automation contract in `rotation_metadata` plus `rotation_contracts`. Live mutations run through `playbooks/secret-rotation.yml`, and OpenBao remains the authoritative KV store for dedicated rotatable secret paths plus their rotation metadata.
 
 ## Entry Points
 

@@ -724,6 +724,18 @@
   ansible.builtin.set_fact:
     openbao_rotatable_secret_catalog: "{{ lookup('ansible.builtin.file', openbao_secret_catalog_file) | from_json }}"
     openbao_controller_secret_manifest: "{{ lookup('ansible.builtin.file', openbao_controller_secret_manifest_file) | from_json }}"
+    openbao_rotation_metadata: >-
+      {{
+        openbao_rotatable_secret_catalog.rotation_metadata
+        if openbao_rotatable_secret_catalog.rotation_metadata is defined
+        else openbao_rotatable_secret_catalog.metadata
+      }}
+    openbao_rotatable_secret_contracts: >-
+      {{
+        openbao_rotatable_secret_catalog.rotation_contracts
+        if openbao_rotatable_secret_catalog.rotation_contracts is defined
+        else openbao_rotatable_secret_catalog.secrets
+      }}
   no_log: true
 
 - name: Read current dedicated rotatable secrets from OpenBao
@@ -736,7 +748,7 @@
     status_code:
       - 200
       - 404
-  loop: "{{ openbao_rotatable_secret_catalog.secrets | dict2items }}"
+  loop: "{{ openbao_rotatable_secret_contracts | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
   register: openbao_rotatable_secret_current
@@ -753,7 +765,7 @@
       data:
         "{{ item.value.openbao_field }}": "{{ lookup('ansible.builtin.file', openbao_controller_secret_manifest.secrets[item.value.seed_controller_secret_id].path) | trim }}"
     status_code: 200
-  loop: "{{ openbao_rotatable_secret_catalog.secrets | dict2items }}"
+  loop: "{{ openbao_rotatable_secret_contracts | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
   when: >-
@@ -792,12 +804,12 @@
         command_contract: "{{ item.value.command_contract }}"
         rotation_period_days: "{{ item.value.rotation_period_days | string }}"
         warning_window_days: "{{ item.value.warning_window_days | string }}"
-        "{{ openbao_rotatable_secret_catalog.metadata.last_rotated_metadata_key }}": "{{ item.value.last_rotated | default('unrotated', true) }}"
-        "{{ openbao_rotatable_secret_catalog.metadata.rotated_by_metadata_key }}": "openbao-seed"
+        "{{ openbao_rotation_metadata.last_rotated_metadata_key }}": "{{ item.value.last_rotated | default('unrotated', true) }}"
+        "{{ openbao_rotation_metadata.rotated_by_metadata_key }}": "openbao-seed"
     status_code:
       - 200
       - 204
-  loop: "{{ openbao_rotatable_secret_catalog.secrets | dict2items }}"
+  loop: "{{ openbao_rotatable_secret_contracts | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
   no_log: true

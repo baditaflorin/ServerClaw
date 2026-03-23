@@ -51,8 +51,8 @@ openbao_postgres_rotator_password_local_file: "{{ openbao_local_artifact_dir }}/
 openbao_controller_approle_local_file: "{{ openbao_local_artifact_dir }}/controller-automation-approle.json"
 openbao_mail_platform_approle_local_file: "{{ openbao_local_artifact_dir }}/mail-platform-approle.json"
 openbao_secret_rotation_approle_local_file: "{{ openbao_local_artifact_dir }}/secret-rotation-approle.json"
-openbao_secret_catalog_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/secret-catalog.json
-openbao_controller_secret_manifest_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/controller-local-secrets.json
+openbao_secret_catalog_file: "{{ playbook_dir }}/../config/secret-catalog.json"
+openbao_controller_secret_manifest_file: "{{ playbook_dir }}/../config/controller-local-secrets.json"
 openbao_init_key_shares: 3
 openbao_init_key_threshold: 2
 openbao_userpass_users:
