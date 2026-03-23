@@ -2,9 +2,9 @@
 
 - ADR: [ADR 0083](../adr/0083-docker-based-check-runner.md)
 - Title: Containerised, versioned lint and validation toolchains running in parallel on the build server
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0083-docker-check-runner`
-- Worktree: `../proxmox_florin_server-docker-check-runner`
+- Worktree: `.worktrees/adr-0083`
 - Owner: codex
 - Depends On: `adr-0082-remote-build-gateway`
 - Conflicts With: none
@@ -34,6 +34,7 @@
 - `scripts/parallel_check.py`
 - updated `Makefile` (`build-check-runners`, `push-check-runners`)
 - Windmill script `config/windmill/scripts/check-runner-rebuild.py`
+- `docs/runbooks/docker-check-runners.md`
 - `docs/adr/0083-docker-based-check-runner.md`
 - `docs/workstreams/adr-0083-docker-check-runner.md`
 - `workstreams.yaml`
@@ -49,6 +50,12 @@
 - `scripts/parallel_check.py lint-ansible lint-yaml validate-schemas` completes in < 20 s on the build server with all three checks running concurrently
 - image digests in `config/check-runner-manifest.json` match the actual published digests in `registry.lv3.org`
 
+## Completion Notes
+
+- the repository carries pinned Dockerfiles for `ansible`, `python`, `infra`, and `security` check runners under `docker/check-runners/`
+- manifest-backed execution is available through [scripts/parallel_check.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/parallel_check.py) and the `make run-checks` wrapper on `main`
+- digest write-back remains delegated to the Windmill rebuild helper once the images are published from a credentialed worker
+
 ## Merge Criteria
 
 - all four images build cleanly from a fresh Docker build (no cache)
@@ -57,6 +64,5 @@
 
 ## Notes For The Next Assistant
 
-- pin base images to digests (not floating tags) in all Dockerfiles: `FROM debian:12-slim@sha256:...` — this is required by ADR 0068 image policy
-- `trivy` in the security image requires a vulnerability database; add a `trivy db update` step to the Windmill rebuild workflow so the DB is current when the image is published
-- set `--cpus=4` per container in `parallel_check.py` to prevent a single slow check from consuming all build server cores
+- `trivy` in the security image requires a vulnerability database; keep the `trivy --download-db-only` build step or an equivalent warm-up in the Windmill rebuild workflow so first-run scans stay fast
+- if `security-scan` becomes too slow for pre-push use, split the manifest into fast and deep profiles instead of dropping the scan entirely

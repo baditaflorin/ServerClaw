@@ -1,0 +1,2 @@
+---
+- import_playbook: services/build-artifact-cache.yml

@@ -1,10 +1,10 @@
 # ADR 0089: Build Artifact Cache and Layer Registry
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.87.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-23
 - Date: 2026-03-22
 
 ## Context
@@ -133,6 +133,12 @@ The workflow pulls all images, runs a no-op `pip install`, pre-downloads Packer 
 - apt-cacher-ng is a new service on `build-lv3`; it must be provisioned as part of the build server role
 - Cache warming workflow adds ~5 minutes of build server CPU/network work per `main` merge
 - Docker volume and disk space management is an ongoing operational concern on `build-lv3`
+
+## Implementation Notes
+
+- This workstream branch now adds the repo-managed `build_server` role, a dedicated cache converge playbook, the cache manifest skeleton, the Windmill `warm-build-cache` and weekly cache-maintenance helpers, and the operator runbook for the cache host.
+- The branch also wires the cache hooks into `scripts/remote_exec.sh`, `config/check-runner-manifest.json`, `scripts/validate_repo.sh`, and the user-facing `Makefile` targets so the shared pip, Packer, and Ansible cache surfaces are available to the build-server execution path.
+- Live verification of warm-cache timing and the scheduled Windmill jobs still depends on applying the build-server role from `main` to `docker-build-lv3`.
 
 ## Alternatives Considered
 

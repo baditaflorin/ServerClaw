@@ -1,0 +1,17 @@
+[Unit]
+Description=LV3 BuildKit daemon
+After=docker.service network-online.target
+Requires=docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=5
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker rm -f {{ build_server_buildkit_container_name }}
+ExecStart=/usr/bin/docker run --rm --name {{ build_server_buildkit_container_name }} --privileged --network host -v {{ build_server_buildkit_config_file }}:/etc/buildkit/buildkitd.toml:ro -v {{ build_server_buildkit_cache_dir }}:/var/lib/buildkit -v {{ build_server_buildkit_socket_dir }}:{{ build_server_buildkit_socket_dir }} {{ build_server_buildkit_image }} --addr unix://{{ build_server_buildkit_socket_file }} --config /etc/buildkit/buildkitd.toml
+ExecStop=/usr/bin/docker stop {{ build_server_buildkit_container_name }}
+
+[Install]
+WantedBy=multi-user.target

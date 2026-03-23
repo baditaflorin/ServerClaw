@@ -1108,6 +1108,26 @@ workstreams:
     ready_to_merge: false
     live_applied: true
 
+  - id: adr-0083-docker-check-runner
+    adr: "0083"
+    title: Docker-based check runner
+    status: merged
+    owner: codex
+    branch: codex/adr-0083-docker-check-runner
+    worktree_path: .worktrees/adr-0083
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0083-docker-check-runner.md
+    depends_on:
+      - adr-0082-remote-build-gateway
+    conflicts_with: []
+    shared_surfaces:
+      - docker/check-runners/
+      - config/check-runner-manifest.json
+      - scripts/parallel_check.py
+      - config/windmill/scripts/check-runner-rebuild.py
+      - Makefile
+    ready_to_merge: false
+    live_applied: false
+
   - id: adr-0086-ansible-collections
     adr: "0086"
     title: Ansible collection packaging
@@ -1129,5 +1149,28 @@ workstreams:
       - ansible.cfg
       - Makefile
       - config/windmill/scripts/collection-publish.py
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0089-build-cache
+    adr: "0089"
+    title: Build artifact cache and layer registry
+    status: merged
+    owner: codex
+    branch: codex/adr-0089-build-cache
+    worktree_path: ../proxmox_florin_server-build-cache
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0089-build-cache.md
+    depends_on:
+      - adr-0082-remote-build-gateway
+      - adr-0083-docker-check-runner
+    conflicts_with: []
+    shared_surfaces:
+      - roles/build_server/
+      - playbooks/build-artifact-cache.yml
+      - playbooks/services/build-artifact-cache.yml
+      - config/build-cache-manifest.json
+      - config/windmill/scripts/warm-build-cache.py
+      - scripts/cache_status.py
+      - docs/runbooks/configure-build-artifact-cache.md
     ready_to_merge: false
     live_applied: false

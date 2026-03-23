@@ -76,7 +76,7 @@ Portainer is now live on `docker-runtime-lv3` and reachable privately at `https:
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.87.0` |
+| Repository version | `0.88.0` |
 | Platform version | `0.38.0` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -307,6 +307,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Complete Security Baseline Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/complete-security-baseline.md)
 - [Compose Runtime Secrets Injection](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/compose-secrets-injection.md)
 - [Configure Backup VM](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-backup-vm.md)
+- [Configure Build Artifact Cache](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-build-artifact-cache.md)
 - [Configure Control-Plane Recovery](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-control-plane-recovery.md)
 - [Configure Docker Build VM](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-docker-build-vm.md)
 - [Configure Docker Runtime Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-docker-runtime.md)
@@ -333,6 +334,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Controller-Local Secrets And Preflight Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/controller-local-secrets-and-preflight.md)
 - [Deploy Uptime Kuma](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/deploy-uptime-kuma.md)
 - [Deployment History Portal](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/deployment-history-portal.md)
+- [Docker Check Runners](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/docker-check-runners.md)
 - [Environment Promotion Pipeline](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/environment-promotion-pipeline.md)
 - [Generate Status Documents](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/generate-status-documents.md)
 - [Harden Access Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/harden-access.md)
@@ -543,7 +545,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.87.0` |
+| Repository version | `0.88.0` |
 | Platform version | `0.38.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -637,7 +639,9 @@ This repository is intentionally opinionated:
 | `0080` | Maintenance window and change suppression protocol | `merged` | [adr-0080-maintenance-windows.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0080-maintenance-windows.md) |
 | `0081` | Platform changelog and deployment history portal | `merged` | [adr-0081-changelog-portal.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0081-changelog-portal.md) |
 | `0082` | Remote build execution gateway | `live_applied` | [adr-0082-remote-build-gateway.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0082-remote-build-gateway.md) |
+| `0083` | Docker-based check runner | `merged` | [adr-0083-docker-check-runner.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0083-docker-check-runner.md) |
 | `0086` | Ansible collection packaging | `merged` | [adr-0086-ansible-collections.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0086-ansible-collections.md) |
+| `0089` | Build artifact cache and layer registry | `merged` | [adr-0089-build-cache.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0089-build-cache.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow
