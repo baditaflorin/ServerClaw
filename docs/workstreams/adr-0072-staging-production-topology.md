@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0072](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0072-staging-and-production-environment-topology.md)
 - Title: Canonical production and staging topology for shared-edge single-node operations
-- Status: ready_for_merge
+- Status: merged
 - Branch: `codex/adr-0072-staging-production-topology`
 - Worktree: `../proxmox_florin_server-adr-0072-staging-production-topology`
 - Owner: codex

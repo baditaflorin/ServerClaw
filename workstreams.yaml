@@ -878,7 +878,7 @@ workstreams:
   - id: adr-0072-staging-production-topology
     adr: "0072"
     title: Staging and production environment topology
-    status: ready_for_merge
+    status: merged
     owner: codex
     branch: codex/adr-0072-staging-production-topology
     worktree_path: ../proxmox_florin_server-adr-0072-staging-production-topology
@@ -893,7 +893,7 @@ workstreams:
       - config/subdomain-catalog.json
       - scripts/generate_ops_portal.py
       - docs/runbooks/platform-operations-portal.md
-    ready_to_merge: true
+    ready_to_merge: false
     live_applied: false
 
   - id: adr-0074-ops-portal
