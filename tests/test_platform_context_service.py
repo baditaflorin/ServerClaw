@@ -29,7 +29,7 @@ def make_repo(tmp_path: Path) -> Path:
     write(tmp_path / "config" / "agent-tool-registry.json", '{"tools":[]}')
     write(
         tmp_path / "config" / "dependency-graph.json",
-        '{"schema_version":"1.0.0","nodes":[{"id":"step_ca","service":"step_ca","name":"step-ca","vm":"docker-runtime-lv3","tier":1}],"edges":[]}',
+        '{"schema_version":"1.0.0","nodes":[{"id":"grafana","service":"grafana","name":"Grafana","vm":"monitoring-lv3","tier":1},{"id":"step_ca","service":"step_ca","name":"step-ca","vm":"docker-runtime-lv3","tier":1}],"edges":[]}',
     )
     write(
         tmp_path / "versions" / "stack.yaml",

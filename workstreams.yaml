@@ -51,7 +51,7 @@ workstreams:
   - id: adr-0020-backups
     adr: "0020"
     title: Initial storage and backup model
-    status: merged
+    status: ready
     owner: codex
     branch: codex/adr-0020-backups
     worktree_path: ../proxmox_florin_server-backups
