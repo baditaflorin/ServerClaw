@@ -1,10 +1,10 @@
 # ADR 0084: Packer VM Template Pipeline
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.91.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-23
 - Date: 2026-03-22
 
 ## Context
@@ -50,6 +50,7 @@ packer/
   variables/
     common.pkrvars.hcl      # Proxmox API URL, node name, storage pool
     build-server.pkrvars.hcl  # build server specific overrides
+    lv3-*.pkrvars.hcl       # template-specific VMIDs, names, and bootstrap inputs
 ```
 
 ### Build execution
@@ -64,10 +65,10 @@ Which translates to:
 ```bash
 # on build-lv3
 docker run --rm \
-  -v /opt/builds/proxmox_florin_server/packer:/workspace \
+  -v /opt/builds/proxmox_florin_server:/workspace \
   -e PROXMOX_API_TOKEN \
   registry.lv3.org/check-runner/infra:latest \
-  packer build -var-file=variables/common.pkrvars.hcl templates/lv3-debian-base.pkr.hcl
+  /workspace/scripts/build_packer_template.sh lv3-debian-base
 ```
 
 Packer communicates with the Proxmox API over the Tailscale network. The API token is injected from OpenBao (ADR 0077 secrets model).
@@ -124,3 +125,9 @@ A Windmill workflow (`packer-template-rebuild`) triggers on:
 - ADR 0083: Docker-based check runner (infra image includes Packer binary)
 - ADR 0085: OpenTofu VM lifecycle (clones from templates defined here)
 - ADR 0089: Build artifact cache (caches Packer plugin downloads and apt layers)
+
+## Implementation Notes
+
+- Repository implementation landed in `0.91.0` with repo-managed Packer templates under [packer/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-adr-0084/packer), the manifest at [config/vm-template-manifest.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-adr-0084/config/vm-template-manifest.json), the build-server helper targets in [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-adr-0084/Makefile), and the Windmill helper at [config/windmill/scripts/packer-template-rebuild.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-adr-0084/config/windmill/scripts/packer-template-rebuild.py).
+- Managed guest cloning now consumes the declared template catalog through [inventory/group_vars/all.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-adr-0084/inventory/group_vars/all.yml), [inventory/host_vars/proxmox_florin.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-adr-0084/inventory/host_vars/proxmox_florin.yml), and [roles/proxmox_guests/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-adr-0084/roles/proxmox_guests/tasks/main.yml).
+- Live publication of the four templates and manifest hydration still depends on running the rebuild flow from a credentialed worker against the Proxmox API.

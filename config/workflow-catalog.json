@@ -1431,6 +1431,73 @@
         "python3 config/windmill/scripts/collection-publish.py --repo-root \"$PWD\" --dry-run"
       ]
     },
+    "adr-0077-compose-runtime-secrets-live-apply": {
+      "description": "Historical compatibility alias retained so the archived ADR 0077 live-apply receipt continues to validate against the current workflow catalog.",
+      "lifecycle_status": "blocked",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "validate",
+        "command": "make validate"
+      },
+      "preflight": {
+        "required": false
+      },
+      "validation_targets": [],
+      "live_impact": "repo_only",
+      "owner_runbook": "docs/workstreams/adr-0077-compose-secrets-injection.md",
+      "implementation_refs": [
+        "receipts/live-applies/2026-03-23-adr-0077-compose-runtime-secrets-live-apply.json",
+        "docs/workstreams/adr-0077-compose-secrets-injection.md"
+      ],
+      "outputs": [
+        "Legacy workflow-id compatibility for archived ADR 0077 live-apply evidence."
+      ],
+      "verification_commands": [
+        "python3 -c \"import json; json.load(open('receipts/live-applies/2026-03-23-adr-0077-compose-runtime-secrets-live-apply.json'))\""
+      ]
+    },
+    "packer-template-rebuild": {
+      "description": "Validate and rebuild the repo-managed Proxmox VM template catalog in dependency order, then refresh the template manifest metadata.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "packer-template-rebuild",
+        "command": "make packer-template-rebuild"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "validate-packer"
+      ],
+      "live_impact": "host_live",
+      "owner_runbook": "docs/runbooks/packer-vm-templates.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/build-server.json",
+        "config/vm-template-manifest.json",
+        "config/windmill/scripts/packer-template-rebuild.py",
+        "docs/runbooks/packer-vm-templates.md",
+        "packer/templates/lv3-debian-base.pkr.hcl",
+        "packer/templates/lv3-docker-host.pkr.hcl",
+        "packer/templates/lv3-postgres-host.pkr.hcl",
+        "packer/templates/lv3-ops-base.pkr.hcl",
+        "scripts/build_packer_template.sh",
+        "scripts/validate_packer_templates.sh"
+      ],
+      "outputs": [
+        "Rebuilt Proxmox VM templates in dependency order and refreshed metadata in config/vm-template-manifest.json."
+      ],
+      "verification_commands": [
+        "bash -n packer/scripts/base-hardening.sh",
+        "python3 -c \"import json; json.load(open('config/vm-template-manifest.json'))\"",
+        "make validate-packer"
+      ]
+    },
     "check-platform-drift": {
       "description": "Run the ADR 0071 observation loop checks and emit structured findings from the controller command lane.",
       "lifecycle_status": "active",

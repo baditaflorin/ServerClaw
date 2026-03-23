@@ -37,4 +37,5 @@ go.work.sum
 __pycache__/
 *.pyc
 .cache/
+.packer.d/
 build/

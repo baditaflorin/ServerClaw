@@ -3,9 +3,14 @@
 .env
 receipts/
 .git/
+.ansible/
 .ansible/validation/
 .claude/
 .worktrees/
+.mypy_cache/
+.pytest_cache/
+.venv/
+tofu/
 __pycache__/
 *.pyc
 .terraform/

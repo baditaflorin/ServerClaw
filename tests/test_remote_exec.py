@@ -24,6 +24,9 @@ printf '%s\n' "$*" >> "${REMOTE_EXEC_SSH_LOG:?}"
 if [[ "${REMOTE_EXEC_SSH_FAIL:-0}" == "1" ]]; then
   exit 255
 fi
+if [[ "${REMOTE_EXEC_REMOTE_FAIL:-0}" == "1" && "$*" != *" true" && "$*" != *"mkdir -p"* ]]; then
+  exit 1
+fi
 if [[ "$*" == *"docker run"* ]]; then
   printf 'remote-docker-ok\n'
 fi
@@ -43,6 +46,9 @@ def make_fake_rsync(path: Path) -> None:
         """#!/usr/bin/env bash
 set -euo pipefail
 printf '%s\n' "$*" >> "${REMOTE_EXEC_RSYNC_LOG:?}"
+if [[ "${REMOTE_EXEC_RSYNC_FAIL:-0}" == "1" ]]; then
+  exit 23
+fi
 """,
     )
 
@@ -199,6 +205,32 @@ def test_remote_exec_falls_back_locally_when_requested(tmp_path: Path) -> None:
     assert completed.marker.read_text() == "local-fallback"  # type: ignore[attr-defined]
 
 
+def test_remote_exec_falls_back_locally_when_sync_fails(tmp_path: Path) -> None:
+    completed = run_remote_exec(
+        tmp_path,
+        "remote-lint",
+        "--local-fallback",
+        extra_env={"REMOTE_EXEC_RSYNC_FAIL": "1"},
+    )
+
+    assert completed.returncode == 0
+    assert "remote sync failed" in completed.stderr
+    assert completed.marker.read_text() == "local-fallback"  # type: ignore[attr-defined]
+
+
+def test_remote_exec_falls_back_locally_when_remote_command_fails(tmp_path: Path) -> None:
+    completed = run_remote_exec(
+        tmp_path,
+        "remote-lint",
+        "--local-fallback",
+        extra_env={"REMOTE_EXEC_REMOTE_FAIL": "1"},
+    )
+
+    assert completed.returncode == 0
+    assert "remote command failed" in completed.stderr
+    assert completed.marker.read_text() == "local-fallback"  # type: ignore[attr-defined]
+
+
 def test_check_build_server_uses_rsync_dry_run(tmp_path: Path) -> None:
     completed = run_remote_exec(tmp_path, "check-build-server")
 
@@ -270,3 +302,21 @@ def test_remote_exec_mounts_packer_cache_for_infra_runners(tmp_path: Path) -> No
 
     assert completed.returncode == 0, completed.stderr
     assert "/opt/builds/.packer.d:/root/.packer.d" in completed.stderr
+
+
+def test_remote_exec_forwards_packer_related_environment_variables(tmp_path: Path) -> None:
+    completed = run_remote_exec(
+        tmp_path,
+        "remote-lint",
+        extra_env={
+            "REMOTE_EXEC_VERBOSE": "1",
+            "PKR_VAR_proxmox_api_token_secret": "secret-value",
+            "PROXMOX_API_TOKEN_ID": "lv3-automation@pve!primary",
+        },
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    ssh_log = completed.ssh_log.read_text()  # type: ignore[attr-defined]
+    assert "PKR_VAR_proxmox_api_token_secret=secret-value" in ssh_log
+    assert "PROXMOX_API_TOKEN_ID=" in ssh_log
+    assert "lv3-automation@pve" in ssh_log

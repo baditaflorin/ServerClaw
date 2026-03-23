@@ -124,6 +124,7 @@ proxmox_guests:
   - vmid: 110
     name: nginx-lv3
     role: nginx
+    template_key: lv3-debian-base
     ipv4: 10.10.10.10
     cidr: 24
     gateway4: 10.10.10.1
@@ -140,6 +141,7 @@ proxmox_guests:
   - vmid: 120
     name: docker-runtime-lv3
     role: docker-runtime
+    template_key: lv3-docker-host
     ipv4: 10.10.10.20
     cidr: 24
     gateway4: 10.10.10.1
@@ -156,6 +158,7 @@ proxmox_guests:
   - vmid: 130
     name: docker-build-lv3
     role: docker-build
+    template_key: lv3-docker-host
     ipv4: 10.10.10.30
     cidr: 24
     gateway4: 10.10.10.1
@@ -176,6 +179,7 @@ proxmox_guests:
   - vmid: 140
     name: monitoring-lv3
     role: monitoring
+    template_key: lv3-debian-base
     ipv4: 10.10.10.40
     cidr: 24
     gateway4: 10.10.10.1
@@ -192,6 +196,7 @@ proxmox_guests:
   - vmid: 150
     name: postgres-lv3
     role: postgres
+    template_key: lv3-postgres-host
     ipv4: 10.10.10.50
     cidr: 24
     gateway4: 10.10.10.1
@@ -211,6 +216,7 @@ proxmox_guests:
   - vmid: 160
     name: backup-lv3
     role: backup
+    template_key: lv3-ops-base
     ipv4: 10.10.10.60
     cidr: 24
     gateway4: 10.10.10.1

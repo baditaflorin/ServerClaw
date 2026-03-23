@@ -2,20 +2,11 @@
 - name: Validate Proxmox guest provisioning inputs
   ansible.builtin.assert:
     that:
-      - debian_cloud_image_url | length > 0
-      - debian_cloud_image_filename | length > 0
-      - debian_cloud_image_sha512 | length > 0
-      - proxmox_template_name | length > 0
       - proxmox_storage_id | length > 0
       - proxmox_internal_bridge | length > 0
+      - proxmox_vm_templates | length > 0
       - (proxmox_guests_active | default(proxmox_guests)) | length > 0
-    fail_msg: "proxmox_guests requires template, storage, bridge, and guest inventory inputs."
-
-- name: Ensure template cache directory exists
-  ansible.builtin.file:
-    path: /var/lib/vz/template/cache
-    state: directory
-    mode: "0755"
+    fail_msg: "proxmox_guests requires template catalog, storage, bridge, and guest inventory inputs."
 
 - name: Ensure snippets directory exists
   ansible.builtin.file:
@@ -23,43 +14,16 @@
     state: directory
     mode: "0755"
 
-- name: Download official Debian 13 cloud image
-  ansible.builtin.get_url:
-    url: "{{ debian_cloud_image_url }}"
-    dest: "/var/lib/vz/template/cache/{{ debian_cloud_image_filename }}"
-    mode: "0644"
-    checksum: "sha512:{{ debian_cloud_image_sha512 }}"
-
-- name: Check whether Proxmox template exists
-  ansible.builtin.command: "qm config {{ proxmox_template_vmid }}"
-  register: proxmox_template_config
-  failed_when: false
-  changed_when: false
-
-- name: Create Debian 13 cloud template VM
-  ansible.builtin.shell: |
-    set -euo pipefail
-    qm create {{ proxmox_template_vmid }} \
-      --name {{ proxmox_template_name }} \
-      --ostype l26 \
-      --scsihw virtio-scsi-single \
-      --cpu host \
-      --cores 2 \
-      --memory 2048 \
-      --agent enabled=1,fstrim_cloned_disks=1 \
-      --serial0 socket \
-      --vga serial0 \
-      --net0 virtio,bridge={{ proxmox_internal_bridge }}
-    qm disk import {{ proxmox_template_vmid }} /var/lib/vz/template/cache/{{ debian_cloud_image_filename }} {{ proxmox_storage_id }} --format qcow2 --target-disk scsi0
-    qm set {{ proxmox_template_vmid }} \
-      --boot order=scsi0 \
-      --ide2 {{ proxmox_storage_id }}:cloudinit \
-      --ciupgrade 1
-    qm template {{ proxmox_template_vmid }}
-  args:
-    executable: /bin/bash
-  when: proxmox_template_config.rc != 0
-  changed_when: true
+- name: Validate each guest references a declared template
+  ansible.builtin.assert:
+    that:
+      - item.template_key is defined
+      - item.template_key in proxmox_vm_templates
+      - proxmox_vm_templates[item.template_key].vmid is defined
+    fail_msg: "Each guest must declare template_key present in proxmox_vm_templates."
+  loop: "{{ proxmox_guests_active | default(proxmox_guests) }}"
+  loop_control:
+    label: "{{ item.name }}"
 
 - name: Render cloud-init user-data snippets for guests
   ansible.builtin.template:
@@ -93,7 +57,7 @@
     argv:
       - qm
       - clone
-      - "{{ proxmox_template_vmid | string }}"
+      - "{{ proxmox_vm_templates[item.item.template_key].vmid | string }}"
       - "{{ item.item.vmid | string }}"
       - --name
       - "{{ item.item.name }}"

@@ -26,6 +26,7 @@ from workflow_catalog import (
 
 
 STACK_PATH = repo_path("versions", "stack.yaml")
+GLOBAL_VARS_PATH = repo_path("inventory", "group_vars", "all.yml")
 HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 UPTIME_MONITORS_PATH = repo_path("config", "uptime-kuma", "monitors.json")
 HEALTH_PROBE_CATALOG_PATH = repo_path("config", "health-probe-catalog.json")
@@ -33,6 +34,7 @@ SECRET_CATALOG_PATH = repo_path("config", "secret-catalog.json")
 IMAGE_CATALOG_PATH = repo_path("config", "image-catalog.json")
 PLATFORM_FINDING_SCHEMA_PATH = repo_path("docs", "schema", "platform-finding.json")
 MAINTENANCE_WINDOW_SCHEMA_PATH = repo_path("docs", "schema", "maintenance-window.json")
+VM_TEMPLATE_MANIFEST_PATH = repo_path("config", "vm-template-manifest.json")
 
 SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -191,11 +193,12 @@ def guest_plan_key(role: str) -> str:
     return f"{role.replace('-', '_')}_vm"
 
 
-def validate_proxmox_guest(guest: Any, path: str) -> tuple[int, str, str]:
+def validate_proxmox_guest(guest: Any, path: str) -> tuple[int, str, str, str]:
     guest = require_mapping(guest, path)
     vmid = require_int(guest.get("vmid"), f"{path}.vmid", 1)
     name = require_hostname(guest.get("name"), f"{path}.name")
     require_identifier(guest.get("role"), f"{path}.role")
+    template_key = require_identifier(guest.get("template_key"), f"{path}.template_key")
     ipv4 = require_ipv4(guest.get("ipv4"), f"{path}.ipv4")
     require_int(guest.get("cidr"), f"{path}.cidr", 1)
     require_ipv4(guest.get("gateway4"), f"{path}.gateway4")
@@ -218,7 +221,7 @@ def validate_proxmox_guest(guest: Any, path: str) -> tuple[int, str, str]:
         require_str(disk.get("storage"), f"{path}.extra_disks[{index}].storage")
         require_int(disk.get("size_gb"), f"{path}.extra_disks[{index}].size_gb", 1)
 
-    return vmid, name, ipv4
+    return vmid, name, ipv4, template_key
 
 
 def validate_service_topology_entry(
@@ -393,6 +396,7 @@ def validate_network_policy(value: Any, path: str, guest_names: set[str]) -> Non
 
 def validate_host_vars() -> dict[str, Any]:
     host_vars = require_mapping(load_yaml(HOST_VARS_PATH), str(HOST_VARS_PATH))
+    global_vars = require_mapping(load_yaml(GLOBAL_VARS_PATH), str(GLOBAL_VARS_PATH))
     host_id = require_identifier(HOST_VARS_PATH.stem, "host_vars host id")
     require_ipv4(host_vars.get("management_ipv4"), "host_vars.management_ipv4")
     require_ipv4(host_vars.get("management_tailscale_ipv4"), "host_vars.management_tailscale_ipv4")
@@ -407,6 +411,24 @@ def validate_host_vars() -> dict[str, Any]:
             public_ingress_ports,
         )
 
+    proxmox_vm_templates = require_mapping(global_vars.get("proxmox_vm_templates"), "inventory/group_vars/all.yml.proxmox_vm_templates")
+    template_vmids: set[int] = set()
+    template_names: set[str] = set()
+    for template_key, template in proxmox_vm_templates.items():
+        template_key = require_identifier(template_key, f"inventory/group_vars/all.yml.proxmox_vm_templates key '{template_key}'")
+        template = require_mapping(template, f"inventory/group_vars/all.yml.proxmox_vm_templates.{template_key}")
+        template_vmid = require_int(template.get("vmid"), f"inventory/group_vars/all.yml.proxmox_vm_templates.{template_key}.vmid", 1)
+        template_name = require_hostname(template.get("name"), f"inventory/group_vars/all.yml.proxmox_vm_templates.{template_key}.name")
+        source_template = template.get("source_template")
+        if source_template is not None:
+            require_str(source_template, f"inventory/group_vars/all.yml.proxmox_vm_templates.{template_key}.source_template")
+        if template_vmid in template_vmids:
+            raise ValueError(f"duplicate proxmox template vmid: {template_vmid}")
+        if template_name in template_names:
+            raise ValueError(f"duplicate proxmox template name: {template_name}")
+        template_vmids.add(template_vmid)
+        template_names.add(template_name)
+
     proxmox_guests = require_list(host_vars.get("proxmox_guests"), "host_vars.proxmox_guests")
     guest_vmids: set[int] = set()
     guest_names: set[str] = set()
@@ -416,8 +438,12 @@ def validate_host_vars() -> dict[str, Any]:
     guest_ips_by_key: dict[str, str] = {}
     backup_guest_key: str | None = None
     for index, guest in enumerate(proxmox_guests):
-        vmid, name, ipv4 = validate_proxmox_guest(guest, f"host_vars.proxmox_guests[{index}]")
+        vmid, name, ipv4, template_key = validate_proxmox_guest(guest, f"host_vars.proxmox_guests[{index}]")
         role = guest_plan_key(require_identifier(guest.get("role"), f"host_vars.proxmox_guests[{index}].role"))
+        if template_key not in proxmox_vm_templates:
+            raise ValueError(
+                f"host_vars.proxmox_guests[{index}].template_key must reference inventory/group_vars/all.yml.proxmox_vm_templates"
+            )
         if vmid in guest_vmids:
             raise ValueError(f"duplicate proxmox guest vmid: {vmid}")
         if name in guest_names:
@@ -493,10 +519,12 @@ def validate_host_vars() -> dict[str, Any]:
 
     return {
         "host_id": host_id,
+        "host_vars": host_vars,
         "guest_names": guest_names,
         "guest_plan_keys": guest_plan_keys,
         "guest_vmids_by_key": guest_vmids_by_key,
         "guest_ips_by_key": guest_ips_by_key,
+        "proxmox_vm_templates": proxmox_vm_templates,
         "platform_port_assignments": platform_port_assignments,
         "topology": {
             service_id: {
@@ -506,6 +534,51 @@ def validate_host_vars() -> dict[str, Any]:
             for service_id, service in topology.items()
         },
     }
+
+
+def validate_vm_template_manifest(template_catalog: dict[str, Any]) -> None:
+    manifest = require_mapping(load_json(VM_TEMPLATE_MANIFEST_PATH), str(VM_TEMPLATE_MANIFEST_PATH))
+    templates = require_mapping(manifest.get("templates"), "config/vm-template-manifest.json.templates")
+    if set(templates.keys()) != set(template_catalog.keys()):
+        raise ValueError("config/vm-template-manifest.json.templates must match host_vars.proxmox_vm_templates")
+
+    for template_key, template in template_catalog.items():
+        template = require_mapping(template, f"inventory/group_vars/all.yml.proxmox_vm_templates.{template_key}")
+        manifest_entry = require_mapping(templates.get(template_key), f"config/vm-template-manifest.json.templates.{template_key}")
+        manifest_vmid = require_int(manifest_entry.get("vmid"), f"config/vm-template-manifest.json.templates.{template_key}.vmid", 1)
+        inventory_vmid = require_int(template.get("vmid"), f"inventory/group_vars/all.yml.proxmox_vm_templates.{template_key}.vmid", 1)
+        if manifest_vmid != inventory_vmid:
+            raise ValueError(f"config/vm-template-manifest.json.templates.{template_key}.vmid must match inventory template vmid")
+
+        manifest_name = require_hostname(
+            manifest_entry.get("name"),
+            f"config/vm-template-manifest.json.templates.{template_key}.name",
+        )
+        inventory_name = require_hostname(template.get("name"), f"inventory/group_vars/all.yml.proxmox_vm_templates.{template_key}.name")
+        if manifest_name != inventory_name:
+            raise ValueError(f"config/vm-template-manifest.json.templates.{template_key}.name must match inventory template name")
+
+        source_template = manifest_entry.get("source_template")
+        if source_template is not None:
+            require_str(source_template, f"config/vm-template-manifest.json.templates.{template_key}.source_template")
+
+        build_date = manifest_entry.get("build_date")
+        if build_date is not None:
+            dt.datetime.fromisoformat(
+                require_str(build_date, f"config/vm-template-manifest.json.templates.{template_key}.build_date").replace("Z", "+00:00")
+            )
+
+        version = manifest_entry.get("version")
+        if version is not None:
+            require_semver(version, f"config/vm-template-manifest.json.templates.{template_key}.version")
+
+        digest = manifest_entry.get("digest")
+        if digest is not None:
+            require_str(digest, f"config/vm-template-manifest.json.templates.{template_key}.digest")
+
+        packer_commit = manifest_entry.get("packer_commit")
+        if packer_commit is not None:
+            require_str(packer_commit, f"config/vm-template-manifest.json.templates.{template_key}.packer_commit")
 
 
 def validate_platform_vars() -> None:
@@ -1519,6 +1592,7 @@ def validate_repository_data_models() -> int:
     validate_secret_catalog(secret_manifest)
     validate_platform_finding_schema()
     validate_maintenance_window_schema()
+    validate_vm_template_manifest(host_vars_context["proxmox_vm_templates"])
     validate_versions_stack(host_vars_context)
     validate_platform_vars()
     print("Repository data models OK")

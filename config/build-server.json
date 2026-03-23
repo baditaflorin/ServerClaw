@@ -42,8 +42,14 @@
     "remote-packer-build": {
       "runner_label": "packer-validate",
       "skip_docker": true,
-      "command": "test -n \"$IMAGE\" || { echo \"set IMAGE=<name>\" >&2; exit 1; }; cd packer && packer build -var-file=variables/common.pkrvars.hcl \"templates/${IMAGE}.pkr.hcl\"",
-      "local_fallback_command": "test -n \"$IMAGE\" || { echo \"set IMAGE=<name>\" >&2; exit 1; }; cd packer && packer build -var-file=variables/common.pkrvars.hcl \"templates/${IMAGE}.pkr.hcl\""
+      "command": "test -n \"$IMAGE\" || { echo \"set IMAGE=<name>\" >&2; exit 1; }; ./scripts/build_packer_template.sh \"$IMAGE\"",
+      "local_fallback_command": "test -n \"$IMAGE\" || { echo \"set IMAGE=<name>\" >&2; exit 1; }; ./scripts/build_packer_template.sh \"$IMAGE\""
+    },
+    "remote-packer-validate": {
+      "runner_label": "packer-validate",
+      "skip_docker": true,
+      "command": "./scripts/validate_packer_templates.sh",
+      "local_fallback_command": "./scripts/validate_packer_templates.sh"
     },
     "remote-image-build": {
       "runner_label": "image-build",

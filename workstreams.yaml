@@ -1128,6 +1128,30 @@ workstreams:
     ready_to_merge: false
     live_applied: false
 
+  - id: adr-0084-packer-pipeline
+    adr: "0084"
+    title: Packer VM template pipeline
+    status: merged
+    owner: codex
+    branch: codex/adr-0084-packer-vm-template-pipeline
+    worktree_path: ../proxmox_florin_server-adr-0084
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0084-packer-pipeline.md
+    depends_on:
+      - adr-0082-remote-build-gateway
+      - adr-0083-docker-check-runner
+    conflicts_with: []
+    shared_surfaces:
+      - packer/
+      - config/vm-template-manifest.json
+      - config/windmill/scripts/packer-template-rebuild.py
+      - roles/proxmox_guests/
+      - inventory/group_vars/all.yml
+      - inventory/host_vars/proxmox_florin.yml
+      - Makefile
+      - config/build-server.json
+    ready_to_merge: false
+    live_applied: false
+
   - id: adr-0086-ansible-collections
     adr: "0086"
     title: Ansible collection packaging

@@ -1,4 +1,4 @@
-repo_version: 0.68.0
+repo_version: 0.91.0
 platform_version: 0.34.0
 container_image_catalog_path: "{{ playbook_dir }}/../config/image-catalog.json"
 container_image_catalog: "{{ lookup('file', container_image_catalog_path) | from_json }}"
@@ -33,11 +33,23 @@ debian_prereq_packages:
 
 bootstrap_authorized_key_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/keys/hetzner_llm_agents_ed25519.pub
 
-debian_cloud_image_url: https://cloud.debian.org/images/cloud/trixie/latest/debian-13-genericcloud-amd64.qcow2
-debian_cloud_image_sha512: 0e5edfbe49b0cca779a4a7dc9738f34c92e3ff481ee1f7d5c4e93e180654fe275eb8c96397224c6ca04a2910eaaed27489f431573ebe4cb5412ef257888b2b18
-debian_cloud_image_filename: debian-13-genericcloud-amd64.qcow2
-proxmox_template_vmid: 9000
-proxmox_template_name: debian13-cloud-template
+proxmox_vm_templates:
+  lv3-debian-base:
+    vmid: 9000
+    name: lv3-debian-base
+    source_template: debian13-cloud-template
+  lv3-docker-host:
+    vmid: 9001
+    name: lv3-docker-host
+    source_template: lv3-debian-base
+  lv3-postgres-host:
+    vmid: 9002
+    name: lv3-postgres-host
+    source_template: lv3-debian-base
+  lv3-ops-base:
+    vmid: 9003
+    name: lv3-ops-base
+    source_template: lv3-debian-base
 proxmox_storage_id: local
 proxmox_snippets_storage_id: local
 proxmox_guest_ci_user: ops
