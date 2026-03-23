@@ -377,3 +377,30 @@ live-apply-service:
 
 live-apply-site:
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/site.yml --private-key $(BOOTSTRAP_KEY) -e env=$(env) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(EXTRA_ARGS)
+
+## Remote build execution (ADR 0082)
+.PHONY: remote-lint remote-validate remote-pre-push remote-packer-build remote-image-build remote-exec check-build-server
+
+remote-lint:
+	$(REPO_ROOT)/scripts/remote_exec.sh remote-lint --local-fallback
+
+remote-validate:
+	$(REPO_ROOT)/scripts/remote_exec.sh remote-validate --local-fallback
+
+remote-pre-push:
+	$(REPO_ROOT)/scripts/remote_exec.sh remote-pre-push --local-fallback
+
+remote-packer-build:
+	@test -n "$(IMAGE)" || (echo "set IMAGE=<name>"; exit 1)
+	IMAGE="$(IMAGE)" $(REPO_ROOT)/scripts/remote_exec.sh remote-packer-build --local-fallback
+
+remote-image-build:
+	@test -n "$(SERVICE)" || (echo "set SERVICE=<service-id>"; exit 1)
+	SERVICE="$(SERVICE)" COMMAND="$(COMMAND)" $(REPO_ROOT)/scripts/remote_exec.sh remote-image-build --local-fallback
+
+remote-exec:
+	@test -n "$(COMMAND)" || (echo "set COMMAND=<shell-command>"; exit 1)
+	COMMAND="$(COMMAND)" $(REPO_ROOT)/scripts/remote_exec.sh remote-exec --local-fallback
+
+check-build-server:
+	$(REPO_ROOT)/scripts/remote_exec.sh check-build-server
