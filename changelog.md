@@ -8,6 +8,16 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.80.0 - 2026-03-23
+
+- implemented ADR 0082 on current `main` by adding the remote build execution gateway script, the build-server capability manifest, the rsync secret-exclusion contract, and the operator runbook for remote validation flows
+- appended `make remote-lint`, `make remote-validate`, `make remote-pre-push`, `make remote-packer-build`, `make remote-image-build`, `make remote-exec`, and `make check-build-server` so heavy repository work can be routed through the build server without changing operator workflow
+- added regression coverage for remote docker-runner selection, explicit local fallback behavior, and the build-server rsync dry-run health check, while updating ADR 0082 and the workstream registry to record the current-main implementation in `0.80.0`
+
+Platform impact:
+
+- no direct live platform change is claimed in this release commit; this is a repository automation and operator-ergonomics release on top of the current live `0.37.0` platform
+
 ## 0.79.0 - 2026-03-23
 
 - repaired the current-main repository validation gate after the ADR 0066 rollout by declaring the nftables reload task in `roles/docker_runtime` as conditionally changing only when the forward-compat patch actually applied
