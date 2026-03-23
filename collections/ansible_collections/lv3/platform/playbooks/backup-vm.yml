@@ -82,3 +82,25 @@
       tags:
         - backups
         - storage
+
+- name: Configure optional off-site backup of backup-lv3
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  tags:
+    - tier-1
+    - data
+    - service-backup-vm
+    - offsite-backups
+  vars:
+    proxmox_backup_storage: "{{ dr_offsite_backup_storage }}"
+    proxmox_backup_jobs: "{{ dr_offsite_backup_jobs }}"
+    proxmox_backup_jobs_marker_id: "{{ dr_offsite_backup_storage.id }}"
+
+  roles:
+    - role: lv3.platform.proxmox_backups
+      when: dr_offsite_backup_storage.enabled | bool
+      tags:
+        - backups
+        - storage
+        - offsite-backups

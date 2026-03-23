@@ -810,6 +810,11 @@ observed_state:
     mode: snapshot
     storage_id: lv3-backup-pbs
     legacy_external_cifs_path_blocked: true
+    offsite_backup:
+      configured: false
+      storage_id: lv3-backup-offsite
+      protected_vm: backup-lv3
+      latest_run: not recorded
     control_plane_recovery:
       runtime_source_vm: docker-runtime-lv3
       backup_store_vm: backup-lv3

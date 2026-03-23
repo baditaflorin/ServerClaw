@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This runbook captures the first-code path for creating the dedicated backup VM and wiring the Proxmox host to it as a PBS backup target.
+This runbook captures the first-code path for creating the dedicated backup VM, wiring the Proxmox host to it as a PBS backup target, and optionally configuring the off-site recovery copy required by ADR 0100.
 
 ## Model Summary
 
@@ -10,7 +10,7 @@ This runbook captures the first-code path for creating the dedicated backup VM a
 - run Proxmox Backup Server inside the guest
 - store the PBS datastore on a dedicated secondary virtual disk
 - point the Proxmox host backup job at that PBS datastore
-- treat this as a same-host recovery layer, not as off-host disaster recovery
+- optionally back up `backup-lv3` itself to off-site Proxmox storage for total-host-loss recovery
 
 ## Command
 
@@ -33,6 +33,20 @@ make configure-backup-vm
 5. Stores the token secret locally outside git.
 6. Converges the Proxmox host storage entry `lv3-backup-pbs`.
 7. Converges the nightly backup job `backup-lv3-nightly`.
+8. Optionally converges the off-site storage entry `lv3-backup-offsite`.
+9. Optionally converges the off-site backup job `backup-lv3-offsite` for VM `160`.
+
+## Optional Off-Site Inputs
+
+Set these when enabling the ADR 0100 off-site copy of `backup-lv3`:
+
+```bash
+export PROXMOX_DR_OFFSITE_ENABLED=true
+export PROXMOX_DR_OFFSITE_SERVER=<storage-box-hostname>
+export PROXMOX_DR_OFFSITE_SHARE=<share>
+export PROXMOX_DR_OFFSITE_USERNAME=<username>
+export PROXMOX_DR_OFFSITE_PASSWORD=<password>
+```
 
 ## Verification
 
@@ -58,6 +72,12 @@ Verify the backup job:
 
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo pvesh get /cluster/backup/backup-lv3-nightly --output-format json-pretty'
+```
+
+Verify the optional off-site job when enabled:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo pvesh get /cluster/backup/backup-lv3-offsite --output-format json-pretty'
 ```
 
 Run one ad hoc backup for validation:
@@ -88,7 +108,7 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
 
 ## Limitation
 
-This VM lives on the same Proxmox host and the same underlying local storage pool as the primary workloads. It improves day-two restores and rollback safety, but it does not replace the need for an off-host replication or export strategy.
+Local PBS on `backup-lv3` still shares the same host failure domain as the primary workloads. ADR 0100 closes that gap only when the optional off-site `backup-lv3` copy is configured and verified.
 
 ## Lessons Learned
 

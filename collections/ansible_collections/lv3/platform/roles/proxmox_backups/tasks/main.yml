@@ -170,8 +170,8 @@
         stripped=/root/.lv3-jobs.cfg.stripped
         desired=/root/.lv3-jobs.cfg.desired
         block=/root/.lv3-jobs.cfg.block
-        begin='# BEGIN ANSIBLE MANAGED BACKUP JOBS'
-        end='# END ANSIBLE MANAGED BACKUP JOBS'
+        begin='# BEGIN ANSIBLE MANAGED BACKUP JOBS {{ proxmox_backup_jobs_marker_id }}'
+        end='# END ANSIBLE MANAGED BACKUP JOBS {{ proxmox_backup_jobs_marker_id }}'
 
         if [ -f "$target" ]; then
           cp "$target" "$current"
@@ -208,7 +208,7 @@
       when: (proxmox_enabled_backup_jobs | default([])) | length > 0
 
     - name: Restart the Proxmox scheduler if backup jobs changed
-      ansible.builtin.command: pvescheduler restart
+      ansible.builtin.command: systemctl restart pvescheduler.service
       when:
         - proxmox_backup_jobs_cfg is defined
         - proxmox_backup_jobs_cfg.changed

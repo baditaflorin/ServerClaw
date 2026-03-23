@@ -76,6 +76,11 @@ windmill_seed_scripts:
     language: python3
     summary: Maintain the LV3 build caches
     description: Repo-managed helper that purges the shared pip cache and checks the apt-cacher-ng report endpoint on the build server.
+  - path: f/lv3/disaster_recovery_runbook
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/disaster-recovery-runbook.py"
+    language: python3
+    summary: ADR 0100 disaster recovery runbook
+    description: Repo-managed helper that renders the ordered LV3 disaster recovery plan and records the runbook invocation path.
 windmill_seed_schedules:
   - path: f/lv3/platform_observation_loop_every_4h
     schedule: "0 0 */4 * * *"

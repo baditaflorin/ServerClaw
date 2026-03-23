@@ -35,3 +35,5 @@ proxmox_backup_jobs:
       keep_daily: 7
       keep_weekly: 5
       keep_monthly: 12
+
+proxmox_backup_jobs_marker_id: "{{ proxmox_backup_storage.id }}"
