@@ -1,10 +1,10 @@
 # ADR 0073: Environment Promotion Gate And Deployment Pipeline
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.79.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-23
 - Date: 2026-03-22
 
 ## Context
@@ -82,6 +82,13 @@ In a production incident requiring an immediate fix, an operator with break-glas
 - Agent-initiated changes are bounded: an agent can trigger the full pipeline but cannot bypass the operator approval gate on the promotion step.
 - The 24-hour staging receipt window prevents stale validations from being used to justify a production change.
 - The promotion workflow is a Windmill-managed surface; if Windmill is unavailable, the break-glass path must be used and documented.
+
+## Implementation Notes
+
+- Repo automation now ships the promotion pipeline entrypoint at [scripts/promotion_pipeline.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/promotion_pipeline.py), the promotion receipt schema at [docs/schema/promotion-receipt.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/schema/promotion-receipt.json), and the operator runbook at [docs/runbooks/environment-promotion-pipeline.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/environment-promotion-pipeline.md).
+- The command/workflow contracts are now first-class in [config/command-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/command-catalog.json) and [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json), with `promote-to-production` enforcing operator approval before any governed production promotion.
+- Live-apply receipt handling now supports staged receipts under [receipts/live-applies/staging/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/live-applies/staging), and promotion evidence is reserved under [receipts/promotions/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/promotions).
+- The Windmill converge now seeds the repo-managed wrapper [config/windmill/scripts/deploy-and-promote.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/deploy-and-promote.py), so operators and agents call the same promotion logic rather than duplicating policy in a separate workflow definition.
 
 ## Boundaries
 

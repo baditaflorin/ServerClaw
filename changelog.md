@@ -8,6 +8,17 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.79.0 - 2026-03-23
+
+- completed ADR 0073 on current `main` by adding a repo-managed promotion pipeline with staging receipt support, gate validation, production promotion execution, and promotion receipt validation
+- added the governed `deploy-and-promote` workflow contract, the `promote-to-production` command contract, the `operator_approved` approval policy, and the `make promote` operator entrypoint
+- seeded the Windmill `deploy_and_promote` wrapper, reserved repo-managed staging and promotion receipt directories, and wired break-glass `promotion_bypassed` audit emission into the direct production live-apply path
+- documented the promotion workflow in a dedicated runbook and updated the ADR/workstream metadata to record repository implementation in `0.79.0`
+
+Platform impact:
+
+- no direct live platform change is claimed in this release commit; the ADR 0073 promotion gate is implemented in repository automation and awaits a deliberate live promotion from `main`
+
 ## 0.78.0 - 2026-03-23
 
 - completed ADR 0066 on current `main` by validating the structured mutation-audit schema, Ansible callback emission, command-catalog audit events, the seeded Windmill helper, and the host-side `/var/log/platform/mutation-audit.jsonl` sinks now shipped through ADR 0052

@@ -49,6 +49,11 @@ windmill_seed_scripts:
     language: python3
     summary: LV3 container image upgrade workflow
     description: Repo-managed wrapper for catalog-based image upgrades, receipts, and optional converges.
+  - path: f/lv3/deploy_and_promote
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/deploy-and-promote.py"
+    language: python3
+    summary: LV3 deploy and promote workflow
+    description: Repo-managed wrapper for ADR 0073 staging gate evaluation, production promotion, and receipt generation.
   - path: f/lv3/mutation_audit_emit
     local_file: "{{ playbook_dir }}/../config/windmill/scripts/lv3-mutation-audit.py"
     language: python3

@@ -20,6 +20,7 @@ from workflow_catalog import load_workflow_catalog, load_secret_manifest, valida
 SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 ALLOWED_RESULTS = {"pass", "partial", "fail"}
+ALLOWED_ENVIRONMENTS = {"production", "staging"}
 
 
 def load_receipt(path: Path) -> dict:
@@ -31,7 +32,23 @@ def git_commit_exists(commit: str) -> bool:
 
 
 def iter_receipt_paths() -> list[Path]:
-    return sorted(RECEIPTS_DIR.glob("*.json"))
+    return sorted(RECEIPTS_DIR.rglob("*.json"))
+
+
+def receipt_environment_for_path(path: Path) -> str:
+    relative = path.relative_to(RECEIPTS_DIR)
+    return "staging" if relative.parts and relative.parts[0] == "staging" else "production"
+
+
+def receipt_relative_path(path: Path) -> Path:
+    return path.relative_to(REPO_ROOT)
+
+
+def resolve_receipt_path(receipt_ref: str) -> Path:
+    candidate = Path(receipt_ref)
+    if not candidate.is_absolute():
+        candidate = REPO_ROOT / candidate
+    return candidate
 
 
 def validate_receipt(receipt: dict, path: Path, workflow_catalog: dict) -> None:
@@ -62,8 +79,22 @@ def validate_receipt(receipt: dict, path: Path, workflow_catalog: dict) -> None:
         if not DATE_PATTERN.match(receipt[field]):
             raise ValueError(f"{path.name}: {field} must use YYYY-MM-DD")
 
+    recorded_at = receipt.get("recorded_at")
+    if recorded_at is not None:
+        if not isinstance(recorded_at, str) or not recorded_at.strip():
+            raise ValueError(f"{path.name}: recorded_at must be a non-empty ISO-8601 string when present")
+
     if not SEMVER_PATTERN.match(receipt["repo_version_context"]):
         raise ValueError(f"{path.name}: repo_version_context must use semantic version format")
+
+    environment = receipt.get("environment", receipt_environment_for_path(path))
+    if not isinstance(environment, str) or environment not in ALLOWED_ENVIRONMENTS:
+        raise ValueError(f"{path.name}: environment must be one of {sorted(ALLOWED_ENVIRONMENTS)}")
+    derived_environment = receipt_environment_for_path(path)
+    if environment != derived_environment:
+        raise ValueError(
+            f"{path.name}: environment '{environment}' does not match receipt path environment '{derived_environment}'"
+        )
 
     if receipt["workflow_id"] not in workflow_catalog["workflows"]:
         raise ValueError(
@@ -148,8 +179,9 @@ def list_receipts() -> int:
     print("Available receipts:")
     for path in iter_receipt_paths():
         receipt = load_receipt(path)
+        environment = receipt.get("environment", receipt_environment_for_path(path))
         print(
-            f"  - {receipt['receipt_id']}: {receipt['recorded_on']} {receipt['workflow_id']} "
+            f"  - {receipt['receipt_id']}: {receipt['recorded_on']} [{environment}] {receipt['workflow_id']} "
             f"applied {receipt['applied_on']} "
             f"{receipt['source_commit'][:7]} {receipt['summary']}"
         )
@@ -157,15 +189,28 @@ def list_receipts() -> int:
 
 
 def show_receipt(receipt_id: str) -> int:
-    target_path = RECEIPTS_DIR / f"{receipt_id}.json"
-    if not target_path.is_file():
+    matches = [path for path in iter_receipt_paths() if path.stem == receipt_id]
+    if not matches:
         print(f"Unknown receipt: {receipt_id}", file=sys.stderr)
         return 2
+    if len(matches) > 1:
+        print(
+            f"Ambiguous receipt id '{receipt_id}': "
+            + ", ".join(str(receipt_relative_path(path)) for path in matches),
+            file=sys.stderr,
+        )
+        return 2
+
+    target_path = matches[0]
 
     receipt = load_receipt(target_path)
     print(f"Receipt: {receipt['receipt_id']}")
+    print(f"Path: {receipt_relative_path(target_path)}")
+    print(f"Environment: {receipt.get('environment', receipt_environment_for_path(target_path))}")
     print(f"Applied on: {receipt['applied_on']}")
     print(f"Recorded on: {receipt['recorded_on']}")
+    if receipt.get("recorded_at"):
+        print(f"Recorded at: {receipt['recorded_at']}")
     print(f"Recorded by: {receipt['recorded_by']}")
     print(f"Source commit: {receipt['source_commit']}")
     print(f"Repo version context: {receipt['repo_version_context']}")

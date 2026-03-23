@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lv3.org/schema/promotion-receipt.json",
+  "title": "Promotion Receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "promotion_id",
+    "branch",
+    "service",
+    "playbook",
+    "staging_receipt",
+    "staging_health_check",
+    "gate_decision",
+    "gate_actor",
+    "repo_version_context",
+    "platform_version_context",
+    "ts"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "promotion_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "branch": {
+      "type": "string",
+      "pattern": "^(codex|operator)\\/.+$"
+    },
+    "service": {
+      "type": "string",
+      "minLength": 1
+    },
+    "playbook": {
+      "type": "string",
+      "minLength": 1
+    },
+    "staging_receipt": {
+      "type": "string",
+      "pattern": "^receipts\\/live-applies\\/staging\\/.+\\.json$"
+    },
+    "staging_health_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "passed",
+        "checks"
+      ],
+      "properties": {
+        "passed": {
+          "type": "boolean"
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "check",
+              "result",
+              "passed",
+              "observed"
+            ],
+            "properties": {
+              "check": {
+                "type": "string",
+                "minLength": 1
+              },
+              "result": {
+                "type": "string",
+                "enum": [
+                  "pass",
+                  "partial",
+                  "fail"
+                ]
+              },
+              "passed": {
+                "type": "boolean"
+              },
+              "observed": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "gate_decision": {
+      "type": "string",
+      "enum": [
+        "approved",
+        "rejected",
+        "bypassed"
+      ]
+    },
+    "gate_actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "class",
+        "id"
+      ],
+      "properties": {
+        "class": {
+          "type": "string",
+          "enum": [
+            "operator",
+            "agent",
+            "service",
+            "automation"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "prod_receipt": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "repo_version_context": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "platform_version_context": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}
