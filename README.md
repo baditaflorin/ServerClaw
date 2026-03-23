@@ -70,13 +70,15 @@ Mattermost is now live on `docker-runtime-lv3` and reachable privately at `http:
 
 Portainer is now live on `docker-runtime-lv3` and reachable privately at `https://100.118.189.95:9444`, with controller-local bootstrap artifacts under `.local/portainer` and a governed wrapper for read-mostly runtime inspection plus bounded restarts.
 
+The repository now also ships the repo-managed `lv3` operator CLI for terminal-first discovery, validation, status checks, and private control-plane entrypoints.
+
 <!-- BEGIN GENERATED: platform-status -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_status_docs.py). Do not edit this block by hand.
 
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.90.0` |
+| Repository version | `0.91.0` |
 | Platform version | `0.39.0` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -353,6 +355,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Roadmap Runbook: IaC Potency, Build Server Offload, and User Ergonomics](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/plan-iac-potency-and-build-server.md)
 - [Platform Hardening And Agentic Extensibility Roadmap](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/plan-platform-hardening-and-agentic-extensibility.md)
 - [Visual And Agent Operations Roadmap](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/plan-visual-agent-operations.md)
+- [Platform CLI](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/platform-cli.md)
 - [Platform Facts Library](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/platform-facts-library.md)
 - [Platform Operations Portal](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/platform-operations-portal.md)
 - [Playbook Execution Model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/playbook-execution-model.md)
@@ -545,7 +548,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.90.0` |
+| Repository version | `0.91.0` |
 | Platform version | `0.39.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -642,6 +645,7 @@ This repository is intentionally opinionated:
 | `0083` | Docker-based check runner | `merged` | [adr-0083-docker-check-runner.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0083-docker-check-runner.md) |
 | `0086` | Ansible collection packaging | `merged` | [adr-0086-ansible-collections.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0086-ansible-collections.md) |
 | `0089` | Build artifact cache and layer registry | `merged` | [adr-0089-build-cache.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0089-build-cache.md) |
+| `0090` | Unified platform CLI | `merged` | [adr-0090-platform-cli.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0090-platform-cli.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

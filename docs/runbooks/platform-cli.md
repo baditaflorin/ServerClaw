@@ -1,0 +1,106 @@
+# Platform CLI
+
+## Purpose
+
+`lv3` is the terminal entry point for common operator tasks in this repository.
+
+It wraps the existing make targets, service catalog, workflow catalog, and controller-local secret references behind one discoverable command surface.
+
+## Installation
+
+Preferred:
+
+```bash
+make install-cli
+```
+
+This installs the editable CLI entry point into the current operator environment.
+
+Update an existing install after changes:
+
+```bash
+make update-cli
+```
+
+Install completion:
+
+```bash
+lv3 --install-completion bash
+lv3 --install-completion zsh
+```
+
+## Core Commands
+
+Show the full command surface:
+
+```bash
+lv3 --help
+```
+
+Check repository health:
+
+```bash
+lv3 lint
+lv3 validate
+lv3 validate --strict
+```
+
+Inspect platform health:
+
+```bash
+lv3 status
+lv3 status grafana
+```
+
+Preview a deploy route without executing it:
+
+```bash
+lv3 deploy grafana --env production --dry-run
+```
+
+Open a published or private operator surface:
+
+```bash
+lv3 open ops_portal
+lv3 open windmill
+```
+
+Inspect logs through Loki:
+
+```bash
+lv3 logs windmill --tail 50 --since 2h
+```
+
+Trigger a Windmill workflow:
+
+```bash
+lv3 run windmill_healthcheck
+lv3 run deploy_and_promote --args service=grafana environment=production
+```
+
+## Routing Model
+
+- `lv3 lint` and `lv3 validate` route through ADR 0082's build-server gateway unless `--local` is set.
+- `lv3 deploy` routes to `make remote-exec` and then into the repo-managed service apply path.
+- `lv3 status`, `lv3 logs`, and `lv3 open` use catalog-backed read paths from the controller.
+- `lv3 run` calls the private Windmill API using the controller-local Windmill superadmin secret.
+
+## Current Limits
+
+- `lv3 vm create`, `lv3 vm destroy`, `lv3 diff`, and `lv3 fixture ...` assume the related OpenTofu and fixture workstreams are present on the execution surface. If those repo surfaces are still missing, the CLI fails explicitly instead of silently guessing.
+- `lv3 scaffold` expects ADR 0078's `make scaffold-service` surface. If that generator is not merged yet, the command will fail through the underlying make target.
+- `lv3 deploy` follows ADR 0090's build-server route, so the remote execution surface must already have the required live-apply prerequisites.
+
+## Troubleshooting
+
+`lv3 lint` or `lv3 validate` fails before running:
+- run `make check-build-server`
+
+`lv3 status` shows timeouts:
+- verify the operator machine still has the Proxmox Tailscale route for `10.10.10.0/24`
+
+`lv3 run ...` cannot authenticate:
+- verify `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt` exists and is current
+
+`lv3 logs ...` cannot reach Loki:
+- override the query endpoint with `LV3_LOKI_URL=http://<host>:3100/loki/api/v1/query_range`

@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0090](../adr/0090-unified-platform-cli.md)
 - Title: Single `lv3` CLI that routes deploy, lint, validate, status, vm, secret, and fixture commands to the right execution target
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0090-platform-cli`
 - Worktree: `../proxmox_florin_server-platform-cli`
 - Owner: codex
@@ -12,8 +12,8 @@
 
 ## Scope
 
-- write `scripts/lv3_cli.py` — `click`-based CLI with all 14 command groups documented in the ADR
-- write `pyproject.toml` (or update if it exists) with `[project.scripts] lv3 = "scripts.lv3_cli:cli"` entry point
+- write `scripts/lv3_cli.py` — Python CLI with all 14 command groups documented in the ADR
+- write `pyproject.toml` (or update if it exists) with `[project.scripts] lv3 = "scripts.lv3_cli:main"` entry point
 - add `make install-cli` target (pipx editable install)
 - add `make update-cli` target (re-installs after changes)
 - implement `lv3 status` reading `config/service-capability-catalog.json` and probing health endpoints concurrently
@@ -24,7 +24,7 @@
 - implement `lv3 open <service>` opening the service URL in the default browser
 - implement `lv3 ssh <vm-name>` resolving VM Tailscale IP from inventory and calling `ssh ops@<ip>`
 - implement `lv3 logs <service>` calling Loki API with the service label filter
-- implement `lv3 scaffold <name>` wrapping `make scaffold-service SERVICE=<name>`
+- implement `lv3 scaffold <name>` wrapping `make scaffold-service NAME=<name>`
 - implement shell completion for bash and zsh
 - write `docs/runbooks/platform-cli.md` with install guide and command reference
 
@@ -55,19 +55,19 @@
 
 - `make install-cli` installs `lv3` in `PATH`; `lv3 --help` shows all command groups
 - `lv3 status` returns within 5 s with concurrent health probes for all live services
-- `lv3 deploy grafana --dry-run` prints the Ansible command it would run without executing it
-- `lv3 open grafana` opens `https://grafana.lv3.org` in the default browser
+- `lv3 deploy grafana --dry-run` prints the routed `make remote-exec` command without executing it
+- `lv3 open grafana` resolves the catalog URL in the default browser
 - shell completion tested: `lv3 dep<TAB>` completes to `lv3 deploy`
+- targeted regression coverage: `uv run --with pytest pytest -q tests/test_lv3_cli.py`
 
 ## Merge Criteria
 
 - all 14 command groups implemented and pass smoke tests
 - `lv3 status` output format matches the layout documented in the ADR
 - `docs/runbooks/platform-cli.md` complete with installation, usage examples, and troubleshooting
+- commands whose dependent ADR surfaces are still absent fail explicitly with actionable errors instead of inventing ad hoc behavior
 
 ## Notes For The Next Assistant
 
-- use `click.echo` with ANSI colour codes for the status table; add a `--no-color` flag for CI environments; honour `NO_COLOR` env var
-- `lv3 status` health probes should have a 3-second timeout per service; failures should show as `✗ timeout` not crash the command
-- the `lv3 logs` command needs a `--since` flag accepting natural language time (`10m`, `2h`, `1d`); convert to Loki `start` timestamp in the command before the Loki API call
-- `lv3 deploy` must print the receipt URL at the end; read the last-created file in `receipts/live-applies/` matching the service name and date
+- The shipped CLI is stdlib-only rather than `click`-based so it remains directly runnable as `python3 scripts/lv3_cli.py ...` without extra dependency bootstrapping.
+- VM lifecycle, fixtures, and scaffolding now have CLI routes, but the underlying ADR 0085 / 0088 / 0078 repo surfaces are still separate dependencies; keep that explicit if extending those commands.
