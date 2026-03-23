@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0099](../adr/0099-automated-backup-restore-verification.md)
 - Title: Weekly Windmill workflow restoring postgres-lv3, docker-runtime-lv3, and backup-lv3 into ephemeral VMs and running smoke tests
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0099-backup-restore-verification`
 - Worktree: `../proxmox_florin_server-backup-restore-verification`
 - Owner: codex
@@ -12,15 +12,16 @@
 
 ## Scope
 
-- write `scripts/restore_verification.py` — orchestrates PBS restore, smoke tests, and report writing for each target VM
-- write `scripts/smoke_tests/postgres_smoke.py` — psycopg2-based Postgres connectivity and table-count tests
-- write `scripts/smoke_tests/docker_runtime_smoke.py` — httpx-based health probe tests against restored Docker runtime containers
-- write `scripts/smoke_tests/backup_vm_smoke.py` — PBS API connectivity test against restored backup VM
-- write Windmill workflow `restore-verification` — scheduled Sunday 02:00 UTC; calls `scripts/restore_verification.py` via remote exec on build server
+- write `scripts/restore_verification.py` — orchestrates PBS restore, smoke tests, receipt writing, mutation audit emission, and optional NATS plus Mattermost notifications
+- write `scripts/smoke_tests/postgres_smoke.py` — guest-local PostgreSQL readiness, table-count, and `pg_dump` smoke tests
+- write `scripts/smoke_tests/docker_runtime_smoke.py` — guest-local HTTP health probes for the restored Docker runtime services
+- write `scripts/smoke_tests/backup_vm_smoke.py` — guest-local PBS CLI and listener checks on the restored backup VM
+- write Windmill workflow wrapper `restore-verification` — runs `scripts/restore_verification.py` from the mounted repo checkout
 - create `receipts/restore-verifications/.gitkeep`
-- add Grafana panel `Backup Health` to the platform overview dashboard (`config/grafana/dashboards/platform-overview.json`) showing last verification date and pass/fail per VM
-- add Grafana alert: last successful verification > 10 days ago → warning alert
-- add restore verification alert to `config/alertmanager/rules/platform.yml`
+- add `make restore-verification`
+- add workflow catalog entry for `restore-verification`
+- add a runbook at `docs/runbooks/backup-restore-verification.md`
+- add Grafana `Backup Restore` status panels to the platform overview dashboard template via Influx-backed summary metrics
 
 ## Non-Goals
 
@@ -34,9 +35,13 @@
 - `scripts/smoke_tests/postgres_smoke.py`
 - `scripts/smoke_tests/docker_runtime_smoke.py`
 - `scripts/smoke_tests/backup_vm_smoke.py`
-- `config/grafana/dashboards/platform-overview.json` (patched: Backup Health panel)
-- `config/alertmanager/rules/platform.yml` (patched: restore-verification-stale alert)
+- `config/windmill/scripts/restore-verification.py`
+- `config/workflow-catalog.json`
+- `Makefile`
+- `collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/_grafana_dashboard_macros.j2`
+- `collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/lv3-platform-overview.json.j2`
 - `receipts/restore-verifications/.gitkeep`
+- `docs/runbooks/backup-restore-verification.md`
 - `docs/adr/0099-automated-backup-restore-verification.md`
 - `docs/workstreams/adr-0099-backup-restore-verification.md`
 
@@ -49,7 +54,7 @@
 
 ## Verification
 
-- Trigger workflow manually: `lv3 runbook restore-verification`
+- Trigger the repo workflow manually: `make restore-verification`
 - Verify three ephemeral VMs appear in VMID range 900–909 during the workflow run
 - Verify all three are destroyed after the workflow completes
 - Read `receipts/restore-verifications/<date>.json`; verify `overall: pass` for all three VMs
@@ -64,7 +69,14 @@
 
 ## Notes For The Next Assistant
 
-- PBS restore via API requires the `PBSClient` from `scripts/pbs_client.py` if it exists, or use `proxmoxer` with the backup node endpoint; check what PBS API credentials are available in OpenBao at `platform/pbs/api-token`
-- The smoke test for `docker-runtime-lv3` must wait for all containers to start before probing; add a 90-second wait after VM boot before starting container health probes; some containers (Keycloak) take 60+ seconds to become ready
-- The restored VMs will not have their OpenBao secrets available (they will attempt to connect to the live OpenBao using the same credentials — this is correct; test credentials are valid); if the restored VM's OpenBao connection fails, the smoke test should note this but not fail the overall test
-- Ensure the `finally` block in `restore_verification.py` uses `proxmoxer` to destroy VMs by VMID even if the VMID is not in the expected list — guard against leaking VMs on unexpected exceptions
+- The current implementation restores through the Proxmox host CLI over SSH instead of calling the PVE or PBS HTTP APIs directly. This keeps the workflow aligned with the repo's existing host-side PBS operations and avoids a second credentials path.
+- The smoke test for `docker-runtime-lv3` waits 90 seconds after SSH readiness before probing the service endpoints because Keycloak is the slowest runtime to settle after restore.
+- OpenBao remains a non-blocking observation in the Docker runtime smoke suite. A restored Docker runtime can still be judged pass if the required services recover while the OpenBao readiness probe reports a soft failure.
+- The repository does not currently ship a committed Prometheus or Alertmanager rule surface, so stale restore-verification age is exposed through Influx-backed Grafana status panels for now.
+
+## Outcome
+
+- repository implementation is complete on `main` in repo release `0.99.0`
+- the restore-verification workflow now restores recent PBS snapshots for `postgres-lv3`, `docker-runtime-lv3`, and `backup-lv3` into the staged fixture network, runs service-specific smoke tests, emits receipts, and can publish notifications plus audit events
+- the repository now ships the Windmill wrapper, command and workflow catalog entries, dashboard summary metrics, and targeted test coverage for the restore-verification path
+- live rollout still requires enabling the workflow from `main`, verifying the staging bridge path on the Proxmox host, and confirming the external notification variables in the execution environment

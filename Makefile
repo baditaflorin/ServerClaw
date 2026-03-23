@@ -148,6 +148,10 @@ fixture-list:
 fixture-reaper:
 	python3 $(REPO_ROOT)/config/windmill/scripts/ephemeral-vm-reaper.py
 
+## Backup restore verification (ADR 0099)
+restore-verification:
+	python3 $(REPO_ROOT)/scripts/restore_verification.py $(RESTORE_ARGS)
+
 ## Platform CLI (ADR 0090)
 install-cli:
 	@if command -v pipx >/dev/null 2>&1; then \

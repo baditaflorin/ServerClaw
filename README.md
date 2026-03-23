@@ -80,7 +80,7 @@ The repository now also ships continuous drift detection across OpenTofu, Ansibl
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.99.0` |
+| Repository version | `0.100.0` |
 | Platform version | `0.40.0` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -311,6 +311,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Agent Observation Loop](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/agent-observation-loop.md)
 - [Agent Tool Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/agent-tool-registry.md)
 - [Ansible Collection Development](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/ansible-collection-development.md)
+- [Backup Restore Verification](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/backup-restore-verification.md)
 - [Break-Glass Recovery](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/break-glass-recovery.md)
 - [Certificate Expired](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/cert-expired.md)
 - [Command Catalog And Approval Gates](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/command-catalog-and-approval-gates.md)
@@ -608,7 +609,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.99.0` |
+| Repository version | `0.100.0` |
 | Platform version | `0.40.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -716,6 +717,7 @@ This repository is intentionally opinionated:
 | `0091` | Continuous drift detection and reconciliation | `merged` | [adr-0091-drift-detection.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0091-drift-detection.md) |
 | `0093` | Interactive ops portal with live actions | `merged` | [adr-0093-interactive-ops-portal.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0093-interactive-ops-portal.md) |
 | `0094` | Developer portal and service documentation site | `merged` | [adr-0094-developer-portal.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0094-developer-portal.md) |
+| `0099` | Automated backup restore verification | `merged` | [adr-0099-backup-restore-verification.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0099-backup-restore-verification.md) |
 | `0101` | Automated certificate lifecycle management | `merged` | [adr-0101-certificate-lifecycle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0101-certificate-lifecycle.md) |
 | `0106` | Ephemeral environment lifecycle and teardown policy | `merged` | [adr-0106-ephemeral-lifecycle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0106-ephemeral-lifecycle.md) |
 | `0111` | End-to-end integration test suite | `merged` | [adr-0111-integration-test-suite.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0111-integration-test-suite.md) |
