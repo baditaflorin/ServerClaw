@@ -1,175 +1,102 @@
 # ADR 0109: Public Status Page
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.104.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-23
 - Date: 2026-03-23
 
 ## Context
 
-The platform publishes several services to the public internet: `grafana.lv3.org`, `sso.lv3.org`, `uptime.lv3.org`, `ops.lv3.org`, and `docs.lv3.org`. External users — collaborators, link recipients, anyone who was given a URL — have no way to determine whether a service is currently experiencing an outage or whether their inability to reach it is on their end.
+The platform already publishes several public hostnames, including `grafana.lv3.org`, `sso.lv3.org`, and `uptime.lv3.org`. External users still lacked one unauthenticated place to answer a simple question: is the platform down, or is the problem local to them?
 
-Uptime Kuma (ADR 0027) already monitors all published services internally. It has a built-in status page feature that publicly exposes a subset of its monitoring data without requiring authentication. This feature has not been configured.
+Uptime Kuma already tracks the public surfaces, but its built-in public status-page feature was not configured. The maintenance-window workflow also had no outward-facing publication path, so planned downtime looked indistinguishable from an outage to anyone outside the private operator context.
 
-The absence of a public status page also creates an operational blind spot: if the platform's own internal monitoring is down (monitoring VM failure), an operator outside the network has no signal about platform health. A truly external status check — one that does not depend on internal platform services — provides a last-resort signal.
-
-An external status page has a second benefit: it signals that the platform is a product. A product tells its users when it is down. A collection of services does not.
+There was also no independent last-resort signal. If the platform lost the Uptime Kuma runtime entirely, there would be no external confirmation that the public status surface itself had failed.
 
 ## Decision
 
-We will configure Uptime Kuma's built-in status page at `status.lv3.org` and supplement it with an external synthetic monitoring probe via Uptime Robot (free tier) for last-resort monitoring independence.
+We will publish a repo-managed public status page at `status.lv3.org`, backed by Uptime Kuma and supplemented by an independent Uptime Robot probe set.
 
-### Uptime Kuma status page configuration
+### Public status page
 
-Uptime Kuma supports multiple status pages, each showing a configurable subset of monitors. We create one public status page:
+The repository now defines one Uptime Kuma status page in `config/uptime-kuma/status-page.json`:
 
-**Page configuration** (via Uptime Kuma API or Ansible role):
+- slug: `lv3-platform`
+- title: `lv3 Platform Status`
+- hostname: `status.lv3.org`
+- groups:
+  - Platform Access: `Keycloak OIDC Discovery`, `Uptime Kuma Public`
+  - Observability: `Grafana Public`, `NGINX Edge Public`
 
-```yaml
-status_page:
-  slug: lv3-platform
-  title: "lv3 Platform Status"
-  description: "Current operational status of lv3.org platform services"
-  theme: dark
-  show_tags: false
-  custom_css: ""
-  footer_text: "lv3.org — powered by Uptime Kuma"
+Only externally meaningful monitors are published. Private-only services such as Postgres, OpenBao, Windmill, and step-ca remain off the public page.
 
-monitors_included:
-  - name: "SSO (Keycloak)"
-    url: "https://sso.lv3.org/health/ready"
-    group: "Platform Services"
+### Edge publication
 
-  - name: "Grafana"
-    url: "https://grafana.lv3.org/api/health"
-    group: "Observability"
+`status.lv3.org` is registered in the canonical subdomain catalog and added to the shared NGINX edge topology. The edge keeps the hostname public and unauthenticated, but maps only the root request to the Uptime Kuma slug route so that the dedicated hostname serves the status page cleanly while still letting the backend load its normal assets.
 
-  - name: "Ops Portal"
-    url: "https://ops.lv3.org/health"
-    group: "Platform Services"
+### Maintenance-window publication
 
-  - name: "Uptime Monitor"
-    url: "https://uptime.lv3.org"
-    group: "Platform Services"
+`scripts/maintenance_window_tool.py` now performs a best-effort Uptime Kuma sync when a maintenance window is opened or closed:
 
-  - name: "API Gateway"
-    url: "https://api.lv3.org/v1/health"
-    group: "Platform Services"
+- open: create or update a matching single-run Uptime Kuma maintenance entry
+- close: remove the matching Uptime Kuma maintenance entry
+- monitor selection: derive the affected public monitor from the canonical service catalog, or all published status-page monitors for `maintenance/all`
 
-  - name: "Documentation"
-    url: "https://docs.lv3.org"
-    group: "Platform Services"
-```
+This keeps ADR 0080 as the source of truth while exposing planned downtime on the public page.
 
-Monitors that are internal-only (Postgres, OpenBao, step-ca, Windmill) are explicitly excluded from the public status page. The public page shows only what is meaningful to an external user.
+### Independent monitoring
 
-### Subdomain and DNS
+The repository now includes `scripts/uptime_robot_tool.py` plus the canonical config in `config/uptime-robot/public-status-monitoring.json` for three independent 5-minute monitors:
 
-`status.lv3.org` is registered in `config/subdomain-catalog.json` as a public subdomain. The DNS record points to `10.10.10.10` (nginx-lv3). The nginx edge proxies to `uptime-kuma:3001` (Uptime Kuma's status page endpoint), without OIDC protection — it is deliberately public.
+- `https://sso.lv3.org/realms/lv3/.well-known/openid-configuration`
+- `https://grafana.lv3.org/api/health`
+- `https://status.lv3.org`
 
-```nginx
-# nginx config for status.lv3.org
-server {
-    listen 443 ssl;
-    server_name status.lv3.org;
+The same config also defines two alert contacts:
 
-    location / {
-        proxy_pass http://10.10.10.20:3001;
-        proxy_set_header Host $host;
-        # No auth_request — this is a public page
-    }
-}
-```
+- operator email: `baditaflorin@gmail.com`
+- Mattermost webhook: controller-local secret `uptime_robot_mattermost_webhook`
 
-### Incident announcements
+### SLO and health contract
 
-The status page supports manual incident announcements via the Uptime Kuma API. The maintenance window workflow (ADR 0080) is updated to post a maintenance announcement to the status page when a maintenance window is declared:
+The status page now has:
 
-```python
-def post_status_page_maintenance(window: MaintenanceWindow):
-    uptime_kuma_api.create_maintenance(
-        title=f"Planned maintenance: {window.reason}",
-        description=f"Services may be intermittently unavailable.",
-        start_date=window.start,
-        end_date=window.end,
-        affected_monitors=resolve_affected_monitors(window.service)
-    )
-```
+- a canonical health-probe contract in `config/health-probe-catalog.json`
+- a canonical service entry in `config/service-capability-catalog.json`
+- a status-page SLO stub in `config/slo-catalog.json`
 
-This creates a scheduled "Under Maintenance" status on the public page during the maintenance window, preventing user confusion.
-
-### External synthetic monitoring (Uptime Robot)
-
-Uptime Kuma monitoring runs on `monitoring-lv3`, which is itself part of the platform. If the Proxmox host fails entirely, Uptime Kuma stops monitoring and the status page goes dark — exactly when it is most needed.
-
-We add **Uptime Robot** (free tier, 50 monitors, 5-minute intervals) as an independent external probe:
-
-```
-External monitors (Uptime Robot, free tier):
-  - https://sso.lv3.org/health/ready   (keyword: "UP")
-  - https://grafana.lv3.org/api/health (keyword: "ok")
-  - https://status.lv3.org             (HTTP 200)
-```
-
-Uptime Robot sends email and Mattermost webhook alerts when external monitors fail. These alerts are independent of the internal Alertmanager (ADR 0097) — they work even when Alertmanager is down.
-
-The Uptime Robot API key is stored in OpenBao (`platform/uptime-robot/api-key`) and the Mattermost webhook URL is configured as a notification integration.
-
-### Status page SLO
-
-The status page itself has an SLO (ADR 0096):
-
-```json
-{
-  "id": "status-page-availability",
-  "service": "status-page",
-  "indicator": "uptime",
-  "objective_percent": 99.9,
-  "window_days": 30,
-  "probe": "http_probe_success{job='uptime-kuma-status-page'}",
-  "description": "The public status page is available 99.9% of the time"
-}
-```
-
-The status page's SLO is held to a higher standard than most services because it is the last-resort signal for operators and users during an incident.
-
-### Privacy
-
-The public status page does not expose:
-- Internal IP addresses
-- VM names or topology
-- Error messages from services (only up/down status)
-- Service version numbers
-
-The "Description" field for each monitor on the public page shows only the service name and category, not technical details.
+The Uptime Kuma health-probe contract intentionally disables same-instance self-monitoring to avoid recursive checks. External status-page coverage is delegated to Uptime Robot.
 
 ## Consequences
 
-**Positive**
-- External users have a definitive answer to "is the platform down or is it just me?" without needing to contact the operator
-- Maintenance windows create proactive status page announcements; planned downtime is not a surprise
-- Uptime Robot provides monitoring independence from the internal platform; total platform failure is detectable from outside
-- The status page signals that the platform is a product with defined availability commitments
+### Positive
 
-**Negative / Trade-offs**
-- The Uptime Robot free tier polls every 5 minutes; there is a 5-minute detection lag for external incidents. The internal Alertmanager has 2-minute polling; the external probe is for backup, not primary alerting
-- Uptime Robot is a third-party SaaS service; adding a dependency on it for monitoring independence is a trade-off — but the alternative (no external monitoring) is worse
-- The status page shows only binary up/down status; it does not show performance degradation (e.g., Keycloak is responding but slowly). Adding latency monitoring to Uptime Kuma would address this in a future iteration
+- External users get a stable public status surface at `status.lv3.org`
+- Planned maintenance can be reflected on the public page from the same maintenance-window workflow that suppresses internal alert noise
+- Independent external monitoring now exists for the public status surface and two critical public services
+- The platform’s public-facing operational posture is more product-like and less ad hoc
+
+### Negative / Trade-offs
+
+- The independent probe path depends on a third-party SaaS
+- Free-tier Uptime Robot polling remains coarse at 5 minutes
+- The status-page SLO is currently a catalog contract only; full ADR 0096 rule generation is still separate work
+- Maintenance publication is best-effort and does not block the primary ADR 0080 maintenance-window path if the Uptime Kuma admin session is unavailable
 
 ## Alternatives Considered
 
-- **Freshping / Better Uptime / Betterstack**: similar external synthetic monitoring services; Uptime Robot is chosen for its generous free tier and long track record
-- **Self-hosted external probe on a separate server**: eliminates the SaaS dependency but requires a second server outside the platform — cost and complexity not justified
-- **No external monitoring; just the internal Uptime Kuma page**: does not provide monitoring independence; if the platform is fully down, the status page is also down; this was the deciding factor for adding Uptime Robot
+- No public status page: rejected because it leaves external users without a clear outage signal
+- Public static page with manually edited incidents: rejected because Uptime Kuma already owns the live monitor state
+- Self-hosting the independent probe elsewhere: rejected for now because the extra host and network path are not justified yet
 
 ## Related ADRs
 
-- ADR 0015: DNS and subdomain model (`status.lv3.org` DNS entry)
-- ADR 0021: Public subdomain publication (nginx edge serves the status page)
-- ADR 0027: Uptime Kuma (provides the status page backend)
-- ADR 0076: Subdomain governance (`status.lv3.org` registration)
-- ADR 0080: Maintenance window (creates status page announcements)
-- ADR 0096: SLO definitions (status page has its own SLO)
-- ADR 0097: Alerting routing (Uptime Robot alerts supplement Alertmanager)
+- ADR 0015: DNS and subdomain model
+- ADR 0021: Public subdomain publication
+- ADR 0027: Uptime Kuma
+- ADR 0076: Subdomain governance
+- ADR 0080: Maintenance window
+- ADR 0096: SLO definitions
+- ADR 0097: Alert routing

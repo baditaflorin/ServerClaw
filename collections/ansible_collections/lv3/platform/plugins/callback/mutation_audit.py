@@ -3,17 +3,27 @@ from __future__ import annotations
 import os
 import re
 import sys
+from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 
 from ansible.plugins.callback import CallbackBase
 
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
-SCRIPTS_DIR = REPO_ROOT / "scripts"
-if str(SCRIPTS_DIR) not in sys.path:
-    sys.path.insert(0, str(SCRIPTS_DIR))
+REPO_ROOT = next(
+    candidate
+    for candidate in Path(__file__).resolve().parents
+    if (candidate / "scripts" / "mutation_audit.py").exists()
+)
+MUTATION_AUDIT_PATH = REPO_ROOT / "scripts" / "mutation_audit.py"
+MUTATION_AUDIT_SPEC = spec_from_file_location("lv3_mutation_audit", MUTATION_AUDIT_PATH)
+if MUTATION_AUDIT_SPEC is None or MUTATION_AUDIT_SPEC.loader is None:
+    raise RuntimeError(f"unable to load mutation audit helpers from {MUTATION_AUDIT_PATH}")
+MUTATION_AUDIT_MODULE = module_from_spec(MUTATION_AUDIT_SPEC)
+sys.modules.setdefault("lv3_mutation_audit", MUTATION_AUDIT_MODULE)
+MUTATION_AUDIT_SPEC.loader.exec_module(MUTATION_AUDIT_MODULE)
 
-from mutation_audit import build_event, emit_event_best_effort  # noqa: E402
+build_event = MUTATION_AUDIT_MODULE.build_event
+emit_event_best_effort = MUTATION_AUDIT_MODULE.emit_event_best_effort
 
 
 ACTION_SANITIZE_PATTERN = re.compile(r"[^a-z0-9]+")

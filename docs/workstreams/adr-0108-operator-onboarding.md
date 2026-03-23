@@ -73,7 +73,7 @@
 - added Windmill wrappers plus Make targets for `operator-onboard`, `operator-offboard`, `sync-operators`, and `quarterly-access-review`
 - added `lv3 operator add`, `lv3 operator remove`, and `lv3 operator inventory`
 - wired the validation gate and repository data-model checks to validate the operator roster
-- documented the onboarding and offboarding procedures in dedicated runbooks and updated ADR 0108 implementation metadata for release `0.104.0`
+- documented the onboarding and offboarding procedures in dedicated runbooks and updated ADR 0108 implementation metadata for release `0.105.0`
 
 ## Notes For The Next Assistant
 

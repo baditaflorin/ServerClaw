@@ -1,10 +1,10 @@
 # ADR 0110: Platform Versioning, Release Notes, and Upgrade Path
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.104.0
+- Implemented In Platform Version: not applicable (repo-only)
+- Implemented On: 2026-03-23
 - Date: 2026-03-23
 
 ## Context
@@ -16,7 +16,7 @@ ADR 0008 defines a versioning model for the repository and platform: semantic ve
 - When is a change considered "breaking" at the platform level?
 - What constitutes a release, and how is it communicated to platform users?
 
-Without these definitions, version numbers are arbitrary counters. The repository is currently at `0.93.0`. This number means the repo has had 93 minor-level ADR merges, but it communicates nothing about stability, compatibility, or what changed between `0.92.0` and `0.93.0`.
+Without these definitions, version numbers are arbitrary counters. The repository is currently at `0.103.0`. This number means the repo has had 103 minor-level ADR merges, but it communicates little about stability, compatibility, or what changed between releases.
 
 As the platform approaches production-ready status (the goal of ADRs 0092–0111), a version `1.0.0` should be a meaningful milestone, not just the next increment. For `1.0.0` to be meaningful, version semantics must be defined.
 
@@ -45,10 +45,11 @@ Breaking changes always bump MAJOR. Everything else follows the table above.
 ### Release definition
 
 A **release** is a `main` branch state that has:
-1. A version tag (`v0.93.0`)
+1. A committed version bump
 2. A `RELEASE.md` file in the root with structured release notes
-3. All changes from the `Unreleased` changelog section moved to a versioned section
-4. A `versions/stack.yaml` entry recording the platform state at release
+3. A versioned file under `docs/release-notes/`
+4. `VERSION`, `changelog.md`, and the repository-version fields in `versions/stack.yaml` updated together
+5. An annotated git tag (`v0.104.0`, `v1.0.0`, etc.)
 
 A release is created by:
 ```bash
@@ -56,11 +57,17 @@ lv3 release --version 1.0.0  # or: --bump minor | --bump patch
 ```
 
 This command:
-1. Validates that all workstreams are `merged` or `live_applied` (no in-progress work can be released)
-2. Updates `VERSION`, `changelog.md`, and `versions/stack.yaml`
-3. Creates a git tag `v1.0.0`
-4. Pushes tag to the remote
-5. Publishes the release notes to the docs site changelog page (ADR 0094)
+1. Validates that no workstream is still `in_progress`
+2. Updates `VERSION`, `changelog.md`, `RELEASE.md`, `docs/release-notes/`, and the repository-version fields in `versions/stack.yaml`
+3. Leaves the repository ready for a normal release commit on `main`
+
+After the release commit exists on `main`, finalize the tag explicitly:
+
+```bash
+lv3 release tag --push
+```
+
+This keeps the git history explicit while still making the release steps machine-driven.
 
 ### Structured release notes
 
@@ -128,13 +135,14 @@ This defines "finished product" in machine-checkable terms.
 ```bash
 lv3 release status
 # Platform 1.0.0 readiness:
-#   ✅ ADRs 0001–0091: all implemented
-#   ⏳ ADRs 0092–0111: 6/20 implemented (0.30 complete)
-#   ✅ Backup restore verification: 2 consecutive passes
-#   ⏳ Ops portal: not yet deployed
-#   ⏳ Status page: not yet deployed
-#   ⏳ Docs site: not yet deployed
-#   ⏳ DR table-top review: not yet completed
+#   release blockers: 0 workstreams in progress
+#   ADR window 0001-0111: 89/111 implemented
+#   SLO error budgets: pending (receipt missing)
+#   Backup restore verification: pending (receipt missing)
+#   Ops portal: pending
+#   Status page: pending
+#   Docs site: pending
+#   DR table-top review: pending
 ```
 
 ## Consequences

@@ -78,12 +78,20 @@ lv3 run windmill_healthcheck
 lv3 run deploy_and_promote --args service=grafana environment=production
 ```
 
+Inspect release readiness and prepare a repository release:
+
+```bash
+lv3 release status
+lv3 release --bump patch --dry-run
+```
+
 ## Routing Model
 
 - `lv3 lint` and `lv3 validate` route through ADR 0082's build-server gateway unless `--local` is set.
 - `lv3 deploy` routes to `make remote-exec` and then into the repo-managed service apply path.
 - `lv3 status`, `lv3 logs`, and `lv3 open` use catalog-backed read paths from the controller.
 - `lv3 run` calls the private Windmill API using the controller-local Windmill superadmin secret.
+- `lv3 release` reads repository metadata and release receipts locally; `lv3 release tag` shells out to git for the annotated tag step.
 
 ## Current Limits
 

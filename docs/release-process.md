@@ -19,6 +19,7 @@ This repository now supports parallel ADR implementation. That requires a clear 
    - merge the completed workstream to `main`
    - bump `VERSION` once on `main`
    - move relevant changelog notes from `Unreleased` into `docs/release-notes/<version>.md`
+   - regenerate `RELEASE.md` and the release-notes index
    - if canonical status inputs changed, run `make generate-status-docs` before cutting the release
    - update `workstreams.yaml` status to reflect merge completion
 3. Live apply phase
@@ -71,6 +72,12 @@ Before merging a workstream to `main`, confirm:
 - keep `changelog.md` as the portal-first index and scratchpad, not the detailed release archive
 - keep generated README status blocks current before cutting the versioned release-note file
 - do not create fake release entries on long-lived feature branches
+
+## Release Commands
+
+- `lv3 release status` or `python scripts/release_manager.py status` shows release blockers plus the machine-checkable `1.0.0` readiness criteria from `config/version-semantics.json`
+- `lv3 release --bump minor` prepares the release artifacts on `main`
+- `lv3 release tag --push` finalises the annotated release tag after the release commit exists
 
 ## Recommended Worktree Commands
 

@@ -854,11 +854,11 @@ def completion_candidates(words: list[str], current: str) -> list[str]:
         "diff",
         "promote",
         "run",
-        "release",
         "logs",
         "ssh",
         "open",
         "operator",
+        "release",
     ]
     if len(words) <= 1:
         return [candidate for candidate in top_level if candidate.startswith(current)]
@@ -885,7 +885,7 @@ def completion_candidates(words: list[str], current: str) -> list[str]:
     if words[1] == "operator" and len(words) == 3:
         return [action for action in ["add", "remove", "inventory"] if action.startswith(current)]
     if words[1] == "release" and len(words) == 3:
-        return [action for action in ["status"] if action.startswith(current)]
+        return [action for action in ["status", "tag"] if action.startswith(current)]
     return []
 
 
@@ -1008,10 +1008,6 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--dry-run", action="store_true")
     run.add_argument("--explain", action="store_true")
 
-    release = subparsers.add_parser("release", help="Show release-readiness information.")
-    release_subparsers = release.add_subparsers(dest="release_action", required=True)
-    release_subparsers.add_parser("status", help="Show current 1.0.0 readiness criteria.")
-
     logs = subparsers.add_parser("logs", help="Query service logs from Loki.")
     logs.add_argument("service")
     logs.add_argument("--tail", type=int, default=DEFAULT_LOG_LINES)
@@ -1029,6 +1025,21 @@ def build_parser() -> argparse.ArgumentParser:
     open_parser.add_argument("--env", default="production", choices=["production", "staging"])
     open_parser.add_argument("--dry-run", action="store_true")
     open_parser.add_argument("--explain", action="store_true")
+
+    release = subparsers.add_parser("release", help="Prepare repository releases and show readiness.")
+    release.add_argument("--version", help="Explicit release version to prepare.")
+    release.add_argument("--bump", choices=["major", "minor", "patch"], help="Semantic version bump to prepare.")
+    release.add_argument("--platform-impact", help="One-line platform impact summary for the release notes.")
+    release.add_argument("--released-on", help="Release date in YYYY-MM-DD format.")
+    release.add_argument("--dry-run", action="store_true")
+    release_subparsers = release.add_subparsers(dest="release_action")
+    release_status = release_subparsers.add_parser("status", help="Show release blockers and product readiness.")
+    release_status.add_argument("--json", action="store_true")
+    release_status.add_argument("--timeout", type=float, default=2.0)
+    release_tag = release_subparsers.add_parser("tag", help="Create the annotated release tag for the current VERSION.")
+    release_tag.add_argument("--version", help="Version to tag. Defaults to the current VERSION file.")
+    release_tag.add_argument("--push", action="store_true")
+    release_tag.add_argument("--dry-run", action="store_true")
 
     operator = subparsers.add_parser("operator", help="Manage human operator access.")
     operator_subparsers = operator.add_subparsers(dest="operator_action", required=True)
@@ -1128,18 +1139,43 @@ def main(argv: list[str] | None = None) -> int:
         )
     if args.command == "run":
         return run_windmill_workflow(args.workflow, args.args, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
-    if args.command == "release":
-        if args.release_action == "status":
-            from generate_dr_report import build_dr_report, render_release_status
-
-            print(render_release_status(build_dr_report()))
-            return 0
     if args.command == "logs":
         return logs_command(args.service, tail=args.tail, since=args.since, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
     if args.command == "ssh":
         return ssh_command(args.vm_name, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
     if args.command == "open":
         return open_service_url(args.service, args.env, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
+    if args.command == "release":
+        import release_manager
+
+        forwarded_args: list[str] = []
+        if args.release_action == "status":
+            forwarded_args.append("status")
+            if args.json:
+                forwarded_args.append("--json")
+            if args.timeout != 2.0:
+                forwarded_args.extend(["--timeout", str(args.timeout)])
+            return release_manager.main(forwarded_args)
+        if args.release_action == "tag":
+            forwarded_args.append("tag")
+            if args.version:
+                forwarded_args.extend(["--version", args.version])
+            if args.push:
+                forwarded_args.append("--push")
+            if args.dry_run:
+                forwarded_args.append("--dry-run")
+            return release_manager.main(forwarded_args)
+        if args.version:
+            forwarded_args.extend(["--version", args.version])
+        if args.bump:
+            forwarded_args.extend(["--bump", args.bump])
+        if args.platform_impact:
+            forwarded_args.extend(["--platform-impact", args.platform_impact])
+        if args.released_on:
+            forwarded_args.extend(["--released-on", args.released_on])
+        if args.dry_run:
+            forwarded_args.append("--dry-run")
+        return release_manager.main(forwarded_args)
     if args.command == "operator":
         if args.operator_action == "add":
             workflow_args = [

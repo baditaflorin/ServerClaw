@@ -695,6 +695,34 @@
       }
     },
     {
+      "id": "status_page",
+      "name": "Public Status Page",
+      "description": "Public-facing platform status page backed by Uptime Kuma and independently checked by Uptime Robot.",
+      "category": "observability",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:3001/status/lv3-platform",
+      "public_url": "https://status.lv3.org",
+      "subdomain": "status.lv3.org",
+      "exposure": "edge-published",
+      "health_probe_id": "status_page",
+      "adr": "0109",
+      "runbook": "docs/runbooks/public-status-page.md",
+      "tags": [
+        "status",
+        "uptime",
+        "public"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://status.lv3.org",
+          "subdomain": "status.lv3.org"
+        }
+      }
+    },
+    {
       "id": "windmill",
       "name": "Windmill",
       "description": "Operator and agent workflow runtime exposed privately on the management tailnet.",
