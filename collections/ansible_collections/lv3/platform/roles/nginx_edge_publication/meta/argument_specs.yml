@@ -18,6 +18,11 @@ argument_specs:
         required: true
         description:
           - Certificate name used for the managed edge bundle.
+      public_edge_acme_challenge_method:
+        type: str
+        required: false
+        description:
+          - ACME challenge method for the shared edge certificate (`webroot` or `dns-hetzner`).
       public_edge_static_root:
         type: path
         required: true
@@ -33,6 +38,21 @@ argument_specs:
         required: true
         description:
           - Hostname used by the edge health probe contract.
+      public_edge_dns_hetzner_plugin_version:
+        type: str
+        required: false
+        description:
+          - Pinned `certbot-dns-hetzner` plugin version installed for DNS-01 validation.
+      public_edge_dns_hetzner_credentials_file:
+        type: path
+        required: false
+        description:
+          - Root-only credential file used by the Hetzner DNS Certbot plugin.
+      public_edge_dns_hetzner_propagation_seconds:
+        type: int
+        required: false
+        description:
+          - Seconds Certbot waits before verifying DNS-01 records through Hetzner DNS.
       public_edge_certificate_domains:
         type: list
         elements: str

@@ -19,7 +19,6 @@
     - name: Load controller defaults
       ansible.builtin.include_vars:
         file: "{{ inventory_defaults_path }}"
-        name: subdomain_inventory_defaults
 
     - name: Load the subdomain catalog
       ansible.builtin.include_vars:
@@ -43,7 +42,7 @@
         that:
           - selected_subdomain != {}
           - selected_subdomain.status in ['active', 'planned']
-          - selected_subdomain.fqdn.endswith(subdomain_inventory_defaults.hetzner_dns_zone_name)
+          - selected_subdomain.fqdn.endswith(hetzner_dns_zone_name)
         fail_msg: >-
           The requested FQDN must exist in config/subdomain-catalog.json with status active or planned
           and stay inside the managed Hetzner DNS zone.
@@ -53,12 +52,12 @@
         selected_subdomain_record_name: >-
           {{
             '@'
-            if selected_subdomain.fqdn == subdomain_inventory_defaults.hetzner_dns_zone_name
+            if selected_subdomain.fqdn == hetzner_dns_zone_name
             else (
               selected_subdomain.fqdn
               | regex_replace(
                   '\\.' ~ (
-                    subdomain_inventory_defaults.hetzner_dns_zone_name
+                    hetzner_dns_zone_name
                     | replace('.', '\\.')
                   ) ~ '$',
                   ''
@@ -70,7 +69,7 @@
       ansible.builtin.include_role:
         name: lv3.platform.hetzner_dns_record
       vars:
-        hetzner_dns_record_zone_name: "{{ subdomain_inventory_defaults.hetzner_dns_zone_name }}"
+        hetzner_dns_record_zone_name: "{{ hetzner_dns_zone_name }}"
         hetzner_dns_record_name: "{{ selected_subdomain_record_name }}"
         hetzner_dns_record_type: A
         hetzner_dns_record_value: "{{ selected_subdomain.target }}"

@@ -4,6 +4,7 @@
     that:
       - public_edge_certbot_email | length > 0
       - public_edge_cert_name | length > 0
+      - public_edge_acme_challenge_method in ['webroot', 'dns-hetzner']
       - public_edge_static_root | length > 0
       - public_edge_acme_root | length > 0
       - public_edge_certificate_domains | length > 0
@@ -12,9 +13,15 @@
 
 - name: Ensure public edge packages are present
   ansible.builtin.apt:
-    name:
-      - nginx
-      - certbot
+    name: >-
+      {{
+        ['nginx', 'certbot']
+        + (
+          ['python3-venv']
+          if public_edge_acme_challenge_method == 'dns-hetzner'
+          else []
+        )
+      }}
     state: present
     update_cache: true
     force_apt_get: true
@@ -31,6 +38,44 @@
     - /etc/nginx/sites-available
     - /etc/nginx/sites-enabled
     - /etc/letsencrypt/renewal-hooks/deploy
+    - "{{ public_edge_dns_hetzner_credentials_file | dirname }}"
+
+- name: Record the Certbot plugin path for local Python packages
+  ansible.builtin.set_fact:
+    public_edge_certbot_plugin_path: >-
+      {{ public_edge_dns_hetzner_virtualenv }}/lib/python{{ ansible_python.version.major }}.{{ ansible_python.version.minor }}/site-packages
+
+- name: Install the pinned Certbot Hetzner DNS plugin
+  ansible.builtin.pip:
+    name: "certbot-dns-hetzner=={{ public_edge_dns_hetzner_plugin_version }}"
+    virtualenv: "{{ public_edge_dns_hetzner_virtualenv }}"
+    virtualenv_command: /usr/bin/python3 -m venv
+  when: public_edge_acme_challenge_method == 'dns-hetzner'
+
+- name: Write the Hetzner DNS credential file when a controller token is present
+  ansible.builtin.copy:
+    dest: "{{ public_edge_dns_hetzner_credentials_file }}"
+    mode: "0600"
+    content: "dns_hetzner_api_token = {{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}\n"
+  when:
+    - public_edge_acme_challenge_method == 'dns-hetzner'
+    - (lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim | length) > 0
+  no_log: true
+
+- name: Check the Hetzner DNS credential file
+  ansible.builtin.stat:
+    path: "{{ public_edge_dns_hetzner_credentials_file }}"
+  register: public_edge_dns_hetzner_credentials_after
+  when: public_edge_acme_challenge_method == 'dns-hetzner'
+
+- name: Assert the Hetzner DNS credential file is available when DNS-01 is enabled
+  ansible.builtin.assert:
+    that:
+      - public_edge_dns_hetzner_credentials_after.stat.exists
+    fail_msg: >-
+      public_edge_acme_challenge_method=dns-hetzner requires either HETZNER_DNS_API_TOKEN on the controller
+      or an existing {{ public_edge_dns_hetzner_credentials_file }} on the edge host.
+  when: public_edge_acme_challenge_method == 'dns-hetzner'
 
 - name: Render static pages for published informational hostnames
   ansible.builtin.template:
@@ -112,40 +157,51 @@
 
 - name: Obtain the public edge Let's Encrypt certificate
   ansible.builtin.command:
-    argv:
-      - certbot
-      - certonly
-      - --non-interactive
-      - --agree-tos
-      - --email
-      - "{{ public_edge_certbot_email }}"
-      - --cert-name
-      - "{{ public_edge_cert_name }}"
-      - --webroot
-      - -w
-      - "{{ public_edge_acme_root }}"
-      - -d
-      - "{{ public_edge_certificate_domains | join(',') }}"
+    argv: >-
+      {{
+        ['certbot', 'certonly', '--non-interactive', '--agree-tos', '--email', public_edge_certbot_email, '--cert-name', public_edge_cert_name]
+        + (
+          ['--webroot', '-w', public_edge_acme_root]
+          if public_edge_acme_challenge_method == 'webroot'
+          else [
+            '--authenticator', 'dns-hetzner',
+            '--dns-hetzner-credentials', public_edge_dns_hetzner_credentials_file,
+            '--dns-hetzner-propagation-seconds', public_edge_dns_hetzner_propagation_seconds | string
+          ]
+        )
+        + ['-d', public_edge_certificate_domains | join(',')]
+      }}
+  environment: >-
+    {{
+      {'CERTBOT_PLUGIN_PATH': public_edge_certbot_plugin_path}
+      if public_edge_acme_challenge_method == 'dns-hetzner'
+      else {}
+    }}
   when: not public_edge_certificate.stat.exists
   changed_when: true
 
 - name: Expand the public edge Let's Encrypt certificate when domains were added
   ansible.builtin.command:
-    argv:
-      - certbot
-      - certonly
-      - --non-interactive
-      - --agree-tos
-      - --expand
-      - --email
-      - "{{ public_edge_certbot_email }}"
-      - --cert-name
-      - "{{ public_edge_cert_name }}"
-      - --webroot
-      - -w
-      - "{{ public_edge_acme_root }}"
-      - -d
-      - "{{ public_edge_certificate_domains | join(',') }}"
+    argv: >-
+      {{
+        ['certbot', 'certonly', '--non-interactive', '--agree-tos', '--expand', '--email', public_edge_certbot_email, '--cert-name', public_edge_cert_name]
+        + (
+          ['--webroot', '-w', public_edge_acme_root]
+          if public_edge_acme_challenge_method == 'webroot'
+          else [
+            '--authenticator', 'dns-hetzner',
+            '--dns-hetzner-credentials', public_edge_dns_hetzner_credentials_file,
+            '--dns-hetzner-propagation-seconds', public_edge_dns_hetzner_propagation_seconds | string
+          ]
+        )
+        + ['-d', public_edge_certificate_domains | join(',')]
+      }}
+  environment: >-
+    {{
+      {'CERTBOT_PLUGIN_PATH': public_edge_certbot_plugin_path}
+      if public_edge_acme_challenge_method == 'dns-hetzner'
+      else {}
+    }}
   when:
     - public_edge_certificate.stat.exists
     - public_edge_missing_certificate_domains | length > 0
