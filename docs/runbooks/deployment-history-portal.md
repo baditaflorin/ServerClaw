@@ -74,4 +74,4 @@ uv run --with pyyaml --with jsonschema python scripts/generate_changelog_portal.
 
 This workstream implements the generated site, the governed history query tool, and edge publication wiring for `changelog.lv3.org`.
 
-Publishing `changelog.lv3.org` live still requires a deliberate apply from `main` so DNS, TLS, and NGINX converge together.
+`changelog.lv3.org` is live on platform version `0.40.0` after the shared edge publication path moved to Hetzner DNS-01 certificate validation.

@@ -67,4 +67,4 @@ That renders the site in a temporary directory and verifies that all expected pa
 
 This workstream implements the generated site and repo automation.
 
-Publishing `ops.lv3.org` live still requires a deliberate apply from `main` so the edge VM, DNS, and certificate state converge together.
+`ops.lv3.org` is live on platform version `0.40.0` after the shared edge publication path moved to Hetzner DNS-01 certificate validation.

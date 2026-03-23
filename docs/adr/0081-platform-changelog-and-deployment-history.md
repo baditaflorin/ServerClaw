@@ -3,7 +3,7 @@
 - Status: Accepted
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.81.0
-- Implemented In Platform Version: not yet
+- Implemented In Platform Version: 0.40.0
 - Implemented On: 2026-03-23
 - Date: 2026-03-22
 
@@ -108,6 +108,7 @@ This allows agents to answer "what changed in production in the last 7 days?" wi
 - The generated portal lives under [build/changelog-portal/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/build/changelog-portal/) through [scripts/generate_changelog_portal.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_changelog_portal.py) and is wired into `make generate-status` plus repository validation.
 - Repo-managed publication wiring now includes the planned `changelog.lv3.org` static edge site, the `changelog_portal` service catalog entry, and the governed `get-deployment-history` observe tool.
 - The repository release model now stores numbered notes under [docs/release-notes/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/) while leaving [changelog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/changelog.md) as the portal-first scratchpad and index.
+- `changelog.lv3.org` was published live on platform version `0.40.0` after the shared NGINX edge certificate moved to Hetzner-backed DNS-01 validation.
 
 ## Boundaries
 

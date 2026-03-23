@@ -927,7 +927,7 @@ workstreams:
   - id: adr-0074-ops-portal
     adr: "0074"
     title: Platform operations portal
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0074-ops-portal
     worktree_path: ../proxmox_florin_server__adr_0074
@@ -944,7 +944,7 @@ workstreams:
       - ops.lv3.org
       - Makefile
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0075-service-capability-catalog
     adr: "0075"
@@ -1068,7 +1068,7 @@ workstreams:
   - id: adr-0081-changelog-portal
     adr: "0081"
     title: Platform changelog and deployment history portal
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0081-changelog-portal
     worktree_path: ../proxmox_florin_server-changelog-portal
@@ -1087,7 +1087,7 @@ workstreams:
       - changelog.md
       - docs/release-notes/
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0082-remote-build-gateway
     adr: "0082"

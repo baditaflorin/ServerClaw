@@ -3,7 +3,7 @@
 - Status: Accepted
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.69.0
-- Implemented In Platform Version: not yet
+- Implemented In Platform Version: 0.40.0
 - Implemented On: 2026-03-23
 - Date: 2026-03-22
 
@@ -101,4 +101,4 @@ The portal is served behind NGINX auth via Keycloak (ADR 0056) using the `operat
 - The first repository implementation renders six static pages under `build/ops-portal/` through `scripts/generate_ops_portal.py` and validates them in `make validate`.
 - Health rendering accepts a generation-time snapshot file and falls back to direct URL or TCP probes so CI and local validation stay deterministic without requiring a client-side runtime.
 - Repo links in the generated portal resolve to GitHub when the repository remote is available, with filesystem-path fallback for local inspection.
-- Repository automation now includes generated-static publication support in `roles/nginx_edge_publication`, but the portal remains `Implemented In Platform Version: not yet` until a deliberate live apply publishes `ops.lv3.org`.
+- Repository automation now includes generated-static publication support in `roles/nginx_edge_publication`, and `ops.lv3.org` was published live on platform version `0.40.0` via the DNS-01 edge certificate flow.

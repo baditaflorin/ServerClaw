@@ -80,7 +80,7 @@ OpenTofu VM lifecycle automation is now implemented under `tofu/`, the six produ
 | Field | Value |
 | --- | --- |
 | Repository version | `0.93.0` |
-| Platform version | `0.39.0` |
+| Platform version | `0.40.0` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -135,7 +135,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `platform_context` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
 | `portainer` | `2026-03-22-adr-0055-portainer-live-apply` |
 | `postgres_vm` | `2026-03-22-adr-0026-postgres-vm-live-apply` |
-| `public_edge_publication` | `2026-03-22-adr-0021-edge-publication-live-apply` |
+| `public_edge_publication` | `2026-03-23-adr-0021-edge-publication-portal-hostnames-live-apply` |
 | `remote_build_gateway` | `2026-03-23-adr-0082-remote-build-gateway-live-apply` |
 | `runtime_container_telemetry` | `2026-03-22-adr-0040-runtime-container-telemetry-live-apply` |
 | `secret_rotation` | `2026-03-23-adr-0065-secret-rotation-live-apply` |
@@ -554,7 +554,7 @@ Current values on `main`:
 | Field | Value |
 | --- | --- |
 | Repository version | `0.93.0` |
-| Platform version | `0.39.0` |
+| Platform version | `0.40.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -639,13 +639,13 @@ This repository is intentionally opinionated:
 | `0071` | Agent observation loop and autonomous drift detection | `merged` | [adr-0071-agent-observation-loop.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0071-agent-observation-loop.md) |
 | `0072` | Staging and production environment topology | `merged` | [adr-0072-staging-production-topology.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0072-staging-production-topology.md) |
 | `0073` | Environment promotion gate and deployment pipeline | `merged` | [adr-0073-promotion-pipeline.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0073-promotion-pipeline.md) |
-| `0074` | Platform operations portal | `merged` | [adr-0074-ops-portal.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0074-ops-portal.md) |
+| `0074` | Platform operations portal | `live_applied` | [adr-0074-ops-portal.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0074-ops-portal.md) |
 | `0075` | Service capability catalog | `merged` | [adr-0075-service-capability-catalog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0075-service-capability-catalog.md) |
 | `0076` | Subdomain governance and DNS lifecycle | `merged` | [adr-0076-subdomain-governance.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0076-subdomain-governance.md) |
 | `0077` | Compose runtime secrets injection via OpenBao Agent | `live_applied` | [adr-0077-compose-secrets-injection.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0077-compose-secrets-injection.md) |
 | `0079` | Playbook decomposition and shared execution model | `merged` | [adr-0079-playbook-decomposition.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0079-playbook-decomposition.md) |
 | `0080` | Maintenance window and change suppression protocol | `merged` | [adr-0080-maintenance-windows.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0080-maintenance-windows.md) |
-| `0081` | Platform changelog and deployment history portal | `merged` | [adr-0081-changelog-portal.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0081-changelog-portal.md) |
+| `0081` | Platform changelog and deployment history portal | `live_applied` | [adr-0081-changelog-portal.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0081-changelog-portal.md) |
 | `0082` | Remote build execution gateway | `live_applied` | [adr-0082-remote-build-gateway.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0082-remote-build-gateway.md) |
 | `0083` | Docker-based check runner | `merged` | [adr-0083-docker-check-runner.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0083-docker-check-runner.md) |
 | `0084` | Packer VM template pipeline | `merged` | [adr-0084-packer-pipeline.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0084-packer-pipeline.md) |

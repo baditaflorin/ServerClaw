@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0081](../adr/0081-platform-changelog-and-deployment-history.md)
 - Title: Generated deployment history portal synthesising receipts, promotions, and audit events into a human-readable timeline
-- Status: merged
+- Status: live_applied
 - Branch: `codex/adr-0081-changelog-portal`
 - Worktree: `../proxmox_florin_server-changelog-portal`
 - Owner: codex
@@ -70,4 +70,4 @@
 ## Outcome
 
 - repository implementation is complete on `main`
-- live publication and TLS verification for `changelog.lv3.org` remain pending a deliberate apply from `main`
+- live publication and TLS verification for `changelog.lv3.org` completed on platform version `0.40.0`

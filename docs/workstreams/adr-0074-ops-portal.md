@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0074](../adr/0074-platform-operations-portal.md)
 - Title: Generated static web portal for human navigation of all platform services, VMs, and runbooks
-- Status: merged
+- Status: live_applied
 - Branch: `codex/adr-0074-ops-portal`
 - Worktree: `../proxmox_florin_server__adr_0074`
 - Owner: codex
@@ -41,7 +41,7 @@
 
 ## Expected Live Surfaces
 
-- none yet from this merge alone; live publication remains pending from `main`
+- `https://ops.lv3.org` serving the generated operations portal through the shared NGINX edge certificate
 
 ## Verification
 
@@ -60,4 +60,4 @@
 ## Notes For The Next Assistant
 
 - repository implementation is merged by `0.69.0`
-- a later live apply from `main` should publish `ops.lv3.org`, verify TLS, and record the first platform version where it becomes true
+- live publication and TLS verification completed on platform version `0.40.0`
