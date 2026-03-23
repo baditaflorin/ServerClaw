@@ -111,6 +111,19 @@
   changed_when: true
   no_log: true
 
+- name: Ensure the Windmill admin role password matches the managed secret
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "ALTER ROLE {{ windmill_database_user }} PASSWORD '{{ windmill_database_password }}'"
+  changed_when: false
+  no_log: true
+
 - name: Grant the Windmill support role to the admin role
   become: true
   become_user: postgres

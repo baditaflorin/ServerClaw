@@ -400,7 +400,7 @@
   loop: "{{ windmill_seed_schedule_exists.results }}"
   loop_control:
     label: "{{ item.item.path }}"
-  when: not (item.json | default(false) | bool)
+  when: not (item.content | default('false') | trim | bool)
   changed_when: true
   no_log: true
 
@@ -423,7 +423,7 @@
   loop: "{{ windmill_seed_schedule_exists.results }}"
   loop_control:
     label: "{{ item.item.path }}"
-  when: item.json | default(false) | bool
+  when: item.content | default('false') | trim | bool
   changed_when: false
   no_log: true
 

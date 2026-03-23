@@ -15,10 +15,10 @@ windmill_database_name: windmill
 windmill_database_user: windmill_admin
 windmill_database_host: "{{ platform_guest_catalog.by_name | platform_guest_attr('postgres-lv3', 'ipv4') }}"
 windmill_database_port: 5432
-windmill_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/database-password.txt
+windmill_database_password_local_file: "{{ playbook_dir }}/../.local/windmill/database-password.txt"
 windmill_superadmin_secret_remote_file: "{{ windmill_secret_dir }}/superadmin-secret"
-windmill_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill
-windmill_superadmin_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt
+windmill_local_artifact_dir: "{{ playbook_dir }}/../.local/windmill"
+windmill_superadmin_secret_local_file: "{{ windmill_local_artifact_dir }}/superadmin-secret.txt"
 windmill_private_base_url: "{{ platform_service_topology | platform_service_url('windmill', 'internal') }}"
 windmill_base_url: "{{ platform_service_topology | platform_service_url('windmill', 'controller') }}"
 windmill_mutation_audit_dir: "{{ platform_log_dir }}"
@@ -50,7 +50,7 @@ windmill_seed_scripts:
     summary: LV3 container image upgrade workflow
     description: Repo-managed wrapper for catalog-based image upgrades, receipts, and optional converges.
   - path: f/lv3/mutation_audit_emit
-    local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/lv3-mutation-audit.py
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/lv3-mutation-audit.py"
     language: python3
     summary: LV3 mutation audit helper
     description: Repo-managed helper that emits a structured mutation audit event from a Windmill job.
