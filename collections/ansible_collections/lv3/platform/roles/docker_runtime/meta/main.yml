@@ -1,0 +1,7 @@
+---
+dependencies:
+  - role: lv3.platform.preflight
+    vars:
+      preflight_required_vars:
+        - docker_runtime_prereq_packages
+        - docker_runtime_engine_packages

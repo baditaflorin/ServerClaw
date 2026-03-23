@@ -1,0 +1,10 @@
+---
+preflight_required_vars: []
+preflight_allowed_distributions:
+  - Debian
+preflight_allowed_major_versions:
+  - "12"
+  - "13"
+preflight_wait_for_connection: true
+preflight_wait_timeout: 30
+preflight_skip_distribution_check: false

@@ -1,0 +1,5 @@
+---
+argument_specs:
+  main:
+    short_description: Hetzner DNS records role inputs.
+    options: {}

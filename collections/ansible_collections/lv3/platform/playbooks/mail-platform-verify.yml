@@ -1,0 +1,314 @@
+---
+- name: Warm the host graph for guest jump access
+  hosts: proxmox_hosts
+  become: false
+  gather_facts: false
+
+  tasks:
+    - name: Record mail verification start
+      ansible.builtin.debug:
+        msg: "Starting mail platform live verification."
+
+- name: Read the server mailbox state before inbound probe
+  hosts: docker-runtime-lv3
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Read inbox count before SMTP probe
+      ansible.builtin.shell: |
+        python3 - <<'PY'
+        import imaplib
+        from pathlib import Path
+
+        password = Path('/etc/lv3/mail-platform/server-mailbox-password').read_text(encoding='utf-8').strip()
+        mailbox = imaplib.IMAP4_SSL('127.0.0.1', 993)
+        mailbox.login('server', password)
+        status, data = mailbox.select('INBOX', readonly=True)
+        mailbox.logout()
+        if status != 'OK':
+            raise SystemExit('imap select failed')
+        print(int(data[0]))
+        PY
+      args:
+        executable: /bin/bash
+      register: mail_platform_inbox_before
+      changed_when: false
+
+- name: Send an inbound probe through the public SMTP endpoint
+  hosts: monitoring-lv3
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Try SMTP probe to server mailbox through mail.lv3.org
+      ansible.builtin.shell: |
+        python3 - <<'PY'
+        import smtplib
+        from email.message import EmailMessage
+
+        message = EmailMessage()
+        message['From'] = 'monitor-probe@lv3.org'
+        message['To'] = 'server@lv3.org'
+        message['Subject'] = 'LV3 inbound SMTP probe {{ mail_platform_probe_id | default("manual") }} public'
+        message.set_content('Inbound SMTP probe delivered through mail.lv3.org')
+
+        with smtplib.SMTP('mail.lv3.org', 25, timeout=30) as client:
+            client.send_message(message)
+
+        print('sent')
+        PY
+      args:
+        executable: /bin/bash
+      register: mail_platform_public_inbound_probe
+      changed_when: false
+      failed_when: false
+
+    - name: Fall back to private SMTP probe when public mail endpoint does not answer
+      ansible.builtin.shell: |
+        python3 - <<'PY'
+        import smtplib
+        from email.message import EmailMessage
+
+        message = EmailMessage()
+        message['From'] = 'monitor-probe@lv3.org'
+        message['To'] = 'server@lv3.org'
+        message['Subject'] = 'LV3 inbound SMTP probe {{ mail_platform_probe_id | default("manual") }} private'
+        message.set_content('Inbound SMTP probe delivered through 10.10.10.20')
+
+        with smtplib.SMTP('10.10.10.20', 25, timeout=30) as client:
+            client.send_message(message)
+
+        print('sent')
+        PY
+      args:
+        executable: /bin/bash
+      register: mail_platform_private_inbound_probe
+      changed_when: false
+      when: mail_platform_public_inbound_probe.rc != 0
+
+- name: Verify inbound delivery and send a live outbound Gmail probe
+  hosts: docker-runtime-lv3
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Wait briefly for inbound SMTP delivery
+      ansible.builtin.pause:
+        seconds: 8
+
+    - name: Read inbox count after SMTP probe
+      ansible.builtin.shell: |
+        python3 - <<'PY'
+        import imaplib
+        from pathlib import Path
+
+        password = Path('/etc/lv3/mail-platform/server-mailbox-password').read_text(encoding='utf-8').strip()
+        mailbox = imaplib.IMAP4_SSL('127.0.0.1', 993)
+        mailbox.login('server', password)
+        status, data = mailbox.select('INBOX', readonly=True)
+        mailbox.logout()
+        if status != 'OK':
+            raise SystemExit('imap select failed')
+        print(int(data[0]))
+        PY
+      args:
+        executable: /bin/bash
+      register: mail_platform_inbox_after
+      changed_when: false
+
+    - name: Assert the inbound SMTP probe is present in IMAP
+      ansible.builtin.shell: |
+        python3 - <<'PY'
+        import imaplib
+        from pathlib import Path
+
+        public_subject = 'LV3 inbound SMTP probe {{ mail_platform_probe_id | default("manual") }} public'
+        private_subject = 'LV3 inbound SMTP probe {{ mail_platform_probe_id | default("manual") }} private'
+
+        password = Path('/etc/lv3/mail-platform/server-mailbox-password').read_text(encoding='utf-8').strip()
+        mailbox = imaplib.IMAP4_SSL('127.0.0.1', 993)
+        mailbox.login('server', password)
+        status, data = mailbox.select('INBOX', readonly=True)
+        if status != 'OK':
+            raise SystemExit('imap select failed')
+
+        status, ids = mailbox.search(None, 'ALL')
+        if status != 'OK':
+            raise SystemExit('imap search failed')
+
+        recent_ids = ids[0].split()[-20:]
+        found_subjects = []
+        for message_id in recent_ids:
+            status, message_data = mailbox.fetch(message_id, '(BODY.PEEK[HEADER.FIELDS (SUBJECT)])')
+            if status != 'OK':
+                continue
+            header_bytes = b''.join(
+                part[1] for part in message_data if isinstance(part, tuple) and len(part) > 1
+            )
+            subject_header = header_bytes.decode('utf-8', errors='ignore')
+            if public_subject in subject_header:
+                found_subjects.append(public_subject)
+            if private_subject in subject_header:
+                found_subjects.append(private_subject)
+
+        mailbox.logout()
+        if not found_subjects:
+            raise SystemExit('probe subject not found in recent IMAP headers')
+
+        print(','.join(found_subjects))
+        PY
+      args:
+        executable: /bin/bash
+      register: mail_platform_inbound_probe_match
+      changed_when: false
+
+    - name: Verify the notification profile catalog through the mail gateway
+      ansible.builtin.shell: |
+        python3 - <<'PY'
+        import json
+        import urllib.request
+        from pathlib import Path
+
+        request = urllib.request.Request(
+            'http://127.0.0.1:8081/v1/profiles',
+            method='GET',
+            headers={
+                'X-API-Key': Path('/etc/lv3/mail-platform/gateway-api-key').read_text(encoding='utf-8').strip(),
+            },
+        )
+
+        with urllib.request.urlopen(request, timeout=30) as response:
+            payload = json.loads(response.read().decode('utf-8'))
+
+        profile_ids = sorted(item['id'] for item in payload['items'])
+        expected = ['agent-reports', 'operator-alerts', 'platform-transactional']
+        if profile_ids != expected:
+            raise SystemExit(f'unexpected profile ids: {profile_ids}')
+
+        print(response.status)
+        print(','.join(profile_ids))
+        PY
+      args:
+        executable: /bin/bash
+      register: mail_platform_profile_catalog
+      changed_when: false
+
+    - name: Verify scoped profile keys reject mismatched profile ids
+      ansible.builtin.shell: |
+        python3 - <<'PY'
+        import json
+        import urllib.error
+        import urllib.request
+        from pathlib import Path
+
+        payload = json.dumps(
+            {
+                'profile_id': 'platform-transactional',
+                'to': ['baditaflorin@gmail.com'],
+                'subject': 'LV3 scoped profile rejection test',
+                'text': 'This request should be rejected before delivery.',
+            }
+        ).encode('utf-8')
+        request = urllib.request.Request(
+            'http://127.0.0.1:8081/send',
+            data=payload,
+            method='POST',
+            headers={
+                'Content-Type': 'application/json',
+                'X-API-Key': Path('/etc/lv3/mail-platform/profiles/operator-alerts-gateway-api-key').read_text(encoding='utf-8').strip(),
+            },
+        )
+
+        try:
+            urllib.request.urlopen(request, timeout=30)
+        except urllib.error.HTTPError as exc:
+            print(exc.code)
+            print(exc.read().decode('utf-8'))
+            if exc.code != 403:
+                raise SystemExit(f'unexpected status: {exc.code}')
+        else:
+            raise SystemExit('expected scoped profile rejection')
+        PY
+      args:
+        executable: /bin/bash
+      register: mail_platform_profile_scope_rejection
+      changed_when: false
+
+    - name: Send outbound Gmail probes through each notification profile
+      ansible.builtin.shell: |
+        python3 - <<'PY'
+        import json
+        import urllib.request
+        from pathlib import Path
+
+        profiles = [
+            (
+                'operator-alerts',
+                '/etc/lv3/mail-platform/profiles/operator-alerts-gateway-api-key',
+                'LV3 operator alerts live test',
+                'Operator alert notification profile delivery test.',
+            ),
+            (
+                'platform-transactional',
+                '/etc/lv3/mail-platform/profiles/platform-transactional-gateway-api-key',
+                'LV3 platform transactional live test',
+                'Platform transactional notification profile delivery test.',
+            ),
+            (
+                'agent-reports',
+                '/etc/lv3/mail-platform/profiles/agent-reports-gateway-api-key',
+                'LV3 agent reports live test',
+                'Agent reporting notification profile delivery test.',
+            ),
+        ]
+
+        results = []
+        for profile_id, key_path, subject, text in profiles:
+            payload = json.dumps(
+                {
+                    'to': ['baditaflorin@gmail.com'],
+                    'subject': subject,
+                    'text': text,
+                    'html': f'<p>{text}</p>',
+                }
+            ).encode('utf-8')
+            request = urllib.request.Request(
+                'http://127.0.0.1:8081/send',
+                data=payload,
+                method='POST',
+                headers={
+                    'Content-Type': 'application/json',
+                    'X-API-Key': Path(key_path).read_text(encoding='utf-8').strip(),
+                },
+            )
+
+            with urllib.request.urlopen(request, timeout=30) as response:
+                body = json.loads(response.read().decode('utf-8'))
+                results.append(
+                    {
+                        'profile_id': profile_id,
+                        'status': response.status,
+                        'channel': body['channel'],
+                        'sender_email': body['sender_email'],
+                    }
+                )
+
+        print(json.dumps(results, sort_keys=True))
+        PY
+      args:
+        executable: /bin/bash
+      register: mail_platform_outbound_probe
+      changed_when: false
+
+    - name: Show live mail verification summary
+      ansible.builtin.debug:
+        msg:
+          - "inbox_before={{ mail_platform_inbox_before.stdout | int }}"
+          - "inbox_after={{ mail_platform_inbox_after.stdout | int }}"
+          - "inbound_match={{ mail_platform_inbound_probe_match.stdout | default('missing') }}"
+          - "profile_catalog={{ mail_platform_profile_catalog.stdout_lines[1] | default('missing') }}"
+          - "scope_rejection_status={{ mail_platform_profile_scope_rejection.stdout_lines[0] | default('missing') }}"
+          - "outbound_profiles={{ mail_platform_outbound_probe.stdout | default('missing') }}"
+          - "public_inbound_rc={{ hostvars['monitoring-lv3'].mail_platform_public_inbound_probe.rc | default('missing') }}"
+          - "private_inbound_rc={{ hostvars['monitoring-lv3'].mail_platform_private_inbound_probe.rc | default('not-run') }}"

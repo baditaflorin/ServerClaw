@@ -1,0 +1,6 @@
+---
+dependencies:
+  - role: lv3.platform.preflight
+    vars:
+      preflight_required_vars:
+        - linux_guest_firewall_rules

@@ -1,0 +1,19 @@
+---
+- name: Assert wait_for_healthy inputs are present
+  ansible.builtin.assert:
+    that:
+      - health_url | length > 0
+      - health_timeout_seconds | int > 0
+      - health_retry_delay | int >= 0
+    fail_msg: "wait_for_healthy requires health_url and positive retry settings."
+
+- name: Poll the service health endpoint
+  ansible.builtin.uri:
+    url: "{{ health_url }}"
+    method: GET
+    validate_certs: "{{ health_validate_certs }}"
+    status_code: "{{ health_expected_status }}"
+  register: wait_for_healthy_result
+  retries: "{{ ((health_timeout_seconds | int) / ((health_retry_delay | int) if (health_retry_delay | int) > 0 else 1)) | round(0, 'ceil') | int }}"
+  delay: "{{ health_retry_delay }}"
+  until: wait_for_healthy_result.status == health_expected_status

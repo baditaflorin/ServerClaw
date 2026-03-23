@@ -1,0 +1,35 @@
+---
+argument_specs:
+  main:
+    short_description: Shared connectivity and Debian target validation for platform roles.
+    options:
+      preflight_required_vars:
+        type: list
+        elements: str
+        required: false
+        default: []
+      preflight_allowed_distributions:
+        type: list
+        elements: str
+        required: false
+        default:
+          - Debian
+      preflight_allowed_major_versions:
+        type: list
+        elements: str
+        required: false
+        default:
+          - "12"
+          - "13"
+      preflight_wait_for_connection:
+        type: bool
+        required: false
+        default: true
+      preflight_wait_timeout:
+        type: int
+        required: false
+        default: 30
+      preflight_skip_distribution_check:
+        type: bool
+        required: false
+        default: false

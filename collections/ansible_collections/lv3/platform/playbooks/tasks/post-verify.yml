@@ -1,0 +1,66 @@
+---
+- name: Load the health probe catalog
+  ansible.builtin.set_fact:
+    playbook_execution_health_probe_catalog: >-
+      {{
+        lookup(
+          'ansible.builtin.file',
+          playbook_execution_health_probe_catalog_path
+        ) | from_json
+      }}
+  changed_when: false
+
+- name: Assert the requested service health probe exists
+  ansible.builtin.assert:
+    that:
+      - service_health_probe_id is defined
+      - service_health_probe_id in playbook_execution_health_probe_catalog.services
+    fail_msg: >-
+      Unknown health probe id '{{ service_health_probe_id | default('undefined') }}'.
+  changed_when: false
+
+- name: Record the active service health probe contract
+  ansible.builtin.set_fact:
+    playbook_execution_service_probe: "{{ playbook_execution_health_probe_catalog.services[service_health_probe_id] }}"
+  changed_when: false
+
+- name: Run liveness verification
+  ansible.builtin.include_tasks: verify-probe.yml
+  vars:
+    playbook_execution_probe_stage: liveness
+    playbook_execution_probe: "{{ playbook_execution_service_probe.liveness }}"
+
+- name: Run readiness verification
+  ansible.builtin.include_tasks: verify-probe.yml
+  vars:
+    playbook_execution_probe_stage: readiness
+    playbook_execution_probe: "{{ playbook_execution_service_probe.readiness }}"
+
+- name: Emit a best-effort playbook completion audit event
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ playbook_execution_mutation_audit_script }}"
+      - --emit
+      - --actor-class
+      - automation
+      - --actor-id
+      - ansible-playbook
+      - --surface
+      - ansible
+      - --action
+      - "{{ playbook_execution_post_verify_audit_action | default('playbook.verify') }}"
+      - --target
+      - "{{ service_health_probe_id }}"
+      - --outcome
+      - success
+      - --correlation-id
+      - "{{ playbook_execution_correlation_id }}"
+      - --evidence-ref
+      - "{{ playbook_execution_audit_evidence_ref | default('') }}"
+  delegate_to: localhost
+  become: false
+  run_once: true
+  changed_when: false
+  failed_when: false
+  when: playbook_execution_emit_audit | bool

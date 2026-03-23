@@ -1083,3 +1083,27 @@ workstreams:
       - Makefile
     ready_to_merge: false
     live_applied: false
+
+  - id: adr-0086-ansible-collections
+    adr: "0086"
+    title: Ansible collection packaging
+    status: merged
+    owner: codex
+    branch: codex/adr-0086-ansible-collections
+    worktree_path: ../proxmox_florin_server-ansible-collections
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0086-ansible-collections.md
+    depends_on:
+      - adr-0082-remote-build-gateway
+      - adr-0083-docker-check-runner
+    conflicts_with: []
+    shared_surfaces:
+      - collections/
+      - roles/
+      - filter_plugins/
+      - callback_plugins/
+      - playbooks/
+      - ansible.cfg
+      - Makefile
+      - config/windmill/scripts/collection-publish.py
+    ready_to_merge: false
+    live_applied: false

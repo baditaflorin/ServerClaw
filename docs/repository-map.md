@@ -110,7 +110,7 @@ These files are integration-owned and should normally be edited only during merg
 
 ### Reusable automation units
 
-- reusable role interfaces now live beside each role in `roles/<role>/defaults/main.yml` and `roles/<role>/README.md`
+- reusable role interfaces now live under `collections/ansible_collections/lv3/platform/roles/<role>/`, with repo-root `roles/` kept as a compatibility symlink
 - reusable roles should validate required inputs near the top of `tasks/main.yml`
 
 - [roles/proxmox_repository/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_repository/tasks/main.yml): Proxmox package repository setup

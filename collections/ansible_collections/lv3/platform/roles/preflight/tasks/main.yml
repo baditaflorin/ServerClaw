@@ -1,0 +1,28 @@
+---
+- name: Wait for the target connection to become ready
+  ansible.builtin.wait_for_connection:
+    timeout: "{{ preflight_wait_timeout }}"
+  when:
+    - preflight_wait_for_connection | bool
+    - ansible_connection | default("ssh") != "local"
+
+- name: Assert the target distribution is supported
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution in preflight_allowed_distributions
+      - ansible_distribution_major_version in preflight_allowed_major_versions
+    fail_msg: >-
+      Unsupported target {{ ansible_distribution }} {{ ansible_distribution_major_version }}.
+      Expected one of {{ preflight_allowed_distributions | join(", ") }} major versions
+      {{ preflight_allowed_major_versions | join(", ") }}.
+  when: not preflight_skip_distribution_check | bool
+
+- name: Assert required preflight variables are present
+  ansible.builtin.assert:
+    that:
+      - vars[item] is defined
+      - vars[item] is not none
+      - (vars[item] is string and vars[item] | length > 0) or (vars[item] is not string)
+    fail_msg: "Required role variable {{ item }} is missing or empty."
+  loop: "{{ preflight_required_vars }}"
+  when: preflight_required_vars | length > 0

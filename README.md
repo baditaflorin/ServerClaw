@@ -297,6 +297,7 @@ this is still same-host recovery, not off-host disaster recovery
 ### Runbooks
 - [Agent Observation Loop](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/agent-observation-loop.md)
 - [Agent Tool Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/agent-tool-registry.md)
+- [Ansible Collection Development](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/ansible-collection-development.md)
 - [Command Catalog And Approval Gates](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/command-catalog-and-approval-gates.md)
 - [Complete Security Baseline Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/complete-security-baseline.md)
 - [Compose Runtime Secrets Injection](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/compose-secrets-injection.md)
@@ -629,6 +630,7 @@ This repository is intentionally opinionated:
 | `0079` | Playbook decomposition and shared execution model | `merged` | [adr-0079-playbook-decomposition.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0079-playbook-decomposition.md) |
 | `0081` | Platform changelog and deployment history portal | `merged` | [adr-0081-changelog-portal.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0081-changelog-portal.md) |
 | `0082` | Remote build execution gateway | `merged` | [adr-0082-remote-build-gateway.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0082-remote-build-gateway.md) |
+| `0086` | Ansible collection packaging | `merged` | [adr-0086-ansible-collections.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0086-ansible-collections.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

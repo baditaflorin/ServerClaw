@@ -11,7 +11,7 @@ ANSIBLE_LINT_CMD=(uvx --from ansible-lint ansible-lint)
 YAMLLINT_CMD=(uvx --from yamllint yamllint)
 
 export ANSIBLE_CONFIG="$REPO_ROOT/ansible.cfg"
-export ANSIBLE_COLLECTIONS_PATH="$ANSIBLE_COLLECTIONS_DIR"
+export ANSIBLE_COLLECTIONS_PATH="$REPO_ROOT/collections:$ANSIBLE_COLLECTIONS_DIR"
 
 usage() {
   cat <<'EOF'
@@ -91,13 +91,13 @@ validate_ansible_lint() {
   echo "Ansible lint"
   install_collections
   mapfile -t lint_targets < <(
-    tracked_files 'playbooks/*.yml' 'playbooks/groups/*.yml' 'playbooks/services/*.yml' 'roles/*/*' |
+    tracked_files 'playbooks/*.yml' 'playbooks/groups/*.yml' 'playbooks/services/*.yml' |
       awk -F/ '
-        $1 == "playbooks" && $2 != "tasks" && $NF ~ /\.yml$/ { print; next }
-        $1 == "roles" && $2 != "" && $2 != "_template" { print $1 "/" $2 }
+        $1 == "playbooks" && $2 != "tasks" && $NF ~ /\.yml$/ { print }
       ' |
       awk '!seen[$0]++'
   )
+  lint_targets+=("collections/ansible_collections/lv3/platform")
   if [[ ${#lint_targets[@]} -eq 0 ]]; then
     return 0
   fi

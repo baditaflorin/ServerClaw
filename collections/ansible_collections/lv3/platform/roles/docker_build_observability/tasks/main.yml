@@ -1,0 +1,87 @@
+---
+- name: Validate docker build observability inputs
+  ansible.builtin.assert:
+    that:
+      - docker_build_observability_state_dir | length > 0
+      - docker_build_observability_telegraf_config_file | length > 0
+      - docker_build_observability_hostname | length > 0
+      - docker_build_observability_role | length > 0
+      - docker_build_observability_docker_wrapper_path | length > 0
+      - docker_build_observability_socket_listener_address | length > 0
+    fail_msg: "docker_build_observability requires wrapper, Telegraf fragment, socket listener, and service identity inputs."
+
+- name: Prepare shared guest observability plumbing for docker build telemetry
+  ansible.builtin.include_role:
+    name: lv3.platform.guest_observability
+    public: true
+    tasks_from: setup
+  vars:
+    guest_observability_state_dir: "{{ docker_build_observability_state_dir }}"
+    guest_observability_hostname: "{{ docker_build_observability_hostname }}"
+    guest_observability_role: "{{ docker_build_observability_role }}"
+    guest_observability_service: docker-build-telemetry
+    guest_observability_managed_directories:
+      - path: /etc/docker
+        owner: root
+        group: root
+        mode: "0755"
+      - path: "{{ docker_build_observability_state_dir }}"
+        owner: root
+        group: root
+        mode: "0700"
+
+- name: Remove deprecated Docker daemon metrics configuration
+  ansible.builtin.file:
+    path: "{{ docker_build_observability_docker_daemon_config_file }}"
+    state: absent
+  notify: Restart Docker
+
+- name: Render Docker CLI telemetry wrapper
+  ansible.builtin.template:
+    src: docker-wrapper.sh.j2
+    dest: "{{ docker_build_observability_docker_wrapper_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+  notify: Restart Docker
+
+- name: Render Telegraf docker build observability configuration
+  ansible.builtin.template:
+    src: telegraf-docker-build.conf.j2
+    dest: "{{ docker_build_observability_telegraf_config_file }}"
+    owner: root
+    group: telegraf
+    mode: "0640"
+  no_log: true
+  notify: Restart Telegraf
+
+- name: Flush docker build observability handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Ensure Docker service is enabled and started
+  ansible.builtin.systemd:
+    name: docker
+    enabled: true
+    state: started
+
+- name: Verify shared guest observability services for docker build telemetry
+  ansible.builtin.include_role:
+    name: lv3.platform.guest_observability
+    public: true
+    tasks_from: verify
+
+- name: Verify Docker resolves to the telemetry wrapper for login shells
+  ansible.builtin.shell: bash -lc 'command -v docker'
+  register: docker_build_observability_docker_path
+  changed_when: false
+  failed_when: docker_build_observability_docker_path.stdout | trim != docker_build_observability_docker_wrapper_path
+
+- name: Verify Telegraf socket listener configuration is rendered
+  ansible.builtin.command:
+    argv:
+      - grep
+      - -F
+      - "{{ docker_build_observability_socket_listener_address }}"
+      - "{{ docker_build_observability_telegraf_config_file }}"
+  register: docker_build_observability_listener_config
+  changed_when: false
