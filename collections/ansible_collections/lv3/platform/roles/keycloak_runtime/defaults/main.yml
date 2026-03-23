@@ -37,6 +37,8 @@ keycloak_ops_portal_client_id: ops-portal-oauth
 keycloak_ops_portal_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/ops-portal-client-secret.txt
 keycloak_agent_client_id: lv3-agent-hub
 keycloak_agent_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/lv3-agent-hub-client-secret.txt
+keycloak_api_gateway_client_id: api-gateway
+keycloak_api_gateway_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/api-gateway-client-secret.txt
 keycloak_grafana_groups:
   admins: grafana-admins
   viewers: grafana-viewers

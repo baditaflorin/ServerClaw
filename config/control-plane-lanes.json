@@ -84,6 +84,17 @@
       ],
       "current_surfaces": [
         {
+          "id": "platform-api-gateway",
+          "kind": "service_api",
+          "endpoint": "https://api.lv3.org/v1",
+          "auth": "Keycloak-issued bearer tokens validated against the LV3 realm JWKS by the gateway before request forwarding.",
+          "service_refs": [
+            "api_gateway"
+          ],
+          "workflow_refs": [],
+          "notes": "This is the single authenticated HTTP front door for approved platform APIs and the native /v1/platform endpoints."
+        },
+        {
           "id": "proxmox-management-api",
           "kind": "management_api",
           "endpoint": "https://100.118.189.95:8006/api2/json",

@@ -3,6 +3,38 @@
   "schema_version": "1.0.0",
   "services": [
     {
+      "id": "api_gateway",
+      "name": "Platform API Gateway",
+      "description": "Unified authenticated gateway for operator and automation access to platform HTTP APIs.",
+      "category": "automation",
+      "lifecycle_status": "planned",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8080",
+      "public_url": "https://api.lv3.org",
+      "subdomain": "api.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Platform API Gateway Public",
+      "health_probe_id": "api_gateway",
+      "adr": "0092",
+      "runbook": "docs/runbooks/configure-api-gateway.md",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-platform-api-gateway/lv3-platform-api-gateway",
+      "tags": [
+        "api",
+        "gateway",
+        "platform",
+        "oidc"
+      ],
+      "environments": {
+        "production": {
+          "status": "planned",
+          "url": "https://api.lv3.org",
+          "subdomain": "api.lv3.org",
+          "notes": "Repository automation is ready; live publication still requires apply from main."
+        }
+      }
+    },
+    {
       "id": "backup_pbs",
       "name": "Proxmox Backup Server",
       "description": "Backup datastore and snapshot retention service for the Proxmox estate.",

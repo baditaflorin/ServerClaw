@@ -33,6 +33,9 @@ mattermost_local_mode_socket: /var/tmp/mattermost_local.socket
 mattermost_private_base_url: "{{ platform_service_topology | platform_service_url('mattermost', 'internal') }}"
 mattermost_controller_url: "{{ platform_service_topology | platform_service_url('mattermost', 'controller') }}"
 mattermost_support_email: "{{ proxmox_notification_email }}"
+mattermost_message_retention_hours: 17520
+mattermost_file_retention_hours: 17520
+mattermost_retention_deletion_job_start_time: "03:00"
 mattermost_channels:
   - id: platform-alerts
     name: platform-alerts

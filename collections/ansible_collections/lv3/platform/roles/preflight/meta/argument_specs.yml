@@ -33,3 +33,11 @@ argument_specs:
         type: bool
         required: false
         default: false
+      preflight_check_repo_env_files:
+        type: bool
+        required: false
+        default: true
+      preflight_repo_root:
+        type: str
+        required: false
+        default: "{{ lookup('ansible.builtin.env', 'PWD') }}"

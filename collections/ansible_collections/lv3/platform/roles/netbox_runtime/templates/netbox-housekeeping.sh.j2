@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+
+cd {{ netbox_site_dir }}
+exec docker compose --file {{ netbox_compose_file }} exec -T netbox /opt/netbox/contrib/netbox-housekeeping.sh

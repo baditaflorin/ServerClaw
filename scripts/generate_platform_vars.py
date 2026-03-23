@@ -38,6 +38,7 @@ PORT_KEYS = (
     "netbox_host_proxy_port",
     "open_webui_port",
     "open_webui_host_proxy_port",
+    "api_gateway_internal_port",
     "platform_context_internal_port",
     "platform_context_host_proxy_port",
     "ntopng_http_port",
@@ -256,6 +257,9 @@ def build_service_urls(
         urls["controller"] = service_url("http", tailscale_ipv4, ports["open_webui_host_proxy_port"])
         port_map["internal"] = ports["open_webui_port"]
         port_map["controller"] = ports["open_webui_host_proxy_port"]
+    elif service_id == "api_gateway":
+        urls["internal"] = service_url("http", private_ip, ports["api_gateway_internal_port"])
+        port_map["internal"] = ports["api_gateway_internal_port"]
     elif service_id == "openbao":
         urls["internal"] = service_url("https", private_ip, ports["openbao_proxy_port"])
         urls["controller"] = service_url("https", tailscale_ipv4, ports["openbao_proxy_port"])
@@ -406,6 +410,7 @@ def build_platform_vars(
     mattermost_service = service_topology["mattermost"]
     netbox_service = service_topology["netbox"]
     open_webui_service = service_topology["open_webui"]
+    api_gateway_service = service_topology["api_gateway"]
     openbao_service = service_topology["openbao"]
     platform_context_service = service_topology["platform_context_api"]
     portainer_service = service_topology["portainer"]
@@ -508,6 +513,9 @@ def build_platform_vars(
         "netbox_controller_url": netbox_service["urls"]["controller"],
         "open_webui_host_proxy_port": resolved_ports["open_webui_host_proxy_port"],
         "open_webui_controller_url": open_webui_service["urls"]["controller"],
+        "api_gateway_internal_port": resolved_ports["api_gateway_internal_port"],
+        "api_gateway_public_url": api_gateway_service["urls"]["public"],
+        "api_gateway_internal_url": api_gateway_service["urls"]["internal"],
         "ntopng_proxy_port": resolved_ports["ntopng_proxy_port"],
         "ntopng_operator_url": service_topology["ntopng"]["urls"]["controller"],
         "mattermost_server_port": resolved_ports["mattermost_server_port"],

@@ -1,0 +1,19 @@
+---
+- name: Wait for the API gateway health endpoint
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ api_gateway_internal_port }}/healthz"
+    method: GET
+    status_code: 200
+  register: api_gateway_health
+  retries: 18
+  delay: 5
+  until: api_gateway_health.status == 200
+  changed_when: false
+
+- name: Verify the authenticated aggregate health endpoint rejects anonymous requests
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ api_gateway_internal_port }}/v1/health"
+    method: GET
+    status_code: 401
+  register: api_gateway_auth_check
+  changed_when: false

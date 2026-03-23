@@ -1,4 +1,4 @@
-repo_version: 0.101.0
+repo_version: 0.103.0
 platform_version: 0.40.0
 container_image_catalog_path: "{{ playbook_dir }}/../config/image-catalog.json"
 container_image_catalog: "{{ lookup('file', container_image_catalog_path) | from_json }}"

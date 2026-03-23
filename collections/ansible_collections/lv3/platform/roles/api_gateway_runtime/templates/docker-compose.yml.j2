@@ -1,0 +1,22 @@
+services:
+  api-gateway:
+    build:
+      context: {{ api_gateway_service_dir }}
+      network: host
+    image: {{ api_gateway_image_name }}:latest
+    container_name: {{ api_gateway_container_name }}
+    restart: unless-stopped
+    env_file:
+      - {{ api_gateway_env_file }}
+    ports:
+      - "{{ api_gateway_internal_port }}:8080"
+    volumes:
+      - {{ api_gateway_config_dir }}:/config:ro
+      - {{ api_gateway_data_dir }}:/data:ro
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/healthz', timeout=5)"
+      interval: 30s
+      timeout: 5s
+      retries: 3

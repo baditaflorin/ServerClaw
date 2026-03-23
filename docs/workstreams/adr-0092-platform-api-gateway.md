@@ -1,10 +1,10 @@
 # Workstream ADR 0092: Unified Platform API Gateway
 
 - ADR: [ADR 0092](../adr/0092-unified-platform-api-gateway.md)
-- Title: FastAPI + Caddy gateway aggregating all platform service APIs behind a single authenticated endpoint at api.lv3.org
-- Status: ready
-- Branch: `codex/adr-0092-platform-api-gateway`
-- Worktree: `../proxmox_florin_server-api-gateway`
+- Title: FastAPI gateway aggregating all platform service APIs behind a single authenticated endpoint at api.lv3.org
+- Status: merged
+- Branch: `codex/adr-0092-unified-platform-api-gateway`
+- Worktree: `.worktrees/adr-0092`
 - Owner: codex
 - Depends On: `adr-0021-nginx-edge`, `adr-0045-communication-lanes`, `adr-0047-mtls`, `adr-0056-keycloak`, `adr-0058-nats`, `adr-0066-audit-log`, `adr-0069-agent-tool-registry`
 - Conflicts With: none
@@ -33,7 +33,7 @@
 ## Expected Repo Surfaces
 
 - `scripts/api_gateway/` (new directory with FastAPI app)
-- `roles/api_gateway_runtime/`
+- `collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/`
 - `playbooks/services/api-gateway.yml`
 - `config/api-gateway-catalog.json`
 - `config/service-capability-catalog.json` (patched)
@@ -71,3 +71,9 @@
 - JWT validation must use the JWKS endpoint, not a static key; Keycloak rotates its signing keys periodically
 - The `/v1/platform/topology` endpoint calls the Proxmox API directly; use the existing `lv3_automation@pve` credentials from OpenBao
 - The API gateway catalog JSON schema must be validated by `scripts/validate_repository_data_models.py` — add a schema for `api-gateway-catalog.json`
+
+## Outcome
+
+- repository implementation is complete on `main` in repo release `0.101.0`
+- the FastAPI gateway runtime, catalog validation, deployment playbooks, service topology wiring, health probes, Grafana dashboard, and agent-tool routing now ship from repository state
+- no live platform version change is claimed yet; edge publication, service deployment, and live verification still require apply from `main`

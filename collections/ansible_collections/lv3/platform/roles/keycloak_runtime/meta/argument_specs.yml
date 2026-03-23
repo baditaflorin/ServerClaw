@@ -153,6 +153,16 @@ argument_specs:
         required: true
         description:
           - Controller-local file used to mirror the agent client secret.
+      keycloak_api_gateway_client_id:
+        type: str
+        required: true
+        description:
+          - Confidential client id used by the unified platform API gateway migration path.
+      keycloak_api_gateway_client_secret_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file used to mirror the API gateway client secret.
       keycloak_grafana_groups:
         type: dict
         required: true

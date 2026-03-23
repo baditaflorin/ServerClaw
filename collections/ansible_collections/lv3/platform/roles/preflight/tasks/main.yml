@@ -26,3 +26,34 @@
     fail_msg: "Required role variable {{ item }} is missing or empty."
   loop: "{{ preflight_required_vars }}"
   when: preflight_required_vars | length > 0
+
+- name: Find controller-side .env files in the repository workspace
+  ansible.builtin.find:
+    paths: "{{ preflight_repo_root }}"
+    recurse: true
+    hidden: true
+    patterns: "*.env"
+    excludes: ".git,.ansible,.claude,.local,.venv,.worktrees"
+  delegate_to: localhost
+  become: false
+  run_once: true
+  register: preflight_repo_env_files
+  changed_when: false
+  when: preflight_check_repo_env_files | bool
+
+- name: Assert the repository workspace has no tracked or generated compose env files
+  ansible.builtin.assert:
+    that:
+      - (preflight_repo_env_files.files | default([])) | length == 0
+    fail_msg: >-
+      Repository workspace contains unexpected .env files:
+      {{
+        (preflight_repo_env_files.files | default([]))
+        | map(attribute='path')
+        | join(', ')
+      }}.
+  delegate_to: localhost
+  become: false
+  run_once: true
+  changed_when: false
+  when: preflight_check_repo_env_files | bool

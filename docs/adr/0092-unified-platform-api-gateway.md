@@ -1,10 +1,10 @@
 # ADR 0092: Unified Platform API Gateway
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.101.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-23
 - Date: 2026-03-23
 
 ## Context
@@ -23,7 +23,7 @@ The platform has all the building blocks: Keycloak for identity, OpenBao for sec
 
 ## Decision
 
-We will deploy a **platform API gateway** on `docker-runtime-lv3` as a Caddy-based reverse proxy with a lightweight FastAPI facade, exposed internally at `http://api.internal.lv3:8080` and published at `https://api.lv3.org` via the nginx edge (ADR 0021).
+We will deploy a **platform API gateway** on `docker-runtime-lv3` as a FastAPI-based aggregation and proxy service, exposed internally at `http://10.10.10.20:8080` and published at `https://api.lv3.org` via the nginx edge (ADR 0021).
 
 ### Architecture
 
@@ -34,7 +34,7 @@ external clients / agents / ops portal
   api.lv3.org:443  (nginx edge, OIDC-protected via ADR 0056)
         │
         ▼
-  api.internal.lv3:8080  (Caddy gateway, mTLS from edge)
+  10.10.10.20:8080  (api-gateway runtime on docker-runtime-lv3)
         │
    ┌────┴──────────────────────────────────┐
    │  FastAPI facade  (routes + OpenAPI)   │
@@ -48,7 +48,7 @@ external clients / agents / ops portal
         └── /v1/health        → aggregate health check
 ```
 
-### FastAPI facade
+### FastAPI gateway
 
 The facade is a thin Python FastAPI application (`scripts/api_gateway/main.py`) that:
 

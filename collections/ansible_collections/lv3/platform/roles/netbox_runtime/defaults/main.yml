@@ -30,3 +30,8 @@ netbox_superuser_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/pro
 netbox_secret_key_file: "{{ netbox_secret_dir }}/secret-key"
 netbox_redis_password_file: "{{ netbox_secret_dir }}/redis-password"
 netbox_redis_cache_password_file: "{{ netbox_secret_dir }}/redis-cache-password"
+netbox_changelog_retention_days: 180
+netbox_housekeeping_script: "{{ netbox_site_dir }}/netbox-housekeeping.sh"
+netbox_housekeeping_service_name: lv3-netbox-housekeeping.service
+netbox_housekeeping_timer_name: lv3-netbox-housekeeping.timer
+netbox_housekeeping_on_calendar: "*-*-* 04:10:00"

@@ -1,0 +1,18 @@
+---
+- name: Converge scheduled data retention on the Docker runtime VM
+  hosts: "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        required_hosts:
+          - "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
+        playbook_execution_require_debian: true
+
+  roles:
+    - role: lv3.platform.data_retention
+      vars:
+        data_retention_repo_root: "{{ playbook_dir | dirname }}"

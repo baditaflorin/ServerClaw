@@ -34,6 +34,7 @@ platform_port_assignments:
   netbox_host_proxy_port: 8004
   open_webui_port: 8088
   open_webui_host_proxy_port: 8008
+  api_gateway_internal_port: 8080
   platform_context_internal_port: 8010
   platform_context_host_proxy_port: 8010
   ops_portal_port: 8090
@@ -319,6 +320,11 @@ network_policy:
           ports:
             - 8090
           description: Reverse proxy access to the interactive ops portal
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
+            - 8080
+          description: Edge access to the unified platform API gateway
     docker-build-lv3:
       allow_container_forwarding: true
       allowed_inbound:
@@ -727,6 +733,27 @@ lv3_service_topology:
     access:
       kind: tailscale-tcp-proxy
       url: "{{ open_webui_controller_url }}"
+  api_gateway:
+    service_name: api-gateway
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: api.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: true
+    dns:
+      managed: true
+      visibility: public
+      name: api
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:8080"
   platform_context_api:
     service_name: platform-context-api
     owning_vm: docker-runtime-lv3

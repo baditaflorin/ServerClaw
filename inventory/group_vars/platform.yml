@@ -118,6 +118,7 @@ platform_ports:
   netbox_host_proxy_port: 8004
   open_webui_port: 8088
   open_webui_host_proxy_port: 8008
+  api_gateway_internal_port: 8080
   platform_context_internal_port: 8010
   platform_context_host_proxy_port: 8010
   ntopng_http_port: 3000
@@ -859,6 +860,34 @@ platform_service_topology:
     urls:
       internal: http://10.10.10.20:8088
       controller: http://100.118.189.95:8008
+  api_gateway:
+    service_name: api-gateway
+    owning_vm: docker-runtime-lv3
+    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
+      | map(attribute=''ipv4'') | first) }}'
+    public_hostname: api.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: true
+    dns:
+      managed: true
+      visibility: public
+      name: api
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:8080
+    service_id: api_gateway
+    ports:
+      internal: 8080
+    urls:
+      public: https://api.lv3.org
+      internal: http://10.10.10.20:8080
   platform_context_api:
     service_name: platform-context-api
     owning_vm: docker-runtime-lv3
@@ -1049,6 +1078,10 @@ platform_dns_records:
       value: 65.108.75.123
       ttl: 60
     - name: mail
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: api
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -1410,6 +1443,34 @@ public_edge_service_topology:
     urls:
       internal: http://10.10.10.20:8088
       controller: http://100.118.189.95:8008
+  api_gateway:
+    service_name: api-gateway
+    owning_vm: docker-runtime-lv3
+    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
+      | map(attribute=''ipv4'') | first) }}'
+    public_hostname: api.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: true
+    dns:
+      managed: true
+      visibility: public
+      name: api
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:8080
+    service_id: api_gateway
+    ports:
+      internal: 8080
+    urls:
+      public: https://api.lv3.org
+      internal: http://10.10.10.20:8080
   platform_context_api:
     service_name: platform-context-api
     owning_vm: docker-runtime-lv3
@@ -1609,6 +1670,9 @@ netbox_host_proxy_port: 8004
 netbox_controller_url: http://100.118.189.95:8004
 open_webui_host_proxy_port: 8008
 open_webui_controller_url: http://100.118.189.95:8008
+api_gateway_internal_port: 8080
+api_gateway_public_url: https://api.lv3.org
+api_gateway_internal_url: http://10.10.10.20:8080
 ntopng_proxy_port: 3001
 ntopng_operator_url: http://100.118.189.95:3001
 mattermost_server_port: 8065

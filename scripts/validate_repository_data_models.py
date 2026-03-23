@@ -5,14 +5,17 @@ import datetime as dt
 import ipaddress
 import json
 import re
+import subprocess
 import sys
 from typing import Any
 
 from command_catalog import load_command_catalog, validate_command_catalog
+from api_gateway_catalog import load_api_gateway_catalog, validate_api_gateway_catalog
 from api_publication import load_api_publication_catalog, validate_api_publication_catalog
 from container_image_policy import load_image_catalog, validate_image_catalog as validate_container_image_catalog
 from controller_automation_toolkit import REPO_ROOT, emit_cli_error, load_json, load_yaml, repo_path
 from control_plane_lanes import load_lane_catalog
+from data_catalog import load_data_catalog, validate_data_catalog
 from live_apply_receipts import RECEIPTS_DIR, iter_receipt_paths, validate_receipts
 from generate_platform_vars import PLATFORM_VARS_PATH, PORT_KEYS, build_platform_vars
 from mutation_audit import load_mutation_audit_schema, validate_mutation_audit_schema
@@ -218,6 +221,9 @@ def validate_no_scaffold_placeholders() -> None:
         repo_path("config", "service-capability-catalog.json"): load_json(
             repo_path("config", "service-capability-catalog.json")
         ),
+        repo_path("config", "api-gateway-catalog.json"): load_json(
+            repo_path("config", "api-gateway-catalog.json")
+        ),
         repo_path("config", "subdomain-catalog.json"): load_json(
             repo_path("config", "subdomain-catalog.json")
         ),
@@ -228,6 +234,20 @@ def validate_no_scaffold_placeholders() -> None:
     }
     for path, payload in structured_paths.items():
         validate_placeholder_free(payload, str(path))
+
+
+def validate_no_tracked_env_files() -> None:
+    completed = subprocess.run(
+        ["git", "-C", str(REPO_ROOT), "ls-files", "*.env"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if completed.returncode != 0:
+        raise RuntimeError(completed.stderr.strip() or "git ls-files failed")
+    tracked = [line.strip() for line in completed.stdout.splitlines() if line.strip()]
+    if tracked:
+        raise ValueError(f"tracked .env files are not allowed: {', '.join(tracked)}")
 
 
 def guest_plan_key(role: str) -> str:
@@ -1727,6 +1747,8 @@ def validate_repository_data_models() -> int:
     command_catalog = load_command_catalog()
     validate_command_catalog(command_catalog, workflow_catalog, secret_manifest)
     validate_container_image_catalog(load_image_catalog())
+    api_gateway_catalog, _ = load_api_gateway_catalog()
+    validate_api_gateway_catalog(api_gateway_catalog)
     lane_catalog, _ = load_lane_catalog()
     api_publication_catalog, _, _ = load_api_publication_catalog()
     validate_api_publication_catalog(api_publication_catalog, lane_catalog)
@@ -1737,6 +1759,7 @@ def validate_repository_data_models() -> int:
     host_vars_context = validate_host_vars()
     validate_certificate_catalog(host_vars_context)
     validate_health_probe_catalog(host_vars_context)
+    validate_data_catalog(load_data_catalog())
     validate_secret_catalog(secret_manifest)
     validate_platform_finding_schema()
     validate_maintenance_window_schema()
@@ -1744,6 +1767,7 @@ def validate_repository_data_models() -> int:
     validate_vm_template_manifest(host_vars_context["proxmox_vm_templates"])
     validate_versions_stack(host_vars_context)
     validate_platform_vars()
+    validate_no_tracked_env_files()
     validate_no_scaffold_placeholders()
     print("Repository data models OK")
     return 0

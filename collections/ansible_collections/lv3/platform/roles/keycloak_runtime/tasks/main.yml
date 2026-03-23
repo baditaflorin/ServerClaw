@@ -393,6 +393,29 @@
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
 
+    - name: Ensure the API gateway client exists
+      community.general.keycloak_client:
+        realm: "{{ keycloak_realm_name }}"
+        client_id: "{{ keycloak_api_gateway_client_id }}"
+        name: Platform API Gateway
+        description: Repo-managed confidential client reserved for the unified platform API gateway rollout.
+        enabled: true
+        protocol: openid-connect
+        public_client: false
+        client_authenticator_type: client-secret
+        standard_flow_enabled: false
+        implicit_flow_enabled: false
+        direct_access_grants_enabled: false
+        service_accounts_enabled: true
+        full_scope_allowed: false
+        state: present
+        auth_client_id: admin-cli
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
+        auth_realm: master
+        auth_username: "{{ keycloak_bootstrap_admin_username }}"
+        auth_password: "{{ keycloak_bootstrap_admin_password }}"
+        validate_certs: false
+
     - name: Read the Grafana client secret
       community.general.keycloak_clientsecret_info:
         realm: "{{ keycloak_realm_name }}"
@@ -432,11 +455,25 @@
       register: keycloak_agent_client_secret_info
       no_log: true
 
+    - name: Read the API gateway client secret
+      community.general.keycloak_clientsecret_info:
+        realm: "{{ keycloak_realm_name }}"
+        client_id: "{{ keycloak_api_gateway_client_id }}"
+        auth_client_id: admin-cli
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
+        auth_realm: master
+        auth_username: "{{ keycloak_bootstrap_admin_username }}"
+        auth_password: "{{ keycloak_bootstrap_admin_password }}"
+        validate_certs: false
+      register: keycloak_api_gateway_client_secret_info
+      no_log: true
+
 - name: Record the Keycloak client secrets
   ansible.builtin.set_fact:
     keycloak_grafana_client_secret: "{{ keycloak_grafana_client_secret_info.clientsecret_info.value }}"
     keycloak_ops_portal_client_secret: "{{ keycloak_ops_portal_client_secret_info.clientsecret_info.value }}"
     keycloak_agent_client_secret: "{{ keycloak_agent_client_secret_info.clientsecret_info.value }}"
+    keycloak_api_gateway_client_secret: "{{ keycloak_api_gateway_client_secret_info.clientsecret_info.value }}"
   no_log: true
 
 - name: Mirror the Grafana client secret to the control machine
@@ -461,6 +498,15 @@
   ansible.builtin.copy:
     dest: "{{ keycloak_agent_client_secret_local_file }}"
     content: "{{ keycloak_agent_client_secret }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Mirror the API gateway client secret to the control machine
+  ansible.builtin.copy:
+    dest: "{{ keycloak_api_gateway_client_secret_local_file }}"
+    content: "{{ keycloak_api_gateway_client_secret }}\n"
     mode: "0600"
   delegate_to: localhost
   become: false

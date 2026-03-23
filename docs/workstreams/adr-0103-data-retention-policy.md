@@ -2,9 +2,9 @@
 
 - ADR: [ADR 0103](../adr/0103-data-classification-and-retention-policy.md)
 - Title: Four-class data model with per-store retention rules enforced via service configuration, cron jobs, and Ansible, plus a data catalog JSON
-- Status: ready
-- Branch: `codex/adr-0103-data-retention`
-- Worktree: `../proxmox_florin_server-data-retention`
+- Status: merged
+- Branch: `codex/adr-0103`
+- Worktree: `.worktrees/codex-adr-0103`
 - Owner: codex
 - Depends On: `adr-0043-openbao`, `adr-0052-loki`, `adr-0053-tempo`, `adr-0056-keycloak`, `adr-0066-audit-log`, `adr-0077-compose-secrets`, `adr-0087-validation-gate`, `adr-0092-platform-api-gateway`
 - Conflicts With: none
@@ -51,6 +51,14 @@
 - Mattermost data retention plugin is enabled and set to 2 years
 - NetBox changelog retention is set to 180 days
 - `config/data-catalog.json` documents all data stores
+
+## Implemented Notes
+
+- The repository implementation now uses the canonical `config/data-catalog.json` plus `docs/schema/data-catalog.schema.json` for data classification and retention metadata.
+- Receipt and mutation-audit cleanup is delivered through `scripts/purge_old_receipts.py` and the `lv3.platform.data_retention` role, which installs a weekly systemd timer on runtime hosts.
+- Mattermost retention is configured through `DataRetentionSettings` in the runtime environment contract.
+- NetBox changelog retention is configured through `CHANGELOG_RETENTION` and enforced with a scheduled `netbox-housekeeping` timer.
+- Repository validation now blocks tracked `.env` files and validates the data catalog schema in the gate.
 
 ## Verification
 

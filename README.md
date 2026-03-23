@@ -80,7 +80,7 @@ The repository now also ships continuous drift detection across OpenTofu, Ansibl
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.101.0` |
+| Repository version | `0.103.0` |
 | Platform version | `0.40.0` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -103,6 +103,7 @@ Template VM: `9000` `debian13-cloud-template`
 ### Published Service Inventory
 | Hostname | Service | Exposure | Owner |
 | --- | --- | --- | --- |
+| `api.lv3.org` | `api-gateway` | `edge-published` | `docker-runtime-lv3` |
 | `build.lv3.org` | `docker-build` | `informational-only` | `docker-build-lv3` |
 | `database.lv3.org` | `postgres` | `private-only` | `postgres-lv3` |
 | `docker.lv3.org` | `docker-runtime` | `informational-only` | `docker-runtime-lv3` |
@@ -173,7 +174,7 @@ password SSH disabled on host and guests
 | Lane | Title | Transport | Surfaces | Primary Rule |
 | --- | --- | --- | --- | --- |
 | `command` | Command Lane | `ssh` | 2 | Use SSH only for command-lane access. |
-| `api` | API Lane | `https` | 10 | Default new APIs to internal-only or operator-only publication. |
+| `api` | API Lane | `https` | 11 | Default new APIs to internal-only or operator-only publication. |
 | `message` | Message Lane | `authenticated_submission` | 2 | Submit platform mail through the internal mail platform rather than arbitrary external SMTP relays. |
 | `event` | Event Lane | `mixed` | 5 | Event sinks must be documented and intentionally reachable. |
 
@@ -182,6 +183,7 @@ password SSH disabled on host and guests
 | --- | --- | --- | --- |
 | `proxmox-host-ops-ssh` | `command` | `ssh_endpoint` | `ops@100.118.189.95` |
 | `guest-ops-ssh-via-proxmox-jump` | `command` | `ssh_endpoint` | `ops@10.10.10.0/24 via ProxyJump through ops@100.118.189.95` |
+| `platform-api-gateway` | `api` | `service_api` | `https://api.lv3.org/v1` |
 | `proxmox-management-api` | `api` | `management_api` | `https://100.118.189.95:8006/api2/json` |
 | `step-ca-api` | `api` | `service_api` | `https://100.118.189.95:9443` |
 | `openbao-api` | `api` | `service_api` | `https://100.118.189.95:8200` |
@@ -205,11 +207,12 @@ password SSH disabled on host and guests
 | --- | --- | --- | --- |
 | `internal-only` | Internal-Only | 8 | Reachable only from LV3 private networks, loopback paths, or explicitly trusted control-plane hosts. |
 | `operator-only` | Operator-Only | 7 | Reachable only from approved operator devices over private access such as Tailscale. |
-| `public-edge` | Public Edge | 0 | Intentionally published on a public domain through the named edge model. |
+| `public-edge` | Public Edge | 1 | Intentionally published on a public domain through the named edge model. |
 
 ### Classified API And Webhook Surfaces
 | Surface | Tier | Lane | Endpoint | Reachability |
 | --- | --- | --- | --- | --- |
+| `platform-api-gateway` | `public-edge` | `api` | `https://api.lv3.org/v1` | Reachable on https://api.lv3.org through the NGINX edge, with Keycloak bearer-token authentication enforced by the gateway itself. |
 | `proxmox-management-api` | `operator-only` | `api` | `https://100.118.189.95:8006/api2/json` | Reachable only over the Proxmox host Tailscale address on port 8006. |
 | `step-ca-api` | `internal-only` | `api` | `https://100.118.189.95:9443` | Reachable through the Proxmox host Tailscale proxy for approved controller and trust-bootstrap traffic only. |
 | `openbao-api` | `internal-only` | `api` | `https://100.118.189.95:8200` | Reachable through the Proxmox host Tailscale proxy and the runtime loopback listener, with client-certificate authentication on the external path. |
@@ -318,6 +321,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Command Catalog And Approval Gates](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/command-catalog-and-approval-gates.md)
 - [Complete Security Baseline Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/complete-security-baseline.md)
 - [Compose Runtime Secrets Injection](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/compose-secrets-injection.md)
+- [Configure API Gateway](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-api-gateway.md)
 - [Configure Backup VM](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-backup-vm.md)
 - [Configure Build Artifact Cache](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-build-artifact-cache.md)
 - [Configure Control-Plane Recovery](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-control-plane-recovery.md)
@@ -344,6 +348,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Control-Plane Communication Lanes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/control-plane-communication-lanes.md)
 - [Controller Automation Toolkit](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/controller-automation-toolkit.md)
 - [Controller-Local Secrets And Preflight Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/controller-local-secrets-and-preflight.md)
+- [Data Retention](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/data-retention.md)
 - [Deploy a Service](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/deploy-a-service.md)
 - [Deploy Uptime Kuma](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/deploy-uptime-kuma.md)
 - [Deployment History Portal](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/deployment-history-portal.md)
@@ -611,7 +616,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.101.0` |
+| Repository version | `0.103.0` |
 | Platform version | `0.40.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -722,6 +727,7 @@ This repository is intentionally opinionated:
 | `0098` | Postgres high availability and automated failover | `merged` | [adr-0098-postgres-ha.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0098-postgres-ha.md) |
 | `0099` | Automated backup restore verification | `merged` | [adr-0099-backup-restore-verification.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0099-backup-restore-verification.md) |
 | `0101` | Automated certificate lifecycle management | `merged` | [adr-0101-certificate-lifecycle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0101-certificate-lifecycle.md) |
+| `0103` | Data classification and retention policy | `merged` | [adr-0103-data-retention-policy.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0103-data-retention-policy.md) |
 | `0106` | Ephemeral environment lifecycle and teardown policy | `merged` | [adr-0106-ephemeral-lifecycle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0106-ephemeral-lifecycle.md) |
 | `0111` | End-to-end integration test suite | `merged` | [adr-0111-integration-test-suite.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0111-integration-test-suite.md) |
 <!-- END GENERATED: merged-workstreams -->

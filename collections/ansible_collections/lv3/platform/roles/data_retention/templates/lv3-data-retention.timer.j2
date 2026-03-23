@@ -1,0 +1,9 @@
+[Unit]
+Description=Run LV3 receipt and mutation-audit retention
+
+[Timer]
+OnCalendar={{ data_retention_on_calendar }}
+Persistent=true
+
+[Install]
+WantedBy=timers.target

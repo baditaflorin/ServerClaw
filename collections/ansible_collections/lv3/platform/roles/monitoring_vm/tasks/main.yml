@@ -201,6 +201,15 @@
     mode: "0640"
   notify: Restart Grafana
 
+- name: Bound Grafana annotation retention
+  community.general.ini_file:
+    path: /etc/grafana/grafana.ini
+    section: annotations
+    option: max_age
+    value: "{{ monitoring_grafana_annotation_retention }}"
+    mode: "0640"
+  notify: Restart Grafana
+
 - name: Enable and start InfluxDB
   ansible.builtin.systemd:
     name: influxdb

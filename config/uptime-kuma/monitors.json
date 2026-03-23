@@ -177,6 +177,17 @@
     "accepted_statuscodes": ["200-299"]
   },
   {
+    "name": "Platform API Gateway Public",
+    "type": "http",
+    "url": "https://api.lv3.org/healthz",
+    "description": "Public edge entrypoint for the unified LV3 API gateway.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 5,
+    "accepted_statuscodes": ["200-299"]
+  },
+  {
     "name": "Portainer Private",
     "type": "http",
     "url": "https://10.10.10.20:9443/api/status",

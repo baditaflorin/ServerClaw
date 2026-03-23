@@ -8,3 +8,5 @@ preflight_allowed_major_versions:
 preflight_wait_for_connection: true
 preflight_wait_timeout: 30
 preflight_skip_distribution_check: false
+preflight_check_repo_env_files: true
+preflight_repo_root: "{{ lookup('ansible.builtin.env', 'PWD') }}"

@@ -1396,8 +1396,8 @@ workstreams:
     title: Unified platform API gateway
     status: ready
     owner: codex
-    branch: codex/adr-0092-platform-api-gateway
-    worktree_path: ../proxmox_florin_server-api-gateway
+    branch: codex/adr-0092-unified-platform-api-gateway
+    worktree_path: .worktrees/adr-0092
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0092-platform-api-gateway.md
     depends_on:
       - adr-0021-nginx-edge
@@ -1652,10 +1652,10 @@ workstreams:
   - id: adr-0103-data-retention-policy
     adr: "0103"
     title: Data classification and retention policy
-    status: ready
+    status: merged
     owner: codex
-    branch: codex/adr-0103-data-retention
-    worktree_path: ../proxmox_florin_server-data-retention
+    branch: codex/adr-0103
+    worktree_path: .worktrees/codex-adr-0103
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0103-data-retention-policy.md
     depends_on:
       - adr-0043-openbao
