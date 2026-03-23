@@ -370,6 +370,7 @@ platform_guest_catalog:
       vmid: 110
       name: nginx-lv3
       role: nginx
+      proxmox_firewall_enabled: false
       template_key: lv3-debian-base
       ipv4: 10.10.10.10
       cidr: 24
