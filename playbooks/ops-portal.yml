@@ -1,0 +1,35 @@
+---
+- name: Converge the interactive ops portal on the Docker runtime VM
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - access
+    - service-ops-portal
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.ops-portal
+        playbook_execution_audit_target: ops-portal
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.ops_portal_runtime
+
+  post_tasks:
+    - name: Run shared post-verify checks
+      ansible.builtin.import_tasks: tasks/post-verify.yml
+      vars:
+        service_health_probe_id: ops_portal
+        playbook_execution_post_verify_audit_action: playbook.verify.ops-portal
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: ops_portal

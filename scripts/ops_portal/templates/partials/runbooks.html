@@ -1,0 +1,25 @@
+<div class="runbook-grid">
+  {% for runbook in runbooks %}
+  <article class="panel runbook-card">
+    <div class="runbook-head">
+      <div>
+        <p class="service-category">{{ runbook.live_impact }}</p>
+        <h3>{{ runbook.id }}</h3>
+        <p class="muted">{{ runbook.description }}</p>
+      </div>
+    </div>
+    {% if runbook.owner_runbook %}
+    <p><a href="{{ docs_base_url }}/{{ runbook.owner_runbook }}" target="_blank" rel="noreferrer">Open runbook</a></p>
+    {% endif %}
+    <form
+      hx-post="/actions/runbooks/{{ runbook.id }}"
+      hx-target="#runbook-result-{{ runbook.id }}"
+      hx-swap="innerHTML">
+      <label class="form-label" for="params-{{ runbook.id }}">Parameters (JSON object)</label>
+      <textarea id="params-{{ runbook.id }}" name="parameters" rows="4">{}</textarea>
+      <button class="action-button" type="submit">Launch</button>
+    </form>
+    <div id="runbook-result-{{ runbook.id }}"></div>
+  </article>
+  {% endfor %}
+</div>

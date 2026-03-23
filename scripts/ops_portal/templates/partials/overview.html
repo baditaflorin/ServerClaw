@@ -1,0 +1,136 @@
+{% if health_warning %}
+<div class="banner warning">Gateway health aggregation is degraded: {{ health_warning }}</div>
+{% endif %}
+
+<div class="overview-grid">
+  <section class="panel summary-panel">
+    <div class="stat-block">
+      <span class="label">Maintenance</span>
+      <strong>{{ maintenance_count }}</strong>
+    </div>
+    <div class="stat-block">
+      <span class="label">Drift</span>
+      <strong>{{ drift_summary.status or "unknown" }}</strong>
+    </div>
+    <div class="stat-block">
+      <span class="label">Unsuppressed Drift</span>
+      <strong>{{ drift_summary.unsuppressed_count or 0 }}</strong>
+    </div>
+  </section>
+
+  <section class="panel summary-panel">
+    <h3>Active Maintenance Windows</h3>
+    {% if maintenance_windows %}
+    <ul class="compact-list">
+      {% for window in maintenance_windows[:4] %}
+      <li>
+        <strong>{{ window.service_id }}</strong>
+        <span>{{ window.reason }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="muted">No active maintenance windows.</p>
+    {% endif %}
+  </section>
+</div>
+
+<div class="service-grid">
+  {% for service in services %}
+  <article class="service-card">
+    <div class="service-head">
+      <div>
+        <p class="service-category">{{ service.category }}</p>
+        <h3>{{ service.name }}</h3>
+        <p class="muted">{{ service.description }}</p>
+      </div>
+      <span class="status-dot {{ service.status_tone }}">{{ service.status }}</span>
+    </div>
+
+    <dl class="service-meta">
+      <div>
+        <dt>Health</dt>
+        <dd>{{ service.status_detail }}</dd>
+      </div>
+      <div>
+        <dt>Last deployment</dt>
+        <dd>
+          {% if service.last_deployment %}
+          {{ service.last_deployment.recorded_on|humanize_timestamp }}
+          {% else %}
+          Not recorded
+          {% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt>Drift</dt>
+        <dd>{{ service.drift_items|length }} findings</dd>
+      </div>
+      <div>
+        <dt>Surface</dt>
+        <dd>{{ service.public_url or service.internal_url or "Private only" }}</dd>
+      </div>
+    </dl>
+
+    {% if service.maintenance_windows %}
+    <div class="hint-strip">
+      {% for window in service.maintenance_windows[:2] %}
+      <span>{{ window.reason }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="action-row">
+      <button
+        class="action-button"
+        hx-post="/actions/services/{{ service.id }}/deploy"
+        hx-target="#action-result-{{ service.id }}"
+        hx-swap="innerHTML"
+        hx-confirm="Deploy {{ service.name }} through the platform gateway?">
+        Deploy
+      </button>
+      <button
+        class="action-button secondary"
+        hx-post="/actions/services/{{ service.id }}/health-check"
+        hx-target="#action-result-{{ service.id }}"
+        hx-swap="innerHTML">
+        Health check
+      </button>
+      <button
+        class="action-button secondary"
+        hx-post="/actions/services/{{ service.id }}/rotate-secret"
+        hx-target="#action-result-{{ service.id }}"
+        hx-swap="innerHTML"
+        hx-confirm="Rotate secrets for {{ service.name }}?">
+        Rotate secret
+      </button>
+      <button
+        class="action-button secondary"
+        hx-post="/actions/services/{{ service.id }}/deploy"
+        hx-target="#action-result-{{ service.id }}"
+        hx-vals='{"restart_only":"true"}'
+        hx-swap="innerHTML"
+        hx-confirm="Restart {{ service.name }} via deployment pipeline?">
+        Restart
+      </button>
+      <a class="action-button ghost" href="{{ service.logs_url }}" target="_blank" rel="noreferrer">View logs</a>
+    </div>
+
+    {% if service.runbook or service.adr %}
+    <div class="link-row">
+      {% if service.runbook %}
+      <a href="{{ docs_base_url }}/{{ service.runbook }}" target="_blank" rel="noreferrer">Runbook</a>
+      {% endif %}
+      {% if service.adr %}
+      <a href="{{ docs_base_url }}/adr/{{ service.adr }}" target="_blank" rel="noreferrer">ADR {{ service.adr }}</a>
+      {% endif %}
+      {% if service.dashboard_url %}
+      <a href="{{ service.dashboard_url }}" target="_blank" rel="noreferrer">Dashboard</a>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <div id="action-result-{{ service.id }}"></div>
+  </article>
+  {% endfor %}
+</div>

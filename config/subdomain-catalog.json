@@ -178,13 +178,13 @@
       "exposure": "edge-published",
       "target": "65.108.75.123",
       "target_port": 443,
-      "owner_adr": "0074",
+      "owner_adr": "0093",
       "tls": {
         "provider": "letsencrypt",
         "cert_path": "/etc/letsencrypt/live/lv3-edge/",
         "auto_renew": true
       },
-      "notes": "Repository automation is ready; live publication still requires apply from main."
+      "notes": "Interactive runtime is repo-managed; live cutover from the static portal still requires apply from main."
     },
     {
       "fqdn": "proxmox.lv3.org",

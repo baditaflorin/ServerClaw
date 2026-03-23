@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}LV3 Ops Portal{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', path='portal.css') }}">
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">LV3 Control Surface</p>
+        <h1>Interactive Ops Portal</h1>
+        <p class="hero-copy">Live health, drift, deployments, and operator actions in one browser-native surface.</p>
+      </div>
+      <div class="operator-card">
+        <span class="label">Operator</span>
+        <strong>{{ operator.operator_id }}</strong>
+        {% if operator.operator_email %}
+        <span class="muted">{{ operator.operator_email }}</span>
+        {% endif %}
+        <span class="muted">Rendered {{ generated_at }}</span>
+      </div>
+    </header>
+
+    <nav class="portal-nav">
+      <a href="#overview">Overview</a>
+      <a href="#deployments">Deployments</a>
+      <a href="#drift">Drift</a>
+      <a href="#runbooks">Runbooks</a>
+      <a href="#changelog">Changelog</a>
+    </nav>
+
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>

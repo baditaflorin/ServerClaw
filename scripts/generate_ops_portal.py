@@ -33,6 +33,7 @@ HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 ADR_DIR = repo_path("docs", "adr")
 RUNBOOK_DIR = repo_path("docs", "runbooks")
 BUILD_DIR = repo_path("build", "ops-portal")
+SNAPSHOT_PATH = repo_path("receipts", "ops-portal-snapshot.html")
 DRIFT_RECEIPTS_DIR = repo_path("receipts", "drift-reports")
 FIXTURE_RECEIPTS_DIR = repo_path("receipts", "fixtures")
 
@@ -661,7 +662,12 @@ def validate_output(output_dir: Path) -> None:
             raise ValueError(f"missing generated portal artifact: {path}")
 
 
-def render_portal(output_dir: Path, health_snapshot: Path | None, probe_timeout: float) -> None:
+def render_portal(
+    output_dir: Path,
+    health_snapshot: Path | None,
+    probe_timeout: float,
+    snapshot_file: Path | None = None,
+) -> None:
     environment_catalog = load_environment_topology()
     service_catalog = load_service_catalog()
     subdomain_catalog = load_subdomain_catalog()
@@ -742,6 +748,9 @@ def render_portal(output_dir: Path, health_snapshot: Path | None, probe_timeout:
         render_agents(tools),
     )
     validate_output(output_dir)
+    if snapshot_file is not None:
+        snapshot_file.parent.mkdir(parents=True, exist_ok=True)
+        snapshot_file.write_text((output_dir / "index.html").read_text())
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -763,6 +772,12 @@ def build_parser() -> argparse.ArgumentParser:
         default=0.5,
         help="Timeout in seconds for direct service probes when no snapshot entry exists.",
     )
+    parser.add_argument(
+        "--snapshot-file",
+        type=Path,
+        default=SNAPSHOT_PATH,
+        help="Optional single-file archive copy of the generated landing page.",
+    )
     parser.add_argument("--write", action="store_true", help="Write output to the target directory.")
     parser.add_argument(
         "--check",
@@ -782,10 +797,15 @@ def main(argv: list[str] | None = None) -> int:
 
         if args.check:
             with tempfile.TemporaryDirectory(prefix="ops-portal-") as temp_dir:
-                render_portal(Path(temp_dir), args.health_snapshot, 0 if args.health_snapshot is None else args.probe_timeout)
+                render_portal(
+                    Path(temp_dir),
+                    args.health_snapshot,
+                    0 if args.health_snapshot is None else args.probe_timeout,
+                    None,
+                )
             return 0
 
-        render_portal(args.output_dir, args.health_snapshot, args.probe_timeout)
+        render_portal(args.output_dir, args.health_snapshot, args.probe_timeout, args.snapshot_file)
         return 0
     except Exception as exc:  # noqa: BLE001
         return emit_cli_error("ops portal", exc)

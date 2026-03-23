@@ -24,6 +24,7 @@ class OpsPortalRenderTests(unittest.TestCase):
     def test_render_portal_writes_expected_pages(self) -> None:
         temp_dir = Path(tempfile.mkdtemp(prefix="ops-portal-test-"))
         original_receipts = ops_portal.active_ephemeral_receipts
+        snapshot_file = temp_dir / "ops-portal-snapshot.html"
         try:
             ops_portal.active_ephemeral_receipts = lambda: [
                 {
@@ -39,6 +40,7 @@ class OpsPortalRenderTests(unittest.TestCase):
                 temp_dir,
                 REPO_ROOT / "tests" / "fixtures" / "ops_portal_health.json",
                 0,
+                snapshot_file,
             )
             index_html = (temp_dir / "index.html").read_text()
             dns_html = (temp_dir / "subdomains" / "index.html").read_text()
@@ -52,6 +54,7 @@ class OpsPortalRenderTests(unittest.TestCase):
             self.assertIn("adr-0106-test", index_html)
             self.assertIn("ops.lv3.org", dns_html)
             self.assertIn("get-platform-status", agents_html)
+            self.assertEqual(snapshot_file.read_text(), index_html)
         finally:
             ops_portal.active_ephemeral_receipts = original_receipts
             shutil.rmtree(temp_dir)
@@ -69,6 +72,7 @@ class OpsPortalRenderTests(unittest.TestCase):
                 temp_dir,
                 REPO_ROOT / "tests" / "fixtures" / "ops_portal_health.json",
                 0,
+                temp_dir / "snapshot.html",
             )
             index_html = (temp_dir / "index.html").read_text()
             self.assertIn("Latest Receipt", index_html)

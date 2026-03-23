@@ -123,7 +123,7 @@ workstreams:
   - id: adr-0025-docker-compose-stacks
     adr: "0025"
     title: Compose-managed runtime stacks
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0025-docker-compose-stacks
     worktree_path: ../proxmox_florin_server-docker-compose-stacks
@@ -1420,7 +1420,7 @@ workstreams:
   - id: adr-0093-interactive-ops-portal
     adr: "0093"
     title: Interactive ops portal with live actions
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0093-interactive-ops-portal
     worktree_path: ../proxmox_florin_server-interactive-ops-portal
