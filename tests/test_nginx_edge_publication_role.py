@@ -46,6 +46,16 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
             task_names,
         )
 
+    def test_certificate_san_regex_preserves_domains_with_s_characters(self) -> None:
+        derive_task = next(
+            task
+            for task in self.tasks
+            if task["name"] == "Derive current and missing public edge certificate domains"
+        )
+        current_domains_expr = derive_task["ansible.builtin.set_fact"]["public_edge_current_certificate_domains"]
+
+        self.assertIn("regex_findall('DNS:([^, ]+)')", current_domains_expr)
+
     def test_defaults_include_public_docs_site(self) -> None:
         docs_site = next(
             site for site in self.defaults["public_edge_extra_sites"] if site["hostname"] == "docs.lv3.org"

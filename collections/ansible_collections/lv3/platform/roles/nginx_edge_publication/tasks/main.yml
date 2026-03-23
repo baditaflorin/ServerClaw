@@ -117,14 +117,14 @@
     public_edge_current_certificate_domains: >-
       {{
         (public_edge_certificate_sans.stdout | default(''))
-        | regex_findall('DNS:([^,\\s]+)')
+        | regex_findall('DNS:([^, ]+)')
       }}
     public_edge_missing_certificate_domains: >-
       {{
         public_edge_certificate_domains
         | difference(
             (public_edge_certificate_sans.stdout | default(''))
-            | regex_findall('DNS:([^,\\s]+)')
+            | regex_findall('DNS:([^, ]+)')
           )
       }}
 
