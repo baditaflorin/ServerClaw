@@ -1390,3 +1390,472 @@ workstreams:
       - docs/runbooks/drift-detection.md
     ready_to_merge: false
     live_applied: false
+
+  - id: adr-0092-platform-api-gateway
+    adr: "0092"
+    title: Unified platform API gateway
+    status: ready
+    owner: codex
+    branch: codex/adr-0092-platform-api-gateway
+    worktree_path: ../proxmox_florin_server-api-gateway
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0092-platform-api-gateway.md
+    depends_on:
+      - adr-0021-nginx-edge
+      - adr-0045-communication-lanes
+      - adr-0047-short-lived-creds
+      - adr-0056-keycloak
+      - adr-0058-nats-event-bus
+      - adr-0066-mutation-audit-log
+      - adr-0069-agent-tool-registry
+    conflicts_with: []
+    shared_surfaces:
+      - config/api-gateway-catalog.json
+      - config/service-capability-catalog.json
+      - config/agent-tool-registry.json
+      - Compose stack docker-runtime-lv3
+      - nginx edge config
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0093-interactive-ops-portal
+    adr: "0093"
+    title: Interactive ops portal with live actions
+    status: ready
+    owner: codex
+    branch: codex/adr-0093-interactive-ops-portal
+    worktree_path: ../proxmox_florin_server-interactive-ops-portal
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0093-interactive-ops-portal.md
+    depends_on:
+      - adr-0092-platform-api-gateway
+      - adr-0056-keycloak
+      - adr-0058-nats-event-bus
+      - adr-0066-mutation-audit-log
+      - adr-0074-ops-portal
+      - adr-0080-maintenance-windows
+      - adr-0091-drift-detection
+    conflicts_with:
+      - adr-0074-ops-portal
+    shared_surfaces:
+      - scripts/generate_ops_portal.py
+      - nginx edge ops.lv3.org vhost
+      - config/service-capability-catalog.json
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0094-developer-portal
+    adr: "0094"
+    title: Developer portal and service documentation site
+    status: ready
+    owner: codex
+    branch: codex/adr-0094-developer-portal
+    worktree_path: ../proxmox_florin_server-developer-portal
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0094-developer-portal.md
+    depends_on:
+      - adr-0021-nginx-edge
+      - adr-0033-service-catalog
+      - adr-0076-subdomain-governance
+      - adr-0081-changelog-portal
+      - adr-0092-platform-api-gateway
+    conflicts_with: []
+    shared_surfaces:
+      - config/service-capability-catalog.json
+      - docs/adr/
+      - changelog.md
+      - nginx edge config
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0095-unified-search
+    adr: "0095"
+    title: Unified search across platform services
+    status: ready
+    owner: codex
+    branch: codex/adr-0095-unified-search
+    worktree_path: ../proxmox_florin_server-unified-search
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0095-unified-search.md
+    depends_on:
+      - adr-0092-platform-api-gateway
+      - adr-0054-netbox
+      - adr-0066-mutation-audit-log
+      - adr-0069-agent-tool-registry
+    conflicts_with: []
+    shared_surfaces:
+      - config/agent-tool-registry.json
+      - config/api-gateway-catalog.json
+      - Compose stack docker-runtime-lv3
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0096-slo-tracking
+    adr: "0096"
+    title: SLO definitions and error budget tracking
+    status: ready
+    owner: codex
+    branch: codex/adr-0096-slo-tracking
+    worktree_path: ../proxmox_florin_server-slo-tracking
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0096-slo-tracking.md
+    depends_on:
+      - adr-0011-monitoring
+      - adr-0064-health-probes
+      - adr-0073-promotion-gate
+      - adr-0092-platform-api-gateway
+    conflicts_with: []
+    shared_surfaces:
+      - config/grafana/
+      - scripts/promotion_pipeline.py
+      - monitoring-lv3 Prometheus config
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0097-alerting-routing
+    adr: "0097"
+    title: Alerting routing and on-call runbook model
+    status: ready
+    owner: codex
+    branch: codex/adr-0097-alerting-routing
+    worktree_path: ../proxmox_florin_server-alerting-routing
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0097-alerting-routing.md
+    depends_on:
+      - adr-0011-monitoring
+      - adr-0057-mattermost
+      - adr-0064-health-probes
+      - adr-0080-maintenance-windows
+      - adr-0096-slo-tracking
+    conflicts_with: []
+    shared_surfaces:
+      - config/grafana/provisioning/
+      - scripts/maintenance_window_tool.py
+      - monitoring-lv3 services
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0098-postgres-ha
+    adr: "0098"
+    title: Postgres high availability and automated failover
+    status: ready
+    owner: codex
+    branch: codex/adr-0098-postgres-ha
+    worktree_path: ../proxmox_florin_server-postgres-ha
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0098-postgres-ha.md
+    depends_on:
+      - adr-0026-postgres-vm
+      - adr-0064-health-probes
+      - adr-0085-opentofu-vm-lifecycle
+      - adr-0096-slo-tracking
+      - adr-0097-alerting-routing
+    conflicts_with: []
+    shared_surfaces:
+      - tofu/environments/production/
+      - roles/postgres_lv3/
+      - inventory/
+      - config/service-capability-catalog.json
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0099-backup-restore-verification
+    adr: "0099"
+    title: Automated backup restore verification
+    status: ready
+    owner: codex
+    branch: codex/adr-0099-backup-restore-verification
+    worktree_path: ../proxmox_florin_server-backup-restore-verification
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0099-backup-restore-verification.md
+    depends_on:
+      - adr-0020-backups
+      - adr-0029-backup-vm
+      - adr-0044-windmill
+      - adr-0057-mattermost
+      - adr-0066-mutation-audit-log
+      - adr-0088-ephemeral-fixtures
+      - adr-0097-alerting-routing
+    conflicts_with: []
+    shared_surfaces:
+      - scripts/
+      - Windmill workflows
+      - receipts/
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0100-disaster-recovery
+    adr: "0100"
+    title: RTO/RPO targets and disaster recovery playbook
+    status: ready
+    owner: codex
+    branch: codex/adr-0100-disaster-recovery
+    worktree_path: ../proxmox_florin_server-disaster-recovery
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0100-disaster-recovery-playbook.md
+    depends_on:
+      - adr-0020-backups
+      - adr-0029-backup-vm
+      - adr-0042-step-ca
+      - adr-0043-openbao
+      - adr-0051-control-plane-backup
+      - adr-0098-postgres-ha
+      - adr-0099-backup-restore-verification
+    conflicts_with: []
+    shared_surfaces:
+      - docs/runbooks/
+      - backup-lv3 PBS config
+      - Windmill workflows
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0101-certificate-lifecycle
+    adr: "0101"
+    title: Automated certificate lifecycle management
+    status: ready
+    owner: codex
+    branch: codex/adr-0101-certificate-lifecycle
+    worktree_path: ../proxmox_florin_server-certificate-lifecycle
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0101-certificate-lifecycle.md
+    depends_on:
+      - adr-0042-step-ca
+      - adr-0047-short-lived-creds
+      - adr-0064-health-probes
+      - adr-0091-drift-detection
+      - adr-0096-slo-tracking
+      - adr-0097-alerting-routing
+    conflicts_with: []
+    shared_surfaces:
+      - config/health-probe-catalog.json
+      - all Compose stacks
+      - systemd unit files
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0102-security-posture-reporting
+    adr: "0102"
+    title: Security posture reporting and benchmark drift
+    status: ready
+    owner: codex
+    branch: codex/adr-0102-security-posture
+    worktree_path: ../proxmox_florin_server-security-posture
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0102-security-posture-reporting.md
+    depends_on:
+      - adr-0006-security-baseline
+      - adr-0044-windmill
+      - adr-0057-mattermost
+      - adr-0061-glitchtip
+      - adr-0066-mutation-audit-log
+      - adr-0097-alerting-routing
+    conflicts_with: []
+    shared_surfaces:
+      - playbooks/tasks/
+      - scripts/
+      - config/grafana/dashboards/
+      - receipts/
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0103-data-retention-policy
+    adr: "0103"
+    title: Data classification and retention policy
+    status: ready
+    owner: codex
+    branch: codex/adr-0103-data-retention
+    worktree_path: ../proxmox_florin_server-data-retention
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0103-data-retention-policy.md
+    depends_on:
+      - adr-0043-openbao
+      - adr-0052-loki-log-aggregation
+      - adr-0053-tempo-traces
+      - adr-0066-mutation-audit-log
+      - adr-0077-compose-secrets-injection
+      - adr-0087-validation-gate
+    conflicts_with: []
+    shared_surfaces:
+      - Loki config
+      - Tempo config
+      - Mattermost config
+      - config/ catalogs
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0104-dependency-graph
+    adr: "0104"
+    title: Service dependency graph and failure propagation model
+    status: ready
+    owner: codex
+    branch: codex/adr-0104-dependency-graph
+    worktree_path: ../proxmox_florin_server-dependency-graph
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0104-dependency-graph.md
+    depends_on:
+      - adr-0033-service-catalog
+      - adr-0073-promotion-gate
+      - adr-0093-interactive-ops-portal
+      - adr-0094-developer-portal
+    conflicts_with: []
+    shared_surfaces:
+      - config/
+      - scripts/promotion_pipeline.py
+      - scripts/generate_docs_site.py
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0105-capacity-model
+    adr: "0105"
+    title: Platform capacity model and resource quota enforcement
+    status: ready
+    owner: codex
+    branch: codex/adr-0105-capacity-model
+    worktree_path: ../proxmox_florin_server-capacity-model
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0105-capacity-model.md
+    depends_on:
+      - adr-0010-vm-topology
+      - adr-0073-promotion-gate
+      - adr-0085-opentofu-vm-lifecycle
+      - adr-0097-alerting-routing
+      - adr-0098-postgres-ha
+    conflicts_with: []
+    shared_surfaces:
+      - config/
+      - scripts/promotion_pipeline.py
+      - config/grafana/dashboards/
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0106-ephemeral-lifecycle
+    adr: "0106"
+    title: Ephemeral environment lifecycle and teardown policy
+    status: ready
+    owner: codex
+    branch: codex/adr-0106-ephemeral-lifecycle
+    worktree_path: ../proxmox_florin_server-ephemeral-lifecycle
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0106-ephemeral-lifecycle.md
+    depends_on:
+      - adr-0072-staging-production
+      - adr-0085-opentofu-vm-lifecycle
+      - adr-0088-ephemeral-fixtures
+      - adr-0093-interactive-ops-portal
+      - adr-0105-capacity-model
+    conflicts_with: []
+    shared_surfaces:
+      - scripts/fixture_manager.py
+      - Windmill workflows
+      - config/capacity-model.json
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0107-extension-model
+    adr: "0107"
+    title: Platform extension model for adding new services
+    status: ready
+    owner: codex
+    branch: codex/adr-0107-extension-model
+    worktree_path: ../proxmox_florin_server-extension-model
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0107-extension-model.md
+    depends_on:
+      - adr-0033-service-catalog
+      - adr-0064-health-probes
+      - adr-0078-service-scaffold
+      - adr-0087-validation-gate
+      - adr-0092-platform-api-gateway
+      - adr-0096-slo-tracking
+      - adr-0104-dependency-graph
+    conflicts_with: []
+    shared_surfaces:
+      - scripts/generate_service_scaffold.py
+      - config/validation-gate.json
+      - all catalog JSON files
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0108-operator-onboarding
+    adr: "0108"
+    title: Operator onboarding and off-boarding workflow
+    status: ready
+    owner: codex
+    branch: codex/adr-0108-operator-onboarding
+    worktree_path: ../proxmox_florin_server-operator-onboarding
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0108-operator-onboarding.md
+    depends_on:
+      - adr-0014-tailscale
+      - adr-0042-step-ca
+      - adr-0043-openbao
+      - adr-0044-windmill
+      - adr-0046-identity-classes
+      - adr-0056-keycloak
+      - adr-0066-mutation-audit-log
+    conflicts_with: []
+    shared_surfaces:
+      - config/
+      - Windmill workflows
+      - Keycloak realm configuration
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0109-public-status-page
+    adr: "0109"
+    title: Public status page
+    status: ready
+    owner: codex
+    branch: codex/adr-0109-public-status-page
+    worktree_path: ../proxmox_florin_server-public-status-page
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0109-public-status-page.md
+    depends_on:
+      - adr-0015-dns-subdomains
+      - adr-0021-nginx-edge
+      - adr-0027-uptime-kuma
+      - adr-0076-subdomain-governance
+      - adr-0080-maintenance-windows
+      - adr-0096-slo-tracking
+      - adr-0097-alerting-routing
+    conflicts_with: []
+    shared_surfaces:
+      - scripts/maintenance_window_tool.py
+      - nginx edge config
+      - config/subdomain-catalog.json
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0110-platform-versioning
+    adr: "0110"
+    title: Platform versioning, release notes, and upgrade path
+    status: ready
+    owner: codex
+    branch: codex/adr-0110-platform-versioning
+    worktree_path: ../proxmox_florin_server-platform-versioning
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0110-platform-versioning.md
+    depends_on:
+      - adr-0008-versioning-model
+      - adr-0017-adr-lifecycle
+      - adr-0073-promotion-gate
+      - adr-0081-changelog-portal
+      - adr-0090-platform-cli
+      - adr-0094-developer-portal
+    conflicts_with: []
+    shared_surfaces:
+      - VERSION
+      - changelog.md
+      - versions/stack.yaml
+      - scripts/lv3_cli.py
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0111-integration-tests
+    adr: "0111"
+    title: End-to-end integration test suite
+    status: ready
+    owner: codex
+    branch: codex/adr-0111-integration-tests
+    worktree_path: ../proxmox_florin_server-integration-tests
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0111-integration-test-suite.md
+    depends_on:
+      - adr-0044-windmill
+      - adr-0056-keycloak
+      - adr-0061-glitchtip
+      - adr-0064-health-probes
+      - adr-0066-mutation-audit-log
+      - adr-0088-ephemeral-fixtures
+      - adr-0092-platform-api-gateway
+      - adr-0098-postgres-ha
+      - adr-0106-ephemeral-lifecycle
+      - adr-0108-operator-onboarding
+    conflicts_with: []
+    shared_surfaces:
+      - tests/
+      - config/validation-gate.json
+      - Windmill workflows
+      - Keycloak realm
+    ready_to_merge: false
+    live_applied: false
