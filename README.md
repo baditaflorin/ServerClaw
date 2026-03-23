@@ -76,8 +76,8 @@ Portainer is now live on `docker-runtime-lv3` and reachable privately at `https:
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.88.0` |
-| Platform version | `0.38.0` |
+| Repository version | `0.90.0` |
+| Platform version | `0.39.0` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -119,17 +119,17 @@ Template VM: `9000` `debian13-cloud-template`
 | `docker_runtime` | `2026-03-22-adr-0023-docker-runtime-live-apply` |
 | `guest_network_policy` | `2026-03-22-adr-0067-guest-network-policy-live-apply` |
 | `identity_taxonomy` | `2026-03-22-adr-0046-identity-classes-live-apply` |
-| `keycloak` | `2026-03-22-adr-0056-keycloak-live-apply` |
-| `mail_platform` | `2026-03-22-adr-0041-email-platform-live-apply` |
-| `mattermost` | `2026-03-22-adr-0057-mattermost-live-apply` |
+| `keycloak` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
+| `mail_platform` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
+| `mattermost` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
 | `monitoring` | `2026-03-22-adr-0052-loki-live-apply` |
 | `mutation_audit` | `2026-03-23-adr-0066-mutation-audit-live-apply` |
-| `netbox` | `2026-03-22-adr-0054-netbox-live-apply` |
+| `netbox` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
 | `notification_profiles` | `2026-03-22-adr-0050-notification-profiles-live-apply` |
 | `ntopng` | `2026-03-22-adr-0059-ntopng-live-apply` |
-| `open_webui` | `2026-03-22-adr-0060-open-webui-live-apply` |
+| `open_webui` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
 | `openbao` | `2026-03-22-adr-0043-openbao-live-apply` |
-| `platform_context` | `2026-03-23-adr-0070-rag-platform-context-live-apply` |
+| `platform_context` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
 | `portainer` | `2026-03-22-adr-0055-portainer-live-apply` |
 | `postgres_vm` | `2026-03-22-adr-0026-postgres-vm-live-apply` |
 | `public_edge_publication` | `2026-03-22-adr-0021-edge-publication-live-apply` |
@@ -140,7 +140,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `step_ca` | `2026-03-22-adr-0042-step-ca-live-apply` |
 | `tempo_tracing` | `2026-03-22-adr-0053-tempo-traces-live-apply` |
 | `uptime_kuma` | `2026-03-22-adr-0027-uptime-kuma-live-apply` |
-| `windmill` | `2026-03-22-adr-0044-windmill-live-apply` |
+| `windmill` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
 <!-- END GENERATED: platform-status -->
 
 The current access posture is:
@@ -545,8 +545,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.88.0` |
-| Platform version | `0.38.0` |
+| Repository version | `0.90.0` |
+| Platform version | `0.39.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
