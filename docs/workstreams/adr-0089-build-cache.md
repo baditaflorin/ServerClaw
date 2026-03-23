@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0089](../adr/0089-build-artifact-cache.md)
 - Title: Persistent Docker layer, pip, apt, and Ansible collection caches on the build server for sub-20-second check runs
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0089-build-cache`
 - Worktree: `../proxmox_florin_server-build-cache`
 - Owner: codex
@@ -68,5 +68,5 @@
 ## Notes For The Next Assistant
 
 - apt-cacher-ng requires the Packer provisioner scripts to inject the proxy config before any `apt-get install`; verify this is in `base-hardening.sh` before running a Packer build
-- The repo-side implementation is complete on this branch, including the `remote_exec.sh`, runner-manifest, and `validate_repo.sh` cache hooks that were previously deferred.
-- Remaining work is the integration step only: merge from `main`, bump the repo version, and apply the cache host live so the timing-based verification and Windmill schedules can be marked true.
+- The repo-side implementation is complete on `main`, including the `remote_exec.sh`, runner-manifest, and `validate_repo.sh` cache hooks that were previously deferred.
+- Remaining work is the live-apply step only: apply the cache host from `main`, measure warm-cache timings on `docker-build-lv3`, and enable the seeded Windmill schedules once the host is verified.

@@ -1111,7 +1111,7 @@ workstreams:
   - id: adr-0089-build-cache
     adr: "0089"
     title: Build artifact cache and layer registry
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0089-build-cache
     worktree_path: ../proxmox_florin_server-build-cache
@@ -1128,13 +1128,13 @@ workstreams:
       - config/windmill/scripts/warm-build-cache.py
       - scripts/cache_status.py
       - docs/runbooks/configure-build-artifact-cache.md
-    ready_to_merge: true
+    ready_to_merge: false
     live_applied: false
 
   - id: adr-0083-docker-check-runner
     adr: "0083"
     title: Docker-based check runner
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0083-docker-check-runner
     worktree_path: .worktrees/adr-0083
@@ -1148,5 +1148,5 @@ workstreams:
       - scripts/parallel_check.py
       - config/windmill/scripts/check-runner-rebuild.py
       - Makefile
-    ready_to_merge: true
+    ready_to_merge: false
     live_applied: false

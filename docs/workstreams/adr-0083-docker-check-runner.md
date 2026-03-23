@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0083](../adr/0083-docker-based-check-runner.md)
 - Title: Containerised, versioned lint and validation toolchains running in parallel on the build server
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0083-docker-check-runner`
 - Worktree: `.worktrees/adr-0083`
 - Owner: codex
@@ -53,7 +53,7 @@
 ## Completion Notes
 
 - the repository carries pinned Dockerfiles for `ansible`, `python`, `infra`, and `security` check runners under `docker/check-runners/`
-- manifest-backed execution is available through [scripts/parallel_check.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0083/scripts/parallel_check.py) and the `make run-checks` wrapper on this branch
+- manifest-backed execution is available through [scripts/parallel_check.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/parallel_check.py) and the `make run-checks` wrapper on `main`
 - digest write-back remains delegated to the Windmill rebuild helper once the images are published from a credentialed worker
 
 ## Merge Criteria
