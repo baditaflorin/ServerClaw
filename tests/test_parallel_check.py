@@ -30,7 +30,7 @@ def write_fake_docker(path: Path) -> None:
                 "",
                 "args = sys.argv[1:]",
                 "command = args[args.index('sh') + 2]",
-                "raise SystemExit(subprocess.run(['sh', '-lc', command]).returncode)",
+                "raise SystemExit(subprocess.run(['sh', '-c', command]).returncode)",
             ]
         )
         + "\n",
@@ -61,7 +61,35 @@ def test_load_manifest_and_build_docker_command(tmp_path: Path) -> None:
     command = parallel_check.build_docker_command(check, tmp_path, "docker")
 
     assert command[:5] == ["docker", "run", "--rm", "--cpus=4", "-v"]
-    assert command[-3:] == ["sh", "-lc", "echo ok"]
+    assert command[-3:] == ["sh", "-c", "echo ok"]
+
+
+def test_build_docker_command_mounts_worktree_git_metadata(tmp_path: Path) -> None:
+    parallel_check = load_parallel_check_module()
+    repo_root = tmp_path / "repo"
+    workspace = repo_root / ".worktrees" / "adr-0083"
+    gitdir = repo_root / ".git" / "worktrees" / "adr-0083"
+    common_dir = repo_root / ".git"
+
+    workspace.mkdir(parents=True)
+    gitdir.mkdir(parents=True)
+    common_dir.mkdir(parents=True, exist_ok=True)
+    (workspace / ".git").write_text(f"gitdir: {gitdir}\n", encoding="utf-8")
+    (gitdir / "commondir").write_text("../..\n", encoding="utf-8")
+
+    check = parallel_check.CheckDefinition(
+        label="validate-schemas",
+        image="registry.lv3.org/check-runner/python:3.12.10",
+        command="python scripts/validate_repository_data_models.py --validate",
+        working_dir="/workspace",
+        timeout_seconds=30,
+    )
+
+    command = parallel_check.build_docker_command(check, workspace, "docker")
+
+    assert f"{workspace.resolve()}:/workspace" in command
+    assert f"{gitdir.resolve()}:{gitdir.resolve()}:ro" in command
+    assert f"{common_dir.resolve()}:{common_dir.resolve()}:ro" in command
 
 
 def test_run_checks_returns_non_zero_when_any_check_fails(tmp_path: Path) -> None:

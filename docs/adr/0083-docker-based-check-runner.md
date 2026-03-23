@@ -1,10 +1,10 @@
 # ADR 0083: Docker-Based Check Runner on Build Server
 
 - Status: Accepted
-- Implementation Status: Implemented
-- Implemented In Repo Version: 0.79.0
+- Implementation Status: Not Implemented
+- Implemented In Repo Version: not yet
 - Implemented In Platform Version: not yet
-- Implemented On: 2026-03-23
+- Implemented On: not yet
 - Date: 2026-03-22
 
 ## Context

@@ -116,18 +116,30 @@ def build_docker_command(
     workspace: Path,
     docker_binary: str,
 ) -> list[str]:
+    mount_args = ["-v", f"{workspace.resolve()}:/workspace"]
+    git_metadata_file = workspace / ".git"
+    if git_metadata_file.is_file():
+        gitdir_line = git_metadata_file.read_text(encoding="utf-8").strip()
+        if gitdir_line.startswith("gitdir:"):
+            gitdir = Path(gitdir_line.split(":", 1)[1].strip()).resolve()
+            common_dir = gitdir.joinpath("commondir")
+            extra_mounts = {gitdir}
+            if common_dir.exists():
+                extra_mounts.add((gitdir / common_dir.read_text(encoding="utf-8").strip()).resolve())
+            for path in sorted(extra_mounts):
+                mount_args.extend(["-v", f"{path}:{path}:ro"])
+
     return [
         docker_binary,
         "run",
         "--rm",
         "--cpus=4",
-        "-v",
-        f"{workspace.resolve()}:/workspace",
+        *mount_args,
         "-w",
         check.working_dir,
         check.image,
         "sh",
-        "-lc",
+        "-c",
         check.command,
     ]
 
