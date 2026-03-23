@@ -118,3 +118,18 @@ def test_resolve_status_page_monitor_names_for_all_uses_status_page_catalog(monk
     monitor_names = tool.resolve_status_page_monitor_names({"service_id": "all"}, {})
 
     assert monitor_names == ["Grafana Public", "Keycloak OIDC Discovery"]
+
+
+def test_build_alertmanager_silence_uses_service_matcher():
+    window = tool.build_maintenance_window(
+        service_id="grafana",
+        reason="deploy",
+        duration_minutes=10,
+        opened_by_class="operator",
+        opened_by_id="ops-linux",
+    )
+
+    silence = tool.build_alertmanager_silence(window)
+
+    assert silence["matchers"] == [{"name": "service", "value": "grafana", "isRegex": False}]
+    assert silence["comment"] == "Maintenance window: deploy"

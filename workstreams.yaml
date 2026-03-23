@@ -1516,10 +1516,10 @@ workstreams:
   - id: adr-0097-alerting-routing
     adr: "0097"
     title: Alerting routing and on-call runbook model
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0097-alerting-routing
-    worktree_path: ../proxmox_florin_server-alerting-routing
+    worktree_path: ../.worktrees/adr-0097-alerting-routing
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0097-alerting-routing.md
     depends_on:
       - adr-0011-monitoring

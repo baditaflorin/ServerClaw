@@ -3,6 +3,31 @@
   "schema_version": "1.0.0",
   "services": [
     {
+      "id": "alertmanager",
+      "name": "Alertmanager",
+      "description": "Severity-based alert routing, grouping, and silencing service for the monitoring stack.",
+      "category": "observability",
+      "lifecycle_status": "active",
+      "vm": "monitoring-lv3",
+      "vmid": 140,
+      "internal_url": "http://10.10.10.40:9093",
+      "exposure": "private-only",
+      "health_probe_id": "alertmanager",
+      "adr": "0097",
+      "runbook": "docs/runbooks/monitoring-stack.md",
+      "tags": [
+        "alerts",
+        "routing",
+        "monitoring"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://10.10.10.40:9093"
+        }
+      }
+    },
+    {
       "id": "api_gateway",
       "name": "Platform API Gateway",
       "description": "Unified authenticated gateway for operator and automation access to platform HTTP APIs.",
@@ -261,6 +286,34 @@
         "production": {
           "status": "active",
           "url": "http://100.118.189.95:8066"
+        }
+      }
+    },
+    {
+      "id": "ntfy",
+      "name": "ntfy",
+      "description": "Private push notification gateway used for critical platform paging.",
+      "category": "communication",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:2586",
+      "exposure": "private-only",
+      "health_probe_id": "ntfy",
+      "secret_catalog_ids": [
+        "ntfy_alertmanager_password"
+      ],
+      "adr": "0097",
+      "runbook": "docs/runbooks/configure-ntfy.md",
+      "tags": [
+        "notifications",
+        "paging",
+        "private"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://10.10.10.20:2586"
         }
       }
     },

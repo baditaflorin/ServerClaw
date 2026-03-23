@@ -100,14 +100,17 @@ platform_host:
         upstream_host: 10.10.10.20
         upstream_port: 9443
 platform_ports:
+  alertmanager_port: 9093
   monitoring_grafana_port: 3000
   monitoring_influxdb_port: 8086
   monitoring_loki_port: 3100
+  monitoring_blackbox_exporter_port: 9115
   monitoring_prometheus_port: 9090
   monitoring_tempo_http_port: 3200
   monitoring_otlp_grpc_port: 4317
   monitoring_otlp_http_port: 4318
   mail_platform_gateway_port: 8081
+  ntfy_port: 2586
   openbao_http_port: 8201
   openbao_proxy_port: 8200
   windmill_server_port: 8000
@@ -619,6 +622,19 @@ platform_service_topology:
       tempo: http://10.10.10.40:3200
       otlp_grpc: http://10.10.10.40:4317
       otlp_http: http://10.10.10.40:4318/v1/traces
+  alertmanager:
+    service_name: alertmanager
+    owning_vm: monitoring-lv3
+    private_ip: 10.10.10.40
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    service_id: alertmanager
+    ports:
+      internal: 9093
+    urls:
+      internal: http://10.10.10.40:9093
   proxmox_ui:
     service_name: proxmox-ui
     owning_vm: proxmox_florin
@@ -1006,6 +1022,19 @@ platform_service_topology:
     urls:
       internal: https://10.10.10.20:8200
       controller: https://100.118.189.95:8200
+  ntfy:
+    service_name: ntfy
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    service_id: ntfy
+    ports:
+      internal: 2586
+    urls:
+      internal: http://10.10.10.20:2586
   ntopng:
     service_name: ntopng
     owning_vm: proxmox_florin
@@ -1234,6 +1263,19 @@ public_edge_service_topology:
       tempo: http://10.10.10.40:3200
       otlp_grpc: http://10.10.10.40:4317
       otlp_http: http://10.10.10.40:4318/v1/traces
+  alertmanager:
+    service_name: alertmanager
+    owning_vm: monitoring-lv3
+    private_ip: 10.10.10.40
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    service_id: alertmanager
+    ports:
+      internal: 9093
+    urls:
+      internal: http://10.10.10.40:9093
   proxmox_ui:
     service_name: proxmox-ui
     owning_vm: proxmox_florin
@@ -1621,6 +1663,19 @@ public_edge_service_topology:
     urls:
       internal: https://10.10.10.20:8200
       controller: https://100.118.189.95:8200
+  ntfy:
+    service_name: ntfy
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    service_id: ntfy
+    ports:
+      internal: 2586
+    urls:
+      internal: http://10.10.10.20:2586
   ntopng:
     service_name: ntopng
     owning_vm: proxmox_florin
@@ -1763,14 +1818,17 @@ proxmox_management_allowed_tcp_ports:
   - 8010
   - 9444
 mail_platform_private_api_url: http://10.10.10.20:8081
+alertmanager_port: 9093
 monitoring_grafana_port: 3000
 monitoring_influxdb_port: 8086
 monitoring_loki_port: 3100
+monitoring_blackbox_exporter_port: 9115
 monitoring_prometheus_port: 9090
 monitoring_tempo_http_port: 3200
 monitoring_otlp_grpc_port: 4317
 monitoring_otlp_http_port: 4318
 mail_platform_gateway_port: 8081
+ntfy_port: 2586
 openbao_http_port: 8201
 openbao_proxy_port: 8200
 windmill_server_port: 8000

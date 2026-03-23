@@ -2,9 +2,9 @@
 
 - ADR: [ADR 0097](../adr/0097-alerting-routing-and-oncall-runbook-model.md)
 - Title: Alertmanager with severity-based routing to Ntfy and Mattermost, mandatory runbook links on all alert rules, and maintenance window silence integration
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0097-alerting-routing`
-- Worktree: `../proxmox_florin_server-alerting-routing`
+- Worktree: `../.worktrees/adr-0097-alerting-routing`
 - Owner: codex
 - Depends On: `adr-0011-monitoring`, `adr-0057-mattermost`, `adr-0061-glitchtip`, `adr-0064-health-probes`, `adr-0080-maintenance-window`, `adr-0091-drift-detection`, `adr-0096-slo-tracking`
 - Conflicts With: none
@@ -69,6 +69,11 @@
 - At least one end-to-end alert notification verified (amtool → Mattermost)
 - 5 runbooks written and deployed to docs site
 - Maintenance window silence integration tested
+
+## Current Status
+
+- repository implementation merged for `0.97.0`
+- live apply still pending; the platform host was not reachable with the documented SSH path during this turn
 
 ## Notes For The Next Assistant
 

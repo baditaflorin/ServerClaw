@@ -10,12 +10,23 @@
   until: monitoring_verify_grafana_health.status == 200
   changed_when: false
 
+- name: Verify blackbox exporter health endpoint responds
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ monitoring_blackbox_exporter_port }}/-/healthy"
+    method: GET
+    status_code: 200
+  register: monitoring_verify_blackbox_health
+  retries: 20
+  delay: 3
+  until: monitoring_verify_blackbox_health.status == 200
+  changed_when: false
+
 - name: Verify blackbox exporter metrics endpoint responds
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ monitoring_blackbox_exporter_port }}/metrics"
     method: GET
     status_code: 200
-  register: monitoring_verify_blackbox_exporter_health
+  register: monitoring_verify_blackbox_exporter_metrics
   changed_when: false
 
 - name: Verify Grafana datasource is provisioned

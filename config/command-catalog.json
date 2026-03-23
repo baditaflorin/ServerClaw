@@ -1277,6 +1277,40 @@
         ]
       }
     },
+    "converge-ntfy": {
+      "description": "Converge the private ntfy paging gateway and the repo-managed Alertmanager credential on docker-runtime-lv3.",
+      "workflow_id": "converge-ntfy",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-ntfy passes",
+        "make validate passes before the apply",
+        "The Alertmanager dependency and the repo-managed ntfy topic credential are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record ntfy health, container status, and the controller-local credential artifact path used by Alertmanager."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the ntfy runtime, compose converge, or health verification fails.",
+          "Stop if the converge would leave the paging topic reachable without the expected authenticated boundary."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good ntfy runtime state before retrying.",
+          "Do not hand-edit topic authentication or container configuration outside the repo-managed workflow."
+        ]
+      }
+    },
     "converge-portainer": {
       "description": "Converge the private Portainer runtime, host-side Tailscale proxy, and controller-local bootstrap auth for Docker runtime operations.",
       "workflow_id": "converge-portainer",

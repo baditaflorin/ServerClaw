@@ -20,14 +20,17 @@ GENERATED_HEADER = (
     "# inventory/host_vars/proxmox_florin.yml. Do not edit by hand.\n"
 )
 PORT_KEYS = (
+    "alertmanager_port",
     "monitoring_grafana_port",
     "monitoring_influxdb_port",
     "monitoring_loki_port",
+    "monitoring_blackbox_exporter_port",
     "monitoring_prometheus_port",
     "monitoring_tempo_http_port",
     "monitoring_otlp_grpc_port",
     "monitoring_otlp_http_port",
     "mail_platform_gateway_port",
+    "ntfy_port",
     "openbao_http_port",
     "openbao_proxy_port",
     "windmill_server_port",
@@ -210,7 +213,10 @@ def build_service_urls(
     if public_hostname:
         urls["public"] = f"https://{public_hostname}"
 
-    if service_id == "grafana":
+    if service_id == "alertmanager":
+        urls["internal"] = service_url("http", private_ip, ports["alertmanager_port"])
+        port_map["internal"] = ports["alertmanager_port"]
+    elif service_id == "grafana":
         urls["internal"] = service_url("http", private_ip, ports["monitoring_grafana_port"])
         urls["influxdb"] = service_url("http", private_ip, ports["monitoring_influxdb_port"])
         urls["loki_push"] = service_url(
@@ -270,6 +276,9 @@ def build_service_urls(
         urls["controller"] = service_url("http", tailscale_ipv4, ports["platform_context_host_proxy_port"])
         port_map["internal"] = ports["platform_context_internal_port"]
         port_map["controller"] = ports["platform_context_host_proxy_port"]
+    elif service_id == "ntfy":
+        urls["internal"] = service_url("http", private_ip, ports["ntfy_port"])
+        port_map["internal"] = ports["ntfy_port"]
     elif service_id == "ntopng":
         urls["internal"] = service_url("http", "127.0.0.1", ports["ntopng_http_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["ntopng_proxy_port"])

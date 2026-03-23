@@ -7,6 +7,13 @@ global:
 
 rule_files:
   - {{ monitoring_prometheus_rules_dir }}/*.yml
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+{% for target in monitoring_prometheus_alertmanager_targets %}
+            - {{ target }}
+{% endfor %}
 
 scrape_configs:
   - job_name: prometheus
@@ -46,3 +53,40 @@ scrape_configs:
         target_label: instance
       - target_label: __address__
         replacement: 127.0.0.1:{{ monitoring_blackbox_exporter_port }}
+{% for service_id, service in monitoring_health_probe_catalog.services | dictsort %}
+{% for probe_kind in ['liveness', 'readiness'] %}
+{% set probe = service[probe_kind] %}
+{% if probe.kind in ['http', 'tcp'] %}
+
+  - job_name: {{ service_id }}-{{ probe_kind }}
+    metrics_path: /probe
+    params:
+      module:
+{% if probe.kind == 'tcp' %}
+        - tcp_connect
+{% elif probe.validate_tls is defined and not probe.validate_tls %}
+        - http_2xx_insecure
+{% else %}
+        - http_2xx
+{% endif %}
+    static_configs:
+      - targets:
+{% if probe.kind == 'http' %}
+          - {{ probe.url }}
+{% else %}
+          - {{ probe.host }}:{{ probe.port }}
+{% endif %}
+        labels:
+          service: {{ service_id }}
+          probe_kind: {{ probe_kind }}
+          probe_id: {{ service_id }}-{{ probe_kind }}
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - target_label: __address__
+        replacement: 127.0.0.1:{{ monitoring_blackbox_exporter_port }}
+      - source_labels: [__param_target]
+        target_label: instance
+{% endif %}
+{% endfor %}
+{% endfor %}

@@ -31,8 +31,8 @@
     },
     "remote-validate": {
       "runner_label": "validate-schemas",
-      "command": "./scripts/validate_repo.sh generated-vars ansible-syntax role-argument-specs shell json health-probes data-models generated-docs generated-portals",
-      "local_fallback_command": "./scripts/validate_repo.sh generated-vars ansible-syntax role-argument-specs shell json health-probes data-models generated-docs generated-portals"
+      "command": "./scripts/validate_repo.sh generated-vars ansible-syntax role-argument-specs shell json health-probes alert-rules data-models generated-docs generated-portals",
+      "local_fallback_command": "./scripts/validate_repo.sh generated-vars ansible-syntax role-argument-specs shell json health-probes alert-rules data-models generated-docs generated-portals"
     },
     "pre-push-gate": {
       "skip_docker": true,

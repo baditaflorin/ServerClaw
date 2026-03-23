@@ -37,6 +37,7 @@ The workflow manages these live surfaces:
 - Tailscale-only operator entrypoint at `http://100.118.189.95:8066`
 - repo-managed team `lv3`
 - repo-managed channels `platform-alerts`, `workflow-events`, `change-approvals`, `agent-handoffs`, and `mail-ops`
+- repo-managed channels `platform-alerts-critical` and `platform-ops` for ADR 0097 alert routing
 - repo-managed incoming webhooks mirrored locally for the managed channels
 - Grafana contact point `lv3-mattermost-platform-alerts` on `monitoring-lv3`
 
@@ -49,6 +50,12 @@ After a successful converge, these controller-local files should exist:
 - `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mattermost/incoming-webhooks.json`
 
 Treat the entire `.local/mattermost/` subtree as operational secret material and keep it out of git.
+
+The webhook manifest now includes the repo-managed keys used by Alertmanager routing:
+
+- `alerts`
+- `alerts_critical`
+- `ops`
 
 ## Verification
 
@@ -66,3 +73,4 @@ Run these checks after converge:
 - This rollout intentionally uses a repo-managed local admin plus incoming webhook model first. Shared SSO through Keycloak remains a follow-on integration under ADR 0056 instead of blocking the private ChatOps surface entirely.
 - Chat channels are a collaboration surface, not the source of truth. Final decisions, live-apply evidence, and durable operational state still belong in ADRs, runbooks, receipts, and repo-managed automation.
 - The webhook manifest includes internal URLs for service-to-service routing and external URLs for operator access through the Proxmox host Tailscale proxy.
+- ADR 0097 uses the `alerts_critical` webhook for critical Alertmanager notifications and `ops` for informational operator events.

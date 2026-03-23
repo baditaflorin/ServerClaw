@@ -161,15 +161,6 @@
       ARGS="--config.file={{ monitoring_blackbox_exporter_config_file }} --web.listen-address=127.0.0.1:{{ monitoring_blackbox_exporter_port }}"
   notify: Restart Blackbox Exporter
 
-- name: Copy blackbox exporter configuration
-  ansible.builtin.copy:
-    src: "{{ monitoring_blackbox_exporter_source_file }}"
-    dest: "{{ monitoring_blackbox_exporter_config_file }}"
-    owner: root
-    group: prometheus
-    mode: "0644"
-  notify: Restart Blackbox Exporter
-
 - name: Copy Prometheus SLO recording rules
   ansible.builtin.copy:
     src: "{{ monitoring_prometheus_slo_rules_source_file }}"

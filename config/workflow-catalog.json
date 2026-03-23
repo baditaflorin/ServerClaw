@@ -1390,6 +1390,44 @@
         "curl -s -X POST -H \"Content-Type: application/json\" -d '{\"email\":\"ops@lv3.org\",\"password\":\"'\"$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/admin-password.txt)\"'\"}' http://100.118.189.95:8008/api/v1/auths/signin"
       ]
     },
+    "converge-ntfy": {
+      "description": "Deploy the private ntfy paging gateway on docker-runtime-lv3 and persist the repo-managed credential used by Alertmanager critical routing.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-ntfy",
+        "command": "make converge-ntfy"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "ntfy_alertmanager_password"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-ntfy"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-ntfy.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/ntfy.yml",
+        "roles/ntfy_runtime",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/ntfy/server.yml"
+      ],
+      "outputs": [
+        "A private ntfy runtime on docker-runtime-lv3 with the paging topic credential mirrored under .local/ntfy."
+      ],
+      "verification_commands": [
+        "make syntax-check-ntfy",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'curl -fsS http://127.0.0.1:2586/v1/health'"
+      ]
+    },
     "converge-rag-context": {
       "description": "Deploy the private platform context API with Qdrant on docker-runtime-lv3, publish it through the Proxmox host Tailscale proxy, and seed the initial retrieval corpus.",
       "lifecycle_status": "active",

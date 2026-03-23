@@ -82,6 +82,12 @@ monitoring_blackbox_exporter_env_file: /etc/default/prometheus-blackbox-exporter
 monitoring_blackbox_exporter_config_file: /etc/prometheus/blackbox.yml
 monitoring_blackbox_exporter_source_file: "{{ monitoring_repo_root }}/config/blackbox/blackbox.yml"
 monitoring_blackbox_exporter_port: 9115
+monitoring_prometheus_rules_dir: /etc/prometheus/rules
+monitoring_prometheus_rule_files:
+  - /etc/prometheus/rules/*.yml
+monitoring_prometheus_alertmanager_targets:
+  - 127.0.0.1:9093
+monitoring_health_probe_catalog_path: "{{ inventory_dir | dirname }}/config/health-probe-catalog.json"
 monitoring_tempo_version: 2.10.3
 monitoring_tempo_deb_url: https://github.com/grafana/tempo/releases/download/v2.10.3/tempo_2.10.3_linux_amd64.deb
 monitoring_tempo_deb_checksum: sha256:574b4c4b0a30d01eca01c4f37dcee8b5161b459b770623468bbb391a375ed841
