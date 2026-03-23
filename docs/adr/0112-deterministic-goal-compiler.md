@@ -1,10 +1,10 @@
 # ADR 0112: Deterministic Goal Compiler
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.117.1
+- Implemented In Platform Version: not applicable (repo-only)
+- Implemented On: 2026-03-24
 - Date: 2026-03-24
 
 ## Context
@@ -23,113 +23,85 @@ The goal compiler closes this gap. It is the CPU-only front door for all agent a
 
 ## Decision
 
-We will introduce a **deterministic goal compiler** as a standalone Python module at `platform/goal_compiler/` that transforms operator input into a typed `ExecutionIntent` struct.
+We will introduce a deterministic goal compiler as a Python module rooted at `platform/goal_compiler/` that transforms operator input into a typed `ExecutionIntent` struct.
 
 ### Intent schema
 
 ```python
-# platform/goal_compiler/schema.py
-
 @dataclass
 class ExecutionIntent:
-    id: str                         # UUID, stable across retries
-    created_at: str                 # ISO8601
-    raw_input: str                  # the original operator expression, verbatim
-    action: str                     # canonical verb: deploy | rotate | restart | query | ...
-    target: IntentTarget            # host, service, vmid, or group
-    scope: IntentScope              # allowed_hosts, allowed_services, allowed_vmids
-    preconditions: list[str]        # e.g. "service netbox is healthy", "no active incident"
-    risk_class: RiskClass           # LOW | MEDIUM | HIGH | CRITICAL
-    allowed_tools: list[str]        # tool IDs from the tool registry (ADR 0069)
-    rollback_path: str | None       # rollback workflow ID or None if not applicable
-    success_criteria: list[str]     # machine-checkable assertions
-    ttl_seconds: int                # intent expires after this many seconds if not executed
-    requires_approval: bool         # derived from risk_class and scope
-    compiled_by: str                # compiler version string
+    id: str
+    created_at: str
+    raw_input: str
+    action: str
+    target: IntentTarget
+    scope: IntentScope
+    preconditions: list[str]
+    risk_class: RiskClass
+    allowed_tools: list[str]
+    rollback_path: str | None
+    success_criteria: list[str]
+    ttl_seconds: int
+    requires_approval: bool
+    compiled_by: str
 ```
 
 ### Compilation pipeline
 
-The compiler runs in three stages, all CPU-only:
+The compiler runs in three CPU-only stages:
 
-1. **Normalisation**: strip whitespace, resolve aliases (e.g. `"the monitoring stack"` → `["grafana", "loki", "prometheus"]`), and lower-case the action verb. The alias table lives in `config/goal-compiler-aliases.yaml` and is version-controlled.
-
-2. **Rule matching**: match the normalised input against an ordered rule table in `config/goal-compiler-rules.yaml`. Each rule declares a pattern (substring or regex), the resulting action verb, the default risk class, the allowed tool set, and the rollback path. The first matching rule wins. If no rule matches, the compiler returns a `PARSE_ERROR` with the unmatched input for operator review.
-
-3. **Scope and precondition injection**: bind the resolved target to the current world-state (ADR 0113) to determine which hosts and services fall within the declared scope. Inject platform-level preconditions (maintenance window check via ADR 0080, active incident check via ADR 0114).
-
-### Rule table format
-
-```yaml
-# config/goal-compiler-rules.yaml
-- id: deploy-service
-  patterns:
-    - "deploy {service}"
-    - "converge {service}"
-    - "apply {service}"
-  action: deploy
-  default_risk_class: MEDIUM
-  allowed_tools: [ansible-playbook, windmill-trigger]
-  rollback_path: rollback-service-deployment
-  requires_approval_above: MEDIUM
-
-- id: rotate-secret
-  patterns:
-    - "rotate secret for {service}"
-    - "rotate {service} credentials"
-  action: rotate
-  default_risk_class: HIGH
-  allowed_tools: [openbao-rotate, windmill-trigger]
-  rollback_path: restore-secret-from-openbao-snapshot
-  requires_approval_above: LOW
-```
+1. **Normalisation**: collapse whitespace, lower-case the instruction, and apply the version-controlled alias table from `config/goal-compiler-aliases.yaml`.
+2. **Rule matching**: match the normalised instruction against ordered rules in `config/goal-compiler-rules.yaml`. The first matching template, regex, or substring rule wins.
+3. **Scope and precondition injection**: bind the matched target to repository catalogs and best-effort world-state data, then inject maintenance-window and active-incident preconditions.
 
 ### Integration with the platform CLI
 
-The platform CLI `lv3 run <instruction>` command:
+The platform CLI `lv3 run <instruction>` command now:
 
-1. Calls the goal compiler with the raw instruction.
-2. Displays the compiled `ExecutionIntent` as a YAML summary.
-3. If `requires_approval` is true, prompts the operator for explicit confirmation.
-4. If approved or auto-runnable, submits the intent to the workflow scheduler (ADR 0119), which enforces budget limits before handing off to Windmill.
-
-### Integration with the agent observation loop
-
-The agent observation loop (ADR 0071) must submit all planned actions through the goal compiler before execution. Raw language expressions must never reach Windmill or the platform API gateway directly. The goal compiler is the mandatory first hop for every programmatic and human-initiated action.
+1. Compiles the raw instruction into an `ExecutionIntent`.
+2. Displays the compiled intent as YAML before execution.
+3. Writes `intent.compiled` to the ledger for every run, including dry-runs.
+4. Prompts for approval when the compiled risk class requires it.
+5. Routes approved intents to the resolved Windmill workflow path.
 
 ### Error handling
 
-Compilation errors are not silent. Every `PARSE_ERROR` or `SCOPE_ERROR` is written to the mutation ledger (ADR 0115) with the raw input, the failure reason, and the compiler version. This makes mis-compilations auditable and improvable.
+Compilation errors are explicit. `PARSE_ERROR` paths return a clean CLI error message and write a rejection event with the raw input, reason, and compiler metadata to the ledger.
 
 ## Consequences
 
 **Positive**
 
-- Every action is reviewable before it executes: the compiled intent is a diff-able YAML document.
-- Risk classification and approval gating happen at compile time, not inside individual playbooks.
-- The rule table is the single place to update intent-to-action mappings; no playbook changes needed for scope adjustments.
-- Compilation errors are auditable: patterns that fail to match accumulate in the ledger and drive rule improvements.
-- Rollback paths are declared upfront; the workflow scheduler (ADR 0119) can verify rollback workflows exist before starting execution.
+- Every action is reviewable before execution as a diff-able YAML intent document.
+- Risk classification and approval gating happen at compile time instead of being hidden in playbooks.
+- The rule table is the single place to maintain natural-language to action mappings.
+- Parse failures become auditable ledger events instead of disappearing into shell history.
 
 **Negative / Trade-offs**
 
-- Novel or ad hoc instructions that match no rule will be rejected until a rule is added; this is intentional but requires ongoing rule maintenance.
-- The alias table and rule table must be updated as the platform grows; stale aliases produce silent mis-compilations.
-- The compiler introduces latency (sub-second, but non-zero) into every interactive `lv3 run` invocation.
+- Novel instructions are rejected until a matching rule exists.
+- The alias and rule tables now require ongoing maintenance as the platform surface grows.
+- The compiler adds a small amount of latency to every `lv3 run` invocation.
 
 ## Boundaries
 
-- The goal compiler is a CPU-only module. It does not call any LLM at runtime. Compilation is deterministic for identical inputs and rule tables.
-- The compiler does not execute anything. Execution is delegated to the workflow scheduler (ADR 0119).
-- The compiler does not validate that the target actually exists in the live platform; that is the responsibility of the world-state materializer (ADR 0113) and the dry-run diff engine (ADR 0120).
+- The goal compiler is CPU-only and deterministic for identical inputs and rule tables.
+- It does not execute mutations directly; it compiles intent and resolves the workflow route.
+- World-state binding is best-effort until ADR 0113 is implemented, so host and VM scope can fall back to repo-grounded defaults.
+
+## Implementation Notes
+
+- The compiler lives under `platform/goal_compiler/` and is loaded by the CLI through a repo-local module loader so the repository can keep the `platform/...` ADR path without colliding with Python's standard-library `platform` module.
+- Intent lifecycle events are written to the current `platform/ledger/writer.py`, which now supports a repo-local fallback sink under `.local/state/ledger/ledger.events.jsonl` when no ledger DSN is configured.
+- `platform/world_state/client.py` falls back to repo-local snapshots for scope binding when the DB-backed world-state materializer is not configured.
 
 ## Related ADRs
 
 - ADR 0048: Command catalog (source of canonical action verb definitions)
 - ADR 0069: Agent tool registry (source of allowed tool IDs)
 - ADR 0071: Agent observation loop (all agent actions pass through the compiler)
+- ADR 0080: Maintenance windows (compiler injects maintenance checks)
 - ADR 0090: Platform CLI (user-facing entry point for compiled intents)
-- ADR 0113: World-state materializer (provides scope-binding context)
-- ADR 0115: Event-sourced mutation ledger (audit log for compilation errors and compiled intents)
-- ADR 0116: Change risk scoring (provides risk_class override when score exceeds rule defaults)
-- ADR 0119: Budgeted workflow scheduler (receives compiled intents for execution)
+- ADR 0113: World-state materializer (future authoritative scope-binding context)
+- ADR 0115: Event-sourced mutation ledger (target lifecycle model for intent events)
+- ADR 0119: Budgeted workflow scheduler (future post-compiler execution stage)

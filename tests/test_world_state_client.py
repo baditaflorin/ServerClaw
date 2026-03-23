@@ -90,6 +90,21 @@ def test_missing_surface_raises(client_db: WorldStateClient) -> None:
         client_db.get("proxmox_vms")
 
 
+def test_repo_snapshot_mode_reads_local_surface(tmp_path: Path) -> None:
+    snapshot_dir = tmp_path / ".local" / "state" / "world-state"
+    snapshot_dir.mkdir(parents=True)
+    (snapshot_dir / "proxmox_vms.json").write_text(
+        json.dumps({"items": [{"service_id": "netbox", "vmid": 130}], "stale": False}) + "\n",
+        encoding="utf-8",
+    )
+
+    client = WorldStateClient(tmp_path)
+
+    payload = client.get("proxmox_vms")
+
+    assert payload["items"][0]["vmid"] == 130
+
+
 def test_platform_package_preserves_stdlib_api(monkeypatch: pytest.MonkeyPatch) -> None:
     repo_root = Path(__file__).resolve().parents[1]
     monkeypatch.syspath_prepend(str(repo_root))

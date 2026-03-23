@@ -1,0 +1,20 @@
+schema_version: 1.0.0
+phrase_aliases:
+  the monitoring stack: monitoring stack
+  monitoring stack: monitoring stack
+  ops portal: ops_portal
+  public edge: public_edge
+service_aliases:
+  grafana ui: grafana
+  windmill ui: windmill
+  netbox ui: netbox
+  ops: ops_portal
+groups:
+  monitoring stack:
+    services:
+      - grafana
+      - loki
+      - prometheus
+    workflow_id: converge-monitoring
+    hosts:
+      - monitoring-lv3

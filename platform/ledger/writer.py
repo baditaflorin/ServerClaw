@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import datetime as dt
+import json
 import os
 import threading
 import uuid
+from pathlib import Path
 from typing import Any, Callable
 
 from ._common import (
@@ -41,7 +43,6 @@ def _publish_async(
         try:
             publisher(subject, payload)
         except Exception:
-            # Ledger writes must succeed even when downstream fan-out is unavailable.
             return
 
     thread = threading.Thread(target=runner, name="ledger-event-publisher", daemon=True)
@@ -92,6 +93,9 @@ def mutation_audit_metadata(event: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+ALLOWED_EVENT_TYPES = frozenset(load_event_type_registry())
+
+
 class LedgerWriter:
     def __init__(
         self,
@@ -102,13 +106,31 @@ class LedgerWriter:
         event_types_path=None,
         nats_publisher: Callable[[str, dict[str, Any]], None] | None = _default_nats_publisher,
         publish_subject: str = "ledger.event_written",
+        file_path: str | os.PathLike[str] | None = None,
     ) -> None:
         self._dsn = dsn
         self._connection = connection
         self._connect = connect
-        self._allowed_event_types = set(load_event_type_registry(event_types_path) if event_types_path else load_event_type_registry())
+        self._allowed_event_types = set(load_event_type_registry(event_types_path) if event_types_path else ALLOWED_EVENT_TYPES)
         self._nats_publisher = nats_publisher
         self._publish_subject = publish_subject
+        self._file_path = self._resolve_file_path(file_path)
+
+    @staticmethod
+    def _resolve_file_path(file_path: str | os.PathLike[str] | None) -> Path | None:
+        if file_path is not None:
+            return Path(file_path).expanduser()
+        candidate = os.environ.get("LV3_LEDGER_FILE", "").strip()
+        if not candidate or candidate.lower() == "off":
+            return None
+        return Path(candidate).expanduser()
+
+    def _write_file_record(self, record: dict[str, Any]) -> dict[str, Any]:
+        assert self._file_path is not None
+        self._file_path.parent.mkdir(parents=True, exist_ok=True)
+        with self._file_path.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(record, sort_keys=True) + "\n")
+        return record
 
     def write(
         self,
@@ -142,6 +164,27 @@ class LedgerWriter:
         resolved_event_id = event_id or str(uuid.uuid4())
         resolved_metadata = dict(metadata or {})
         resolved_occurred_at = normalize_timestamp(occurred_at)
+        resolved_dsn = (self._dsn or os.environ.get("LV3_LEDGER_DSN", "")).strip()
+        if self._connection is None and not resolved_dsn and self._file_path is not None:
+            record = {
+                "id": None,
+                "event_id": resolved_event_id,
+                "event_type": event_type,
+                "occurred_at": resolved_occurred_at or dt.datetime.now(dt.timezone.utc).isoformat(),
+                "actor": actor,
+                "actor_intent_id": actor_intent_id,
+                "tool_id": tool_id,
+                "target_kind": target_kind,
+                "target_id": target_id,
+                "before_state": before_state,
+                "after_state": after_state,
+                "receipt": receipt,
+                "metadata": resolved_metadata,
+            }
+            self._write_file_record(record)
+            _publish_async(self._nats_publisher, self._publish_subject, record)
+            return record
+
         connection, owned_connection = resolve_connection(
             dsn=self._dsn,
             connection=self._connection,

@@ -22,15 +22,18 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, Iterable
 
-from dependency_graph import dependency_summary, load_dependency_graph
 import yaml
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+from dependency_graph import dependency_summary, load_dependency_graph
+from repo_package_loader import load_repo_package
+
+
+CODE_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = CODE_ROOT
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from scripts.risk_scorer import ExecutionIntent, assemble_context, compile_workflow_intent, score_intent
-
 CLI_VERSION = "0.1.0"
 DEFAULT_STATUS_TIMEOUT_SECONDS = 3.0
 DEFAULT_LOG_LINES = 20
@@ -43,6 +46,12 @@ SERVICE_ALIASES = {
     "changelog": "changelog_portal",
     "proxmox": "proxmox_ui",
 }
+
+GOAL_COMPILER_MODULE = load_repo_package("lv3_goal_compiler", CODE_ROOT / "platform" / "goal_compiler")
+LEDGER_MODULE = load_repo_package("lv3_platform_ledger", CODE_ROOT / "platform" / "ledger")
+GoalCompilationError = GOAL_COMPILER_MODULE.GoalCompilationError
+GoalCompiler = GOAL_COMPILER_MODULE.GoalCompiler
+LedgerWriter = LEDGER_MODULE.LedgerWriter
 
 
 @dataclass(frozen=True)
@@ -570,6 +579,14 @@ def maybe_write_compiled_intent_event(
     )
 
 
+def print_goal_compiled_intent(result: Any) -> None:
+    print("Compiled Intent:")
+    print(yaml.safe_dump(result.intent.as_dict(), sort_keys=False).rstrip())
+    print(f"Matched Rule: {result.matched_rule_id}")
+    if result.dispatch_workflow_id:
+        print(f"Dispatch Workflow: {result.dispatch_workflow_id}")
+
+
 def enforce_risk_gate(intent: ExecutionIntent, *, approve_risk: bool, risk_override: bool) -> int:
     if intent.risk_score.approval_gate == "BLOCK" and not risk_override:
         print(
@@ -588,15 +605,13 @@ def enforce_risk_gate(intent: ExecutionIntent, *, approve_risk: bool, risk_overr
     return 0
 
 
-def run_windmill_workflow(
+def run_windmill_request(
     workflow_name: str,
-    args: list[str],
+    payload: dict[str, Any],
     *,
     dry_run: bool,
     explain: bool,
     no_color: bool,
-    approve_risk: bool = False,
-    risk_override: bool = False,
 ) -> int:
     service_map = load_service_map()
     base_url = windmill_url(service_map)
@@ -604,10 +619,7 @@ def run_windmill_workflow(
     script_path = workflow_name if "/" in workflow_name else f"f/lv3/{workflow_name}"
     encoded_path = urllib.parse.quote(script_path, safe="")
     url = f"{base_url}/api/w/lv3/jobs/run_wait_result/p/{encoded_path}"
-    intent = build_execution_intent(workflow_name, args)
-    maybe_write_compiled_intent_event(intent)
-    payload = json.dumps(intent.arguments).encode("utf-8")
-    print_compiled_intent(intent)
+    encoded_payload = json.dumps(payload).encode("utf-8")
     plan = CommandPlan(
         label=f"run {workflow_name}",
         route="controller -> Windmill API",
@@ -621,19 +633,16 @@ def run_windmill_workflow(
             "Content-Type: application/json",
             url,
             "--data-binary",
-            payload.decode("utf-8"),
+            encoded_payload.decode("utf-8"),
         ],
     )
     print_plan(plan, no_color=no_color)
     if dry_run or explain:
         return 0
-    blocked = enforce_risk_gate(intent, approve_risk=approve_risk, risk_override=risk_override)
-    if blocked:
-        return blocked
 
     request = urllib.request.Request(
         url,
-        data=payload,
+        data=encoded_payload,
         headers={
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json",
@@ -650,6 +659,136 @@ def run_windmill_workflow(
     if body.strip():
         print(body)
     return 0
+
+
+def run_windmill_workflow(
+    workflow_name: str,
+    args: list[str],
+    *,
+    dry_run: bool,
+    explain: bool,
+    no_color: bool,
+    approve_risk: bool = False,
+    risk_override: bool = False,
+) -> int:
+    intent = build_execution_intent(workflow_name, args)
+    maybe_write_compiled_intent_event(intent)
+    print_compiled_intent(intent)
+    if not (dry_run or explain):
+        blocked = enforce_risk_gate(intent, approve_risk=approve_risk, risk_override=risk_override)
+        if blocked:
+            return blocked
+    return run_windmill_request(
+        workflow_name,
+        intent.arguments,
+        dry_run=dry_run,
+        explain=explain,
+        no_color=no_color,
+    )
+
+
+def prompt_for_intent_approval() -> bool:
+    response = input("Approval required. Execute this intent? [y/N]: ").strip().lower()
+    return response in {"y", "yes"}
+
+
+def run_compiled_instruction(
+    instruction: str,
+    args: list[str],
+    *,
+    dry_run: bool,
+    explain: bool,
+    no_color: bool,
+) -> int:
+    compiler = GoalCompiler(REPO_ROOT)
+    ledger = LedgerWriter(
+        file_path=REPO_ROOT / ".local" / "state" / "ledger" / "ledger.events.jsonl",
+        nats_publisher=None,
+    )
+    parsed_args = parse_kv_pairs(args)
+    try:
+        result = compiler.compile(instruction, dispatch_args=parsed_args)
+    except GoalCompilationError as exc:
+        ledger.write(
+            event_type="intent.rejected",
+            actor="operator:lv3-cli",
+            target_kind="instruction",
+            target_id=instruction,
+            metadata={
+                "error_code": exc.code,
+                "error_message": exc.message,
+                "raw_input": exc.raw_input,
+                "details": exc.details,
+            },
+        )
+        print(str(exc), file=sys.stderr)
+        return 2
+
+    print_goal_compiled_intent(result)
+    ledger.write(
+        event_type="intent.compiled",
+        actor="operator:lv3-cli",
+        target_kind=result.intent.target.kind,
+        target_id=result.intent.target.name,
+        actor_intent_id=result.intent.id,
+        after_state=result.intent.as_dict(),
+        metadata={
+            "matched_rule_id": result.matched_rule_id,
+            "normalized_input": result.normalized_input,
+            "dispatch_workflow_id": result.dispatch_workflow_id,
+        },
+    )
+
+    if dry_run or explain:
+        if result.dispatch_workflow_id:
+            return run_windmill_request(
+                result.dispatch_workflow_id,
+                result.dispatch_payload,
+                dry_run=True,
+                explain=explain,
+                no_color=no_color,
+            )
+        return 0
+
+    if result.intent.requires_approval:
+        if not prompt_for_intent_approval():
+            ledger.write(
+                event_type="intent.rejected",
+                actor="operator:lv3-cli",
+                target_kind=result.intent.target.kind,
+                target_id=result.intent.target.name,
+                actor_intent_id=result.intent.id,
+                metadata={"reason": "approval_denied", "dispatch_workflow_id": result.dispatch_workflow_id},
+            )
+            print("Execution cancelled.", file=sys.stderr)
+            return 1
+        ledger.write(
+            event_type="intent.approved",
+            actor="operator:lv3-cli",
+            target_kind=result.intent.target.kind,
+            target_id=result.intent.target.name,
+            actor_intent_id=result.intent.id,
+            after_state=result.intent.as_dict(),
+            metadata={"dispatch_workflow_id": result.dispatch_workflow_id},
+        )
+
+    if result.dispatch_workflow_id is None:
+        print("No workflow route is available for this intent.", file=sys.stderr)
+        return 1
+
+    return run_windmill_request(
+        result.dispatch_workflow_id,
+        result.dispatch_payload,
+        dry_run=False,
+        explain=False,
+        no_color=no_color,
+    )
+
+
+def should_run_direct_workflow(instruction: str) -> bool:
+    normalized = instruction.strip()
+    workflows = load_workflow_catalog()
+    return normalized in workflows or "/" in normalized
 
 
 def open_service_url(service_id: str, environment: str, *, dry_run: bool, explain: bool, no_color: bool) -> int:
@@ -1206,8 +1345,8 @@ def build_parser() -> argparse.ArgumentParser:
     promote.add_argument("--dry-run", action="store_true")
     promote.add_argument("--explain", action="store_true")
 
-    run = subparsers.add_parser("run", help="Trigger one Windmill workflow.")
-    run.add_argument("workflow")
+    run = subparsers.add_parser("run", help="Compile and trigger one platform instruction.")
+    run.add_argument("instruction", nargs="+")
     run.add_argument("--args", nargs="*", default=[])
     run.add_argument("--approve-risk", action="store_true", help="Acknowledge a HIGH risk score and proceed.")
     run.add_argument("--risk-override", action="store_true", help="Override a BLOCK gate for a CRITICAL risk score.")
@@ -1358,14 +1497,23 @@ def main(argv: list[str] | None = None) -> int:
             no_color=no_color,
         )
     if args.command == "run":
-        return run_windmill_workflow(
-            args.workflow,
+        instruction = " ".join(args.instruction)
+        if should_run_direct_workflow(instruction):
+            return run_windmill_workflow(
+                instruction,
+                args.args,
+                dry_run=args.dry_run,
+                explain=args.explain,
+                no_color=no_color,
+                approve_risk=args.approve_risk,
+                risk_override=args.risk_override,
+            )
+        return run_compiled_instruction(
+            instruction,
             args.args,
             dry_run=args.dry_run,
             explain=args.explain,
             no_color=no_color,
-            approve_risk=args.approve_risk,
-            risk_override=args.risk_override,
         )
     if args.command == "logs":
         return logs_command(args.service, tail=args.tail, since=args.since, dry_run=args.dry_run, explain=args.explain, no_color=no_color)

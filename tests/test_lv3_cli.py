@@ -50,6 +50,8 @@ all:
           ansible_host: 10.10.10.20
         nginx-lv3:
           ansible_host: 10.10.10.10
+        netbox-lv3:
+          ansible_host: 10.10.10.30
 """.strip()
         + "\n"
     )
@@ -83,6 +85,15 @@ all:
                         "public_url": "https://ops.lv3.org",
                         "environments": {"production": {"status": "planned", "url": "https://ops.lv3.org"}},
                     },
+                    {
+                        "id": "netbox",
+                        "name": "NetBox",
+                        "vm": "netbox-lv3",
+                        "lifecycle_status": "active",
+                        "internal_url": "http://127.0.0.1:18082",
+                        "health_probe_id": "netbox",
+                        "environments": {"production": {"status": "active", "url": "http://127.0.0.1:18082"}},
+                    },
                 ]
             },
             indent=2,
@@ -95,6 +106,7 @@ all:
                 "services": {
                     "grafana": {"readiness": {"validate_tls": True}},
                     "windmill": {"readiness": {"validate_tls": True}},
+                    "netbox": {"readiness": {"validate_tls": True}},
                 }
             },
             indent=2,
@@ -125,6 +137,13 @@ all:
                         "service": "ops_portal",
                         "name": "Ops Portal",
                         "vm": "nginx-lv3",
+                        "tier": 1,
+                    },
+                    {
+                        "id": "netbox",
+                        "service": "netbox",
+                        "name": "NetBox",
+                        "vm": "netbox-lv3",
                         "tier": 1,
                     },
                 ],
@@ -159,7 +178,9 @@ all:
                     "windmill_healthcheck": {"description": "Healthcheck"},
                     "operator-onboard": {"description": "Operator onboarding", "live_impact": "guest_live"},
                     "operator-offboard": {"description": "Operator offboarding", "live_impact": "guest_live"},
+                    "converge-netbox": {"description": "NetBox converge", "live_impact": "guest_live"},
                     "disaster-recovery-runbook": {"description": "DR runbook"},
+                    "validate": {"description": "Validate repository", "live_impact": "repo_only"},
                 }
             },
             indent=2,
@@ -261,8 +282,58 @@ def test_run_dry_run_redacts_token(
     exit_code = lv3_cli.main(["run", "windmill_healthcheck", "--args", "probe=manual", "--dry-run"])
     captured = capsys.readouterr()
     assert exit_code == 0
+    assert "Compiled Intent:" in captured.out
     assert "<redacted>" in captured.out
     assert "secret-token" not in captured.out
+
+
+def test_run_dry_run_compiles_natural_language_instruction(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    exit_code = lv3_cli.main(["run", "deploy", "netbox", "--dry-run"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "Compiled Intent:" in captured.out
+    assert "action: deploy" in captured.out
+    assert "Dispatch Workflow: converge-netbox" in captured.out
+    ledger_path = minimal_repo / ".local" / "state" / "ledger" / "ledger.events.jsonl"
+    events = [json.loads(line) for line in ledger_path.read_text().splitlines()]
+    assert events[-1]["event_type"] == "intent.compiled"
+
+
+def test_run_parse_error_is_clean(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    exit_code = lv3_cli.main(["run", "dploy", "netbox"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 2
+    assert "PARSE_ERROR" in captured.err
+    ledger_path = minimal_repo / ".local" / "state" / "ledger" / "ledger.events.jsonl"
+    events = [json.loads(line) for line in ledger_path.read_text().splitlines()]
+    assert events[-1]["event_type"] == "intent.rejected"
+
+
+def test_run_requires_approval_and_writes_lifecycle_events(
+    minimal_repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    calls: list[tuple[str, dict[str, str]]] = []
+
+    monkeypatch.setattr(lv3_cli, "prompt_for_intent_approval", lambda: True)
+    monkeypatch.setattr(
+        lv3_cli,
+        "run_windmill_request",
+        lambda workflow_name, payload, **_kwargs: calls.append((workflow_name, payload)) or 0,
+    )
+
+    exit_code = lv3_cli.main(["run", "deploy", "netbox"])
+
+    assert exit_code == 0
+    assert calls == [("converge-netbox", {"service": "netbox", "target": "netbox"})]
+    ledger_path = minimal_repo / ".local" / "state" / "ledger" / "ledger.events.jsonl"
+    event_types = [json.loads(line)["event_type"] for line in ledger_path.read_text().splitlines()]
+    assert event_types == ["intent.compiled", "intent.approved"]
 
 
 def test_vm_list_uses_inventory(

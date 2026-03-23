@@ -238,6 +238,25 @@ def test_writer_rejects_duplicate_event_id() -> None:
         )
 
 
+def test_writer_falls_back_to_file_sink(tmp_path: Path) -> None:
+    sink_path = tmp_path / "ledger.events.jsonl"
+    writer = LedgerWriter(file_path=sink_path, nats_publisher=None)
+
+    record = writer.write(
+        event_type="intent.compiled",
+        actor="operator:lv3-cli",
+        target_kind="service",
+        target_id="netbox",
+        actor_intent_id="intent:test",
+        metadata={"matched_rule_id": "deploy-service"},
+    )
+
+    assert record["id"] is None
+    assert sink_path.exists()
+    persisted = [json.loads(line) for line in sink_path.read_text(encoding="utf-8").splitlines()]
+    assert persisted == [record]
+
+
 def test_writer_maps_legacy_mutation_audit_events() -> None:
     connection = FakeConnection()
     writer = LedgerWriter(connection=connection, nats_publisher=None)
