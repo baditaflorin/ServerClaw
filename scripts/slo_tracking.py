@@ -320,8 +320,20 @@ def write_yaml(path: Path, payload: Any) -> None:
         import yaml
     except ModuleNotFoundError as exc:  # pragma: no cover - direct runtime guard
         raise RuntimeError(PYYAML_INSTALL_HINT) from exc
+
+    class IndentedSafeDumper(yaml.SafeDumper):
+        def increase_indent(self, flow: bool = False, indentless: bool = False) -> Any:  # noqa: ANN401
+            return super().increase_indent(flow, False)
+
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(yaml.safe_dump(payload, sort_keys=False))
+    path.write_text(
+        yaml.dump(
+            payload,
+            Dumper=IndentedSafeDumper,
+            sort_keys=False,
+            default_flow_style=False,
+        )
+    )
 
 
 def print_slo_status(prometheus_url: str | None) -> int:
