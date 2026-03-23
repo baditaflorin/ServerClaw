@@ -1,10 +1,10 @@
 # ADR 0088: Ephemeral Infrastructure Fixtures
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.95.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-23
 - Date: 2026-03-22
 
 ## Context
@@ -102,6 +102,12 @@ Fixture VMIDs are drawn from the range `9100–9199`. A small Python helper (`sc
 - Each fixture consumes ~10–20 GB disk (thin-provisioned clone) during its lifetime; 10 simultaneous fixtures ≈ 200 GB; acceptable on a multi-TB pool
 - `tofu apply` + VM boot + Ansible run ≈ 4–6 minutes per fixture; not suitable for sub-minute unit test loops
 - OpenTofu and Packer pipeline (ADRs 0084, 0085) must be operational before fixtures can run
+
+## Implementation Notes
+
+- Repository implementation landed in `0.95.0` with the shared [proxmox-fixture module](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tofu/modules/proxmox-fixture/main.tf), fixture definitions under [tests/fixtures/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests/fixtures), the lifecycle helpers [scripts/fixture_manager.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/fixture_manager.py) and [scripts/vmid_allocator.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/vmid_allocator.py), and the Windmill expiry reaper at [config/windmill/scripts/fixture-expiry-reaper.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/fixture-expiry-reaper.py).
+- The repository now exposes `make fixture-up`, `make fixture-down`, and `make fixture-list`, plus the delegated Molecule driver under [molecule/drivers/proxmox-fixture/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/molecule/drivers/proxmox-fixture/).
+- Live enablement still depends on ADR 0072's staging bridge being present on the host before fixture VMs can be booted on `vmbr20`, so the platform-version field remains unset.
 
 ## Alternatives Considered
 

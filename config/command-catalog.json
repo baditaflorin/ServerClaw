@@ -171,6 +171,47 @@
         ]
       }
     },
+    "fixture-expiry-reaper": {
+      "description": "Destroy expired ADR 0088 ephemeral fixtures and emit one reaper-run receipt for the sweep.",
+      "workflow_id": "fixture-expiry-reaper",
+      "scope": "proxmox_host",
+      "approval_policy": "standard_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used for fixture SSH verification and teardown."
+        },
+        {
+          "name": "proxmox_api_token_payload",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side Proxmox API token payload used by the fixture manager to destroy expired VMs."
+        }
+      ],
+      "expected_preconditions": [
+        "make validate passes before enabling or manually triggering the reaper",
+        "The staging fixture bridge and template catalog are already working from main",
+        "Operators confirm the receipt retention path under .local/fixtures/archive before cleanup starts"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the expired receipt ids, any skipped active fixtures, and the generated reaper-run summary receipt."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if fixture receipt parsing fails, the Proxmox destroy path fails, or a fixture cannot be torn down cleanly.",
+          "Stop if the reaper would act on a fixture whose receipt was manually extended but not yet expired."
+        ],
+        "rollback_guidance": [
+          "Disable the schedule and inspect the affected receipt plus archived runtime state before retrying cleanup.",
+          "Treat partially-destroyed fixtures as infrastructure drift and repair them through scripts/fixture_manager.py before re-enabling automation."
+        ]
+      }
+    },
     "adr-0077-compose-runtime-secrets-live-apply": {
       "description": "Converge the ADR 0077 runtime-secret injection path across the docker-runtime-lv3 platform applications.",
       "workflow_id": "adr-0077-compose-runtime-secrets-live-apply",

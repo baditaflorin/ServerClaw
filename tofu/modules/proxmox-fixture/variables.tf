@@ -1,3 +1,7 @@
+variable "fixture_id" {
+  type = string
+}
+
 variable "name" {
   type = string
 }
@@ -11,6 +15,14 @@ variable "node_name" {
 }
 
 variable "vm_id" {
+  type = number
+}
+
+variable "vmid_range" {
+  type = list(number)
+}
+
+variable "lifetime_minutes" {
   type = number
 }
 
@@ -32,16 +44,6 @@ variable "cloud_init_datastore_id" {
 
 variable "cores" {
   type = number
-}
-
-variable "sockets" {
-  type    = number
-  default = 1
-}
-
-variable "cpu_type" {
-  type    = string
-  default = "host"
 }
 
 variable "memory_mb" {
@@ -84,64 +86,10 @@ variable "tags" {
   type = list(string)
 }
 
-variable "startup_order" {
-  type = number
-  default = null
-}
-
-variable "on_boot" {
-  type    = bool
-  default = true
-}
-
-variable "started" {
-  type    = bool
-  default = true
-}
-
-variable "protection" {
-  type    = bool
-  default = false
-}
-
-variable "reboot_after_update" {
-  type    = bool
-  default = true
-}
-
-variable "scsi_hardware" {
-  type    = string
-  default = "virtio-scsi-single"
-}
-
 variable "ci_user" {
   type = string
 }
 
 variable "ssh_authorized_keys" {
   type = list(string)
-}
-
-variable "user_data_file_id" {
-  type    = string
-  default = null
-}
-
-variable "network_firewall" {
-  type    = bool
-  default = true
-}
-
-variable "prevent_destroy" {
-  type    = bool
-  default = true
-}
-
-variable "extra_disks" {
-  type = list(object({
-    interface    = string
-    datastore_id = string
-    size_gb      = number
-  }))
-  default = []
 }

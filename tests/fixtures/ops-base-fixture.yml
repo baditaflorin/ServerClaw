@@ -1,0 +1,25 @@
+{
+  "fixture_id": "ops-base",
+  "template": "lv3-ops-base",
+  "vmid_range": [9100, 9199],
+  "network": {
+    "bridge": "vmbr20",
+    "ip_cidr": "10.20.10.120/24",
+    "gateway": "10.20.10.1"
+  },
+  "resources": {
+    "cores": 2,
+    "memory_mb": 2048,
+    "disk_gb": 24
+  },
+  "lifetime_minutes": 60,
+  "extend_minutes": 0,
+  "tags": ["ephemeral", "fixture", "ops"],
+  "roles_under_test": ["lv3.platform.linux_access"],
+  "verify": [
+    {
+      "command": "id ops >/dev/null",
+      "timeout_seconds": 30
+    }
+  ]
+}

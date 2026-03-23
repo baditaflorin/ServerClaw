@@ -343,6 +343,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Docker Check Runners](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/docker-check-runners.md)
 - [Drift Detection](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/drift-detection.md)
 - [Environment Promotion Pipeline](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/environment-promotion-pipeline.md)
+- [Ephemeral Fixtures](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/ephemeral-fixtures.md)
 - [Generate Status Documents](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/generate-status-documents.md)
 - [Harden Access Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/harden-access.md)
 - [Health Probe Contracts Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/health-probe-contracts.md)
@@ -557,7 +558,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.94.0` |
+| Repository version | `0.95.0` |
 | Platform version | `0.40.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -656,6 +657,7 @@ This repository is intentionally opinionated:
 | `0085` | Declarative VM provisioning with OpenTofu | `merged` | [adr-0085-opentofu-vm-lifecycle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0085-opentofu-vm-lifecycle.md) |
 | `0086` | Ansible collection packaging | `merged` | [adr-0086-ansible-collections.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0086-ansible-collections.md) |
 | `0087` | Repository validation gate | `merged` | [adr-0087-validation-gate.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0087-validation-gate.md) |
+| `0088` | Ephemeral infrastructure fixtures | `merged` | [adr-0088-ephemeral-fixtures.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0088-ephemeral-fixtures.md) |
 | `0089` | Build artifact cache and layer registry | `merged` | [adr-0089-build-cache.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0089-build-cache.md) |
 | `0090` | Unified platform CLI | `merged` | [adr-0090-platform-cli.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0090-platform-cli.md) |
 | `0091` | Continuous drift detection and reconciliation | `merged` | [adr-0091-drift-detection.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0091-drift-detection.md) |

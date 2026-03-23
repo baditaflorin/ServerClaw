@@ -2,9 +2,9 @@
 
 - ADR: [ADR 0088](../adr/0088-ephemeral-infrastructure-fixtures.md)
 - Title: On-demand disposable Proxmox VMs for role testing, Packer validation, and staging integration checks
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0088-ephemeral-fixtures`
-- Worktree: `../proxmox_florin_server-ephemeral-fixtures`
+- Worktree: `.worktrees/adr-0088-ephemeral-fixtures`
 - Owner: codex
 - Depends On: `adr-0082-remote-build-gateway`, `adr-0084-packer-pipeline`, `adr-0085-opentofu-vm-lifecycle`, `adr-0072-staging-environment`
 - Conflicts With: none
@@ -62,6 +62,6 @@
 
 ## Notes For The Next Assistant
 
-- the expiry reaper must use atomic state: read all receipts, identify expired, destroy one at a time, and write a `reaper-run.json` receipt after each run; never destroy a fixture that has been manually extended (add `extend_minutes` field to fixture YAML)
-- `make fixture-list` should show: fixture name, VMID, IP, age, remaining lifetime, and current health check status — all in a single table output
-- the `molecule` custom driver is invoked with environment variables: `MOLECULE_FIXTURE_NAME`, `MOLECULE_FIXTURE_IP`; the driver writes these to a `molecule.env` file that Molecule picks up for the test run
+- The repository-side implementation is complete on `main`, including the fixture module, lifecycle manager, Make targets, delegated Molecule driver, fixture definitions, and the Windmill expiry reaper.
+- Runtime receipts are intentionally ignored under `receipts/fixtures/`; the durable history lives under `.local/fixtures/archive/` so fixture runs do not dirty the git worktree.
+- Live rollout is still pending the staging bridge from ADR 0072 on the Proxmox host; once `vmbr20` exists, verify `make fixture-up FIXTURE=docker-host` and then seed the Windmill schedule from `main`.

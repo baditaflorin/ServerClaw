@@ -131,7 +131,7 @@ resource "proxmox_virtual_environment_vm" "this" {
   }
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = var.prevent_destroy
     ignore_changes  = [agent[0].type, clone, keyboard_layout, node_name]
   }
 }

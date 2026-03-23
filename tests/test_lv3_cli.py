@@ -13,6 +13,7 @@ def minimal_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     (tmp_path / "config").mkdir()
     (tmp_path / "inventory").mkdir()
     (tmp_path / "receipts" / "live-applies").mkdir(parents=True)
+    (tmp_path / "tests" / "fixtures").mkdir(parents=True)
     (tmp_path / "scripts").mkdir()
     (tmp_path / "Makefile").write_text(
         "\n".join(
@@ -24,6 +25,9 @@ def minimal_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
                 "remote-exec:",
                 "rotate-secret:",
                 "promote:",
+                "fixture-up:",
+                "fixture-down:",
+                "fixture-list:",
                 "",
             ]
         )
@@ -110,6 +114,7 @@ all:
         + "\n"
     )
     (tmp_path / "windmill-token.txt").write_text("secret-token\n")
+    (tmp_path / "tests" / "fixtures" / "docker-host-fixture.yml").write_text("{}\n")
     (tmp_path / "receipts" / "live-applies" / "2026-03-23-grafana.json").write_text(
         json.dumps({"summary": "grafana deploy", "workflow_id": "converge-grafana"}) + "\n"
     )
@@ -189,3 +194,17 @@ def test_diff_dry_run_uses_drift_report_target(
     captured = capsys.readouterr()
     assert exit_code == 0
     assert "make drift-report ENV=production" in captured.out
+
+
+def test_fixture_list_dry_run_prints_make_target(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    exit_code = lv3_cli.main(["fixture", "list", "--dry-run"])
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "make fixture-list" in captured.out
+
+
+def test_fixture_completion_suggests_fixture_names(minimal_repo: Path) -> None:
+    candidates = lv3_cli.completion_candidates(["lv3", "fixture", "up", "d"], "d")
+    assert candidates == ["docker-host"]

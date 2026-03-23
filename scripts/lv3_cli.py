@@ -341,12 +341,15 @@ def secret_rotate_command(secret_id: str) -> CommandPlan:
     )
 
 
-def fixture_command(action: str, fixture_name: str) -> CommandPlan:
+def fixture_command(action: str, fixture_name: str | None = None) -> CommandPlan:
     target = f"fixture-{action}"
+    command = ["make", target]
+    if fixture_name:
+        command.append(f"FIXTURE={fixture_name}")
     return CommandPlan(
-        label=f"fixture {action} {fixture_name}",
+        label=f"fixture {action} {fixture_name}".strip(),
         route="controller -> build server staging fixture workflow",
-        command=["make", target, f"FIXTURE={fixture_name}"],
+        command=command,
     )
 
 
@@ -809,7 +812,14 @@ def completion_candidates(words: list[str], current: str) -> list[str]:
     if words[1] == "vm" and len(words) == 3:
         return [action for action in ["create", "destroy", "resize", "list"] if action.startswith(current)]
     if words[1] == "fixture" and len(words) == 3:
-        return [action for action in ["up", "down"] if action.startswith(current)]
+        return [action for action in ["up", "down", "list"] if action.startswith(current)]
+    if words[1] == "fixture" and len(words) == 4 and words[2] in {"up", "down"}:
+        fixtures_dir = repo_path("tests", "fixtures")
+        candidates = []
+        if fixtures_dir.exists():
+            for path in sorted(fixtures_dir.glob("*-fixture.yml")):
+                candidates.append(path.name.removesuffix("-fixture.yml"))
+        return [fixture_id for fixture_id in sorted(dict.fromkeys(candidates)) if fixture_id.startswith(current)]
     if words[1] == "secret" and len(words) == 3:
         return [action for action in ["get", "rotate"] if action.startswith(current)]
     return []
@@ -892,6 +902,9 @@ def build_parser() -> argparse.ArgumentParser:
         fixture_action.add_argument("name")
         fixture_action.add_argument("--dry-run", action="store_true")
         fixture_action.add_argument("--explain", action="store_true")
+    fixture_list = fixture_subparsers.add_parser("list", help="List active fixtures.")
+    fixture_list.add_argument("--dry-run", action="store_true")
+    fixture_list.add_argument("--explain", action="store_true")
 
     scaffold = subparsers.add_parser("scaffold", help="Scaffold a new service.")
     scaffold.add_argument("name")
@@ -978,7 +991,12 @@ def main(argv: list[str] | None = None) -> int:
             return run_plan(secret_get_command(args.path), dry_run=args.dry_run, explain=args.explain, no_color=no_color)
         return run_plan(secret_rotate_command(args.secret_id), dry_run=args.dry_run, explain=args.explain, no_color=no_color)
     if args.command == "fixture":
-        return run_plan(fixture_command(args.fixture_action, args.name), dry_run=args.dry_run, explain=args.explain, no_color=no_color)
+        return run_plan(
+            fixture_command(args.fixture_action, getattr(args, "name", None)),
+            dry_run=args.dry_run,
+            explain=args.explain,
+            no_color=no_color,
+        )
     if args.command == "scaffold":
         return run_plan(scaffold_command(args.name), dry_run=args.dry_run, explain=args.explain, no_color=no_color)
     if args.command == "diff":
