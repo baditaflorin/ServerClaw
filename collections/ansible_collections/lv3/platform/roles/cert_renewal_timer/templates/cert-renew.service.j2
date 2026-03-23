@@ -1,0 +1,10 @@
+[Unit]
+Description={{ cert_renewal_timer_description }}
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User={{ cert_renewal_timer_user }}
+Group={{ cert_renewal_timer_group }}
+ExecStart={{ cert_renewal_timer_script_path }}

@@ -29,6 +29,7 @@
         },
         "validate_tls": false
       },
+      "tls_certificate_ids": ["nginx-edge-public"],
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
@@ -69,6 +70,7 @@
         "method": "GET",
         "expected_status": [200]
       },
+      "tls_certificate_ids": ["grafana-edge"],
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
@@ -109,6 +111,7 @@
         "method": "GET",
         "expected_status": [200]
       },
+      "tls_certificate_ids": ["keycloak-edge"],
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
@@ -149,6 +152,7 @@
         "expected_status": [200],
         "validate_tls": false
       },
+      "tls_certificate_ids": ["proxmox-ui", "proxmox-edge-page"],
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
@@ -187,6 +191,7 @@
         "argv": ["docker", "info", "--format", "{{.ServerVersion}}"],
         "success_rc": 0
       },
+      "tls_certificate_ids": ["docker-runtime-edge"],
       "uptime_kuma": {
         "enabled": false,
         "reason": "Docker daemon health is enforced by the role verify task and does not expose a dedicated external HTTP surface."
@@ -215,6 +220,7 @@
         "host": "10.10.10.30",
         "port": 22
       },
+      "tls_certificate_ids": ["build-edge"],
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
@@ -254,6 +260,7 @@
         "method": "GET",
         "expected_status": [200]
       },
+      "tls_certificate_ids": ["uptime-kuma-edge"],
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
@@ -297,6 +304,7 @@
         ],
         "success_rc": 0
       },
+      "tls_certificate_ids": ["mail-platform-edge"],
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
@@ -335,6 +343,7 @@
         "argv": ["step", "ca", "certificate", "step-ca-service-test.lv3.internal", "/opt/step-ca/service-test.crt", "/opt/step-ca/service-test.key"],
         "success_rc": 0
       },
+      "tls_certificate_ids": ["step-ca-proxy"],
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
@@ -575,6 +584,7 @@
         "method": "GET",
         "expected_status": [200]
       },
+      "tls_certificate_ids": ["openbao-proxy"],
       "uptime_kuma": {
         "enabled": false,
         "reason": "The operator-facing TLS surface requires client-certificate authentication, so Uptime Kuma only tracks this contract indirectly through role verification."
@@ -635,6 +645,7 @@
         "expected_status": [200],
         "validate_tls": false
       },
+      "tls_certificate_ids": ["portainer-proxy"],
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
@@ -712,6 +723,7 @@
         "argv": ["proxmox-backup-manager", "datastore", "list", "--output-format", "json"],
         "success_rc": 0
       },
+      "tls_certificate_ids": ["backup-pbs-ui"],
       "uptime_kuma": {
         "enabled": true,
         "monitor": {

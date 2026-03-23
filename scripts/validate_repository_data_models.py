@@ -30,6 +30,7 @@ GLOBAL_VARS_PATH = repo_path("inventory", "group_vars", "all.yml")
 HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 UPTIME_MONITORS_PATH = repo_path("config", "uptime-kuma", "monitors.json")
 HEALTH_PROBE_CATALOG_PATH = repo_path("config", "health-probe-catalog.json")
+CERTIFICATE_CATALOG_PATH = repo_path("config", "certificate-catalog.json")
 SECRET_CATALOG_PATH = repo_path("config", "secret-catalog.json")
 IMAGE_CATALOG_PATH = repo_path("config", "image-catalog.json")
 PLATFORM_FINDING_SCHEMA_PATH = repo_path("docs", "schema", "platform-finding.json")
@@ -209,6 +210,7 @@ def validate_placeholder_free(value: Any, path: str) -> None:
 def validate_no_scaffold_placeholders() -> None:
     structured_paths = {
         HEALTH_PROBE_CATALOG_PATH: load_json(HEALTH_PROBE_CATALOG_PATH),
+        CERTIFICATE_CATALOG_PATH: load_json(CERTIFICATE_CATALOG_PATH),
         SECRET_CATALOG_PATH: load_json(SECRET_CATALOG_PATH),
         IMAGE_CATALOG_PATH: load_json(IMAGE_CATALOG_PATH),
         repo_path("config", "service-capability-catalog.json"): load_json(
@@ -717,6 +719,15 @@ def validate_health_probe_catalog(host_vars_context: dict[str, Any]) -> None:
     require_semver(catalog.get("schema_version"), "config/health-probe-catalog.json.schema_version")
     services = require_mapping(catalog.get("services"), "config/health-probe-catalog.json.services")
     topology = host_vars_context["topology"]
+    certificate_catalog = require_mapping(load_json(CERTIFICATE_CATALOG_PATH), str(CERTIFICATE_CATALOG_PATH))
+    certificate_entries = require_list(certificate_catalog.get("certificates"), "config/certificate-catalog.json.certificates")
+    certificate_service_map = {
+        require_identifier(entry.get("id"), f"config/certificate-catalog.json.certificates[{index}].id"): require_identifier(
+            entry.get("service_id"),
+            f"config/certificate-catalog.json.certificates[{index}].service_id",
+        )
+        for index, entry in enumerate(certificate_entries)
+    }
 
     if set(services.keys()) != set(topology.keys()):
         raise ValueError(
@@ -745,6 +756,17 @@ def validate_health_probe_catalog(host_vars_context: dict[str, Any]) -> None:
 
         validate_probe_definition(service.get("liveness"), f"{service_path}.liveness")
         validate_probe_definition(service.get("readiness"), f"{service_path}.readiness")
+        if "tls_certificate_ids" in service:
+            certificate_ids = require_string_list(service.get("tls_certificate_ids"), f"{service_path}.tls_certificate_ids")
+            for index, certificate_id in enumerate(certificate_ids):
+                if certificate_id not in certificate_service_map:
+                    raise ValueError(
+                        f"{service_path}.tls_certificate_ids[{index}] references unknown certificate '{certificate_id}'"
+                    )
+                if certificate_service_map[certificate_id] != service_id:
+                    raise ValueError(
+                        f"{service_path}.tls_certificate_ids[{index}] must reference a certificate owned by service '{service_id}'"
+                    )
 
         uptime_kuma = require_mapping(service.get("uptime_kuma"), f"{service_path}.uptime_kuma")
         enabled = require_bool(uptime_kuma.get("enabled"), f"{service_path}.uptime_kuma.enabled")
@@ -778,6 +800,63 @@ def validate_health_probe_catalog(host_vars_context: dict[str, Any]) -> None:
             raise ValueError(
                 f"config/uptime-kuma/monitors.json monitor '{name}' does not match the health probe catalog contract"
             )
+
+
+def validate_certificate_catalog(host_vars_context: dict[str, Any]) -> None:
+    catalog = require_mapping(load_json(CERTIFICATE_CATALOG_PATH), str(CERTIFICATE_CATALOG_PATH))
+    require_semver(catalog.get("schema_version"), "config/certificate-catalog.json.schema_version")
+    require_str(catalog.get("$schema"), "config/certificate-catalog.json.$schema")
+    certificates = require_list(catalog.get("certificates"), "config/certificate-catalog.json.certificates")
+    if not certificates:
+        raise ValueError("config/certificate-catalog.json.certificates must not be empty")
+
+    topology = host_vars_context["topology"]
+    certificate_ids: set[str] = set()
+    for index, item in enumerate(certificates):
+        path = f"config/certificate-catalog.json.certificates[{index}]"
+        item = require_mapping(item, path)
+        certificate_id = require_identifier(item.get("id"), f"{path}.id")
+        if certificate_id in certificate_ids:
+            raise ValueError(f"duplicate certificate id: {certificate_id}")
+        certificate_ids.add(certificate_id)
+
+        service_id = require_identifier(item.get("service_id"), f"{path}.service_id")
+        if service_id not in topology:
+            raise ValueError(f"{path}.service_id references unknown platform service '{service_id}'")
+
+        require_enum(item.get("status"), f"{path}.status", {"active", "planned"})
+        require_str(item.get("summary"), f"{path}.summary")
+        require_enum(item.get("expected_issuer"), f"{path}.expected_issuer", {"any", "letsencrypt", "self-signed", "step-ca"})
+
+        endpoint = require_mapping(item.get("endpoint"), f"{path}.endpoint")
+        require_str(endpoint.get("host"), f"{path}.endpoint.host")
+        require_int(endpoint.get("port"), f"{path}.endpoint.port", 1)
+        require_str(endpoint.get("server_name"), f"{path}.endpoint.server_name")
+
+        policy = require_mapping(item.get("policy"), f"{path}.policy")
+        warn_days = require_int(policy.get("warn_days"), f"{path}.policy.warn_days", 1)
+        critical_days = require_int(policy.get("critical_days"), f"{path}.policy.critical_days", 1)
+        if warn_days <= critical_days:
+            raise ValueError(f"{path}.policy.warn_days must be greater than {path}.policy.critical_days")
+
+        renewal = require_mapping(item.get("renewal"), f"{path}.renewal")
+        require_str(renewal.get("agent"), f"{path}.renewal.agent")
+        managed_by_repo = require_bool(renewal.get("managed_by_repo"), f"{path}.renewal.managed_by_repo")
+        if managed_by_repo:
+            require_str(renewal.get("host"), f"{path}.renewal.host")
+            require_str(renewal.get("unit_name"), f"{path}.renewal.unit_name")
+            require_str(renewal.get("on_calendar"), f"{path}.renewal.on_calendar")
+            require_int(renewal.get("randomized_delay_seconds"), f"{path}.renewal.randomized_delay_seconds", 0)
+            material = require_mapping(item.get("material"), f"{path}.material")
+            require_str(material.get("certificate_file"), f"{path}.material.certificate_file")
+            require_str(material.get("key_file"), f"{path}.material.key_file")
+            require_str(material.get("root_file"), f"{path}.material.root_file")
+            require_str(material.get("subject"), f"{path}.material.subject")
+            require_string_list(material.get("sans"), f"{path}.material.sans")
+            require_str(material.get("ca_url"), f"{path}.material.ca_url")
+            require_str(material.get("provisioner"), f"{path}.material.provisioner")
+            require_str(material.get("password_file"), f"{path}.material.password_file")
+            require_str(material.get("not_after"), f"{path}.material.not_after")
 
 
 def validate_secret_catalog(secret_manifest: dict[str, Any]) -> None:
@@ -1625,6 +1704,7 @@ def validate_repository_data_models() -> int:
     validate_promotion_receipts()
     validate_uptime_monitors()
     host_vars_context = validate_host_vars()
+    validate_certificate_catalog(host_vars_context)
     validate_health_probe_catalog(host_vars_context)
     validate_secret_catalog(secret_manifest)
     validate_platform_finding_schema()

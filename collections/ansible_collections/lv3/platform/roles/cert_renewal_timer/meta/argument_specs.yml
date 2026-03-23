@@ -1,0 +1,48 @@
+---
+argument_specs:
+  main:
+    short_description: Render and enable a managed certificate renewal timer.
+    options:
+      cert_renewal_timer_name:
+        type: str
+        required: true
+        description:
+          - Base name used for the managed script, service, and timer units.
+      cert_renewal_timer_description:
+        type: str
+        required: false
+        default: Managed certificate renewal timer
+      cert_renewal_timer_user:
+        type: str
+        required: false
+        default: root
+      cert_renewal_timer_group:
+        type: str
+        required: false
+        default: root
+      cert_renewal_timer_on_calendar:
+        type: str
+        required: false
+        default: "*:0/15"
+      cert_renewal_timer_randomized_delay_seconds:
+        type: int
+        required: false
+        default: 60
+      cert_renewal_timer_script_path:
+        type: str
+        required: true
+      cert_renewal_timer_service_path:
+        type: str
+        required: true
+      cert_renewal_timer_timer_path:
+        type: str
+        required: true
+      cert_renewal_timer_issue_command:
+        type: str
+        required: true
+        description:
+          - One-shot command that reissues or renews the certificate when executed.
+      cert_renewal_timer_reload_command:
+        type: str
+        required: false
+        default: ""
