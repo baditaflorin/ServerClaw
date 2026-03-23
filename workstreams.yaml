@@ -997,7 +997,7 @@ workstreams:
   - id: adr-0077-compose-secrets-injection
     adr: "0077"
     title: Compose runtime secrets injection via OpenBao Agent
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0077-compose-secrets-injection
     worktree_path: ./.worktrees/adr-0077
@@ -1015,7 +1015,7 @@ workstreams:
       - scripts/validate_repo.sh
       - config/image-catalog.json
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0079-playbook-decomposition
     adr: "0079"

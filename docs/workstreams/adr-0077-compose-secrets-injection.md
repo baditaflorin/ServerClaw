@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0077](../adr/0077-compose-runtime-secrets-injection.md)
 - Title: Replace compose-directory .env secrets with OpenBao Agent sidecar injection backed by host tmpfs
-- Status: merged
+- Status: live_applied
 - Branch: `codex/adr-0077-compose-secrets-injection`
 - Worktree: `.worktrees/adr-0077`
 - Owner: codex
@@ -61,6 +61,11 @@
 - secret rotation test passes for at least one migrated stack
 - the `.env` validation gate is integrated into `make validate`
 - migration runbook is complete and reviewed
+
+## Live Apply Outcome
+
+- Applied from `main` on 2026-03-23 with repo version `0.86.0` and platform version `0.39.0`
+- All migrated services on `docker-runtime-lv3` now render runtime secrets under `/run/lv3-secrets/<service>/runtime.env` via healthy OpenBao Agent sidecars
 
 ## Notes For The Next Assistant
 

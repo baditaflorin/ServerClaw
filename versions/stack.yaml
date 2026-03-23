@@ -1,6 +1,6 @@
 schema_version: 1.0.0
 repo_version: 0.89.0
-platform_version: 0.38.0
+platform_version: 0.39.0
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -15,11 +15,11 @@ live_apply_evidence:
     backup_vm: 2026-03-22-adr-0029-backup-vm-live-apply
     guest_network_policy: 2026-03-22-adr-0067-guest-network-policy-live-apply
     runtime_container_telemetry: 2026-03-22-adr-0040-runtime-container-telemetry-live-apply
-    mail_platform: 2026-03-22-adr-0041-email-platform-live-apply
+    mail_platform: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
     step_ca: 2026-03-22-adr-0042-step-ca-live-apply
     openbao: 2026-03-22-adr-0043-openbao-live-apply
-    windmill: 2026-03-22-adr-0044-windmill-live-apply
-    mattermost: 2026-03-22-adr-0057-mattermost-live-apply
+    windmill: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
+    mattermost: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
     portainer: 2026-03-22-adr-0055-portainer-live-apply
     short_lived_credentials_and_mtls: 2026-03-22-adr-0047-short-lived-credentials-live-apply
     control_plane_lanes: 2026-03-22-adr-0045-control-plane-communication-lanes-live-apply
@@ -27,11 +27,11 @@ live_apply_evidence:
     command_catalog: 2026-03-22-adr-0048-command-catalog-live-apply
     control_plane_recovery: 2026-03-22-adr-0051-control-plane-recovery-live-apply
     notification_profiles: 2026-03-22-adr-0050-notification-profiles-live-apply
-    netbox: 2026-03-22-adr-0054-netbox-live-apply
-    keycloak: 2026-03-22-adr-0056-keycloak-live-apply
-    platform_context: 2026-03-23-adr-0070-rag-platform-context-live-apply
+    netbox: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
+    keycloak: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
+    platform_context: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
     ntopng: 2026-03-22-adr-0059-ntopng-live-apply
-    open_webui: 2026-03-22-adr-0060-open-webui-live-apply
+    open_webui: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
     remote_build_gateway: 2026-03-23-adr-0082-remote-build-gateway-live-apply
     tempo_tracing: 2026-03-22-adr-0053-tempo-traces-live-apply
     secret_rotation: 2026-03-23-adr-0065-secret-rotation-live-apply
@@ -831,5 +831,5 @@ release_tracks:
     current: 0.89.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.38.0
+    current: 0.39.0
     meaning: intended platform release for the actual server configuration
