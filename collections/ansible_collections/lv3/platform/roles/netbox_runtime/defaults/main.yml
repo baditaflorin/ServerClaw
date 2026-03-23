@@ -19,7 +19,7 @@ netbox_controller_url: "{{ platform_service_topology | platform_service_url('net
 netbox_private_base_url: "{{ platform_service_topology | platform_service_url('netbox', 'internal') }}"
 netbox_database_name: netbox
 netbox_database_user: netbox
-netbox_database_host: "{{ platform_guest_catalog.by_name | platform_guest_attr('postgres-lv3', 'ipv4') }}"
+netbox_database_host: "{{ (hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('postgres')).public_hostname }}"
 netbox_database_port: 5432
 netbox_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/netbox/database-password.txt
 netbox_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/netbox

@@ -1,0 +1,36 @@
+---
+argument_specs:
+  main:
+    short_description: Configure one static etcd member for the LV3 control plane.
+    options:
+      etcd_cluster_member_name:
+        type: str
+        required: true
+      etcd_cluster_member_host:
+        type: str
+        required: true
+      etcd_cluster_member_client_port:
+        type: int
+        required: true
+      etcd_cluster_member_peer_port:
+        type: int
+        required: true
+      etcd_cluster_member_initial_cluster_token:
+        type: str
+        required: true
+      etcd_cluster_member_config_file:
+        type: path
+        required: true
+      etcd_cluster_member_data_dir:
+        type: path
+        required: true
+      etcd_cluster_member_service_name:
+        type: str
+        required: true
+      etcd_cluster_member_service_file:
+        type: path
+        required: true
+      etcd_cluster_member_cluster:
+        type: list
+        elements: dict
+        required: true

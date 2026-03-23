@@ -143,6 +143,33 @@ module "postgres_lv3" {
   user_data_file_id       = "local:snippets/postgres-lv3-user-data.yml"
 }
 
+module "postgres_replica_lv3" {
+  source = "../../modules/proxmox-vm"
+
+  name                    = "postgres-replica-lv3"
+  description             = "postgres replica VM for lv3.org platform"
+  node_name               = var.node_name
+  vm_id                   = 151
+  template_node_name      = var.template_node_name
+  template_vmid           = var.template_vmid
+  datastore_id            = var.datastore_id
+  cloud_init_datastore_id = var.cloud_init_datastore_id
+  cores                   = 4
+  memory_mb               = 8192
+  disk_gb                 = 96
+  bridge                  = var.bridge
+  mac_address             = "BC:24:11:8C:51:17"
+  ip_address              = "10.10.10.51"
+  ip_cidr                 = 24
+  gateway                 = "10.10.10.1"
+  nameserver              = var.nameserver
+  search_domain           = var.search_domain
+  tags                    = ["database", "ha", "lv3", "postgres"]
+  ci_user                 = var.ci_user
+  ssh_authorized_keys     = [local.bootstrap_authorized_key]
+  user_data_file_id       = "local:snippets/postgres-replica-lv3-user-data.yml"
+}
+
 module "backup_lv3" {
   source = "../../modules/proxmox-vm"
 

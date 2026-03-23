@@ -77,7 +77,7 @@ proxmox_tailscale_tcp_proxies:
   - name: postgres-lv3
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: 5432
-    upstream_host: 10.10.10.50
+    upstream_host: 10.10.10.55
     upstream_port: 5432
   - name: windmill
     listen_address: "{{ management_tailscale_ipv4 }}"
@@ -214,6 +214,27 @@ proxmox_guests:
       - nftables
       - postgresql
       - postgresql-contrib
+  - vmid: 151
+    name: postgres-replica-lv3
+    role: postgres-replica
+    template_key: lv3-postgres-host
+    ipv4: 10.10.10.51
+    cidr: 24
+    gateway4: 10.10.10.1
+    macaddr: BC:24:11:8C:51:17
+    cores: 4
+    memory_mb: 8192
+    disk_gb: 96
+    tags:
+      - postgres
+      - database
+      - ha
+      - lv3
+    packages:
+      - acl
+      - nftables
+      - postgresql
+      - postgresql-contrib
   - vmid: 160
     name: backup-lv3
     role: backup
@@ -329,6 +350,18 @@ network_policy:
           ports:
             - 3000
           description: Reverse proxy access to Grafana
+        - source: postgres-lv3
+          protocol: tcp
+          ports:
+            - 2379
+            - 2380
+          description: etcd quorum traffic from the primary PostgreSQL member
+        - source: postgres-replica-lv3
+          protocol: tcp
+          ports:
+            - 2379
+            - 2380
+          description: etcd quorum traffic from the replica PostgreSQL member
     postgres-lv3:
       allowed_inbound:
         - source: management
@@ -346,6 +379,47 @@ network_policy:
           ports:
             - 5432
           description: Application databases and secret rotation
+        - source: postgres-replica-lv3
+          protocol: tcp
+          ports:
+            - 5432
+            - 8008
+            - 2379
+            - 2380
+          description: Patroni, PostgreSQL replication, and etcd peer traffic from the replica
+        - source: postgres-replica-lv3
+          protocol: vrrp
+          description: keepalived VRRP advertisements from the replica
+        - source: monitoring-lv3
+          protocol: tcp
+          ports:
+            - 2379
+            - 2380
+          description: etcd quorum traffic from the monitoring quorum member
+    postgres-replica-lv3:
+      allowed_inbound:
+        - source: management
+          protocol: tcp
+          ports:
+            - 22
+          description: Operator and Ansible SSH access
+        - source: postgres-lv3
+          protocol: tcp
+          ports:
+            - 5432
+            - 8008
+            - 2379
+            - 2380
+          description: Patroni, PostgreSQL replication, and etcd peer traffic from the primary
+        - source: postgres-lv3
+          protocol: vrrp
+          description: keepalived VRRP advertisements from the primary
+        - source: monitoring-lv3
+          protocol: tcp
+          ports:
+            - 2379
+            - 2380
+          description: etcd quorum traffic from the monitoring quorum member
     backup-lv3:
       allowed_inbound:
         - source: management
@@ -362,6 +436,44 @@ network_policy:
 backup_vm_vmid: 160
 backup_vm_name: backup-lv3
 backup_vm_ipv4: 10.10.10.60
+
+postgres_ha:
+  scope: postgres-ha
+  database_hostname: database.lv3.org
+  vip_ipv4: 10.10.10.55
+  vip_cidr: 24
+  postgres_port: 5432
+  patroni_rest_port: 8008
+  initial_primary: postgres-lv3
+  keepalived:
+    interface: eth0
+    virtual_router_id: 51
+    advert_int: 1
+    auth_pass: lv3pgha8
+    priorities:
+      postgres-lv3: 110
+      postgres-replica-lv3: 100
+  dcs:
+    client_port: 2379
+    peer_port: 2380
+    token: postgres-ha-etcd
+    members:
+      - name: postgres-lv3
+        host: 10.10.10.50
+      - name: postgres-replica-lv3
+        host: 10.10.10.51
+      - name: monitoring-lv3
+        host: 10.10.10.40
+  patroni:
+    ttl: 30
+    loop_wait: 10
+    retry_timeout: 10
+    maximum_lag_on_failover: 1048576
+    synchronous_mode: true
+    synchronous_mode_strict: true
+  users:
+    superuser: patroni
+    replicator: replicator
 
 mail_platform_dns_records:
   - name: mail
@@ -677,7 +789,7 @@ lv3_service_topology:
   postgres:
     service_name: postgres
     owning_vm: postgres-lv3
-    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'postgres-lv3') | map(attribute='ipv4') | first) }}"
+    private_ip: "{{ postgres_ha.vip_ipv4 }}"
     public_hostname: database.lv3.org
     exposure_model: private-only
     observability:
@@ -688,7 +800,7 @@ lv3_service_topology:
       visibility: tailnet
       name: database
       type: A
-      target: "{{ management_tailscale_ipv4 }}"
+      target: "{{ postgres_ha.vip_ipv4 }}"
       ttl: 60
   backup_pbs:
     service_name: backup-pbs

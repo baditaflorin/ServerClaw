@@ -654,8 +654,8 @@
     "postgres": {
       "service_name": "postgres",
       "owning_vm": "postgres-lv3",
-      "role": "postgres_vm",
-      "verify_file": "roles/postgres_vm/tasks/verify.yml",
+      "role": "postgres_ha",
+      "verify_file": "roles/postgres_ha/tasks/verify.yml",
       "liveness": {
         "kind": "tcp",
         "description": "PostgreSQL listens on the local TCP port.",
@@ -677,11 +677,11 @@
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
-          "name": "PostgreSQL Port",
+          "name": "PostgreSQL VIP Port",
           "type": "port",
-          "hostname": "10.10.10.50",
+          "hostname": "10.10.10.55",
           "port": 5432,
-          "description": "Private PostgreSQL listener on postgres-lv3.",
+          "description": "Private PostgreSQL VIP listener managed by Patroni and keepalived.",
           "interval": 60,
           "retryInterval": 60,
           "maxretries": 0,

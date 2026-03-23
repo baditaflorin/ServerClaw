@@ -532,7 +532,7 @@
     {
       "id": "postgres",
       "name": "PostgreSQL",
-      "description": "Managed relational database VM for control-plane and future application state.",
+      "description": "Managed high-availability PostgreSQL service for control-plane and future application state.",
       "category": "data",
       "lifecycle_status": "active",
       "vm": "postgres-lv3",
@@ -540,14 +540,15 @@
       "internal_url": "postgres://database.lv3.org:5432",
       "subdomain": "database.lv3.org",
       "exposure": "private-only",
-      "uptime_monitor_name": "PostgreSQL Port",
+      "uptime_monitor_name": "PostgreSQL VIP Port",
       "health_probe_id": "postgres",
-      "adr": "0026",
-      "runbook": "docs/runbooks/configure-postgres-vm.md",
+      "adr": "0098",
+      "runbook": "docs/runbooks/postgres-failover.md",
       "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3",
       "tags": [
         "postgres",
         "database",
+        "ha",
         "sql"
       ],
       "environments": {

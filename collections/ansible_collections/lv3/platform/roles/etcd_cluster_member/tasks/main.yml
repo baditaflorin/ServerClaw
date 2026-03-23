@@ -1,0 +1,76 @@
+---
+- name: Validate etcd member inputs
+  ansible.builtin.assert:
+    that:
+      - etcd_cluster_member_packages | length > 0
+      - etcd_cluster_member_name | length > 0
+      - etcd_cluster_member_host | length > 0
+      - etcd_cluster_member_client_port | int > 0
+      - etcd_cluster_member_peer_port | int > 0
+      - etcd_cluster_member_config_file | length > 0
+      - etcd_cluster_member_data_dir | length > 0
+      - etcd_cluster_member_service_name | length > 0
+      - etcd_cluster_member_service_file | length > 0
+      - etcd_cluster_member_cluster | length >= 3
+    fail_msg: "etcd_cluster_member requires package, member identity, cluster membership, and managed paths."
+
+- name: Install etcd packages
+  ansible.builtin.apt:
+    name: "{{ etcd_cluster_member_packages }}"
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure etcd directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ etcd_cluster_member_config_dir }}"
+      mode: "0755"
+    - path: "{{ etcd_cluster_member_data_dir }}"
+      mode: "0700"
+
+- name: Check whether the etcd member data directory is initialized
+  ansible.builtin.stat:
+    path: "{{ etcd_cluster_member_data_dir }}/member"
+  register: etcd_cluster_member_data_dir_stat
+
+- name: Record the etcd initial cluster state
+  ansible.builtin.set_fact:
+    etcd_cluster_member_initial_cluster_state: "{{ 'existing' if etcd_cluster_member_data_dir_stat.stat.exists else 'new' }}"
+
+- name: Render the etcd member configuration
+  ansible.builtin.template:
+    src: etcd.yml.j2
+    dest: "{{ etcd_cluster_member_config_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart lv3 etcd
+
+- name: Render the etcd systemd unit
+  ansible.builtin.template:
+    src: lv3-etcd.service.j2
+    dest: "{{ etcd_cluster_member_service_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart lv3 etcd
+
+- name: Ensure the etcd service is enabled and started
+  ansible.builtin.systemd:
+    name: "{{ etcd_cluster_member_service_name }}"
+    enabled: true
+    state: started
+    daemon_reload: true
+
+- name: Wait for the local etcd client API
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ etcd_cluster_member_client_port }}"
+    delay: 0
+    timeout: 60

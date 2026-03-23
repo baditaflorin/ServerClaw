@@ -58,7 +58,7 @@ MONITOR_TYPES = {"http", "port"}
 PROBE_KINDS = {"http", "tcp", "command", "systemd"}
 HTTP_METHODS = {"DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"}
 IDENTITY_CLASSES = {"human_operator", "service", "agent", "break_glass"}
-NETWORK_POLICY_PROTOCOLS = {"tcp", "udp"}
+NETWORK_POLICY_PROTOCOLS = {"tcp", "udp", "vrrp"}
 IMAGE_SOURCE_KINDS = {"upstream", "local_build"}
 IMAGE_PIN_STATUSES = {"pinned", "unpinned", "local_build"}
 SCAFFOLD_PLACEHOLDER_MARKER = "TODO"
@@ -418,12 +418,22 @@ def validate_network_policy(value: Any, path: str, guest_names: set[str]) -> Non
                 f"{path}.guests.{guest_name}.allowed_inbound[{index}].protocol",
                 NETWORK_POLICY_PROTOCOLS,
             )
-            ports = require_int_list(
-                rule.get("ports"),
-                f"{path}.guests.{guest_name}.allowed_inbound[{index}].ports",
-            )
-            if not ports:
-                raise ValueError(f"{path}.guests.{guest_name}.allowed_inbound[{index}].ports must not be empty")
+            ports = rule.get("ports", [])
+            if rule.get("protocol") != "vrrp":
+                ports = require_int_list(
+                    ports,
+                    f"{path}.guests.{guest_name}.allowed_inbound[{index}].ports",
+                )
+                if not ports:
+                    raise ValueError(f"{path}.guests.{guest_name}.allowed_inbound[{index}].ports must not be empty")
+            else:
+                if "ports" in rule and require_list(
+                    ports,
+                    f"{path}.guests.{guest_name}.allowed_inbound[{index}].ports",
+                ):
+                    raise ValueError(
+                        f"{path}.guests.{guest_name}.allowed_inbound[{index}].ports must be omitted for VRRP rules"
+                    )
             require_str(
                 rule.get("description"),
                 f"{path}.guests.{guest_name}.allowed_inbound[{index}].description",

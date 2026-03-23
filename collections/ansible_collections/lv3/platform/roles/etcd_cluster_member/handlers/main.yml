@@ -1,0 +1,6 @@
+---
+- name: Restart lv3 etcd
+  ansible.builtin.systemd:
+    name: "{{ etcd_cluster_member_service_name }}"
+    state: restarted
+    daemon_reload: true

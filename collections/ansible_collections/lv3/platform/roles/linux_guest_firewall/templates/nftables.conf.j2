@@ -6,24 +6,30 @@ flush ruleset
 {% set guest_ip_map = dict(hostvars[linux_guest_firewall_host_id].proxmox_guests | map(attribute='name') | zip(hostvars[linux_guest_firewall_host_id].proxmox_guests | map(attribute='ipv4'))) %}
 {% set guest_role_map = dict(hostvars[linux_guest_firewall_host_id].proxmox_guests | map(attribute='name') | zip(hostvars[linux_guest_firewall_host_id].proxmox_guests | map(attribute='role'))) %}
 {% set guest_policy = policy.guests[inventory_hostname] %}
+{% macro render_match(rule) -%}
+{% if rule.protocol == 'vrrp' -%}
+ip protocol vrrp
+{%- else -%}
+{{ rule.protocol }} dport { {{ rule.ports | join(', ') }} }
+{%- endif %}
+{%- endmacro %}
 {% macro render_rule(rule) -%}
-{% set ports = rule.ports | join(', ') %}
 {% if rule.source == 'public' %}
-    {{ rule.protocol }} dport { {{ ports }} } accept
+    {{ render_match(rule) }} accept
 {% elif rule.source == 'management' %}
 {% for source in policy.guest_management_sources %}
-    ip saddr {{ source }} {{ rule.protocol }} dport { {{ ports }} } accept
+    ip saddr {{ source }} {{ render_match(rule) }} accept
 {% endfor %}
 {% elif rule.source == 'host' %}
-    ip saddr {{ policy.host_source }} {{ rule.protocol }} dport { {{ ports }} } accept
+    ip saddr {{ policy.host_source }} {{ render_match(rule) }} accept
 {% elif rule.source == 'all_guests' %}
 {% for guest_name, guest_ip in guest_ip_map.items() | sort if guest_name != inventory_hostname %}
-    ip saddr {{ guest_ip }}/32 {{ rule.protocol }} dport { {{ ports }} } accept
+    ip saddr {{ guest_ip }}/32 {{ render_match(rule) }} accept
 {% endfor %}
 {% elif rule.source in guest_ip_map %}
-    ip saddr {{ guest_ip_map[rule.source] }}/32 {{ rule.protocol }} dport { {{ ports }} } accept
+    ip saddr {{ guest_ip_map[rule.source] }}/32 {{ render_match(rule) }} accept
 {% else %}
-    ip saddr {{ rule.source }} {{ rule.protocol }} dport { {{ ports }} } accept
+    ip saddr {{ rule.source }} {{ render_match(rule) }} accept
 {% endif %}
 {%- endmacro %}
 

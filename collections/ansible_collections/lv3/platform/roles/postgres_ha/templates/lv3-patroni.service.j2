@@ -1,0 +1,17 @@
+[Unit]
+Description=LV3 Patroni PostgreSQL controller
+After=network-online.target {{ 'lv3-etcd.service' if inventory_hostname in (postgres_ha_cluster.dcs.members | map(attribute='name') | list) else '' }}
+Wants=network-online.target
+
+[Service]
+User=postgres
+Group=postgres
+Type=simple
+ExecStart=/usr/bin/patroni {{ postgres_ha_patroni_config_file }}
+Restart=always
+RestartSec=5
+KillMode=process
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

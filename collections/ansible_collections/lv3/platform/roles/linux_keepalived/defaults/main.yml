@@ -1,0 +1,17 @@
+---
+linux_keepalived_packages:
+  - curl
+  - keepalived
+linux_keepalived_service_name: keepalived
+linux_keepalived_config_file: /etc/keepalived/keepalived.conf
+linux_keepalived_track_script: /usr/local/bin/check-patroni-leader.sh
+linux_keepalived_track_url: http://127.0.0.1:8008/leader
+linux_keepalived_state: BACKUP
+linux_keepalived_interface: eth0
+linux_keepalived_virtual_router_id: 51
+linux_keepalived_priority: 100
+linux_keepalived_advert_int: 1
+linux_keepalived_auth_pass: ""
+linux_keepalived_unicast_source_ip: "{{ ansible_host }}"
+linux_keepalived_unicast_peers: []
+linux_keepalived_virtual_ipaddresses: []

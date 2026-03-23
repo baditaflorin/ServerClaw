@@ -1,0 +1,56 @@
+---
+- name: Validate keepalived inputs
+  ansible.builtin.assert:
+    that:
+      - linux_keepalived_packages | length > 0
+      - linux_keepalived_service_name | length > 0
+      - linux_keepalived_config_file | length > 0
+      - linux_keepalived_track_script | length > 0
+      - linux_keepalived_track_url | length > 0
+      - linux_keepalived_interface | length > 0
+      - linux_keepalived_virtual_router_id | int > 0
+      - linux_keepalived_priority | int > 0
+      - linux_keepalived_virtual_ipaddresses | length > 0
+    fail_msg: "linux_keepalived requires a valid VRRP instance configuration and at least one VIP."
+
+- name: Install keepalived packages
+  ansible.builtin.apt:
+    name: "{{ linux_keepalived_packages }}"
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure keepalived directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - /etc/keepalived
+    - "{{ linux_keepalived_track_script | dirname }}"
+
+- name: Render the keepalived leader check script
+  ansible.builtin.template:
+    src: check-patroni-leader.sh.j2
+    dest: "{{ linux_keepalived_track_script }}"
+    owner: root
+    group: root
+    mode: "0755"
+  notify: Restart keepalived
+
+- name: Render the keepalived configuration
+  ansible.builtin.template:
+    src: keepalived.conf.j2
+    dest: "{{ linux_keepalived_config_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart keepalived
+
+- name: Ensure keepalived is enabled and started
+  ansible.builtin.systemd:
+    name: "{{ linux_keepalived_service_name }}"
+    enabled: true
+    state: started

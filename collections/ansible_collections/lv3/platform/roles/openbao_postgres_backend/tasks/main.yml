@@ -44,6 +44,17 @@
     openbao_postgres_admin_password: "{{ openbao_postgres_password_raw.content | b64decode | trim }}"
   no_log: true
 
+- name: Check whether the local PostgreSQL member is writable
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT CASE WHEN pg_is_in_recovery() THEN 0 ELSE 1 END"
+  register: openbao_postgres_writable_check
+  changed_when: false
+
 - name: Ensure the OpenBao PostgreSQL rotator role exists with the managed password
   become: true
   become_user: postgres
@@ -65,6 +76,7 @@
         $$;
   changed_when: false
   no_log: true
+  when: openbao_postgres_writable_check.stdout | trim == "1"
 
 - name: Grant CONNECT on the target database to the OpenBao rotator role
   become: true
@@ -79,6 +91,7 @@
       - -c
       - "GRANT CONNECT ON DATABASE {{ openbao_postgres_database }} TO {{ openbao_postgres_admin_role }}"
   changed_when: false
+  when: openbao_postgres_writable_check.stdout | trim == "1"
 
 - name: Grant pg_read_all_data with admin option to the OpenBao rotator role
   become: true
@@ -93,3 +106,4 @@
       - -c
       - "GRANT pg_read_all_data TO {{ openbao_postgres_admin_role }} WITH ADMIN OPTION"
   changed_when: false
+  when: openbao_postgres_writable_check.stdout | trim == "1"

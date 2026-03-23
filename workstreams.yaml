@@ -1532,7 +1532,7 @@ workstreams:
   - id: adr-0098-postgres-ha
     adr: "0098"
     title: Postgres high availability and automated failover
-    status: ready
+    status: implemented-in-repo
     owner: codex
     branch: codex/adr-0098-postgres-ha
     worktree_path: ../proxmox_florin_server-postgres-ha
@@ -1546,10 +1546,11 @@ workstreams:
     conflicts_with: []
     shared_surfaces:
       - tofu/environments/production/
-      - roles/postgres_lv3/
+      - inventory/host_vars/proxmox_florin.yml
+      - collections/ansible_collections/lv3/platform/roles/postgres_ha/
       - inventory/
       - config/service-capability-catalog.json
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: false
 
   - id: adr-0099-backup-restore-verification

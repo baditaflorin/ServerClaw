@@ -2,48 +2,45 @@
 
 - ADR: [ADR 0098](../adr/0098-postgres-high-availability.md)
 - Title: Patroni streaming replication with keepalived VIP providing automatic Postgres failover on a second VM (postgres-replica-lv3, VMID 151)
-- Status: ready
+- Status: implemented-in-repo
 - Branch: `codex/adr-0098-postgres-ha`
 - Worktree: `../proxmox_florin_server-postgres-ha`
 - Owner: codex
 - Depends On: `adr-0026-postgres-vm`, `adr-0064-health-probes`, `adr-0085-opentofu-vm-lifecycle`, `adr-0096-slo-tracking`, `adr-0097-alerting-routing`
 - Conflicts With: none
-- Shared Surfaces: `tofu/environments/production/`, `roles/postgres_lv3/`, `inventory/`, `config/service-capability-catalog.json`
+- Shared Surfaces: `tofu/environments/production/`, `inventory/`, `inventory/group_vars/platform.yml`, `collections/ansible_collections/lv3/platform/roles/postgres_ha/`, `config/service-capability-catalog.json`
 
 ## Scope
 
 - add `postgres-replica-lv3` VM to `tofu/environments/production/main.tf` (VMID 151, clone of Debian 13 template)
-- write Ansible role `postgres_ha` — installs Patroni, etcd (single-node), and `check_patroni_leader.sh` on both Postgres VMs
-- write Ansible role `keepalived_vip` — installs keepalived with VIP `10.10.10.55` on both Postgres VMs
-- update Ansible role `postgres_lv3` to deploy via `postgres_ha` on both VMs
-- add `postgres-replica-lv3` to `inventory/hosts.yml` and `inventory/host_vars/postgres-replica-lv3.yml`
-- update `inventory/group_vars/all.yml` — `postgres_host` var changed to `postgres.internal.lv3` (VIP DNS)
-- update all service roles that set Postgres connection strings: `keycloak_postgres`, `mattermost_postgres`, `netbox_postgres`, `openbao_postgres`, `windmill` (and any others in `inventory/group_vars/`)
-- add DNS record `postgres.internal.lv3 → 10.10.10.55` to internal DNS config
-- add health probes for VIP and replica to `config/health-probe-catalog.json`
-- add Patroni Telegraf metrics collection to `roles/guest_observability` — Telegraf HTTP input scraping port 8008 on both VMs
-- write Grafana dashboard `config/grafana/dashboards/postgres-ha.json` — leader status, replication lag, WAL position
+- write Ansible role `postgres_ha` — installs Patroni, manages the PostgreSQL HA configuration, and ships Patroni metrics from both Postgres VMs
+- write Ansible role `linux_keepalived` — installs keepalived with VIP `10.10.10.55` on both Postgres VMs
+- write Ansible role `etcd_cluster_member` — provides the three-member DCS quorum on `postgres-lv3`, `postgres-replica-lv3`, and `monitoring-lv3`
+- add `postgres-replica-lv3` to `inventory/hosts.yml` and the canonical guest source-of-truth files
+- update all service roles that set Postgres connection strings to use `database.lv3.org`
+- move the existing `database.lv3.org` DNS target to the HA VIP `10.10.10.55`
+- update health probes, Uptime Kuma, and Grafana dashboards to reflect the VIP and Patroni role metrics
 - write `docs/runbooks/postgres-failover.md` — switchover and failover procedures
-- add postgres VIP SLO to `config/slo-catalog.json`
 
 ## Non-Goals
 
-- etcd clustering (single-node etcd is intentional; see ADR)
+- SLO automation for the Postgres VIP
 - Connection pooling (PgBouncer) — separate concern for a future ADR
 - Multi-master replication (streaming replication is primary → standby only)
 
 ## Expected Repo Surfaces
 
 - `tofu/environments/production/main.tf` (patched: VMID 151 added)
-- `roles/postgres_ha/`
-- `roles/keepalived_vip/`
-- `roles/postgres_lv3/` (patched: uses postgres_ha)
+- `collections/ansible_collections/lv3/platform/roles/postgres_ha/`
+- `collections/ansible_collections/lv3/platform/roles/linux_keepalived/`
+- `collections/ansible_collections/lv3/platform/roles/etcd_cluster_member/`
 - `inventory/hosts.yml` (patched: postgres-replica-lv3 added)
-- `inventory/host_vars/postgres-replica-lv3.yml`
-- `inventory/group_vars/all.yml` (patched: postgres_host changed to VIP DNS)
+- `inventory/host_vars/proxmox_florin.yml`
+- `inventory/group_vars/platform.yml`
 - `config/health-probe-catalog.json` (patched)
-- `config/slo-catalog.json` (patched)
-- `config/grafana/dashboards/postgres-ha.json`
+- `config/uptime-kuma/monitors.json` (patched)
+- `collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/lv3-platform-overview.json.j2`
+- `collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/lv3-vm-detail.json.j2`
 - `docs/runbooks/postgres-failover.md`
 - `docs/adr/0098-postgres-high-availability.md`
 - `docs/workstreams/adr-0098-postgres-ha.md`
@@ -52,14 +49,14 @@
 
 - VMID 151 (`postgres-replica-lv3`) is running at `10.10.10.51`
 - `patronictl -c /etc/patroni/patroni.yml list` shows two nodes: one Leader, one Replica
-- VIP `10.10.10.55` is pingable and resolves via `postgres.internal.lv3`
+- VIP `10.10.10.55` is reachable through `database.lv3.org`
 - Replication lag < 1 MB (Patroni failover threshold)
 - All five dependent services (Keycloak, Windmill, NetBox, OpenBao, Mattermost) are connected to the VIP
 
 ## Verification
 
 - `patronictl list` shows both nodes healthy
-- `psql -h postgres.internal.lv3 -U postgres -c "SELECT pg_is_in_recovery();"` → `f` (primary)
+- `psql -h database.lv3.org -U postgres -c "SELECT pg_is_in_recovery();"` → `f` (primary)
 - Run planned switchover: `patronictl switchover postgres-ha --master postgres-lv3 --candidate postgres-replica-lv3` → verify Keycloak, NetBox, Mattermost remain healthy within 30 seconds
 - Switch back to original primary
 - Verify replication lag metric appears in the Postgres HA Grafana dashboard
@@ -70,7 +67,6 @@
 - VIP at `10.10.10.55` works and moves on switchover
 - All five dependent services connect to VIP (not to bare IP)
 - Replication lag Grafana panel shows data
-- Postgres VIP SLO defined in `config/slo-catalog.json`
 - Planned switchover tested and services recovered within 30 seconds
 
 ## Notes For The Next Assistant
