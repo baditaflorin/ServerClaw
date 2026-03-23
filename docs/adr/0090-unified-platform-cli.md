@@ -1,10 +1,10 @@
 # ADR 0090: Unified Platform CLI (`lv3`)
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.91.0
+- Implemented In Platform Version: not applicable (repo-only)
+- Implemented On: 2026-03-23
 - Date: 2026-03-22
 
 ## Context
@@ -37,7 +37,7 @@ We will implement a `lv3` CLI tool at `scripts/lv3_cli.py`, installed as `lv3` i
 
 ```
 lv3 deploy <service> [--env staging|production] [--dry-run]
-lv3 lint [--fix] [--local]
+lv3 lint [--local]
 lv3 validate [--strict]
 lv3 status [<service>]
 lv3 vm <create|destroy|resize|list> [args]
@@ -45,7 +45,7 @@ lv3 secret <get|rotate> <path>
 lv3 fixture <up|down> <fixture-name>
 lv3 scaffold <service-name>
 lv3 diff [--env staging|production]
-lv3 promote <adr-branch> [--to staging|production]
+lv3 promote <adr-branch> --service <service> --staging-receipt <receipt> [--to staging|production]
 lv3 run <windmill-workflow> [--args key=val]
 lv3 logs <service> [--tail N]
 lv3 ssh <vm-name>
@@ -56,31 +56,35 @@ lv3 open <service>
 
 | Command | Routes to | Where |
 |---|---|---|
-| `lv3 deploy` | `make remote-exec PLAYBOOK=...` | build server → Proxmox VM |
-| `lv3 lint` | `make remote-lint` or `make lint` | build server (or local with `--local`) |
-| `lv3 validate` | `make remote-validate` | build server |
-| `lv3 vm create` | `make remote-tofu-apply ENV=...` | build server → Proxmox API |
+| `lv3 deploy` | `make remote-exec COMMAND="make live-apply-service ..."` | build server → Proxmox VM |
+| `lv3 lint` | `make remote-lint` or `scripts/validate_repo.sh yaml ansible-lint` | build server (or local with `--local`) |
+| `lv3 validate` | `make remote-validate` or `make remote-pre-push` with `--strict` | build server |
+| `lv3 vm create` | repo-managed OpenTofu route via `make remote-tofu-apply ...` or a guarded `remote-exec` fallback | build server → Proxmox API |
 | `lv3 secret get` | `openbao kv get ...` (over Tailscale) | OpenBao on `docker-runtime-lv3` |
 | `lv3 fixture up` | `make fixture-up FIXTURE=...` | build server → Proxmox staging |
 | `lv3 run` | Windmill API trigger | Windmill on `docker-runtime-lv3` |
 | `lv3 logs` | Loki API query | Loki on monitoring VM |
-| `lv3 ssh` | `ssh ops@<tailscale-ip>` | direct SSH via Tailscale |
-| `lv3 open` | `open https://<service>.lv3.org` | local browser |
+| `lv3 ssh` | `ssh ops@<inventory-ip>` | direct SSH via Tailscale / subnet route |
+| `lv3 open` | `python3 -m webbrowser <url>` | local browser |
 
 ### Implementation
 
-`scripts/lv3_cli.py` is a Python 3.12 script with no external dependencies beyond the stdlib and `click` (already in `requirements.txt`). It reads:
+`scripts/lv3_cli.py` is a Python 3.12 script with no runtime dependencies beyond the standard library. It reads:
 - `config/service-capability-catalog.json` for service URLs, health probes, VM assignments
-- `config/build-server.json` for remote execution config
-- `config/vm-template-manifest.json` for Packer template state
+- `config/health-probe-catalog.json` for status probing rules
+- `config/workflow-catalog.json` for Windmill workflow discovery and completion
+- `config/controller-local-secrets.json` for local secret file locations used by private API routes
 
 The CLI is self-bootstrapping: `lv3 --help` works immediately after `make install-cli`; it does not require Ansible, Docker, or any service to be reachable.
+
+Routes that depend on other ADRs such as OpenTofu VM lifecycle, fixtures, or service scaffolding fail explicitly when the required repo surfaces are still absent. The CLI does not invent ad hoc fallbacks for missing automation.
 
 ### `make install-cli`
 
 ```bash
 pipx install --editable . --force  # installs lv3 CLI from pyproject.toml
-# or: ln -sf $(pwd)/scripts/lv3_cli.py /usr/local/bin/lv3 && chmod +x
+# fallback when pipx is unavailable:
+python3 -m pip install --user --editable .
 ```
 
 ### Shell completion
@@ -95,17 +99,14 @@ lv3 --install-completion zsh    # writes to ~/.zshrc
 ```
 $ lv3 deploy grafana --env staging
 
-🎯  lv3 deploy grafana --env staging
-    Route:   build server (build-lv3) → Proxmox staging VM
-    Command: ansible-playbook site.yml -l docker_runtime_staging --tags grafana
+lv3 deploy grafana --env staging
+Route:   controller -> build server -> target service playbook
+Command: make remote-exec COMMAND='make live-apply-service service=grafana env=staging'
 
-    Syncing repo to build-lv3...                  ✓  1.2s
-    Running validation gate...                    ✓  8.4s
-    Applying playbook (staging)...                ✓  94s
-    Health check: https://grafana.staging.lv3.org ✓  2.1s
+Exit:    0
 
-    Receipt: receipts/live-applies/2026-03-22-grafana-staging.json
-    Total:   1m 46s
+Receipt: receipts/live-applies/<latest-matching-receipt>.json
+Total:   1m 46s
 ```
 
 ### `lv3 status` — the dashboard in a terminal
@@ -123,9 +124,7 @@ windmill            docker-runtime-lv3    windmill.lv3.org        ✓ 200
 keycloak            docker-runtime-lv3    auth.lv3.org            ✓ 200
 ...
 
-BUILD SERVER        build-lv3             up  • cache warm  • 4 cpus free
-STAGING             (no active fixtures)
-LAST DEPLOY         grafana  2026-03-21 18:05  (23h ago)
+LAST DEPLOY         2026-03-23-<receipt>
 ```
 
 ## Consequences
@@ -136,11 +135,12 @@ LAST DEPLOY         grafana  2026-03-21 18:05  (23h ago)
 - Routing transparency eliminates "wait, does this run on my laptop?" confusion
 - Shell completion makes the CLI pleasant to use; the 30+ commands become browsable
 - `--dry-run` and `--explain` on every command lower the fear barrier for new operators
+- The CLI can expose future routes early while still failing explicitly if a dependent ADR surface is not merged yet
 
 **Negative / Trade-offs**
 - The CLI is a thin wrapper; it does not add new capabilities, only a consistent surface over existing ones
 - Must be kept in sync with the underlying `make` targets and scripts; a `make` target rename requires a CLI update
-- Python's `click` library adds ~200 ms startup overhead vs a compiled binary; acceptable for interactive use
+- Some command groups are only as complete as the underlying ADRs they depend on; the CLI surfaces those dependency gaps rather than hiding them
 
 ## Alternatives Considered
 
