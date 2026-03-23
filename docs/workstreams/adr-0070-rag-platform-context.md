@@ -60,6 +60,6 @@
 
 ## Repo Implementation Notes
 
-- Repo implementation completed on `2026-03-22` for release `0.62.0`.
+- Repo implementation completed on `2026-03-23` for release `0.71.0`.
 - Live apply completed on `2026-03-23` for platform version `0.35.0`.
 - The running platform now serves the private platform-context API and Qdrant through the Proxmox host Tailscale proxy, with offline-safe `token-hash` embeddings and normalized source citations.

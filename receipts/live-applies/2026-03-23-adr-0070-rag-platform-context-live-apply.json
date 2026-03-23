@@ -4,8 +4,8 @@
   "applied_on": "2026-03-23",
   "recorded_on": "2026-03-23",
   "recorded_by": "codex",
-  "source_commit": "1156f875ccfe30ed2470e7459eb040e4b6ef4a3d",
-  "repo_version_context": "0.70.0",
+  "source_commit": "03700e2a94a35e05adcb90dcc7300614c7c62c22",
+  "repo_version_context": "0.71.0",
   "workflow_id": "converge-rag-context",
   "adr": "0070",
   "summary": "Applied the private platform-context API and Qdrant runtime on docker-runtime-lv3, exposed it through the Proxmox host Tailscale proxy on port 8010, and rebuilt the live retrieval corpus with normalized repo-path citations.",
@@ -40,7 +40,7 @@
     {
       "check": "Corpus build dry run",
       "result": "pass",
-      "observed": "`python3 scripts/build_rag_index.py --dry-run` reported `source_count: 150` and `chunk_count: 923` from the repository corpus."
+      "observed": "`python3 scripts/build_rag_index.py --dry-run` reported `source_count: 160` and `chunk_count: 1010` from the integrated repository corpus."
     }
   ],
   "evidence_refs": [

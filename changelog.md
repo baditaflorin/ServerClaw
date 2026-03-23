@@ -8,6 +8,16 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.71.0 - 2026-03-23
+
+- finalized the ADR 0070 live-apply path on current `main` by resolving Proxmox Tailscale proxy definitions from canonical platform data, fixing host inventory proxy-port templates to use `platform_port_assignments`, and extending the proxy role contract plus regression coverage
+- removed the private platform-context runtime's dependency on `platform_service_topology` defaults during live convergence and taught `scripts/generate_platform_vars.py` to resolve `platform_port_assignments.*` proxy-port templates so repository validation matches the live inventory model
+- refreshed ADR 0070 release metadata, stack observations, and the live-apply receipt for the verified platform-context deployment now running on `docker-runtime-lv3`
+
+Platform impact:
+
+- the private platform context API remains live at `http://100.118.189.95:8010`, and the current repository corpus dry run now reports `160` indexed sources and `1010` chunks on the integrated branch
+
 ## 0.70.0 - 2026-03-23
 
 - applied ADR 0070 live by converging the private platform-context API and Qdrant on `docker-runtime-lv3`, publishing the service through the Proxmox host Tailscale proxy on `http://100.118.189.95:8010`, and rebuilding the live index from the mirrored platform corpus
