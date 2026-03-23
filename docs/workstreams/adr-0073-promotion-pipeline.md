@@ -2,9 +2,9 @@
 
 - ADR: [ADR 0073](../adr/0073-environment-promotion-gate-and-deployment-pipeline.md)
 - Title: Formal staging-to-production promotion workflow with evidence gates and operator approval
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0073-promotion-pipeline`
-- Worktree: `../proxmox_florin_server-promotion-pipeline`
+- Worktree: `.worktrees/adr-0073`
 - Owner: codex
 - Depends On: `adr-0072-staging-environment`, `adr-0044-windmill`, `adr-0048-command-catalog`, `adr-0064-health-probe-contracts`, `adr-0066-mutation-audit-log`
 - Conflicts With: none
@@ -58,6 +58,14 @@
 - the operator approval gate blocks promotion without an explicit approval event
 - health check failure in staging correctly blocks the pipeline before the production step
 - all receipt files are valid against their JSON schemas
+
+## Delivered
+
+- added the repo-managed promotion pipeline at `scripts/promotion_pipeline.py`, including gate evaluation, promotion receipt validation, production promotion execution, and break-glass audit emission
+- extended live-apply receipt handling to support staging receipts under `receipts/live-applies/staging/` and indexed promotion receipts under `receipts/promotions/`
+- added `make promote`, the `deploy-and-promote` workflow contract, the `promote-to-production` command contract, and the `operator_approved` approval policy
+- added the promotion receipt schema, the dedicated operator runbook, and the seeded Windmill `f/lv3/deploy_and_promote` wrapper
+- added focused regression coverage in `tests/test_promotion_pipeline.py` and wired promotion receipt validation into the repository data-model gate
 
 ## Notes For The Next Assistant
 

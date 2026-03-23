@@ -1,32 +1,57 @@
 services:
+  openbao-agent:
+    image: {{ windmill_openbao_agent_image }}
+    container_name: {{ windmill_openbao_agent_container_name }}
+    command:
+      - agent
+      - -config=/openbao-agent/agent.hcl
+    network_mode: host
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -s {{ windmill_env_file }}
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    volumes:
+      - {{ windmill_openbao_agent_dir }}:/openbao-agent:ro
+      - {{ windmill_env_file | dirname }}:{{ windmill_env_file | dirname }}
+
   windmill_server:
-    image: ${WM_IMAGE}
+    image: {{ windmill_image }}
     restart: unless-stopped
     ports:
       - "{{ windmill_server_port }}:8000"
+    env_file:
+      - {{ windmill_env_file }}
     environment:
-      DATABASE_URL: ${DATABASE_URL}
       MODE: server
-      BASE_URL: ${BASE_URL}
-      SUPERADMIN_SECRET: ${SUPERADMIN_SECRET}
       SERVER_BIND_ADDR: 0.0.0.0
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
     volumes:
       - {{ windmill_mutation_audit_dir }}:/var/log/platform
       - worker_logs:/tmp/windmill/logs
 
   windmill_worker:
-    image: ${WM_IMAGE}
+    image: {{ windmill_image }}
     restart: unless-stopped
     privileged: true
+    env_file:
+      - {{ windmill_env_file }}
     environment:
-      DATABASE_URL: ${DATABASE_URL}
       MODE: worker
       WORKER_GROUP: default
       NUM_WORKERS: "{{ windmill_worker_count }}"
       FAVOR_UNSHARE_PID: "true"
       LV3_MUTATION_AUDIT_FILE: /var/log/platform/mutation-audit.jsonl
     depends_on:
-      - windmill_server
+      openbao-agent:
+        condition: service_healthy
+      windmill_server:
+        condition: service_started
     volumes:
       - {{ windmill_mutation_audit_dir }}:/var/log/platform
       - /var/run/docker.sock:/var/run/docker.sock
@@ -34,10 +59,11 @@ services:
       - worker_logs:/tmp/windmill/logs
 
   windmill_worker_native:
-    image: ${WM_IMAGE}
+    image: {{ windmill_image }}
     restart: unless-stopped
+    env_file:
+      - {{ windmill_env_file }}
     environment:
-      DATABASE_URL: ${DATABASE_URL}
       MODE: worker
       WORKER_GROUP: native
       NATIVE_MODE: "true"
@@ -45,13 +71,16 @@ services:
       SLEEP_QUEUE: "200"
       LV3_MUTATION_AUDIT_FILE: /var/log/platform/mutation-audit.jsonl
     depends_on:
-      - windmill_server
+      openbao-agent:
+        condition: service_healthy
+      windmill_server:
+        condition: service_started
     volumes:
       - {{ windmill_mutation_audit_dir }}:/var/log/platform
       - worker_logs:/tmp/windmill/logs
 
   windmill_extra:
-    image: ${WM_EXTRA_IMAGE}
+    image: {{ windmill_extra_image }}
     restart: unless-stopped
     environment:
       ENABLE_LSP: "true"

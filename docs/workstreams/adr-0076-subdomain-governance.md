@@ -63,4 +63,4 @@
 - added reserved-prefix governance to `config/subdomain-catalog.json` and extended the validator to enforce both prefix policy and NGINX route coverage
 - added `playbooks/provision-subdomain.yml` plus the `make provision-subdomain FQDN=<hostname>` entry point backed by new workflow and command contracts
 - documented the lifecycle in `docs/runbooks/subdomain-governance.md` and corrected subdomain-validator invocation examples to use the required PyYAML runtime
-- recorded ADR 0076 as implemented in repository release `0.79.0` without claiming a corresponding live platform rollout yet
+- recorded ADR 0076 as implemented in repository release `0.84.0` without claiming a corresponding live platform rollout yet

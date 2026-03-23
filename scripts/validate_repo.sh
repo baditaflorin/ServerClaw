@@ -16,7 +16,7 @@ export ANSIBLE_COLLECTIONS_PATH="$ANSIBLE_COLLECTIONS_DIR"
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|shell|json|data-models|generated-docs|generated-portals|health-probes]...
+  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|shell|json|compose-runtime-envs|data-models|generated-docs|generated-portals|health-probes]...
 
 Examples:
   scripts/validate_repo.sh
@@ -137,6 +137,27 @@ validate_json() {
   done
 }
 
+validate_compose_runtime_envs() {
+  local env_files=()
+
+  echo "Compose runtime env guard"
+  mapfile -t env_files < <(
+    find "$REPO_ROOT" \
+      \( -path "$REPO_ROOT/.git" \
+         -o -path "$REPO_ROOT/.ansible" \
+         -o -path "$REPO_ROOT/.claude" \
+         -o -path "$REPO_ROOT/.local" \
+         -o -path "$REPO_ROOT/.venv" \
+         -o -path "$REPO_ROOT/.worktrees" \) -prune \
+      -o -type f -name '*.env' -print
+  )
+  if [[ ${#env_files[@]} -gt 0 ]]; then
+    printf 'Unexpected committed or generated .env files inside the repository:\n' >&2
+    printf '  %s\n' "${env_files[@]#"$REPO_ROOT"/}" >&2
+    exit 1
+  fi
+}
+
 validate_data_models() {
   echo "Repository data model validation"
   uvx --from pyyaml python "$REPO_ROOT/scripts/validate_repository_data_models.py" --validate >/dev/null
@@ -156,6 +177,7 @@ validate_generated_docs() {
 validate_generated_portals() {
   echo "Generated portal validation"
   uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/generate_ops_portal.py" --check >/dev/null
+  uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/generate_changelog_portal.py" --check >/dev/null
 }
 
 validate_health_probes() {
@@ -209,6 +231,7 @@ for stage in "$@"; do
       validate_ansible_lint
       validate_shell
       validate_json
+      validate_compose_runtime_envs
       validate_health_probes
       validate_data_models
       validate_generated_docs
@@ -234,6 +257,9 @@ for stage in "$@"; do
       ;;
     json)
       validate_json
+      ;;
+    compose-runtime-envs)
+      validate_compose_runtime_envs
       ;;
     data-models)
       validate_data_models

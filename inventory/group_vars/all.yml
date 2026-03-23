@@ -130,13 +130,15 @@ openbao_breakglass_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/pr
 openbao_postgres_rotator_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/postgres-rotator-password.txt
 openbao_controller_approle_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/controller-automation-approle.json
 openbao_mail_platform_approle_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/mail-platform-approle.json
+openbao_agent_image: "{{ container_image_catalog.images.openbao_runtime.ref }}"
+compose_runtime_secret_root: /run/lv3-secrets
 openbao_site_dir: /opt/openbao
 openbao_config_dir: /opt/openbao/config
 openbao_policy_dir: /opt/openbao/policies
 openbao_tls_dir: /opt/openbao/tls
 windmill_site_dir: /opt/windmill
 windmill_secret_dir: /etc/lv3/windmill
-windmill_env_file: /opt/windmill/windmill.env
+windmill_env_file: /run/lv3-secrets/windmill/runtime.env
 open_webui_version: 0.8.9
 open_webui_image: "{{ container_image_catalog.images.open_webui_runtime.ref }}"
 open_webui_admin_email: ops@lv3.org

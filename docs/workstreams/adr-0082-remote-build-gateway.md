@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0082](../adr/0082-remote-build-execution-gateway.md)
 - Title: Offload CPU-intensive checks and builds to the build server over SSH with rsync workspace sync
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0082-remote-build-gateway`
 - Worktree: `../proxmox_florin_server-remote-build-gateway`
 - Owner: codex
@@ -61,3 +61,10 @@
 - the rsync must use `--checksum` rather than `--times` because the worktree workspace may have newer mtimes on files that haven't actually changed
 - use `ssh -o ConnectTimeout=5 -o BatchMode=yes` in the connectivity check to fail fast when the build server is unreachable
 - `scripts/remote_exec.sh` should print the exact `docker run` command it will run on the remote server when `REMOTE_EXEC_VERBOSE=1` is set — this is critical for debugging check failures
+
+## Delivered
+
+- added `scripts/remote_exec.sh` with managed SSH connectivity checks, rsync sync, dry-run health verification, and local fallback support
+- added `config/build-server.json`, `inventory/build_server.yml`, and `.rsync-exclude` as the repo-managed build-gateway contract
+- appended the `Makefile` remote execution targets and documented the operator flow in `docs/runbooks/remote-build-gateway.md`
+- added regression coverage for docker-runner selection, local fallback behavior, and the rsync dry-run health check

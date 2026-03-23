@@ -898,6 +898,32 @@ workstreams:
     ready_to_merge: false
     live_applied: false
 
+  - id: adr-0073-promotion-pipeline
+    adr: "0073"
+    title: Environment promotion gate and deployment pipeline
+    status: merged
+    owner: codex
+    branch: codex/adr-0073-promotion-pipeline
+    worktree_path: .worktrees/adr-0073
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0073-promotion-pipeline.md
+    depends_on:
+      - adr-0072-staging-production-topology
+      - adr-0044-windmill
+      - adr-0048-command-catalog
+      - adr-0064-health-probe-contracts
+      - adr-0066-structured-mutation-audit-log
+    conflicts_with: []
+    shared_surfaces:
+      - config/command-catalog.json
+      - config/workflow-catalog.json
+      - scripts/promotion_pipeline.py
+      - receipts/live-applies/staging/
+      - receipts/promotions/
+      - Makefile
+      - Windmill seeded scripts
+    ready_to_merge: false
+    live_applied: false
+
   - id: adr-0074-ops-portal
     adr: "0074"
     title: Platform operations portal
@@ -968,6 +994,29 @@ workstreams:
     ready_to_merge: false
     live_applied: false
 
+  - id: adr-0077-compose-secrets-injection
+    adr: "0077"
+    title: Compose runtime secrets injection via OpenBao Agent
+    status: merged
+    owner: codex
+    branch: codex/adr-0077-compose-secrets-injection
+    worktree_path: ./.worktrees/adr-0077
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0077-compose-secrets-injection.md
+    depends_on:
+      - adr-0043-openbao
+      - adr-0025-docker-compose-stacks
+      - adr-0047-short-lived-creds
+      - adr-0065-secret-rotation-automation
+    conflicts_with: []
+    shared_surfaces:
+      - roles/common/tasks/openbao_compose_env.yml
+      - roles/common/templates/openbao-agent.hcl.j2
+      - compose templates on docker-runtime-lv3
+      - scripts/validate_repo.sh
+      - config/image-catalog.json
+    ready_to_merge: false
+    live_applied: false
+
   - id: adr-0079-playbook-decomposition
     adr: "0079"
     title: Playbook decomposition and shared execution model
@@ -988,6 +1037,49 @@ workstreams:
       - playbooks/tasks/
       - playbooks/groups/
       - playbooks/services/
+      - Makefile
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0081-changelog-portal
+    adr: "0081"
+    title: Platform changelog and deployment history portal
+    status: merged
+    owner: codex
+    branch: codex/adr-0081-changelog-portal
+    worktree_path: ../proxmox_florin_server-changelog-portal
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0081-changelog-portal.md
+    depends_on:
+      - adr-0074-ops-portal
+      - adr-0066-mutation-audit-log
+      - adr-0075-service-capability-catalog
+    conflicts_with: []
+    shared_surfaces:
+      - scripts/generate_changelog_portal.py
+      - scripts/deployment_history.py
+      - build/changelog-portal/
+      - config/agent-tool-registry.json
+      - config/subdomain-catalog.json
+      - changelog.md
+      - docs/release-notes/
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0082-remote-build-gateway
+    adr: "0082"
+    title: Remote build execution gateway
+    status: merged
+    owner: codex
+    branch: codex/adr-0082-remote-build-gateway
+    worktree_path: ../proxmox_florin_server-remote-build-gateway
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0082-remote-build-gateway.md
+    depends_on: []
+    conflicts_with: []
+    shared_surfaces:
+      - scripts/remote_exec.sh
+      - config/build-server.json
+      - inventory/build_server.yml
+      - .rsync-exclude
       - Makefile
     ready_to_merge: false
     live_applied: false

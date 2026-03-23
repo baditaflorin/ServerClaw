@@ -1356,6 +1356,42 @@
         "HETZNER_DNS_API_TOKEN=... make provision-subdomain FQDN=ops.lv3.org"
       ]
     },
+    "deploy-and-promote": {
+      "description": "Validate a staged service change, enforce the ADR 0073 promotion gate, and then apply the approved production promotion.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "promote",
+        "command": "make promote SERVICE=<service-id> STAGING_RECEIPT=receipts/live-applies/staging/<receipt>.json"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/environment-promotion-pipeline.md",
+      "implementation_refs": [
+        "Makefile",
+        "scripts/promotion_pipeline.py",
+        "scripts/live_apply_receipts.py",
+        "config/command-catalog.json",
+        "config/windmill/scripts/deploy-and-promote.py",
+        "docs/schema/promotion-receipt.json",
+        "docs/runbooks/environment-promotion-pipeline.md"
+      ],
+      "outputs": [
+        "A validated promotion gate decision, a production live-apply receipt, and a promotion receipt linking staging evidence to the production mutation."
+      ],
+      "verification_commands": [
+        "python3 scripts/promotion_pipeline.py --validate",
+        "make promote SERVICE=<service-id> STAGING_RECEIPT=receipts/live-applies/staging/<receipt>.json DRY_RUN=true"
+      ]
+    },
     "check-platform-drift": {
       "description": "Run the ADR 0071 observation loop checks and emit structured findings from the controller command lane.",
       "lifecycle_status": "active",

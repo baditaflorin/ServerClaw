@@ -1,0 +1,46 @@
+{
+  "host": "build-lv3",
+  "ssh_key": "~/.ssh/id_ed25519",
+  "workspace_root": "/opt/builds/proxmox_florin_server",
+  "default_timeout_seconds": 900,
+  "docker_socket": "unix:///var/run/docker.sock",
+  "registry_base": "registry.lv3.org",
+  "commands": {
+    "remote-lint": {
+      "runner_label": "lint-ansible",
+      "command": "./scripts/validate_repo.sh yaml ansible-lint",
+      "local_fallback_command": "./scripts/validate_repo.sh yaml ansible-lint"
+    },
+    "remote-validate": {
+      "runner_label": "validate-schemas",
+      "command": "./scripts/validate_repo.sh generated-vars ansible-syntax role-argument-specs shell json health-probes data-models generated-docs generated-portals",
+      "local_fallback_command": "./scripts/validate_repo.sh generated-vars ansible-syntax role-argument-specs shell json health-probes data-models generated-docs generated-portals"
+    },
+    "remote-pre-push": {
+      "runner_label": "pre-push-gate",
+      "command": "./scripts/validate_repo.sh && pytest -q",
+      "local_fallback_command": "./scripts/validate_repo.sh && pytest -q"
+    },
+    "remote-packer-build": {
+      "runner_label": "packer-validate",
+      "skip_docker": true,
+      "command": "test -n \"$IMAGE\" || { echo \"set IMAGE=<name>\" >&2; exit 1; }; cd packer && packer build -var-file=variables/common.pkrvars.hcl \"templates/${IMAGE}.pkr.hcl\"",
+      "local_fallback_command": "test -n \"$IMAGE\" || { echo \"set IMAGE=<name>\" >&2; exit 1; }; cd packer && packer build -var-file=variables/common.pkrvars.hcl \"templates/${IMAGE}.pkr.hcl\""
+    },
+    "remote-image-build": {
+      "runner_label": "image-build",
+      "skip_docker": true,
+      "command": "test -n \"$SERVICE\" || { echo \"set SERVICE=<service-id>\" >&2; exit 1; }; test -n \"$COMMAND\" || { echo \"set COMMAND='docker build ...'\" >&2; exit 1; }; bash -lc \"$COMMAND\"",
+      "local_fallback_command": "test -n \"$SERVICE\" || { echo \"set SERVICE=<service-id>\" >&2; exit 1; }; test -n \"$COMMAND\" || { echo \"set COMMAND='docker build ...'\" >&2; exit 1; }; bash -lc \"$COMMAND\""
+    },
+    "remote-exec": {
+      "runner_label": "shell",
+      "skip_docker": true,
+      "command": "test -n \"$COMMAND\" || { echo \"set COMMAND=<shell-command>\" >&2; exit 1; }; bash -lc \"$COMMAND\"",
+      "local_fallback_command": "test -n \"$COMMAND\" || { echo \"set COMMAND=<shell-command>\" >&2; exit 1; }; bash -lc \"$COMMAND\""
+    },
+    "check-build-server": {
+      "builtin": "check-build-server"
+    }
+  }
+}

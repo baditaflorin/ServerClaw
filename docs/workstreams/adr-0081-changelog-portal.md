@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0081](../adr/0081-platform-changelog-and-deployment-history.md)
 - Title: Generated deployment history portal synthesising receipts, promotions, and audit events into a human-readable timeline
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0081-changelog-portal`
 - Worktree: `../proxmox_florin_server-changelog-portal`
 - Owner: codex
@@ -18,7 +18,7 @@
 - add `get-deployment-history` tool to `config/agent-tool-registry.json`
 - replace the manual detail section of `changelog.md` with a pointer to the portal; preserve the `## Unreleased` scratchpad section
 - add `make generate-changelog-portal` target and hook into `make generate-status`
-- add `docs/release-notes/` directory with the current Unreleased section moved to `docs/release-notes/0.49.0.md`
+- add `docs/release-notes/` directory and move numbered release notes out of the root changelog
 - document the changelog model in `docs/runbooks/deployment-history-portal.md`
 
 ## Non-Goals
@@ -34,7 +34,7 @@
 - updated NGINX config for `changelog.lv3.org`
 - updated `config/subdomain-catalog.json`
 - updated `config/agent-tool-registry.json` (`get-deployment-history` tool)
-- `docs/release-notes/` directory with `0.49.0.md`
+- `docs/release-notes/`
 - updated `changelog.md` (stripped to scratchpad + portal pointer)
 - `docs/runbooks/deployment-history-portal.md`
 - updated `Makefile`
@@ -44,7 +44,7 @@
 
 ## Expected Live Surfaces
 
-- `https://changelog.lv3.org` serving the deployment history portal
+- `https://changelog.lv3.org` serving the deployment history portal after a deliberate apply from `main`
 - `get-deployment-history` tool callable via agent tool registry
 
 ## Verification
@@ -66,3 +66,8 @@
 - share the HTML generation utilities with the ops portal generator (ADR 0074) — extract a common `scripts/portal_utils.py` module rather than duplicating HTML rendering logic
 - the Loki query for audit events should use a short timeout (10 seconds) and fail gracefully; most of the value is in the structured receipt files which are always available without a live Loki instance
 - parse receipts in parallel (concurrent file reads) to keep generation fast as the receipt count grows
+
+## Outcome
+
+- repository implementation is complete on `main`
+- live publication and TLS verification for `changelog.lv3.org` remain pending a deliberate apply from `main`
