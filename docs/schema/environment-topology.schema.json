@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/schema/environment-topology.schema.json",
+  "title": "Environment Topology",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "environments"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "environments": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "status",
+          "purpose",
+          "base_domain",
+          "hostname_pattern",
+          "edge_service_id",
+          "edge_vm",
+          "ingress_ipv4",
+          "topology_model",
+          "isolation_model"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": ["production", "staging"]
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active", "planned"]
+          },
+          "purpose": {
+            "type": "string",
+            "minLength": 1
+          },
+          "base_domain": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+(\\.[a-z0-9-]+)+$"
+          },
+          "hostname_pattern": {
+            "type": "string",
+            "minLength": 1
+          },
+          "edge_service_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]*$"
+          },
+          "edge_vm": {
+            "type": "string",
+            "minLength": 1
+          },
+          "ingress_ipv4": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d+\\.\\d+\\.\\d+$"
+          },
+          "topology_model": {
+            "type": "string",
+            "enum": ["single-node-shared-edge"]
+          },
+          "isolation_model": {
+            "type": "string",
+            "minLength": 1
+          },
+          "operator_access": {
+            "type": "string",
+            "minLength": 1
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

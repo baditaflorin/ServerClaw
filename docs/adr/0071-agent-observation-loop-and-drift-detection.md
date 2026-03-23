@@ -1,10 +1,10 @@
 # ADR 0071: Agent Observation Loop And Autonomous Drift Detection
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.59.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-23
 - Date: 2026-03-22
 
 ## Context
@@ -59,3 +59,11 @@ Autonomous remediation scope (first iteration):
 - Autonomous remediation is limited to pre-approved self-healing commands in the first iteration; all other findings require human or agent-initiated action.
 - The observation loop does not replace Grafana alerts or Uptime Kuma; it operates at a different cadence and granularity.
 - Security-specific scanning (vulnerability CVEs, secret leaks) is handled by dedicated tools referenced from this loop but not implemented within it.
+
+## Implementation Notes
+
+- The controller now executes the six checks through [scripts/platform_observation_tool.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/scripts/platform_observation_tool.py), writing structured findings under [`.local/platform-observation/latest/`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/.local/platform-observation/latest) and an Open WebUI digest under [`.local/open-webui/platform-findings-daily.md`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/.local/open-webui/platform-findings-daily.md).
+- The machine-readable contracts for probes, secrets, images, and findings now live in [config/health-probe-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/health-probe-catalog.json), [config/secret-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/secret-catalog.json), [config/image-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/image-catalog.json), and [docs/schema/platform-finding.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/docs/schema/platform-finding.json).
+- Findings can optionally route to NATS, Mattermost, and GlitchTip through the controller-local secret contract additions in [config/controller-local-secrets.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/controller-local-secrets.json), with lane metadata recorded in [config/control-plane-lanes.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/control-plane-lanes.json) and [config/api-publication.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/config/api-publication.json).
+- Windmill now seeds disabled placeholder scripts and schedules for the observation loop and daily digest through [roles/windmill_runtime/defaults/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/roles/windmill_runtime/defaults/main.yml) and [roles/windmill_runtime/tasks/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/roles/windmill_runtime/tasks/main.yml), but live activation remains pending equivalent secret and execution contracts inside Windmill.
+- Operator usage and the five-hour dead-man contract are documented in [docs/runbooks/agent-observation-loop.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-agent-observation-loop/docs/runbooks/agent-observation-loop.md).

@@ -1,0 +1,25 @@
+---
+netbox_image_tag: v4.5.4
+netbox_image: "{{ container_image_catalog.images.netbox_runtime.ref }}"
+netbox_redis_image: "{{ container_image_catalog.images.netbox_redis_runtime.ref }}"
+netbox_site_dir: /opt/netbox
+netbox_secret_dir: /etc/lv3/netbox
+netbox_compose_file: "{{ netbox_site_dir }}/docker-compose.yml"
+netbox_env_file: "{{ netbox_site_dir }}/netbox.env"
+netbox_server_port: "{{ platform_service_topology | platform_service_port('netbox', 'internal') }}"
+netbox_host_proxy_port: "{{ platform_service_topology | platform_service_port('netbox', 'controller') }}"
+netbox_controller_url: "{{ platform_service_topology | platform_service_url('netbox', 'controller') }}"
+netbox_private_base_url: "{{ platform_service_topology | platform_service_url('netbox', 'internal') }}"
+netbox_database_name: netbox
+netbox_database_user: netbox
+netbox_database_host: "{{ platform_guest_catalog.by_name | platform_guest_attr('postgres-lv3', 'ipv4') }}"
+netbox_database_port: 5432
+netbox_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/netbox/database-password.txt
+netbox_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/netbox
+netbox_superuser_name: ops
+netbox_superuser_email: baditaflorin@gmail.com
+netbox_superuser_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/netbox/superuser-password.txt
+netbox_superuser_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/netbox/api-token.txt
+netbox_secret_key_file: "{{ netbox_secret_dir }}/secret-key"
+netbox_redis_password_file: "{{ netbox_secret_dir }}/redis-password"
+netbox_redis_cache_password_file: "{{ netbox_secret_dir }}/redis-cache-password"

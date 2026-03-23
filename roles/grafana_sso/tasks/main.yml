@@ -1,0 +1,96 @@
+---
+- name: Validate Grafana SSO inputs
+  ansible.builtin.assert:
+    that:
+      - grafana_sso_client_id | length > 0
+      - grafana_sso_client_secret | length > 0
+      - grafana_sso_realm_name | length > 0
+      - grafana_sso_service_topology.public_hostname | length > 0
+      - grafana_sso_keycloak_service_topology.public_hostname | length > 0
+    fail_msg: "grafana_sso requires a client id, client secret, realm, and public hostnames."
+
+- name: Ensure Grafana knows its public root URL
+  community.general.ini_file:
+    path: /etc/grafana/grafana.ini
+    section: server
+    option: root_url
+    value: "{{ grafana_sso_root_url }}"
+    mode: "0640"
+  notify: Restart Grafana
+
+- name: Enable Generic OAuth in Grafana
+  community.general.ini_file:
+    path: /etc/grafana/grafana.ini
+    section: auth.generic_oauth
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    mode: "0640"
+  loop:
+    - option: enabled
+      value: "true"
+    - option: name
+      value: Keycloak
+    - option: allow_sign_up
+      value: "true"
+    - option: client_id
+      value: "{{ grafana_sso_client_id }}"
+    - option: client_secret
+      value: "{{ grafana_sso_client_secret }}"
+    - option: scopes
+      value: openid profile email groups
+    - option: email_attribute_path
+      value: email
+    - option: login_attribute_path
+      value: preferred_username
+    - option: name_attribute_path
+      value: full_name
+    - option: auth_url
+      value: "https://{{ grafana_sso_keycloak_service_topology.public_hostname }}/realms/{{ grafana_sso_realm_name }}/protocol/openid-connect/auth"
+    - option: token_url
+      value: "https://{{ grafana_sso_keycloak_service_topology.public_hostname }}/realms/{{ grafana_sso_realm_name }}/protocol/openid-connect/token"
+    - option: api_url
+      value: "https://{{ grafana_sso_keycloak_service_topology.public_hostname }}/realms/{{ grafana_sso_realm_name }}/protocol/openid-connect/userinfo"
+    - option: role_attribute_path
+      value: "contains(groups[*], 'grafana-admins') && 'Admin' || contains(groups[*], 'grafana-viewers') && 'Viewer' || 'Viewer'"
+    - option: groups_attribute_path
+      value: groups
+    - option: allowed_groups
+      value: "{{ grafana_sso_login_groups | join(',') }}"
+    - option: signout_redirect_url
+      value: "{{ grafana_sso_signout_redirect_url }}"
+  loop_control:
+    label: "{{ item.option }}"
+  notify: Restart Grafana
+  no_log: true
+
+- name: Flush Grafana SSO handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Wait for Grafana to answer locally
+  ansible.builtin.uri:
+    url: http://127.0.0.1:3000/login
+    method: GET
+    status_code: 200
+  register: grafana_sso_login_page
+  retries: 20
+  delay: 3
+  until: grafana_sso_login_page.status == 200
+  changed_when: false
+
+- name: Verify Grafana redirects the OAuth login to Keycloak
+  ansible.builtin.uri:
+    url: http://127.0.0.1:3000/login/generic_oauth
+    method: GET
+    follow_redirects: none
+    status_code: 302
+  register: grafana_sso_redirect
+  changed_when: false
+
+- name: Assert the Grafana OAuth redirect is wired to Keycloak
+  ansible.builtin.assert:
+    that:
+      - >-
+        ('https://' ~ grafana_sso_keycloak_service_topology.public_hostname ~ '/realms/' ~ grafana_sso_realm_name ~ '/protocol/openid-connect/auth')
+        in grafana_sso_redirect.location
+      - ('client_id=' ~ grafana_sso_client_id) in grafana_sso_redirect.location
+    fail_msg: "Grafana is not redirecting the generic OAuth login path to the expected Keycloak client."

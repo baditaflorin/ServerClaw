@@ -1,0 +1,13 @@
+services:
+  open-webui:
+    image: ${OPEN_WEBUI_IMAGE}
+    container_name: {{ open_webui_container_name }}
+    restart: unless-stopped
+    ports:
+      - "{{ open_webui_port }}:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    env_file:
+      - {{ open_webui_env_file }}
+    volumes:
+      - {{ open_webui_data_dir }}:/app/backend/data

@@ -24,6 +24,7 @@ make generate-ops-portal
 This renders:
 
 - `build/ops-portal/index.html`
+- `build/ops-portal/environments/index.html`
 - `build/ops-portal/vms/index.html`
 - `build/ops-portal/subdomains/index.html`
 - `build/ops-portal/runbooks/index.html`
@@ -32,6 +33,7 @@ This renders:
 
 The generator reads:
 
+- `config/environment-topology.json`
 - `config/service-capability-catalog.json`
 - `config/subdomain-catalog.json`
 - `config/agent-tool-registry.json`

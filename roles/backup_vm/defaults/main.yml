@@ -4,6 +4,7 @@ backup_vm_repo_file: /etc/apt/sources.list.d/proxmox-backup.sources
 backup_vm_repo_uri: http://download.proxmox.com/debian/pbs
 backup_vm_repo_channel: pbs-no-subscription
 backup_vm_datastore_name: proxmox
+backup_vm_api_port: 8007
 backup_vm_datastore_disk_device: /dev/sdb
 backup_vm_datastore_disk_filesystem: xfs
 backup_vm_datastore_mountpoint: /mnt/datastore/proxmox

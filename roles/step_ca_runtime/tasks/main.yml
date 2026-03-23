@@ -392,3 +392,6 @@
     mode: "0600"
   delegate_to: localhost
   become: false
+
+- name: Verify step-ca health probes
+  ansible.builtin.import_tasks: verify.yml

@@ -3,8 +3,3 @@
   ansible.builtin.service:
     name: "{{ postgres_vm_postgresql_service_name }}"
     state: restarted
-
-- name: Reload nftables
-  ansible.builtin.systemd:
-    name: nftables
-    state: reloaded

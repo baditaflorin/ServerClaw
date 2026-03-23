@@ -93,6 +93,7 @@
     },
     {
       "fqdn": "ops.lv3.org",
+      "service_id": "ops_portal",
       "environment": "production",
       "status": "planned",
       "exposure": "edge-published",
@@ -122,6 +123,21 @@
       }
     },
     {
+      "fqdn": "sso.lv3.org",
+      "service_id": "keycloak",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0056",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      }
+    },
+    {
       "fqdn": "uptime.lv3.org",
       "service_id": "uptime_kuma",
       "environment": "production",
@@ -135,6 +151,70 @@
         "cert_path": "/etc/letsencrypt/live/lv3-edge/",
         "auto_renew": true
       }
+    },
+    {
+      "fqdn": "grafana.staging.lv3.org",
+      "service_id": "grafana",
+      "environment": "staging",
+      "status": "planned",
+      "exposure": "edge-published",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0072",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Planned staging hostname on the shared NGINX edge."
+    },
+    {
+      "fqdn": "ops.staging.lv3.org",
+      "service_id": "ops_portal",
+      "environment": "staging",
+      "status": "planned",
+      "exposure": "edge-published",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0072",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Planned staging portal generated from the canonical service and environment catalogs."
+    },
+    {
+      "fqdn": "sso.staging.lv3.org",
+      "service_id": "keycloak",
+      "environment": "staging",
+      "status": "planned",
+      "exposure": "edge-published",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0072",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Planned staging identity hostname on the shared NGINX edge."
+    },
+    {
+      "fqdn": "uptime.staging.lv3.org",
+      "service_id": "uptime_kuma",
+      "environment": "staging",
+      "status": "planned",
+      "exposure": "edge-published",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0072",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Planned staged monitoring hostname on the shared NGINX edge."
     }
   ]
 }

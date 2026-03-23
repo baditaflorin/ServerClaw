@@ -1,0 +1,32 @@
+---
+open_webui_site_dir: /opt/open-webui
+open_webui_data_dir: "{{ open_webui_site_dir }}/data"
+open_webui_secret_dir: /etc/lv3/open-webui
+open_webui_compose_file: "{{ open_webui_site_dir }}/docker-compose.yml"
+open_webui_env_file: "{{ open_webui_site_dir }}/open-webui.env"
+open_webui_container_name: open-webui
+open_webui_port: "{{ platform_service_topology | platform_service_port('open_webui', 'internal') }}"
+open_webui_host_proxy_port: "{{ platform_service_topology | platform_service_port('open_webui', 'controller') }}"
+open_webui_image: "{{ container_image_catalog.images.open_webui_runtime.ref }}"
+open_webui_admin_name: Florin Badita
+open_webui_admin_email: ops@lv3.org
+open_webui_internal_base_url: "{{ platform_service_topology | platform_service_url('open_webui', 'internal') }}"
+open_webui_controller_url: "{{ platform_service_topology | platform_service_url('open_webui', 'controller') }}"
+open_webui_webui_url: "{{ open_webui_controller_url }}"
+open_webui_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui
+open_webui_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/admin-password.txt
+open_webui_secret_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/webui-secret-key.txt
+open_webui_provider_env_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/provider.env
+open_webui_oidc_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/oidc-client-secret.txt
+open_webui_admin_password_remote_file: "{{ open_webui_secret_dir }}/admin-password.txt"
+open_webui_secret_key_remote_file: "{{ open_webui_secret_dir }}/webui-secret-key.txt"
+open_webui_enable_oidc: false
+open_webui_oidc_client_id: ""
+open_webui_oidc_provider_url: ""
+open_webui_oidc_provider_name: Keycloak
+open_webui_oidc_scopes: openid email profile
+open_webui_enable_openai_api: false
+open_webui_enable_ollama_api: false
+open_webui_default_models: ""
+open_webui_default_pinned_models: ""
+open_webui_audit_log_level: METADATA

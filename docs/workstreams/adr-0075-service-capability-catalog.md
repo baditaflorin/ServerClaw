@@ -2,32 +2,31 @@
 
 - ADR: [ADR 0075](../adr/0075-service-capability-catalog.md)
 - Title: Machine-readable index of every platform service with URLs, ownership, health probes, and runbook links
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0075-service-capability-catalog`
 - Worktree: `../proxmox_florin_server-service-capability-catalog`
 - Owner: codex
 - Depends On: `adr-0064-health-probe-contracts`, `adr-0068-container-image-policy`, `adr-0065-secret-rotation-automation`
 - Conflicts With: none
-- Shared Surfaces: `config/`, `docs/schema/`, `scripts/validate_repo.sh`, `Makefile`
+- Shared Surfaces: `config/service-capability-catalog.json`, `docs/schema/service-capability-catalog.schema.json`, `scripts/validate_service_catalog.py`, `Makefile`
 
 ## Scope
 
-- define JSON schema in `docs/schema/service-capability-catalog.schema.json`
-- populate `config/service-capability-catalog.json` with all currently-running services (minimum 12 entries covering all live-applied services)
-- write `scripts/validate_service_catalog.py` to cross-reference health-probe-catalog, image-catalog, secret-catalog, and runbook paths
-- add validation to `make validate`
-- add `make show-service SERVICE=<id>` query target for agent and operator use
-- document the catalog schema and maintenance process in `docs/runbooks/service-capability-catalog.md`
+- define a canonical schema for the service capability catalog
+- populate the catalog with the current platform service estate
+- validate runbook paths, health-probe references, image references, secret references, and topology alignment
+- add operator and agent query affordances through `make services` and `make show-service`
+- document maintenance and validation in a dedicated runbook
 
 ## Non-Goals
 
-- service-to-service dependency graphs (first iteration: discovery only)
-- runtime topology updates (catalog is updated manually or via scaffold generator, not auto-discovered)
-
+- service-to-service dependency graphs
+- automatic runtime discovery that mutates the catalog
 ## Expected Repo Surfaces
 
 - `config/service-capability-catalog.json`
 - `docs/schema/service-capability-catalog.schema.json`
+- `scripts/service_catalog.py`
 - `scripts/validate_service_catalog.py`
 - updated `scripts/validate_repo.sh`
 - `docs/runbooks/service-capability-catalog.md`
@@ -37,24 +36,26 @@
 
 ## Expected Live Surfaces
 
-- no live changes; this is a repository-only catalog and validation gate
+- none; this is a repository contract and validation surface
 
 ## Verification
 
-- `make validate` catches a catalog entry with a broken `health_probe_id` reference
-- `make show-service SERVICE=grafana` returns a readable summary of the Grafana service entry
-- all 12+ live-applied services have valid catalog entries
-- JSON Schema validation passes for the full catalog file
+- `make services`
+- `make show-service SERVICE=grafana`
+- `uv run --with pyyaml --with jsonschema python scripts/service_catalog.py --validate`
+- `uv run --with pyyaml --with jsonschema python -m unittest tests/test_validate_service_catalog.py`
+- `make validate`
 
 ## Merge Criteria
 
-- all live-applied services are represented in the catalog
-- all cross-references (health probes, images, secrets, runbooks) resolve
-- the validation script is integrated into `make validate` and documented
-- at least one validation failure is demonstrated in a test fixture
+- all 19 health-probe-catalog services are represented in the catalog
+- monitor names, runbooks, topology links, and cross-catalog references validate cleanly
+- validation is wired into the repository gate
+- ADR metadata records the original repository implementation in `0.69.0` and the current-main completion in `0.72.0`
 
-## Notes For The Next Assistant
+## Delivered
 
-- populate the catalog by reading `versions/stack.yaml`, `config/uptime-kuma/monitors.json`, and existing runbooks — most data already exists, it just needs to be assembled into the schema
-- start with services that have the most complete data (grafana, uptime-kuma, openbao) and work toward those with gaps
-- the cross-reference validation is the most valuable part; build that before the full catalog is complete
+- extended `config/service-capability-catalog.json` to cover the current 19 health-probe-backed services on `main`
+- upgraded `scripts/service_catalog.py` to validate the JSON Schema plus health-probe, image, secret, monitor, runbook, and topology cross-references
+- added `make services`, focused service-catalog regression tests, and a negative broken-health-probe fixture
+- updated the ADR, runbook, workstream metadata, and release files to reflect the current-main completion in `0.72.0`

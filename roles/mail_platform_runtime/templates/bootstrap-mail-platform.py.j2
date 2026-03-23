@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
 import json
-import sys
-import urllib.error
 import urllib.parse
 import urllib.request
 from base64 import b64encode
@@ -11,9 +9,7 @@ from base64 import b64encode
 BASE_URL = "http://127.0.0.1:{{ mail_platform_stalwart_http_port }}"
 AUTH_HEADER = "Basic " + b64encode(b"admin:{{ mail_platform_admin_password }}").decode("ascii")
 DOMAIN_NAME = "{{ mail_platform_domain }}"
-MAILBOX_NAME = "{{ mail_platform_mailbox_localpart }}"
-MAILBOX_ADDRESS = "{{ mail_platform_mailbox_address }}"
-MAILBOX_PASSWORD = "{{ mail_platform_mailbox_password }}"
+MANAGED_MAILBOXES = {{ mail_platform_managed_mailboxes_runtime | to_json }}
 
 
 def api_request(method, path, body=None):
@@ -27,62 +23,109 @@ def api_request(method, path, body=None):
         data = json.dumps(body).encode("utf-8")
     request = urllib.request.Request(f"{BASE_URL}{path}", method=method, data=data, headers=headers)
     with urllib.request.urlopen(request, timeout=30) as response:
-        return json.loads(response.read().decode("utf-8"))
+        body = response.read().decode("utf-8")
+        return json.loads(body) if body else {}
 
 
-def principal_names(principal_type):
+def principal_items(principal_type):
     response = api_request("GET", f"/api/principal?types={urllib.parse.quote(principal_type)}")
-    return {item["name"] for item in response.get("data", {}).get("items", [])}
+    return response.get("data", {}).get("items", [])
 
 
-changed = False
+def principal_by_name(principal_type, name):
+    for item in principal_items(principal_type):
+        if item.get("name") == name:
+            return item
+    return None
 
-domains = principal_names("domain")
-if DOMAIN_NAME not in domains:
-    api_request(
-        "POST",
-        "/api/principal",
-        {
-            "type": "domain",
-            "quota": 0,
-            "name": DOMAIN_NAME,
-            "description": "LV3 managed mail domain",
-            "secrets": [],
-            "emails": [],
-            "urls": [],
-            "memberOf": [],
-            "roles": [],
-            "lists": [],
-            "members": [],
-            "enabledPermissions": [],
-            "disabledPermissions": [],
-            "externalMembers": [],
-        },
-    )
-    changed = True
 
-accounts = principal_names("individual")
-if MAILBOX_NAME not in accounts:
-    api_request(
-        "POST",
-        "/api/principal",
-        {
-            "type": "individual",
-            "quota": 0,
-            "name": MAILBOX_NAME,
-            "description": "LV3 managed server mailbox",
-            "secrets": [MAILBOX_PASSWORD],
-            "emails": [MAILBOX_ADDRESS],
-            "urls": [],
-            "memberOf": [],
-            "roles": ["user"],
-            "lists": [],
-            "members": [],
-            "enabledPermissions": [],
-            "disabledPermissions": [],
-            "externalMembers": [],
-        },
-    )
-    changed = True
+def fetch_principal(principal_id):
+    return api_request("GET", f"/api/principal/{principal_id}").get("data", {})
+
+
+def ensure_domain():
+    changed = False
+    if principal_by_name("domain", DOMAIN_NAME) is None:
+        api_request(
+            "POST",
+            "/api/principal",
+            {
+                "type": "domain",
+                "quota": 0,
+                "name": DOMAIN_NAME,
+                "description": "LV3 managed mail domain",
+                "secrets": [],
+                "emails": [],
+                "urls": [],
+                "memberOf": [],
+                "roles": [],
+                "lists": [],
+                "members": [],
+                "enabledPermissions": [],
+                "disabledPermissions": [],
+                "externalMembers": [],
+            },
+        )
+        changed = True
+    return changed
+
+
+def mailbox_payload(mailbox):
+    return {
+        "type": "individual",
+        "quota": 0,
+        "name": mailbox["localpart"],
+        "description": mailbox["description"],
+        "secrets": [mailbox["password"]],
+        "emails": [mailbox["address"]],
+        "urls": [],
+        "memberOf": [],
+        "roles": ["user"],
+        "lists": [],
+        "members": [],
+        "enabledPermissions": [],
+        "disabledPermissions": [],
+        "externalMembers": [],
+    }
+
+
+def principal_emails(principal):
+    emails = principal.get("emails", [])
+    if isinstance(emails, list):
+        return [str(value) for value in emails]
+    if isinstance(emails, str) and emails:
+        return [emails]
+    return []
+
+
+def ensure_mailbox(mailbox):
+    existing = principal_by_name("individual", mailbox["localpart"])
+    if existing is None:
+        api_request("POST", "/api/principal", mailbox_payload(mailbox))
+        return True
+
+    current = fetch_principal(existing["id"])
+    operations = []
+    if current.get("description") != mailbox["description"]:
+        operations.append({"action": "set", "field": "description", "value": mailbox["description"]})
+
+    current_emails = principal_emails(current)
+    if mailbox["address"] not in current_emails:
+        operations.append({"action": "addItem", "field": "emails", "value": mailbox["address"]})
+    for email in current_emails:
+        if email != mailbox["address"]:
+            operations.append({"action": "removeItem", "field": "emails", "value": email})
+
+    operations.append({"action": "set", "field": "secrets", "value": [mailbox["password"]]})
+
+    if operations:
+        api_request("PATCH", f"/api/principal/{existing['id']}", operations)
+        return True
+    return False
+
+
+changed = ensure_domain()
+for mailbox in MANAGED_MAILBOXES:
+    changed = ensure_mailbox(mailbox) or changed
 
 print("changed" if changed else "ok")

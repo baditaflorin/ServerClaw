@@ -1,0 +1,35 @@
+---
+argument_specs:
+  main:
+    short_description: Trust the shared Step CA for SSH host certificates on managed guests.
+    options:
+      step_ca_internal_url:
+        type: str
+        required: true
+        description:
+          - Internal Step CA URL used for bootstrap and certificate issuance.
+      step_ca_local_root_certificate_file:
+        type: path
+        required: true
+        description:
+          - Controller-local Step CA root certificate path.
+      step_ca_local_ssh_user_ca_file:
+        type: path
+        required: true
+        description:
+          - Controller-local SSH user CA public key path.
+      step_ca_local_hosts_password_file:
+        type: path
+        required: true
+        description:
+          - Controller-local provisioner password file for SSH host certificates.
+      step_ca_root_remote_file:
+        type: path
+        required: true
+        description:
+          - Remote path where the Step CA root certificate is stored.
+      step_ca_ssh_host_certificate_file:
+        type: path
+        required: true
+        description:
+          - Remote SSH host certificate path managed by the role.

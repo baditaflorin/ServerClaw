@@ -1,0 +1,155 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the OpenBao runtime, PKI materials, and seeded automation state.
+    options:
+      openbao_image:
+        type: str
+        required: true
+        description:
+          - Container image reference used for OpenBao.
+      openbao_container_name:
+        type: str
+        required: true
+        description:
+          - Expected running container name used for verification.
+      openbao_site_dir:
+        type: path
+        required: true
+        description:
+          - Base directory for the OpenBao runtime stack.
+      openbao_config_dir:
+        type: path
+        required: true
+        description:
+          - Directory containing rendered OpenBao configuration.
+      openbao_data_dir:
+        type: path
+        required: true
+        description:
+          - Persistent data directory used by OpenBao.
+      openbao_log_dir:
+        type: path
+        required: true
+        description:
+          - Directory that stores OpenBao logs.
+      openbao_policy_dir:
+        type: path
+        required: true
+        description:
+          - Directory that stores rendered OpenBao policies.
+      openbao_tls_dir:
+        type: path
+        required: true
+        description:
+          - Host directory that stores OpenBao TLS material.
+      openbao_compose_file:
+        type: path
+        required: true
+        description:
+          - Compose file path for the managed OpenBao stack.
+      openbao_config_file:
+        type: path
+        required: true
+        description:
+          - Main OpenBao configuration file rendered by the role.
+      openbao_tls_enabled:
+        type: bool
+        required: false
+        description:
+          - Whether OpenBao should expose its TLS listener.
+      openbao_http_port:
+        type: int
+        required: false
+        description:
+          - Guest-local HTTP port used when TLS is disabled.
+      openbao_tls_port:
+        type: int
+        required: false
+        description:
+          - Guest-local HTTPS port exposed by OpenBao.
+      openbao_cluster_port:
+        type: int
+        required: false
+        description:
+          - Cluster communication port used by OpenBao.
+      openbao_api_addr:
+        type: str
+        required: true
+        description:
+          - API address advertised by the managed OpenBao runtime.
+      openbao_cluster_addr:
+        type: str
+        required: true
+        description:
+          - Cluster address advertised by the managed OpenBao runtime.
+      openbao_tls_server_cert_host_file:
+        type: path
+        required: true
+        description:
+          - Host path to the TLS certificate mounted into OpenBao.
+      openbao_tls_server_key_host_file:
+        type: path
+        required: true
+        description:
+          - Host path to the TLS private key mounted into OpenBao.
+      openbao_tls_client_ca_host_file:
+        type: path
+        required: true
+        description:
+          - Host path to the client CA bundle mounted into OpenBao.
+      openbao_local_artifact_dir:
+        type: path
+        required: false
+        description:
+          - Controller-local directory for OpenBao artifacts and secrets.
+      openbao_init_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file that stores the initialization output.
+      openbao_userpass_users:
+        type: list
+        elements: dict
+        required: true
+        description:
+          - Userpass accounts that must exist after convergence.
+      openbao_policies:
+        type: list
+        elements: dict
+        required: true
+        description:
+          - Policies rendered and loaded into OpenBao.
+      openbao_approles:
+        type: list
+        elements: dict
+        required: true
+        description:
+          - AppRole identities provisioned for automation clients.
+      openbao_transit_keys:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Transit keys that must exist after convergence.
+      openbao_database_mount_path:
+        type: str
+        required: false
+        description:
+          - Mount path used for the database secrets engine.
+      openbao_database_name:
+        type: str
+        required: false
+        description:
+          - Database configuration name managed inside OpenBao.
+      openbao_database_connection_url:
+        type: str
+        required: false
+        description:
+          - Connection URL used to manage dynamic database credentials.
+      openbao_database_roles:
+        type: list
+        elements: dict
+        required: false
+        description:
+          - Dynamic database credential roles provisioned by the role.

@@ -1,26 +1,38 @@
 schema_version: 1.0.0
-repo_version: 0.49.0
-platform_version: 0.26.0
+repo_version: 0.75.0
+platform_version: 0.36.0
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
   latest_receipts:
-    monitoring: 2026-03-22-adr-0011-monitoring-live-apply
+    monitoring: 2026-03-22-adr-0052-loki-live-apply
     public_edge_publication: 2026-03-22-adr-0021-edge-publication-live-apply
     docker_runtime: 2026-03-22-adr-0023-docker-runtime-live-apply
     postgres_vm: 2026-03-22-adr-0026-postgres-vm-live-apply
     uptime_kuma: 2026-03-22-adr-0027-uptime-kuma-live-apply
     build_telemetry: 2026-03-22-adr-0028-build-telemetry-live-apply
     backup_vm: 2026-03-22-adr-0029-backup-vm-live-apply
+    guest_network_policy: 2026-03-22-adr-0067-guest-network-policy-live-apply
     runtime_container_telemetry: 2026-03-22-adr-0040-runtime-container-telemetry-live-apply
     mail_platform: 2026-03-22-adr-0041-email-platform-live-apply
     step_ca: 2026-03-22-adr-0042-step-ca-live-apply
     openbao: 2026-03-22-adr-0043-openbao-live-apply
     windmill: 2026-03-22-adr-0044-windmill-live-apply
+    mattermost: 2026-03-22-adr-0057-mattermost-live-apply
+    portainer: 2026-03-22-adr-0055-portainer-live-apply
     short_lived_credentials_and_mtls: 2026-03-22-adr-0047-short-lived-credentials-live-apply
     control_plane_lanes: 2026-03-22-adr-0045-control-plane-communication-lanes-live-apply
     identity_taxonomy: 2026-03-22-adr-0046-identity-classes-live-apply
     command_catalog: 2026-03-22-adr-0048-command-catalog-live-apply
+    control_plane_recovery: 2026-03-22-adr-0051-control-plane-recovery-live-apply
+    notification_profiles: 2026-03-22-adr-0050-notification-profiles-live-apply
+    netbox: 2026-03-22-adr-0054-netbox-live-apply
+    keycloak: 2026-03-22-adr-0056-keycloak-live-apply
+    platform_context: 2026-03-23-adr-0070-rag-platform-context-live-apply
+    ntopng: 2026-03-22-adr-0059-ntopng-live-apply
+    open_webui: 2026-03-22-adr-0060-open-webui-live-apply
+    tempo_tracing: 2026-03-22-adr-0053-tempo-traces-live-apply
+    secret_rotation: 2026-03-23-adr-0065-secret-rotation-live-apply
 
 desired_state:
   host_id: proxmox_florin
@@ -60,6 +72,7 @@ desired_state:
   traffic_model:
     guest_default_gateway: 10.10.10.1
     guest_outbound_via_host_nat: true
+    guest_interconnect_policy: default_deny_with_repo_managed_allows
     public_edge_vm: 10.10.10.10
     public_edge_forwarding_enabled: true
     public_ingress_ports:
@@ -140,6 +153,52 @@ desired_state:
         shared_credential_material: false
         surfaces:
           - proxmox_api
+      - id: ops-portainer
+        class: human_operator
+        principal: ops-portainer
+        owner: Florin Badita
+        purpose: Routine read-mostly Docker runtime inspection in Portainer and bounded emergency actions through the governed Portainer surface.
+        scope_boundary: Portainer UI and API on docker-runtime-lv3 only; desired state remains repo-managed and Portainer is not the source of truth for stack definitions.
+        rotation_or_expiry: Rotate the controller-local Portainer bootstrap password on operator change, compromise, or when narrower SSO-backed identities replace the bootstrap path.
+        credential_storage: Controller-local Portainer artifacts under .local/portainer; not committed to git.
+        shared_credential_material: false
+        surfaces:
+          - portainer_ui
+          - portainer_api
+      - id: florin-badita-sso
+        class: human_operator
+        principal: florin.badita
+        owner: Florin Badita
+        purpose: Routine named operator login for the shared Keycloak broker and the first SSO-backed control-plane apps.
+        scope_boundary: Keycloak realm `lv3` and downstream OIDC-integrated internal control-plane apps only; not used for Linux login, Proxmox API automation, or break-glass recovery.
+        rotation_or_expiry: Rotate the bootstrap password after initial TOTP enrollment, on personnel change, or on compromise.
+        credential_storage: Controller-local bootstrap password under .local/keycloak until the first interactive login completes and the operator rotates it.
+        shared_credential_material: false
+        surfaces:
+          - keycloak_operator_login
+          - grafana_sso
+      - id: lv3-agent-hub
+        class: agent
+        principal: lv3-agent-hub
+        owner: Repository automation
+        purpose: Confidential client-credentials identity for approved LV3 agent workflows against the shared Keycloak broker.
+        scope_boundary: Keycloak token issuance for the `lv3` realm only; not used for interactive login or unrelated services.
+        rotation_or_expiry: Rotate the client secret on compromise, workflow ownership change, or broker reconfiguration.
+        credential_storage: Controller-local client secret under .local/keycloak with a mirrored runtime value on docker-runtime-lv3.
+        shared_credential_material: false
+        surfaces:
+          - keycloak_client_credentials
+      - id: grafana-oauth
+        class: service
+        principal: grafana-oauth
+        owner: Monitoring stack
+        purpose: OIDC client identity that lets Grafana delegate user authentication to Keycloak.
+        scope_boundary: Grafana login against the Keycloak `lv3` realm only; not used for Grafana admin API automation or any other application.
+        rotation_or_expiry: Rotate the client secret on compromise, Grafana reconfiguration, or broker client-policy changes.
+        credential_storage: Controller-local client secret under .local/keycloak with a mirrored value in Grafana's managed config on monitoring-lv3.
+        shared_credential_material: false
+        surfaces:
+          - grafana_oauth
       - id: mail-platform-server-mailbox
         class: service
         principal: server@lv3.org
@@ -152,6 +211,42 @@ desired_state:
         surfaces:
           - stalwart_mailbox
           - mail_gateway_submission
+      - id: mail-platform-operator-alerts
+        class: service
+        principal: alerts@lv3.org
+        owner: Platform operations
+        purpose: Outbound operator alert sender profile for incident and health notifications.
+        scope_boundary: Profile-bound outbound sends through the internal mail gateway only; cannot enumerate mail objects or reuse other sender credentials.
+        rotation_or_expiry: Rotate the mailbox password and scoped gateway API key during sender-profile rotation, compromise, or ownership change.
+        credential_storage: Controller-local profile secrets under .local/mail-platform/profiles with mirrored runtime files on docker-runtime-lv3.
+        shared_credential_material: false
+        surfaces:
+          - stalwart_mailbox
+          - mail_gateway_notification_profile
+      - id: mail-platform-platform-transactional
+        class: service
+        principal: platform@lv3.org
+        owner: Platform services
+        purpose: Outbound transactional sender profile for repo-managed service notifications.
+        scope_boundary: Profile-bound outbound sends through the internal mail gateway only; not used for operator alerts or agent reporting.
+        rotation_or_expiry: Rotate the mailbox password and scoped gateway API key during sender-profile rotation, compromise, or service ownership change.
+        credential_storage: Controller-local profile secrets under .local/mail-platform/profiles with mirrored runtime files on docker-runtime-lv3.
+        shared_credential_material: false
+        surfaces:
+          - stalwart_mailbox
+          - mail_gateway_notification_profile
+      - id: mail-platform-agent-reports
+        class: agent
+        principal: agents@lv3.org
+        owner: Repository automation
+        purpose: Outbound sender profile for agent-generated reports and workflow summaries.
+        scope_boundary: Profile-bound outbound sends through the internal mail gateway only; not used for human operators or unrelated services.
+        rotation_or_expiry: Rotate the mailbox password and scoped gateway API key during sender-profile rotation, compromise, or workflow ownership change.
+        credential_storage: Controller-local profile secrets under .local/mail-platform/profiles with mirrored runtime files on docker-runtime-lv3.
+        shared_credential_material: false
+        surfaces:
+          - stalwart_mailbox
+          - mail_gateway_notification_profile
       - id: proxmox-root-break-glass
         class: break_glass
         principal: root
@@ -163,6 +258,17 @@ desired_state:
         shared_credential_material: true
         surfaces:
           - proxmox_host_linux_break_glass
+      - id: keycloak-bootstrap-admin
+        class: break_glass
+        principal: lv3-bootstrap-admin
+        owner: Florin Badita
+        purpose: Emergency master-realm and realm-administration recovery for Keycloak when named operator login is unavailable.
+        scope_boundary: Keycloak recovery and bootstrap administration only; not used for routine operator sessions or non-human automation.
+        rotation_or_expiry: Rotate the bootstrap admin password after any break-glass use, compromise, or major broker recovery event.
+        credential_storage: Controller-local break-glass password under .local/keycloak; not committed to git.
+        shared_credential_material: false
+        surfaces:
+          - keycloak_master_admin
   security:
     management_sources:
       - 100.64.0.0/10
@@ -181,6 +287,7 @@ desired_state:
       - docker.lv3.org
       - build.lv3.org
       - uptime.lv3.org
+      - sso.lv3.org
       - database.lv3.org
     publish_aaaa_initially: false
   mail:
@@ -190,6 +297,28 @@ desired_state:
     api_private_url: http://10.10.10.20:8081
     fallback_delivery_provider: brevo
     grafana_dashboard_uid: lv3-mail-platform
+    notification_profiles:
+      - id: operator-alerts
+        sender_address: alerts@lv3.org
+        owner: Platform operations
+        credential_scope: Profile-scoped mail gateway API key and Stalwart mailbox password.
+        rate_expectation: Low volume with bursty spikes during incidents; not used for bulk mail.
+        retention_policy: Retain gateway counters and mail delivery traces under the managed observability policy.
+        observability_policy: Track request and delivery counters per profile in the mail gateway state and Grafana mail dashboard.
+      - id: platform-transactional
+        sender_address: platform@lv3.org
+        owner: Platform services
+        credential_scope: Profile-scoped mail gateway API key and Stalwart mailbox password.
+        rate_expectation: Low to moderate transactional volume for repo-managed services.
+        retention_policy: Retain gateway counters and mail delivery traces needed to audit service notifications.
+        observability_policy: Track request and delivery counters per profile in the mail gateway state and Grafana mail dashboard.
+      - id: agent-reports
+        sender_address: agents@lv3.org
+        owner: Repository automation
+        credential_scope: Profile-scoped mail gateway API key and Stalwart mailbox password.
+        rate_expectation: Low to moderate workflow-report volume with bursty audit windows.
+        retention_policy: Retain gateway counters and mail delivery traces needed to audit automated reports.
+        observability_policy: Track request and delivery counters per profile in the mail gateway state and Grafana mail dashboard.
     published_ports:
       - 25
       - 587
@@ -204,9 +333,10 @@ desired_state:
       - docker.lv3.org
       - build.lv3.org
       - uptime.lv3.org
+      - sso.lv3.org
 
 observed_state:
-  checked_at: 2026-03-22
+  checked_at: 2026-03-23
   access:
     ssh_bootstrap_key_working: true
     host_ops_user_working: true
@@ -232,6 +362,12 @@ observed_state:
     message_lane_mail_submission_verified: true
     message_lane_notification_endpoint: lv3-ops-email
     event_lane_mail_webhook_verified: true
+    recovery_backup_store_ssh_source_verified: true
+    recovery_backup_timer_active: true
+    recovery_backup_latest_timestamp: 20260322T212846Z
+    recovery_restore_drill_checked_at: 2026-03-22T21:29:48Z
+    recovery_restore_drill_result: pass
+    recovery_controller_bundle_mirrored: true
   identity_taxonomy:
     reviewed_at: 2026-03-22
     all_identities_documented: true
@@ -244,8 +380,16 @@ observed_state:
       - ops
       - ops@pam
       - lv3-automation@pve
+      - ops-portainer
+      - florin.badita
+      - lv3-agent-hub
+      - grafana-oauth
       - server@lv3.org
+      - alerts@lv3.org
+      - platform@lv3.org
+      - agents@lv3.org
       - root
+      - lv3-bootstrap-admin
     human_operator_access_verified: true
     agent_identity_api_verified: true
     service_identity_mailbox_verified: true
@@ -319,6 +463,7 @@ observed_state:
       - docker.lv3.org
       - build.lv3.org
       - uptime.lv3.org
+      - sso.lv3.org
       - database.lv3.org
   guests:
     template:
@@ -357,8 +502,18 @@ observed_state:
     grafana_running: true
     grafana_version: 12.4.1
     influxdb_running: true
+    loki_running: true
+    prometheus_running: true
+    tempo_running: true
+    alloy_log_shipping_active: true
     grafana_internal_url: http://10.10.10.40:3000
     grafana_public_url: https://grafana.lv3.org
+    grafana_sso_enabled: true
+    grafana_keycloak_redirect_verified: true
+    loki_internal_url: http://10.10.10.40:3100
+    prometheus_internal_url: http://10.10.10.40:9090
+    tempo_internal_url: http://10.10.10.40:3200
+    loki_datasource_name: Loki Logs
     grafana_folder_uid: lv3
     grafana_folder_title: LV3
     grafana_dashboards:
@@ -387,10 +542,42 @@ observed_state:
     influxdb_internal_url: http://10.10.10.40:8086
     proxmox_metric_server_id: influxdb-http
     proxmox_metrics_flow_verified: true
+    traces_flow_verified: true
+    prometheus_service_graph_metrics_verified: true
     nginx_stub_status_loopback_enabled: true
     nginx_guest_metrics_flow_verified: true
     docker_build_metrics_flow_verified: true
     docker_build_duration_metrics_verified: true
+    proxmox_host_log_flow_verified: true
+    nginx_log_flow_verified: true
+    docker_runtime_log_flow_verified: true
+    log_label_dimensions:
+      - host
+      - node_role
+      - environment
+      - lane
+      - source
+    log_host_labels:
+      - backup-lv3
+      - docker-build-lv3
+      - docker-runtime-lv3
+      - monitoring-lv3
+      - nginx-lv3
+      - postgres-lv3
+      - proxmox_florin
+  ntopng:
+    host_tailscale_proxy_url: http://100.118.189.95:3001
+    local_http_url: http://127.0.0.1:3000
+    version: 6.7.260322
+    service_running: true
+    redis_running: true
+    capture_interfaces:
+      - vmbr0
+      - vmbr10
+    primary_interface: vmbr10
+    operator_api_verified: true
+    private_bridge_visibility_verified: true
+    top_hosts_api_verified: true
   docker_runtime:
     vm: 10.10.10.20
     docker_engine_running: true
@@ -405,6 +592,15 @@ observed_state:
     telegraf_active: true
     container_telemetry_flow_verified: true
     guest_network_recovered_after_mac_match_update: true
+  portainer:
+    runtime_vm: 10.10.10.20
+    host_tailscale_proxy_url: https://100.118.189.95:9444
+    endpoint_name: local
+    container_running: true
+    local_admin_bootstrapped: true
+    controller_auth_bootstrapped: true
+    governed_wrapper_verified: true
+    system_status_version: 2.39.1
   step_ca:
     runtime_vm: 10.10.10.20
     api_port: 9000
@@ -452,6 +648,83 @@ observed_state:
       - agents/controller/proxmox-api-primary
       - agents/controller/monitoring
       - services/mail-platform/runtime
+  keycloak:
+    runtime_vm: 10.10.10.20
+    postgres_backend_vm: 10.10.10.50
+    public_url: https://sso.lv3.org
+    internal_http_url: http://10.10.10.20:8091
+    realm: lv3
+    container_running: true
+    public_discovery_verified: true
+    public_dns_verified_via_authoritative_resolver: true
+    named_operator_present: true
+    named_operator_requires_totp_enrollment: true
+    break_glass_admin_present: true
+    agent_client_credentials_verified: true
+    grafana_oidc_client_verified: true
+    managed_groups:
+      - lv3-platform-admins
+      - grafana-admins
+      - grafana-viewers
+      - approved-agent-clients
+  open_webui:
+    runtime_vm: 10.10.10.20
+    host_tailscale_proxy_url: http://100.118.189.95:8008
+    container_running: true
+    healthcheck_verified: true
+    bootstrap_admin_email: ops@lv3.org
+    bootstrap_admin_login_verified: true
+    password_auth_enabled: true
+    oidc_enabled: false
+    approved_provider_env_present: false
+    web_search_permission: false
+    image_generation_permission: false
+    code_interpreter_permission: false
+    direct_tool_servers_permission: false
+  platform_context_api:
+    runtime_vm: 10.10.10.20
+    host_tailscale_proxy_url: http://100.118.189.95:8010
+    private_http_url: http://10.10.10.20:8010
+    container_running: true
+    qdrant_container_running: true
+    healthcheck_verified: true
+    rebuild_verified: true
+    query_verified: true
+    embedding_backend: token-hash
+    indexed_chunk_count: 1010
+    corpus_source_count: 160
+  mattermost:
+    runtime_vm: 10.10.10.20
+    postgres_backend_vm: 10.10.10.50
+    host_tailscale_proxy_url: http://100.118.189.95:8066
+    private_internal_url: http://10.10.10.20:8065
+    container_running: true
+    team_name: lv3
+    channels:
+      - platform-alerts
+      - workflow-events
+      - change-approvals
+      - agent-handoffs
+      - mail-ops
+    incoming_webhooks_managed: true
+    controller_webhook_manifest_present: true
+    workflow_webhook_smoke_verified: true
+    grafana_contact_point_name: lv3-mattermost-platform-alerts
+    grafana_contact_point_present: true
+  netbox:
+    runtime_vm: 10.10.10.20
+    postgres_backend_vm: 10.10.10.50
+    host_tailscale_proxy_url: http://100.118.189.95:8004
+    local_http_url: http://10.10.10.20:8082
+    container_running: true
+    api_token_verified: true
+    repo_sync_verified: true
+    repo_sync_idempotent: true
+    synchronized_site: LV3 Hetzner
+    synchronized_device: proxmox_florin
+    synchronized_vm_count: 6
+    synchronized_prefix_count: 2
+    synchronized_service_count: 11
   mail:
     domain: lv3.org
     hostname: mail.lv3.org
@@ -461,9 +734,26 @@ observed_state:
     stalwart_running: true
     brevo_domain_authenticated: true
     brevo_sender_active: server@lv3.org
+    verified_sender_addresses:
+      - server@lv3.org
+      - alerts@lv3.org
+      - platform@lv3.org
+      - agents@lv3.org
     outbound_gmail_delivery_verified: true
     inbound_external_delivery_verified: true
     mailbox_inbox_delivery_verified: true
+    notification_profile_catalog_verified: true
+    notification_profile_scope_rejection_verified: true
+    notification_profiles:
+      - id: operator-alerts
+        sender_address: alerts@lv3.org
+        send_verified: true
+      - id: platform-transactional
+        sender_address: platform@lv3.org
+        send_verified: true
+      - id: agent-reports
+        sender_address: agents@lv3.org
+        send_verified: true
     fallback_delivery_provider: brevo
     grafana_dashboard_uid: lv3-mail-platform
   uptime_kuma:
@@ -473,11 +763,13 @@ observed_state:
     container_running: true
     edge_published: true
     local_auth_bootstrapped: true
-    seeded_monitors: 6
+    seeded_monitors: 7
+    keycloak_discovery_monitor_verified: true
   public_publication:
     edge_configured: true
     edge_tls_certificate_present: true
     grafana_domain_live: true
+    sso_domain_live: true
     uptime_domain_live: true
     published_hostnames:
       - nginx.lv3.org
@@ -486,6 +778,7 @@ observed_state:
       - docker.lv3.org
       - build.lv3.org
       - uptime.lv3.org
+      - sso.lv3.org
   postgres:
     vm: 10.10.10.50
     service_running: true
@@ -499,6 +792,20 @@ observed_state:
     mode: snapshot
     storage_id: lv3-backup-pbs
     legacy_external_cifs_path_blocked: true
+    control_plane_recovery:
+      runtime_source_vm: docker-runtime-lv3
+      backup_store_vm: backup-lv3
+      runtime_backup_ssh_source: 10.10.10.20
+      runtime_backup_timer_active: true
+      runtime_backup_schedule_utc: "*-*-* 01,07,13,19:15:00"
+      latest_runtime_backup_timestamp: 20260322T212846Z
+      latest_runtime_backup_path: /srv/control-plane-recovery/runtime/docker-runtime-lv3/latest
+      controller_bundle_path: /srv/control-plane-recovery/controller/controller-recovery-bundle.tar.zst
+      restore_drill_timer_active: true
+      restore_drill_schedule_utc: "*-*-* 05:45:00"
+      latest_restore_drill:
+        checked_at: 2026-03-22T21:29:48Z
+        result: pass
 
 release_tracks:
   delivery_model:
@@ -507,8 +814,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.49.0
+    current: 0.75.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.26.0
+    current: 0.36.0
     meaning: intended platform release for the actual server configuration

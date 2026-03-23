@@ -4,8 +4,11 @@
   "title": "Service Capability Catalog",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "services"],
+  "required": ["$schema", "schema_version", "services"],
   "properties": {
+    "$schema": {
+      "const": "docs/schema/service-capability-catalog.schema.json"
+    },
     "schema_version": {
       "type": "string",
       "const": "1.0.0"
@@ -23,7 +26,8 @@
           "category",
           "lifecycle_status",
           "vm",
-          "exposure"
+          "exposure",
+          "environments"
         ],
         "properties": {
           "id": {
@@ -91,6 +95,26 @@
             "type": "string",
             "pattern": "^\\d{4}$"
           },
+          "health_probe_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_]*$"
+          },
+          "image_catalog_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9_-]*$"
+            },
+            "uniqueItems": true
+          },
+          "secret_catalog_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9_]*$"
+            },
+            "uniqueItems": true
+          },
           "runbook": {
             "type": "string",
             "minLength": 1
@@ -106,9 +130,46 @@
               "minLength": 1
             }
           },
+          "environments": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["production"],
+            "properties": {
+              "production": {
+                "$ref": "#/$defs/environmentBinding"
+              },
+              "staging": {
+                "$ref": "#/$defs/environmentBinding"
+              }
+            }
+          },
           "notes": {
             "type": "string"
           }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "environmentBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "url"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["active", "planned"]
+        },
+        "url": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subdomain": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string"
         }
       }
     }

@@ -1,0 +1,28 @@
+{
+  "$schema": "docs/schema/service-capability-catalog.schema.json",
+  "schema_version": "1.0.0",
+  "services": [
+    {
+      "id": "grafana",
+      "name": "Grafana",
+      "description": "Metrics dashboards and alerting for the platform.",
+      "category": "observability",
+      "lifecycle_status": "active",
+      "vm": "monitoring-lv3",
+      "vmid": 140,
+      "internal_url": "http://10.10.10.40:3000",
+      "public_url": "https://grafana.lv3.org",
+      "subdomain": "grafana.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Grafana Public",
+      "health_probe_id": "missing_probe",
+      "adr": "0011",
+      "runbook": "docs/runbooks/monitoring-stack.md",
+      "tags": [
+        "dashboards",
+        "metrics",
+        "monitoring"
+      ]
+    }
+  ]
+}

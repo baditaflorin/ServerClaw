@@ -1,0 +1,22 @@
+---
+argument_specs:
+  main:
+    short_description: Manage the Proxmox guest-firewall contract required for recovery archive delivery.
+    options:
+      control_plane_recovery_backup_vm_firewall_file:
+        type: path
+        required: true
+        description:
+          - Proxmox guest-firewall file rendered for the backup VM.
+      control_plane_recovery_backup_vm_ssh_sources:
+        type: list
+        elements: str
+        required: true
+        description:
+          - Source CIDRs allowed to reach SSH on the backup VM.
+      control_plane_recovery_backup_vm_service_rules:
+        type: list
+        elements: dict
+        required: true
+        description:
+          - Additional service rules that should remain present in the backup VM firewall file.

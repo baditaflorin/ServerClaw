@@ -1,0 +1,17 @@
+---
+portainer_image: "{{ container_image_catalog.images.portainer_runtime.ref }}"
+portainer_container_name: portainer
+portainer_site_dir: /opt/portainer
+portainer_data_dir: "{{ portainer_site_dir }}/data"
+portainer_compose_file: "{{ portainer_site_dir }}/docker-compose.yml"
+portainer_https_port: "{{ platform_service_topology | platform_service_port('portainer', 'internal') }}"
+portainer_host_proxy_port: "{{ platform_service_topology | platform_service_port('portainer', 'controller') }}"
+portainer_endpoint_name: local
+portainer_endpoint_creation_type: 1
+portainer_admin_username: ops-portainer
+portainer_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/portainer
+portainer_admin_password_local_file: "{{ portainer_local_artifact_dir }}/admin-password.txt"
+portainer_admin_auth_local_file: "{{ portainer_local_artifact_dir }}/admin-auth.json"
+portainer_controller_url: "{{ platform_service_topology | platform_service_url('portainer', 'controller') }}"
+portainer_private_url: "{{ platform_service_topology | platform_service_url('portainer', 'internal') }}"
+portainer_verify_ssl: false

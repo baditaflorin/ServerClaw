@@ -8,10 +8,42 @@
       - mail_platform_site_dir | length > 0
       - mail_platform_stalwart_dir | length > 0
       - mail_platform_gateway_dir | length > 0
+      - mail_platform_stalwart_image | length > 0
+      - mail_platform_gateway_base_image | length > 0
       - mail_platform_compose_file | length > 0
       - mail_platform_brevo_sender_email | length > 0
       - mail_platform_brevo_api_key_local_file | length > 0
+      - mail_platform_notification_profiles | length > 0
     fail_msg: "mail_platform_runtime requires mail hostnames, paths, mailbox identity, and the Brevo API key path."
+
+- name: Validate notification profile definitions
+  ansible.builtin.assert:
+    that:
+      - item.id | length > 0
+      - item.mailbox_localpart | length > 0
+      - item.mailbox_address | length > 0
+      - item.sender_email | length > 0
+      - item.sender_name | length > 0
+      - item.reply_to | length > 0
+      - item.owner | length > 0
+      - item.credential_scope | length > 0
+      - item.rate_expectation | length > 0
+      - item.retention_policy | length > 0
+      - item.observability_policy | length > 0
+    fail_msg: "Each notification profile needs identity, ownership, sender, and policy metadata."
+  loop: "{{ mail_platform_notification_profiles }}"
+  loop_control:
+    label: "{{ item.id }}"
+
+- name: Assert notification profile ids are unique
+  ansible.builtin.assert:
+    that:
+      - (mail_platform_notification_profiles | map(attribute='id') | list | unique | length) == (mail_platform_notification_profiles | length)
+      - (mail_platform_notification_profiles | map(attribute='mailbox_localpart') | list | unique | length) == (mail_platform_notification_profiles | length)
+      - (mail_platform_notification_profiles | map(attribute='mailbox_address') | list | unique | length) == (mail_platform_notification_profiles | length)
+      - mail_platform_mailbox_localpart not in (mail_platform_notification_profiles | map(attribute='mailbox_localpart') | list)
+      - mail_platform_mailbox_address not in (mail_platform_notification_profiles | map(attribute='mailbox_address') | list)
+    fail_msg: "Notification profile ids, localparts, and mailbox addresses must be unique."
 
 - name: Ensure the Brevo API key exists on the control machine
   ansible.builtin.stat:
@@ -56,6 +88,8 @@
     - path: "{{ mail_platform_gateway_data_dir }}"
       mode: "0755"
     - path: "{{ mail_platform_secret_dir }}"
+      mode: "0700"
+    - path: "{{ mail_platform_profile_secret_dir }}"
       mode: "0700"
 
 - name: Generate Stalwart admin password
@@ -110,6 +144,28 @@
   register: mail_platform_gateway_api_key_generation
   changed_when: "'changed' in mail_platform_gateway_api_key_generation.stdout"
 
+- name: Generate notification profile mailbox passwords
+  ansible.builtin.shell: |
+    umask 077
+    openssl rand -base64 24 > "{{ mail_platform_profile_secret_dir }}/{{ item.id }}-mailbox-password"
+  args:
+    executable: /bin/bash
+    creates: "{{ mail_platform_profile_secret_dir }}/{{ item.id }}-mailbox-password"
+  loop: "{{ mail_platform_notification_profiles }}"
+  loop_control:
+    label: "{{ item.id }}"
+
+- name: Generate notification profile gateway API keys
+  ansible.builtin.shell: |
+    umask 077
+    openssl rand -hex 32 > "{{ mail_platform_profile_secret_dir }}/{{ item.id }}-gateway-api-key"
+  args:
+    executable: /bin/bash
+    creates: "{{ mail_platform_profile_secret_dir }}/{{ item.id }}-gateway-api-key"
+  loop: "{{ mail_platform_notification_profiles }}"
+  loop_control:
+    label: "{{ item.id }}"
+
 - name: Read Stalwart admin password
   ansible.builtin.slurp:
     src: "{{ mail_platform_admin_password_file }}"
@@ -134,6 +190,24 @@
   register: mail_platform_gateway_api_key_raw
   no_log: true
 
+- name: Read notification profile mailbox passwords
+  ansible.builtin.slurp:
+    src: "{{ mail_platform_profile_secret_dir }}/{{ item.id }}-mailbox-password"
+  loop: "{{ mail_platform_notification_profiles }}"
+  loop_control:
+    label: "{{ item.id }}"
+  register: mail_platform_profile_mailbox_password_raw
+  no_log: true
+
+- name: Read notification profile gateway API keys
+  ansible.builtin.slurp:
+    src: "{{ mail_platform_profile_secret_dir }}/{{ item.id }}-gateway-api-key"
+  loop: "{{ mail_platform_notification_profiles }}"
+  loop_control:
+    label: "{{ item.id }}"
+  register: mail_platform_profile_gateway_api_key_raw
+  no_log: true
+
 - name: Record mail platform secret facts
   ansible.builtin.set_fact:
     mail_platform_admin_password: "{{ mail_platform_admin_password_raw.content | b64decode | trim }}"
@@ -142,9 +216,83 @@
     mail_platform_gateway_api_key: "{{ mail_platform_gateway_api_key_raw.content | b64decode | trim }}"
   no_log: true
 
+- name: Record notification profile runtime facts
+  ansible.builtin.set_fact:
+    mail_platform_notification_profiles_runtime: >-
+      {{
+        (mail_platform_notification_profiles_runtime | default([]))
+        + [
+            item
+            | combine(
+                {
+                  'mailbox_password': (
+                    mail_platform_profile_mailbox_password_raw.results
+                    | selectattr('item.id', 'equalto', item.id)
+                    | map(attribute='content')
+                    | first
+                    | b64decode
+                    | trim
+                  ),
+                  'mailbox_password_file': mail_platform_profile_secret_dir ~ '/' ~ item.id ~ '-mailbox-password',
+                  'mailbox_password_local_file': mail_platform_profile_local_artifact_dir ~ '/' ~ item.id ~ '-mailbox-password.txt',
+                  'gateway_api_key': (
+                    mail_platform_profile_gateway_api_key_raw.results
+                    | selectattr('item.id', 'equalto', item.id)
+                    | map(attribute='content')
+                    | first
+                    | b64decode
+                    | trim
+                  ),
+                  'gateway_api_key_file': mail_platform_profile_secret_dir ~ '/' ~ item.id ~ '-gateway-api-key',
+                  'gateway_api_key_local_file': mail_platform_profile_local_artifact_dir ~ '/' ~ item.id ~ '-gateway-api-key.txt'
+                }
+              )
+          ]
+      }}
+  loop: "{{ mail_platform_notification_profiles }}"
+  loop_control:
+    label: "{{ item.id }}"
+  no_log: true
+
+- name: Record managed mailbox runtime facts
+  ansible.builtin.set_fact:
+    mail_platform_managed_mailboxes_runtime:
+      - localpart: "{{ mail_platform_mailbox_localpart }}"
+        address: "{{ mail_platform_mailbox_address }}"
+        password: "{{ mail_platform_mailbox_password }}"
+        description: "{{ mail_platform_mailbox_description }}"
+  no_log: true
+
+- name: Append notification profile mailboxes to the managed mailbox list
+  ansible.builtin.set_fact:
+    mail_platform_managed_mailboxes_runtime: >-
+      {{
+        mail_platform_managed_mailboxes_runtime
+        + [
+            {
+              'localpart': item.mailbox_localpart,
+              'address': item.mailbox_address,
+              'password': item.mailbox_password,
+              'description': item.description
+            }
+          ]
+      }}
+  loop: "{{ mail_platform_notification_profiles_runtime }}"
+  loop_control:
+    label: "{{ item.id }}"
+  no_log: true
+
 - name: Ensure local mail platform artifact directory exists
   ansible.builtin.file:
     path: "{{ mail_platform_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Ensure local notification profile artifact directory exists
+  ansible.builtin.file:
+    path: "{{ mail_platform_profile_local_artifact_dir }}"
     state: directory
     mode: "0700"
   delegate_to: localhost
@@ -186,6 +334,30 @@
   become: false
   no_log: true
 
+- name: Mirror notification profile mailbox passwords to the control machine
+  ansible.builtin.copy:
+    dest: "{{ item.mailbox_password_local_file }}"
+    content: "{{ item.mailbox_password }}\n"
+    mode: "0600"
+  loop: "{{ mail_platform_notification_profiles_runtime }}"
+  loop_control:
+    label: "{{ item.id }}"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Mirror notification profile gateway API keys to the control machine
+  ansible.builtin.copy:
+    dest: "{{ item.gateway_api_key_local_file }}"
+    content: "{{ item.gateway_api_key }}\n"
+    mode: "0600"
+  loop: "{{ mail_platform_notification_profiles_runtime }}"
+  loop_control:
+    label: "{{ item.id }}"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
 - name: Render the Stalwart configuration file
   ansible.builtin.template:
     src: stalwart-config.toml.j2
@@ -212,10 +384,27 @@
     group: root
     mode: preserve
 
+- name: Render the mail gateway Dockerfile
+  ansible.builtin.template:
+    src: mail-gateway.Dockerfile.j2
+    dest: "{{ mail_platform_gateway_app_dir }}/Dockerfile"
+    owner: root
+    group: root
+    mode: "0644"
+
 - name: Render the mail gateway environment file
   ansible.builtin.template:
     src: mail-gateway.env.j2
     dest: "{{ mail_platform_gateway_dir }}/gateway.env"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Render the notification profiles catalog
+  ansible.builtin.template:
+    src: notification-profiles.json.j2
+    dest: "{{ mail_platform_gateway_profiles_file }}"
     owner: root
     group: root
     mode: "0600"
@@ -323,6 +512,17 @@
   changed_when: false
   no_log: true
 
+- name: Verify the mail gateway can list notification profiles
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ mail_platform_gateway_port }}/v1/profiles"
+    method: GET
+    headers:
+      X-API-Key: "{{ mail_platform_gateway_api_key }}"
+    status_code: 200
+  register: mail_platform_gateway_profiles
+  changed_when: false
+  no_log: true
+
 - name: Verify the mail domain exists in Stalwart
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ mail_platform_stalwart_http_port }}/api/principal?types=domain"
@@ -353,8 +553,29 @@
   changed_when: false
   no_log: true
 
-- name: Assert the managed mailbox account is present
+- name: Assert the managed mailbox accounts are present
   ansible.builtin.assert:
     that:
-      - (mail_platform_accounts.json.data['items'] | map(attribute='name') | list) is contains(mail_platform_mailbox_localpart)
-    fail_msg: "Managed mailbox {{ mail_platform_mailbox_localpart }} is not present in Stalwart."
+      - >-
+        (
+          mail_platform_managed_mailboxes_runtime
+          | map(attribute='localpart')
+          | difference(mail_platform_accounts.json.data['items'] | map(attribute='name') | list)
+          | length
+        ) == 0
+    fail_msg: "One or more managed mailboxes are missing from Stalwart."
+
+- name: Assert the notification profile catalog is present
+  ansible.builtin.assert:
+    that:
+      - >-
+        (
+          mail_platform_notification_profiles_runtime
+          | map(attribute='id')
+          | difference(mail_platform_gateway_profiles.json['items'] | map(attribute='id') | list)
+          | length
+        ) == 0
+    fail_msg: "One or more notification profiles are missing from the mail gateway catalog."
+
+- name: Verify mail platform health probes
+  ansible.builtin.import_tasks: verify.yml

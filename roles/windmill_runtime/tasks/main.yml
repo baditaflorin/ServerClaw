@@ -1,21 +1,26 @@
 ---
 - name: Validate Windmill runtime inputs
-  ansible.builtin.assert:
-    that:
-      - windmill_workspace_id | length > 0
-      - windmill_workspace_name | length > 0
-      - windmill_site_dir | length > 0
-      - windmill_secret_dir | length > 0
-      - windmill_compose_file | length > 0
-      - windmill_env_file | length > 0
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: assert_vars
+  vars:
+    common_assert_vars_required:
+      - windmill_workspace_id
+      - windmill_workspace_name
+      - windmill_site_dir
+      - windmill_secret_dir
+      - windmill_compose_file
+      - windmill_env_file
+      - windmill_server_port
+      - windmill_base_url
+      - windmill_database_name
+      - windmill_database_user
+      - windmill_database_host
+      - windmill_database_password_local_file
+      - windmill_seed_scripts
+    common_assert_vars_expressions:
       - windmill_server_port | int > 0
-      - windmill_base_url | length > 0
-      - windmill_database_name | length > 0
-      - windmill_database_user | length > 0
-      - windmill_database_host | length > 0
-      - windmill_database_password_local_file | length > 0
-      - windmill_seed_scripts | length > 0
-    fail_msg: "windmill_runtime requires workspace, database, compose, and seed script inputs."
+    common_assert_vars_fail_msg: "windmill_runtime requires workspace, database, compose, and seed script inputs."
 
 - name: Ensure the Windmill database password exists on the control machine
   ansible.builtin.stat:
@@ -39,17 +44,15 @@
     update_cache: true
 
 - name: Ensure the Windmill directories exist
-  ansible.builtin.file:
-    path: "{{ item.path }}"
-    state: directory
-    owner: root
-    group: root
-    mode: "{{ item.mode }}"
-  loop:
-    - path: "{{ windmill_site_dir }}"
-      mode: "0755"
-    - path: "{{ windmill_secret_dir }}"
-      mode: "0700"
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: directory_tree
+  vars:
+    common_directory_tree_paths:
+      - path: "{{ windmill_site_dir }}"
+        mode: "0755"
+      - path: "{{ windmill_secret_dir }}"
+        mode: "0700"
 
 - name: Generate the Windmill superadmin secret
   ansible.builtin.shell: |
@@ -150,11 +153,12 @@
     or 'Starting' in windmill_up.stdout
 
 - name: Wait for Windmill to listen locally
-  ansible.builtin.wait_for:
-    host: 127.0.0.1
-    port: "{{ windmill_server_port }}"
-    delay: 0
-    timeout: 180
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: wait_port
+  vars:
+    common_wait_port_port: "{{ windmill_server_port }}"
+    common_wait_port_timeout: 180
 
 - name: Wait for the Windmill API version endpoint
   ansible.builtin.uri:
@@ -220,7 +224,12 @@
       description: "{{ item.description }}"
       kind: script
       deployment_message: Repo-managed Windmill seed sync
-      content: "{{ lookup('ansible.builtin.file', item.local_file) }}"
+      content: >-
+        {{
+          lookup('ansible.builtin.template', item.template_src)
+          if item.template_src is defined
+          else lookup('ansible.builtin.file', item.local_file)
+        }}
     return_content: true
     status_code:
       - 201
@@ -230,6 +239,71 @@
     label: "{{ item.path }}"
   register: windmill_seed_script_sync
   failed_when: false
+  changed_when: false
+  no_log: true
+
+- name: Check whether repo-managed Windmill schedules already exist
+  ansible.builtin.uri:
+    url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id | urlencode }}/schedules/exists/{{ item.path | urlencode }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ windmill_superadmin_secret }}"
+    return_content: true
+    status_code: 200
+  loop: "{{ windmill_seed_schedules }}"
+  loop_control:
+    label: "{{ item.path }}"
+  register: windmill_seed_schedule_exists
+  changed_when: false
+  no_log: true
+
+- name: Create repo-managed Windmill schedules
+  ansible.builtin.uri:
+    url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id | urlencode }}/schedules/create"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ windmill_superadmin_secret }}"
+    body_format: json
+    body:
+      path: "{{ item.item.path }}"
+      schedule: "{{ item.item.schedule }}"
+      timezone: "{{ item.item.timezone }}"
+      script_path: "{{ item.item.script_path }}"
+      is_flow: false
+      args: "{{ item.item.args | default({}) }}"
+      enabled: "{{ item.item.enabled | default(false) }}"
+      summary: "{{ item.item.summary }}"
+      description: "{{ item.item.description }}"
+      no_flow_overlap: "{{ item.item.no_flow_overlap | default(true) }}"
+    return_content: true
+    status_code: 201
+  loop: "{{ windmill_seed_schedule_exists.results }}"
+  loop_control:
+    label: "{{ item.item.path }}"
+  when: not (item.json | default(false) | bool)
+  changed_when: true
+  no_log: true
+
+- name: Update existing repo-managed Windmill schedules
+  ansible.builtin.uri:
+    url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id | urlencode }}/schedules/update/{{ item.item.path | urlencode }}"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ windmill_superadmin_secret }}"
+    body_format: json
+    body:
+      schedule: "{{ item.item.schedule }}"
+      timezone: "{{ item.item.timezone }}"
+      args: "{{ item.item.args | default({}) }}"
+      summary: "{{ item.item.summary }}"
+      description: "{{ item.item.description }}"
+      no_flow_overlap: "{{ item.item.no_flow_overlap | default(true) }}"
+    return_content: true
+    status_code: 200
+  loop: "{{ windmill_seed_schedule_exists.results }}"
+  loop_control:
+    label: "{{ item.item.path }}"
+  when: item.json | default(false) | bool
   changed_when: false
   no_log: true
 
@@ -255,3 +329,6 @@
       - windmill_healthcheck.json.job_id_present | bool
       - windmill_healthcheck.json.workspace == windmill_workspace_id
     fail_msg: "Windmill API responded, but the seeded healthcheck script did not return the expected result."
+
+- name: Verify Windmill health probes
+  ansible.builtin.import_tasks: verify.yml

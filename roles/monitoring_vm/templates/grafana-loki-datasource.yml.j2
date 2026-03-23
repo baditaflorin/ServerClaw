@@ -1,0 +1,10 @@
+apiVersion: 1
+
+datasources:
+  - name: {{ monitoring_grafana_loki_datasource_name }}
+    type: loki
+    access: proxy
+    url: {{ monitoring_loki_http_url }}
+    isDefault: false
+    jsonData:
+      maxLines: 5000

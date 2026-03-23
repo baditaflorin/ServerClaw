@@ -16,11 +16,11 @@ export ANSIBLE_COLLECTIONS_PATH="$ANSIBLE_COLLECTIONS_DIR"
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/validate_repo.sh [all|ansible-syntax|yaml|ansible-lint|shell|json|data-models|generated-docs|generated-portals]...
+  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|shell|json|data-models|generated-docs|generated-portals|health-probes]...
 
 Examples:
   scripts/validate_repo.sh
-  scripts/validate_repo.sh ansible-syntax ansible-lint
+  scripts/validate_repo.sh ansible-syntax role-argument-specs ansible-lint
 EOF
 }
 
@@ -63,6 +63,11 @@ validate_ansible_syntax() {
   done
 }
 
+validate_generated_vars() {
+  echo "Generated platform vars validation"
+  uvx --from pyyaml python "$REPO_ROOT/scripts/generate_platform_vars.py" --check >/dev/null
+}
+
 validate_yaml() {
   local yaml_files=()
 
@@ -86,7 +91,7 @@ validate_ansible_lint() {
     tracked_files 'playbooks/*.yml' 'roles/*/*' |
       awk -F/ '
         $1 == "playbooks" && $NF ~ /\.yml$/ { print; next }
-        $1 == "roles" && $2 != "" { print $1 "/" $2 }
+        $1 == "roles" && $2 != "" && $2 != "_template" { print $1 "/" $2 }
       ' |
       awk '!seen[$0]++'
   )
@@ -97,6 +102,10 @@ validate_ansible_lint() {
     cd "$REPO_ROOT"
     "${ANSIBLE_LINT_CMD[@]}" "${lint_targets[@]}"
   )
+}
+
+validate_role_argument_specs() {
+  "$REPO_ROOT/scripts/check_role_argument_specs.sh"
 }
 
 validate_shell() {
@@ -128,9 +137,11 @@ validate_json() {
 validate_data_models() {
   echo "Repository data model validation"
   uvx --from pyyaml python "$REPO_ROOT/scripts/validate_repository_data_models.py" --validate >/dev/null
-  uvx --from pyyaml python "$REPO_ROOT/scripts/service_catalog.py" --validate >/dev/null
+  uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/service_catalog.py" --validate >/dev/null
+  uvx --from pyyaml python "$REPO_ROOT/scripts/environment_topology.py" --validate >/dev/null
+  uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/service_catalog.py" --validate >/dev/null
   python3 "$REPO_ROOT/scripts/subdomain_catalog.py" --validate >/dev/null
-  python3 "$REPO_ROOT/scripts/agent_tool_registry.py" --validate >/dev/null
+  "$REPO_ROOT/scripts/agent_tool_registry.py" --export-mcp >/dev/null
 }
 
 validate_generated_docs() {
@@ -140,7 +151,44 @@ validate_generated_docs() {
 
 validate_generated_portals() {
   echo "Generated portal validation"
-  uvx --from pyyaml python "$REPO_ROOT/scripts/generate_ops_portal.py" --check >/dev/null
+  uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/generate_ops_portal.py" --check >/dev/null
+}
+
+validate_health_probes() {
+  local role
+  local roles=(
+    docker_runtime
+    postgres_vm
+    monitoring_vm
+    backup_vm
+    step_ca_runtime
+    openbao_runtime
+    windmill_runtime
+    mattermost_runtime
+    mail_platform_runtime
+    nginx_edge_publication
+    uptime_kuma_runtime
+    netbox_runtime
+    open_webui_runtime
+    portainer_runtime
+    proxmox_ntopng
+  )
+
+  echo "Health probe contract validation"
+  for role in "${roles[@]}"; do
+    local verify_file="$REPO_ROOT/roles/$role/tasks/verify.yml"
+    local main_file="$REPO_ROOT/roles/$role/tasks/main.yml"
+
+    if [[ ! -f "$verify_file" ]]; then
+      echo "Missing verify task file: roles/$role/tasks/verify.yml" >&2
+      exit 1
+    fi
+
+    if ! grep -Eq 'import_tasks: verify\.yml|include_tasks: verify\.yml' "$main_file"; then
+      echo "roles/$role/tasks/main.yml does not import verify.yml" >&2
+      exit 1
+    fi
+  done
 }
 
 if [[ $# -eq 0 ]]; then
@@ -150,20 +198,29 @@ fi
 for stage in "$@"; do
   case "$stage" in
     all)
+      validate_generated_vars
       validate_ansible_syntax
       validate_yaml
+      validate_role_argument_specs
       validate_ansible_lint
       validate_shell
       validate_json
+      validate_health_probes
       validate_data_models
       validate_generated_docs
       validate_generated_portals
+      ;;
+    generated-vars)
+      validate_generated_vars
       ;;
     ansible-syntax)
       validate_ansible_syntax
       ;;
     yaml)
       validate_yaml
+      ;;
+    role-argument-specs)
+      validate_role_argument_specs
       ;;
     ansible-lint)
       validate_ansible_lint
@@ -176,6 +233,9 @@ for stage in "$@"; do
       ;;
     data-models)
       validate_data_models
+      ;;
+    health-probes)
+      validate_health_probes
       ;;
     generated-docs)
       validate_generated_docs

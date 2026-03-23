@@ -1,0 +1,16 @@
+services:
+  mattermost:
+    image: ${MM_IMAGE}
+    container_name: {{ mattermost_container_name }}
+    restart: unless-stopped
+    env_file:
+      - {{ mattermost_env_file }}
+    ports:
+      - "{{ mattermost_server_port }}:{{ mattermost_server_port }}"
+    volumes:
+      - {{ mattermost_site_dir }}/volumes/app/mattermost/config:/mattermost/config
+      - {{ mattermost_site_dir }}/volumes/app/mattermost/data:/mattermost/data
+      - {{ mattermost_site_dir }}/volumes/app/mattermost/logs:/mattermost/logs
+      - {{ mattermost_site_dir }}/volumes/app/mattermost/plugins:/mattermost/plugins
+      - {{ mattermost_site_dir }}/volumes/app/mattermost/client/plugins:/mattermost/client/plugins
+      - {{ mattermost_site_dir }}/volumes/app/mattermost/bleve-indexes:/mattermost/bleve-indexes

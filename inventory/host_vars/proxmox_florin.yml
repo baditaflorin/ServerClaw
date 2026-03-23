@@ -15,6 +15,33 @@ proxmox_internal_ipv4: 10.10.10.1
 proxmox_internal_cidr: 24
 proxmox_internal_network: 10.10.10.0/24
 proxmox_public_edge_ipv4: 10.10.10.10
+platform_port_assignments:
+  monitoring_grafana_port: 3000
+  monitoring_influxdb_port: 8086
+  monitoring_loki_port: 3100
+  monitoring_prometheus_port: 9090
+  monitoring_tempo_http_port: 3200
+  monitoring_otlp_grpc_port: 4317
+  monitoring_otlp_http_port: 4318
+  mail_platform_gateway_port: 8081
+  openbao_http_port: 8201
+  openbao_proxy_port: 8200
+  windmill_server_port: 8000
+  windmill_host_proxy_port: 8005
+  mattermost_server_port: 8065
+  mattermost_host_proxy_port: 8066
+  netbox_server_port: 8082
+  netbox_host_proxy_port: 8004
+  open_webui_port: 8088
+  open_webui_host_proxy_port: 8008
+  platform_context_internal_port: 8010
+  platform_context_host_proxy_port: 8010
+  ntopng_http_port: 3000
+  ntopng_proxy_port: 3001
+  portainer_https_port: 9443
+  portainer_host_proxy_port: 9444
+  step_ca_api_port: 9000
+  step_ca_proxy_port: 9443
 proxmox_tailscale_hostname: proxmox-florin-subnet-router
 proxmox_tailscale_advertise_routes:
   - "{{ proxmox_internal_network }}"
@@ -42,6 +69,11 @@ proxmox_public_ingress_tcp_forwards:
     target_host: 10.10.10.20
     target_port: 993
 proxmox_tailscale_tcp_proxies:
+  - name: ntopng
+    listen_address: "{{ management_tailscale_ipv4 }}"
+    listen_port: "{{ platform_port_assignments.ntopng_proxy_port }}"
+    upstream_host: 127.0.0.1
+    upstream_port: "{{ platform_port_assignments.ntopng_http_port }}"
   - name: postgres-lv3
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: 5432
@@ -49,19 +81,44 @@ proxmox_tailscale_tcp_proxies:
     upstream_port: 5432
   - name: windmill
     listen_address: "{{ management_tailscale_ipv4 }}"
-    listen_port: "{{ windmill_host_proxy_port }}"
+    listen_port: "{{ platform_port_assignments.windmill_host_proxy_port }}"
     upstream_host: 10.10.10.20
     upstream_port: 8000
+  - name: mattermost
+    listen_address: "{{ management_tailscale_ipv4 }}"
+    listen_port: "{{ platform_port_assignments.mattermost_host_proxy_port }}"
+    upstream_host: 10.10.10.20
+    upstream_port: 8065
+  - name: netbox
+    listen_address: "{{ management_tailscale_ipv4 }}"
+    listen_port: "{{ platform_port_assignments.netbox_host_proxy_port }}"
+    upstream_host: 10.10.10.20
+    upstream_port: 8082
   - name: step-ca
     listen_address: "{{ management_tailscale_ipv4 }}"
-    listen_port: "{{ step_ca_proxy_port }}"
+    listen_port: "{{ platform_port_assignments.step_ca_proxy_port }}"
     upstream_host: 10.10.10.20
-    upstream_port: "{{ step_ca_api_port }}"
+    upstream_port: "{{ platform_port_assignments.step_ca_api_port }}"
   - name: openbao
     listen_address: "{{ management_tailscale_ipv4 }}"
-    listen_port: "{{ openbao_proxy_port }}"
+    listen_port: "{{ platform_port_assignments.openbao_proxy_port }}"
     upstream_host: 10.10.10.20
-    upstream_port: "{{ openbao_proxy_port }}"
+    upstream_port: "{{ platform_port_assignments.openbao_proxy_port }}"
+  - name: open-webui
+    listen_address: "{{ management_tailscale_ipv4 }}"
+    listen_port: "{{ platform_port_assignments.open_webui_host_proxy_port }}"
+    upstream_host: 10.10.10.20
+    upstream_port: "{{ platform_port_assignments.open_webui_port }}"
+  - name: platform-context-api
+    listen_address: "{{ management_tailscale_ipv4 }}"
+    listen_port: "{{ platform_port_assignments.platform_context_host_proxy_port }}"
+    upstream_host: 10.10.10.20
+    upstream_port: 8010
+  - name: portainer
+    listen_address: "{{ management_tailscale_ipv4 }}"
+    listen_port: "{{ platform_port_assignments.portainer_host_proxy_port }}"
+    upstream_host: 10.10.10.20
+    upstream_port: 9443
 
 proxmox_guests:
   - vmid: 110
@@ -70,6 +127,7 @@ proxmox_guests:
     ipv4: 10.10.10.10
     cidr: 24
     gateway4: 10.10.10.1
+    macaddr: BC:24:11:0D:03:BB
     cores: 2
     memory_mb: 4096
     disk_gb: 32
@@ -85,8 +143,9 @@ proxmox_guests:
     ipv4: 10.10.10.20
     cidr: 24
     gateway4: 10.10.10.1
+    macaddr: BC:24:11:AA:99:7C
     cores: 4
-    memory_mb: 12288
+    memory_mb: 24576
     disk_gb: 96
     tags:
       - docker
@@ -100,6 +159,7 @@ proxmox_guests:
     ipv4: 10.10.10.30
     cidr: 24
     gateway4: 10.10.10.1
+    macaddr: BC:24:11:0F:8A:F2
     cores: 12
     memory_mb: 24576
     disk_gb: 160
@@ -118,6 +178,7 @@ proxmox_guests:
     ipv4: 10.10.10.40
     cidr: 24
     gateway4: 10.10.10.1
+    macaddr: BC:24:11:B1:76:A0
     cores: 4
     memory_mb: 8192
     disk_gb: 64
@@ -133,6 +194,7 @@ proxmox_guests:
     ipv4: 10.10.10.50
     cidr: 24
     gateway4: 10.10.10.1
+    macaddr: BC:24:11:2A:2E:CA
     cores: 4
     memory_mb: 8192
     disk_gb: 96
@@ -166,6 +228,123 @@ proxmox_guests:
     packages:
       - acl
       - xfsprogs
+
+network_policy:
+  guest_management_sources:
+    - 100.64.0.0/10
+    - 10.10.10.1/32
+  host_source: 10.10.10.1/32
+  guests:
+    nginx-lv3:
+      allowed_inbound:
+        - source: management
+          protocol: tcp
+          ports:
+            - 22
+          description: Operator and Ansible SSH access
+        - source: public
+          protocol: tcp
+          ports:
+            - 80
+            - 443
+          description: Public edge ingress forwarded by the host
+    docker-runtime-lv3:
+      allow_container_forwarding: true
+      allowed_inbound:
+        - source: management
+          protocol: tcp
+          ports:
+            - 22
+          description: Operator and Ansible SSH access
+        - source: public
+          protocol: tcp
+          ports:
+            - 25
+            - 587
+            - 993
+          description: Public mail ingress forwarded by the host
+        - source: host
+          protocol: tcp
+          ports:
+            - 8000
+            - 8010
+            - 8082
+            - 8088
+            - 8200
+            - 9000
+            - 9443
+          description: Host-side private service proxies
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
+            - 3001
+          description: Reverse proxy access to Uptime Kuma
+    docker-build-lv3:
+      allow_container_forwarding: true
+      allowed_inbound:
+        - source: management
+          protocol: tcp
+          ports:
+            - 22
+          description: Operator and Ansible SSH access
+    monitoring-lv3:
+      allowed_inbound:
+        - source: management
+          protocol: tcp
+          ports:
+            - 22
+          description: Operator and Ansible SSH access
+        - source: host
+          protocol: tcp
+          ports:
+            - 8086
+            - 3100
+          description: Proxmox host metrics and log shipping
+        - source: all_guests
+          protocol: tcp
+          ports:
+            - 8086
+            - 3100
+          description: Guest telemetry and log shipping
+        - source: docker-runtime-lv3
+          protocol: tcp
+          ports:
+            - 4318
+          description: Mail platform OTLP trace export
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
+            - 3000
+          description: Reverse proxy access to Grafana
+    postgres-lv3:
+      allowed_inbound:
+        - source: management
+          protocol: tcp
+          ports:
+            - 22
+          description: Operator and Ansible SSH access
+        - source: host
+          protocol: tcp
+          ports:
+            - 5432
+          description: Host-side PostgreSQL TCP proxy
+        - source: docker-runtime-lv3
+          protocol: tcp
+          ports:
+            - 5432
+          description: Application databases and secret rotation
+    backup-lv3:
+      allowed_inbound:
+        - source: management
+          protocol: tcp
+          ports:
+            - 22
+          description: Operator and Ansible SSH access
+        - source: host
+          protocol: tcp
+          ports:
+            - 8007
+          description: Proxmox Backup Server access from the host
 
 backup_vm_vmid: 160
 backup_vm_name: backup-lv3
@@ -384,6 +563,71 @@ lv3_service_topology:
     access:
       kind: tailscale-tcp-proxy
       url: "{{ windmill_controller_url }}"
+  mattermost:
+    service_name: mattermost
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: "{{ mattermost_controller_url }}"
+  netbox:
+    service_name: netbox
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: "{{ netbox_controller_url }}"
+  open_webui:
+    service_name: open-webui
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: "{{ open_webui_controller_url }}"
+  platform_context_api:
+    service_name: platform-context-api
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: "{{ platform_context_controller_url }}"
+  keycloak:
+    service_name: keycloak
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: sso.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: sso
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:8091"
   openbao:
     service_name: openbao
     owning_vm: docker-runtime-lv3
@@ -395,6 +639,28 @@ lv3_service_topology:
     access:
       kind: tailscale-tcp-proxy
       url: "{{ openbao_controller_url }}"
+  ntopng:
+    service_name: ntopng
+    owning_vm: proxmox_florin
+    private_ip: "{{ management_tailscale_ipv4 }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: true
+    access:
+      kind: tailscale-tcp-proxy
+      url: "{{ ntopng_operator_url }}"
+  portainer:
+    service_name: portainer
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: "{{ portainer_controller_url }}"
   postgres:
     service_name: postgres
     owning_vm: postgres-lv3

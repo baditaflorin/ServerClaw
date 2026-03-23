@@ -8,9 +8,22 @@
       - monitoring_grafana_dashboard_uid | length > 0
       - monitoring_grafana_dashboard_file | length > 0
       - monitoring_grafana_vm_dashboard_dir | length > 0
+      - monitoring_grafana_loki_datasource_name | length > 0
+      - monitoring_grafana_prometheus_datasource_uid | length > 0
+      - monitoring_grafana_tempo_datasource_uid | length > 0
       - monitoring_influxdb_url | length > 0
       - monitoring_influxdb_org | length > 0
       - monitoring_influxdb_bucket | length > 0
+      - monitoring_loki_config_file | length > 0
+      - monitoring_loki_data_dir | length > 0
+      - monitoring_loki_http_url | length > 0
+      - monitoring_prometheus_config_file | length > 0
+      - monitoring_tempo_deb_url | length > 0
+      - monitoring_tempo_deb_checksum | length > 0
+      - monitoring_tempo_config_file | length > 0
+      - monitoring_otelcol_deb_url | length > 0
+      - monitoring_otelcol_deb_checksum | length > 0
+      - monitoring_otelcol_config_file | length > 0
       - groups['proxmox_hosts'] | length > 0
     fail_msg: "monitoring_vm requires monitoring paths plus an available proxmox_hosts inventory group."
 
@@ -112,6 +125,9 @@
     owner: root
     group: grafana
     mode: "0755"
+
+- name: Include tracing infrastructure tasks
+  ansible.builtin.include_tasks: tracing.yml
 
 - name: Generate Grafana admin password
   ansible.builtin.shell: |
@@ -552,6 +568,33 @@
   no_log: true
   notify: Restart Grafana
 
+- name: Render Grafana Loki datasource provisioning
+  ansible.builtin.template:
+    src: grafana-loki-datasource.yml.j2
+    dest: "{{ monitoring_grafana_loki_provisioning_file }}"
+    owner: root
+    group: grafana
+    mode: "0640"
+  notify: Restart Grafana
+
+- name: Render Grafana Prometheus datasource provisioning
+  ansible.builtin.template:
+    src: grafana-prometheus-datasource.yml.j2
+    dest: "{{ monitoring_grafana_prometheus_provisioning_file }}"
+    owner: root
+    group: grafana
+    mode: "0640"
+  notify: Restart Grafana
+
+- name: Render Grafana Tempo datasource provisioning
+  ansible.builtin.template:
+    src: grafana-tempo-datasource.yml.j2
+    dest: "{{ monitoring_grafana_tempo_provisioning_file }}"
+    owner: root
+    group: grafana
+    mode: "0640"
+  notify: Restart Grafana
+
 - name: Remove Grafana file-provider dashboard provisioning
   ansible.builtin.file:
     path: /etc/grafana/provisioning/dashboards/lv3-dashboards.yml
@@ -684,6 +727,42 @@
     force_basic_auth: true
     status_code: 200
   register: monitoring_grafana_datasource_check
+  changed_when: false
+  no_log: true
+
+- name: Verify Grafana Loki datasource is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/datasources/name/{{ monitoring_grafana_loki_datasource_name | urlencode }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_grafana_loki_datasource_check
+  changed_when: false
+  no_log: true
+
+- name: Verify Grafana Prometheus datasource is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/datasources/uid/{{ monitoring_grafana_prometheus_datasource_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_grafana_prometheus_datasource_check
+  changed_when: false
+  no_log: true
+
+- name: Verify Grafana Tempo datasource is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/datasources/uid/{{ monitoring_grafana_tempo_datasource_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_grafana_tempo_datasource_check
   changed_when: false
   no_log: true
 
@@ -899,3 +978,6 @@
   register: monitoring_grafana_vm_dashboard_checks
   changed_when: false
   no_log: true
+
+- name: Verify monitoring service health probes
+  ansible.builtin.import_tasks: verify.yml

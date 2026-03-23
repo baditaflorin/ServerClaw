@@ -1,0 +1,27 @@
+---
+- name: Verify OpenBao responds on the local health endpoint
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/seal-status"
+    method: GET
+    return_content: true
+    status_code: 200
+  register: openbao_verify_seal_status
+  changed_when: false
+
+- name: Assert OpenBao is unsealed
+  ansible.builtin.assert:
+    that:
+      - not (openbao_verify_seal_status.json.sealed | bool)
+    fail_msg: "OpenBao health probe returned a sealed node."
+
+- name: Verify OpenBao is active and ready for traffic
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/health"
+    method: GET
+    return_content: true
+    status_code: 200
+  register: openbao_verify_active_health
+  retries: 30
+  delay: 2
+  until: openbao_verify_active_health.status == 200
+  changed_when: false

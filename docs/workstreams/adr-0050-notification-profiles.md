@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0050](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0050-transactional-email-and-notification-profiles.md)
 - Title: Mail sender profiles for platform, operators, and agents
-- Status: merged
+- Status: live_applied
 - Branch: `codex/adr-0050-notification-profiles`
 - Worktree: `../proxmox_florin_server-notification-profiles`
 - Owner: codex
@@ -18,14 +18,15 @@
 
 ## Non-Goals
 
-- live mail-stack deployment in this planning workstream
 - replacing ADR 0041
 
 ## Expected Repo Surfaces
 
 - `docs/adr/0050-transactional-email-and-notification-profiles.md`
 - `docs/workstreams/adr-0050-notification-profiles.md`
-- `docs/runbooks/plan-agentic-control-plane.md`
+- `docs/runbooks/configure-mail-platform.md`
+- `playbooks/mail-platform-notification-profiles-verify.yml`
+- `config/controller-local-secrets.json`
 - `workstreams.yaml`
 
 ## Expected Live Surfaces
@@ -35,14 +36,17 @@
 
 ## Verification
 
-- `ruby -e 'require "yaml"; YAML.load_file("/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml"); puts "workstreams.yaml OK"'`
-- `test -f /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0050-transactional-email-and-notification-profiles.md`
+- `make syntax-check-mail-platform`
+- `ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/mail-platform-notification-profiles-verify.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --limit docker-runtime-lv3`
 
 ## Merge Criteria
 
-- the ADR defines the initial sender profile set and their required metadata
-- the workstream keeps this layered on top of ADR 0041 instead of duplicating it
+- dedicated sender profiles exist for operator alerts, platform transactional mail, and agent reports
+- each profile is backed by a scoped mail-gateway credential and a dedicated sender identity
+- live verification proves profile-scoped send behavior and per-profile delivery counters
 
-## Notes For The Next Assistant
+## Live Apply Notes
 
-- treat Stalwart as the mail substrate and this ADR as the sender-governance layer
+- Live apply completed on `2026-03-22` from the `main` integration worktree using the repo-managed mail platform automation with a guest-only `--limit` because DNS and host ingress were already converged.
+- Scoped verification proved that the operator-alerts API key is rejected when it attempts to send as `platform-transactional`.
+- Focused live delivery verification succeeded for `alerts@lv3.org`, `platform@lv3.org`, and `agents@lv3.org`, and the mail gateway state recorded one successful Brevo send for each profile.

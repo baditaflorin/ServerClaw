@@ -1,0 +1,11 @@
+-i={{ ntopng_interfaces[0] }}
+{% for interface_name in ntopng_interfaces[1:] %}
+-i={{ interface_name }}
+{% endfor %}
+-m={{ ntopng_local_networks_file }}
+-w=:{{ ntopng_http_port }}
+-W={{ ntopng_https_port }}
+-d=/var/lib/ntopng
+-n=1
+-S=local
+-q=

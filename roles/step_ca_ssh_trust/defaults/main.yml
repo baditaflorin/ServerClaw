@@ -2,7 +2,7 @@
 step_ca_cli_version: 0.30.1
 step_ca_cli_download_url: >-
   https://github.com/smallstep/cli/releases/download/v{{ step_ca_cli_version }}/step_linux_{{ step_ca_cli_version }}_amd64.tar.gz
-step_ca_internal_url: "https://{{ hostvars['docker-runtime-lv3'].ansible_host }}:9000"
+step_ca_internal_url: "{{ platform_service_topology | platform_service_url('step_ca', 'internal') }}"
 step_ca_local_root_certificate_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt
 step_ca_local_ssh_user_ca_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/ssh_user_ca.pub
 step_ca_local_hosts_password_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/secrets/provisioners/hosts-password.txt

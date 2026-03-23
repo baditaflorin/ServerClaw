@@ -1,0 +1,70 @@
+---
+argument_specs:
+  main:
+    short_description: Install and configure the Proxmox Backup Server guest.
+    options:
+      backup_vm_ipv4:
+        type: str
+        required: true
+        description:
+          - IPv4 address assigned to the backup guest.
+      backup_vm_repo_file:
+        type: path
+        required: true
+        description:
+          - APT source file rendered for the Proxmox Backup repository.
+      backup_vm_datastore_name:
+        type: str
+        required: true
+        description:
+          - Name of the managed Proxmox Backup datastore.
+      backup_vm_api_port:
+        type: int
+        required: false
+        description:
+          - TCP port exposed by the Proxmox Backup API.
+      backup_vm_datastore_disk_device:
+        type: path
+        required: true
+        description:
+          - Disk device prepared for the datastore filesystem.
+      backup_vm_datastore_disk_filesystem:
+        type: str
+        required: false
+        description:
+          - Filesystem type created on the datastore disk.
+      backup_vm_datastore_mountpoint:
+        type: path
+        required: true
+        description:
+          - Mountpoint backing the managed datastore.
+      backup_vm_datastore_gc_schedule:
+        type: str
+        required: false
+        description:
+          - Garbage-collection schedule applied to the datastore.
+      backup_vm_api_user:
+        type: str
+        required: true
+        description:
+          - Backup API user created for Proxmox automation.
+      backup_vm_api_user_password_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file used to store or load the API user password.
+      backup_vm_api_token_id:
+        type: str
+        required: true
+        description:
+          - Token identifier generated for the managed API user.
+      backup_vm_api_token_local_dir:
+        type: path
+        required: true
+        description:
+          - Controller-local directory that stores backup API artifacts.
+      backup_vm_api_token_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local JSON file that stores the generated API token.

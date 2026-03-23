@@ -3,3 +3,24 @@
   ansible.builtin.systemd:
     name: grafana-server
     state: restarted
+
+- name: Restart Loki
+  ansible.builtin.systemd:
+    name: loki
+    state: restarted
+
+- name: Restart Tempo
+  ansible.builtin.systemd:
+    name: tempo
+    state: restarted
+
+- name: Restart OpenTelemetry Collector
+  ansible.builtin.systemd:
+    name: otelcol-contrib
+    state: restarted
+
+- name: Restart Prometheus
+  ansible.builtin.systemd:
+    name: "{{ monitoring_prometheus_service_name }}"
+    state: restarted
+    daemon_reload: true

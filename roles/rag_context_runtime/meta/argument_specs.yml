@@ -1,0 +1,127 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the private platform context RAG runtime and corpus mirror.
+    options:
+      platform_context_site_dir:
+        type: path
+        required: true
+        description:
+          - Base directory for the platform context runtime stack.
+      platform_context_service_dir:
+        type: path
+        required: true
+        description:
+          - Directory that stores the API service build context.
+      platform_context_corpus_dir:
+        type: path
+        required: true
+        description:
+          - Directory that stores the mirrored query corpus on the guest.
+      platform_context_data_dir:
+        type: path
+        required: true
+        description:
+          - Directory used for persisted Qdrant data.
+      platform_context_secret_dir:
+        type: path
+        required: true
+        description:
+          - Directory that stores the platform context API secrets.
+      platform_context_compose_file:
+        type: path
+        required: true
+        description:
+          - Compose file path for the platform context runtime stack.
+      platform_context_env_file:
+        type: path
+        required: true
+        description:
+          - Environment file rendered for the API and vector store.
+      platform_context_api_token_remote_file:
+        type: path
+        required: true
+        description:
+          - Remote file that stores the bearer token for the platform context API.
+      platform_context_local_artifact_dir:
+        type: path
+        required: true
+        description:
+          - Controller-local directory that mirrors runtime artifacts for operators.
+      platform_context_api_token_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file that stores the mirrored API token.
+      platform_context_internal_port:
+        type: int
+        required: true
+        description:
+          - Local TCP port exposed by the platform context API container.
+      platform_context_host_proxy_port:
+        type: int
+        required: false
+        description:
+          - Host-side TCP port reserved for operator access through the Tailscale proxy.
+      platform_context_controller_url:
+        type: str
+        required: false
+        description:
+          - Operator-facing URL for the platform context API.
+      platform_context_private_url:
+        type: str
+        required: false
+        description:
+          - Guest-local URL used for health and query verification.
+      platform_context_qdrant_image:
+        type: str
+        required: true
+        description:
+          - Container image used for the Qdrant vector store.
+      platform_context_api_image_name:
+        type: str
+        required: true
+        description:
+          - Local image name built for the platform context API service.
+      platform_context_qdrant_collection:
+        type: str
+        required: true
+        description:
+          - Collection name used to store indexed corpus embeddings.
+      platform_context_embedding_backend:
+        type: str
+        required: true
+        description:
+          - Embedding backend identifier passed to the API service.
+      platform_context_embedding_model:
+        type: str
+        required: true
+        description:
+          - Embedding model identifier used when building the corpus index.
+      platform_context_embedding_dimension:
+        type: int
+        required: true
+        description:
+          - Embedding vector dimension expected by the Qdrant collection.
+      platform_context_repo_root:
+        type: path
+        required: false
+        description:
+          - Repository root used to resolve mirrored service and corpus sources.
+      platform_context_corpus_sources:
+        type: list
+        elements: dict
+        required: true
+        description:
+          - Repo-managed documents and metadata files mirrored into the runtime corpus.
+      platform_context_service_sources:
+        type: list
+        elements: dict
+        required: true
+        description:
+          - Repo-managed API service sources copied into the guest build context.
+      platform_context_local_rebuild_script:
+        type: path
+        required: false
+        description:
+          - Controller-local rebuild helper retained for operator workflows.

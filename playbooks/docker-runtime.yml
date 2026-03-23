@@ -12,4 +12,5 @@
         fail_msg: "This playbook only supports Debian guests."
 
   roles:
+    - role: linux_guest_firewall
     - role: docker_runtime

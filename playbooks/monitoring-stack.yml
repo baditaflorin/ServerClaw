@@ -12,6 +12,7 @@
         fail_msg: "This playbook only supports Debian guests."
 
   roles:
+    - role: linux_guest_firewall
     - role: monitoring_vm
 
 - name: Wire Proxmox metrics into the monitoring stack
@@ -21,6 +22,17 @@
 
   roles:
     - role: proxmox_metrics
+
+- name: Converge Proxmox host log shipping
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: loki_log_agent
+      vars:
+        loki_log_agent_role: proxmox-host
+        loki_log_agent_lane: management
 
 - name: Converge NGINX guest observability
   hosts: nginx-lv3
@@ -35,6 +47,7 @@
         fail_msg: "This playbook only supports Debian guests."
 
   roles:
+    - role: linux_guest_firewall
     - role: nginx_observability
 
 - name: Converge docker build guest observability
@@ -50,6 +63,7 @@
         fail_msg: "This playbook only supports Debian guests."
 
   roles:
+    - role: linux_guest_firewall
     - role: docker_build_observability
 
 - name: Converge docker runtime guest observability
@@ -65,4 +79,53 @@
         fail_msg: "This playbook only supports Debian guests."
 
   roles:
+    - role: linux_guest_firewall
     - role: docker_runtime_observability
+
+- name: Converge guest log shipping
+  hosts: lv3_guests
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Ensure target guest is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+    - name: Derive guest log shipping role and lane
+      ansible.builtin.set_fact:
+        monitoring_stack_guest_role: >-
+          {{
+            hostvars[groups['proxmox_hosts'][0]].proxmox_guests
+            | selectattr('name', 'equalto', inventory_hostname)
+            | map(attribute='role')
+            | first
+          }}
+        monitoring_stack_guest_lane: >-
+          {{
+            {
+              'nginx': 'edge',
+              'docker-runtime': 'control-plane',
+              'docker-build': 'build',
+              'monitoring': 'monitoring',
+              'postgres': 'data',
+              'backup': 'backup'
+            }[
+              (
+                hostvars[groups['proxmox_hosts'][0]].proxmox_guests
+                | selectattr('name', 'equalto', inventory_hostname)
+                | map(attribute='role')
+                | first
+              )
+            ]
+          }}
+
+  roles:
+    - role: loki_log_agent
+      vars:
+        loki_log_agent_role: "{{ monitoring_stack_guest_role }}"
+        loki_log_agent_lane: "{{ monitoring_stack_guest_lane }}"
+        loki_log_agent_nginx_logs_enabled: "{{ monitoring_stack_guest_role == 'nginx' }}"
+        loki_log_agent_docker_logs_enabled: "{{ monitoring_stack_guest_role == 'docker-runtime' }}"

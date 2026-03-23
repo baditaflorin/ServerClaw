@@ -1,0 +1,46 @@
+---
+argument_specs:
+  main:
+    short_description: Configure Grafana to use the shared Keycloak OIDC login flow.
+    options:
+      grafana_sso_service_topology:
+        type: dict
+        required: true
+        description:
+          - Service topology entry for Grafana.
+      grafana_sso_keycloak_service_topology:
+        type: dict
+        required: true
+        description:
+          - Service topology entry for the shared Keycloak broker.
+      grafana_sso_client_id:
+        type: str
+        required: true
+        description:
+          - OIDC client id Grafana should use against Keycloak.
+      grafana_sso_client_secret:
+        type: str
+        required: true
+        description:
+          - OIDC client secret Grafana should use against Keycloak.
+      grafana_sso_realm_name:
+        type: str
+        required: true
+        description:
+          - Keycloak realm name used for Grafana login.
+      grafana_sso_login_groups:
+        type: list
+        elements: str
+        required: true
+        description:
+          - Keycloak groups that should be requested and mapped during login.
+      grafana_sso_root_url:
+        type: str
+        required: true
+        description:
+          - Public Grafana root URL.
+      grafana_sso_signout_redirect_url:
+        type: str
+        required: true
+        description:
+          - Logout redirect URL sent to Keycloak after Grafana signout.

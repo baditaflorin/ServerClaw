@@ -15,7 +15,7 @@ HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 WORKFLOW_CATALOG_PATH = repo_path("config", "workflow-catalog.json")
 SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 IDENTIFIER_PATTERN = re.compile(r"^[a-z0-9][a-z0-9_-]*$")
-ALLOWED_TRANSPORTS = {"ssh", "https", "authenticated_submission", "signed_http"}
+ALLOWED_TRANSPORTS = {"ssh", "https", "authenticated_submission", "signed_http", "mixed"}
 ALLOWED_LANE_IDS = ("command", "api", "message", "event")
 ALLOWED_SURFACE_KINDS = {
     "ssh_endpoint",
@@ -24,6 +24,8 @@ ALLOWED_SURFACE_KINDS = {
     "mail_submission",
     "notification_profile",
     "webhook",
+    "event_subject",
+    "chat_channel",
 }
 
 

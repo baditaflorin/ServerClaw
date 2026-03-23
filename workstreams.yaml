@@ -33,7 +33,7 @@ workstreams:
   - id: adr-0014-tailscale
     adr: "0014"
     title: Tailscale private access rollout
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0014-tailscale
     worktree_path: ../proxmox_florin_server-tailscale
@@ -63,7 +63,7 @@ workstreams:
       - backup_policy
       - restore_validation
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0029-backup-vm
     adr: "0029"
@@ -401,8 +401,8 @@ workstreams:
     title: Private-first API publication model
     status: merged
     owner: codex
-    branch: codex/adr-0049-private-api-publication
-    worktree_path: ../proxmox_florin_server-private-api-publication
+    branch: codex/adr-0049-private-first-api-publication-model
+    worktree_path: ../proxmox_florin_server-adr-0049
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0049-private-api-publication.md
     depends_on:
       - adr-0045-communication-lanes
@@ -438,10 +438,10 @@ workstreams:
   - id: adr-0051-control-plane-recovery
     adr: "0051"
     title: Control-plane backup, recovery, and break-glass
-    status: merged
+    status: live_applied
     owner: codex
-    branch: codex/adr-0051-control-plane-recovery
-    worktree_path: ../proxmox_florin_server-control-plane-recovery
+    branch: codex/adr-0051-control-plane-backup-recovery-break-glass
+    worktree_path: ../proxmox_florin_server-adr-0051
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0051-control-plane-recovery.md
     depends_on:
       - adr-0029-backup-vm
@@ -456,12 +456,12 @@ workstreams:
       - break-glass procedures
       - control-plane state
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0052-loki-logs
     adr: "0052"
     title: Centralized log aggregation with Grafana Loki
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/adr-0052-loki-logs
     worktree_path: ../proxmox_florin_server-loki-logs
@@ -476,12 +476,12 @@ workstreams:
       - guest logs
       - container logs
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0053-tempo-traces
     adr: "0053"
     title: OpenTelemetry traces and service maps with Grafana Tempo
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/adr-0053-tempo-traces
     worktree_path: ../proxmox_florin_server-tempo-traces
@@ -496,12 +496,12 @@ workstreams:
       - internal APIs
       - workflow execution
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0054-netbox-topology
     adr: "0054"
     title: NetBox for topology, IPAM, and inventory
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/adr-0054-netbox-topology
     worktree_path: ../proxmox_florin_server-netbox-topology
@@ -514,12 +514,12 @@ workstreams:
       - IP addressing
       - ownership metadata
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0055-portainer-operations
     adr: "0055"
     title: Portainer for read-mostly Docker runtime operations
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/adr-0055-portainer-operations
     worktree_path: ../proxmox_florin_server-portainer-operations
@@ -535,12 +535,12 @@ workstreams:
       - container logs
       - runtime controls
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0056-keycloak-sso
     adr: "0056"
     title: Keycloak for operator and agent SSO
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/adr-0056-keycloak-sso
     worktree_path: ../proxmox_florin_server-keycloak-sso
@@ -556,12 +556,12 @@ workstreams:
       - agent clients
       - MFA policies
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0057-mattermost-chatops
     adr: "0057"
     title: Mattermost for ChatOps and operator-agent collaboration
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/adr-0057-mattermost-chatops
     worktree_path: ../proxmox_florin_server-mattermost-chatops
@@ -569,15 +569,14 @@ workstreams:
     depends_on:
       - adr-0045-communication-lanes
       - adr-0050-notification-profiles
-      - adr-0056-keycloak-sso
     conflicts_with: []
     shared_surfaces:
       - alerts
       - workflow notifications
       - approvals
-      - bot identities
+      - incoming webhooks
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0058-nats-event-bus
     adr: "0058"
@@ -603,10 +602,10 @@ workstreams:
   - id: adr-0059-ntopng-network-visibility
     adr: "0059"
     title: ntopng for private network flow visibility
-    status: ready
+    status: live_applied
     owner: codex
-    branch: codex/adr-0059-ntopng-network-visibility
-    worktree_path: ../proxmox_florin_server-ntopng-network-visibility
+    branch: codex/adr-0059-ntopng
+    worktree_path: ../proxmox_florin_server-ntopng
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0059-ntopng-network-visibility.md
     depends_on:
       - adr-0011-monitoring
@@ -618,13 +617,13 @@ workstreams:
       - ingress traffic
       - guest egress
       - network triage
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
 
   - id: adr-0060-open-webui-workbench
     adr: "0060"
     title: Open WebUI for operator and agent workbench
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/adr-0060-open-webui-workbench
     worktree_path: ../proxmox_florin_server-open-webui-workbench
@@ -641,7 +640,7 @@ workstreams:
       - governed tools
       - operator sessions
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0061-glitchtip-failure-signals
     adr: "0061"
@@ -667,7 +666,7 @@ workstreams:
   - id: adr-0062-role-composability
     adr: "0062"
     title: Ansible role composability and DRY defaults
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0062-role-composability
     worktree_path: ../proxmox_florin_server-role-composability
@@ -685,7 +684,7 @@ workstreams:
   - id: adr-0063-platform-vars-library
     adr: "0063"
     title: Centralised vars and computed facts library
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0063-platform-vars-library
     worktree_path: ../proxmox_florin_server-platform-vars-library
@@ -704,7 +703,7 @@ workstreams:
   - id: adr-0064-health-probe-contracts
     adr: "0064"
     title: Health probe contracts for all services
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0064-health-probe-contracts
     worktree_path: ../proxmox_florin_server-health-probe-contracts
@@ -724,7 +723,7 @@ workstreams:
   - id: adr-0065-secret-rotation-automation
     adr: "0065"
     title: Secret rotation automation with OpenBao
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/adr-0065-secret-rotation
     worktree_path: ../proxmox_florin_server-secret-rotation
@@ -741,7 +740,7 @@ workstreams:
       - Windmill workflows
       - NATS events
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0066-mutation-audit-log
     adr: "0066"
@@ -768,7 +767,7 @@ workstreams:
   - id: adr-0067-guest-network-policy
     adr: "0067"
     title: Guest network policy enforcement
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/adr-0067-guest-network-policy
     worktree_path: ../proxmox_florin_server-guest-network-policy
@@ -782,13 +781,13 @@ workstreams:
       - Proxmox VE firewall
       - roles/proxmox/network/
       - roles/linux/guest_firewall/
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
 
   - id: adr-0068-container-image-policy
     adr: "0068"
     title: Container image policy and supply chain integrity
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0068-container-image-policy
     worktree_path: ../proxmox_florin_server-container-image-policy
@@ -809,7 +808,7 @@ workstreams:
   - id: adr-0069-agent-tool-registry
     adr: "0069"
     title: Agent tool registry and governed tool calls
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0069-agent-tool-registry
     worktree_path: ../proxmox_florin_server-agent-tool-registry
@@ -817,21 +816,20 @@ workstreams:
     depends_on:
       - adr-0048-command-catalog
       - adr-0049-private-api-publication
-      - adr-0058-nats-event-bus
-      - adr-0066-mutation-audit-log
     conflicts_with: []
     shared_surfaces:
       - config/agent-tool-registry.json
       - config/command-catalog.json
       - config/workflow-catalog.json
-      - Open WebUI tool definitions
+      - docs/schema
+      - .local/tool-audit/agent-tool-calls.jsonl
     ready_to_merge: false
     live_applied: false
 
   - id: adr-0070-rag-platform-context
     adr: "0070"
     title: Retrieval-augmented context for platform queries
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/adr-0070-rag-platform-context
     worktree_path: ../proxmox_florin_server-rag-platform-context
@@ -849,12 +847,12 @@ workstreams:
       - receipts/
       - Open WebUI tools
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0071-agent-observation-loop
     adr: "0071"
     title: Agent observation loop and autonomous drift detection
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0071-agent-observation-loop
     worktree_path: ../proxmox_florin_server-agent-observation-loop
@@ -877,59 +875,34 @@ workstreams:
     ready_to_merge: false
     live_applied: false
 
-  - id: adr-0072-staging-environment
+  - id: adr-0072-staging-production-topology
     adr: "0072"
     title: Staging and production environment topology
-    status: ready
+    status: merged
     owner: codex
-    branch: codex/adr-0072-staging-environment
-    worktree_path: ../proxmox_florin_server-staging-environment
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0072-staging-environment.md
+    branch: codex/adr-0072-staging-production-topology
+    worktree_path: ../proxmox_florin_server-adr-0072-staging-production-topology
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0072-staging-production-topology.md
     depends_on:
-      - adr-0063-platform-vars-library
-      - adr-0042-step-ca
-      - adr-0043-openbao
+      - adr-0074-ops-portal
+      - adr-0075-service-capability-catalog
     conflicts_with: []
     shared_surfaces:
-      - versions/stack.yaml
-      - inventory/group_vars/platform.yml
-      - Proxmox vmbr20 bridge
-      - inventory/staging/
-      - filter_plugins/platform_facts.py
-    ready_to_merge: false
-    live_applied: false
-
-  - id: adr-0073-promotion-pipeline
-    adr: "0073"
-    title: Environment promotion gate and deployment pipeline
-    status: ready
-    owner: codex
-    branch: codex/adr-0073-promotion-pipeline
-    worktree_path: ../proxmox_florin_server-promotion-pipeline
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0073-promotion-pipeline.md
-    depends_on:
-      - adr-0072-staging-environment
-      - adr-0044-windmill
-      - adr-0048-command-catalog
-      - adr-0064-health-probe-contracts
-      - adr-0066-mutation-audit-log
-    conflicts_with: []
-    shared_surfaces:
-      - config/command-catalog.json
-      - receipts/live-applies/staging/
-      - receipts/promotions/
-      - Windmill deploy-and-promote workflow
-      - Makefile
+      - config/environment-topology.json
+      - config/service-capability-catalog.json
+      - config/subdomain-catalog.json
+      - scripts/generate_ops_portal.py
+      - docs/runbooks/platform-operations-portal.md
     ready_to_merge: false
     live_applied: false
 
   - id: adr-0074-ops-portal
     adr: "0074"
     title: Platform operations portal
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0074-ops-portal
-    worktree_path: ../proxmox_florin_server-ops-portal
+    worktree_path: ../proxmox_florin_server__adr_0074
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0074-ops-portal.md
     depends_on:
       - adr-0075-service-capability-catalog
@@ -948,7 +921,7 @@ workstreams:
   - id: adr-0075-service-capability-catalog
     adr: "0075"
     title: Service capability catalog
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0075-service-capability-catalog
     worktree_path: ../proxmox_florin_server-service-capability-catalog
@@ -961,351 +934,9 @@ workstreams:
     shared_surfaces:
       - config/service-capability-catalog.json
       - docs/schema/service-capability-catalog.schema.json
+      - scripts/service_catalog.py
       - scripts/validate_service_catalog.py
-      - make validate
-    ready_to_merge: false
-    live_applied: false
-
-  - id: adr-0076-subdomain-governance
-    adr: "0076"
-    title: Subdomain governance and DNS lifecycle
-    status: ready
-    owner: codex
-    branch: codex/adr-0076-subdomain-governance
-    worktree_path: ../proxmox_florin_server-subdomain-governance
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0076-subdomain-governance.md
-    depends_on:
-      - adr-0042-step-ca
-      - adr-0072-staging-environment
-    conflicts_with: []
-    shared_surfaces:
-      - config/subdomain-catalog.json
-      - roles/hetzner_dns_record
-      - roles/nginx_edge_publication
+      - docs/runbooks/service-capability-catalog.md
       - Makefile
-    ready_to_merge: false
-    live_applied: false
-
-  - id: adr-0077-compose-secrets-injection
-    adr: "0077"
-    title: Compose runtime secrets injection via OpenBao agent
-    status: ready
-    owner: codex
-    branch: codex/adr-0077-compose-secrets-injection
-    worktree_path: ../proxmox_florin_server-compose-secrets-injection
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0077-compose-secrets-injection.md
-    depends_on:
-      - adr-0043-openbao
-      - adr-0025-docker-compose-stacks
-      - adr-0047-short-lived-creds
-      - adr-0065-secret-rotation-automation
-    conflicts_with: []
-    shared_surfaces:
-      - roles/docker_compose_stack
-      - all Compose stack templates on docker-runtime-lv3
-      - config/image-catalog.json
-    ready_to_merge: false
-    live_applied: false
-
-  - id: adr-0078-service-scaffold
-    adr: "0078"
-    title: Service scaffold generator
-    status: ready
-    owner: codex
-    branch: codex/adr-0078-service-scaffold
-    worktree_path: ../proxmox_florin_server-service-scaffold
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0078-service-scaffold.md
-    depends_on:
-      - adr-0062-role-composability
-      - adr-0075-service-capability-catalog
-      - adr-0076-subdomain-governance
-      - adr-0077-compose-secrets-injection
-    conflicts_with: []
-    shared_surfaces:
-      - scripts/scaffold_service.py
-      - roles/_template/
-      - all catalog files
-      - Makefile
-    ready_to_merge: false
-    live_applied: false
-
-  - id: adr-0079-playbook-decomposition
-    adr: "0079"
-    title: Playbook decomposition and shared execution model
-    status: ready
-    owner: codex
-    branch: codex/adr-0079-playbook-decomposition
-    worktree_path: ../proxmox_florin_server-playbook-decomposition
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0079-playbook-decomposition.md
-    depends_on:
-      - adr-0062-role-composability
-      - adr-0063-platform-vars-library
-      - adr-0072-staging-environment
-      - adr-0064-health-probe-contracts
-      - adr-0066-mutation-audit-log
-    conflicts_with: []
-    shared_surfaces:
-      - playbooks/
-      - playbooks/tasks/
-      - playbooks/groups/
-      - Makefile
-    ready_to_merge: false
-    live_applied: false
-
-  - id: adr-0080-maintenance-windows
-    adr: "0080"
-    title: Maintenance window and change suppression protocol
-    status: ready
-    owner: codex
-    branch: codex/adr-0080-maintenance-windows
-    worktree_path: ../proxmox_florin_server-maintenance-windows
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0080-maintenance-windows.md
-    depends_on:
-      - adr-0058-nats-event-bus
-      - adr-0057-mattermost-chatops
-      - adr-0044-windmill
-      - adr-0071-agent-observation-loop
-      - adr-0027-uptime-kuma
-    conflicts_with: []
-    shared_surfaces:
-      - NATS KV maintenance-windows bucket
-      - config/command-catalog.json
-      - Uptime Kuma API
-      - Grafana alert API
-      - Makefile
-    ready_to_merge: false
-    live_applied: false
-
-  - id: adr-0081-changelog-portal
-    adr: "0081"
-    title: Platform changelog and deployment history portal
-    status: ready
-    owner: codex
-    branch: codex/adr-0081-changelog-portal
-    worktree_path: ../proxmox_florin_server-changelog-portal
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0081-changelog-portal.md
-    depends_on:
-      - adr-0074-ops-portal
-      - adr-0073-promotion-pipeline
-      - adr-0066-mutation-audit-log
-      - adr-0052-loki-logs
-      - adr-0075-service-capability-catalog
-    conflicts_with: []
-    shared_surfaces:
-      - scripts/generate_changelog_portal.py
-      - build/changelog-portal/
-      - NGINX edge config
-      - changelog.lv3.org
-      - receipts/
-      - changelog.md
-      - config/agent-tool-registry.json
-    ready_to_merge: false
-    live_applied: false
-
-  - id: adr-0082-remote-build-gateway
-    adr: "0082"
-    title: Remote build execution gateway — offload lint, validate, and builds to the build server
-    status: ready
-    owner: codex
-    branch: codex/adr-0082-remote-build-gateway
-    worktree_path: ../proxmox_florin_server-remote-build-gateway
-    doc: docs/workstreams/adr-0082-remote-build-gateway.md
-    depends_on: []
-    conflicts_with: []
-    shared_surfaces:
-      - Makefile
-      - scripts/
-      - inventory/
-      - ansible.cfg
-    ready_to_merge: false
-    live_applied: false
-
-  - id: adr-0083-docker-check-runner
-    adr: "0083"
-    title: Docker-based check runners on build server for versioned, parallel lint and validation
-    status: ready
-    owner: codex
-    branch: codex/adr-0083-docker-check-runner
-    worktree_path: ../proxmox_florin_server-docker-check-runner
-    doc: docs/workstreams/adr-0083-docker-check-runner.md
-    depends_on:
-      - adr-0082-remote-build-gateway
-    conflicts_with: []
-    shared_surfaces:
-      - docker/
-      - config/check-runner-manifest.json
-      - Makefile
-      - registry.lv3.org
-    ready_to_merge: false
-    live_applied: false
-
-  - id: adr-0084-packer-pipeline
-    adr: "0084"
-    title: Packer VM template pipeline for fast, consistent, layered Proxmox VM provisioning
-    status: ready
-    owner: codex
-    branch: codex/adr-0084-packer-pipeline
-    worktree_path: ../proxmox_florin_server-packer-pipeline
-    doc: docs/workstreams/adr-0084-packer-pipeline.md
-    depends_on:
-      - adr-0082-remote-build-gateway
-      - adr-0083-docker-check-runner
-    conflicts_with: []
-    shared_surfaces:
-      - packer/
-      - config/vm-template-manifest.json
-      - Makefile
-      - Proxmox storage pool
-    ready_to_merge: false
-    live_applied: false
-
-  - id: adr-0085-opentofu-vm-lifecycle
-    adr: "0085"
-    title: OpenTofu declarative VM lifecycle replacing ad-hoc Ansible VM creation
-    status: ready
-    owner: codex
-    branch: codex/adr-0085-opentofu-vm-lifecycle
-    worktree_path: ../proxmox_florin_server-opentofu-vm-lifecycle
-    doc: docs/workstreams/adr-0085-opentofu-vm-lifecycle.md
-    depends_on:
-      - adr-0082-remote-build-gateway
-      - adr-0083-docker-check-runner
-      - adr-0084-packer-pipeline
-    conflicts_with:
-      - any workstream with community.general.proxmox_kvm create tasks
-    shared_surfaces:
-      - tofu/
-      - Makefile
-      - inventory/
-      - MinIO state backend
-    ready_to_merge: false
-    live_applied: false
-
-  - id: adr-0086-ansible-collections
-    adr: "0086"
-    title: lv3.platform Ansible collection with DRY shared utilities and internal Galaxy server
-    status: ready
-    owner: codex
-    branch: codex/adr-0086-ansible-collections
-    worktree_path: ../proxmox_florin_server-ansible-collections
-    doc: docs/workstreams/adr-0086-ansible-collections.md
-    depends_on:
-      - adr-0082-remote-build-gateway
-      - adr-0083-docker-check-runner
-    conflicts_with:
-      - any workstream modifying roles/
-    shared_surfaces:
-      - roles/
-      - collections/
-      - ansible.cfg
-      - requirements.yml
-      - playbooks/
-      - Makefile
-    ready_to_merge: false
-    live_applied: false
-
-  - id: adr-0087-validation-gate
-    adr: "0087"
-    title: Two-layer pre-push validation gate blocking broken code from reaching main
-    status: ready
-    owner: codex
-    branch: codex/adr-0087-validation-gate
-    worktree_path: ../proxmox_florin_server-validation-gate
-    doc: docs/workstreams/adr-0087-validation-gate.md
-    depends_on:
-      - adr-0082-remote-build-gateway
-      - adr-0083-docker-check-runner
-    conflicts_with: []
-    shared_surfaces:
-      - .pre-commit-config.yaml
-      - .githooks/
-      - config/validation-gate.json
-      - Makefile
-      - scripts/
-    ready_to_merge: false
-    live_applied: false
-
-  - id: adr-0088-ephemeral-fixtures
-    adr: "0088"
-    title: Ephemeral disposable Proxmox VMs for role testing, Packer validation, and staging integration
-    status: ready
-    owner: codex
-    branch: codex/adr-0088-ephemeral-fixtures
-    worktree_path: ../proxmox_florin_server-ephemeral-fixtures
-    doc: docs/workstreams/adr-0088-ephemeral-fixtures.md
-    depends_on:
-      - adr-0082-remote-build-gateway
-      - adr-0084-packer-pipeline
-      - adr-0085-opentofu-vm-lifecycle
-      - adr-0072-staging-environment
-    conflicts_with: []
-    shared_surfaces:
-      - tofu/
-      - tests/fixtures/
-      - Makefile
-      - vmbr20 staging network
-    ready_to_merge: false
-    live_applied: false
-
-  - id: adr-0089-build-cache
-    adr: "0089"
-    title: Build artifact cache — Docker layers, pip, apt, Packer plugins, Ansible collections
-    status: ready
-    owner: codex
-    branch: codex/adr-0089-build-cache
-    worktree_path: ../proxmox_florin_server-build-cache
-    doc: docs/workstreams/adr-0089-build-cache.md
-    depends_on:
-      - adr-0082-remote-build-gateway
-      - adr-0083-docker-check-runner
-    conflicts_with: []
-    shared_surfaces:
-      - scripts/remote_exec.sh
-      - config/build-cache-manifest.json
-      - roles/build_server/
-      - Makefile
-    ready_to_merge: false
-    live_applied: false
-
-  - id: adr-0090-platform-cli
-    adr: "0090"
-    title: Unified lv3 CLI — single entry point routing all operator tasks to the right execution target
-    status: ready
-    owner: codex
-    branch: codex/adr-0090-platform-cli
-    worktree_path: ../proxmox_florin_server-platform-cli
-    doc: docs/workstreams/adr-0090-platform-cli.md
-    depends_on:
-      - adr-0075-service-capability-catalog
-      - adr-0082-remote-build-gateway
-    conflicts_with: []
-    shared_surfaces:
-      - scripts/lv3_cli.py
-      - pyproject.toml
-      - Makefile
-      - config/
-    ready_to_merge: false
-    live_applied: false
-
-  - id: adr-0091-drift-detection
-    adr: "0091"
-    title: Continuous drift detection across VMs, services, images, DNS, and TLS
-    status: ready
-    owner: codex
-    branch: codex/adr-0091-drift-detection
-    worktree_path: ../proxmox_florin_server-drift-detection
-    doc: docs/workstreams/adr-0091-drift-detection.md
-    depends_on:
-      - adr-0085-opentofu-vm-lifecycle
-      - adr-0074-ops-portal
-      - adr-0075-service-capability-catalog
-      - adr-0058-nats-event-bus
-    conflicts_with: []
-    shared_surfaces:
-      - scripts/
-      - config/
-      - Windmill workflows
-      - NATS platform.drift.*
-      - Grafana dashboards
     ready_to_merge: false
     live_applied: false

@@ -1,0 +1,239 @@
+---
+- name: Validate Open WebUI runtime inputs
+  ansible.builtin.assert:
+    that:
+      - open_webui_site_dir | length > 0
+      - open_webui_data_dir | length > 0
+      - open_webui_secret_dir | length > 0
+      - open_webui_compose_file | length > 0
+      - open_webui_env_file | length > 0
+      - open_webui_image | length > 0
+      - open_webui_container_name | length > 0
+      - open_webui_port | int > 0
+      - open_webui_admin_name | length > 0
+      - open_webui_admin_email | length > 0
+      - open_webui_internal_base_url | length > 0
+      - open_webui_webui_url | length > 0
+      - (not open_webui_enable_oidc | bool) or (open_webui_oidc_client_id | length > 0)
+      - (not open_webui_enable_oidc | bool) or (open_webui_oidc_provider_url | length > 0)
+    fail_msg: >-
+      open_webui_runtime requires compose paths, image, admin bootstrap, base URLs,
+      and OIDC settings when SSO is enabled.
+
+- name: Check whether a controller-local provider environment file exists
+  ansible.builtin.stat:
+    path: "{{ open_webui_provider_env_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: open_webui_provider_env_local
+
+- name: Check whether a controller-local OIDC client secret file exists
+  ansible.builtin.stat:
+    path: "{{ open_webui_oidc_client_secret_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: open_webui_oidc_client_secret_local
+  when: open_webui_enable_oidc | bool
+
+- name: Fail if OIDC is enabled but the client secret file is missing
+  ansible.builtin.fail:
+    msg: >-
+      {{ open_webui_oidc_client_secret_local_file }} is missing on the control machine.
+      Provide the OIDC client secret before enabling SSO for Open WebUI.
+  when:
+    - open_webui_enable_oidc | bool
+    - not open_webui_oidc_client_secret_local.stat.exists
+
+- name: Ensure the Open WebUI runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - openssl
+    state: present
+    update_cache: true
+
+- name: Ensure the Open WebUI directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ open_webui_site_dir }}"
+      mode: "0755"
+    - path: "{{ open_webui_data_dir }}"
+      mode: "0755"
+    - path: "{{ open_webui_secret_dir }}"
+      mode: "0700"
+
+- name: Generate the Open WebUI admin password
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ open_webui_admin_password_remote_file }}" ]; then
+      umask 077
+      openssl rand -base64 36 > "{{ open_webui_admin_password_remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: open_webui_admin_password_generation
+  changed_when: "'changed' in open_webui_admin_password_generation.stdout"
+  no_log: true
+
+- name: Generate the Open WebUI secret key
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ open_webui_secret_key_remote_file }}" ]; then
+      umask 077
+      openssl rand -hex 32 > "{{ open_webui_secret_key_remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: open_webui_secret_key_generation
+  changed_when: "'changed' in open_webui_secret_key_generation.stdout"
+  no_log: true
+
+- name: Read the Open WebUI admin password
+  ansible.builtin.slurp:
+    src: "{{ open_webui_admin_password_remote_file }}"
+  register: open_webui_admin_password_raw
+  no_log: true
+
+- name: Read the Open WebUI secret key
+  ansible.builtin.slurp:
+    src: "{{ open_webui_secret_key_remote_file }}"
+  register: open_webui_secret_key_raw
+  no_log: true
+
+- name: Load optional provider and OIDC secrets from the control machine
+  ansible.builtin.set_fact:
+    open_webui_admin_password: "{{ open_webui_admin_password_raw.content | b64decode | trim }}"
+    open_webui_secret_key: "{{ open_webui_secret_key_raw.content | b64decode | trim }}"
+    open_webui_provider_env_content: >-
+      {{ lookup('ansible.builtin.file', open_webui_provider_env_local_file)
+         if open_webui_provider_env_local.stat.exists else '' }}
+    open_webui_oidc_client_secret: >-
+      {{ lookup('ansible.builtin.file', open_webui_oidc_client_secret_local_file) | trim
+         if open_webui_enable_oidc | bool else '' }}
+  no_log: true
+
+- name: Ensure the local Open WebUI artifact directory exists
+  ansible.builtin.file:
+    path: "{{ open_webui_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Mirror the Open WebUI bootstrap secrets to the control machine
+  ansible.builtin.copy:
+    dest: "{{ item.dest }}"
+    content: "{{ item.content }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  loop:
+    - dest: "{{ open_webui_admin_password_local_file }}"
+      content: "{{ open_webui_admin_password }}"
+    - dest: "{{ open_webui_secret_key_local_file }}"
+      content: "{{ open_webui_secret_key }}"
+  no_log: true
+
+- name: Render the Open WebUI environment file
+  ansible.builtin.template:
+    src: open-webui.env.j2
+    dest: "{{ open_webui_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Render the Open WebUI compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ open_webui_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the Open WebUI image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --env-file
+      - "{{ open_webui_env_file }}"
+      - --file
+      - "{{ open_webui_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ open_webui_site_dir }}"
+  register: open_webui_pull
+  changed_when: >-
+    'Pulling' in open_webui_pull.stdout
+    or 'Downloaded newer image' in open_webui_pull.stdout
+    or 'Pull complete' in open_webui_pull.stdout
+
+- name: Start the Open WebUI stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --env-file
+      - "{{ open_webui_env_file }}"
+      - --file
+      - "{{ open_webui_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ open_webui_site_dir }}"
+  register: open_webui_up
+  changed_when: >-
+    'Creating' in open_webui_up.stdout
+    or 'Recreating' in open_webui_up.stdout
+    or 'Starting' in open_webui_up.stdout
+
+- name: Wait for Open WebUI to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ open_webui_port }}"
+    delay: 0
+    timeout: 180
+
+- name: Wait for the Open WebUI HTTP surface
+  ansible.builtin.uri:
+    url: "{{ open_webui_internal_base_url }}"
+    method: GET
+    status_code: 200
+  register: open_webui_http_ready
+  retries: 24
+  delay: 5
+  until: open_webui_http_ready.status == 200
+  changed_when: false
+
+- name: Verify Open WebUI admin sign-in works
+  ansible.builtin.uri:
+    url: "{{ open_webui_internal_base_url }}/api/v1/auths/signin"
+    method: POST
+    body_format: json
+    body:
+      email: "{{ open_webui_admin_email }}"
+      password: "{{ open_webui_admin_password }}"
+    return_content: true
+    status_code: 200
+  register: open_webui_admin_signin
+  changed_when: false
+  no_log: true
+
+- name: Assert Open WebUI sign-in returned the expected account
+  ansible.builtin.assert:
+    that:
+      - open_webui_admin_signin.json.email == open_webui_admin_email
+      - (open_webui_admin_signin.json.role | default('')) == 'admin'
+    fail_msg: "Open WebUI started, but the repo-managed admin bootstrap could not be verified."
+  no_log: true
+
+- name: Verify Open WebUI health probes
+  ansible.builtin.import_tasks: verify.yml

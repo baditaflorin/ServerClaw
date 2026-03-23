@@ -60,7 +60,13 @@ The private OpenBao secret authority is now live on `docker-runtime-lv3`, with a
 
 Windmill is now live on `docker-runtime-lv3` and reachable privately at `http://100.118.189.95:8005`, with the repo-managed `lv3` workspace and seeded healthcheck script verified end to end.
 
+NetBox is now live on `docker-runtime-lv3` and reachable privately at `http://100.118.189.95:8004`, with repo-managed synchronization of the Hetzner site, the Proxmox host, all managed VMs, canonical prefixes and IPs, and the governed service catalog.
+
 The control-plane governance layer is now live on `main`: command, API, message, and event lanes are verified against the active host and mail surfaces, the current human/service/agent/break-glass principals have been re-reviewed against the identity taxonomy, and recurring live mutation is expected to use the named command catalog plus approval gates.
+
+Mattermost is now live on `docker-runtime-lv3` and reachable privately at `http://100.118.189.95:8066`, with the repo-managed `lv3` collaboration channels, mirrored incoming webhook manifest, and Grafana alert contact point verified end to end.
+
+Portainer is now live on `docker-runtime-lv3` and reachable privately at `https://100.118.189.95:9444`, with controller-local bootstrap artifacts under `.local/portainer` and a governed wrapper for read-mostly runtime inspection plus bounded restarts.
 
 <!-- BEGIN GENERATED: platform-status -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_status_docs.py). Do not edit this block by hand.
@@ -68,9 +74,9 @@ The control-plane governance layer is now live on `main`: command, API, message,
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.49.0` |
-| Platform version | `0.26.0` |
-| Observed check date | `2026-03-22` |
+| Repository version | `0.75.0` |
+| Platform version | `0.36.0` |
+| Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
 | Observed kernel | `6.17.13-2-pve` |
@@ -97,6 +103,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `mail.lv3.org` | `mail-platform` | `informational-only` | `docker-runtime-lv3` |
 | `nginx.lv3.org` | `nginx-edge` | `edge-static` | `nginx-lv3` |
 | `proxmox.lv3.org` | `proxmox-ui` | `informational-only` | `proxmox_florin` |
+| `sso.lv3.org` | `keycloak` | `edge-published` | `docker-runtime-lv3` |
 | `uptime.lv3.org` | `uptime-kuma` | `edge-published` | `docker-runtime-lv3` |
 
 ### Latest Live-Apply Evidence
@@ -106,16 +113,28 @@ Template VM: `9000` `debian13-cloud-template`
 | `build_telemetry` | `2026-03-22-adr-0028-build-telemetry-live-apply` |
 | `command_catalog` | `2026-03-22-adr-0048-command-catalog-live-apply` |
 | `control_plane_lanes` | `2026-03-22-adr-0045-control-plane-communication-lanes-live-apply` |
+| `control_plane_recovery` | `2026-03-22-adr-0051-control-plane-recovery-live-apply` |
 | `docker_runtime` | `2026-03-22-adr-0023-docker-runtime-live-apply` |
+| `guest_network_policy` | `2026-03-22-adr-0067-guest-network-policy-live-apply` |
 | `identity_taxonomy` | `2026-03-22-adr-0046-identity-classes-live-apply` |
+| `keycloak` | `2026-03-22-adr-0056-keycloak-live-apply` |
 | `mail_platform` | `2026-03-22-adr-0041-email-platform-live-apply` |
-| `monitoring` | `2026-03-22-adr-0011-monitoring-live-apply` |
+| `mattermost` | `2026-03-22-adr-0057-mattermost-live-apply` |
+| `monitoring` | `2026-03-22-adr-0052-loki-live-apply` |
+| `netbox` | `2026-03-22-adr-0054-netbox-live-apply` |
+| `notification_profiles` | `2026-03-22-adr-0050-notification-profiles-live-apply` |
+| `ntopng` | `2026-03-22-adr-0059-ntopng-live-apply` |
+| `open_webui` | `2026-03-22-adr-0060-open-webui-live-apply` |
 | `openbao` | `2026-03-22-adr-0043-openbao-live-apply` |
+| `platform_context` | `2026-03-23-adr-0070-rag-platform-context-live-apply` |
+| `portainer` | `2026-03-22-adr-0055-portainer-live-apply` |
 | `postgres_vm` | `2026-03-22-adr-0026-postgres-vm-live-apply` |
 | `public_edge_publication` | `2026-03-22-adr-0021-edge-publication-live-apply` |
 | `runtime_container_telemetry` | `2026-03-22-adr-0040-runtime-container-telemetry-live-apply` |
+| `secret_rotation` | `2026-03-23-adr-0065-secret-rotation-live-apply` |
 | `short_lived_credentials_and_mtls` | `2026-03-22-adr-0047-short-lived-credentials-live-apply` |
 | `step_ca` | `2026-03-22-adr-0042-step-ca-live-apply` |
+| `tempo_tracing` | `2026-03-22-adr-0053-tempo-traces-live-apply` |
 | `uptime_kuma` | `2026-03-22-adr-0027-uptime-kuma-live-apply` |
 | `windmill` | `2026-03-22-adr-0044-windmill-live-apply` |
 <!-- END GENERATED: platform-status -->
@@ -144,9 +163,9 @@ password SSH disabled on host and guests
 | Lane | Title | Transport | Surfaces | Primary Rule |
 | --- | --- | --- | --- | --- |
 | `command` | Command Lane | `ssh` | 2 | Use SSH only for command-lane access. |
-| `api` | API Lane | `https` | 3 | Default new APIs to internal-only or operator-only publication. |
+| `api` | API Lane | `https` | 10 | Default new APIs to internal-only or operator-only publication. |
 | `message` | Message Lane | `authenticated_submission` | 2 | Submit platform mail through the internal mail platform rather than arbitrary external SMTP relays. |
-| `event` | Event Lane | `signed_http` | 1 | Event sinks must be documented and intentionally reachable. |
+| `event` | Event Lane | `mixed` | 3 | Event sinks must be documented and intentionally reachable. |
 
 ### Current Governed Surfaces
 | Surface | Lane | Kind | Endpoint |
@@ -155,10 +174,43 @@ password SSH disabled on host and guests
 | `guest-ops-ssh-via-proxmox-jump` | `command` | `ssh_endpoint` | `ops@10.10.10.0/24 via ProxyJump through ops@100.118.189.95` |
 | `proxmox-management-api` | `api` | `management_api` | `https://100.118.189.95:8006/api2/json` |
 | `step-ca-api` | `api` | `service_api` | `https://100.118.189.95:9443` |
+| `openbao-api` | `api` | `service_api` | `https://100.118.189.95:8200` |
+| `windmill-api` | `api` | `service_api` | `http://100.118.189.95:8005/api` |
+| `netbox-api` | `api` | `service_api` | `http://100.118.189.95:8004/api/` |
+| `portainer-api` | `api` | `service_api` | `https://100.118.189.95:9444` |
 | `mail-gateway-api` | `api` | `service_api` | `http://10.10.10.20:8081` |
+| `mattermost-operator-api` | `api` | `service_api` | `http://100.118.189.95:8066/api/v4` |
+| `open-webui-operator-workbench` | `api` | `service_api` | `http://100.118.189.95:8008` |
+| `platform-context-api` | `api` | `service_api` | `http://100.118.189.95:8010` |
 | `mail-platform-submission` | `message` | `mail_submission` | `10.10.10.20:587` |
 | `proxmox-host-operator-notifications` | `message` | `notification_profile` | `lv3-ops-email sendmail endpoint with catch-all matcher to baditaflorin@gmail.com` |
 | `stalwart-mail-events` | `event` | `webhook` | `http://10.10.10.20:8081/webhooks/stalwart` |
+| `mattermost-incoming-webhooks` | `event` | `webhook` | `http://10.10.10.20:8065/hooks/<managed-id>` |
+| `platform-finding-subjects` | `event` | `event_subject` | `platform.findings.*` |
+
+### API Publication Tiers
+| Tier | Title | Surfaces | Summary |
+| --- | --- | --- | --- |
+| `internal-only` | Internal-Only | 6 | Reachable only from LV3 private networks, loopback paths, or explicitly trusted control-plane hosts. |
+| `operator-only` | Operator-Only | 7 | Reachable only from approved operator devices over private access such as Tailscale. |
+| `public-edge` | Public Edge | 0 | Intentionally published on a public domain through the named edge model. |
+
+### Classified API And Webhook Surfaces
+| Surface | Tier | Lane | Endpoint | Reachability |
+| --- | --- | --- | --- | --- |
+| `proxmox-management-api` | `operator-only` | `api` | `https://100.118.189.95:8006/api2/json` | Reachable only over the Proxmox host Tailscale address on port 8006. |
+| `step-ca-api` | `internal-only` | `api` | `https://100.118.189.95:9443` | Reachable through the Proxmox host Tailscale proxy for approved controller and trust-bootstrap traffic only. |
+| `openbao-api` | `internal-only` | `api` | `https://100.118.189.95:8200` | Reachable through the Proxmox host Tailscale proxy and the runtime loopback listener, with client-certificate authentication on the external path. |
+| `windmill-api` | `operator-only` | `api` | `http://100.118.189.95:8005/api` | Reachable only through the Proxmox host Tailscale proxy on port 8005. |
+| `netbox-api` | `operator-only` | `api` | `http://100.118.189.95:8004/api/` | Reachable only through the Proxmox host Tailscale proxy on port 8004. |
+| `portainer-api` | `operator-only` | `api` | `https://100.118.189.95:9444` | Reachable only through the Proxmox host Tailscale proxy on port 9444. |
+| `mail-gateway-api` | `internal-only` | `api` | `http://10.10.10.20:8081` | Reachable only on the LV3 private guest network at docker-runtime-lv3:8081. |
+| `mattermost-operator-api` | `operator-only` | `api` | `http://100.118.189.95:8066/api/v4` | Reachable only through the Proxmox host Tailscale proxy on port 8066. |
+| `open-webui-operator-workbench` | `operator-only` | `api` | `http://100.118.189.95:8008` | Reachable only through the Proxmox host Tailscale proxy on port 8008. |
+| `platform-context-api` | `operator-only` | `api` | `http://100.118.189.95:8010` | Reachable only through the Proxmox host Tailscale proxy on port 8010 and requires the controller-local bearer token. |
+| `stalwart-mail-events` | `internal-only` | `event` | `http://10.10.10.20:8081/webhooks/stalwart` | Reachable only from the private mail-platform stack on docker-runtime-lv3. |
+| `mattermost-incoming-webhooks` | `internal-only` | `event` | `http://10.10.10.20:8065/hooks/<managed-id>` | Reachable on the private Mattermost runtime at docker-runtime-lv3:8065, with mirrored webhook ids retained under .local/mattermost for controlled routing. |
+| `platform-finding-subjects` | `internal-only` | `event` | `platform.findings.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
 <!-- END GENERATED: control-plane-lanes -->
 
 The current host security posture is:
@@ -199,6 +251,8 @@ ops present in the local docker group on docker-runtime-lv3
 telegraf active on docker-runtime-lv3 with Docker socket access for container telemetry
 Uptime Kuma running from /opt/uptime-kuma and published at https://uptime.lv3.org
 repo-local Uptime Kuma auth and monitor management material stored under .local/uptime-kuma
+Portainer running from /opt/portainer and published privately through the Proxmox host Tailscale path at https://100.118.189.95:9444
+repo-local Portainer bootstrap and controller auth material stored under .local/portainer
 ```
 
 The current PostgreSQL posture is:
@@ -218,6 +272,9 @@ backup-lv3 runs Proxmox Backup Server on 10.10.10.60
 PBS datastore proxmox is mounted at /mnt/datastore/proxmox on the dedicated backup disk
 Proxmox storage lv3-backup-pbs points to 10.10.10.60:8007
 nightly job backup-lv3-nightly protects VMIDs 110, 120, 130, 140, and 150 at 02:30
+control-plane recovery archives from docker-runtime-lv3 now land on /srv/control-plane-recovery/runtime/docker-runtime-lv3/latest
+the mirrored controller recovery bundle now lives under /srv/control-plane-recovery/controller
+the scheduled restore drill on backup-lv3 last passed at 2026-03-22T21:29:48Z
 restore-oriented verification is documented and includes artifact listing plus test backup validation
 this is still same-host recovery, not off-host disaster recovery
 ```
@@ -236,13 +293,24 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstreams guide](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/README.md)
 
 ### Runbooks
+- [Agent Observation Loop](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/agent-observation-loop.md)
+- [Agent Tool Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/agent-tool-registry.md)
 - [Command Catalog And Approval Gates](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/command-catalog-and-approval-gates.md)
 - [Complete Security Baseline Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/complete-security-baseline.md)
 - [Configure Backup VM](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-backup-vm.md)
+- [Configure Control-Plane Recovery](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-control-plane-recovery.md)
+- [Configure Docker Build VM](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-docker-build-vm.md)
 - [Configure Docker Runtime Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-docker-runtime.md)
 - [Configure Edge Publication](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-edge-publication.md)
+- [Configure Guest Network Policy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-guest-network-policy.md)
+- [Configure Keycloak](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-keycloak.md)
 - [Configure Mail Platform](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-mail-platform.md)
+- [Configure Mattermost](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-mattermost.md)
+- [Configure NetBox](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-netbox.md)
+- [Configure ntopng Private Flow Visibility](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-ntopng.md)
+- [Configure Open WebUI](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-open-webui.md)
 - [Configure OpenBao](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-openbao.md)
+- [Configure Portainer](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-portainer.md)
 - [Configure PostgreSQL VM Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-postgres-vm.md)
 - [Configure Proxmox Network Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-proxmox-network.md)
 - [Configure Public Ingress Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-public-ingress.md)
@@ -250,24 +318,34 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure Storage And Backups](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-storage-and-backups.md)
 - [Configure Tailscale Private Access](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-tailscale-access.md)
 - [Configure Windmill](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-windmill.md)
+- [Container Image Policy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/container-image-policy.md)
 - [Control-Plane Communication Lanes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/control-plane-communication-lanes.md)
 - [Controller Automation Toolkit](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/controller-automation-toolkit.md)
 - [Controller-Local Secrets And Preflight Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/controller-local-secrets-and-preflight.md)
 - [Deploy Uptime Kuma](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/deploy-uptime-kuma.md)
 - [Generate Status Documents](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/generate-status-documents.md)
 - [Harden Access Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/harden-access.md)
+- [Health Probe Contracts Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/health-probe-contracts.md)
 - [Identity Taxonomy And Managed Principals](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/identity-taxonomy-and-managed-principals.md)
 - [Initial Access Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/initial-access.md)
 - [Install Proxmox Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/install-proxmox.md)
 - [Live Apply Receipts And Verification Evidence](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/live-apply-receipts-and-verification-evidence.md)
 - [Monitoring Stack Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/monitoring-stack.md)
+- [Network Policy Reference](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/network-policy-reference.md)
 - [Agentic Control-Plane Roadmap](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/plan-agentic-control-plane.md)
 - [Platform Hardening And Agentic Extensibility Roadmap](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/plan-platform-hardening-and-agentic-extensibility.md)
 - [Visual And Agent Operations Roadmap](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/plan-visual-agent-operations.md)
+- [Platform Facts Library](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/platform-facts-library.md)
+- [Platform Operations Portal](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/platform-operations-portal.md)
 - [Prepare Mail Platform Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/prepare-mail-platform-rollout.md)
+- [Private-First API Publication](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/private-first-api-publication.md)
 - [Provision Guests Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/provision-guests.md)
 - [Proxmox API Automation Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/proxmox-api-automation.md)
+- [RAG Platform Context](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/rag-platform-context.md)
 - [Repair Guest Netplan MAC Drift](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/repair-guest-netplan-mac-drift.md)
+- [Secret Rotation And Lifecycle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/secret-rotation-and-lifecycle.md)
+- [Service Capability Catalog](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/service-capability-catalog.md)
+- [Staging And Production Topology](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/staging-and-production-topology.md)
 - [Validate Repository Automation Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/validate-repository-automation.md)
 - [Workflow Catalog And Execution Contracts](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/workflow-catalog-and-execution-contracts.md)
 
@@ -343,6 +421,9 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0069: Agent Tool Registry And Governed Tool Calls](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0069-agent-tool-registry-and-governed-tool-calls.md)
 - [ADR 0070: Retrieval-Augmented Context For Platform Queries](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0070-rag-context-for-platform-queries.md)
 - [ADR 0071: Agent Observation Loop And Autonomous Drift Detection](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0071-agent-observation-loop-and-drift-detection.md)
+- [ADR 0072: Staging And Production Environment Topology](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0072-staging-and-production-environment-topology.md)
+- [ADR 0074: Platform Operations Portal](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0074-platform-operations-portal.md)
+- [ADR 0075: Service Capability Catalog](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0075-service-capability-catalog.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -388,6 +469,9 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0069: Agent Tool Registry And Governed Tool Calls](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0069-agent-tool-registry.md)
 - [Workstream ADR 0070: Retrieval-Augmented Context For Platform Queries](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0070-rag-platform-context.md)
 - [Workstream ADR 0071: Agent Observation Loop And Autonomous Drift Detection](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0071-agent-observation-loop.md)
+- [Workstream ADR 0072: Staging And Production Environment Topology](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0072-staging-production-topology.md)
+- [Workstream ADR 0074: Platform Operations Portal](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0074-ops-portal.md)
+- [Workstream ADR 0075: Service Capability Catalog](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0075-service-capability-catalog.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
@@ -405,8 +489,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.49.0` |
-| Platform version | `0.26.0` |
+| Repository version | `0.75.0` |
+| Platform version | `0.36.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -451,7 +535,7 @@ This repository is intentionally opinionated:
 | ADR | Title | Status | Doc |
 | --- | --- | --- | --- |
 | `0011` | Monitoring stack rollout | `live_applied` | [adr-0011-monitoring.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md) |
-| `0014` | Tailscale private access rollout | `merged` | [adr-0014-tailscale.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0014-tailscale.md) |
+| `0014` | Tailscale private access rollout | `live_applied` | [adr-0014-tailscale.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0014-tailscale.md) |
 | `0020` | Initial storage and backup model | `merged` | [adr-0020-backups.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0020-backups.md) |
 | `0023` | Docker runtime VM baseline | `live_applied` | [adr-0023-docker-runtime.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0023-docker-runtime.md) |
 | `0026` | Dedicated PostgreSQL VM baseline | `merged` | [adr-0026-postgres-vm.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0026-postgres-vm.md) |
@@ -470,7 +554,27 @@ This repository is intentionally opinionated:
 | `0048` | Command catalog and approval gates | `live_applied` | [adr-0048-command-catalog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0048-command-catalog.md) |
 | `0049` | Private-first API publication model | `merged` | [adr-0049-private-api-publication.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0049-private-api-publication.md) |
 | `0050` | Transactional email and notification profiles | `merged` | [adr-0050-notification-profiles.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0050-notification-profiles.md) |
-| `0051` | Control-plane backup, recovery, and break-glass | `merged` | [adr-0051-control-plane-recovery.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0051-control-plane-recovery.md) |
+| `0051` | Control-plane backup, recovery, and break-glass | `live_applied` | [adr-0051-control-plane-recovery.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0051-control-plane-recovery.md) |
+| `0052` | Centralized log aggregation with Grafana Loki | `live_applied` | [adr-0052-loki-logs.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0052-loki-logs.md) |
+| `0053` | OpenTelemetry traces and service maps with Grafana Tempo | `live_applied` | [adr-0053-tempo-traces.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0053-tempo-traces.md) |
+| `0054` | NetBox for topology, IPAM, and inventory | `live_applied` | [adr-0054-netbox-topology.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0054-netbox-topology.md) |
+| `0055` | Portainer for read-mostly Docker runtime operations | `live_applied` | [adr-0055-portainer-operations.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0055-portainer-operations.md) |
+| `0056` | Keycloak for operator and agent SSO | `live_applied` | [adr-0056-keycloak-sso.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0056-keycloak-sso.md) |
+| `0057` | Mattermost for ChatOps and operator-agent collaboration | `live_applied` | [adr-0057-mattermost-chatops.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0057-mattermost-chatops.md) |
+| `0059` | ntopng for private network flow visibility | `live_applied` | [adr-0059-ntopng-network-visibility.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0059-ntopng-network-visibility.md) |
+| `0060` | Open WebUI for operator and agent workbench | `live_applied` | [adr-0060-open-webui-workbench.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0060-open-webui-workbench.md) |
+| `0062` | Ansible role composability and DRY defaults | `merged` | [adr-0062-role-composability.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0062-role-composability.md) |
+| `0063` | Centralised vars and computed facts library | `merged` | [adr-0063-platform-vars-library.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0063-platform-vars-library.md) |
+| `0064` | Health probe contracts for all services | `merged` | [adr-0064-health-probe-contracts.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0064-health-probe-contracts.md) |
+| `0065` | Secret rotation automation with OpenBao | `live_applied` | [adr-0065-secret-rotation-automation.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0065-secret-rotation-automation.md) |
+| `0067` | Guest network policy enforcement | `live_applied` | [adr-0067-guest-network-policy.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0067-guest-network-policy.md) |
+| `0068` | Container image policy and supply chain integrity | `merged` | [adr-0068-container-image-policy.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0068-container-image-policy.md) |
+| `0069` | Agent tool registry and governed tool calls | `merged` | [adr-0069-agent-tool-registry.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0069-agent-tool-registry.md) |
+| `0070` | Retrieval-augmented context for platform queries | `live_applied` | [adr-0070-rag-platform-context.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0070-rag-platform-context.md) |
+| `0071` | Agent observation loop and autonomous drift detection | `merged` | [adr-0071-agent-observation-loop.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0071-agent-observation-loop.md) |
+| `0072` | Staging and production environment topology | `merged` | [adr-0072-staging-production-topology.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0072-staging-production-topology.md) |
+| `0074` | Platform operations portal | `merged` | [adr-0074-ops-portal.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0074-ops-portal.md) |
+| `0075` | Service capability catalog | `merged` | [adr-0075-service-capability-catalog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0075-service-capability-catalog.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

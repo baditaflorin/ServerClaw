@@ -252,7 +252,7 @@ def split_csv(value: str) -> list[str]:
     return [item.strip() for item in value.split(",") if item.strip()]
 
 
-def check_approval(
+def evaluate_approval(
     command_catalog: dict,
     workflow_catalog: dict,
     command_id: str,
@@ -264,15 +264,14 @@ def check_approval(
     receipt_planned: bool,
     self_approve: bool,
     break_glass: bool,
-) -> int:
+) -> dict[str, object]:
     contract = command_catalog["commands"].get(command_id)
     if contract is None:
-        print(f"Unknown command contract: {command_id}", file=sys.stderr)
-        return 2
+        raise ValueError(f"Unknown command contract: {command_id}")
 
     workflow = workflow_catalog["workflows"][contract["workflow_id"]]
     policy = command_catalog["approval_policies"][contract["approval_policy"]]
-    reasons = []
+    reasons: list[str] = []
 
     if workflow["lifecycle_status"] != "active":
         reasons.append(
@@ -310,18 +309,57 @@ def check_approval(
     if policy["require_receipt_plan"] and not receipt_planned:
         reasons.append("receipt planning has not been marked complete")
 
-    if reasons:
+    return {
+        "approved": not reasons,
+        "reasons": reasons,
+        "workflow_id": contract["workflow_id"],
+        "entrypoint": workflow["preferred_entrypoint"]["command"],
+        "receipt_required": contract["evidence"]["live_apply_receipt_required"],
+    }
+
+
+def check_approval(
+    command_catalog: dict,
+    workflow_catalog: dict,
+    command_id: str,
+    requester_class: str,
+    approver_classes: list[str],
+    *,
+    preflight_passed: bool,
+    validation_passed: bool,
+    receipt_planned: bool,
+    self_approve: bool,
+    break_glass: bool,
+) -> int:
+    try:
+        verdict = evaluate_approval(
+            command_catalog,
+            workflow_catalog,
+            command_id,
+            requester_class,
+            approver_classes,
+            preflight_passed=preflight_passed,
+            validation_passed=validation_passed,
+            receipt_planned=receipt_planned,
+            self_approve=self_approve,
+            break_glass=break_glass,
+        )
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+
+    if verdict["reasons"]:
         print(f"Command approval REJECTED: {command_id}")
-        for reason in reasons:
+        for reason in verdict["reasons"]:
             print(f"  - {reason}")
         return 1
 
     print(f"Command approval OK: {command_id}")
     print(f"  requester_class: {requester_class}")
     print(f"  approver_classes: {', '.join(approver_classes) if approver_classes else 'none'}")
-    print(f"  workflow: {contract['workflow_id']}")
-    print(f"  entrypoint: {workflow['preferred_entrypoint']['command']}")
-    print(f"  receipt_required: {contract['evidence']['live_apply_receipt_required']}")
+    print(f"  workflow: {verdict['workflow_id']}")
+    print(f"  entrypoint: {verdict['entrypoint']}")
+    print(f"  receipt_required: {verdict['receipt_required']}")
     return 0
 
 

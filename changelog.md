@@ -8,37 +8,307 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.76.0 - 2026-03-23
+
+- merged ADR batch 0073–0091 covering IaC potency, build-server offload, human navigation, and deployment lifecycle
+- added ADR 0073 environment promotion gate — Windmill deploy-and-promote workflow with staging receipt, health-check gate, and operator approval before any production change
+- added ADR 0076 subdomain governance — catalog-backed naming, TLS provisioning rules, and `make provision-subdomain` automation
+- added ADR 0077 Compose runtime secrets injection — OpenBao Agent sidecar replaces `.env` files with RAM-only `tmpfs` delivery
+- added ADR 0078 service scaffold generator — `make scaffold-service` creates all 12 artifacts for a new service in one command
+- added ADR 0079 playbook decomposition — group playbooks, shared preflight/post-verify tasks, full env-awareness via `--extra-vars "env=staging"`
+- added ADR 0080 maintenance window protocol — NATS KV-backed suppression integrated into deploy pipeline
+- added ADR 0081 deployment history portal — generated `changelog.lv3.org` from receipts and audit events
+- added ADR 0082 remote build execution gateway — offloads CPU-heavy CI checks to `docker-build-lv3` build server
+- added ADR 0083 Docker-based check runner — linting, ansible-lint, validate, molecule run inside containers on the build server not on the laptop
+- added ADR 0084 Packer VM template pipeline — golden image pipeline on `docker-build-lv3`
+- added ADR 0085 OpenTofu VM lifecycle — declarative VM provisioning replacing ad-hoc `qm` commands
+- added ADR 0086 Ansible collection packaging — role distribution via collection with semantic versioning
+- added ADR 0087 repository validation gate — mandatory `make validate` in CI enforced on the build server
+- added ADR 0088 ephemeral infrastructure fixtures — on-demand staging VMs for integration tests
+- added ADR 0089 build artifact cache — layer and package cache on `docker-build-lv3` for faster iterations
+- added ADR 0090 unified platform CLI — `lv3` CLI wrapping all make targets and runbook commands
+- added ADR 0091 continuous drift detection — scheduled drift scan running from `docker-build-lv3`
+- added 10 matching workstream docs and 10 roadmap runbook entries
+- bumped VERSION 0.75.0 → 0.76.0
+
+## 0.75.0 - 2026-03-23
+
+- implemented ADR 0072 by defining the canonical production and staging topology in a committed environment catalog with matching ADR, workstream, schema, and operator runbook coverage
+- extended the service capability and subdomain catalogs with explicit environment bindings, the missing active `sso.lv3.org` publication, planned `*.staging.lv3.org` hostnames, and the broader current private service inventory
+- wired environment-topology validation into `make validate`, added operator inspection commands for environment metadata, and rendered a dedicated Environment Topology view in the generated operations portal
+
+Platform impact:
+
+- no direct live platform change is claimed in this release commit; `platform_version` remains `0.36.0` and staging remains a repo-modeled topology until later service-specific applies publish staged surfaces from `main`
+
+## 0.74.0 - 2026-03-23
+
+- completed the ADR 0065 live-apply path by fixing the secret-rotation playbook recursion, loading the generated platform facts required by the Windmill runtime rotation path, and correcting OpenBao metadata writes to use the resolved metadata keys
+- hardened the Docker-host guest firewall contract so container workloads on `docker-runtime-lv3` and `docker-build-lv3` can forward to approved east-west services without bypassing the repo-managed nftables policy
+- recorded the first successful low-risk `windmill_database_password` rotation with OpenBao metadata updates, controller-local secret mirroring, and verified Windmill recovery on the live platform
+
+Platform impact:
+
+- the live platform is now on `0.36.0`, and ADR 0065 has been applied successfully for `windmill_database_password`
+- `docker-runtime-lv3` now permits Docker bridge egress through the guest nftables forward policy so repo-managed container workloads can reach approved internal services such as `postgres-lv3:5432`
+
+## 0.73.0 - 2026-03-23
+
+- restored ADR 0065 on current `main` by reintroducing the governed `rotate-secret` workflow, command contracts, secret-rotation playbook, role-local rotate tasks, and the Windmill/OpenBao secret-rotation seed surfaces
+- adapted ADR 0065 to the current list-based `config/secret-catalog.json` contract by layering `rotation_metadata` and `rotation_contracts` on top of the observation-loop secret inventory instead of replacing it
+- hardened the secret-rotation execution path for separate worktrees by resolving controller-local secret paths from the manifest, wiring the missing Makefile targets, and extending repository validation for the richer secret-rotation schema
+
+Platform impact:
+
+- no direct live platform change is claimed in this release commit; the repo-managed secret-rotation path is ready for a deliberate live apply from `main`
+
+## 0.72.0 - 2026-03-23
+
+- completed ADR 0075 on current `main` by expanding the service capability catalog to the full 19-service health-probe-backed estate and by adding cross-references to the canonical health-probe, image, and secret catalogs
+- upgraded the service catalog validator and operator query surface so `make services`, `make show-service`, and the repository validation gate all enforce schema, monitor, topology, and cross-catalog consistency
+- corrected the ADR 0075 workstream metadata, operator runbook, and generated status surfaces so the repository now records the current-main completion of the catalog contract
+
+Platform impact:
+
+- no direct live platform change is claimed in this release commit; this is a repository-only contract and validation completion on top of the current live `0.35.0` platform
+
+## 0.71.0 - 2026-03-23
+
+- finalized the ADR 0070 live-apply path on current `main` by resolving Proxmox Tailscale proxy definitions from canonical platform data, fixing host inventory proxy-port templates to use `platform_port_assignments`, and extending the proxy role contract plus regression coverage
+- removed the private platform-context runtime's dependency on `platform_service_topology` defaults during live convergence and taught `scripts/generate_platform_vars.py` to resolve `platform_port_assignments.*` proxy-port templates so repository validation matches the live inventory model
+- refreshed ADR 0070 release metadata, stack observations, and the live-apply receipt for the verified platform-context deployment now running on `docker-runtime-lv3`
+
+Platform impact:
+
+- the private platform context API remains live at `http://100.118.189.95:8010`, and the current repository corpus dry run now reports `160` indexed sources and `1010` chunks on the integrated branch
+
+## 0.70.0 - 2026-03-23
+
+- applied ADR 0070 live by converging the private platform-context API and Qdrant on `docker-runtime-lv3`, publishing the service through the Proxmox host Tailscale proxy on `http://100.118.189.95:8010`, and rebuilding the live index from the mirrored platform corpus
+- hardened the RAG runtime convergence so build-only images are not pulled from registries, Docker builds use host networking for dependency resolution, missing Docker nat chains are repaired before published-port recreates, and mirrored corpus paths are normalized back to repo-true citations
+- switched the deployed platform-context embedding backend to the offline-safe `token-hash` mode for this platform, added sentence-transformer fallback behavior for unreachable model downloads, and extended regression coverage for the live apply path, firewall policy, and citation normalization
+
+Platform impact:
+
+- the private platform context API is now live at `http://100.118.189.95:8010` with authenticated query and rebuild operations
+- `docker-runtime-lv3` now permits the Proxmox host proxy path to reach guest port `8010`, so controller-originated queries succeed through the declared private access surface
+- live queries now return normalized citations such as `docs/adr/0042-step-ca-for-ssh-and-internal-tls.md` and `docs/runbooks/rag-platform-context.md` instead of mirrored-path duplicates
+
+## 0.69.0 - 2026-03-23
+
+- implemented ADR 0074 in repository automation by generating a six-view static operations portal from canonical service, subdomain, ADR, runbook, stack, and agent-tool inputs
+- implemented ADR 0075 by adding the service capability catalog, its schema, validation, operator query surface, and the supporting runbooks and workstream records
+- extended repository validation and edge publication automation so generated portal output is checked in CI and can be published from `main` without hand-managed static site wiring
+- added the Docker Build VM runbook and corrected the service catalog plus portal generator integration so the new portal surfaces validate cleanly against the current `main`
+- updated ADR 0074 and ADR 0075 metadata to mark repository implementation in `0.69.0` while leaving live publication and `platform_version` unchanged
+
+Platform impact:
+
+- no direct live platform change is claimed in this release commit; `ops.lv3.org` publication remains pending a deliberate apply from `main`
+
+## 0.68.0 - 2026-03-23
+
+- implemented ADR 0063 by adding a committed generated `inventory/group_vars/platform.yml` facts library derived from canonical stack and host inputs
+- added `scripts/generate_platform_vars.py`, `filter_plugins/platform_facts.py`, `make generate-platform-vars`, `make validate-generated-vars`, and `make show-platform-facts` so operators and agents can inspect or validate resolved platform facts without scanning many role defaults
+- removed duplicated computed URLs, ports, and guest-address lookups from shared vars and current role consumers including OpenBao, Mattermost, ntopng, the private platform-context runtime, NetBox, Windmill, Open WebUI, Portainer, Step CA, and guest observability, while documenting the operating model in the platform-facts runbook
+
+Platform impact:
+
+- no direct live platform change in this release commit; this is a repository automation and documentation consolidation release
+
+## 0.67.0 - 2026-03-23
+
+- implemented ADR 0068 as a catalog-backed container image policy with digest-pinned runtime refs, a managed build-base pin for the mail gateway, and repo validation that now treats image pins and scan receipts as part of the canonical contract
+- added `config/image-catalog.json`, Trivy scan receipts under `receipts/image-scans/`, `make check-image-freshness`, and a controller-side `upgrade-container-image` workflow plus Windmill wrapper for governed image refreshes
+- aligned ADR 0071's observation loop with the ADR 0068 image-catalog contract so drift checks, repository validation, and Windmill seed scripts all operate on the same pinned-image source of truth
+
+Platform impact:
+
+- no direct live platform change in this release commit; the catalog, scan receipts, and converge inputs are now ready to be applied from `main`
+
+## 0.66.0 - 2026-03-23
+
+- applied ADR 0056 live by converging Keycloak on `docker-runtime-lv3`, provisioning its PostgreSQL backend on `postgres-lv3`, publishing the shared issuer at `https://sso.lv3.org`, and wiring Grafana through the shared OIDC login flow
+- added repo-managed Keycloak, Grafana SSO, role verification, and controller-secret workflow contracts so the shared broker, named operator bootstrap, and approved agent client-credentials path rerun cleanly from `main`
+- recorded the live-apply receipt, ADR metadata, workstream state, identity taxonomy updates, Uptime Kuma monitor seeding, and canonical stack plus health-probe state for the first shared SSO broker rollout
+
+Platform impact:
+
+- Keycloak is now live on `docker-runtime-lv3` with the `lv3` realm, repo-managed groups, the named operator `florin.badita`, and the confidential clients `grafana-oauth` and `lv3-agent-hub`
+- `postgres-lv3` now serves the managed `keycloak` database and role required by the runtime
+- Grafana public login now redirects through Keycloak at `https://sso.lv3.org`, and the approved agent client-credentials flow is verified live against the same broker
+
+## 0.65.0 - 2026-03-23
+
+- implemented ADR 0071 in repository automation by adding a controller-side observation loop that runs governed drift checks for VM state, service health, image freshness, secret ages, certificate expiry, and backup recency
+- added the ADR 0071 machine-readable observation contracts and routing surfaces through `config/secret-catalog.json`, `config/image-catalog.json`, `docs/schema/platform-finding.json`, the controller-local secret manifest, and the control-plane lane or API publication catalogs
+- added the operator runbook, Windmill seed-script placeholders, and repository validation wiring so the observation loop can write local artifacts now and later be promoted into scheduled Windmill execution without redefining the contract
+- updated ADR 0071 and its workstream status to reflect repository implementation in `0.65.0` while keeping live activation and `platform_version` unchanged
+
+Platform impact:
+
+- no direct live platform change is claimed in this release commit; the observation tooling now detects and records current drift from the controller, but Windmill schedule activation and live alert wiring still need to be applied from `main`
+
+## 0.64.0 - 2026-03-22
+
+- applied ADR 0067 live from `main` by converging explicit default-deny guest network policy on the Proxmox host and every managed Debian guest
+- pinned the canonical guest MAC inventory, rendered per-VM Proxmox firewall policy from `network_policy`, and added a dedicated guest nftables role plus workflow entrypoints for repeatable convergence
+- hardened the host rollout for real Proxmox bridge behavior by managing the required `fwbr+` conntrack-zone helper and by matching guest forwarding on subnet-aware nftables rules instead of pre-firewall bridge names
+- extended guest defence in depth so the same allow matrix governs both local services and Docker-published forwards, then recorded the live-apply receipt, ADR metadata, and workstream state for the first enforced east-west policy
+
+Platform impact:
+
+- `vmbr10` now enforces default-deny inter-guest policy through Proxmox VM firewalls backed by repo-managed per-VM rules under `/etc/pve/firewall/`
+- every managed guest now carries a repo-managed nftables policy that preserves SSH management, approved east-west flows, and approved Docker-published service paths while denying unlisted traffic
+- verified live traffic now allows `docker-runtime-lv3 -> postgres-lv3:5432`, `nginx-lv3 -> docker-runtime-lv3:3001`, and `docker-build-lv3 -> monitoring-lv3:3100`, while denying `backup-lv3 -> postgres-lv3:5432` and `postgres-lv3 -> docker-runtime-lv3:8082`
+
+## 0.63.0 - 2026-03-22
+
+- applied ADR 0051 live by converging the repository-managed control-plane recovery workflow across `docker-runtime-lv3`, `backup-lv3`, and the Proxmox host backup-store firewall contract
+- hardened the recovery automation so OpenBao is unsealed explicitly for managed Raft snapshots and the runtime archive push path now depends on a repo-managed `backup-lv3` guest-firewall allow rule for `10.10.10.20/32`
+- recorded the live recovery evidence, restore-drill result, controller bundle mirror, ADR metadata, runbook updates, and canonical stack state needed to keep control-plane backup and break-glass posture current on `main`
+
+Platform impact:
+
+- control-plane recovery archives now land on `backup-lv3` under `/srv/control-plane-recovery/runtime/docker-runtime-lv3/latest`
+- the mirrored controller recovery bundle now lives under `/srv/control-plane-recovery/controller/controller-recovery-bundle.tar.zst`
+- the scheduled restore drill on `backup-lv3` last passed at `2026-03-22T21:29:48Z`
+
+## 0.62.0 - 2026-03-22
+
+- implemented ADR 0070 in repository automation by adding the private platform-context API, Qdrant-backed RAG runtime, corpus build and query scripts, and the `rag-context` playbook or runtime role
+- extended the governed tool surface with `query-platform-context`, added the Windmill rebuild script, and documented operator usage for the private RAG and OpenAPI tool-server flow
+- added focused tests for corpus chunking, the platform-context service, and the governed registry export path, including a worktree-safe agent-tool test harness
+
+Platform impact:
+
+- no direct live platform change in this release commit; the private platform-context runtime and Open WebUI global-tool registration still need to be applied from `main`
+
+## 0.61.0 - 2026-03-22
+
+- implemented ADR 0064 in repository automation by adding explicit `tasks/verify.yml` health contracts across the current service-owning roles and by documenting the contract in a dedicated health-probe runbook
+- added `config/health-probe-catalog.json` as the machine-readable liveness or readiness inventory for every canonical service, including catalog-only host surfaces that do not yet have standalone service roles
+- aligned `config/uptime-kuma/monitors.json` with the catalog and extended `make validate` so probe-role coverage and Uptime Kuma drift fail before merge
+
+Platform impact:
+
+- no direct live platform change in this release commit; the new probe contracts will take effect on the next live converge from `main`
+
+## 0.60.0 - 2026-03-22
+
+- implemented ADR 0062 to add a reusable `roles/common` task library for role input assertions, directory creation, systemd unit management, and TCP port waits
+- added `roles/_template/` plus a new `make validate` role-interface gate so new or changed roles must carry `meta/argument_specs.yml` without forcing an all-at-once backfill across untouched legacy roles
+- refactored `docker_runtime`, `proxmox_tailscale`, `uptime_kuma_runtime`, and `windmill_runtime` to consume the shared task entrypoints as proof-of-concept consumers
+- documented the new validation contract in the repository automation runbook and updated ADR/workstream metadata to mark the composability workstream as merged
+
+Platform impact:
+
+- no direct live platform change; this release refactors repository Ansible structure and role interface validation only
+
+## 0.59.0 - 2026-03-22
+
+- applied ADR 0057 live by provisioning the Mattermost PostgreSQL backend on `postgres-lv3`, converging the private Mattermost runtime on `docker-runtime-lv3`, and publishing operator access through the Proxmox host Tailscale proxy on port `8066`
+- hardened the Mattermost automation so bootstrap handles Mattermost's actual local `mmctl` JSON behavior, seeds the managed LV3 channels and incoming webhooks idempotently, and configures Grafana alert routing through the repo-managed webhook manifest
+- recorded the Mattermost controller-local artifacts, live-apply evidence, ADR metadata, workstream state, and control-plane lane updates needed for the new ChatOps surface
+
+Platform impact:
+
+- Mattermost is now live on `docker-runtime-lv3` and reachable privately at `http://100.118.189.95:8066`
+- the repo-managed `lv3` team now includes the `platform-alerts`, `workflow-events`, `change-approvals`, `agent-handoffs`, and `mail-ops` collaboration channels with mirrored incoming webhook URLs under `.local/mattermost/incoming-webhooks.json`
+- Grafana on `monitoring-lv3` now carries the `lv3-mattermost-platform-alerts` contact point for repo-managed alert routing into Mattermost
+
+## 0.58.0 - 2026-03-22
+
+- applied ADR 0054 live from `main` by converging a private NetBox runtime on `docker-runtime-lv3`, provisioning its PostgreSQL backend on `postgres-lv3`, and publishing operator and agent access through the Proxmox host Tailscale proxy on port `8004`
+- hardened the NetBox automation so bootstrap token provisioning, NetBox 4.5 service-object sync, transient API retry handling, and repo-to-NetBox idempotency all rerun cleanly from the integration worktree
+- added the NetBox playbook, runtime and sync roles, controller-local secret contracts, configure-NetBox runbook, and live-apply evidence to make topology, IPAM, and governed service inventory a first-class repo-managed surface
+
+Platform impact:
+
+- NetBox is now live on `docker-runtime-lv3` and reachable privately at `http://100.118.189.95:8004`
+- `postgres-lv3` now serves the managed `netbox` database and bootstrap credentials required by the runtime
+- NetBox now contains synchronized site, host, VM, prefix, IP, and governed service inventory derived from canonical repository state, with idempotent re-sync verification
+
+## 0.57.0 - 2026-03-22
+
+- applied ADR 0052 live from `main` by adding Grafana Loki to `monitoring-lv3` and converging Grafana Alloy log shipping on `proxmox_florin` plus every managed guest
+- completed the live rollout of the corrected ADR 0053 monitoring-plane stack at the same time, so Prometheus, Tempo, and the shared OTLP collector now converge together with the new log plane
+- updated ADR 0052 and ADR 0053 implementation status, monitoring runbooks, workflow metadata, canonical stack state, and live-apply evidence to reflect the integrated logs-and-traces observability surface
+
+Platform impact:
+
+- `monitoring-lv3` now serves Grafana, InfluxDB, Loki, Prometheus, Tempo, and the shared OTLP collector as one integrated monitoring plane
+- Grafana now exposes the `Loki Logs`, `Prometheus Service Graphs`, and `Tempo` datasources from the private monitoring surface
+- verified logs now flow from the Proxmox host, `nginx-lv3`, and `docker-runtime-lv3`, while verified traces and service-graph metrics now flow through the shared OTLP path from the private mail gateway
+
+## 0.56.0 - 2026-03-22
+
+- applied ADR 0055 live from `main` by converging Portainer on `docker-runtime-lv3`, publishing it privately through the Proxmox host Tailscale proxy on port `9444`, and persisting controller-local bootstrap auth under `.local/portainer`
+- added a dedicated Portainer playbook, runtime role, runbook, controller-local secret manifest entries, and workflow plus command catalog metadata so the runtime console and governed wrapper rerun cleanly from an integration worktree
+- added the repo-managed `portainer-manage` wrapper to prove read-mostly container inspection, log access, and bounded restart actions without falling back to broad Docker shell access
+- updated ADR 0055, workstream state, canonical stack state, and live-apply evidence to mark the private Portainer operations surface as implemented
+
+Platform impact:
+
+- Portainer CE is now live on `docker-runtime-lv3` and reachable privately at `https://100.118.189.95:9444`
+- controller-local Portainer bootstrap and auth material now lives under `.local/portainer/` for repo-managed verification and governed runtime actions
+- Docker runtime inspection, container log reads, and bounded emergency restarts now have a documented Portainer-backed control surface alongside the existing repo-managed converge paths
+
+## 0.55.0 - 2026-03-22
+
+- completed the ADR 0053 repository rollout by enabling Prometheus native histograms for Tempo's metrics generator, which unblocks persisted span-metrics and service-graph writes into the managed Prometheus receiver
+- corrected the first traced producer so the mail gateway now honors `OTEL_RESOURCE_ATTRIBUTES` in addition to `OTEL_SERVICE_NAME`, keeping `service.namespace` and `deployment.environment` aligned with the shared observability contract
+- refreshed the tracing ADR and runbooks to document the corrected Prometheus and resource-tag expectations before the live apply from `main`
+
+Platform impact:
+
+- no direct live platform change in this release commit; the corrected tracing stack still needs to be applied from `main`
+
+## 0.54.0 - 2026-03-22
+
+- applied ADR 0060 live by converging a private Open WebUI runtime on `docker-runtime-lv3` and publishing it through the Proxmox host Tailscale proxy on port `8008`
+- added repo-managed Open WebUI automation, workflow and command contracts, controller-local bootstrap secret handling, and an operator runbook for the workbench
+- locked the initial workbench posture down to local bootstrap auth with future OIDC support, disabled public signup and community sharing, and disabled web search, image generation, code interpreter, and direct tool servers by policy
+- updated ADR 0060, workstream state, generated status docs, and live-apply evidence to reflect the new private operator workbench
+
+Platform impact:
+
+- Open WebUI is now live privately at `http://100.118.189.95:8008`
+- controller-local bootstrap artifacts now exist under `.local/open-webui/`
+- the first operator-and-agent workbench now exists, but governed tools and repo-grounded RAG remain follow-up work under ADR 0069 and ADR 0070
+
+## 0.53.0 - 2026-03-22
+
+- implemented ADR 0059 live by installing `ntopng` on `proxmox_florin`, capturing the private guest bridge directly from `vmbr10`, and adding edge-adjacent context from `vmbr0`
+- added a dedicated `playbooks/ntopng.yml` converge path, the new `roles/proxmox_ntopng` automation, a private-access runbook, and workflow or command catalog entries for operator-driven flow visibility
+- exposed the ntopng UI only through the Proxmox host Tailscale proxy on port `3001`, kept it off the public edge, and updated ADR or workstream metadata to mark the network-visibility rollout as live
+
+Platform impact:
+
+- ntopng is now running on `proxmox_florin` and is reachable privately at `http://100.118.189.95:3001`
+- operators now have a repo-managed flow-visibility surface for `vmbr10` private-network traffic and `vmbr0` edge context without introducing nProbe or public publication
+- the Proxmox host firewall now explicitly allows the ntopng proxy port only from declared management sources
+
 ## 0.51.0 - 2026-03-22
 
-- added ADRs 0082–0091 covering IaC potency, build server offload, and human ergonomics
-- defined remote build execution gateway (ADR 0082) — `scripts/remote_exec.sh` offloads all CPU-intensive checks and builds to `build-lv3` over SSH+rsync; laptop fans stay silent
-- defined Docker-based check runner (ADR 0083) — four versioned container images run ansible-lint, yamllint, mypy, trivy, and more in parallel on the build server; identical to Windmill CI
-- defined Packer VM template pipeline (ADR 0084) — four layered Packer templates reduce new VM provisioning from 15–20 min to 3–5 min; all builds on the build server
-- defined OpenTofu VM lifecycle management (ADR 0085) — declarative `tofu plan/apply` replaces ad-hoc `proxmox_kvm` Ansible tasks; plan output shows what will change before any Proxmox mutation
-- defined Ansible collection packaging (ADR 0086) — 40+ roles restructured into `lv3.platform` collection; four shared utility roles eliminate copy-pasted boilerplate across 15+ roles
-- defined repository validation gate (ADR 0087) — two-layer pre-push gate: fast local pre-commit (< 5 s) plus remote parallel check suite (< 18 s); bypass logging via `receipts/gate-bypasses/`
-- defined ephemeral infrastructure fixtures (ADR 0088) — on-demand Proxmox VMs on the `vmbr20` staging network for role testing and integration checks; auto-expired by Windmill reaper
-- defined build artifact cache (ADR 0089) — Docker layer cache (50 GB BuildKit), pip volume, apt-cacher-ng, Packer plugin cache, and Galaxy collection cache; warm `make remote-lint` in < 18 s
-- defined unified platform CLI `lv3` (ADR 0090) — 14 command groups routing each task to the correct execution target with transparent routing labels and `--dry-run` on every command
-- defined continuous drift detection (ADR 0091) — five drift sources (OpenTofu, Ansible check-mode, Docker image digests, DNS, TLS) on a 6-hour schedule; workstream-aware suppression; Grafana panel; NATS events
-- added 10 matching workstream docs and 10 new entries in `workstreams.yaml`
-- added roadmap runbook `docs/runbooks/plan-iac-potency-and-build-server.md` with dependency graph, 4-week delivery schedule, full make-target inventory, and success criteria
+- implemented ADR 0053 in repository automation by adding pinned Tempo and `otelcol-contrib` packages plus a managed Prometheus service to the monitoring VM role
+- provisioned Grafana Prometheus and Tempo datasources, documented the shared OTLP collector contract, and instrumented the private mail-gateway service as the first traced internal API surface
+- updated the ADR, workstream, monitoring runbook, mail-platform runbook, and workflow catalog to describe the new tracing and service-map operating model
+
+Platform impact:
+
+- no direct live platform change in this release commit; the tracing stack still needs to be applied from `main`
 
 ## 0.50.0 - 2026-03-22
 
-- added ADRs 0072–0081 covering human navigation, deployment lifecycle, DRY engineering, and production security hardening
-- defined staging and production environment topology (ADR 0072) with a second internal bridge `vmbr20` and disposable staging VMs
-- defined environment promotion gate (ADR 0073) — Windmill `deploy-and-promote` workflow with staging receipt, health-check gate, and operator approval before any production change
-- defined platform operations portal (ADR 0074) — generated static site at `ops.lv3.org` answering "where does everything live?" with service map, VM inventory, DNS map, runbook index, and ADR log
-- defined service capability catalog (ADR 0075) — `config/service-capability-catalog.json` as the single source of truth for every service: URL, VM, health probe, images, secrets, runbook
-- defined subdomain governance model (ADR 0076) — catalog-backed naming, TLS provisioning rules, and `make provision-subdomain` automation
-- defined Compose runtime secrets injection (ADR 0077) — OpenBao Agent sidecar pattern replaces `.env` files with RAM-only `tmpfs` delivery; secrets rotate live without container restarts
-- defined service scaffold generator (ADR 0078) — `make scaffold-service` creates all 12 artifacts for a new service in one command
-- defined playbook decomposition model (ADR 0079) — group playbooks, shared preflight/post-verify tasks, and full environment-awareness via `--extra-vars "env=staging"`
-- defined maintenance window protocol (ADR 0080) — NATS KV-backed windows with multi-surface suppression; integrated into the deploy pipeline to eliminate planned-outage alert noise
-- defined deployment history portal (ADR 0081) — generated `changelog.lv3.org` timeline from receipts, promotions, and audit events
-- added 10 matching workstream docs and updated `workstreams.yaml` with all new workstream entries
-- added roadmap runbook `docs/runbooks/plan-human-navigation-and-deployment-lifecycle.md` with dependency graph, parallel delivery lanes, new make targets, and success criteria
+- implemented ADR 0049 as a canonical API publication contract instead of leaving publication policy only in prose
+- added `config/api-publication.json` plus `scripts/api_publication.py` so publication tiers are machine-readable, inspectable, and validation-backed
+- extended the governed API lane inventory to include the live OpenBao and Windmill APIs, and classified every current API or webhook surface as internal-only, operator-only, or public-edge
+- rendered the publication-tier summary into the generated README and documented the operating procedure in a dedicated API publication runbook
+
+Platform impact:
+
+- no direct live platform change; this release makes the existing private-first API and webhook exposure model explicit, reviewable, and enforced from `main`
 
 ## 0.49.0 - 2026-03-22
 

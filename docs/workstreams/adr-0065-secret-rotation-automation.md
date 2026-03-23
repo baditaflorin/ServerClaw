@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0065](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0065-secret-rotation-automation-with-openbao.md)
 - Title: Bounded credential lifetimes with automated rotation via OpenBao and Windmill
-- Status: ready
+- Status: live_applied
 - Branch: `codex/adr-0065-secret-rotation`
 - Worktree: `../proxmox_florin_server-secret-rotation`
 - Owner: codex
@@ -55,3 +55,9 @@
 
 - start with the postgres service password as the lowest-risk rotation candidate
 - the approval gate for high-risk rotations reuses the command-catalog approval mechanism from ADR 0048
+
+## Repo Implementation Notes
+
+- Repo implementation completed on `2026-03-23` for release `0.73.0`.
+- Live apply completed on `2026-03-23` for platform version `0.36.0`.
+- The first successful live rotation covered `windmill_database_password`, including controller-local secret mirroring, Windmill runtime restart, and OpenBao metadata updates.

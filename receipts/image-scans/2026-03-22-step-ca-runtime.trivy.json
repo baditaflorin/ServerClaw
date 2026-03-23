@@ -1,0 +1,349 @@
+{
+  "SchemaVersion": 2,
+  "CreatedAt": "2026-03-22T21:17:48.247392419Z",
+  "ArtifactName": "docker.io/smallstep/step-ca:0.30.1@sha256:fddf37513b8b00d5e3cd2ccbf997ef6cc8519060fd74eaed2cde4284e4a7cfa9",
+  "ArtifactType": "container_image",
+  "Metadata": {
+    "Size": 146235392,
+    "OS": {
+      "Family": "alpine",
+      "Name": "3.23.3"
+    },
+    "ImageID": "sha256:6ad1069568c0f4a3d31595c7d17381eb54069e5be251cd66bf56930b2097bfad",
+    "DiffIDs": [
+      "sha256:989e799e634906e94dc9a5ee2ee26fc92ad260522990f26e707861a5f52bf64e",
+      "sha256:d93946a43fd23a53679e223ff67a391249e9da284400d8fd2ff1ad0b88a7d550",
+      "sha256:ec9cb30c921c3bfdcf198c9c97f4566c7d1fb88cd770956239c99467e5dde4de",
+      "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+      "sha256:ab9870d05094b06d7c49cfafcaaa517a9a91a52d2c8083f0a0a35aa5291ce225",
+      "sha256:5dde1bf10fe63be49c13422f591a446848207194fd0dc930949caa722833810c",
+      "sha256:b1fb38dac3bcb41c3b640803e624ccaa9bb4c00dfebec90ccc50e1af4abd6551"
+    ],
+    "RepoDigests": [
+      "smallstep/step-ca@sha256:fddf37513b8b00d5e3cd2ccbf997ef6cc8519060fd74eaed2cde4284e4a7cfa9"
+    ],
+    "ImageConfig": {
+      "architecture": "amd64",
+      "created": "2026-03-19T01:52:36.719506867Z",
+      "history": [
+        {
+          "created": "2026-01-28T01:18:04.977843834Z",
+          "created_by": "ADD alpine-minirootfs-3.23.3-x86_64.tar.gz / # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-01-28T01:18:04.977843834Z",
+          "created_by": "CMD [\"/bin/sh\"]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-19T01:25:35.679584279Z",
+          "created_by": "ENV STEP=/home/step",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-19T01:25:35.679584279Z",
+          "created_by": "ENV STEPPATH=/home/step",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-19T01:25:35.679584279Z",
+          "created_by": "ARG STEPUID=1000",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-19T01:25:35.679584279Z",
+          "created_by": "ARG STEPGID=1000",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-19T01:25:35.679584279Z",
+          "created_by": "RUN |2 STEPUID=1000 STEPGID=1000 /bin/sh -c apk update         \u0026\u0026 apk upgrade         \u0026\u0026 apk add --no-cache bash curl tzdata jq         \u0026\u0026 addgroup -g ${STEPGID} step         \u0026\u0026 adduser -D -u ${STEPUID} -G step step         \u0026\u0026 chown step:step /home/step # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-19T01:29:02.830507066Z",
+          "created_by": "COPY /src/bin/step /usr/local/bin/step # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-19T01:29:02.830507066Z",
+          "created_by": "USER step",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-19T01:29:02.854960496Z",
+          "created_by": "WORKDIR /home/step",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-19T01:29:02.854960496Z",
+          "created_by": "STOPSIGNAL SIGTERM",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-19T01:29:02.854960496Z",
+          "created_by": "CMD [\"/bin/bash\"]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-19T01:52:36.63866651Z",
+          "created_by": "COPY /src/bin/step-ca /usr/local/bin/step-ca # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-19T01:52:36.698234049Z",
+          "created_by": "COPY /usr/local/bin/step-kms-plugin /usr/local/bin/step-kms-plugin # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-19T01:52:36.719506867Z",
+          "created_by": "USER step",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-19T01:52:36.719506867Z",
+          "created_by": "ENV CONFIGPATH=/home/step/config/ca.json",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-19T01:52:36.719506867Z",
+          "created_by": "ENV PWDPATH=/home/step/secrets/password",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-19T01:52:36.719506867Z",
+          "created_by": "VOLUME [/home/step]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-19T01:52:36.719506867Z",
+          "created_by": "STOPSIGNAL SIGTERM",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-19T01:52:36.719506867Z",
+          "created_by": "HEALTHCHECK \u0026{[\"CMD-SHELL\" \"step ca health 2\u003e/dev/null | grep \\\"^ok\\\" \u003e/dev/null\"] \"0s\" \"0s\" \"0s\" \"0s\" '\\x00'}",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-19T01:52:36.719506867Z",
+          "created_by": "COPY docker/entrypoint.sh /entrypoint.sh # buildkit",
+          "comment": "buildkit.dockerfile.v0"
+        },
+        {
+          "created": "2026-03-19T01:52:36.719506867Z",
+          "created_by": "ENTRYPOINT [\"/bin/bash\" \"/entrypoint.sh\"]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        },
+        {
+          "created": "2026-03-19T01:52:36.719506867Z",
+          "created_by": "CMD [\"/usr/local/bin/step-ca\" \"--password-file\" \"/home/step/secrets/password\" \"/home/step/config/ca.json\"]",
+          "comment": "buildkit.dockerfile.v0",
+          "empty_layer": true
+        }
+      ],
+      "os": "linux",
+      "rootfs": {
+        "type": "layers",
+        "diff_ids": [
+          "sha256:989e799e634906e94dc9a5ee2ee26fc92ad260522990f26e707861a5f52bf64e",
+          "sha256:d93946a43fd23a53679e223ff67a391249e9da284400d8fd2ff1ad0b88a7d550",
+          "sha256:ec9cb30c921c3bfdcf198c9c97f4566c7d1fb88cd770956239c99467e5dde4de",
+          "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+          "sha256:ab9870d05094b06d7c49cfafcaaa517a9a91a52d2c8083f0a0a35aa5291ce225",
+          "sha256:5dde1bf10fe63be49c13422f591a446848207194fd0dc930949caa722833810c",
+          "sha256:b1fb38dac3bcb41c3b640803e624ccaa9bb4c00dfebec90ccc50e1af4abd6551"
+        ]
+      },
+      "config": {
+        "Cmd": [
+          "/usr/local/bin/step-ca",
+          "--password-file",
+          "/home/step/secrets/password",
+          "/home/step/config/ca.json"
+        ],
+        "Healthcheck": {
+          "Test": [
+            "CMD-SHELL",
+            "step ca health 2\u003e/dev/null | grep \"^ok\" \u003e/dev/null"
+          ]
+        },
+        "Entrypoint": [
+          "/bin/bash",
+          "/entrypoint.sh"
+        ],
+        "Env": [
+          "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+          "STEP=/home/step",
+          "STEPPATH=/home/step",
+          "CONFIGPATH=/home/step/config/ca.json",
+          "PWDPATH=/home/step/secrets/password"
+        ],
+        "User": "step",
+        "Volumes": {
+          "/home/step": {}
+        },
+        "WorkingDir": "/home/step",
+        "ArgsEscaped": true,
+        "StopSignal": "SIGTERM"
+      }
+    },
+    "Layers": [
+      {
+        "Size": 8724480,
+        "Digest": "sha256:589002ba0eaed121a1dbf42f6648f29e5be55d5c8a6ee0f8eaa0285cc21ac153",
+        "DiffID": "sha256:989e799e634906e94dc9a5ee2ee26fc92ad260522990f26e707861a5f52bf64e"
+      },
+      {
+        "Size": 12887552,
+        "Digest": "sha256:7d4e1cc5046fbc50bfe428e6f8dd748960f7c39b90172d1e6f11ef6f382fc9c7",
+        "DiffID": "sha256:d93946a43fd23a53679e223ff67a391249e9da284400d8fd2ff1ad0b88a7d550"
+      },
+      {
+        "Size": 43701760,
+        "Digest": "sha256:e43c14f34b3c1881e92a5ffb1fcda122eca308cb222efecf2f5b85034cd0ece0",
+        "DiffID": "sha256:ec9cb30c921c3bfdcf198c9c97f4566c7d1fb88cd770956239c99467e5dde4de"
+      },
+      {
+        "Size": 1024,
+        "Digest": "sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+        "DiffID": "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+      },
+      {
+        "Size": 54262272,
+        "Digest": "sha256:872d8e212ea9ba0e66807f2044ee744184da7483d997414d87543df3022fce0e",
+        "DiffID": "sha256:ab9870d05094b06d7c49cfafcaaa517a9a91a52d2c8083f0a0a35aa5291ce225"
+      },
+      {
+        "Size": 26652160,
+        "Digest": "sha256:6d660f741fe42979a5eb03c9169762330f4dc3cc637181613319052efc926213",
+        "DiffID": "sha256:5dde1bf10fe63be49c13422f591a446848207194fd0dc930949caa722833810c"
+      },
+      {
+        "Size": 6144,
+        "Digest": "sha256:019cfbf5acf7ba7db2661c4d0394f21d328e322aa6e29b53679a2e120b2c2ed1",
+        "DiffID": "sha256:b1fb38dac3bcb41c3b640803e624ccaa9bb4c00dfebec90ccc50e1af4abd6551"
+      }
+    ]
+  },
+  "Results": [
+    {
+      "Target": "docker.io/smallstep/step-ca:0.30.1@sha256:fddf37513b8b00d5e3cd2ccbf997ef6cc8519060fd74eaed2cde4284e4a7cfa9 (alpine 3.23.3)",
+      "Class": "os-pkgs",
+      "Type": "alpine"
+    },
+    {
+      "Target": "usr/local/bin/step",
+      "Class": "lang-pkgs",
+      "Type": "gobinary"
+    },
+    {
+      "Target": "usr/local/bin/step-ca",
+      "Class": "lang-pkgs",
+      "Type": "gobinary",
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2026-33186",
+          "PkgID": "google.golang.org/grpc@v1.79.2",
+          "PkgName": "google.golang.org/grpc",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/google.golang.org/grpc@v1.79.2",
+            "UID": "f1f1b1a7217d4628"
+          },
+          "InstalledVersion": "v1.79.2",
+          "FixedVersion": "1.79.3",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:872d8e212ea9ba0e66807f2044ee744184da7483d997414d87543df3022fce0e",
+            "DiffID": "sha256:ab9870d05094b06d7c49cfafcaaa517a9a91a52d2c8083f0a0a35aa5291ce225"
+          },
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-33186",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Go",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Ago"
+          },
+          "Title": "gRPC-Go has an authorization bypass via missing leading slash in :path",
+          "Description": "### Impact\n_What kind of vulnerability is it? Who is impacted?_\n\nIt is an **Authorization Bypass** resulting from **Improper Input Validation** of the HTTP/2 `:path` pseudo-header.\n\nThe gRPC-Go server was too lenient in its routing logic, accepting requests where the `:path` omitted the mandatory leading slash (e.g., `Service/Method` instead of `/Service/Method`). While the server successfully routed these requests to the correct handler, authorization interceptors (including the official `grpc/authz` package) evaluated the raw, non-canonical path string. Consequently, \"deny\" rules defined using canonical paths (starting with `/`) failed to match the incoming request, allowing it to bypass the policy if a fallback \"allow\" rule was present.\n\n**Who is impacted?**\nThis affects gRPC-Go servers that meet both of the following criteria:\n1. They use path-based authorization interceptors, such as the official RBAC implementation in `google.golang.org/grpc/authz` or custom interceptors relying on `info.FullMethod` or `grpc.Method(ctx)`.\n2. Their security policy contains specific \"deny\" rules for canonical paths but allows other requests by default (a fallback \"allow\" rule).\n\nThe vulnerability is exploitable by an attacker who can send raw HTTP/2 frames with malformed `:path` headers directly to the gRPC server.\n\n### Patches\n_Has the problem been patched? What versions should users upgrade to?_\n\nYes, the issue has been patched. The fix ensures that any request with a `:path` that does not start with a leading slash is immediately rejected with a `codes.Unimplemented` error, preventing it from reaching authorization interceptors or handlers with a non-canonical path string.\n\nUsers should upgrade to the following versions (or newer):\n* **v1.79.3**\n* The latest **master** branch.\n\nIt is recommended that all users employing path-based authorization (especially `grpc/authz`) upgrade as soon as the patch is available in a tagged release.\n\n### Workarounds\n_Is there a way for users to fix or remediate the vulnerability without upgrading?_\n\nWhile upgrading is the most secure and recommended path, users can mitigate the vulnerability using one of the following methods:\n\n#### 1. Use a Validating Interceptor (Recommended Mitigation)\nAdd an \"outermost\" interceptor to your server that validates the path before any other authorization logic runs:\n\n```go\nfunc pathValidationInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {\n    if info.FullMethod == \"\" || info.FullMethod[0] != '/' {\n        return nil, status.Errorf(codes.Unimplemented, \"malformed method name\")\n    }   \n    return handler(ctx, req)\n}\n\n// Ensure this is the FIRST interceptor in your chain\ns := grpc.NewServer(\n    grpc.ChainUnaryInterceptor(pathValidationInterceptor, authzInterceptor),\n)\n```\n\n#### 2. Infrastructure-Level Normalization\nIf your gRPC server is behind a reverse proxy or load balancer (such as Envoy, NGINX, or an L7 Cloud Load Balancer), ensure it is configured to enforce strict HTTP/2 compliance for pseudo-headers and reject or normalize requests where the `:path` header does not start with a leading slash.\n\n#### 3. Policy Hardening\nSwitch to a \"default deny\" posture in your authorization policies (explicitly listing all allowed paths and denying everything else) to reduce the risk of bypasses via malformed inputs.",
+          "Severity": "CRITICAL",
+          "VendorSeverity": {
+            "ghsa": 4
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+              "V3Score": 9.1
+            }
+          },
+          "References": [
+            "https://github.com/grpc/grpc-go",
+            "https://github.com/grpc/grpc-go/security/advisories/GHSA-p77j-4mvh-x3m3"
+          ]
+        }
+      ]
+    },
+    {
+      "Target": "usr/local/bin/step-kms-plugin",
+      "Class": "lang-pkgs",
+      "Type": "gobinary",
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2026-33186",
+          "PkgID": "google.golang.org/grpc@v1.79.2",
+          "PkgName": "google.golang.org/grpc",
+          "PkgIdentifier": {
+            "PURL": "pkg:golang/google.golang.org/grpc@v1.79.2",
+            "UID": "e4f3bc3b2676db1"
+          },
+          "InstalledVersion": "v1.79.2",
+          "FixedVersion": "1.79.3",
+          "Status": "fixed",
+          "Layer": {
+            "Digest": "sha256:6d660f741fe42979a5eb03c9169762330f4dc3cc637181613319052efc926213",
+            "DiffID": "sha256:5dde1bf10fe63be49c13422f591a446848207194fd0dc930949caa722833810c"
+          },
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-33186",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory Go",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Ago"
+          },
+          "Title": "gRPC-Go has an authorization bypass via missing leading slash in :path",
+          "Description": "### Impact\n_What kind of vulnerability is it? Who is impacted?_\n\nIt is an **Authorization Bypass** resulting from **Improper Input Validation** of the HTTP/2 `:path` pseudo-header.\n\nThe gRPC-Go server was too lenient in its routing logic, accepting requests where the `:path` omitted the mandatory leading slash (e.g., `Service/Method` instead of `/Service/Method`). While the server successfully routed these requests to the correct handler, authorization interceptors (including the official `grpc/authz` package) evaluated the raw, non-canonical path string. Consequently, \"deny\" rules defined using canonical paths (starting with `/`) failed to match the incoming request, allowing it to bypass the policy if a fallback \"allow\" rule was present.\n\n**Who is impacted?**\nThis affects gRPC-Go servers that meet both of the following criteria:\n1. They use path-based authorization interceptors, such as the official RBAC implementation in `google.golang.org/grpc/authz` or custom interceptors relying on `info.FullMethod` or `grpc.Method(ctx)`.\n2. Their security policy contains specific \"deny\" rules for canonical paths but allows other requests by default (a fallback \"allow\" rule).\n\nThe vulnerability is exploitable by an attacker who can send raw HTTP/2 frames with malformed `:path` headers directly to the gRPC server.\n\n### Patches\n_Has the problem been patched? What versions should users upgrade to?_\n\nYes, the issue has been patched. The fix ensures that any request with a `:path` that does not start with a leading slash is immediately rejected with a `codes.Unimplemented` error, preventing it from reaching authorization interceptors or handlers with a non-canonical path string.\n\nUsers should upgrade to the following versions (or newer):\n* **v1.79.3**\n* The latest **master** branch.\n\nIt is recommended that all users employing path-based authorization (especially `grpc/authz`) upgrade as soon as the patch is available in a tagged release.\n\n### Workarounds\n_Is there a way for users to fix or remediate the vulnerability without upgrading?_\n\nWhile upgrading is the most secure and recommended path, users can mitigate the vulnerability using one of the following methods:\n\n#### 1. Use a Validating Interceptor (Recommended Mitigation)\nAdd an \"outermost\" interceptor to your server that validates the path before any other authorization logic runs:\n\n```go\nfunc pathValidationInterceptor(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {\n    if info.FullMethod == \"\" || info.FullMethod[0] != '/' {\n        return nil, status.Errorf(codes.Unimplemented, \"malformed method name\")\n    }   \n    return handler(ctx, req)\n}\n\n// Ensure this is the FIRST interceptor in your chain\ns := grpc.NewServer(\n    grpc.ChainUnaryInterceptor(pathValidationInterceptor, authzInterceptor),\n)\n```\n\n#### 2. Infrastructure-Level Normalization\nIf your gRPC server is behind a reverse proxy or load balancer (such as Envoy, NGINX, or an L7 Cloud Load Balancer), ensure it is configured to enforce strict HTTP/2 compliance for pseudo-headers and reject or normalize requests where the `:path` header does not start with a leading slash.\n\n#### 3. Policy Hardening\nSwitch to a \"default deny\" posture in your authorization policies (explicitly listing all allowed paths and denying everything else) to reduce the risk of bypasses via malformed inputs.",
+          "Severity": "CRITICAL",
+          "VendorSeverity": {
+            "ghsa": 4
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+              "V3Score": 9.1
+            }
+          },
+          "References": [
+            "https://github.com/grpc/grpc-go",
+            "https://github.com/grpc/grpc-go/security/advisories/GHSA-p77j-4mvh-x3m3"
+          ]
+        }
+      ]
+    }
+  ]
+}
