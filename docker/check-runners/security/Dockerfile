@@ -1,11 +1,11 @@
-FROM aquasec/trivy:0.68.2 AS trivy_source
+FROM aquasec/trivy:0.68.2@sha256:05d0126976bdedcd0782a0336f77832dbea1c81b9cc5e4b3a5ea5d2ec863aca7 AS trivy_source
 
 FROM debian:12-slim@sha256:8af0e5095f9964007f5ebd11191dfe52dcb51bf3afa2c07f055fc5451b78ba0e
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 ENV VIRTUAL_ENV=/opt/check-runner
-ENV PATH=/opt/check-runner/bin:${PATH}
+ENV PATH=/opt/check-runner/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ARG TARGETARCH
 ARG GITLEAKS_VERSION=8.28.0
 
@@ -37,9 +37,9 @@ RUN case "${TARGETARCH}" in \
 COPY .tool-versions /tmp/.tool-versions
 
 RUN python3 -m venv "${VIRTUAL_ENV}" \
-    && pip install --no-cache-dir --upgrade pip setuptools wheel \
-    && pip install --no-cache-dir checkov==3.2.469 \
-    && trivy --download-db-only --cache-dir /var/lib/trivy >/dev/null
+    && "${VIRTUAL_ENV}/bin/pip" install --no-cache-dir --upgrade pip setuptools wheel \
+    && "${VIRTUAL_ENV}/bin/pip" install --no-cache-dir checkov==3.2.469 \
+    && trivy image --download-db-only --cache-dir /var/lib/trivy >/dev/null
 
 WORKDIR /workspace
 

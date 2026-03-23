@@ -1,5 +1,7 @@
 import json
+import os
 import shlex
+import socket
 import subprocess
 from pathlib import Path
 
@@ -24,6 +26,13 @@ RUNNERS = {
 }
 
 
+def detect_build_network() -> str:
+    configured = os.environ.get("CHECK_RUNNER_BUILD_NETWORK")
+    if configured is not None:
+        return configured
+    return "host" if socket.gethostname() == "docker-build-lv3" else ""
+
+
 def run(command: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         command,
@@ -36,6 +45,7 @@ def run(command: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
 
 def build_and_push(repo_root: Path, image: str, context: str) -> dict[str, object]:
     cache_ref = f"{image}:cache"
+    build_network = detect_build_network()
     command = [
         "docker",
         "buildx",
@@ -43,6 +53,10 @@ def build_and_push(repo_root: Path, image: str, context: str) -> dict[str, objec
         "--platform",
         "linux/amd64",
         "--push",
+    ]
+    if build_network:
+        command.extend(["--network", build_network])
+    command.extend([
         "--build-arg",
         "BUILDKIT_INLINE_CACHE=1",
         "--cache-from",
@@ -52,7 +66,7 @@ def build_and_push(repo_root: Path, image: str, context: str) -> dict[str, objec
         "--tag",
         image,
         context,
-    ]
+    ])
     result = run(command, repo_root)
     return {
         "command": " ".join(shlex.quote(part) for part in command),

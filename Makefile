@@ -40,6 +40,7 @@ CHECK_RUNNER_PYTHON_TAG ?= 3.12.10
 CHECK_RUNNER_INFRA_TAG ?= 2026.03.23
 CHECK_RUNNER_SECURITY_TAG ?= 2026.03.23
 CHECK_RUNNER_PLATFORM ?= linux/amd64
+CHECK_RUNNER_BUILD_NETWORK ?= $(if $(filter docker-build-lv3,$(shell hostname -s 2>/dev/null)),host,)
 CHECK_RUNNER_ANSIBLE_IMAGE ?= $(CHECK_RUNNER_REGISTRY)/ansible:$(CHECK_RUNNER_ANSIBLE_TAG)
 CHECK_RUNNER_PYTHON_IMAGE ?= $(CHECK_RUNNER_REGISTRY)/python:$(CHECK_RUNNER_PYTHON_TAG)
 CHECK_RUNNER_INFRA_IMAGE ?= $(CHECK_RUNNER_REGISTRY)/infra:$(CHECK_RUNNER_INFRA_TAG)
@@ -78,10 +79,10 @@ validate-data-models:
 	$(REPO_ROOT)/scripts/validate_repo.sh data-models
 
 build-check-runners:
-	docker build --pull --platform $(CHECK_RUNNER_PLATFORM) --tag $(CHECK_RUNNER_ANSIBLE_IMAGE) $(REPO_ROOT)/docker/check-runners/ansible
-	docker build --pull --platform $(CHECK_RUNNER_PLATFORM) --tag $(CHECK_RUNNER_PYTHON_IMAGE) $(REPO_ROOT)/docker/check-runners/python
-	docker build --pull --platform $(CHECK_RUNNER_PLATFORM) --tag $(CHECK_RUNNER_INFRA_IMAGE) $(REPO_ROOT)/docker/check-runners/infra
-	docker build --pull --platform $(CHECK_RUNNER_PLATFORM) --tag $(CHECK_RUNNER_SECURITY_IMAGE) $(REPO_ROOT)/docker/check-runners/security
+	docker build --pull --platform $(CHECK_RUNNER_PLATFORM) $(if $(CHECK_RUNNER_BUILD_NETWORK),--network $(CHECK_RUNNER_BUILD_NETWORK)) --tag $(CHECK_RUNNER_ANSIBLE_IMAGE) $(REPO_ROOT)/docker/check-runners/ansible
+	docker build --pull --platform $(CHECK_RUNNER_PLATFORM) $(if $(CHECK_RUNNER_BUILD_NETWORK),--network $(CHECK_RUNNER_BUILD_NETWORK)) --tag $(CHECK_RUNNER_PYTHON_IMAGE) $(REPO_ROOT)/docker/check-runners/python
+	docker build --pull --platform $(CHECK_RUNNER_PLATFORM) $(if $(CHECK_RUNNER_BUILD_NETWORK),--network $(CHECK_RUNNER_BUILD_NETWORK)) --tag $(CHECK_RUNNER_INFRA_IMAGE) $(REPO_ROOT)/docker/check-runners/infra
+	docker build --pull --platform $(CHECK_RUNNER_PLATFORM) $(if $(CHECK_RUNNER_BUILD_NETWORK),--network $(CHECK_RUNNER_BUILD_NETWORK)) --tag $(CHECK_RUNNER_SECURITY_IMAGE) $(REPO_ROOT)/docker/check-runners/security
 
 push-check-runners:
 	docker push $(CHECK_RUNNER_ANSIBLE_IMAGE)
