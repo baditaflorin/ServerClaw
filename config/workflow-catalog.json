@@ -190,6 +190,73 @@
         "python3 config/windmill/scripts/nightly-integration-tests.py --repo-path /srv/proxmox_florin_server"
       ]
     },
+    "run-triage": {
+      "description": "Run the ADR 0114 rule-based incident triage engine for one alert payload, write the report, and optionally post the summary to Mattermost.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "triage-alert",
+        "command": "make triage-alert TRIAGE_ARGS='--payload /path/to/alert.json --emit'"
+      },
+      "preflight": {
+        "required": false,
+        "required_secret_ids": []
+      },
+      "validation_targets": [
+        "validate-data-models"
+      ],
+      "live_impact": "repo_only",
+      "owner_runbook": "docs/runbooks/incident-triage-engine.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/triage-rules.yaml",
+        "config/triage-auto-check-allowlist.yaml",
+        "config/windmill/scripts/run-triage.py",
+        "docs/adr/0114-rule-based-incident-triage-engine.md",
+        "docs/runbooks/incident-triage-engine.md",
+        "scripts/incident_triage.py",
+        "tests/test_incident_triage.py",
+        "tests/test_triage_windmill.py"
+      ],
+      "outputs": [
+        "A JSON triage report under .local/triage/reports/, together with an optional Mattermost summary and mutation-audit event."
+      ],
+      "verification_commands": [
+        "python3 scripts/incident_triage.py --service netbox --alert-name netbox_health_probe_failed --signal recent_deployment_within_2h=true",
+        "python3 config/windmill/scripts/run-triage.py"
+      ]
+    },
+    "triage-calibration": {
+      "description": "Calibrate ADR 0114 rule precision and recall against resolved incident cases and publish the weekly summary.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "triage-calibration",
+        "command": "make triage-calibration"
+      },
+      "preflight": {
+        "required": false,
+        "required_secret_ids": []
+      },
+      "validation_targets": [
+        "validate-data-models"
+      ],
+      "live_impact": "repo_only",
+      "owner_runbook": "docs/runbooks/incident-triage-engine.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/windmill/scripts/calibrate-triage-rules.py",
+        "docs/runbooks/incident-triage-engine.md",
+        "scripts/triage_calibration.py"
+      ],
+      "outputs": [
+        "A calibration summary under .local/triage/calibration/latest.json with per-rule precision and recall or an explicit insufficient-data status."
+      ],
+      "verification_commands": [
+        "python3 scripts/triage_calibration.py",
+        "python3 config/windmill/scripts/calibrate-triage-rules.py --repo-path /srv/proxmox_florin_server"
+      ]
+    },
     "generate-status-docs": {
       "description": "Regenerate the README status fragments that are derived from canonical repository state.",
       "lifecycle_status": "active",

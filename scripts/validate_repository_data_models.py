@@ -56,6 +56,8 @@ VM_TEMPLATE_MANIFEST_PATH = repo_path("config", "vm-template-manifest.json")
 CAPACITY_MODEL_PATH = repo_path("config", "capacity-model.json")
 VERSION_SEMANTICS_PATH = repo_path("config", "version-semantics.json")
 WORKSTREAMS_PATH = repo_path("workstreams.yaml")
+TRIAGE_RULES_PATH = repo_path("config", "triage-rules.yaml")
+TRIAGE_AUTO_CHECK_ALLOWLIST_PATH = repo_path("config", "triage-auto-check-allowlist.yaml")
 
 SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -1346,6 +1348,29 @@ def validate_workstreams_release_policy() -> None:
         raise ValueError("workstreams.yaml.release_policy.breaking_change_criteria must point to config/version-semantics.json")
 
 
+def validate_triage_rule_contracts() -> None:
+    import incident_triage
+
+    rules = incident_triage.load_triage_rules(TRIAGE_RULES_PATH)
+    allowlist = incident_triage.load_auto_check_allowlist(TRIAGE_AUTO_CHECK_ALLOWLIST_PATH)
+    if not allowlist:
+        raise ValueError("config/triage-auto-check-allowlist.yaml must not be empty")
+    for index, rule in enumerate(rules["rules"]):
+        if not rule["auto_check"]:
+            continue
+        check_types = [
+            check["type"]
+            for check in rule["discriminating_checks"]
+            if isinstance(check, dict) and isinstance(check.get("type"), str)
+        ]
+        if not check_types:
+            raise ValueError(f"config/triage-rules.yaml.rules[{index}] auto_check rule must define at least one check type")
+        if check_types[0] not in allowlist:
+            raise ValueError(
+                f"config/triage-rules.yaml.rules[{index}] first auto_check type '{check_types[0]}' must be allowlisted"
+            )
+
+
 def validate_identity_taxonomy(
     desired_state: dict[str, Any],
     observed_state: dict[str, Any],
@@ -1989,6 +2014,7 @@ def validate_repository_data_models() -> int:
     validate_secret_catalog(secret_manifest)
     validate_version_semantics()
     validate_workstreams_release_policy()
+    validate_triage_rule_contracts()
     validate_platform_finding_schema()
     validate_maintenance_window_schema()
     validate_capacity_model()

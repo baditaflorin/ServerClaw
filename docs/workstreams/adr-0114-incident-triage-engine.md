@@ -2,25 +2,25 @@
 
 - ADR: [ADR 0114](../adr/0114-rule-based-incident-triage-engine.md)
 - Title: CPU-only triage engine triggered on every firing alert — assembles signals from world state, evaluates ranked rules, posts hypotheses and cheapest first action to Mattermost before any operator acts
-- Status: ready
-- Branch: `codex/adr-0114-triage-engine`
-- Worktree: `../proxmox_florin_server-triage-engine`
+- Status: in_progress
+- Branch: `codex/adr-0114-incident-triage`
+- Worktree: `.worktrees/adr-0114`
 - Owner: codex
 - Depends On: `adr-0052-loki-logs`, `adr-0057-mattermost-chatops`, `adr-0058-nats-event-bus`, `adr-0061-glitchtip`, `adr-0064-health-probe-contracts`, `adr-0097-alerting-routing`, `adr-0113-world-state-materializer`, `adr-0115-mutation-ledger`, `adr-0117-dependency-graph-runtime`
 - Conflicts With: none
-- Shared Surfaces: `platform/triage/`, `config/triage-rules.yaml`, Windmill triage workflow, `ledger.events`
+- Shared Surfaces: `scripts/incident_triage.py`, `scripts/triage_calibration.py`, `config/triage-rules.yaml`, `config/windmill/scripts/`, mutation-audit sink
 
 ## Scope
 
-- create `platform/triage/__init__.py`, `platform/triage/engine.py` — context assembly, signal extraction, rule evaluation, hypothesis ranking
-- create `platform/triage/rules.py` — YAML rule table loader, AND/OR condition evaluator, confidence scorer
-- create `platform/triage/signals.py` — named signal extractors for all signal types defined in ADR 0114
+- create `scripts/incident_triage.py` — context assembly, signal extraction, rule evaluation, hypothesis ranking, and report emission
+- create `scripts/triage_calibration.py` — weekly precision and recall summariser over resolved incident cases
 - create `config/triage-rules.yaml` — initial rule set with at minimum: `recent-deployment-regression`, `upstream-db-saturation`, `tls-cert-expiry`, `resource-exhaustion`, `dependency-failure`, `configuration-drift`
-- create `windmill/triage/run-triage.py` — Windmill workflow that receives an alert payload, calls the triage engine, and emits output
-- configure Windmill subscription on `alerts.fired` NATS topic to trigger `run-triage` workflow
-- configure the triage workflow to post the Mattermost triage report to `#platform-incidents`
-- create `windmill/triage/calibrate-rules.py` — weekly workflow that computes per-rule precision/recall and posts to `#platform-ops`
-- write `tests/unit/test_triage_engine.py` — unit tests for rule evaluation and signal extraction
+- create `config/triage-auto-check-allowlist.yaml` — explicit safe auto-check types
+- create `config/windmill/scripts/run-triage.py` — Windmill workflow that receives an alert payload, calls the triage engine, and emits output
+- create `config/windmill/scripts/calibrate-triage-rules.py` — weekly workflow that computes per-rule precision/recall and posts a summary
+- update `config/workflow-catalog.json` and `Makefile` — repo-managed entrypoints for triage and calibration
+- write `tests/test_incident_triage.py` and `tests/test_triage_windmill.py` — unit tests for rule evaluation, emission, and Windmill wrappers
+- write `docs/runbooks/incident-triage-engine.md` — operator runbook for payload contract, outputs, safety rules, and verification
 
 ## Non-Goals
 
@@ -30,41 +30,42 @@
 
 ## Expected Repo Surfaces
 
-- `platform/triage/__init__.py`
-- `platform/triage/engine.py`
-- `platform/triage/rules.py`
-- `platform/triage/signals.py`
+- `scripts/incident_triage.py`
+- `scripts/triage_calibration.py`
 - `config/triage-rules.yaml`
-- `windmill/triage/run-triage.py`
-- `windmill/triage/calibrate-rules.py`
+- `config/triage-auto-check-allowlist.yaml`
+- `config/windmill/scripts/run-triage.py`
+- `config/windmill/scripts/calibrate-triage-rules.py`
+- `config/workflow-catalog.json`
+- `Makefile`
+- `docs/runbooks/incident-triage-engine.md`
 - `docs/adr/0114-rule-based-incident-triage-engine.md`
 - `docs/workstreams/adr-0114-incident-triage-engine.md`
 
 ## Expected Live Surfaces
 
-- Firing a test alert via `lv3 alert test netbox_health_probe_failed` triggers a Windmill triage job
-- Within 60 seconds the Mattermost `#platform-incidents` channel receives a triage report with at least one hypothesis
-- The triage report is written as a `triage.report_created` event in `ledger.events`
-- The weekly calibration workflow is scheduled in Windmill
+- Running `python3 config/windmill/scripts/run-triage.py` with an alert payload produces a triage report and writes it under `.local/triage/reports/`
+- When `LV3_TRIAGE_MATTERMOST_WEBHOOK_URL` is configured, the wrapper posts a summary to the incidents channel webhook
+- The triage report is written as a `triage.report_created` event in the mutation-audit sink
+- The weekly calibration wrapper writes `.local/triage/calibration/latest.json`
 
 ## Verification
 
-- Run `pytest tests/unit/test_triage_engine.py -v` → all tests pass
-- Fire a simulated health probe failure for netbox: `lv3 alert test netbox_health_probe_failed`
-- Confirm the triage report appears in Mattermost `#platform-incidents` within 60 seconds
-- Confirm `SELECT * FROM ledger.events WHERE event_type = 'triage.report_created' LIMIT 1;` returns a row
-- Confirm the triage report JSON contains at least one hypothesis with `confidence > 0`
+- Run `uv run --with pytest --with pyyaml python -m pytest tests/test_incident_triage.py tests/test_triage_windmill.py -q` → all tests pass
+- Run `uv run --with pyyaml python scripts/validate_repository_data_models.py --validate` → triage config contracts validate
+- Run `python3 scripts/incident_triage.py --service netbox --alert-name netbox_health_probe_failed --signal recent_deployment_within_2h=true` → report JSON contains at least one hypothesis
+- Run `python3 config/windmill/scripts/run-triage.py` from a worker checkout with a payload → report is emitted successfully
 
 ## Merge Criteria
 
 - Unit tests pass
-- End-to-end triage flow verified: alert → Windmill job → Mattermost post → ledger event
-- At least 6 rules in the initial `triage-rules.yaml`
-- Calibration workflow scheduled and has run at least once (can be a manual trigger for merge)
+- Triage config contracts validate through the repository data-model gate
+- At least 6 rules exist in the initial `triage-rules.yaml`
+- Windmill wrappers for report generation and calibration both return successful payloads from a mounted repo checkout
 
 ## Notes For The Next Assistant
 
-- The `run-triage` Windmill workflow must have a 120-second timeout budget in the workflow catalog — triage involves Loki queries which can be slow
-- The Loki signal extraction (`error_log_count_15m`) must use the LogQL HTTP API directly, not `logcli`; the Windmill execution environment may not have `logcli` installed
-- For the `auto_check: true` discriminating checks, implement a hard allowlist of safe-to-auto-run check types in `config/triage-auto-check-allowlist.yaml`; do not derive the allowlist from the rule table at runtime
-- The `calibration` workflow joins triage reports against resolved cases by `incident_id`; cases must be created in ADR 0118 before calibration can produce meaningful precision/recall numbers — the calibration workflow should handle `no cases found` gracefully with a "insufficient data" output
+- The triage engine intentionally lives under `scripts/` rather than a new top-level `platform/` package so it does not shadow Python's stdlib `platform` module
+- The Loki signal extraction (`error_log_count_15m`) uses the LogQL HTTP API directly when `LV3_TRIAGE_LOKI_QUERY_URL` is configured
+- The auto-check executor is observation-only and gated by `config/triage-auto-check-allowlist.yaml`
+- Calibration joins triage reports against resolved cases by `incident_id`; until ADR 0118 exists live, the wrapper returns `insufficient_data` cleanly when no case file is present
