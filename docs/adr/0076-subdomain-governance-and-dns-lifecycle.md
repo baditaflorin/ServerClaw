@@ -1,10 +1,10 @@
 # ADR 0076: Subdomain Governance And DNS Lifecycle
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.84.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-23
 - Date: 2026-03-22
 
 ## Context
@@ -34,14 +34,13 @@ We will define a subdomain governance model covering naming, ownership, TLS prov
 - `<env>` — omitted for production (e.g. `grafana.lv3.org`), included for staging (e.g. `grafana.staging.lv3.org`), and for any future additional environments
 - special top-level subdomains (`mail.lv3.org`, `smtp.lv3.org`) are pre-reserved and documented in `config/subdomain-catalog.json`
 
-Reserved subdomain prefixes that are never assigned to user-facing services:
+Reserved first-label prefixes are catalogued and enforced for future hostnames:
 
-- `_dmarc`, `_domainkey`, `dkim*` — mail authentication records
-- `smtp`, `imap` — mail submission/retrieval
-- `ops` — operations portal (ADR 0074)
-- `internal` — reserved for internal routing only
-- `staging` — staging wildcard delegation
-- `api` — reserved for future internal API gateway
+- `ops` — operations portal namespace (ADR 0074)
+- `internal` — internal routing only
+- `staging` — reserved environment namespace
+- `api` — future governed API gateway
+- `smtp`, `imap`, `mail` — mail transport and primary mail namespace
 
 ### Subdomain catalog
 
@@ -69,6 +68,8 @@ All active subdomains are recorded in `config/subdomain-catalog.json`:
 }
 ```
 
+The catalog also records `reserved_prefixes` so the validator can reject new hostnames that would collide with governed namespaces unless the exact FQDN is explicitly allowlisted.
+
 ### TLS provisioning rules
 
 | Exposure | TLS Provider | Certificate Type |
@@ -86,7 +87,7 @@ Internal subdomains under `staging.lv3.org` are served by the staging step-ca in
 **Creating a subdomain:**
 1. add an entry to `config/subdomain-catalog.json`
 2. add to the service capability catalog (ADR 0075)
-3. run `make provision-subdomain fqdn=<name>` — this runs the DNS record role, provisions the TLS certificate, and adds the NGINX route
+3. run `make provision-subdomain FQDN=<name>` — this converges the DNS record and, when the hostname already has a repo-managed edge route, refreshes the shared NGINX publication and certificate set
 4. verify the subdomain appears in the operations portal DNS map (ADR 0074)
 
 **Retiring a subdomain:**
@@ -112,7 +113,7 @@ For staging, `*.staging.lv3.org` issued by the internal step-ca is acceptable be
 ## Consequences
 
 - Every subdomain is catalogued before it can receive traffic; ungoverned DNS records cannot silently accumulate.
-- The `make validate` gate includes a check that every NGINX route has a matching subdomain catalog entry.
+- The `make validate` gate now checks that every repo-managed NGINX route has a matching subdomain catalog entry and that reserved prefixes are enforced from the catalog itself.
 - Certificate lifecycle is predictable and monitored; expiry surprises are eliminated.
 - Retiring a service now has a defined subdomain teardown checklist.
 

@@ -14,4 +14,4 @@ Versioned release notes live under [docs/release-notes/README.md](/Users/live/Do
 
 ## Latest Release
 
-- [0.84.0 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.84.0.md)
+- [0.85.0 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.85.0.md)
