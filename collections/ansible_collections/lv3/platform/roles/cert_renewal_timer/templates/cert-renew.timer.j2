@@ -1,0 +1,11 @@
+[Unit]
+Description={{ cert_renewal_timer_description }} schedule
+
+[Timer]
+OnCalendar={{ cert_renewal_timer_on_calendar }}
+Persistent=true
+RandomizedDelaySec={{ cert_renewal_timer_randomized_delay_seconds }}
+Unit={{ cert_renewal_timer_name }}.service
+
+[Install]
+WantedBy=timers.target

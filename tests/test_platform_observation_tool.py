@@ -196,28 +196,48 @@ def test_check_image_freshness_supports_pinned_mapping_catalog(monkeypatch):
 
 
 def test_check_certificate_expiry_uses_tls_probe(monkeypatch):
-    def fake_execute_runner(context, runner, target, command):
-        del context, target, command
-        assert runner == "host_ssh"
-        return tool.CommandResult(
-            command="openssl x509",
-            returncode=0,
-            stdout="subject=CN=proxmox.lv3.org\nnotAfter=Jun 19 20:50:43 2026 GMT\n",
-            stderr="",
-        )
-
-    def fake_probe_tls_certificate(host, port, server_name=None, timeout_seconds=10):
-        del server_name, timeout_seconds
-        mapping = {
-            ("100.118.189.95", 9443): ("commonName=step-ca", tool.parse_date("2026-04-23T20:32:11Z")),
-            ("100.118.189.95", 8200): ("commonName=openbao", tool.parse_date("2026-04-23T18:36:41Z")),
-            ("100.118.189.95", 9444): ("commonName=portainer", tool.parse_date("2031-03-22T19:17:59Z")),
-        }
-        return mapping[(host, port)]
-
-    monkeypatch.setattr(tool, "execute_runner", fake_execute_runner)
-    monkeypatch.setattr(tool, "probe_tls_certificate", fake_probe_tls_certificate)
-    monkeypatch.setattr(tool, "utc_now", lambda: tool.parse_date("2026-03-23T00:00:00Z"))
+    monkeypatch.setattr(
+        tool,
+        "collect_certificate_results",
+        lambda now=None: [
+            {
+                "certificate_id": "openbao-proxy",
+                "severity": "ok",
+                "status": "ok",
+                "subject": "commonName=openbao",
+                "issuer": "commonName=LV3 Internal CA Intermediate",
+                "not_after": "2026-04-23T18:36:41Z",
+                "days_remaining": 31,
+            },
+            {
+                "certificate_id": "portainer-proxy",
+                "severity": "ok",
+                "status": "ok",
+                "subject": "commonName=portainer",
+                "issuer": "commonName=portainer",
+                "not_after": "2031-03-22T19:17:59Z",
+                "days_remaining": 1825,
+            },
+            {
+                "certificate_id": "proxmox-ui",
+                "severity": "ok",
+                "status": "ok",
+                "subject": "commonName=proxmox.lv3.org",
+                "issuer": "commonName=Let's Encrypt",
+                "not_after": "2026-06-19T20:50:43Z",
+                "days_remaining": 88,
+            },
+            {
+                "certificate_id": "step-ca-proxy",
+                "severity": "ok",
+                "status": "ok",
+                "subject": "commonName=step-ca",
+                "issuer": "commonName=LV3 Internal CA Intermediate",
+                "not_after": "2026-04-23T20:32:11Z",
+                "days_remaining": 31,
+            },
+        ],
+    )
 
     finding = tool.check_certificate_expiry({}, "run-2")
 

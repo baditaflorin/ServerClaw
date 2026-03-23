@@ -1,0 +1,11 @@
+---
+cert_renewer_sidecar_name: cert-renewer
+cert_renewer_sidecar_image: smallstep/step-cli:latest
+cert_renewer_sidecar_cert_mount_path: /certs
+cert_renewer_sidecar_restart: unless-stopped
+cert_renewer_sidecar_exec_command: ""
+cert_renewer_sidecar_ca_url: ""
+cert_renewer_sidecar_root_file: /certs/root_ca.crt
+cert_renewer_sidecar_certificate_file: /certs/service.crt
+cert_renewer_sidecar_key_file: /certs/service.key
+cert_renewer_sidecar_output_path: ""

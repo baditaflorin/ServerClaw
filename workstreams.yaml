@@ -135,7 +135,7 @@ workstreams:
       - playbooks/docker-compose-stacks.yml
       - roles/docker_compose_stack
       - docs/runbooks/deploy-docker-compose-stack.md
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: false
 
   - id: adr-0026-postgres-vm
