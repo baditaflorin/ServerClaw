@@ -173,3 +173,78 @@ control_plane_recovery_backup_store_root: /srv/control-plane-recovery
 control_plane_recovery_backup_store_user: lv3-control-plane-backup
 control_plane_recovery_backup_on_calendar: "*-*-* 01,07,13,19:15:00"
 control_plane_recovery_restore_drill_on_calendar: "*-*-* 05:45:00"
+
+proxmox_management_allowed_tcp_ports:
+  - "{{ step_ca_proxy_port }}"
+  - "{{ openbao_proxy_port }}"
+  - "{{ windmill_host_proxy_port }}"
+
+playbook_execution_env: "{{ env | default('production') }}"
+playbook_execution_allowed_envs:
+  - production
+  - staging
+playbook_execution_preflight_connection_timeout: 30
+playbook_execution_check_connectivity: true
+playbook_execution_emit_audit: true
+playbook_execution_correlation_id: "playbook:{{ playbook_execution_env }}:{{ lookup('ansible.builtin.env', 'USER') | default('unknown', true) }}"
+playbook_execution_controller_secret_manifest_path: "{{ inventory_dir | dirname }}/config/controller-local-secrets.json"
+playbook_execution_health_probe_catalog_path: "{{ inventory_dir | dirname }}/config/health-probe-catalog.json"
+playbook_execution_mutation_audit_script: "{{ inventory_dir | dirname }}/scripts/mutation_audit.py"
+playbook_execution_mattermost_webhook_url: "{{ lookup('ansible.builtin.env', 'LV3_MATTERMOST_WEBHOOK') | default('', true) }}"
+playbook_execution_nats_notify_command: "{{ lookup('ansible.builtin.env', 'LV3_NATS_NOTIFY_COMMAND') | default('', true) }}"
+playbook_execution_host_patterns:
+  proxmox_hosts:
+    production: "proxmox_hosts:&production"
+    staging: "proxmox_hosts:&staging"
+  lv3_guests:
+    production: "lv3_guests:&production"
+    staging: "lv3_guests:&staging"
+  postgres_guests:
+    production: "postgres_guests:&production"
+    staging: "postgres_guests:&staging"
+  backup_guests:
+    production: "backup_guests:&production"
+    staging: "backup_guests:&staging"
+  nginx_edge:
+    production: nginx-lv3
+    staging: nginx-staging-lv3
+  docker_runtime:
+    production: docker-runtime-lv3
+    staging: docker-runtime-staging-lv3
+  docker_build:
+    production: docker-build-lv3
+    staging: docker-build-staging-lv3
+  monitoring:
+    production: monitoring-lv3
+    staging: monitoring-staging-lv3
+  postgres:
+    production: postgres-lv3
+    staging: postgres-staging-lv3
+  backup:
+    production: backup-lv3
+    staging: backup-staging-lv3
+playbook_execution_required_hosts:
+  proxmox_hosts:
+    production: proxmox_florin
+    staging: proxmox_florin
+  lv3_guests:
+    production: lv3_guests
+    staging: lv3_guests
+  nginx_edge:
+    production: nginx-lv3
+    staging: nginx-staging-lv3
+  docker_runtime:
+    production: docker-runtime-lv3
+    staging: docker-runtime-staging-lv3
+  docker_build:
+    production: docker-build-lv3
+    staging: docker-build-staging-lv3
+  monitoring:
+    production: monitoring-lv3
+    staging: monitoring-staging-lv3
+  postgres:
+    production: postgres-lv3
+    staging: postgres-staging-lv3
+  backup:
+    production: backup-lv3
+    staging: backup-staging-lv3

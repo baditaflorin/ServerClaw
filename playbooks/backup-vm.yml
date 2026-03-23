@@ -3,6 +3,10 @@
   hosts: proxmox_hosts
   become: true
   gather_facts: true
+  tags:
+    - tier-1
+    - data
+    - service-backup-vm
   vars:
     proxmox_guests_active: >-
       {{
@@ -37,9 +41,13 @@
         - backup-vm
 
 - name: Configure the backup VM guest
-  hosts: backup_guests
+  hosts: "{{ 'backup_guests:&staging' if (env | default('production')) == 'staging' else 'backup_guests:&production' }}"
   become: true
   gather_facts: false
+  tags:
+    - tier-2
+    - data
+    - service-backup-vm
   vars:
     proxmox_guest_ssh_connection_mode: proxmox_host_jump
 
@@ -62,6 +70,10 @@
   hosts: proxmox_hosts
   become: true
   gather_facts: true
+  tags:
+    - tier-1
+    - data
+    - service-backup-vm
   vars:
     proxmox_backup_storage_enabled_override: true
 

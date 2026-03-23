@@ -1,0 +1,35 @@
+# depends_on:
+#   - playbooks/services/proxmox-metrics.yml
+---
+- name: Converge monitoring VM stack
+  hosts: "{{ 'monitoring-staging-lv3' if (env | default('production')) == 'staging' else 'monitoring-lv3' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - observability
+    - service-grafana
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: ../tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.grafana
+        playbook_execution_audit_target: grafana
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.monitoring[playbook_execution_env] }}"
+
+  roles:
+    - role: monitoring_vm
+
+  post_tasks:
+    - name: Run shared post-verify checks
+      ansible.builtin.import_tasks: ../tasks/post-verify.yml
+      vars:
+        service_health_probe_id: grafana
+        playbook_execution_post_verify_audit_action: playbook.verify.grafana
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: ../tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: grafana

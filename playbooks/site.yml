@@ -1,2 +1,9 @@
 ---
 - import_playbook: proxmox-install.yml
+- import_playbook: groups/access.yml
+- import_playbook: groups/data.yml
+- import_playbook: groups/security.yml
+- import_playbook: groups/observability.yml
+- import_playbook: groups/automation.yml
+- import_playbook: groups/communication.yml
+- import_playbook: groups/platform-apps.yml

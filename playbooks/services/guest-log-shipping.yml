@@ -1,0 +1,61 @@
+---
+- name: Converge guest log shipping
+  hosts: "{{ 'lv3_guests:&staging' if (env | default('production')) == 'staging' else 'lv3_guests:&production' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - observability
+    - service-guest-log-shipping
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: ../tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.guest-log-shipping
+        playbook_execution_audit_target: guest-log-shipping
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.lv3_guests[playbook_execution_env] }}"
+
+    - name: Derive guest log shipping role and lane
+      ansible.builtin.set_fact:
+        monitoring_stack_guest_role: >-
+          {{
+            hostvars[groups['proxmox_hosts'][0]].proxmox_guests
+            | selectattr('name', 'equalto', inventory_hostname)
+            | map(attribute='role')
+            | first
+          }}
+        monitoring_stack_guest_lane: >-
+          {{
+            {
+              'nginx': 'edge',
+              'docker-runtime': 'control-plane',
+              'docker-build': 'build',
+              'monitoring': 'monitoring',
+              'postgres': 'data',
+              'backup': 'backup'
+            }[
+              (
+                hostvars[groups['proxmox_hosts'][0]].proxmox_guests
+                | selectattr('name', 'equalto', inventory_hostname)
+                | map(attribute='role')
+                | first
+              )
+            ]
+          }}
+
+  roles:
+    - role: loki_log_agent
+      vars:
+        loki_log_agent_role: "{{ monitoring_stack_guest_role }}"
+        loki_log_agent_lane: "{{ monitoring_stack_guest_lane }}"
+        loki_log_agent_nginx_logs_enabled: "{{ monitoring_stack_guest_role == 'nginx' }}"
+        loki_log_agent_docker_logs_enabled: "{{ monitoring_stack_guest_role == 'docker-runtime' }}"
+
+  post_tasks:
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: ../tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: guest-log-shipping

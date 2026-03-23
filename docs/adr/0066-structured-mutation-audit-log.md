@@ -1,10 +1,10 @@
 # ADR 0066: Structured Mutation Audit Log
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Partial
+- Implemented In Repo Version: 0.77.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-23
 - Date: 2026-03-22
 
 ## Context

@@ -1,15 +1,20 @@
 ---
 - name: Enforce guest Linux access baseline
-  hosts: lv3_guests
+  hosts: "{{ 'lv3_guests:&staging' if (env | default('production')) == 'staging' else 'lv3_guests:&production' }}"
   become: true
   gather_facts: true
+  tags:
+    - tier-1
+    - access
+    - service-guest-access
 
   pre_tasks:
-    - name: Ensure target guest is Debian
-      ansible.builtin.assert:
-        that:
-          - ansible_distribution == "Debian"
-        fail_msg: "This playbook only supports Debian guests."
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts: "{{ ansible_play_hosts_all }}"
 
   roles:
     - role: linux_guest_firewall

@@ -1,7 +1,11 @@
 - name: Prepare PostgreSQL for OpenBao dynamic credentials
-  hosts: postgres_guests
+  hosts: "{{ 'postgres_guests:&staging' if (env | default('production')) == 'staging' else 'postgres_guests:&production' }}"
   become: true
   gather_facts: true
+  tags:
+    - tier-2
+    - security
+    - service-openbao
 
   pre_tasks:
     - name: Ensure target guest is Debian
@@ -16,25 +20,47 @@
     - role: openbao_postgres_backend
 
 - name: Converge OpenBao on the Docker runtime VM
-  hosts: docker-runtime-lv3
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
   become: true
   gather_facts: true
+  tags:
+    - tier-2
+    - security
+    - service-openbao
 
   pre_tasks:
-    - name: Ensure target guest is Debian
-      ansible.builtin.assert:
-        that:
-          - ansible_distribution == "Debian"
-        fail_msg: "This playbook only supports Debian guests."
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.openbao
+        playbook_execution_audit_target: openbao
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
 
   roles:
     - role: linux_guest_firewall
     - role: openbao_runtime
 
+  post_tasks:
+    - name: Run shared post-verify checks
+      ansible.builtin.import_tasks: tasks/post-verify.yml
+      vars:
+        service_health_probe_id: openbao
+        playbook_execution_post_verify_audit_action: playbook.verify.openbao
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: openbao
+
 - name: Verify PostgreSQL dynamic credentials end to end
-  hosts: postgres_guests
+  hosts: "{{ 'postgres_guests:&staging' if (env | default('production')) == 'staging' else 'postgres_guests:&production' }}"
   become: true
   gather_facts: true
+  tags:
+    - tier-2
+    - security
+    - service-openbao
 
   tasks:
     - name: Read the controller AppRole artifact
@@ -60,7 +86,7 @@
           secret_id: "{{ openbao_verify_controller_approle.secret_id }}"
         return_content: true
         status_code: 200
-      delegate_to: docker-runtime-lv3
+      delegate_to: "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
       register: openbao_verify_controller_login
       no_log: true
 
@@ -72,7 +98,7 @@
           X-Vault-Token: "{{ openbao_verify_controller_login.json.auth.client_token }}"
         return_content: true
         status_code: 200
-      delegate_to: docker-runtime-lv3
+      delegate_to: "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
       register: openbao_verify_postgres_dynamic_credential
       retries: 6
       delay: 5
@@ -105,9 +131,13 @@
         fail_msg: "The OpenBao-issued PostgreSQL dynamic credential could not authenticate successfully."
 
 - name: Refresh persisted OpenBao AppRole artifacts after end-to-end verification
-  hosts: docker-runtime-lv3
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
   become: true
   gather_facts: true
+  tags:
+    - tier-2
+    - security
+    - service-openbao
   vars:
     openbao_verification_approles:
       - name: controller-automation

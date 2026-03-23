@@ -74,7 +74,7 @@ Portainer is now live on `docker-runtime-lv3` and reachable privately at `https:
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.75.0` |
+| Repository version | `0.77.0` |
 | Platform version | `0.36.0` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -330,13 +330,17 @@ this is still same-host recovery, not off-host disaster recovery
 - [Initial Access Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/initial-access.md)
 - [Install Proxmox Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/install-proxmox.md)
 - [Live Apply Receipts And Verification Evidence](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/live-apply-receipts-and-verification-evidence.md)
+- [LLM Implementation Prompts — ADRs 0082–0091](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/llm-implementation-prompts.md)
 - [Monitoring Stack Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/monitoring-stack.md)
 - [Network Policy Reference](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/network-policy-reference.md)
 - [Agentic Control-Plane Roadmap](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/plan-agentic-control-plane.md)
+- [Plan: Human Navigation, Deployment Lifecycle, And Platform Hardening (ADRs 0072–0081)](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/plan-human-navigation-and-deployment-lifecycle.md)
+- [Roadmap Runbook: IaC Potency, Build Server Offload, and User Ergonomics](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/plan-iac-potency-and-build-server.md)
 - [Platform Hardening And Agentic Extensibility Roadmap](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/plan-platform-hardening-and-agentic-extensibility.md)
 - [Visual And Agent Operations Roadmap](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/plan-visual-agent-operations.md)
 - [Platform Facts Library](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/platform-facts-library.md)
 - [Platform Operations Portal](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/platform-operations-portal.md)
+- [Playbook Execution Model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/playbook-execution-model.md)
 - [Prepare Mail Platform Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/prepare-mail-platform-rollout.md)
 - [Private-First API Publication](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/private-first-api-publication.md)
 - [Provision Guests Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/provision-guests.md)
@@ -422,8 +426,25 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0070: Retrieval-Augmented Context For Platform Queries](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0070-rag-context-for-platform-queries.md)
 - [ADR 0071: Agent Observation Loop And Autonomous Drift Detection](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0071-agent-observation-loop-and-drift-detection.md)
 - [ADR 0072: Staging And Production Environment Topology](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0072-staging-and-production-environment-topology.md)
+- [ADR 0073: Environment Promotion Gate And Deployment Pipeline](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0073-environment-promotion-gate-and-deployment-pipeline.md)
 - [ADR 0074: Platform Operations Portal](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0074-platform-operations-portal.md)
 - [ADR 0075: Service Capability Catalog](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0075-service-capability-catalog.md)
+- [ADR 0076: Subdomain Governance And DNS Lifecycle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0076-subdomain-governance-and-dns-lifecycle.md)
+- [ADR 0077: Compose Runtime Secrets Injection Via OpenBao Agent](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0077-compose-runtime-secrets-injection.md)
+- [ADR 0078: Service Scaffold Generator](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0078-service-scaffold-generator.md)
+- [ADR 0079: Playbook Decomposition And Shared Execution Model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0079-playbook-decomposition-and-shared-execution-model.md)
+- [ADR 0080: Maintenance Window And Change Suppression Protocol](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0080-maintenance-window-and-change-suppression-protocol.md)
+- [ADR 0081: Platform Changelog And Deployment History Portal](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0081-platform-changelog-and-deployment-history.md)
+- [ADR 0082: Remote Build Execution Gateway](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0082-remote-build-execution-gateway.md)
+- [ADR 0083: Docker-Based Check Runner on Build Server](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0083-docker-based-check-runner.md)
+- [ADR 0084: Packer VM Template Pipeline](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0084-packer-vm-template-pipeline.md)
+- [ADR 0085: OpenTofu IaC for VM Lifecycle Management](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0085-opentofu-vm-lifecycle.md)
+- [ADR 0086: Ansible Collection Packaging and Versioned Role Distribution](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0086-ansible-collection-packaging.md)
+- [ADR 0087: Repository Validation Gate (Pre-Push and CI)](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0087-repository-validation-gate.md)
+- [ADR 0088: Ephemeral Infrastructure Fixtures](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0088-ephemeral-infrastructure-fixtures.md)
+- [ADR 0089: Build Artifact Cache and Layer Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0089-build-artifact-cache.md)
+- [ADR 0090: Unified Platform CLI (`lv3`)](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0090-unified-platform-cli.md)
+- [ADR 0091: Continuous Drift Detection and Reconciliation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0091-continuous-drift-detection.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -469,9 +490,27 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0069: Agent Tool Registry And Governed Tool Calls](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0069-agent-tool-registry.md)
 - [Workstream ADR 0070: Retrieval-Augmented Context For Platform Queries](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0070-rag-platform-context.md)
 - [Workstream ADR 0071: Agent Observation Loop And Autonomous Drift Detection](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0071-agent-observation-loop.md)
+- [Workstream ADR 0072: Staging And Production Environment Topology](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0072-staging-environment.md)
 - [Workstream ADR 0072: Staging And Production Environment Topology](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0072-staging-production-topology.md)
+- [Workstream ADR 0073: Environment Promotion Gate And Deployment Pipeline](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0073-promotion-pipeline.md)
 - [Workstream ADR 0074: Platform Operations Portal](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0074-ops-portal.md)
 - [Workstream ADR 0075: Service Capability Catalog](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0075-service-capability-catalog.md)
+- [Workstream ADR 0076: Subdomain Governance And DNS Lifecycle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0076-subdomain-governance.md)
+- [Workstream ADR 0077: Compose Runtime Secrets Injection Via OpenBao Agent](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0077-compose-secrets-injection.md)
+- [Workstream ADR 0078: Service Scaffold Generator](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0078-service-scaffold.md)
+- [Workstream ADR 0079: Playbook Decomposition And Shared Execution Model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0079-playbook-decomposition.md)
+- [Workstream ADR 0080: Maintenance Window And Change Suppression Protocol](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0080-maintenance-windows.md)
+- [Workstream ADR 0081: Platform Changelog And Deployment History Portal](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0081-changelog-portal.md)
+- [Workstream ADR 0082: Remote Build Execution Gateway](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0082-remote-build-gateway.md)
+- [Workstream ADR 0083: Docker-Based Check Runner](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0083-docker-check-runner.md)
+- [Workstream ADR 0084: Packer VM Template Pipeline](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0084-packer-pipeline.md)
+- [Workstream ADR 0085: OpenTofu VM Lifecycle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0085-opentofu-vm-lifecycle.md)
+- [Workstream ADR 0086: Ansible Collection Packaging](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0086-ansible-collections.md)
+- [Workstream ADR 0087: Repository Validation Gate](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0087-validation-gate.md)
+- [Workstream ADR 0088: Ephemeral Infrastructure Fixtures](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0088-ephemeral-fixtures.md)
+- [Workstream ADR 0089: Build Artifact Cache and Layer Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0089-build-cache.md)
+- [Workstream ADR 0090: Unified Platform CLI (`lv3`)](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0090-platform-cli.md)
+- [Workstream ADR 0091: Continuous Drift Detection and Reconciliation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0091-drift-detection.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
@@ -489,7 +528,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.75.0` |
+| Repository version | `0.77.0` |
 | Platform version | `0.36.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -575,6 +614,7 @@ This repository is intentionally opinionated:
 | `0072` | Staging and production environment topology | `merged` | [adr-0072-staging-production-topology.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0072-staging-production-topology.md) |
 | `0074` | Platform operations portal | `merged` | [adr-0074-ops-portal.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0074-ops-portal.md) |
 | `0075` | Service capability catalog | `merged` | [adr-0075-service-capability-catalog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0075-service-capability-catalog.md) |
+| `0079` | Playbook decomposition and shared execution model | `merged` | [adr-0079-playbook-decomposition.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0079-playbook-decomposition.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

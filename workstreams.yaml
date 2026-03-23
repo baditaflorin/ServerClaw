@@ -940,3 +940,27 @@ workstreams:
       - Makefile
     ready_to_merge: false
     live_applied: false
+
+  - id: adr-0079-playbook-decomposition
+    adr: "0079"
+    title: Playbook decomposition and shared execution model
+    status: merged
+    owner: codex
+    branch: codex/adr-0079-playbook-decomposition-and-shared-execution-model
+    worktree_path: .worktrees/adr-0079
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0079-playbook-decomposition.md
+    depends_on:
+      - adr-0062-role-composability
+      - adr-0063-platform-vars-library
+      - adr-0072-staging-environment
+      - adr-0064-health-probe-contracts
+      - adr-0066-mutation-audit-log
+    conflicts_with: []
+    shared_surfaces:
+      - playbooks/
+      - playbooks/tasks/
+      - playbooks/groups/
+      - playbooks/services/
+      - Makefile
+    ready_to_merge: false
+    live_applied: false

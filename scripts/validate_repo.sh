@@ -48,7 +48,10 @@ validate_ansible_syntax() {
   local playbooks=()
 
   install_collections
-  mapfile -t playbooks < <(tracked_files 'playbooks/*.yml')
+  mapfile -t playbooks < <(
+    tracked_files 'playbooks/*.yml' 'playbooks/groups/*.yml' 'playbooks/services/*.yml' |
+      awk -F/ '$1 == "playbooks" && $2 != "tasks" { print }'
+  )
   if [[ ${#playbooks[@]} -eq 0 ]]; then
     return 0
   fi
@@ -88,9 +91,9 @@ validate_ansible_lint() {
   echo "Ansible lint"
   install_collections
   mapfile -t lint_targets < <(
-    tracked_files 'playbooks/*.yml' 'roles/*/*' |
+    tracked_files 'playbooks/*.yml' 'playbooks/groups/*.yml' 'playbooks/services/*.yml' 'roles/*/*' |
       awk -F/ '
-        $1 == "playbooks" && $NF ~ /\.yml$/ { print; next }
+        $1 == "playbooks" && $2 != "tasks" && $NF ~ /\.yml$/ { print; next }
         $1 == "roles" && $2 != "" && $2 != "_template" { print $1 "/" $2 }
       ' |
       awk '!seen[$0]++'
@@ -142,6 +145,7 @@ validate_data_models() {
   uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/service_catalog.py" --validate >/dev/null
   python3 "$REPO_ROOT/scripts/subdomain_catalog.py" --validate >/dev/null
   "$REPO_ROOT/scripts/agent_tool_registry.py" --export-mcp >/dev/null
+  python3 "$REPO_ROOT/scripts/mutation_audit.py" --validate-schema >/dev/null
 }
 
 validate_generated_docs() {

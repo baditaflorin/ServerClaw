@@ -1,0 +1,3 @@
+---
+- import_playbook: ../services/public-edge.yml
+- import_playbook: ../services/guest-access.yml

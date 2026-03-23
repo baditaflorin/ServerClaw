@@ -3,6 +3,10 @@
   hosts: proxmox_hosts
   become: false
   gather_facts: false
+  tags:
+    - tier-2
+    - observability
+    - service-uptime-kuma
 
   tasks:
     - name: Ensure Hetzner DNS records are present
@@ -14,25 +18,35 @@
       run_once: true
 
 - name: Converge Uptime Kuma on the Docker runtime VM
-  hosts: docker-runtime-lv3
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
   become: true
   gather_facts: true
+  tags:
+    - tier-2
+    - observability
+    - service-uptime-kuma
 
   pre_tasks:
-    - name: Ensure target guest is Debian
-      ansible.builtin.assert:
-        that:
-          - ansible_distribution == "Debian"
-        fail_msg: "This playbook only supports Debian guests."
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
 
   roles:
     - role: linux_guest_firewall
     - role: uptime_kuma_runtime
 
 - name: Publish Uptime Kuma through the NGINX edge
-  hosts: nginx-lv3
+  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
   become: true
   gather_facts: true
+  tags:
+    - tier-2
+    - observability
+    - service-uptime-kuma
 
   roles:
     - role: linux_guest_firewall

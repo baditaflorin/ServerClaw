@@ -1,0 +1,21 @@
+---
+- name: Converge NGINX guest observability
+  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - observability
+    - service-nginx-observability
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: ../tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.nginx_edge[playbook_execution_env] }}"
+
+  roles:
+    - role: nginx_observability

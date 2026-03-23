@@ -1,8 +1,12 @@
 ---
 - name: Configure public publication on the NGINX edge VM
-  hosts: nginx-lv3
+  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
   become: true
   gather_facts: true
+  tags:
+    - tier-1
+    - access
+    - service-public-edge
 
   roles:
     - role: linux_guest_firewall

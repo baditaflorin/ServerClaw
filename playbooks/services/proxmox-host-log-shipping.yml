@@ -1,0 +1,30 @@
+---
+- name: Converge Proxmox host log shipping
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - observability
+    - service-proxmox-host-log-shipping
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: ../tasks/preflight.yml
+      vars:
+        playbook_execution_audit_action: playbook.start.proxmox-host-log-shipping
+        playbook_execution_audit_target: proxmox-host-log-shipping
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.proxmox_hosts[playbook_execution_env] }}"
+
+  roles:
+    - role: loki_log_agent
+      vars:
+        loki_log_agent_role: proxmox-host
+        loki_log_agent_lane: management
+
+  post_tasks:
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: ../tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: proxmox-host-log-shipping

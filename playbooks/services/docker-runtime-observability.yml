@@ -1,16 +1,16 @@
 ---
-- name: Converge Docker runtime VM baseline
+- name: Converge docker runtime guest observability
   hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
   become: true
   gather_facts: true
   tags:
     - tier-2
-    - platform
-    - service-docker-runtime
+    - observability
+    - service-docker-runtime-observability
 
   pre_tasks:
     - name: Run shared preflight checks
-      ansible.builtin.import_tasks: tasks/preflight.yml
+      ansible.builtin.import_tasks: ../tasks/preflight.yml
       vars:
         playbook_execution_require_debian: true
         playbook_execution_emit_audit: false
@@ -18,5 +18,4 @@
           - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
 
   roles:
-    - role: linux_guest_firewall
-    - role: docker_runtime
+    - role: docker_runtime_observability
