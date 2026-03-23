@@ -83,7 +83,7 @@ The repository now also ships ADR 0096 SLO tracking: a canonical SLO catalog, ge
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.107.0` |
+| Repository version | `0.108.0` |
 | Platform version | `0.40.0` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -628,7 +628,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.107.0` |
+| Repository version | `0.108.0` |
 | Platform version | `0.40.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -681,7 +681,6 @@ This repository is intentionally opinionated:
 | `0026` | Dedicated PostgreSQL VM baseline | `merged` | [adr-0026-postgres-vm.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0026-postgres-vm.md) |
 | `0027` | Uptime Kuma rollout on the Docker runtime VM | `merged` | [adr-0027-uptime-kuma.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0027-uptime-kuma.md) |
 | `0028` | Docker build VM build count and duration telemetry | `live_applied` | [adr-0028-build-telemetry.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0028-build-telemetry.md) |
-| `0029` | Dedicated backup VM with local PBS | `merged` | [adr-0029-backup-vm.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0029-backup-vm.md) |
 | `0040` | Docker runtime container telemetry | `live_applied` | [adr-0040-runtime-container-telemetry.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0040-runtime-container-telemetry.md) |
 | `0041` | Dockerized mail platform with API, Grafana telemetry, and failover delivery | `merged` | [adr-0041-email-platform.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0041-email-platform.md) |
 | `0041` | Dockerized mail platform live rollout | `live_applied` | [adr-0041-email-platform-live.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0041-email-platform-live.md) |

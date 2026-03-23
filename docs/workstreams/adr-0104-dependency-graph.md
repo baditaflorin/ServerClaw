@@ -74,6 +74,6 @@
 
 ## Notes For The Next Assistant
 
-- Repo implementation is complete in `0.107.0`; no live platform version bump has been recorded yet.
+- Repo implementation is complete in `0.108.0`; no live platform version bump has been recorded yet.
 - The `/v1/platform/dependency-graph*` routes still ride on `platform_context_service.py`; ADR 0092 now fronts public APIs, but the dependency-graph endpoints have not yet been re-homed under the gateway.
 - The generated documentation page is validated both by `scripts/generate_dependency_diagram.py --check` and through the ADR 0094 docs-site build path.

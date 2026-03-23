@@ -69,7 +69,7 @@ workstreams:
   - id: adr-0029-backup-vm
     adr: "0029"
     title: Dedicated backup VM with local PBS
-    status: merged
+    status: ready
     owner: codex
     branch: codex/adr-0026-backup-vm
     worktree_path: ../proxmox_florin_server-backup-vm
