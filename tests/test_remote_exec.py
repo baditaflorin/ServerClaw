@@ -47,10 +47,18 @@ printf '%s\n' "$*" >> "${REMOTE_EXEC_RSYNC_LOG:?}"
     )
 
 
-def build_config(path: Path, *, workspace_root: str, local_command: str, builtin: str | None = None) -> None:
+def build_config(
+    path: Path,
+    *,
+    workspace_root: str,
+    local_command: str,
+    builtin: str | None = None,
+    ssh_options: list[str] | None = None,
+) -> None:
     payload = {
         "host": "build-lv3",
         "ssh_key": "~/.ssh/id_ed25519",
+        "ssh_options": ssh_options or [],
         "workspace_root": workspace_root,
         "default_timeout_seconds": 120,
         "docker_socket": "unix:///var/run/docker.sock",
@@ -167,3 +175,51 @@ def test_check_build_server_uses_rsync_dry_run(tmp_path: Path) -> None:
     assert "--dry-run" in rsync_log
     assert "--verbose" in rsync_log
     assert "build-server-ok" in completed.stdout
+
+
+def test_remote_exec_applies_configured_ssh_options(tmp_path: Path) -> None:
+    ssh_log = tmp_path / "ssh.log"
+    rsync_log = tmp_path / "rsync.log"
+    config_path = tmp_path / "build-server.json"
+    manifest_path = tmp_path / "check-runner-manifest.json"
+    exclude_path = tmp_path / "exclude.txt"
+    fake_ssh = tmp_path / "ssh"
+    fake_rsync = tmp_path / "rsync"
+
+    build_config(
+        config_path,
+        workspace_root="/opt/builds/proxmox_florin_server",
+        local_command="printf local-fallback > \"$REMOTE_EXEC_MARKER\"",
+        ssh_options=["-o", "ProxyCommand=ssh jump.example -W %h:%p"],
+    )
+    build_manifest(manifest_path)
+    exclude_path.write_text(".local/\n")
+    make_fake_ssh(fake_ssh)
+    make_fake_rsync(fake_rsync)
+
+    env = os.environ.copy()
+    env.update(
+        {
+            "REMOTE_EXEC_CONFIG": str(config_path),
+            "REMOTE_EXEC_RUNNER_MANIFEST": str(manifest_path),
+            "REMOTE_EXEC_EXCLUDE_FILE": str(exclude_path),
+            "REMOTE_EXEC_SSH_BIN": str(fake_ssh),
+            "REMOTE_EXEC_RSYNC_BIN": str(fake_rsync),
+            "REMOTE_EXEC_SSH_LOG": str(ssh_log),
+            "REMOTE_EXEC_RSYNC_LOG": str(rsync_log),
+            "REMOTE_EXEC_WORKSPACE_ROOT": "/opt/builds/proxmox_florin_server",
+            "REMOTE_EXEC_MARKER": str(tmp_path / "marker.txt"),
+        }
+    )
+
+    completed = subprocess.run(
+        [str(SCRIPT_PATH), "check-build-server"],
+        cwd=REPO_ROOT,
+        env=env,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    assert "ProxyCommand=ssh jump.example -W %h:%p" in ssh_log.read_text()

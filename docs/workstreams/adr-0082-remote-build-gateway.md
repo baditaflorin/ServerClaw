@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0082](../adr/0082-remote-build-execution-gateway.md)
 - Title: Offload CPU-intensive checks and builds to the build server over SSH with rsync workspace sync
-- Status: merged
+- Status: live_applied
 - Branch: `codex/adr-0082-remote-build-gateway`
 - Worktree: `../proxmox_florin_server-remote-build-gateway`
 - Owner: codex
@@ -40,7 +40,7 @@
 
 ## Expected Live Surfaces
 
-- `build-lv3` reachable via Tailscale and responsive to `make check-build-server`
+- `docker-build-lv3` reachable through the current Proxmox host jump path and responsive to `make check-build-server`
 - `make remote-lint` completes in < 20 s from the laptop
 
 ## Verification
@@ -68,3 +68,10 @@
 - added `config/build-server.json`, `inventory/build_server.yml`, and `.rsync-exclude` as the repo-managed build-gateway contract
 - appended the `Makefile` remote execution targets and documented the operator flow in `docs/runbooks/remote-build-gateway.md`
 - added regression coverage for docker-runner selection, local fallback behavior, and the rsync dry-run health check
+- verified the live SSH route through `ops@100.118.189.95` to `ops@10.10.10.30` and captured that jump-path contract in the gateway config
+
+## Repo Implementation Notes
+
+- Repo implementation first landed on `2026-03-23` in release `0.80.0`.
+- Live apply completed on `2026-03-23` for platform version `0.38.0`.
+- `make check-build-server` now passes against the real `docker-build-lv3` route, and `rsync` is part of the canonical build-guest package list so future guest convergence preserves that requirement.

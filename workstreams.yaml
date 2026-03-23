@@ -1068,7 +1068,7 @@ workstreams:
   - id: adr-0082-remote-build-gateway
     adr: "0082"
     title: Remote build execution gateway
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0082-remote-build-gateway
     worktree_path: ../proxmox_florin_server-remote-build-gateway
@@ -1082,4 +1082,4 @@ workstreams:
       - .rsync-exclude
       - Makefile
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
