@@ -1,10 +1,10 @@
 # ADR 0113: World-State Materializer
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.111.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-24
 - Date: 2026-03-24
 
 ## Context
@@ -29,16 +29,14 @@ We will build a **world-state materializer** that continuously refreshes a canon
 
 | Surface | Source | Refresh interval | Stale threshold |
 |---|---|---|---|
-| VM inventory | Proxmox API | 60 s | 5 min |
-| VM resource utilisation | Proxmox API | 60 s | 5 min |
-| Service health | Health probe contracts (ADR 0064) | 30 s | 2 min |
+| VM inventory and runtime state | Proxmox API or observed-state fallback | 60 s | 5 min |
+| Service health | Health probe contracts (ADR 0064) and service capability catalog | 30 s | 2 min |
 | Container inventory | Docker API (per host) | 60 s | 5 min |
-| Network topology | NetBox API | 5 min | 30 min |
-| DNS records | Internal resolver + NetBox | 5 min | 30 min |
-| TLS certificate expiry | step-ca API + external scan | 1 hr | 6 hr |
-| OpenTofu drift summary | OpenTofu plan output | 15 min | 1 hr |
-| OpenBao secret expiry | OpenBao lease API | 5 min | 30 min |
-| Mutation receipts | Mutation ledger (ADR 0115) | real-time append | n/a |
+| Network topology | NetBox API or inventory fallback | 5 min | 30 min |
+| DNS records | Subdomain catalog and resolver-facing publication data | 5 min | 30 min |
+| TLS certificate expiry | step-ca scan and external TLS scan | 1 hr | 6 hr |
+| OpenTofu drift summary | OpenTofu drift command output | 15 min | 1 hr |
+| OpenBao secret expiry | OpenBao lease API or secret-catalog fallback | 5 min | 30 min |
 | Maintenance windows | Maintenance window store (ADR 0080) | 1 min | 5 min |
 
 ### Schema (abbreviated)
@@ -73,10 +71,12 @@ WHERE s.id IN (
 Each surface has a Windmill workflow that runs on the corresponding refresh interval:
 
 ```
-windmill/world-state/
+config/windmill/scripts/world-state/
 ├── refresh-proxmox-vms.py
 ├── refresh-service-health.py
+├── refresh-container-inventory.py
 ├── refresh-netbox-topology.py
+├── refresh-dns-records.py
 ├── refresh-tls-certs.py
 ├── refresh-opentofu-drift.py
 ├── refresh-openbao-leases.py
@@ -115,6 +115,11 @@ past_vms = ws.get_at("proxmox_vms", at="2026-03-24T02:00:00Z")
 ```
 
 The client is available to Windmill workflows, the platform CLI, and the agent observation loop without any additional service dependency.
+
+## Implementation Notes
+
+- Repository implementation landed in `0.111.0` with the shared [platform/world_state/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/world_state) package, the Postgres schema migration at [migrations/0010_world_state_schema.sql](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/migrations/0010_world_state_schema.sql), the seeded Windmill workers under [config/windmill/scripts/world-state/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/world-state), and schedule registration through [collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml).
+- The repository now seeds all ADR 0113 workers and schedules, but live Windmill enablement and the first Postgres migration/apply remain platform-version work and therefore do not bump `platform_version` yet.
 
 ## Consequences
 

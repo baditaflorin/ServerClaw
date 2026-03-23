@@ -81,6 +81,51 @@ windmill_seed_scripts:
     language: python3
     summary: ADR 0100 disaster recovery runbook
     description: Repo-managed helper that renders the ordered LV3 disaster recovery plan and records the runbook invocation path.
+  - path: f/lv3/world_state/refresh_proxmox_vms
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/world-state/refresh-proxmox-vms.py"
+    language: python3
+    summary: Refresh world-state Proxmox VM inventory
+    description: Repo-managed ADR 0113 worker that refreshes the canonical Proxmox VM inventory surface.
+  - path: f/lv3/world_state/refresh_service_health
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/world-state/refresh-service-health.py"
+    language: python3
+    summary: Refresh world-state service health
+    description: Repo-managed ADR 0113 worker that refreshes service health from the platform capability catalog and live probes.
+  - path: f/lv3/world_state/refresh_container_inventory
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/world-state/refresh-container-inventory.py"
+    language: python3
+    summary: Refresh world-state container inventory
+    description: Repo-managed ADR 0113 worker that refreshes runtime container inventory from the Docker host.
+  - path: f/lv3/world_state/refresh_netbox_topology
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/world-state/refresh-netbox-topology.py"
+    language: python3
+    summary: Refresh world-state NetBox topology
+    description: Repo-managed ADR 0113 worker that refreshes the canonical NetBox topology surface.
+  - path: f/lv3/world_state/refresh_dns_records
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/world-state/refresh-dns-records.py"
+    language: python3
+    summary: Refresh world-state DNS records
+    description: Repo-managed ADR 0113 worker that refreshes canonical DNS publication state.
+  - path: f/lv3/world_state/refresh_tls_certs
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/world-state/refresh-tls-certs.py"
+    language: python3
+    summary: Refresh world-state TLS certificates
+    description: Repo-managed ADR 0113 worker that refreshes TLS certificate expiry inventory.
+  - path: f/lv3/world_state/refresh_opentofu_drift
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/world-state/refresh-opentofu-drift.py"
+    language: python3
+    summary: Refresh world-state OpenTofu drift
+    description: Repo-managed ADR 0113 worker that refreshes the OpenTofu drift summary surface.
+  - path: f/lv3/world_state/refresh_openbao_secret_expiry
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/world-state/refresh-openbao-leases.py"
+    language: python3
+    summary: Refresh world-state OpenBao secret expiry
+    description: Repo-managed ADR 0113 worker that refreshes OpenBao lease and secret expiry metadata.
+  - path: f/lv3/world_state/refresh_maintenance_windows
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/world-state/refresh-maintenance-windows.py"
+    language: python3
+    summary: Refresh world-state maintenance windows
+    description: Repo-managed ADR 0113 worker that refreshes active maintenance windows.
 windmill_seed_schedules:
   - path: f/lv3/platform_observation_loop_every_4h
     schedule: "0 0 */4 * * *"
@@ -117,4 +162,85 @@ windmill_seed_schedules:
     enabled: false
     summary: Disabled ADR 0089 weekly cache maintenance placeholder
     description: Repo-managed weekly cache maintenance definition that purges the shared pip cache and checks apt-cacher-ng after the cache host is applied live from main.
+    no_flow_overlap: true
+  - path: f/lv3/world_state/refresh_proxmox_vms_every_minute
+    schedule: "0 * * * * *"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/world_state/refresh_proxmox_vms
+    args: {}
+    enabled: false
+    summary: ADR 0113 Proxmox VM world-state refresh
+    description: Repo-managed minute refresh definition for the canonical Proxmox VM world-state surface; enable after the worker checkout is applied from main.
+    no_flow_overlap: true
+  - path: f/lv3/world_state/refresh_service_health_every_30s
+    schedule: "*/30 * * * * *"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/world_state/refresh_service_health
+    args: {}
+    enabled: false
+    summary: ADR 0113 service health world-state refresh
+    description: Repo-managed 30-second refresh definition for the service health world-state surface; enable after the worker checkout is applied from main.
+    no_flow_overlap: true
+  - path: f/lv3/world_state/refresh_container_inventory_every_minute
+    schedule: "0 * * * * *"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/world_state/refresh_container_inventory
+    args: {}
+    enabled: false
+    summary: ADR 0113 container inventory world-state refresh
+    description: Repo-managed minute refresh definition for the container inventory world-state surface; enable after the worker checkout is applied from main.
+    no_flow_overlap: true
+  - path: f/lv3/world_state/refresh_netbox_topology_every_5m
+    schedule: "0 */5 * * * *"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/world_state/refresh_netbox_topology
+    args: {}
+    enabled: false
+    summary: ADR 0113 NetBox topology world-state refresh
+    description: Repo-managed five-minute refresh definition for the NetBox topology world-state surface; enable after the worker checkout is applied from main.
+    no_flow_overlap: true
+  - path: f/lv3/world_state/refresh_dns_records_every_5m
+    schedule: "0 */5 * * * *"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/world_state/refresh_dns_records
+    args: {}
+    enabled: false
+    summary: ADR 0113 DNS records world-state refresh
+    description: Repo-managed five-minute refresh definition for the DNS records world-state surface; enable after the worker checkout is applied from main.
+    no_flow_overlap: true
+  - path: f/lv3/world_state/refresh_tls_certs_hourly
+    schedule: "0 0 * * * *"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/world_state/refresh_tls_certs
+    args: {}
+    enabled: false
+    summary: ADR 0113 TLS certificate world-state refresh
+    description: Repo-managed hourly refresh definition for the TLS certificate expiry world-state surface; enable after the worker checkout is applied from main.
+    no_flow_overlap: true
+  - path: f/lv3/world_state/refresh_opentofu_drift_every_15m
+    schedule: "0 */15 * * * *"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/world_state/refresh_opentofu_drift
+    args: {}
+    enabled: false
+    summary: ADR 0113 OpenTofu drift world-state refresh
+    description: Repo-managed 15-minute refresh definition for the OpenTofu drift world-state surface; enable after the worker checkout is applied from main.
+    no_flow_overlap: true
+  - path: f/lv3/world_state/refresh_openbao_secret_expiry_every_5m
+    schedule: "0 */5 * * * *"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/world_state/refresh_openbao_secret_expiry
+    args: {}
+    enabled: false
+    summary: ADR 0113 OpenBao secret expiry world-state refresh
+    description: Repo-managed five-minute refresh definition for the OpenBao secret expiry world-state surface; enable after the worker checkout is applied from main.
+    no_flow_overlap: true
+  - path: f/lv3/world_state/refresh_maintenance_windows_every_minute
+    schedule: "0 * * * * *"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/world_state/refresh_maintenance_windows
+    args: {}
+    enabled: false
+    summary: ADR 0113 maintenance window world-state refresh
+    description: Repo-managed minute refresh definition for the maintenance window world-state surface; enable after the worker checkout is applied from main.
     no_flow_overlap: true

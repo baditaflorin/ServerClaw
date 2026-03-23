@@ -84,7 +84,7 @@ The repository now also ships ADR 0115 mutation-ledger primitives: the `ledger.e
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.110.0` |
+| Repository version | `0.111.0` |
 | Platform version | `0.105.0` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -417,6 +417,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Validate Repository Automation Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/validate-repository-automation.md)
 - [Validation Gate Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/validation-gate.md)
 - [Workflow Catalog And Execution Contracts](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/workflow-catalog-and-execution-contracts.md)
+- [World-State Materializer](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/world-state-materializer.md)
 
 ### ADRs
 - [ADR 0001: Bootstrap Dedicated Host With Ansible](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0001-bootstrap-dedicated-host-with-ansible.md)
@@ -653,7 +654,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.110.0` |
+| Repository version | `0.111.0` |
 | Platform version | `0.105.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -773,6 +774,7 @@ This repository is intentionally opinionated:
 | `0109` | Public status page | `merged` | [adr-0109-public-status-page.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0109-public-status-page.md) |
 | `0110` | Platform versioning, release notes, and upgrade path | `merged` | [adr-0110-platform-versioning.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0110-platform-versioning.md) |
 | `0111` | End-to-end integration test suite | `merged` | [adr-0111-integration-test-suite.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0111-integration-test-suite.md) |
+| `0113` | World-state materializer | `merged` | [adr-0113-world-state-materializer.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0113-world-state-materializer.md) |
 | `0115` | Event-sourced mutation ledger | `merged` | [adr-0115-mutation-ledger.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0115-mutation-ledger.md) |
 <!-- END GENERATED: merged-workstreams -->
 
