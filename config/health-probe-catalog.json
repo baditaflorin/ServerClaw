@@ -168,7 +168,7 @@
         "timeout_seconds": 90,
         "retries": 18,
         "delay_seconds": 5,
-        "url": "http://127.0.0.1:8080/healthz",
+        "url": "http://127.0.0.1:8083/healthz",
         "method": "GET",
         "expected_status": [200]
       },
@@ -178,7 +178,7 @@
         "timeout_seconds": 90,
         "retries": 1,
         "delay_seconds": 0,
-        "url": "http://127.0.0.1:8080/v1/health",
+        "url": "http://127.0.0.1:8083/v1/health",
         "method": "GET",
         "expected_status": [401]
       },

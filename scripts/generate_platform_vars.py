@@ -525,6 +525,7 @@ def build_platform_vars(
             },
         },
         "platform_ports": resolved_ports,
+        "platform_port_assignments": copy.deepcopy(resolved_ports),
         "platform_guest_catalog": guest_catalog,
         "platform_service_topology": service_topology,
         "platform_dns_records": dns_records,

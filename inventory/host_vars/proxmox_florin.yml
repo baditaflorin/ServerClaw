@@ -37,7 +37,7 @@ platform_port_assignments:
   netbox_host_proxy_port: 8004
   open_webui_port: 8088
   open_webui_host_proxy_port: 8008
-  api_gateway_internal_port: 8080
+  api_gateway_internal_port: 8083
   platform_context_internal_port: 8010
   platform_context_host_proxy_port: 8010
   ops_portal_port: 8092
@@ -326,7 +326,7 @@ network_policy:
         - source: nginx-lv3
           protocol: tcp
           ports:
-            - 8080
+            - 8083
           description: Edge access to the unified platform API gateway
         - source: monitoring-lv3
           protocol: tcp
@@ -791,7 +791,7 @@ lv3_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:8080"
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.api_gateway_internal_port }}"
   platform_context_api:
     service_name: platform-context-api
     owning_vm: docker-runtime-lv3

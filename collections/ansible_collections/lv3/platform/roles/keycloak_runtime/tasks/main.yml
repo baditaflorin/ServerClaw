@@ -242,6 +242,28 @@
   until: keycloak_master_openid_config.status == 200
   changed_when: false
 
+- name: Wait for the Keycloak bootstrap admin token endpoint to succeed
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/realms/master/protocol/openid-connect/token"
+    method: POST
+    body_format: form-urlencoded
+    body:
+      grant_type: password
+      client_id: admin-cli
+      username: "{{ keycloak_bootstrap_admin_username }}"
+      password: "{{ keycloak_bootstrap_admin_password }}"
+    status_code:
+      - 200
+      - 400
+      - 401
+      - 500
+  register: keycloak_bootstrap_admin_token_probe
+  retries: 18
+  delay: 5
+  until: keycloak_bootstrap_admin_token_probe.status == 200
+  changed_when: false
+  no_log: true
+
 - name: Converge Keycloak realm objects
   block:
     - name: Ensure the LV3 realm exists

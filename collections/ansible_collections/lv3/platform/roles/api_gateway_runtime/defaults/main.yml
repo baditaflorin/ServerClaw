@@ -18,6 +18,8 @@ api_gateway_platform_vars_src: "{{ api_gateway_repo_root }}/inventory/group_vars
 api_gateway_drift_receipts_glob: "{{ api_gateway_repo_root }}/receipts/drift-reports/*.json"
 api_gateway_platform_context_token_local_file: "{{ api_gateway_repo_root }}/.local/platform-context/api-token.txt"
 api_gateway_sources:
+  - src: "{{ api_gateway_repo_root }}/scripts/controller_automation_toolkit.py"
+    dest: controller_automation_toolkit.py
   - src: "{{ api_gateway_repo_root }}/scripts/api_gateway_catalog.py"
     dest: api_gateway_catalog.py
   - src: "{{ api_gateway_repo_root }}/scripts/api_gateway/__init__.py"

@@ -394,7 +394,7 @@
         "make syntax-check-guest-network-policy",
         "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo pve-firewall compile >/dev/null && sudo ls /etc/pve/firewall/*.fw'",
         "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'nc -z -w 2 10.10.10.50 5432'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.50 'nc -z -w 2 10.10.10.20 8080'"
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.50 'nc -z -w 2 10.10.10.20 8083'"
       ]
     },
     "configure-ingress": {

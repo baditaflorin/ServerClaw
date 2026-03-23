@@ -37,6 +37,8 @@
       mode: "0755"
     - path: "{{ api_gateway_service_dir }}"
       mode: "0755"
+    - path: "{{ api_gateway_service_dir }}/api_gateway"
+      mode: "0755"
     - path: "{{ api_gateway_config_dir }}"
       mode: "0755"
     - path: "{{ api_gateway_data_dir }}"
@@ -132,6 +134,7 @@
       WORKDIR /app
       COPY requirements.txt ./requirements.txt
       RUN pip install --no-cache-dir -r requirements.txt
+      COPY controller_automation_toolkit.py ./controller_automation_toolkit.py
       COPY api_gateway_catalog.py ./api_gateway_catalog.py
       COPY api_gateway ./api_gateway
       EXPOSE 8080
