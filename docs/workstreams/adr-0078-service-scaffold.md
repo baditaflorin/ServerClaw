@@ -32,6 +32,6 @@
 
 ## Outcome
 
-- repository implementation is complete on `main` in repo release `0.94.0`
+- repository implementation is complete on `main` in repo release `0.96.0`
 - the scaffold generator now targets the collection-based role layout and current catalog schemas instead of the older root-role layout from the original draft
 - no live platform version change is claimed; this workstream adds repository-side onboarding automation only

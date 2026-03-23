@@ -80,7 +80,7 @@ The repository now also ships continuous drift detection across OpenTofu, Ansibl
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.95.0` |
+| Repository version | `0.96.0` |
 | Platform version | `0.40.0` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -559,7 +559,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.95.0` |
+| Repository version | `0.96.0` |
 | Platform version | `0.40.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -662,6 +662,7 @@ This repository is intentionally opinionated:
 | `0088` | Ephemeral infrastructure fixtures | `merged` | [adr-0088-ephemeral-fixtures.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0088-ephemeral-fixtures.md) |
 | `0089` | Build artifact cache and layer registry | `merged` | [adr-0089-build-cache.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0089-build-cache.md) |
 | `0090` | Unified platform CLI | `merged` | [adr-0090-platform-cli.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0090-platform-cli.md) |
+| `0091` | Continuous drift detection and reconciliation | `merged` | [adr-0091-drift-detection.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0091-drift-detection.md) |
 | `0091` | Continuous drift detection and reconciliation | `merged` | [adr-0091-drift-detection.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0091-drift-detection.md) |
 <!-- END GENERATED: merged-workstreams -->
 

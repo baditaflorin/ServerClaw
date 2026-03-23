@@ -132,11 +132,6 @@ variable "network_firewall" {
   default = true
 }
 
-variable "prevent_destroy" {
-  type    = bool
-  default = true
-}
-
 variable "extra_disks" {
   type = list(object({
     interface    = string
