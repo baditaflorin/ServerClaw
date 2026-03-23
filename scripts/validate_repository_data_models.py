@@ -17,6 +17,7 @@ from live_apply_receipts import RECEIPTS_DIR, iter_receipt_paths, validate_recei
 from generate_platform_vars import PLATFORM_VARS_PATH, PORT_KEYS, build_platform_vars
 from mutation_audit import load_mutation_audit_schema, validate_mutation_audit_schema
 from promotion_pipeline import validate_promotion_receipts
+from validate_ephemeral_vmid import validate_ephemeral_vmid_ranges
 from workflow_catalog import (
     load_secret_manifest,
     load_workflow_catalog,
@@ -35,6 +36,7 @@ IMAGE_CATALOG_PATH = repo_path("config", "image-catalog.json")
 PLATFORM_FINDING_SCHEMA_PATH = repo_path("docs", "schema", "platform-finding.json")
 MAINTENANCE_WINDOW_SCHEMA_PATH = repo_path("docs", "schema", "maintenance-window.json")
 VM_TEMPLATE_MANIFEST_PATH = repo_path("config", "vm-template-manifest.json")
+CAPACITY_MODEL_PATH = repo_path("config", "capacity-model.json")
 
 SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -1008,6 +1010,25 @@ def validate_maintenance_window_schema() -> None:
         raise ValueError("docs/schema/maintenance-window.json.required must match the ADR 0080 contract")
 
 
+def validate_capacity_model() -> None:
+    payload = require_mapping(load_json(CAPACITY_MODEL_PATH), str(CAPACITY_MODEL_PATH))
+    require_semver(payload.get("schema_version"), "config/capacity-model.json.schema_version")
+    pool = require_mapping(payload.get("ephemeral_pool"), "config/capacity-model.json.ephemeral_pool")
+    vmid_range = require_int_list(pool.get("vmid_range"), "config/capacity-model.json.ephemeral_pool.vmid_range")
+    if len(vmid_range) != 2:
+        raise ValueError("config/capacity-model.json.ephemeral_pool.vmid_range must contain exactly two integers")
+    if vmid_range[0] > vmid_range[1]:
+        raise ValueError("config/capacity-model.json.ephemeral_pool.vmid_range must be ascending")
+    require_int(pool.get("max_concurrent_vms"), "config/capacity-model.json.ephemeral_pool.max_concurrent_vms", 1)
+    require_int(pool.get("reserved_ram_gb"), "config/capacity-model.json.ephemeral_pool.reserved_ram_gb", 1)
+    require_int(pool.get("reserved_vcpu"), "config/capacity-model.json.ephemeral_pool.reserved_vcpu", 1)
+    require_int(pool.get("reserved_disk_gb"), "config/capacity-model.json.ephemeral_pool.reserved_disk_gb", 1)
+    require_str(pool.get("notes"), "config/capacity-model.json.ephemeral_pool.notes")
+    violations = validate_ephemeral_vmid_ranges()
+    if violations:
+        raise ValueError("; ".join(violations))
+
+
 def validate_identity_taxonomy(
     desired_state: dict[str, Any],
     observed_state: dict[str, Any],
@@ -1629,6 +1650,7 @@ def validate_repository_data_models() -> int:
     validate_secret_catalog(secret_manifest)
     validate_platform_finding_schema()
     validate_maintenance_window_schema()
+    validate_capacity_model()
     validate_vm_template_manifest(host_vars_context["proxmox_vm_templates"])
     validate_versions_stack(host_vars_context)
     validate_platform_vars()

@@ -341,14 +341,46 @@ def secret_rotate_command(secret_id: str) -> CommandPlan:
     )
 
 
-def fixture_command(action: str, fixture_name: str | None = None) -> CommandPlan:
-    target = f"fixture-{action}"
+def fixture_command(
+    action: str,
+    fixture_name: str | None = None,
+    *,
+    purpose: str | None = None,
+    owner: str | None = None,
+    lifetime_hours: float | None = None,
+    policy: str | None = None,
+    extend: bool = False,
+    vmid: int | None = None,
+    receipt_id: str | None = None,
+) -> CommandPlan:
+    action_map = {
+        "create": "up",
+        "up": "up",
+        "destroy": "down",
+        "down": "down",
+        "list": "list",
+    }
+    target = f"fixture-{action_map[action]}"
     command = ["make", target]
     if fixture_name:
         command.append(f"FIXTURE={fixture_name}")
+    if purpose:
+        command.append(f"PURPOSE={purpose}")
+    if owner:
+        command.append(f"OWNER={owner}")
+    if lifetime_hours is not None:
+        command.append(f"LIFETIME_HOURS={lifetime_hours}")
+    if policy:
+        command.append(f"EPHEMERAL_POLICY={policy}")
+    if extend:
+        command.append("ALLOW_EXTEND=1")
+    if vmid is not None:
+        command.append(f"VMID={vmid}")
+    if receipt_id:
+        command.append(f"RECEIPT_ID={receipt_id}")
     return CommandPlan(
-        label=f"fixture {action} {fixture_name}".strip(),
-        route="controller -> build server staging fixture workflow",
+        label=f"fixture {action} {fixture_name or ''}".strip(),
+        route="controller -> repo-managed ephemeral VM lifecycle helper",
         command=command,
     )
 
@@ -812,8 +844,8 @@ def completion_candidates(words: list[str], current: str) -> list[str]:
     if words[1] == "vm" and len(words) == 3:
         return [action for action in ["create", "destroy", "resize", "list"] if action.startswith(current)]
     if words[1] == "fixture" and len(words) == 3:
-        return [action for action in ["up", "down", "list"] if action.startswith(current)]
-    if words[1] == "fixture" and len(words) == 4 and words[2] in {"up", "down"}:
+        return [action for action in ["create", "destroy", "list", "up", "down"] if action.startswith(current)]
+    if words[1] == "fixture" and len(words) == 4 and words[2] in {"up", "down", "create", "destroy"}:
         fixtures_dir = repo_path("tests", "fixtures")
         candidates = []
         if fixtures_dir.exists():
@@ -897,11 +929,25 @@ def build_parser() -> argparse.ArgumentParser:
 
     fixture = subparsers.add_parser("fixture", help="Manage ephemeral fixtures.")
     fixture_subparsers = fixture.add_subparsers(dest="fixture_action", required=True)
-    for action in ("up", "down"):
-        fixture_action = fixture_subparsers.add_parser(action, help=f"{action.title()} one fixture.")
-        fixture_action.add_argument("name")
-        fixture_action.add_argument("--dry-run", action="store_true")
-        fixture_action.add_argument("--explain", action="store_true")
+    fixture_create = fixture_subparsers.add_parser("create", aliases=["up"], help="Create one ephemeral fixture VM.")
+    fixture_create.add_argument("name", nargs="?")
+    fixture_create.add_argument("--purpose")
+    fixture_create.add_argument("--owner")
+    fixture_create.add_argument("--lifetime-hours", type=float)
+    fixture_create.add_argument(
+        "--policy",
+        default="adr-development",
+        choices=["adr-development", "extended-fixture", "integration-test", "restore-verification"],
+    )
+    fixture_create.add_argument("--extend", action="store_true")
+    fixture_create.add_argument("--dry-run", action="store_true")
+    fixture_create.add_argument("--explain", action="store_true")
+    fixture_destroy = fixture_subparsers.add_parser("destroy", aliases=["down"], help="Destroy one ephemeral fixture VM.")
+    fixture_destroy.add_argument("name", nargs="?")
+    fixture_destroy.add_argument("--vmid", type=int)
+    fixture_destroy.add_argument("--receipt-id")
+    fixture_destroy.add_argument("--dry-run", action="store_true")
+    fixture_destroy.add_argument("--explain", action="store_true")
     fixture_list = fixture_subparsers.add_parser("list", help="List active fixtures.")
     fixture_list.add_argument("--dry-run", action="store_true")
     fixture_list.add_argument("--explain", action="store_true")
@@ -992,7 +1038,17 @@ def main(argv: list[str] | None = None) -> int:
         return run_plan(secret_rotate_command(args.secret_id), dry_run=args.dry_run, explain=args.explain, no_color=no_color)
     if args.command == "fixture":
         return run_plan(
-            fixture_command(args.fixture_action, getattr(args, "name", None)),
+            fixture_command(
+                args.fixture_action,
+                getattr(args, "name", None),
+                purpose=getattr(args, "purpose", None),
+                owner=getattr(args, "owner", None),
+                lifetime_hours=getattr(args, "lifetime_hours", None),
+                policy=getattr(args, "policy", None),
+                extend=getattr(args, "extend", False),
+                vmid=getattr(args, "vmid", None),
+                receipt_id=getattr(args, "receipt_id", None),
+            ),
             dry_run=args.dry_run,
             explain=args.explain,
             no_color=no_color,

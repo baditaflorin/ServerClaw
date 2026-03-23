@@ -10,6 +10,8 @@
 - Conflicts With: none
 - Shared Surfaces: `tofu/`, `tests/`, `Makefile`, Proxmox staging VLAN (`vmbr20`)
 
+ADR 0106 later tightened the lifecycle governance: the active governed ephemeral pool is now `910-979`, not the original `9100-9199` workstream placeholder noted below.
+
 ## Scope
 
 - create `tests/fixtures/` directory with fixture definition YAML files for three initial fixtures: `docker-host-fixture.yml`, `postgres-host-fixture.yml`, `ops-base-fixture.yml`

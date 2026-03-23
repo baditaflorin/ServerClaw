@@ -1,7 +1,7 @@
 {
   "fixture_id": "docker-host",
   "template": "lv3-docker-host",
-  "vmid_range": [9100, 9199],
+  "vmid_range": [910, 979],
   "network": {
     "bridge": "vmbr20",
     "ip_cidr": "10.20.10.100/24",

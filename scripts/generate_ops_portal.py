@@ -34,6 +34,7 @@ ADR_DIR = repo_path("docs", "adr")
 RUNBOOK_DIR = repo_path("docs", "runbooks")
 BUILD_DIR = repo_path("build", "ops-portal")
 DRIFT_RECEIPTS_DIR = repo_path("receipts", "drift-reports")
+FIXTURE_RECEIPTS_DIR = repo_path("receipts", "fixtures")
 
 NAV = [
     ("index.html", "Service Map"),
@@ -295,6 +296,59 @@ def render_drift_panel() -> str:
         + f'<div class="chip-row">{receipt_link}</div>'
         + table
         + "</section>"
+    )
+
+
+def active_ephemeral_receipts() -> list[dict[str, Any]]:
+    if not FIXTURE_RECEIPTS_DIR.exists():
+        return []
+    receipts: list[dict[str, Any]] = []
+    for path in sorted(FIXTURE_RECEIPTS_DIR.glob("*.json")):
+        if path.name.startswith("reaper-run-"):
+            continue
+        try:
+            payload = load_json(path)
+        except Exception:  # noqa: BLE001
+            continue
+        if not isinstance(payload, dict):
+            continue
+        if payload.get("status") not in {"provisioning", "active"}:
+            continue
+        receipts.append(payload)
+    return receipts
+
+
+def render_ephemeral_vm_panel() -> str:
+    receipts = active_ephemeral_receipts()
+    if not receipts:
+        return (
+            '<section class="panel">'
+            '<div class="card-head"><div><h2>Ephemeral VMs</h2><p class="muted">No active repo-managed ephemeral fixtures are recorded.</p></div>'
+            f"<div>{render_badge('none', 'neutral')}</div></div>"
+            "</section>"
+        )
+
+    rows = []
+    for receipt in receipts:
+        rows.append(
+            "<tr>"
+            f"<td>{escape(str(receipt.get('vm_id', 'n/a')))}</td>"
+            f"<td>{escape(str(receipt.get('fixture_id', 'n/a')))}</td>"
+            f"<td>{escape(str(receipt.get('owner', 'n/a')))}</td>"
+            f"<td>{escape(str(receipt.get('purpose', 'n/a')))}</td>"
+            f"<td>{escape(str(receipt.get('expires_at', 'n/a')))}</td>"
+            "</tr>"
+        )
+    return (
+        '<section class="panel">'
+        '<div class="card-head">'
+        '<div><h2>Ephemeral VMs</h2><p class="muted">Repo-managed active ephemeral fixtures governed by ADR 0106.</p></div>'
+        f"<div>{render_badge(str(len(receipts)), 'neutral')}</div>"
+        "</div>"
+        '<div class="table-scroll"><table>'
+        "<thead><tr><th>VMID</th><th>Profile</th><th>Owner</th><th>Purpose</th><th>Expires</th></tr></thead>"
+        f"<tbody>{''.join(rows)}</tbody></table></div>"
+        "</section>"
     )
 
 
@@ -640,7 +694,10 @@ def render_portal(output_dir: Path, health_snapshot: Path | None, probe_timeout:
         "index.html",
         "Platform Operations Portal",
         "Generated operator map of services, health, and ownership across the current LV3 estate.",
-        render_summary(services, subdomains, tools, environments) + render_drift_panel() + render_service_cards(services, health),
+        render_summary(services, subdomains, tools, environments)
+        + render_drift_panel()
+        + render_ephemeral_vm_panel()
+        + render_service_cards(services, health),
     )
     write_page(
         output_dir,

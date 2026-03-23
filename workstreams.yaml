@@ -1717,13 +1717,13 @@ workstreams:
   - id: adr-0106-ephemeral-lifecycle
     adr: "0106"
     title: Ephemeral environment lifecycle and teardown policy
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0106-ephemeral-lifecycle
     worktree_path: ../proxmox_florin_server-ephemeral-lifecycle
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0106-ephemeral-lifecycle.md
     depends_on:
-      - adr-0072-staging-production
+      - adr-0072-staging-production-topology
       - adr-0085-opentofu-vm-lifecycle
       - adr-0088-ephemeral-fixtures
       - adr-0093-interactive-ops-portal
@@ -1731,9 +1731,12 @@ workstreams:
     conflicts_with: []
     shared_surfaces:
       - scripts/fixture_manager.py
-      - Windmill workflows
+      - scripts/lv3_cli.py
+      - scripts/generate_ops_portal.py
+      - config/command-catalog.json
+      - config/workflow-catalog.json
       - config/capacity-model.json
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: false
 
   - id: adr-0107-extension-model

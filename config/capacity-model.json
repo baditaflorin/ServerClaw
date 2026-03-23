@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0.0",
+  "ephemeral_pool": {
+    "vmid_range": [
+      910,
+      979
+    ],
+    "max_concurrent_vms": 5,
+    "reserved_ram_gb": 20,
+    "reserved_vcpu": 8,
+    "reserved_disk_gb": 100,
+    "notes": "Reserved shared budget for ADR development fixtures, integration test VMs, and restore verification VMs that use the governed ephemeral lifecycle."
+  }
+}

@@ -12,14 +12,14 @@ from typing import Any
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_RANGE = "9100:9199"
+DEFAULT_RANGE = "910:979"
 DEFAULT_SECRET_MANIFEST = REPO_ROOT / "config" / "controller-local-secrets.json"
 
 
 def parse_range(value: str) -> tuple[int, int]:
     start_text, separator, end_text = value.partition(":")
     if separator != ":":
-        raise ValueError("VMID range must look like 9100:9199")
+        raise ValueError("VMID range must look like 910:979")
     start = int(start_text)
     end = int(end_text)
     if start <= 0 or end <= 0 or start > end:

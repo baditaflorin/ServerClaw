@@ -1719,6 +1719,45 @@
         "python3 config/windmill/scripts/fixture-expiry-reaper.py"
       ]
     },
+    "ephemeral-vm-reaper": {
+      "description": "Sweep the governed ADR 0106 ephemeral VM pool, retag unowned temporary VMs with a one-hour grace period, and destroy expired VMs.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "fixture-reaper",
+        "command": "make fixture-reaper"
+      },
+      "preflight": {
+        "required": false,
+        "required_secret_ids": []
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "host_live",
+      "owner_runbook": "docs/runbooks/ephemeral-fixtures.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/capacity-model.json",
+        "config/windmill/scripts/ephemeral-vm-reaper.py",
+        "docs/runbooks/ephemeral-fixtures.md",
+        "scripts/fixture_manager.py",
+        "scripts/validate_ephemeral_vmid.py",
+        "scripts/vmid_allocator.py",
+        "tests/fixtures/docker-host-fixture.yml",
+        "tests/fixtures/postgres-host-fixture.yml",
+        "tests/fixtures/ops-base-fixture.yml"
+      ],
+      "outputs": [
+        "Expired ephemeral VMs are destroyed even if the originating workflow never reaches explicit teardown.",
+        "Untagged VMs in the ephemeral VMID pool are retagged with a one-hour grace period and included in the reaper summary receipt."
+      ],
+      "verification_commands": [
+        "python3 scripts/fixture_manager.py list",
+        "python3 config/windmill/scripts/ephemeral-vm-reaper.py",
+        "python3 scripts/validate_ephemeral_vmid.py --validate"
+      ]
+    },
     "check-platform-drift": {
       "description": "Run the ADR 0071 observation loop checks and emit structured findings from the controller command lane.",
       "lifecycle_status": "active",

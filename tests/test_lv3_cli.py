@@ -206,5 +206,45 @@ def test_fixture_list_dry_run_prints_make_target(
 
 
 def test_fixture_completion_suggests_fixture_names(minimal_repo: Path) -> None:
-    candidates = lv3_cli.completion_candidates(["lv3", "fixture", "up", "d"], "d")
+    candidates = lv3_cli.completion_candidates(["lv3", "fixture", "create", "d"], "d")
     assert candidates == ["docker-host"]
+
+
+def test_fixture_create_dry_run_passes_lifecycle_parameters(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    exit_code = lv3_cli.main(
+        [
+            "fixture",
+            "create",
+            "docker-host",
+            "--purpose",
+            "adr-0106-test",
+            "--owner",
+            "codex",
+            "--lifetime-hours",
+            "1",
+            "--policy",
+            "integration-test",
+            "--dry-run",
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "make fixture-up" in captured.out
+    assert "PURPOSE=adr-0106-test" in captured.out
+    assert "OWNER=codex" in captured.out
+    assert "LIFETIME_HOURS=1.0" in captured.out
+    assert "EPHEMERAL_POLICY=integration-test" in captured.out
+
+
+def test_fixture_destroy_dry_run_accepts_vmid(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    exit_code = lv3_cli.main(["fixture", "destroy", "--vmid", "910", "--dry-run"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "make fixture-down" in captured.out
+    assert "VMID=910" in captured.out

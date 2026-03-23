@@ -23,7 +23,18 @@ class ServiceCatalogTests(unittest.TestCase):
 class OpsPortalRenderTests(unittest.TestCase):
     def test_render_portal_writes_expected_pages(self) -> None:
         temp_dir = Path(tempfile.mkdtemp(prefix="ops-portal-test-"))
+        original_receipts = ops_portal.active_ephemeral_receipts
         try:
+            ops_portal.active_ephemeral_receipts = lambda: [
+                {
+                    "vm_id": 910,
+                    "fixture_id": "ops-base",
+                    "owner": "codex",
+                    "purpose": "adr-0106-test",
+                    "expires_at": "2026-03-24T00:00:00Z",
+                    "status": "active",
+                }
+            ]
             ops_portal.render_portal(
                 temp_dir,
                 REPO_ROOT / "tests" / "fixtures" / "ops_portal_health.json",
@@ -37,9 +48,12 @@ class OpsPortalRenderTests(unittest.TestCase):
             self.assertIn("Grafana", index_html)
             self.assertIn("healthy", index_html)
             self.assertIn("Drift Status", index_html)
+            self.assertIn("Ephemeral VMs", index_html)
+            self.assertIn("adr-0106-test", index_html)
             self.assertIn("ops.lv3.org", dns_html)
             self.assertIn("get-platform-status", agents_html)
         finally:
+            ops_portal.active_ephemeral_receipts = original_receipts
             shutil.rmtree(temp_dir)
 
     def test_render_portal_includes_drift_receipt_summary(self) -> None:
