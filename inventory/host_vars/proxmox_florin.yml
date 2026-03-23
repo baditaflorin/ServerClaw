@@ -249,6 +249,7 @@ network_policy:
             - 443
           description: Public edge ingress forwarded by the host
     docker-runtime-lv3:
+      allow_container_forwarding: true
       allowed_inbound:
         - source: management
           protocol: tcp
@@ -279,6 +280,7 @@ network_policy:
             - 3001
           description: Reverse proxy access to Uptime Kuma
     docker-build-lv3:
+      allow_container_forwarding: true
       allowed_inbound:
         - source: management
           protocol: tcp
