@@ -8,6 +8,16 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.75.0 - 2026-03-23
+
+- implemented ADR 0072 by defining the canonical production and staging topology in a committed environment catalog with matching ADR, workstream, schema, and operator runbook coverage
+- extended the service capability and subdomain catalogs with explicit environment bindings, the missing active `sso.lv3.org` publication, planned `*.staging.lv3.org` hostnames, and the broader current private service inventory
+- wired environment-topology validation into `make validate`, added operator inspection commands for environment metadata, and rendered a dedicated Environment Topology view in the generated operations portal
+
+Platform impact:
+
+- no direct live platform change is claimed in this release commit; `platform_version` remains `0.36.0` and staging remains a repo-modeled topology until later service-specific applies publish staged surfaces from `main`
+
 ## 0.74.0 - 2026-03-23
 
 - completed the ADR 0065 live-apply path by fixing the secret-rotation playbook recursion, loading the generated platform facts required by the Windmill runtime rotation path, and correcting OpenBao metadata writes to use the resolved metadata keys

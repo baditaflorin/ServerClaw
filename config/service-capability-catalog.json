@@ -23,7 +23,13 @@
         "backup",
         "pbs",
         "snapshots"
-      ]
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://10.10.10.60:8007"
+        }
+      }
     },
     {
       "id": "docker_build",
@@ -46,7 +52,14 @@
         "build",
         "docker",
         "worker"
-      ]
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://build.lv3.org",
+          "subdomain": "build.lv3.org"
+        }
+      }
     },
     {
       "id": "docker_runtime",
@@ -68,7 +81,14 @@
         "docker",
         "runtime",
         "control-plane"
-      ]
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://docker.lv3.org",
+          "subdomain": "docker.lv3.org"
+        }
+      }
     },
     {
       "id": "grafana",
@@ -95,7 +115,20 @@
         "metrics",
         "dashboards",
         "observability"
-      ]
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://grafana.lv3.org",
+          "subdomain": "grafana.lv3.org"
+        },
+        "staging": {
+          "status": "planned",
+          "url": "https://grafana.staging.lv3.org",
+          "subdomain": "grafana.staging.lv3.org",
+          "notes": "Planned shared-edge staging hostname; live publication remains pending."
+        }
+      }
     },
     {
       "id": "keycloak",
@@ -117,7 +150,20 @@
         "oidc",
         "sso",
         "tokens"
-      ]
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://sso.lv3.org",
+          "subdomain": "sso.lv3.org"
+        },
+        "staging": {
+          "status": "planned",
+          "url": "https://sso.staging.lv3.org",
+          "subdomain": "sso.staging.lv3.org",
+          "notes": "Planned staging identity hostname on the shared edge."
+        }
+      }
     },
     {
       "id": "mail_platform",
@@ -151,7 +197,14 @@
         "smtp",
         "imap",
         "delivery"
-      ]
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://mail.lv3.org",
+          "subdomain": "mail.lv3.org"
+        }
+      }
     },
     {
       "id": "mattermost",
@@ -171,7 +224,13 @@
         "chatops",
         "collaboration",
         "private"
-      ]
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://100.118.189.95:8066"
+        }
+      }
     },
     {
       "id": "netbox",
@@ -199,7 +258,13 @@
         "inventory",
         "ipam",
         "topology"
-      ]
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://100.118.189.95:8004"
+        }
+      }
     },
     {
       "id": "nginx_edge",
@@ -223,7 +288,14 @@
         "edge",
         "tls",
         "ingress"
-      ]
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://nginx.lv3.org",
+          "subdomain": "nginx.lv3.org"
+        }
+      }
     },
     {
       "id": "ntopng",
@@ -241,7 +313,13 @@
         "flows",
         "network",
         "traffic"
-      ]
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://100.118.189.95:3001"
+        }
+      }
     },
     {
       "id": "open_webui",
@@ -268,7 +346,13 @@
         "agents",
         "operators",
         "workbench"
-      ]
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://100.118.189.95:8008"
+        }
+      }
     },
     {
       "id": "openbao",
@@ -294,7 +378,45 @@
         "secrets",
         "vault",
         "pki"
-      ]
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://100.118.189.95:8200"
+        }
+      }
+    },
+    {
+      "id": "ops_portal",
+      "name": "Platform Operations Portal",
+      "description": "Generated operator-facing static portal for service, runbook, ADR, and environment navigation.",
+      "category": "access",
+      "lifecycle_status": "planned",
+      "vm": "nginx-lv3",
+      "vmid": 110,
+      "public_url": "https://ops.lv3.org",
+      "subdomain": "ops.lv3.org",
+      "exposure": "edge-published",
+      "adr": "0074",
+      "runbook": "docs/runbooks/platform-operations-portal.md",
+      "tags": [
+        "portal",
+        "operations",
+        "navigation"
+      ],
+      "environments": {
+        "production": {
+          "status": "planned",
+          "url": "https://ops.lv3.org",
+          "subdomain": "ops.lv3.org"
+        },
+        "staging": {
+          "status": "planned",
+          "url": "https://ops.staging.lv3.org",
+          "subdomain": "ops.staging.lv3.org",
+          "notes": "Planned staging portal generated from the same canonical catalogs."
+        }
+      }
     },
     {
       "id": "platform_context_api",
@@ -315,7 +437,13 @@
         "context",
         "rag",
         "search"
-      ]
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://100.118.189.95:8010"
+        }
+      }
     },
     {
       "id": "portainer",
@@ -341,7 +469,13 @@
         "docker",
         "operations",
         "runtime"
-      ]
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://100.118.189.95:9444"
+        }
+      }
     },
     {
       "id": "postgres",
@@ -363,7 +497,14 @@
         "postgres",
         "database",
         "sql"
-      ]
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "postgres://database.lv3.org:5432",
+          "subdomain": "database.lv3.org"
+        }
+      }
     },
     {
       "id": "proxmox_ui",
@@ -387,7 +528,14 @@
         "proxmox",
         "host",
         "management"
-      ]
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://proxmox.lv3.org",
+          "subdomain": "proxmox.lv3.org"
+        }
+      }
     },
     {
       "id": "step_ca",
@@ -411,7 +559,13 @@
         "certificates",
         "ssh",
         "tls"
-      ]
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://100.118.189.95:9443"
+        }
+      }
     },
     {
       "id": "uptime_kuma",
@@ -436,7 +590,20 @@
         "monitoring",
         "synthetics",
         "health"
-      ]
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://uptime.lv3.org",
+          "subdomain": "uptime.lv3.org"
+        },
+        "staging": {
+          "status": "planned",
+          "url": "https://uptime.staging.lv3.org",
+          "subdomain": "uptime.staging.lv3.org",
+          "notes": "Planned staged monitor surface on the shared edge."
+        }
+      }
     },
     {
       "id": "windmill",
@@ -464,7 +631,13 @@
         "workflow",
         "automation",
         "jobs"
-      ]
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://100.118.189.95:8005"
+        }
+      }
     }
   ]
 }

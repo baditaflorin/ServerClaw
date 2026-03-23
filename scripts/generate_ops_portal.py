@@ -17,6 +17,11 @@ from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
+from environment_topology import (
+    load_environment_topology,
+    validate_environment_references,
+    validate_environment_topology,
+)
 from portal_utils import PORTAL_STYLES, escape, page_template, render_badge, render_external_link
 from service_catalog import load_service_catalog, validate_service_catalog
 from subdomain_catalog import load_subdomain_catalog, validate_subdomain_catalog
@@ -31,6 +36,7 @@ BUILD_DIR = repo_path("build", "ops-portal")
 
 NAV = [
     ("index.html", "Service Map"),
+    ("environments/index.html", "Environments"),
     ("vms/index.html", "VM Inventory"),
     ("subdomains/index.html", "DNS Map"),
     ("runbooks/index.html", "Runbook Index"),
@@ -200,9 +206,15 @@ def badge_for_health(state: HealthState) -> str:
     return render_badge(label, tone)
 
 
-def render_summary(services: list[dict[str, Any]], subdomains: list[dict[str, Any]], tools: list[dict[str, Any]]) -> str:
+def render_summary(
+    services: list[dict[str, Any]],
+    subdomains: list[dict[str, Any]],
+    tools: list[dict[str, Any]],
+    environments: list[dict[str, Any]],
+) -> str:
     metrics = [
         ("Services", str(len(services))),
+        ("Environments", str(len(environments))),
         ("Public Subdomains", str(sum(1 for item in subdomains if item["status"] == "active"))),
         ("Private Surfaces", str(sum(1 for item in services if item["exposure"] == "private-only"))),
         ("Agent Tools", str(len(tools))),
@@ -274,6 +286,83 @@ def render_service_cards(services: list[dict[str, Any]], health: dict[str, Healt
     return "".join(blocks)
 
 
+def render_environment_topology(
+    environment_catalog: dict[str, Any],
+    services: list[dict[str, Any]],
+    subdomains: list[dict[str, Any]],
+) -> str:
+    environment_subdomains: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    environment_services: dict[str, list[tuple[dict[str, Any], dict[str, Any]]]] = defaultdict(list)
+
+    for entry in subdomains:
+        environment_subdomains[entry["environment"]].append(entry)
+    for service in services:
+        for env_id, binding in service.get("environments", {}).items():
+            environment_services[env_id].append((service, binding))
+
+    blocks = []
+    for environment in sorted(environment_catalog["environments"], key=lambda item: item["id"]):
+        env_id = environment["id"]
+        service_rows = []
+        for service, binding in sorted(environment_services.get(env_id, []), key=lambda item: item[0]["name"]):
+            service_rows.append(
+                "<tr>"
+                f"<td>{escape(service['name'])}</td>"
+                f"<td>{render_badge(binding['status'], 'ok' if binding['status'] == 'active' else 'warn')}</td>"
+                f"<td>{escape(binding['url'])}</td>"
+                f"<td>{escape(binding.get('subdomain', 'n/a'))}</td>"
+                "</tr>"
+            )
+        subdomain_rows = []
+        for entry in sorted(environment_subdomains.get(env_id, []), key=lambda item: item["fqdn"]):
+            subdomain_rows.append(
+                "<tr>"
+                f"<td>{escape(entry['fqdn'])}</td>"
+                f"<td>{escape(entry.get('service_id', 'n/a'))}</td>"
+                f"<td>{render_badge(entry['status'], 'ok' if entry['status'] == 'active' else 'warn')}</td>"
+                f"<td>{escape(entry['exposure'])}</td>"
+                "</tr>"
+            )
+
+        operator_access = (
+            f"<div><strong>Operator Access</strong><span>{escape(environment['operator_access'])}</span></div>"
+            if environment.get("operator_access")
+            else ""
+        )
+        notes = (
+            f"<div><strong>Notes</strong><span>{escape(environment['notes'])}</span></div>"
+            if environment.get("notes")
+            else ""
+        )
+
+        blocks.append(
+            '<section class="group-block panel">'
+            '<div class="card-head">'
+            f"<div><h2>{escape(environment['name'])}</h2><p class=\"muted\">{escape(environment['purpose'])}</p></div>"
+            f"<div>{render_badge(environment['status'], 'ok' if environment['status'] == 'active' else 'warn')}"
+            f"{render_badge(environment['topology_model'], 'neutral')}</div>"
+            "</div>"
+            '<div class="meta-list">'
+            f"<div><strong>Base Domain</strong><span>{escape(environment['base_domain'])}</span></div>"
+            f"<div><strong>Pattern</strong><span>{escape(environment['hostname_pattern'])}</span></div>"
+            f"<div><strong>Edge</strong><span>{escape(environment['edge_service_id'])} on {escape(environment['edge_vm'])}</span></div>"
+            f"<div><strong>Ingress IPv4</strong><span>{escape(environment['ingress_ipv4'])}</span></div>"
+            f"<div><strong>Isolation</strong><span>{escape(environment['isolation_model'])}</span></div>"
+            f"{operator_access}"
+            f"{notes}"
+            "</div>"
+            '<div class="table-scroll"><table>'
+            "<thead><tr><th>Service</th><th>Status</th><th>URL</th><th>Subdomain</th></tr></thead>"
+            f"<tbody>{''.join(service_rows)}</tbody></table></div>"
+            '<div class="table-scroll"><table>'
+            "<thead><tr><th>Subdomain</th><th>Service</th><th>Status</th><th>Exposure</th></tr></thead>"
+            f"<tbody>{''.join(subdomain_rows)}</tbody></table></div>"
+            "</section>"
+        )
+
+    return "".join(blocks)
+
+
 def render_vm_inventory(
     services: list[dict[str, Any]],
     stack: dict[str, Any],
@@ -325,6 +414,7 @@ def render_dns_map(subdomains: list[dict[str, Any]]) -> str:
         rows.append(
             "<tr>"
             f"<td>{escape(entry['fqdn'])}</td>"
+            f"<td>{escape(entry['environment'])}</td>"
             f"<td>{escape(entry.get('service_id', 'n/a'))}</td>"
             f"<td>{render_badge(entry['status'], 'warn' if entry['status'] == 'planned' else 'ok' if entry['status'] == 'active' else 'neutral')}</td>"
             f"<td>{escape(entry['exposure'])}</td>"
@@ -336,7 +426,7 @@ def render_dns_map(subdomains: list[dict[str, Any]]) -> str:
     return (
         '<section class="panel">'
         '<div class="table-scroll"><table>'
-        "<thead><tr><th>FQDN</th><th>Service</th><th>Status</th><th>Exposure</th><th>Target</th><th>TLS</th><th>Notes</th></tr></thead>"
+        "<thead><tr><th>FQDN</th><th>Environment</th><th>Service</th><th>Status</th><th>Exposure</th><th>Target</th><th>TLS</th><th>Notes</th></tr></thead>"
         f"<tbody>{''.join(rows)}</tbody></table></div></section>"
     )
 
@@ -436,6 +526,7 @@ def write_page(output_dir: Path, relative_path: str, title: str, subtitle: str, 
 def validate_output(output_dir: Path) -> None:
     expected = [
         output_dir / "index.html",
+        output_dir / "environments" / "index.html",
         output_dir / "vms" / "index.html",
         output_dir / "subdomains" / "index.html",
         output_dir / "runbooks" / "index.html",
@@ -449,16 +540,20 @@ def validate_output(output_dir: Path) -> None:
 
 
 def render_portal(output_dir: Path, health_snapshot: Path | None, probe_timeout: float) -> None:
+    environment_catalog = load_environment_topology()
     service_catalog = load_service_catalog()
     subdomain_catalog = load_subdomain_catalog()
     agent_registry, _workflow_catalog = load_agent_tool_registry()
     stack = load_yaml(STACK_PATH)
     host_vars = load_yaml(HOST_VARS_PATH)
 
+    validate_environment_topology(environment_catalog, host_vars)
     validate_service_catalog(service_catalog)
     validate_subdomain_catalog(subdomain_catalog, service_catalog)
+    validate_environment_references(environment_catalog, service_catalog, subdomain_catalog, host_vars)
 
     services = service_catalog["services"]
+    environments = environment_catalog["environments"]
     subdomains = subdomain_catalog["subdomains"]
     tools = agent_registry["tools"]
     snapshot = load_health_snapshot(health_snapshot)
@@ -477,7 +572,14 @@ def render_portal(output_dir: Path, health_snapshot: Path | None, probe_timeout:
         "index.html",
         "Platform Operations Portal",
         "Generated operator map of services, health, and ownership across the current LV3 estate.",
-        render_summary(services, subdomains, tools) + render_service_cards(services, health),
+        render_summary(services, subdomains, tools, environments) + render_service_cards(services, health),
+    )
+    write_page(
+        output_dir,
+        "environments/index.html",
+        "Environment Topology",
+        "Canonical production and staging topology rendered from the environment, service, and subdomain catalogs.",
+        render_environment_topology(environment_catalog, services, subdomains),
     )
     write_page(
         output_dir,

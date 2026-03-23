@@ -138,6 +138,8 @@ validate_data_models() {
   echo "Repository data model validation"
   uvx --from pyyaml python "$REPO_ROOT/scripts/validate_repository_data_models.py" --validate >/dev/null
   uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/service_catalog.py" --validate >/dev/null
+  uvx --from pyyaml python "$REPO_ROOT/scripts/environment_topology.py" --validate >/dev/null
+  uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/service_catalog.py" --validate >/dev/null
   python3 "$REPO_ROOT/scripts/subdomain_catalog.py" --validate >/dev/null
   "$REPO_ROOT/scripts/agent_tool_registry.py" --export-mcp >/dev/null
 }

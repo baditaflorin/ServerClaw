@@ -875,6 +875,27 @@ workstreams:
     ready_to_merge: false
     live_applied: false
 
+  - id: adr-0072-staging-production-topology
+    adr: "0072"
+    title: Staging and production environment topology
+    status: ready_for_merge
+    owner: codex
+    branch: codex/adr-0072-staging-production-topology
+    worktree_path: ../proxmox_florin_server-adr-0072-staging-production-topology
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0072-staging-production-topology.md
+    depends_on:
+      - adr-0074-ops-portal
+      - adr-0075-service-capability-catalog
+    conflicts_with: []
+    shared_surfaces:
+      - config/environment-topology.json
+      - config/service-capability-catalog.json
+      - config/subdomain-catalog.json
+      - scripts/generate_ops_portal.py
+      - docs/runbooks/platform-operations-portal.md
+    ready_to_merge: true
+    live_applied: false
+
   - id: adr-0074-ops-portal
     adr: "0074"
     title: Platform operations portal

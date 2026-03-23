@@ -4,13 +4,13 @@ import argparse
 from typing import Any
 
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path
+from environment_topology import ALLOWED_ENVIRONMENTS
 
 
 SUBDOMAIN_CATALOG_PATH = repo_path("config", "subdomain-catalog.json")
 SERVICE_CATALOG_PATH = repo_path("config", "service-capability-catalog.json")
 
 ALLOWED_STATUSES = {"active", "planned", "reserved", "retiring"}
-ALLOWED_ENVIRONMENTS = {"production", "staging"}
 ALLOWED_EXPOSURES = {"edge-published", "informational-only", "private-only"}
 ALLOWED_TLS_PROVIDERS = {"letsencrypt", "step-ca", "none"}
 

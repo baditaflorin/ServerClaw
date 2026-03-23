@@ -5,6 +5,7 @@ import sys
 from typing import Any, Final
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
+from environment_topology import ALLOWED_BINDING_STATUSES, ALLOWED_ENVIRONMENTS
 
 try:
     import jsonschema
@@ -41,6 +42,53 @@ ALLOWED_EXPOSURES = {
     "informational-only",
     "private-only",
 }
+
+
+def require_environment_bindings(
+    value: Any,
+    path: str,
+    *,
+    public_url: str | None,
+    internal_url: str | None,
+    subdomain: str | None,
+) -> dict[str, dict[str, str]]:
+    bindings = require_mapping(value, path)
+    if "production" not in bindings:
+        raise ValueError(f"{path} must declare a production binding")
+
+    normalized: dict[str, dict[str, str]] = {}
+    for env_id, binding in bindings.items():
+        if env_id not in ALLOWED_ENVIRONMENTS:
+            raise ValueError(f"{path}.{env_id} must be one of {sorted(ALLOWED_ENVIRONMENTS)}")
+        binding = require_mapping(binding, f"{path}.{env_id}")
+        status = require_str(binding.get("status"), f"{path}.{env_id}.status")
+        if status not in ALLOWED_BINDING_STATUSES:
+            raise ValueError(
+                f"{path}.{env_id}.status must be one of {sorted(ALLOWED_BINDING_STATUSES)}"
+            )
+        url = require_str(binding.get("url"), f"{path}.{env_id}.url")
+        normalized_binding: dict[str, str] = {"status": status, "url": url}
+        if "subdomain" in binding:
+            normalized_binding["subdomain"] = require_str(
+                binding.get("subdomain"), f"{path}.{env_id}.subdomain"
+            )
+        if "notes" in binding:
+            normalized_binding["notes"] = require_str(binding.get("notes"), f"{path}.{env_id}.notes")
+
+        if env_id == "production":
+            expected_url = public_url or internal_url
+            if expected_url and url != expected_url:
+                raise ValueError(
+                    f"{path}.production.url must match the service primary URL '{expected_url}'"
+                )
+            if subdomain is not None and normalized_binding.get("subdomain") != subdomain:
+                raise ValueError(
+                    f"{path}.production.subdomain must match the service subdomain '{subdomain}'"
+                )
+
+        normalized[env_id] = normalized_binding
+
+    return normalized
 
 
 def require_mapping(value: Any, path: str) -> dict[str, Any]:
@@ -152,6 +200,7 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
 
     seen_ids: set[str] = set()
     seen_names: set[str] = set()
+    active_service_ids: set[str] = set()
 
     for index, service in enumerate(services):
         service = require_mapping(service, f"services[{index}]")
@@ -193,9 +242,26 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
         if exposure not in ALLOWED_EXPOSURES:
             raise ValueError(f"services[{index}].exposure must be one of {sorted(ALLOWED_EXPOSURES)}")
 
+        internal_url = None
+        public_url = None
+        subdomain = None
         for field in ("internal_url", "public_url", "subdomain", "dashboard_url", "runbook", "adr"):
             if field in service:
-                require_str(service.get(field), f"services[{index}].{field}")
+                value = require_str(service.get(field), f"services[{index}].{field}")
+                if field == "internal_url":
+                    internal_url = value
+                if field == "public_url":
+                    public_url = value
+                if field == "subdomain":
+                    subdomain = value
+
+        require_environment_bindings(
+            service.get("environments"),
+            f"services[{index}].environments",
+            public_url=public_url,
+            internal_url=internal_url,
+            subdomain=subdomain,
+        )
 
         runbook = service.get("runbook")
         if runbook is not None and not repo_path(runbook).exists():
@@ -211,14 +277,15 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
                     f"services[{index}].uptime_monitor_name references unknown monitor '{monitor_name}'"
                 )
 
-        health_probe_id = require_str(
-            service.get("health_probe_id"),
-            f"services[{index}].health_probe_id",
-        )
-        if health_probe_id not in probe_service_ids:
-            raise ValueError(
-                f"services[{index}].health_probe_id references unknown health probe '{health_probe_id}'"
+        if "health_probe_id" in service or lifecycle_status == "active":
+            health_probe_id = require_str(
+                service.get("health_probe_id"),
+                f"services[{index}].health_probe_id",
             )
+            if health_probe_id not in probe_service_ids:
+                raise ValueError(
+                    f"services[{index}].health_probe_id references unknown health probe '{health_probe_id}'"
+                )
 
         for image_id in require_string_list(
             service.get("image_catalog_ids", []),
@@ -242,6 +309,7 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
             require_string_list(service.get("tags"), f"services[{index}].tags")
 
         if lifecycle_status == "active":
+            active_service_ids.add(service_id)
             if vm != "proxmox_florin" and vm not in observed_guests:
                 raise ValueError(
                     f"active service '{service_id}' must reference an observed guest or host surface"
@@ -259,9 +327,9 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
                         f"'{topology_entry.get('exposure_model')}'"
                     )
 
-    if seen_ids != probe_service_ids:
-        missing = sorted(probe_service_ids - seen_ids)
-        extra = sorted(seen_ids - probe_service_ids)
+    if active_service_ids != probe_service_ids:
+        missing = sorted(probe_service_ids - active_service_ids)
+        extra = sorted(active_service_ids - probe_service_ids)
         details = []
         if missing:
             details.append(f"missing services: {', '.join(missing)}")
@@ -319,6 +387,15 @@ def show_service(catalog: dict[str, Any], service_id: str) -> int:
             print(f"Dashboard: {service['dashboard_url']}")
         if "adr" in service:
             print(f"ADR: {service['adr']}")
+        environments = service.get("environments", {})
+        if environments:
+            print("Environments:")
+            for env_id in sorted(environments):
+                binding = environments[env_id]
+                subdomain = f" [{binding['subdomain']}]" if "subdomain" in binding else ""
+                print(
+                    f"  - {env_id}: {binding['status']} -> {binding['url']}{subdomain}"
+                )
         tags = service.get("tags", [])
         if tags:
             print("Tags:")

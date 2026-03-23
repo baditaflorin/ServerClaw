@@ -26,7 +26,8 @@
           "category",
           "lifecycle_status",
           "vm",
-          "exposure"
+          "exposure",
+          "environments"
         ],
         "properties": {
           "id": {
@@ -129,9 +130,46 @@
               "minLength": 1
             }
           },
+          "environments": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["production"],
+            "properties": {
+              "production": {
+                "$ref": "#/$defs/environmentBinding"
+              },
+              "staging": {
+                "$ref": "#/$defs/environmentBinding"
+              }
+            }
+          },
           "notes": {
             "type": "string"
           }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "environmentBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "url"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["active", "planned"]
+        },
+        "url": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subdomain": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string"
         }
       }
     }
