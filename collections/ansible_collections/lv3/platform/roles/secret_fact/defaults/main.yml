@@ -1,0 +1,5 @@
+---
+secret_fact_openbao_url: "http://127.0.0.1:8200"
+secret_fact_validate_certs: false
+secret_fact_token: "{{ lookup('ansible.builtin.env', 'OPENBAO_TOKEN') | default('', true) }}"
+secret_fact_field: ""

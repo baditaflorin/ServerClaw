@@ -1,0 +1,5 @@
+---
+argument_specs:
+  main:
+    short_description: NetBox PostgreSQL role inputs.
+    options: {}

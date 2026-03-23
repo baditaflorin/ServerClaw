@@ -1394,6 +1394,43 @@
         "make promote SERVICE=<service-id> STAGING_RECEIPT=receipts/live-applies/staging/<receipt>.json DRY_RUN=true"
       ]
     },
+    "collection-publish": {
+      "description": "Build the lv3.platform Ansible collection, validate the local tarball path, and publish it to the configured internal Galaxy server.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "collection-publish",
+        "command": "ANSIBLE_GALAXY_SERVER_TOKEN=... make collection-publish"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "ansible_galaxy_server_token"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "collection-build"
+      ],
+      "live_impact": "repo_only",
+      "owner_runbook": "docs/runbooks/ansible-collection-development.md",
+      "implementation_refs": [
+        "Makefile",
+        "ansible.cfg",
+        "collections/ansible_collections/lv3/platform/galaxy.yml",
+        "config/build-server.json",
+        "config/windmill/scripts/collection-publish.py",
+        "docs/runbooks/ansible-collection-development.md"
+      ],
+      "outputs": [
+        "A versioned lv3.platform collection tarball under build/collections and, when a token is present, a publish request against the internal Galaxy server."
+      ],
+      "verification_commands": [
+        "make collection-build",
+        "make collection-install",
+        "python3 config/windmill/scripts/collection-publish.py --repo-root \"$PWD\" --dry-run"
+      ]
+    },
     "check-platform-drift": {
       "description": "Run the ADR 0071 observation loop checks and emit structured findings from the controller command lane.",
       "lifecycle_status": "active",

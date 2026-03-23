@@ -1,0 +1,22 @@
+---
+namespace: lv3
+name: platform
+version: 1.0.0
+readme: README.md
+authors:
+  - Florin Badita-Nistor
+description: LV3 homelab platform roles, plugins, and playbooks packaged as an Ansible collection.
+license:
+  - MIT
+tags:
+  - proxmox
+  - homelab
+  - platform
+  - infrastructure
+  - linux
+repository: https://github.com/live/proxmox_florin_server
+documentation: https://github.com/live/proxmox_florin_server/blob/main/docs/runbooks/ansible-collection-development.md
+homepage: https://github.com/live/proxmox_florin_server
+issues: https://github.com/live/proxmox_florin_server/issues
+build_ignore:
+  - molecule/.gitkeep

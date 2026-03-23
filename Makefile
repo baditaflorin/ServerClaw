@@ -37,8 +37,17 @@ EXCEPTION_OWNER ?=
 EXCEPTION_REVIEW_BY ?=
 SECRET_ID ?=
 ROTATION_ARGS ?=
+COLLECTION_NAMESPACE ?= lv3
+COLLECTION_NAME ?= platform
+COLLECTION_ROOT := $(REPO_ROOT)/collections/ansible_collections/$(COLLECTION_NAMESPACE)/$(COLLECTION_NAME)
+COLLECTION_DIST_DIR ?= $(REPO_ROOT)/build/collections
+COLLECTION_VERSION := $(shell ruby -ryaml -e 'puts YAML.load_file(ARGV[0]).fetch("version")' "$(COLLECTION_ROOT)/galaxy.yml")
+COLLECTION_TARBALL := $(COLLECTION_DIST_DIR)/$(COLLECTION_NAMESPACE)-$(COLLECTION_NAME)-$(COLLECTION_VERSION).tar.gz
+COLLECTION_SERVER ?= internal_galaxy
+COLLECTION_INSTALL_PATH ?= $(REPO_ROOT)/build/collection-install
+COLLECTION_INSTALL_SOURCE ?= tarball
 
-.PHONY: validate validate-generated-vars validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-shell validate-json validate-compose-runtime-envs validate-data-models validate-health-probes generate-platform-vars show-platform-facts generate-status-docs generate-status generate-ops-portal generate-changelog-portal deploy-ops-portal deploy-changelog-portal validate-generated-docs validate-generated-portals receipts receipt-info workflows workflow-info commands command-info services show-service environments environment-info lanes lane-info api-publication api-publication-info agent-tools agent-tool-info export-mcp-tools check-image-freshness upgrade-container-image preflight syntax-check syntax-check-monitoring syntax-check-ntopng syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-openbao syntax-check-step-ca syntax-check-windmill syntax-check-keycloak syntax-check-netbox syntax-check-open-webui syntax-check-mattermost syntax-check-portainer syntax-check-rag-context syntax-check-secret-rotation check-platform-drift open-maintenance-window close-maintenance-window install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-guest-network-policy converge-monitoring converge-ntopng converge-docker-runtime converge-postgres-vm converge-mail-platform converge-openbao converge-step-ca converge-windmill converge-control-plane-recovery converge-keycloak converge-netbox converge-open-webui converge-mattermost converge-portainer converge-rag-context rotate-secret deploy-uptime-kuma uptime-kuma-manage portainer-manage configure-backups configure-backup-vm database-dns provision-subdomain start-workstream promote live-apply-group live-apply-service live-apply-site
+.PHONY: validate validate-generated-vars validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-shell validate-json validate-compose-runtime-envs validate-data-models validate-health-probes generate-platform-vars show-platform-facts generate-status-docs generate-status generate-ops-portal generate-changelog-portal deploy-ops-portal deploy-changelog-portal validate-generated-docs validate-generated-portals receipts receipt-info workflows workflow-info commands command-info services show-service environments environment-info lanes lane-info api-publication api-publication-info agent-tools agent-tool-info export-mcp-tools check-image-freshness upgrade-container-image preflight syntax-check syntax-check-monitoring syntax-check-ntopng syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-openbao syntax-check-step-ca syntax-check-windmill syntax-check-keycloak syntax-check-netbox syntax-check-open-webui syntax-check-mattermost syntax-check-portainer syntax-check-rag-context syntax-check-secret-rotation collection-sync collection-build collection-publish collection-install check-platform-drift install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-guest-network-policy converge-monitoring converge-ntopng converge-docker-runtime converge-postgres-vm converge-mail-platform converge-openbao converge-step-ca converge-windmill converge-control-plane-recovery converge-keycloak converge-netbox converge-open-webui converge-mattermost converge-portainer converge-rag-context rotate-secret deploy-uptime-kuma uptime-kuma-manage portainer-manage configure-backups configure-backup-vm database-dns provision-subdomain start-workstream promote live-apply-group live-apply-service live-apply-site
 
 validate:
 	$(REPO_ROOT)/scripts/validate_repo.sh
@@ -78,6 +87,24 @@ show-platform-facts:
 
 validate-health-probes:
 	$(REPO_ROOT)/scripts/validate_repo.sh health-probes
+
+collection-sync:
+	mkdir -p $(COLLECTION_ROOT)/playbooks
+	rsync -a --delete $(REPO_ROOT)/playbooks/ $(COLLECTION_ROOT)/playbooks/
+
+collection-build: collection-sync
+	mkdir -p $(COLLECTION_DIST_DIR)
+	uvx --from ansible-core ansible-galaxy collection build $(COLLECTION_ROOT) --output-path $(COLLECTION_DIST_DIR) --force
+
+collection-publish: collection-build
+	python3 $(REPO_ROOT)/config/windmill/scripts/collection-publish.py --repo-root $(REPO_ROOT) --server $(COLLECTION_SERVER)
+
+collection-install: collection-build
+	@if [ "$(COLLECTION_INSTALL_SOURCE)" = "server" ]; then \
+		uvx --from ansible-core ansible-galaxy collection install $(COLLECTION_NAMESPACE).$(COLLECTION_NAME):$(COLLECTION_VERSION) --server $(COLLECTION_SERVER) -p $(COLLECTION_INSTALL_PATH) --force; \
+	else \
+		uvx --from ansible-core ansible-galaxy collection install $(COLLECTION_TARBALL) -p $(COLLECTION_INSTALL_PATH) --force; \
+	fi
 
 check-image-freshness:
 	$(REPO_ROOT)/scripts/container_image_policy.py --check-freshness

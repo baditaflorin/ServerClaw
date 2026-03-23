@@ -15,6 +15,9 @@
   "default_timeout_seconds": 900,
   "docker_socket": "unix:///var/run/docker.sock",
   "registry_base": "registry.lv3.org",
+  "galaxy_server_url": "https://galaxy.lv3.org/",
+  "galaxy_server_name": "internal_galaxy",
+  "collection_root": "collections/ansible_collections/lv3/platform",
   "commands": {
     "remote-lint": {
       "runner_label": "lint-ansible",

@@ -3,9 +3,14 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+COLLECTION_ROLES_ROOT="collections/ansible_collections/lv3/platform/roles"
 
 role_paths_from_files() {
-  awk -F/ '$1 == "roles" && $2 != "" { print $1 "/" $2 }'
+  awk -F/ '
+    $1 == "collections" && $2 == "ansible_collections" && $3 == "lv3" && $4 == "platform" && $5 == "roles" && $6 != "" {
+      print $1 "/" $2 "/" $3 "/" $4 "/" $5 "/" $6
+    }
+  '
 }
 
 base_ref() {
@@ -21,10 +26,10 @@ collect_candidate_roles() {
   base="$(base_ref)"
 
   {
-    git -C "$REPO_ROOT" diff --name-only "$base"...HEAD -- 'roles/*' 'roles/*/*' 'roles/*/*/*'
-    git -C "$REPO_ROOT" diff --name-only --cached -- 'roles/*' 'roles/*/*' 'roles/*/*/*'
-    git -C "$REPO_ROOT" diff --name-only -- 'roles/*' 'roles/*/*' 'roles/*/*/*'
-    git -C "$REPO_ROOT" ls-files --others --exclude-standard -- 'roles/*' 'roles/*/*' 'roles/*/*/*'
+    git -C "$REPO_ROOT" diff --name-only "$base"...HEAD -- "$COLLECTION_ROLES_ROOT"
+    git -C "$REPO_ROOT" diff --name-only --cached -- "$COLLECTION_ROLES_ROOT"
+    git -C "$REPO_ROOT" diff --name-only -- "$COLLECTION_ROLES_ROOT"
+    git -C "$REPO_ROOT" ls-files --others --exclude-standard -- "$COLLECTION_ROLES_ROOT"
   } | role_paths_from_files | awk '!seen[$0]++'
 }
 
@@ -45,7 +50,7 @@ main() {
       continue
     fi
     if [[ ! -f "$REPO_ROOT/$role_dir/meta/argument_specs.yml" ]]; then
-      echo "Missing meta/argument_specs.yml for ${role_dir#roles/}" >&2
+      echo "Missing meta/argument_specs.yml for ${role_dir#"$COLLECTION_ROLES_ROOT"/}" >&2
       missing=1
     fi
   done

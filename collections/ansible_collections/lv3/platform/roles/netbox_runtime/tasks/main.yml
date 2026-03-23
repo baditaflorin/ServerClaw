@@ -1,0 +1,342 @@
+---
+- name: Validate NetBox runtime inputs
+  ansible.builtin.assert:
+    that:
+      - netbox_image | length > 0
+      - netbox_redis_image | length > 0
+      - netbox_site_dir | length > 0
+      - netbox_secret_dir | length > 0
+      - netbox_compose_file | length > 0
+      - netbox_env_file | length > 0
+      - netbox_server_port | int > 0
+      - netbox_database_name | length > 0
+      - netbox_database_user | length > 0
+      - netbox_database_host | length > 0
+      - netbox_database_password_local_file | length > 0
+      - netbox_superuser_name | length > 0
+      - netbox_superuser_email | length > 0
+      - netbox_superuser_password_local_file | length > 0
+      - netbox_superuser_api_token_local_file | length > 0
+    fail_msg: "netbox_runtime requires image, path, database, and bootstrap-secret inputs."
+
+- name: Ensure the NetBox database password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ netbox_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: netbox_database_password_local
+
+- name: Fail if the NetBox database password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ netbox_database_password_local_file }} is missing on the control machine.
+      Run the NetBox PostgreSQL converge first so the runtime can connect to postgres-lv3.
+  when: not netbox_database_password_local.stat.exists
+
+- name: Ensure the local NetBox artifact directory exists
+  ansible.builtin.file:
+    path: "{{ netbox_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Generate the NetBox local bootstrap secrets
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ item.path }}" ]; then
+      umask 077
+      {{ item.generator }} > "{{ item.path }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  loop:
+    - path: "{{ netbox_superuser_password_local_file }}"
+      generator: "openssl rand -base64 24 | tr -d '\\n'"
+  delegate_to: localhost
+  become: false
+  register: netbox_local_secret_generation
+  changed_when: "'changed' in netbox_local_secret_generation.stdout"
+  no_log: true
+
+- name: Ensure NetBox runtime prerequisite packages are present
+  ansible.builtin.apt:
+    name:
+      - openssl
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the NetBox runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ netbox_site_dir }}"
+      mode: "0755"
+    - path: "{{ netbox_secret_dir }}"
+      mode: "0700"
+
+- name: Generate the NetBox runtime secret files
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ item.path }}" ]; then
+      umask 077
+      {{ item.generator }} > "{{ item.path }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  loop:
+    - path: "{{ netbox_secret_key_file }}"
+      generator: "openssl rand -hex 64"
+    - path: "{{ netbox_redis_password_file }}"
+      generator: "openssl rand -hex 24"
+    - path: "{{ netbox_redis_cache_password_file }}"
+      generator: "openssl rand -hex 24"
+  register: netbox_runtime_secret_generation
+  changed_when: "'changed' in netbox_runtime_secret_generation.stdout"
+  no_log: true
+
+- name: Read the NetBox bootstrap secrets from the control machine
+  ansible.builtin.slurp:
+    src: "{{ item }}"
+  loop:
+    - "{{ netbox_database_password_local_file }}"
+    - "{{ netbox_superuser_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: netbox_local_secret_payloads
+  no_log: true
+
+- name: Read the NetBox runtime secret files
+  ansible.builtin.slurp:
+    src: "{{ item }}"
+  loop:
+    - "{{ netbox_secret_key_file }}"
+    - "{{ netbox_redis_password_file }}"
+    - "{{ netbox_redis_cache_password_file }}"
+  register: netbox_runtime_secret_payloads
+  no_log: true
+
+- name: Record the NetBox secret facts
+  ansible.builtin.set_fact:
+    netbox_database_password: "{{ netbox_local_secret_payloads.results[0].content | b64decode | trim }}"
+    netbox_superuser_password: "{{ netbox_local_secret_payloads.results[1].content | b64decode | trim }}"
+    netbox_secret_key: "{{ netbox_runtime_secret_payloads.results[0].content | b64decode | trim }}"
+    netbox_redis_password: "{{ netbox_runtime_secret_payloads.results[1].content | b64decode | trim }}"
+    netbox_redis_cache_password: "{{ netbox_runtime_secret_payloads.results[2].content | b64decode | trim }}"
+    netbox_runtime_secret_payload:
+      DB_PASSWORD: "{{ netbox_local_secret_payloads.results[0].content | b64decode | trim }}"
+      REDIS_PASSWORD: "{{ netbox_runtime_secret_payloads.results[1].content | b64decode | trim }}"
+      REDIS_CACHE_PASSWORD: "{{ netbox_runtime_secret_payloads.results[2].content | b64decode | trim }}"
+      SECRET_KEY: "{{ netbox_runtime_secret_payloads.results[0].content | b64decode | trim }}"
+      SUPERUSER_PASSWORD: "{{ netbox_local_secret_payloads.results[1].content | b64decode | trim }}"
+  no_log: true
+
+- name: Prepare OpenBao agent runtime secret injection for NetBox
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: netbox
+    common_openbao_compose_env_agent_dir: "{{ netbox_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ netbox_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ netbox_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ netbox_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ netbox_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ netbox_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ netbox_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ netbox_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ netbox_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ netbox_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ netbox_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: netbox.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ netbox_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ netbox_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ netbox_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ netbox_legacy_env_file }}"
+  no_log: true
+
+- name: Render the NetBox environment file
+  ansible.builtin.template:
+    src: netbox.env.j2
+    dest: "{{ netbox_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Render the NetBox compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ netbox_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the NetBox images
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ netbox_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ netbox_site_dir }}"
+  register: netbox_pull
+  changed_when: >-
+    'Pulling' in netbox_pull.stdout
+    or 'Downloaded newer image' in netbox_pull.stdout
+    or 'Pull complete' in netbox_pull.stdout
+
+- name: Start the NetBox stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ netbox_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ netbox_site_dir }}"
+  register: netbox_up
+  changed_when: >-
+    'Creating' in netbox_up.stdout
+    or 'Recreating' in netbox_up.stdout
+    or 'Starting' in netbox_up.stdout
+
+- name: Wait for NetBox to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ netbox_server_port }}"
+    delay: 0
+    timeout: 300
+
+- name: Wait for the NetBox API status endpoint
+  ansible.builtin.uri:
+    url: "{{ netbox_private_base_url }}/login/"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: netbox_status
+  retries: 30
+  delay: 10
+  until: netbox_status.status == 200
+  changed_when: false
+
+- name: Check whether the NetBox bootstrap API token already works
+  ansible.builtin.stat:
+    path: "{{ netbox_superuser_api_token_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: netbox_superuser_api_token_local
+
+- name: Read the existing NetBox bootstrap API token
+  ansible.builtin.slurp:
+    src: "{{ netbox_superuser_api_token_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: netbox_superuser_api_token_raw
+  when: netbox_superuser_api_token_local.stat.exists
+  no_log: true
+
+- name: Record the existing NetBox bootstrap API token
+  ansible.builtin.set_fact:
+    netbox_superuser_api_token: "{{ netbox_superuser_api_token_raw.content | b64decode | trim }}"
+  when: netbox_superuser_api_token_local.stat.exists
+  no_log: true
+
+- name: Mark whether the saved NetBox bootstrap token is already in v2 bearer format
+  ansible.builtin.set_fact:
+    netbox_existing_token_is_v2: "{{ (netbox_superuser_api_token | default('')) is match('^nbt_[A-Za-z0-9]+\\.[A-Za-z0-9]+$') }}"
+  when: netbox_superuser_api_token_local.stat.exists
+  no_log: true
+
+- name: Check whether the NetBox bootstrap API token already works
+  ansible.builtin.shell: |
+    set -euo pipefail
+    http_code="$(
+      curl -sS -o /dev/null -w '%{http_code}' \
+        -H 'Authorization: Bearer {{ netbox_superuser_api_token }}' \
+        '{{ netbox_private_base_url }}/api/users/users/?limit=1'
+    )"
+    printf '%s\n' "${http_code}"
+  args:
+    executable: /bin/bash
+  register: netbox_existing_token_check
+  when: netbox_superuser_api_token_local.stat.exists
+  changed_when: false
+  failed_when: false
+  no_log: true
+
+- name: Provision the NetBox bootstrap API token
+  ansible.builtin.uri:
+    url: "{{ netbox_private_base_url }}/api/users/tokens/provision/"
+    method: POST
+    body_format: json
+    body:
+      username: "{{ netbox_superuser_name }}"
+      password: "{{ netbox_superuser_password }}"
+      write_enabled: true
+      description: Repo-managed NetBox bootstrap token
+    status_code: 201
+    return_content: true
+  register: netbox_token_provision
+  when: >-
+    not netbox_superuser_api_token_local.stat.exists
+    or not (netbox_existing_token_is_v2 | default(false))
+    or (netbox_existing_token_check.stdout | default('000') | trim) != '200'
+  no_log: true
+
+- name: Persist the NetBox bootstrap API token locally
+  ansible.builtin.copy:
+    dest: "{{ netbox_superuser_api_token_local_file }}"
+    content: "nbt_{{ netbox_token_provision.json.key }}.{{ netbox_token_provision.json.token }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  when: netbox_token_provision is not skipped
+  no_log: true
+
+- name: Record the provisioned NetBox bootstrap API token
+  ansible.builtin.set_fact:
+    netbox_superuser_api_token: "nbt_{{ netbox_token_provision.json.key }}.{{ netbox_token_provision.json.token }}"
+  when: netbox_token_provision is not skipped
+  no_log: true
+
+- name: Verify the NetBox bootstrap API token
+  ansible.builtin.uri:
+    url: "{{ netbox_private_base_url }}/api/users/users/?limit=1"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ netbox_superuser_api_token }}"
+    status_code: 200
+    return_content: true
+  register: netbox_api_token_verify
+  retries: 12
+  delay: 5
+  until: netbox_api_token_verify.status == 200
+  changed_when: false
+  no_log: true
+
+- name: Verify NetBox health probes
+  ansible.builtin.import_tasks: verify.yml

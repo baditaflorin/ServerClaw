@@ -1,0 +1,24 @@
+---
+argument_specs:
+  main:
+    short_description: Poll an HTTP endpoint until it reports the expected status.
+    options:
+      health_url:
+        type: str
+        required: true
+      health_expected_status:
+        type: int
+        required: false
+        default: 200
+      health_timeout_seconds:
+        type: int
+        required: false
+        default: 60
+      health_retry_delay:
+        type: int
+        required: false
+        default: 5
+      health_validate_certs:
+        type: bool
+        required: false
+        default: false

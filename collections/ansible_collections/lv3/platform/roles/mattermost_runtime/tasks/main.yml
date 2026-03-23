@@ -1,0 +1,319 @@
+---
+- name: Validate Mattermost runtime inputs
+  ansible.builtin.assert:
+    that:
+      - mattermost_team_name | length > 0
+      - mattermost_team_display_name | length > 0
+      - mattermost_site_dir | length > 0
+      - mattermost_secret_dir | length > 0
+      - mattermost_compose_file | length > 0
+      - mattermost_env_file | length > 0
+      - mattermost_bootstrap_file | length > 0
+      - mattermost_server_port | int > 0
+      - mattermost_controller_url | length > 0
+      - mattermost_database_name | length > 0
+      - mattermost_database_user | length > 0
+      - mattermost_database_host | length > 0
+      - mattermost_database_password_local_file | length > 0
+      - mattermost_admin_username | length > 0
+      - mattermost_admin_email | length > 0
+      - mattermost_channels | length > 0
+    fail_msg: "mattermost_runtime requires site, database, admin, and channel inputs."
+
+- name: Ensure the Mattermost database password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ mattermost_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: mattermost_database_password_local
+
+- name: Fail if the Mattermost database password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ mattermost_database_password_local_file }} is missing on the control machine.
+      Run the Mattermost PostgreSQL converge first so the runtime can connect to postgres-lv3.
+  when: not mattermost_database_password_local.stat.exists
+
+- name: Ensure the Mattermost runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - python3
+      - openssl
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the Mattermost directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ mattermost_site_dir }}"
+      owner: root
+      group: root
+      mode: "0755"
+    - path: "{{ mattermost_secret_dir }}"
+      owner: root
+      group: root
+      mode: "0700"
+    - path: "{{ mattermost_site_dir }}/volumes"
+      owner: root
+      group: root
+      mode: "0755"
+    - path: "{{ mattermost_site_dir }}/volumes/app"
+      owner: root
+      group: root
+      mode: "0755"
+    - path: "{{ mattermost_site_dir }}/volumes/app/mattermost"
+      owner: root
+      group: root
+      mode: "0755"
+    - path: "{{ mattermost_site_dir }}/volumes/app/mattermost/config"
+      owner: 2000
+      group: 2000
+      mode: "0755"
+    - path: "{{ mattermost_site_dir }}/volumes/app/mattermost/data"
+      owner: 2000
+      group: 2000
+      mode: "0755"
+    - path: "{{ mattermost_site_dir }}/volumes/app/mattermost/logs"
+      owner: 2000
+      group: 2000
+      mode: "0755"
+    - path: "{{ mattermost_site_dir }}/volumes/app/mattermost/plugins"
+      owner: 2000
+      group: 2000
+      mode: "0755"
+    - path: "{{ mattermost_site_dir }}/volumes/app/mattermost/client"
+      owner: 2000
+      group: 2000
+      mode: "0755"
+    - path: "{{ mattermost_site_dir }}/volumes/app/mattermost/client/plugins"
+      owner: 2000
+      group: 2000
+      mode: "0755"
+    - path: "{{ mattermost_site_dir }}/volumes/app/mattermost/bleve-indexes"
+      owner: 2000
+      group: 2000
+      mode: "0755"
+
+- name: Generate the Mattermost admin password
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ mattermost_admin_password_remote_file }}" ]; then
+      umask 077
+      openssl rand -base64 24 > "{{ mattermost_admin_password_remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: mattermost_admin_password_generation
+  changed_when: "'changed' in mattermost_admin_password_generation.stdout"
+  no_log: true
+
+- name: Read the Mattermost admin password
+  ansible.builtin.slurp:
+    src: "{{ mattermost_admin_password_remote_file }}"
+  register: mattermost_admin_password_raw
+  no_log: true
+
+- name: Record Mattermost secret facts
+  ansible.builtin.set_fact:
+    mattermost_admin_password: "{{ mattermost_admin_password_raw.content | b64decode | trim }}"
+    mattermost_database_password: "{{ lookup('ansible.builtin.file', mattermost_database_password_local_file) | trim }}"
+    mattermost_runtime_secret_payload:
+      MM_SQLSETTINGS_DATASOURCE: >-
+        postgres://{{ mattermost_database_user }}:{{ mattermost_database_password | urlencode | replace('/', '%2F') }}@{{ mattermost_database_host }}:{{ mattermost_database_port }}/{{ mattermost_database_name }}?sslmode=disable&connect_timeout=10
+      MM_ADMIN_PASSWORD: "{{ mattermost_admin_password }}"
+  no_log: true
+
+- name: Ensure the local Mattermost artifact directory exists
+  ansible.builtin.file:
+    path: "{{ mattermost_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Mirror the Mattermost admin password to the control machine
+  ansible.builtin.copy:
+    dest: "{{ mattermost_admin_password_local_file }}"
+    content: "{{ mattermost_admin_password }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Prepare OpenBao agent runtime secret injection for Mattermost
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: mattermost
+    common_openbao_compose_env_agent_dir: "{{ mattermost_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ mattermost_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ mattermost_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ mattermost_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ mattermost_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ mattermost_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ mattermost_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ mattermost_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ mattermost_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ mattermost_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ mattermost_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: mattermost.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ mattermost_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ mattermost_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ mattermost_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ mattermost_legacy_env_file }}"
+  no_log: true
+
+- name: Render the Mattermost environment file
+  ansible.builtin.template:
+    src: mattermost.env.j2
+    dest: "{{ mattermost_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Render the Mattermost compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ mattermost_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the Mattermost bootstrap script
+  ansible.builtin.template:
+    src: bootstrap-mattermost.py.j2
+    dest: "{{ mattermost_bootstrap_file }}"
+    owner: root
+    group: root
+    mode: "0750"
+  no_log: true
+
+- name: Pull the Mattermost image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ mattermost_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ mattermost_site_dir }}"
+  register: mattermost_pull
+  changed_when: >-
+    'Pulling' in mattermost_pull.stdout
+    or 'Downloaded newer image' in mattermost_pull.stdout
+    or 'Pull complete' in mattermost_pull.stdout
+
+- name: Start the Mattermost stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ mattermost_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ mattermost_site_dir }}"
+  register: mattermost_up
+  changed_when: >-
+    'Creating' in mattermost_up.stdout
+    or 'Recreating' in mattermost_up.stdout
+    or 'Starting' in mattermost_up.stdout
+
+- name: Wait for Mattermost to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ mattermost_server_port }}"
+    delay: 0
+    timeout: 240
+
+- name: Wait for the Mattermost system ping endpoint
+  ansible.builtin.uri:
+    url: "{{ mattermost_private_base_url }}/api/v4/system/ping"
+    method: GET
+    status_code: 200
+  register: mattermost_ping
+  retries: 24
+  delay: 5
+  until: mattermost_ping.status == 200
+  changed_when: false
+
+- name: Bootstrap Mattermost team, channels, and webhooks
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ mattermost_bootstrap_file }}"
+  register: mattermost_bootstrap
+  changed_when: >-
+    'BOOTSTRAP_CHANGED=true' in mattermost_bootstrap.stdout
+  no_log: true
+
+- name: Read the Mattermost incoming webhook manifest
+  ansible.builtin.slurp:
+    src: "{{ mattermost_webhooks_remote_file }}"
+  register: mattermost_webhooks_raw
+  no_log: true
+
+- name: Mirror the Mattermost incoming webhook manifest to the control machine
+  ansible.builtin.copy:
+    dest: "{{ mattermost_webhooks_local_file }}"
+    content: "{{ mattermost_webhooks_raw.content | b64decode }}"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Post a Mattermost smoke message through the workflow webhook
+  ansible.builtin.uri:
+    url: >-
+      {{
+        (
+          mattermost_webhooks_raw.content
+          | b64decode
+          | from_json
+        ).webhooks.workflows.internal_url
+      }}
+    method: POST
+    body_format: json
+    body:
+      text: "LV3 Mattermost workflow smoke test from repo-managed converge."
+      username: LV3 Workflow Smoke
+    status_code: 200
+  changed_when: false
+  no_log: true
+
+- name: Verify the Mattermost team webhook manifest matches the desired channels
+  ansible.builtin.assert:
+    that:
+      - "((mattermost_webhooks_raw.content | b64decode | from_json).team.name) == mattermost_team_name"
+      - >-
+        (
+          (mattermost_webhooks_raw.content | b64decode | from_json).channels.keys()
+          | sort
+        ) == (mattermost_channels | map(attribute='webhook_key') | sort)
+    fail_msg: "Mattermost bootstrap completed, but the webhook manifest does not match the desired team and channel set."
+
+- name: Run Mattermost health probe verification tasks
+  ansible.builtin.import_tasks: verify.yml

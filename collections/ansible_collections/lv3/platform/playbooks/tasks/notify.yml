@@ -1,0 +1,41 @@
+---
+- name: Build the shared playbook notification payload
+  ansible.builtin.set_fact:
+    playbook_execution_notification_payload:
+      service: "{{ playbook_execution_notification_service | default(service_health_probe_id | default(playbook_name | default('unknown'))) }}"
+      environment: "{{ playbook_execution_env }}"
+      correlation_id: "{{ playbook_execution_correlation_id }}"
+      message: "{{ playbook_execution_notification_message | default('Playbook completed successfully.') }}"
+  delegate_to: localhost
+  become: false
+  run_once: true
+  changed_when: false
+
+- name: Publish a best-effort Mattermost completion notification
+  ansible.builtin.uri:
+    url: "{{ playbook_execution_mattermost_webhook_url }}"
+    method: POST
+    body_format: json
+    body:
+      text: >-
+        {{ playbook_execution_notification_payload.service }}
+        ({{ playbook_execution_notification_payload.environment }})
+        completed. Correlation id: {{ playbook_execution_notification_payload.correlation_id }}.
+  delegate_to: localhost
+  become: false
+  run_once: true
+  changed_when: false
+  failed_when: false
+  when: (playbook_execution_mattermost_webhook_url | default('')) | length > 0
+
+- name: Publish a best-effort NATS completion notification command
+  ansible.builtin.command:
+    argv:
+      - "{{ playbook_execution_nats_notify_command }}"
+      - "{{ playbook_execution_notification_payload | to_json }}"
+  delegate_to: localhost
+  become: false
+  run_once: true
+  changed_when: false
+  failed_when: false
+  when: (playbook_execution_nats_notify_command | default('')) | length > 0

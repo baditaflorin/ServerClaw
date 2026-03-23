@@ -1,0 +1,67 @@
+---
+- name: Warm the host graph for guest jump access
+  hosts: proxmox_hosts
+  become: false
+  gather_facts: false
+
+  tasks:
+    - name: Record live Gmail probe start
+      ansible.builtin.debug:
+        msg: "Sending live Gmail probe through the mail gateway."
+
+- name: Send the live Gmail probe
+  hosts: docker-runtime-lv3
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Send Gmail probe through the local mail gateway
+      ansible.builtin.shell: |
+        python3 - <<'PY'
+        import json
+        import urllib.request
+        from pathlib import Path
+
+        gateway_api_key = Path('/etc/lv3/mail-platform/profiles/platform-transactional-gateway-api-key').read_text(encoding='utf-8').strip()
+        payload = json.dumps(
+            {
+                'to': ['baditaflorin@gmail.com'],
+                'subject': 'LV3 platform transactional mail probe',
+                'text': 'This is the live delivery test from the platform transactional notification profile.',
+                'html': '<p>This is the <strong>live delivery test</strong> from the platform transactional notification profile.</p>',
+            }
+        ).encode('utf-8')
+
+        request = urllib.request.Request(
+            'http://127.0.0.1:8081/send',
+            data=payload,
+            method='POST',
+            headers={
+                'Content-Type': 'application/json',
+                'X-API-Key': gateway_api_key,
+            },
+        )
+
+        with urllib.request.urlopen(request, timeout=30) as response:
+            print(response.status)
+            print(response.read().decode('utf-8'))
+        PY
+      args:
+        executable: /bin/bash
+      register: mail_platform_gmail_probe
+      changed_when: false
+
+    - name: Read mail gateway state after Gmail probe
+      ansible.builtin.command:
+        argv:
+          - cat
+          - /opt/mail-platform/gateway/data/state.json
+      register: mail_platform_gateway_state_after_probe
+      changed_when: false
+
+    - name: Show Gmail probe summary
+      ansible.builtin.debug:
+        msg:
+          - "outbound_status={{ mail_platform_gmail_probe.stdout_lines[0] | default('missing') }}"
+          - "outbound_body={{ mail_platform_gmail_probe.stdout_lines[1] | default('missing') }}"
+          - "gateway_state={{ mail_platform_gateway_state_after_probe.stdout }}"

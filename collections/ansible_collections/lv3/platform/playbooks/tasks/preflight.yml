@@ -1,0 +1,132 @@
+---
+- name: Assert the requested execution environment is supported
+  ansible.builtin.assert:
+    that:
+      - playbook_execution_env in playbook_execution_allowed_envs
+    fail_msg: >-
+      Unsupported env '{{ playbook_execution_env }}'.
+      Supported environments: {{ playbook_execution_allowed_envs | join(', ') }}.
+  delegate_to: localhost
+  become: false
+  run_once: true
+  changed_when: false
+
+- name: Load the controller secret manifest
+  ansible.builtin.set_fact:
+    playbook_execution_secret_manifest: >-
+      {{
+        lookup(
+          'ansible.builtin.file',
+          playbook_execution_controller_secret_manifest_path
+        ) | from_json
+      }}
+  delegate_to: localhost
+  become: false
+  run_once: true
+  changed_when: false
+
+- name: Assert required controller-local secret ids are declared
+  ansible.builtin.assert:
+    that:
+      - (required_secrets | default([])) | difference(playbook_execution_secret_manifest.secrets.keys() | list) | length == 0
+    fail_msg: >-
+      Missing controller-local secret ids:
+      {{ (required_secrets | default([])) | difference(playbook_execution_secret_manifest.secrets.keys() | list) | join(', ') }}.
+  delegate_to: localhost
+  become: false
+  run_once: true
+  changed_when: false
+
+- name: Assert required host selectors resolve in the inventory
+  ansible.builtin.assert:
+    that:
+      - query('inventory_hostnames', item) | length > 0
+    fail_msg: >-
+      Inventory selector '{{ item }}' did not resolve to any hosts.
+  delegate_to: localhost
+  become: false
+  loop: "{{ required_hosts | default([]) }}"
+  run_once: true
+  changed_when: false
+
+- name: Initialize resolved required host list
+  ansible.builtin.set_fact:
+    playbook_execution_resolved_required_hosts: []
+  delegate_to: localhost
+  become: false
+  run_once: true
+  changed_when: false
+
+- name: Expand required host selectors into concrete inventory hosts
+  ansible.builtin.set_fact:
+    playbook_execution_resolved_required_hosts: >-
+      {{
+        (
+          playbook_execution_resolved_required_hosts
+          + query('inventory_hostnames', item)
+        ) | unique
+      }}
+  delegate_to: localhost
+  become: false
+  loop: "{{ required_hosts | default([]) }}"
+  run_once: true
+  changed_when: false
+
+- name: Verify SSH connectivity to required hosts
+  ansible.builtin.wait_for_connection:
+    timeout: "{{ playbook_execution_preflight_connection_timeout }}"
+  delegate_to: "{{ item }}"
+  become: false
+  loop: "{{ playbook_execution_resolved_required_hosts | default([]) }}"
+  run_once: true
+  when:
+    - playbook_execution_check_connectivity | bool
+    - (playbook_execution_resolved_required_hosts | default([])) | length > 0
+
+- name: Ensure the current target is Debian when required
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution == "Debian"
+    fail_msg: "This playbook only supports Debian targets."
+  when:
+    - playbook_execution_require_debian | default(false) | bool
+
+- name: Stat the mutation audit helper
+  ansible.builtin.stat:
+    path: "{{ playbook_execution_mutation_audit_script }}"
+  delegate_to: localhost
+  become: false
+  run_once: true
+  register: playbook_execution_mutation_audit_script_stat
+  changed_when: false
+
+- name: Emit a best-effort playbook start audit event
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ playbook_execution_mutation_audit_script }}"
+      - --emit
+      - --actor-class
+      - automation
+      - --actor-id
+      - ansible-playbook
+      - --surface
+      - ansible
+      - --action
+      - "{{ playbook_execution_audit_action | default('playbook.start') }}"
+      - --target
+      - "{{ playbook_execution_audit_target | default(playbook_name | default(inventory_hostname)) }}"
+      - --outcome
+      - success
+      - --correlation-id
+      - "{{ playbook_execution_correlation_id }}"
+      - --evidence-ref
+      - "{{ playbook_execution_audit_evidence_ref | default('') }}"
+  delegate_to: localhost
+  become: false
+  run_once: true
+  changed_when: false
+  failed_when: false
+  when:
+    - playbook_execution_emit_audit | bool
+    - playbook_execution_mutation_audit_script_stat.stat.exists

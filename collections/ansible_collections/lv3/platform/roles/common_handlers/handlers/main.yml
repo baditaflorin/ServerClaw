@@ -1,0 +1,20 @@
+---
+- name: Systemd daemon-reload
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Restart Docker
+  ansible.builtin.systemd:
+    name: docker
+    state: restarted
+
+- name: Reload Nginx
+  ansible.builtin.systemd:
+    name: nginx
+    state: reloaded
+
+- name: Restart generic service
+  ansible.builtin.systemd:
+    name: "{{ common_handlers_service_name }}"
+    state: restarted
+  when: common_handlers_service_name | length > 0

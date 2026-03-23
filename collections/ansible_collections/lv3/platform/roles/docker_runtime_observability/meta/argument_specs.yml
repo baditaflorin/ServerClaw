@@ -1,0 +1,5 @@
+---
+argument_specs:
+  main:
+    short_description: Docker runtime observability role inputs.
+    options: {}

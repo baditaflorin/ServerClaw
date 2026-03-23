@@ -1,0 +1,32 @@
+---
+- name: Validate Proxmox access inputs
+  ansible.builtin.assert:
+    that:
+      - proxmox_host_admin_user | length > 0
+      - proxmox_host_admin_comment | length > 0
+      - proxmox_host_admin_shell | length > 0
+      - proxmox_host_sudo_group | length > 0
+      - proxmox_host_ssh_hardening_file | length > 0
+    fail_msg: "proxmox_access requires the Proxmox admin identity and SSH hardening inputs."
+
+- name: Apply shared Linux access baseline on Proxmox host
+  ansible.builtin.include_role:
+    name: lv3.platform.linux_access
+  vars:
+    linux_access_admin_user: "{{ proxmox_host_admin_user }}"
+    linux_access_admin_comment: "{{ proxmox_host_admin_comment }}"
+    linux_access_admin_shell: "{{ proxmox_host_admin_shell }}"
+    linux_access_sudo_group: "{{ proxmox_host_sudo_group }}"
+    linux_access_ssh_hardening_file: "{{ proxmox_host_ssh_hardening_file }}"
+    linux_access_permit_root_login: "{{ proxmox_access_linux_access_permit_root_login }}"
+
+- name: Ensure Proxmox PAM user exists for host admin
+  ansible.builtin.command: "pveum user add {{ proxmox_host_admin_user }}@pam --comment '{{ proxmox_host_admin_comment }}' --enable 1"
+  register: pveum_user_add
+  failed_when: pveum_user_add.rc != 0 and ('already exists' not in (pveum_user_add.stderr | default('')))
+  changed_when: pveum_user_add.rc == 0
+
+- name: Grant Proxmox PVEAdmin role to host admin PAM identity
+  ansible.builtin.command: "pveum acl modify / --users {{ proxmox_host_admin_user }}@pam --roles PVEAdmin"
+  register: pveum_acl_modify
+  changed_when: pveum_acl_modify.rc == 0

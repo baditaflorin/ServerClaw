@@ -1,0 +1,50 @@
+---
+- name: Run HTTP probe {{ playbook_execution_probe_stage }}
+  ansible.builtin.uri:
+    url: "{{ playbook_execution_probe.url }}"
+    method: "{{ playbook_execution_probe.method | default('GET') }}"
+    headers: "{{ playbook_execution_probe.headers | default(omit) }}"
+    body: "{{ playbook_execution_probe.body | default(omit) }}"
+    body_format: "{{ playbook_execution_probe.body_format | default(omit) }}"
+    status_code: "{{ playbook_execution_probe.expected_status }}"
+    validate_certs: "{{ playbook_execution_probe.validate_tls | default(true) }}"
+    return_content: false
+    timeout: "{{ playbook_execution_probe.timeout_seconds }}"
+  register: playbook_execution_probe_http_result
+  retries: "{{ playbook_execution_probe.retries | default(1) }}"
+  delay: "{{ playbook_execution_probe.delay_seconds | default(0) }}"
+  until: playbook_execution_probe_http_result.status in playbook_execution_probe.expected_status
+  changed_when: false
+  when: playbook_execution_probe.kind == 'http'
+
+- name: Run TCP probe {{ playbook_execution_probe_stage }}
+  ansible.builtin.wait_for:
+    host: "{{ playbook_execution_probe.host }}"
+    port: "{{ playbook_execution_probe.port }}"
+    timeout: "{{ playbook_execution_probe.timeout_seconds }}"
+    state: started
+  changed_when: false
+  when: playbook_execution_probe.kind == 'tcp'
+
+- name: Run command probe {{ playbook_execution_probe_stage }}
+  ansible.builtin.command:
+    argv: "{{ playbook_execution_probe.argv }}"
+  register: playbook_execution_probe_command_result
+  retries: "{{ playbook_execution_probe.retries | default(1) }}"
+  delay: "{{ playbook_execution_probe.delay_seconds | default(0) }}"
+  until: playbook_execution_probe_command_result.rc == (playbook_execution_probe.success_rc | default(0))
+  changed_when: false
+  when: playbook_execution_probe.kind == 'command'
+
+- name: Run systemd probe {{ playbook_execution_probe_stage }}
+  ansible.builtin.command:
+    argv:
+      - systemctl
+      - is-active
+      - "{{ playbook_execution_probe.unit }}"
+  register: playbook_execution_probe_systemd_result
+  retries: "{{ playbook_execution_probe.retries | default(1) }}"
+  delay: "{{ playbook_execution_probe.delay_seconds | default(0) }}"
+  until: playbook_execution_probe_systemd_result.stdout | trim == (playbook_execution_probe.expected_state | default('active'))
+  changed_when: false
+  when: playbook_execution_probe.kind == 'systemd'

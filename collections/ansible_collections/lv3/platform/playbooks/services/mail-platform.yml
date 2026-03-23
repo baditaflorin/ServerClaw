@@ -1,0 +1,4 @@
+# depends_on:
+#   - playbooks/services/grafana.yml
+---
+- import_playbook: ../mail-platform.yml

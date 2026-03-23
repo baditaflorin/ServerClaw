@@ -1,0 +1,14 @@
+---
+- name: Placeholder platform app group
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tags:
+    - tier-2
+    - platform-apps
+
+  tasks:
+    - name: Note that no platform-app service playbooks are registered yet
+      ansible.builtin.debug:
+        msg: "No platform-app service playbooks are registered yet."
+      changed_when: false

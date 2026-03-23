@@ -1,10 +1,10 @@
 # ADR 0086: Ansible Collection Packaging and Versioned Role Distribution
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.87.0
+- Implemented In Platform Version: not applicable (repo-only)
+- Implemented On: 2026-03-23
 - Date: 2026-03-22
 
 ## Context
@@ -38,27 +38,27 @@ We will restructure the `roles/` directory into a proper **Ansible Collection** 
 
 ```
 collections/
-  lv3/
-    platform/
-      galaxy.yml            # collection metadata + version
-      README.md
-      roles/
-        common/             # replaces roles/common
-        docker_runtime/     # replaces roles/docker_runtime
-        openbao_runtime/    # replaces roles/openbao_runtime
-        nginx_edge/         # replaces roles/nginx_edge
-        ...                 # all 40+ roles migrated
-      plugins/
-        modules/            # custom modules (e.g., proxmox_template_facts)
-        filter_plugins/     # Jinja2 filters shared across roles
-      playbooks/
-        site.yml            # top-level site playbook (referenced from repo root)
-      meta/
-        runtime.yml         # minimum ansible-core version
-      molecule/             # collection-level integration tests
+  ansible_collections/
+    lv3/
+      platform/
+        galaxy.yml          # collection metadata + version
+        README.md
+        roles/
+          common/           # migrated from repo-root roles/common
+          docker_runtime/   # migrated from repo-root roles/docker_runtime
+          openbao_runtime/  # migrated from repo-root roles/openbao_runtime
+          ...
+        plugins/
+          callback/
+          filter/
+        playbooks/
+          site.yml
+        meta/
+          runtime.yml
+        molecule/
 ```
 
-The existing `roles/` symlink at the repo root will point to `collections/lv3/platform/roles/` for backwards compatibility during migration.
+The existing repo-root `roles/`, `filter_plugins/`, and `callback_plugins/` paths are compatibility symlinks that point into the collection.
 
 ### Shared role utilities (DRY extraction)
 
@@ -98,9 +98,9 @@ token = <fetched from OpenBao at install time>
 ### Build and publish workflow
 
 ```bash
-make collection-build       # ansible-galaxy collection build → lv3-platform-<version>.tar.gz
-make collection-publish     # push to galaxy.lv3.org (runs on build server via ADR 0082)
-make collection-install     # ansible-galaxy collection install lv3.platform:<version>
+make collection-build       # ansible-galaxy collection build → build/collections/lv3-platform-<version>.tar.gz
+make collection-publish     # push to galaxy.lv3.org
+make collection-install     # install from the built tarball (or server when requested)
 ```
 
 A Windmill workflow (`collection-publish`) runs on every merge to `main` that touches `collections/`.
@@ -122,6 +122,7 @@ Top-level playbooks reference the collection with FQCNs:
 - Collection version pinning enables a future second repo to consume `lv3.platform:1.2.0` without tracking this repo's `HEAD`
 - `galaxy.yml` version history provides a clean record of when role interfaces changed
 - `molecule` tests at the collection level run on the build server; no local Docker required for role development
+- repo-root playbooks continue to work through collection FQCNs and compatibility symlinks, while packaged consumers can install the same collection tarball directly
 
 **Negative / Trade-offs**
 - Migration of 40+ roles to the collection structure is a multi-hour mechanical task; must be done carefully to avoid breaking existing playbook imports

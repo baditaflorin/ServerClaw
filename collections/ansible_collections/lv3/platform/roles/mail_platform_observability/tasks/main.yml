@@ -1,0 +1,73 @@
+---
+- name: Validate mail platform observability inputs
+  ansible.builtin.assert:
+    that:
+      - mail_platform_observability_state_dir | length > 0
+      - mail_platform_observability_telegraf_config_file | length > 0
+      - mail_platform_observability_metrics_script | length > 0
+      - mail_platform_observability_gateway_state_file | length > 0
+      - mail_platform_observability_stalwart_api_url | length > 0
+      - mail_platform_observability_mailbox_address | length > 0
+    fail_msg: "mail_platform_observability requires Telegraf config, the metrics script path, and local mail platform credentials."
+
+- name: Prepare shared guest observability plumbing for mail telemetry
+  ansible.builtin.include_role:
+    name: lv3.platform.guest_observability
+    public: true
+    tasks_from: setup
+  vars:
+    guest_observability_state_dir: "{{ mail_platform_observability_state_dir }}"
+    guest_observability_hostname: "{{ mail_platform_observability_hostname }}"
+    guest_observability_role: "{{ mail_platform_observability_role }}"
+    guest_observability_service: "{{ mail_platform_observability_service }}"
+
+- name: Ensure the mail metrics script directory exists
+  ansible.builtin.file:
+    path: "{{ mail_platform_observability_metrics_script | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Render the mail platform metrics collector
+  ansible.builtin.template:
+    src: mail-platform-metrics.py.j2
+    dest: "{{ mail_platform_observability_metrics_script }}"
+    owner: root
+    group: root
+    mode: "0755"
+  no_log: true
+  notify: Restart Telegraf
+
+- name: Render Telegraf mail platform observability configuration
+  ansible.builtin.template:
+    src: telegraf-mail-platform.conf.j2
+    dest: "{{ mail_platform_observability_telegraf_config_file }}"
+    owner: root
+    group: telegraf
+    mode: "0640"
+  no_log: true
+  notify: Restart Telegraf
+
+- name: Flush mail platform observability handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Verify shared guest observability services for mail telemetry
+  ansible.builtin.include_role:
+    name: lv3.platform.guest_observability
+    public: true
+    tasks_from: verify
+
+- name: Verify the mail platform metrics script can run
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ mail_platform_observability_metrics_script }}"
+  register: mail_platform_metrics_probe
+  changed_when: false
+
+- name: Assert the mail platform metrics measurement is emitted
+  ansible.builtin.assert:
+    that:
+      - "'mail_platform,' in mail_platform_metrics_probe.stdout"
+    fail_msg: "Mail platform metrics collector did not emit the expected measurement."
