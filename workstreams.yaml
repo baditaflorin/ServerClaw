@@ -1651,10 +1651,10 @@ workstreams:
   - id: adr-0103-data-retention-policy
     adr: "0103"
     title: Data classification and retention policy
-    status: ready
+    status: merged
     owner: codex
-    branch: codex/adr-0103-data-retention
-    worktree_path: ../proxmox_florin_server-data-retention
+    branch: codex/adr-0103
+    worktree_path: .worktrees/codex-adr-0103
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0103-data-retention-policy.md
     depends_on:
       - adr-0043-openbao

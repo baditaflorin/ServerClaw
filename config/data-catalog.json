@@ -1,0 +1,243 @@
+{
+  "$schema": "docs/schema/data-catalog.schema.json",
+  "schema_version": "1.0.0",
+  "data_stores": [
+    {
+      "id": "openbao-secrets",
+      "service": "openbao",
+      "name": "OpenBao KV secrets",
+      "class": "secret",
+      "retention_days": null,
+      "backup_included": true,
+      "access_role": "break_glass",
+      "pii_risk": "medium",
+      "locations": [
+        "kv/services/*",
+        "kv/controller/*"
+      ],
+      "notes": "Secret material is retained until explicit deletion or rotation removes the prior value."
+    },
+    {
+      "id": "tls-private-keys",
+      "service": "step_ca",
+      "name": "TLS private keys",
+      "class": "secret",
+      "retention_days": 7,
+      "backup_included": false,
+      "access_role": "service_account",
+      "pii_risk": "low",
+      "locations": [
+        "step-ca runtime volumes",
+        "/etc/pve/local/pve-ssl.*"
+      ],
+      "notes": "Runtime keys are rotated with certificate renewal and old material should not persist beyond the overlap window."
+    },
+    {
+      "id": "loki-logs",
+      "service": "grafana",
+      "name": "Loki log store",
+      "class": "internal",
+      "retention_days": 30,
+      "backup_included": false,
+      "access_role": "platform-read",
+      "pii_risk": "low",
+      "locations": [
+        "/var/lib/loki",
+        "Grafana Loki datasource"
+      ],
+      "notes": "Operational logs may contain internal IP addresses, usernames, and error details."
+    },
+    {
+      "id": "tempo-traces",
+      "service": "grafana",
+      "name": "Tempo trace blocks",
+      "class": "internal",
+      "retention_days": 14,
+      "backup_included": false,
+      "access_role": "platform-read",
+      "pii_risk": "low",
+      "locations": [
+        "/var/lib/tempo/blocks",
+        "Grafana Tempo datasource"
+      ],
+      "notes": "Trace payloads support short-lived troubleshooting and should remain bounded to protect monitoring disk capacity."
+    },
+    {
+      "id": "grafana-annotations",
+      "service": "grafana",
+      "name": "Grafana annotations",
+      "class": "internal",
+      "retention_days": 90,
+      "backup_included": true,
+      "access_role": "platform-read",
+      "pii_risk": "low",
+      "locations": [
+        "Grafana SQLite/PostgreSQL annotation store"
+      ],
+      "notes": "Annotations capture deployment and incident context that remains useful longer than raw logs."
+    },
+    {
+      "id": "mutation-audit-log",
+      "service": "platform_control_plane",
+      "name": "Mutation audit log",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "/var/log/platform/mutation-audit.jsonl",
+        ".local/state/mutation-audit/mutation-audit.jsonl",
+        "Loki {job=\"mutation-audit\"}"
+      ],
+      "notes": "Audit events record operator and automation identities and must remain available for at least one annual review cycle."
+    },
+    {
+      "id": "windmill-run-history",
+      "service": "windmill",
+      "name": "Windmill job history",
+      "class": "internal",
+      "retention_days": 60,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "Windmill PostgreSQL data",
+        "Windmill workspace logs"
+      ],
+      "notes": "Workflow logs can contain operator context and transient execution metadata but do not need indefinite retention."
+    },
+    {
+      "id": "mattermost-messages",
+      "service": "mattermost",
+      "name": "Mattermost messages and attachments",
+      "class": "confidential",
+      "retention_days": 730,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "mattermost PostgreSQL database",
+        "/opt/mattermost/volumes/app/mattermost"
+      ],
+      "notes": "ChatOps history supports incident reconstruction and should retain two years of operator discussion."
+    },
+    {
+      "id": "netbox-change-log",
+      "service": "netbox",
+      "name": "NetBox object change log",
+      "class": "internal",
+      "retention_days": 180,
+      "backup_included": true,
+      "access_role": "platform-read",
+      "pii_risk": "low",
+      "locations": [
+        "NetBox PostgreSQL extras_objectchange table"
+      ],
+      "notes": "Object-change history should remain available through at least one quarterly planning cycle without growing unbounded."
+    },
+    {
+      "id": "live-apply-receipts",
+      "service": "platform_control_plane",
+      "name": "Live-apply receipts",
+      "class": "internal",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-read",
+      "pii_risk": "low",
+      "locations": [
+        "receipts/live-applies",
+        "receipts/live-applies/staging"
+      ],
+      "retention_paths": [
+        "live-applies"
+      ],
+      "notes": "Deployment evidence remains part of the short-term operational timeline and is summarized into longer-lived release history."
+    },
+    {
+      "id": "promotion-receipts",
+      "service": "platform_control_plane",
+      "name": "Promotion receipts",
+      "class": "internal",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-read",
+      "pii_risk": "low",
+      "locations": [
+        "receipts/promotions"
+      ],
+      "retention_paths": [
+        "promotions"
+      ],
+      "notes": "Promotion evidence remains useful for release forensics for one year."
+    },
+    {
+      "id": "gate-bypass-receipts",
+      "service": "platform_control_plane",
+      "name": "Validation gate bypass receipts",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "receipts/gate-bypasses"
+      ],
+      "retention_paths": [
+        "gate-bypasses"
+      ],
+      "notes": "Bypass records capture exception handling and should remain available for annual audit review."
+    },
+    {
+      "id": "drift-report-receipts",
+      "service": "platform_control_plane",
+      "name": "Drift detection receipts",
+      "class": "internal",
+      "retention_days": 90,
+      "backup_included": true,
+      "access_role": "platform-read",
+      "pii_risk": "low",
+      "locations": [
+        "receipts/drift-reports"
+      ],
+      "retention_paths": [
+        "drift-reports"
+      ],
+      "notes": "Drift findings are operationally useful across recent investigations but are superseded by longer-term audit evidence."
+    },
+    {
+      "id": "fixture-receipts",
+      "service": "platform_control_plane",
+      "name": "Ephemeral fixture receipts",
+      "class": "internal",
+      "retention_days": 30,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "low",
+      "locations": [
+        "receipts/fixtures"
+      ],
+      "retention_paths": [
+        "fixtures"
+      ],
+      "notes": "Fixture receipts track temporary environments and can be discarded after the short-lived debugging window closes."
+    },
+    {
+      "id": "image-scan-reports",
+      "service": "platform_control_plane",
+      "name": "Image scan receipts",
+      "class": "internal",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "low",
+      "locations": [
+        "receipts/image-scans"
+      ],
+      "retention_paths": [
+        "image-scans"
+      ],
+      "notes": "Security scan evidence should remain available across one full patching and review cycle."
+    }
+  ]
+}

@@ -190,6 +190,30 @@
     group: root
     mode: "0644"
 
+- name: Render the NetBox housekeeping script
+  ansible.builtin.template:
+    src: netbox-housekeeping.sh.j2
+    dest: "{{ netbox_housekeeping_script }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Render the NetBox housekeeping systemd service
+  ansible.builtin.template:
+    src: netbox-housekeeping.service.j2
+    dest: "/etc/systemd/system/{{ netbox_housekeeping_service_name }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the NetBox housekeeping systemd timer
+  ansible.builtin.template:
+    src: netbox-housekeeping.timer.j2
+    dest: "/etc/systemd/system/{{ netbox_housekeeping_timer_name }}"
+    owner: root
+    group: root
+    mode: "0644"
+
 - name: Pull the NetBox images
   ansible.builtin.command:
     argv:
@@ -223,6 +247,13 @@
     'Creating' in netbox_up.stdout
     or 'Recreating' in netbox_up.stdout
     or 'Starting' in netbox_up.stdout
+
+- name: Enable the NetBox housekeeping timer
+  ansible.builtin.systemd:
+    name: "{{ netbox_housekeeping_timer_name }}"
+    enabled: true
+    state: started
+    daemon_reload: true
 
 - name: Wait for NetBox to listen locally
   ansible.builtin.wait_for:

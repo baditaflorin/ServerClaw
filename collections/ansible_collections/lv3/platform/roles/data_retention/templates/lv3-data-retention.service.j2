@@ -1,0 +1,8 @@
+[Unit]
+Description=LV3 receipt and mutation-audit retention
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 {{ data_retention_purge_script_path }} --catalog {{ data_retention_catalog_path }} --receipts-root {{ data_retention_receipts_root }} --audit-log {{ data_retention_audit_log_path }} --execute

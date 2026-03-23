@@ -1,10 +1,10 @@
 # ADR 0103: Data Classification and Retention Policy
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.97.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-23
 - Date: 2026-03-23
 
 ## Context
@@ -41,8 +41,8 @@ We will define a **platform data classification model** with four classes, assig
 | Grafana annotations | Internal | 90 days | Grafana `[annotations] max_age = 2160h` |
 | Windmill run history | Internal | 60 days | Windmill job retention setting |
 | PBS VM snapshots | Confidential | 7 daily, 4 weekly, 3 monthly | PBS retention policy (already configured in ADR 0020) |
-| Mattermost messages | Confidential | 2 years | Mattermost data retention plugin |
-| NetBox change log | Internal | 6 months | NetBox `CHANGELOG_RETENTION = 180` |
+| Mattermost messages | Confidential | 2 years | Mattermost `DataRetentionSettings` |
+| NetBox change log | Internal | 6 months | NetBox `CHANGELOG_RETENTION = 180` plus scheduled housekeeping |
 | Deployment receipts | Internal | 1 year | Cron job purges `receipts/` subdirectories older than 365 days |
 | Restore verification reports | Internal | 2 years | Cron job in `receipts/restore-verifications/` |
 | Security scan reports | Internal | 1 year | Cron job in `receipts/security-reports/` |
@@ -119,6 +119,15 @@ When a service is decommissioned, the following data cleanup is required:
 ```
 
 A `scripts/decommission_service.py` script implements steps 1–6 and requires explicit operator confirmation before executing destructive steps.
+
+## Implementation
+
+- The canonical store inventory now lives in `config/data-catalog.json` and is validated by both `scripts/data_catalog.py` and the existing repository data-model gate.
+- Monitoring automation now sets 30-day Loki retention, 14-day Tempo retention, and 90-day Grafana annotation retention.
+- Mattermost runtime configuration now sets `DataRetentionSettings` to a 2-year retention window.
+- NetBox runtime configuration now sets `CHANGELOG_RETENTION = 180` and installs a scheduled housekeeping timer.
+- `scripts/purge_old_receipts.py` now prunes receipt directories and JSONL mutation-audit sinks from the catalog-defined retention windows, and the new `data_retention` role installs that as a systemd timer.
+- `scripts/decommission_service.py` now generates or executes the service cleanup plan across PostgreSQL, Loki, OpenBao, Keycloak, and the repo catalogs.
 
 ## Consequences
 

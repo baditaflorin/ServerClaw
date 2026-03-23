@@ -49,9 +49,10 @@ monitoring_loki_config_file: /etc/loki/config.yml
 monitoring_loki_data_dir: /var/lib/loki
 monitoring_loki_http_url: http://127.0.0.1:3100
 monitoring_loki_port: 3100
-monitoring_loki_retention_default: 168h
-monitoring_loki_retention_edge_access: 72h
-monitoring_loki_retention_control_plane: 672h
+monitoring_loki_retention_default: 720h
+monitoring_loki_retention_edge_access: 720h
+monitoring_loki_retention_control_plane: 720h
+monitoring_grafana_annotation_retention: 2160h
 monitoring_prometheus_service_name: lv3-prometheus
 monitoring_prometheus_service_file: /etc/systemd/system/lv3-prometheus.service
 monitoring_prometheus_config_file: /etc/prometheus/prometheus.yml
@@ -68,7 +69,7 @@ monitoring_tempo_deb_checksum: sha256:574b4c4b0a30d01eca01c4f37dcee8b5161b459b77
 monitoring_tempo_deb_file: /tmp/tempo_2.10.3_linux_amd64.deb
 monitoring_tempo_config_file: /etc/tempo/config.yml
 monitoring_tempo_data_dir: /var/lib/tempo
-monitoring_tempo_trace_retention: 168h
+monitoring_tempo_trace_retention: 336h
 monitoring_tempo_http_port: 3200
 monitoring_tempo_grpc_port: 3201
 monitoring_tempo_otlp_grpc_port: 14317

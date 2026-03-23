@@ -1,0 +1,9 @@
+[Unit]
+Description=Schedule NetBox housekeeping
+
+[Timer]
+OnCalendar={{ netbox_housekeeping_on_calendar }}
+Persistent=true
+
+[Install]
+WantedBy=timers.target

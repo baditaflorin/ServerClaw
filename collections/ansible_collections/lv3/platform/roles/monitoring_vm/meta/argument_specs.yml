@@ -84,6 +84,26 @@ argument_specs:
         required: true
         description:
           - Guest-local Loki HTTP base URL used for verification.
+      monitoring_loki_retention_default:
+        type: str
+        required: false
+        description:
+          - Default Loki retention window applied to unmatched streams.
+      monitoring_loki_retention_edge_access:
+        type: str
+        required: false
+        description:
+          - Loki retention window applied to edge access logs.
+      monitoring_loki_retention_control_plane:
+        type: str
+        required: false
+        description:
+          - Loki retention window applied to control-plane streams.
+      monitoring_grafana_annotation_retention:
+        type: str
+        required: false
+        description:
+          - Grafana annotation max_age setting.
       monitoring_prometheus_config_file:
         type: path
         required: true
@@ -104,6 +124,11 @@ argument_specs:
         required: true
         description:
           - Tempo configuration file rendered by the role.
+      monitoring_tempo_trace_retention:
+        type: str
+        required: false
+        description:
+          - Tempo block retention window used by the compactor.
       monitoring_otelcol_deb_url:
         type: str
         required: true

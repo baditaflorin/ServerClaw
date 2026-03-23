@@ -78,3 +78,28 @@ argument_specs:
         required: true
         description:
           - Guest-local file that stores the NetBox Django secret key.
+      netbox_changelog_retention_days:
+        type: int
+        required: false
+        description:
+          - Number of days NetBox keeps object-change records before housekeeping prunes them.
+      netbox_housekeeping_script:
+        type: path
+        required: false
+        description:
+          - Host-local housekeeping wrapper script rendered by the role.
+      netbox_housekeeping_service_name:
+        type: str
+        required: false
+        description:
+          - systemd service name that runs NetBox housekeeping.
+      netbox_housekeeping_timer_name:
+        type: str
+        required: false
+        description:
+          - systemd timer name that schedules NetBox housekeeping.
+      netbox_housekeeping_on_calendar:
+        type: str
+        required: false
+        description:
+          - systemd OnCalendar expression for NetBox housekeeping.

@@ -1,0 +1,9 @@
+---
+dependencies:
+  - role: lv3.platform.preflight
+    vars:
+      preflight_required_vars:
+        - data_retention_repo_root
+        - data_retention_runtime_root
+        - data_retention_config_dir
+        - data_retention_receipts_root
