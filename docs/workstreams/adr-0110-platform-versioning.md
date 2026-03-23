@@ -19,7 +19,7 @@
 - update `scripts/lv3_cli.py` — add `release` and `release status` subcommands
 - update `workstreams.yaml` release_policy section — add `breaking_change_criteria` reference to `config/version-semantics.json`
 - add `lv3 release status` output to the existing generated ops portal so the readiness signal is visible before ADR 0093 replaces the static portal
-- align the implementation with the current mainline release layout (`docs/release-notes/<version>.md`, current repo version `0.101.0`, and explicit post-commit tagging)
+- align the implementation with the current mainline release layout (`docs/release-notes/<version>.md`, current repo version `0.103.0`, and explicit post-commit tagging)
 
 ## Non-Goals
 
@@ -60,5 +60,5 @@
 
 ## Outcome
 
-- implementation shipped in repo release `0.102.0`
+- implementation shipped in repo release `0.104.0`
 - the current mainline release model is narrower than the original draft, so the implementation follows the existing changelog and release-note surfaces instead of inventing a second archive format

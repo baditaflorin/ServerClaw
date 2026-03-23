@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Implementation Status: Implemented
-- Implemented In Repo Version: 0.102.0
+- Implemented In Repo Version: 0.104.0
 - Implemented In Platform Version: not applicable (repo-only)
 - Implemented On: 2026-03-23
 - Date: 2026-03-23
@@ -16,7 +16,7 @@ ADR 0008 defines a versioning model for the repository and platform: semantic ve
 - When is a change considered "breaking" at the platform level?
 - What constitutes a release, and how is it communicated to platform users?
 
-Without these definitions, version numbers are arbitrary counters. The repository is currently at `0.101.0`. This number means the repo has had 101 minor-level ADR merges, but it communicates little about stability, compatibility, or what changed between releases.
+Without these definitions, version numbers are arbitrary counters. The repository is currently at `0.103.0`. This number means the repo has had 103 minor-level ADR merges, but it communicates little about stability, compatibility, or what changed between releases.
 
 As the platform approaches production-ready status (the goal of ADRs 0092–0111), a version `1.0.0` should be a meaningful milestone, not just the next increment. For `1.0.0` to be meaningful, version semantics must be defined.
 
@@ -49,7 +49,7 @@ A **release** is a `main` branch state that has:
 2. A `RELEASE.md` file in the root with structured release notes
 3. A versioned file under `docs/release-notes/`
 4. `VERSION`, `changelog.md`, and the repository-version fields in `versions/stack.yaml` updated together
-5. An annotated git tag (`v0.102.0`, `v1.0.0`, etc.)
+5. An annotated git tag (`v0.104.0`, `v1.0.0`, etc.)
 
 A release is created by:
 ```bash

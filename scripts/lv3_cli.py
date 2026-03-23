@@ -994,10 +994,6 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--dry-run", action="store_true")
     run.add_argument("--explain", action="store_true")
 
-    release = subparsers.add_parser("release", help="Show release-readiness information.")
-    release_subparsers = release.add_subparsers(dest="release_action", required=True)
-    release_subparsers.add_parser("status", help="Show current 1.0.0 readiness criteria.")
-
     logs = subparsers.add_parser("logs", help="Query service logs from Loki.")
     logs.add_argument("service")
     logs.add_argument("--tail", type=int, default=DEFAULT_LOG_LINES)
@@ -1103,12 +1099,6 @@ def main(argv: list[str] | None = None) -> int:
         )
     if args.command == "run":
         return run_windmill_workflow(args.workflow, args.args, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
-    if args.command == "release":
-        if args.release_action == "status":
-            from generate_dr_report import build_dr_report, render_release_status
-
-            print(render_release_status(build_dr_report()))
-            return 0
     if args.command == "logs":
         return logs_command(args.service, tail=args.tail, since=args.since, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
     if args.command == "ssh":

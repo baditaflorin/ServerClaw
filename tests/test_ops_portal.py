@@ -38,7 +38,7 @@ class OpsPortalRenderTests(unittest.TestCase):
                 }
             ]
             ops_portal.build_release_status_snapshot = lambda timeout=0.5: {
-                "repo_version": "0.102.0",
+                "repo_version": "0.104.0",
                 "platform_version": "0.40.0",
                 "release_blockers": {"detail": "0 workstreams in progress"},
                 "summary": {"ready": False, "met": 1, "total": 6, "percent": 16.67},
