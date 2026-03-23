@@ -4,6 +4,7 @@ flush ruleset
 
 {% set policy = hostvars[linux_guest_firewall_host_id].network_policy %}
 {% set guest_ip_map = dict(hostvars[linux_guest_firewall_host_id].proxmox_guests | map(attribute='name') | zip(hostvars[linux_guest_firewall_host_id].proxmox_guests | map(attribute='ipv4'))) %}
+{% set guest_role_map = dict(hostvars[linux_guest_firewall_host_id].proxmox_guests | map(attribute='name') | zip(hostvars[linux_guest_firewall_host_id].proxmox_guests | map(attribute='role'))) %}
 {% set guest_policy = policy.guests[inventory_hostname] %}
 {% macro render_rule(rule) -%}
 {% set ports = rule.ports | join(', ') %}
@@ -42,6 +43,9 @@ table inet filter {
     type filter hook forward priority 0;
     policy drop;
     ct state established,related accept
+{% if guest_role_map[inventory_hostname] in ['docker-runtime', 'docker-build'] %}
+    ip saddr 172.16.0.0/12 accept
+{% endif %}
 {% for rule in guest_policy.allowed_inbound %}
 {{ render_rule(rule) }}
 {% endfor %}
