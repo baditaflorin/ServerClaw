@@ -1,0 +1,95 @@
+version: 1.0.0
+default_host_service: proxmox_ui
+service_tiers:
+  api_gateway: high
+  backup_pbs: high
+  changelog_portal: medium
+  docker_build: high
+  docker_runtime: critical
+  docs_portal: medium
+  grafana: medium
+  keycloak: high
+  mail_platform: high
+  mattermost: medium
+  netbox: high
+  nginx_edge: high
+  ntopng: medium
+  open_webui: medium
+  openbao: critical
+  ops_portal: medium
+  platform_context_api: medium
+  portainer: medium
+  postgres: critical
+  proxmox_ui: critical
+  status_page: medium
+  step_ca: critical
+  uptime_kuma: medium
+  windmill: high
+downstream_count_fallbacks:
+  api_gateway: 5
+  backup_pbs: 2
+  changelog_portal: 1
+  docker_build: 3
+  docker_runtime: 9
+  docs_portal: 1
+  grafana: 2
+  keycloak: 6
+  mail_platform: 3
+  mattermost: 2
+  netbox: 4
+  nginx_edge: 5
+  ntopng: 1
+  open_webui: 1
+  openbao: 7
+  ops_portal: 1
+  platform_context_api: 2
+  portainer: 1
+  postgres: 8
+  proxmox_ui: 8
+  status_page: 1
+  step_ca: 6
+  uptime_kuma: 1
+  windmill: 6
+workflow_defaults:
+  open-maintenance-window:
+    rollback_verified: true
+    expected_change_count: 1
+  close-maintenance-window:
+    rollback_verified: true
+    expected_change_count: 1
+  rotate-secret:
+    rollback_verified: false
+    expected_change_count: 7
+  deploy-and-promote:
+    rollback_verified: false
+    expected_change_count: 12
+  restore-verification:
+    target_service: backup_pbs
+    rollback_verified: true
+    expected_change_count: 8
+  install-proxmox:
+    target_service: proxmox_ui
+    rollback_verified: false
+    expected_change_count: 15
+  configure-network:
+    target_service: proxmox_ui
+    rollback_verified: false
+    expected_change_count: 14
+  configure-ingress:
+    target_service: nginx_edge
+    rollback_verified: true
+    expected_change_count: 9
+  configure-edge-publication:
+    target_service: nginx_edge
+    rollback_verified: true
+    expected_change_count: 6
+  continuous-drift-detection:
+    target_service: docker_runtime
+    rollback_verified: true
+    expected_change_count: 4
+  nightly-integration-tests:
+    target_service: docker_runtime
+    rollback_verified: true
+    expected_change_count: 3
+active_incidents: []
+recent_failure_rate_overrides: {}

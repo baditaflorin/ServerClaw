@@ -1,66 +1,73 @@
 # Workstream ADR 0116: Change Risk Scoring Without LLMs
 
 - ADR: [ADR 0116](../adr/0116-change-risk-scoring.md)
-- Title: Deterministic weighted arithmetic risk scorer — takes an ExecutionIntent and live platform context, returns a 0–100 score and RiskClass used to gate approvals and autonomous execution
-- Status: ready
+- Title: Deterministic weighted arithmetic risk scorer for compiled `lv3 run` workflow intents
+- Status: merged
 - Branch: `codex/adr-0116-risk-scoring`
-- Worktree: `../proxmox_florin_server-risk-scoring`
+- Worktree: `.worktrees/adr-0116`
 - Owner: codex
 - Depends On: `adr-0075-service-capability-catalog`, `adr-0080-maintenance-windows`, `adr-0112-goal-compiler`, `adr-0113-world-state-materializer`, `adr-0115-mutation-ledger`, `adr-0117-dependency-graph-runtime`
 - Conflicts With: none
-- Shared Surfaces: `platform/risk_scorer/`, `config/risk-scoring-weights.yaml`
+- Shared Surfaces: `scripts/risk_scorer/`, `scripts/lv3_cli.py`, `config/risk-scoring-weights.yaml`, `config/risk-scoring-overrides.yaml`
 
 ## Scope
 
-- create `platform/risk_scorer/__init__.py`
-- create `platform/risk_scorer/engine.py` — `score_intent()` function implementing the weighted arithmetic formula from ADR 0116
-- create `platform/risk_scorer/dimensions.py` — one function per scoring dimension: `criticality_score()`, `fanout_score()`, `failure_rate_score()`, `surface_score()`, `rollback_score()`, `maintenance_score()`, `incident_score()`, `recency_score()`
-- create `platform/risk_scorer/context.py` — `ScoringContext` dataclass and `assemble_context(intent, world_state, graph, ledger)` factory
+- create `scripts/risk_scorer/__init__.py`
+- create `scripts/risk_scorer/engine.py` — `score_intent()` function implementing the weighted arithmetic formula from ADR 0116
+- create `scripts/risk_scorer/dimensions.py` — one function per scoring dimension: `criticality_score()`, `fanout_score()`, `failure_rate_score()`, `surface_score()`, `rollback_score()`, `maintenance_score()`, `incident_score()`, `recency_score()`
+- create `scripts/risk_scorer/context.py` — `ScoringContext` dataclass plus context assembly from workflow catalog, service catalog, receipts, maintenance windows, and overrides
+- create `scripts/risk_scorer/models.py` — typed `ExecutionIntent`, `RiskClass`, and `RiskScore` structs for compiled workflow runs
 - create `config/risk-scoring-weights.yaml` — initial weights and approval threshold config from ADR 0116
-- create `windmill/risk-scoring/calibrate-weights.py` — weekly calibration workflow: queries ledger for recent changes, computes false positive/negative rates, posts to Mattermost
-- update `platform/goal_compiler/compiler.py` — call risk scorer after compilation; embed `RiskScore` in `ExecutionIntent`; use higher of `rule_risk_class` and `computed_risk_class`
-- write `tests/unit/test_risk_scorer.py` — test each scoring dimension independently; test classification thresholds; test stale-context penalty
+- create `config/risk-scoring-overrides.yaml` — canonical fallback tiers, downstream counts, and workflow defaults until ADRs 0117/0120 land
+- create `config/windmill/scripts/calibrate-risk-scoring.py` — calibration workflow: scores recent live-apply receipts, computes false positive/negative rates, optionally posts to Mattermost
+- update `scripts/lv3_cli.py` — compile workflow intents, display the YAML summary, and enforce `AUTO` / `SOFT` / `HARD` / `BLOCK` gates before calling Windmill
+- write `tests/test_risk_scorer.py` — test each scoring dimension independently, classification thresholds, stale-context penalty, maintenance-window reduction, and CLI blocking behavior
 
 ## Non-Goals
 
-- Writing the dependency graph traversal (ADR 0117) — `ScoringContext.downstream_count` will use a stub that reads from a config fallback until ADR 0117 is complete
-- Deciding whether to execute — that gate belongs to the scheduler (ADR 0119)
+- Writing the ADR 0112 goal compiler runtime — the scorer integrates with the current `lv3 run <workflow>` entrypoint until that surface exists
+- Writing the dependency graph traversal (ADR 0117) — `ScoringContext.downstream_count` uses repo-managed fallback counts until ADR 0117 is complete
+- Writing ledger-native persistence (ADR 0115) — the compiled CLI summary holds the scoring context until the mutation ledger runtime exists
 
 ## Expected Repo Surfaces
 
-- `platform/risk_scorer/__init__.py`
-- `platform/risk_scorer/engine.py`
-- `platform/risk_scorer/dimensions.py`
-- `platform/risk_scorer/context.py`
+- `scripts/risk_scorer/__init__.py`
+- `scripts/risk_scorer/engine.py`
+- `scripts/risk_scorer/dimensions.py`
+- `scripts/risk_scorer/context.py`
+- `scripts/risk_scorer/models.py`
 - `config/risk-scoring-weights.yaml`
-- `windmill/risk-scoring/calibrate-weights.py`
-- `platform/goal_compiler/compiler.py` (patched: risk scorer call added)
+- `config/risk-scoring-overrides.yaml`
+- `config/windmill/scripts/calibrate-risk-scoring.py`
+- `scripts/lv3_cli.py`
+- `tests/test_risk_scorer.py`
 - `docs/adr/0116-change-risk-scoring.md`
 - `docs/workstreams/adr-0116-change-risk-scoring.md`
+- `docs/runbooks/change-risk-scoring.md`
 
 ## Expected Live Surfaces
 
-- `lv3 run "deploy netbox"` displays a risk score and risk class in the compiled intent summary
-- `lv3 run "deploy proxmox-host-lv3"` (a CRITICAL tier target) scores >= 75 and shows a `BLOCK` gate
-- The weekly calibration workflow is scheduled in Windmill
+- `lv3 run windmill_healthcheck --dry-run` displays a compiled intent summary including the scoring context and numeric risk score
+- `lv3 run configure-network` resolves a CRITICAL target and shows a `BLOCK` gate before any Windmill call
+- `lv3 run restart-uptime-kuma` scores lower inside an active maintenance window than outside it
+- `config/windmill/scripts/calibrate-risk-scoring.py` can score recent receipts and emit the calibration report JSON
 
 ## Verification
 
-- Run `pytest tests/unit/test_risk_scorer.py -v` → all tests pass
-- Run `lv3 run "rotate secret for openbao" --dry-run` → confirm a HIGH or CRITICAL risk class is shown
-- Run `lv3 run "restart uptime-kuma"` during an active maintenance window → confirm score is lower than the same command outside a maintenance window
-- Confirm `RiskScore` is embedded in the `intent.compiled` ledger event metadata
+- Run `uv run --with pytest python -m pytest tests/test_risk_scorer.py tests/test_lv3_cli.py -q` → all tests pass
+- Run `uv run python -m py_compile scripts/lv3_cli.py scripts/risk_scorer/*.py config/windmill/scripts/calibrate-risk-scoring.py` → Python entry points compile
+- Run `lv3 run configure-network` → confirm the CLI blocks before calling Windmill unless `--risk-override` is supplied
+- Run `lv3 run restart-uptime-kuma --dry-run` with and without an active maintenance window → confirm the score decreases during the window
 
 ## Merge Criteria
 
-- Unit tests pass including stale-context penalty test
-- `lv3 run` interactive flow shows risk score in the compiled intent display
-- At least one BLOCK-class intent tested manually and confirmed to halt before reaching Windmill
-- Calibration workflow scheduled
+- Focused unit and CLI tests pass including the stale-context penalty test
+- `lv3 run` shows the compiled intent YAML and risk score before calling Windmill
+- At least one BLOCK-class workflow is confirmed to halt before any Windmill request is submitted
+- The calibration script handles empty buckets by reporting `no data` instead of crashing
 
 ## Notes For The Next Assistant
 
-- The `downstream_count` dimension uses `DependencyGraphClient().descendants()` (ADR 0117). Until that workstream is merged, stub it as `config/risk-scoring-overrides.yaml` with a per-service fallback count. The stub should log a warning so the gap is visible.
-- The `expected_change_count` dimension uses `SemanticDiff.total_changes` from ADR 0120. Until that workstream is merged, default it to 5 (the midpoint of the score range) to avoid producing artificially low scores.
-- The calibration workflow should handle division-by-zero gracefully: if there are no changes in a risk class bucket during the lookback window, report "no data" for that bucket rather than crashing.
-- Do not hard-code the `proxmox-host-lv3` host as CRITICAL in the scorer; read criticality from the service capability catalog (ADR 0075) via the world-state snapshot.
+- The downstream-count signal should be switched from `config/risk-scoring-overrides.yaml` to the ADR 0117 runtime when that module lands on `main`.
+- The expected-change-count signal should be switched from workflow defaults to ADR 0120 semantic diff output when available.
+- If ADR 0112 lands later, keep the existing `scripts/risk_scorer/` package and reuse it from the compiler rather than introducing a conflicting top-level `platform/` package.
