@@ -692,6 +692,130 @@ def validate_secret_catalog(secret_manifest: dict[str, Any]) -> None:
         require_date(secret.get("last_rotated_at"), f"{path}.last_rotated_at")
         require_str(secret.get("rotation_mode"), f"{path}.rotation_mode")
 
+    if "rotation_contracts" not in catalog:
+        return
+
+    rotation_metadata = require_mapping(
+        catalog.get("rotation_metadata"),
+        "config/secret-catalog.json.rotation_metadata",
+    )
+    require_str(
+        rotation_metadata.get("state_source"),
+        "config/secret-catalog.json.rotation_metadata.state_source",
+    )
+    require_str(
+        rotation_metadata.get("value_field"),
+        "config/secret-catalog.json.rotation_metadata.value_field",
+    )
+    require_str(
+        rotation_metadata.get("last_rotated_metadata_key"),
+        "config/secret-catalog.json.rotation_metadata.last_rotated_metadata_key",
+    )
+    require_str(
+        rotation_metadata.get("rotated_by_metadata_key"),
+        "config/secret-catalog.json.rotation_metadata.rotated_by_metadata_key",
+    )
+    require_str(
+        rotation_metadata.get("default_event_subject"),
+        "config/secret-catalog.json.rotation_metadata.default_event_subject",
+    )
+    require_str(
+        rotation_metadata.get("default_glitchtip_component"),
+        "config/secret-catalog.json.rotation_metadata.default_glitchtip_component",
+    )
+
+    rotation_contracts = require_mapping(
+        catalog.get("rotation_contracts"),
+        "config/secret-catalog.json.rotation_contracts",
+    )
+    allowed_secret_types = {
+        "admin_password",
+        "admin_token",
+        "api_key",
+        "database_password",
+        "mailbox_password",
+        "metrics_password",
+    }
+    allowed_risk_levels = {"low", "high"}
+    allowed_approval_modes = {"auto", "approval_required"}
+    allowed_generators = {"base64_24", "hex_32"}
+    allowed_apply_targets = {
+        "mail_platform_profile_field",
+        "mail_platform_runtime_field",
+        "windmill_database",
+        "windmill_superadmin",
+    }
+
+    for secret_id, secret in rotation_contracts.items():
+        path = f"config/secret-catalog.json.rotation_contracts.{secret_id}"
+        require_identifier(secret_id, path)
+        if secret_id not in secret_ids:
+            raise ValueError(f"{path} must also exist in config/secret-catalog.json.secrets")
+
+        secret = require_mapping(secret, path)
+        require_str(secret.get("owner"), f"{path}.owner")
+        require_identifier(secret.get("service"), f"{path}.service")
+        require_enum(secret.get("secret_type"), f"{path}.secret_type", allowed_secret_types)
+        risk_level = require_enum(secret.get("risk_level"), f"{path}.risk_level", allowed_risk_levels)
+        approval_mode = require_enum(
+            secret.get("approval_mode"),
+            f"{path}.approval_mode",
+            allowed_approval_modes,
+        )
+        if risk_level == "high" and approval_mode != "approval_required":
+            raise ValueError(f"{path}.approval_mode must be approval_required for high-risk secrets")
+
+        require_identifier(secret.get("command_contract"), f"{path}.command_contract")
+        rotation_period_days = require_int(secret.get("rotation_period_days"), f"{path}.rotation_period_days", 1)
+        warning_window_days = require_int(secret.get("warning_window_days"), f"{path}.warning_window_days", 0)
+        if warning_window_days >= rotation_period_days:
+            raise ValueError(f"{path}.warning_window_days must be smaller than rotation_period_days")
+
+        last_rotated = secret.get("last_rotated")
+        if last_rotated is not None:
+            require_str(last_rotated, f"{path}.last_rotated")
+
+        seed_secret_id = require_identifier(
+            secret.get("seed_controller_secret_id"),
+            f"{path}.seed_controller_secret_id",
+        )
+        if seed_secret_id not in manifest_secrets:
+            raise ValueError(
+                f"{path}.seed_controller_secret_id references unknown controller-local secret '{seed_secret_id}'"
+            )
+
+        require_enum(secret.get("value_generator"), f"{path}.value_generator", allowed_generators)
+        require_str(secret.get("openbao_path"), f"{path}.openbao_path")
+        require_str(secret.get("openbao_field"), f"{path}.openbao_field")
+        apply_target = require_enum(secret.get("apply_target"), f"{path}.apply_target", allowed_apply_targets)
+
+        apply_field = secret.get("apply_field")
+        if apply_target in {"mail_platform_profile_field", "mail_platform_runtime_field"}:
+            require_identifier(apply_field, f"{path}.apply_field")
+        elif apply_field is not None:
+            require_identifier(apply_field, f"{path}.apply_field")
+
+        profile_id = secret.get("profile_id")
+        if apply_target == "mail_platform_profile_field":
+            require_identifier(profile_id, f"{path}.profile_id")
+        elif profile_id is not None:
+            require_identifier(profile_id, f"{path}.profile_id")
+
+        compatibility_mirror = secret.get("compatibility_mirror")
+        if compatibility_mirror is not None:
+            compatibility_mirror = require_mapping(compatibility_mirror, f"{path}.compatibility_mirror")
+            require_str(
+                compatibility_mirror.get("openbao_path"),
+                f"{path}.compatibility_mirror.openbao_path",
+            )
+            require_identifier(
+                compatibility_mirror.get("field"),
+                f"{path}.compatibility_mirror.field",
+            )
+
+        require_str(secret.get("event_subject"), f"{path}.event_subject")
+        require_str(secret.get("glitchtip_component"), f"{path}.glitchtip_component")
+
 
 def validate_legacy_image_catalog(host_vars_context: dict[str, Any]) -> None:
     catalog = require_mapping(load_json(IMAGE_CATALOG_PATH), str(IMAGE_CATALOG_PATH))

@@ -720,6 +720,100 @@
     or (openbao_mail_platform_runtime_current.json.data.data | default({})) != openbao_mail_platform_runtime_secret
   no_log: true
 
+- name: Load the rotatable secret catalog and controller secret manifest
+  ansible.builtin.set_fact:
+    openbao_rotatable_secret_catalog: "{{ lookup('ansible.builtin.file', openbao_secret_catalog_file) | from_json }}"
+    openbao_controller_secret_manifest: "{{ lookup('ansible.builtin.file', openbao_controller_secret_manifest_file) | from_json }}"
+    openbao_rotation_metadata: >-
+      {{
+        openbao_rotatable_secret_catalog.rotation_metadata
+        if openbao_rotatable_secret_catalog.rotation_metadata is defined
+        else openbao_rotatable_secret_catalog.metadata
+      }}
+    openbao_rotatable_secret_contracts: >-
+      {{
+        openbao_rotatable_secret_catalog.rotation_contracts
+        if openbao_rotatable_secret_catalog.rotation_contracts is defined
+        else openbao_rotatable_secret_catalog.secrets
+      }}
+  no_log: true
+
+- name: Read current dedicated rotatable secrets from OpenBao
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/kv/data/{{ item.value.openbao_path }}"
+    method: GET
+    headers:
+      X-Vault-Token: "{{ openbao_init_payload.root_token }}"
+    return_content: true
+    status_code:
+      - 200
+      - 404
+  loop: "{{ openbao_rotatable_secret_contracts | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  register: openbao_rotatable_secret_current
+  no_log: true
+
+- name: Seed dedicated rotatable secrets into OpenBao
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/kv/data/{{ item.value.openbao_path }}"
+    method: POST
+    headers:
+      X-Vault-Token: "{{ openbao_init_payload.root_token }}"
+    body_format: json
+    body:
+      data:
+        "{{ item.value.openbao_field }}": "{{ lookup('ansible.builtin.file', openbao_controller_secret_manifest.secrets[item.value.seed_controller_secret_id].path) | trim }}"
+    status_code: 200
+  loop: "{{ openbao_rotatable_secret_contracts | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when: >-
+    (
+      openbao_rotatable_secret_current.results
+      | selectattr('item.key', 'equalto', item.key)
+      | map(attribute='status')
+      | first
+    ) == 404
+    or (
+      (
+        openbao_rotatable_secret_current.results
+        | selectattr('item.key', 'equalto', item.key)
+        | map(attribute='json.data.data')
+        | first
+        | default({})
+      ).get(item.value.openbao_field, '')
+      != (lookup('ansible.builtin.file', openbao_controller_secret_manifest.secrets[item.value.seed_controller_secret_id].path) | trim)
+    )
+  no_log: true
+
+- name: Seed rotation metadata for dedicated rotatable secrets
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/kv/metadata/{{ item.value.openbao_path }}"
+    method: POST
+    headers:
+      X-Vault-Token: "{{ openbao_init_payload.root_token }}"
+    body_format: json
+    body:
+      custom_metadata:
+        secret_id: "{{ item.key }}"
+        service: "{{ item.value.service }}"
+        owner: "{{ item.value.owner }}"
+        risk_level: "{{ item.value.risk_level }}"
+        approval_mode: "{{ item.value.approval_mode }}"
+        command_contract: "{{ item.value.command_contract }}"
+        rotation_period_days: "{{ item.value.rotation_period_days | string }}"
+        warning_window_days: "{{ item.value.warning_window_days | string }}"
+        "{{ openbao_rotation_metadata.last_rotated_metadata_key }}": "{{ item.value.last_rotated | default('unrotated', true) }}"
+        "{{ openbao_rotation_metadata.rotated_by_metadata_key }}": "openbao-seed"
+    status_code:
+      - 200
+      - 204
+  loop: "{{ openbao_rotatable_secret_contracts | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  no_log: true
+
 - name: Read AppRole role IDs
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/auth/approle/role/{{ item.name }}/role-id"

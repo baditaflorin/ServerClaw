@@ -1,10 +1,10 @@
 # ADR 0065: Secret Rotation Automation With OpenBao
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.62.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-22
 - Date: 2026-03-22
 
 ## Context
@@ -47,3 +47,10 @@ Rotation approval:
 - SSH certificates use step-ca's existing renewal model and are not managed by this rotation workflow.
 - Dynamic database credentials from OpenBao leases do not need explicit rotation; their TTL handles it.
 - Rotation of Proxmox root credentials is a break-glass procedure and is not automated.
+
+## Implementation Notes
+
+- The canonical secret inventory remains in [config/secret-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/secret-catalog.json), while ADR 0065 now stores its richer automation contract in the same file under `rotation_metadata` and `rotation_contracts`. That contract is validated by [scripts/secret_rotation.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/secret_rotation.py), [tests/test_secret_rotation.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests/test_secret_rotation.py), and the repository data-model pipeline.
+- Live mutation now runs through [playbooks/secret-rotation.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/secret-rotation.yml), which dispatches to role-local apply entry points under [roles/windmill_postgres/tasks/rotate.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/windmill_postgres/tasks/rotate.yml), [roles/windmill_runtime/tasks/rotate.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/windmill_runtime/tasks/rotate.yml), and [roles/mail_platform_runtime/tasks/rotate.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/mail_platform_runtime/tasks/rotate.yml).
+- [roles/openbao_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/openbao_runtime) now seeds dedicated rotatable secret paths and path-level metadata into OpenBao, while [roles/windmill_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/windmill_runtime) seeds the repo-managed `f/lv3/rotate_credentials` script as the first Windmill surface for scheduled evaluation.
+- The governed execution and approval path is represented in [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json), [config/command-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/command-catalog.json), and the operator runbook [docs/runbooks/secret-rotation-and-lifecycle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/secret-rotation-and-lifecycle.md).

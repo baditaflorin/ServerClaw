@@ -1,0 +1,20 @@
+---
+- name: Assert the Windmill PostgreSQL rotation request is valid
+  ansible.builtin.assert:
+    that:
+      - secret_rotation_secret_id == 'windmill_database_password'
+      - secret_rotation_new_value | length > 0
+    fail_msg: "windmill_postgres rotate.yml only supports windmill_database_password with a new value."
+
+- name: Rotate the Windmill PostgreSQL password
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "ALTER ROLE {{ windmill_database_user }} PASSWORD '{{ secret_rotation_new_value }}'"
+  changed_when: true
+  no_log: true

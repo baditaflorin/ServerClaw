@@ -754,6 +754,50 @@
         "curl -s -H \"Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)\" http://100.118.189.95:8005/api/users/global/whoami"
       ]
     },
+    "rotate-secret": {
+      "description": "Plan or apply one repo-managed secret rotation, update the owning service without a full reconverge, and persist the rotated value in OpenBao.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "rotate-secret",
+        "command": "make rotate-secret SECRET_ID=windmill_database_password ROTATION_ARGS=\"--plan\""
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "openbao_init_payload"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-secret-rotation"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/secret-rotation-and-lifecycle.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/secret-catalog.json",
+        "config/controller-local-secrets.json",
+        "playbooks/secret-rotation.yml",
+        "roles/openbao_runtime/tasks/main.yml",
+        "roles/windmill_postgres/tasks/rotate.yml",
+        "roles/windmill_runtime/tasks/rotate.yml",
+        "roles/mail_platform_runtime/tasks/rotate.yml",
+        "roles/windmill_runtime/templates/lv3-secret-rotation.py.j2",
+        "scripts/secret_rotation.py",
+        "tests/test_secret_rotation.py"
+      ],
+      "outputs": [
+        "One named secret rotation planned or applied through the canonical catalog, the owning role-local rotate task, and the dedicated OpenBao path plus metadata."
+      ],
+      "verification_commands": [
+        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/secret_rotation.py --validate",
+        "python3 -m unittest discover -s /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests -p 'test_secret_rotation.py'",
+        "make syntax-check-secret-rotation",
+        "make rotate-secret SECRET_ID=windmill_database_password ROTATION_ARGS=\"--plan\""
+      ]
+    },
     "converge-control-plane-recovery": {
       "description": "Converge scheduled control-plane backups on docker-runtime-lv3, stage controller recovery references, and validate recurring restore drills on backup-lv3.",
       "lifecycle_status": "active",
