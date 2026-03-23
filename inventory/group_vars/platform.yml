@@ -797,8 +797,7 @@ platform_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3')
-        | map(attribute='ipv4') | first) }}:8091
+      upstream: http://10.10.10.20:8091
     service_id: keycloak
     ports: {}
     urls:
@@ -1301,8 +1300,7 @@ public_edge_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3')
-        | map(attribute='ipv4') | first) }}:8091
+      upstream: http://10.10.10.20:8091
     service_id: keycloak
     ports: {}
     urls:

@@ -627,7 +627,7 @@ lv3_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:8091"
+      upstream: http://10.10.10.20:8091
   openbao:
     service_name: openbao
     owning_vm: docker-runtime-lv3
