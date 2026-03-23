@@ -634,6 +634,47 @@
         ]
       }
     },
+    "adr-0077-compose-runtime-secrets-live-apply": {
+      "description": "Converge the ADR 0077 runtime secret injection path across the migrated docker-runtime-lv3 platform applications.",
+      "workflow_id": "adr-0077-compose-runtime-secrets-live-apply",
+      "scope": "host_and_guest",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        },
+        {
+          "name": "openbao_init_payload",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-local OpenBao bootstrap payload used to verify the runtime secret injection path."
+        }
+      ],
+      "expected_preconditions": [
+        "make validate passes before the apply",
+        "The affected docker-runtime-lv3 application set and runtime secret paths are reviewed before the live change",
+        "A live-apply receipt is planned for the shared secret injection rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the migrated services, runtime secret path verification, and any host-side fixes needed to complete the rollout."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if any migrated service fails to render or consume its runtime secret payload.",
+          "Stop if the OpenBao Agent sidecars or compose runtime health checks fail after the change."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good runtime secret injection templates and service configs from version control before retrying.",
+          "Do not leave a mixed partially-migrated state without documenting the remaining services and restoring the prior runtime env path."
+        ]
+      }
+    },
     "converge-openbao": {
       "description": "Converge the private OpenBao runtime, seeded auth identities, Transit, and PostgreSQL dynamic-credential integration.",
       "workflow_id": "converge-openbao",

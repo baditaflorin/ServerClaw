@@ -38,3 +38,6 @@ __pycache__/
 *.pyc
 .cache/
 build/
+.terraform/
+*.tfplan
+*.plan.json

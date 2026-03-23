@@ -3,11 +3,12 @@
 .env
 receipts/
 .git/
+.ansible/
 .ansible/validation/
+.mypy_cache/
 .claude/
 .worktrees/
 __pycache__/
 *.pyc
-.terraform/
 .packer_cache/
 config/build-cache-manifest.json

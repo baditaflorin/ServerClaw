@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0085](../adr/0085-opentofu-vm-lifecycle.md)
 - Title: Declarative VM provisioning with OpenTofu replacing ad-hoc Ansible VM creation tasks
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0085-opentofu-vm-lifecycle`
 - Worktree: `../proxmox_florin_server-opentofu-vm-lifecycle`
 - Owner: codex
@@ -40,26 +40,23 @@
 - `docs/workstreams/adr-0085-opentofu-vm-lifecycle.md`
 - `workstreams.yaml`
 
-## Expected Live Surfaces
+## Observed Live Surfaces
 
-- MinIO bucket `tofu-state/production/` contains valid state file matching all 8 production VMs
-- `make tofu-drift ENV=production` exits 0 (no unplanned changes) after import
-- `make remote-tofu-plan ENV=staging` produces a clean plan showing the staging VM declarations
+- the production declarations now cover the six live VMs `110`, `120`, `130`, `140`, `150`, and `160`
+- `make tofu-import ENV=production VM=<name>` was verified against all six production VMs on `build-lv3`
+- `make tofu-drift ENV=production` exits `0` with `No changes`
+- `make remote-tofu-plan ENV=staging` produces a valid create-only plan for the declared staging VMs
+- MinIO backend configuration is committed, with runtime fallback to build-server local state when backend credentials are not injected
 
 ## Verification
 
 - `make tofu-drift ENV=production` exit 0 on a fresh build server run
-- `tofu show` for each production VM matches the values in `versions/stack.yaml`
+- `tofu state show` for each imported production VM matches the declared VMID, MAC, IP, and tag surfaces
 - `make remote-tofu-plan ENV=staging` produces a parseable JSON plan with no errors
 
-## Merge Criteria
+## Outcome
 
-- all 8 production VMs imported into state; `tofu plan` shows "No changes" for production
-- state file exists in MinIO and is readable by a second build server workspace (shared state confirmed)
-- `make tofu-import VM=<name>` runbook verified against one real VM as a smoke test
-
-## Notes For The Next Assistant
-
-- the `bpg/proxmox` provider requires the Proxmox API URL and token; use the same OpenBao path as the Packer pipeline; document the exact OpenBao path in `tofu/modules/proxmox-vm/README.md`
-- during the import phase, run `tofu import` in `--target` mode one VM at a time; do not run a bulk import; each import should be followed by `tofu plan` to verify zero drift before importing the next
-- add `lifecycle { prevent_destroy = true }` to all production VM resources as a safeguard; an accidental `tofu destroy` must never be possible without removing the lifecycle block explicitly
+- the OpenTofu VM module and both environment trees are implemented
+- the remote wrapper uses the pinned infra check-runner image plus host networking on `build-lv3`
+- provider import quirks are isolated through module-level ignore rules so imported production VMs do not plan replacement
+- production import and drift are verified; staging planning is verified

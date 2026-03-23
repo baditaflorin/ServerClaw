@@ -801,6 +801,53 @@
         "make rotate-secret SECRET_ID=windmill_database_password ROTATION_ARGS=\"--plan\""
       ]
     },
+    "adr-0077-compose-runtime-secrets-live-apply": {
+      "description": "Converge the OpenBao Agent runtime-secret injection path across the migrated docker-runtime-lv3 platform applications and verify that the services now consume `/run/lv3-secrets/<service>/runtime.env` instead of compose-directory `.env` files.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "live-apply-group",
+        "command": "make live-apply-group group=platform-apps"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "openbao_init_payload"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "validate-compose-runtime-envs",
+        "syntax-check-mail-platform",
+        "syntax-check-windmill",
+        "syntax-check-keycloak",
+        "syntax-check-netbox",
+        "syntax-check-open-webui",
+        "syntax-check-mattermost"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/compose-secrets-injection.md",
+      "implementation_refs": [
+        "docs/adr/0077-compose-runtime-secrets-injection.md",
+        "docs/workstreams/adr-0077-compose-secrets-injection.md",
+        "docs/runbooks/compose-secrets-injection.md",
+        "playbooks/mail-platform.yml",
+        "playbooks/windmill.yml",
+        "playbooks/keycloak.yml",
+        "playbooks/netbox.yml",
+        "playbooks/open-webui.yml",
+        "playbooks/mattermost.yml"
+      ],
+      "outputs": [
+        "Migrated platform applications on docker-runtime-lv3 consume repo-managed runtime secret files rendered by OpenBao Agent sidecars instead of legacy compose-directory `.env` files."
+      ],
+      "verification_commands": [
+        "scripts/validate_repo.sh compose-runtime-envs health-probes",
+        "uv run --with pytest pytest -q tests/test_compose_runtime_secret_injection.py",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'sudo ls /run/lv3-secrets'"
+      ]
+    },
     "converge-control-plane-recovery": {
       "description": "Converge scheduled control-plane backups on docker-runtime-lv3, stage controller recovery references, and validate recurring restore drills on backup-lv3.",
       "lifecycle_status": "active",
