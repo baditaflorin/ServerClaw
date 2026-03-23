@@ -1,63 +1,58 @@
 # Workstream ADR 0106: Ephemeral Environment Lifecycle and Teardown Policy
 
 - ADR: [ADR 0106](../adr/0106-ephemeral-environment-lifecycle-policy.md)
-- Title: VMID range 910–979 governance with mandatory expiry tags, automated reaper Windmill workflow, and ephemeral pool capacity reservation
-- Status: ready
+- Title: Govern the 910-979 ephemeral VM pool with expiry tags, capacity reservation, cluster-aware reaping, and operator-visible status
+- Status: merged
 - Branch: `codex/adr-0106-ephemeral-lifecycle`
 - Worktree: `../proxmox_florin_server-ephemeral-lifecycle`
 - Owner: codex
 - Depends On: `adr-0072-staging-production-topology`, `adr-0085-opentofu-vm-lifecycle`, `adr-0088-ephemeral-fixtures`, `adr-0093-interactive-ops-portal`, `adr-0105-capacity-model`
 - Conflicts With: none
-- Shared Surfaces: `scripts/fixture_manager.py` (if it exists from ADR 0088), Windmill workflows, `config/capacity-model.json`
+- Shared Surfaces: `scripts/fixture_manager.py`, `scripts/lv3_cli.py`, `scripts/generate_ops_portal.py`, `config/capacity-model.json`, `config/{command,workflow}-catalog.json`, `tests/fixtures/`
 
-## Scope
+## Scope Delivered
 
-- update `scripts/fixture_manager.py` (from ADR 0088) or write `scripts/ephemeral_vm_manager.py` — adds `create_ephemeral_vm()` with mandatory tagging, `destroy_ephemeral_vm()`, and `allocate_ephemeral_vmid()` (scans VMID range 910–979 for free slot)
-- write Windmill workflow `ephemeral-vm-reaper` — scheduled every 30 minutes; queries Proxmox for VMs in the ephemeral range, destroys expired ones, warns on untagged ones
-- update `config/capacity-model.json` — add `ephemeral_pool` section with resource reservation
-- add Grafana panel `Ephemeral VMs` to the ops portal integration or platform overview dashboard — shows current running ephemeral VMs with expiry times
-- write `scripts/validate_ephemeral_vmid.py` — validates that no VMID in the ephemeral range appears in OpenTofu state (would indicate a staging VM accidentally placed in the wrong range)
-- update `docs/runbooks/add-a-new-service.md` — add note about using ephemeral VMs for service testing during development
-- add `lv3 fixture list` and `lv3 fixture destroy <vmid>` commands to platform CLI
+- moved the governed ephemeral VM pool from the older fixture-local 9100-9199 range to `910-979`
+- extended [scripts/fixture_manager.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/fixture_manager.py) so `create/up` stamps owner, purpose, policy, and expiry tags onto every repo-managed ephemeral VM
+- added capacity enforcement against [config/capacity-model.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/capacity-model.json) before a new ephemeral VM is allocated
+- made `fixture list` cluster-aware so it shows current ephemeral VMs by VMID, owner, purpose, remaining lifetime, and health
+- added direct destroy support by VMID for ephemeral VMs that exist in the governed range even when no active receipt remains
+- upgraded the reaper path to a cluster-aware sweep that retags unowned VMs in the ephemeral range with a one-hour grace period and destroys expired VMs
+- added the repo guard [scripts/validate_ephemeral_vmid.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_ephemeral_vmid.py) and wired the capacity-model check into [scripts/validate_repository_data_models.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_repository_data_models.py)
+- exposed the new lifecycle surface through `lv3 fixture create|destroy|list` and added a static ops-portal panel for active repo-managed ephemeral VMs
 
-## Non-Goals
+## Non-Goals Still Out Of Scope
 
-- Ephemeral LXC containers (VMs only in this iteration)
-- Per-operator ephemeral quotas (shared pool only)
-- Automatic re-provisioning of expired fixtures
+- Windmill job-awareness before reaping a currently-used VM
+- per-operator quotas inside the shared pool
+- a live platform claim that the reaper schedule is already enabled from `main`
 
 ## Expected Repo Surfaces
 
-- `scripts/ephemeral_vm_manager.py` (new or updated from ADR 0088)
-- `config/capacity-model.json` (patched: `ephemeral_pool` section)
-- Makefile (patched: `lv3 fixture list`, `lv3 fixture destroy`)
-- `docs/adr/0106-ephemeral-environment-lifecycle-policy.md`
-- `docs/workstreams/adr-0106-ephemeral-lifecycle.md`
+- [scripts/fixture_manager.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/fixture_manager.py)
+- [scripts/validate_ephemeral_vmid.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_ephemeral_vmid.py)
+- [scripts/lv3_cli.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/lv3_cli.py)
+- [scripts/generate_ops_portal.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_ops_portal.py)
+- [config/capacity-model.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/capacity-model.json)
+- [config/windmill/scripts/ephemeral-vm-reaper.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/ephemeral-vm-reaper.py)
+- [docs/runbooks/ephemeral-fixtures.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/ephemeral-fixtures.md)
+- [docs/runbooks/scaffold-new-service.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/scaffold-new-service.md)
 
-## Expected Live Surfaces
+## Live Surfaces Still Pending
 
-- Windmill `ephemeral-vm-reaper` workflow is scheduled every 30 minutes and has at least one successful run
-- `lv3 fixture create --purpose test --lifetime-hours 1` creates a VM in VMID range 910–979 with correct tags
-- The VM is automatically destroyed within 30 minutes of its expiry time
-- `lv3 fixture list` shows currently running ephemeral VMs
+- the Windmill schedule for `ephemeral-vm-reaper` is not claimed as live from this repo-only merge
+- no platform version bump is claimed because the host-side schedule and end-to-end live sweep were not applied from `main` in this workstream
 
-## Verification
+## Verification Run
 
-- `lv3 fixture create --purpose adr-0106-test --lifetime-hours 1` → creates a VM; `qm list` shows it in VMID range 910–979
-- Wait 60+ minutes (or manually trigger the reaper workflow); verify the VM is destroyed
-- Create a VM without the expiry tag manually in the Proxmox UI in VMID range 910–979; trigger the reaper; verify Mattermost receives a warning and the VM gets a 1-hour grace tag
-- `lv3 fixture list` shows the VM correctly
+- `uvx --with pytest --with pyyaml --with jsonschema pytest tests/test_vmid_allocator.py tests/test_fixture_manager.py tests/test_fixture_expiry_reaper.py tests/test_ephemeral_vm_reaper.py tests/test_lv3_cli.py tests/test_ops_portal.py tests/test_validate_ephemeral_vmid.py`
+- `uvx --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`
+- `uvx --with pyyaml python scripts/validate_ephemeral_vmid.py --validate`
+- `uvx --with pyyaml --with jsonschema python scripts/generate_ops_portal.py --output-dir /tmp/ops-portal-0106 --health-snapshot tests/fixtures/ops_portal_health.json --probe-timeout 0 --write`
 
-## Merge Criteria
+## Merge Criteria Result
 
-- Reaper workflow deployed and scheduled in Windmill
-- `lv3 fixture create` and `lv3 fixture destroy` commands work
-- Reaper successfully destroys an expired test VM (end-to-end test)
-- Capacity model updated with ephemeral pool reservation
-
-## Notes For The Next Assistant
-
-- Proxmox VM tags are set via `qm set <vmid> --tags <tag-list>` (comma-separated); the Proxmox API uses `proxmoxer` in Python: `proxmox.nodes('florin').qemu(vmid).config.put(tags='ephemeral-codex-test-1234567890')`
-- The reaper must not destroy VMs that are currently being used by an active Windmill workflow; check if a Windmill job referencing the VMID is currently running before destroying it (via Windmill jobs API)
-- VMID allocation: scan from 910 to 979 and return the first VMID not in `qm list` output; add a small lock file or atomic check to prevent race conditions if two workflows try to allocate simultaneously
-- Warn in the reaper workflow if more than 3 untagged VMs are found in the ephemeral range simultaneously — this indicates the tagging policy is being bypassed and needs investigation
+- repo-side lifecycle enforcement is complete
+- repo-side validation covers the governed ephemeral range and capacity seed
+- static operator visibility for active repo-managed ephemeral VMs exists
+- live enablement remains a follow-up from `main`

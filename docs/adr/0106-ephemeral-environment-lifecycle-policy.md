@@ -1,10 +1,10 @@
 # ADR 0106: Ephemeral Environment Lifecycle and Teardown Policy
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.97.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-23
 - Date: 2026-03-23
 
 ## Context
@@ -153,6 +153,13 @@ The ops portal (ADR 0093) includes an **Ephemeral VMs** panel showing:
 - **Manual cleanup discipline**: rely on operators to clean up their own ephemeral VMs; provably insufficient; this is exactly the failure mode that led to staging environment rot
 - **Kubernetes ephemeral environments (Namespace per PR)**: appropriate for containerised platforms; does not apply to VM-based workloads
 - **No maximum lifetime; just tag with owner**: without enforcement, tags are informational only; the reaper is what transforms the tag from advice into policy
+
+## Implementation Notes
+
+- Repository implementation landed in `0.97.0` with the governed pool seed at [config/capacity-model.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/capacity-model.json), the lifecycle enforcement and cluster-aware reaper logic in [scripts/fixture_manager.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/fixture_manager.py), the Windmill entrypoint [config/windmill/scripts/ephemeral-vm-reaper.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/ephemeral-vm-reaper.py), and the range guard [scripts/validate_ephemeral_vmid.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_ephemeral_vmid.py).
+- The repo-managed `lv3 fixture create|destroy|list` route now exposes owner, purpose, lifetime, and VMID-aware teardown through [scripts/lv3_cli.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/lv3_cli.py) and [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/Makefile).
+- Operator visibility is currently delivered through the static ops-portal panel rendered by [scripts/generate_ops_portal.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_ops_portal.py). This is an inference from the current repo state because ADR 0093's interactive portal is not implemented yet.
+- No live platform version is claimed here. The repository contract is complete, but enabling the recurring schedule from `main` and observing a successful live sweep remains a follow-up apply step.
 
 ## Related ADRs
 

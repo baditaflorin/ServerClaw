@@ -1,0 +1,8 @@
+<div class="action-result {{ result.tone }}">
+  <strong>{{ result.title }}</strong>
+  <span>{{ result.detail }}</span>
+  {% if result.job_id %}
+  <span class="muted">Job {{ result.job_id }}</span>
+  {% endif %}
+  <span class="muted">{{ result.timestamp|humanize_timestamp }}</span>
+</div>

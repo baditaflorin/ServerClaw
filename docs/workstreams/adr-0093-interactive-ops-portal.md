@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0093](../adr/0093-interactive-ops-portal.md)
 - Title: FastHTML-based interactive ops portal replacing the static generated portal with live actions, deployment streaming, and drift visibility
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0093-interactive-ops-portal`
 - Worktree: `../proxmox_florin_server-interactive-ops-portal`
 - Owner: codex
@@ -66,7 +66,8 @@
 
 ## Notes For The Next Assistant
 
-- FastHTML uses `@app.get` and `@app.post` decorators; the SSE endpoint for the deployment console uses `@app.get` with `response_class=EventSourceResponse` from the `sse-starlette` package
-- The portal must exchange the Keycloak session cookie for a short-lived API token from the gateway at session start; store it in the server-side session (FastHTML supports `SessionMiddleware`)
-- HTMX polling for the status panel uses `hx-trigger="load, every 30s"` on the outer div; the inner content is a partial rendered by a `/partial/status` endpoint
-- The `proxy_read_timeout 300s` directive must be added to the nginx ops.lv3.org vhost config to prevent SSE connections from being cut off
+- Repository implementation is merged in `0.97.0`
+- Live cutover is still pending; do not claim `ops.lv3.org` runs the interactive runtime until `playbooks/ops-portal.yml` and `playbooks/public-edge.yml` are applied from `main`
+- The portal uses FastAPI + HTMX-augmented Jinja templates rather than a separate frontend build
+- The edge config now forwards `X-Auth-Request-*` headers and the access token from `oauth2-proxy`; the portal stores the token in the server-side session and uses it for gateway calls
+- The legacy static generator is preserved as an archive path through `receipts/ops-portal-snapshot.html`

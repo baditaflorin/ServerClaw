@@ -212,6 +212,40 @@
         ]
       }
     },
+    "ephemeral-vm-reaper": {
+      "description": "Run the ADR 0106 ephemeral VM lifecycle sweep across the governed 910-979 pool and enforce expiry tags.",
+      "workflow_id": "ephemeral-vm-reaper",
+      "scope": "proxmox_host",
+      "approval_policy": "standard_live_change",
+      "inputs": [
+        {
+          "name": "proxmox_api_token_payload",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side Proxmox API token payload used to enumerate, retag, stop, and destroy VMs in the ephemeral range."
+        }
+      ],
+      "expected_preconditions": [
+        "make validate passes before enabling or manually triggering the reaper",
+        "config/capacity-model.json and scripts/validate_ephemeral_vmid.py both agree on the governed ephemeral pool",
+        "Operators understand that any VM in the 910-979 range is temporary and may be destroyed automatically"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record expired_vmids, warned_vmids, retagged_vmids, and the generated reaper-run summary receipt."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if Proxmox API enumeration fails or if the reaper cannot apply a grace tag to an unowned VM in the ephemeral range.",
+          "Stop if a VM outside the governed range would be affected by the reaper logic."
+        ],
+        "rollback_guidance": [
+          "Disable the schedule, inspect the summary receipt, and correct the VM tags or receipt state before re-enabling the workflow.",
+          "Treat incorrectly-ranged long-lived VMs as a platform data-model bug and move them back under the managed production or staging ranges."
+        ]
+      }
+    },
     "adr-0077-compose-runtime-secrets-live-apply": {
       "description": "Converge the ADR 0077 runtime-secret injection path across the docker-runtime-lv3 platform applications.",
       "workflow_id": "adr-0077-compose-runtime-secrets-live-apply",

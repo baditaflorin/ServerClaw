@@ -25,7 +25,7 @@ def test_reaper_uses_fixture_manager_for_existing_repo(monkeypatch, tmp_path: Pa
     monkeypatch.setattr(
         fixture_expiry_reaper.fixture_manager,
         "reap_expired",
-        lambda: {"run_at": "2026-03-23T12:00:00Z", "expired_receipts": [], "skipped_receipts": []},
+        lambda: {"run_at": "2026-03-23T12:00:00Z", "expired_vmids": [], "skipped_vmids": []},
     )
 
     payload = fixture_expiry_reaper.main(repo_path=str(tmp_path))

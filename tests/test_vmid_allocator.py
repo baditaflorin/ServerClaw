@@ -7,16 +7,16 @@ import vmid_allocator
 
 
 def test_parse_range_parses_expected_bounds() -> None:
-    assert vmid_allocator.parse_range("9100:9199") == (9100, 9199)
+    assert vmid_allocator.parse_range("910:979") == (910, 979)
 
 
 def test_allocate_free_vmid_skips_used_values() -> None:
-    assert vmid_allocator.allocate_free_vmid({9100, 9101, 9103}, 9100, 9105) == 9102
+    assert vmid_allocator.allocate_free_vmid({910, 911, 913}, 910, 915) == 912
 
 
 def test_parse_cluster_vmids_accepts_int_and_string_values() -> None:
-    payload = {"data": [{"vmid": 9100}, {"vmid": "9101"}, {"vmid": "bad"}]}
-    assert vmid_allocator.parse_cluster_vmids(payload) == {9100, 9101}
+    payload = {"data": [{"vmid": 910}, {"vmid": "911"}, {"vmid": "bad"}]}
+    assert vmid_allocator.parse_cluster_vmids(payload) == {910, 911}
 
 
 def test_read_api_credentials_uses_token_file(tmp_path: Path) -> None:

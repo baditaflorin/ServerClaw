@@ -38,7 +38,7 @@ Fixtures are declared in `tests/fixtures/`:
 # tests/fixtures/docker-host-fixture.yml
 fixture_id: docker-host
 template: lv3-docker-host         # Packer template (ADR 0084)
-vmid_range: [9100, 9199]           # VMID pool for ephemeral VMs
+vmid_range: [910, 979]             # VMID pool for ephemeral VMs
 network:
   bridge: vmbr20                   # staging bridge (ADR 0072)
   ip_cidr: 10.20.10.100/24
@@ -75,7 +75,7 @@ Destroys the fixture VM via `tofu destroy` and removes its state entry. Can be c
 
 ### Lifetime enforcement
 
-A Windmill workflow (`fixture-expiry-reaper`) runs every 15 minutes. It reads all fixture receipts, identifies any with `created_at + lifetime_minutes < now`, and calls `make fixture-down` for each. This ensures no ephemeral VMs accumulate on the Proxmox host.
+ADR 0106 now governs the shared ephemeral VM lifecycle. The repository implementation uses the cluster-aware Windmill entrypoint `ephemeral-vm-reaper`, which reads the governed 910-979 pool, destroys expired VMs, and applies a one-hour grace-period expiry tag to unowned VMs that appear in the ephemeral range.
 
 ### Integration with Molecule
 
@@ -87,7 +87,7 @@ The `pre-merge-integration` Windmill workflow provisions fixtures for every ADR 
 
 ### VMID pool management
 
-Fixture VMIDs are drawn from the range `9100–9199`. A small Python helper (`scripts/vmid_allocator.py`) scans active Proxmox VMIDs and picks the first free slot in range. This avoids VMID conflicts with production VMs (range `100–199`) and templates (range `9000–9009`).
+Fixture VMIDs are drawn from the range `910–979`. ADR 0106 reserves this pool for all governed ephemeral VMs and adds explicit owner, purpose, and expiry metadata. A small Python helper ([scripts/vmid_allocator.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/vmid_allocator.py)) scans active Proxmox VMIDs and picks the first free slot in range.
 
 ## Consequences
 
@@ -107,6 +107,7 @@ Fixture VMIDs are drawn from the range `9100–9199`. A small Python helper (`sc
 
 - Repository implementation landed in `0.95.0` with the shared [proxmox-fixture module](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tofu/modules/proxmox-fixture/main.tf), fixture definitions under [tests/fixtures/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests/fixtures), the lifecycle helpers [scripts/fixture_manager.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/fixture_manager.py) and [scripts/vmid_allocator.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/vmid_allocator.py), and the Windmill expiry reaper at [config/windmill/scripts/fixture-expiry-reaper.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/fixture-expiry-reaper.py).
 - The repository now exposes `make fixture-up`, `make fixture-down`, and `make fixture-list`, plus the delegated Molecule driver under [molecule/drivers/proxmox-fixture/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/molecule/drivers/proxmox-fixture/).
+- ADR 0106 refined the governance in `0.97.0`: the pool moved to `910–979`, repo-managed fixtures now stamp structured owner/purpose/expiry tags, and the reaper path became cluster-aware through [config/windmill/scripts/ephemeral-vm-reaper.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/ephemeral-vm-reaper.py).
 - Live enablement still depends on ADR 0072's staging bridge being present on the host before fixture VMs can be booted on `vmbr20`, so the platform-version field remains unset.
 
 ## Alternatives Considered

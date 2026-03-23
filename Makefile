@@ -131,18 +131,16 @@ cache-status:
 
 ## Ephemeral fixtures (ADR 0088)
 fixture-up:
-	@test -n "$(FIXTURE)" || (echo "set FIXTURE=<fixture-name>"; exit 1)
-	python3 $(REPO_ROOT)/scripts/fixture_manager.py up "$(FIXTURE)"
+	python3 $(REPO_ROOT)/scripts/fixture_manager.py create $(if $(FIXTURE),"$(FIXTURE)") $(if $(PURPOSE),--purpose "$(PURPOSE)") $(if $(OWNER),--owner "$(OWNER)") $(if $(LIFETIME_HOURS),--lifetime-hours "$(LIFETIME_HOURS)") $(if $(EPHEMERAL_POLICY),--policy "$(EPHEMERAL_POLICY)") $(if $(ALLOW_EXTEND),--extend)
 
 fixture-down:
-	@test -n "$(FIXTURE)" || (echo "set FIXTURE=<fixture-name>"; exit 1)
-	python3 $(REPO_ROOT)/scripts/fixture_manager.py down "$(FIXTURE)"
+	python3 $(REPO_ROOT)/scripts/fixture_manager.py destroy $(if $(FIXTURE),"$(FIXTURE)") $(if $(RECEIPT_ID),--receipt-id "$(RECEIPT_ID)") $(if $(VMID),--vmid "$(VMID)")
 
 fixture-list:
-	python3 $(REPO_ROOT)/scripts/fixture_manager.py list
+	python3 $(REPO_ROOT)/scripts/fixture_manager.py list $(if $(NO_REFRESH_HEALTH),--no-refresh-health)
 
 fixture-reaper:
-	python3 $(REPO_ROOT)/config/windmill/scripts/fixture-expiry-reaper.py
+	python3 $(REPO_ROOT)/config/windmill/scripts/ephemeral-vm-reaper.py
 
 ## Platform CLI (ADR 0090)
 install-cli:

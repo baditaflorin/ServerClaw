@@ -21,12 +21,11 @@ public_edge_extra_sites:
     kind: static_dir
     source_dir: docs-portal
     noindex: true
-  - hostname: ops.lv3.org
-    kind: static_dir
-    source_dir: ops-portal
 public_edge_authenticated_sites:
   ops.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
+    unauthenticated_paths:
+      - /health
 public_edge_certificate_domains: >-
   {{
     (

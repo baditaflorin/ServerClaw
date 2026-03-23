@@ -1,0 +1,75 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the interactive ops portal runtime stack.
+    options:
+      ops_portal_site_dir:
+        type: path
+        required: true
+        description:
+          - Base directory for the managed ops portal stack.
+      ops_portal_service_dir:
+        type: path
+        required: true
+        description:
+          - Directory that receives the application source for the image build.
+      ops_portal_data_dir:
+        type: path
+        required: true
+        description:
+          - Directory that stores the copied service catalog, receipts, and changelog inputs.
+      ops_portal_secret_dir:
+        type: path
+        required: true
+        description:
+          - Directory holding the runtime session secret.
+      ops_portal_compose_file:
+        type: path
+        required: true
+        description:
+          - Compose file path for the runtime stack.
+      ops_portal_env_file:
+        type: path
+        required: true
+        description:
+          - Environment file rendered for the portal container.
+      ops_portal_session_secret_file:
+        type: path
+        required: true
+        description:
+          - File path used to persist the server-side session secret.
+      ops_portal_container_name:
+        type: str
+        required: true
+        description:
+          - Expected running container name used for verification.
+      ops_portal_internal_port:
+        type: int
+        required: true
+        description:
+          - Local TCP port exposed by the portal runtime.
+      ops_portal_gateway_url:
+        type: str
+        required: true
+        description:
+          - Base URL for the platform API gateway used by live actions.
+      ops_portal_public_base_url:
+        type: str
+        required: true
+        description:
+          - Public portal URL presented to operators.
+      ops_portal_docs_base_url:
+        type: str
+        required: true
+        description:
+          - Base URL used for ADR and runbook deep links.
+      ops_portal_grafana_logs_url:
+        type: str
+        required: true
+        description:
+          - Base Explore URL used to open service logs in Grafana.
+      ops_portal_service_image_name:
+        type: str
+        required: true
+        description:
+          - Local image name built for the portal.

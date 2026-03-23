@@ -36,6 +36,7 @@ platform_port_assignments:
   open_webui_host_proxy_port: 8008
   platform_context_internal_port: 8010
   platform_context_host_proxy_port: 8010
+  ops_portal_port: 8090
   ntopng_http_port: 3000
   ntopng_proxy_port: 3001
   portainer_https_port: 9443
@@ -292,6 +293,11 @@ network_policy:
           ports:
             - 8091
           description: Edge and oauth2-proxy access to Keycloak
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
+            - 8090
+          description: Reverse proxy access to the interactive ops portal
     docker-build-lv3:
       allow_container_forwarding: true
       allowed_inbound:
@@ -641,6 +647,27 @@ lv3_service_topology:
       tls: true
       kind: proxy
       upstream: http://10.10.10.20:8091
+  ops_portal:
+    service_name: ops-portal
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: ops.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: ops
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: "http://10.10.10.20:{{ platform_port_assignments.ops_portal_port }}"
   openbao:
     service_name: openbao
     owning_vm: docker-runtime-lv3
