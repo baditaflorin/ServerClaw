@@ -1913,6 +1913,68 @@
         "HETZNER_DNS_API_TOKEN=... make provision-subdomain FQDN=ops.lv3.org"
       ]
     },
+    "capacity-report": {
+      "description": "Render the repository-managed capacity model report, combining committed allocations, planned growth, and optional live metrics from the monitoring VM.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "capacity-report",
+        "command": "make capacity-report"
+      },
+      "preflight": {
+        "required": false
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "repo_only",
+      "owner_runbook": "docs/runbooks/capacity-model.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/capacity-model.json",
+        "docs/schema/capacity-model.schema.json",
+        "scripts/capacity_report.py",
+        "scripts/lv3_cli.py",
+        "scripts/validate_repository_data_models.py",
+        "docs/runbooks/capacity-model.md"
+      ],
+      "outputs": [
+        "A text, markdown, json, or Prometheus-format summary of host capacity targets, active commitments, planned guests, and reserved ephemeral headroom."
+      ],
+      "verification_commands": [
+        "python3 scripts/capacity_report.py --model config/capacity-model.json --no-live-metrics",
+        "python3 scripts/capacity_report.py --model config/capacity-model.json --check-gate --proposed-change 20,8,100"
+      ]
+    },
+    "weekly-capacity-report": {
+      "description": "Generate the weekly Windmill payload used to post the current platform capacity summary to Mattermost.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "weekly-capacity-report",
+        "command": "make weekly-capacity-report"
+      },
+      "preflight": {
+        "required": false
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "repo_only",
+      "owner_runbook": "docs/runbooks/capacity-model.md",
+      "implementation_refs": [
+        "config/windmill/scripts/weekly-capacity-report.py",
+        "scripts/capacity_report.py",
+        "config/workflow-catalog.json",
+        "docs/runbooks/capacity-model.md"
+      ],
+      "outputs": [
+        "A JSON payload containing the destination channel, metrics source, and markdown-formatted weekly capacity report."
+      ],
+      "verification_commands": [
+        "make weekly-capacity-report NO_LIVE_METRICS=true"
+      ]
+    },
     "deploy-and-promote": {
       "description": "Validate a staged service change, enforce the ADR 0073 promotion gate, and then apply the approved production promotion.",
       "lifecycle_status": "active",

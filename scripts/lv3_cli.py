@@ -354,6 +354,17 @@ def secret_rotate_command(secret_id: str) -> CommandPlan:
     )
 
 
+def resolve_capacity_command(output_format: str, *, no_live_metrics: bool) -> CommandPlan:
+    command = ["make", "capacity-report", f"FORMAT={output_format}"]
+    if no_live_metrics:
+        command.append("NO_LIVE_METRICS=true")
+    return CommandPlan(
+        label=f"capacity --format {output_format}",
+        route="controller local capacity model report",
+        command=command,
+    )
+
+
 def fixture_command(
     action: str,
     fixture_name: str | None = None,
@@ -965,6 +976,7 @@ def completion_candidates(words: list[str], current: str) -> list[str]:
         "fixture",
         "scaffold",
         "diff",
+        "capacity",
         "promote",
         "run",
         "logs",
@@ -1114,6 +1126,12 @@ def build_parser() -> argparse.ArgumentParser:
     diff.add_argument("--dry-run", action="store_true")
     diff.add_argument("--explain", action="store_true")
 
+    capacity = subparsers.add_parser("capacity", help="Render the platform capacity report.")
+    capacity.add_argument("--format", choices=["text", "markdown", "json", "prometheus"], default="text")
+    capacity.add_argument("--no-live-metrics", action="store_true")
+    capacity.add_argument("--dry-run", action="store_true")
+    capacity.add_argument("--explain", action="store_true")
+
     promote = subparsers.add_parser("promote", help="Run the promotion pipeline.")
     promote.add_argument("branch")
     promote.add_argument("--service", required=True)
@@ -1259,6 +1277,13 @@ def main(argv: list[str] | None = None) -> int:
         return run_plan(scaffold_command(args.name), dry_run=args.dry_run, explain=args.explain, no_color=no_color)
     if args.command == "diff":
         return run_plan(resolve_diff_command(args.env), dry_run=args.dry_run, explain=args.explain, no_color=no_color)
+    if args.command == "capacity":
+        return run_plan(
+            resolve_capacity_command(args.format, no_live_metrics=args.no_live_metrics),
+            dry_run=args.dry_run,
+            explain=args.explain,
+            no_color=no_color,
+        )
     if args.command == "promote":
         return run_plan(
             promote_command(args.branch, args.service, args.staging_receipt, args.dry_run),

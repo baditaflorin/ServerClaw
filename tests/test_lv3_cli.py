@@ -30,6 +30,7 @@ def minimal_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
                 "remote-exec:",
                 "rotate-secret:",
                 "promote:",
+                "capacity-report:",
                 "fixture-up:",
                 "fixture-down:",
                 "fixture-list:",
@@ -295,6 +296,15 @@ def test_fixture_list_dry_run_prints_make_target(
     captured = capsys.readouterr()
     assert exit_code == 0
     assert "make fixture-list" in captured.out
+
+
+def test_capacity_dry_run_prints_make_target(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    exit_code = lv3_cli.main(["capacity", "--format", "json", "--no-live-metrics", "--dry-run"])
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "make capacity-report FORMAT=json NO_LIVE_METRICS=true" in captured.out
 
 
 def test_validate_service_dry_run_uses_local_completeness_command(

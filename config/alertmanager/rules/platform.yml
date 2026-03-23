@@ -74,3 +74,38 @@ groups:
           description: 'The earliest observed TLS certificate for {{ $labels.service }} is approaching expiry.'
           runbook_url: https://docs.lv3.org/runbooks/cert-expired/
           dashboard_url: https://grafana.lv3.org/d/lv3-platform-overview/lv3-platform-overview
+
+  - name: lv3-platform-capacity
+    rules:
+      - alert: HostRamCommittedHigh
+        expr: lv3_capacity_committed_ram_gb{scope="active",host="proxmox_florin"} / lv3_capacity_target_ram_gb{host="proxmox_florin"} > 0.90
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: Host RAM commitment is above 90 percent of the configured target
+          runbook_url: https://docs.lv3.org/runbooks/capacity-model/
+      - alert: HostDiskCommittedHigh
+        expr: lv3_capacity_committed_disk_gb{scope="active",host="proxmox_florin"} / lv3_capacity_target_disk_gb{host="proxmox_florin"} > 0.80
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: Host disk commitment is above 80 percent of the configured target
+          runbook_url: https://docs.lv3.org/runbooks/capacity-model/
+      - alert: HostDiskCommittedCritical
+        expr: lv3_capacity_committed_disk_gb{scope="active",host="proxmox_florin"} / lv3_capacity_target_disk_gb{host="proxmox_florin"} > 0.90
+        for: 15m
+        labels:
+          severity: critical
+        annotations:
+          summary: Host disk commitment is above 90 percent of the configured target
+          runbook_url: https://docs.lv3.org/runbooks/capacity-model/
+      - alert: GuestRamActualNearAllocation
+        expr: lv3_guest_actual_ram_gb / lv3_guest_allocated_ram_gb > 0.90
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: Guest RAM usage is above 90 percent of its current allocation
+          runbook_url: https://docs.lv3.org/runbooks/capacity-model/

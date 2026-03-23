@@ -96,6 +96,10 @@ class PromotionPipelineTests(unittest.TestCase):
             ), patch.object(
                 promotion_pipeline, "load_findings", return_value=[]
             ), patch.object(
+                promotion_pipeline, "load_capacity_model", return_value=object()
+            ), patch.object(
+                promotion_pipeline, "check_capacity_gate", return_value=(True, [])
+            ), patch.object(
                 promotion_pipeline, "evaluate_slo_gate", return_value={"checked": True, "entries": [], "blocking": [], "reason": None, "prometheus_url": "http://monitoring"}
             ), patch.object(
                 promotion_pipeline.dt, "datetime", wraps=promotion_pipeline.dt.datetime
@@ -142,6 +146,10 @@ class PromotionPipelineTests(unittest.TestCase):
             ), patch.object(
                 promotion_pipeline, "load_findings", return_value=[]
             ), patch.object(
+                promotion_pipeline, "load_capacity_model", return_value=object()
+            ), patch.object(
+                promotion_pipeline, "check_capacity_gate", return_value=(True, [])
+            ), patch.object(
                 promotion_pipeline, "evaluate_slo_gate", return_value={"checked": True, "entries": [], "blocking": [], "reason": None, "prometheus_url": "http://monitoring"}
             ), patch.object(
                 promotion_pipeline.dt, "datetime", wraps=promotion_pipeline.dt.datetime
@@ -187,6 +195,10 @@ class PromotionPipelineTests(unittest.TestCase):
                 "load_findings",
                 return_value=[{"severity": "critical", "summary": "Grafana probe failed", "details": []}],
             ), patch.object(
+                promotion_pipeline, "load_capacity_model", return_value=object()
+            ), patch.object(
+                promotion_pipeline, "check_capacity_gate", return_value=(True, [])
+            ), patch.object(
                 promotion_pipeline, "evaluate_slo_gate", return_value={"checked": True, "entries": [], "blocking": [], "reason": None, "prometheus_url": "http://monitoring"}
             ), patch.object(
                 promotion_pipeline.dt, "datetime", wraps=promotion_pipeline.dt.datetime
@@ -203,6 +215,56 @@ class PromotionPipelineTests(unittest.TestCase):
 
         self.assertEqual(verdict["gate_decision"], "rejected")
         self.assertIn("open critical findings exist for service 'grafana'", verdict["reasons"])
+
+    def test_gate_rejects_capacity_model_failure(self) -> None:
+        from unittest.mock import patch
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            stage_dir = Path(temp_dir) / "staging"
+            stage_dir.mkdir(parents=True, exist_ok=True)
+            stage_path = stage_dir / "receipt.json"
+            stage_path.write_text("{}")
+
+            with patch.object(promotion_pipeline, "STAGING_RECEIPTS_DIR", stage_dir), patch.object(
+                promotion_pipeline, "load_catalog_context", return_value=make_catalog_context()
+            ), patch.object(
+                promotion_pipeline,
+                "load_service_index",
+                return_value={"grafana": {"id": "grafana", "name": "Grafana", "vm": "monitoring-lv3"}},
+            ), patch.object(
+                promotion_pipeline, "load_receipt", return_value=self.stage_receipt
+            ), patch.object(
+                promotion_pipeline, "validate_receipt", return_value=None
+            ), patch.object(
+                promotion_pipeline, "resolve_receipt_path", return_value=stage_path
+            ), patch.object(
+                promotion_pipeline, "receipt_relative_path", return_value=Path("receipts/live-applies/staging/receipt.json")
+            ), patch.object(
+                promotion_pipeline, "load_findings", return_value=[]
+            ), patch.object(
+                promotion_pipeline, "load_capacity_model", return_value=object()
+            ), patch.object(
+                promotion_pipeline,
+                "check_capacity_gate",
+                return_value=(False, ["projected RAM commitment 70.0 GB exceeds target 44.8 GB"]),
+            ), patch.object(
+                promotion_pipeline, "evaluate_slo_gate", return_value={"checked": True, "entries": [], "blocking": [], "reason": None, "prometheus_url": "http://monitoring"}
+            ), patch.object(
+                promotion_pipeline.dt, "datetime", wraps=promotion_pipeline.dt.datetime
+            ) as mocked_datetime:
+                mocked_datetime.now.return_value = promotion_pipeline.dt.datetime(
+                    2026, 3, 23, 12, 0, tzinfo=promotion_pipeline.dt.timezone.utc
+                )
+                verdict = promotion_pipeline.check_promotion_gate(
+                    service_id="grafana",
+                    staging_receipt_ref="receipts/live-applies/staging/receipt.json",
+                    requester_class="human_operator",
+                    approver_classes=["human_operator"],
+                )
+
+        self.assertEqual(verdict["gate_decision"], "rejected")
+        self.assertFalse(verdict["capacity_gate"]["approved"])
+        self.assertIn("projected RAM commitment 70.0 GB exceeds target 44.8 GB", verdict["reasons"])
 
     def test_gate_rejects_low_slo_budget(self) -> None:
         from unittest.mock import patch
@@ -229,6 +291,10 @@ class PromotionPipelineTests(unittest.TestCase):
                 promotion_pipeline, "receipt_relative_path", return_value=Path("receipts/live-applies/staging/receipt.json")
             ), patch.object(
                 promotion_pipeline, "load_findings", return_value=[]
+            ), patch.object(
+                promotion_pipeline, "load_capacity_model", return_value=object()
+            ), patch.object(
+                promotion_pipeline, "check_capacity_gate", return_value=(True, [])
             ), patch.object(
                 promotion_pipeline,
                 "evaluate_slo_gate",

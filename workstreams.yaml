@@ -1714,10 +1714,10 @@ workstreams:
   - id: adr-0105-capacity-model
     adr: "0105"
     title: Platform capacity model and resource quota enforcement
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0105-capacity-model
-    worktree_path: ../proxmox_florin_server-capacity-model
+    worktree_path: .worktrees/adr-0105
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0105-capacity-model.md
     depends_on:
       - adr-0010-vm-topology
@@ -1730,7 +1730,7 @@ workstreams:
       - config/
       - scripts/promotion_pipeline.py
       - config/grafana/dashboards/
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: false
 
   - id: adr-0106-ephemeral-lifecycle

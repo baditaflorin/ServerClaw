@@ -12,6 +12,7 @@ from typing import Any
 from command_catalog import load_command_catalog, validate_command_catalog
 from api_gateway_catalog import load_api_gateway_catalog, validate_api_gateway_catalog
 from api_publication import load_api_publication_catalog, validate_api_publication_catalog
+from capacity_report import load_capacity_model
 from container_image_policy import load_image_catalog, validate_image_catalog as validate_container_image_catalog
 from controller_automation_toolkit import REPO_ROOT, emit_cli_error, load_json, load_yaml, repo_path
 from control_plane_lanes import load_lane_catalog
@@ -54,6 +55,7 @@ PLATFORM_FINDING_SCHEMA_PATH = repo_path("docs", "schema", "platform-finding.jso
 MAINTENANCE_WINDOW_SCHEMA_PATH = repo_path("docs", "schema", "maintenance-window.json")
 VM_TEMPLATE_MANIFEST_PATH = repo_path("config", "vm-template-manifest.json")
 CAPACITY_MODEL_PATH = repo_path("config", "capacity-model.json")
+CAPACITY_MODEL_SCHEMA_PATH = repo_path("docs", "schema", "capacity-model.schema.json")
 VERSION_SEMANTICS_PATH = repo_path("config", "version-semantics.json")
 WORKSTREAMS_PATH = repo_path("workstreams.yaml")
 TRIAGE_RULES_PATH = repo_path("config", "triage-rules.yaml")
@@ -1157,22 +1159,24 @@ def validate_maintenance_window_schema() -> None:
 
 
 def validate_capacity_model() -> None:
-    payload = require_mapping(load_json(CAPACITY_MODEL_PATH), str(CAPACITY_MODEL_PATH))
-    require_semver(payload.get("schema_version"), "config/capacity-model.json.schema_version")
-    pool = require_mapping(payload.get("ephemeral_pool"), "config/capacity-model.json.ephemeral_pool")
-    vmid_range = require_int_list(pool.get("vmid_range"), "config/capacity-model.json.ephemeral_pool.vmid_range")
-    if len(vmid_range) != 2:
-        raise ValueError("config/capacity-model.json.ephemeral_pool.vmid_range must contain exactly two integers")
-    if vmid_range[0] > vmid_range[1]:
-        raise ValueError("config/capacity-model.json.ephemeral_pool.vmid_range must be ascending")
-    require_int(pool.get("max_concurrent_vms"), "config/capacity-model.json.ephemeral_pool.max_concurrent_vms", 1)
-    require_int(pool.get("reserved_ram_gb"), "config/capacity-model.json.ephemeral_pool.reserved_ram_gb", 1)
-    require_int(pool.get("reserved_vcpu"), "config/capacity-model.json.ephemeral_pool.reserved_vcpu", 1)
-    require_int(pool.get("reserved_disk_gb"), "config/capacity-model.json.ephemeral_pool.reserved_disk_gb", 1)
-    require_str(pool.get("notes"), "config/capacity-model.json.ephemeral_pool.notes")
+    load_capacity_model(CAPACITY_MODEL_PATH)
     violations = validate_ephemeral_vmid_ranges()
     if violations:
         raise ValueError("; ".join(violations))
+
+
+def validate_capacity_model_schema() -> None:
+    schema = require_mapping(load_json(CAPACITY_MODEL_SCHEMA_PATH), str(CAPACITY_MODEL_SCHEMA_PATH))
+    require_str(schema.get("$schema"), "docs/schema/capacity-model.schema.json.$schema")
+    require_str(schema.get("$id"), "docs/schema/capacity-model.schema.json.$id")
+    require_str(schema.get("title"), "docs/schema/capacity-model.schema.json.title")
+    properties = require_mapping(
+        schema.get("properties"),
+        "docs/schema/capacity-model.schema.json.properties",
+    )
+    for field in ("$schema", "schema_version", "host", "guests", "reservations"):
+        if field not in properties:
+            raise ValueError(f"docs/schema/capacity-model.schema.json.properties must include '{field}'")
 
 
 def validate_version_semantics() -> None:
@@ -2017,6 +2021,7 @@ def validate_repository_data_models() -> int:
     validate_triage_rule_contracts()
     validate_platform_finding_schema()
     validate_maintenance_window_schema()
+    validate_capacity_model_schema()
     validate_capacity_model()
     validate_vm_template_manifest(host_vars_context["proxmox_vm_templates"])
     validate_operator_roster(load_yaml(ROSTER_PATH))
