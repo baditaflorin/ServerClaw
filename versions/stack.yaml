@@ -1,13 +1,13 @@
 schema_version: 1.0.0
 repo_version: 0.108.0
-platform_version: 0.40.0
+platform_version: 0.105.0
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
   latest_receipts:
     monitoring: 2026-03-22-adr-0052-loki-live-apply
     mutation_audit: 2026-03-23-adr-0066-mutation-audit-live-apply
-    public_edge_publication: 2026-03-23-adr-0021-edge-publication-portal-hostnames-live-apply
+    public_edge_publication: 2026-03-24-adr-0094-developer-portal-live-apply
     docker_runtime: 2026-03-22-adr-0023-docker-runtime-live-apply
     postgres_vm: 2026-03-22-adr-0026-postgres-vm-live-apply
     uptime_kuma: 2026-03-22-adr-0027-uptime-kuma-live-apply
@@ -846,5 +846,5 @@ release_tracks:
     current: 0.108.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.40.0
+    current: 0.105.0
     meaning: intended platform release for the actual server configuration

@@ -1,4 +1,9 @@
 ---
+public_edge_control_plane_host: "{{ groups['proxmox_hosts'][0] }}"
+proxmox_guests: "{{ hostvars[public_edge_control_plane_host].proxmox_guests }}"
+management_tailscale_ipv4: "{{ hostvars[public_edge_control_plane_host].management_tailscale_ipv4 }}"
+platform_port_assignments: "{{ hostvars[public_edge_control_plane_host].platform_port_assignments }}"
+postgres_ha: "{{ hostvars[public_edge_control_plane_host].postgres_ha }}"
 public_edge_service_topology: "{{ platform_service_topology }}"
 public_edge_certbot_email: baditaflorin@gmail.com
 public_edge_cert_name: lv3-edge
