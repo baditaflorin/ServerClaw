@@ -2,9 +2,9 @@
 
 - ADR: [ADR 0083](../adr/0083-docker-based-check-runner.md)
 - Title: Containerised, versioned lint and validation toolchains running in parallel on the build server
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0083-docker-check-runner`
-- Worktree: `../proxmox_florin_server-docker-check-runner`
+- Worktree: `.worktrees/adr-0083`
 - Owner: codex
 - Depends On: `adr-0082-remote-build-gateway`
 - Conflicts With: none
@@ -34,6 +34,7 @@
 - `scripts/parallel_check.py`
 - updated `Makefile` (`build-check-runners`, `push-check-runners`)
 - Windmill script `config/windmill/scripts/check-runner-rebuild.py`
+- `docs/runbooks/docker-check-runners.md`
 - `docs/adr/0083-docker-based-check-runner.md`
 - `docs/workstreams/adr-0083-docker-check-runner.md`
 - `workstreams.yaml`
@@ -48,6 +49,12 @@
 - `make build-check-runners` produces all four images with no build errors
 - `scripts/parallel_check.py lint-ansible lint-yaml validate-schemas` completes in < 20 s on the build server with all three checks running concurrently
 - image digests in `config/check-runner-manifest.json` match the actual published digests in `registry.lv3.org`
+
+## Completion Notes
+
+- the repository now carries pinned Dockerfiles for `ansible`, `python`, `infra`, and `security` check runners under `docker/check-runners/`
+- manifest-backed execution is available through `make run-checks` and [scripts/parallel_check.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/parallel_check.py)
+- digest write-back is delegated to the Windmill rebuild helper once the images are published from a credentialed worker
 
 ## Merge Criteria
 

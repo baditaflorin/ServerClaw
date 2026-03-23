@@ -8,6 +8,16 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.79.0 - 2026-03-23
+
+- implemented ADR 0083 on current `main` by adding pinned Docker-based check runner images for Ansible, Python, infra, and security validation workloads
+- added manifest-backed parallel execution through `scripts/parallel_check.py`, `config/check-runner-manifest.json`, and `make run-checks`
+- added the Windmill rebuild helper plus the operator runbook needed to rebuild, publish, and write image digests back into the manifest
+
+Platform impact:
+
+- no direct live platform change is claimed in this release commit; registry publication and build-server consumption remain repo-managed follow-up actions from `main`
+
 ## 0.78.0 - 2026-03-23
 
 - completed ADR 0066 on current `main` by validating the structured mutation-audit schema, Ansible callback emission, command-catalog audit events, the seeded Windmill helper, and the host-side `/var/log/platform/mutation-audit.jsonl` sinks now shipped through ADR 0052

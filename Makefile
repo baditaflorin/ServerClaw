@@ -28,8 +28,20 @@ EXCEPTION_OWNER ?=
 EXCEPTION_REVIEW_BY ?=
 SECRET_ID ?=
 ROTATION_ARGS ?=
+CHECKS ?=
+CHECK_RUNNER_REGISTRY ?= registry.lv3.org/check-runner
+CHECK_RUNNER_ANSIBLE_TAG ?= 2.17.10
+CHECK_RUNNER_PYTHON_TAG ?= 3.12.10
+CHECK_RUNNER_INFRA_TAG ?= 2026.03.23
+CHECK_RUNNER_SECURITY_TAG ?= 2026.03.23
+CHECK_RUNNER_PLATFORM ?= linux/amd64
+CHECK_RUNNER_ANSIBLE_IMAGE ?= $(CHECK_RUNNER_REGISTRY)/ansible:$(CHECK_RUNNER_ANSIBLE_TAG)
+CHECK_RUNNER_PYTHON_IMAGE ?= $(CHECK_RUNNER_REGISTRY)/python:$(CHECK_RUNNER_PYTHON_TAG)
+CHECK_RUNNER_INFRA_IMAGE ?= $(CHECK_RUNNER_REGISTRY)/infra:$(CHECK_RUNNER_INFRA_TAG)
+CHECK_RUNNER_SECURITY_IMAGE ?= $(CHECK_RUNNER_REGISTRY)/security:$(CHECK_RUNNER_SECURITY_TAG)
 
 .PHONY: validate validate-generated-vars validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-shell validate-json validate-data-models validate-health-probes generate-platform-vars show-platform-facts generate-status-docs generate-status generate-ops-portal deploy-ops-portal validate-generated-docs validate-generated-portals receipts receipt-info workflows workflow-info commands command-info services show-service lanes lane-info api-publication api-publication-info agent-tools agent-tool-info export-mcp-tools check-image-freshness upgrade-container-image preflight syntax-check syntax-check-monitoring syntax-check-ntopng syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-openbao syntax-check-step-ca syntax-check-windmill syntax-check-keycloak syntax-check-netbox syntax-check-open-webui syntax-check-mattermost syntax-check-portainer syntax-check-rag-context syntax-check-secret-rotation check-platform-drift install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-guest-network-policy converge-monitoring converge-ntopng converge-docker-runtime converge-postgres-vm converge-mail-platform converge-openbao converge-step-ca converge-windmill converge-control-plane-recovery converge-keycloak converge-netbox converge-open-webui converge-mattermost converge-portainer converge-rag-context rotate-secret deploy-uptime-kuma uptime-kuma-manage portainer-manage configure-backups configure-backup-vm database-dns start-workstream live-apply-group live-apply-service live-apply-site
+.PHONY: build-check-runners push-check-runners run-checks
 .PHONY: validate validate-generated-vars validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-shell validate-json validate-data-models validate-health-probes generate-platform-vars show-platform-facts generate-status-docs generate-status generate-ops-portal deploy-ops-portal validate-generated-docs validate-generated-portals receipts receipt-info workflows workflow-info commands command-info services show-service environments environment-info lanes lane-info api-publication api-publication-info agent-tools agent-tool-info export-mcp-tools check-image-freshness upgrade-container-image preflight syntax-check syntax-check-monitoring syntax-check-ntopng syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-openbao syntax-check-step-ca syntax-check-windmill syntax-check-keycloak syntax-check-netbox syntax-check-open-webui syntax-check-mattermost syntax-check-portainer syntax-check-rag-context syntax-check-secret-rotation check-platform-drift install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-guest-network-policy converge-monitoring converge-ntopng converge-docker-runtime converge-postgres-vm converge-mail-platform converge-openbao converge-step-ca converge-windmill converge-control-plane-recovery converge-keycloak converge-netbox converge-open-webui converge-mattermost converge-portainer converge-rag-context rotate-secret deploy-uptime-kuma uptime-kuma-manage portainer-manage configure-backups configure-backup-vm database-dns start-workstream live-apply-group live-apply-service live-apply-site
 
 validate:
@@ -58,6 +70,21 @@ validate-json:
 
 validate-data-models:
 	$(REPO_ROOT)/scripts/validate_repo.sh data-models
+
+build-check-runners:
+	docker build --pull --platform $(CHECK_RUNNER_PLATFORM) --tag $(CHECK_RUNNER_ANSIBLE_IMAGE) $(REPO_ROOT)/docker/check-runners/ansible
+	docker build --pull --platform $(CHECK_RUNNER_PLATFORM) --tag $(CHECK_RUNNER_PYTHON_IMAGE) $(REPO_ROOT)/docker/check-runners/python
+	docker build --pull --platform $(CHECK_RUNNER_PLATFORM) --tag $(CHECK_RUNNER_INFRA_IMAGE) $(REPO_ROOT)/docker/check-runners/infra
+	docker build --pull --platform $(CHECK_RUNNER_PLATFORM) --tag $(CHECK_RUNNER_SECURITY_IMAGE) $(REPO_ROOT)/docker/check-runners/security
+
+push-check-runners:
+	docker push $(CHECK_RUNNER_ANSIBLE_IMAGE)
+	docker push $(CHECK_RUNNER_PYTHON_IMAGE)
+	docker push $(CHECK_RUNNER_INFRA_IMAGE)
+	docker push $(CHECK_RUNNER_SECURITY_IMAGE)
+
+run-checks:
+	python3 $(REPO_ROOT)/scripts/parallel_check.py $(if $(CHECKS),$(CHECKS),--all)
 
 generate-platform-vars:
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/generate_platform_vars.py --write
