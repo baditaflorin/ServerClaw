@@ -30,6 +30,11 @@ from live_apply_receipts import (
     validate_receipt,
 )
 from mutation_audit import build_event, emit_event_best_effort, utc_now_iso
+from dependency_graph import (
+    DependencyGraph,
+    deployment_order as resolve_deployment_order,
+    load_dependency_graph,
+)
 from slo_tracking import build_slo_status_entries, default_prometheus_url, find_budget_breaches
 from workflow_catalog import (
     load_secret_manifest,
@@ -44,6 +49,7 @@ STAGING_RECEIPTS_DIR = RECEIPTS_DIR / "staging"
 VERSION_PATH = REPO_ROOT / "VERSION"
 STACK_PATH = REPO_ROOT / "versions" / "stack.yaml"
 SERVICE_CATALOG_PATH = REPO_ROOT / "config" / "service-capability-catalog.json"
+DEPENDENCY_GRAPH_PATH = REPO_ROOT / "config" / "dependency-graph.json"
 FINDINGS_PATH = REPO_ROOT / ".local" / "platform-observation" / "latest" / "findings.json"
 ALLOWED_GATE_DECISIONS = {"approved", "rejected", "bypassed"}
 ALLOWED_GATE_ACTOR_CLASSES = {"operator", "agent", "service", "automation"}
@@ -124,6 +130,18 @@ def load_service_index() -> dict[str, dict[str, Any]]:
         service_id = require_str(service.get("id"), f"service-capability-catalog.services[{index}].id")
         indexed[service_id] = service
     return indexed
+
+
+def deployment_order(
+    services_to_deploy: list[str],
+    graph: DependencyGraph | None = None,
+) -> list[str]:
+    graph = graph or load_dependency_graph(
+        DEPENDENCY_GRAPH_PATH,
+        service_catalog_path=SERVICE_CATALOG_PATH,
+        validate_schema=False,
+    )
+    return resolve_deployment_order(services_to_deploy, graph)
 
 
 def service_aliases(service_id: str, service: dict[str, Any]) -> set[str]:

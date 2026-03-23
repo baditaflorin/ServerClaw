@@ -179,12 +179,12 @@ validate_compose_runtime_envs() {
 
 validate_data_models() {
   echo "Repository data model validation"
-  uvx --from pyyaml python "$REPO_ROOT/scripts/validate_repository_data_models.py" --validate >/dev/null
+  uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/validate_repository_data_models.py" --validate >/dev/null
   uvx --from pyyaml python "$REPO_ROOT/scripts/operator_manager.py" validate >/dev/null
   uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/data_catalog.py" --validate >/dev/null
+  uv run --with jsonschema python "$REPO_ROOT/scripts/validate_dependency_graph.py" >/dev/null
   uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/service_catalog.py" --validate >/dev/null
   uvx --from pyyaml python "$REPO_ROOT/scripts/environment_topology.py" --validate >/dev/null
-  uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/service_catalog.py" --validate >/dev/null
   uvx --from pyyaml python "$REPO_ROOT/scripts/subdomain_catalog.py" --validate >/dev/null
   python3 "$REPO_ROOT/scripts/validate_service_completeness.py" --validate >/dev/null
   "$REPO_ROOT/scripts/agent_tool_registry.py" --export-mcp >/dev/null
@@ -194,6 +194,7 @@ validate_data_models() {
 validate_generated_docs() {
   echo "Generated status document validation"
   uvx --from pyyaml python "$REPO_ROOT/scripts/generate_status_docs.py" --check >/dev/null
+  uv run --with jsonschema python "$REPO_ROOT/scripts/generate_dependency_diagram.py" --check >/dev/null
 }
 
 validate_generated_portals() {

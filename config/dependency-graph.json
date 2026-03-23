@@ -1,6 +1,365 @@
 {
-  "$schema": "docs/schema/dependency-graph.schema.json",
+  "$schema": "docs/schema/service-dependency-graph.schema.json",
   "schema_version": "1.0.0",
-  "nodes": [],
-  "edges": []
+  "nodes": [
+    {
+      "id": "api_gateway",
+      "service": "api_gateway",
+      "name": "Platform API Gateway",
+      "vm": "docker-runtime-lv3",
+      "tier": 3,
+      "category": "automation",
+      "adr": "0092"
+    },
+    {
+      "id": "backup_pbs",
+      "service": "backup_pbs",
+      "name": "Proxmox Backup Server",
+      "vm": "backup-lv3",
+      "tier": 1,
+      "category": "data",
+      "adr": "0029"
+    },
+    {
+      "id": "changelog_portal",
+      "service": "changelog_portal",
+      "name": "Changelog Portal",
+      "vm": "nginx-lv3",
+      "tier": 2,
+      "category": "communication",
+      "adr": "0081"
+    },
+    {
+      "id": "docker_build",
+      "service": "docker_build",
+      "name": "Docker Build VM",
+      "vm": "docker-build-lv3",
+      "tier": 1,
+      "category": "infrastructure",
+      "adr": "0028"
+    },
+    {
+      "id": "docker_runtime",
+      "service": "docker_runtime",
+      "name": "Docker Runtime VM",
+      "vm": "docker-runtime-lv3",
+      "tier": 1,
+      "category": "infrastructure",
+      "adr": "0023"
+    },
+    {
+      "id": "docs_portal",
+      "service": "docs_portal",
+      "name": "Developer Portal",
+      "vm": "nginx-lv3",
+      "tier": 2,
+      "category": "access",
+      "adr": "0094"
+    },
+    {
+      "id": "grafana",
+      "service": "grafana",
+      "name": "Grafana",
+      "vm": "monitoring-lv3",
+      "tier": 1,
+      "category": "observability",
+      "adr": "0011"
+    },
+    {
+      "id": "keycloak",
+      "service": "keycloak",
+      "name": "Keycloak",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "access",
+      "adr": "0056"
+    },
+    {
+      "id": "mail_platform",
+      "service": "mail_platform",
+      "name": "Mail Platform",
+      "vm": "docker-runtime-lv3",
+      "tier": 1,
+      "category": "communication",
+      "adr": "0041"
+    },
+    {
+      "id": "mattermost",
+      "service": "mattermost",
+      "name": "Mattermost",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "communication",
+      "adr": "0057"
+    },
+    {
+      "id": "netbox",
+      "service": "netbox",
+      "name": "NetBox",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "data",
+      "adr": "0054"
+    },
+    {
+      "id": "nginx_edge",
+      "service": "nginx_edge",
+      "name": "NGINX Edge",
+      "vm": "nginx-lv3",
+      "tier": 1,
+      "category": "infrastructure",
+      "adr": "0021"
+    },
+    {
+      "id": "ntopng",
+      "service": "ntopng",
+      "name": "ntopng",
+      "vm": "proxmox_florin",
+      "tier": 1,
+      "category": "observability",
+      "adr": "0059"
+    },
+    {
+      "id": "open_webui",
+      "service": "open_webui",
+      "name": "Open WebUI",
+      "vm": "docker-runtime-lv3",
+      "tier": 1,
+      "category": "automation",
+      "adr": "0060"
+    },
+    {
+      "id": "openbao",
+      "service": "openbao",
+      "name": "OpenBao",
+      "vm": "docker-runtime-lv3",
+      "tier": 1,
+      "category": "security",
+      "adr": "0043"
+    },
+    {
+      "id": "ops_portal",
+      "service": "ops_portal",
+      "name": "Ops Portal",
+      "vm": "nginx-lv3",
+      "tier": 4,
+      "category": "automation",
+      "adr": "0074"
+    },
+    {
+      "id": "platform_context_api",
+      "service": "platform_context_api",
+      "name": "Platform Context API",
+      "vm": "docker-runtime-lv3",
+      "tier": 1,
+      "category": "automation",
+      "adr": "0070"
+    },
+    {
+      "id": "portainer",
+      "service": "portainer",
+      "name": "Portainer",
+      "vm": "docker-runtime-lv3",
+      "tier": 1,
+      "category": "automation",
+      "adr": "0055"
+    },
+    {
+      "id": "postgres",
+      "service": "postgres",
+      "name": "Postgres",
+      "vm": "postgres-lv3",
+      "tier": 1,
+      "category": "data",
+      "adr": "0026"
+    },
+    {
+      "id": "proxmox_ui",
+      "service": "proxmox_ui",
+      "name": "Proxmox UI",
+      "vm": "proxmox_florin",
+      "tier": 1,
+      "category": "infrastructure",
+      "adr": "0004"
+    },
+    {
+      "id": "step_ca",
+      "service": "step_ca",
+      "name": "step-ca",
+      "vm": "docker-runtime-lv3",
+      "tier": 1,
+      "category": "security",
+      "adr": "0042"
+    },
+    {
+      "id": "uptime_kuma",
+      "service": "uptime_kuma",
+      "name": "Uptime Kuma",
+      "vm": "docker-runtime-lv3",
+      "tier": 1,
+      "category": "observability",
+      "adr": "0027"
+    },
+    {
+      "id": "windmill",
+      "service": "windmill",
+      "name": "Windmill",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "automation",
+      "adr": "0044"
+    }
+  ],
+  "edges": [
+    {
+      "from": "api_gateway",
+      "to": "keycloak",
+      "type": "hard",
+      "description": "The unified API gateway validates caller JWTs against Keycloak before serving authenticated platform routes."
+    },
+    {
+      "from": "api_gateway",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public access to api.lv3.org depends on the shared edge publication path, but the internal gateway remains reachable directly."
+    },
+    {
+      "from": "changelog_portal",
+      "to": "nginx_edge",
+      "type": "hard",
+      "description": "The changelog portal is served as generated static content on nginx-lv3."
+    },
+    {
+      "from": "docs_portal",
+      "to": "nginx_edge",
+      "type": "hard",
+      "description": "The generated developer portal is published as static content on nginx-lv3."
+    },
+    {
+      "from": "grafana",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Grafana uses Keycloak for the preferred SSO path, but local admin remains the break-glass fallback."
+    },
+    {
+      "from": "grafana",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public access to grafana.lv3.org depends on the shared NGINX edge; private reachability remains available if the edge is degraded."
+    },
+    {
+      "from": "keycloak",
+      "to": "postgres",
+      "type": "hard",
+      "description": "Keycloak stores realm, client, and session state in Postgres."
+    },
+    {
+      "from": "keycloak",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Keycloak reads its mirrored database and bootstrap secrets through the OpenBao agent before startup."
+    },
+    {
+      "from": "keycloak",
+      "to": "step_ca",
+      "type": "startup_only",
+      "description": "Keycloak depends on the internal certificate authority when repo-managed internal TLS material is refreshed."
+    },
+    {
+      "from": "keycloak",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public reachability for sso.lv3.org depends on the shared edge publication path."
+    },
+    {
+      "from": "mail_platform",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "The mail gateway runtime is rendered from secrets mirrored locally by the OpenBao sidecar."
+    },
+    {
+      "from": "mail_platform",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "The published mail.lv3.org informational surface is exposed through the shared NGINX edge."
+    },
+    {
+      "from": "mattermost",
+      "to": "postgres",
+      "type": "hard",
+      "description": "Mattermost stores channels, users, and message history in Postgres."
+    },
+    {
+      "from": "mattermost",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Mattermost starts from OpenBao-rendered runtime secrets mirrored into its compose environment."
+    },
+    {
+      "from": "netbox",
+      "to": "postgres",
+      "type": "hard",
+      "description": "NetBox stores all inventory, topology, and IPAM data in Postgres."
+    },
+    {
+      "from": "netbox",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "NetBox receives its database and Redis credentials from the OpenBao agent before the application containers start."
+    },
+    {
+      "from": "open_webui",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Open WebUI can be configured for Keycloak OIDC, but the current runtime can still fall back to local login if OIDC is unavailable."
+    },
+    {
+      "from": "open_webui",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Open WebUI consumes mirrored runtime secrets and optional OIDC client credentials from the OpenBao sidecar."
+    },
+    {
+      "from": "ops_portal",
+      "to": "api_gateway",
+      "type": "hard",
+      "description": "The interactive operations portal depends on the unified API gateway for governed platform actions and live status reads."
+    },
+    {
+      "from": "ops_portal",
+      "to": "keycloak",
+      "type": "hard",
+      "description": "ops.lv3.org is gated behind oauth2-proxy and Keycloak-backed browser authentication."
+    },
+    {
+      "from": "ops_portal",
+      "to": "nginx_edge",
+      "type": "hard",
+      "description": "The generated portal is published as static content on nginx-lv3."
+    },
+    {
+      "from": "platform_context_api",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "The platform context API loads its bearer token and runtime configuration from OpenBao-rendered environment files."
+    },
+    {
+      "from": "platform_context_api",
+      "to": "step_ca",
+      "type": "reads_from",
+      "description": "The indexed corpus includes step-ca ADR and runbook content for operator query grounding."
+    },
+    {
+      "from": "windmill",
+      "to": "postgres",
+      "type": "hard",
+      "description": "Windmill persists workflow metadata, run history, and state in Postgres."
+    },
+    {
+      "from": "windmill",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Windmill workers and the server runtime load mirrored secrets from the OpenBao agent before the containers start."
+    }
+  ]
 }

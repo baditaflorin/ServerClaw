@@ -1683,10 +1683,10 @@ workstreams:
   - id: adr-0104-dependency-graph
     adr: "0104"
     title: Service dependency graph and failure propagation model
-    status: ready
+    status: merged
     owner: codex
-    branch: codex/adr-0104-dependency-graph
-    worktree_path: ../proxmox_florin_server-dependency-graph
+    branch: codex/adr-0104-service-dependency-graph
+    worktree_path: .worktrees/adr-0104
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0104-dependency-graph.md
     depends_on:
       - adr-0033-service-catalog
@@ -1696,9 +1696,12 @@ workstreams:
     conflicts_with: []
     shared_surfaces:
       - config/
+      - scripts/dependency_graph.py
       - scripts/promotion_pipeline.py
-      - scripts/generate_docs_site.py
-    ready_to_merge: false
+      - scripts/generate_ops_portal.py
+      - scripts/platform_context_service.py
+      - scripts/lv3_cli.py
+    ready_to_merge: true
     live_applied: false
 
   - id: adr-0105-capacity-model

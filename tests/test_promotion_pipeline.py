@@ -330,6 +330,17 @@ class PromotionPipelineTests(unittest.TestCase):
         self.assertEqual(result["service"], "grafana")
         self.assertEqual(result["gate"]["gate_decision"], "approved")
 
+    def test_deployment_order_sorts_dependencies_first(self) -> None:
+        graph = promotion_pipeline.load_dependency_graph(
+            promotion_pipeline.DEPENDENCY_GRAPH_PATH,
+            service_catalog_path=promotion_pipeline.SERVICE_CATALOG_PATH,
+            validate_schema=False,
+        )
+
+        ordered = promotion_pipeline.deployment_order(["ops_portal", "postgres", "keycloak"], graph)
+
+        self.assertEqual(ordered, ["postgres", "keycloak", "ops_portal"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -100,6 +100,46 @@ all:
         )
         + "\n"
     )
+    (tmp_path / "config" / "dependency-graph.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "1.0.0",
+                "nodes": [
+                    {
+                        "id": "grafana",
+                        "service": "grafana",
+                        "name": "Grafana",
+                        "vm": "monitoring-lv3",
+                        "tier": 1,
+                    },
+                    {
+                        "id": "windmill",
+                        "service": "windmill",
+                        "name": "Windmill",
+                        "vm": "docker-runtime-lv3",
+                        "tier": 2,
+                    },
+                    {
+                        "id": "ops_portal",
+                        "service": "ops_portal",
+                        "name": "Ops Portal",
+                        "vm": "nginx-lv3",
+                        "tier": 1,
+                    },
+                ],
+                "edges": [
+                    {
+                        "from": "windmill",
+                        "to": "grafana",
+                        "type": "hard",
+                        "description": "Synthetic test edge.",
+                    }
+                ],
+            },
+            indent=2,
+        )
+        + "\n"
+    )
     (tmp_path / "config" / "controller-local-secrets.json").write_text(
         json.dumps(
             {
@@ -263,6 +303,16 @@ def test_validate_service_dry_run_uses_local_completeness_command(
     assert exit_code == 0
     assert "ADR 0107 completeness check" in captured.out
     assert "scripts/validate_service_completeness.py --service grafana" in captured.out
+
+
+def test_impact_command_prints_dependency_summary(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    exit_code = lv3_cli.main(["impact", "windmill"])
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "Service: Windmill" in captured.out
+    assert "Hard: Grafana" in captured.out
 
 
 def test_fixture_completion_suggests_fixture_names(minimal_repo: Path) -> None:

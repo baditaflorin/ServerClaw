@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from dependency_graph import compute_impact, graph_to_dict, load_dependency_graph
 from fastapi import Depends, FastAPI, Header, HTTPException, Query
 from pydantic import BaseModel, Field
 from qdrant_client import QdrantClient
@@ -239,6 +240,22 @@ class PlatformContextService:
             ),
         }
 
+    def dependency_graph(self) -> dict[str, Any]:
+        graph = load_dependency_graph(
+            self.config.corpus_root / "config" / "dependency-graph.json",
+            service_catalog_path=self.config.corpus_root / "config" / "service-capability-catalog.json",
+            validate_schema=False,
+        )
+        return graph_to_dict(graph)
+
+    def dependency_impact(self, service_id: str) -> dict[str, Any]:
+        graph = load_dependency_graph(
+            self.config.corpus_root / "config" / "dependency-graph.json",
+            service_catalog_path=self.config.corpus_root / "config" / "service-capability-catalog.json",
+            validate_schema=False,
+        )
+        return compute_impact(service_id, graph).to_dict()
+
 
 def load_yaml(path: Path) -> Any:
     import yaml
@@ -296,6 +313,19 @@ def healthz() -> dict[str, Any]:
 @app.get("/v1/platform-summary", dependencies=[Depends(require_auth)])
 def platform_summary() -> dict[str, Any]:
     return get_service().platform_summary()
+
+
+@app.get("/v1/platform/dependency-graph", dependencies=[Depends(require_auth)])
+def platform_dependency_graph() -> dict[str, Any]:
+    return get_service().dependency_graph()
+
+
+@app.get("/v1/platform/dependency-graph/{service_id}/impact", dependencies=[Depends(require_auth)])
+def platform_dependency_impact(service_id: str) -> dict[str, Any]:
+    try:
+        return get_service().dependency_impact(service_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @app.get("/v1/receipts/recent", dependencies=[Depends(require_auth)])

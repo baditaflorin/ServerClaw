@@ -20,6 +20,7 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
 from api_publication import load_api_publication_catalog
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
+from dependency_graph import load_dependency_graph, render_dependency_markdown
 
 
 SERVICE_CATALOG_PATH = repo_path("config", "service-capability-catalog.json")
@@ -484,9 +485,29 @@ def render_adr_pages(output_dir: Path) -> list[dict[str, str]]:
     write_generated(
         output_dir,
         "architecture/index.md",
-        render_template("architecture-index.md.j2", totals=totals, adrs=entries),
+        render_template(
+            "architecture-index.md.j2",
+            totals=totals,
+            adrs=entries,
+            generated_pages=[
+                {
+                    "title": "Service Dependency Graph",
+                    "description": "Recovery tiers and Mermaid service-dependency diagram generated from config/dependency-graph.json.",
+                    "link": "dependency-graph.md",
+                }
+            ],
+        ),
     )
     return entries
+
+
+def render_dependency_graph_page(output_dir: Path) -> None:
+    graph = load_dependency_graph(validate_schema=True)
+    write_generated(
+        output_dir,
+        Path("architecture", "dependency-graph.md"),
+        render_dependency_markdown(graph),
+    )
 
 
 def render_release_notes(output_dir: Path) -> list[dict[str, str]]:
@@ -747,6 +768,7 @@ def render_site(output_dir: Path, *, openapi_url: str | None = OPENAPI_DEFAULT_U
     render_home_and_upgrade(output_dir)
     render_runbook_pages(output_dir)
     render_adr_pages(output_dir)
+    render_dependency_graph_page(output_dir)
     releases = render_release_notes(output_dir)
     render_services(output_dir)
     render_api_pages(output_dir, openapi_url)
@@ -760,6 +782,7 @@ def validate_site(output_dir: Path) -> None:
         output_dir / "services" / "keycloak.md",
         output_dir / "runbooks" / "index.md",
         output_dir / "architecture" / "index.md",
+        output_dir / "architecture" / "dependency-graph.md",
         output_dir / "reference" / "ports.md",
         output_dir / "api" / "index.md",
         output_dir / "api" / "openapi.md",

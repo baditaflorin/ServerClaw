@@ -16,6 +16,8 @@ from container_image_policy import load_image_catalog, validate_image_catalog as
 from controller_automation_toolkit import REPO_ROOT, emit_cli_error, load_json, load_yaml, repo_path
 from control_plane_lanes import load_lane_catalog
 from data_catalog import load_data_catalog, validate_data_catalog
+from dependency_graph import load_dependency_graph
+from data_catalog import load_data_catalog, validate_data_catalog
 from live_apply_receipts import RECEIPTS_DIR, iter_receipt_paths, validate_receipts
 from generate_platform_vars import PLATFORM_VARS_PATH, PORT_KEYS, build_platform_vars
 from mutation_audit import load_mutation_audit_schema, validate_mutation_audit_schema
@@ -1961,6 +1963,7 @@ def validate_slo_catalog_assets() -> None:
 
 
 def validate_repository_data_models() -> int:
+    load_dependency_graph(validate_schema=True)
     secret_manifest = load_secret_manifest()
     validate_secret_manifest(secret_manifest)
     workflow_catalog = load_workflow_catalog()

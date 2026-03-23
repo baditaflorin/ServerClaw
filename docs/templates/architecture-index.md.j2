@@ -8,6 +8,12 @@ This index is generated from `docs/adr/`.
 - Implemented: **{{ totals.implemented }}**
 - Proposed: **{{ totals.proposed }}**
 
+## Generated Architecture Views
+
+{% for page in generated_pages -%}
+- [{{ page.title }}]({{ page.link }}) — {{ page.description }}
+{% endfor %}
+
 | ADR | Title | Status | Implementation |
 | --- | --- | --- | --- |
 {% for adr in adrs -%}

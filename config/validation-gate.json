@@ -17,6 +17,14 @@
     "timeout_seconds": 300,
     "cache_mounts": ["ansible_collections"]
   },
+  "dependency-graph": {
+    "description": "Validate the service dependency graph schema, cross references, and generated Mermaid markdown.",
+    "severity": "error",
+    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "command": "python scripts/validate_dependency_graph.py >/dev/null && python scripts/generate_dependency_diagram.py --check >/dev/null",
+    "working_dir": "/workspace",
+    "timeout_seconds": 120
+  },
   "packer-validate": {
     "description": "Validate all Packer templates when the repo carries them; otherwise report a no-op pass.",
     "severity": "error",

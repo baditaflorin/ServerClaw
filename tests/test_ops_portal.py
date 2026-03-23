@@ -69,6 +69,8 @@ class OpsPortalRenderTests(unittest.TestCase):
             self.assertIn("Drift Status", index_html)
             self.assertIn("Ephemeral VMs", index_html)
             self.assertIn("adr-0106-test", index_html)
+            self.assertIn("Recovery tier", index_html)
+            self.assertIn("Failure blast radius", index_html)
             self.assertIn("ops.lv3.org", dns_html)
             self.assertIn("get-platform-status", agents_html)
             self.assertEqual(snapshot_file.read_text(), index_html)

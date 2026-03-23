@@ -1,10 +1,10 @@
 # ADR 0104: Service Dependency Graph and Failure Propagation Model
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.102.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-23
 - Date: 2026-03-23
 
 ## Context
@@ -242,3 +242,12 @@ The disaster recovery playbook (ADR 0100) recovery tiers are now derived from th
 - ADR 0096: SLO definitions (SLO at-risk analysis uses the dependency graph)
 - ADR 0100: Disaster recovery playbook (recovery tiers derived from the graph)
 - ADR 0107: Platform extension model (new services must declare dependencies)
+
+## Implementation Notes
+
+- The canonical graph now lives in [config/dependency-graph.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/dependency-graph.json) and is schema-validated by [docs/schema/service-dependency-graph.schema.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/schema/service-dependency-graph.schema.json).
+- [scripts/dependency_graph.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/dependency_graph.py) provides the shared parser, impact analysis, recovery-tier calculation, Mermaid rendering, and deployment-order logic used across the repo.
+- Operators can inspect the graph through [scripts/dependency_impact.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/dependency_impact.py) and the `lv3 impact <service>` CLI surface in [scripts/lv3_cli.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/lv3_cli.py).
+- The static ops portal generator now renders recovery tier and blast-radius context onto service cards via [scripts/generate_ops_portal.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_ops_portal.py).
+- The current repo implementation exposes the intended `/v1/platform/dependency-graph` and `/v1/platform/dependency-graph/{service}/impact` routes through [scripts/platform_context_service.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/platform_context_service.py) so callers can adopt the API contract before ADR 0092's dedicated gateway runtime lands.
+- Until ADR 0094's full docs-site generator is merged, the documentation-site integration is represented by the generated Markdown page [docs/site-generated/architecture/dependency-graph.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/site-generated/architecture/dependency-graph.md), produced by [scripts/generate_dependency_diagram.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_dependency_diagram.py) and validated as part of the repository checks.

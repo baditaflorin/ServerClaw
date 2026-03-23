@@ -22,6 +22,7 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, Iterable
 
+from dependency_graph import dependency_summary, load_dependency_graph
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CLI_VERSION = "0.1.0"
@@ -524,6 +525,45 @@ def open_service_url(service_id: str, environment: str, *, dry_run: bool, explai
     return 0 if webbrowser.open(url) else 1
 
 
+def impact_command(service_id: str) -> int:
+    graph = load_dependency_graph(
+        repo_path("config", "dependency-graph.json"),
+        service_catalog_path=repo_path("config", "service-capability-catalog.json"),
+        validate_schema=False,
+    )
+    summary = dependency_summary(SERVICE_ALIASES.get(service_id, service_id), graph)
+    service_map = load_service_map()
+
+    def service_names(service_ids: list[str]) -> str:
+        return ", ".join(service_map[item]["name"] if item in service_map else item for item in service_ids)
+
+    print(f"Service: {summary['name']} ({summary['service']})")
+    print(f"Recovery tier: {summary['tier']}")
+    print("Depends on:")
+    rendered = 0
+    for edge_type, label in (
+        ("hard", "Hard"),
+        ("soft", "Soft"),
+        ("startup_only", "Startup-only"),
+        ("reads_from", "Reads-from"),
+    ):
+        services = summary["depends_on"][edge_type]
+        if services:
+            rendered += 1
+            print(f"  {label}: {service_names(services)}")
+    if rendered == 0:
+        print("  none")
+    print(
+        "Impact if this service fails:"
+        f"\n  Direct hard: {service_names(summary['impact']['direct_hard']) if summary['impact']['direct_hard'] else 'none'}"
+        f"\n  Transitive hard: {service_names(summary['impact']['transitive_hard']) if summary['impact']['transitive_hard'] else 'none'}"
+        f"\n  Direct soft: {service_names(summary['impact']['direct_soft']) if summary['impact']['direct_soft'] else 'none'}"
+        f"\n  Startup-only: {service_names(summary['impact']['direct_startup_only']) if summary['impact']['direct_startup_only'] else 'none'}"
+        f"\n  Reads-from: {service_names(summary['impact']['direct_reads_from']) if summary['impact']['direct_reads_from'] else 'none'}"
+    )
+    return 0
+
+
 def http_probe(url: str, *, timeout: float, validate_tls: bool) -> ProbeResult:
     started = time.monotonic()
     request = urllib.request.Request(url, headers={"User-Agent": "lv3-cli/0.1.0"})
@@ -850,6 +890,7 @@ def install_completion(shell_name: str) -> int:
 def completion_candidates(words: list[str], current: str) -> list[str]:
     top_level = [
         "deploy",
+        "impact",
         "lint",
         "validate",
         "status",
@@ -868,7 +909,7 @@ def completion_candidates(words: list[str], current: str) -> list[str]:
     ]
     if len(words) <= 1:
         return [candidate for candidate in top_level if candidate.startswith(current)]
-    if words[1] in {"deploy", "status", "logs", "open"}:
+    if words[1] in {"deploy", "impact", "status", "logs", "open"}:
         candidates = sorted(set(load_service_map()) | set(SERVICE_ALIASES))
         return [service_id for service_id in candidates if service_id.startswith(current)]
     if words[1] == "validate" and "--service" in words:
@@ -920,6 +961,9 @@ def build_parser() -> argparse.ArgumentParser:
     deploy.add_argument("--env", default="production", choices=["production", "staging"])
     deploy.add_argument("--dry-run", action="store_true")
     deploy.add_argument("--explain", action="store_true")
+
+    impact = subparsers.add_parser("impact", help="Show dependency and failure impact for one service.")
+    impact.add_argument("service")
 
     lint = subparsers.add_parser("lint", help="Run repository lint checks.")
     lint.add_argument("--local", action="store_true")
@@ -1104,6 +1148,8 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "deploy":
         return run_plan(resolve_deploy_command(args.service, args.env), dry_run=args.dry_run, explain=args.explain, no_color=no_color)
+    if args.command == "impact":
+        return impact_command(args.service)
     if args.command == "lint":
         return run_plan(resolve_lint_command(args.local), dry_run=args.dry_run, explain=args.explain, no_color=no_color)
     if args.command == "validate":

@@ -17,6 +17,7 @@ from typing import Any
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
+from dependency_graph import dependency_summary, load_dependency_graph
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 from environment_topology import (
     load_environment_topology,
@@ -439,8 +440,13 @@ def render_slo_panel(prometheus_url: str | None = None) -> str:
     )
 
 
-def render_service_cards(services: list[dict[str, Any]], health: dict[str, HealthState]) -> str:
+def render_service_cards(
+    services: list[dict[str, Any]],
+    health: dict[str, HealthState],
+    dependency_summaries: dict[str, dict[str, Any]],
+) -> str:
     groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    service_names = {service["id"]: service["name"] for service in services}
     for service in services:
         groups[service["category"]].append(service)
 
@@ -468,6 +474,30 @@ def render_service_cards(services: list[dict[str, Any]], health: dict[str, Healt
                 if matches:
                     links.append(render_external_link(repo_view_link(matches[0]), f"ADR {service['adr']}"))
 
+            summary = dependency_summaries[service["id"]]
+
+            def names(service_ids: list[str]) -> str:
+                return ", ".join(service_names.get(item, item) for item in service_ids)
+
+            dependency_details = []
+            if summary["depends_on"]["hard"]:
+                dependency_details.append(
+                    f"<div><strong>Hard deps</strong><span>{escape(names(summary['depends_on']['hard']))}</span></div>"
+                )
+            if summary["depends_on"]["soft"]:
+                dependency_details.append(
+                    f"<div><strong>Soft deps</strong><span>{escape(names(summary['depends_on']['soft']))}</span></div>"
+                )
+            if summary["depends_on"]["startup_only"]:
+                dependency_details.append(
+                    f"<div><strong>Startup deps</strong><span>{escape(names(summary['depends_on']['startup_only']))}</span></div>"
+                )
+            blast_radius = summary["impact"]["direct_hard"] + summary["impact"]["transitive_hard"]
+            if blast_radius:
+                dependency_details.append(
+                    f"<div><strong>Failure blast radius</strong><span>{escape(names(blast_radius))}</span></div>"
+                )
+
             tags = "".join(f'<span class="tag">{escape(tag)}</span>' for tag in service.get("tags", []))
             cards.append(
                 '<article class="card">'
@@ -479,9 +509,11 @@ def render_service_cards(services: list[dict[str, Any]], health: dict[str, Healt
                 f"<div><strong>VM</strong><span>{escape(service['vm'])}"
                 + (f" (VMID {escape(service['vmid'])})" if "vmid" in service else "")
                 + "</span></div>"
+                + f"<div><strong>Recovery tier</strong><span>{escape(str(summary['tier']))}</span></div>"
                 + (f"<div><strong>Primary</strong><span>{escape(service.get('public_url') or service.get('internal_url') or 'n/a')}</span></div>")
                 + f"<div><strong>Health</strong><span>{escape(state.detail)}</span></div>"
                 + "</div>"
+                + (f'<div class="meta-list">{"".join(dependency_details)}</div>' if dependency_details else "")
                 + (f'<div class="chip-row">{tags}</div>' if tags else "")
                 + (f'<div class="chip-row">{"".join(links)}</div>' if links else "")
                 + "</article>"
@@ -773,6 +805,11 @@ def render_portal(
     snapshot = load_health_snapshot(health_snapshot)
     health = resolve_health(services, snapshot, probe_timeout)
     slo_prometheus_url = os.environ.get("OPS_PORTAL_PROMETHEUS_URL", "")
+    graph = load_dependency_graph(validate_schema=False)
+    dependency_summaries = {
+        service["id"]: dependency_summary(service["id"], graph)
+        for service in services
+    }
     guest_roles = {
         guest["name"]: guest["role"]
         for guest in host_vars["proxmox_guests"]
@@ -792,7 +829,7 @@ def render_portal(
         + render_drift_panel()
         + render_release_panel()
         + render_ephemeral_vm_panel()
-        + render_service_cards(services, health),
+        + render_service_cards(services, health, dependency_summaries),
     )
     write_page(
         output_dir,
