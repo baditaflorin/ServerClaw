@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0101](../adr/0101-automated-certificate-lifecycle-management.md)
 - Title: certificate inventory, TLS probes, and repo-managed renewal for current HTTPS endpoints
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0101-certificate-lifecycle`
 - Worktree: `../proxmox_florin_server-certificate-lifecycle`
 - Owner: codex
