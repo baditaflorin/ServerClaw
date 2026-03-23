@@ -1,0 +1,23 @@
+services:
+  ops-portal:
+    build:
+      context: {{ ops_portal_service_dir }}
+      network: host
+    image: {{ ops_portal_service_image_name }}:latest
+    container_name: {{ ops_portal_container_name }}
+    restart: unless-stopped
+    env_file:
+      - {{ ops_portal_env_file }}
+    ports:
+      - "{{ ops_portal_internal_port }}:8090"
+    volumes:
+      - {{ ops_portal_data_dir }}:/srv/ops-portal/data:ro
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8090/health', timeout=5)
+      interval: 30s
+      timeout: 5s
+      retries: 3

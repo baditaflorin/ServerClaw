@@ -26,6 +26,15 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
             "/opt/certbot-dns-hetzner",
         )
 
+    def test_ops_portal_defaults_use_authenticated_proxy_mode(self) -> None:
+        extra_hostnames = [site["hostname"] for site in self.defaults["public_edge_extra_sites"]]
+
+        self.assertNotIn("ops.lv3.org", extra_hostnames)
+        self.assertEqual(
+            self.defaults["public_edge_authenticated_sites"]["ops.lv3.org"]["unauthenticated_paths"],
+            ["/health"],
+        )
+
     def test_tasks_include_dns_hetzner_plugin_and_credentials_flow(self) -> None:
         task_names = {task["name"] for task in self.tasks}
 

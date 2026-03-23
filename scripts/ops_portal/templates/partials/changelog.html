@@ -1,0 +1,31 @@
+<div class="changelog-grid">
+  <section class="panel">
+    <h3>Recent Live Applies</h3>
+    {% if deployments %}
+    <ul class="timeline">
+      {% for deployment in deployments %}
+      <li>
+        <strong>{{ deployment.summary }}</strong>
+        <span>{{ deployment.recorded_on|humanize_timestamp }}</span>
+        <span class="muted">{{ deployment.recorded_by }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="muted">No live-apply receipts are mirrored into the portal data set yet.</p>
+    {% endif %}
+  </section>
+
+  <section class="panel">
+    <h3>Unreleased Notes</h3>
+    {% if changelog_notes %}
+    <ul class="compact-list">
+      {% for note in changelog_notes %}
+      <li>{{ note }}</li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="muted">No unreleased notes are recorded in changelog.md.</p>
+    {% endif %}
+  </section>
+</div>

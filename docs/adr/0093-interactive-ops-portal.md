@@ -1,10 +1,10 @@
 # ADR 0093: Interactive Ops Portal with Live Actions
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.97.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-23
 - Date: 2026-03-23
 
 ## Context
@@ -104,6 +104,18 @@ Published at `ops.lv3.org` via nginx edge with OIDC enforcement (replacing the c
 ### Transition from static portal
 
 The existing `scripts/generate_ops_portal.py` continues to run and writes its output to `receipts/ops-portal-snapshot.html` as a point-in-time read-only archive. The live portal at `ops.lv3.org` switches to the dynamic version. This is a non-breaking change: the DNS entry and OIDC client already exist.
+
+### Repository implementation
+
+The repository implementation delivered in `0.97.0` includes:
+
+- `scripts/ops_portal/` — FastAPI + Jinja templates for the interactive portal shell, live action surface, drift panel, runbook launcher, changelog panel, and SSE deployment console
+- `roles/ops_portal_runtime/` plus `playbooks/ops-portal.yml` — container build and runtime deployment on `docker-runtime-lv3`
+- public-edge OIDC propagation updates so the protected proxy forwards the authenticated operator identity and access token to the portal, while `GET /health` remains unauthenticated
+- catalog updates for the interactive runtime contract in `config/service-capability-catalog.json`, `config/health-probe-catalog.json`, `config/subdomain-catalog.json`, and `config/api-gateway-catalog.json`
+- legacy static snapshot archiving through `receipts/ops-portal-snapshot.html`
+
+The live cutover from the existing static portal is still intentionally pending until applied from `main`.
 
 ## Consequences
 

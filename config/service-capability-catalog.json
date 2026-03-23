@@ -415,32 +415,36 @@
     {
       "id": "ops_portal",
       "name": "Platform Operations Portal",
-      "description": "Generated operator-facing static portal for service, runbook, ADR, and environment navigation.",
+      "description": "Interactive operator portal with live service actions, drift visibility, runbook launchers, and deployment streaming.",
       "category": "access",
       "lifecycle_status": "planned",
-      "vm": "nginx-lv3",
-      "vmid": 110,
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8090",
       "public_url": "https://ops.lv3.org",
       "subdomain": "ops.lv3.org",
       "exposure": "edge-published",
-      "adr": "0074",
-      "runbook": "docs/runbooks/platform-operations-portal.md",
+      "health_probe_id": "ops_portal",
+      "adr": "0093",
+      "runbook": "docs/runbooks/ops-portal-down.md",
       "tags": [
         "portal",
         "operations",
-        "navigation"
+        "actions",
+        "drift"
       ],
       "environments": {
         "production": {
           "status": "planned",
           "url": "https://ops.lv3.org",
-          "subdomain": "ops.lv3.org"
+          "subdomain": "ops.lv3.org",
+          "notes": "Interactive runtime now ships from the repo, but live cutover from the static portal still requires apply from main."
         },
         "staging": {
           "status": "planned",
           "url": "https://ops.staging.lv3.org",
           "subdomain": "ops.staging.lv3.org",
-          "notes": "Planned staging portal generated from the same canonical catalogs."
+          "notes": "Planned staging portal for the interactive runtime."
         }
       }
     },

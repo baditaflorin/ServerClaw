@@ -826,6 +826,31 @@ platform_service_topology:
     ports: {}
     urls:
       public: https://sso.lv3.org
+  ops_portal:
+    service_name: ops-portal
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: ops.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: ops
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:{{ platform_port_assignments.ops_portal_port }}
+    service_id: ops_portal
+    ports: {}
+    urls:
+      public: https://ops.lv3.org
   openbao:
     service_name: openbao
     owning_vm: docker-runtime-lv3
@@ -944,6 +969,10 @@ platform_dns_records:
       value: 65.108.75.123
       ttl: 60
     - name: sso
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: ops
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -1329,6 +1358,31 @@ public_edge_service_topology:
     ports: {}
     urls:
       public: https://sso.lv3.org
+  ops_portal:
+    service_name: ops-portal
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: ops.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: ops
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:{{ platform_port_assignments.ops_portal_port }}
+    service_id: ops_portal
+    ports: {}
+    urls:
+      public: https://ops.lv3.org
   openbao:
     service_name: openbao
     owning_vm: docker-runtime-lv3
