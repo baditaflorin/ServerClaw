@@ -36,6 +36,7 @@ The workflow manages these live surfaces:
 - Tailscale-only operator entrypoint at `http://100.118.189.95:8005`
 - repo-managed workspace `lv3`
 - seeded script `f/lv3/windmill_healthcheck`
+- seeded script `f/lv3/rotate_credentials`
 
 ## Generated Local Artifacts
 
@@ -59,4 +60,5 @@ Run these checks after converge:
 - Windmill stays private-only in this rollout. There is no public edge publication and no public DNS record for it.
 - The current bootstrap uses a repo-managed superadmin secret mirrored locally so the repository can seed and verify the runtime without UI-only state. Replace that with narrower identities as ADR 0046, ADR 0047, and ADR 0056 are implemented.
 - No repo-managed Windmill job in this rollout stores long-lived third-party secrets inside Windmill. Secret-bearing workflows should wait for ADR 0043 or use another approved authority.
+- The seeded `f/lv3/rotate_credentials` script summarizes the canonical secret-rotation catalog and is the first Windmill surface for ADR 0065.
 - Backup coverage comes from the existing VM backup policy: `postgres-lv3` protects the Windmill database and `docker-runtime-lv3` protects the runtime filesystem and logs.

@@ -36,7 +36,8 @@ make syntax-check-openbao
    - `breakglass` userpass for emergency use
    - `controller-automation` AppRole
    - `mail-platform` AppRole
-7. Seeds current controller and mail secrets into OpenBao under scoped KV paths.
+   - `secret-rotation` AppRole reserved for the future Windmill-side scheduler path
+7. Seeds current controller, Windmill, and mail secrets into OpenBao under scoped KV paths.
 8. Configures the PostgreSQL database secrets engine and verifies that OpenBao can mint working dynamic credentials.
 
 ## Controller-Local Artifacts
@@ -49,6 +50,7 @@ The converge creates these controller-local files:
 - `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/postgres-rotator-password.txt`
 - `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/controller-automation-approle.json`
 - `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/mail-platform-approle.json`
+- `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/secret-rotation-approle.json`
 
 Treat the entire `.local/openbao/` subtree as recovery material and keep it out of git.
 
@@ -105,4 +107,5 @@ curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local
 
 - The loopback HTTP API on `127.0.0.1:8201` remains the managed automation and operator path for bootstrap, verification, and recovery-safe forwarding.
 - The external OpenBao API on `https://100.118.189.95:8200` is private-only, published through the Proxmox host Tailscale path, and requires a valid client certificate signed by `step-ca`.
-- The current implementation seeds existing mail, monitoring, and Proxmox API artifacts into OpenBao so later consumers can fetch them without reintroducing git-managed secrets.
+- The current implementation seeds existing mail, monitoring, Proxmox API, Windmill, and mail-profile artifacts into OpenBao so later consumers can fetch them without reintroducing git-managed secrets.
+- Dedicated rotatable secret paths and their metadata now align with `config/secret-catalog.json`, so future scheduled evaluators can inspect bounded credential age directly in OpenBao.
