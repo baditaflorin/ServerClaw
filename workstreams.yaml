@@ -723,7 +723,7 @@ workstreams:
   - id: adr-0065-secret-rotation-automation
     adr: "0065"
     title: Secret rotation automation with OpenBao
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/adr-0065-secret-rotation
     worktree_path: ../proxmox_florin_server-secret-rotation
@@ -740,7 +740,7 @@ workstreams:
       - Windmill workflows
       - NATS events
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0066-mutation-audit-log
     adr: "0066"

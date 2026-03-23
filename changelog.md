@@ -8,6 +8,17 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.74.0 - 2026-03-23
+
+- completed the ADR 0065 live-apply path by fixing the secret-rotation playbook recursion, loading the generated platform facts required by the Windmill runtime rotation path, and correcting OpenBao metadata writes to use the resolved metadata keys
+- hardened the Docker-host guest firewall contract so container workloads on `docker-runtime-lv3` and `docker-build-lv3` can forward to approved east-west services without bypassing the repo-managed nftables policy
+- recorded the first successful low-risk `windmill_database_password` rotation with OpenBao metadata updates, controller-local secret mirroring, and verified Windmill recovery on the live platform
+
+Platform impact:
+
+- the live platform is now on `0.36.0`, and ADR 0065 has been applied successfully for `windmill_database_password`
+- `docker-runtime-lv3` now permits Docker bridge egress through the guest nftables forward policy so repo-managed container workloads can reach approved internal services such as `postgres-lv3:5432`
+
 ## 0.73.0 - 2026-03-23
 
 - restored ADR 0065 on current `main` by reintroducing the governed `rotate-secret` workflow, command contracts, secret-rotation playbook, role-local rotate tasks, and the Windmill/OpenBao secret-rotation seed surfaces
