@@ -1,4 +1,7 @@
 ---
+kinds:
+  - playbook: "**/playbooks/tasks/security-scan.yml"
+  - playbook: "**/collections/ansible_collections/lv3/platform/playbooks/tasks/security-scan.yml"
 exclude_paths:
   - .ansible/
   - .git/

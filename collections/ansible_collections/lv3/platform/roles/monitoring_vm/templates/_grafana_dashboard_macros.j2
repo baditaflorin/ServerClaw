@@ -101,6 +101,12 @@ union(tables: [status, health])
 {% macro drift_summary_query(bucket, field_name) -%}
 from(bucket: "{{ bucket }}") |> range(start: -30d) |> filter(fn: (r) => r._measurement == "platform_drift_summary" and r.environment == "production" and r._field == "{{ field_name }}") |> last()
 {%- endmacro %}
+{% macro security_posture_summary_query(bucket, field_name) -%}
+from(bucket: "{{ bucket }}") |> range(start: -30d) |> filter(fn: (r) => r._measurement == "platform_security_posture_summary" and r.environment == "production" and r._field == "{{ field_name }}")
+{%- endmacro %}
+{% macro security_posture_host_query(bucket, field_name) -%}
+from(bucket: "{{ bucket }}") |> range(start: -30d) |> filter(fn: (r) => r._measurement == "platform_security_posture_host" and r.environment == "production" and r._field == "{{ field_name }}")
+{%- endmacro %}
 {% macro timeseries_panel(datasource_name, panel_id, x, y, title, unit, query, min_value=None, max_value=None, width=6, height=8) -%}
 {
   "id": {{ panel_id }},

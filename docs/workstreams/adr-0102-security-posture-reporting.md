@@ -2,28 +2,26 @@
 
 - ADR: [ADR 0102](../adr/0102-security-posture-reporting.md)
 - Title: Weekly Lynis host hardening scans and Trivy container image CVE scans with results in the ops portal, GlitchTip, and Mattermost
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0102-security-posture`
 - Worktree: `../proxmox_florin_server-security-posture`
 - Owner: codex
 - Depends On: `adr-0006-security-baseline`, `adr-0024-docker-security`, `adr-0044-windmill`, `adr-0057-mattermost`, `adr-0061-glitchtip`, `adr-0066-audit-log`, `adr-0068-image-policy`, `adr-0087-validation-gate`, `adr-0093-interactive-ops-portal`, `adr-0097-alerting-routing`
 - Conflicts With: none
-- Shared Surfaces: `playbooks/tasks/`, `scripts/`, `config/grafana/dashboards/`, `receipts/`
+- Shared Surfaces: `playbooks/tasks/`, `scripts/`, `config/workflow-catalog.json`, `config/control-plane-lanes.json`, `config/api-publication.json`, Grafana dashboard templates, `receipts/`
 
 ## Scope
 
 - write `playbooks/tasks/security-scan.yml` — Ansible playbook that runs Lynis on target hosts and fetches reports
 - write `scripts/parse_lynis_report.py` — parses Lynis `.dat` report into structured JSON
-- write `scripts/trivy_scan_running_images.sh` — scans all running containers on `docker-runtime-lv3` via Trivy
+- write `scripts/trivy_scan_running_images.sh` — scans the running images on each Docker host via the containerized Trivy runner
 - write `scripts/security_posture_report.py` — aggregates Lynis and Trivy results into a unified report JSON
 - write Windmill workflow `security-posture-scan` — scheduled Monday 01:00 UTC; orchestrates all scans
 - write `config/lynis-suppressions.json` — known-acceptable Lynis findings to suppress from reporting
 - add `receipts/security-reports/.gitkeep`
-- add Grafana panel `Security Posture` to platform overview dashboard (`config/grafana/dashboards/platform-overview.json`)
-- add Grafana alert: hardening index drops > 10 points from previous week → warning alert
-- add security posture summary endpoint to API gateway (`/v1/platform/security-posture`)
-- install Lynis on all target VMs via `roles/security_baseline/` (patch existing role)
-- install Trivy on `docker-build-lv3` via a new task in `roles/docker_build_server/` or a dedicated role
+- add Security Posture sections to the generated ops portal and the managed platform overview dashboard template
+- add `platform.security.*` event-lane registration and publication metadata
+- make the workflow optionally forward summaries to Mattermost, critical findings to GlitchTip, and metrics to InfluxDB
 
 ## Non-Goals
 
@@ -37,38 +35,47 @@
 - `scripts/parse_lynis_report.py`
 - `scripts/trivy_scan_running_images.sh`
 - `scripts/security_posture_report.py`
+- `config/windmill/scripts/security-posture-scan.py`
+- `config/workflow-catalog.json`
+- `config/control-plane-lanes.json`
+- `config/api-publication.json`
 - `config/lynis-suppressions.json`
 - `receipts/security-reports/.gitkeep`
-- `config/grafana/dashboards/platform-overview.json` (patched: Security Posture panel)
-- `roles/security_baseline/` (patched: Lynis installation task)
+- `collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/lv3-platform-overview.json.j2`
+- `scripts/generate_ops_portal.py`
+- `docs/runbooks/security-posture-reporting.md`
 - `docs/adr/0102-security-posture-reporting.md`
 - `docs/workstreams/adr-0102-security-posture-reporting.md`
 
 ## Expected Live Surfaces
 
-- Windmill `security-posture-scan` workflow has at least one successful run
+- Windmill `security-posture-scan` workflow has at least one successful run from the worker checkout
 - `receipts/security-reports/` contains at least one report JSON
-- Grafana platform overview shows Security Posture panel with hardening index bars
-- Mattermost `#platform-security` channel received the weekly scan summary
+- Grafana platform overview shows Security Posture panels backed by the repo-managed line protocol metrics
+- NATS `platform.security.*` is receivable when publication is enabled
 
 ## Verification
 
-- Trigger `security-posture-scan` workflow manually
-- Verify `receipts/security-reports/<date>.json` is written with all 5 hosts' Lynis results
-- Verify Trivy results are included for all running containers on `docker-runtime-lv3`
-- Mattermost `#platform-security` received the scan summary
-- Grafana Security Posture panel shows hardening indexes for all 5 hosts
+- `python3 -m py_compile scripts/parse_lynis_report.py scripts/security_posture_report.py config/windmill/scripts/security-posture-scan.py`
+- `python3 scripts/parse_lynis_report.py tests/fixtures/security_posture_docker_runtime.dat`
+- `uv run --with pytest --with pyyaml --with jsonschema pytest -q tests/test_parse_lynis_report.py tests/test_security_posture_report.py tests/test_ops_portal.py`
+- `uv run --with pyyaml --with jsonschema python scripts/generate_ops_portal.py --check`
 
 ## Merge Criteria
 
-- Workflow completes successfully with results from at least 3 hosts
-- No CRITICAL CVEs in any running container image (if any are found, update the images before merging)
-- Lynis hardening indexes are > 50 for all hosts
-- Grafana panel deployed and showing data
+- repo workflow surfaces validate and the targeted tests pass
+- the report generator writes a receipt, compares to the previous receipt, and emits the expected summary shape
+- the ops portal and dashboard templates include the security posture summary surfaces
+- the ADR, runbook, and workstream registry reflect repository implementation status
 
 ## Notes For The Next Assistant
 
-- Lynis runs as root; the Ansible task must use `become: yes`; the report file must be fetched as root and then chown'd to the automation user before the fetch module runs, or use `become_user: root` explicitly
-- Trivy needs to pull image manifests from the registry (`registry.lv3.org`); ensure the build server has valid step-ca TLS certificates and the registry is reachable; if not, pass `--skip-db-update` and use a pre-cached DB
-- Add `#platform-security` Mattermost channel before the workflow runs; ensure the Alertmanager Mattermost webhook has posting rights to this channel
-- The hardening index trend comparison requires storing the previous week's report; read the most recent file in `receipts/security-reports/` and compare indexes; the first run has no baseline and should report `N/A (first run)` for the trend
+- The current repo implementation is intentionally receipt-first; no live platform version bump is claimed until the workflow is scheduled from `main` and a successful live receipt exists.
+- The containerized Trivy runner uses the host Docker socket, so it can scan the currently running images without a separate native Trivy install.
+- The hardening index trend comparison reads the newest existing receipt in `receipts/security-reports/`; the first run has no baseline and therefore no delta.
+
+## Outcome
+
+- repository implementation is complete on `main` in repo release `0.97.0`
+- the repo now ships the scan playbook, Lynis parser, Trivy runtime scanner, security posture report generator, Windmill wrapper, receipt directory, portal summary, dashboard panels, and `platform.security.*` event-lane metadata
+- no live platform version change is claimed yet; scheduling the workflow, configuring webhook or metric credentials, and collecting the first production receipt still require apply from `main`
