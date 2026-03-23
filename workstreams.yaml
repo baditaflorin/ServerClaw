@@ -135,7 +135,7 @@ workstreams:
       - playbooks/docker-compose-stacks.yml
       - roles/docker_compose_stack
       - docs/runbooks/deploy-docker-compose-stack.md
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: false
 
   - id: adr-0026-postgres-vm
@@ -1556,7 +1556,7 @@ workstreams:
   - id: adr-0099-backup-restore-verification
     adr: "0099"
     title: Automated backup restore verification
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0099-backup-restore-verification
     worktree_path: ../proxmox_florin_server-backup-restore-verification
@@ -1574,7 +1574,7 @@ workstreams:
       - scripts/
       - Windmill workflows
       - receipts/
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: false
 
   - id: adr-0100-disaster-recovery
@@ -1604,7 +1604,7 @@ workstreams:
   - id: adr-0101-certificate-lifecycle
     adr: "0101"
     title: Automated certificate lifecycle management
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0101-certificate-lifecycle
     worktree_path: ../proxmox_florin_server-certificate-lifecycle
@@ -1619,8 +1619,9 @@ workstreams:
     conflicts_with: []
     shared_surfaces:
       - config/health-probe-catalog.json
-      - all Compose stacks
-      - systemd unit files
+      - config/certificate-catalog.json
+      - TLS-owning service roles
+      - systemd unit files on VMs
     ready_to_merge: false
     live_applied: false
 
@@ -1839,10 +1840,10 @@ workstreams:
   - id: adr-0111-integration-tests
     adr: "0111"
     title: End-to-end integration test suite
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0111-integration-tests
-    worktree_path: ../proxmox_florin_server-integration-tests
+    worktree_path: .worktrees/adr-0111
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0111-integration-test-suite.md
     depends_on:
       - adr-0044-windmill
@@ -1858,8 +1859,13 @@ workstreams:
     conflicts_with: []
     shared_surfaces:
       - tests/
+      - scripts/integration_suite.py
+      - requirements/integration-tests.txt
+      - Makefile
       - config/validation-gate.json
+      - config/workflow-catalog.json
       - Windmill workflows
       - Keycloak realm
+      - docs/runbooks/
     ready_to_merge: false
     live_applied: false

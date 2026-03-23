@@ -84,7 +84,7 @@
         ".githooks/pre-push"
       ],
       "outputs": [
-        "A blocking pass or fail result across the eight configured pre-push validation checks, together with a recorded last-run status payload."
+        "A blocking pass or fail result across the nine configured pre-push validation checks, together with a recorded last-run status payload."
       ],
       "verification_commands": [
         "make pre-push-gate",
@@ -144,6 +144,50 @@
       ],
       "verification_commands": [
         "make post-merge-gate"
+      ]
+    },
+    "nightly-integration-tests": {
+      "description": "Run the ADR 0111 nightly integration suite, post the summary to Mattermost, and emit GlitchTip failures when checks regress.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "nightly-integration-tests",
+        "command": "make nightly-integration-tests"
+      },
+      "preflight": {
+        "required": false,
+        "required_secret_ids": []
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/integration-test-suite.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/validation-gate.json",
+        "config/windmill/scripts/nightly-integration-tests.py",
+        "docs/adr/0111-end-to-end-integration-test-suite.md",
+        "docs/runbooks/integration-test-suite.md",
+        "requirements/integration-tests.txt",
+        "scripts/integration_suite.py",
+        "tests/integration/conftest.py",
+        "tests/integration/test_authentication.py",
+        "tests/integration/test_platform_api.py",
+        "tests/integration/test_secret_management.py",
+        "tests/integration/test_deployment.py",
+        "tests/integration/test_observability.py",
+        "tests/integration/test_data_services.py",
+        "tests/integration/test_failover.py",
+        "tests/integration/test_backup_recovery.py"
+      ],
+      "outputs": [
+        "A JSON report under .local/integration-tests/nightly-last-run.json describing passed, failed, and skipped ADR 0111 checks.",
+        "An optional Mattermost summary and GlitchTip failure event when the worker has the corresponding webhook secrets or environment overrides."
+      ],
+      "verification_commands": [
+        "python3 scripts/integration_suite.py --mode gate --environment staging",
+        "python3 config/windmill/scripts/nightly-integration-tests.py --repo-path /srv/proxmox_florin_server"
       ]
     },
     "generate-status-docs": {
@@ -914,6 +958,48 @@
         "python3 -m py_compile scripts/drift_detector.py scripts/parse_ansible_drift.py scripts/docker_image_drift.py scripts/dns_drift.py scripts/tls_cert_drift.py",
         "echo '' | python3 scripts/parse_ansible_drift.py",
         "python3 scripts/drift_detector.py --help"
+      ]
+    },
+    "restore-verification": {
+      "description": "Run the ADR 0099 backup-restore verification workflow, write one receipt, emit the mutation-audit event, and optionally publish NATS and Mattermost summaries.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "restore-verification",
+        "command": "make restore-verification"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "proxmox_api_token_payload"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/backup-restore-verification.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/windmill/scripts/restore-verification.py",
+        "docs/runbooks/backup-restore-verification.md",
+        "receipts/restore-verifications",
+        "scripts/restore_verification.py",
+        "scripts/smoke_tests/backup_vm_smoke.py",
+        "scripts/smoke_tests/docker_runtime_smoke.py",
+        "scripts/smoke_tests/postgres_smoke.py",
+        "tests/test_restore_verification.py",
+        "tests/test_restore_verification_windmill.py"
+      ],
+      "outputs": [
+        "A dated restore-verification receipt recording the selected backup, restore duration, boot time, per-target smoke tests, and overall pass or fail status.",
+        "Mutation-audit evidence plus optional NATS and Mattermost notifications for the restore-verification run."
+      ],
+      "verification_commands": [
+        "python3 -m py_compile scripts/restore_verification.py scripts/smoke_tests/postgres_smoke.py scripts/smoke_tests/docker_runtime_smoke.py scripts/smoke_tests/backup_vm_smoke.py config/windmill/scripts/restore-verification.py",
+        "uv run --with pytest --with pyyaml pytest tests/test_restore_verification.py tests/test_restore_verification_windmill.py -q",
+        "python3 scripts/restore_verification.py --help"
       ]
     },
     "rotate-secret": {

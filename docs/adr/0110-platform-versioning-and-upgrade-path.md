@@ -129,7 +129,7 @@ This defines "finished product" in machine-checkable terms.
 lv3 release status
 # Platform 1.0.0 readiness:
 #   ✅ ADRs 0001–0091: all implemented
-#   ⏳ ADRs 0092–0111: 3/20 implemented (0.15 complete)
+#   ⏳ ADRs 0092–0111: 6/20 implemented (0.30 complete)
 #   ✅ Backup restore verification: 2 consecutive passes
 #   ⏳ Ops portal: not yet deployed
 #   ⏳ Status page: not yet deployed

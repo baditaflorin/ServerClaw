@@ -39,10 +39,19 @@ openbao_tls_client_ca_host_file: "{{ openbao_tls_dir }}/root_ca.crt"
 openbao_tls_server_cert_file: "{{ openbao_tls_mount_dir }}/server.crt"
 openbao_tls_server_key_file: "{{ openbao_tls_mount_dir }}/server.key"
 openbao_tls_client_ca_file: "{{ openbao_tls_mount_dir }}/root_ca.crt"
+openbao_tls_certificate_subject: "{{ platform_host.management.tailscale_ipv4 }}"
 openbao_tls_server_sans:
   - "{{ platform_service_topology | platform_service_host('openbao') }}"
   - "{{ platform_host.management.tailscale_ipv4 }}"
+openbao_tls_certificate_not_after: 24h
 openbao_tls_cert_renew_before_seconds: 86400
+openbao_tls_renewal_timer_name: lv3-openbao-cert-renew
+openbao_tls_renewal_script_path: "/usr/local/libexec/{{ openbao_tls_renewal_timer_name }}.sh"
+openbao_tls_renewal_service_path: "/etc/systemd/system/{{ openbao_tls_renewal_timer_name }}.service"
+openbao_tls_renewal_timer_path: "/etc/systemd/system/{{ openbao_tls_renewal_timer_name }}.timer"
+openbao_tls_renewal_on_calendar: "*:0/15"
+openbao_tls_renewal_randomized_delay_seconds: 60
+openbao_tls_reload_command: "docker compose --file {{ openbao_compose_file }} restart openbao"
 openbao_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao
 openbao_init_local_file: "{{ openbao_local_artifact_dir }}/init.json"
 openbao_ops_password_local_file: "{{ openbao_local_artifact_dir }}/ops-password.txt"

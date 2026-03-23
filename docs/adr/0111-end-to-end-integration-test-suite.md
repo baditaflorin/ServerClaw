@@ -1,10 +1,10 @@
 # ADR 0111: End-to-End Integration Test Suite
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.100.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-23
 - Date: 2026-03-23
 
 ## Context
@@ -258,6 +258,13 @@ Test results are published to:
 - **Molecule for Ansible role testing**: molecule tests individual roles in isolation; does not test cross-service integration; both are needed, not either/or
 - **Contract testing (Pact)**: verifies API contracts between producer and consumer services; excellent for microservices teams; over-engineered for a single-operator platform where all services are in the same repo
 - **Manual smoke testing after each deployment**: the current state; inconsistent; does not catch regressions over time; not scalable
+
+## Implementation Notes
+
+- Repository implementation landed in `0.100.0` with the environment-aware runner in [scripts/integration_suite.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/integration_suite.py), the opt-in live test matrix under [tests/integration/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests/integration), and the nightly wrapper at [config/windmill/scripts/nightly-integration-tests.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/nightly-integration-tests.py).
+- The validation contract now includes a non-destructive gate entry in [config/validation-gate.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/validation-gate.json), while [Makefile](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/Makefile) exposes `make integration-tests` and `make nightly-integration-tests` for local and worker execution.
+- Operator guidance for targets, environment variables, reports, and destructive toggles is documented in [docs/runbooks/integration-test-suite.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/integration-test-suite.md).
+- No live platform version is claimed here. Scheduling the recurring worker job, provisioning `test-runner@lv3.org`, and storing its credentials in OpenBao remain follow-up apply tasks from `main`.
 
 ## Related ADRs
 

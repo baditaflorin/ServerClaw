@@ -246,6 +246,55 @@
         ]
       }
     },
+    "nightly-integration-tests": {
+      "description": "Run the ADR 0111 nightly integration suite, including the NetBox rotation mutation check when the worker is provisioned for it.",
+      "workflow_id": "nightly-integration-tests",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "LV3_TEST_RUNNER_USERNAME",
+          "kind": "operator_parameter",
+          "required": true,
+          "source": "Windmill worker environment or OpenBao injection",
+          "description": "Dedicated automation identity used to obtain a real Keycloak token for the integration suite."
+        },
+        {
+          "name": "LV3_TEST_RUNNER_PASSWORD",
+          "kind": "operator_parameter",
+          "required": true,
+          "source": "Windmill worker environment or OpenBao injection",
+          "description": "Password for the dedicated integration-test runner identity."
+        },
+        {
+          "name": "LV3_INTEGRATION_GATEWAY_URL",
+          "kind": "operator_parameter",
+          "required": false,
+          "source": "Windmill worker environment",
+          "description": "Explicit API gateway override used until ADR 0092 is represented in the service catalog."
+        }
+      ],
+      "expected_preconditions": [
+        "make validate passes before enabling the nightly schedule",
+        "The worker can resolve and reach the intended environment endpoints over the private network or Tailscale",
+        "The test-runner identity is provisioned through ADR 0108 and its credentials are stored in OpenBao or equivalent worker injection",
+        "Operators explicitly review whether the nightly run should include the NetBox rotation mutation test before enabling the schedule"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the nightly report path, the enabled mutation toggles, and at least one successful scheduled run before treating the workflow as fully rolled out."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the worker cannot reach the private platform URLs, the Keycloak token flow fails, or the rotation mutation leaves NetBox unhealthy.",
+          "Stop if the nightly job starts creating GlitchTip or Mattermost noise because the target environment is not yet intentionally enrolled."
+        ],
+        "rollback_guidance": [
+          "Disable the schedule and rerun the suite manually through scripts/integration_suite.py before re-enabling automation.",
+          "If the rotation mutation fails, restore the affected service through the repo-managed secret rotation or service converge path before the next nightly window."
+        ]
+      }
+    },
     "adr-0077-compose-runtime-secrets-live-apply": {
       "description": "Converge the ADR 0077 runtime-secret injection path across the docker-runtime-lv3 platform applications.",
       "workflow_id": "adr-0077-compose-runtime-secrets-live-apply",
@@ -1628,6 +1677,47 @@
         "rollback_guidance": [
           "Do not reconcile directly from shell history; return to the owning repo workflow or runbook for the affected source.",
           "If the drift run itself was noisy because a workstream was missing suppression metadata, fix the workstream registry and rerun before escalating."
+        ]
+      }
+    },
+    "run-restore-verification": {
+      "description": "Run the ADR 0099 restore-verification workflow so PBS backups are restored into short-lived staging VMs and validated before the next disaster-recovery event forces the first real restore.",
+      "workflow_id": "restore-verification",
+      "scope": "proxmox_host",
+      "approval_policy": "standard_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used to reach the Proxmox host and the restored guests over the managed jump path."
+        },
+        {
+          "name": "proxmox_api_token_payload",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-local Proxmox API token payload used by the restore-verification workflow for VM teardown safety and the surrounding Proxmox automation context."
+        }
+      ],
+      "expected_preconditions": [
+        "make validate passes on the repo state being used for the restore-verification run",
+        "The staging bridge exists on the Proxmox host and the controller-to-host jump path is healthy before any restore starts",
+        "Enough local storage capacity exists for the temporary restored VMs so the workflow can complete and destroy them cleanly"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the dated restore-verification receipt, the selected backup dates, any failed smoke tests, and the cleanup outcome for VMIDs 900 to 909."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if PBS backup listing fails, a restore cannot be created, or any temporary VM cannot be cleaned up after the run.",
+          "Stop if the staging bridge or SSH path is unhealthy enough that restore success cannot be distinguished from environment failure."
+        ],
+        "rollback_guidance": [
+          "Destroy any leftover restore-verification VMIDs immediately before retrying; do not leave ambiguous restored guests running on the host.",
+          "Treat repeated restore failures as backup health incidents and investigate the selected PBS recovery points before changing unrelated platform automation."
         ]
       }
     },
