@@ -74,7 +74,7 @@ Portainer is now live on `docker-runtime-lv3` and reachable privately at `https:
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.78.0` |
+| Repository version | `0.79.0` |
 | Platform version | `0.37.0` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -352,6 +352,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Secret Rotation And Lifecycle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/secret-rotation-and-lifecycle.md)
 - [Service Capability Catalog](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/service-capability-catalog.md)
 - [Staging And Production Topology](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/staging-and-production-topology.md)
+- [Subdomain Governance](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/subdomain-governance.md)
 - [Validate Repository Automation Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/validate-repository-automation.md)
 - [Workflow Catalog And Execution Contracts](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/workflow-catalog-and-execution-contracts.md)
 
@@ -530,7 +531,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.78.0` |
+| Repository version | `0.79.0` |
 | Platform version | `0.37.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -617,6 +618,7 @@ This repository is intentionally opinionated:
 | `0072` | Staging and production environment topology | `merged` | [adr-0072-staging-production-topology.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0072-staging-production-topology.md) |
 | `0074` | Platform operations portal | `merged` | [adr-0074-ops-portal.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0074-ops-portal.md) |
 | `0075` | Service capability catalog | `merged` | [adr-0075-service-capability-catalog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0075-service-capability-catalog.md) |
+| `0076` | Subdomain governance and DNS lifecycle | `merged` | [adr-0076-subdomain-governance.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0076-subdomain-governance.md) |
 | `0079` | Playbook decomposition and shared execution model | `merged` | [adr-0079-playbook-decomposition.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0079-playbook-decomposition.md) |
 <!-- END GENERATED: merged-workstreams -->
 

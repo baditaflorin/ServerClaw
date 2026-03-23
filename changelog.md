@@ -8,6 +8,16 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.79.0 - 2026-03-23
+
+- completed ADR 0076 on current `main` by turning the subdomain catalog into an enforced governance contract with reserved-prefix policy, repo-managed edge-route coverage checks, and a dedicated subdomain lifecycle runbook
+- added `playbooks/provision-subdomain.yml`, `make provision-subdomain FQDN=<hostname>`, and matching workflow and command catalog contracts so already-catalogued hostnames can be converged through the Hetzner DNS role and, when applicable, the shared NGINX edge publication path
+- added focused regression coverage for ADR 0076 validation behavior and repaired the current-main `ansible-lint` idempotency failure in `roles/docker_runtime/tasks/main.yml` so the full repository gate passes cleanly again
+
+Platform impact:
+
+- no direct live platform change is claimed in this release commit; this is a repository governance and operator workflow completion on top of the current live `0.37.0` platform
+
 ## 0.78.0 - 2026-03-23
 
 - completed ADR 0066 on current `main` by validating the structured mutation-audit schema, Ansible callback emission, command-catalog audit events, the seeded Windmill helper, and the host-side `/var/log/platform/mutation-audit.jsonl` sinks now shipped through ADR 0052

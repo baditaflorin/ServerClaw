@@ -1320,6 +1320,42 @@
         "dig +short database.lv3.org"
       ]
     },
+    "provision-subdomain": {
+      "description": "Converge one catalogued lv3.org hostname through the Hetzner DNS role and, when applicable, refresh the shared NGINX edge publication.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "provision-subdomain",
+        "command": "HETZNER_DNS_API_TOKEN=... make provision-subdomain FQDN=<hostname>"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "hetzner_dns_api_token"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "external_live",
+      "owner_runbook": "docs/runbooks/subdomain-governance.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/provision-subdomain.yml",
+        "scripts/subdomain_catalog.py",
+        "roles/hetzner_dns_record/tasks/main.yml",
+        "roles/nginx_edge_publication/tasks/main.yml"
+      ],
+      "outputs": [
+        "The selected DNS record is converged through the Hetzner API.",
+        "If the FQDN is backed by a repo-managed edge route, the shared NGINX publication and certificate set are refreshed."
+      ],
+      "verification_commands": [
+        "uvx --from pyyaml python scripts/subdomain_catalog.py --fqdn ops.lv3.org --provision-check",
+        "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory/hosts.yml playbooks/provision-subdomain.yml --syntax-check",
+        "HETZNER_DNS_API_TOKEN=... make provision-subdomain FQDN=ops.lv3.org"
+      ]
+    },
     "check-platform-drift": {
       "description": "Run the ADR 0071 observation loop checks and emit structured findings from the controller command lane.",
       "lifecycle_status": "active",

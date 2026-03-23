@@ -943,6 +943,31 @@ workstreams:
     ready_to_merge: false
     live_applied: false
 
+  - id: adr-0076-subdomain-governance
+    adr: "0076"
+    title: Subdomain governance and DNS lifecycle
+    status: merged
+    owner: codex
+    branch: codex/adr-0076-subdomain-governance
+    worktree_path: .worktrees/adr-0076
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0076-subdomain-governance.md
+    depends_on:
+      - adr-0042-step-ca
+      - adr-0021-nginx-edge-publication
+      - adr-0072-staging-production-topology
+    conflicts_with: []
+    shared_surfaces:
+      - config/subdomain-catalog.json
+      - scripts/subdomain_catalog.py
+      - roles/hetzner_dns_record
+      - roles/nginx_edge_publication
+      - playbooks/provision-subdomain.yml
+      - Makefile
+      - config/workflow-catalog.json
+      - config/command-catalog.json
+    ready_to_merge: false
+    live_applied: false
+
   - id: adr-0079-playbook-decomposition
     adr: "0079"
     title: Playbook decomposition and shared execution model
