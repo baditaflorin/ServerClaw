@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0104](../adr/0104-service-dependency-graph.md)
 - Title: Machine-readable dependency graph with transitive impact analysis, deployment ordering, portal integration, and generated Mermaid documentation
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0104-service-dependency-graph`
 - Worktree: `.worktrees/adr-0104`
 - Owner: codex
