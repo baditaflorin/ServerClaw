@@ -29,3 +29,15 @@ def test_host_network_policy_allows_platform_context_proxy_port() -> None:
     docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
     host_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "host")
     assert 8010 in host_rule["ports"]
+
+
+def test_role_restores_docker_nat_chain_before_recreate() -> None:
+    tasks = load_tasks()
+    check_task = next(
+        task for task in tasks if task.get("name") == "Check whether the Docker nat chain exists before recreating published ports"
+    )
+    restore_task = next(
+        task for task in tasks if task.get("name") == "Restore Docker networking when the nat chain is missing"
+    )
+    assert check_task["ansible.builtin.command"]["argv"] == ["iptables", "-t", "nat", "-S", "DOCKER"]
+    assert restore_task["ansible.builtin.service"]["name"] == "docker"

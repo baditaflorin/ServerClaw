@@ -32,6 +32,12 @@ CORPUS_FILES: tuple[str, ...] = (
     "VERSION",
 )
 
+MIRRORED_PATH_PREFIXES: tuple[str, ...] = (
+    "docs/adr",
+    "docs/runbooks",
+    "receipts/live-applies",
+)
+
 
 def iter_corpus_paths(repo_root: Path) -> list[Path]:
     paths: list[Path] = []
@@ -55,6 +61,14 @@ def load_document_text(path: Path) -> str:
     if suffix in YAML_EXTENSIONS:
         return path.read_text()
     return path.read_text()
+
+
+def normalize_relative_path(relative_path: str) -> str:
+    for prefix in MIRRORED_PATH_PREFIXES:
+        duplicated_prefix = f"{prefix}/{Path(prefix).name}/"
+        if relative_path.startswith(duplicated_prefix):
+            return f"{prefix}/{relative_path.removeprefix(duplicated_prefix)}"
+    return relative_path
 
 
 def document_kind_for_path(relative_path: str) -> str:
@@ -174,7 +188,7 @@ def build_chunks(
     repo_root = repo_root.resolve()
     chunks: list[dict[str, Any]] = []
     for source_path in iter_corpus_paths(repo_root):
-        relative_path = source_path.relative_to(repo_root).as_posix()
+        relative_path = normalize_relative_path(source_path.relative_to(repo_root).as_posix())
         source_text = load_document_text(source_path)
         document_kind = document_kind_for_path(relative_path)
         document_title = first_heading(source_text) or source_path.stem.replace("-", " ")

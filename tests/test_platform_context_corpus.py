@@ -30,3 +30,20 @@ def test_build_chunks_prefers_markdown_sections(tmp_path: Path) -> None:
     manifest = build_manifest(tmp_path)
     assert manifest["source_count"] >= 6
     assert manifest["chunk_count"] == len(chunks)
+
+
+def test_build_chunks_normalizes_mirrored_corpus_paths(tmp_path: Path) -> None:
+    write(
+        tmp_path / "docs" / "adr" / "adr" / "0042-step-ca.md",
+        "# ADR 0042\n\n## Decision\nstep-ca issues SSH certificates.\n",
+    )
+    write(
+        tmp_path / "docs" / "runbooks" / "runbooks" / "rag-platform-context.md",
+        "# Runbook\n\n## Verify\nQuery the platform context API.\n",
+    )
+
+    chunks = build_chunks(tmp_path)
+
+    source_paths = {chunk["source_path"] for chunk in chunks}
+    assert "docs/adr/0042-step-ca.md" in source_paths
+    assert "docs/runbooks/rag-platform-context.md" in source_paths

@@ -168,6 +168,24 @@
     or 'Downloaded newer image' in platform_context_pull.stdout
     or 'Pull complete' in platform_context_pull.stdout
 
+- name: Check whether the Docker nat chain exists before recreating published ports
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: platform_context_docker_nat_chain
+  changed_when: false
+  failed_when: false
+
+- name: Restore Docker networking when the nat chain is missing
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+  when: platform_context_docker_nat_chain.rc != 0
+
 - name: Build and start the platform context stack
   ansible.builtin.command:
     argv:
