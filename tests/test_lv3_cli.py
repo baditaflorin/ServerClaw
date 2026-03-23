@@ -17,6 +17,7 @@ def minimal_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     (tmp_path / "Makefile").write_text(
         "\n".join(
             [
+                "drift-report:",
                 "remote-lint:",
                 "remote-validate:",
                 "remote-pre-push:",
@@ -179,3 +180,12 @@ def test_vm_list_uses_inventory(
 def test_completion_suggests_services(minimal_repo: Path) -> None:
     candidates = lv3_cli.completion_candidates(["lv3", "open"], "g")
     assert candidates == ["grafana"]
+
+
+def test_diff_dry_run_uses_drift_report_target(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    exit_code = lv3_cli.main(["diff", "--env", "production", "--dry-run"])
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "make drift-report ENV=production" in captured.out

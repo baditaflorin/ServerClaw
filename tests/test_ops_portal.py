@@ -1,3 +1,4 @@
+import json
 import shutil
 import sys
 import tempfile
@@ -8,7 +9,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from generate_ops_portal import render_portal  # noqa: E402
+import generate_ops_portal as ops_portal  # noqa: E402
 from service_catalog import load_service_catalog, validate_service_catalog  # noqa: E402
 
 
@@ -23,7 +24,7 @@ class OpsPortalRenderTests(unittest.TestCase):
     def test_render_portal_writes_expected_pages(self) -> None:
         temp_dir = Path(tempfile.mkdtemp(prefix="ops-portal-test-"))
         try:
-            render_portal(
+            ops_portal.render_portal(
                 temp_dir,
                 REPO_ROOT / "tests" / "fixtures" / "ops_portal_health.json",
                 0,
@@ -35,9 +36,31 @@ class OpsPortalRenderTests(unittest.TestCase):
             self.assertIn("Platform Operations Portal", index_html)
             self.assertIn("Grafana", index_html)
             self.assertIn("healthy", index_html)
+            self.assertIn("Drift Status", index_html)
             self.assertIn("ops.lv3.org", dns_html)
             self.assertIn("get-platform-status", agents_html)
         finally:
+            shutil.rmtree(temp_dir)
+
+    def test_render_portal_includes_drift_receipt_summary(self) -> None:
+        temp_dir = Path(tempfile.mkdtemp(prefix="ops-portal-test-"))
+        original = ops_portal.latest_drift_report
+        try:
+            drift_receipt = temp_dir / "latest-drift.json"
+            drift_receipt.write_text(
+                '{"generated_at":"2026-03-23T18:00:00Z","summary":{"status":"warn","unsuppressed_count":1,"warn_count":1,"critical_count":0,"suppressed_count":0},"records":[{"source":"dns","service":"grafana","severity":"warn","detail":"wrong record"}]}'
+            )
+            ops_portal.latest_drift_report = lambda: (drift_receipt, json.loads(drift_receipt.read_text()))
+            ops_portal.render_portal(
+                temp_dir,
+                REPO_ROOT / "tests" / "fixtures" / "ops_portal_health.json",
+                0,
+            )
+            index_html = (temp_dir / "index.html").read_text()
+            self.assertIn("Latest Receipt", index_html)
+            self.assertIn("wrong record", index_html)
+        finally:
+            ops_portal.latest_drift_report = original
             shutil.rmtree(temp_dir)
 
 

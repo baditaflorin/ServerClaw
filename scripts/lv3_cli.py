@@ -262,6 +262,12 @@ def remote_tofu_shell(environment: str, action: str, *, target: str | None = Non
 
 
 def resolve_diff_command(environment: str) -> CommandPlan:
+    if "drift-report" in parse_make_targets():
+        return CommandPlan(
+            label=f"diff --env {environment}",
+            route="controller local full-platform drift check",
+            command=["make", "drift-report", f"ENV={environment}"],
+        )
     if "tofu-drift" in parse_make_targets():
         return CommandPlan(
             label=f"diff --env {environment}",
@@ -270,8 +276,8 @@ def resolve_diff_command(environment: str) -> CommandPlan:
         )
     return CommandPlan(
         label=f"diff --env {environment}",
-        route="controller -> build server OpenTofu drift check",
-        command=["make", "remote-exec", f"COMMAND={remote_tofu_shell(environment, 'drift')}"],
+            route="controller -> build server OpenTofu drift check",
+            command=["make", "remote-exec", f"COMMAND={remote_tofu_shell(environment, 'drift')}"],
     )
 
 

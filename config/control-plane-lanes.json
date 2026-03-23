@@ -314,6 +314,19 @@
           "notes": "Each observation-loop check emits a structured finding on its own subject so future consumers can subscribe without scraping shell output."
         },
         {
+          "id": "platform-drift-subjects",
+          "kind": "event_subject",
+          "endpoint": "platform.drift.*",
+          "auth": "Internal NATS publication from ADR 0091 through the private docker-runtime-lv3 event bus runtime.",
+          "owner_refs": [
+            "proxmox_florin"
+          ],
+          "workflow_refs": [
+            "continuous-drift-detection"
+          ],
+          "notes": "Each scheduled drift run publishes per-record warn, critical, and unreachable events so portal, alerting, and future reconciliation workflows can subscribe to platform state divergence directly."
+        },
+        {
           "id": "maintenance-window-subjects",
           "kind": "event_subject",
           "endpoint": "maintenance.*",

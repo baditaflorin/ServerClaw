@@ -72,6 +72,7 @@ Portainer is now live on `docker-runtime-lv3` and reachable privately at `https:
 
 The repository now also ships the repo-managed `lv3` operator CLI for terminal-first discovery, validation, status checks, and private control-plane entrypoints.
 OpenTofu VM lifecycle automation is now implemented under `tofu/`, the six production VMs are imported into OpenTofu state through the build-server path, and `make tofu-drift ENV=production` now verifies the current production guest declarations without planned changes.
+The repository now also ships continuous drift detection across OpenTofu, Ansible check mode, runtime Docker image digests, DNS records, and TLS posture, with receipts under `receipts/drift-reports/`, an ops-portal Drift Status panel, and `lv3 diff` routed to `make drift-report`; the live schedule and dashboard metric feed still require apply from `main`.
 
 <!-- BEGIN GENERATED: platform-status -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_status_docs.py). Do not edit this block by hand.
@@ -79,7 +80,7 @@ OpenTofu VM lifecycle automation is now implemented under `tofu/`, the six produ
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.93.0` |
+| Repository version | `0.94.0` |
 | Platform version | `0.40.0` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -172,7 +173,7 @@ password SSH disabled on host and guests
 | `command` | Command Lane | `ssh` | 2 | Use SSH only for command-lane access. |
 | `api` | API Lane | `https` | 10 | Default new APIs to internal-only or operator-only publication. |
 | `message` | Message Lane | `authenticated_submission` | 2 | Submit platform mail through the internal mail platform rather than arbitrary external SMTP relays. |
-| `event` | Event Lane | `mixed` | 4 | Event sinks must be documented and intentionally reachable. |
+| `event` | Event Lane | `mixed` | 5 | Event sinks must be documented and intentionally reachable. |
 
 ### Current Governed Surfaces
 | Surface | Lane | Kind | Endpoint |
@@ -194,12 +195,13 @@ password SSH disabled on host and guests
 | `stalwart-mail-events` | `event` | `webhook` | `http://10.10.10.20:8081/webhooks/stalwart` |
 | `mattermost-incoming-webhooks` | `event` | `webhook` | `http://10.10.10.20:8065/hooks/<managed-id>` |
 | `platform-finding-subjects` | `event` | `event_subject` | `platform.findings.*` |
+| `platform-drift-subjects` | `event` | `event_subject` | `platform.drift.*` |
 | `maintenance-window-subjects` | `event` | `event_subject` | `maintenance.*` |
 
 ### API Publication Tiers
 | Tier | Title | Surfaces | Summary |
 | --- | --- | --- | --- |
-| `internal-only` | Internal-Only | 7 | Reachable only from LV3 private networks, loopback paths, or explicitly trusted control-plane hosts. |
+| `internal-only` | Internal-Only | 8 | Reachable only from LV3 private networks, loopback paths, or explicitly trusted control-plane hosts. |
 | `operator-only` | Operator-Only | 7 | Reachable only from approved operator devices over private access such as Tailscale. |
 | `public-edge` | Public Edge | 0 | Intentionally published on a public domain through the named edge model. |
 
@@ -219,6 +221,7 @@ password SSH disabled on host and guests
 | `stalwart-mail-events` | `internal-only` | `event` | `http://10.10.10.20:8081/webhooks/stalwart` | Reachable only from the private mail-platform stack on docker-runtime-lv3. |
 | `mattermost-incoming-webhooks` | `internal-only` | `event` | `http://10.10.10.20:8065/hooks/<managed-id>` | Reachable on the private Mattermost runtime at docker-runtime-lv3:8065, with mirrored webhook ids retained under .local/mattermost for controlled routing. |
 | `platform-finding-subjects` | `internal-only` | `event` | `platform.findings.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
+| `platform-drift-subjects` | `internal-only` | `event` | `platform.drift.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
 | `maintenance-window-subjects` | `internal-only` | `event` | `maintenance.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
 <!-- END GENERATED: control-plane-lanes -->
 
@@ -338,6 +341,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Deploy Uptime Kuma](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/deploy-uptime-kuma.md)
 - [Deployment History Portal](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/deployment-history-portal.md)
 - [Docker Check Runners](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/docker-check-runners.md)
+- [Drift Detection](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/drift-detection.md)
 - [Environment Promotion Pipeline](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/environment-promotion-pipeline.md)
 - [Generate Status Documents](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/generate-status-documents.md)
 - [Harden Access Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/harden-access.md)
@@ -553,7 +557,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.93.0` |
+| Repository version | `0.94.0` |
 | Platform version | `0.40.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -654,6 +658,7 @@ This repository is intentionally opinionated:
 | `0087` | Repository validation gate | `merged` | [adr-0087-validation-gate.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0087-validation-gate.md) |
 | `0089` | Build artifact cache and layer registry | `merged` | [adr-0089-build-cache.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0089-build-cache.md) |
 | `0090` | Unified platform CLI | `merged` | [adr-0090-platform-cli.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0090-platform-cli.md) |
+| `0091` | Continuous drift detection and reconciliation | `merged` | [adr-0091-drift-detection.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0091-drift-detection.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

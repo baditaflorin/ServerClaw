@@ -33,6 +33,7 @@ HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 ADR_DIR = repo_path("docs", "adr")
 RUNBOOK_DIR = repo_path("docs", "runbooks")
 BUILD_DIR = repo_path("build", "ops-portal")
+DRIFT_RECEIPTS_DIR = repo_path("receipts", "drift-reports")
 
 NAV = [
     ("index.html", "Service Map"),
@@ -78,7 +79,10 @@ def repo_remote_url() -> str:
 def repo_view_link(path: Path) -> str:
     remote = repo_remote_url()
     if remote.startswith("https://github.com/"):
-        relative = path.relative_to(repo_path())
+        try:
+            relative = path.relative_to(repo_path())
+        except ValueError:
+            return str(path)
         return f"{remote}/blob/main/{relative.as_posix()}"
 
     return str(path)
@@ -228,6 +232,70 @@ def render_summary(
             "</section>"
         )
     return '<section class="summary-grid">' + "".join(cards) + "</section>"
+
+
+def latest_drift_report() -> tuple[Path | None, dict[str, Any] | None]:
+    reports = sorted(DRIFT_RECEIPTS_DIR.glob("*.json"), key=lambda path: path.stat().st_mtime, reverse=True)
+    for report in reports:
+        try:
+            return report, load_json(report)
+        except Exception:  # noqa: BLE001
+            continue
+    return None, None
+
+
+def render_drift_panel() -> str:
+    path, payload = latest_drift_report()
+    if not path or not isinstance(payload, dict):
+        return (
+            '<section class="panel">'
+            '<div class="card-head"><div><h2>Drift Status</h2><p class="muted">No drift receipt is committed yet.</p></div>'
+            f"<div>{render_badge('unknown', 'neutral')}</div></div>"
+            "</section>"
+        )
+
+    summary = payload.get("summary", {})
+    status = str(summary.get("status", "unknown"))
+    badge_tone = "ok" if status == "clean" else "warn" if status == "warn" else "danger"
+    records = payload.get("records", [])
+    top_rows = []
+    for record in records[:5]:
+        service = record.get("service") or record.get("resource") or "n/a"
+        top_rows.append(
+            "<tr>"
+            f"<td>{escape(record.get('source', 'n/a'))}</td>"
+            f"<td>{escape(service)}</td>"
+            f"<td>{render_badge(str(record.get('severity', 'unknown')), 'warn' if record.get('severity') == 'warn' else 'danger' if record.get('severity') == 'critical' else 'neutral')}</td>"
+            f"<td>{escape(record.get('detail', ''))}</td>"
+            "</tr>"
+        )
+    receipt_link = render_external_link(repo_view_link(path), "Latest Receipt")
+    generated_at = escape(str(payload.get("generated_at", "unknown")))
+    status_metrics = (
+        '<div class="meta-list">'
+        f"<div><strong>Run</strong><span>{generated_at}</span></div>"
+        f"<div><strong>Unsuppressed</strong><span>{escape(summary.get('unsuppressed_count', 0))}</span></div>"
+        f"<div><strong>Warn</strong><span>{escape(summary.get('warn_count', 0))}</span></div>"
+        f"<div><strong>Critical</strong><span>{escape(summary.get('critical_count', 0))}</span></div>"
+        f"<div><strong>Suppressed</strong><span>{escape(summary.get('suppressed_count', 0))}</span></div>"
+        "</div>"
+    )
+    table = (
+        '<div class="table-scroll"><table>'
+        "<thead><tr><th>Source</th><th>Resource</th><th>Severity</th><th>Detail</th></tr></thead>"
+        f"<tbody>{''.join(top_rows) if top_rows else '<tr><td colspan=\"4\">No actionable drift.</td></tr>'}</tbody></table></div>"
+    )
+    return (
+        '<section class="panel">'
+        '<div class="card-head">'
+        '<div><h2>Drift Status</h2><p class="muted">Latest multi-source drift report from the ADR 0091 receipt stream.</p></div>'
+        f"<div>{render_badge(status, badge_tone)}</div>"
+        "</div>"
+        + status_metrics
+        + f'<div class="chip-row">{receipt_link}</div>'
+        + table
+        + "</section>"
+    )
 
 
 def render_service_cards(services: list[dict[str, Any]], health: dict[str, HealthState]) -> str:
@@ -572,7 +640,7 @@ def render_portal(output_dir: Path, health_snapshot: Path | None, probe_timeout:
         "index.html",
         "Platform Operations Portal",
         "Generated operator map of services, health, and ownership across the current LV3 estate.",
-        render_summary(services, subdomains, tools, environments) + render_service_cards(services, health),
+        render_summary(services, subdomains, tools, environments) + render_drift_panel() + render_service_cards(services, health),
     )
     write_page(
         output_dir,

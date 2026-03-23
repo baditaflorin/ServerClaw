@@ -1,10 +1,10 @@
 # ADR 0091: Continuous Drift Detection and Reconciliation
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.94.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-23
 - Date: 2026-03-22
 
 ## Context
@@ -52,7 +52,7 @@ Run in `--check` mode against production hosts. Changed tasks are drift. The out
 
 #### 3. Docker image drift (container version drift)
 
-Query the Docker daemon on each host for running container image digests, compare against `config/service-capability-catalog.json` `expected_image` field. Any container running a different digest than declared is image drift.
+Query the Docker daemon on each host for running container image digests, compare against the runtime image declarations in `config/image-catalog.json`. Any container running a different digest than declared is image drift.
 
 ```python
 actual_digest = docker_inspect(container)["Image"]
@@ -111,7 +111,7 @@ The ops portal (ADR 0074) displays a **Drift Status** panel:
 - Yellow: warn-class drift items exist (with count and services)
 - Red: critical-class drift (with service names and details)
 
-Each drift item links to the relevant ADR and has a "Reconcile" button that triggers the corrective playbook via Windmill.
+The implemented portal view links to the latest drift receipt and surfaces the most recent records directly from `receipts/drift-reports/`.
 
 ### Reconciliation
 

@@ -137,6 +137,15 @@
       "approval_notes": "ADR 0071 finding subjects stay private-first and should not be bridged outside the internal event plane without an explicit follow-up ADR."
     },
     {
+      "id": "platform-drift-subjects",
+      "title": "Platform drift event subjects",
+      "lane": "event",
+      "lane_surface_ref": "platform-drift-subjects",
+      "publication_tier": "internal-only",
+      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "approval_notes": "ADR 0091 drift subjects stay private-first because they disclose real-time divergence between repo intent and live platform state."
+    },
+    {
       "id": "maintenance-window-subjects",
       "title": "Maintenance window event subjects",
       "lane": "event",

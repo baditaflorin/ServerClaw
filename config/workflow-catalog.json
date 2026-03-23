@@ -871,6 +871,51 @@
         "curl -s -H \"Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)\" http://100.118.189.95:8005/api/users/global/whoami"
       ]
     },
+    "continuous-drift-detection": {
+      "description": "Run the ADR 0091 multi-source drift suite through the build server and publish structured drift events plus a stored receipt.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "drift-report",
+        "command": "make drift-report ENV=production"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "nats_jetstream_admin_password",
+          "proxmox_api_token_payload"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "validate-generated-portals"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/drift-detection.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/control-plane-lanes.json",
+        "config/subdomain-catalog.json",
+        "config/service-capability-catalog.json",
+        "config/image-catalog.json",
+        "config/windmill/scripts/continuous-drift-detection.py",
+        "scripts/drift_detector.py",
+        "scripts/parse_ansible_drift.py",
+        "scripts/docker_image_drift.py",
+        "scripts/dns_drift.py",
+        "scripts/tls_cert_drift.py",
+        "receipts/drift-reports"
+      ],
+      "outputs": [
+        "A timestamped drift receipt covering OpenTofu, Ansible, Docker image, DNS, and TLS drift plus structured NATS events for actionable findings."
+      ],
+      "verification_commands": [
+        "python3 -m py_compile scripts/drift_detector.py scripts/parse_ansible_drift.py scripts/docker_image_drift.py scripts/dns_drift.py scripts/tls_cert_drift.py",
+        "echo '' | python3 scripts/parse_ansible_drift.py",
+        "python3 scripts/drift_detector.py --help"
+      ]
+    },
     "rotate-secret": {
       "description": "Plan or apply one repo-managed secret rotation, update the owning service without a full reconverge, and persist the rotated value in OpenBao.",
       "lifecycle_status": "active",
