@@ -1,0 +1,35 @@
+$schema: config/schemas/operators.schema.json
+schema_version: "1.0.0"
+operators:
+  - id: florin-badita
+    name: Florin Badita
+    email: baditaflorin@gmail.com
+    role: admin
+    status: active
+    notes: Existing platform owner documented when ADR 0108 was implemented.
+    keycloak:
+      username: florin.badita
+      realm_roles:
+        - platform-admin
+      groups:
+        - lv3-platform-admins
+        - grafana-admins
+      enabled: true
+    ssh:
+      principal: florin.badita
+      certificate_ttl_hours: 24
+      public_keys:
+        - name: bootstrap-ssh
+          public_key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOVJGGbg4OQjkLUMokPgKjl9LnBciBCgGHaWvTO3zxer llm-agents@proxmox_florin_server
+          fingerprint: SHA256:+wOwI8QKECFX9y2hlFMfBLP1m67PC0y9PYlO8+s0isQ
+    openbao:
+      entity_name: florin.badita
+      policies:
+        - platform-admin
+    tailscale:
+      login_email: baditaflorin@gmail.com
+      tags:
+        - tag:platform-operator
+    audit:
+      onboarded_at: "2026-03-23T00:00:00Z"
+      onboarded_by: adr-0108-bootstrap

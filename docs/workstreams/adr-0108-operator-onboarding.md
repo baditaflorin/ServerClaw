@@ -2,9 +2,9 @@
 
 - ADR: [ADR 0108](../adr/0108-operator-onboarding-and-offboarding.md)
 - Title: Windmill-backed onboarding/offboarding across Keycloak, step-ca, OpenBao, and Tailscale with operators.yaml as the authoritative roster
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0108-operator-onboarding`
-- Worktree: `../proxmox_florin_server-operator-onboarding`
+- Worktree: `.worktrees/adr-0108`
 - Owner: codex
 - Depends On: `adr-0014-tailscale`, `adr-0042-step-ca`, `adr-0043-openbao`, `adr-0044-windmill`, `adr-0046-identity-classes`, `adr-0056-keycloak`, `adr-0066-audit-log`
 - Conflicts With: none
@@ -65,9 +65,18 @@
 - `quarterly-access-review` workflow scheduled
 - Runbooks for onboarding and offboarding written and deployed to docs site
 
+## Delivered
+
+- added the repo-authoritative operator roster at `config/operators.yaml` plus the schema under `config/schemas/operators.schema.json`
+- added repo-managed OpenBao policy sources for `platform-admin`, `platform-operator`, and `platform-read`
+- added `scripts/operator_manager.py` and `scripts/operator_access_inventory.py` for onboarding, offboarding, sync, inventory, and quarterly access reviews
+- added Windmill wrappers plus Make targets for `operator-onboard`, `operator-offboard`, `sync-operators`, and `quarterly-access-review`
+- added `lv3 operator add`, `lv3 operator remove`, and `lv3 operator inventory`
+- wired the validation gate and repository data-model checks to validate the operator roster
+- documented the onboarding and offboarding procedures in dedicated runbooks and updated ADR 0108 implementation metadata for release `0.97.0`
+
 ## Notes For The Next Assistant
 
-- Tailscale operator invitation via API requires the Tailscale API key stored in OpenBao at `platform/tailscale/api-key`; the Tailscale API endpoint for creating device invitations is `POST /api/v2/tailnet/<tailnet>/device-invites`; check the current Tailscale API docs as the endpoint may have changed
-- OpenBao policies `platform-admin`, `platform-operator`, and `platform-read` must be created before the onboarding workflow runs; check `config/secret-catalog.json` or `roles/openbao_runtime/` for any existing policy definitions
-- SSH certificate principal registration via step-ca: use `step ca ssh certificate <username> /tmp/<username>.pub --sign-only` from the build server; this does not issue a certificate but registers the principal as valid for future `step ssh login` calls
-- `config/operators.yaml` should be a YAML file (not JSON) for readability; the schema validation gate must be updated to support YAML schema validation or the file converted to JSON
+- The repository-side implementation is complete on `main`, but the live Windmill worker still needs deployment-local environment variables for the Tailscale invite endpoint and optional step-ca registration/revocation hooks.
+- `sync-operators` is the mainline reconciliation entrypoint when `config/operators.yaml` changes after merge.
+- The current inventory report can query Keycloak, OpenBao, and Tailscale directly; step-ca inventory remains controller-state-driven because the live deployment does not expose a stable certificate-inventory API in repo automation today.

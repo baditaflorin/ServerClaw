@@ -1763,10 +1763,10 @@ workstreams:
   - id: adr-0108-operator-onboarding
     adr: "0108"
     title: Operator onboarding and off-boarding workflow
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0108-operator-onboarding
-    worktree_path: ../proxmox_florin_server-operator-onboarding
+    worktree_path: .worktrees/adr-0108
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0108-operator-onboarding.md
     depends_on:
       - adr-0014-tailscale
