@@ -57,6 +57,7 @@ It defines these nine blocking checks:
 - `tofu-validate`
 - `packer-validate`
 - `security-scan`
+- `service-completeness`
 
 `scripts/run_gate.py` reads that manifest and executes the checks in parallel via [scripts/parallel_check.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/parallel_check.py).
 

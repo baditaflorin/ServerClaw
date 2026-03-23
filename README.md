@@ -71,6 +71,7 @@ Mattermost is now live on `docker-runtime-lv3` and reachable privately at `http:
 Portainer is now live on `docker-runtime-lv3` and reachable privately at `https://100.118.189.95:9444`, with controller-local bootstrap artifacts under `.local/portainer` and a governed wrapper for read-mostly runtime inspection plus bounded restarts.
 
 The repository now also ships the repo-managed `lv3` operator CLI for terminal-first discovery, validation, status checks, and private control-plane entrypoints.
+The new ADR 0107 extension model is now implemented in the repository: `make scaffold-service` writes the cross-cutting integration artifacts for a new service, and `lv3 validate --service <service_id>` enforces the completeness checklist with legacy per-check grandfathering until `2026-09-23`.
 OpenTofu VM lifecycle automation is now implemented under `tofu/`, the six production VMs are imported into OpenTofu state through the build-server path, and `make tofu-drift ENV=production` now verifies the current production guest declarations without planned changes.
 The repository now also ships continuous drift detection across OpenTofu, Ansible check mode, runtime Docker image digests, DNS records, and TLS posture, with receipts under `receipts/drift-reports/`, an ops-portal Drift Status panel, and `lv3 diff` routed to `make drift-report`; the live schedule and dashboard metric feed still require apply from `main`.
 The repository now also ships ADR 0100 disaster-recovery targets, a structured recovery runbook, and `make dr-status` / `lv3 release status` readiness views; the live off-site copy of `backup-lv3` is still pending external storage credentials.
@@ -314,7 +315,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstreams guide](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/README.md)
 
 ### Runbooks
-- [Add a New Service](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/add-a-new-service.md)
+- [Add A New Service](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/add-a-new-service.md)
 - [Agent Observation Loop](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/agent-observation-loop.md)
 - [Agent Tool Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/agent-tool-registry.md)
 - [Ansible Collection Development](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/ansible-collection-development.md)
@@ -741,6 +742,7 @@ This repository is intentionally opinionated:
 | `0101` | Automated certificate lifecycle management | `merged` | [adr-0101-certificate-lifecycle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0101-certificate-lifecycle.md) |
 | `0103` | Data classification and retention policy | `merged` | [adr-0103-data-retention-policy.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0103-data-retention-policy.md) |
 | `0106` | Ephemeral environment lifecycle and teardown policy | `merged` | [adr-0106-ephemeral-lifecycle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0106-ephemeral-lifecycle.md) |
+| `0107` | Platform extension model for adding new services | `merged` | [adr-0107-extension-model.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0107-extension-model.md) |
 | `0108` | Operator onboarding and off-boarding workflow | `merged` | [adr-0108-operator-onboarding.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0108-operator-onboarding.md) |
 | `0109` | Public status page | `merged` | [adr-0109-public-status-page.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0109-public-status-page.md) |
 | `0110` | Platform versioning, release notes, and upgrade path | `merged` | [adr-0110-platform-versioning.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0110-platform-versioning.md) |

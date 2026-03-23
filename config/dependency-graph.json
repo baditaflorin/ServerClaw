@@ -1,0 +1,6 @@
+{
+  "$schema": "docs/schema/dependency-graph.schema.json",
+  "schema_version": "1.0.0",
+  "nodes": [],
+  "edges": []
+}

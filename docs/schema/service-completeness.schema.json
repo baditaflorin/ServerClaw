@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/schema/service-completeness.schema.json",
+  "title": "Service Completeness Catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schema_version", "suppression_presets", "services"],
+  "properties": {
+    "$schema": {
+      "const": "docs/schema/service-completeness.schema.json"
+    },
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "suppression_presets": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/suppressionMap"
+      }
+    },
+    "services": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "service_type",
+          "requires_subdomain",
+          "requires_oidc",
+          "requires_secrets",
+          "requires_compose_secrets"
+        ],
+        "properties": {
+          "service_type": {
+            "type": "string",
+            "enum": ["compose", "vm-service", "nginx-plugin"]
+          },
+          "requires_subdomain": {
+            "type": "boolean"
+          },
+          "requires_oidc": {
+            "type": "boolean"
+          },
+          "requires_secrets": {
+            "type": "boolean"
+          },
+          "requires_compose_secrets": {
+            "type": "boolean"
+          },
+          "suppression_preset": {
+            "type": "string",
+            "minLength": 1
+          },
+          "suppressed_checks": {
+            "$ref": "#/$defs/suppressionMap"
+          },
+          "dashboard_file": {
+            "type": "string",
+            "minLength": 1
+          },
+          "alert_rule_file": {
+            "type": "string",
+            "minLength": 1
+          },
+          "keycloak_client_generated": {
+            "type": "boolean"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "suppressionMap": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+      }
+    }
+  }
+}

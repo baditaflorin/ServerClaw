@@ -12,6 +12,8 @@ from typing import Any
 
 import yaml
 
+from service_completeness import CHECKLIST_IDS
+
 
 NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 ADR_FILENAME_PATTERN = re.compile(r"^(\d{4})-")
@@ -38,6 +40,7 @@ class RepoPaths:
     adr_dir: Path
     workstream_dir: Path
     runbook_dir: Path
+    docs_template_dir: Path
     collection_roles_dir: Path
     scaffold_template_dir: Path
     playbook_dir: Path
@@ -50,6 +53,13 @@ class RepoPaths:
     secret_catalog_path: Path
     image_catalog_path: Path
     secret_manifest_path: Path
+    api_gateway_catalog_path: Path
+    dependency_graph_path: Path
+    slo_catalog_path: Path
+    data_catalog_path: Path
+    service_completeness_path: Path
+    grafana_dashboard_dir: Path
+    alert_rule_dir: Path
 
 
 @dataclass(frozen=True)
@@ -83,9 +93,13 @@ class ServiceSpec:
     playbook_filename: str
     description: str
     category: str
+    service_type: str
     exposure: str
     vm: str
     vmid: int | None
+    depends_on: tuple[str, ...]
+    requires_oidc: bool
+    requires_secrets: bool
     private_ip: str
     port: int
     public_hostname: str | None
@@ -116,6 +130,22 @@ class ServiceSpec:
     @property
     def runbook_path(self) -> Path:
         return Path("docs/runbooks") / self.runbook_filename
+
+    @property
+    def dashboard_filename(self) -> str:
+        return f"{self.service_name}.json"
+
+    @property
+    def dashboard_path(self) -> Path:
+        return Path("config/grafana/dashboards") / self.dashboard_filename
+
+    @property
+    def alert_rule_filename(self) -> str:
+        return f"{self.service_name}.yml"
+
+    @property
+    def alert_rule_path(self) -> Path:
+        return Path("config/alertmanager/rules") / self.alert_rule_filename
 
     @property
     def adr_path(self) -> Path:
@@ -215,6 +245,7 @@ def build_repo_paths(repo_root: Path) -> RepoPaths:
         adr_dir=repo_root / "docs" / "adr",
         workstream_dir=repo_root / "docs" / "workstreams",
         runbook_dir=repo_root / "docs" / "runbooks",
+        docs_template_dir=repo_root / "docs" / "templates",
         collection_roles_dir=repo_root / "collections" / "ansible_collections" / "lv3" / "platform" / "roles",
         scaffold_template_dir=repo_root
         / "collections"
@@ -234,6 +265,13 @@ def build_repo_paths(repo_root: Path) -> RepoPaths:
         secret_catalog_path=repo_root / "config" / "secret-catalog.json",
         image_catalog_path=repo_root / "config" / "image-catalog.json",
         secret_manifest_path=repo_root / "config" / "controller-local-secrets.json",
+        api_gateway_catalog_path=repo_root / "config" / "api-gateway-catalog.json",
+        dependency_graph_path=repo_root / "config" / "dependency-graph.json",
+        slo_catalog_path=repo_root / "config" / "slo-catalog.json",
+        data_catalog_path=repo_root / "config" / "data-catalog.json",
+        service_completeness_path=repo_root / "config" / "service-completeness.json",
+        grafana_dashboard_dir=repo_root / "config" / "grafana" / "dashboards",
+        alert_rule_dir=repo_root / "config" / "alertmanager" / "rules",
     )
 
 
@@ -325,6 +363,7 @@ def build_service_spec(args: argparse.Namespace, repo_paths: RepoPaths) -> Servi
     variable_prefix = service_id
     env_var_prefix = name_slug.replace("-", "_").upper()
     role_name = f"{service_id}_runtime"
+    depends_on = tuple(sorted({item.strip().replace("-", "_") for item in args.depends_on.split(",") if item.strip()}))
     adr_id = discover_next_adr_id(repo_paths.adr_dir)
     worktree_path = f"../proxmox_florin_server-{adr_id}-{name_slug}"
     branch_name = f"codex/adr-{adr_id}-{name_slug}"
@@ -353,9 +392,13 @@ def build_service_spec(args: argparse.Namespace, repo_paths: RepoPaths) -> Servi
         playbook_filename=f"{name_slug}.yml",
         description=args.description.strip(),
         category=category,
+        service_type=args.service_type,
         exposure=exposure,
         vm=args.vm,
         vmid=vmid,
+        depends_on=depends_on,
+        requires_oidc=bool(args.oidc),
+        requires_secrets=bool(args.has_secrets),
         private_ip=private_ip,
         port=args.port,
         public_hostname=public_hostname,
@@ -374,6 +417,8 @@ def ensure_new_paths(spec: ServiceSpec, repo_paths: RepoPaths) -> None:
         repo_paths.adr_dir / spec.adr_filename,
         repo_paths.workstream_dir / spec.workstream_filename,
         repo_paths.runbook_dir / spec.runbook_filename,
+        repo_paths.grafana_dashboard_dir / spec.dashboard_filename,
+        repo_paths.alert_rule_dir / spec.alert_rule_filename,
         repo_paths.collection_roles_dir / spec.role_name,
         repo_paths.playbook_dir / spec.playbook_filename,
         repo_paths.service_playbook_dir / spec.playbook_filename,
@@ -392,6 +437,7 @@ def ensure_new_paths(spec: ServiceSpec, repo_paths: RepoPaths) -> None:
         ],
         "image catalog": list(load_json(repo_paths.image_catalog_path)["images"].keys()),
         "controller-local secret manifest": list(load_json(repo_paths.secret_manifest_path)["secrets"].keys()),
+        "service completeness catalog": list(load_json(repo_paths.service_completeness_path)["services"].keys()),
     }
     for label, ids in catalogs.items():
         if spec.service_id in ids or spec.role_name in ids:
@@ -430,6 +476,8 @@ def template_replacements(spec: ServiceSpec, repo_paths: RepoPaths) -> dict[str,
         "CONTAINER_NAME": spec.name_slug,
         "PORT": str(spec.port),
         "VM": spec.vm,
+        "SERVICE_TYPE": spec.service_type,
+        "DEPENDS_ON": ", ".join(spec.depends_on),
         "PUBLIC_HOSTNAME": spec.public_hostname or "",
         "PRIVATE_URL": spec.internal_url,
         "REQUESTED_IMAGE": spec.image.requested_ref,
@@ -455,12 +503,17 @@ def write_scaffold_files(spec: ServiceSpec, repo_paths: RepoPaths) -> None:
     replacements = template_replacements(spec, repo_paths)
     template_root = repo_paths.scaffold_template_dir
     require_file(template_root / "README.md.tpl")
+    require_file(repo_paths.docs_template_dir / "runbook.md.j2")
+    require_file(repo_paths.docs_template_dir / "grafana-dashboard.json.j2")
+    require_file(repo_paths.docs_template_dir / "alert-rules.yml.j2")
 
     role_root = repo_paths.collection_roles_dir / spec.role_name
     (role_root / "defaults").mkdir(parents=True)
     (role_root / "meta").mkdir(parents=True)
     (role_root / "tasks").mkdir(parents=True)
     (role_root / "templates").mkdir(parents=True)
+    repo_paths.grafana_dashboard_dir.mkdir(parents=True, exist_ok=True)
+    repo_paths.alert_rule_dir.mkdir(parents=True, exist_ok=True)
 
     rendered_files = {
         role_root / "README.md": "README.md.tpl",
@@ -475,11 +528,19 @@ def write_scaffold_files(spec: ServiceSpec, repo_paths: RepoPaths) -> None:
         repo_paths.service_playbook_dir / spec.playbook_filename: "service-playbook.yml.tpl",
         repo_paths.adr_dir / spec.adr_filename: "adr.md.tpl",
         repo_paths.workstream_dir / spec.workstream_filename: "workstream.md.tpl",
-        repo_paths.runbook_dir / spec.runbook_filename: "runbook.md.tpl",
     }
 
     for destination, template_name in rendered_files.items():
         destination.write_text(render_template(template_root / template_name, replacements))
+    (repo_paths.runbook_dir / spec.runbook_filename).write_text(
+        render_template(repo_paths.docs_template_dir / "runbook.md.j2", replacements)
+    )
+    (repo_paths.grafana_dashboard_dir / spec.dashboard_filename).write_text(
+        render_template(repo_paths.docs_template_dir / "grafana-dashboard.json.j2", replacements)
+    )
+    (repo_paths.alert_rule_dir / spec.alert_rule_filename).write_text(
+        render_template(repo_paths.docs_template_dir / "alert-rules.yml.j2", replacements)
+    )
 
 
 def insert_topology_block(host_vars_path: Path, spec: ServiceSpec) -> None:
@@ -562,6 +623,8 @@ def update_workstreams_registry(path: Path, spec: ServiceSpec) -> None:
                     spec.playbook_path,
                     spec.service_playbook_path,
                     spec.runbook_path,
+                    spec.dashboard_path,
+                    spec.alert_rule_path,
                     spec.adr_path,
                     spec.workstream_path,
                 )
@@ -739,6 +802,101 @@ def update_image_catalog(path: Path, spec: ServiceSpec) -> None:
     write_json(path, catalog)
 
 
+def update_api_gateway_catalog(path: Path, spec: ServiceSpec) -> None:
+    catalog = load_json(path)
+    catalog["services"].append(
+        {
+            "service_id": spec.service_id,
+            "gateway_prefix": f"/v1/{spec.name_slug}",
+            "upstream": spec.internal_url,
+            "auth": "keycloak_jwt" if spec.requires_oidc else "none",
+            "required_role": "platform-operator" if spec.requires_oidc else "platform-read",
+            "strip_prefix": True,
+            "timeout_seconds": 30,
+            "notes": f"TODO: confirm the gateway route contract for {spec.display_name}.",
+        }
+    )
+    catalog["services"] = sorted(catalog["services"], key=lambda item: item["service_id"])
+    write_json(path, catalog)
+
+
+def update_dependency_graph(path: Path, spec: ServiceSpec) -> None:
+    graph = load_json(path)
+    graph["nodes"].append(
+        {
+            "id": spec.service_id,
+            "service": spec.service_id,
+            "vm": spec.vm,
+            "tier": 3,
+            "notes": f"TODO: confirm the recovery tier and blast radius for {spec.display_name}.",
+        }
+    )
+    for dependency in spec.depends_on:
+        graph["edges"].append(
+            {
+                "from": spec.service_id,
+                "to": dependency,
+                "type": "hard",
+                "description": f"TODO: confirm why {spec.display_name} depends on {dependency}.",
+            }
+        )
+    graph["nodes"] = sorted(graph["nodes"], key=lambda item: item["id"])
+    graph["edges"] = sorted(graph["edges"], key=lambda item: (item["from"], item["to"]))
+    write_json(path, graph)
+
+
+def update_slo_catalog(path: Path, spec: ServiceSpec) -> None:
+    catalog = load_json(path)
+    catalog["slos"].append(
+        {
+            "id": f"{spec.service_id}_availability",
+            "service": spec.service_id,
+            "indicator": "uptime",
+            "objective_percent": 99.5,
+            "window_days": 30,
+            "probe": f"http_probe_success{{job='{spec.service_name}'}}",
+            "description": f"TODO: confirm the {spec.display_name} availability objective and measurement query.",
+        }
+    )
+    catalog["slos"] = sorted(catalog["slos"], key=lambda item: item["id"])
+    write_json(path, catalog)
+
+
+def update_data_catalog(path: Path, spec: ServiceSpec) -> None:
+    catalog = load_json(path)
+    catalog["data_stores"].append(
+        {
+            "id": f"{spec.service_id}_primary_data",
+            "service": spec.service_id,
+            "class": "internal",
+            "retention_days": 30,
+            "backup_included": False,
+            "access_role": "platform-read",
+            "pii_risk": "unknown",
+            "notes": f"TODO: classify the primary {spec.display_name} data store.",
+        }
+    )
+    catalog["data_stores"] = sorted(catalog["data_stores"], key=lambda item: item["id"])
+    write_json(path, catalog)
+
+
+def update_service_completeness(path: Path, spec: ServiceSpec) -> None:
+    catalog = load_json(path)
+    catalog["services"][spec.service_id] = {
+        "service_type": spec.service_type,
+        "requires_subdomain": spec.public_hostname is not None,
+        "requires_oidc": spec.requires_oidc,
+        "requires_secrets": spec.requires_secrets,
+        "requires_compose_secrets": spec.service_type == "compose",
+        "dashboard_file": spec.dashboard_path.as_posix(),
+        "alert_rule_file": spec.alert_rule_path.as_posix(),
+        "keycloak_client_generated": spec.requires_oidc,
+        "suppressed_checks": {},
+    }
+    catalog["services"] = dict(sorted(catalog["services"].items()))
+    write_json(path, catalog)
+
+
 def write_placeholder_scan_receipt(repo_root: Path, spec: ServiceSpec) -> None:
     receipt_path = repo_root / spec.image.receipt_path
     receipt_path.parent.mkdir(parents=True, exist_ok=True)
@@ -769,6 +927,7 @@ def print_checklist(spec: ServiceSpec) -> None:
         "  [ ] Replace every scaffold TODO marker and confirm `make validate-data-models` passes "
         "before merging."
     )
+    print(f"  [ ] Run the ADR 0107 completeness check: lv3 validate --service {spec.service_id}")
     print(f"  [ ] Pin the requested image digest: make pin-image IMAGE={spec.image.requested_ref}")
     print(f"  [ ] Review the generated role and runtime env contract: {spec.role_path.as_posix()}")
     print(f"  [ ] Review the generated playbook entry points: {spec.playbook_path.as_posix()}")
@@ -781,11 +940,15 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--name", required=True)
     parser.add_argument("--description", default="")
     parser.add_argument("--category", default="automation")
+    parser.add_argument("--type", dest="service_type", choices=["compose", "vm-service", "nginx-plugin"], default="compose")
     parser.add_argument("--vm", default="docker-runtime-lv3")
     parser.add_argument("--vmid", type=int)
+    parser.add_argument("--depends-on", default="")
     parser.add_argument("--port", type=int, default=8080)
     parser.add_argument("--subdomain")
     parser.add_argument("--exposure", default="private-only")
+    parser.add_argument("--oidc", action=argparse.BooleanOptionalAction, default=False)
+    parser.add_argument("--has-secrets", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--image", default="docker.io/library/nginx:latest")
     parser.add_argument("--today", default="")
     return parser.parse_args(argv)
@@ -810,6 +973,11 @@ def main(argv: list[str] | None = None) -> int:
         update_secret_catalog(repo_paths.secret_catalog_path, spec)
         update_secret_manifest(repo_paths.secret_manifest_path, spec)
         update_image_catalog(repo_paths.image_catalog_path, spec)
+        update_api_gateway_catalog(repo_paths.api_gateway_catalog_path, spec)
+        update_dependency_graph(repo_paths.dependency_graph_path, spec)
+        update_slo_catalog(repo_paths.slo_catalog_path, spec)
+        update_data_catalog(repo_paths.data_catalog_path, spec)
+        update_service_completeness(repo_paths.service_completeness_path, spec)
         write_placeholder_scan_receipt(repo_paths.root, spec)
         print_checklist(spec)
     except ValueError as exc:

@@ -43,6 +43,14 @@
     "timeout_seconds": 240,
     "cache_mounts": ["trivy"]
   },
+  "service-completeness": {
+    "description": "Enforce the ADR 0107 extension checklist for non-grandfathered services.",
+    "severity": "error",
+    "image": "registry.lv3.org/check-runner/python:3.12.10",
+    "command": "python scripts/validate_service_completeness.py --validate >/dev/null",
+    "working_dir": "/workspace",
+    "timeout_seconds": 120
+  },
   "tofu-validate": {
     "description": "Validate OpenTofu configuration if the repo carries a tofu root; otherwise report a no-op pass.",
     "severity": "error",

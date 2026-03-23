@@ -1751,7 +1751,7 @@ workstreams:
   - id: adr-0107-extension-model
     adr: "0107"
     title: Platform extension model for adding new services
-    status: ready
+    status: merged
     owner: codex
     branch: codex/adr-0107-extension-model
     worktree_path: ../proxmox_florin_server-extension-model

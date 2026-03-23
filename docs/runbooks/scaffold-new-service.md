@@ -2,6 +2,8 @@
 
 `make scaffold-service` creates the repo skeleton for a new service on the current mainline contracts.
 
+The ADR 0107 formal operator workflow now lives in [add-a-new-service.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-extension-model/docs/runbooks/add-a-new-service.md). Use this runbook as the lower-level reference for the generator itself.
+
 ## Usage
 
 ```bash
@@ -34,7 +36,13 @@ Only `NAME` is required. The target derives defaults for the rest.
   - `config/secret-catalog.json`
   - `config/controller-local-secrets.json`
   - `config/image-catalog.json`
+  - `config/api-gateway-catalog.json`
+  - `config/dependency-graph.json`
+  - `config/slo-catalog.json`
+  - `config/data-catalog.json`
+  - `config/service-completeness.json`
   - `workstreams.yaml`
+- generated dashboard and alert stubs under `config/grafana/dashboards/` and `config/alertmanager/rules/`
 - placeholder Trivy receipt under `receipts/image-scans/`
 
 ## Validation Model
@@ -46,9 +54,10 @@ The generator writes a *planned* service contract with explicit scaffold placeho
 That means the expected flow is:
 
 1. run `make scaffold-service`
-2. refine the generated role, playbook, ADR, workstream, and runbook
+2. refine the generated role, playbook, ADR, workstream, runbook, dashboard, and alert rules
 3. replace every scaffold placeholder in topology and catalogs
-4. run `make validate`
+4. run `lv3 validate --service <service_id>`
+5. run `make validate`
 
 ## Common Follow-Up
 

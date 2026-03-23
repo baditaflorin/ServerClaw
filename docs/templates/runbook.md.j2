@@ -1,0 +1,23 @@
+# Configure @@DISPLAY_NAME@@
+
+This runbook follows the ADR 0107 extension checklist for @@DISPLAY_NAME@@.
+
+## Generated Surfaces
+
+- role: [@@ROLE_PATH@@](@@ABS_REPO_ROOT@@/@@ROLE_PATH@@)
+- playbook: [@@PLAYBOOK_PATH@@](@@ABS_REPO_ROOT@@/@@PLAYBOOK_PATH@@)
+- service playbook: [@@SERVICE_PLAYBOOK_PATH@@](@@ABS_REPO_ROOT@@/@@SERVICE_PLAYBOOK_PATH@@)
+- dashboard: [config/grafana/dashboards/@@SERVICE_NAME@@.json](@@ABS_REPO_ROOT@@/config/grafana/dashboards/@@SERVICE_NAME@@.json)
+- alert rules: [config/alertmanager/rules/@@SERVICE_NAME@@.yml](@@ABS_REPO_ROOT@@/config/alertmanager/rules/@@SERVICE_NAME@@.yml)
+
+## Formal Process
+
+1. Confirm the ADR, runbook, and workstream metadata are complete.
+2. Replace scaffold TODO markers in the generated catalogs and files.
+3. Run `lv3 validate --service @@SERVICE_ID@@` until the service is complete.
+4. Run `make validate-data-models` and the relevant syntax/lint checks before merge.
+
+## Notes
+
+- requested image: `@@REQUESTED_IMAGE@@`
+- initial internal URL: `@@PRIVATE_URL@@`

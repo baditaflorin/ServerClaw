@@ -31,6 +31,7 @@ from slo_tracking import (
     SLO_CATALOG_PATH,
     load_slo_catalog,
 )
+from service_completeness import load_context as load_service_completeness_context
 from workflow_catalog import (
     load_secret_manifest,
     load_workflow_catalog,
@@ -241,6 +242,17 @@ def validate_no_scaffold_placeholders() -> None:
         ),
         repo_path("config", "controller-local-secrets.json"): load_json(
             repo_path("config", "controller-local-secrets.json")
+        ),
+        repo_path("config", "api-gateway-catalog.json"): load_json(
+            repo_path("config", "api-gateway-catalog.json")
+        ),
+        repo_path("config", "dependency-graph.json"): load_json(
+            repo_path("config", "dependency-graph.json")
+        ),
+        repo_path("config", "slo-catalog.json"): load_json(repo_path("config", "slo-catalog.json")),
+        repo_path("config", "data-catalog.json"): load_json(repo_path("config", "data-catalog.json")),
+        repo_path("config", "service-completeness.json"): load_json(
+            repo_path("config", "service-completeness.json")
         ),
         HOST_VARS_PATH: load_yaml(HOST_VARS_PATH),
     }
@@ -1961,6 +1973,7 @@ def validate_repository_data_models() -> int:
     lane_catalog, _ = load_lane_catalog()
     api_publication_catalog, _, _ = load_api_publication_catalog()
     validate_api_publication_catalog(api_publication_catalog, lane_catalog)
+    load_service_completeness_context()
     validate_mutation_audit_schema(load_mutation_audit_schema())
     validate_receipts()
     validate_promotion_receipts()

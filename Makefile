@@ -32,6 +32,10 @@ HOST ?= proxmox_florin
 TOOL ?=
 IMAGE_ID ?=
 IMAGE_TAG ?=
+TYPE ?= compose
+DEPENDS_ON ?=
+OIDC ?= false
+HAS_SECRETS ?= true
 FQDN ?=
 WRITE ?= false
 APPLY ?= false
@@ -219,7 +223,7 @@ pin-image:
 
 scaffold-service:
 	@test -n "$(NAME)" || (echo "set NAME=<service-name>"; exit 1)
-	uvx --from pyyaml python $(REPO_ROOT)/scripts/scaffold_service.py --repo-root $(REPO_ROOT) --name "$(NAME)" $(if $(DESCRIPTION),--description "$(DESCRIPTION)",) $(if $(CATEGORY),--category "$(CATEGORY)",) $(if $(VM),--vm "$(VM)",) $(if $(VMID),--vmid $(VMID),) $(if $(PORT),--port $(PORT),) $(if $(SUBDOMAIN),--subdomain "$(SUBDOMAIN)",) $(if $(EXPOSURE),--exposure "$(EXPOSURE)",) $(if $(IMAGE),--image "$(IMAGE)",)
+	uvx --from pyyaml python $(REPO_ROOT)/scripts/generate_service_scaffold.py --repo-root $(REPO_ROOT) --name "$(NAME)" --type "$(TYPE)" $(if $(DESCRIPTION),--description "$(DESCRIPTION)",) $(if $(CATEGORY),--category "$(CATEGORY)",) $(if $(VM),--vm "$(VM)",) $(if $(VMID),--vmid $(VMID),) $(if $(DEPENDS_ON),--depends-on "$(DEPENDS_ON)",) $(if $(PORT),--port $(PORT),) $(if $(SUBDOMAIN),--subdomain "$(SUBDOMAIN)",) $(if $(EXPOSURE),--exposure "$(EXPOSURE)",) --$(if $(filter true,$(OIDC)),,no-)oidc --$(if $(filter true,$(HAS_SECRETS)),,no-)has-secrets $(if $(IMAGE),--image "$(IMAGE)",)
 
 generate-status-docs:
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/generate_status_docs.py --write

@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/schema/slo-catalog.schema.json",
+  "title": "SLO Catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schema_version", "slos"],
+  "properties": {
+    "$schema": {
+      "const": "docs/schema/slo-catalog.schema.json"
+    },
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "review_note": {
+      "type": "string"
+    },
+    "slos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "service",
+          "indicator",
+          "objective_percent",
+          "window_days",
+          "probe",
+          "description"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]*$"
+          },
+          "service": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]*$"
+          },
+          "indicator": {
+            "type": "string",
+            "enum": ["uptime", "latency", "freshness"]
+          },
+          "objective_percent": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "threshold_ms": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "window_days": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "probe": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

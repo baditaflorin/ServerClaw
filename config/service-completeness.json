@@ -1,0 +1,193 @@
+{
+  "$schema": "docs/schema/service-completeness.schema.json",
+  "schema_version": "1.0.0",
+  "suppression_presets": {
+    "legacy-service": {
+      "adr": "2026-09-23",
+      "ansible_role": "2026-09-23",
+      "service_catalog": "2026-09-23",
+      "health_probe": "2026-09-23",
+      "subdomain": "2026-09-23",
+      "api_gateway": "2026-09-23",
+      "dependency_graph": "2026-09-23",
+      "keycloak_client": "2026-09-23",
+      "secret_definition": "2026-09-23",
+      "grafana_dashboard": "2026-09-23",
+      "slo_definition": "2026-09-23",
+      "compose_secrets": "2026-09-23",
+      "data_catalog": "2026-09-23",
+      "alert_rules": "2026-09-23",
+      "runbook": "2026-09-23"
+    }
+  },
+  "services": {
+    "backup_pbs": {
+      "service_type": "vm-service",
+      "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_secrets": true,
+      "requires_compose_secrets": false,
+      "suppression_preset": "legacy-service"
+    },
+    "changelog_portal": {
+      "service_type": "nginx-plugin",
+      "requires_subdomain": true,
+      "requires_oidc": false,
+      "requires_secrets": false,
+      "requires_compose_secrets": false,
+      "suppression_preset": "legacy-service"
+    },
+    "docker_build": {
+      "service_type": "vm-service",
+      "requires_subdomain": true,
+      "requires_oidc": false,
+      "requires_secrets": false,
+      "requires_compose_secrets": false,
+      "suppression_preset": "legacy-service"
+    },
+    "docker_runtime": {
+      "service_type": "vm-service",
+      "requires_subdomain": true,
+      "requires_oidc": false,
+      "requires_secrets": false,
+      "requires_compose_secrets": false,
+      "suppression_preset": "legacy-service"
+    },
+    "grafana": {
+      "service_type": "vm-service",
+      "requires_subdomain": true,
+      "requires_oidc": false,
+      "requires_secrets": true,
+      "requires_compose_secrets": false,
+      "suppression_preset": "legacy-service"
+    },
+    "keycloak": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": false,
+      "requires_secrets": false,
+      "requires_compose_secrets": true,
+      "suppression_preset": "legacy-service"
+    },
+    "mail_platform": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": false,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "suppression_preset": "legacy-service"
+    },
+    "mattermost": {
+      "service_type": "compose",
+      "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_secrets": false,
+      "requires_compose_secrets": true,
+      "suppression_preset": "legacy-service"
+    },
+    "netbox": {
+      "service_type": "compose",
+      "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "suppression_preset": "legacy-service"
+    },
+    "nginx_edge": {
+      "service_type": "nginx-plugin",
+      "requires_subdomain": true,
+      "requires_oidc": false,
+      "requires_secrets": false,
+      "requires_compose_secrets": false,
+      "suppression_preset": "legacy-service"
+    },
+    "ntopng": {
+      "service_type": "vm-service",
+      "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_secrets": false,
+      "requires_compose_secrets": false,
+      "suppression_preset": "legacy-service"
+    },
+    "open_webui": {
+      "service_type": "compose",
+      "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "suppression_preset": "legacy-service"
+    },
+    "openbao": {
+      "service_type": "compose",
+      "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "suppression_preset": "legacy-service"
+    },
+    "ops_portal": {
+      "service_type": "nginx-plugin",
+      "requires_subdomain": true,
+      "requires_oidc": true,
+      "requires_secrets": false,
+      "requires_compose_secrets": false,
+      "suppression_preset": "legacy-service"
+    },
+    "platform_context_api": {
+      "service_type": "compose",
+      "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_secrets": false,
+      "requires_compose_secrets": true,
+      "suppression_preset": "legacy-service"
+    },
+    "portainer": {
+      "service_type": "compose",
+      "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "suppression_preset": "legacy-service"
+    },
+    "postgres": {
+      "service_type": "vm-service",
+      "requires_subdomain": true,
+      "requires_oidc": false,
+      "requires_secrets": false,
+      "requires_compose_secrets": false,
+      "suppression_preset": "legacy-service"
+    },
+    "proxmox_ui": {
+      "service_type": "vm-service",
+      "requires_subdomain": true,
+      "requires_oidc": true,
+      "requires_secrets": true,
+      "requires_compose_secrets": false,
+      "suppression_preset": "legacy-service"
+    },
+    "step_ca": {
+      "service_type": "compose",
+      "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_secrets": false,
+      "requires_compose_secrets": true,
+      "suppression_preset": "legacy-service"
+    },
+    "uptime_kuma": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": false,
+      "requires_secrets": false,
+      "requires_compose_secrets": true,
+      "suppression_preset": "legacy-service"
+    },
+    "windmill": {
+      "service_type": "compose",
+      "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "suppression_preset": "legacy-service"
+    }
+  }
+}

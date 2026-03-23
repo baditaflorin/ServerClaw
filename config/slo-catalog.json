@@ -1,4 +1,5 @@
 {
+  "$schema": "docs/schema/slo-catalog.schema.json",
   "schema_version": "1.0.0",
   "review_note": "Initial objectives should be recalibrated after 30 days of production telemetry.",
   "slos": [

@@ -24,6 +24,7 @@ SCAFFOLD_TEMPLATE_SRC = (
     / "_template"
     / "service_scaffold"
 )
+DOC_TEMPLATES_SRC = REPO_ROOT / "docs" / "templates"
 
 
 class ScaffoldServiceTests(unittest.TestCase):
@@ -31,6 +32,7 @@ class ScaffoldServiceTests(unittest.TestCase):
         (root / "docs" / "adr").mkdir(parents=True)
         (root / "docs" / "workstreams").mkdir(parents=True)
         (root / "docs" / "runbooks").mkdir(parents=True)
+        (root / "docs" / "templates").mkdir(parents=True)
         (root / "playbooks" / "services").mkdir(parents=True)
         (root / "config").mkdir(parents=True)
         (root / "inventory" / "host_vars").mkdir(parents=True)
@@ -54,6 +56,13 @@ class ScaffoldServiceTests(unittest.TestCase):
             / "_template"
             / "service_scaffold",
         )
+        for template_name in [
+            "alert-rules.yml.j2",
+            "grafana-dashboard.json.j2",
+            "runbook.md.j2",
+            "service-page.md.j2",
+        ]:
+            shutil.copy2(DOC_TEMPLATES_SRC / template_name, root / "docs" / "templates" / template_name)
 
         (root / "docs" / "adr" / "0001-bootstrap.md").write_text("# ADR 0001\n")
         (root / "workstreams.yaml").write_text(
@@ -207,6 +216,72 @@ class ScaffoldServiceTests(unittest.TestCase):
             )
             + "\n"
         )
+        (root / "config" / "api-gateway-catalog.json").write_text(
+            json.dumps(
+                {
+                    "$schema": "docs/schema/api-gateway-catalog.schema.json",
+                    "schema_version": "1.0.0",
+                    "services": [],
+                },
+                indent=2,
+            )
+            + "\n"
+        )
+        (root / "config" / "dependency-graph.json").write_text(
+            json.dumps(
+                {
+                    "$schema": "docs/schema/dependency-graph.schema.json",
+                    "schema_version": "1.0.0",
+                    "nodes": [],
+                    "edges": [],
+                },
+                indent=2,
+            )
+            + "\n"
+        )
+        (root / "config" / "slo-catalog.json").write_text(
+            json.dumps(
+                {
+                    "$schema": "docs/schema/slo-catalog.schema.json",
+                    "schema_version": "1.0.0",
+                    "review_note": "Targets should be reviewed after 30 days of data collection.",
+                    "slos": [],
+                },
+                indent=2,
+            )
+            + "\n"
+        )
+        (root / "config" / "data-catalog.json").write_text(
+            json.dumps(
+                {
+                    "$schema": "docs/schema/data-catalog.schema.json",
+                    "schema_version": "1.0.0",
+                    "data_stores": [],
+                },
+                indent=2,
+            )
+            + "\n"
+        )
+        (root / "config" / "service-completeness.json").write_text(
+            json.dumps(
+                {
+                    "$schema": "docs/schema/service-completeness.schema.json",
+                    "schema_version": "1.0.0",
+                    "suppression_presets": {},
+                    "services": {
+                        "docker_runtime": {
+                            "service_type": "vm-service",
+                            "requires_subdomain": False,
+                            "requires_oidc": False,
+                            "requires_secrets": False,
+                            "requires_compose_secrets": False,
+                        }
+                    },
+                },
+                indent=2,
+            )
+            + "\n"
+        )
 
     def test_scaffold_creates_role_docs_and_catalog_entries(self) -> None:
         from tempfile import TemporaryDirectory
@@ -282,6 +357,25 @@ class ScaffoldServiceTests(unittest.TestCase):
 
             image_catalog = json.loads((root / "config" / "image-catalog.json").read_text())
             self.assertEqual(image_catalog["images"]["test_echo_runtime"]["tag"], "TODO-pin-tag")
+
+            api_gateway_catalog = json.loads((root / "config" / "api-gateway-catalog.json").read_text())
+            self.assertEqual(api_gateway_catalog["services"][0]["service_id"], "test_echo")
+
+            dependency_graph = json.loads((root / "config" / "dependency-graph.json").read_text())
+            self.assertEqual(dependency_graph["nodes"][0]["id"], "test_echo")
+
+            slo_catalog = json.loads((root / "config" / "slo-catalog.json").read_text())
+            self.assertEqual(slo_catalog["slos"][0]["service"], "test_echo")
+
+            data_catalog = json.loads((root / "config" / "data-catalog.json").read_text())
+            self.assertEqual(data_catalog["data_stores"][0]["service"], "test_echo")
+
+            completeness_catalog = json.loads((root / "config" / "service-completeness.json").read_text())
+            self.assertIn("test_echo", completeness_catalog["services"])
+            self.assertFalse(completeness_catalog["services"]["test_echo"]["suppressed_checks"])
+
+            self.assertTrue((root / "config" / "grafana" / "dashboards" / "test-echo.json").is_file())
+            self.assertTrue((root / "config" / "alertmanager" / "rules" / "test-echo.yml").is_file())
 
     def test_scaffold_rejects_reserved_prefix_without_allowlist(self) -> None:
         from tempfile import TemporaryDirectory

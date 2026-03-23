@@ -255,6 +255,16 @@ def test_fixture_list_dry_run_prints_make_target(
     assert "make fixture-list" in captured.out
 
 
+def test_validate_service_dry_run_uses_local_completeness_command(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    exit_code = lv3_cli.main(["validate", "--service", "grafana", "--dry-run"])
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "ADR 0107 completeness check" in captured.out
+    assert "scripts/validate_service_completeness.py --service grafana" in captured.out
+
+
 def test_fixture_completion_suggests_fixture_names(minimal_repo: Path) -> None:
     candidates = lv3_cli.completion_candidates(["lv3", "fixture", "create", "d"], "d")
     assert candidates == ["docker-host"]
@@ -369,3 +379,7 @@ def test_operator_add_viewer_dry_run_does_not_require_ssh_key(
     assert exit_code == 0
     assert "operator-onboard" in captured.out
     assert "viewer@example.com" in captured.out
+
+def test_validate_completion_suggests_services(minimal_repo: Path) -> None:
+    candidates = lv3_cli.completion_candidates(["lv3", "validate", "--service"], "g")
+    assert candidates == ["grafana"]

@@ -1,10 +1,10 @@
 # ADR 0107: Platform Extension Model for Adding New Services
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.97.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-23
 - Date: 2026-03-23
 
 ## Context
@@ -49,15 +49,15 @@ Every new service must complete the following before it is considered a first-cl
 
 ### Enhanced scaffold generator
 
-`scripts/generate_service_scaffold.py` is updated to accept a new service definition and generate all artifacts in items 2–15:
+`scripts/generate_service_scaffold.py` now backs the repo-managed `make scaffold-service` entry point and generates all artifacts in items 2–15:
 
 ```bash
-lv3 scaffold new-service \
-  --name "my-service" \
-  --vm "docker-runtime-lv3" \
-  --public-url "my-service.lv3.org" \
-  --depends-on "postgres,keycloak" \
-  --type compose  # or: vm-service, nginx-plugin
+make scaffold-service \
+  NAME=my-service \
+  TYPE=compose \
+  VM=docker-runtime-lv3 \
+  DEPENDS_ON=postgres,keycloak \
+  OIDC=true
 ```
 
 Output (generated files):
@@ -80,12 +80,12 @@ config/data-catalog.json                [patched: my-service data store stub]
 
 config/grafana/dashboards/my-service.json     [generated: template dashboard]
 config/alertmanager/rules/my-service.yml      [generated: template alert rules]
-docs/runbooks/my-service-down.md              [generated: template runbook]
+docs/runbooks/configure-my-service.md         [generated: template runbook]
 docs/adr/XXXX-my-service.md                  [generated: ADR template]
 docs/workstreams/adr-XXXX-my-service.md       [generated: workstream template]
 ```
 
-The generator uses Jinja2 templates for all generated files. Operators fill in the stubs; the scaffold ensures nothing is forgotten.
+The generator writes template-backed stubs for all generated files. Operators fill in the stubs; the scaffold ensures nothing is forgotten.
 
 ### Completion validation
 
@@ -117,16 +117,16 @@ This script is added to the validation gate (ADR 0087) as a required check. A pu
 
 ### Grandfathering existing services
 
-For services already in the platform, the checklist creates a set of technical debt items. These are tracked in `config/service-completeness.json` with a `grandfathered: true` flag that suppresses the validation gate for items that existed before this ADR. Grandfathered items must be completed within 6 months; the suppression flag expires on 2026-09-23.
+For services already in the platform, the checklist creates a set of technical debt items. These are tracked in `config/service-completeness.json` with per-check suppression dates. Legacy suppressions expire on 2026-09-23, after which the same checklist blocks those services too.
 
 ### Documentation
 
 The "Adding a New Service" runbook in the docs site (ADR 0094) is the primary reference:
 
 1. Write the ADR
-2. Run `lv3 scaffold new-service --name <name> ...`
+2. Run `make scaffold-service NAME=<name> ...`
 3. Fill in all generated stubs (role tasks, dependency edges, secret names, dashboard panels, runbook content)
-4. Run `lv3 validate --service <name>` to check completeness
+4. Run `lv3 validate --service <service_id>` to check completeness
 5. Open the ADR workstream and proceed with the standard ADR implementation workflow
 
 ## Consequences

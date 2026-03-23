@@ -223,7 +223,13 @@ def resolve_lint_command(local: bool) -> CommandPlan:
     )
 
 
-def resolve_validate_command(strict: bool) -> CommandPlan:
+def resolve_validate_command(strict: bool, service: str | None = None) -> CommandPlan:
+    if service:
+        return CommandPlan(
+            label=f"validate --service {service}",
+            route="controller local ADR 0107 completeness check",
+            command=["python3", "scripts/validate_service_completeness.py", "--service", service],
+        )
     if strict:
         return CommandPlan(
             label="validate --strict",
@@ -865,6 +871,9 @@ def completion_candidates(words: list[str], current: str) -> list[str]:
     if words[1] in {"deploy", "status", "logs", "open"}:
         candidates = sorted(set(load_service_map()) | set(SERVICE_ALIASES))
         return [service_id for service_id in candidates if service_id.startswith(current)]
+    if words[1] == "validate" and "--service" in words:
+        candidates = sorted(set(load_service_map()) | set(SERVICE_ALIASES))
+        return [service_id for service_id in candidates if service_id.startswith(current)]
     if words[1] == "run":
         return [workflow_id for workflow_id in sorted(load_workflow_catalog()) if workflow_id.startswith(current)]
     if words[1] == "ssh":
@@ -919,6 +928,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     validate = subparsers.add_parser("validate", help="Run repository validation.")
     validate.add_argument("--strict", action="store_true")
+    validate.add_argument("--service")
     validate.add_argument("--dry-run", action="store_true")
     validate.add_argument("--explain", action="store_true")
 
@@ -1097,7 +1107,12 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "lint":
         return run_plan(resolve_lint_command(args.local), dry_run=args.dry_run, explain=args.explain, no_color=no_color)
     if args.command == "validate":
-        return run_plan(resolve_validate_command(args.strict), dry_run=args.dry_run, explain=args.explain, no_color=no_color)
+        return run_plan(
+            resolve_validate_command(args.strict, args.service),
+            dry_run=args.dry_run,
+            explain=args.explain,
+            no_color=no_color,
+        )
     if args.command == "status":
         return status_command(args.service, args.env, timeout=args.timeout, no_color=no_color)
     if args.command == "vm":
