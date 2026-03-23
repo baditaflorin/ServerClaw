@@ -269,7 +269,7 @@
 - name: Render the mail gateway environment file with rotated secrets
   ansible.builtin.template:
     src: mail-gateway.env.j2
-    dest: "{{ mail_platform_gateway_dir }}/gateway.env"
+    dest: "{{ mail_platform_gateway_env_file }}"
     owner: root
     group: root
     mode: "0600"

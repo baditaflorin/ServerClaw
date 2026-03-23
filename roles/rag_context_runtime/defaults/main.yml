@@ -5,7 +5,14 @@ platform_context_corpus_dir: "{{ platform_context_site_dir }}/corpus"
 platform_context_data_dir: "{{ platform_context_site_dir }}/qdrant"
 platform_context_secret_dir: /etc/lv3/platform-context
 platform_context_compose_file: "{{ platform_context_site_dir }}/docker-compose.yml"
-platform_context_env_file: "{{ platform_context_site_dir }}/platform-context.env"
+platform_context_env_file: "{{ compose_runtime_secret_root }}/platform-context/runtime.env"
+platform_context_legacy_env_file: "{{ platform_context_site_dir }}/platform-context.env"
+platform_context_openbao_agent_dir: "{{ platform_context_site_dir }}/openbao"
+platform_context_openbao_agent_image: "{{ openbao_agent_image }}"
+platform_context_openbao_agent_container_name: platform-context-openbao-agent
+platform_context_openbao_secret_path: services/platform-context/runtime-env
+platform_context_openbao_policy_name: lv3-service-platform-context-runtime
+platform_context_openbao_approle_name: platform-context-runtime
 platform_context_api_token_remote_file: "{{ platform_context_secret_dir }}/api-token.txt"
 platform_context_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context
 platform_context_api_token_local_file: "{{ platform_context_local_artifact_dir }}/api-token.txt"

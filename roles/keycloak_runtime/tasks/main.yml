@@ -96,6 +96,9 @@
     keycloak_bootstrap_admin_password: "{{ keycloak_bootstrap_admin_password_raw.content | b64decode | trim }}"
     keycloak_operator_password: "{{ keycloak_operator_password_raw.content | b64decode | trim }}"
     keycloak_database_password: "{{ lookup('ansible.builtin.file', keycloak_database_password_local_file) | trim }}"
+    keycloak_runtime_secret_payload:
+      KC_DB_PASSWORD: "{{ lookup('ansible.builtin.file', keycloak_database_password_local_file) | trim }}"
+      KC_BOOTSTRAP_ADMIN_PASSWORD: "{{ keycloak_bootstrap_admin_password_raw.content | b64decode | trim }}"
   no_log: true
 
 - name: Ensure the local Keycloak artifact directory exists
@@ -124,6 +127,41 @@
   become: false
   no_log: true
 
+- name: Prepare OpenBao agent runtime secret injection for Keycloak
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: keycloak
+    common_openbao_compose_env_agent_dir: "{{ keycloak_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ keycloak_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ keycloak_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ keycloak_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ keycloak_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ keycloak_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ keycloak_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ keycloak_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ keycloak_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ keycloak_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ keycloak_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: keycloak.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ keycloak_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ keycloak_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ keycloak_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ keycloak_legacy_env_file }}"
+  no_log: true
+
 - name: Render the Keycloak environment file
   ansible.builtin.template:
     src: keycloak.env.j2
@@ -146,8 +184,6 @@
     argv:
       - docker
       - compose
-      - --env-file
-      - "{{ keycloak_env_file }}"
       - --file
       - "{{ keycloak_compose_file }}"
       - pull
@@ -164,8 +200,6 @@
     argv:
       - docker
       - compose
-      - --env-file
-      - "{{ keycloak_env_file }}"
       - --file
       - "{{ keycloak_compose_file }}"
       - up

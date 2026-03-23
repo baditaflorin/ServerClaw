@@ -11,6 +11,14 @@ PORTAINER_ARGS ?=
 RECEIPT ?=
 COMMAND ?=
 SERVICE ?=
+DURATION_MINUTES ?= 30
+REASON ?=
+FORCE ?= false
+STAGING_RECEIPT ?=
+BRANCH ?=
+REQUESTER_CLASS ?= human_operator
+APPROVER_CLASSES ?= human_operator
+DRY_RUN ?= false
 ENVIRONMENT ?=
 service ?=
 group ?=
@@ -21,6 +29,7 @@ HOST ?= proxmox_florin
 TOOL ?=
 IMAGE_ID ?=
 IMAGE_TAG ?=
+FQDN ?=
 WRITE ?= false
 APPLY ?= false
 EXCEPTION_REASON ?=
@@ -29,8 +38,7 @@ EXCEPTION_REVIEW_BY ?=
 SECRET_ID ?=
 ROTATION_ARGS ?=
 
-.PHONY: validate validate-generated-vars validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-shell validate-json validate-data-models validate-health-probes generate-platform-vars show-platform-facts generate-status-docs generate-status generate-ops-portal deploy-ops-portal validate-generated-docs validate-generated-portals receipts receipt-info workflows workflow-info commands command-info services show-service lanes lane-info api-publication api-publication-info agent-tools agent-tool-info export-mcp-tools check-image-freshness upgrade-container-image preflight syntax-check syntax-check-monitoring syntax-check-ntopng syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-openbao syntax-check-step-ca syntax-check-windmill syntax-check-keycloak syntax-check-netbox syntax-check-open-webui syntax-check-mattermost syntax-check-portainer syntax-check-rag-context syntax-check-secret-rotation check-platform-drift install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-guest-network-policy converge-monitoring converge-ntopng converge-docker-runtime converge-postgres-vm converge-mail-platform converge-openbao converge-step-ca converge-windmill converge-control-plane-recovery converge-keycloak converge-netbox converge-open-webui converge-mattermost converge-portainer converge-rag-context rotate-secret deploy-uptime-kuma uptime-kuma-manage portainer-manage configure-backups configure-backup-vm database-dns start-workstream live-apply-group live-apply-service live-apply-site
-.PHONY: validate validate-generated-vars validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-shell validate-json validate-data-models validate-health-probes generate-platform-vars show-platform-facts generate-status-docs generate-status generate-ops-portal deploy-ops-portal validate-generated-docs validate-generated-portals receipts receipt-info workflows workflow-info commands command-info services show-service environments environment-info lanes lane-info api-publication api-publication-info agent-tools agent-tool-info export-mcp-tools check-image-freshness upgrade-container-image preflight syntax-check syntax-check-monitoring syntax-check-ntopng syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-openbao syntax-check-step-ca syntax-check-windmill syntax-check-keycloak syntax-check-netbox syntax-check-open-webui syntax-check-mattermost syntax-check-portainer syntax-check-rag-context syntax-check-secret-rotation check-platform-drift install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-guest-network-policy converge-monitoring converge-ntopng converge-docker-runtime converge-postgres-vm converge-mail-platform converge-openbao converge-step-ca converge-windmill converge-control-plane-recovery converge-keycloak converge-netbox converge-open-webui converge-mattermost converge-portainer converge-rag-context rotate-secret deploy-uptime-kuma uptime-kuma-manage portainer-manage configure-backups configure-backup-vm database-dns start-workstream live-apply-group live-apply-service live-apply-site
+.PHONY: validate validate-generated-vars validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-shell validate-json validate-compose-runtime-envs validate-data-models validate-health-probes generate-platform-vars show-platform-facts generate-status-docs generate-status generate-ops-portal generate-changelog-portal deploy-ops-portal deploy-changelog-portal validate-generated-docs validate-generated-portals receipts receipt-info workflows workflow-info commands command-info services show-service environments environment-info lanes lane-info api-publication api-publication-info agent-tools agent-tool-info export-mcp-tools check-image-freshness upgrade-container-image preflight syntax-check syntax-check-monitoring syntax-check-ntopng syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-openbao syntax-check-step-ca syntax-check-windmill syntax-check-keycloak syntax-check-netbox syntax-check-open-webui syntax-check-mattermost syntax-check-portainer syntax-check-rag-context syntax-check-secret-rotation check-platform-drift open-maintenance-window close-maintenance-window install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-guest-network-policy converge-monitoring converge-ntopng converge-docker-runtime converge-postgres-vm converge-mail-platform converge-openbao converge-step-ca converge-windmill converge-control-plane-recovery converge-keycloak converge-netbox converge-open-webui converge-mattermost converge-portainer converge-rag-context rotate-secret deploy-uptime-kuma uptime-kuma-manage portainer-manage configure-backups configure-backup-vm database-dns provision-subdomain start-workstream promote live-apply-group live-apply-service live-apply-site
 
 validate:
 	$(REPO_ROOT)/scripts/validate_repo.sh
@@ -55,6 +63,9 @@ validate-shell:
 
 validate-json:
 	$(REPO_ROOT)/scripts/validate_repo.sh json
+
+validate-compose-runtime-envs:
+	$(REPO_ROOT)/scripts/validate_repo.sh compose-runtime-envs
 
 validate-data-models:
 	$(REPO_ROOT)/scripts/validate_repo.sh data-models
@@ -81,16 +92,23 @@ generate-status-docs:
 generate-ops-portal:
 	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/generate_ops_portal.py --write
 
+generate-changelog-portal:
+	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/generate_changelog_portal.py --write
+
 deploy-ops-portal: generate-ops-portal
 	$(MAKE) configure-edge-publication
 
-generate-status: generate-status-docs generate-ops-portal
+deploy-changelog-portal: generate-changelog-portal
+	$(MAKE) configure-edge-publication
+
+generate-status: generate-status-docs generate-ops-portal generate-changelog-portal
 
 validate-generated-docs:
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/generate_status_docs.py --check
 
 validate-generated-portals:
 	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/generate_ops_portal.py --check
+	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/generate_changelog_portal.py --check
 
 receipts:
 	$(REPO_ROOT)/scripts/live_apply_receipts.py --list
@@ -218,7 +236,18 @@ syntax-check-secret-rotation:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/secret-rotation.yml --syntax-check
 
 check-platform-drift:
-	uvx --from pyyaml python $(REPO_ROOT)/scripts/platform_observation_tool.py
+	uv run --with pyyaml --with nats-py python $(REPO_ROOT)/scripts/platform_observation_tool.py
+
+open-maintenance-window:
+	$(MAKE) preflight WORKFLOW=open-maintenance-window
+	@test -n "$(SERVICE)" || (echo "set SERVICE=<service-id>"; exit 1)
+	@test -n "$(REASON)" || (echo "set REASON=<planned-change-reason>"; exit 1)
+	uv run --with pyyaml --with nats-py python $(REPO_ROOT)/scripts/maintenance_window_tool.py open --service "$(SERVICE)" --reason "$(REASON)" --duration-minutes $(DURATION_MINUTES)
+
+close-maintenance-window:
+	$(MAKE) preflight WORKFLOW=close-maintenance-window
+	@test -n "$(SERVICE)" || (echo "set SERVICE=<service-id|all>"; exit 1)
+	uv run --with pyyaml --with nats-py python $(REPO_ROOT)/scripts/maintenance_window_tool.py close --service "$(SERVICE)" $(if $(filter true,$(FORCE)),--force,)
 
 install-proxmox:
 	$(MAKE) preflight WORKFLOW=install-proxmox
@@ -234,7 +263,7 @@ configure-ingress:
 
 configure-edge-publication:
 	$(MAKE) preflight WORKFLOW=configure-edge-publication
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/public-edge.yml --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/public-edge.yml --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(EXTRA_ARGS)
 
 configure-tailscale:
 	$(MAKE) preflight WORKFLOW=configure-tailscale
@@ -363,17 +392,67 @@ database-dns:
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/database-dns.yml
 
+provision-subdomain:
+	@test -n "$(FQDN)" || (echo "set FQDN=<hostname>"; exit 1)
+	$(MAKE) preflight WORKFLOW=provision-subdomain
+	uvx --from pyyaml python $(REPO_ROOT)/scripts/subdomain_catalog.py --fqdn "$(FQDN)" --provision-check
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/provision-subdomain.yml -e subdomain_fqdn="$(FQDN)" $(EXTRA_ARGS)
+	@if [ "$$(uvx --from pyyaml python $(REPO_ROOT)/scripts/subdomain_catalog.py --fqdn "$(FQDN)" --print-field route_mode)" = "edge" ]; then \
+		$(MAKE) configure-edge-publication EXTRA_ARGS="$(EXTRA_ARGS)"; \
+	fi
+
 start-workstream:
 	@test -n "$(WORKSTREAM)" || (echo "set WORKSTREAM=<workstream-id>"; exit 1)
 	$(REPO_ROOT)/scripts/create-workstream.sh $(WORKSTREAM)
 
+promote:
+	@test -n "$(SERVICE)" || (echo "set SERVICE=<service-id>"; exit 1)
+	@test -n "$(STAGING_RECEIPT)" || (echo "set STAGING_RECEIPT=receipts/live-applies/staging/<receipt>.json"; exit 1)
+	python3 $(REPO_ROOT)/scripts/promotion_pipeline.py --promote --service "$(SERVICE)" --staging-receipt "$(STAGING_RECEIPT)" --requester-class "$(REQUESTER_CLASS)" --approver-classes "$(APPROVER_CLASSES)" $(if $(BRANCH),--branch "$(BRANCH)",) $(if $(EXTRA_ARGS),--extra-args "$(EXTRA_ARGS)",) $(if $(filter true,$(DRY_RUN)),--dry-run,)
+
 live-apply-group:
 	@test -n "$(group)" || (echo "set group=<group-id>"; exit 1)
+	@if [ "$(env)" = "production" ] && printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])bypass_promotion=true([[:space:]]|$$)'; then \
+		python3 $(REPO_ROOT)/scripts/promotion_pipeline.py --emit-bypass-event --service "group:$(group)" --actor-id "$${USER:-unknown}" --correlation-id "break-glass:group:$(group):$$(date -u +%Y%m%dT%H%M%SZ)"; \
+	fi
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/groups/$(group).yml --private-key $(BOOTSTRAP_KEY) -e env=$(env) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(EXTRA_ARGS)
 
 live-apply-service:
 	@test -n "$(service)" || (echo "set service=<service-id>"; exit 1)
+	@if [ "$(env)" = "production" ] && printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])bypass_promotion=true([[:space:]]|$$)'; then \
+		python3 $(REPO_ROOT)/scripts/promotion_pipeline.py --emit-bypass-event --service "$(service)" --actor-id "$${USER:-unknown}" --correlation-id "break-glass:service:$(service):$$(date -u +%Y%m%dT%H%M%SZ)"; \
+	fi
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/services/$(service).yml --private-key $(BOOTSTRAP_KEY) -e env=$(env) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(EXTRA_ARGS)
 
 live-apply-site:
+	@if [ "$(env)" = "production" ] && printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])bypass_promotion=true([[:space:]]|$$)'; then \
+		python3 $(REPO_ROOT)/scripts/promotion_pipeline.py --emit-bypass-event --service "site" --actor-id "$${USER:-unknown}" --correlation-id "break-glass:site:$$(date -u +%Y%m%dT%H%M%SZ)"; \
+	fi
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/site.yml --private-key $(BOOTSTRAP_KEY) -e env=$(env) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(EXTRA_ARGS)
+
+## Remote build execution (ADR 0082)
+.PHONY: remote-lint remote-validate remote-pre-push remote-packer-build remote-image-build remote-exec check-build-server
+
+remote-lint:
+	$(REPO_ROOT)/scripts/remote_exec.sh remote-lint --local-fallback
+
+remote-validate:
+	$(REPO_ROOT)/scripts/remote_exec.sh remote-validate --local-fallback
+
+remote-pre-push:
+	$(REPO_ROOT)/scripts/remote_exec.sh remote-pre-push --local-fallback
+
+remote-packer-build:
+	@test -n "$(IMAGE)" || (echo "set IMAGE=<name>"; exit 1)
+	IMAGE="$(IMAGE)" $(REPO_ROOT)/scripts/remote_exec.sh remote-packer-build --local-fallback
+
+remote-image-build:
+	@test -n "$(SERVICE)" || (echo "set SERVICE=<service-id>"; exit 1)
+	SERVICE="$(SERVICE)" COMMAND="$(COMMAND)" $(REPO_ROOT)/scripts/remote_exec.sh remote-image-build --local-fallback
+
+remote-exec:
+	@test -n "$(COMMAND)" || (echo "set COMMAND=<shell-command>"; exit 1)
+	COMMAND="$(COMMAND)" $(REPO_ROOT)/scripts/remote_exec.sh remote-exec --local-fallback
+
+check-build-server:
+	$(REPO_ROOT)/scripts/remote_exec.sh check-build-server

@@ -10,6 +10,7 @@ This runbook documents the ADR 0071 observation loop that checks live drift agai
 - structured findings are written to `.local/platform-observation/latest/`
 - a Markdown digest for Open WebUI review is written to `.local/open-webui/platform-findings-daily.md`
 - optional NATS, Mattermost, and GlitchTip routing can be enabled with controller-local secrets
+- ADR 0080 maintenance windows suppress only planned non-security noise, not the underlying checks
 
 ## Repo Surfaces
 
@@ -77,10 +78,18 @@ uvx --from pyyaml python scripts/platform_observation_tool.py --publish-nats
 
 Each finding follows `docs/schema/platform-finding.json`.
 
+When ADR 0080 suppression is active, a finding may be emitted with:
+
+- `severity: suppressed`
+- `original_severity`
+- `suppressed: true`
+- `maintenance_windows`
+
 ## Routing Notes
 
 - NATS publication uses the live `lv3-nats-jetstream` runtime on `docker-runtime-lv3` and emits one event per check on `platform.findings.<check-name>`.
 - Mattermost and GlitchTip routing stay local-secret-driven so the repo does not commit chat or issue-tracker credentials.
+- Active maintenance windows are read from the private `maintenance-windows` NATS KV bucket unless `LV3_MAINTENANCE_WINDOWS_FILE` is set for test or offline use.
 - The current Open WebUI integration is file-based: operators can review the digest artifact from the existing private workbench until a richer governed tool path lands.
 
 ## Dead-Man Switch

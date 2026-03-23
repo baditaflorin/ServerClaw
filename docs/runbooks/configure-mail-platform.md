@@ -133,7 +133,7 @@ curl -s \
 Run these checks after converge:
 
 1. `make syntax-check-mail-platform`
-2. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose --file /opt/mail-platform/docker-compose.yml ps'`
+2. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose --file /opt/mail-platform/docker-compose.yml ps && sudo ls -l /opt/mail-platform/openbao /run/lv3-secrets/mail-platform && sudo test ! -e /opt/mail-platform/gateway/gateway.env'`
 3. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'python3 /usr/local/libexec/lv3-mail-platform-metrics.py'`
 4. `curl -s -H "X-API-Key: $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/gateway-api-key.txt)" http://10.10.10.20:8081/v1/profiles`
 5. `curl -s -H "X-API-Key: $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/gateway-api-key.txt)" http://10.10.10.20:8081/v1/mailboxes`

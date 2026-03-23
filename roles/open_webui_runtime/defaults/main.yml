@@ -3,7 +3,14 @@ open_webui_site_dir: /opt/open-webui
 open_webui_data_dir: "{{ open_webui_site_dir }}/data"
 open_webui_secret_dir: /etc/lv3/open-webui
 open_webui_compose_file: "{{ open_webui_site_dir }}/docker-compose.yml"
-open_webui_env_file: "{{ open_webui_site_dir }}/open-webui.env"
+open_webui_env_file: "{{ compose_runtime_secret_root }}/open-webui/runtime.env"
+open_webui_legacy_env_file: "{{ open_webui_site_dir }}/open-webui.env"
+open_webui_openbao_agent_dir: "{{ open_webui_site_dir }}/openbao"
+open_webui_openbao_agent_image: "{{ openbao_agent_image }}"
+open_webui_openbao_agent_container_name: open-webui-openbao-agent
+open_webui_openbao_secret_path: services/open-webui/runtime-env
+open_webui_openbao_policy_name: lv3-service-open-webui-runtime
+open_webui_openbao_approle_name: open-webui-runtime
 open_webui_container_name: open-webui
 open_webui_port: "{{ platform_service_topology | platform_service_port('open_webui', 'internal') }}"
 open_webui_host_proxy_port: "{{ platform_service_topology | platform_service_port('open_webui', 'controller') }}"

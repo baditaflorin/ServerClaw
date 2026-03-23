@@ -21,7 +21,9 @@ from command_catalog import (
     validate_command_catalog,
 )
 from controller_automation_toolkit import REPO_ROOT, emit_cli_error, load_json, load_yaml, repo_path
+from deployment_history import query_deployment_history
 from live_apply_receipts import iter_receipt_paths, load_receipt, validate_receipts
+from maintenance_window_tool import list_active_windows_best_effort
 from workflow_catalog import (
     load_secret_manifest,
     load_workflow_catalog,
@@ -370,6 +372,17 @@ def tool_list_recent_receipts(_tool: dict[str, Any], args: dict[str, Any]) -> di
     return {"count": len(receipts), "receipts": receipts}
 
 
+def tool_get_deployment_history(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    service_id = args.get("service_id")
+    if service_id is not None:
+        service_id = require_str(service_id, "arguments.service_id")
+    environment = args.get("environment")
+    if environment is not None:
+        environment = require_str(environment, "arguments.environment")
+    days = require_int(args.get("days", 30), "arguments.days", 1)
+    return query_deployment_history(service_id=service_id, environment=environment, days=days)
+
+
 def tool_get_workflow_contract(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
     workflow_id = require_str(args.get("workflow_id"), "arguments.workflow_id")
     _secret_manifest, workflow_catalog, _command_catalog = load_catalog_context()
@@ -436,6 +449,20 @@ def tool_query_platform_context(tool: dict[str, Any], args: dict[str, Any]) -> d
         ) from exc
     except urllib.error.URLError as exc:
         raise ValueError(f"platform-context API query failed: {exc.reason}") from exc
+
+
+def tool_get_maintenance_windows(_tool: dict[str, Any], args: dict[str, Any]) -> dict[str, Any]:
+    service_id = args.get("service_id")
+    if service_id is not None:
+        service_id = require_str(service_id, "arguments.service_id")
+    windows = list_active_windows_best_effort()
+    payload = [windows[key] for key in sorted(windows)]
+    if service_id:
+        payload = [window for window in payload if window["service_id"] in {service_id, "all"}]
+    return {
+        "count": len(payload),
+        "windows": payload,
+    }
 
 
 def normalize_approval_args(args: dict[str, Any]) -> dict[str, Any]:
@@ -533,9 +560,11 @@ def tool_run_governed_command(_tool: dict[str, Any], args: dict[str, Any]) -> tu
 HANDLERS: Final[dict[str, Any]] = {
     "get_platform_status": tool_get_platform_status,
     "list_recent_receipts": tool_list_recent_receipts,
+    "get_deployment_history": tool_get_deployment_history,
     "get_workflow_contract": tool_get_workflow_contract,
     "get_command_contract": tool_get_command_contract,
     "get_api_publication_surface": tool_get_api_publication_surface,
+    "get_maintenance_windows": tool_get_maintenance_windows,
     "export_mcp_tools": tool_export_mcp_tools,
     "query_platform_context": tool_query_platform_context,
     "check_command_approval": tool_check_command_approval,

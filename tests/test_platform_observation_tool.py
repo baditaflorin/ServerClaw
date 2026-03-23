@@ -1,3 +1,4 @@
+import argparse
 from pathlib import Path
 import sys
 
@@ -285,3 +286,65 @@ def test_check_service_health_supports_service_catalog(monkeypatch):
     assert finding["severity"] == "ok"
     assert finding["outputs"]["checked_probe_count"] == 2
     assert [entry["probe_id"] for entry in finding["details"]] == ["windmill-liveness", "windmill-readiness"]
+
+
+def test_run_checks_suppresses_maintenance_findings_and_skips_webhooks(monkeypatch, tmp_path: Path):
+    captured_findings = []
+    webhook_payloads = []
+
+    monkeypatch.setattr(
+        tool,
+        "load_observation_context",
+        lambda: {"secret_manifest": {"secrets": {}}},
+    )
+    monkeypatch.setattr(
+        tool,
+        "CHECK_HANDLERS",
+        {
+            "check-service-health": lambda _context, run_id: {
+                "check": "check-service-health",
+                "severity": "critical",
+                "summary": "1 service probe failed.",
+                "details": [{"service_id": "grafana", "probe_id": "grafana-ready", "ok": False}],
+                "ts": "2026-03-23T10:00:00Z",
+                "run_id": run_id,
+            }
+        },
+    )
+    monkeypatch.setattr(
+        tool,
+        "list_active_windows_best_effort",
+        lambda _context: {
+            "maintenance/grafana": {
+                "window_id": "33333333-3333-3333-3333-333333333333",
+                "service_id": "grafana",
+                "reason": "deploy",
+                "opened_by": {"class": "operator", "id": "ops-linux"},
+                "opened_at": "2026-03-23T09:50:00Z",
+                "expected_duration_minutes": 30,
+                "auto_close_at": "2026-03-23T10:20:00Z",
+                "correlation_id": "deploy:grafana",
+            }
+        },
+    )
+    monkeypatch.setattr(
+        tool,
+        "write_outputs",
+        lambda findings, _output_dir, _digest_path: captured_findings.extend(findings),
+    )
+    monkeypatch.setattr(tool, "post_json_webhook", lambda url, payload, headers=None: webhook_payloads.append(payload))
+
+    args = argparse.Namespace(
+        output_dir=str(tmp_path / "out"),
+        digest_path=str(tmp_path / "digest.md"),
+        publish_nats=False,
+        mattermost_webhook_url="http://mattermost.example",
+        glitchtip_event_url="http://glitchtip.example",
+        checks=["check-service-health"],
+    )
+
+    exit_code = tool.run_checks(args)
+
+    assert exit_code == 0
+    assert captured_findings[0]["severity"] == "suppressed"
+    assert webhook_payloads == []

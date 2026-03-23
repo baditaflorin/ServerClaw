@@ -1,11 +1,33 @@
 services:
+  openbao-agent:
+    image: {{ keycloak_openbao_agent_image }}
+    container_name: {{ keycloak_openbao_agent_container_name }}
+    command:
+      - agent
+      - -config=/openbao-agent/agent.hcl
+    network_mode: host
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -s {{ keycloak_env_file }}
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    volumes:
+      - {{ keycloak_openbao_agent_dir }}:/openbao-agent:ro
+      - {{ keycloak_env_file | dirname }}:{{ keycloak_env_file | dirname }}
+
   keycloak:
-    image: ${KEYCLOAK_IMAGE}
+    image: {{ keycloak_image }}
     restart: unless-stopped
     command:
       - start
     env_file:
       - {{ keycloak_env_file }}
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
     ports:
       - "{{ ansible_host }}:{{ keycloak_internal_http_port }}:8080"
       - "127.0.0.1:{{ keycloak_local_http_port }}:8080"

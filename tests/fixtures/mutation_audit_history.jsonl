@@ -1,0 +1,2 @@
+{"ts":"2026-03-23T09:45:27Z","actor":{"class":"operator","id":"ops"},"surface":"manual","action":"document.manual_change","target":"grafana.lv3.org","outcome":"success","correlation_id":"manual:grafana:20260323","evidence_ref":"docs/runbooks/mutation-audit-log.md"}
+{"ts":"2026-03-23T10:15:00Z","actor":{"class":"automation","id":"windmill"},"surface":"command-catalog","action":"promote.to_production","target":"ops.lv3.org","outcome":"success","correlation_id":"windmill:promote:20260323","evidence_ref":"docs/adr/0073-environment-promotion-gate-and-deployment-pipeline.md"}

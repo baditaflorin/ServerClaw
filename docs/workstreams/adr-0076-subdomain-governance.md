@@ -2,22 +2,22 @@
 
 - ADR: [ADR 0076](../adr/0076-subdomain-governance-and-dns-lifecycle.md)
 - Title: Catalog-backed subdomain naming, TLS provisioning, and lifecycle management for lv3.org
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0076-subdomain-governance`
-- Worktree: `../proxmox_florin_server-subdomain-governance`
+- Worktree: `.worktrees/adr-0076`
 - Owner: codex
 - Depends On: `adr-0042-step-ca`, `adr-0021-nginx-edge-publication`, `adr-0072-staging-environment`
 - Conflicts With: none
-- Shared Surfaces: `config/subdomain-catalog.json`, `roles/hetzner_dns_record`, `roles/nginx_edge_publication`, `Makefile`
+- Shared Surfaces: `config/subdomain-catalog.json`, `roles/hetzner_dns_record`, `roles/nginx_edge_publication`, `Makefile`, `config/workflow-catalog.json`, `config/command-catalog.json`
 
 ## Scope
 
 - define JSON schema in `docs/schema/subdomain-catalog.schema.json`
-- populate `config/subdomain-catalog.json` with all current subdomains (minimum: all live-applied subdomains)
-- write `make provision-subdomain FQDN=<name>` target that runs DNS record + TLS + NGINX route in sequence
-- add subdomain catalog validation to `make validate` (check every NGINX route has a catalog entry)
+- populate `config/subdomain-catalog.json` with the current governed hostname set plus reserved first-label prefixes
+- write `make provision-subdomain FQDN=<name>` so catalogued hostnames can converge DNS and, when already route-backed, refresh the shared edge publication
+- add subdomain catalog validation to `make validate` so every repo-managed NGINX route has a catalog entry
 - document the subdomain lifecycle process in `docs/runbooks/subdomain-governance.md`
-- reserve all listed prefixes (ops, internal, staging, api, smtp, imap, mail) in the catalog
+- reserve the listed first-label prefixes (`ops`, `internal`, `staging`, `api`, `smtp`, `imap`, `mail`) in the catalog
 
 ## Non-Goals
 
@@ -29,8 +29,10 @@
 
 - `config/subdomain-catalog.json`
 - `docs/schema/subdomain-catalog.schema.json`
-- updated `roles/nginx_edge_publication` (validates against catalog on apply)
-- updated `Makefile` (`provision-subdomain` target)
+- `scripts/subdomain_catalog.py`
+- `playbooks/provision-subdomain.yml`
+- updated `Makefile` (`provision-subdomain` target plus edge syntax-check passthrough)
+- updated workflow and command catalogs
 - `docs/runbooks/subdomain-governance.md`
 - `docs/adr/0076-subdomain-governance-and-dns-lifecycle.md`
 - `docs/workstreams/adr-0076-subdomain-governance.md`
@@ -38,23 +40,27 @@
 
 ## Expected Live Surfaces
 
-- no new subdomains created by this workstream; catalog documents existing subdomains
-- `make provision-subdomain` is operational (tested against staging with a test subdomain)
+- no direct live change claimed by this merge; this workstream completes repository governance and the operator workflow
+- `make provision-subdomain` is ready for deliberate live use against already-catalogued hostnames
 
 ## Verification
 
-- `make validate` catches a missing catalog entry for a NGINX route
-- `make provision-subdomain FQDN=test.staging.lv3.org` creates DNS record, step-ca cert, and NGINX route
-- all existing public subdomains appear in the catalog with correct TLS provider and target
+- `uvx --from pyyaml python scripts/subdomain_catalog.py --validate`
+- `uv run --with pyyaml --with jsonschema python -m unittest tests/test_subdomain_catalog.py`
+- `ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory/hosts.yml playbooks/provision-subdomain.yml --syntax-check`
+- `uvx --from pyyaml python scripts/subdomain_catalog.py --fqdn ops.lv3.org --provision-check`
+- `make validate`
 
 ## Merge Criteria
 
-- all live-applied subdomains are in the catalog
-- the NGINX validation lint rule is integrated into `make validate`
-- `make provision-subdomain` is tested and documented
-- reserved prefixes are documented in the catalog and the runbook
+- all current repo-managed public routes are represented in the subdomain catalog
+- reserved prefixes are represented in the catalog and enforced by validation
+- `make provision-subdomain` is implemented, documented, and limited to already-catalogued hostnames
+- ADR metadata records repository implementation in the release that merges this workstream
 
-## Notes For The Next Assistant
+## Delivered
 
-- the existing `roles/hetzner_dns_record` role already handles DNS API calls; `provision-subdomain` should wrap it, not replace it
-- staging wildcard `*.staging.lv3.org` can be a single step-ca cert issued to the nginx-staging VM; add that as the first staging TLS entry in the catalog
+- added reserved-prefix governance to `config/subdomain-catalog.json` and extended the validator to enforce both prefix policy and NGINX route coverage
+- added `playbooks/provision-subdomain.yml` plus the `make provision-subdomain FQDN=<hostname>` entry point backed by new workflow and command contracts
+- documented the lifecycle in `docs/runbooks/subdomain-governance.md` and corrected subdomain-validator invocation examples to use the required PyYAML runtime
+- recorded ADR 0076 as implemented in repository release `0.84.0` without claiming a corresponding live platform rollout yet

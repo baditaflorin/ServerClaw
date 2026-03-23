@@ -130,6 +130,47 @@
     netbox_secret_key: "{{ netbox_runtime_secret_payloads.results[0].content | b64decode | trim }}"
     netbox_redis_password: "{{ netbox_runtime_secret_payloads.results[1].content | b64decode | trim }}"
     netbox_redis_cache_password: "{{ netbox_runtime_secret_payloads.results[2].content | b64decode | trim }}"
+    netbox_runtime_secret_payload:
+      DB_PASSWORD: "{{ netbox_local_secret_payloads.results[0].content | b64decode | trim }}"
+      REDIS_PASSWORD: "{{ netbox_runtime_secret_payloads.results[1].content | b64decode | trim }}"
+      REDIS_CACHE_PASSWORD: "{{ netbox_runtime_secret_payloads.results[2].content | b64decode | trim }}"
+      SECRET_KEY: "{{ netbox_runtime_secret_payloads.results[0].content | b64decode | trim }}"
+      SUPERUSER_PASSWORD: "{{ netbox_local_secret_payloads.results[1].content | b64decode | trim }}"
+  no_log: true
+
+- name: Prepare OpenBao agent runtime secret injection for NetBox
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: netbox
+    common_openbao_compose_env_agent_dir: "{{ netbox_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ netbox_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ netbox_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ netbox_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ netbox_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ netbox_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ netbox_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ netbox_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ netbox_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ netbox_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ netbox_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: netbox.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ netbox_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ netbox_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ netbox_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ netbox_legacy_env_file }}"
   no_log: true
 
 - name: Render the NetBox environment file
@@ -154,8 +195,6 @@
     argv:
       - docker
       - compose
-      - --env-file
-      - "{{ netbox_env_file }}"
       - --file
       - "{{ netbox_compose_file }}"
       - pull
@@ -172,8 +211,6 @@
     argv:
       - docker
       - compose
-      - --env-file
-      - "{{ netbox_env_file }}"
       - --file
       - "{{ netbox_compose_file }}"
       - up

@@ -12,6 +12,14 @@ mail_platform_gateway_app_dir: "{{ mail_platform_gateway_dir }}/app"
 mail_platform_gateway_data_dir: "{{ mail_platform_gateway_dir }}/data"
 mail_platform_gateway_profiles_file: "{{ mail_platform_gateway_dir }}/notification-profiles.json"
 mail_platform_gateway_profiles_container_file: /config/notification-profiles.json
+mail_platform_gateway_env_file: "{{ compose_runtime_secret_root }}/mail-platform/runtime.env"
+mail_platform_gateway_legacy_env_file: "{{ mail_platform_gateway_dir }}/gateway.env"
+mail_platform_openbao_agent_dir: "{{ mail_platform_site_dir }}/openbao"
+mail_platform_openbao_agent_image: "{{ openbao_agent_image }}"
+mail_platform_openbao_agent_container_name: mail-platform-openbao-agent
+mail_platform_openbao_secret_path: services/mail-platform/runtime
+mail_platform_openbao_policy_name: lv3-service-mail-platform-runtime
+mail_platform_openbao_approle_name: mail-platform-runtime
 mail_platform_compose_file: "{{ mail_platform_site_dir }}/docker-compose.yml"
 mail_platform_stalwart_config_file: "{{ mail_platform_stalwart_dir }}/etc/config.toml"
 mail_platform_stalwart_bootstrap_file: "{{ mail_platform_site_dir }}/bootstrap-mail-platform.py"

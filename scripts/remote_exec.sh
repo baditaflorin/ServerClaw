@@ -1,0 +1,325 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+BUILD_SERVER_CONFIG="${REMOTE_EXEC_CONFIG:-$REPO_ROOT/config/build-server.json}"
+RUNNER_MANIFEST="${REMOTE_EXEC_RUNNER_MANIFEST:-$REPO_ROOT/config/check-runner-manifest.json}"
+RSYNC_EXCLUDE_FILE="${REMOTE_EXEC_EXCLUDE_FILE:-$REPO_ROOT/.rsync-exclude}"
+SSH_BIN="${REMOTE_EXEC_SSH_BIN:-ssh}"
+RSYNC_BIN="${REMOTE_EXEC_RSYNC_BIN:-rsync}"
+PYTHON_BIN="${REMOTE_EXEC_PYTHON_BIN:-python3}"
+CONNECT_TIMEOUT="${REMOTE_EXEC_CONNECT_TIMEOUT:-5}"
+VERBOSE="${REMOTE_EXEC_VERBOSE:-0}"
+LOCAL_FALLBACK=false
+COMMAND_LABEL=""
+
+REMOTE_HOST=""
+SSH_KEY_PATH=""
+WORKSPACE_ROOT=""
+DEFAULT_TIMEOUT_SECONDS=""
+DOCKER_SOCKET=""
+REMOTE_COMMAND=""
+LOCAL_COMMAND=""
+DOCKER_IMAGE=""
+RUNNER_WORKDIR=""
+TIMEOUT_SECONDS=""
+SKIP_DOCKER="false"
+MOUNT_DOCKER_SOCKET="false"
+BUILTIN_ACTION=""
+SSH_OPTIONS_NL=""
+
+SSH_BASE_CMD=()
+
+usage() {
+  cat <<'EOF'
+Usage:
+  scripts/remote_exec.sh <command-label> [--local-fallback]
+
+Examples:
+  scripts/remote_exec.sh remote-lint
+  scripts/remote_exec.sh remote-pre-push --local-fallback
+  scripts/remote_exec.sh remote-exec --local-fallback
+EOF
+}
+
+fail() {
+  echo "remote_exec: $*" >&2
+  exit 1
+}
+
+parse_args() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --local-fallback)
+        LOCAL_FALLBACK=true
+        ;;
+      -h|--help)
+        usage
+        exit 0
+        ;;
+      -*)
+        fail "unknown option: $1"
+        ;;
+      *)
+        if [[ -n "$COMMAND_LABEL" ]]; then
+          fail "command label already set to $COMMAND_LABEL"
+        fi
+        COMMAND_LABEL="$1"
+        ;;
+    esac
+    shift
+  done
+
+  [[ -n "$COMMAND_LABEL" ]] || {
+    usage >&2
+    exit 1
+  }
+}
+
+load_command_configuration() {
+  [[ -f "$BUILD_SERVER_CONFIG" ]] || fail "missing config: $BUILD_SERVER_CONFIG"
+  [[ -f "$RSYNC_EXCLUDE_FILE" ]] || fail "missing rsync exclude file: $RSYNC_EXCLUDE_FILE"
+
+  eval "$(
+    "$PYTHON_BIN" - "$BUILD_SERVER_CONFIG" "$RUNNER_MANIFEST" "$COMMAND_LABEL" <<'PY'
+import json
+import os
+import shlex
+import sys
+from pathlib import Path
+
+config_path = Path(sys.argv[1])
+manifest_path = Path(sys.argv[2])
+command_label = sys.argv[3]
+
+config = json.loads(config_path.read_text())
+commands = config.get("commands", {})
+if command_label not in commands:
+    raise SystemExit(f"unknown command label: {command_label}")
+
+command_spec = commands[command_label]
+runner_label = command_spec.get("runner_label", "")
+manifest = {}
+if manifest_path.exists():
+    manifest = json.loads(manifest_path.read_text())
+
+runner_spec = manifest.get(runner_label, {}) if runner_label else {}
+
+def normalize_command(value):
+    if isinstance(value, list):
+        return " ".join(shlex.quote(str(item)) for item in value)
+    return "" if value in (None, "") else str(value)
+
+def shell_assign(name, value):
+    print(f"{name}={shlex.quote('' if value is None else str(value))}")
+
+image = runner_spec.get("image", command_spec.get("docker_image", ""))
+working_dir = runner_spec.get("working_dir", command_spec.get("working_dir", "/workspace"))
+timeout_seconds = command_spec.get(
+    "timeout_seconds",
+    runner_spec.get("timeout_seconds", config.get("default_timeout_seconds", 900)),
+)
+
+shell_assign("REMOTE_HOST", config["host"])
+shell_assign("SSH_KEY_PATH", os.path.expanduser(config.get("ssh_key", "")))
+shell_assign("WORKSPACE_ROOT", config["workspace_root"])
+shell_assign("DEFAULT_TIMEOUT_SECONDS", config.get("default_timeout_seconds", 900))
+shell_assign("DOCKER_SOCKET", config.get("docker_socket", ""))
+shell_assign(
+    "SSH_OPTIONS_NL",
+    "\n".join(str(item) for item in config.get("ssh_options", [])),
+)
+shell_assign("REMOTE_COMMAND", command_spec.get("command", normalize_command(runner_spec.get("command"))))
+shell_assign("LOCAL_COMMAND", command_spec.get("local_fallback_command", command_spec.get("command", "")))
+shell_assign("DOCKER_IMAGE", image)
+shell_assign("RUNNER_WORKDIR", working_dir)
+shell_assign("TIMEOUT_SECONDS", timeout_seconds)
+shell_assign("SKIP_DOCKER", "true" if command_spec.get("skip_docker", False) else "false")
+shell_assign("MOUNT_DOCKER_SOCKET", "true" if command_spec.get("mount_docker_socket", False) else "false")
+shell_assign("BUILTIN_ACTION", command_spec.get("builtin", ""))
+PY
+  )"
+
+  [[ -n "$REMOTE_HOST" ]] || fail "remote host is empty in $BUILD_SERVER_CONFIG"
+  [[ -n "$WORKSPACE_ROOT" ]] || fail "workspace_root is empty in $BUILD_SERVER_CONFIG"
+  [[ -n "$TIMEOUT_SECONDS" ]] || TIMEOUT_SECONDS="$DEFAULT_TIMEOUT_SECONDS"
+}
+
+build_ssh_command() {
+  SSH_BASE_CMD=("$SSH_BIN" "-o" "ConnectTimeout=$CONNECT_TIMEOUT" "-o" "BatchMode=yes")
+  if [[ -n "$SSH_KEY_PATH" ]]; then
+    SSH_BASE_CMD+=("-i" "$SSH_KEY_PATH")
+  fi
+  if [[ -n "$SSH_OPTIONS_NL" ]]; then
+    while IFS= read -r option; do
+      [[ -n "$option" ]] || continue
+      SSH_BASE_CMD+=("$option")
+    done <<< "$SSH_OPTIONS_NL"
+  fi
+}
+
+quote_shell() {
+  printf "%q" "$1"
+}
+
+render_command() {
+  local rendered=""
+  printf -v rendered "%q " "$@"
+  echo "${rendered% }"
+}
+
+timeout_prefix() {
+  if [[ -n "$TIMEOUT_SECONDS" && "$TIMEOUT_SECONDS" != "0" ]]; then
+    printf "timeout --foreground %s " "${TIMEOUT_SECONDS}s"
+  fi
+}
+
+remote_env_exports() {
+  local prefix=""
+  local name=""
+  for name in COMMAND IMAGE SERVICE ENV ENVIRONMENT HOST WORKFLOW; do
+    if [[ -n "${!name:-}" ]]; then
+      printf -v prefix "%sexport %s=%q; " "$prefix" "$name" "${!name}"
+    fi
+  done
+  echo "$prefix"
+}
+
+remote_docker_env_args() {
+  local args=()
+  local name=""
+  for name in COMMAND IMAGE SERVICE ENV ENVIRONMENT HOST WORKFLOW; do
+    if [[ -n "${!name:-}" ]]; then
+      args+=("-e" "$name=${!name}")
+    fi
+  done
+  printf "%s\n" "${args[@]}"
+}
+
+remote_reachable() {
+  "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "true" >/dev/null 2>&1
+}
+
+ensure_remote_workspace() {
+  "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "mkdir -p $(quote_shell "$WORKSPACE_ROOT")" >/dev/null
+}
+
+sync_workspace() {
+  local dry_run="${1:-false}"
+  local rc=0
+  local ssh_wrapper=""
+  local rsync_args=("--archive" "--checksum" "--delete" "--exclude-from=$RSYNC_EXCLUDE_FILE")
+
+  [[ "$dry_run" == "true" ]] && rsync_args+=("--dry-run" "--verbose")
+
+  ssh_wrapper="$(mktemp "${TMPDIR:-/tmp}/remote-exec-ssh.XXXXXX")"
+  {
+    printf '%s\n' '#!/usr/bin/env bash'
+    printf 'exec '
+    printf '%q ' "${SSH_BASE_CMD[@]}"
+    printf '%s\n' '"$@"'
+  } > "$ssh_wrapper"
+  chmod 700 "$ssh_wrapper"
+
+  "$RSYNC_BIN" \
+    "${rsync_args[@]}" \
+    -e "$ssh_wrapper" \
+    "$REPO_ROOT/" \
+    "$REMOTE_HOST:$WORKSPACE_ROOT/" || rc=$?
+
+  rm -f "$ssh_wrapper"
+  return "$rc"
+}
+
+run_local_command() {
+  [[ -n "$LOCAL_COMMAND" ]] || fail "no local fallback command configured for $COMMAND_LABEL"
+  echo "remote_exec: build server unreachable, running local fallback for $COMMAND_LABEL" >&2
+  (
+    cd "$REPO_ROOT"
+    bash -lc "$LOCAL_COMMAND"
+  )
+}
+
+run_builtin_check_build_server() {
+  echo "Checking SSH connectivity to $REMOTE_HOST"
+  "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "printf 'build-server-ok\n'"
+
+  echo "Checking remote workspace root $WORKSPACE_ROOT"
+  ensure_remote_workspace
+  "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "cd $(quote_shell "$WORKSPACE_ROOT") && pwd"
+
+  echo "Checking rsync dry-run with excludes from $RSYNC_EXCLUDE_FILE"
+  sync_workspace true
+}
+
+run_remote_command() {
+  local remote_payload=""
+  local remote_prefix=""
+  local timeout_cmd=""
+
+  remote_prefix="$(remote_env_exports)"
+  timeout_cmd="$(timeout_prefix)"
+
+  if [[ "$BUILTIN_ACTION" == "check-build-server" ]]; then
+    run_builtin_check_build_server
+    return 0
+  fi
+
+  ensure_remote_workspace
+  sync_workspace false
+
+  if [[ "$SKIP_DOCKER" == "true" || -z "$DOCKER_IMAGE" ]]; then
+    printf -v remote_payload "cd %q && %sbash -lc %q" \
+      "$WORKSPACE_ROOT" \
+      "$remote_prefix$timeout_cmd" \
+      "$REMOTE_COMMAND"
+  else
+    local docker_cmd=(
+      docker run --rm
+      --workdir "$RUNNER_WORKDIR"
+      -v "$WORKSPACE_ROOT:$RUNNER_WORKDIR"
+    )
+    local docker_socket_path=""
+    local docker_env_args=()
+
+    mapfile -t docker_env_args < <(remote_docker_env_args)
+    if [[ -n "$DOCKER_SOCKET" && "$MOUNT_DOCKER_SOCKET" == "true" ]]; then
+      docker_socket_path="${DOCKER_SOCKET#unix://}"
+      docker_cmd+=("-v" "$docker_socket_path:$docker_socket_path" "-e" "DOCKER_HOST=$DOCKER_SOCKET")
+    fi
+    if [[ ${#docker_env_args[@]} -gt 0 ]]; then
+      docker_cmd+=("${docker_env_args[@]}")
+    fi
+    docker_cmd+=("$DOCKER_IMAGE" "bash" "-lc" "$REMOTE_COMMAND")
+
+    remote_payload="$(timeout_prefix)$(render_command "${docker_cmd[@]}")"
+    printf -v remote_payload "cd %q && %s" "$WORKSPACE_ROOT" "$remote_payload"
+
+    if [[ "$VERBOSE" == "1" ]]; then
+      echo "Remote docker command: $(render_command "${docker_cmd[@]}")" >&2
+    fi
+  fi
+
+  "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "$remote_payload"
+}
+
+main() {
+  parse_args "$@"
+  load_command_configuration
+  build_ssh_command
+
+  if remote_reachable; then
+    run_remote_command
+    return 0
+  fi
+
+  if [[ "$LOCAL_FALLBACK" == "true" ]]; then
+    run_local_command
+    return $?
+  fi
+
+  fail "build server $REMOTE_HOST is unreachable; rerun with --local-fallback to execute locally"
+}
+
+main "$@"

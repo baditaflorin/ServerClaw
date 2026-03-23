@@ -48,7 +48,7 @@ After a successful converge, these controller-local files should exist:
 Run these checks after converge:
 
 1. `make syntax-check-netbox`
-2. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose --env-file /opt/netbox/netbox.env --file /opt/netbox/docker-compose.yml ps'`
+2. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose --file /opt/netbox/docker-compose.yml ps && sudo ls -l /opt/netbox/openbao /run/lv3-secrets/netbox && sudo test ! -e /opt/netbox/netbox.env'`
 3. `curl -s -o /dev/null -w '%{http_code}\n' http://100.118.189.95:8004/login/`
 4. `curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/netbox/api-token.txt)" http://100.118.189.95:8004/api/virtualization/virtual-machines/?limit=20`
 5. `uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/netbox_inventory_sync.py --api-url http://100.118.189.95:8004 --api-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/netbox/api-token.txt --host-vars /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml --stack /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml --lane-catalog /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/control-plane-lanes.json`

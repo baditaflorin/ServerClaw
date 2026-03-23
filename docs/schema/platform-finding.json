@@ -22,7 +22,8 @@
       "enum": [
         "ok",
         "warning",
-        "critical"
+        "critical",
+        "suppressed"
       ]
     },
     "summary": {
@@ -46,6 +47,23 @@
     "outputs": {
       "type": "object",
       "additionalProperties": true
+    },
+    "original_severity": {
+      "type": "string",
+      "enum": [
+        "ok",
+        "warning",
+        "critical"
+      ]
+    },
+    "suppressed": {
+      "type": "boolean"
+    },
+    "maintenance_windows": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
     }
   }
 }

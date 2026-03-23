@@ -48,7 +48,7 @@
 
 - `uvx --from pyyaml python scripts/environment_topology.py --validate`
 - `uvx --from pyyaml python scripts/service_catalog.py --validate`
-- `python3 scripts/subdomain_catalog.py --validate`
+- `uvx --from pyyaml python scripts/subdomain_catalog.py --validate`
 - `uvx --from pyyaml python scripts/generate_ops_portal.py --check`
 - `./scripts/validate_repo.sh data-models generated-portals generated-docs`
 

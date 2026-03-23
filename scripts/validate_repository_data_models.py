@@ -16,6 +16,7 @@ from control_plane_lanes import load_lane_catalog
 from live_apply_receipts import RECEIPTS_DIR, iter_receipt_paths, validate_receipts
 from generate_platform_vars import PLATFORM_VARS_PATH, PORT_KEYS, build_platform_vars
 from mutation_audit import load_mutation_audit_schema, validate_mutation_audit_schema
+from promotion_pipeline import validate_promotion_receipts
 from workflow_catalog import (
     load_secret_manifest,
     load_workflow_catalog,
@@ -31,6 +32,7 @@ HEALTH_PROBE_CATALOG_PATH = repo_path("config", "health-probe-catalog.json")
 SECRET_CATALOG_PATH = repo_path("config", "secret-catalog.json")
 IMAGE_CATALOG_PATH = repo_path("config", "image-catalog.json")
 PLATFORM_FINDING_SCHEMA_PATH = repo_path("docs", "schema", "platform-finding.json")
+MAINTENANCE_WINDOW_SCHEMA_PATH = repo_path("docs", "schema", "maintenance-window.json")
 
 SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -864,6 +866,36 @@ def validate_platform_finding_schema() -> None:
     expected_fields = {"check", "severity", "summary", "details", "ts", "run_id"}
     if required_fields != expected_fields:
         raise ValueError("docs/schema/platform-finding.json.required must match the ADR 0071 finding contract")
+    severity_enum = set(
+        require_string_list(
+            schema["properties"]["severity"].get("enum", []),
+            "docs/schema/platform-finding.json.properties.severity.enum",
+        )
+    )
+    if severity_enum != {"ok", "warning", "critical", "suppressed"}:
+        raise ValueError("docs/schema/platform-finding.json severity enum must include suppressed maintenance findings")
+
+
+def validate_maintenance_window_schema() -> None:
+    schema = require_mapping(load_json(MAINTENANCE_WINDOW_SCHEMA_PATH), str(MAINTENANCE_WINDOW_SCHEMA_PATH))
+    require_str(schema.get("$schema"), "docs/schema/maintenance-window.json.$schema")
+    require_str(schema.get("$id"), "docs/schema/maintenance-window.json.$id")
+    if schema.get("type") != "object":
+        raise ValueError("docs/schema/maintenance-window.json.type must be object")
+    required_fields = set(
+        require_string_list(schema.get("required"), "docs/schema/maintenance-window.json.required")
+    )
+    expected_fields = {
+        "window_id",
+        "service_id",
+        "reason",
+        "opened_by",
+        "opened_at",
+        "expected_duration_minutes",
+        "auto_close_at",
+    }
+    if required_fields != expected_fields:
+        raise ValueError("docs/schema/maintenance-window.json.required must match the ADR 0080 contract")
 
 
 def validate_identity_taxonomy(
@@ -1480,11 +1512,13 @@ def validate_repository_data_models() -> int:
     validate_api_publication_catalog(api_publication_catalog, lane_catalog)
     validate_mutation_audit_schema(load_mutation_audit_schema())
     validate_receipts()
+    validate_promotion_receipts()
     validate_uptime_monitors()
     host_vars_context = validate_host_vars()
     validate_health_probe_catalog(host_vars_context)
     validate_secret_catalog(secret_manifest)
     validate_platform_finding_schema()
+    validate_maintenance_window_schema()
     validate_versions_stack(host_vars_context)
     validate_platform_vars()
     print("Repository data models OK")

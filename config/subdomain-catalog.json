@@ -1,5 +1,44 @@
 {
   "schema_version": "1.0.0",
+  "reserved_prefixes": [
+    {
+      "prefix": "ops",
+      "owner_adr": "0074",
+      "allowed_fqdns": ["ops.lv3.org", "ops.staging.lv3.org"],
+      "notes": "Reserved for the generated operations portal and its staged hostname."
+    },
+    {
+      "prefix": "internal",
+      "owner_adr": "0076",
+      "notes": "Reserved for future internal-only routing or split-horizon publication."
+    },
+    {
+      "prefix": "staging",
+      "owner_adr": "0072",
+      "notes": "Reserved for environment delegation and should not become a service hostname."
+    },
+    {
+      "prefix": "api",
+      "owner_adr": "0049",
+      "notes": "Reserved for a future governed API gateway surface."
+    },
+    {
+      "prefix": "smtp",
+      "owner_adr": "0041",
+      "notes": "Reserved for mail submission and transport naming."
+    },
+    {
+      "prefix": "imap",
+      "owner_adr": "0041",
+      "notes": "Reserved for mail retrieval naming."
+    },
+    {
+      "prefix": "mail",
+      "owner_adr": "0041",
+      "allowed_fqdns": ["mail.lv3.org"],
+      "notes": "Reserved for the primary platform mail surface."
+    }
+  ],
   "subdomains": [
     {
       "fqdn": "build.lv3.org",
@@ -30,6 +69,22 @@
         "auto_renew": false
       },
       "notes": "Tailnet-only TCP proxy through the Proxmox host."
+    },
+    {
+      "fqdn": "changelog.lv3.org",
+      "service_id": "changelog_portal",
+      "environment": "production",
+      "status": "planned",
+      "exposure": "edge-published",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0081",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Repository automation is ready; live publication still requires apply from main."
     },
     {
       "fqdn": "docker.lv3.org",

@@ -25,7 +25,7 @@ Workstream branches are expected to update:
 Workstream branches should avoid updating:
 
 - `VERSION`
-- numbered release sections in `changelog.md`
+- `changelog.md` and `docs/release-notes/`
 - canonical observed-state sections in `versions/stack.yaml`
 - top-level integrated summaries in `README.md`
 

@@ -78,7 +78,8 @@
       "preflight": {
         "required": true,
         "required_secret_ids": [
-          "bootstrap_ssh_private_key"
+          "bootstrap_ssh_private_key",
+          "nats_jetstream_admin_password"
         ]
       },
       "validation_targets": [
@@ -112,7 +113,8 @@
       "preflight": {
         "required": true,
         "required_secret_ids": [
-          "bootstrap_ssh_private_key"
+          "bootstrap_ssh_private_key",
+          "nats_jetstream_admin_password"
         ]
       },
       "validation_targets": [
@@ -1320,6 +1322,78 @@
         "dig +short database.lv3.org"
       ]
     },
+    "provision-subdomain": {
+      "description": "Converge one catalogued lv3.org hostname through the Hetzner DNS role and, when applicable, refresh the shared NGINX edge publication.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "provision-subdomain",
+        "command": "HETZNER_DNS_API_TOKEN=... make provision-subdomain FQDN=<hostname>"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "hetzner_dns_api_token"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "external_live",
+      "owner_runbook": "docs/runbooks/subdomain-governance.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/provision-subdomain.yml",
+        "scripts/subdomain_catalog.py",
+        "roles/hetzner_dns_record/tasks/main.yml",
+        "roles/nginx_edge_publication/tasks/main.yml"
+      ],
+      "outputs": [
+        "The selected DNS record is converged through the Hetzner API.",
+        "If the FQDN is backed by a repo-managed edge route, the shared NGINX publication and certificate set are refreshed."
+      ],
+      "verification_commands": [
+        "uvx --from pyyaml python scripts/subdomain_catalog.py --fqdn ops.lv3.org --provision-check",
+        "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory/hosts.yml playbooks/provision-subdomain.yml --syntax-check",
+        "HETZNER_DNS_API_TOKEN=... make provision-subdomain FQDN=ops.lv3.org"
+      ]
+    },
+    "deploy-and-promote": {
+      "description": "Validate a staged service change, enforce the ADR 0073 promotion gate, and then apply the approved production promotion.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "promote",
+        "command": "make promote SERVICE=<service-id> STAGING_RECEIPT=receipts/live-applies/staging/<receipt>.json"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/environment-promotion-pipeline.md",
+      "implementation_refs": [
+        "Makefile",
+        "scripts/promotion_pipeline.py",
+        "scripts/live_apply_receipts.py",
+        "config/command-catalog.json",
+        "config/windmill/scripts/deploy-and-promote.py",
+        "docs/schema/promotion-receipt.json",
+        "docs/runbooks/environment-promotion-pipeline.md"
+      ],
+      "outputs": [
+        "A validated promotion gate decision, a production live-apply receipt, and a promotion receipt linking staging evidence to the production mutation."
+      ],
+      "verification_commands": [
+        "python3 scripts/promotion_pipeline.py --validate",
+        "make promote SERVICE=<service-id> STAGING_RECEIPT=receipts/live-applies/staging/<receipt>.json DRY_RUN=true"
+      ]
+    },
     "check-platform-drift": {
       "description": "Run the ADR 0071 observation loop checks and emit structured findings from the controller command lane.",
       "lifecycle_status": "active",
@@ -1354,6 +1428,74 @@
       "verification_commands": [
         "uvx --from pyyaml python scripts/platform_observation_tool.py",
         "test -f .local/platform-observation/latest/findings.json"
+      ]
+    },
+    "open-maintenance-window": {
+      "description": "Open one ADR 0080 maintenance window in the private NATS KV bucket before a planned live change.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "open-maintenance-window",
+        "command": "make open-maintenance-window SERVICE=grafana REASON='planned restart' DURATION_MINUTES=30"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate-data-models"
+      ],
+      "live_impact": "external_live",
+      "owner_runbook": "docs/runbooks/maintenance-windows.md",
+      "implementation_refs": [
+        "Makefile",
+        "scripts/maintenance_window_tool.py",
+        "docs/schema/maintenance-window.json",
+        "docs/runbooks/maintenance-windows.md",
+        "config/windmill/scripts/maintenance-window.py"
+      ],
+      "outputs": [
+        "One active maintenance window stored in the private maintenance-windows KV bucket together with a maintenance.opened event on the internal event bus."
+      ],
+      "verification_commands": [
+        "uv run --with pyyaml --with nats-py python scripts/maintenance_window_tool.py list",
+        "make command-info COMMAND=open-maintenance-window"
+      ]
+    },
+    "close-maintenance-window": {
+      "description": "Close one ADR 0080 maintenance window and emit the matching maintenance.closed or maintenance.force_closed event.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "close-maintenance-window",
+        "command": "make close-maintenance-window SERVICE=grafana"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate-data-models"
+      ],
+      "live_impact": "external_live",
+      "owner_runbook": "docs/runbooks/maintenance-windows.md",
+      "implementation_refs": [
+        "Makefile",
+        "scripts/maintenance_window_tool.py",
+        "docs/schema/maintenance-window.json",
+        "docs/runbooks/maintenance-windows.md",
+        "config/windmill/scripts/maintenance-window.py"
+      ],
+      "outputs": [
+        "The targeted maintenance window is removed from the private maintenance-windows KV bucket and a close event is emitted on the internal event bus."
+      ],
+      "verification_commands": [
+        "uv run --with pyyaml --with nats-py python scripts/maintenance_window_tool.py list",
+        "make command-info COMMAND=close-maintenance-window"
       ]
     }
   }

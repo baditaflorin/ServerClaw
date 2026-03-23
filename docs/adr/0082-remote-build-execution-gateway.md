@@ -1,10 +1,10 @@
 # ADR 0082: Remote Build Execution Gateway
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.80.0
+- Implemented In Platform Version: 0.38.0
+- Implemented On: 2026-03-23
 - Date: 2026-03-22
 
 ## Context
@@ -85,6 +85,13 @@ Records what the build server can run, pinned tool versions, and available Docke
 - Requires Tailscale reachability to `build-lv3` for the fast path; degraded but functional without it
 - rsync adds 1–3 s per invocation even for no-change runs; this is acceptable for a lint gate but not for watch-mode workflows
 - Build server must have the project Docker images pre-pulled (addressed by ADR 0089 build cache)
+
+## Implementation Notes
+
+- Repository implementation landed in `0.80.0` and the first verified live gateway path completed on `2026-03-23` for platform version `0.38.0`.
+- The current live route is controller -> `ops@100.118.189.95` -> `ops@10.10.10.30` rather than a directly reachable build-VM Tailscale address.
+- The verified remote workspace root is `/home/ops/builds/proxmox_florin_server` so the `ops` account can manage the synced checkout without extra privilege escalation.
+- `docker-build-lv3` now includes `rsync` in the canonical guest package baseline so `make check-build-server` can verify SSH plus rsync health end to end.
 
 ## Alternatives Considered
 

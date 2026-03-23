@@ -10,8 +10,9 @@ Read these in order when picking up the repository cold:
 2. [AGENTS.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/AGENTS.md)
 3. [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml)
 4. [changelog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/changelog.md)
-5. [workstreams.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml)
-6. [docs/assistant-operator-guide.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/assistant-operator-guide.md)
+5. [docs/release-notes/README.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/README.md)
+6. [workstreams.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml)
+7. [docs/assistant-operator-guide.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/assistant-operator-guide.md)
 
 ## Source Of Truth By Topic
 
@@ -20,7 +21,8 @@ Read these in order when picking up the repository cold:
 - [README.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/README.md): current summary, major milestones, and next steps
 - [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml): desired state plus observed live state, including the enforced identity taxonomy and managed-principal inventory
 - [VERSION](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/VERSION): current repository version only
-- [changelog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/changelog.md): release-by-release history
+- [changelog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/changelog.md): release scratchpad and deployment-history portal index
+- [docs/release-notes/README.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/README.md): versioned release-note archive
 - [workstreams.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/workstreams.yaml): active branch-level implementation streams
 
 ### Protected integration files
@@ -29,6 +31,7 @@ These files are integration-owned and should normally be edited only during merg
 
 - [VERSION](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/VERSION)
 - [changelog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/changelog.md)
+- [docs/release-notes/README.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/README.md)
 - [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml)
 - [README.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/README.md)
 
@@ -46,6 +49,7 @@ These files are integration-owned and should normally be edited only during merg
 - [docs/runbooks/control-plane-communication-lanes.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/control-plane-communication-lanes.md): canonical command, API, message, and event lane policy with the governed-surface catalog
 - [docs/runbooks/private-first-api-publication.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/private-first-api-publication.md): ADR 0049 publication tiers and the classified API/webhook surface inventory
 - [docs/runbooks/live-apply-receipts-and-verification-evidence.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/live-apply-receipts-and-verification-evidence.md): structured evidence model for real platform applies
+- [docs/runbooks/deployment-history-portal.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/deployment-history-portal.md): generated timeline portal and audit-source fallback model
 - [docs/runbooks/generate-status-documents.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/generate-status-documents.md): generated README status fragments and validation flow
 - [docs/runbooks/platform-facts-library.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/platform-facts-library.md): generated platform topology facts, validation, and inventory-inspection flow
 - [docs/runbooks/identity-taxonomy-and-managed-principals.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/identity-taxonomy-and-managed-principals.md): ADR 0046 identity classes, required metadata, and the current principal inventory
@@ -151,7 +155,7 @@ Minimum expected updates for a meaningful infrastructure change:
 - relevant workstream file and `workstreams.yaml` if the change is in flight on a branch
 - [README.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/README.md) if the integrated current-state summary changed
 - [versions/stack.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml) if `main` truth or observed state changed
-- [VERSION](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/VERSION) and [changelog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/changelog.md) only when cutting a `main` release
+- [VERSION](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/VERSION), [changelog.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/changelog.md), and [docs/release-notes/README.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/README.md) only when cutting a `main` release
 - commit and push if the change was applied to the live platform
 
 ## Known Gaps
