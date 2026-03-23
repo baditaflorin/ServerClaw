@@ -165,38 +165,85 @@
   tags:
     - mutation
 
-- name: Start the Windmill stack
-  vars:
-    mutation_audit_action: start.windmill_stack
-    mutation_audit_target: windmill-runtime
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --env-file
-      - "{{ windmill_env_file }}"
-      - --file
-      - "{{ windmill_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-  args:
-    chdir: "{{ windmill_site_dir }}"
-  register: windmill_up
-  changed_when: >-
-    'Creating' in windmill_up.stdout
-    or 'Recreating' in windmill_up.stdout
-    or 'Starting' in windmill_up.stdout
-  tags:
-    - mutation
+- name: Start Windmill and wait for the API socket
+  block:
+    - name: Start the Windmill stack
+      vars:
+        mutation_audit_action: start.windmill_stack
+        mutation_audit_target: windmill-runtime
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --env-file
+          - "{{ windmill_env_file }}"
+          - --file
+          - "{{ windmill_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ windmill_site_dir }}"
+      register: windmill_up
+      changed_when: >-
+        'Creating' in windmill_up.stdout
+        or 'Recreating' in windmill_up.stdout
+        or 'Starting' in windmill_up.stdout
+      tags:
+        - mutation
 
-- name: Wait for Windmill to listen locally
-  ansible.builtin.include_role:
-    name: common
-    tasks_from: wait_port
-  vars:
-    common_wait_port_port: "{{ windmill_server_port }}"
-    common_wait_port_timeout: 180
+    - name: Wait for Windmill to listen locally
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: "{{ windmill_server_port }}"
+        delay: 0
+        timeout: 180
+  rescue:
+    - name: Recreate the Windmill server container after startup timeout
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --env-file
+          - "{{ windmill_env_file }}"
+          - --file
+          - "{{ windmill_compose_file }}"
+          - rm
+          - -fsv
+          - windmill_server
+      args:
+        chdir: "{{ windmill_site_dir }}"
+      register: windmill_server_recreate_rm
+      changed_when: >-
+        'Removed' in windmill_server_recreate_rm.stdout
+        or 'Stopping' in windmill_server_recreate_rm.stdout
+
+    - name: Start a fresh Windmill server container
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --env-file
+          - "{{ windmill_env_file }}"
+          - --file
+          - "{{ windmill_compose_file }}"
+          - up
+          - -d
+          - windmill_server
+      args:
+        chdir: "{{ windmill_site_dir }}"
+      register: windmill_server_recreate_up
+      changed_when: >-
+        'Creating' in windmill_server_recreate_up.stdout
+        or 'Recreating' in windmill_server_recreate_up.stdout
+        or 'Starting' in windmill_server_recreate_up.stdout
+
+    - name: Wait for Windmill to listen locally after server recreation
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: "{{ windmill_server_port }}"
+        delay: 0
+        timeout: 180
 
 - name: Wait for the Windmill API version endpoint
   ansible.builtin.uri:

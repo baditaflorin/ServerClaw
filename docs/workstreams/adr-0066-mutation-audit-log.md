@@ -64,4 +64,4 @@
 
 - the callback plugin must handle Ansible failure gracefully and not suppress the original error
 - scrubbing of variable values tagged `no_log: true` is inherited from Ansible's existing behaviour; verify this is working before merging
-- the current branch implements controller-side JSONL emission by default under `.local/state/mutation-audit/`; move the sink to `/var/log/platform/` only as part of the live rollout
+- controller-side JSONL emission still defaults to `.local/state/mutation-audit/`, while host-local runtime sinks now live under `/var/log/platform/` and are shipped to Loki

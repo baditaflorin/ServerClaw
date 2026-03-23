@@ -37,7 +37,7 @@ The workflow manages these live surfaces:
 - repo-managed workspace `lv3`
 - seeded script `f/lv3/windmill_healthcheck`
 - seeded script `f/lv3/rotate_credentials`
-- seeded helper `f/lv3/mutation_audit`
+- seeded helper `f/lv3/mutation_audit_emit`
 
 ## Generated Local Artifacts
 

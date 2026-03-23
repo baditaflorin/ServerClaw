@@ -260,7 +260,6 @@ def split_csv(value: str) -> list[str]:
     return [item.strip() for item in value.split(",") if item.strip()]
 
 
-def evaluate_approval(
 def emit_approval_audit_event(
     *,
     command_id: str,
@@ -295,7 +294,6 @@ def evaluate_approval(
     self_approve: bool,
     break_glass: bool,
 ) -> dict[str, object]:
- ) -> dict[str, object]:
     contract = command_catalog["commands"].get(command_id)
     if contract is None:
         raise ValueError(f"Unknown command contract: {command_id}")

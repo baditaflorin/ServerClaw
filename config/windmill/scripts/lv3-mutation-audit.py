@@ -8,6 +8,7 @@ import urllib.request
 ALLOWED_ACTOR_CLASSES = {"operator", "agent", "service", "automation"}
 ALLOWED_OUTCOMES = {"success", "failure", "rejected"}
 ACTION_PATTERN = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
+DEFAULT_SINK_PATH = "/var/log/platform/mutation-audit.jsonl"
 
 
 def _require_string(value, field, allow_empty=False):
@@ -105,8 +106,8 @@ def main(
         evidence_ref=evidence_ref,
     )
 
-    sink_path = os.getenv("LV3_MUTATION_AUDIT_FILE", "").strip()
-    if sink_path:
+    sink_path = os.getenv("LV3_MUTATION_AUDIT_FILE", "").strip() or DEFAULT_SINK_PATH
+    if sink_path.lower() != "off":
         _append_jsonl(sink_path, event)
 
     webhook_url = os.getenv("LV3_MUTATION_AUDIT_WEBHOOK", "").strip()

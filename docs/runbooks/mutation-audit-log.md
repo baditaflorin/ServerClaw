@@ -42,7 +42,7 @@ The current workstream branch implements these emission paths:
 
 - `scripts/command_catalog.py --check-approval` emits `command-catalog` audit events for approvals and rejections
 - tagged Ansible mutation tasks emit `ansible` audit events through the callback plugin
-- the Windmill converge seeds `f/lv3/mutation_audit` as a reusable workflow helper
+- the Windmill converge seeds `f/lv3/mutation_audit_emit` as a reusable workflow helper
 - operators can emit an explicit `manual` event from the controller
 
 The default local sink on the controller is:
@@ -51,7 +51,18 @@ The default local sink on the controller is:
 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/state/mutation-audit/mutation-audit.jsonl
 ```
 
-For live host-side rollout, point the sink at `/var/log/platform/mutation-audit.jsonl` and wire the same stream into Loki once ADR 0052 is applied.
+Live host-side sinks now exist at:
+
+```bash
+/var/log/platform/mutation-audit.jsonl
+```
+
+on:
+
+- `proxmox_florin`
+- `docker-runtime-lv3`
+
+ADR 0052 ships both host files into Loki under `{job="mutation-audit"}`. The controller-side emitter remains repo-local by default.
 
 ## Validate The Schema
 
@@ -118,5 +129,6 @@ Optional environment variables:
 
 ## Notes
 
-- OpenBao already writes its own audit-device log as part of the runtime config. Converging that raw feed into the structured mutation stream remains part of the live rollout work.
+- The repo-managed Windmill helper path is `f/lv3/mutation_audit_emit`.
+- OpenBao already writes its own audit-device log as part of the runtime config, and ADR 0052 ships that native audit feed into Loki with `job="mutation-audit"` and `surface="openbao"`.
 - NATS-triggered mutations and full manual-operation coverage still require the later control-plane workstreams that introduce those surfaces.
