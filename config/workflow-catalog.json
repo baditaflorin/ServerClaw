@@ -84,7 +84,7 @@
         ".githooks/pre-push"
       ],
       "outputs": [
-        "A blocking pass or fail result across the eight configured pre-push validation checks, together with a recorded last-run status payload."
+        "A blocking pass or fail result across the nine configured pre-push validation checks, together with a recorded last-run status payload."
       ],
       "verification_commands": [
         "make pre-push-gate",
@@ -144,6 +144,50 @@
       ],
       "verification_commands": [
         "make post-merge-gate"
+      ]
+    },
+    "nightly-integration-tests": {
+      "description": "Run the ADR 0111 nightly integration suite, post the summary to Mattermost, and emit GlitchTip failures when checks regress.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "nightly-integration-tests",
+        "command": "make nightly-integration-tests"
+      },
+      "preflight": {
+        "required": false,
+        "required_secret_ids": []
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/integration-test-suite.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/validation-gate.json",
+        "config/windmill/scripts/nightly-integration-tests.py",
+        "docs/adr/0111-end-to-end-integration-test-suite.md",
+        "docs/runbooks/integration-test-suite.md",
+        "requirements/integration-tests.txt",
+        "scripts/integration_suite.py",
+        "tests/integration/conftest.py",
+        "tests/integration/test_authentication.py",
+        "tests/integration/test_platform_api.py",
+        "tests/integration/test_secret_management.py",
+        "tests/integration/test_deployment.py",
+        "tests/integration/test_observability.py",
+        "tests/integration/test_data_services.py",
+        "tests/integration/test_failover.py",
+        "tests/integration/test_backup_recovery.py"
+      ],
+      "outputs": [
+        "A JSON report under .local/integration-tests/nightly-last-run.json describing passed, failed, and skipped ADR 0111 checks.",
+        "An optional Mattermost summary and GlitchTip failure event when the worker has the corresponding webhook secrets or environment overrides."
+      ],
+      "verification_commands": [
+        "python3 scripts/integration_suite.py --mode gate --environment staging",
+        "python3 config/windmill/scripts/nightly-integration-tests.py --repo-path /srv/proxmox_florin_server"
       ]
     },
     "generate-status-docs": {

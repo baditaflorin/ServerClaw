@@ -212,6 +212,55 @@
         ]
       }
     },
+    "nightly-integration-tests": {
+      "description": "Run the ADR 0111 nightly integration suite, including the NetBox rotation mutation check when the worker is provisioned for it.",
+      "workflow_id": "nightly-integration-tests",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "LV3_TEST_RUNNER_USERNAME",
+          "kind": "operator_parameter",
+          "required": true,
+          "source": "Windmill worker environment or OpenBao injection",
+          "description": "Dedicated automation identity used to obtain a real Keycloak token for the integration suite."
+        },
+        {
+          "name": "LV3_TEST_RUNNER_PASSWORD",
+          "kind": "operator_parameter",
+          "required": true,
+          "source": "Windmill worker environment or OpenBao injection",
+          "description": "Password for the dedicated integration-test runner identity."
+        },
+        {
+          "name": "LV3_INTEGRATION_GATEWAY_URL",
+          "kind": "operator_parameter",
+          "required": false,
+          "source": "Windmill worker environment",
+          "description": "Explicit API gateway override used until ADR 0092 is represented in the service catalog."
+        }
+      ],
+      "expected_preconditions": [
+        "make validate passes before enabling the nightly schedule",
+        "The worker can resolve and reach the intended environment endpoints over the private network or Tailscale",
+        "The test-runner identity is provisioned through ADR 0108 and its credentials are stored in OpenBao or equivalent worker injection",
+        "Operators explicitly review whether the nightly run should include the NetBox rotation mutation test before enabling the schedule"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the nightly report path, the enabled mutation toggles, and at least one successful scheduled run before treating the workflow as fully rolled out."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the worker cannot reach the private platform URLs, the Keycloak token flow fails, or the rotation mutation leaves NetBox unhealthy.",
+          "Stop if the nightly job starts creating GlitchTip or Mattermost noise because the target environment is not yet intentionally enrolled."
+        ],
+        "rollback_guidance": [
+          "Disable the schedule and rerun the suite manually through scripts/integration_suite.py before re-enabling automation.",
+          "If the rotation mutation fails, restore the affected service through the repo-managed secret rotation or service converge path before the next nightly window."
+        ]
+      }
+    },
     "adr-0077-compose-runtime-secrets-live-apply": {
       "description": "Converge the ADR 0077 runtime-secret injection path across the docker-runtime-lv3 platform applications.",
       "workflow_id": "adr-0077-compose-runtime-secrets-live-apply",

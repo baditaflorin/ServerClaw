@@ -1835,10 +1835,10 @@ workstreams:
   - id: adr-0111-integration-tests
     adr: "0111"
     title: End-to-end integration test suite
-    status: ready
+    status: ready_for_merge
     owner: codex
     branch: codex/adr-0111-integration-tests
-    worktree_path: ../proxmox_florin_server-integration-tests
+    worktree_path: .worktrees/adr-0111
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0111-integration-test-suite.md
     depends_on:
       - adr-0044-windmill
@@ -1854,8 +1854,13 @@ workstreams:
     conflicts_with: []
     shared_surfaces:
       - tests/
+      - scripts/integration_suite.py
+      - requirements/integration-tests.txt
+      - Makefile
       - config/validation-gate.json
+      - config/workflow-catalog.json
       - Windmill workflows
       - Keycloak realm
-    ready_to_merge: false
+      - docs/runbooks/
+    ready_to_merge: true
     live_applied: false
