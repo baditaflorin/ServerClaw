@@ -72,5 +72,5 @@
 
 ## Outcome
 
-- merged in repo version `0.108.0`
+- merged in repo version `0.110.0`
 - live apply not yet performed from `main`
