@@ -80,7 +80,7 @@ The repository now also ships continuous drift detection across OpenTofu, Ansibl
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.94.0` |
+| Repository version | `0.95.0` |
 | Platform version | `0.40.0` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
