@@ -378,6 +378,15 @@ def validate_service_topology_entry(
                     )
             if kind == "proxy":
                 require_str(edge.get("upstream"), f"lv3_service_topology.{service_id}.edge.upstream")
+                if "root_proxy_path" in edge:
+                    root_proxy_path = require_str(
+                        edge.get("root_proxy_path"),
+                        f"lv3_service_topology.{service_id}.edge.root_proxy_path",
+                    )
+                    if not root_proxy_path.startswith("/"):
+                        raise ValueError(
+                            f"lv3_service_topology.{service_id}.edge.root_proxy_path must start with '/'"
+                        )
 
     return service_name, public_hostname
 

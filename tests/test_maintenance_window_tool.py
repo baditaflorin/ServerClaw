@@ -95,3 +95,26 @@ def test_suppress_finding_for_maintenance_does_not_hide_security_checks():
 
     assert result["severity"] == "critical"
     assert "suppressed" not in result
+
+
+def test_status_page_maintenance_title_uses_service_name():
+    service_catalog = {
+        "keycloak": {"name": "Keycloak"},
+    }
+    window = {
+        "service_id": "keycloak",
+    }
+
+    assert tool.status_page_maintenance_title(window, service_catalog) == "Planned maintenance: Keycloak"
+
+
+def test_resolve_status_page_monitor_names_for_all_uses_status_page_catalog(monkeypatch):
+    monkeypatch.setattr(
+        tool,
+        "load_status_page_monitor_names",
+        lambda: ["Grafana Public", "Keycloak OIDC Discovery"],
+    )
+
+    monitor_names = tool.resolve_status_page_monitor_names({"service_id": "all"}, {})
+
+    assert monitor_names == ["Grafana Public", "Keycloak OIDC Discovery"]

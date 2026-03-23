@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0.0",
+  "slos": [
+    {
+      "id": "status-page-availability",
+      "service": "status_page",
+      "indicator": "uptime",
+      "objective_percent": 99.9,
+      "window_days": 30,
+      "probe": "http_probe_success{job='status-page'}",
+      "description": "The public status page should remain externally reachable as the last-resort platform signal."
+    }
+  ]
+}

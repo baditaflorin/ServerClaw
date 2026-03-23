@@ -234,6 +234,21 @@
       }
     },
     {
+      "fqdn": "status.lv3.org",
+      "service_id": "status_page",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0109",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      }
+    },
+    {
       "fqdn": "uptime.lv3.org",
       "service_id": "uptime_kuma",
       "environment": "production",

@@ -65,6 +65,8 @@ def service_topology_edge_sites(catalog):
             site["upstream"] = edge["upstream"]
             if "aliases" in edge:
                 site["aliases"] = edge["aliases"]
+            if "root_proxy_path" in edge:
+                site["root_proxy_path"] = edge["root_proxy_path"]
         else:
             raise AnsibleFilterError(
                 f"service {service_id} has unsupported edge kind: {kind}"

@@ -36,7 +36,9 @@ go.work.sum
 # Python cache
 __pycache__/
 *.pyc
+*.egg-info/
 .cache/
+uv.lock
 .packer.d/
 build/
 .terraform/
