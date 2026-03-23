@@ -19,6 +19,7 @@ from data_catalog import load_data_catalog, validate_data_catalog
 from live_apply_receipts import RECEIPTS_DIR, iter_receipt_paths, validate_receipts
 from generate_platform_vars import PLATFORM_VARS_PATH, PORT_KEYS, build_platform_vars
 from mutation_audit import load_mutation_audit_schema, validate_mutation_audit_schema
+from operator_manager import ROSTER_PATH, validate_operator_roster
 from promotion_pipeline import validate_promotion_receipts
 from validate_ephemeral_vmid import validate_ephemeral_vmid_ranges
 from workflow_catalog import (
@@ -1765,6 +1766,7 @@ def validate_repository_data_models() -> int:
     validate_maintenance_window_schema()
     validate_capacity_model()
     validate_vm_template_manifest(host_vars_context["proxmox_vm_templates"])
+    validate_operator_roster(load_yaml(ROSTER_PATH))
     validate_versions_stack(host_vars_context)
     validate_platform_vars()
     validate_no_tracked_env_files()

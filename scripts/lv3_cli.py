@@ -385,6 +385,17 @@ def fixture_command(
     )
 
 
+def operator_inventory_command(operator_id: str, *, offline: bool) -> CommandPlan:
+    command = ["uvx", "--from", "pyyaml", "python", "scripts/operator_access_inventory.py", "--id", operator_id]
+    if offline:
+        command.append("--offline")
+    return CommandPlan(
+        label=f"operator inventory {operator_id}",
+        route="controller local operator access inventory",
+        command=command,
+    )
+
+
 def scaffold_command(service_name: str) -> CommandPlan:
     return CommandPlan(
         label=f"scaffold {service_name}",
@@ -847,6 +858,7 @@ def completion_candidates(words: list[str], current: str) -> list[str]:
         "logs",
         "ssh",
         "open",
+        "operator",
     ]
     if len(words) <= 1:
         return [candidate for candidate in top_level if candidate.startswith(current)]
@@ -870,6 +882,8 @@ def completion_candidates(words: list[str], current: str) -> list[str]:
         return [fixture_id for fixture_id in sorted(dict.fromkeys(candidates)) if fixture_id.startswith(current)]
     if words[1] == "secret" and len(words) == 3:
         return [action for action in ["get", "rotate"] if action.startswith(current)]
+    if words[1] == "operator" and len(words) == 3:
+        return [action for action in ["add", "remove", "inventory"] if action.startswith(current)]
     if words[1] == "release" and len(words) == 3:
         return [action for action in ["status"] if action.startswith(current)]
     return []
@@ -1016,6 +1030,32 @@ def build_parser() -> argparse.ArgumentParser:
     open_parser.add_argument("--dry-run", action="store_true")
     open_parser.add_argument("--explain", action="store_true")
 
+    operator = subparsers.add_parser("operator", help="Manage human operator access.")
+    operator_subparsers = operator.add_subparsers(dest="operator_action", required=True)
+    operator_add = operator_subparsers.add_parser("add", help="Run the operator onboarding workflow.")
+    operator_add.add_argument("--name", required=True)
+    operator_add.add_argument("--email", required=True)
+    operator_add.add_argument("--role", required=True, choices=["admin", "operator", "viewer"])
+    operator_add.add_argument("--ssh-key", default="")
+    operator_add.add_argument("--id")
+    operator_add.add_argument("--keycloak-username")
+    operator_add.add_argument("--tailscale-login-email")
+    operator_add.add_argument("--tailscale-device-name")
+    operator_add.add_argument("--dry-run", action="store_true")
+    operator_add.add_argument("--explain", action="store_true")
+
+    operator_remove = operator_subparsers.add_parser("remove", help="Run the operator offboarding workflow.")
+    operator_remove.add_argument("--id", required=True)
+    operator_remove.add_argument("--reason")
+    operator_remove.add_argument("--dry-run", action="store_true")
+    operator_remove.add_argument("--explain", action="store_true")
+
+    operator_inventory = operator_subparsers.add_parser("inventory", help="Show one operator access inventory.")
+    operator_inventory.add_argument("--id", required=True)
+    operator_inventory.add_argument("--offline", action="store_true")
+    operator_inventory.add_argument("--dry-run", action="store_true")
+    operator_inventory.add_argument("--explain", action="store_true")
+
     completion = subparsers.add_parser("__complete")
     completion.add_argument("current", nargs="?", default="")
 
@@ -1100,6 +1140,46 @@ def main(argv: list[str] | None = None) -> int:
         return ssh_command(args.vm_name, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
     if args.command == "open":
         return open_service_url(args.service, args.env, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
+    if args.command == "operator":
+        if args.operator_action == "add":
+            workflow_args = [
+                f"name={args.name}",
+                f"email={args.email}",
+                f"role={args.role}",
+                f"ssh_key={args.ssh_key}",
+            ]
+            if args.id:
+                workflow_args.append(f"operator_id={args.id}")
+            if args.keycloak_username:
+                workflow_args.append(f"keycloak_username={args.keycloak_username}")
+            if args.tailscale_login_email:
+                workflow_args.append(f"tailscale_login_email={args.tailscale_login_email}")
+            if args.tailscale_device_name:
+                workflow_args.append(f"tailscale_device_name={args.tailscale_device_name}")
+            return run_windmill_workflow(
+                "operator-onboard",
+                workflow_args,
+                dry_run=args.dry_run,
+                explain=args.explain,
+                no_color=no_color,
+            )
+        if args.operator_action == "remove":
+            workflow_args = [f"operator_id={args.id}"]
+            if args.reason:
+                workflow_args.append(f"reason={args.reason}")
+            return run_windmill_workflow(
+                "operator-offboard",
+                workflow_args,
+                dry_run=args.dry_run,
+                explain=args.explain,
+                no_color=no_color,
+            )
+        return run_plan(
+            operator_inventory_command(args.id, offline=args.offline),
+            dry_run=args.dry_run,
+            explain=args.explain,
+            no_color=no_color,
+        )
 
     raise SystemExit(f"Unhandled command '{args.command}'.")
 

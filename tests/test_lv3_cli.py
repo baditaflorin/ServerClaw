@@ -176,6 +176,7 @@ def test_help_lists_command_groups(capsys: pytest.CaptureFixture[str], minimal_r
     assert "deploy" in captured.out
     assert "status" in captured.out
     assert "open" in captured.out
+    assert "operator" in captured.out
 
 
 def test_deploy_dry_run_prints_remote_exec_route(
@@ -303,3 +304,60 @@ def test_release_status_uses_dr_report(capsys: pytest.CaptureFixture[str], minim
     assert exit_code == 0
     assert "Platform 1.0.0 readiness" in captured.out
     assert "DR table-top review: complete" in captured.out
+
+
+def test_operator_add_dry_run_uses_windmill_workflow(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    exit_code = lv3_cli.main(
+        [
+            "operator",
+            "add",
+            "--name",
+            "Alice Example",
+            "--email",
+            "alice@example.com",
+            "--role",
+            "operator",
+            "--ssh-key",
+            "@/tmp/alice.pub",
+            "--dry-run",
+        ]
+    )
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "controller -> Windmill API" in captured.out
+    assert "operator-onboard" in captured.out
+    assert "alice@example.com" in captured.out
+
+
+def test_operator_inventory_dry_run_prints_local_script_route(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    exit_code = lv3_cli.main(["operator", "inventory", "--id", "florin-badita", "--offline", "--dry-run"])
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "controller local operator access inventory" in captured.out
+    assert "scripts/operator_access_inventory.py" in captured.out
+
+
+def test_operator_add_viewer_dry_run_does_not_require_ssh_key(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    exit_code = lv3_cli.main(
+        [
+            "operator",
+            "add",
+            "--name",
+            "Viewer Example",
+            "--email",
+            "viewer@example.com",
+            "--role",
+            "viewer",
+            "--dry-run",
+        ]
+    )
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "operator-onboard" in captured.out
+    assert "viewer@example.com" in captured.out

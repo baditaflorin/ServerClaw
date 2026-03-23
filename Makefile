@@ -14,6 +14,8 @@ SERVICE ?=
 DURATION_MINUTES ?= 30
 REASON ?=
 FORCE ?= false
+WARNING_DAYS ?= 45
+INACTIVE_DAYS ?= 60
 STAGING_RECEIPT ?=
 BRANCH ?=
 REQUESTER_CLASS ?= human_operator
@@ -60,7 +62,7 @@ CHECK_RUNNER_PYTHON_IMAGE ?= $(CHECK_RUNNER_REGISTRY)/python:$(CHECK_RUNNER_PYTH
 CHECK_RUNNER_INFRA_IMAGE ?= $(CHECK_RUNNER_REGISTRY)/infra:$(CHECK_RUNNER_INFRA_TAG)
 CHECK_RUNNER_SECURITY_IMAGE ?= $(CHECK_RUNNER_REGISTRY)/security:$(CHECK_RUNNER_SECURITY_TAG)
 
-.PHONY: validate validate-generated-vars validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-shell validate-json validate-compose-runtime-envs validate-data-models validate-health-probes validate-tofu generate-platform-vars show-platform-facts generate-status-docs generate-status generate-ops-portal generate-changelog-portal docs deploy-ops-portal deploy-changelog-portal deploy-docs-portal validate-generated-docs validate-generated-portals receipts receipt-info workflows workflow-info commands command-info services show-service environments environment-info lanes lane-info api-publication api-publication-info agent-tools agent-tool-info export-mcp-tools check-image-freshness upgrade-container-image pin-image scaffold-service install-hooks pre-push-gate gate-status dr-status dr-runbook post-merge-gate integration-tests nightly-integration-tests setup preflight syntax-check syntax-check-monitoring syntax-check-ntopng syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-openbao syntax-check-step-ca syntax-check-windmill syntax-check-keycloak syntax-check-netbox syntax-check-open-webui syntax-check-mattermost syntax-check-portainer syntax-check-rag-context syntax-check-secret-rotation collection-sync collection-build collection-publish collection-install check-platform-drift drift-report open-maintenance-window close-maintenance-window install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-guest-network-policy converge-monitoring converge-ntopng converge-docker-runtime converge-postgres-vm converge-mail-platform converge-openbao converge-step-ca converge-windmill converge-control-plane-recovery converge-keycloak converge-netbox converge-open-webui converge-mattermost converge-portainer converge-rag-context rotate-secret deploy-uptime-kuma uptime-kuma-manage portainer-manage configure-backups configure-backup-vm database-dns provision-subdomain start-workstream promote live-apply-group live-apply-service live-apply-site build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-reaper install-cli update-cli validate-packer remote-packer-validate packer-template-rebuild remote-tofu-plan remote-tofu-apply tofu-drift tofu-import
+.PHONY: validate validate-generated-vars validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-shell validate-json validate-compose-runtime-envs validate-data-models validate-health-probes validate-tofu generate-platform-vars show-platform-facts generate-status-docs generate-status generate-ops-portal generate-changelog-portal docs deploy-ops-portal deploy-changelog-portal deploy-docs-portal validate-generated-docs validate-generated-portals receipts receipt-info workflows workflow-info commands command-info services show-service environments environment-info lanes lane-info api-publication api-publication-info agent-tools agent-tool-info export-mcp-tools check-image-freshness upgrade-container-image pin-image scaffold-service install-hooks pre-push-gate gate-status dr-status dr-runbook post-merge-gate integration-tests nightly-integration-tests setup preflight syntax-check syntax-check-monitoring syntax-check-ntopng syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-openbao syntax-check-step-ca syntax-check-windmill syntax-check-keycloak syntax-check-netbox syntax-check-open-webui syntax-check-mattermost syntax-check-portainer syntax-check-rag-context syntax-check-secret-rotation collection-sync collection-build collection-publish collection-install check-platform-drift drift-report open-maintenance-window close-maintenance-window operator-onboard operator-offboard sync-operators quarterly-access-review install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-guest-network-policy converge-monitoring converge-ntopng converge-docker-runtime converge-postgres-vm converge-mail-platform converge-openbao converge-step-ca converge-windmill converge-control-plane-recovery converge-keycloak converge-netbox converge-open-webui converge-mattermost converge-portainer converge-rag-context rotate-secret deploy-uptime-kuma uptime-kuma-manage portainer-manage configure-backups configure-backup-vm database-dns provision-subdomain start-workstream promote live-apply-group live-apply-service live-apply-site build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-reaper install-cli update-cli validate-packer remote-packer-validate packer-template-rebuild remote-tofu-plan remote-tofu-apply tofu-drift tofu-import
 
 validate:
 	$(REPO_ROOT)/scripts/validate_repo.sh
@@ -387,6 +389,26 @@ close-maintenance-window:
 	$(MAKE) preflight WORKFLOW=close-maintenance-window
 	@test -n "$(SERVICE)" || (echo "set SERVICE=<service-id|all>"; exit 1)
 	uv run --with pyyaml --with nats-py python $(REPO_ROOT)/scripts/maintenance_window_tool.py close --service "$(SERVICE)" $(if $(filter true,$(FORCE)),--force,)
+
+operator-onboard:
+	$(MAKE) preflight WORKFLOW=operator-onboard
+	@test -n "$(NAME)" || (echo "set NAME=<operator-name>"; exit 1)
+	@test -n "$(EMAIL)" || (echo "set EMAIL=<operator-email>"; exit 1)
+	@test -n "$(ROLE)" || (echo "set ROLE=<admin|operator|viewer>"; exit 1)
+	@case "$(ROLE)" in admin|operator) test -n "$(SSH_KEY)" || { echo "set SSH_KEY=@/path/to/public-key.pub"; exit 1; } ;; viewer) : ;; *) echo "ROLE must be admin, operator, or viewer"; exit 1 ;; esac
+	uvx --from pyyaml python $(REPO_ROOT)/scripts/operator_manager.py onboard --name "$(NAME)" --email "$(EMAIL)" --role "$(ROLE)" $(if $(SSH_KEY),--ssh-key "$(SSH_KEY)",) $(if $(OPERATOR_ID),--id "$(OPERATOR_ID)",) $(if $(KEYCLOAK_USERNAME),--keycloak-username "$(KEYCLOAK_USERNAME)",) $(if $(TAILSCALE_LOGIN_EMAIL),--tailscale-login-email "$(TAILSCALE_LOGIN_EMAIL)",) $(if $(TAILSCALE_DEVICE_NAME),--tailscale-device-name "$(TAILSCALE_DEVICE_NAME)",) $(if $(BOOTSTRAP_PASSWORD),--bootstrap-password "$(BOOTSTRAP_PASSWORD)",) --emit-json
+
+operator-offboard:
+	$(MAKE) preflight WORKFLOW=operator-offboard
+	@test -n "$(OPERATOR_ID)" || (echo "set OPERATOR_ID=<operator-id>"; exit 1)
+	uvx --from pyyaml python $(REPO_ROOT)/scripts/operator_manager.py offboard --id "$(OPERATOR_ID)" $(if $(REASON),--reason "$(REASON)",) --emit-json
+
+sync-operators:
+	$(MAKE) preflight WORKFLOW=sync-operators
+	uvx --from pyyaml python $(REPO_ROOT)/scripts/operator_manager.py sync $(if $(OPERATOR_ID),--id "$(OPERATOR_ID)",) $(if $(filter true,$(DRY_RUN)),--dry-run,) --emit-json
+
+quarterly-access-review:
+	uvx --from pyyaml python $(REPO_ROOT)/scripts/operator_manager.py quarterly-review --warning-days $(WARNING_DAYS) --inactive-days $(INACTIVE_DAYS) $(if $(filter true,$(DRY_RUN)),--dry-run,) --emit-json
 
 install-proxmox:
 	$(MAKE) preflight WORKFLOW=install-proxmox

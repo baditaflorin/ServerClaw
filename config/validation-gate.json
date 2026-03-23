@@ -27,10 +27,10 @@
     "cache_mounts": ["packer_plugins"]
   },
   "schema-validation": {
-    "description": "Validate canonical repository data models, cross references, and receipt schemas.",
+    "description": "Validate canonical repository data models, operator roster schema, cross references, and receipt schemas.",
     "severity": "error",
     "image": "registry.lv3.org/check-runner/python:3.12.10",
-    "command": "python scripts/validate_repository_data_models.py --validate >/dev/null && python scripts/data_catalog.py --validate >/dev/null && python scripts/service_catalog.py --validate >/dev/null && python scripts/environment_topology.py --validate >/dev/null && python scripts/subdomain_catalog.py --validate >/dev/null && ./scripts/agent_tool_registry.py --export-mcp >/dev/null && python scripts/mutation_audit.py --validate-schema >/dev/null",
+    "command": "python scripts/validate_repository_data_models.py --validate >/dev/null && python scripts/data_catalog.py --validate >/dev/null && python scripts/operator_manager.py validate >/dev/null && python scripts/service_catalog.py --validate >/dev/null && python scripts/environment_topology.py --validate >/dev/null && python scripts/subdomain_catalog.py --validate >/dev/null && ./scripts/agent_tool_registry.py --export-mcp >/dev/null && python scripts/mutation_audit.py --validate-schema >/dev/null",
     "working_dir": "/workspace",
     "timeout_seconds": 180
   },

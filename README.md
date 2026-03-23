@@ -81,7 +81,7 @@ The repository now also ships ADR 0100 disaster-recovery targets, a structured r
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.103.0` |
+| Repository version | `0.104.0` |
 | Platform version | `0.40.0` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -318,8 +318,8 @@ this is still same-host recovery, not off-host disaster recovery
 - [Ansible Collection Development](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/ansible-collection-development.md)
 - [Backup Restore Verification](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/backup-restore-verification.md)
 - [Break-Glass Recovery](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/break-glass-recovery.md)
-- [Certificate Expired](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/cert-expired.md)
 - [Break-Glass References](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/break-glass.md)
+- [Certificate Expired](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/cert-expired.md)
 - [Command Catalog And Approval Gates](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/command-catalog-and-approval-gates.md)
 - [Complete Security Baseline Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/complete-security-baseline.md)
 - [Compose Runtime Secrets Injection](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/compose-secrets-injection.md)
@@ -373,6 +373,8 @@ this is still same-host recovery, not off-host disaster recovery
 - [Monitoring Stack Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/monitoring-stack.md)
 - [Mutation Audit Log](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/mutation-audit-log.md)
 - [Network Policy Reference](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/network-policy-reference.md)
+- [Operator Offboarding](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/operator-offboarding.md)
+- [Operator Onboarding](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/operator-onboarding.md)
 - [Ops Portal Down](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/ops-portal-down.md)
 - [Packer VM Templates](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/packer-vm-templates.md)
 - [Agentic Control-Plane Roadmap](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/plan-agentic-control-plane.md)
@@ -619,7 +621,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.103.0` |
+| Repository version | `0.104.0` |
 | Platform version | `0.40.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -733,6 +735,7 @@ This repository is intentionally opinionated:
 | `0101` | Automated certificate lifecycle management | `merged` | [adr-0101-certificate-lifecycle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0101-certificate-lifecycle.md) |
 | `0103` | Data classification and retention policy | `merged` | [adr-0103-data-retention-policy.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0103-data-retention-policy.md) |
 | `0106` | Ephemeral environment lifecycle and teardown policy | `merged` | [adr-0106-ephemeral-lifecycle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0106-ephemeral-lifecycle.md) |
+| `0108` | Operator onboarding and off-boarding workflow | `merged` | [adr-0108-operator-onboarding.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0108-operator-onboarding.md) |
 | `0111` | End-to-end integration test suite | `merged` | [adr-0111-integration-test-suite.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0111-integration-test-suite.md) |
 <!-- END GENERATED: merged-workstreams -->
 

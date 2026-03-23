@@ -1981,6 +1981,155 @@
         "uv run --with pyyaml --with nats-py python scripts/maintenance_window_tool.py list",
         "make command-info COMMAND=close-maintenance-window"
       ]
+    },
+    "operator-onboard": {
+      "description": "Apply one ADR 0108 human-operator onboarding change across the repo-authoritative roster, Keycloak, OpenBao, step-ca, Tailscale, and Mattermost.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "operator-onboard",
+        "command": "make operator-onboard NAME='Alice Example' EMAIL='alice@example.com' ROLE=operator SSH_KEY=@/tmp/alice.pub"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "keycloak_bootstrap_admin_password",
+          "openbao_init_payload"
+        ]
+      },
+      "validation_targets": [
+        "validate-data-models"
+      ],
+      "live_impact": "external_live",
+      "owner_runbook": "docs/runbooks/operator-onboarding.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/controller-local-secrets.json",
+        "config/openbao/policies/platform-admin.hcl",
+        "config/openbao/policies/platform-operator.hcl",
+        "config/openbao/policies/platform-read.hcl",
+        "config/operators.yaml",
+        "config/schemas/operators.schema.json",
+        "config/windmill/scripts/operator-onboard.py",
+        "docs/runbooks/operator-onboarding.md",
+        "scripts/operator_manager.py",
+        "scripts/operator_access_inventory.py"
+      ],
+      "outputs": [
+        "A normalized active operator entry committed in config/operators.yaml together with controller-local ADR 0108 state under .local/state/operator-access/.",
+        "The Keycloak user, OpenBao entity, and repo-managed operator role definitions are converged for the requested operator."
+      ],
+      "verification_commands": [
+        "python3 scripts/operator_manager.py validate",
+        "python3 scripts/operator_access_inventory.py --id florin-badita --offline",
+        "make workflow-info WORKFLOW=operator-onboard"
+      ]
+    },
+    "operator-offboard": {
+      "description": "Disable one ADR 0108 human operator across Keycloak, OpenBao, Tailscale, and the repo-authoritative roster while preserving audit history.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "operator-offboard",
+        "command": "make operator-offboard OPERATOR_ID=alice-example REASON='contract ended'"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "keycloak_bootstrap_admin_password",
+          "openbao_init_payload"
+        ]
+      },
+      "validation_targets": [
+        "validate-data-models"
+      ],
+      "live_impact": "external_live",
+      "owner_runbook": "docs/runbooks/operator-offboarding.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/controller-local-secrets.json",
+        "config/operators.yaml",
+        "config/windmill/scripts/operator-offboard.py",
+        "docs/runbooks/operator-offboarding.md",
+        "scripts/operator_manager.py",
+        "scripts/operator_access_inventory.py"
+      ],
+      "outputs": [
+        "The targeted operator is marked inactive in config/operators.yaml and mirrored in controller-local ADR 0108 state.",
+        "Keycloak is disabled and the OpenBao entity is driven to the inactive state for the targeted operator."
+      ],
+      "verification_commands": [
+        "python3 scripts/operator_manager.py validate",
+        "python3 scripts/operator_access_inventory.py --id florin-badita --offline",
+        "make workflow-info WORKFLOW=operator-offboard"
+      ]
+    },
+    "sync-operators": {
+      "description": "Reconcile the merged ADR 0108 operator roster into the live identity systems from the authoritative config/operators.yaml file.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "sync-operators",
+        "command": "make sync-operators"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "keycloak_bootstrap_admin_password",
+          "openbao_init_payload"
+        ]
+      },
+      "validation_targets": [
+        "validate-data-models"
+      ],
+      "live_impact": "external_live",
+      "owner_runbook": "docs/runbooks/operator-onboarding.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/operators.yaml",
+        "config/windmill/scripts/sync-operators.py",
+        "docs/runbooks/operator-onboarding.md",
+        "scripts/operator_manager.py"
+      ],
+      "outputs": [
+        "Every active or inactive roster entry is applied idempotently to the external identity systems from the current mainline operator roster."
+      ],
+      "verification_commands": [
+        "python3 scripts/operator_manager.py sync --dry-run --emit-json",
+        "make workflow-info WORKFLOW=sync-operators"
+      ]
+    },
+    "quarterly-access-review": {
+      "description": "Build the ADR 0108 quarterly access review summary and optionally post it to Mattermost.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "quarterly-access-review",
+        "command": "make quarterly-access-review WARNING_DAYS=45 INACTIVE_DAYS=60"
+      },
+      "preflight": {
+        "required": false,
+        "required_secret_ids": []
+      },
+      "validation_targets": [
+        "validate-data-models"
+      ],
+      "live_impact": "repo_only",
+      "owner_runbook": "docs/runbooks/operator-offboarding.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/operators.yaml",
+        "config/windmill/scripts/quarterly-access-review.py",
+        "docs/runbooks/operator-offboarding.md",
+        "scripts/operator_manager.py"
+      ],
+      "outputs": [
+        "A review summary enumerating active operators, stale activity, and the currently flagged access-review items."
+      ],
+      "verification_commands": [
+        "python3 scripts/operator_manager.py quarterly-review --dry-run --emit-json",
+        "make workflow-info WORKFLOW=quarterly-access-review"
+      ]
     }
   }
 }
