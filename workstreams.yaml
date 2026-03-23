@@ -969,6 +969,29 @@ workstreams:
     ready_to_merge: false
     live_applied: false
 
+  - id: adr-0077-compose-secrets-injection
+    adr: "0077"
+    title: Compose runtime secrets injection via OpenBao Agent
+    status: merged
+    owner: codex
+    branch: codex/adr-0077-compose-secrets-injection
+    worktree_path: ./.worktrees/adr-0077
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0077-compose-secrets-injection.md
+    depends_on:
+      - adr-0043-openbao
+      - adr-0025-docker-compose-stacks
+      - adr-0047-short-lived-creds
+      - adr-0065-secret-rotation-automation
+    conflicts_with: []
+    shared_surfaces:
+      - roles/common/tasks/openbao_compose_env.yml
+      - roles/common/templates/openbao-agent.hcl.j2
+      - compose templates on docker-runtime-lv3
+      - scripts/validate_repo.sh
+      - config/image-catalog.json
+    ready_to_merge: false
+    live_applied: false
+
   - id: adr-0079-playbook-decomposition
     adr: "0079"
     title: Playbook decomposition and shared execution model

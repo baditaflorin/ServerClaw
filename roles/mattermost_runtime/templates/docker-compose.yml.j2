@@ -1,10 +1,32 @@
 services:
+  openbao-agent:
+    image: {{ mattermost_openbao_agent_image }}
+    container_name: {{ mattermost_openbao_agent_container_name }}
+    command:
+      - agent
+      - -config=/openbao-agent/agent.hcl
+    network_mode: host
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -s {{ mattermost_env_file }}
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    volumes:
+      - {{ mattermost_openbao_agent_dir }}:/openbao-agent:ro
+      - {{ mattermost_env_file | dirname }}:{{ mattermost_env_file | dirname }}
+
   mattermost:
-    image: ${MM_IMAGE}
+    image: {{ mattermost_image }}
     container_name: {{ mattermost_container_name }}
     restart: unless-stopped
     env_file:
       - {{ mattermost_env_file }}
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
     ports:
       - "{{ mattermost_server_port }}:{{ mattermost_server_port }}"
     volumes:

@@ -1,6 +1,25 @@
 services:
+  openbao-agent:
+    image: {{ open_webui_openbao_agent_image }}
+    container_name: {{ open_webui_openbao_agent_container_name }}
+    command:
+      - agent
+      - -config=/openbao-agent/agent.hcl
+    network_mode: host
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -s {{ open_webui_env_file }}
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    volumes:
+      - {{ open_webui_openbao_agent_dir }}:/openbao-agent:ro
+      - {{ open_webui_env_file | dirname }}:{{ open_webui_env_file | dirname }}
+
   open-webui:
-    image: ${OPEN_WEBUI_IMAGE}
+    image: {{ open_webui_image }}
     container_name: {{ open_webui_container_name }}
     restart: unless-stopped
     ports:
@@ -9,5 +28,8 @@ services:
       - "host.docker.internal:host-gateway"
     env_file:
       - {{ open_webui_env_file }}
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
     volumes:
       - {{ open_webui_data_dir }}:/app/backend/data

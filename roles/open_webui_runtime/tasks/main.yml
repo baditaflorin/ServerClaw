@@ -117,6 +117,15 @@
     open_webui_oidc_client_secret: >-
       {{ lookup('ansible.builtin.file', open_webui_oidc_client_secret_local_file) | trim
          if open_webui_enable_oidc | bool else '' }}
+    open_webui_runtime_secret_payload:
+      WEBUI_SECRET_KEY: "{{ open_webui_secret_key_raw.content | b64decode | trim }}"
+      WEBUI_ADMIN_PASSWORD: "{{ open_webui_admin_password_raw.content | b64decode | trim }}"
+      OAUTH_CLIENT_SECRET: >-
+        {{ lookup('ansible.builtin.file', open_webui_oidc_client_secret_local_file) | trim
+           if open_webui_enable_oidc | bool else '' }}
+      PROVIDER_ENV_BLOCK: >-
+        {{ lookup('ansible.builtin.file', open_webui_provider_env_local_file)
+           if open_webui_provider_env_local.stat.exists else '' }}
   no_log: true
 
 - name: Ensure the local Open WebUI artifact directory exists
@@ -141,6 +150,41 @@
       content: "{{ open_webui_secret_key }}"
   no_log: true
 
+- name: Prepare OpenBao agent runtime secret injection for Open WebUI
+  ansible.builtin.include_role:
+    name: common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: open-webui
+    common_openbao_compose_env_agent_dir: "{{ open_webui_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ open_webui_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ open_webui_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ open_webui_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ open_webui_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ open_webui_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ open_webui_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ open_webui_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ open_webui_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ open_webui_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ open_webui_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: open-webui.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ open_webui_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ open_webui_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ open_webui_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ open_webui_legacy_env_file }}"
+  no_log: true
+
 - name: Render the Open WebUI environment file
   ansible.builtin.template:
     src: open-webui.env.j2
@@ -163,8 +207,6 @@
     argv:
       - docker
       - compose
-      - --env-file
-      - "{{ open_webui_env_file }}"
       - --file
       - "{{ open_webui_compose_file }}"
       - pull
@@ -181,8 +223,6 @@
     argv:
       - docker
       - compose
-      - --env-file
-      - "{{ open_webui_env_file }}"
       - --file
       - "{{ open_webui_compose_file }}"
       - up
