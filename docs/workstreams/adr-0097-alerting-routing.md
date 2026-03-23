@@ -34,7 +34,6 @@
 - `roles/ntfy_runtime/`
 - `config/alertmanager/alertmanager.yml`
 - `config/alertmanager/rules/platform.yml`
-- `config/alertmanager/rules/slo_alerts.yml` (from ADR 0096)
 - `scripts/maintenance_window_tool.py` (patched)
 - `scripts/validate_alert_rules.py` (new: validation gate check)
 - `docs/runbooks/keycloak-down.md`
@@ -72,7 +71,7 @@
 
 ## Current Status
 
-- repository implementation merged for `0.97.0`
+- repository implementation merged for `0.114.0`
 - live apply still pending; the platform host was not reachable with the documented SSH path during this turn
 
 ## Notes For The Next Assistant
