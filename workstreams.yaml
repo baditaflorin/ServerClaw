@@ -1532,7 +1532,7 @@ workstreams:
   - id: adr-0098-postgres-ha
     adr: "0098"
     title: Postgres high availability and automated failover
-    status: implemented-in-repo
+    status: merged
     owner: codex
     branch: codex/adr-0098-postgres-ha
     worktree_path: ../proxmox_florin_server-postgres-ha
@@ -1550,7 +1550,7 @@ workstreams:
       - collections/ansible_collections/lv3/platform/roles/postgres_ha/
       - inventory/
       - config/service-capability-catalog.json
-    ready_to_merge: true
+    ready_to_merge: false
     live_applied: false
 
   - id: adr-0099-backup-restore-verification

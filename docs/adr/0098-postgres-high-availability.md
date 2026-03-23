@@ -1,10 +1,10 @@
 # ADR 0098: Postgres High Availability and Automated Failover
 
 - Status: Accepted
-- Implementation Status: Implemented in Repo
-- Implemented In Repo Version: 0.97.0
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.98.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-23
 - Date: 2026-03-23
 
 ## Context

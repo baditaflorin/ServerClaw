@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0098](../adr/0098-postgres-high-availability.md)
 - Title: Patroni streaming replication with keepalived VIP providing automatic Postgres failover on a second VM (postgres-replica-lv3, VMID 151)
-- Status: implemented-in-repo
+- Status: merged
 - Branch: `codex/adr-0098-postgres-ha`
 - Worktree: `../proxmox_florin_server-postgres-ha`
 - Owner: codex
@@ -71,8 +71,8 @@
 
 ## Notes For The Next Assistant
 
+- Repo implementation is merged; the remaining work is live rollout from `main`
 - Run `tofu apply` before any Ansible work — the replica VM must exist before Patroni can be configured
-- Patroni requires the `replicator` Postgres role to exist on the primary before the replica joins; create it in the `postgres_ha` role's primary-only tasks
 - The keepalived `check_patroni_leader.sh` script must use `curl -sf http://localhost:8008/leader` (returns 200 if leader, 503 if not); do not use `patronictl` in the script — it is too slow for keepalived's 2-second check interval
 - When updating service connection strings to use the VIP DNS, do a rolling restart (one service at a time) rather than all at once; some services require a full container restart to pick up the new connection string
 - After switchover, the old primary becomes a standby; if keepalived is not running on the old primary, the VIP will not move back on the next planned switchover; ensure keepalived starts automatically on both VMs

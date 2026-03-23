@@ -907,7 +907,8 @@ platform_service_topology:
   ops_portal:
     service_name: ops-portal
     owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
+      | map(attribute=''ipv4'') | first) }}'
     public_hostname: ops.lv3.org
     exposure_model: edge-published
     observability:
@@ -1457,7 +1458,8 @@ public_edge_service_topology:
   ops_portal:
     service_name: ops-portal
     owning_vm: docker-runtime-lv3
-    private_ip: 10.10.10.20
+    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
+      | map(attribute=''ipv4'') | first) }}'
     public_hostname: ops.lv3.org
     exposure_model: edge-published
     observability:

@@ -104,6 +104,11 @@ variable "protection" {
   default = false
 }
 
+variable "prevent_destroy" {
+  type    = bool
+  default = true
+}
+
 variable "reboot_after_update" {
   type    = bool
   default = true
