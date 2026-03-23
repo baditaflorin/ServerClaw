@@ -1890,3 +1890,33 @@ workstreams:
       - docs/runbooks/
     ready_to_merge: false
     live_applied: false
+
+  - id: adr-0114-incident-triage
+    adr: "0114"
+    title: Rule-based incident triage engine
+    status: in_progress
+    owner: codex
+    branch: codex/adr-0114-incident-triage
+    worktree_path: .worktrees/adr-0114
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0114-incident-triage-engine.md
+    depends_on:
+      - adr-0052-loki-log-aggregation
+      - adr-0057-mattermost-chatops
+      - adr-0058-nats-event-bus
+      - adr-0061-glitchtip
+      - adr-0064-health-probes
+      - adr-0097-alerting-routing
+      - adr-0113-world-state-materializer
+      - adr-0115-mutation-ledger
+      - adr-0117-dependency-graph-runtime
+    conflicts_with: []
+    shared_surfaces:
+      - scripts/incident_triage.py
+      - scripts/triage_calibration.py
+      - config/triage-rules.yaml
+      - config/triage-auto-check-allowlist.yaml
+      - config/windmill/scripts/
+      - config/workflow-catalog.json
+      - docs/runbooks/incident-triage-engine.md
+    ready_to_merge: false
+    live_applied: false

@@ -1,0 +1,115 @@
+schema_version: "1.0.0"
+rule_table_version: "0.1.0"
+rules:
+  - id: recent-deployment-regression
+    description: Service health probe failed shortly after a recent deployment.
+    conditions:
+      all:
+        - signal: service_health_probe_failing
+          value: true
+        - signal: recent_deployment_within_2h
+          value: true
+    hypothesis: "A recent deployment likely introduced a regression in {{ affected_service }}."
+    confidence: 0.85
+    discriminating_checks:
+      - type: log_query
+        query: 'service="{{ affected_service }}" error'
+        window: 30m
+      - type: manual
+        instruction: Review the latest deployment receipt for {{ deployment_actor }}.
+    cheapest_first_action: "Review the latest deployment receipt for {{ deployment_actor }}."
+    auto_check: false
+
+  - id: upstream-db-saturation
+    description: Service errors correlate with high database connection pressure.
+    conditions:
+      all:
+        - signal: service_health_probe_failing
+          value: true
+        - signal: upstream_db_healthy
+          value: true
+        - signal: db_connection_count_pct
+          gte: 85
+    hypothesis: "{{ affected_service }} is failing because its database connection pool is saturated."
+    confidence: 0.75
+    discriminating_checks:
+      - type: metric_query
+        datasource: prometheus
+        query: 'db_connection_count_pct{service="{{ affected_service }}"}'
+      - type: log_query
+        query: 'service="{{ affected_service }}" connection pool'
+        window: 15m
+    cheapest_first_action: "Compare active database connections for {{ affected_service }} against the configured pool limit."
+    auto_check: true
+
+  - id: tls-cert-expiry
+    description: HTTPS health probe failure correlates with an expiring TLS certificate.
+    conditions:
+      all:
+        - signal: service_health_probe_failing
+          value: true
+        - signal: tls_cert_expiry_days
+          lte: 7
+    hypothesis: "TLS certificate expiry is likely breaking {{ affected_service }}."
+    confidence: 0.9
+    discriminating_checks:
+      - type: cert_check
+        target: "{{ affected_service }}"
+    cheapest_first_action: "Check the certificate expiry window and trigger renewal for {{ affected_service }} if needed."
+    auto_check: true
+
+  - id: resource-exhaustion
+    description: Probe failures correlate with high CPU, memory, or disk utilisation.
+    conditions:
+      all:
+        - signal: service_health_probe_failing
+          value: true
+        - any:
+            - signal: cpu_utilisation_pct
+              gte: 90
+            - signal: memory_utilisation_pct
+              gte: 90
+            - signal: disk_utilisation_pct
+              gte: 95
+    hypothesis: "{{ affected_service }} is degraded because the host or guest is resource constrained."
+    confidence: 0.72
+    discriminating_checks:
+      - type: metric_query
+        datasource: prometheus
+        query: 'resource_pressure{service="{{ affected_service }}"}'
+      - type: manual
+        instruction: Check CPU, memory, and disk headroom on the owning VM.
+    cheapest_first_action: "Check current host and guest resource pressure for {{ affected_service }}."
+    auto_check: true
+
+  - id: dependency-failure
+    description: The service is failing while one or more upstream dependencies are unhealthy.
+    conditions:
+      all:
+        - signal: service_health_probe_failing
+          value: true
+        - signal: unhealthy_upstream_count
+          gte: 1
+    hypothesis: "{{ affected_service }} is a downstream victim of an upstream dependency failure."
+    confidence: 0.82
+    discriminating_checks:
+      - type: manual
+        instruction: Inspect the unhealthy upstream service list and confirm whether the dependency is the root cause.
+    cheapest_first_action: "Validate the health of the failing upstream dependency before touching {{ affected_service }}."
+    auto_check: false
+
+  - id: configuration-drift
+    description: Service failure coincides with recent drift detection or an unmanaged change.
+    conditions:
+      all:
+        - signal: service_health_probe_failing
+          value: true
+        - signal: recent_drift_detected
+          value: true
+    hypothesis: "{{ affected_service }} is failing because configuration drift or an unmanaged change bypassed the expected automation path."
+    confidence: 0.68
+    discriminating_checks:
+      - type: manual
+        instruction: Review recent drift findings and mutation audit events for {{ affected_service }}.
+    cheapest_first_action: "Review the most recent drift findings and unmanaged changes for {{ affected_service }}."
+    auto_check: false
