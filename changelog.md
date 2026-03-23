@@ -8,6 +8,15 @@ Historical entries before `0.10.0` are reconstructed from repository history, AD
 
 ## Unreleased
 
+## 0.79.0 - 2026-03-23
+
+- repaired the current-main repository validation gate after the ADR 0066 rollout by declaring the nftables reload task in `roles/docker_runtime` as conditionally changing only when the forward-compat patch actually applied
+- revalidated the shared ADR 0079 playbook entry points on the latest current-main head after reconciling the ADR 0079 worktree with the newer ADR 0066 integration line
+
+Platform impact:
+
+- no direct live platform change is claimed in this release commit; this is a repository-only validation and mainline reconciliation fix on top of live platform `0.37.0`
+
 ## 0.78.0 - 2026-03-23
 
 - completed ADR 0066 on current `main` by validating the structured mutation-audit schema, Ansible callback emission, command-catalog audit events, the seeded Windmill helper, and the host-side `/var/log/platform/mutation-audit.jsonl` sinks now shipped through ADR 0052
