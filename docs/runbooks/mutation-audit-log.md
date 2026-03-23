@@ -4,6 +4,8 @@
 
 This runbook defines the structured mutation audit trail introduced by ADR 0066.
 
+ADR 0115 supersedes ADR 0066 in the repository by adding the Postgres-backed mutation ledger. Use this runbook for the legacy JSONL/Loki event contract and the current dual-write bridge; use [docs/runbooks/mutation-ledger.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-mutation-ledger/docs/runbooks/mutation-ledger.md) for the ledger schema, replay API, and audit-log migration workflow.
+
 It covers:
 
 - the canonical event schema
@@ -126,6 +128,8 @@ Optional environment variables:
 - `LV3_MUTATION_AUDIT_ACTOR_ID`: default actor id for Ansible callback events
 - `LV3_MUTATION_AUDIT_CORRELATION_ID`: default correlation id for Ansible callback events
 - `LV3_MUTATION_AUDIT_WEBHOOK`: webhook endpoint for the seeded Windmill helper
+- `LV3_LEDGER_DSN`: optional Postgres DSN that enables dual-write from the controller emitter into `ledger.events`
+- `LV3_LEDGER_NATS_URL`: optional NATS URL override for `ledger.event_written` fan-out after successful inserts
 
 ## Notes
 

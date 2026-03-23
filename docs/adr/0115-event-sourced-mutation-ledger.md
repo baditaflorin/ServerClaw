@@ -1,10 +1,10 @@
 # ADR 0115: Event-Sourced Mutation Ledger
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.108.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-24
 - Date: 2026-03-24
 
 ## Context
@@ -170,6 +170,12 @@ The existing `audit_log` table from ADR 0066 is migrated to `ledger.events` via 
 - The schema requires `before_state` and `after_state` discipline from every writer. Lazy writers that omit these fields degrade the ledger's usefulness for replay.
 - Append-only tables grow without bound. A retention policy (ADR 0103) must define how long events are kept and how they are archived.
 - The NATS publish on every write adds a small latency cost. Writers must not block on NATS delivery; publish must be fire-and-forget.
+
+## Implementation Notes
+
+- The repository now ships the Postgres schema migration at [migrations/0011_ledger_schema.sql](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-mutation-ledger/migrations/0011_ledger_schema.sql), the canonical registry at [config/ledger-event-types.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-mutation-ledger/config/ledger-event-types.yaml), and the runtime modules at [platform/ledger/writer.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-mutation-ledger/platform/ledger/writer.py), [platform/ledger/reader.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-mutation-ledger/platform/ledger/reader.py), and [platform/ledger/replay.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-mutation-ledger/platform/ledger/replay.py).
+- A one-time migration helper now lives at [windmill/ledger/migrate-audit-log.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-mutation-ledger/windmill/ledger/migrate-audit-log.py) and installs the backward-compatible `audit_log` view after moving legacy rows into `ledger.events`.
+- The existing controller-side emitter at [scripts/mutation_audit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-mutation-ledger/scripts/mutation_audit.py) now dual-writes legacy mutation events into the ledger when `LV3_LEDGER_DSN` is configured, preserving the JSONL/Loki sinks while the platform is migrated.
 
 ## Boundaries
 

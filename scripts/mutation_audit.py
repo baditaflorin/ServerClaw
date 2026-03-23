@@ -14,6 +14,13 @@ from typing import Any, Final
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path
 
 
+REPO_ROOT: Final[Path] = repo_path()
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from platform.ledger import LedgerWriter  # noqa: E402
+
+
 SCHEMA_PATH: Final[Path] = repo_path("docs", "schema", "mutation-audit-event.json")
 DEFAULT_LOCAL_SINK_PATH: Final[Path] = repo_path(
     ".local", "state", "mutation-audit", "mutation-audit.jsonl"
@@ -255,6 +262,10 @@ def emit_event(
     resolved_loki_url = resolve_loki_url(loki_url)
     if resolved_loki_url:
         push_event_to_loki(event, resolved_loki_url, resolve_loki_labels(loki_labels, event))
+
+    ledger_dsn = os.environ.get("LV3_LEDGER_DSN", "").strip()
+    if ledger_dsn and ledger_dsn.lower() != "off":
+        LedgerWriter(dsn=ledger_dsn).write_mutation_audit_event(event)
 
     return event
 

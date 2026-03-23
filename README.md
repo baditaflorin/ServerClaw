@@ -76,6 +76,7 @@ OpenTofu VM lifecycle automation is now implemented under `tofu/`, the six produ
 The repository now also ships continuous drift detection across OpenTofu, Ansible check mode, runtime Docker image digests, DNS records, and TLS posture, with receipts under `receipts/drift-reports/`, an ops-portal Drift Status panel, and `lv3 diff` routed to `make drift-report`; the live schedule and dashboard metric feed still require apply from `main`.
 The repository now also ships ADR 0100 disaster-recovery targets, a structured recovery runbook, and `make dr-status` / `lv3 release status` readiness views; the live off-site copy of `backup-lv3` is still pending external storage credentials.
 The repository now also ships ADR 0096 SLO tracking: a canonical SLO catalog, generated Prometheus rules and blackbox targets, a Grafana SLO dashboard, an ops-portal SLO section, a `/v1/platform/slos` API surface, and promotion-gate enforcement for low remaining error budget.
+The repository now also ships ADR 0115 mutation-ledger primitives: the `ledger.events` Postgres schema migration, the `platform.ledger` writer/reader/replay package, the one-time `audit_log` migration helper, and optional dual-write from the existing mutation-audit emitter when `LV3_LEDGER_DSN` is configured; live migration from `main` is still pending.
 
 <!-- BEGIN GENERATED: platform-status -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_status_docs.py). Do not edit this block by hand.

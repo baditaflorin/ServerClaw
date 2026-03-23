@@ -1,0 +1,45 @@
+# Intent lifecycle
+- intent.compiled
+- intent.approved
+- intent.rejected
+- intent.expired
+
+# Execution lifecycle
+- execution.started
+- execution.completed
+- execution.failed
+- execution.aborted
+- execution.budget_exceeded
+
+# Service mutations
+- service.deployed
+- service.rolled_back
+- service.restarted
+- service.config_changed
+
+# Secret management
+- secret.rotated
+- secret.accessed
+- secret.expiry_extended
+
+# Infrastructure
+- host.provisioned
+- host.decommissioned
+- vm.created
+- vm.destroyed
+- vm.snapshot_taken
+
+# Certificate management
+- cert.issued
+- cert.renewed
+- cert.revoked
+
+# Observability
+- alert.fired
+- triage.report_created
+- incident.opened
+- incident.resolved
+
+# Corrections and annotations
+- correction
+- operator.annotation

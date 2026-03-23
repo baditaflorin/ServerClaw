@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0115](../adr/0115-event-sourced-mutation-ledger.md)
 - Title: Promote the mutation audit log into a fully typed, append-only event stream with before/after state and replay capability — the canonical operational memory for the whole platform
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0115-mutation-ledger`
 - Worktree: `../proxmox_florin_server-mutation-ledger`
 - Owner: codex
@@ -69,3 +69,8 @@
 - The NATS publish in `LedgerWriter.write()` must be fire-and-forget using `asyncio.create_task()` or a thread; never await the NATS publish inside the DB transaction.
 - The append-only trigger should use `BEFORE UPDATE OR DELETE` → `RAISE EXCEPTION 'ledger.events is append-only'`. Do not use `RULE` syntax as it has surprising semantics with `RETURNING`.
 - The `project_state` method in `LedgerReplayer` needs a well-defined state projection function per target_kind. Start with only `service` and `vm` kinds; return `NotImplementedError` for others until they are built out.
+
+## Outcome
+
+- merged in repo version `0.108.0`
+- live apply not yet performed from `main`

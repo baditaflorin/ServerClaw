@@ -1,14 +1,13 @@
-# Release 0.107.0
+# Release 0.108.0
 
 - Date: 2026-03-24
 
 ## Summary
-- implemented ADR 0107 in repository automation with canonical extension catalogs and schemas for API gateway routes, dependency graph nodes, SLOs, data stores, and service completeness, including per-check legacy suppressions that expire on `2026-09-23`
-- added `scripts/generate_service_scaffold.py`, `scripts/validate_service_completeness.py`, `make scaffold-service`, and `lv3 validate --service <service_id>` so new services generate and verify the full platform extension checklist from one workflow
-- aligned the ADR 0107 scaffold and completeness checks with the current mainline API gateway and SLO catalog contracts, added grandfathered completeness coverage for `api_gateway`, `docs_portal`, and `status_page`, and marked ADR 0107 plus its workstream as implemented in `0.107.0`
+- implemented ADR 0115 in the repository with the `ledger.events` Postgres migration, the `platform.ledger` writer/reader/replay package, the `windmill/ledger/migrate-audit-log.py` migration helper, and optional dual-write from `scripts/mutation_audit.py` when `LV3_LEDGER_DSN` is configured
+- added the mutation-ledger operator runbook, registered the ADR 0115 workstream in `workstreams.yaml`, and marked ADR 0115 plus its workstream as implemented in repo version `0.108.0`
 
 ## Platform Impact
-- no live platform version bump; this release adds repository-side service scaffolding, completeness validation, and extension-model documentation only
+- no live platform version bump; this release updates repository automation, release metadata, and operator tooling only
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

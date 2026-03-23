@@ -1890,3 +1890,27 @@ workstreams:
       - docs/runbooks/
     ready_to_merge: false
     live_applied: false
+
+  - id: adr-0115-mutation-ledger
+    adr: "0115"
+    title: Event-sourced mutation ledger
+    status: merged
+    owner: codex
+    branch: codex/adr-0115-mutation-ledger
+    worktree_path: ../proxmox_florin_server-mutation-ledger
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0115-mutation-ledger.md
+    depends_on:
+      - adr-0058-nats-event-bus
+      - adr-0066-mutation-audit-log
+      - adr-0098-postgres-ha
+    conflicts_with:
+      - adr-0112-goal-compiler
+      - adr-0114-triage-engine
+    shared_surfaces:
+      - platform/ledger/
+      - ledger.events
+      - config/ledger-event-types.yaml
+      - windmill/ledger/
+      - scripts/mutation_audit.py
+    ready_to_merge: false
+    live_applied: false
