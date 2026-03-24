@@ -1,10 +1,10 @@
 # ADR 0138: Published Artifact Secret Scanning
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.123.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-24
 - Date: 2026-03-24
 
 ## Context

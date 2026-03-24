@@ -2,10 +2,10 @@
 
 - ADR: [ADR 0138](../adr/0138-published-artifact-secret-scanning.md)
 - Title: Add a dedicated secret-scanning stage for published receipts, generated search documents, and deployment-history portal artifacts
-- Status: ready
-- Implemented In Repo Version: not yet
+- Status: merged
+- Implemented In Repo Version: 0.123.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-24
 - Branch: `codex/adr-0138-published-artifact-secret-scanning`
 - Worktree: `.worktrees/adr-0138`
 - Owner: codex
