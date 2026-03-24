@@ -81,6 +81,7 @@ The repository now also ships ADR 0117 dependency-graph runtime primitives: the 
 The repository now also ships ADR 0121 local search: a repo-managed search fabric under `scripts/search_fabric/`, a persisted local index at `build/search-index/documents.json`, the `lv3 search` CLI command, the `/v1/search` API surface, and an ops-portal search panel backed by the same corpus.
 The repository now also ships ADR 0122 browser-first operator access management: a repo-managed Windmill admin app at `f/lv3/operator_access_admin` backed by the governed ADR 0108 onboarding, off-boarding, reconciliation, and inventory workflows.
 The repository now also ships ADR 0130 agent state persistence: `platform.agent.AgentStateClient`, the `agent.state` schema migration, and `lv3 agent state show|delete|verify` provide a governed scratch-state path for resumable agent work and post-handoff integrity validation; the first live schema apply from `main` is still pending.
+The repository now also ships ADR 0131 multi-agent handoffs: `platform.handoff`, the `handoff.transfers` schema migration, mutation-ledger event types, and `lv3 handoff send|list|view|accept|refuse|complete` provide a durable transfer path between agents and operators, with concurrent burst coverage verified in-repo; the first live transport integration from `main` is still pending.
 The developer portal generator now stamps published docs pages with sensitivity metadata, keeps `RESTRICTED` ADRs and runbooks summary-only in portal output, and leaves `CONFIDENTIAL` documents source-only until a dedicated admin-view path exists.
 
 <!-- BEGIN GENERATED: platform-status -->
@@ -89,7 +90,7 @@ The developer portal generator now stamps published docs pages with sensitivity 
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.124.1` |
+| Repository version | `0.126.0` |
 | Platform version | `0.114.6` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -383,6 +384,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Ephemeral Fixtures](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/ephemeral-fixtures.md)
 - [Generate Status Documents](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/generate-status-documents.md)
 - [Harden Access Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/harden-access.md)
+- [Health Composite Index](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/health-composite-index.md)
 - [Health Probe Contracts Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/health-probe-contracts.md)
 - [Identity Taxonomy And Managed Principals](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/identity-taxonomy-and-managed-principals.md)
 - [Incident Triage Engine](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/incident-triage-engine.md)
@@ -569,6 +571,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0122: Windmill Operator Access Admin Surface](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0122-windmill-operator-access-admin.md)
 - [ADR 0123: Service Uptime Contracts And Monitor-Backed Health](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0123-service-uptime-contracts-and-monitor-backed-health.md)
 - [ADR 0127: Intent Deduplication and Conflict Resolution](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0127-intent-deduplication-and-conflict-resolution.md)
+- [ADR 0128: Platform Health Composite Index](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0128-platform-health-composite-index.md)
 - [ADR 0130: Agent State Persistence Across Workflow Boundaries](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0130-agent-state-persistence-across-workflow-boundaries.md)
 - [ADR 0131: Multi-Agent Handoff Protocol](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0131-multi-agent-handoff-protocol.md)
 - [ADR 0135: Developer Portal Sensitivity Classification](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0135-developer-portal-sensitivity-classification.md)
@@ -673,6 +676,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0122: Windmill Operator Access Admin Surface](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0122-operator-access-admin.md)
 - [Workstream ADR 0123: Service Uptime Contracts And Monitor-Backed Health](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0123-service-uptime-contracts.md)
 - [Workstream ADR 0127: Intent Conflict Resolution](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0127-intent-conflict-resolution.md)
+- [Workstream ADR 0128: Platform Health Composite Index](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0128-platform-health-composite-index.md)
 - [Workstream ADR 0130: Agent State Persistence Across Workflow Boundaries](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0130-agent-state-persistence.md)
 - [Workstream ADR 0131: Multi-Agent Handoff Protocol](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0131-agent-handoff-protocol.md)
 - [Workstream ADR 0135: Developer Portal Sensitivity Classification](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0135-developer-portal-sensitivity-classification.md)
@@ -695,7 +699,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.124.1` |
+| Repository version | `0.126.0` |
 | Platform version | `0.114.6` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -831,6 +835,7 @@ This repository is intentionally opinionated:
 | `0122` | Windmill operator access admin surface | `live_applied` | [adr-0122-operator-access-admin.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0122-operator-access-admin.md) |
 | `0123` | Service uptime contracts and monitor-backed health | `merged` | [adr-0123-service-uptime-contracts.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0123-service-uptime-contracts.md) |
 | `0127` | Intent deduplication and conflict resolution | `merged` | [adr-0127-intent-conflict-resolution.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0127-intent-conflict-resolution.md) |
+| `0128` | Platform health composite index | `merged` | [adr-0128-platform-health-composite-index.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0128-platform-health-composite-index.md) |
 | `0130` | Agent state persistence across workflow boundaries | `merged` | [adr-0130-agent-state-persistence.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0130-agent-state-persistence.md) |
 | `0131` | Multi-agent handoff protocol | `merged` | [adr-0131-agent-handoff-protocol.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0131-agent-handoff-protocol.md) |
 | `0135` | Developer portal sensitivity classification | `merged` | [adr-0135-developer-portal-sensitivity-classification.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0135-developer-portal-sensitivity-classification.md) |

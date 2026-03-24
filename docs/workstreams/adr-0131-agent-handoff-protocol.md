@@ -3,7 +3,7 @@
 - ADR: [ADR 0131](../adr/0131-multi-agent-handoff-protocol.md)
 - Title: Add a durable, auditable handoff protocol so agents and operators can transfer task ownership without hidden context
 - Status: merged
-- Implemented In Repo Version: 0.122.0
+- Implemented In Repo Version: 0.126.0
 - Implemented On: 2026-03-24
 - Branch: `codex/adr-0131-handoff-protocol`
 - Worktree: `.worktrees/adr-0131`
@@ -18,7 +18,7 @@
 - add an in-memory transport so repository verification can exercise retries, refusal, timeout, and load burst handling without a live NATS dependency
 - extend `lv3` with `handoff send/list/view/accept/refuse/complete`
 - add the `handoff.transfers` schema migration and register the handoff lifecycle events in the ledger event registry
-- document the operator workflow and record ADR 0131 as implemented in repo version `0.122.0`
+- document the operator workflow and record ADR 0131 as implemented in repo version `0.126.0`
 
 ## Non-Goals
 

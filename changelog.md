@@ -12,8 +12,6 @@ Versioned release notes live under [docs/release-notes/README.md](/Users/live/Do
 
 ## Unreleased
 
-- 0.122.0: implement ADR 0127 intent conflict gating with atomic claim registration, duplicate suppression, `lv3 intent check`, and race-condition coverage
-
 ## Latest Release
 
-- [0.125.0 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.125.0.md)
+- [0.126.0 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.126.0.md)
