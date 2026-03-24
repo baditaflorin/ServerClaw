@@ -8,6 +8,7 @@ Recover the interactive ops portal runtime when `ops.lv3.org` or the local `http
 
 - `https://ops.lv3.org/health` no longer returns `200`
 - the portal renders an NGINX `502` or the login flow completes but the app shell never loads
+- the Keycloak login form accepts a submit and then renders `We are sorry... Unexpected error when handling authentication request to identity provider.`
 - `docker compose ps` on `docker-runtime-lv3` shows the `ops-portal` container exited or unhealthy
 
 ## Immediate Checks
@@ -30,6 +31,19 @@ ssh ops@100.118.189.95 'ssh ops@10.10.10.20 "curl -sf http://127.0.0.1:8090/heal
 ssh ops@100.118.189.95 'ssh ops@10.10.10.10 "curl -k -I -H \"Host: ops.lv3.org\" https://127.0.0.1/health"'
 ```
 
+4. If the portal redirects to Keycloak but the submit fails, check the Keycloak runtime directly:
+
+```bash
+curl -I https://sso.lv3.org/realms/lv3/.well-known/openid-configuration
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  -o IdentitiesOnly=yes \
+  -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 -W %h:%p' \
+  ops@10.10.10.20 \
+  'docker logs --tail 80 keycloak-keycloak-1'
+```
+
+If the logs show `Acquisition timeout while waiting for new connection`, the JDBC pool is wedged. If a restart then fails with `No chain/target/match by that name`, Docker's nat chain on `docker-runtime-lv3` is missing and Keycloak must be recreated after Docker itself is restarted.
+
 ## Recovery
 
 1. Re-apply the portal runtime:
@@ -45,6 +59,27 @@ ansible-playbook playbooks/public-edge.yml
 ```
 
 3. If gateway-backed actions fail while the UI shell loads, confirm the configured `GATEWAY_URL` from `/opt/ops-portal/ops-portal.env` and verify the API gateway separately before restarting the portal.
+
+4. If the auth failure is actually Keycloak, recover the runtime from the Proxmox host through the guest agent:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  -o IdentitiesOnly=yes \
+  root@100.118.189.95 \
+  "qm guest exec 120 -- /bin/sh -lc 'systemctl restart docker'"
+
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  -o IdentitiesOnly=yes \
+  root@100.118.189.95 \
+  \"qm guest exec 120 -- /bin/sh -lc 'cd /opt/keycloak && docker compose up -d --force-recreate keycloak'\"
+```
+
+5. Re-verify the IdP and portal redirect path:
+
+```bash
+curl -I https://sso.lv3.org/realms/lv3/.well-known/openid-configuration
+curl -I https://ops.lv3.org/oauth2/sign_in
+```
 
 ## Static Fallback
 
