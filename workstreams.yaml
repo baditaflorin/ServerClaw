@@ -2235,6 +2235,36 @@ workstreams:
     ready_to_merge: false
     live_applied: false
 
+  - id: adr-0128-platform-health-composite-index
+    adr: "0128"
+    title: Platform health composite index
+    status: merged
+    owner: codex
+    branch: codex/adr-0128-health-composite-index
+    worktree_path: .worktrees/adr-0128
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0128-platform-health-composite-index.md
+    depends_on:
+      - adr-0064-health-probe-contracts
+      - adr-0080-maintenance-windows
+      - adr-0091-drift-detection
+      - adr-0096-slo-tracking
+      - adr-0113-world-state-materializer
+      - adr-0114-incident-triage
+      - adr-0115-mutation-ledger
+      - adr-0123-service-uptime-contracts
+    conflicts_with: []
+    shared_surfaces:
+      - platform/health/
+      - scripts/api_gateway/
+      - scripts/lv3_cli.py
+      - platform/goal_compiler/
+      - config/windmill/scripts/health/
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/
+      - migrations/0013_health_schema.sql
+      - docs/runbooks/health-composite-index.md
+    ready_to_merge: false
+    live_applied: false
+
   - id: adr-0130-agent-state-persistence
     adr: "0130"
     title: Agent state persistence across workflow boundaries

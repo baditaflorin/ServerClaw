@@ -17,6 +17,7 @@ if str(SCRIPTS_DIR) not in sys.path:
 
 from maintenance_window_tool import list_active_windows_best_effort
 from platform.conflict import infer_resource_claims
+from platform.health import HealthCompositeClient, ServiceHealthNotFoundError
 
 from .rules import AliasConfig, GoalRule, GroupAlias, load_alias_config, load_goal_rules, match_rule
 from .schema import ExecutionIntent, IntentScope, IntentTarget, RiskClass, RiskScore
@@ -85,8 +86,15 @@ class GoalCompiler:
         self.rules = load_goal_rules(rules_path)
         self.aliases = load_alias_config(aliases_path)
         self.world_state = WorldStateClient(self.repo_root)
+        self.health = HealthCompositeClient(self.repo_root)
 
-    def compile(self, raw_input: str, *, dispatch_args: dict[str, Any] | None = None) -> CompilationResult:
+    def compile(
+        self,
+        raw_input: str,
+        *,
+        dispatch_args: dict[str, Any] | None = None,
+        force_unsafe_health: bool = False,
+    ) -> CompilationResult:
         normalized = self.normalize(raw_input)
         direct_workflow = self._match_direct_workflow(normalized, dispatch_args=dispatch_args)
         if direct_workflow is not None:
@@ -104,12 +112,16 @@ class GoalCompiler:
         captures = {key: value.strip() for key, value in captures.items() if value is not None}
         target = self._resolve_target(rule, captures)
         scope = self._bind_scope(rule, target)
+        health_preconditions = self._health_preconditions(target, force_unsafe_health=force_unsafe_health)
         workflow_id = self._resolve_workflow_id(rule, captures, target)
         workflow_payload = self._build_dispatch_payload(rule, captures, target, dispatch_args or {})
         success_criteria = self._render_list(rule.success_criteria, captures, target, workflow_id)
         preconditions = self._inject_preconditions(rule, captures, target)
+        preconditions.extend(health_preconditions)
         risk_class = rule.default_risk_class
         requires_approval = RISK_RANK[risk_class] > RISK_RANK[rule.requires_approval_above]
+        if force_unsafe_health and target.services:
+            requires_approval = True
 
         intent = ExecutionIntent(
             id=str(uuid.uuid4()),
@@ -141,6 +153,50 @@ class GoalCompiler:
             dispatch_workflow_id=workflow_id,
             dispatch_payload=workflow_payload,
         )
+
+    def _health_preconditions(self, target: IntentTarget, *, force_unsafe_health: bool) -> list[str]:
+        if not target.services:
+            return ["health composite check completed"]
+
+        preconditions: list[str] = []
+        unsafe: list[dict[str, Any]] = []
+        for service_id in target.services:
+            try:
+                entry = self.health.get(service_id, allow_stale=True)
+            except ServiceHealthNotFoundError:
+                preconditions.append(f"health composite unavailable for {service_id}; proceeding without a hard gate")
+                continue
+            if entry.safe_to_act:
+                preconditions.append(
+                    f"health composite permits mutation for {service_id} "
+                    f"({entry.composite_status} {entry.composite_score:.2f})"
+                )
+                continue
+            unsafe.append(
+                {
+                    "service": service_id,
+                    "status": entry.composite_status,
+                    "score": entry.composite_score,
+                    "reason": entry.primary_reason(),
+                }
+            )
+
+        if unsafe and not force_unsafe_health:
+            first = unsafe[0]
+            raise GoalCompilationError(
+                code="HEALTH_UNSAFE",
+                message=(
+                    f"Unsafe health for '{first['service']}': "
+                    f"{first['status']} ({first['score']:.2f}) — {first['reason']}"
+                ),
+                raw_input=target.name,
+                details={"unsafe_services": unsafe},
+            )
+        if unsafe and force_unsafe_health:
+            preconditions.append(
+                "unsafe health bypass acknowledged for " + ", ".join(item["service"] for item in unsafe)
+            )
+        return preconditions
 
     def normalize(self, raw_input: str) -> str:
         normalized = " ".join(raw_input.strip().lower().split())

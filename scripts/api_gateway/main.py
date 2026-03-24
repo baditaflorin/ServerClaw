@@ -23,6 +23,7 @@ from pydantic import BaseModel, Field
 
 from api_gateway_catalog import load_api_gateway_catalog
 from platform.graph import DependencyGraphClient, NodeNotFoundError
+from platform.health import HealthCompositeClient, ServiceHealthNotFoundError
 from platform.world_state.client import SurfaceNotFoundError, WorldStateClient, WorldStateUnavailable
 from platform.world_state.materializer import SQLITE_CURRENT_VIEW_NAME, SQLITE_SNAPSHOTS_TABLE_NAME
 from platform.world_state.workers import collect_service_health
@@ -267,6 +268,12 @@ class GatewayRuntime:
             if config.graph_dsn
             else None
         )
+        self.health_client = HealthCompositeClient(
+            repo_root=config.repo_root,
+            dsn=config.world_state_dsn or config.graph_dsn,
+            world_state_dsn=config.world_state_dsn,
+            ledger_dsn=config.world_state_dsn or config.graph_dsn,
+        )
 
     async def close(self) -> None:
         await self.http_client.aclose()
@@ -347,19 +354,10 @@ class GatewayRuntime:
             }
 
     def collect_platform_health(self) -> dict[str, Any]:
-        try:
-            payload = self.world_state_client().get("service_health", allow_stale=True)
-            source = "world_state"
-        except (SurfaceNotFoundError, WorldStateUnavailable, OSError, RuntimeError):
-            payload = collect_service_health(self.config.repo_root)
-            source = "live_probe"
-
         catalog = self.primary_service_catalog()
-        items = payload.get("services", []) if isinstance(payload, dict) else []
         services_by_id = {
-            str(item.get("service_id") or item.get("id")): item
-            for item in items
-            if isinstance(item, dict) and (item.get("service_id") or item.get("id"))
+            entry.service_id: entry.as_dict()
+            for entry in self.health_client.get_all(allow_stale=True)
         }
 
         services: list[dict[str, Any]] = []
@@ -367,49 +365,54 @@ class GatewayRuntime:
             if not isinstance(service, dict) or service.get("lifecycle_status") != "active":
                 continue
             service_id = str(service.get("id"))
-            health = services_by_id.get(service_id, {})
-            status = str(health.get("status", "unknown"))
-            detail = (
-                health.get("detail")
-                or health.get("error")
-                or (
-                    f"HTTP {health['http_status']}"
-                    if isinstance(health, dict) and health.get("http_status") is not None
-                    else "No live health data"
-                )
-            )
-            services.append(
+            health = services_by_id.get(service_id) or {
+                "service_id": service_id,
+                "status": "unknown",
+                "composite_status": "unknown",
+                "composite_score": 0.0,
+                "safe_to_act": False,
+                "signals": [],
+                "reason": "health composite entry unavailable",
+                "stale": True,
+            }
+            item = dict(health)
+            item.update(
                 {
                     "service_id": service_id,
                     "name": service.get("name", service_id),
-                    "status": status,
-                    "detail": str(detail),
                     "vm": service.get("vm"),
                     "vmid": service.get("vmid"),
                     "public_url": service.get("public_url"),
                     "internal_url": service.get("internal_url"),
                     "uptime_monitor_name": service.get("uptime_monitor_name"),
-                    "probe_source": health.get("probe_source"),
-                    "probe_kind": health.get("probe_kind"),
-                    "http_status": health.get("http_status"),
                 }
             )
+            services.append(item)
 
-        statuses = {item["status"] for item in services}
+        statuses = {item["composite_status"] for item in services}
         overall = "healthy"
-        if any(status in {"down", "error", "failed"} for status in statuses):
+        if any(status == "critical" for status in statuses):
             overall = "degraded"
-        elif any(status in {"degraded", "warn", "warning", "unhealthy", "unreachable"} for status in statuses):
+        elif any(status == "degraded" for status in statuses):
             overall = "degraded"
-        elif statuses and statuses == {"unknown"}:
+        elif statuses and statuses <= {"unknown"}:
             overall = "unknown"
 
         return {
             "status": overall,
             "service_count": len(services),
+            "safe_service_count": sum(1 for item in services if item.get("safe_to_act") is True),
+            "unsafe_service_count": sum(1 for item in services if item.get("safe_to_act") is False),
             "services": services,
-            "source": source,
+            "source": "health_composite",
         }
+
+    def collect_platform_service_health(self, service_id: str) -> dict[str, Any]:
+        payload = self.collect_platform_health()
+        for service in payload["services"]:
+            if service["service_id"] == service_id:
+                return service
+        raise ServiceHealthNotFoundError(service_id)
 
 
 def build_config() -> GatewayConfig:
@@ -595,12 +598,12 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
         if not has_required_role(identity, "platform-read"):
             raise HTTPException(status_code=403, detail="missing required role 'platform-read'")
         runtime: GatewayRuntime = request.app.state.runtime
-        payload = await asyncio.to_thread(runtime.collect_platform_health)
-        for service in payload["services"]:
-            if service["service_id"] == service_id:
-                await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
-                return service
-        raise HTTPException(status_code=404, detail=f"unknown service '{service_id}'")
+        try:
+            payload = await asyncio.to_thread(runtime.collect_platform_service_health, service_id)
+        except ServiceHealthNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
+        return payload
 
     @app.get("/v1/platform/services")
     async def platform_services(

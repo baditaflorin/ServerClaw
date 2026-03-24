@@ -359,6 +359,55 @@ def test_run_parse_error_is_clean(
     assert events[-1]["event_type"] == "intent.rejected"
 
 
+def test_health_command_prints_composite_summary(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    snapshot_dir = minimal_repo / ".local" / "state" / "world-state"
+    snapshot_dir.mkdir(parents=True)
+    (snapshot_dir / "service_health.json").write_text(
+        json.dumps(
+            {
+                "services": [
+                    {"service_id": "grafana", "status": "healthy"},
+                    {"service_id": "windmill", "status": "degraded"},
+                    {"service_id": "netbox", "status": "healthy"},
+                ],
+                "collected_at": "2026-03-24T10:00:00Z",
+            }
+        )
+        + "\n"
+    )
+
+    exit_code = lv3_cli.main(["health"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "SERVICE" in captured.out
+    assert "windmill" in captured.out
+
+
+def test_run_force_unsafe_health_bypasses_health_gate(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    snapshot_dir = minimal_repo / ".local" / "state" / "world-state"
+    snapshot_dir.mkdir(parents=True)
+    (snapshot_dir / "service_health.json").write_text(
+        json.dumps(
+            {
+                "services": [{"service_id": "netbox", "status": "down"}],
+                "collected_at": "2026-03-24T10:00:00Z",
+            }
+        )
+        + "\n"
+    )
+
+    exit_code = lv3_cli.main(["run", "deploy", "netbox", "--force-unsafe-health", "--dry-run"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "Dispatch Workflow: converge-netbox" in captured.out
+
+
 def test_run_requires_approval_and_writes_lifecycle_events(
     minimal_repo: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

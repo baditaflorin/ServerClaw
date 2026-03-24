@@ -39,6 +39,7 @@ REPO_ROOT = CODE_ROOT
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from platform.health import HealthCompositeClient, ServiceHealthNotFoundError
 from platform.scheduler import build_scheduler
 from scripts.risk_scorer import ExecutionIntent, assemble_context, compile_workflow_intent, score_intent
 CLI_VERSION = "0.1.0"
@@ -775,6 +776,7 @@ def run_compiled_instruction(
     dry_run: bool,
     explain: bool,
     no_color: bool,
+    force_unsafe_health: bool = False,
 ) -> int:
     compiler = GoalCompiler(REPO_ROOT)
     ledger = LedgerWriter(
@@ -783,7 +785,11 @@ def run_compiled_instruction(
     )
     parsed_args = parse_kv_pairs(args)
     try:
-        result = compiler.compile(instruction, dispatch_args=parsed_args)
+        result = compiler.compile(
+            instruction,
+            dispatch_args=parsed_args,
+            force_unsafe_health=force_unsafe_health,
+        )
     except GoalCompilationError as exc:
         ledger.write(
             event_type="intent.rejected",
@@ -795,6 +801,7 @@ def run_compiled_instruction(
                 "error_message": exc.message,
                 "raw_input": exc.raw_input,
                 "details": exc.details,
+                "force_unsafe_health": force_unsafe_health,
             },
         )
         print(str(exc), file=sys.stderr)
@@ -812,6 +819,7 @@ def run_compiled_instruction(
             "matched_rule_id": result.matched_rule_id,
             "normalized_input": result.normalized_input,
             "dispatch_workflow_id": result.dispatch_workflow_id,
+            "force_unsafe_health": force_unsafe_health,
         },
     )
 
@@ -1066,6 +1074,59 @@ def print_status_table(results: list[tuple[dict[str, Any], ProbeResult]], *, no_
         print(f"Last deploy: {latest.stem}")
     if not overall_ok:
         raise SystemExit(1)
+
+
+def print_health_summary(entries: list[dict[str, Any]], *, no_color: bool) -> None:
+    enabled = not no_color and not NO_COLOR
+    print(f"{'SERVICE':<20} {'STATUS':<12} {'SCORE':>6} {'SAFE':<5} {'AGE':>5}")
+    for entry in entries:
+        status = str(entry["composite_status"])
+        color = "32" if status in {"healthy", "maintenance"} else "31" if status == "critical" else "33"
+        status_label = colorize(status, color, enabled=enabled)
+        print(
+            f"{entry['service_id']:<20} "
+            f"{status_label if enabled else status:<12} "
+            f"{entry['composite_score']:>6.2f} "
+            f"{yes_no(entry['safe_to_act']):<5} "
+            f"{str(entry['age_seconds']) + 's':>5}"
+        )
+
+
+def health_command(service_id: str | None, *, verbose: bool, json_output: bool, no_color: bool) -> int:
+    client = HealthCompositeClient(REPO_ROOT)
+    if service_id:
+        entry = client.get(service_id, allow_stale=True).as_dict()
+        if json_output:
+            print(json.dumps(entry, indent=2, sort_keys=True))
+        else:
+            print(f"composite_status: {entry['composite_status']}")
+            print(f"composite_score:  {entry['composite_score']:.2f}")
+            print(f"safe_to_act:     {yes_no(entry['safe_to_act'])}")
+            print(f"computed_at:     {entry['computed_at']}")
+            if verbose:
+                print("\nsignals:")
+                for signal in entry["signals"]:
+                    print(
+                        f"  {signal['name']:<18} "
+                        f"{signal['score']:.2f}  "
+                        f"(weight {signal['weight']:.2f})  "
+                        f"{signal['reason']}"
+                    )
+            else:
+                print(f"reason:          {entry['reason']}")
+        return 0 if entry["safe_to_act"] else 1
+
+    entries = [entry.as_dict() for entry in client.get_all(allow_stale=True)]
+    payload = {
+        "status": "healthy" if all(entry["safe_to_act"] for entry in entries) else "degraded",
+        "service_count": len(entries),
+        "services": entries,
+    }
+    if json_output:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+    else:
+        print_health_summary(entries, no_color=no_color)
+    return 0 if all(entry["safe_to_act"] for entry in entries) else 1
 
 
 def status_command(service_id: str | None, environment: str, *, timeout: float, no_color: bool) -> int:
@@ -1560,6 +1621,11 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--args", nargs="*", default=[])
     run.add_argument("--approve-risk", action="store_true", help="Acknowledge a HIGH risk score and proceed.")
     run.add_argument("--risk-override", action="store_true", help="Override a BLOCK gate for a CRITICAL risk score.")
+    run.add_argument(
+        "--force-unsafe-health",
+        action="store_true",
+        help="Bypass the health composite gate and record the override in the ledger.",
+    )
     run.add_argument("--dry-run", action="store_true")
     run.add_argument("--explain", action="store_true")
 
@@ -1568,6 +1634,11 @@ def build_parser() -> argparse.ArgumentParser:
     intent_check = intent_subparsers.add_parser("check", help="Preview resource claims and conflict status.")
     intent_check.add_argument("instruction", nargs="+")
     intent_check.add_argument("--args", nargs="*", default=[])
+
+    health = subparsers.add_parser("health", help="Show the composite health index.")
+    health.add_argument("service", nargs="?")
+    health.add_argument("--verbose", action="store_true")
+    health.add_argument("--json", action="store_true")
 
     logs = subparsers.add_parser("logs", help="Query service logs from Loki.")
     logs.add_argument("service")
@@ -1691,6 +1762,12 @@ def main(argv: list[str] | None = None) -> int:
         return search_command(args.query, collection=args.collection, limit=args.limit, rebuild=args.rebuild)
     if args.command == "status":
         return status_command(args.service, args.env, timeout=args.timeout, no_color=no_color)
+    if args.command == "health":
+        try:
+            return health_command(args.service, verbose=args.verbose, json_output=args.json, no_color=no_color)
+        except ServiceHealthNotFoundError as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
     if args.command == "vm":
         if args.vm_action == "list":
             return vm_list_command(args.env)
@@ -1753,6 +1830,7 @@ def main(argv: list[str] | None = None) -> int:
             dry_run=args.dry_run,
             explain=args.explain,
             no_color=no_color,
+            force_unsafe_health=args.force_unsafe_health,
         )
     if args.command == "intent":
         if args.intent_action == "check":

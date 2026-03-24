@@ -130,3 +130,44 @@ def test_compile_parse_error_is_explicit(compiler_repo: Path) -> None:
         compiler.compile("dploy netbox")
 
     assert excinfo.value.code == "PARSE_ERROR"
+
+
+def test_compile_rejects_unsafe_health(compiler_repo: Path) -> None:
+    snapshot_dir = compiler_repo / ".local" / "state" / "world-state"
+    snapshot_dir.mkdir(parents=True, exist_ok=True)
+    (snapshot_dir / "service_health.json").write_text(
+        json.dumps(
+            {
+                "services": [{"service_id": "netbox", "status": "down"}],
+                "collected_at": "2026-03-24T10:00:00Z",
+            }
+        )
+        + "\n"
+    )
+
+    compiler = GoalCompiler(compiler_repo)
+
+    with pytest.raises(GoalCompilationError) as excinfo:
+        compiler.compile("deploy netbox")
+
+    assert excinfo.value.code == "HEALTH_UNSAFE"
+
+
+def test_compile_force_unsafe_health_allows_instruction(compiler_repo: Path) -> None:
+    snapshot_dir = compiler_repo / ".local" / "state" / "world-state"
+    snapshot_dir.mkdir(parents=True, exist_ok=True)
+    (snapshot_dir / "service_health.json").write_text(
+        json.dumps(
+            {
+                "services": [{"service_id": "netbox", "status": "down"}],
+                "collected_at": "2026-03-24T10:00:00Z",
+            }
+        )
+        + "\n"
+    )
+
+    compiler = GoalCompiler(compiler_repo)
+    result = compiler.compile("deploy netbox", force_unsafe_health=True)
+
+    assert result.dispatch_workflow_id == "converge-netbox"
+    assert result.intent.requires_approval is True
