@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 import lv3_cli
+from platform.conflict import IntentConflictRegistry
 
 
 def prepare_agent_state_db(path: Path) -> Path:
@@ -377,6 +378,36 @@ def test_run_requires_approval_and_writes_lifecycle_events(
     ledger_path = minimal_repo / ".local" / "state" / "ledger" / "ledger.events.jsonl"
     event_types = [json.loads(line)["event_type"] for line in ledger_path.read_text().splitlines()]
     assert event_types == ["intent.compiled", "intent.approved"]
+
+
+def test_intent_check_reports_clear_status(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    exit_code = lv3_cli.main(["intent", "check", "deploy", "netbox"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "Resource claims:" in captured.out
+    assert "Conflict check: CLEAR" in captured.out
+
+
+def test_intent_check_reports_conflict(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    registry = IntentConflictRegistry(repo_root=minimal_repo)
+    registry.register_intent(
+        {"workflow_id": "converge-netbox", "arguments": {"service": "netbox"}, "target_service_id": "netbox"},
+        actor_intent_id="intent-existing",
+        actor="agent:test",
+        ttl_seconds=120,
+    )
+
+    exit_code = lv3_cli.main(["intent", "check", "deploy", "netbox"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 1
+    assert "Conflict check: CONFLICT" in captured.out
+    assert "intent-existing" in captured.out
 
 
 def test_vm_list_uses_inventory(

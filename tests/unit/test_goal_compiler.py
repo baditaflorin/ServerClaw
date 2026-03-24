@@ -96,6 +96,10 @@ def test_compile_deploy_service_with_scope_binding(compiler_repo: Path) -> None:
     assert result.intent.scope.allowed_hosts == ["netbox-lv3"]
     assert result.intent.scope.allowed_vmids == [130]
     assert result.intent.requires_approval is True
+    assert result.intent.resource_claims == [
+        {"resource": "service:netbox", "access": "write"},
+        {"resource": "vm:netbox-lv3", "access": "read"},
+    ]
 
 
 def test_compile_alias_group_uses_group_workflow(compiler_repo: Path) -> None:

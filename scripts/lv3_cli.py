@@ -26,6 +26,7 @@ from typing import Any, Iterable
 import yaml
 
 from dependency_graph import dependency_summary, load_dependency_graph
+from platform.conflict import IntentConflictRegistry
 from repo_package_loader import load_repo_package
 
 try:
@@ -529,6 +530,8 @@ def build_execution_intent(workflow_name: str, args: list[str]) -> ExecutionInte
         scoring_context=context.as_dict(),
         risk_score=risk,
         semantic_diff=compiled.get("semantic_diff"),
+        resource_claims=compiled.get("resource_claims"),
+        conflict_warnings=compiled.get("conflict_warnings"),
     )
 
 
@@ -568,6 +571,36 @@ def print_compiled_intent(intent: ExecutionIntent) -> None:
     print_semantic_diff(intent)
     print("Compiled intent:")
     print(yaml.safe_dump(intent.as_dict(), sort_keys=False, default_flow_style=False).rstrip())
+
+
+def print_conflict_preview(result: Any) -> None:
+    print("Resource claims:")
+    if not result.resource_claims:
+        print("  none")
+    for claim in result.resource_claims:
+        print(f"  {claim.resource:<28} {claim.access}")
+    print()
+    print(f"Conflict check: {result.status.upper()}")
+    if result.message:
+        print(result.message)
+    if result.conflicting_intent_id:
+        actor = result.conflicting_actor or "unknown"
+        print(f"Conflicting intent: {result.conflicting_intent_id} ({actor})")
+    if result.resolution:
+        print(f"Resolution: {result.resolution}")
+    if result.warnings:
+        print("Warnings:")
+        for warning in result.warnings:
+            print(f"  - {warning.message}")
+
+
+def preview_conflicts(intent: Any, *, actor_intent_id: str, actor: str = "operator:lv3_cli") -> Any:
+    registry = IntentConflictRegistry(repo_root=REPO_ROOT)
+    return registry.preview_intent(
+        intent,
+        actor_intent_id=actor_intent_id,
+        actor=actor,
+    )
 
 
 def maybe_write_compiled_intent_event(
@@ -677,13 +710,18 @@ def run_windmill_request(
         print(f"Windmill API error: {exc}", file=sys.stderr)
         return 1
 
-    if result.status in {"concurrency_limit", "rollback_depth_exceeded", "budget_exceeded"}:
+    if result.status in {"concurrency_limit", "rollback_depth_exceeded", "budget_exceeded", "conflict_rejected"}:
         print(
             f"Scheduler rejected {workflow_name}: {result.status}"
             + (f" ({result.reason})" if result.reason else ""),
             file=sys.stderr,
         )
         return 1
+    warnings = result.metadata.get("conflict_warnings", []) if isinstance(result.metadata, dict) else []
+    for warning in warnings:
+        message = warning.get("message") if isinstance(warning, dict) else None
+        if message:
+            print(f"Conflict warning: {message}", file=sys.stderr)
     if result.output is not None:
         if isinstance(result.output, str):
             print(result.output)
@@ -814,13 +852,54 @@ def run_compiled_instruction(
         print("No workflow route is available for this intent.", file=sys.stderr)
         return 1
 
+    scheduler_intent = SimpleNamespace(
+        id=result.intent.id,
+        workflow_id=result.dispatch_workflow_id,
+        arguments=result.dispatch_payload,
+        target_service_id=result.intent.target.services[0] if result.intent.target.services else None,
+        target_vm=result.intent.scope.allowed_hosts[0] if result.intent.scope.allowed_hosts else None,
+        resource_claims=result.intent.resource_claims,
+        conflict_warnings=result.intent.conflict_warnings,
+    )
     return run_windmill_request(
         result.dispatch_workflow_id,
         result.dispatch_payload,
         dry_run=False,
         explain=False,
         no_color=no_color,
+        intent=scheduler_intent,
     )
+
+
+def check_intent_conflicts(instruction: str, args: list[str]) -> int:
+    if should_run_direct_workflow(instruction):
+        intent = build_execution_intent(instruction, args)
+        preview = preview_conflicts(intent, actor_intent_id=intent.intent_id)
+        print_conflict_preview(preview)
+        return 0 if preview.status in {"clear", "duplicate"} else 1
+
+    compiler = GoalCompiler(REPO_ROOT)
+    parsed_args = parse_kv_pairs(args)
+    try:
+        result = compiler.compile(instruction, dispatch_args=parsed_args)
+    except GoalCompilationError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+    if result.dispatch_workflow_id is None:
+        print("No workflow route is available for this intent.", file=sys.stderr)
+        return 1
+    scheduler_intent = SimpleNamespace(
+        id=result.intent.id,
+        workflow_id=result.dispatch_workflow_id,
+        arguments=result.dispatch_payload,
+        target_service_id=result.intent.target.services[0] if result.intent.target.services else None,
+        target_vm=result.intent.scope.allowed_hosts[0] if result.intent.scope.allowed_hosts else None,
+        resource_claims=result.intent.resource_claims,
+        conflict_warnings=result.intent.conflict_warnings,
+    )
+    preview = preview_conflicts(scheduler_intent, actor_intent_id=result.intent.id)
+    print_conflict_preview(preview)
+    return 0 if preview.status in {"clear", "duplicate"} else 1
 
 
 def should_run_direct_workflow(instruction: str) -> bool:
@@ -1484,6 +1563,12 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--dry-run", action="store_true")
     run.add_argument("--explain", action="store_true")
 
+    intent = subparsers.add_parser("intent", help="Inspect compiled intent routing and conflicts.")
+    intent_subparsers = intent.add_subparsers(dest="intent_action", required=True)
+    intent_check = intent_subparsers.add_parser("check", help="Preview resource claims and conflict status.")
+    intent_check.add_argument("instruction", nargs="+")
+    intent_check.add_argument("--args", nargs="*", default=[])
+
     logs = subparsers.add_parser("logs", help="Query service logs from Loki.")
     logs.add_argument("service")
     logs.add_argument("--tail", type=int, default=DEFAULT_LOG_LINES)
@@ -1669,6 +1754,9 @@ def main(argv: list[str] | None = None) -> int:
             explain=args.explain,
             no_color=no_color,
         )
+    if args.command == "intent":
+        if args.intent_action == "check":
+            return check_intent_conflicts(" ".join(args.instruction), args.args)
     if args.command == "logs":
         return logs_command(args.service, tail=args.tail, since=args.since, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
     if args.command == "ssh":

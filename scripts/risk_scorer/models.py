@@ -71,6 +71,8 @@ class ExecutionIntent:
     scoring_context: dict[str, Any]
     risk_score: RiskScore
     semantic_diff: "SemanticDiff | None" = None
+    resource_claims: list[dict[str, Any]] | None = None
+    conflict_warnings: list[dict[str, Any]] | None = None
 
     def as_dict(self) -> dict[str, Any]:
         payload: dict[str, Any] = {
@@ -92,6 +94,10 @@ class ExecutionIntent:
         }
         if self.semantic_diff is not None:
             payload["semantic_diff"] = self.semantic_diff.as_dict()
+        if self.resource_claims:
+            payload["resource_claims"] = self.resource_claims
+        if self.conflict_warnings:
+            payload["conflict_warnings"] = self.conflict_warnings
         if self.target_service_id:
             payload["target_service_id"] = self.target_service_id
         if self.target_vm:

@@ -6,7 +6,7 @@ import json
 import re
 import sys
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -16,6 +16,7 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 from maintenance_window_tool import list_active_windows_best_effort
+from platform.conflict import infer_resource_claims
 
 from .rules import AliasConfig, GoalRule, GroupAlias, load_alias_config, load_goal_rules, match_rule
 from .schema import ExecutionIntent, IntentScope, IntentTarget, RiskClass, RiskScore
@@ -125,12 +126,14 @@ class GoalCompiler:
             ttl_seconds=rule.ttl_seconds,
             requires_approval=requires_approval,
             compiled_by=COMPILER_VERSION,
+            resource_claims=[],
             risk_score=RiskScore(
                 source="rule_table",
                 value=RISK_SCORE[risk_class],
                 reasons=[f"matched rule {rule.rule_id}"],
             ),
         )
+        intent = self._with_resource_claims(intent, workflow_id=workflow_id, dispatch_payload=workflow_payload)
         return CompilationResult(
             intent=intent,
             matched_rule_id=rule.rule_id,
@@ -173,8 +176,10 @@ class GoalCompiler:
             ttl_seconds=300,
             requires_approval=RISK_RANK[risk_class] >= RISK_RANK[RiskClass.HIGH],
             compiled_by=COMPILER_VERSION,
+            resource_claims=[],
             risk_score=RiskScore(source="workflow_catalog", value=RISK_SCORE[risk_class], reasons=["direct workflow invocation"]),
         )
+        intent = self._with_resource_claims(intent, workflow_id=workflow_id, dispatch_payload=dispatch_args or {})
         return CompilationResult(
             intent=intent,
             matched_rule_id="direct-workflow-id",
@@ -351,3 +356,23 @@ class GoalCompiler:
 
     def _utc_now(self) -> str:
         return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+    def _with_resource_claims(
+        self,
+        intent: ExecutionIntent,
+        *,
+        workflow_id: str | None,
+        dispatch_payload: dict[str, Any],
+    ) -> ExecutionIntent:
+        if not workflow_id:
+            return intent
+        payload = {
+            "workflow_id": workflow_id,
+            "arguments": dispatch_payload,
+            "target_service_id": intent.target.services[0] if intent.target.services else None,
+            "target_vm": intent.scope.allowed_hosts[0] if intent.scope.allowed_hosts else None,
+        }
+        return replace(
+            intent,
+            resource_claims=[claim.as_dict() for claim in infer_resource_claims(payload, repo_root=self.repo_root)],
+        )

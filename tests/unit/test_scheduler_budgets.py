@@ -285,6 +285,7 @@ def test_scheduler_submits_waits_and_records_completion(tmp_path: Path) -> None:
     assert result.status == "completed"
     assert result.output == {"status": "ok"}
     assert [event["event_type"] for event in ledger.events] == [
+        "intent.claim_registered",
         "execution.started",
         "execution.completed",
     ]

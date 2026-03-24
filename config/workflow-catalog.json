@@ -286,6 +286,13 @@
         "python3 config/windmill/scripts/run-triage.py"
       ],
       "execution_class": "diagnostic",
+      "dedup_window_seconds": 0,
+      "resource_claims": [
+        {
+          "resource": "service:{service}",
+          "access": "read"
+        }
+      ],
       "budget": {
         "max_duration_seconds": 900,
         "max_steps": 250,
@@ -460,6 +467,16 @@
         "make syntax-check"
       ],
       "execution_class": "mutation",
+      "resource_claims": [
+        {
+          "resource": "host:proxmox_florin",
+          "access": "exclusive"
+        },
+        {
+          "resource": "service:guest-network",
+          "access": "write"
+        }
+      ],
       "budget": {
         "max_duration_seconds": 1200,
         "max_steps": 180,
@@ -591,6 +608,12 @@
         "curl -I https://nginx.lv3.org"
       ],
       "execution_class": "mutation",
+      "resource_claims": [
+        {
+          "resource": "service:nginx_edge",
+          "access": "write"
+        }
+      ],
       "budget": {
         "max_duration_seconds": 900,
         "max_steps": 250,
@@ -1469,6 +1492,16 @@
         "make rotate-secret SECRET_ID=windmill_database_password ROTATION_ARGS=\"--plan\""
       ],
       "execution_class": "mutation",
+      "resource_claims": [
+        {
+          "resource": "secret:{secret_id}",
+          "access": "write"
+        },
+        {
+          "resource": "service:{service}",
+          "access": "write"
+        }
+      ],
       "budget": {
         "max_duration_seconds": 900,
         "max_steps": 250,
@@ -1749,6 +1782,20 @@
         "uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/netbox_inventory_sync.py --api-url http://100.118.189.95:8004 --api-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/netbox/api-token.txt --host-vars /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml --stack /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml --lane-catalog /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/control-plane-lanes.json"
       ],
       "execution_class": "mutation",
+      "resource_claims": [
+        {
+          "resource": "service:netbox",
+          "access": "write"
+        },
+        {
+          "resource": "vm:docker-runtime-lv3",
+          "access": "read"
+        },
+        {
+          "resource": "vm:postgres-lv3",
+          "access": "read"
+        }
+      ],
       "budget": {
         "max_duration_seconds": 1500,
         "max_steps": 300,
@@ -2906,6 +2953,12 @@
         "make workflow-info WORKFLOW=operator-onboard"
       ],
       "execution_class": "mutation",
+      "resource_claims": [
+        {
+          "resource": "identity:operator:{operator_id}",
+          "access": "exclusive"
+        }
+      ],
       "budget": {
         "max_duration_seconds": 1800,
         "max_steps": 220,
@@ -2955,6 +3008,12 @@
         "make workflow-info WORKFLOW=operator-offboard"
       ],
       "execution_class": "mutation",
+      "resource_claims": [
+        {
+          "resource": "identity:operator:{operator_id}",
+          "access": "exclusive"
+        }
+      ],
       "budget": {
         "max_duration_seconds": 1800,
         "max_steps": 220,

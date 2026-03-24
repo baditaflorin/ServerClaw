@@ -26,6 +26,7 @@ ALLOWED_LIVE_IMPACTS = {
 ALLOWED_LIFECYCLE_STATUSES = {"active", "blocked"}
 ALLOWED_EXECUTION_CLASSES = {"mutation", "diagnostic"}
 ALLOWED_ESCALATION_ACTIONS = {"notify_and_abort", "abort_silently", "escalate_to_operator"}
+ALLOWED_RESOURCE_CLAIM_ACCESS = {"read", "write", "exclusive"}
 WORKFLOW_SECRET_FIELDS = ("required_secret_ids", "generated_secret_ids", "blocked_secret_ids")
 
 
@@ -75,6 +76,24 @@ def validate_budget_payload(payload: dict, workflow_id: str) -> None:
         )
 
 
+def validate_resource_claims(payload: object, workflow_id: str) -> None:
+    if payload is None:
+        return
+    if not isinstance(payload, list):
+        raise ValueError(f"workflow '{workflow_id}' resource_claims must be a list")
+    for index, item in enumerate(payload):
+        if not isinstance(item, dict):
+            raise ValueError(f"workflow '{workflow_id}' resource_claims[{index}] must be a mapping")
+        resource = item.get("resource")
+        access = item.get("access")
+        if not isinstance(resource, str) or not resource.strip():
+            raise ValueError(f"workflow '{workflow_id}' resource_claims[{index}].resource must be a non-empty string")
+        if access not in ALLOWED_RESOURCE_CLAIM_ACCESS:
+            raise ValueError(
+                f"workflow '{workflow_id}' resource_claims[{index}].access must be one of {sorted(ALLOWED_RESOURCE_CLAIM_ACCESS)}"
+            )
+
+
 def validate_secret_manifest(manifest: dict) -> None:
     secrets = manifest.get("secrets")
     if not isinstance(secrets, dict):
@@ -108,6 +127,10 @@ def validate_workflow_catalog(catalog: dict, secret_manifest: dict) -> None:
             raise ValueError(
                 f"workflow '{workflow_id}' has invalid execution_class '{execution_class}'"
             )
+        dedup_window = workflow.get("dedup_window_seconds")
+        if dedup_window is not None and (isinstance(dedup_window, bool) or not isinstance(dedup_window, int) or dedup_window < 0):
+            raise ValueError(f"workflow '{workflow_id}' dedup_window_seconds must be an integer >= 0")
+        validate_resource_claims(workflow.get("resource_claims"), workflow_id)
 
         budget = dict(defaults_payload)
         workflow_budget = workflow.get("budget", {})
@@ -225,6 +248,7 @@ def show_workflow(catalog: dict, workflow_id: str) -> int:
     print(f"Lifecycle: {workflow['lifecycle_status']}")
     print(f"Live impact: {workflow['live_impact']}")
     print(f"Execution class: {workflow.get('execution_class', 'mutation')}")
+    print(f"Dedup window: {workflow.get('dedup_window_seconds', 'default')}")
     print(f"Entrypoint: {workflow['preferred_entrypoint']['command']}")
     print(f"Runbook: {workflow['owner_runbook']}")
     print("Budget:")
@@ -238,6 +262,12 @@ def show_workflow(catalog: dict, workflow_id: str) -> int:
     print("Validation targets:")
     for target in workflow["validation_targets"]:
         print(f"  - make {target}")
+
+    claims = workflow.get("resource_claims", [])
+    if claims:
+        print("Resource claims:")
+        for claim in claims:
+            print(f"  - {claim['resource']} ({claim['access']})")
 
     preflight = workflow["preflight"]
     if preflight["required"]:

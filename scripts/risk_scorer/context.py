@@ -15,6 +15,7 @@ if str(SCRIPTS_DIR) not in sys.path:
 
 from controller_automation_toolkit import load_json, load_yaml, repo_path
 from maintenance_window_tool import list_active_windows_best_effort
+from platform.conflict import infer_resource_claims
 from platform.graph import DependencyGraphClient
 
 from .models import ExecutionIntent, RiskClass
@@ -436,6 +437,7 @@ def compile_workflow_intent(
         "irreversible_count": irreversible_count,
         "unknown_count": unknown_count,
     }
+    payload["resource_claims"] = [claim.as_dict() for claim in infer_resource_claims(payload, repo_root=repo_root or repo_path())]
     semantic_diff = compute_semantic_diff(payload, repo_root=repo_root)
     if semantic_diff is not None:
         payload["semantic_diff"] = semantic_diff

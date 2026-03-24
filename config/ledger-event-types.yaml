@@ -1,6 +1,8 @@
 # Intent lifecycle
 - intent.compiled
 - intent.approved
+- intent.claim_registered
+- intent.deduplicated
 - intent.rejected
 - intent.expired
 

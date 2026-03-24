@@ -13,6 +13,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Protocol
 
+from platform.conflict import IntentConflictRegistry
 from platform.ledger import LedgerReader, LedgerWriter
 
 from .budgets import HostTouchEstimate, WorkflowPolicy, estimate_touched_hosts, load_workflow_policy
@@ -265,6 +266,7 @@ class BudgetedWorkflowScheduler:
         state_store: SchedulerStateStore | None = None,
         rollback_guard: RollbackGuard | None = None,
         watchdog: Watchdog | None = None,
+        conflict_registry: IntentConflictRegistry | None = None,
         poll_interval_seconds: float = 2.0,
         sleep_fn: Any = time.sleep,
     ) -> None:
@@ -279,6 +281,7 @@ class BudgetedWorkflowScheduler:
             state_store=self._state_store,
             ledger_writer=ledger_writer,
         )
+        self._conflict_registry = conflict_registry or IntentConflictRegistry(repo_root=self._repo_root)
         self._poll_interval_seconds = poll_interval_seconds
         self._sleep = sleep_fn
         if lock_manager is not None:
@@ -294,6 +297,88 @@ class BudgetedWorkflowScheduler:
             if isinstance(value, str) and value.strip():
                 return value
         return None
+
+    @staticmethod
+    def _resolve_actor_intent_id(intent: Any) -> str:
+        for key in ("actor_intent_id", "intent_id", "id"):
+            value = getattr(intent, key, None)
+            if isinstance(value, str) and value.strip():
+                return value
+        return str(uuid.uuid4())
+
+    def _write_claim_registered_event(
+        self,
+        *,
+        policy: WorkflowPolicy,
+        actor_intent_id: str,
+        requested_by: str,
+        resource_claims: list[dict[str, str]],
+        warnings: list[dict[str, Any]],
+    ) -> None:
+        if self._ledger_writer is None:
+            return
+        self._ledger_writer.write(
+            event_type="intent.claim_registered",
+            actor=requested_by,
+            actor_intent_id=actor_intent_id,
+            target_kind="workflow",
+            target_id=policy.workflow_id,
+            metadata={
+                "resource_claims": resource_claims,
+                "conflict_warnings": warnings,
+            },
+        )
+
+    def _write_conflict_rejected_event(
+        self,
+        *,
+        policy: WorkflowPolicy,
+        actor_intent_id: str,
+        requested_by: str,
+        result: Any,
+    ) -> None:
+        if self._ledger_writer is None:
+            return
+        self._ledger_writer.write(
+            event_type="intent.rejected",
+            actor=requested_by,
+            actor_intent_id=actor_intent_id,
+            target_kind="workflow",
+            target_id=policy.workflow_id,
+            metadata={
+                "reason": "conflict_rejected",
+                "conflicting_intent_id": result.conflicting_intent_id,
+                "conflicting_actor": result.conflicting_actor,
+                "conflict_type": result.conflict_type,
+                "message": result.message,
+                "resource_claims": [claim.as_dict() for claim in result.resource_claims],
+                "conflict_warnings": [warning.as_dict() for warning in result.warnings],
+            },
+        )
+
+    def _write_deduplicated_event(
+        self,
+        *,
+        policy: WorkflowPolicy,
+        actor_intent_id: str,
+        requested_by: str,
+        result: Any,
+    ) -> None:
+        if self._ledger_writer is None:
+            return
+        self._ledger_writer.write(
+            event_type="intent.deduplicated",
+            actor=requested_by,
+            actor_intent_id=actor_intent_id,
+            target_kind="workflow",
+            target_id=policy.workflow_id,
+            metadata={
+                "existing_intent_id": result.conflicting_intent_id,
+                "existing_actor": result.conflicting_actor,
+                "resource_claims": [claim.as_dict() for claim in result.resource_claims],
+            },
+            receipt=result.dedup_output,
+        )
 
     @staticmethod
     def _is_rollback(workflow_id: str, arguments: dict[str, Any]) -> bool:
@@ -336,7 +421,7 @@ class BudgetedWorkflowScheduler:
 
     def submit(self, intent: Any, *, requested_by: str = "operator:lv3_cli") -> SchedulerResult:
         policy = load_workflow_policy(intent.workflow_id, repo_root=self._repo_root)
-        actor_intent_id = str(uuid.uuid4())
+        actor_intent_id = self._resolve_actor_intent_id(intent)
         parent_actor_intent_id = self._parent_actor_intent_id(getattr(intent, "arguments", {}) or {})
         host_touch_estimate = estimate_touched_hosts(intent, policy)
 
@@ -373,6 +458,7 @@ class BudgetedWorkflowScheduler:
                 )
 
         lock_token = None
+        registered_claim = False
         if policy.execution_class == "mutation":
             lock_token = self._lock_manager.acquire(
                 policy.workflow_id,
@@ -388,6 +474,50 @@ class BudgetedWorkflowScheduler:
                 )
 
         try:
+            conflict_result = self._conflict_registry.register_intent(
+                intent,
+                actor_intent_id=actor_intent_id,
+                actor=requested_by,
+                ttl_seconds=policy.budget.max_duration_seconds + 60,
+            )
+            if conflict_result.status == "conflict":
+                self._write_conflict_rejected_event(
+                    policy=policy,
+                    actor_intent_id=actor_intent_id,
+                    requested_by=requested_by,
+                    result=conflict_result,
+                )
+                return SchedulerResult(
+                    status="conflict_rejected",
+                    workflow_id=policy.workflow_id,
+                    actor_intent_id=actor_intent_id,
+                    reason=conflict_result.message,
+                    budget=policy.budget.as_dict(),
+                    metadata=conflict_result.as_dict(),
+                )
+            if conflict_result.status == "duplicate":
+                self._write_deduplicated_event(
+                    policy=policy,
+                    actor_intent_id=actor_intent_id,
+                    requested_by=requested_by,
+                    result=conflict_result,
+                )
+                return SchedulerResult(
+                    status="duplicate",
+                    workflow_id=policy.workflow_id,
+                    actor_intent_id=actor_intent_id,
+                    output=conflict_result.dedup_output,
+                    budget=policy.budget.as_dict(),
+                    metadata=conflict_result.as_dict(),
+                )
+            registered_claim = True
+            self._write_claim_registered_event(
+                policy=policy,
+                actor_intent_id=actor_intent_id,
+                requested_by=requested_by,
+                resource_claims=[claim.as_dict() for claim in conflict_result.resource_claims],
+                warnings=[warning.as_dict() for warning in conflict_result.warnings],
+            )
             submission = self._windmill_client.submit_workflow(
                 policy.workflow_id,
                 getattr(intent, "arguments", {}) or {},
@@ -414,13 +544,18 @@ class BudgetedWorkflowScheduler:
                         target_id=policy.workflow_id,
                         metadata={"windmill_submission": submission},
                     )
+                if registered_claim:
+                    self._conflict_registry.complete_intent(actor_intent_id, status=status, output=submission.get("result"))
                 return SchedulerResult(
                     status=status,
                     workflow_id=policy.workflow_id,
                     actor_intent_id=actor_intent_id,
                     output=submission.get("result"),
                     budget=policy.budget.as_dict(),
-                    metadata={"windmill_submission": submission},
+                    metadata={
+                        "windmill_submission": submission,
+                        "conflict_warnings": [warning.as_dict() for warning in conflict_result.warnings],
+                    },
                 )
 
             active_job = ActiveJobRecord(
@@ -441,6 +576,8 @@ class BudgetedWorkflowScheduler:
                 violation = self._watchdog.evaluate(active_job, status)
                 if violation is not None and not violation.advisory_only:
                     payload = self._watchdog.handle_violation(active_job, status, violation)
+                    if registered_claim:
+                        self._conflict_registry.complete_intent(actor_intent_id, status="budget_exceeded")
                     return SchedulerResult(
                         status="budget_exceeded",
                         workflow_id=policy.workflow_id,
@@ -457,6 +594,8 @@ class BudgetedWorkflowScheduler:
                         final_status = "aborted"
                     elif status.get("success") is False:
                         final_status = "failed"
+                    if registered_claim:
+                        self._conflict_registry.complete_intent(actor_intent_id, status=final_status, output=status.get("result"))
                     return SchedulerResult(
                         status=final_status,
                         workflow_id=policy.workflow_id,
@@ -464,10 +603,15 @@ class BudgetedWorkflowScheduler:
                         actor_intent_id=actor_intent_id,
                         output=status.get("result"),
                         budget=policy.budget.as_dict(),
-                        metadata={"windmill_status": status},
+                        metadata={
+                            "windmill_status": status,
+                            "conflict_warnings": [warning.as_dict() for warning in conflict_result.warnings],
+                        },
                     )
                 self._sleep(self._poll_interval_seconds)
         finally:
+            if registered_claim:
+                self._conflict_registry.complete_intent(actor_intent_id, status="aborted")
             if lock_token is not None:
                 lock_token.release()
 
