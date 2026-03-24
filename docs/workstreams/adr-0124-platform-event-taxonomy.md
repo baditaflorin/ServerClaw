@@ -3,7 +3,7 @@
 - ADR: [ADR 0124](../adr/0124-platform-event-taxonomy-and-canonical-nats-topics.md)
 - Title: Canonicalize the platform event plane around one NATS taxonomy and validated routing contract
 - Status: merged
-- Implemented In Repo Version: 0.127.0
+- Implemented In Repo Version: 0.128.0
 - Implemented On: 2026-03-24
 - Branch: `codex/adr-0124-platform-event-taxonomy`
 - Worktree: `.worktrees/adr-0124`
