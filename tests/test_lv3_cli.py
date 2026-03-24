@@ -283,6 +283,7 @@ def test_run_dry_run_redacts_token(
     captured = capsys.readouterr()
     assert exit_code == 0
     assert "Compiled intent:" in captured.out
+    assert "budgeted scheduler" in captured.out
     assert "<redacted>" in captured.out
     assert "secret-token" not in captured.out
 
@@ -477,7 +478,7 @@ def test_operator_add_dry_run_uses_windmill_workflow(
     )
     captured = capsys.readouterr()
     assert exit_code == 0
-    assert "controller -> Windmill API" in captured.out
+    assert "budgeted scheduler" in captured.out
     assert "operator-onboard" in captured.out
     assert "alice@example.com" in captured.out
 

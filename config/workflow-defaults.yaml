@@ -1,0 +1,8 @@
+default_budget:
+  max_duration_seconds: 600
+  max_steps: 200
+  max_concurrent_instances: 3
+  max_touched_hosts: 10
+  max_restarts: 1
+  max_rollback_depth: 1
+  escalation_action: notify_and_abort

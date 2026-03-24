@@ -20,6 +20,7 @@ import webbrowser
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any, Iterable
 
 import yaml
@@ -33,6 +34,7 @@ REPO_ROOT = CODE_ROOT
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from platform.scheduler import build_scheduler
 from scripts.risk_scorer import ExecutionIntent, assemble_context, compile_workflow_intent, score_intent
 CLI_VERSION = "0.1.0"
 DEFAULT_STATUS_TIMEOUT_SECONDS = 3.0
@@ -612,6 +614,7 @@ def run_windmill_request(
     dry_run: bool,
     explain: bool,
     no_color: bool,
+    intent: ExecutionIntent | None = None,
 ) -> int:
     service_map = load_service_map()
     base_url = windmill_url(service_map)
@@ -622,7 +625,7 @@ def run_windmill_request(
     encoded_payload = json.dumps(payload).encode("utf-8")
     plan = CommandPlan(
         label=f"run {workflow_name}",
-        route="controller -> Windmill API",
+        route="controller -> budgeted scheduler -> Windmill API",
         command=[
             "curl",
             "-X",
@@ -640,24 +643,41 @@ def run_windmill_request(
     if dry_run or explain:
         return 0
 
-    request = urllib.request.Request(
-        url,
-        data=encoded_payload,
-        headers={
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json",
-        },
-        method="POST",
+    scheduler = build_scheduler(
+        base_url=base_url,
+        token=token,
+        workspace="lv3",
+        repo_root=REPO_ROOT,
+    )
+    scheduler_intent = intent or SimpleNamespace(
+        workflow_id=workflow_name,
+        arguments=payload,
+        target_vm=payload.get("target_vm") or payload.get("target"),
     )
     try:
-        with urllib.request.urlopen(request, timeout=30) as response:
-            body = response.read().decode("utf-8")
-    except urllib.error.URLError as exc:
+        result = scheduler.submit(scheduler_intent, requested_by="operator:lv3_cli")
+    except (urllib.error.URLError, RuntimeError) as exc:
         print(f"Windmill API error: {exc}", file=sys.stderr)
         return 1
 
-    if body.strip():
-        print(body)
+    if result.status in {"concurrency_limit", "rollback_depth_exceeded", "budget_exceeded"}:
+        print(
+            f"Scheduler rejected {workflow_name}: {result.status}"
+            + (f" ({result.reason})" if result.reason else ""),
+            file=sys.stderr,
+        )
+        return 1
+    if result.output is not None:
+        if isinstance(result.output, str):
+            print(result.output)
+        else:
+            print(json.dumps(result.output, indent=2, sort_keys=True))
+    if result.status in {"failed", "aborted"}:
+        print(
+            f"Workflow {workflow_name} ended with status {result.status}.",
+            file=sys.stderr,
+        )
+        return 1
     return 0
 
 
@@ -684,6 +704,7 @@ def run_windmill_workflow(
         dry_run=dry_run,
         explain=explain,
         no_color=no_color,
+        intent=intent,
     )
 
 

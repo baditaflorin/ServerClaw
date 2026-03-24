@@ -91,7 +91,7 @@ lv3 release --bump patch --dry-run
 - `lv3 lint` and `lv3 validate` route through ADR 0082's build-server gateway unless `--local` is set.
 - `lv3 deploy` routes to `make remote-exec` and then into the repo-managed service apply path.
 - `lv3 status`, `lv3 logs`, and `lv3 open` use catalog-backed read paths from the controller.
-- `lv3 run` first compiles the raw instruction into a YAML `ExecutionIntent`, writes `intent.compiled` to the repo-local ledger, prompts for approval when required, and then calls the private Windmill API using the controller-local Windmill superadmin secret.
+- `lv3 run` compiles the workflow intent, enforces ADR 0116 risk gates, then submits through ADR 0119's budgeted scheduler before the Windmill API call is made.
 - `lv3 release` reads repository metadata and release receipts locally; `lv3 release tag` shells out to git for the annotated tag step.
 
 ## Current Limits
@@ -116,6 +116,10 @@ lv3 release --bump patch --dry-run
 - inspect the compiled rule set in `config/goal-compiler-rules.yaml`
 - add or refine aliases in `config/goal-compiler-aliases.yaml` when the intent is valid but phrased differently
 - confirm the target service or workflow exists in the relevant repo catalog before widening the rule table
+
+`lv3 run ...` returns `concurrency_limit` or `budget_exceeded`:
+- inspect `config/workflow-catalog.json` and `config/workflow-defaults.yaml`
+- run `make scheduler-watchdog-loop` to reconcile active scheduler state
 
 `lv3 logs ...` cannot reach Loki:
 - override the query endpoint with `LV3_LOKI_URL=http://<host>:3100/loki/api/v1/query_range`

@@ -1971,6 +1971,35 @@ workstreams:
     ready_to_merge: false
     live_applied: false
 
+  - id: adr-0119-budgeted-workflow-scheduler
+    adr: "0119"
+    title: Budgeted workflow scheduler
+    status: merged
+    owner: codex
+    branch: codex/adr-0119-budgeted-scheduler
+    worktree_path: .worktrees/adr-0119
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0119-budgeted-workflow-scheduler.md
+    depends_on:
+      - adr-0044-windmill
+      - adr-0048-command-catalog
+      - adr-0058-nats-event-bus
+      - adr-0071-agent-observation-loop
+      - adr-0098-postgres-ha
+      - adr-0112-goal-compiler
+      - adr-0115-mutation-ledger
+      - adr-0116-change-risk-scoring
+    conflicts_with:
+      - adr-0112-goal-compiler
+    shared_surfaces:
+      - platform/scheduler
+      - scripts/lv3_cli.py
+      - config/workflow-catalog.json
+      - config/workflow-defaults.yaml
+      - windmill/scheduler/watchdog-loop.py
+      - docs/runbooks/budgeted-workflow-scheduler.md
+    ready_to_merge: false
+    live_applied: false
+
   - id: adr-0120-dry-run-diff-engine
     adr: "0120"
     title: Dry-run semantic diff engine

@@ -30,7 +30,17 @@
       ],
       "verification_commands": [
         "make validate"
-      ]
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 0,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "abort_silently"
+      }
     },
     "install-hooks": {
       "description": "Install the repo-managed pre-commit and pre-push hook layers for this checkout.",
@@ -58,7 +68,17 @@
       "verification_commands": [
         "make install-hooks",
         "git rev-parse --git-path hooks"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 0,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "pre-push-gate": {
       "description": "Run the ADR 0087 repository validation gate through the build server with local Docker fallback.",
@@ -89,7 +109,17 @@
       "verification_commands": [
         "make pre-push-gate",
         "make gate-status"
-      ]
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 0,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "abort_silently"
+      }
     },
     "gate-status": {
       "description": "Show the configured validation gate checks plus the last local, bypass, and post-merge results.",
@@ -117,7 +147,17 @@
       ],
       "verification_commands": [
         "make gate-status"
-      ]
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 0,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "abort_silently"
+      }
     },
     "post-merge-gate": {
       "description": "Re-run the ADR 0087 validation manifest after merge to main from the Windmill worker checkout.",
@@ -144,7 +184,17 @@
       ],
       "verification_commands": [
         "make post-merge-gate"
-      ]
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 0,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "abort_silently"
+      }
     },
     "nightly-integration-tests": {
       "description": "Run the ADR 0111 nightly integration suite, post the summary to Mattermost, and emit GlitchTip failures when checks regress.",
@@ -188,7 +238,17 @@
       "verification_commands": [
         "python3 scripts/integration_suite.py --mode gate --environment staging",
         "python3 config/windmill/scripts/nightly-integration-tests.py --repo-path /srv/proxmox_florin_server"
-      ]
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 3600,
+        "max_steps": 400,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "abort_silently"
+      }
     },
     "run-triage": {
       "description": "Run the ADR 0114 rule-based incident triage engine for one alert payload, write the report, and optionally post the summary to Mattermost.",
@@ -224,7 +284,17 @@
       "verification_commands": [
         "python3 scripts/incident_triage.py --service netbox --alert-name netbox_health_probe_failed --signal recent_deployment_within_2h=true",
         "python3 config/windmill/scripts/run-triage.py"
-      ]
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 0,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "abort_silently"
+      }
     },
     "triage-calibration": {
       "description": "Calibrate ADR 0114 rule precision and recall against resolved incident cases and publish the weekly summary.",
@@ -255,7 +325,17 @@
       "verification_commands": [
         "python3 scripts/triage_calibration.py",
         "python3 config/windmill/scripts/calibrate-triage-rules.py --repo-path /srv/proxmox_florin_server"
-      ]
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 0,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "abort_silently"
+      }
     },
     "generate-status-docs": {
       "description": "Regenerate the README status fragments that are derived from canonical repository state.",
@@ -290,7 +370,17 @@
       "verification_commands": [
         "make generate-status-docs",
         "make validate-generated-docs"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 0,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "install-proxmox": {
       "description": "Install Proxmox VE on the Debian host from the repo-managed package path.",
@@ -325,7 +415,17 @@
       "verification_commands": [
         "make syntax-check",
         "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'pveversion'"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 2400,
+        "max_steps": 320,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "configure-network": {
       "description": "Converge the host bridge and NAT network model for guest connectivity.",
@@ -358,7 +458,17 @@
       ],
       "verification_commands": [
         "make syntax-check"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 180,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "converge-guest-network-policy": {
       "description": "Converge the default-deny guest network policy on the Proxmox host and all managed guests.",
@@ -395,7 +505,17 @@
         "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo pve-firewall compile >/dev/null && sudo ls /etc/pve/firewall/*.fw'",
         "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'nc -z -w 2 10.10.10.50 5432'",
         "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.50 'nc -z -w 2 10.10.10.20 8083'"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1500,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "configure-ingress": {
       "description": "Converge public ingress forwarding from the host to the NGINX edge VM.",
@@ -427,7 +547,17 @@
       ],
       "verification_commands": [
         "make syntax-check"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "configure-edge-publication": {
       "description": "Publish repo-managed public hostnames at the NGINX edge.",
@@ -459,7 +589,17 @@
       "verification_commands": [
         "curl -I https://grafana.lv3.org",
         "curl -I https://nginx.lv3.org"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "configure-tailscale": {
       "description": "Converge host Tailscale installation and subnet-router settings.",
@@ -491,7 +631,17 @@
       ],
       "verification_commands": [
         "make syntax-check"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "provision-guests": {
       "description": "Provision the Debian cloud template and declared guest VMs on Proxmox.",
@@ -523,7 +673,17 @@
       ],
       "verification_commands": [
         "make syntax-check"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 2400,
+        "max_steps": 320,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 4,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "harden-access": {
       "description": "Converge the host access baseline for routine non-root operations.",
@@ -555,7 +715,17 @@
       ],
       "verification_commands": [
         "make syntax-check"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "harden-guest-access": {
       "description": "Converge the Linux guest access baseline for the managed VM fleet.",
@@ -586,7 +756,17 @@
       ],
       "verification_commands": [
         "make validate"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "harden-security": {
       "description": "Converge the Proxmox host security baseline including firewall, notifications, ACME, and TOTP.",
@@ -622,7 +802,17 @@
       ],
       "verification_commands": [
         "HETZNER_DNS_API_TOKEN=... make harden-security"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "provision-api-access": {
       "description": "Create and verify the durable Proxmox API automation identity and token.",
@@ -657,7 +847,17 @@
       ],
       "verification_commands": [
         "make syntax-check"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "converge-monitoring": {
       "description": "Converge the monitoring VM, guest telemetry paths, Grafana dashboards, Prometheus service-graph metrics, Tempo tracing, and centralized Loki log shipping.",
@@ -699,7 +899,17 @@
         "make syntax-check-monitoring",
         "make converge-monitoring",
         "curl -I https://grafana.lv3.org"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1500,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "converge-ntopng": {
       "description": "Converge host-local ntopng capture on the Proxmox bridges and expose the operator-only Tailscale proxy path.",
@@ -737,7 +947,17 @@
         "make syntax-check-ntopng",
         "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo systemctl is-active redis-server ntopng'",
         "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'PASS=$(sudo cat /etc/lv3/ntopng/admin-password); curl -fsS -u admin:${PASS} http://100.118.189.95:3001/lua/rest/v2/get/ntopng/interfaces.lua'"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "converge-docker-runtime": {
       "description": "Converge the Docker runtime baseline on docker-runtime-lv3.",
@@ -769,7 +989,17 @@
       ],
       "verification_commands": [
         "make syntax-check-docker-runtime"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "converge-postgres-vm": {
       "description": "Converge the dedicated PostgreSQL guest baseline on postgres-lv3.",
@@ -800,7 +1030,17 @@
       ],
       "verification_commands": [
         "psql \"host=database.lv3.org port=5432 dbname=postgres user=ops sslmode=prefer\""
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "converge-mail-platform": {
       "description": "Converge the Dockerized mail platform, host SMTP ingress, DNS, sender profiles, Grafana mail telemetry, and mail-gateway trace export.",
@@ -843,7 +1083,17 @@
         "curl -s -H \"X-API-Key: $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/gateway-api-key.txt)\" http://10.10.10.20:8081/v1/profiles",
         "ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/mail-platform-notification-profiles-verify.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --limit docker-runtime-lv3",
         "curl -I https://grafana.lv3.org"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1500,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "converge-openbao": {
       "description": "Deploy private OpenBao on docker-runtime-lv3, seed scoped secrets, configure Transit, and enable PostgreSQL dynamic credentials.",
@@ -892,7 +1142,17 @@
         "make syntax-check-openbao",
         "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'ssh -o StrictHostKeyChecking=no ops@10.10.10.20 docker compose --file /opt/openbao/docker-compose.yml ps'",
         "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'ssh -o StrictHostKeyChecking=no ops@10.10.10.20 curl -fsS http://127.0.0.1:8200/v1/sys/health'"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "converge-step-ca": {
       "description": "Deploy the private step-ca runtime, expose it over the host Tailscale path, and enable SSH CA trust on the Proxmox host and managed guests.",
@@ -938,7 +1198,17 @@
         "make syntax-check-step-ca",
         "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose --file /opt/step-ca/docker-compose.yml ps'",
         "curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt https://100.118.189.95:9443/health"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1500,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "converge-windmill": {
       "description": "Converge Windmill on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and expose the operator-only Tailscale proxy on the Proxmox host.",
@@ -980,7 +1250,17 @@
         "make syntax-check-windmill",
         "curl -s http://100.118.189.95:8005/api/version",
         "curl -s -H \"Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)\" http://100.118.189.95:8005/api/users/global/whoami"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1500,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "continuous-drift-detection": {
       "description": "Run the ADR 0091 multi-source drift suite through the build server and publish structured drift events plus a stored receipt.",
@@ -1025,7 +1305,17 @@
         "python3 -m py_compile scripts/drift_detector.py scripts/parse_ansible_drift.py scripts/docker_image_drift.py scripts/dns_drift.py scripts/tls_cert_drift.py",
         "echo '' | python3 scripts/parse_ansible_drift.py",
         "python3 scripts/drift_detector.py --help"
-      ]
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "abort_silently"
+      }
     },
     "restore-verification": {
       "description": "Run the ADR 0099 backup-restore verification workflow, write one receipt, emit the mutation-audit event, and optionally publish NATS and Mattermost summaries.",
@@ -1067,7 +1357,17 @@
         "python3 -m py_compile scripts/restore_verification.py scripts/smoke_tests/postgres_smoke.py scripts/smoke_tests/docker_runtime_smoke.py scripts/smoke_tests/backup_vm_smoke.py config/windmill/scripts/restore-verification.py",
         "uv run --with pytest --with pyyaml pytest tests/test_restore_verification.py tests/test_restore_verification_windmill.py -q",
         "python3 scripts/restore_verification.py --help"
-      ]
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 5400,
+        "max_steps": 400,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "security-posture-scan": {
       "description": "Run the ADR 0102 Lynis and Trivy security posture workflow, store a receipt, and publish security events.",
@@ -1113,7 +1413,17 @@
         "python3 -m py_compile scripts/parse_lynis_report.py scripts/security_posture_report.py config/windmill/scripts/security-posture-scan.py",
         "python3 scripts/parse_lynis_report.py tests/fixtures/security_posture_docker_runtime.dat",
         "python3 scripts/security_posture_report.py --help"
-      ]
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 3600,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "abort_silently"
+      }
     },
     "rotate-secret": {
       "description": "Plan or apply one repo-managed secret rotation, update the owning service without a full reconverge, and persist the rotated value in OpenBao.",
@@ -1157,7 +1467,17 @@
         "python3 -m unittest discover -s /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests -p 'test_secret_rotation.py'",
         "make syntax-check-secret-rotation",
         "make rotate-secret SECRET_ID=windmill_database_password ROTATION_ARGS=\"--plan\""
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "adr-0077-compose-runtime-secrets-live-apply": {
       "description": "Converge the OpenBao Agent runtime-secret injection path across the migrated docker-runtime-lv3 platform applications and verify that the services now consume `/run/lv3-secrets/<service>/runtime.env` instead of compose-directory `.env` files.",
@@ -1204,7 +1524,17 @@
         "scripts/validate_repo.sh compose-runtime-envs health-probes",
         "uv run --with pytest pytest -q tests/test_compose_runtime_secret_injection.py",
         "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'sudo ls /run/lv3-secrets'"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "converge-control-plane-recovery": {
       "description": "Converge scheduled control-plane backups on docker-runtime-lv3, stage controller recovery references, and validate recurring restore drills on backup-lv3.",
@@ -1252,7 +1582,17 @@
         "make syntax-check-control-plane-recovery",
         "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 -W %h:%p\" ops@10.10.10.20 'sudo systemctl status lv3-control-plane-backup.timer --no-pager'",
         "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 -W %h:%p\" ops@10.10.10.60 'sudo systemctl status lv3-control-plane-restore-drill.timer --no-pager'"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "converge-keycloak": {
       "description": "Converge Keycloak on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at sso.lv3.org, and wire Grafana through the shared SSO broker.",
@@ -1299,7 +1639,17 @@
         "make syntax-check-keycloak",
         "curl -s https://sso.lv3.org/realms/lv3/.well-known/openid-configuration",
         "curl -I https://grafana.lv3.org/login/generic_oauth"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "converge-api-gateway": {
       "description": "Converge the unified platform API gateway on docker-runtime-lv3 and publish it at api.lv3.org through the shared NGINX edge.",
@@ -1340,7 +1690,17 @@
         "make syntax-check-api-gateway",
         "curl -s https://api.lv3.org/healthz",
         "curl -s -o /dev/null -w '%{http_code}\\n' https://api.lv3.org/v1/health"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "converge-netbox": {
       "description": "Converge private NetBox on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish the host-side Tailscale proxy, and synchronize canonical repo inventory into the API.",
@@ -1387,7 +1747,17 @@
         "curl -s -o /dev/null -w '%{http_code}\\n' http://100.118.189.95:8004/login/",
         "curl -s -H \"Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/netbox/api-token.txt)\" http://100.118.189.95:8004/api/virtualization/virtual-machines/?limit=20",
         "uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/netbox_inventory_sync.py --api-url http://100.118.189.95:8004 --api-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/netbox/api-token.txt --host-vars /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml --stack /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml --lane-catalog /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/control-plane-lanes.json"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1500,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "converge-open-webui": {
       "description": "Deploy private Open WebUI on docker-runtime-lv3 with repo-managed bootstrap auth and an operator-only Tailscale proxy on the Proxmox host.",
@@ -1429,7 +1799,17 @@
         "make syntax-check-open-webui",
         "curl -s http://100.118.189.95:8008/",
         "curl -s -X POST -H \"Content-Type: application/json\" -d '{\"email\":\"ops@lv3.org\",\"password\":\"'\"$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/admin-password.txt)\"'\"}' http://100.118.189.95:8008/api/v1/auths/signin"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1500,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "converge-ntfy": {
       "description": "Deploy the private ntfy paging gateway on docker-runtime-lv3 and persist the repo-managed credential used by Alertmanager critical routing.",
@@ -1467,7 +1847,17 @@
       "verification_commands": [
         "make syntax-check-ntfy",
         "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'curl -fsS http://127.0.0.1:2586/v1/health'"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "converge-rag-context": {
       "description": "Deploy the private platform context API with Qdrant on docker-runtime-lv3, publish it through the Proxmox host Tailscale proxy, and seed the initial retrieval corpus.",
@@ -1513,7 +1903,17 @@
         "curl -s http://100.118.189.95:8010/healthz",
         "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/build_rag_index.py --dry-run",
         "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/query_platform_context.py --api-url http://100.118.189.95:8010 --question 'how does step-ca issue SSH certificates'"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1500,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "converge-portainer": {
       "description": "Converge the private Portainer runtime on docker-runtime-lv3, publish it through the Proxmox host Tailscale proxy, and persist the controller-local bootstrap auth.",
@@ -1555,7 +1955,17 @@
         "make syntax-check-portainer",
         "curl -sk https://100.118.189.95:9444/api/system/status",
         "make portainer-manage ACTION=list-containers PORTAINER_ARGS='--all'"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1500,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "converge-mattermost": {
       "description": "Converge Mattermost on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, expose the operator-only Tailscale proxy on the Proxmox host, and seed the repo-managed collaboration channels and incoming webhooks.",
@@ -1601,7 +2011,17 @@
         "curl -s http://100.118.189.95:8066/api/v4/system/ping",
         "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker exec lv3-mattermost /mattermost/bin/mmctl --local team search lv3 --json'",
         "python -m json.tool /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mattermost/incoming-webhooks.json"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1500,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "deploy-uptime-kuma": {
       "description": "Deploy Uptime Kuma on the Docker runtime VM and publish it at uptime.lv3.org.",
@@ -1637,7 +2057,17 @@
       "verification_commands": [
         "make syntax-check-uptime-kuma",
         "curl -I https://uptime.lv3.org"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1500,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "uptime-kuma-manage": {
       "description": "Run repo-local Uptime Kuma client actions such as bootstrap, monitor reconciliation, status-page reconciliation, or maintenance inspection.",
@@ -1672,7 +2102,17 @@
         "make uptime-kuma-manage ACTION=list-monitors",
         "make uptime-kuma-manage ACTION=ensure-status-page",
         "make uptime-kuma-manage ACTION=list-maintenances"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "uptime-robot-manage": {
       "description": "Run repo-local Uptime Robot automation for independent public status monitoring contacts and monitors.",
@@ -1705,7 +2145,17 @@
       "verification_commands": [
         "make uptime-robot-manage ACTION=ensure",
         "make uptime-robot-manage ACTION=list-monitors"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "portainer-manage": {
       "description": "Run governed Portainer API actions such as listing containers, reading logs, or restarting one container through the repo-managed wrapper.",
@@ -1735,7 +2185,17 @@
       ],
       "verification_commands": [
         "make portainer-manage ACTION=list-containers PORTAINER_ARGS='--all'"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "configure-backup-vm": {
       "description": "Converge the dedicated backup VM, host-side PBS integration, and the optional ADR 0100 off-site copy of backup-lv3.",
@@ -1772,7 +2232,17 @@
       ],
       "verification_commands": [
         "make syntax-check-backup-vm"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 260,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "disaster-recovery-runbook": {
       "description": "Render the ADR 0100 ordered recovery plan, current DR evidence summary, and table-top review state.",
@@ -1806,7 +2276,17 @@
         "python3 scripts/disaster_recovery_runbook.py --format json",
         "python3 scripts/generate_dr_report.py",
         "python3 scripts/lv3_cli.py release status"
-      ]
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 3600,
+        "max_steps": 320,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "escalate_to_operator"
+      }
     },
     "configure-backups": {
       "description": "Retained legacy external CIFS backup workflow from ADR 0020.",
@@ -1844,7 +2324,17 @@
       ],
       "verification_commands": [
         "make preflight WORKFLOW=configure-backups"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 260,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "database-dns": {
       "description": "Publish the private database.lv3.org DNS record toward the Patroni-managed PostgreSQL VIP.",
@@ -1875,7 +2365,17 @@
       ],
       "verification_commands": [
         "dig +short database.lv3.org"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "provision-subdomain": {
       "description": "Converge one catalogued lv3.org hostname through the Hetzner DNS role and, when applicable, refresh the shared NGINX edge publication.",
@@ -1911,7 +2411,17 @@
         "uvx --from pyyaml python scripts/subdomain_catalog.py --fqdn ops.lv3.org --provision-check",
         "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory/hosts.yml playbooks/provision-subdomain.yml --syntax-check",
         "HETZNER_DNS_API_TOKEN=... make provision-subdomain FQDN=ops.lv3.org"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "capacity-report": {
       "description": "Render the repository-managed capacity model report, combining committed allocations, planned growth, and optional live metrics from the monitoring VM.",
@@ -2009,7 +2519,17 @@
       "verification_commands": [
         "python3 scripts/promotion_pipeline.py --validate",
         "make promote SERVICE=<service-id> STAGING_RECEIPT=receipts/live-applies/staging/<receipt>.json DRY_RUN=true"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "collection-publish": {
       "description": "Build the lv3.platform Ansible collection, validate the local tarball path, and publish it to the configured internal Galaxy server.",
@@ -2046,7 +2566,17 @@
         "make collection-build",
         "make collection-install",
         "python3 config/windmill/scripts/collection-publish.py --repo-root \"$PWD\" --dry-run"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 0,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "packer-template-rebuild": {
       "description": "Validate and rebuild the repo-managed Proxmox VM template catalog in dependency order, then refresh the template manifest metadata.",
@@ -2088,7 +2618,17 @@
         "bash -n packer/scripts/base-hardening.sh",
         "python3 -c \"import json; json.load(open('config/vm-template-manifest.json'))\"",
         "make validate-packer"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 7200,
+        "max_steps": 400,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "fixture-expiry-reaper": {
       "description": "Destroy any ADR 0088 ephemeral fixture whose lifetime window has expired and record one reaper-run receipt for the scan.",
@@ -2128,7 +2668,17 @@
       "verification_commands": [
         "python3 scripts/fixture_manager.py list",
         "python3 config/windmill/scripts/fixture-expiry-reaper.py"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "ephemeral-vm-reaper": {
       "description": "Sweep the governed ADR 0106 ephemeral VM pool, retag unowned temporary VMs with a one-hour grace period, and destroy expired VMs.",
@@ -2167,7 +2717,17 @@
         "python3 scripts/fixture_manager.py list",
         "python3 config/windmill/scripts/ephemeral-vm-reaper.py",
         "python3 scripts/validate_ephemeral_vmid.py --validate"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "check-platform-drift": {
       "description": "Run the ADR 0071 observation loop checks and emit structured findings from the controller command lane.",
@@ -2203,7 +2763,17 @@
       "verification_commands": [
         "uvx --from pyyaml python scripts/platform_observation_tool.py",
         "test -f .local/platform-observation/latest/findings.json"
-      ]
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 0,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "abort_silently"
+      }
     },
     "open-maintenance-window": {
       "description": "Open one ADR 0080 maintenance window in the private NATS KV bucket before a planned live change.",
@@ -2237,7 +2807,17 @@
       "verification_commands": [
         "uv run --with pyyaml --with nats-py python scripts/maintenance_window_tool.py list",
         "make command-info COMMAND=open-maintenance-window"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "close-maintenance-window": {
       "description": "Close one ADR 0080 maintenance window and emit the matching maintenance.closed or maintenance.force_closed event.",
@@ -2271,7 +2851,17 @@
       "verification_commands": [
         "uv run --with pyyaml --with nats-py python scripts/maintenance_window_tool.py list",
         "make command-info COMMAND=close-maintenance-window"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "operator-onboard": {
       "description": "Apply one ADR 0108 human-operator onboarding change across the repo-authoritative roster, Keycloak, OpenBao, step-ca, Tailscale, and Mattermost.",
@@ -2314,7 +2904,17 @@
         "python3 scripts/operator_manager.py validate",
         "python3 scripts/operator_access_inventory.py --id florin-badita --offline",
         "make workflow-info WORKFLOW=operator-onboard"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 220,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "escalate_to_operator"
+      }
     },
     "operator-offboard": {
       "description": "Disable one ADR 0108 human operator across Keycloak, OpenBao, Tailscale, and the repo-authoritative roster while preserving audit history.",
@@ -2353,7 +2953,17 @@
         "python3 scripts/operator_manager.py validate",
         "python3 scripts/operator_access_inventory.py --id florin-badita --offline",
         "make workflow-info WORKFLOW=operator-offboard"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 220,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "escalate_to_operator"
+      }
     },
     "sync-operators": {
       "description": "Reconcile the merged ADR 0108 operator roster into the live identity systems from the authoritative config/operators.yaml file.",
@@ -2388,7 +2998,17 @@
       "verification_commands": [
         "python3 scripts/operator_manager.py sync --dry-run --emit-json",
         "make workflow-info WORKFLOW=sync-operators"
-      ]
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 220,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     },
     "quarterly-access-review": {
       "description": "Build the ADR 0108 quarterly access review summary and optionally post it to Mattermost.",
@@ -2420,6 +3040,59 @@
       "verification_commands": [
         "python3 scripts/operator_manager.py quarterly-review --dry-run --emit-json",
         "make workflow-info WORKFLOW=quarterly-access-review"
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 0,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "abort_silently"
+      }
+    },
+    "scheduler-watchdog-loop": {
+      "description": "Run one ADR 0119 watchdog pass over active mutation jobs and cancel budget violations.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "scheduler-watchdog-loop",
+        "command": "make scheduler-watchdog-loop"
+      },
+      "preflight": {
+        "required": false,
+        "required_secret_ids": []
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "repo_only",
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 25,
+        "max_steps": 100,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 0,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "abort_silently"
+      },
+      "owner_runbook": "docs/runbooks/budgeted-workflow-scheduler.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/workflow-defaults.yaml",
+        "config/workflow-catalog.json",
+        "docs/runbooks/budgeted-workflow-scheduler.md",
+        "platform/scheduler",
+        "windmill/scheduler/watchdog-loop.py"
+      ],
+      "outputs": [
+        "A JSON summary of active scheduler-tracked jobs, including any budget violations canceled during the pass."
+      ],
+      "verification_commands": [
+        "python3 -m py_compile platform/scheduler/*.py windmill/scheduler/watchdog-loop.py",
+        "python3 windmill/scheduler/watchdog-loop.py --repo-path ."
       ]
     }
   }

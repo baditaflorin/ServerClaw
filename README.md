@@ -85,7 +85,7 @@ The repository now also ships ADR 0117 dependency-graph runtime primitives: the 
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.117.1` |
+| Repository version | `0.118.0` |
 | Platform version | `0.114.2` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -328,6 +328,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Backup Restore Verification](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/backup-restore-verification.md)
 - [Break-Glass Recovery](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/break-glass-recovery.md)
 - [Break-Glass References](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/break-glass.md)
+- [Budgeted Workflow Scheduler](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/budgeted-workflow-scheduler.md)
 - [Capacity Model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/capacity-model.md)
 - [Certificate Expired](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/cert-expired.md)
 - [Change Risk Scoring](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/change-risk-scoring.md)
@@ -667,7 +668,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.117.1` |
+| Repository version | `0.118.0` |
 | Platform version | `0.114.2` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -796,6 +797,7 @@ This repository is intentionally opinionated:
 | `0115` | Event-sourced mutation ledger | `merged` | [adr-0115-mutation-ledger.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0115-mutation-ledger.md) |
 | `0116` | Deterministic workflow change risk scoring | `merged` | [adr-0116-change-risk-scoring.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0116-change-risk-scoring.md) |
 | `0117` | Service dependency graph as first-class runtime | `merged` | [adr-0117-dependency-graph-runtime.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0117-dependency-graph-runtime.md) |
+| `0119` | Budgeted workflow scheduler | `merged` | [adr-0119-budgeted-workflow-scheduler.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0119-budgeted-workflow-scheduler.md) |
 | `0120` | Dry-run semantic diff engine | `merged` | [adr-0120-dry-run-diff-engine.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0120-dry-run-diff-engine.md) |
 <!-- END GENERATED: merged-workstreams -->
 
