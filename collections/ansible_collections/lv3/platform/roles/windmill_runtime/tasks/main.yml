@@ -398,6 +398,71 @@
   tags:
     - mutation
 
+- name: Ensure the Windmill seed app sync directory exists
+  ansible.builtin.file:
+    path: "{{ windmill_seed_app_sync_dir }}"
+    state: directory
+    mode: "0755"
+  when: (windmill_seed_raw_apps | default([])) | length > 0
+
+- name: Copy the repo-managed Windmill app sync root
+  ansible.builtin.copy:
+    src: "{{ windmill_seed_app_repo_root_local_dir }}/"
+    dest: "{{ windmill_seed_app_sync_dir }}/"
+    mode: preserve
+  when: (windmill_seed_raw_apps | default([])) | length > 0
+
+- name: Sync repo-managed Windmill raw apps
+  vars:
+    mutation_audit_action: sync.windmill_raw_apps
+    mutation_audit_target: "{{ item.path }}"
+    mutation_audit_emit_on_success: true
+  ansible.builtin.command:
+    argv:
+      - docker
+      - run
+      - --rm
+      - --network
+      - host
+      - -e
+      - WM_WORKSPACE
+      - -e
+      - WM_TOKEN
+      - -e
+      - BASE_INTERNAL_URL
+      - -v
+      - "{{ windmill_seed_app_sync_dir }}:/workspace"
+      - "{{ windmill_image }}"
+      - sh
+      - -lc
+      - >-
+        cd /workspace
+        && wmill sync push
+        --yes
+        --skip-variables
+        --skip-secrets
+        --skip-resources
+        --skip-resource-types
+        --skip-scripts
+        --skip-flows
+        --skip-folders
+        --skip-workspace-dependencies
+        --skip-branch-validation
+        --includes "{{ item.sync_pattern }}"
+        --message "Repo-managed Windmill raw app sync"
+  loop: "{{ windmill_seed_raw_apps | default([]) }}"
+  loop_control:
+    label: "{{ item.path }}"
+  register: windmill_seed_raw_app_sync
+  environment:
+    WM_WORKSPACE: "{{ windmill_workspace_id }}"
+    WM_TOKEN: "{{ windmill_superadmin_secret }}"
+    BASE_INTERNAL_URL: "{{ windmill_private_base_url }}"
+  changed_when: false
+  when: (windmill_seed_raw_apps | default([])) | length > 0
+  tags:
+    - mutation
+
 - name: Check whether repo-managed Windmill schedules already exist
   ansible.builtin.uri:
     url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id | urlencode }}/schedules/exists/{{ item.path | urlencode }}"

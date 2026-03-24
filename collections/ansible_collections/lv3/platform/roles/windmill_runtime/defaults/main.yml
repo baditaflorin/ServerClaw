@@ -28,6 +28,8 @@ windmill_local_artifact_dir: "{{ playbook_dir }}/../.local/windmill"
 windmill_superadmin_secret_local_file: "{{ windmill_local_artifact_dir }}/superadmin-secret.txt"
 windmill_private_base_url: "{{ platform_service_topology | platform_service_url('windmill', 'internal') }}"
 windmill_base_url: "{{ platform_service_topology | platform_service_url('windmill', 'controller') }}"
+windmill_seed_app_repo_root_local_dir: "{{ playbook_dir }}/../config/windmill/apps"
+windmill_seed_app_sync_dir: "{{ windmill_site_dir }}/seed-apps"
 windmill_mutation_audit_dir: "{{ platform_log_dir }}"
 windmill_mutation_audit_file: "{{ mutation_audit_log_file }}"
 windmill_seed_scripts:
@@ -86,6 +88,36 @@ windmill_seed_scripts:
     language: python3
     summary: ADR 0100 disaster recovery runbook
     description: Repo-managed helper that renders the ordered LV3 disaster recovery plan and records the runbook invocation path.
+  - path: f/lv3/operator_onboard
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/operator-onboard.py"
+    language: python3
+    summary: ADR 0108 operator onboarding
+    description: Repo-managed wrapper that provisions one human operator across Keycloak, OpenBao, step-ca, Tailscale, and Mattermost.
+  - path: f/lv3/operator_offboard
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/operator-offboard.py"
+    language: python3
+    summary: ADR 0108 operator off-boarding
+    description: Repo-managed wrapper that disables one human operator across the managed identity systems while preserving audit history.
+  - path: f/lv3/sync_operators
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/sync-operators.py"
+    language: python3
+    summary: ADR 0108 operator roster reconciliation
+    description: Repo-managed wrapper that reconciles the merged operator roster into the live identity systems.
+  - path: f/lv3/quarterly_access_review
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/quarterly-access-review.py"
+    language: python3
+    summary: ADR 0108 quarterly access review
+    description: Repo-managed helper that builds the operator access review summary for scheduled or manual review.
+  - path: f/lv3/operator_roster
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/operator-roster.py"
+    language: python3
+    summary: Operator roster reader
+    description: Repo-managed helper that returns a sanitized snapshot of config/operators.yaml for browser-first admin tooling.
+  - path: f/lv3/operator_inventory
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/operator-inventory.py"
+    language: python3
+    summary: Operator access inventory
+    description: Repo-managed helper that runs the operator inventory report and returns structured JSON for the admin app.
   - path: f/lv3/world_state/refresh_proxmox_vms
     local_file: "{{ playbook_dir }}/../config/windmill/scripts/world-state/refresh-proxmox-vms.py"
     language: python3
@@ -291,3 +323,8 @@ windmill_seed_schedules:
     summary: Disabled ADR 0121 nightly search-index rebuild placeholder
     description: Repo-managed nightly search-index rebuild definition; enable it after the search fabric is applied live from main.
     no_flow_overlap: true
+windmill_seed_raw_apps:
+  - path: f/lv3/operator_access_admin
+    relative_dir: f/lv3/operator_access_admin.raw_app
+    sync_pattern: f/lv3/operator_access_admin.raw_app/**
+    summary: Browser-first operator access admin console

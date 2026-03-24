@@ -1,0 +1,359 @@
+:root {
+  color-scheme: light;
+  --page: #f4f0e8;
+  --panel: #fffaf2;
+  --ink: #1c1a16;
+  --muted: #5d584d;
+  --line: rgba(28, 26, 22, 0.12);
+  --accent: #a5411c;
+  --ok: #23623a;
+  --danger: #7e1d13;
+  --shadow: 0 18px 50px rgba(28, 26, 22, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(165, 65, 28, 0.08), transparent 38%),
+    linear-gradient(180deg, #f9f4eb 0%, var(--page) 100%);
+  color: var(--ink);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.shell {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 32px 20px 48px;
+}
+
+.hero {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+  margin-bottom: 24px;
+}
+
+.heroCard,
+.panel,
+.resultPanel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+}
+
+.heroCard {
+  padding: 28px;
+}
+
+.heroCard h1 {
+  margin: 0 0 10px;
+  font-family: "IBM Plex Serif", "Georgia", serif;
+  font-size: clamp(2rem, 4vw, 3.3rem);
+  line-height: 0.96;
+}
+
+.heroCard p {
+  margin: 0;
+  max-width: 62ch;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.heroStats {
+  display: grid;
+  gap: 12px;
+}
+
+.stat {
+  padding: 18px 20px;
+}
+
+.statLabel {
+  display: block;
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.statValue {
+  display: block;
+  margin-top: 8px;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.layout {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(0, 1.2fr) minmax(360px, 0.8fr);
+}
+
+.panel {
+  padding: 22px;
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.panelHeader h2,
+.panelHeader h3 {
+  margin: 0;
+  font-family: "IBM Plex Serif", "Georgia", serif;
+}
+
+.panelHeader p {
+  margin: 6px 0 0;
+  color: var(--muted);
+}
+
+.toolbar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.button,
+.buttonGhost,
+.buttonDanger {
+  border: none;
+  border-radius: 999px;
+  padding: 11px 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 120ms ease, opacity 120ms ease;
+}
+
+.button {
+  background: var(--accent);
+  color: white;
+}
+
+.buttonGhost {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+
+.buttonDanger {
+  background: var(--danger);
+  color: white;
+}
+
+.button:disabled,
+.buttonGhost:disabled,
+.buttonDanger:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.button:hover,
+.buttonGhost:hover,
+.buttonDanger:hover {
+  transform: translateY(-1px);
+}
+
+.tableWrap {
+  overflow: auto;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+}
+
+.rosterTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+.rosterTable th,
+.rosterTable td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.rosterTable th {
+  font-size: 0.86rem;
+  color: var(--muted);
+  background: rgba(28, 26, 22, 0.03);
+}
+
+.rosterTable tr:last-child td {
+  border-bottom: none;
+}
+
+.rosterTable tbody tr {
+  cursor: pointer;
+}
+
+.rosterTable tbody tr.isSelected {
+  background: rgba(165, 65, 28, 0.08);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.pillActive {
+  background: rgba(35, 98, 58, 0.12);
+  color: var(--ok);
+}
+
+.pillInactive {
+  background: rgba(126, 29, 19, 0.12);
+  color: var(--danger);
+}
+
+.pillRole {
+  background: rgba(28, 26, 22, 0.07);
+  color: var(--ink);
+}
+
+.sidebar {
+  display: grid;
+  gap: 20px;
+}
+
+.forms {
+  display: grid;
+  gap: 20px;
+}
+
+.formGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.formField {
+  display: grid;
+  gap: 6px;
+}
+
+.formFieldWide {
+  grid-column: 1 / -1;
+}
+
+.formField label {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.formField input,
+.formField select,
+.formField textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  background: white;
+  border-radius: 14px;
+  color: var(--ink);
+}
+
+.formField textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.checkboxRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.resultPanel {
+  padding: 20px;
+}
+
+.resultPanel pre {
+  margin: 0;
+  padding: 16px;
+  border-radius: 16px;
+  background: #17130f;
+  color: #f8f3e8;
+  overflow: auto;
+  font-size: 0.9rem;
+}
+
+.banner {
+  margin-bottom: 18px;
+  border-radius: 16px;
+  padding: 14px 16px;
+  border: 1px solid transparent;
+}
+
+.bannerInfo {
+  background: rgba(165, 65, 28, 0.08);
+  border-color: rgba(165, 65, 28, 0.14);
+}
+
+.bannerError {
+  background: rgba(126, 29, 19, 0.08);
+  border-color: rgba(126, 29, 19, 0.14);
+  color: var(--danger);
+}
+
+.inventoryMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.inventoryMeta .pill {
+  background: rgba(28, 26, 22, 0.06);
+}
+
+@media (max-width: 1080px) {
+  .hero,
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .shell {
+    padding: 20px 14px 36px;
+  }
+
+  .heroCard,
+  .panel,
+  .resultPanel {
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+}

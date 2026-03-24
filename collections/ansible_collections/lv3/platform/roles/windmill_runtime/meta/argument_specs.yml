@@ -74,6 +74,12 @@ argument_specs:
         required: true
         description:
           - Repo-managed scripts that should be present in the workspace after convergence.
+      windmill_seed_raw_apps:
+        type: list
+        elements: dict
+        required: false
+        description:
+          - Repo-managed raw apps that should be pushed into the workspace after the script seed sync.
       windmill_private_base_url:
         type: str
         required: false

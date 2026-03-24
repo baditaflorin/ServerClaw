@@ -193,3 +193,4 @@ Operators inactive for > 60 days are automatically flagged for review; their acc
 - ADR 0046: Identity classes (operator identity classes are defined there)
 - ADR 0056: Keycloak SSO (user and role management)
 - ADR 0066: Mutation audit log (all access changes recorded here)
+- ADR 0122: Windmill operator access admin surface (browser-first admin UI on top of this workflow)
