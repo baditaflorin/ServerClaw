@@ -262,6 +262,54 @@
         delay: 0
         timeout: 180
   rescue:
+    - name: Detect stale Windmill compose-network startup failures
+      ansible.builtin.set_fact:
+        windmill_missing_network_failure: >-
+          {{
+            'network ' in (windmill_up.stderr | default(''))
+            and ' does not exist' in (windmill_up.stderr | default(''))
+          }}
+
+    - name: Reset the stale Windmill compose network before retrying startup
+      ansible.builtin.shell: |
+        set -euo pipefail
+        docker compose --file "{{ windmill_compose_file }}" rm -fsv windmill_server windmill_worker windmill_worker_native >/dev/null 2>&1 || true
+        docker network rm windmill_default >/dev/null 2>&1 || true
+        echo changed
+      args:
+        chdir: "{{ windmill_site_dir }}"
+        executable: /bin/bash
+      register: windmill_network_reset
+      changed_when: "'changed' in windmill_network_reset.stdout"
+      when: windmill_missing_network_failure | bool
+
+    - name: Recreate the full Windmill stack after stale-network cleanup
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ windmill_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ windmill_site_dir }}"
+      register: windmill_network_retry_up
+      changed_when: >-
+        'Creating' in windmill_network_retry_up.stdout
+        or 'Recreating' in windmill_network_retry_up.stdout
+        or 'Starting' in windmill_network_retry_up.stdout
+      when: windmill_missing_network_failure | bool
+
+    - name: Wait for Windmill to listen locally after stale-network cleanup
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: "{{ windmill_server_port }}"
+        delay: 0
+        timeout: 180
+      when: windmill_missing_network_failure | bool
+
     - name: Recreate the Windmill server container after startup timeout
       ansible.builtin.command:
         argv:
@@ -278,6 +326,7 @@
       changed_when: >-
         'Removed' in windmill_server_recreate_rm.stdout
         or 'Stopping' in windmill_server_recreate_rm.stdout
+      when: not (windmill_missing_network_failure | bool)
 
     - name: Start a fresh Windmill server container
       ansible.builtin.command:
@@ -296,6 +345,7 @@
         'Creating' in windmill_server_recreate_up.stdout
         or 'Recreating' in windmill_server_recreate_up.stdout
         or 'Starting' in windmill_server_recreate_up.stdout
+      when: not (windmill_missing_network_failure | bool)
 
     - name: Wait for Windmill to listen locally after server recreation
       ansible.builtin.wait_for:
@@ -303,6 +353,7 @@
         port: "{{ windmill_server_port }}"
         delay: 0
         timeout: 180
+      when: not (windmill_missing_network_failure | bool)
 
 - name: Wait for the Windmill API version endpoint
   ansible.builtin.uri:
