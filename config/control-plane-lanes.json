@@ -352,14 +352,15 @@
           "id": "platform-security-subjects",
           "kind": "event_subject",
           "endpoint": "platform.security.*",
-          "auth": "Internal NATS publication from ADR 0102 through the private docker-runtime-lv3 event bus runtime.",
+          "auth": "Internal NATS publication from ADR 0102 and ADR 0142 through the private docker-runtime-lv3 event bus runtime.",
           "owner_refs": [
             "proxmox_florin"
           ],
           "workflow_refs": [
-            "security-posture-scan"
+            "security-posture-scan",
+            "weekly-security-scan"
           ],
-          "notes": "Each scheduled security posture run publishes a summary event plus critical findings so operators and future automation can react without polling the receipt directory."
+          "notes": "Scheduled security workflows publish summary events plus high or critical findings so operators and future automation can react without polling the receipt directories."
         },
         {
           "id": "maintenance-window-subjects",
