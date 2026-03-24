@@ -124,6 +124,7 @@ platform_ports:
   api_gateway_internal_port: 8080
   platform_context_internal_port: 8010
   platform_context_host_proxy_port: 8010
+  ops_portal_port: 8092
   ntopng_http_port: 3000
   ntopng_proxy_port: 3001
   portainer_https_port: 9443
@@ -560,8 +561,7 @@ platform_service_topology:
   nginx_edge:
     service_name: nginx-edge
     owning_vm: nginx-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''nginx-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.10
     public_hostname: nginx.lv3.org
     exposure_model: edge-static
     observability:
@@ -591,8 +591,7 @@ platform_service_topology:
   grafana:
     service_name: grafana
     owning_vm: monitoring-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''monitoring-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.40
     public_hostname: grafana.lv3.org
     exposure_model: edge-published
     observability:
@@ -639,7 +638,7 @@ platform_service_topology:
   proxmox_ui:
     service_name: proxmox-ui
     owning_vm: proxmox_florin
-    private_ip: '{{ management_tailscale_ipv4 }}'
+    private_ip: 100.118.189.95
     public_hostname: proxmox.lv3.org
     exposure_model: informational-only
     observability:
@@ -672,8 +671,7 @@ platform_service_topology:
   docker_runtime:
     service_name: docker-runtime
     owning_vm: docker-runtime-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.20
     public_hostname: docker.lv3.org
     exposure_model: informational-only
     observability:
@@ -703,8 +701,7 @@ platform_service_topology:
   docker_build:
     service_name: docker-build
     owning_vm: docker-build-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-build-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.30
     public_hostname: build.lv3.org
     exposure_model: informational-only
     observability:
@@ -734,8 +731,7 @@ platform_service_topology:
   uptime_kuma:
     service_name: uptime-kuma
     owning_vm: docker-runtime-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.20
     public_hostname: uptime.lv3.org
     exposure_model: edge-published
     observability:
@@ -762,8 +758,7 @@ platform_service_topology:
   status_page:
     service_name: status-page
     owning_vm: docker-runtime-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.20
     public_hostname: status.lv3.org
     exposure_model: edge-published
     observability:
@@ -780,18 +775,18 @@ platform_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3')
-        | map(attribute='ipv4') | first) }}:3001
+      upstream: http://10.10.10.20:3001
       root_proxy_path: /status/lv3-platform
     service_id: status_page
-    ports: {}
+    ports:
+      internal: 3001
     urls:
       public: https://status.lv3.org
+      internal: http://10.10.10.20:3001
   mail_platform:
     service_name: mail-platform
     owning_vm: docker-runtime-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.20
     public_hostname: mail.lv3.org
     exposure_model: informational-only
     observability:
@@ -813,8 +808,7 @@ platform_service_topology:
   step_ca:
     service_name: step-ca
     owning_vm: docker-runtime-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -832,8 +826,7 @@ platform_service_topology:
   windmill:
     service_name: windmill
     owning_vm: docker-runtime-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -851,8 +844,7 @@ platform_service_topology:
   mattermost:
     service_name: mattermost
     owning_vm: docker-runtime-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -870,8 +862,7 @@ platform_service_topology:
   netbox:
     service_name: netbox
     owning_vm: docker-runtime-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -889,8 +880,7 @@ platform_service_topology:
   open_webui:
     service_name: open-webui
     owning_vm: docker-runtime-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -908,8 +898,7 @@ platform_service_topology:
   api_gateway:
     service_name: api-gateway
     owning_vm: docker-runtime-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.20
     public_hostname: api.lv3.org
     exposure_model: edge-published
     observability:
@@ -936,8 +925,7 @@ platform_service_topology:
   platform_context_api:
     service_name: platform-context-api
     owning_vm: docker-runtime-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -955,8 +943,7 @@ platform_service_topology:
   keycloak:
     service_name: keycloak
     owning_vm: docker-runtime-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.20
     public_hostname: sso.lv3.org
     exposure_model: edge-published
     observability:
@@ -981,8 +968,7 @@ platform_service_topology:
   ops_portal:
     service_name: ops-portal
     owning_vm: docker-runtime-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.20
     public_hostname: ops.lv3.org
     exposure_model: edge-published
     observability:
@@ -999,16 +985,17 @@ platform_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:{{ platform_port_assignments.ops_portal_port }}
+      upstream: http://10.10.10.20:8092
     service_id: ops_portal
-    ports: {}
+    ports:
+      internal: 8092
     urls:
       public: https://ops.lv3.org
+      internal: http://10.10.10.20:8092
   openbao:
     service_name: openbao
     owning_vm: docker-runtime-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -1040,7 +1027,7 @@ platform_service_topology:
   ntopng:
     service_name: ntopng
     owning_vm: proxmox_florin
-    private_ip: '{{ management_tailscale_ipv4 }}'
+    private_ip: 100.118.189.95
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -1058,8 +1045,7 @@ platform_service_topology:
   portainer:
     service_name: portainer
     owning_vm: docker-runtime-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -1077,7 +1063,7 @@ platform_service_topology:
   postgres:
     service_name: postgres
     owning_vm: postgres-lv3
-    private_ip: '{{ postgres_ha.vip_ipv4 }}'
+    private_ip: 10.10.10.55
     public_hostname: database.lv3.org
     exposure_model: private-only
     observability:
@@ -1088,7 +1074,7 @@ platform_service_topology:
       visibility: tailnet
       name: database
       type: A
-      target: '{{ postgres_ha.vip_ipv4 }}'
+      target: 10.10.10.55
       ttl: 60
     service_id: postgres
     ports:
@@ -1101,8 +1087,7 @@ platform_service_topology:
   backup_pbs:
     service_name: backup-pbs
     owning_vm: backup-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''backup-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.60
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -1187,7 +1172,7 @@ platform_dns_records:
   tailnet:
     - name: database
       type: A
-      value: '{{ postgres_ha.vip_ipv4 }}'
+      value: 10.10.10.55
       ttl: 60
 platform_management_allowed_tcp_ports:
   - 3001
@@ -1203,8 +1188,7 @@ public_edge_service_topology:
   nginx_edge:
     service_name: nginx-edge
     owning_vm: nginx-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''nginx-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.10
     public_hostname: nginx.lv3.org
     exposure_model: edge-static
     observability:
@@ -1234,8 +1218,7 @@ public_edge_service_topology:
   grafana:
     service_name: grafana
     owning_vm: monitoring-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''monitoring-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.40
     public_hostname: grafana.lv3.org
     exposure_model: edge-published
     observability:
@@ -1282,7 +1265,7 @@ public_edge_service_topology:
   proxmox_ui:
     service_name: proxmox-ui
     owning_vm: proxmox_florin
-    private_ip: '{{ management_tailscale_ipv4 }}'
+    private_ip: 100.118.189.95
     public_hostname: proxmox.lv3.org
     exposure_model: informational-only
     observability:
@@ -1315,8 +1298,7 @@ public_edge_service_topology:
   docker_runtime:
     service_name: docker-runtime
     owning_vm: docker-runtime-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.20
     public_hostname: docker.lv3.org
     exposure_model: informational-only
     observability:
@@ -1346,8 +1328,7 @@ public_edge_service_topology:
   docker_build:
     service_name: docker-build
     owning_vm: docker-build-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-build-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.30
     public_hostname: build.lv3.org
     exposure_model: informational-only
     observability:
@@ -1377,8 +1358,7 @@ public_edge_service_topology:
   uptime_kuma:
     service_name: uptime-kuma
     owning_vm: docker-runtime-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.20
     public_hostname: uptime.lv3.org
     exposure_model: edge-published
     observability:
@@ -1405,8 +1385,7 @@ public_edge_service_topology:
   status_page:
     service_name: status-page
     owning_vm: docker-runtime-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.20
     public_hostname: status.lv3.org
     exposure_model: edge-published
     observability:
@@ -1423,18 +1402,18 @@ public_edge_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3')
-        | map(attribute='ipv4') | first) }}:3001
+      upstream: http://10.10.10.20:3001
       root_proxy_path: /status/lv3-platform
     service_id: status_page
-    ports: {}
+    ports:
+      internal: 3001
     urls:
       public: https://status.lv3.org
+      internal: http://10.10.10.20:3001
   mail_platform:
     service_name: mail-platform
     owning_vm: docker-runtime-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.20
     public_hostname: mail.lv3.org
     exposure_model: informational-only
     observability:
@@ -1456,8 +1435,7 @@ public_edge_service_topology:
   step_ca:
     service_name: step-ca
     owning_vm: docker-runtime-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -1475,8 +1453,7 @@ public_edge_service_topology:
   windmill:
     service_name: windmill
     owning_vm: docker-runtime-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -1494,8 +1471,7 @@ public_edge_service_topology:
   mattermost:
     service_name: mattermost
     owning_vm: docker-runtime-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -1513,8 +1489,7 @@ public_edge_service_topology:
   netbox:
     service_name: netbox
     owning_vm: docker-runtime-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -1532,8 +1507,7 @@ public_edge_service_topology:
   open_webui:
     service_name: open-webui
     owning_vm: docker-runtime-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -1551,8 +1525,7 @@ public_edge_service_topology:
   api_gateway:
     service_name: api-gateway
     owning_vm: docker-runtime-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.20
     public_hostname: api.lv3.org
     exposure_model: edge-published
     observability:
@@ -1579,8 +1552,7 @@ public_edge_service_topology:
   platform_context_api:
     service_name: platform-context-api
     owning_vm: docker-runtime-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -1598,8 +1570,7 @@ public_edge_service_topology:
   keycloak:
     service_name: keycloak
     owning_vm: docker-runtime-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.20
     public_hostname: sso.lv3.org
     exposure_model: edge-published
     observability:
@@ -1624,8 +1595,7 @@ public_edge_service_topology:
   ops_portal:
     service_name: ops-portal
     owning_vm: docker-runtime-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.20
     public_hostname: ops.lv3.org
     exposure_model: edge-published
     observability:
@@ -1642,16 +1612,17 @@ public_edge_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://10.10.10.20:{{ platform_port_assignments.ops_portal_port }}
+      upstream: http://10.10.10.20:8092
     service_id: ops_portal
-    ports: {}
+    ports:
+      internal: 8092
     urls:
       public: https://ops.lv3.org
+      internal: http://10.10.10.20:8092
   openbao:
     service_name: openbao
     owning_vm: docker-runtime-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -1683,7 +1654,7 @@ public_edge_service_topology:
   ntopng:
     service_name: ntopng
     owning_vm: proxmox_florin
-    private_ip: '{{ management_tailscale_ipv4 }}'
+    private_ip: 100.118.189.95
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -1701,8 +1672,7 @@ public_edge_service_topology:
   portainer:
     service_name: portainer
     owning_vm: docker-runtime-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.20
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -1720,7 +1690,7 @@ public_edge_service_topology:
   postgres:
     service_name: postgres
     owning_vm: postgres-lv3
-    private_ip: '{{ postgres_ha.vip_ipv4 }}'
+    private_ip: 10.10.10.55
     public_hostname: database.lv3.org
     exposure_model: private-only
     observability:
@@ -1731,7 +1701,7 @@ public_edge_service_topology:
       visibility: tailnet
       name: database
       type: A
-      target: '{{ postgres_ha.vip_ipv4 }}'
+      target: 10.10.10.55
       ttl: 60
     service_id: postgres
     ports:
@@ -1744,8 +1714,7 @@ public_edge_service_topology:
   backup_pbs:
     service_name: backup-pbs
     owning_vm: backup-lv3
-    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''backup-lv3'')
-      | map(attribute=''ipv4'') | first) }}'
+    private_ip: 10.10.10.60
     exposure_model: private-only
     observability:
       guest_dashboard: false
@@ -1756,8 +1725,7 @@ public_edge_service_topology:
 uptime_kuma_service_topology:
   service_name: uptime-kuma
   owning_vm: docker-runtime-lv3
-  private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
-    | map(attribute=''ipv4'') | first) }}'
+  private_ip: 10.10.10.20
   public_hostname: uptime.lv3.org
   exposure_model: edge-published
   observability:
@@ -1838,5 +1806,6 @@ openbao_proxy_port: 8200
 windmill_server_port: 8000
 netbox_server_port: 8082
 open_webui_port: 8088
+ops_portal_port: 8092
 ntopng_http_port: 3000
 portainer_https_port: 9443

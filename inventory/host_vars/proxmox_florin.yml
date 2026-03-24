@@ -40,7 +40,7 @@ platform_port_assignments:
   api_gateway_internal_port: 8080
   platform_context_internal_port: 8010
   platform_context_host_proxy_port: 8010
-  ops_portal_port: 8090
+  ops_portal_port: 8092
   ntopng_http_port: 3000
   ntopng_proxy_port: 3001
   portainer_https_port: 9443
@@ -321,7 +321,7 @@ network_policy:
         - source: nginx-lv3
           protocol: tcp
           ports:
-            - 8090
+            - 8092
           description: Reverse proxy access to the interactive ops portal
         - source: nginx-lv3
           protocol: tcp

@@ -154,6 +154,9 @@
   args:
     chdir: "{{ ops_portal_site_dir }}"
   register: ops_portal_up
+  retries: 3
+  delay: 5
+  until: ops_portal_up.rc == 0
   changed_when: >-
     'Creating' in ops_portal_up.stdout
     or 'Recreating' in ops_portal_up.stdout

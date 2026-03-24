@@ -208,7 +208,7 @@
         "timeout_seconds": 120,
         "retries": 24,
         "delay_seconds": 5,
-        "url": "http://127.0.0.1:8090/health",
+        "url": "http://10.10.10.20:8092/health",
         "method": "GET",
         "expected_status": [200]
       },
@@ -218,7 +218,7 @@
         "timeout_seconds": 120,
         "retries": 24,
         "delay_seconds": 5,
-        "url": "http://127.0.0.1:8090/",
+        "url": "http://10.10.10.20:8092/",
         "method": "GET",
         "expected_status": [200]
       },

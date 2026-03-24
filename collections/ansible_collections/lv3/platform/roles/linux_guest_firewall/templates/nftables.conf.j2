@@ -2,9 +2,9 @@
 
 flush ruleset
 
-{% set policy = hostvars[linux_guest_firewall_host_id].network_policy %}
-{% set guest_ip_map = dict(hostvars[linux_guest_firewall_host_id].proxmox_guests | map(attribute='name') | zip(hostvars[linux_guest_firewall_host_id].proxmox_guests | map(attribute='ipv4'))) %}
-{% set guest_role_map = dict(hostvars[linux_guest_firewall_host_id].proxmox_guests | map(attribute='name') | zip(hostvars[linux_guest_firewall_host_id].proxmox_guests | map(attribute='role'))) %}
+{% set policy = linux_guest_firewall_policy %}
+{% set guest_ip_map = linux_guest_firewall_guest_ip_map %}
+{% set guest_role_map = linux_guest_firewall_guest_role_map %}
 {% set guest_policy = policy.guests[inventory_hostname] %}
 {% macro render_match(rule) -%}
 {% if rule.protocol == 'vrrp' -%}

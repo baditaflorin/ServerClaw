@@ -11,6 +11,10 @@ import urllib.request
 from pathlib import Path
 from typing import Any, Final
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path
 
 

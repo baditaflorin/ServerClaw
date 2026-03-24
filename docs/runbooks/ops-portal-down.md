@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Recover the interactive ops portal runtime when `ops.lv3.org` or the local `http://127.0.0.1:8090/health` probe fails.
+Recover the interactive ops portal runtime when `ops.lv3.org` or the local `http://10.10.10.20:8092/health` probe fails.
 
 ## Symptoms
 
@@ -21,7 +21,7 @@ ssh ops@100.118.189.95 'ssh ops@10.10.10.20 "docker compose -f /opt/ops-portal/d
 2. Verify the local health endpoint:
 
 ```bash
-ssh ops@100.118.189.95 'ssh ops@10.10.10.20 "curl -sf http://127.0.0.1:8090/health"'
+ssh ops@100.118.189.95 'ssh ops@10.10.10.20 "curl -sf http://10.10.10.20:8092/health"'
 ```
 
 3. Verify the edge can still reach the runtime:

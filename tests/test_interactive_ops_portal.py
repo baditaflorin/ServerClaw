@@ -81,7 +81,7 @@ def portal_client(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient]:
                         "category": "access",
                         "lifecycle_status": "planned",
                         "public_url": "https://ops.lv3.org",
-                        "internal_url": "http://10.10.10.20:8090",
+                        "internal_url": "http://10.10.10.20:8092",
                         "runbook": "docs/runbooks/ops-portal-down.md",
                         "adr": "0093",
                     },

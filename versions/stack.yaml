@@ -35,6 +35,7 @@ live_apply_evidence:
     remote_build_gateway: 2026-03-23-adr-0082-remote-build-gateway-live-apply
     tempo_tracing: 2026-03-22-adr-0053-tempo-traces-live-apply
     secret_rotation: 2026-03-23-adr-0065-secret-rotation-live-apply
+    ops_portal: 2026-03-24-adr-0093-interactive-ops-portal-live-apply
 
 desired_state:
   host_id: proxmox_florin

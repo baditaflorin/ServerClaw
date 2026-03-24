@@ -14,6 +14,24 @@
     name: nftables
     state: present
 
+- name: Snapshot the canonical guest firewall policy inputs
+  ansible.builtin.set_fact:
+    linux_guest_firewall_policy: "{{ hostvars[linux_guest_firewall_host_id].network_policy }}"
+    linux_guest_firewall_guest_ip_map: >-
+      {{
+        dict(
+          hostvars[linux_guest_firewall_host_id].proxmox_guests | map(attribute='name')
+          | zip(hostvars[linux_guest_firewall_host_id].proxmox_guests | map(attribute='ipv4'))
+        )
+      }}
+    linux_guest_firewall_guest_role_map: >-
+      {{
+        dict(
+          hostvars[linux_guest_firewall_host_id].proxmox_guests | map(attribute='name')
+          | zip(hostvars[linux_guest_firewall_host_id].proxmox_guests | map(attribute='role'))
+        )
+      }}
+
 - name: Render guest nftables policy
   ansible.builtin.template:
     src: nftables.conf.j2

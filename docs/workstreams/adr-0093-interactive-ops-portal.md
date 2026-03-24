@@ -2,9 +2,9 @@
 
 - ADR: [ADR 0093](../adr/0093-interactive-ops-portal.md)
 - Title: FastHTML-based interactive ops portal replacing the static generated portal with live actions, deployment streaming, and drift visibility
-- Status: merged
-- Branch: `codex/adr-0093-interactive-ops-portal`
-- Worktree: `../proxmox_florin_server-interactive-ops-portal`
+- Status: live_applied
+- Branch: `codex/live-apply-0093`
+- Worktree: `.worktrees/live-apply-0093`
 - Owner: codex
 - Depends On: `adr-0092-platform-api-gateway`, `adr-0056-keycloak`, `adr-0058-nats`, `adr-0066-audit-log`, `adr-0074-ops-portal`, `adr-0080-maintenance-window`, `adr-0091-drift-detection`
 - Conflicts With: `adr-0074-ops-portal` (replaces static generation)
@@ -15,7 +15,7 @@
 - write `scripts/ops_portal/app.py` — FastHTML application with all portal sections
 - write Ansible role `ops_portal_runtime` — deploys the portal Compose stack
 - write `playbooks/services/ops-portal.yml` — service deployment playbook
-- update nginx vhost `ops.lv3.org` — switch from static file serving to proxy to port 8090
+- update nginx vhost `ops.lv3.org` — switch from static file serving to proxy to port 8092
 - register Keycloak client `ops-portal` (with `offline_access` scope for SSE sessions)
 - add health probe for portal to `config/health-probe-catalog.json`
 - update `config/service-capability-catalog.json` — ops-portal entry updated (was edge-static, now edge-published dynamic)
@@ -67,7 +67,8 @@
 ## Notes For The Next Assistant
 
 - Repository implementation is merged in `0.97.0`
-- Live cutover is still pending; do not claim `ops.lv3.org` runs the interactive runtime until `playbooks/ops-portal.yml` and `playbooks/public-edge.yml` are applied from `main`
+- Live cutover completed on `2026-03-24`; `ops.lv3.org` now serves the interactive runtime through the OIDC-protected nginx edge with the corrected `8092` host-port contract
+- The rollout required re-syncing the docker-runtime guest firewall, the Proxmox VM firewall for VM `120`, and the nginx edge vhost so every layer converged on the new `8092` publish target
 - The portal uses FastAPI + HTMX-augmented Jinja templates rather than a separate frontend build
 - The edge config now forwards `X-Auth-Request-*` headers and the access token from `oauth2-proxy`; the portal stores the token in the server-side session and uses it for gateway calls
 - The legacy static generator is preserved as an archive path through `receipts/ops-portal-snapshot.html`

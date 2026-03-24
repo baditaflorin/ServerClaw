@@ -21,7 +21,7 @@
 
 - name: Verify the ops portal health endpoint responds locally
   ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ ops_portal_internal_port }}/health"
+    url: "http://{{ ops_portal_verify_address }}:{{ ops_portal_internal_port }}/health"
     method: GET
     status_code: 200
   register: ops_portal_verify_health
@@ -29,7 +29,7 @@
 
 - name: Verify the ops portal root page renders locally
   ansible.builtin.uri:
-    url: "http://127.0.0.1:{{ ops_portal_internal_port }}/"
+    url: "http://{{ ops_portal_verify_address }}:{{ ops_portal_internal_port }}/"
     method: GET
     status_code: 200
   register: ops_portal_verify_root
