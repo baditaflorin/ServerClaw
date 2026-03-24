@@ -3153,6 +3153,57 @@
         "python3 -m py_compile platform/scheduler/*.py windmill/scheduler/watchdog-loop.py",
         "python3 windmill/scheduler/watchdog-loop.py --repo-path ."
       ]
+    },
+    "platform-observation-loop": {
+      "description": "Run the ADR 0126 observation-to-action closure loop over one batch of observation findings and persist per-service loop runs.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "platform-observation-loop",
+        "command": "make platform-observation-loop"
+      },
+      "preflight": {
+        "required": false,
+        "required_secret_ids": []
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "repo_only",
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 0,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "abort_silently"
+      },
+      "owner_runbook": "docs/runbooks/observation-to-action-closure-loop.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/agent-policies.yaml",
+        "config/ledger-event-types.yaml",
+        "config/windmill/scripts/platform-observation-loop.py",
+        "docs/adr/0126-observation-to-action-closure-loop.md",
+        "docs/runbooks/observation-to-action-closure-loop.md",
+        "platform/closure_loop",
+        "scripts/lv3_cli.py",
+        "tests/test_closure_loop_windmill.py",
+        "tests/unit/test_closure_loop.py"
+      ],
+      "outputs": [
+        "A JSON summary of processed observation findings plus durable loop run records under .local/state/closure-loop/."
+      ],
+      "verification": {
+        "type": "health_probe",
+        "target": "windmill"
+      },
+      "verification_commands": [
+        "python3 -m py_compile platform/closure_loop/*.py config/windmill/scripts/platform-observation-loop.py",
+        "python3 config/windmill/scripts/platform-observation-loop.py --repo-path ."
+      ]
     }
   }
 }

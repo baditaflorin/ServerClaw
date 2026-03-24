@@ -46,6 +46,18 @@ def minimal_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     (tmp_path / "tests" / "fixtures").mkdir(parents=True)
     (tmp_path / "versions").mkdir()
     (tmp_path / "scripts").mkdir()
+    (tmp_path / "scripts" / "incident_triage.py").write_text(
+        """
+def build_report(payload):
+    return {
+        "affected_service": payload["service_id"],
+        "hypotheses": [{"rank": 1, "id": "resource-exhaustion", "auto_check": True, "cheapest_first_action": "check pressure"}],
+        "auto_check_result": {"status": "executed", "type": "metric_query"},
+    }
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
     (tmp_path / "Makefile").write_text(
         "\n".join(
             [
@@ -423,6 +435,16 @@ def test_vm_list_uses_inventory(
 def test_completion_suggests_services(minimal_repo: Path) -> None:
     candidates = lv3_cli.completion_candidates(["lv3", "open"], "g")
     assert candidates == ["grafana"]
+
+
+def test_loop_start_outputs_resolved_run(capsys: pytest.CaptureFixture[str], minimal_repo: Path) -> None:
+    exit_code = lv3_cli.main(["loop", "start", "--trigger", "manual", "--service", "netbox"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    payload = json.loads(captured.out)
+    assert payload["service_id"] == "netbox"
+    assert payload["current_state"] == "RESOLVED"
 
 
 def test_diff_dry_run_uses_drift_report_target(

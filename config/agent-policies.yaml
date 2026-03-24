@@ -1,0 +1,36 @@
+- agent_id: agent/observation-loop
+  description: Scheduled observation findings flowing into the ADR 0126 closure loop.
+  identity_class: service-agent
+  trust_tier: T2
+  read_surfaces:
+    - world_state
+    - ledger
+    - health_probes
+  autonomous_actions:
+    max_risk_class: LOW
+    allowed_workflow_tags:
+      - diagnostic
+      - auto_check
+    max_daily_autonomous_executions: 20
+  escalation:
+    on_risk_above: LOW
+    escalation_target: mattermost:#platform-findings
+
+- agent_id: operator:lv3_cli
+  description: Interactive operator session acting through the lv3 CLI.
+  identity_class: operator-agent
+  trust_tier: T3
+  read_surfaces:
+    - world_state
+    - ledger
+    - health_probes
+  autonomous_actions:
+    max_risk_class: MEDIUM
+    allowed_workflow_tags:
+      - diagnostic
+      - converge
+      - remediation
+    max_daily_autonomous_executions: 100
+  escalation:
+    on_risk_above: MEDIUM
+    escalation_target: operator

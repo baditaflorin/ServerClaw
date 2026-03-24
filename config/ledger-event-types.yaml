@@ -39,8 +39,10 @@
 # Observability
 - alert.fired
 - graph.health_propagated
+- loop.state_transition
 - triage.report_created
 - incident.opened
+- incident.escalated
 - incident.resolved
 
 # Corrections and annotations

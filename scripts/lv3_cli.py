@@ -61,6 +61,11 @@ GoalCompilationError = GOAL_COMPILER_MODULE.GoalCompilationError
 GoalCompiler = GOAL_COMPILER_MODULE.GoalCompiler
 LedgerWriter = LEDGER_MODULE.LedgerWriter
 AgentStateClient = AGENT_MODULE.AgentStateClient
+CLOSURE_LOOP_MODULE = load_repo_package("lv3_platform_closure_loop", CODE_ROOT / "platform" / "closure_loop")
+GoalCompilationError = GOAL_COMPILER_MODULE.GoalCompilationError
+GoalCompiler = GOAL_COMPILER_MODULE.GoalCompiler
+LedgerWriter = LEDGER_MODULE.LedgerWriter
+ClosureLoop = CLOSURE_LOOP_MODULE.ClosureLoop
 
 
 @dataclass(frozen=True)
@@ -1387,6 +1392,7 @@ def completion_candidates(words: list[str], current: str) -> list[str]:
         "logs",
         "ssh",
         "open",
+        "loop",
         "operator",
         "release",
     ]
@@ -1421,9 +1427,74 @@ def completion_candidates(words: list[str], current: str) -> list[str]:
         return [action for action in ["state"] if action.startswith(current)]
     if words[1:3] == ["agent", "state"] and len(words) == 4:
         return [action for action in ["show", "delete", "verify"] if action.startswith(current)]
+    if words[1] == "loop" and len(words) == 3:
+        return [action for action in ["start", "status", "approve", "close"] if action.startswith(current)]
     if words[1] == "release" and len(words) == 3:
         return [action for action in ["status", "tag"] if action.startswith(current)]
     return []
+
+
+def loop_command(
+    action: str,
+    *,
+    run_id: str | None = None,
+    trigger: str = "manual",
+    service: str | None = None,
+    state: str = "OBSERVED",
+    payload_file: Path | None = None,
+    instruction: str | None = None,
+    reason: str | None = None,
+    actor_id: str | None = None,
+) -> int:
+    try:
+        loop = ClosureLoop(REPO_ROOT)
+        if action == "start":
+            if payload_file is not None:
+                payload = load_json(payload_file)
+                if not isinstance(payload, dict):
+                    raise ValueError("loop payload file must contain a JSON object")
+            else:
+                if not service:
+                    raise ValueError("--service is required unless --payload-file is supplied")
+                payload = {
+                    "service_id": service,
+                    "alert_name": f"{trigger}_loop_start",
+                    "status": "firing",
+                }
+            resolved_service = service or payload.get("service_id")
+            if not isinstance(resolved_service, str) or not resolved_service.strip():
+                raise ValueError("service_id is required in the loop payload")
+            if instruction:
+                payload["approved_instruction"] = instruction
+            run = loop.start(
+                trigger_type=trigger,
+                trigger_ref=str(payload.get("incident_id") or payload.get("finding_id") or f"{trigger}:{resolved_service}"),
+                service_id=resolved_service,
+                trigger_payload=payload,
+                state=state,
+                actor_id=actor_id,
+            )
+        elif action == "status":
+            if not run_id:
+                raise ValueError("run_id is required for loop status")
+            run = loop.status(run_id)
+        elif action == "approve":
+            if not run_id:
+                raise ValueError("run_id is required for loop approve")
+            run = loop.approve(run_id, instruction=instruction, actor_id=actor_id or "operator:lv3_cli")
+        elif action == "close":
+            if not run_id:
+                raise ValueError("run_id is required for loop close")
+            if not reason:
+                raise ValueError("--reason is required for loop close")
+            run = loop.close(run_id, reason=reason, actor_id=actor_id or "operator:lv3_cli")
+        else:
+            raise ValueError(f"unsupported loop action '{action}'")
+        print(json.dumps(run, indent=2, sort_keys=True))
+        return 0
+    except (KeyError, OSError, RuntimeError, ValueError) as exc:
+        print(f"Loop command failed: {exc}", file=sys.stderr)
+        return 2
 
 
 def handle_completion(current: str) -> int:
@@ -1649,6 +1720,29 @@ def build_parser() -> argparse.ArgumentParser:
     agent_state_verify.add_argument("--digest", required=True)
     agent_state_verify.add_argument("--json", action="store_true")
 
+    loop = subparsers.add_parser("loop", help="Manage ADR 0126 closure-loop runs.")
+    loop_subparsers = loop.add_subparsers(dest="loop_action", required=True)
+    loop_start = loop_subparsers.add_parser("start", help="Start one closure-loop run.")
+    loop_start.add_argument("--trigger", default="manual", choices=["manual", "observation_finding", "alert"])
+    loop_start.add_argument("--service")
+    loop_start.add_argument("--state", default="OBSERVED", choices=["OBSERVED", "TRIAGED", "PROPOSING"])
+    loop_start.add_argument("--payload-file", type=Path)
+    loop_start.add_argument("--instruction")
+    loop_start.add_argument("--actor-id")
+
+    loop_status = loop_subparsers.add_parser("status", help="Show one closure-loop run.")
+    loop_status.add_argument("run_id")
+
+    loop_approve = loop_subparsers.add_parser("approve", help="Approve and resume one paused closure-loop run.")
+    loop_approve.add_argument("run_id")
+    loop_approve.add_argument("--instruction")
+    loop_approve.add_argument("--actor-id")
+
+    loop_close = loop_subparsers.add_parser("close", help="Close one closure-loop run without action.")
+    loop_close.add_argument("run_id")
+    loop_close.add_argument("--reason", required=True)
+    loop_close.add_argument("--actor-id")
+
     completion = subparsers.add_parser("__complete")
     completion.add_argument("current", nargs="?", default="")
 
@@ -1763,6 +1857,18 @@ def main(argv: list[str] | None = None) -> int:
         return ssh_command(args.vm_name, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
     if args.command == "open":
         return open_service_url(args.service, args.env, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
+    if args.command == "loop":
+        return loop_command(
+            args.loop_action,
+            run_id=getattr(args, "run_id", None),
+            trigger=getattr(args, "trigger", "manual"),
+            service=getattr(args, "service", None),
+            state=getattr(args, "state", "OBSERVED"),
+            payload_file=getattr(args, "payload_file", None),
+            instruction=getattr(args, "instruction", None),
+            reason=getattr(args, "reason", None),
+            actor_id=getattr(args, "actor_id", None),
+        )
     if args.command == "release":
         import release_manager
 
