@@ -843,7 +843,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.111.0
+    current: 0.112.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.105.0
