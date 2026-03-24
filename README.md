@@ -86,7 +86,7 @@ The repository now also ships ADR 0121 local search: a repo-managed search fabri
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.118.0` |
+| Repository version | `0.119.0` |
 | Platform version | `0.114.2` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -670,7 +670,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.118.0` |
+| Repository version | `0.119.0` |
 | Platform version | `0.114.2` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
