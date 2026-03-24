@@ -21,7 +21,7 @@ The current implementation covers:
 - governed `make open-maintenance-window` and `make close-maintenance-window` command surfaces
 - observation-loop suppression for non-security findings
 - Alertmanager silence creation and deletion for live maintenance windows under ADR 0097
-- internal NATS events on `maintenance.opened`, `maintenance.closed`, and `maintenance.force_closed`
+- internal NATS events on `platform.maintenance.opened`, `platform.maintenance.closed`, and `platform.maintenance.force_closed`
 - an agent-tool query surface for active windows
 - best-effort publication of matching maintenances into the Uptime Kuma public status page
 
@@ -46,7 +46,7 @@ The command:
 - writes `maintenance/<service-id>` with the ADR 0080 JSON payload
 - sets per-message TTL so the key expires at `auto_close_at`
 - creates an Alertmanager silence for the matching `service` label when live API access is enabled
-- emits `maintenance.opened` on the internal NATS event plane
+- emits `platform.maintenance.opened` on the internal NATS event plane
 - attempts to create or update a matching Uptime Kuma maintenance bound to the public status page
 
 ## Close A Window
@@ -63,7 +63,7 @@ Force-close every active window:
 make close-maintenance-window SERVICE=all FORCE=true
 ```
 
-The close command deletes the active KV entry, removes any stored Alertmanager silence, emits either `maintenance.closed` or `maintenance.force_closed`, and attempts to remove the matching Uptime Kuma maintenance entry.
+The close command deletes the active KV entry, removes any stored Alertmanager silence, emits either `platform.maintenance.closed` or `platform.maintenance.force_closed`, and attempts to remove the matching Uptime Kuma maintenance entry.
 
 ## Query Active Windows
 

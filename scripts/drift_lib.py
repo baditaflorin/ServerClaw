@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from controller_automation_toolkit import load_json, load_yaml, repo_path
+from platform.events import build_envelope
 
 
 HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
@@ -38,6 +39,22 @@ def utc_now() -> datetime:
 
 def isoformat(value: datetime) -> str:
     return value.astimezone(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+DRIFT_EVENT_TOPICS = {
+    "warn": "platform.drift.warn",
+    "critical": "platform.drift.critical",
+    "unreachable": "platform.drift.unreachable",
+}
+
+
+def drift_event_topic(severity: str) -> str:
+    normalized = str(severity).strip().lower()
+    if normalized == "warning":
+        normalized = "warn"
+    if normalized not in DRIFT_EVENT_TOPICS:
+        raise ValueError(f"unsupported drift severity '{severity}'")
+    return DRIFT_EVENT_TOPICS[normalized]
 
 
 def parse_datetime(value: str) -> datetime:
@@ -304,8 +321,24 @@ async def publish_nats_events_async(
     nc = await connect_nats(nats_url, credentials)
     try:
         for record in records:
-            subject = str(record["event"])
-            await nc.publish(subject, json.dumps(record, separators=(",", ":")).encode())
+            subject = str(record.get("subject") or record.get("event") or "").strip()
+            if not subject:
+                raise ValueError("NATS record must define subject or event")
+            payload = record.get("payload")
+            if not isinstance(payload, dict):
+                payload = dict(record)
+                payload.pop("subject", None)
+                payload.pop("actor_id", None)
+                payload.pop("context_id", None)
+                payload.pop("ts", None)
+            envelope = build_envelope(
+                subject,
+                payload,
+                actor_id=str(record.get("actor_id") or "").strip() or None,
+                context_id=str(record.get("context_id") or "").strip() or None,
+                ts=record.get("ts") or record.get("generated_at") or record.get("occurred_at") or record.get("collected_at"),
+            )
+            await nc.publish(subject, json.dumps(envelope, separators=(",", ":")).encode())
         await nc.flush(timeout=5)
     finally:
         await nc.drain()

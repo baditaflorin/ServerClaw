@@ -23,6 +23,7 @@ from controller_automation_toolkit import emit_cli_error, load_json, repo_path, 
 from dns_drift import collect_drift as collect_dns_drift
 from docker_image_drift import collect_drift as collect_docker_image_drift
 from drift_lib import (
+    drift_event_topic,
     isoformat,
     load_controller_context,
     nats_tunnel,
@@ -61,7 +62,7 @@ def parse_tofu_plan(plan_json_path: Path) -> list[dict[str, Any]]:
         records.append(
             {
                 "source": "tofu",
-                "event": "platform.drift.warn",
+                "event": drift_event_topic("warn"),
                 "severity": "warn",
                 "resource": address,
                 "detail": f"planned actions: {', '.join(actions)}",
@@ -90,7 +91,7 @@ def run_tofu_drift(environment: str, *, command: str | None = None) -> list[dict
         records.append(
             {
                 "source": "tofu",
-                "event": "platform.drift.critical",
+                "event": drift_event_topic("critical"),
                 "severity": "critical",
                 "resource": f"tofu/{environment}",
                 "detail": message,
@@ -128,7 +129,7 @@ def run_ansible_drift(environment: str, *, playbook: str, inventory: str, limit:
         records.append(
             {
                 "source": "ansible-check-mode",
-                "event": "platform.drift.critical",
+                "event": drift_event_topic("critical"),
                 "severity": "critical",
                 "resource": playbook,
                 "detail": result.stderr.strip() or result.stdout.strip() or "ansible check failed",
@@ -204,14 +205,14 @@ def enrich_records(records: list[dict[str, Any]], *, service_map: dict[str, dict
         service_id = str(item.get("service") or "")
         if item.get("severity") == "warn" and service_id and not backoff_health(service_id, service_map, health_probes):
             item["severity"] = "critical"
-            item["event"] = "platform.drift.critical"
+            item["event"] = drift_event_topic("critical")
             item["detail"] = f"{item['detail']} (service unhealthy after backoff)"
         suppressed, matches = workstream_suppression([str(value) for value in item.get("shared_surfaces", []) if value])
         item["workstream_suppressed"] = suppressed
         if matches:
             item["suppressed_by"] = matches
         item["detected_at"] = detected_at
-        item.setdefault("event", f"platform.drift.{item['severity']}")
+        item.setdefault("event", drift_event_topic(str(item["severity"])))
         enriched.append(item)
     return enriched
 

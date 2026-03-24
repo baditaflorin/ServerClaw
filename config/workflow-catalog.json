@@ -2900,7 +2900,7 @@
         "config/windmill/scripts/maintenance-window.py"
       ],
       "outputs": [
-        "One active maintenance window stored in the private maintenance-windows KV bucket together with a maintenance.opened event on the internal event bus."
+        "One active maintenance window stored in the private maintenance-windows KV bucket together with a platform.maintenance.opened event on the internal event bus."
       ],
       "verification_commands": [
         "uv run --with pyyaml --with nats-py python scripts/maintenance_window_tool.py list",
@@ -2918,7 +2918,7 @@
       }
     },
     "close-maintenance-window": {
-      "description": "Close one ADR 0080 maintenance window and emit the matching maintenance.closed or maintenance.force_closed event.",
+      "description": "Close one ADR 0080 maintenance window and emit the matching platform.maintenance.closed or platform.maintenance.force_closed event.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",

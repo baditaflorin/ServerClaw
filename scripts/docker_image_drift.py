@@ -8,7 +8,13 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
 from controller_automation_toolkit import load_json, repo_path
-from drift_lib import build_guest_ssh_command, load_controller_context, normalize_image_reference, run_command
+from drift_lib import (
+    build_guest_ssh_command,
+    drift_event_topic,
+    load_controller_context,
+    normalize_image_reference,
+    run_command,
+)
 
 
 IMAGE_CATALOG_PATH = repo_path("config", "image-catalog.json")
@@ -67,7 +73,7 @@ def evaluate_image(image: dict[str, Any], context: dict[str, Any]) -> dict[str, 
     except Exception as exc:  # noqa: BLE001
         return {
             "source": "docker-image",
-            "event": "platform.drift.critical",
+            "event": drift_event_topic("critical"),
             "severity": "critical",
             "service": image["service_id"],
             "host": image["runtime_host"],
@@ -87,7 +93,7 @@ def evaluate_image(image: dict[str, Any], context: dict[str, Any]) -> dict[str, 
         return None
     return {
         "source": "docker-image",
-        "event": "platform.drift.warn",
+        "event": drift_event_topic("warn"),
         "severity": "warn",
         "service": image["service_id"],
         "host": image["runtime_host"],

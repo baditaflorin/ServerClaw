@@ -15,7 +15,7 @@
 - create Windmill workflow `platform-observation-loop` with 4-hour schedule
 - implement the six named checks: vm-state, service-health, image-freshness, secret-ages, certificate-expiry, backup-recency
 - define finding JSON schema in `docs/schema/platform-finding.json`
-- wire findings to NATS `platform.findings.<check-name>` and Mattermost `#platform-findings`
+- wire findings to NATS `platform.findings.observation` and Mattermost `#platform-findings`
 - add dead-man's switch: alert if no finding events arrive within 5 hours
 - document the observation model in `docs/runbooks/agent-observation-loop.md`
 - integrate finding stream into Open WebUI daily digest
@@ -38,7 +38,7 @@
 ## Expected Live Surfaces
 
 - Windmill workflow running on 4-hour schedule
-- NATS subject `platform.findings.*` receiving structured finding events
+- NATS subject `platform.findings.observation` receiving structured finding events
 - Mattermost `#platform-findings` channel receiving non-ok findings
 - dead-man's switch alert configured in Grafana or Uptime Kuma
 

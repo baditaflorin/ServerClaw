@@ -894,7 +894,7 @@ workstreams:
     conflicts_with: []
     shared_surfaces:
       - Windmill workflows
-      - NATS platform.findings.*
+      - NATS platform.findings.observation
       - Mattermost platform-findings channel
       - GlitchTip issue tracking
       - Open WebUI daily digest
@@ -2209,6 +2209,35 @@ workstreams:
       - scripts/api_gateway/
       - scripts/ops_portal/
       - docs/runbooks/
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0124-platform-event-taxonomy
+    adr: "0124"
+    title: Platform event taxonomy and canonical NATS topics
+    status: merged
+    owner: codex
+    branch: codex/adr-0124-platform-event-taxonomy
+    worktree_path: .worktrees/adr-0124
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0124-platform-event-taxonomy.md
+    depends_on:
+      - adr-0058-nats-event-bus
+      - adr-0071-agent-observation-loop
+      - adr-0080-maintenance-windows
+      - adr-0092-platform-api-gateway
+      - adr-0099-backup-restore-verification
+      - adr-0102-security-posture-reporting
+      - adr-0113-world-state-materializer
+      - adr-0115-mutation-ledger
+    conflicts_with: []
+    shared_surfaces:
+      - config/event-taxonomy.yaml
+      - config/nats-streams.yaml
+      - config/control-plane-lanes.json
+      - config/api-publication.json
+      - platform/events/
+      - scripts/validate_nats_topics.py
+      - docs/runbooks/platform-event-taxonomy.md
     ready_to_merge: false
     live_applied: false
 

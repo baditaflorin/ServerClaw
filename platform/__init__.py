@@ -19,7 +19,7 @@ for _name in dir(_stdlib_platform):
         continue
     globals()[_name] = getattr(_stdlib_platform, _name)
 
-_REPO_SUBMODULES = {"diff_engine", "goal_compiler", "health", "ledger", "world_state"}
+_REPO_SUBMODULES = {"diff_engine", "events", "goal_compiler", "health", "ledger", "world_state"}
 
 
 def __getattr__(name: str):  # pragma: no cover - exercised indirectly through imports

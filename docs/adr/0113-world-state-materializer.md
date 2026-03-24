@@ -89,7 +89,7 @@ Each worker follows a consistent pattern:
 2. Validate the response against the surface JSON schema.
 3. Insert a new row into `world_state.snapshots`.
 4. Trigger a `REFRESH MATERIALIZED VIEW CONCURRENTLY` on `world_state.current_view`.
-5. Emit a `world_state.refreshed` event to NATS (ADR 0058).
+5. Emit a `platform.world_state.refreshed` event to NATS (ADR 0058).
 
 ### Staleness handling
 

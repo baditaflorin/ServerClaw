@@ -57,7 +57,7 @@ make open-maintenance-window \
 A shared Windmill wrapper is provided so future workflows can open and close maintenance windows without re-embedding the protocol.
 
 **Broadcast:**
-On window open, a `maintenance.opened` event is published on the private NATS event plane:
+On window open, a `platform.maintenance.opened` event is published on the private NATS event plane:
 ```
 [MAINTENANCE OPEN] grafana — upgrading grafana to 11.x
   Opened by: operator/ops-linux
@@ -97,7 +97,7 @@ If a window is accidentally left open, an operator can force-close all active wi
 ```bash
 make close-maintenance-window SERVICE=all FORCE=true
 ```
-This emits `maintenance.force_closed` on the private event plane.
+This emits `platform.maintenance.force_closed` on the private event plane.
 
 ### Catalog
 

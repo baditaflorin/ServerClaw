@@ -1,0 +1,429 @@
+schema_version: 1.0.0
+event_schema_version: "1.0"
+
+domains:
+  api:
+    description: HTTP control-plane request events emitted by the platform API gateway.
+    topics:
+      - name: platform.api.request
+        description: One authenticated platform API request completed.
+        status: active
+        delivery: at_least_once
+        retention: 7d
+        producers:
+          - adr-0092-platform-api-gateway
+        payload:
+          required:
+            - request_id
+            - method
+            - path
+            - status_code
+            - latency_ms
+            - caller_identity
+            - caller_roles
+
+  findings:
+    description: Structured operator and agent observation findings.
+    topics:
+      - name: platform.findings.observation
+        description: One observation-loop finding emitted on the canonical findings subject.
+        status: active
+        delivery: at_least_once
+        retention: 14d
+        producers:
+          - adr-0071-agent-observation-loop
+        payload:
+          required:
+            - check
+            - severity
+            - summary
+            - details
+            - ts
+            - run_id
+
+  drift:
+    description: Drift detection and reconciliation findings.
+    topics:
+      - name: platform.drift.warn
+        description: Drift was detected and classified as warn severity.
+        status: active
+        delivery: at_least_once
+        retention: 30d
+        producers:
+          - adr-0091-drift-detection
+        payload:
+          required:
+            - event
+            - source
+            - severity
+      - name: platform.drift.critical
+        description: Drift was detected and classified as critical severity.
+        status: active
+        delivery: at_least_once
+        retention: 30d
+        producers:
+          - adr-0091-drift-detection
+        payload:
+          required:
+            - event
+            - source
+            - severity
+      - name: platform.drift.unreachable
+        description: Drift detection could not reach the target surface.
+        status: active
+        delivery: at_least_once
+        retention: 30d
+        producers:
+          - adr-0091-drift-detection
+        payload:
+          required:
+            - event
+            - source
+            - severity
+
+  security:
+    description: Security posture summaries and critical findings.
+    topics:
+      - name: platform.security.report
+        description: One generated security posture report summary.
+        status: active
+        delivery: at_least_once
+        retention: 30d
+        producers:
+          - adr-0102-security-posture-reporting
+        payload:
+          required:
+            - event
+            - environment
+            - generated_at
+            - summary
+      - name: platform.security.critical-finding
+        description: One critical security finding emitted from the posture report.
+        status: active
+        delivery: at_least_once
+        retention: 90d
+        producers:
+          - adr-0102-security-posture-reporting
+        payload:
+          required:
+            - event
+            - kind
+            - generated_at
+
+  maintenance:
+    description: Planned maintenance-window state transitions.
+    topics:
+      - name: platform.maintenance.opened
+        description: A maintenance window was opened or updated.
+        status: active
+        delivery: at_least_once
+        retention: 30d
+        producers:
+          - adr-0080-maintenance-windows
+        payload:
+          required:
+            - window
+            - key
+            - bucket
+            - action
+      - name: platform.maintenance.closed
+        description: One or more maintenance windows were closed.
+        status: active
+        delivery: at_least_once
+        retention: 30d
+        producers:
+          - adr-0080-maintenance-windows
+        payload:
+          required:
+            - bucket
+            - service_id
+            - closed_by
+            - windows
+            - force
+      - name: platform.maintenance.force_closed
+        description: One or more maintenance windows were force-closed.
+        status: active
+        delivery: at_least_once
+        retention: 30d
+        producers:
+          - adr-0080-maintenance-windows
+        payload:
+          required:
+            - bucket
+            - service_id
+            - closed_by
+            - windows
+            - force
+
+  backup:
+    description: Backup verification lifecycle events.
+    topics:
+      - name: platform.backup.restore-verification.completed
+        description: One restore-verification run completed.
+        status: active
+        delivery: at_least_once
+        retention: 90d
+        producers:
+          - adr-0099-backup-restore-verification
+        payload:
+          required:
+            - event
+            - run_date
+            - triggered_by
+            - summary
+            - overall
+            - results
+      - name: platform.backup.restore-verification.failed
+        description: One restore-verification run completed with a failing outcome.
+        status: active
+        delivery: at_least_once
+        retention: 90d
+        producers:
+          - adr-0099-backup-restore-verification
+        payload:
+          required:
+            - event
+            - run_date
+            - triggered_by
+            - summary
+            - overall
+            - results
+
+  world_state:
+    description: World-state refresh lifecycle events.
+    topics:
+      - name: platform.world_state.refreshed
+        description: One world-state surface refresh completed successfully.
+        status: active
+        delivery: at_least_once
+        retention: 14d
+        producers:
+          - adr-0113-world-state-materializer
+        payload:
+          required:
+            - surface
+            - summary
+            - collected_at
+            - stale
+            - record_count
+            - refresh_interval_seconds
+            - stale_threshold_seconds
+
+  ledger:
+    description: Mutation-ledger fan-out events for downstream consumers.
+    topics:
+      - name: platform.ledger.event_written
+        description: One mutation-ledger event row was committed.
+        status: active
+        delivery: at_least_once
+        retention: 90d
+        producers:
+          - adr-0115-mutation-ledger
+        payload:
+          required:
+            - event_id
+            - event_type
+            - actor
+            - target_kind
+            - target_id
+
+  intent:
+    description: Goal compilation and approval lifecycle events.
+    topics:
+      - name: platform.intent.compiled
+        description: A natural-language request was compiled into an execution intent.
+        status: reserved
+        delivery: at_least_once
+        retention: 7d
+        producers:
+          - adr-0112-goal-compiler
+        payload:
+          required:
+            - intent_id
+            - requester
+      - name: platform.intent.approved
+        description: An execution intent passed approval and was submitted for scheduling.
+        status: reserved
+        delivery: at_least_once
+        retention: 7d
+        producers:
+          - adr-0119-budgeted-scheduler
+        payload:
+          required:
+            - intent_id
+            - approved_by
+      - name: platform.intent.rejected
+        description: An execution intent was rejected.
+        status: reserved
+        delivery: at_least_once
+        retention: 7d
+        producers:
+          - adr-0119-budgeted-scheduler
+        payload:
+          required:
+            - intent_id
+            - reason
+
+  execution:
+    description: Workflow and execution lifecycle events.
+    topics:
+      - name: platform.execution.started
+        description: One workflow run started.
+        status: reserved
+        delivery: at_least_once
+        retention: 7d
+        producers:
+          - adr-0119-budgeted-scheduler
+        payload:
+          required:
+            - intent_id
+            - workflow_id
+      - name: platform.execution.completed
+        description: One workflow run completed successfully.
+        status: reserved
+        delivery: at_least_once
+        retention: 7d
+        producers:
+          - adr-0119-budgeted-scheduler
+        payload:
+          required:
+            - intent_id
+            - workflow_id
+      - name: platform.execution.failed
+        description: One workflow run failed.
+        status: reserved
+        delivery: at_least_once
+        retention: 7d
+        producers:
+          - adr-0119-budgeted-scheduler
+        payload:
+          required:
+            - intent_id
+            - workflow_id
+      - name: platform.execution.budget_exceeded
+        description: One workflow run exceeded a declared budget.
+        status: reserved
+        delivery: at_least_once
+        retention: 30d
+        producers:
+          - adr-0119-budgeted-scheduler
+        payload:
+          required:
+            - intent_id
+            - budget_name
+
+  health:
+    description: Health-state transition events.
+    topics:
+      - name: platform.health.degraded
+        description: A service health signal degraded.
+        status: reserved
+        delivery: at_least_once
+        retention: 30d
+        producers:
+          - adr-0128-health-composite-index
+        payload:
+          required:
+            - service_id
+            - status
+      - name: platform.health.recovered
+        description: A service health signal recovered.
+        status: reserved
+        delivery: at_least_once
+        retention: 30d
+        producers:
+          - adr-0128-health-composite-index
+        payload:
+          required:
+            - service_id
+            - status
+
+  incident:
+    description: Incident lifecycle events.
+    topics:
+      - name: platform.incident.opened
+        description: One incident entered the opened state.
+        status: reserved
+        delivery: at_least_once
+        retention: 90d
+        producers:
+          - adr-0114-incident-triage
+        payload:
+          required:
+            - incident_id
+            - severity
+      - name: platform.incident.resolved
+        description: One incident was resolved.
+        status: reserved
+        delivery: at_least_once
+        retention: 90d
+        producers:
+          - adr-0126-observation-to-action-closure-loop
+        payload:
+          required:
+            - incident_id
+            - resolution
+      - name: platform.incident.escalated
+        description: One incident was escalated.
+        status: reserved
+        delivery: at_least_once
+        retention: 90d
+        producers:
+          - adr-0126-observation-to-action-closure-loop
+        payload:
+          required:
+            - incident_id
+            - escalation_reason
+
+  deployment:
+    description: Deployment lifecycle events.
+    topics:
+      - name: platform.deployment.completed
+        description: A deployment completed successfully.
+        status: reserved
+        delivery: at_least_once
+        retention: 90d
+        producers:
+          - adr-0073-promotion-pipeline
+        payload:
+          required:
+            - service_id
+            - version
+      - name: platform.deployment.rolled_back
+        description: A deployment rolled back.
+        status: reserved
+        delivery: at_least_once
+        retention: 90d
+        producers:
+          - adr-0073-promotion-pipeline
+        payload:
+          required:
+            - service_id
+            - version
+
+  agent:
+    description: Agent coordination and state lifecycle events.
+    topics:
+      - name: platform.agent.handoff
+        description: One agent delegated work to another agent.
+        status: reserved
+        delivery: exactly_once
+        retention: 7d
+        producers:
+          - adr-0131-handoff-protocol
+        payload:
+          required:
+            - handoff_id
+            - from_agent
+            - to_agent
+      - name: platform.agent.state_checkpoint
+        description: One agent emitted a durable state checkpoint.
+        status: reserved
+        delivery: at_least_once
+        retention: 7d
+        producers:
+          - adr-0130-agent-state
+        payload:
+          required:
+            - checkpoint_id
+            - agent_id

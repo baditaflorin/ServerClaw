@@ -8,6 +8,8 @@ import re
 import sys
 from typing import Any
 
+from drift_lib import drift_event_topic
+
 
 TASK_PATTERN = re.compile(r"^TASK \[(?P<label>.+?)\]\s+\*+$")
 HOST_RESULT_PATTERN = re.compile(r"^(?P<kind>changed|fatal): \[(?P<host>[^\]]+)\]")
@@ -32,7 +34,7 @@ def build_record(
     diff_before: str = "",
     diff_after: str = "",
 ) -> dict[str, Any]:
-    event = "platform.drift.unreachable" if unreachable else "platform.drift.warn"
+    event = drift_event_topic("unreachable" if unreachable else "warn")
     return {
         "source": source,
         "host": host,

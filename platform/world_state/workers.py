@@ -14,6 +14,8 @@ from datetime import timedelta
 from pathlib import Path
 from typing import Any, Callable
 
+from platform.events import build_envelope
+
 from ._db import ConnectionFactory, isoformat, parse_timestamp, utc_now
 from .materializer import SURFACE_DEFINITIONS, EventPublisher, materialize_surface
 
@@ -510,7 +512,8 @@ def publish_refresh_event_best_effort(subject: str, payload: dict[str, Any]) -> 
             connect_kwargs.update({"user": username, "password": password})
         client = await nats.connect(nats_url, **connect_kwargs)
         try:
-            await client.publish(subject, json.dumps(payload).encode())
+            envelope = build_envelope(subject, payload, actor_id="service/world-state-worker", ts=payload.get("collected_at"))
+            await client.publish(subject, json.dumps(envelope).encode())
             await client.flush()
         finally:
             await client.drain()

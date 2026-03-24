@@ -105,7 +105,7 @@ class LedgerWriter:
         connect: Callable[[str], Any] | None = None,
         event_types_path=None,
         nats_publisher: Callable[[str, dict[str, Any]], None] | None = _default_nats_publisher,
-        publish_subject: str = "ledger.event_written",
+        publish_subject: str = "platform.ledger.event_written",
         file_path: str | os.PathLike[str] | None = None,
     ) -> None:
         self._dsn = dsn

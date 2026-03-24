@@ -136,7 +136,7 @@ When all ten ADRs are live, an agent interacting with this platform can:
 
 - **discover** what tools are available by reading `config/agent-tool-registry.json` or loading the MCP tool export
 - **query** platform topology, health, and recent history by calling `query-platform-context` (RAG) or `get-platform-status` (live probes)
-- **observe** the current drift posture via the NATS `platform.findings.*` stream or the Open WebUI daily digest
+- **observe** the current drift posture via the NATS `platform.findings.observation` stream or the Open WebUI daily digest
 - **execute** an approved workflow by calling an `execute` category tool subject to the command approval gate
 - **audit** any past mutation by querying the Loki `{job="mutation-audit"}` label stream
 - **ground** its answers in repo truth via the RAG index over ADRs, runbooks, receipts, and `stack.yaml`
