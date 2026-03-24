@@ -1921,44 +1921,31 @@ workstreams:
     ready_to_merge: true
     live_applied: false
 
-  - id: adr-0134-changelog-redaction
-    adr: "0134"
-    title: Changelog portal content redaction
+  - id: adr-0132-platform-manifest
+    adr: "0132"
+    title: Self-describing platform manifest
     status: merged
     owner: codex
-    branch: codex/adr-0134-changelog-redaction
-    worktree_path: .worktrees/adr-0134
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0134-changelog-redaction.md
+    branch: codex/adr-0132-platform-manifest-v2
+    worktree_path: .worktrees/adr-0132-v2
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0132-self-describing-platform-manifest.md
     depends_on:
-      - adr-0081-changelog-portal
-      - adr-0115-mutation-ledger
-    conflicts_with: []
-    shared_surfaces:
-      - scripts/changelog_redaction.py
-      - scripts/deployment_history.py
-      - scripts/generate_changelog_portal.py
-      - config/changelog-redaction.yaml
-      - tests/test_changelog_redaction.py
-      - docs/runbooks/deployment-history-portal.md
-
-  - id: adr-0135-data-governance
-    adr: "0135"
-    title: Developer portal sensitivity classification
-    status: merged
-    owner: codex
-    branch: codex/adr-0135-data-governance
-    worktree_path: .worktrees/adr-0135
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0135-developer-portal-sensitivity-classification.md
-    depends_on:
-      - adr-0094-developer-portal
+      - adr-0037-schema-validated-repository-data-models
+      - adr-0087-validation-gate
+      - adr-0090-platform-cli
       - adr-0110-platform-versioning
-      - adr-0121-search-indexing-fabric
+      - adr-0113-world-state-materializer
     conflicts_with: []
     shared_surfaces:
-      - docs/adr/
-      - docs/runbooks/
-      - docs/templates/
-      - scripts/generate_docs_site.py
-      - tests/test_docs_site.py
+      - scripts/platform_manifest.py
+      - config/manifest-static.yaml
+      - docs/schema/platform-manifest.schema.json
+      - build/platform-manifest.json
+      - scripts/lv3_cli.py
+      - Makefile
+      - scripts/validate_repo.sh
+      - config/check-runner-manifest.json
+      - config/validation-gate.json
+      - docs/runbooks/platform-manifest.md
     ready_to_merge: false
     live_applied: false

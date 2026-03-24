@@ -15,7 +15,7 @@
   },
   "validate-schemas": {
     "image": "registry.lv3.org/check-runner/python:3.12.10",
-    "command": "python scripts/validate_repository_data_models.py --validate",
+    "command": "python scripts/validate_repository_data_models.py --validate && python scripts/platform_manifest.py --check",
     "working_dir": "/workspace",
     "timeout_seconds": 180,
     "cache_mounts": ["pip"]

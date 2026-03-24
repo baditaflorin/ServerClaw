@@ -55,11 +55,9 @@ SERVICE_ALIASES = {
 
 GOAL_COMPILER_MODULE = load_repo_package("lv3_goal_compiler", CODE_ROOT / "platform" / "goal_compiler")
 LEDGER_MODULE = load_repo_package("lv3_platform_ledger", CODE_ROOT / "platform" / "ledger")
-AGENT_MODULE = load_repo_package("lv3_platform_agent", CODE_ROOT / "platform" / "agent")
 GoalCompilationError = GOAL_COMPILER_MODULE.GoalCompilationError
 GoalCompiler = GOAL_COMPILER_MODULE.GoalCompiler
 LedgerWriter = LEDGER_MODULE.LedgerWriter
-AgentStateClient = AGENT_MODULE.AgentStateClient
 
 
 @dataclass(frozen=True)
@@ -89,10 +87,6 @@ def load_json(path: Path, *, default: Any | None = None) -> Any:
             return default
         raise FileNotFoundError(path)
     return json.loads(path.read_text())
-
-
-def emit_json(payload: Any) -> None:
-    print(json.dumps(payload, indent=2, sort_keys=True))
 
 
 def load_service_catalog() -> list[dict[str, Any]]:
@@ -183,13 +177,6 @@ def format_duration(seconds: float) -> str:
         return f"{seconds:.1f}s"
     minutes, remainder = divmod(int(round(seconds)), 60)
     return f"{minutes}m {remainder:02d}s"
-
-
-def compact_json(value: Any, *, limit: int = 80) -> str:
-    rendered = json.dumps(value, sort_keys=True, separators=(",", ":"))
-    if len(rendered) <= limit:
-        return rendered
-    return f"{rendered[: limit - 3]}..."
 
 
 def strip_ansi(text: str) -> str:
@@ -845,6 +832,70 @@ def open_service_url(service_id: str, environment: str, *, dry_run: bool, explai
     return 0 if webbrowser.open(url) else 1
 
 
+def manifest_show_command(*, as_json: bool, refresh: bool) -> int:
+    import platform_manifest
+
+    manifest_path = repo_path("build", "platform-manifest.json")
+    if refresh or not manifest_path.exists():
+        args = ["--output", str(manifest_path)]
+        if refresh:
+            args.append("--write")
+        payload = platform_manifest.build_manifest()
+        if refresh:
+            platform_manifest.write_json(manifest_path, payload, indent=2)
+    else:
+        payload = platform_manifest.load_json(manifest_path)
+        platform_manifest.validate_manifest(payload)
+
+    if as_json:
+        print(json.dumps(payload, indent=2))
+        return 0
+
+    services = payload["health"]["services"]
+    unsafe = sum(1 for item in services.values() if not item["safe_to_act"])
+    print(
+        f"Platform: {payload['identity']['platform_name']} (repo {payload['repo_version']}, "
+        f"platform {payload['platform_version']}) | Health: {payload['health']['summary']}"
+    )
+    print(
+        f"Open incidents: {payload['incidents']['open_count']} | "
+        f"Maintenance windows: {len(payload['maintenance']['active_windows'])} active | "
+        f"Unsafe services: {unsafe}"
+    )
+    if unsafe:
+        print("\nUnsafe services:")
+        for service_id, item in sorted(services.items()):
+            if item["safe_to_act"]:
+                continue
+            print(f"  {service_id}  {item['status']}  {item['score']:.2f}  - {item['reason']}")
+    if payload["known_gaps"]:
+        print("\nKnown gaps:")
+        for gap in payload["known_gaps"][:10]:
+            print(f"  ADR {gap['adr']}  {gap['title']}")
+    return 0
+
+
+def manifest_refresh_command(*, no_color: bool) -> int:
+    plan = CommandPlan(
+        label="manifest refresh",
+        route="controller local manifest generator",
+        command=[
+            "uv",
+            "run",
+            "--with",
+            "pyyaml",
+            "--with",
+            "jsonschema",
+            "python",
+            str(repo_path("scripts", "platform_manifest.py")),
+            "--write",
+        ],
+    )
+    print_plan(plan, no_color=no_color)
+    completed = subprocess.run(plan.command, cwd=REPO_ROOT, text=True, check=False)
+    return completed.returncode
+
+
 def impact_command(service_id: str) -> int:
     graph = load_dependency_graph(
         repo_path("config", "dependency-graph.json"),
@@ -1173,76 +1224,6 @@ def search_command(query: str, *, collection: str | None, limit: int, rebuild: b
     return 0
 
 
-def agent_state_client(agent_id: str, task_id: str) -> AgentStateClient:
-    return AgentStateClient(agent_id=agent_id, task_id=task_id)
-
-
-def agent_state_show_command(agent_id: str, task_id: str, *, json_output: bool) -> int:
-    entries = agent_state_client(agent_id, task_id).list_entries()
-    if json_output:
-        emit_json(
-            {
-                "agent_id": agent_id,
-                "task_id": task_id,
-                "entries": [
-                    {
-                        "key": entry.key,
-                        "value": entry.value,
-                        "context_id": entry.context_id,
-                        "written_at": entry.written_at.isoformat(),
-                        "expires_at": entry.expires_at.isoformat(),
-                        "version": entry.version,
-                    }
-                    for entry in entries
-                ],
-            }
-        )
-        return 0
-    if not entries:
-        print("No non-expired state entries found.")
-        return 0
-    print(f"{'KEY':<24} {'VALUE':<80} {'WRITTEN_AT':<20} {'EXPIRES_AT':<20} {'VER':>3}")
-    for entry in entries:
-        print(
-            f"{entry.key:<24} "
-            f"{compact_json(entry.value):<80} "
-            f"{entry.written_at.strftime('%Y-%m-%dT%H:%M:%SZ'):<20} "
-            f"{entry.expires_at.strftime('%Y-%m-%dT%H:%M:%SZ'):<20} "
-            f"{entry.version:>3}"
-        )
-    return 0
-
-
-def agent_state_delete_command(agent_id: str, task_id: str, *, key: str) -> int:
-    deleted = agent_state_client(agent_id, task_id).delete(key)
-    if deleted:
-        print(f"Deleted {key} from {agent_id}/{task_id}.")
-        return 0
-    print(f"State key not found: {key}", file=sys.stderr)
-    return 1
-
-
-def agent_state_verify_command(agent_id: str, task_id: str, *, digest: str, json_output: bool) -> int:
-    result = agent_state_client(agent_id, task_id).validate_handoff(digest)
-    if json_output:
-        emit_json(
-            {
-                "agent_id": result.agent_id,
-                "task_id": result.task_id,
-                "expected_digest": result.expected_digest,
-                "actual_digest": result.actual_digest,
-                "matched": result.matched,
-                "key_count": result.key_count,
-            }
-        )
-    else:
-        print(f"Integrity: {'ok' if result.matched else 'mismatch'}")
-        print(f"Expected:  {result.expected_digest}")
-        print(f"Observed:  {result.actual_digest}")
-        print(f"Key count: {result.key_count}")
-    return 0 if result.matched else 1
-
-
 def generate_completion_script(shell_name: str) -> str:
     function_name = "_lv3_completion"
     if shell_name == "bash":
@@ -1290,7 +1271,6 @@ def install_completion(shell_name: str) -> int:
 
 def completion_candidates(words: list[str], current: str) -> list[str]:
     top_level = [
-        "agent",
         "deploy",
         "impact",
         "lint",
@@ -1308,6 +1288,7 @@ def completion_candidates(words: list[str], current: str) -> list[str]:
         "logs",
         "ssh",
         "open",
+        "manifest",
         "operator",
         "release",
     ]
@@ -1338,10 +1319,8 @@ def completion_candidates(words: list[str], current: str) -> list[str]:
         return [action for action in ["get", "rotate"] if action.startswith(current)]
     if words[1] == "operator" and len(words) == 3:
         return [action for action in ["add", "remove", "inventory"] if action.startswith(current)]
-    if words[1] == "agent" and len(words) == 3:
-        return [action for action in ["state"] if action.startswith(current)]
-    if words[1:3] == ["agent", "state"] and len(words) == 4:
-        return [action for action in ["show", "delete", "verify"] if action.startswith(current)]
+    if words[1] == "manifest" and len(words) == 3:
+        return [action for action in ["show", "refresh"] if action.startswith(current)]
     if words[1] == "release" and len(words) == 3:
         return [action for action in ["status", "tag"] if action.startswith(current)]
     return []
@@ -1502,6 +1481,14 @@ def build_parser() -> argparse.ArgumentParser:
     open_parser.add_argument("--dry-run", action="store_true")
     open_parser.add_argument("--explain", action="store_true")
 
+    manifest = subparsers.add_parser("manifest", help="Inspect or refresh the platform manifest.")
+    manifest_subparsers = manifest.add_subparsers(dest="manifest_action", required=True)
+    manifest_show = manifest_subparsers.add_parser("show", help="Show the generated platform manifest.")
+    manifest_show.add_argument("--json", action="store_true")
+    manifest_show.add_argument("--refresh", action="store_true", help="Regenerate before showing.")
+    manifest_refresh = manifest_subparsers.add_parser("refresh", help="Regenerate the committed platform manifest artifact.")
+    manifest_refresh.add_argument("--json", action="store_true", help="Show the refreshed manifest after writing it.")
+
     release = subparsers.add_parser("release", help="Prepare repository releases and show readiness.")
     release.add_argument("--version", help="Explicit release version to prepare.")
     release.add_argument("--bump", choices=["major", "minor", "patch"], help="Semantic version bump to prepare.")
@@ -1542,27 +1529,6 @@ def build_parser() -> argparse.ArgumentParser:
     operator_inventory.add_argument("--offline", action="store_true")
     operator_inventory.add_argument("--dry-run", action="store_true")
     operator_inventory.add_argument("--explain", action="store_true")
-
-    agent = subparsers.add_parser("agent", help="Inspect persisted agent scratch state.")
-    agent_subparsers = agent.add_subparsers(dest="agent_action", required=True)
-    agent_state = agent_subparsers.add_parser("state", help="Inspect one persisted agent task namespace.")
-    agent_state_subparsers = agent_state.add_subparsers(dest="agent_state_action", required=True)
-
-    agent_state_show = agent_state_subparsers.add_parser("show", help="Show active keys for one agent/task.")
-    agent_state_show.add_argument("--agent", required=True)
-    agent_state_show.add_argument("--task", required=True)
-    agent_state_show.add_argument("--json", action="store_true")
-
-    agent_state_delete = agent_state_subparsers.add_parser("delete", help="Delete one persisted state key.")
-    agent_state_delete.add_argument("--agent", required=True)
-    agent_state_delete.add_argument("--task", required=True)
-    agent_state_delete.add_argument("--key", required=True)
-
-    agent_state_verify = agent_state_subparsers.add_parser("verify", help="Verify a handoff state digest.")
-    agent_state_verify.add_argument("--agent", required=True)
-    agent_state_verify.add_argument("--task", required=True)
-    agent_state_verify.add_argument("--digest", required=True)
-    agent_state_verify.add_argument("--json", action="store_true")
 
     completion = subparsers.add_parser("__complete")
     completion.add_argument("current", nargs="?", default="")
@@ -1675,6 +1641,15 @@ def main(argv: list[str] | None = None) -> int:
         return ssh_command(args.vm_name, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
     if args.command == "open":
         return open_service_url(args.service, args.env, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
+    if args.command == "manifest":
+        if args.manifest_action == "show":
+            return manifest_show_command(as_json=args.json, refresh=args.refresh)
+        exit_code = manifest_refresh_command(no_color=no_color)
+        if exit_code != 0:
+            return exit_code
+        if args.json:
+            return manifest_show_command(as_json=True, refresh=False)
+        return 0
     if args.command == "release":
         import release_manager
 
@@ -1706,14 +1681,6 @@ def main(argv: list[str] | None = None) -> int:
         if args.dry_run:
             forwarded_args.append("--dry-run")
         return release_manager.main(forwarded_args)
-    if args.command == "agent":
-        if args.agent_action == "state":
-            if args.agent_state_action == "show":
-                return agent_state_show_command(args.agent, args.task, json_output=args.json)
-            if args.agent_state_action == "delete":
-                return agent_state_delete_command(args.agent, args.task, key=args.key)
-            if args.agent_state_action == "verify":
-                return agent_state_verify_command(args.agent, args.task, digest=args.digest, json_output=args.json)
     if args.command == "operator":
         if args.operator_action == "add":
             workflow_args = [

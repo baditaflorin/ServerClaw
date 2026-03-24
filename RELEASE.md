@@ -1,9 +1,11 @@
-# Release 0.111.0
+# Release 0.121.0
 
 - Date: 2026-03-24
 
 ## Summary
-- Implemented ADR 0134 changelog portal content redaction with a config-backed policy, read-path masking, and tests for secret and PII filtering.
+- implemented ADR 0132 in repository automation with a self-describing platform manifest generator, committed `build/platform-manifest.json` output, and the matching JSON schema
+- added `lv3 manifest show` and `lv3 manifest refresh`, plus validation-gate enforcement that fails when the committed manifest drifts from canonical repo inputs
+- documented the operator workflow in `docs/runbooks/platform-manifest.md` and recorded the merged workstream in `docs/workstreams/adr-0132-self-describing-platform-manifest.md`
 
 ## Platform Impact
 - no live platform version bump; this release updates repository automation, release metadata, and operator tooling only

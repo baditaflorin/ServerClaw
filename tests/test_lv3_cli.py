@@ -507,6 +507,56 @@ def test_release_status_is_forwarded_to_release_manager(
     assert calls == [["status", "--json"]]
 
 
+def test_manifest_show_json_reads_existing_artifact(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    manifest_path = minimal_repo / "build" / "platform-manifest.json"
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "identity": {"platform_name": "lv3.org"},
+                "repo_version": "0.96.0",
+                "platform_version": "0.40.0",
+                "health": {"summary": "healthy", "services": {}},
+                "incidents": {"open_count": 0},
+                "maintenance": {"active_windows": []},
+                "known_gaps": [],
+            }
+        )
+        + "\n"
+    )
+    fake_module = types.SimpleNamespace(
+        load_json=lambda path: json.loads(Path(path).read_text()),
+        validate_manifest=lambda payload: None,
+        build_manifest=lambda: {},
+        write_json=lambda *args, **kwargs: None,
+    )
+    monkeypatch.setitem(sys.modules, "platform_manifest", fake_module)
+
+    exit_code = lv3_cli.main(["manifest", "show", "--json"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert '"platform_name": "lv3.org"' in captured.out
+
+
+def test_manifest_refresh_runs_local_generator(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(
+        lv3_cli.subprocess,
+        "run",
+        lambda *args, **kwargs: types.SimpleNamespace(returncode=0),
+    )
+    exit_code = lv3_cli.main(["manifest", "refresh"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "controller local manifest generator" in captured.out
+    assert "scripts/platform_manifest.py" in captured.out
+
+
 def test_operator_add_dry_run_uses_windmill_workflow(
     capsys: pytest.CaptureFixture[str], minimal_repo: Path
 ) -> None:
