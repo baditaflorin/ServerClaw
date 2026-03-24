@@ -1,21 +1,18 @@
-# Release 0.130.0
+# Release 0.130.1
 
 - Date: 2026-03-24
 
 ## Summary
-- Implemented ADR 0133 so portal services now default to authentication instead of public exposure.
-- Updated the governed subdomain catalog to require `edge_oidc` for `docs.lv3.org`, `changelog.lv3.org`, and `ops.lv3.org`, while preserving Grafana's `upstream_auth` login boundary.
-- Kept the ADR 0139 subdomain exposure registry model and schema intact while correcting the catalog to reflect the now-hardened live portal state.
-- Expanded repository validation with `scripts/validate_portal_auth.py` and focused tests so protected portal hostnames cannot silently drift back to unauthenticated exposure.
-- Corrected the edge template lookup used for protected hostnames so the intended auth policy actually renders into live NGINX configuration.
+- finalized ADR 0140 by hardening the public Grafana edge so unauthenticated dashboard URLs redirect to login, `/api/health` is blocked, and the hostname is marked `noindex`
+- fixed the generated Prometheus latency SLO recording rules so Prometheus accepts the rule set during monitoring convergence
+- recorded the repository release needed to carry the Grafana hardening live-state follow-through on top of the current integrated `main`
 
 ## Platform Impact
-- repository version advances to `0.130.0`
-- live platform version advances to `0.114.7` because ADR 0133 was applied and verified on nginx-lv3 on 2026-03-24
+- repository version advances to `0.130.1`
+- platform version remains `0.114.7` until the live receipts for ADR 0140 are recorded from `main`
 
 ## Residual Risk
-- `status.lv3.org`, `uptime.lv3.org`, and other intentionally public informational surfaces still rely on correct catalog classification; future portal additions must not bypass that review path.
-- the protected portal policy currently depends on the shared edge auth proxy configuration, so regressions in hostname-to-policy mapping need to keep the new validation and template test coverage in place.
+- the shared `make live-apply-service service=grafana env=production` path still depends on the controller-local ntfy Alertmanager password file being present in `.local/ntfy/alertmanager-password.txt` when Alertmanager runtime validation runs in a fresh worktree
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

@@ -186,7 +186,9 @@ def slo_success_expr(slo: dict[str, Any], window: str) -> str:
     if slo["indicator"] == "availability":
         return f"avg_over_time(probe_success{{{labels}}}[{window}])"
     threshold_seconds = float(slo["latency_threshold_ms"]) / 1000.0
-    return f'avg_over_time((probe_duration_seconds{{{labels}}} < bool {threshold_seconds:g})[{window}])'
+    # Latency compliance evaluates a comparison expression, so Prometheus
+    # requires subquery syntax instead of a plain range selector.
+    return f'avg_over_time((probe_duration_seconds{{{labels}}} < bool {threshold_seconds:g})[{window}:])'
 
 
 def slo_metric_queries(slo: dict[str, Any]) -> dict[str, str]:

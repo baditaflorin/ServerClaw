@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.130.0
+repo_version: 0.130.1
 platform_version: 0.114.7
 
 live_apply_evidence:
@@ -845,7 +845,15 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
+<<<<<<< HEAD
     current: 0.130.0
+=======
+<<<<<<< HEAD
+    current: 0.129.1
+=======
+    current: 0.125.1
+>>>>>>> 4802ff8 (Release 0.125.1 for ADR 0140 rollout)
+>>>>>>> 61fbcaf (Release 0.125.1 for ADR 0140 rollout)
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.114.7
