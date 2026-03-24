@@ -178,6 +178,17 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
         },
     )
     write_json(
+        tmp_path / "config" / "command-catalog.json",
+        {
+            "commands": {
+                "converge-netbox": {
+                    "description": "deploy netbox",
+                    "workflow_id": "deploy-and-promote",
+                }
+            }
+        },
+    )
+    write_json(
         tmp_path / "config" / "api-gateway-catalog.json",
         {
             "schema_version": "1.0.0",
@@ -199,6 +210,14 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
     write_yaml(
         tmp_path / "inventory" / "group_vars" / "platform.yml",
         "platform_service_topology:\n  windmill:\n    urls:\n      internal: http://10.10.10.20:8000\n",
+    )
+    write_yaml(
+        tmp_path / "config" / "search-synonyms.yaml",
+        "schema_version: 1.0.0\ngroups: []\n",
+    )
+    write_yaml(
+        tmp_path / "docs" / "runbooks" / "configure-windmill.md",
+        "# Configure Windmill\n\nDeploy service runtime.\n",
     )
     write_json(
         tmp_path / "receipts" / "drift-reports" / "2026-03-23-test.json",
@@ -306,6 +325,10 @@ def test_gateway_proxy_and_platform_endpoints(tmp_path: Path) -> None:
                     )
                     assert path_response.status_code == 200
                     assert path_response.json()["path"] == ["service:windmill", "service:postgres"]
+
+                    search = await client.get("/v1/search?q=deploy", headers=headers)
+                    assert search.status_code == 200
+                    assert search.json()["results"]
 
                     proxied = await client.get("/v1/windmill/api/version", headers=headers)
                     assert proxied.status_code == 200

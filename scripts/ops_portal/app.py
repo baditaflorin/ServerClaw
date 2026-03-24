@@ -19,6 +19,11 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
+try:
+    from search_fabric.collectors import available_collections
+except ImportError:  # pragma: no cover - packaged import path
+    from scripts.search_fabric.collectors import available_collections
+
 
 def utc_now() -> datetime:
     return datetime.now(UTC).replace(microsecond=0)
@@ -206,6 +211,19 @@ class GatewayClient:
             token=token,
             payload={"workflow_id": workflow_id, "parameters": parameters or {}, "source": "portal"},
         )
+
+    async def search(
+        self,
+        query: str,
+        *,
+        collection: str | None = None,
+        token: str | None = None,
+        limit: int = 8,
+    ) -> dict[str, Any]:
+        params = {"q": query, "limit": str(limit)}
+        if collection:
+            params["collection"] = collection
+        return await self._request("GET", f"/v1/search?{httpx.QueryParams(params)}", token=token)
 
 
 @dataclass
@@ -524,6 +542,10 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         "deployment_events": deployment_console_seed(),
         "generated_at": isoformat(utc_now()),
         "docs_base_url": request.app.state.settings.docs_base_url,
+        "search_collections": available_collections(),
+        "search_results": [],
+        "search_query": "",
+        "search_collection": "",
     }
 
 
@@ -587,6 +609,11 @@ def create_app(
     async def changelog_partial(request: Request) -> HTMLResponse:
         context = await build_dashboard_context(request)
         return templates.TemplateResponse(request=request, name="partials/changelog.html", context=context)
+
+    @app.get("/partials/search", response_class=HTMLResponse)
+    async def search_partial(request: Request) -> HTMLResponse:
+        context = await build_dashboard_context(request)
+        return templates.TemplateResponse(request=request, name="partials/search.html", context=context)
 
     @app.get("/events/deployments")
     async def deployment_events() -> StreamingResponse:
@@ -733,6 +760,28 @@ def create_app(
             },
         }
         return templates.TemplateResponse(request=request, name="partials/action_result.html", context=context)
+
+    @app.post("/actions/search", response_class=HTMLResponse)
+    async def search_action(
+        request: Request,
+        query: str = Form(default=""),
+        collection: str = Form(default=""),
+    ) -> HTMLResponse:
+        session = await ensure_session(request)
+        gateway = request.app.state.gateway_client
+        context = await build_dashboard_context(request)
+        context["search_query"] = query
+        context["search_collection"] = collection
+        if not query.strip():
+            context["search_error"] = "Enter a query to search the platform corpus."
+            return templates.TemplateResponse(request=request, name="partials/search.html", context=context)
+        try:
+            payload = await gateway.search(query, collection=collection or None, token=session.get("api_token") or None)
+            context["search_results"] = payload.get("results", [])
+            context["search_expanded_query"] = payload.get("expanded_query", query)
+        except Exception as exc:  # noqa: BLE001
+            context["search_error"] = str(exc)
+        return templates.TemplateResponse(request=request, name="partials/search.html", context=context)
 
     return app
 

@@ -17,12 +17,17 @@ from urllib.parse import urljoin, urlparse
 import httpx
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
-from fastapi import Depends, FastAPI, HTTPException, Request, Response
+from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from api_gateway_catalog import load_api_gateway_catalog
 from platform.graph import DependencyGraphClient, NodeNotFoundError
+
+try:
+    from search_fabric import SearchClient
+except ImportError:  # pragma: no cover - packaged import path
+    from scripts.search_fabric import SearchClient
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -245,6 +250,7 @@ class GatewayRuntime:
         self.services = [GatewayService(**service) for service in normalized_catalog]
         self.service_by_prefix = sorted(self.services, key=lambda service: len(service.gateway_prefix), reverse=True)
         self.http_client = httpx.AsyncClient(follow_redirects=False)
+        self.search_client = SearchClient(config.repo_root)
         self.verifier = KeycloakJWTVerifier(
             jwks_url=config.jwks_url,
             issuer=config.issuer,
@@ -556,6 +562,32 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
             "service_topology": platform_vars.get("platform_service_topology", {}),
             "public_edge": platform_vars.get("public_edge_service_topology", {}),
         }
+
+    @app.get("/v1/search")
+    async def platform_search(
+        request: Request,
+        q: str = Query(min_length=2),
+        collection: str | None = Query(default=None),
+        limit: int = Query(default=10, ge=1, le=25),
+        identity: dict[str, Any] = Depends(require_identity),
+    ) -> dict[str, Any]:
+        started_at = time.perf_counter()
+        if not has_required_role(identity, "platform-read"):
+            raise HTTPException(status_code=403, detail="missing required role 'platform-read'")
+        runtime: GatewayRuntime = request.app.state.runtime
+        payload = runtime.search_client.query(q, collection=collection, limit=limit)
+        await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
+        return payload
+
+    @app.get("/v1/platform/search")
+    async def platform_search_legacy(
+        request: Request,
+        q: str = Query(min_length=2),
+        collection: str | None = Query(default=None),
+        limit: int = Query(default=10, ge=1, le=25),
+        identity: dict[str, Any] = Depends(require_identity),
+    ) -> dict[str, Any]:
+        return await platform_search(request, q=q, collection=collection, limit=limit, identity=identity)
 
     @app.get("/v1/graph/nodes")
     async def graph_nodes(

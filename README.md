@@ -78,6 +78,7 @@ The repository now also ships ADR 0100 disaster-recovery targets, a structured r
 The repository now also ships ADR 0096 SLO tracking: a canonical SLO catalog, generated Prometheus rules and blackbox targets, a Grafana SLO dashboard, an ops-portal SLO section, a `/v1/platform/slos` API surface, and promotion-gate enforcement for low remaining error budget.
 The repository now also ships ADR 0115 mutation-ledger primitives: the `ledger.events` Postgres schema migration, the `platform.ledger` writer/reader/replay package, the one-time `audit_log` migration helper, and optional dual-write from the existing mutation-audit emitter when `LV3_LEDGER_DSN` is configured; live migration from `main` is still pending.
 The repository now also ships ADR 0117 dependency-graph runtime primitives: the `platform.graph` traversal client, the `graph.nodes` / `graph.edges` schema migration, the repo-managed graph manifest and Windmill rebuild helpers, `/v1/graph/*` gateway routes, and risk-scorer integration via live `DependencyGraphClient().descendants()` when `LV3_GRAPH_DSN` is configured; the first live apply from `main` is still pending.
+The repository now also ships ADR 0121 local search: a repo-managed search fabric under `scripts/search_fabric/`, a persisted local index at `build/search-index/documents.json`, the `lv3 search` CLI command, the `/v1/search` API surface, and an ops-portal search panel backed by the same corpus.
 
 <!-- BEGIN GENERATED: platform-status -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_status_docs.py). Do not edit this block by hand.
@@ -418,6 +419,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Repair Guest Netplan MAC Drift](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/repair-guest-netplan-mac-drift.md)
 - [Rotate Certificates](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/rotate-certificates.md)
 - [Scaffold A New Service](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/scaffold-new-service.md)
+- [Search Indexing Fabric](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/search-indexing-fabric.md)
 - [Secret Rotation And Lifecycle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/secret-rotation-and-lifecycle.md)
 - [Security Posture Reporting](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/security-posture-reporting.md)
 - [Service Capability Catalog](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/service-capability-catalog.md)
@@ -799,6 +801,7 @@ This repository is intentionally opinionated:
 | `0117` | Service dependency graph as first-class runtime | `merged` | [adr-0117-dependency-graph-runtime.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0117-dependency-graph-runtime.md) |
 | `0119` | Budgeted workflow scheduler | `merged` | [adr-0119-budgeted-workflow-scheduler.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0119-budgeted-workflow-scheduler.md) |
 | `0120` | Dry-run semantic diff engine | `merged` | [adr-0120-dry-run-diff-engine.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0120-dry-run-diff-engine.md) |
+| `0121` | Local search and indexing fabric | `merged` | [adr-0121-search-indexing-fabric.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0121-search-indexing-fabric.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

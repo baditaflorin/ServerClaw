@@ -1487,6 +1487,39 @@ workstreams:
     ready_to_merge: false
     live_applied: false
 
+  - id: adr-0121-search-indexing-fabric
+    adr: "0121"
+    title: Local search and indexing fabric
+    status: merged
+    owner: codex
+    branch: codex/adr-0121-local-search-indexing-fabric
+    worktree_path: .worktrees/adr-0121
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0121-search-indexing-fabric.md
+    depends_on:
+      - adr-0048-command-catalog
+      - adr-0052-loki-logs
+      - adr-0061-glitchtip-failure-signals
+      - adr-0090-platform-cli
+      - adr-0092-platform-api-gateway
+      - adr-0093-interactive-ops-portal
+      - adr-0095-unified-search
+      - adr-0098-postgres-ha
+      - adr-0113-world-state-materializer
+      - adr-0115-mutation-ledger
+      - adr-0118-failure-case-library
+    conflicts_with: []
+    shared_surfaces:
+      - scripts/search_fabric/
+      - migrations/0014_search_schema.sql
+      - config/search-synonyms.yaml
+      - config/windmill/scripts/rebuild-search-index.py
+      - scripts/api_gateway/main.py
+      - scripts/lv3_cli.py
+      - scripts/ops_portal/
+      - docs/runbooks/search-indexing-fabric.md
+    ready_to_merge: false
+    live_applied: false
+
   - id: adr-0096-slo-tracking
     adr: "0096"
     title: SLO definitions and error budget tracking

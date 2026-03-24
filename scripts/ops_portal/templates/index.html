@@ -52,6 +52,18 @@
     </div>
   </section>
 
+  <section id="search" class="portal-section">
+    <div class="section-head">
+      <div>
+        <p class="section-kicker">Search Fabric</p>
+        <h2>Query ADRs, runbooks, configs, receipts, and catalog entries in one place</h2>
+      </div>
+    </div>
+    <div id="search-panel" hx-get="/partials/search" hx-trigger="load" hx-swap="innerHTML">
+      {% include "partials/search.html" %}
+    </div>
+  </section>
+
   <section id="runbooks" class="portal-section">
     <div class="section-head">
       <div>

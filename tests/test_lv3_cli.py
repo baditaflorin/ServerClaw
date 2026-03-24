@@ -14,6 +14,7 @@ import lv3_cli
 def minimal_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     (tmp_path / "config").mkdir()
     (tmp_path / "docs" / "adr").mkdir(parents=True)
+    (tmp_path / "docs" / "runbooks").mkdir(parents=True)
     (tmp_path / "inventory").mkdir()
     (tmp_path / "receipts" / "live-applies").mkdir(parents=True)
     (tmp_path / "receipts" / "dr-table-top-reviews").mkdir(parents=True)
@@ -187,6 +188,20 @@ all:
         )
         + "\n"
     )
+    (tmp_path / "config" / "command-catalog.json").write_text(
+        json.dumps(
+            {
+                "commands": {
+                    "converge-netbox": {
+                        "description": "Deploy the NetBox service.",
+                        "workflow_id": "deploy-and-promote",
+                    }
+                }
+            },
+            indent=2,
+        )
+        + "\n"
+    )
     (tmp_path / "config" / "disaster-recovery-targets.json").write_text(
         json.dumps(
             {
@@ -222,6 +237,9 @@ backups:
     )
     (tmp_path / "docs" / "adr" / "0109-public-status-page.md").write_text(
         "- Status: Proposed\n- Implementation Status: Not Implemented\n"
+    )
+    (tmp_path / "docs" / "runbooks" / "rotate-certificates.md").write_text(
+        "# Rotate Certificates\n\nRenew the TLS certificate before it expires.\n"
     )
     (tmp_path / "receipts" / "dr-table-top-reviews" / "2026-03-23-review.json").write_text(
         json.dumps({"reviewed_on": "2026-03-23", "result": "completed_with_gaps"}) + "\n"
@@ -387,6 +405,13 @@ def test_validate_service_dry_run_uses_local_completeness_command(
     assert exit_code == 0
     assert "ADR 0107 completeness check" in captured.out
     assert "scripts/validate_service_completeness.py --service grafana" in captured.out
+
+
+def test_search_command_returns_catalog_match(capsys: pytest.CaptureFixture[str], minimal_repo: Path) -> None:
+    exit_code = lv3_cli.main(["search", "converge netbox", "--collection", "command_catalog"])
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "converge-netbox" in captured.out
 
 
 def test_impact_command_prints_dependency_summary(

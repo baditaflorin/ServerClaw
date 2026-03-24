@@ -28,6 +28,10 @@ import yaml
 from dependency_graph import dependency_summary, load_dependency_graph
 from repo_package_loader import load_repo_package
 
+try:
+    from search_fabric import SearchClient
+except ImportError:  # pragma: no cover - packaged entrypoint path
+    from scripts.search_fabric import SearchClient
 
 CODE_ROOT = Path(__file__).resolve().parent.parent
 REPO_ROOT = CODE_ROOT
@@ -1145,6 +1149,17 @@ def logs_command(service_id: str, *, tail: int, since: str, dry_run: bool, expla
     return 0
 
 
+def search_command(query: str, *, collection: str | None, limit: int, rebuild: bool) -> int:
+    client = SearchClient(REPO_ROOT)
+    payload = client.query(query, collection=collection, limit=limit, rebuild=rebuild)
+    if not payload["results"]:
+        print(f"No results for '{query}'.")
+        return 0
+    for result in payload["results"]:
+        print(f"[{result['collection']}] {result['title']}  {result['score']:.2f}  {result.get('url') or '-'}")
+    return 0
+
+
 def generate_completion_script(shell_name: str) -> str:
     function_name = "_lv3_completion"
     if shell_name == "bash":
@@ -1196,6 +1211,7 @@ def completion_candidates(words: list[str], current: str) -> list[str]:
         "impact",
         "lint",
         "validate",
+        "search",
         "status",
         "vm",
         "secret",
@@ -1279,6 +1295,12 @@ def build_parser() -> argparse.ArgumentParser:
     validate.add_argument("--service")
     validate.add_argument("--dry-run", action="store_true")
     validate.add_argument("--explain", action="store_true")
+
+    search = subparsers.add_parser("search", help="Query the local platform search fabric.")
+    search.add_argument("query")
+    search.add_argument("--collection")
+    search.add_argument("--limit", type=int, default=10)
+    search.add_argument("--rebuild", action="store_true")
 
     status = subparsers.add_parser("status", help="Show service health status.")
     status.add_argument("service", nargs="?")
@@ -1471,6 +1493,8 @@ def main(argv: list[str] | None = None) -> int:
             explain=args.explain,
             no_color=no_color,
         )
+    if args.command == "search":
+        return search_command(args.query, collection=args.collection, limit=args.limit, rebuild=args.rebuild)
     if args.command == "status":
         return status_command(args.service, args.env, timeout=args.timeout, no_color=no_color)
     if args.command == "vm":
