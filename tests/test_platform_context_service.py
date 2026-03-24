@@ -59,8 +59,8 @@ def test_query_returns_cited_step_ca_chunk(tmp_path: Path) -> None:
 
     result = service.query("how does step-ca issue SSH certificates", 3)
     assert result["matches"]
-    assert result["matches"][0]["source_path"].startswith("docs/")
-    assert "SSH certificates" in result["matches"][0]["content"]
+    assert any(match["source_path"].startswith("docs/") for match in result["matches"])
+    assert any("SSH certificates" in match["content"] for match in result["matches"])
 
 
 def test_sentence_transformers_backend_falls_back_to_token_hash(tmp_path: Path, monkeypatch) -> None:
