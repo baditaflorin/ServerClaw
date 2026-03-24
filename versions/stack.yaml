@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.120.1
-platform_version: 0.114.5
+repo_version: 0.120.2
+platform_version: 0.114.6
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -16,7 +16,7 @@ live_apply_evidence:
     backup_vm: 2026-03-22-adr-0029-backup-vm-live-apply
     guest_network_policy: 2026-03-22-adr-0067-guest-network-policy-live-apply
     runtime_container_telemetry: 2026-03-22-adr-0040-runtime-container-telemetry-live-apply
-    mail_platform: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
+    mail_platform: 2026-03-24-keycloak-password-reset-mail-live-apply
     step_ca: 2026-03-22-adr-0042-step-ca-live-apply
     openbao: 2026-03-22-adr-0043-openbao-live-apply
     windmill: 2026-03-24-adr-0122-windmill-operator-access-admin-hotfix-live-apply
@@ -29,7 +29,7 @@ live_apply_evidence:
     control_plane_recovery: 2026-03-22-adr-0051-control-plane-recovery-live-apply
     notification_profiles: 2026-03-22-adr-0050-notification-profiles-live-apply
     netbox: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
-    keycloak: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
+    keycloak: 2026-03-24-keycloak-password-reset-mail-live-apply
     platform_context: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
     ntopng: 2026-03-22-adr-0059-ntopng-live-apply
     open_webui: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
@@ -845,8 +845,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.120.0
+    current: 0.120.2
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.114.4
+    current: 0.114.6
     meaning: intended platform release for the actual server configuration
