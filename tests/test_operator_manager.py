@@ -48,6 +48,18 @@ class FakeBackend:
             "audit": {"status": "ok"},
         }
 
+    def reset_password(self, operator: dict, password: str, *, temporary: bool) -> dict:
+        return {
+            "keycloak": {
+                "status": "password-reset",
+                "username": operator["keycloak"]["username"],
+                "temporary": temporary,
+                "required_actions": ["UPDATE_PASSWORD"] if temporary else [],
+                "failure_counters_cleared": True,
+            },
+            "audit": {"status": "ok"},
+        }
+
     def inventory_operator(self, operator: dict, state: dict, offline: bool) -> dict:
         return {"operator": operator, "state": state, "offline": offline}
 
@@ -219,6 +231,46 @@ def test_recover_totp_persists_state(
     assert state["last_operation"] == "recover-totp"
     assert state["keycloak"]["status"] == "totp-reset"
     assert payload["result"]["keycloak"]["required_actions"] == ["CONFIGURE_TOTP"]
+
+
+def test_reset_password_persists_state(
+    roster_paths: tuple[Path, Path], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    roster_path, state_dir = roster_paths
+    monkeypatch.setattr(operator_manager, "select_backend", lambda **kwargs: FakeBackend())
+    onboarded = operator_manager.onboard(
+        roster_path=roster_path,
+        state_dir=state_dir,
+        name="Alice Example",
+        email="alice@example.com",
+        role="operator",
+        ssh_key=TEST_KEY,
+        actor_id="tester",
+        actor_class="operator",
+        operator_id=None,
+        keycloak_username=None,
+        ssh_key_name="laptop",
+        tailscale_login_email=None,
+        tailscale_device_name=None,
+        bootstrap_password="Bootstrap123",
+        dry_run=False,
+    )
+
+    payload = operator_manager.reset_password(
+        roster_path=roster_path,
+        state_dir=state_dir,
+        operator_id=onboarded["operator"]["id"],
+        actor_id="tester",
+        actor_class="operator",
+        password="NewPassword123",
+        temporary=True,
+        dry_run=False,
+    )
+
+    state = json.loads((state_dir / "alice-example.json").read_text(encoding="utf-8"))
+    assert state["last_operation"] == "reset-password"
+    assert state["keycloak"]["status"] == "password-reset"
+    assert payload["result"]["keycloak"]["required_actions"] == ["UPDATE_PASSWORD"]
 
 
 def test_quarterly_review_flags_stale_operator(

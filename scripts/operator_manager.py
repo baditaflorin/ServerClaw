@@ -101,6 +101,9 @@ class OperatorBackend(Protocol):
     def recover_totp(self, operator: dict[str, Any]) -> dict[str, Any]:
         ...
 
+    def reset_password(self, operator: dict[str, Any], password: str, *, temporary: bool) -> dict[str, Any]:
+        ...
+
     def inventory_operator(self, operator: dict[str, Any], state: dict[str, Any], offline: bool) -> dict[str, Any]:
         ...
 
@@ -1117,6 +1120,53 @@ class LiveBackend:
             "audit": audit,
         }
 
+    def reset_password(self, operator: dict[str, Any], password: str, *, temporary: bool) -> dict[str, Any]:
+        if not password.strip():
+            raise OperatorManagerError("Password reset requires a non-empty password.")
+        username = operator["keycloak"]["username"]
+        user_id = self._keycloak_user_id(username)
+        details = self._keycloak_user_details(username)
+        json_request(
+            f"{service_url('keycloak', prefer_public=True)}/admin/realms/{KEYCLOAK_REALM}/users/{user_id}/reset-password",
+            method="PUT",
+            headers=self._keycloak_headers(),
+            body={"type": "password", "temporary": temporary, "value": password},
+            expected_status=(204,),
+        )
+        required_actions = details.get("requiredActions")
+        if not isinstance(required_actions, list):
+            required_actions = []
+        normalized_required_actions = [str(action) for action in required_actions if str(action).strip()]
+        if temporary and "UPDATE_PASSWORD" not in normalized_required_actions:
+            normalized_required_actions.append("UPDATE_PASSWORD")
+        details["requiredActions"] = normalized_required_actions
+        json_request(
+            f"{service_url('keycloak', prefer_public=True)}/admin/realms/{KEYCLOAK_REALM}/users/{user_id}",
+            method="PUT",
+            headers=self._keycloak_headers(),
+            body=details,
+            expected_status=(204,),
+        )
+        json_request(
+            f"{service_url('keycloak', prefer_public=True)}/admin/realms/{KEYCLOAK_REALM}/attack-detection/brute-force/users/{user_id}",
+            method="DELETE",
+            headers=self._keycloak_headers(),
+            expected_status=(200, 204),
+        )
+        self._keycloak_user_cache.pop(username, None)
+        audit = self._emit_audit("operator.password_recovered", operator["id"])
+        return {
+            "keycloak": {
+                "status": "password-reset",
+                "username": username,
+                "user_id": user_id,
+                "temporary": temporary,
+                "required_actions": normalized_required_actions,
+                "failure_counters_cleared": True,
+            },
+            "audit": audit,
+        }
+
     def inventory_operator(self, operator: dict[str, Any], state: dict[str, Any], offline: bool) -> dict[str, Any]:
         ssh_enabled = ROLE_DEFINITIONS[operator["role"]].ssh_enabled
         summary = {
@@ -1232,6 +1282,17 @@ class NoopBackend:
                 "status": "dry-run",
                 "username": operator["keycloak"]["username"],
                 "required_actions": ["CONFIGURE_TOTP"],
+                "failure_counters_cleared": True,
+            }
+        }
+
+    def reset_password(self, operator: dict[str, Any], password: str, *, temporary: bool) -> dict[str, Any]:
+        return {
+            "keycloak": {
+                "status": "dry-run",
+                "username": operator["keycloak"]["username"],
+                "temporary": temporary,
+                "required_actions": ["UPDATE_PASSWORD"] if temporary else [],
                 "failure_counters_cleared": True,
             }
         }
@@ -1372,6 +1433,32 @@ def recover_totp(
     state_path = operator_state_path(operator_id, state_dir)
     if not dry_run:
         state_path = persist_state(operator_id, "recover-totp", result, state_dir=state_dir)
+    return {
+        "status": "dry-run" if dry_run else "ok",
+        "operator": operator,
+        "state_path": str(state_path),
+        "result": result,
+    }
+
+
+def reset_password(
+    *,
+    roster_path: Path,
+    state_dir: Path,
+    operator_id: str,
+    actor_id: str,
+    actor_class: str,
+    password: str,
+    temporary: bool,
+    dry_run: bool,
+) -> dict[str, Any]:
+    roster = load_operator_roster(roster_path)
+    operator = find_operator(roster, operator_id)
+    backend = select_backend(dry_run=dry_run, actor_class=actor_class, actor_id=actor_id)
+    result = backend.reset_password(operator, password, temporary=temporary)
+    state_path = operator_state_path(operator_id, state_dir)
+    if not dry_run:
+        state_path = persist_state(operator_id, "reset-password", result, state_dir=state_dir)
     return {
         "status": "dry-run" if dry_run else "ok",
         "operator": operator,
@@ -1535,6 +1622,15 @@ def build_parser() -> argparse.ArgumentParser:
     recover_totp_parser.add_argument("--id", required=True)
     recover_totp_parser.add_argument("--dry-run", action="store_true")
 
+    reset_password_parser = subparsers.add_parser(
+        "reset-password",
+        help="Set one operator's Keycloak password and optionally require rotation on next login.",
+    )
+    reset_password_parser.add_argument("--id", required=True)
+    reset_password_parser.add_argument("--password", required=True)
+    reset_password_parser.add_argument("--temporary", action="store_true")
+    reset_password_parser.add_argument("--dry-run", action="store_true")
+
     inventory_parser = subparsers.add_parser("inventory", help="Show the access inventory for one operator.")
     inventory_parser.add_argument("--id", required=True)
     inventory_parser.add_argument("--offline", action="store_true")
@@ -1597,6 +1693,17 @@ def main(argv: list[str] | None = None) -> int:
                 operator_id=args.id,
                 actor_id=args.actor_id,
                 actor_class=args.actor_class,
+                dry_run=args.dry_run,
+            )
+        elif args.command == "reset-password":
+            payload = reset_password(
+                roster_path=roster_path,
+                state_dir=state_dir,
+                operator_id=args.id,
+                actor_id=args.actor_id,
+                actor_class=args.actor_class,
+                password=args.password,
+                temporary=args.temporary,
                 dry_run=args.dry_run,
             )
         elif args.command == "inventory":

@@ -86,6 +86,24 @@ The recovery action:
 
 After the command succeeds, sign in again with the existing password and complete TOTP enrollment with a newly scanned QR code.
 
+## Password Recovery
+
+If the locally mirrored bootstrap password no longer matches the live account, set a new known password and optionally force rotation at next login:
+
+```bash
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/operator_manager.py \
+  reset-password \
+  --id florin-badita \
+  --password 'REPLACE_WITH_NEW_PASSWORD' \
+  --temporary
+```
+
+The password recovery action:
+
+- updates the live Keycloak password for that user
+- clears the Keycloak brute-force failure counters for that user
+- adds `UPDATE_PASSWORD` to the user's required actions when `--temporary` is used
+
 ## Notes
 
 - Keycloak is the shared SSO broker. It does not replace OpenBao for secrets or `step-ca` for SSH and internal TLS.
