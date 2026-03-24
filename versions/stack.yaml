@@ -1,13 +1,13 @@
 schema_version: 1.0.0
 repo_version: 0.130.1
-platform_version: 0.114.7
+platform_version: 0.130.1
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
   latest_receipts:
-    monitoring: 2026-03-22-adr-0052-loki-live-apply
+    monitoring: 2026-03-24-adr-0140-grafana-monitoring-hardening-live-apply
     mutation_audit: 2026-03-23-adr-0066-mutation-audit-live-apply
-    public_edge_publication: 2026-03-24-adr-0133-portal-authentication-by-default-live-apply
+    public_edge_publication: 2026-03-24-adr-0140-grafana-edge-hardening-live-apply
     api_gateway: 2026-03-24-adr-0092-platform-api-gateway-live-apply
     docker_runtime: 2026-03-22-adr-0023-docker-runtime-live-apply
     postgres_vm: 2026-03-22-adr-0026-postgres-vm-live-apply
@@ -845,16 +845,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-<<<<<<< HEAD
-    current: 0.130.0
-=======
-<<<<<<< HEAD
-    current: 0.129.1
-=======
-    current: 0.125.1
->>>>>>> 4802ff8 (Release 0.125.1 for ADR 0140 rollout)
->>>>>>> 61fbcaf (Release 0.125.1 for ADR 0140 rollout)
+    current: 0.130.1
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.114.7
+    current: 0.130.1
     meaning: intended platform release for the actual server configuration

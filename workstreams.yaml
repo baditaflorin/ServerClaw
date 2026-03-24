@@ -2407,7 +2407,7 @@ workstreams:
   - id: adr-0140-grafana-public-access-hardening
     adr: "0140"
     title: Grafana public access hardening
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0140-grafana-hardening
     worktree_path: .worktrees/adr-0140-grafana-hardening
@@ -2425,7 +2425,7 @@ workstreams:
       - docs/runbooks/
       - tests/
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0142-public-surface-security-scan
     adr: "0142"

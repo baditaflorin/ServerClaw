@@ -92,8 +92,8 @@ The repository now also ships ADR 0142 public-surface security scanning: `make p
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.130.0` |
-| Platform version | `0.114.7` |
+| Repository version | `0.130.1` |
+| Platform version | `0.130.1` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -143,7 +143,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `keycloak` | `2026-03-24-keycloak-password-reset-mail-live-apply` |
 | `mail_platform` | `2026-03-24-keycloak-password-reset-mail-live-apply` |
 | `mattermost` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
-| `monitoring` | `2026-03-22-adr-0052-loki-live-apply` |
+| `monitoring` | `2026-03-24-adr-0140-grafana-monitoring-hardening-live-apply` |
 | `mutation_audit` | `2026-03-23-adr-0066-mutation-audit-live-apply` |
 | `netbox` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
 | `notification_profiles` | `2026-03-22-adr-0050-notification-profiles-live-apply` |
@@ -154,7 +154,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `platform_context` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
 | `portainer` | `2026-03-22-adr-0055-portainer-live-apply` |
 | `postgres_vm` | `2026-03-22-adr-0026-postgres-vm-live-apply` |
-| `public_edge_publication` | `2026-03-24-adr-0133-portal-authentication-by-default-live-apply` |
+| `public_edge_publication` | `2026-03-24-adr-0140-grafana-edge-hardening-live-apply` |
 | `remote_build_gateway` | `2026-03-23-adr-0082-remote-build-gateway-live-apply` |
 | `runtime_container_telemetry` | `2026-03-22-adr-0040-runtime-container-telemetry-live-apply` |
 | `secret_rotation` | `2026-03-23-adr-0065-secret-rotation-live-apply` |
@@ -721,8 +721,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.130.0` |
-| Platform version | `0.114.7` |
+| Repository version | `0.130.1` |
+| Platform version | `0.130.1` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -865,7 +865,7 @@ This repository is intentionally opinionated:
 | `0135` | Developer portal sensitivity classification | `merged` | [adr-0135-developer-portal-sensitivity-classification.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0135-developer-portal-sensitivity-classification.md) |
 | `0138` | Published artifact secret scanning | `merged` | [adr-0138-published-artifact-secret-scanning.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0138-published-artifact-secret-scanning.md) |
 | `0139` | Subdomain exposure audit and registry | `merged` | [adr-0139-subdomain-exposure-audit.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0139-subdomain-exposure-audit.md) |
-| `0140` | Grafana public access hardening | `merged` | [adr-0140-grafana-public-access-hardening.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0140-grafana-public-access-hardening.md) |
+| `0140` | Grafana public access hardening | `live_applied` | [adr-0140-grafana-public-access-hardening.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0140-grafana-public-access-hardening.md) |
 | `0142` | Public surface automated security scan | `merged` | [adr-0142-public-surface-security-scan.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0142-public-surface-security-scan.md) |
 <!-- END GENERATED: merged-workstreams -->
 

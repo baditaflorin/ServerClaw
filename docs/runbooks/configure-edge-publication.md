@@ -40,3 +40,4 @@ Expected result:
 ## Notes
 
 - This runbook does not publish Proxmox UI itself. The `proxmox.lv3.org` edge page is intentionally informational because Proxmox administration remains private and Tailscale-based.
+- When only the NGINX edge config needs to change and the generated portal directories are already current on the guest, rerun `playbooks/public-edge.yml` from `Check whether the public edge certificate exists` to skip the slow static-directory copy and force the config render, validation, and reload path.

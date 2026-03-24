@@ -1,9 +1,9 @@
 # ADR 0140: Grafana Public Access Hardening
 
-- Status: Accepted
+- Status: Implemented
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.124.1
-- Implemented In Platform Version: not yet
+- Implemented In Platform Version: 0.130.1
 - Implemented On: 2026-03-24
 - Date: 2026-03-24
 

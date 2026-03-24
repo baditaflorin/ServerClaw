@@ -34,6 +34,11 @@ The public hostname is operator-facing only: anonymous dashboard access is denie
 make converge-monitoring
 ```
 
+## Controller Prerequisites
+
+- The shared monitoring converge path validates Alertmanager delivery into the private ntfy paging gateway and expects the controller-local secret file `.local/ntfy/alertmanager-password.txt`.
+- If that file is missing in a fresh worktree, run `make converge-ntfy` first or materialize the existing controller-local secret before rerunning `make converge-monitoring`.
+
 ## What the playbook does
 
 1. Adds the Grafana and InfluxData APT repositories on `monitoring-lv3`.
