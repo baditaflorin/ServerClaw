@@ -1,5 +1,8 @@
 # Developer Portal
 
+- Sensitivity: INTERNAL
+- Portal Summary: Build, publish, and verify the generated developer portal, including page-level sensitivity tagging.
+
 This runbook covers the generated documentation site published at `docs.lv3.org`.
 
 ## Build
@@ -13,6 +16,16 @@ This command:
 1. regenerates the MkDocs source tree under `docs/site-generated/`
 2. snapshots the best available OpenAPI schema for the API section
 3. builds the static site into `build/docs-portal/`
+
+## Sensitivity Classification
+
+ADR and runbook pages can declare portal sensitivity in either YAML frontmatter (`sensitivity`) or the existing top metadata block (`- Sensitivity:`).
+
+- documents with no explicit sensitivity default to `INTERNAL`
+- `RESTRICTED` documents are rendered as summary-only pages in the generated portal
+- `CONFIDENTIAL` documents stay source-only and are omitted from the published portal output
+
+If a restricted document needs a safe summary, add `portal_summary` in frontmatter or `- Portal Summary:` in the metadata block instead of relying on body text.
 
 ## Publish
 
