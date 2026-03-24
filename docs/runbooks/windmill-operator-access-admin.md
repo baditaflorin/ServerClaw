@@ -16,8 +16,18 @@ It wraps the existing ADR 0108 backend so operators can:
 
 - Windmill workspace: `lv3`
 - Raw app path: `f/lv3/operator_access_admin`
+- Windmill base URL: `http://100.118.189.95:8005`
+- Direct app route: `http://100.118.189.95:8005/apps/get/f/lv3/operator_access_admin`
 
 The app is private to the Windmill workspace. It is not published anonymously.
+
+## Access
+
+- login page: `http://100.118.189.95:8005/user/login`
+- bootstrap email: `superadmin_secret@windmill.dev`
+- bootstrap password source: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt`
+
+The current platform path uses the managed Windmill bootstrap admin for browser access. That keeps the app reachable from a fresh machine without requiring a terminal-local cookie jar or manual API token injection.
 
 ## What The App Uses
 

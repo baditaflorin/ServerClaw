@@ -20,17 +20,18 @@ windmill_worker_count: 2
 windmill_native_worker_count: 4
 windmill_database_name: windmill
 windmill_database_user: windmill_admin
+windmill_database_inventory_host: >-
+  {{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}
 windmill_database_host: >-
-  {{
-    hostvars[
-      'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3'
-    ].ansible_host
-  }}
+  {{ hostvars[windmill_database_inventory_host].ansible_host }}
 windmill_database_port: 5432
 windmill_database_password_local_file: "{{ playbook_dir }}/../.local/windmill/database-password.txt"
 windmill_superadmin_secret_remote_file: "{{ windmill_secret_dir }}/superadmin-secret"
 windmill_local_artifact_dir: "{{ playbook_dir }}/../.local/windmill"
 windmill_superadmin_secret_local_file: "{{ windmill_local_artifact_dir }}/superadmin-secret.txt"
+windmill_bootstrap_identity_email: superadmin_secret@windmill.dev
+windmill_bootstrap_identity_username: superadmin_secret
+windmill_bootstrap_identity_login_type: password
 windmill_private_base_url: "{{ platform_service_topology | platform_service_url('windmill', 'internal') }}"
 windmill_base_url: "{{ platform_service_topology | platform_service_url('windmill', 'controller') }}"
 windmill_seed_app_repo_root_local_dir: "{{ playbook_dir }}/../config/windmill/apps"
@@ -212,7 +213,7 @@ windmill_seed_schedules:
     description: Repo-managed nightly cache warmer definition for the build-cache workflow; enable it after the cache host is applied live from main.
     no_flow_overlap: true
   - path: f/lv3/build_cache_maintenance_weekly
-    schedule: "0 0 4 * * 0"
+    schedule: "0 0 4 * * 7"
     timezone: Europe/Bucharest
     script_path: f/lv3/build_cache_maintenance
     args: {}

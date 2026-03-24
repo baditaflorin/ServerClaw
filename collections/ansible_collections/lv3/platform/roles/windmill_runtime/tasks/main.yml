@@ -411,6 +411,107 @@
   tags:
     - mutation
 
+- name: Ensure the Windmill bootstrap workspace identity is consistent
+  become: true
+  become_user: postgres
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        INSERT INTO password
+          (email, password_hash, login_type, super_admin, verified, name, company, first_time_user, username, devops, role_source)
+        VALUES
+          ('{{ windmill_bootstrap_identity_email }}', NULL, '{{ windmill_bootstrap_identity_login_type }}', TRUE, TRUE, NULL, NULL, FALSE, '{{ windmill_bootstrap_identity_username }}', FALSE, 'manual')
+        ON CONFLICT (email) DO UPDATE
+        SET login_type = EXCLUDED.login_type,
+            super_admin = TRUE,
+            verified = TRUE,
+            username = COALESCE(password.username, EXCLUDED.username),
+            devops = FALSE,
+            role_source = 'manual'
+  changed_when: false
+  no_log: true
+
+- name: Ensure the Windmill bootstrap workspace user is consistent
+  become: true
+  become_user: postgres
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        INSERT INTO usr
+          (workspace_id, email, username, is_admin, operator, disabled, role, added_via)
+        VALUES
+          ('{{ windmill_workspace_id }}', '{{ windmill_bootstrap_identity_email }}', '{{ windmill_bootstrap_identity_username }}', TRUE, FALSE, FALSE, 'admin', '{"kind":"bootstrap"}'::jsonb)
+        ON CONFLICT (workspace_id, username) DO UPDATE
+        SET email = EXCLUDED.email,
+            is_admin = TRUE,
+            operator = FALSE,
+            disabled = FALSE,
+            role = 'admin',
+            added_via = COALESCE(usr.added_via, EXCLUDED.added_via)
+  changed_when: false
+  no_log: true
+
+- name: Ensure the Windmill bootstrap user remains in the default workspace group
+  become: true
+  become_user: postgres
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        INSERT INTO usr_to_group (workspace_id, usr, group_)
+        VALUES ('{{ windmill_workspace_id }}', '{{ windmill_bootstrap_identity_username }}', 'all')
+        ON CONFLICT DO NOTHING
+  changed_when: false
+  no_log: true
+
+- name: Ensure the Windmill bootstrap admin login type matches the managed contract
+  ansible.builtin.uri:
+    url: "{{ windmill_private_base_url }}/api/users/set_login_type/{{ windmill_bootstrap_identity_email | urlencode }}"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ windmill_superadmin_secret }}"
+    body_format: json
+    body:
+      login_type: "{{ windmill_bootstrap_identity_login_type }}"
+    return_content: true
+    status_code: 200
+  changed_when: false
+  no_log: true
+
+- name: Ensure the Windmill bootstrap admin password matches the managed secret
+  ansible.builtin.uri:
+    url: "{{ windmill_private_base_url }}/api/users/set_password_of/{{ windmill_bootstrap_identity_email | urlencode }}"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ windmill_superadmin_secret }}"
+    body_format: json
+    body:
+      password: "{{ windmill_superadmin_secret }}"
+    return_content: true
+    status_code: 200
+  changed_when: false
+  no_log: true
+
 - name: Sync repo-managed Windmill scripts
   vars:
     mutation_audit_action: sync.windmill_scripts
@@ -548,12 +649,22 @@
       description: "{{ item.item.description }}"
       no_flow_overlap: "{{ item.item.no_flow_overlap | default(true) }}"
     return_content: true
-    status_code: 201
+    status_code:
+      - 200
+      - 201
+      - 400
   loop: "{{ windmill_seed_schedule_exists.results }}"
   loop_control:
     label: "{{ item.item.path }}"
   when: not (item.content | default('false') | trim | bool)
-  changed_when: true
+  failed_when: >-
+    windmill_seed_schedule_create.status not in [200, 201, 400]
+    or (
+      windmill_seed_schedule_create.status == 400
+      and 'already exists' not in (windmill_seed_schedule_create.content | default('') | lower)
+    )
+  changed_when: windmill_seed_schedule_create.status in [200, 201]
+  register: windmill_seed_schedule_create
   no_log: true
 
 - name: Update existing repo-managed Windmill schedules

@@ -34,6 +34,7 @@ The workflow manages these live surfaces:
 - PostgreSQL login role `windmill_admin` plus support role `windmill_user` on `postgres-lv3`
 - Windmill runtime under `/opt/windmill` on `docker-runtime-lv3`
 - Tailscale-only operator entrypoint at `http://100.118.189.95:8005`
+- password-login bootstrap admin `superadmin_secret@windmill.dev` backed by the managed Windmill secret
 - repo-managed workspace `lv3`
 - seeded script `f/lv3/windmill_healthcheck`
 - seeded script `f/lv3/rotate_credentials`
@@ -56,11 +57,12 @@ Run these checks after converge:
 3. `curl -s http://100.118.189.95:8005/api/version`
 4. `curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" http://100.118.189.95:8005/api/users/whoami`
 5. `curl -s -X POST -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" -H "Content-Type: application/json" -d '{"probe":"manual-run"}' http://100.118.189.95:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fwindmill_healthcheck`
+6. `curl -s -X POST http://100.118.189.95:8005/api/auth/login -H "Content-Type: application/json" -d "{\"email\":\"superadmin_secret@windmill.dev\",\"password\":\"$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)\"}"`
 
 ## Notes
 
 - Windmill stays private-only in this rollout. There is no public edge publication and no public DNS record for it.
-- The current bootstrap uses a repo-managed superadmin secret mirrored locally so the repository can seed and verify the runtime without UI-only state. Replace that with narrower identities as ADR 0046, ADR 0047, and ADR 0056 are implemented.
+- The current bootstrap uses a repo-managed superadmin secret mirrored locally so the repository can seed and verify the runtime without UI-only state. The same managed secret currently backs the password-login bootstrap admin for browser access. Replace that with narrower identities as ADR 0046, ADR 0047, and ADR 0056 are implemented.
 - No repo-managed Windmill job in this rollout stores long-lived third-party secrets inside Windmill. Secret-bearing workflows should wait for ADR 0043 or use another approved authority.
 - The seeded `f/lv3/rotate_credentials` script summarizes the canonical secret-rotation catalog and is the first Windmill surface for ADR 0065.
 - Backup coverage comes from the existing VM backup policy: `postgres-lv3` protects the Windmill database and `docker-runtime-lv3` protects the runtime filesystem and logs.

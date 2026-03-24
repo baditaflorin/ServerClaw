@@ -36,6 +36,11 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         "f/lv3/operator_inventory",
     }.issubset(script_paths)
     assert "f/lv3/operator_access_admin" in raw_app_paths
+    assert defaults["windmill_bootstrap_identity_email"] == "superadmin_secret@windmill.dev"
+    assert defaults["windmill_bootstrap_identity_username"] == "superadmin_secret"
+    assert defaults["windmill_bootstrap_identity_login_type"] == "password"
+    weekly_schedule = next(entry for entry in defaults["windmill_seed_schedules"] if entry["path"] == "f/lv3/build_cache_maintenance_weekly")
+    assert weekly_schedule["schedule"] == "0 0 4 * * 7"
 
 
 def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> None:
@@ -122,6 +127,17 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
         REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml"
     ).read_text()
 
+    assert "Ensure the Windmill bootstrap workspace identity is consistent" in tasks
+    assert "INSERT INTO password" in tasks
+    assert "Ensure the Windmill bootstrap workspace user is consistent" in tasks
+    assert "INSERT INTO usr" in tasks
+    assert "INSERT INTO usr_to_group" in tasks
+    assert "Ensure the Windmill bootstrap admin login type matches the managed contract" in tasks
+    assert "/api/users/set_login_type/" in tasks
+    assert "Ensure the Windmill bootstrap admin password matches the managed secret" in tasks
+    assert "/api/users/set_password_of/" in tasks
+    assert "Create repo-managed Windmill schedules" in tasks
+    assert "status_code:\n      - 200\n      - 201\n      - 400" in tasks
     assert "Sync repo-managed Windmill raw apps" in tasks
     assert "wmill sync push" in tasks
     assert "--skip-branch-validation" in tasks

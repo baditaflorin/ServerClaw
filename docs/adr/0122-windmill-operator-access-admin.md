@@ -79,7 +79,7 @@ This ADR adds a browser-first admin path inside Windmill. It does not attempt to
 - operator creation and removal gain a browser-first path with no terminal requirement
 - the same governed backend remains in control, so there is no policy drift between UI and CLI
 - the app is versioned, tested, and deployed from the repo like the rest of the platform
-- a new machine can perform routine access administration through Windmill after normal SSO login
+- a new machine can perform routine access administration through Windmill after normal authenticated login
 
 **Negative / Trade-offs**
 
