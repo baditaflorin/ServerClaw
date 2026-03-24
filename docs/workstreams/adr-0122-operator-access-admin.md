@@ -2,7 +2,9 @@
 
 - ADR: [ADR 0122](../adr/0122-windmill-operator-access-admin.md)
 - Title: Repo-managed Windmill raw app for browser-first operator onboarding, off-boarding, reconciliation, and inventory
-- Status: ready
+- Status: merged
+- Implemented In Repo Version: 0.120.0
+- Implemented On: 2026-03-24
 - Branch: `codex/adr-0122-operator-admin-ui`
 - Worktree: `.worktrees/adr-0122-operator-admin-ui`
 - Owner: codex
