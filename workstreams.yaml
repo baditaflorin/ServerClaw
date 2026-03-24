@@ -2552,3 +2552,25 @@ workstreams:
       - docs/runbooks/public-surface-security-scan.md
     ready_to_merge: false
     live_applied: false
+
+  - id: adr-0136-http-security-headers
+    adr: "0136"
+    title: HTTP security headers hardening
+    status: live_applied
+    owner: codex
+    branch: codex/adr-0136-http-security-headers
+    worktree_path: .worktrees/adr-0136
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0136-http-security-headers.md
+    depends_on:
+      - adr-0021-public-subdomain-publication
+      - adr-0133-portal-auth-by-default
+    conflicts_with: []
+    shared_surfaces:
+      - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/
+      - scripts/security_headers_audit.py
+      - docs/runbooks/http-security-headers.md
+      - docs/adr/0136-http-security-headers-hardening.md
+      - tests/test_nginx_edge_publication_role.py
+      - tests/test_security_headers_audit.py
+    ready_to_merge: false
+    live_applied: true

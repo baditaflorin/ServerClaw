@@ -90,6 +90,22 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertEqual(docs_site["source_dir"], "docs-portal")
         self.assertNotIn("noindex", docs_site)
 
+    def test_defaults_publish_global_security_headers_with_host_overrides(self) -> None:
+        security_defaults = self.defaults["public_edge_security_headers_default"]
+        security_overrides = self.defaults["public_edge_security_headers_overrides"]
+
+        self.assertEqual(
+            security_defaults["strict_transport_security"],
+            "max-age=63072000; includeSubDomains; preload",
+        )
+        self.assertEqual(security_defaults["cross_origin_resource_policy"], "same-origin")
+        self.assertEqual(security_defaults["x_content_type_options"], "nosniff")
+        self.assertIn("frame-ancestors 'none'", security_defaults["content_security_policy"])
+        self.assertIn("grafana.lv3.org", security_overrides)
+        self.assertIn("'unsafe-eval'", security_overrides["grafana.lv3.org"]["content_security_policy"])
+        self.assertIn("https://fonts.googleapis.com", security_overrides["docs.lv3.org"]["content_security_policy"])
+        self.assertIn("https://unpkg.com", security_overrides["ops.lv3.org"]["content_security_policy"])
+
     def test_template_supports_root_proxy_path_override(self) -> None:
         self.assertIn("site.root_proxy_path is defined", self.template)
         self.assertIn("location = / {", self.template)
@@ -109,6 +125,15 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertIn("site.proxy_hide_headers | default([])", self.template)
         self.assertIn("site.blocked_exact_paths | default([])", self.template)
         self.assertIn("proxy_hide_header {{ header_name }};", self.template)
+
+    def test_template_renders_security_headers_from_default_and_override_maps(self) -> None:
+        self.assertIn("public_edge_security_headers_default | combine(", self.template)
+        self.assertIn('add_header Strict-Transport-Security', self.template)
+        self.assertIn('add_header Cross-Origin-Resource-Policy', self.template)
+        self.assertIn('add_header Content-Security-Policy', self.template)
+        self.assertIn('add_header Permissions-Policy', self.template)
+        self.assertIn('proxy_hide_header Cross-Origin-Resource-Policy;', self.template)
+        self.assertIn('proxy_hide_header Content-Security-Policy;', self.template)
 
 
 if __name__ == "__main__":

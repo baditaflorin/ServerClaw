@@ -28,6 +28,59 @@ public_edge_robots_txt_content: |
   # There is no public content intended for indexing.
 public_edge_generated_build_root: "{{ playbook_dir }}/../build"
 public_edge_static_sites: "{{ public_edge_service_topology | service_topology_edge_static_sites }}"
+public_edge_security_headers_default:
+  strict_transport_security: "max-age=63072000; includeSubDomains; preload"
+  x_content_type_options: nosniff
+  x_frame_options: DENY
+  referrer_policy: strict-origin-when-cross-origin
+  permissions_policy: "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
+  x_robots_tag: "noindex, nofollow"
+  content_security_policy: >-
+    default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+    object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline';
+    img-src 'self' data:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'
+public_edge_security_headers_overrides:
+  api.lv3.org:
+    content_security_policy: >-
+      default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none';
+      object-src 'none'
+  docs.lv3.org:
+    content_security_policy: >-
+      default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'
+      https://fonts.googleapis.com; img-src 'self' data:; font-src 'self' data:
+      https://fonts.gstatic.com; connect-src 'self'; manifest-src 'self'
+  grafana.lv3.org:
+    content_security_policy: >-
+      default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self'
+      'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:;
+      connect-src 'self' https://grafana.lv3.org wss://grafana.lv3.org;
+      worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
+  ops.lv3.org:
+    content_security_policy: >-
+      default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline' https://unpkg.com;
+      style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:;
+      connect-src 'self'; manifest-src 'self'
+  sso.lv3.org:
+    content_security_policy: >-
+      default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';
+      img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://sso.lv3.org;
+      frame-src 'self'; manifest-src 'self'
+  status.lv3.org:
+    content_security_policy: >-
+      default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';
+      img-src 'self' data:; font-src 'self' data:; connect-src 'self'
+      https://status.lv3.org ws://status.lv3.org wss://status.lv3.org; manifest-src 'self'
+  uptime.lv3.org:
+    content_security_policy: >-
+      default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';
+      img-src 'self' data:; font-src 'self' data:; connect-src 'self'
+      https://uptime.lv3.org ws://uptime.lv3.org wss://uptime.lv3.org; manifest-src 'self'
 public_edge_extra_sites:
   - hostname: changelog.lv3.org
     kind: static_dir
