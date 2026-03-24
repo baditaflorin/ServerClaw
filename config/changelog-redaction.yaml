@@ -1,0 +1,52 @@
+schema_version: "1.0.0"
+rules:
+  - field_pattern: "*.error_detail"
+    level: STRIP
+  - field_pattern: "*.stack_trace"
+    level: STRIP
+  - field_pattern: "*.job_payload"
+    level: STRIP
+  - field_pattern: actor
+    level: MASK
+    mask_fn: identity_prefix
+  - field_pattern: metadata.branch
+    level: MASK
+    mask_fn: identity_prefix
+  - field_pattern: vm_names
+    level: MASK
+    mask_fn: host_labels
+  - field_pattern: targets
+    level: MASK
+    mask_fn: target_labels
+  - field_pattern: metadata.target
+    level: MASK
+    mask_fn: redact_inline_text
+  - field_pattern: metadata.evidence_ref
+    level: MASK
+    mask_fn: redact_inline_text
+  - field_pattern: metadata.staging_receipt
+    level: SUMMARISE
+    summarise_fn: receipt_reference
+  - field_pattern: metadata.prod_receipt
+    level: SUMMARISE
+    summarise_fn: receipt_reference
+  - field_pattern: "*.params"
+    level: SUMMARISE
+    summarise_fn: count_keys
+  - field_pattern: "*.env_vars"
+    level: SUMMARISE
+    summarise_fn: key_names_only
+  - field_pattern: workflow_id
+    level: RETAIN
+  - field_pattern: change_type
+    level: RETAIN
+  - field_pattern: service_ids
+    level: RETAIN
+  - field_pattern: service_names
+    level: RETAIN
+  - field_pattern: timestamp
+    level: RETAIN
+  - field_pattern: date_label
+    level: RETAIN
+  - field_pattern: outcome
+    level: RETAIN

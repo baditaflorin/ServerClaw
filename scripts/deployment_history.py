@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from controller_automation_toolkit import load_json, repo_path
+from changelog_redaction import redact_history_entries
 from mutation_audit import resolve_loki_url
 
 
@@ -481,6 +482,11 @@ def collect_mutation_audit_entries(
                     "action": action,
                     "target": target,
                     "evidence_ref": event.get("evidence_ref"),
+                    "params": event.get("params"),
+                    "env_vars": event.get("env_vars"),
+                    "error_detail": event.get("error_detail"),
+                    "stack_trace": event.get("stack_trace"),
+                    "job_payload": event.get("job_payload"),
                 },
             }
         )
@@ -546,8 +552,9 @@ def load_deployment_history(
         loki_query_url=loki_query_url,
     )
     entries = sort_history_entries(live_entries + promotion_entries + audit_entries)
+    redacted_entries = redact_history_entries(entries)
     return {
-        "entries": entries,
+        "entries": redacted_entries,
         "warnings": warnings,
         "stats": {
             "live_apply_count": len(live_entries),
