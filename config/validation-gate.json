@@ -59,6 +59,14 @@
     "timeout_seconds": 240,
     "cache_mounts": ["trivy"]
   },
+  "artifact-secret-scan": {
+    "description": "Scan published receipts and generated publication artifacts for secrets with the repo-managed gitleaks rules.",
+    "severity": "error",
+    "image": "registry.lv3.org/check-runner/security:2026.03.23",
+    "command": "python scripts/published_artifact_secret_scan.py --repo-root /workspace --enforce-gitleaks",
+    "working_dir": "/workspace",
+    "timeout_seconds": 120
+  },
   "service-completeness": {
     "description": "Enforce the ADR 0107 extension checklist for non-grandfathered services.",
     "severity": "error",

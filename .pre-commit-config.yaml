@@ -15,3 +15,11 @@ repos:
       - id: gitleaks
         args:
           - --config=.gitleaks.toml
+  - repo: local
+    hooks:
+      - id: published-artifact-secret-scan
+        name: Scan published artifacts for secrets
+        entry: python3 scripts/published_artifact_secret_scan.py --repo-root .
+        language: system
+        pass_filenames: false
+        files: ^(receipts/.*\.json|\.local/triage/reports/.*\.json|build/search-index/.*\.json|build/changelog-portal/.*\.(html|json))$

@@ -14,6 +14,29 @@ release_policy:
   breaking_change_criteria: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/version-semantics.json
 
 workstreams:
+  - id: adr-0138-published-artifact-secret-scanning
+    adr: "0138"
+    title: Published artifact secret scanning
+    status: ready
+    owner: codex
+    branch: codex/adr-0138-published-artifact-secret-scanning
+    worktree_path: .worktrees/adr-0138
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0138-published-artifact-secret-scanning.md
+    depends_on:
+      - adr-0081-changelog-portal
+      - adr-0087-validation-gate
+      - adr-0114-incident-triage
+      - adr-0121-search-indexing-fabric
+    conflicts_with: []
+    shared_surfaces:
+      - .gitleaks.toml
+      - .pre-commit-config.yaml
+      - config/validation-gate.json
+      - scripts/published_artifact_secret_scan.py
+      - docs/runbooks/validation-gate.md
+    ready_to_merge: true
+    live_applied: false
+
   - id: adr-0011-monitoring
     adr: "0011"
     title: Monitoring stack rollout
