@@ -57,7 +57,7 @@
 - the edge role renders `robots.txt` without per-site exceptions
 - the shared certificate definition includes `lv3.org`
 - role verification checks `robots.txt`, the crawl header, and the robots meta tag
-- release metadata records ADR 0137 as implemented in repository version `0.126.0`
+- release metadata records ADR 0137 as implemented in repository version `0.134.0`
 
 ## Outcome
 
