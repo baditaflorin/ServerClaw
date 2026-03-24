@@ -50,6 +50,8 @@
           "environment",
           "status",
           "exposure",
+          "auth_requirement",
+          "audience",
           "target",
           "owner_adr",
           "tls"
@@ -75,9 +77,27 @@
             "type": "string",
             "enum": ["edge-published", "informational-only", "private-only"]
           },
+          "auth_requirement": {
+            "type": "string",
+            "enum": [
+              "keycloak_oidc",
+              "keycloak_oidc_readonly",
+              "token_auth",
+              "private_network_only",
+              "public_intentional",
+              "public_informational"
+            ]
+          },
+          "audience": {
+            "type": "string",
+            "minLength": 1
+          },
           "target": {
             "type": "string",
             "minLength": 1
+          },
+          "justification": {
+            "type": ["string", "null"]
           },
           "target_port": {
             "type": "integer",

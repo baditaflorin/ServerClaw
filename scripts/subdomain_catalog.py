@@ -15,6 +15,14 @@ PUBLIC_EDGE_DEFAULTS_PATH = repo_path("roles", "nginx_edge_publication", "defaul
 
 ALLOWED_STATUSES = {"active", "planned", "reserved", "retiring"}
 ALLOWED_EXPOSURES = {"edge-published", "informational-only", "private-only"}
+ALLOWED_AUTH_REQUIREMENTS = {
+    "keycloak_oidc",
+    "keycloak_oidc_readonly",
+    "token_auth",
+    "private_network_only",
+    "public_intentional",
+    "public_informational",
+}
 ALLOWED_TLS_PROVIDERS = {"letsencrypt", "step-ca", "none"}
 EDGE_ROUTE_EXPOSURES = {"edge-published", "informational-only"}
 PROVISIONABLE_STATUSES = {"active", "planned"}
@@ -254,6 +262,26 @@ def validate_subdomain_catalog(
         if exposure not in ALLOWED_EXPOSURES:
             raise ValueError(
                 f"subdomains[{index}].exposure must be one of {sorted(ALLOWED_EXPOSURES)}"
+            )
+        auth_requirement = require_str(
+            entry.get("auth_requirement"),
+            f"subdomains[{index}].auth_requirement",
+        )
+        if auth_requirement not in ALLOWED_AUTH_REQUIREMENTS:
+            raise ValueError(
+                f"subdomains[{index}].auth_requirement must be one of {sorted(ALLOWED_AUTH_REQUIREMENTS)}"
+            )
+        require_str(entry.get("audience"), f"subdomains[{index}].audience")
+        justification = entry.get("justification")
+        if justification is not None:
+            require_str(justification, f"subdomains[{index}].justification")
+        if auth_requirement in {"public_intentional", "public_informational"} and not justification:
+            raise ValueError(
+                f"subdomains[{index}] public auth classifications require a non-empty justification"
+            )
+        if auth_requirement == "private_network_only" and exposure != "private-only":
+            raise ValueError(
+                f"subdomains[{index}].auth_requirement=private_network_only requires exposure=private-only"
             )
 
         require_str(entry.get("target"), f"subdomains[{index}].target")

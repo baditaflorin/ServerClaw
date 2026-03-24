@@ -70,8 +70,18 @@ or directly:
 uv run --with pyyaml --with jsonschema python scripts/generate_changelog_portal.py --check
 ```
 
+## Live Verification
+
+After publishing through the shared edge:
+
+```bash
+curl -Ik https://changelog.lv3.org/
+```
+
+Expected result: `HTTP/2 302` to `/oauth2/sign_in` for an unauthenticated request.
+
 ## Deployment Boundary
 
 This workstream implements the generated site, the governed history query tool, and edge publication wiring for `changelog.lv3.org`.
 
-`changelog.lv3.org` is live on platform version `0.40.0` after the shared edge publication path moved to Hetzner DNS-01 certificate validation.
+`changelog.lv3.org` is live on platform version `0.40.0`; from platform version `0.114.7` onward it is also protected by the shared Keycloak portal auth gate defined in ADR 0133.

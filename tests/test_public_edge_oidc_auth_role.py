@@ -17,6 +17,8 @@ class PublicEdgeOidcAuthRoleTests(unittest.TestCase):
     def test_ops_portal_proxy_requests_only_standard_oidc_scopes(self) -> None:
         self.assertEqual(self.defaults["public_edge_oidc_auth_scope"], "openid profile email")
         self.assertNotIn("groups", self.defaults["public_edge_oidc_auth_scope"].split())
+        self.assertEqual(self.defaults["public_edge_oidc_auth_cookie_domain"], ".lv3.org")
+        self.assertEqual(self.defaults["public_edge_oidc_auth_probe_hostname"], "ops.lv3.org")
 
     def test_template_renders_scope_and_group_filtering(self) -> None:
         self.assertIn('scope = "{{ public_edge_oidc_auth_scope }}"', self.template)

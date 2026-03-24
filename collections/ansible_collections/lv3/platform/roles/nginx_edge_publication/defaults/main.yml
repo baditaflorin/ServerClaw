@@ -27,6 +27,10 @@ public_edge_extra_sites:
     source_dir: docs-portal
     noindex: true
 public_edge_authenticated_sites:
+  changelog.lv3.org:
+    auth_proxy_upstream: http://127.0.0.1:4180
+  docs.lv3.org:
+    auth_proxy_upstream: http://127.0.0.1:4180
   ops.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
     unauthenticated_paths:

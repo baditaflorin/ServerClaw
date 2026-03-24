@@ -40,4 +40,5 @@ make deploy-docs-portal
 - `build/docs-portal/index.html` exists after `make docs`
 - `build/docs-portal/services/keycloak/index.html` exists
 - `build/docs-portal/reference/ports/index.html` exists
-- the rendered site stays public and returns the `X-Robots-Tag: noindex` header until the platform reaches `1.0.0`
+- unauthenticated `curl -Ik https://docs.lv3.org/` returns `302` to `/oauth2/sign_in`
+- the authenticated site still returns the `X-Robots-Tag: noindex` header until the platform reaches `1.0.0`

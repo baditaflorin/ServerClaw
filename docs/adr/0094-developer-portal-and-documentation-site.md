@@ -145,7 +145,7 @@ nav:
 
 ### Access model
 
-`docs.lv3.org` is **publicly readable** — no authentication required. It contains no secrets (the reference page shows secret names from `config/secret-catalog.json` but never values). This matches the access model for typical open-source project documentation: the platform's design is not a secret, and making docs public allows sharing links without an SSO session.
+This original public-readability decision was superseded by ADR 0133 in repo version `0.122.0` and platform version `0.114.7`. `docs.lv3.org` now requires a Keycloak-backed operator session even though the site remains read-only after login.
 
 ## Consequences
 

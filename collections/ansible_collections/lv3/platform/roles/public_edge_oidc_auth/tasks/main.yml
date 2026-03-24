@@ -30,6 +30,7 @@
       - public_edge_oidc_auth_profile_url
       - public_edge_oidc_auth_validate_url
       - public_edge_oidc_auth_jwks_url
+      - public_edge_oidc_auth_probe_hostname
     common_assert_vars_fail_msg: >-
       public_edge_oidc_auth requires the oauth2-proxy install settings, Keycloak client material,
       and cookie/session configuration.
@@ -170,9 +171,9 @@
     url: "http://{{ public_edge_oidc_auth_http_address }}/oauth2/auth"
     method: GET
     headers:
-      Host: "{{ public_edge_oidc_auth_cookie_domain }}"
+      Host: "{{ public_edge_oidc_auth_probe_hostname }}"
       X-Forwarded-Proto: https
-      X-Forwarded-Host: "{{ public_edge_oidc_auth_cookie_domain }}"
+      X-Forwarded-Host: "{{ public_edge_oidc_auth_probe_hostname }}"
       X-Forwarded-Uri: /
       X-Real-IP: 127.0.0.1
     status_code: 401

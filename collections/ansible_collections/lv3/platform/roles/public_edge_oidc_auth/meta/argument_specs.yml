@@ -130,3 +130,8 @@ argument_specs:
         required: true
         description:
           - Private Keycloak JWKS endpoint used by the auth proxy.
+      public_edge_oidc_auth_probe_hostname:
+        type: str
+        required: true
+        description:
+          - One protected hostname used for the local unauthenticated auth-check probe.

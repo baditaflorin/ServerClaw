@@ -48,12 +48,13 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
 
     def test_ops_portal_defaults_use_authenticated_proxy_mode(self) -> None:
         extra_hostnames = [site["hostname"] for site in self.defaults["public_edge_extra_sites"]]
+        protected_sites = self.defaults["public_edge_authenticated_sites"]
 
         self.assertNotIn("ops.lv3.org", extra_hostnames)
-        self.assertEqual(
-            self.defaults["public_edge_authenticated_sites"]["ops.lv3.org"]["unauthenticated_paths"],
-            ["/health"],
-        )
+        self.assertEqual(sorted(protected_sites), ["changelog.lv3.org", "docs.lv3.org", "ops.lv3.org"])
+        self.assertEqual(protected_sites["ops.lv3.org"]["unauthenticated_paths"], ["/health"])
+        self.assertNotIn("unauthenticated_paths", protected_sites["docs.lv3.org"])
+        self.assertNotIn("unauthenticated_paths", protected_sites["changelog.lv3.org"])
 
     def test_tasks_include_dns_hetzner_plugin_and_credentials_flow(self) -> None:
         task_names = {task["name"] for task in self.tasks}
@@ -84,6 +85,7 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
     def test_template_supports_root_proxy_path_override(self) -> None:
         self.assertIn("site.root_proxy_path is defined", self.template)
         self.assertIn("location = / {", self.template)
+        self.assertIn("site.hostname in public_edge_authenticated_sites", self.template)
 
     def test_template_supports_proxy_header_stripping_and_blocked_paths(self) -> None:
         self.assertIn("site.proxy_hide_headers | default([])", self.template)
