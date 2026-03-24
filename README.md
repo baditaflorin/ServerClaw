@@ -89,7 +89,7 @@ The developer portal generator now stamps published docs pages with sensitivity 
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.124.0` |
+| Repository version | `0.124.1` |
 | Platform version | `0.114.6` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -692,7 +692,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.124.0` |
+| Repository version | `0.124.1` |
 | Platform version | `0.114.6` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |

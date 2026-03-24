@@ -3,7 +3,7 @@
 - ADR: [ADR 0140](../adr/0140-grafana-public-access-hardening.md)
 - Title: Remove unauthenticated Grafana visibility and version disclosure from the public edge
 - Status: merged
-- Implemented In Repo Version: 0.123.1
+- Implemented In Repo Version: 0.124.1
 - Implemented On: 2026-03-24
 - Branch: `codex/adr-0140-grafana-hardening`
 - Worktree: `.worktrees/adr-0140-grafana-hardening`
