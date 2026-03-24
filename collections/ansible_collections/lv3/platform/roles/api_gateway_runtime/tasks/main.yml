@@ -148,6 +148,16 @@
     group: root
     mode: "0644"
 
+- name: Assert the external Keycloak Docker network exists
+  ansible.builtin.command:
+    argv:
+      - docker
+      - network
+      - inspect
+      - "{{ api_gateway_keycloak_docker_network }}"
+  register: api_gateway_keycloak_network
+  changed_when: false
+
 - name: Pull the API gateway base image
   ansible.builtin.command:
     argv:
@@ -176,6 +186,35 @@
     or 'Recreating' in api_gateway_up.stdout
     or 'Starting' in api_gateway_up.stdout
     or 'Building' in api_gateway_up.stdout
+
+- name: Check whether the API gateway published host port is present
+  ansible.builtin.command:
+    argv:
+      - docker
+      - port
+      - "{{ api_gateway_container_name }}"
+      - 8080/tcp
+  register: api_gateway_published_port
+  changed_when: false
+  failed_when: false
+
+- name: Force recreate the API gateway when the published host port is missing
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ api_gateway_compose_file }}"
+      - up
+      - -d
+      - --build
+      - --force-recreate
+      - --remove-orphans
+  args:
+    chdir: "{{ api_gateway_site_dir }}"
+  register: api_gateway_force_recreate
+  changed_when: true
+  when: api_gateway_published_port.stdout | trim == ""
 
 - name: Verify the API gateway runtime
   ansible.builtin.import_tasks: verify.yml

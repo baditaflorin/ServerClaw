@@ -24,13 +24,19 @@ uv run --with pytest --with fastapi==0.116.1 --with httpx==0.28.1 --with uvicorn
 ansible-playbook -i inventory/hosts.yml playbooks/api-gateway.yml
 ```
 
+If the controller cannot reach guests directly over Tailscale, use the Proxmox jump path:
+
+```bash
+ansible-playbook -i inventory/hosts.yml -e proxmox_guest_ssh_connection_mode=proxmox_host_jump playbooks/api-gateway.yml
+```
+
 ## Verify
 
 From `docker-runtime-lv3`:
 
 ```bash
-curl -sf http://127.0.0.1:8080/healthz
-curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8080/v1/health
+curl -sf http://127.0.0.1:8083/healthz
+curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8083/v1/health
 ```
 
 Expected:
@@ -41,6 +47,7 @@ Expected:
 From an operator workstation with a valid Keycloak token:
 
 ```bash
+curl https://api.lv3.org/healthz
 curl -H "Authorization: Bearer $LV3_TOKEN" https://api.lv3.org/v1/health
 curl -H "Authorization: Bearer $LV3_TOKEN" https://api.lv3.org/v1/platform/services
 ```
@@ -49,4 +56,4 @@ curl -H "Authorization: Bearer $LV3_TOKEN" https://api.lv3.org/v1/platform/servi
 
 - The gateway validates Keycloak JWTs directly against the realm JWKS.
 - Native `/v1/platform/*` endpoints read repo-synced catalogs copied into the runtime bundle.
-- Public publication is ready in repo automation; live DNS and edge truth only become active after apply from `main`.
+- The public edge certificate for `api.lv3.org` is part of the shared `lv3-edge` certificate on `nginx-lv3`.

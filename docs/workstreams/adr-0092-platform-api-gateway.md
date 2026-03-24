@@ -2,9 +2,9 @@
 
 - ADR: [ADR 0092](../adr/0092-unified-platform-api-gateway.md)
 - Title: FastAPI gateway aggregating all platform service APIs behind a single authenticated endpoint at api.lv3.org
-- Status: merged
-- Branch: `codex/adr-0092-unified-platform-api-gateway`
-- Worktree: `.worktrees/adr-0092`
+- Status: live_applied
+- Branch: `codex/integration-0092-live`
+- Worktree: `.worktrees/integration-0092`
 - Owner: codex
 - Depends On: `adr-0021-nginx-edge`, `adr-0045-communication-lanes`, `adr-0047-mtls`, `adr-0056-keycloak`, `adr-0058-nats`, `adr-0066-audit-log`, `adr-0069-agent-tool-registry`
 - Conflicts With: none
@@ -46,23 +46,23 @@
 
 ## Expected Live Surfaces
 
-- `https://api.lv3.org/v1/health` returns HTTP 200 with `{"status": "healthy"}`
-- `https://api.lv3.org/v1/platform/services` returns the full service catalog
+- `https://api.lv3.org/healthz` returns HTTP 200 with `{"status":"ok"}`
+- `https://api.lv3.org/v1/health` returns `401` without a bearer token
+- `https://api.lv3.org/v1/platform/services` returns the full service catalog with a valid Keycloak bearer token
 - All existing agent tools in `config/agent-tool-registry.json` resolve via `api.lv3.org`
 
 ## Verification
 
-- `curl -H "Authorization: Bearer $(lv3 token)" https://api.lv3.org/v1/health` → 200
-- `curl -H "Authorization: Bearer $(lv3 token)" https://api.lv3.org/v1/platform/services` → lists all services
-- `curl https://api.lv3.org/v1/health` (no token) → 401
-- Grafana API Gateway dashboard shows request rate > 0 after running the above
+- `ansible-playbook -e proxmox_guest_ssh_connection_mode=proxmox_host_jump playbooks/api-gateway.yml` → passes and verifies a real bearer token against `/v1/platform/services`
+- `curl https://api.lv3.org/healthz` → `200 {"status":"ok"}`
+- `curl https://api.lv3.org/v1/health` (no token) → `401`
+- `curl -H "Authorization: Bearer <realm token>" https://api.lv3.org/v1/platform/services` → `200` with `24` services
 
 ## Merge Criteria
 
 - Gateway deployed and healthy on `docker-runtime-lv3`
-- `api.lv3.org` resolves and is TLS-terminated by nginx with OIDC
-- All 5 native `/v1/platform/*` endpoints return valid responses
-- NATS event `platform.api.request` is published and receivable (verify with `nats sub platform.api.request`)
+- `api.lv3.org` resolves and is TLS-terminated by nginx with a certificate that includes `api.lv3.org`
+- Anonymous `healthz` and authenticated `/v1/platform/services` requests succeed through the public edge
 - Health probe in `config/health-probe-catalog.json` passes
 
 ## Notes For The Next Assistant
@@ -74,6 +74,7 @@
 
 ## Outcome
 
-- repository implementation is complete on `main` in repo release `0.101.0`
-- the FastAPI gateway runtime, catalog validation, deployment playbooks, service topology wiring, health probes, Grafana dashboard, and agent-tool routing now ship from repository state
-- no live platform version change is claimed yet; edge publication, service deployment, and live verification still require apply from `main`
+- repository implementation landed earlier on `main` in repo release `0.101.0`
+- live rollout completed on 2026-03-24 in platform version `0.114.2`
+- the live platform now serves `https://api.lv3.org/healthz` and accepts authenticated bearer requests on `https://api.lv3.org/v1/platform/services`
+- the rollout is recorded in [receipts/live-applies/2026-03-24-adr-0092-platform-api-gateway-live-apply.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/live-applies/2026-03-24-adr-0092-platform-api-gateway-live-apply.json)

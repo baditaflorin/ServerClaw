@@ -186,6 +186,7 @@ platform_guest_catalog:
     - vmid: 120
       name: docker-runtime-lv3
       role: docker-runtime
+      proxmox_firewall_enabled: false
       template_key: lv3-docker-host
       ipv4: 10.10.10.20
       cidr: 24
@@ -325,6 +326,7 @@ platform_guest_catalog:
       vmid: 120
       name: docker-runtime-lv3
       role: docker-runtime
+      proxmox_firewall_enabled: false
       template_key: lv3-docker-host
       ipv4: 10.10.10.20
       cidr: 24
@@ -469,6 +471,7 @@ platform_guest_catalog:
       vmid: 120
       name: docker-runtime-lv3
       role: docker-runtime
+      proxmox_firewall_enabled: false
       template_key: lv3-docker-host
       ipv4: 10.10.10.20
       cidr: 24

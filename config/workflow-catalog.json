@@ -1301,6 +1301,47 @@
         "curl -I https://grafana.lv3.org/login/generic_oauth"
       ]
     },
+    "converge-api-gateway": {
+      "description": "Converge the unified platform API gateway on docker-runtime-lv3 and publish it at api.lv3.org through the shared NGINX edge.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-api-gateway",
+        "command": "make converge-api-gateway"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "keycloak_agent_client_secret"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-api-gateway"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-api-gateway.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/api-gateway.yml",
+        "playbooks/public-edge.yml",
+        "roles/api_gateway_runtime/tasks/main.yml",
+        "roles/linux_guest_firewall/templates/nftables.conf.j2",
+        "roles/nginx_edge_publication/tasks/main.yml",
+        "inventory/group_vars/all.yml",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/api-gateway-catalog.json"
+      ],
+      "outputs": [
+        "A repo-managed FastAPI gateway on docker-runtime-lv3, the public edge hostname api.lv3.org, and an authenticated platform service catalog backed by Keycloak bearer tokens."
+      ],
+      "verification_commands": [
+        "make syntax-check-api-gateway",
+        "curl -s https://api.lv3.org/healthz",
+        "curl -s -o /dev/null -w '%{http_code}\\n' https://api.lv3.org/v1/health"
+      ]
+    },
     "converge-netbox": {
       "description": "Converge private NetBox on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish the host-side Tailscale proxy, and synchronize canonical repo inventory into the API.",
       "lifecycle_status": "active",

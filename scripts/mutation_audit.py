@@ -26,7 +26,9 @@ if str(REPO_ROOT) not in sys.path:
 # Drop that non-package entry so the repo's platform/ package can be imported.
 loaded_platform = sys.modules.get("platform")
 if loaded_platform is not None and not hasattr(loaded_platform, "__path__"):
-    sys.modules.pop("platform", None)
+    loaded_platform_file = getattr(loaded_platform, "__file__", "")
+    if not str(loaded_platform_file).startswith(str(REPO_ROOT / "platform")):
+        sys.modules.pop("platform", None)
 
 from platform.ledger import LedgerWriter  # noqa: E402
 

@@ -1175,6 +1175,47 @@
         ]
       }
     },
+    "converge-api-gateway": {
+      "description": "Converge the unified platform API gateway on docker-runtime-lv3 and publish it at api.lv3.org.",
+      "workflow_id": "converge-api-gateway",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        },
+        {
+          "name": "keycloak_agent_client_secret",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-local Keycloak confidential-client secret used for authenticated gateway verification."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-api-gateway passes",
+        "make validate passes before the apply",
+        "The gateway catalog, guest firewall allowances, and shared-edge certificate impact are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the source commit, public `api.lv3.org` HTTPS verification, and one authenticated `/v1/platform/services` response."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the runtime, bearer-token verification, or shared-edge publication fails.",
+          "Stop if `api.lv3.org` loses the intended certificate SAN or begins routing to the wrong upstream."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good gateway and edge configuration from version control before retrying.",
+          "Do not leave `api.lv3.org` partially published with a broken certificate or mismatched runtime port."
+        ]
+      }
+    },
     "converge-netbox": {
       "description": "Converge the private NetBox runtime, PostgreSQL backend, host-side proxy, and repo-managed inventory synchronization.",
       "workflow_id": "converge-netbox",

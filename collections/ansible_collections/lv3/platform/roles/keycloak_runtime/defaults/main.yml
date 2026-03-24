@@ -59,6 +59,22 @@ keycloak_realm_groups:
     attributes:
       identity_class: agent
       scope_boundary: agent_client_credentials
+keycloak_realm_roles:
+  - name: platform-read
+    description: Read access to platform metadata and health APIs.
+    composites: []
+  - name: platform-operator
+    description: Operator access to platform automation APIs.
+    composites:
+      - name: platform-read
+keycloak_group_realm_role_mappings:
+  - group_name: lv3-platform-admins
+    roles:
+      - name: platform-operator
+keycloak_service_account_realm_role_mappings:
+  - service_account_user_client_id: "{{ keycloak_agent_client_id }}"
+    roles:
+      - name: platform-read
 keycloak_public_base_url: "https://{{ keycloak_service_topology.public_hostname }}"
 keycloak_local_admin_url: "http://127.0.0.1:{{ keycloak_local_http_port }}"
 keycloak_grafana_root_url: "https://{{ hostvars['proxmox_florin'].lv3_service_topology.grafana.public_hostname }}"

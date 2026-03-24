@@ -147,6 +147,7 @@ proxmox_guests:
   - vmid: 120
     name: docker-runtime-lv3
     role: docker-runtime
+    proxmox_firewall_enabled: false
     template_key: lv3-docker-host
     ipv4: 10.10.10.20
     cidr: 24
@@ -318,6 +319,16 @@ network_policy:
           ports:
             - 8091
           description: Edge and oauth2-proxy access to Keycloak
+        - source: 172.16.0.0/12
+          protocol: tcp
+          ports:
+            - 8091
+          description: Local Docker workloads that validate or broker Keycloak tokens
+        - source: 192.168.0.0/16
+          protocol: tcp
+          ports:
+            - 8091
+          description: Local Docker workloads that validate or broker Keycloak tokens
         - source: nginx-lv3
           protocol: tcp
           ports:

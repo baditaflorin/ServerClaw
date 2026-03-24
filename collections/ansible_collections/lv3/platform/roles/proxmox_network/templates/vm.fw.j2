@@ -6,35 +6,62 @@ policy_out: ACCEPT
 {% set policy = network_policy %}
 {% set guest_ip_map = dict(proxmox_guests | map(attribute='name') | zip(proxmox_guests | map(attribute='ipv4'))) %}
 {% set guest_policy = policy.guests[guest.name] %}
+{% macro render_line(rule, source=None, port=None) -%}
+IN ACCEPT{% if source %} -source {{ source }}{% endif %} -p {{ rule.protocol }}{% if port is not none %} -dport {{ port }}{% endif %}
+{%- endmacro %}
 {% macro render_rule(rule) -%}
 {% if rule.source == 'public' %}
-{% for port in rule.ports %}
-IN ACCEPT -p {{ rule.protocol }} -dport {{ port }}
-{% endfor %}
-{% elif rule.source == 'management' %}
-{% for source in policy.guest_management_sources %}
-{% for port in rule.ports %}
-IN ACCEPT -source {{ source }} -p {{ rule.protocol }} -dport {{ port }}
-{% endfor %}
-{% endfor %}
-{% elif rule.source == 'host' %}
-{% for port in rule.ports %}
-IN ACCEPT -source {{ policy.host_source }} -p {{ rule.protocol }} -dport {{ port }}
-{% endfor %}
-{% elif rule.source == 'all_guests' %}
-{% for guest_name, guest_ip in guest_ip_map.items() | sort if guest_name != guest.name %}
-{% for port in rule.ports %}
-IN ACCEPT -source {{ guest_ip }}/32 -p {{ rule.protocol }} -dport {{ port }}
-{% endfor %}
-{% endfor %}
-{% elif rule.source in guest_ip_map %}
-{% for port in rule.ports %}
-IN ACCEPT -source {{ guest_ip_map[rule.source] }}/32 -p {{ rule.protocol }} -dport {{ port }}
-{% endfor %}
+{% if rule.protocol == 'vrrp' %}
+{{ render_line(rule) }}
 {% else %}
 {% for port in rule.ports %}
-IN ACCEPT -source {{ rule.source }} -p {{ rule.protocol }} -dport {{ port }}
+{{ render_line(rule, port=port) }}
 {% endfor %}
+{% endif %}
+{% elif rule.source == 'management' %}
+{% for source in policy.guest_management_sources %}
+{% if rule.protocol == 'vrrp' %}
+{{ render_line(rule, source=source) }}
+{% else %}
+{% for port in rule.ports %}
+{{ render_line(rule, source=source, port=port) }}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% elif rule.source == 'host' %}
+{% if rule.protocol == 'vrrp' %}
+{{ render_line(rule, source=policy.host_source) }}
+{% else %}
+{% for port in rule.ports %}
+{{ render_line(rule, source=policy.host_source, port=port) }}
+{% endfor %}
+{% endif %}
+{% elif rule.source == 'all_guests' %}
+{% for guest_name, guest_ip in guest_ip_map.items() | sort if guest_name != guest.name %}
+{% if rule.protocol == 'vrrp' %}
+{{ render_line(rule, source=guest_ip ~ '/32') }}
+{% else %}
+{% for port in rule.ports %}
+{{ render_line(rule, source=guest_ip ~ '/32', port=port) }}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% elif rule.source in guest_ip_map %}
+{% if rule.protocol == 'vrrp' %}
+{{ render_line(rule, source=guest_ip_map[rule.source] ~ '/32') }}
+{% else %}
+{% for port in rule.ports %}
+{{ render_line(rule, source=guest_ip_map[rule.source] ~ '/32', port=port) }}
+{% endfor %}
+{% endif %}
+{% else %}
+{% if rule.protocol == 'vrrp' %}
+{{ render_line(rule, source=rule.source) }}
+{% else %}
+{% for port in rule.ports %}
+{{ render_line(rule, source=rule.source, port=port) }}
+{% endfor %}
+{% endif %}
 {% endif %}
 {%- endmacro %}
 [RULES]

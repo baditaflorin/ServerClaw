@@ -1,10 +1,10 @@
 # ADR 0092: Unified Platform API Gateway
 
 - Status: Accepted
-- Implementation Status: Implemented
+- Implementation Status: Live Applied
 - Implemented In Repo Version: 0.101.0
-- Implemented In Platform Version: not yet
-- Implemented On: 2026-03-23
+- Implemented In Platform Version: 0.114.2
+- Implemented On: 2026-03-24
 - Date: 2026-03-23
 
 ## Context
@@ -23,7 +23,7 @@ The platform has all the building blocks: Keycloak for identity, OpenBao for sec
 
 ## Decision
 
-We will deploy a **platform API gateway** on `docker-runtime-lv3` as a FastAPI-based aggregation and proxy service, exposed internally at `http://10.10.10.20:8080` and published at `https://api.lv3.org` via the nginx edge (ADR 0021).
+We will deploy a **platform API gateway** on `docker-runtime-lv3` as a FastAPI-based aggregation and proxy service, exposed on the host at `http://10.10.10.20:8083` and published at `https://api.lv3.org` via the nginx edge (ADR 0021). TLS terminates at the edge; bearer-token authentication is enforced by the gateway itself.
 
 ### Architecture
 
@@ -31,10 +31,10 @@ We will deploy a **platform API gateway** on `docker-runtime-lv3` as a FastAPI-b
 external clients / agents / ops portal
         │
         ▼
-  api.lv3.org:443  (nginx edge, OIDC-protected via ADR 0056)
+  api.lv3.org:443  (nginx edge, TLS termination only)
         │
         ▼
-  10.10.10.20:8080  (api-gateway runtime on docker-runtime-lv3)
+  10.10.10.20:8083  (published api-gateway runtime on docker-runtime-lv3)
         │
    ┌────┴──────────────────────────────────┐
    │  FastAPI facade  (routes + OpenAPI)   │
@@ -52,7 +52,7 @@ external clients / agents / ops portal
 
 The facade is a thin Python FastAPI application (`scripts/api_gateway/main.py`) that:
 
-1. **Authenticates** every request against the Keycloak JWKS endpoint, extracting the caller identity and roles.
+1. **Authenticates** bearer-protected requests against the Keycloak JWKS endpoint, extracting the caller identity and roles, while keeping `/healthz` anonymous for liveness.
 2. **Routes** the request to the appropriate upstream service using `httpx` with connection pooling.
 3. **Strips** service-internal headers before forwarding; adds `X-Gateway-Request-ID` and `X-Caller-Identity` headers.
 4. **Emits** a NATS event `platform.api.request` for every request (async, non-blocking) with method, path, status, latency, and caller identity — enabling the mutation audit log (ADR 0066) to capture API-level mutations.
@@ -120,13 +120,13 @@ services:
     ports:
       - "8080:8080"
     environment:
-      KEYCLOAK_JWKS_URL: "https://sso.lv3.org/realms/lv3/protocol/openid-connect/certs"
+      KEYCLOAK_JWKS_URL: "http://keycloak:8080/realms/lv3/protocol/openid-connect/certs"
       NATS_URL: "nats://nats:4222"
       GATEWAY_CATALOG: "/config/api-gateway-catalog.json"
     volumes:
       - ./config:/config:ro
     healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:8080/v1/health"]
+      test: ["CMD", "curl", "-sf", "http://localhost:8080/healthz"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -153,6 +153,12 @@ A dedicated **Platform API** Grafana dashboard tracks:
 - The gateway is a new single point of failure; it must be deployed with a health probe (ADR 0064) and monitored
 - Proxying adds one network hop and ~1–2ms latency per request; acceptable for platform operations, not for database queries (which remain direct)
 - Services that use binary protocols (OpenBao Agent auto-auth, step-ca TLS bootstrapping) cannot be proxied by this gateway; they remain direct
+
+## Implementation Notes
+
+- Live rollout completed on 2026-03-24 in platform version `0.114.2` with receipt [receipts/live-applies/2026-03-24-adr-0092-platform-api-gateway-live-apply.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/live-applies/2026-03-24-adr-0092-platform-api-gateway-live-apply.json).
+- The live runtime now validates JWTs against Keycloak over the shared Docker network, publishes the gateway on host port `8083`, and verifies an authenticated `/v1/platform/services` request during the Ansible converge.
+- Live verification on 2026-03-24 confirmed `https://api.lv3.org/healthz` returned `200 {"status":"ok"}` and `https://api.lv3.org/v1/platform/services` returned `200` with a valid realm-issued bearer token.
 
 ## Alternatives Considered
 

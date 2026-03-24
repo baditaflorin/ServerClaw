@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.114.1
-platform_version: 0.105.0
+repo_version: 0.114.2
+platform_version: 0.114.2
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -8,6 +8,7 @@ live_apply_evidence:
     monitoring: 2026-03-22-adr-0052-loki-live-apply
     mutation_audit: 2026-03-23-adr-0066-mutation-audit-live-apply
     public_edge_publication: 2026-03-24-adr-0094-developer-portal-live-apply
+    api_gateway: 2026-03-24-adr-0092-platform-api-gateway-live-apply
     docker_runtime: 2026-03-22-adr-0023-docker-runtime-live-apply
     postgres_vm: 2026-03-22-adr-0026-postgres-vm-live-apply
     uptime_kuma: 2026-03-22-adr-0027-uptime-kuma-live-apply
@@ -844,8 +845,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.114.1
+    current: 0.114.2
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.105.0
+    current: 0.114.2
     meaning: intended platform release for the actual server configuration

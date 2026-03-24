@@ -1395,10 +1395,10 @@ workstreams:
   - id: adr-0092-platform-api-gateway
     adr: "0092"
     title: Unified platform API gateway
-    status: ready
+    status: live_applied
     owner: codex
-    branch: codex/adr-0092-unified-platform-api-gateway
-    worktree_path: .worktrees/adr-0092
+    branch: codex/integration-0092-live
+    worktree_path: .worktrees/integration-0092
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0092-platform-api-gateway.md
     depends_on:
       - adr-0021-nginx-edge
@@ -1416,7 +1416,7 @@ workstreams:
       - Compose stack docker-runtime-lv3
       - nginx edge config
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0093-interactive-ops-portal
     adr: "0093"

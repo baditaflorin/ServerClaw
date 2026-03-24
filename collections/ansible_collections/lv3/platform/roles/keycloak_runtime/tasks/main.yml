@@ -307,6 +307,40 @@
       loop_control:
         label: "{{ item.name }}"
 
+    - name: Ensure the Keycloak realm roles exist
+      community.general.keycloak_role:
+        realm: "{{ keycloak_realm_name }}"
+        name: "{{ item.name }}"
+        description: "{{ item.description }}"
+        composite: "{{ (item.composites | default([])) | length > 0 }}"
+        composites: "{{ item.composites | default([]) }}"
+        state: present
+        auth_client_id: admin-cli
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
+        auth_realm: master
+        auth_username: "{{ keycloak_bootstrap_admin_username }}"
+        auth_password: "{{ keycloak_bootstrap_admin_password }}"
+        validate_certs: false
+      loop: "{{ keycloak_realm_roles }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: Ensure realm roles are mapped to Keycloak groups
+      community.general.keycloak_realm_rolemapping:
+        realm: "{{ keycloak_realm_name }}"
+        group_name: "{{ item.group_name }}"
+        roles: "{{ item.roles }}"
+        state: present
+        auth_client_id: admin-cli
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
+        auth_realm: master
+        auth_username: "{{ keycloak_bootstrap_admin_username }}"
+        auth_password: "{{ keycloak_bootstrap_admin_password }}"
+        validate_certs: false
+      loop: "{{ keycloak_group_realm_role_mappings }}"
+      loop_control:
+        label: "{{ item.group_name }}"
+
     - name: Ensure the Grafana OAuth client exists
       community.general.keycloak_client:
         realm: "{{ keycloak_realm_name }}"
@@ -406,7 +440,7 @@
         implicit_flow_enabled: false
         direct_access_grants_enabled: false
         service_accounts_enabled: true
-        full_scope_allowed: false
+        full_scope_allowed: true
         state: present
         auth_client_id: admin-cli
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"
@@ -437,6 +471,22 @@
         auth_username: "{{ keycloak_bootstrap_admin_username }}"
         auth_password: "{{ keycloak_bootstrap_admin_password }}"
         validate_certs: false
+
+    - name: Ensure realm roles are mapped to service account users
+      community.general.keycloak_user_rolemapping:
+        realm: "{{ keycloak_realm_name }}"
+        service_account_user_client_id: "{{ item.service_account_user_client_id }}"
+        roles: "{{ item.roles }}"
+        state: present
+        auth_client_id: admin-cli
+        auth_keycloak_url: "{{ keycloak_local_admin_url }}"
+        auth_realm: master
+        auth_username: "{{ keycloak_bootstrap_admin_username }}"
+        auth_password: "{{ keycloak_bootstrap_admin_password }}"
+        validate_certs: false
+      loop: "{{ keycloak_service_account_realm_role_mappings }}"
+      loop_control:
+        label: "{{ item.service_account_user_client_id }}"
 
     - name: Read the Grafana client secret
       community.general.keycloak_clientsecret_info:
