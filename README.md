@@ -326,6 +326,7 @@ this is still same-host recovery, not off-host disaster recovery
 
 ### Runbooks
 - [Add A New Service](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/add-a-new-service.md)
+- [Agent Handoff Protocol](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/agent-handoff-protocol.md)
 - [Agent Observation Loop](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/agent-observation-loop.md)
 - [Agent State Store](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/agent-state-store.md)
 - [Agent Tool Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/agent-tool-registry.md)
@@ -569,6 +570,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0123: Service Uptime Contracts And Monitor-Backed Health](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0123-service-uptime-contracts-and-monitor-backed-health.md)
 - [ADR 0127: Intent Deduplication and Conflict Resolution](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0127-intent-deduplication-and-conflict-resolution.md)
 - [ADR 0130: Agent State Persistence Across Workflow Boundaries](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0130-agent-state-persistence-across-workflow-boundaries.md)
+- [ADR 0131: Multi-Agent Handoff Protocol](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0131-multi-agent-handoff-protocol.md)
 - [ADR 0135: Developer Portal Sensitivity Classification](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0135-developer-portal-sensitivity-classification.md)
 - [ADR 0138: Published Artifact Secret Scanning](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0138-published-artifact-secret-scanning.md)
 - [ADR 0140: Grafana Public Access Hardening](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0140-grafana-public-access-hardening.md)
@@ -672,6 +674,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0123: Service Uptime Contracts And Monitor-Backed Health](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0123-service-uptime-contracts.md)
 - [Workstream ADR 0127: Intent Conflict Resolution](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0127-intent-conflict-resolution.md)
 - [Workstream ADR 0130: Agent State Persistence Across Workflow Boundaries](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0130-agent-state-persistence.md)
+- [Workstream ADR 0131: Multi-Agent Handoff Protocol](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0131-agent-handoff-protocol.md)
 - [Workstream ADR 0135: Developer Portal Sensitivity Classification](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0135-developer-portal-sensitivity-classification.md)
 - [Workstream ADR 0138: Published Artifact Secret Scanning](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0138-published-artifact-secret-scanning.md)
 - [Workstream ADR 0140: Grafana Public Access Hardening](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0140-grafana-public-access-hardening.md)
@@ -829,6 +832,7 @@ This repository is intentionally opinionated:
 | `0123` | Service uptime contracts and monitor-backed health | `merged` | [adr-0123-service-uptime-contracts.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0123-service-uptime-contracts.md) |
 | `0127` | Intent deduplication and conflict resolution | `merged` | [adr-0127-intent-conflict-resolution.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0127-intent-conflict-resolution.md) |
 | `0130` | Agent state persistence across workflow boundaries | `merged` | [adr-0130-agent-state-persistence.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0130-agent-state-persistence.md) |
+| `0131` | Multi-agent handoff protocol | `merged` | [adr-0131-agent-handoff-protocol.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0131-agent-handoff-protocol.md) |
 | `0135` | Developer portal sensitivity classification | `merged` | [adr-0135-developer-portal-sensitivity-classification.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0135-developer-portal-sensitivity-classification.md) |
 | `0138` | Published artifact secret scanning | `merged` | [adr-0138-published-artifact-secret-scanning.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0138-published-artifact-secret-scanning.md) |
 | `0140` | Grafana public access hardening | `merged` | [adr-0140-grafana-public-access-hardening.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0140-grafana-public-access-hardening.md) |
