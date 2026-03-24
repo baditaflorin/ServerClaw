@@ -2144,7 +2144,7 @@ workstreams:
   - id: adr-0122-operator-access-admin
     adr: "0122"
     title: Windmill operator access admin surface
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/adr-0122-operator-admin-ui
     worktree_path: .worktrees/adr-0122-operator-admin-ui
@@ -2160,5 +2160,5 @@ workstreams:
       - config/windmill/apps/
       - collections/ansible_collections/lv3/platform/roles/windmill_runtime/
       - docs/runbooks/operator-onboarding.md
-    ready_to_merge: true
-    live_applied: false
+    ready_to_merge: false
+    live_applied: true

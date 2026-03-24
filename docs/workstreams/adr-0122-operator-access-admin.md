@@ -2,8 +2,9 @@
 
 - ADR: [ADR 0122](../adr/0122-windmill-operator-access-admin.md)
 - Title: Repo-managed Windmill raw app for browser-first operator onboarding, off-boarding, reconciliation, and inventory
-- Status: merged
+- Status: live_applied
 - Implemented In Repo Version: 0.120.0
+- Implemented In Platform Version: 0.114.4
 - Implemented On: 2026-03-24
 - Branch: `codex/adr-0122-operator-admin-ui`
 - Worktree: `.worktrees/adr-0122-operator-admin-ui`
@@ -73,3 +74,4 @@
 - added the repo-managed raw app bundle under `config/windmill/apps/f/lv3/operator_access_admin.raw_app/`
 - extended `windmill_runtime` to seed the existing operator workflow wrappers and push repo-managed raw apps with the Windmill CLI
 - added focused tests for the new app bundle, wrapper scripts, and Windmill seed metadata
+- completed the live rollout on `docker-runtime-lv3`, including bootstrap admin repair, raw-app sync, and password-login verification for the private Windmill admin surface
