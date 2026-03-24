@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from platform.diff_engine.schema import SemanticDiff
 
 
 class RiskClass(StrEnum):
@@ -50,6 +53,7 @@ class RiskScore:
 
 @dataclass(frozen=True)
 class ExecutionIntent:
+    intent_id: str
     workflow_id: str
     workflow_description: str
     arguments: dict[str, Any]
@@ -62,11 +66,15 @@ class ExecutionIntent:
     requires_approval: bool
     rollback_verified: bool
     expected_change_count: int
+    irreversible_count: int
+    unknown_count: int
     scoring_context: dict[str, Any]
     risk_score: RiskScore
+    semantic_diff: "SemanticDiff | None" = None
 
     def as_dict(self) -> dict[str, Any]:
         payload: dict[str, Any] = {
+            "intent_id": self.intent_id,
             "workflow_id": self.workflow_id,
             "description": self.workflow_description,
             "arguments": self.arguments,
@@ -77,9 +85,13 @@ class ExecutionIntent:
             "requires_approval": self.requires_approval,
             "rollback_verified": self.rollback_verified,
             "expected_change_count": self.expected_change_count,
+            "irreversible_count": self.irreversible_count,
+            "unknown_count": self.unknown_count,
             "scoring_context": self.scoring_context,
             "risk_score": self.risk_score.as_dict(),
         }
+        if self.semantic_diff is not None:
+            payload["semantic_diff"] = self.semantic_diff.as_dict()
         if self.target_service_id:
             payload["target_service_id"] = self.target_service_id
         if self.target_vm:

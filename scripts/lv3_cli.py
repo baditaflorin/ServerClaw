@@ -483,6 +483,7 @@ def build_execution_intent(workflow_name: str, args: list[str]) -> ExecutionInte
     context = assemble_context(compiled, repo_root=REPO_ROOT)
     risk = score_intent(compiled, context, repo_root=REPO_ROOT)
     return ExecutionIntent(
+        intent_id=compiled["intent_id"],
         workflow_id=compiled["workflow_id"],
         workflow_description=compiled["workflow_description"],
         arguments=payload,
@@ -495,14 +496,78 @@ def build_execution_intent(workflow_name: str, args: list[str]) -> ExecutionInte
         requires_approval=risk.approval_gate in {"HARD", "BLOCK"},
         rollback_verified=compiled["rollback_verified"],
         expected_change_count=compiled["expected_change_count"],
+        irreversible_count=compiled["irreversible_count"],
+        unknown_count=compiled["unknown_count"],
         scoring_context=context.as_dict(),
         risk_score=risk,
+        semantic_diff=compiled.get("semantic_diff"),
+    )
+
+
+def semantic_diff_symbol(change_kind: str, confidence: str) -> str:
+    if confidence == "unknown" or change_kind == "unknown":
+        return "?"
+    return {
+        "create": "+",
+        "update": "~",
+        "delete": "-",
+        "restart": "!",
+        "renew": "!",
+        "replace": "!",
+    }.get(change_kind, "~")
+
+
+def print_semantic_diff(intent: ExecutionIntent) -> None:
+    diff = intent.semantic_diff
+    if diff is None:
+        print("Predicted changes: unavailable")
+        return
+    print(f"Predicted changes ({diff.total_changes} objects):")
+    if not diff.changed_objects:
+        print("  none")
+    for item in diff.changed_objects:
+        symbol = semantic_diff_symbol(item.change_kind, item.confidence)
+        detail = item.notes or ""
+        print(f"  {symbol} {item.surface}:{item.object_id} {item.change_kind} {detail}".rstrip())
+    adapters = ", ".join(diff.adapters_used) if diff.adapters_used else "none"
+    print(
+        f"Irreversible: {diff.irreversible_count}   Unknown: {diff.unknown_count}   "
+        f"Adapters used: {adapters}"
     )
 
 
 def print_compiled_intent(intent: ExecutionIntent) -> None:
+    print_semantic_diff(intent)
     print("Compiled intent:")
     print(yaml.safe_dump(intent.as_dict(), sort_keys=False, default_flow_style=False).rstrip())
+
+
+def maybe_write_compiled_intent_event(
+    intent: ExecutionIntent,
+    *,
+    dsn: str | None = None,
+    writer_factory: Any | None = None,
+) -> dict[str, Any] | None:
+    resolved_dsn = (dsn if dsn is not None else os.environ.get("LV3_LEDGER_DSN", "")).strip()
+    if not resolved_dsn or resolved_dsn.lower() == "off":
+        return None
+    if writer_factory is None:
+        from platform.ledger import LedgerWriter
+
+        writer_factory = LedgerWriter
+
+    target_id = intent.target_service_id or intent.workflow_id
+    target_kind = "service" if intent.target_service_id else "workflow"
+    return writer_factory(dsn=resolved_dsn).write(
+        event_type="intent.compiled",
+        actor="operator:lv3_cli",
+        actor_intent_id=intent.intent_id,
+        tool_id="lv3_cli",
+        target_kind=target_kind,
+        target_id=target_id,
+        before_state=intent.semantic_diff.as_dict() if intent.semantic_diff is not None else None,
+        after_state=intent.as_dict(),
+    )
 
 
 def enforce_risk_gate(intent: ExecutionIntent, *, approve_risk: bool, risk_override: bool) -> int:
@@ -540,6 +605,7 @@ def run_windmill_workflow(
     encoded_path = urllib.parse.quote(script_path, safe="")
     url = f"{base_url}/api/w/lv3/jobs/run_wait_result/p/{encoded_path}"
     intent = build_execution_intent(workflow_name, args)
+    maybe_write_compiled_intent_event(intent)
     payload = json.dumps(intent.arguments).encode("utf-8")
     print_compiled_intent(intent)
     plan = CommandPlan(

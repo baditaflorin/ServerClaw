@@ -1918,6 +1918,34 @@ workstreams:
     ready_to_merge: false
     live_applied: false
 
+  - id: adr-0120-dry-run-diff-engine
+    adr: "0120"
+    title: Dry-run semantic diff engine
+    status: merged
+    owner: codex
+    branch: codex/adr-0120-diff-engine
+    worktree_path: ../proxmox_florin_server-diff-engine
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0120-dry-run-diff-engine.md
+    depends_on:
+      - adr-0048-command-catalog
+      - adr-0085-opentofu-vm-lifecycle
+      - adr-0090-platform-cli
+      - adr-0112-goal-compiler
+      - adr-0113-world-state-materializer
+      - adr-0115-mutation-ledger
+      - adr-0116-change-risk-scoring
+    conflicts_with: []
+    shared_surfaces:
+      - platform/diff_engine/
+      - config/diff-adapters.yaml
+      - scripts/risk_scorer/context.py
+      - scripts/risk_scorer/models.py
+      - scripts/risk_scorer/dimensions.py
+      - scripts/lv3_cli.py
+      - docs/runbooks/dry-run-semantic-diff-engine.md
+    ready_to_merge: false
+    live_applied: false
+
   - id: adr-0115-mutation-ledger
     adr: "0115"
     title: Event-sourced mutation ledger

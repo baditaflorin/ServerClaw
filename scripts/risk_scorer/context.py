@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import sys
+from hashlib import sha1
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -25,6 +26,8 @@ class ScoringContext:
     downstream_count: int
     recent_failure_rate: float
     expected_change_count: int
+    irreversible_count: int
+    unknown_count: int
     rollback_verified: bool
     in_maintenance_window: bool
     active_incident: bool
@@ -41,6 +44,8 @@ class ScoringContext:
             "downstream_count": self.downstream_count,
             "recent_failure_rate": round(self.recent_failure_rate, 3),
             "expected_change_count": self.expected_change_count,
+            "irreversible_count": self.irreversible_count,
+            "unknown_count": self.unknown_count,
             "rollback_verified": self.rollback_verified,
             "in_maintenance_window": self.in_maintenance_window,
             "active_incident": self.active_incident,
@@ -143,6 +148,11 @@ def resolve_rule_risk_class(live_impact: str) -> RiskClass:
 
 def normalize_identifier(value: str) -> str:
     return value.strip().lower().replace("-", "_")
+
+
+def make_intent_id(workflow_id: str, arguments: dict[str, Any]) -> str:
+    digest = sha1(json.dumps(arguments, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()[:12]
+    return f"{workflow_id}:{digest}"
 
 
 def infer_target_service_id(
@@ -399,9 +409,12 @@ def compile_workflow_intent(
     expected_change_count = workflow_defaults.get("expected_change_count")
     if not isinstance(expected_change_count, int):
         expected_change_count = int(load_risk_scoring_weights(repo_root).get("defaults", {}).get("expected_change_count", 5))
+    irreversible_count = int(workflow_defaults.get("irreversible_count", 0))
+    unknown_count = int(workflow_defaults.get("unknown_count", 0))
     rollback_verified = bool(workflow_defaults.get("rollback_verified", False))
     live_impact = str(workflow.get("live_impact", "guest_live"))
-    return {
+    payload = {
+        "intent_id": make_intent_id(workflow_id, arguments),
         "workflow_id": workflow_id,
         "workflow_description": str(workflow.get("description", "")),
         "arguments": arguments,
@@ -411,7 +424,27 @@ def compile_workflow_intent(
         "rule_risk_class": resolve_rule_risk_class(live_impact),
         "rollback_verified": rollback_verified,
         "expected_change_count": expected_change_count,
+        "irreversible_count": irreversible_count,
+        "unknown_count": unknown_count,
     }
+    semantic_diff = compute_semantic_diff(payload, repo_root=repo_root)
+    if semantic_diff is not None:
+        payload["semantic_diff"] = semantic_diff
+        payload["expected_change_count"] = semantic_diff.total_changes
+        payload["irreversible_count"] = semantic_diff.irreversible_count
+        payload["unknown_count"] = semantic_diff.unknown_count
+    return payload
+
+
+def compute_semantic_diff(payload: dict[str, Any], *, repo_root: Path | None = None) -> Any | None:
+    try:
+        from platform.diff_engine import DiffEngine
+    except Exception:  # noqa: BLE001
+        return None
+    try:
+        return DiffEngine(repo_root=repo_root or repo_path()).compute(payload)
+    except Exception:  # noqa: BLE001
+        return None
 
 
 def assemble_context(
@@ -448,6 +481,8 @@ def assemble_context(
     expected_change_count = int(payload.get("expected_change_count", defaults.get("expected_change_count", 5)))
     if "expected_change_count" not in payload:
         stale_reasons.append("expected change count defaulted because diff engine is unavailable")
+    irreversible_count = int(payload.get("irreversible_count", 0))
+    unknown_count = int(payload.get("unknown_count", 0))
     rollback_verified = bool(payload.get("rollback_verified", False))
     in_window = maintenance_window_active(target_service_id)
     incident_open = active_incident(target_service_id, overrides)
@@ -483,6 +518,8 @@ def assemble_context(
         downstream_count=downstream_count,
         recent_failure_rate=failure_rate,
         expected_change_count=expected_change_count,
+        irreversible_count=irreversible_count,
+        unknown_count=unknown_count,
         rollback_verified=rollback_verified,
         in_maintenance_window=in_window,
         active_incident=incident_open,

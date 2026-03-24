@@ -12,7 +12,7 @@ ADR 0116 adds deterministic risk scoring to the `lv3 run <workflow>` path.
 
 - Adjust scoring weights in `config/risk-scoring-weights.yaml`.
 - Adjust fallback target tiers, workflow defaults, and downstream counts in `config/risk-scoring-overrides.yaml`.
-- Prefer changing overrides only when the canonical runtime signal does not exist yet. Remove the override once ADR 0117 or ADR 0120 provides the real signal.
+- Prefer changing overrides only when the canonical runtime signal does not exist yet. ADR 0120 now provides the mutation-surface count for supported workflows; keep `expected_change_count` overrides only for unsupported or unavailable diff surfaces and remove them once the adapter coverage lands.
 
 ## Calibration
 

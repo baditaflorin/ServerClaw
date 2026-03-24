@@ -69,5 +69,5 @@
 ## Notes For The Next Assistant
 
 - The downstream-count signal should be switched from `config/risk-scoring-overrides.yaml` to the ADR 0117 runtime when that module lands on `main`.
-- The expected-change-count signal should be switched from workflow defaults to ADR 0120 semantic diff output when available.
+- ADR 0120 now supplies the expected-change-count signal for supported workflows. Keep workflow defaults only as a fallback for unsupported or unavailable diff surfaces.
 - If ADR 0112 lands later, keep the existing `scripts/risk_scorer/` package and reuse it from the compiler rather than introducing a conflicting top-level `platform/` package.

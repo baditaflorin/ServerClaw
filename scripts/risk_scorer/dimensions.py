@@ -28,16 +28,22 @@ def failure_rate_score(recent_failure_rate: float) -> float:
     return 15.0 * clamped
 
 
-def surface_score(expected_change_count: int) -> float:
+def surface_score(expected_change_count: int, *, irreversible_count: int = 0, unknown_count: int = 0) -> float:
     if expected_change_count <= 0:
-        return 0.0
-    if expected_change_count <= 2:
-        return 2.0
-    if expected_change_count <= 5:
-        return 5.0
-    if expected_change_count <= 10:
-        return 8.0
-    return 10.0
+        base = 0.0
+    elif expected_change_count <= 2:
+        base = 2.0
+    elif expected_change_count <= 5:
+        base = 5.0
+    elif expected_change_count <= 10:
+        base = 8.0
+    else:
+        base = 10.0
+    if unknown_count > 0:
+        return 10.0
+    if irreversible_count > 0:
+        return max(base, 8.0)
+    return base
 
 
 def rollback_score(rollback_verified: bool) -> float:

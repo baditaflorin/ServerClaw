@@ -1,10 +1,10 @@
 # ADR 0120: Dry-Run Semantic Diff Engine
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.116.0
+- Implemented In Platform Version: not applicable (repo-only)
+- Implemented On: 2026-03-24
 - Date: 2026-03-24
 
 ## Context
@@ -117,7 +117,7 @@ class AnsibleAdapter:
 
 ### Integration with the goal compiler
 
-The goal compiler (ADR 0112) calls the diff engine immediately after compilation, before presenting the intent to the operator. The compiled intent display includes the semantic diff:
+The long-term architecture remains the same: the goal compiler (ADR 0112) calls the diff engine immediately after compilation, before presenting the intent to the operator. The compiled intent display includes the semantic diff:
 
 ```
 $ lv3 run "deploy netbox"
@@ -144,6 +144,13 @@ The diff engine result is passed to the risk scorer (ADR 0116) as the `expected_
 Not all surfaces have complete adapters at launch. When an intent involves a surface with no adapter, the engine returns a `ChangedObject` with `confidence: unknown` and `change_kind: unknown`. These count toward the `unknown_count` in the diff summary and are flagged in the approval prompt.
 
 The risk scorer treats `unknown_count > 0` as a penalty: changes with unknown surfaces have their `mutation_surface` score contribution set to the maximum rather than zero.
+
+## Implementation Notes
+
+- Repository implementation landed in `0.116.0` with the new [platform/diff_engine/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/diff_engine) package, the adapter registry at [config/diff-adapters.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/diff-adapters.yaml), focused coverage in [tests/unit/test_diff_engine.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests/unit/test_diff_engine.py), and CLI/risk integration through [scripts/risk_scorer/context.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/risk_scorer/context.py), [scripts/risk_scorer/models.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/risk_scorer/models.py), [scripts/risk_scorer/dimensions.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/risk_scorer/dimensions.py), and [scripts/lv3_cli.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/lv3_cli.py).
+- The repository still does not ship the standalone `platform/goal_compiler/` runtime proposed in ADR 0112. The implemented integration point is the existing compiled-intent path used by `compile_workflow_intent()` and `lv3 run`, which now computes and renders `SemanticDiff` before any Windmill submission.
+- Unsupported or unconfigured surfaces now emit `confidence: unknown` objects instead of silently defaulting the change count. The mutation-surface risk dimension treats those unknowns as maximum-risk evidence rather than zero-risk absence.
+- Firewall and Proxmox VM semantic adapters remain follow-up work. The initial implemented surfaces are Ansible, OpenTofu, Docker, DNS, and TLS certificate policy.
 
 ## Consequences
 

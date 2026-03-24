@@ -59,7 +59,12 @@ def score_intent(
         "dependency_fanout": float(weights.get("dependency_fanout", 1.0)) * fanout_score(ctx.downstream_count),
         "historical_failure": float(weights.get("historical_failure", 1.0))
         * failure_rate_score(ctx.recent_failure_rate),
-        "mutation_surface": float(weights.get("mutation_surface", 1.0)) * surface_score(ctx.expected_change_count),
+        "mutation_surface": float(weights.get("mutation_surface", 1.0))
+        * surface_score(
+            ctx.expected_change_count,
+            irreversible_count=ctx.irreversible_count,
+            unknown_count=ctx.unknown_count,
+        ),
         "rollback_confidence": float(weights.get("rollback_confidence", 1.0)) * rollback_score(ctx.rollback_verified),
         "maintenance_window": float(weights.get("maintenance_window", 1.0)) * maintenance_score(ctx.in_maintenance_window),
         "active_incident": float(weights.get("active_incident", 1.0)) * incident_score(ctx.active_incident),

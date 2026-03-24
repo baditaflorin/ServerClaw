@@ -117,7 +117,7 @@ These rates can be posted to Mattermost `#platform-ops` and are used by the oper
 **Negative / Trade-offs**
 
 - Initial scoring weights will be wrong. The first 30–60 days of operation will require regular weight tuning as false positive and negative rates surface.
-- The mutation surface dimension (number of expected changes) still depends on ADR 0120 for exact semantic diffs. Until that runtime exists, the scorer uses repo-managed defaults and workflow-specific overrides.
+- The mutation surface dimension now consumes ADR 0120 semantic diff output when the diff engine can compute a surface-specific prediction. Workflow defaults and overrides remain as fallback values for workflows whose surfaces are still unsupported or unavailable at compile time.
 - The dependency fanout dimension still depends on ADR 0117 for live graph traversal. Until that runtime exists, the scorer uses `config/risk-scoring-overrides.yaml` fallback counts and marks the context as stale when a canonical signal is unavailable.
 
 ## Boundaries
