@@ -22,11 +22,11 @@ def test_repo_policy_loads() -> None:
 
 def test_discover_scan_targets_only_includes_active_public_https_targets() -> None:
     targets = scan.discover_scan_targets("production")
-    hostnames = {item["fqdn"] for item in targets}
+    target_map = {item["fqdn"]: item for item in targets}
 
-    assert "grafana.lv3.org" in hostnames
-    assert "database.lv3.org" not in hostnames
-    assert "ops.lv3.org" not in hostnames
+    assert "grafana.lv3.org" in target_map
+    assert "database.lv3.org" not in target_map
+    assert target_map["ops.lv3.org"]["requires_auth"] is True
 
 
 def test_header_and_version_findings_detect_missing_controls() -> None:

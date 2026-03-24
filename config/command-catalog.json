@@ -246,52 +246,37 @@
         ]
       }
     },
-    "nightly-integration-tests": {
-      "description": "Run the ADR 0111 nightly integration suite, including the NetBox rotation mutation check when the worker is provisioned for it.",
-      "workflow_id": "nightly-integration-tests",
-      "scope": "guest_runtime",
-      "approval_policy": "sensitive_live_change",
+    "subdomain-exposure-audit": {
+      "description": "Run the ADR 0139 subdomain exposure audit against the governed public catalog and record one receipt.",
+      "workflow_id": "subdomain-exposure-audit",
+      "scope": "external_service",
+      "approval_policy": "standard_live_change",
       "inputs": [
         {
-          "name": "LV3_TEST_RUNNER_USERNAME",
-          "kind": "operator_parameter",
+          "name": "hetzner_dns_api_token",
+          "kind": "controller_secret",
           "required": true,
-          "source": "Windmill worker environment or OpenBao injection",
-          "description": "Dedicated automation identity used to obtain a real Keycloak token for the integration suite."
-        },
-        {
-          "name": "LV3_TEST_RUNNER_PASSWORD",
-          "kind": "operator_parameter",
-          "required": true,
-          "source": "Windmill worker environment or OpenBao injection",
-          "description": "Password for the dedicated integration-test runner identity."
-        },
-        {
-          "name": "LV3_INTEGRATION_GATEWAY_URL",
-          "kind": "operator_parameter",
-          "required": false,
-          "source": "Windmill worker environment",
-          "description": "Explicit API gateway override used until ADR 0092 is represented in the service catalog."
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-local Hetzner DNS API token used when the audit verifies the public zone alongside repo and HTTP state."
         }
       ],
       "expected_preconditions": [
-        "make validate passes before enabling the nightly schedule",
-        "The worker can resolve and reach the intended environment endpoints over the private network or Tailscale",
-        "The test-runner identity is provisioned through ADR 0108 and its credentials are stored in OpenBao or equivalent worker injection",
-        "Operators explicitly review whether the nightly run should include the NetBox rotation mutation test before enabling the schedule"
+        "make validate passes before running the audit from a live worker or operator shell",
+        "The controller or worker can resolve the public hostnames and reach the published HTTP or HTTPS surfaces being audited",
+        "Operators understand the audit performs read-only DNS and HTTP checks and writes a receipt under receipts/subdomain-exposure-audit"
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record the nightly report path, the enabled mutation toggles, and at least one successful scheduled run before treating the workflow as fully rolled out."
+        "notes": "Record the receipt path plus any DNS drift, auth drift, or catalog mismatches detected during the audit."
       },
       "failure_guidance": {
         "stop_conditions": [
-          "Stop if the worker cannot reach the private platform URLs, the Keycloak token flow fails, or the rotation mutation leaves NetBox unhealthy.",
-          "Stop if the nightly job starts creating GlitchTip or Mattermost noise because the target environment is not yet intentionally enrolled."
+          "Stop if the public DNS zone cannot be queried, the Hetzner API token is unavailable for zone verification, or the audit reports inconsistent catalog inputs.",
+          "Stop if the audit starts reporting unexpected auth results that suggest an active publication change is still in progress."
         ],
         "rollback_guidance": [
-          "Disable the schedule and rerun the suite manually through scripts/integration_suite.py before re-enabling automation.",
-          "If the rotation mutation fails, restore the affected service through the repo-managed secret rotation or service converge path before the next nightly window."
+          "This workflow is diagnostic only; treat failures as drift or publication issues and repair them through the governed edge publication path before rerunning the audit.",
+          "Disable any schedule temporarily if the public catalog is intentionally mid-change and rerun after the publication window closes."
         ]
       }
     },
