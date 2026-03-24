@@ -84,7 +84,7 @@ The repository now also ships ADR 0115 mutation-ledger primitives: the `ledger.e
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.113.0` |
+| Repository version | `0.114.1` |
 | Platform version | `0.105.0` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -141,6 +141,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `ntopng` | `2026-03-22-adr-0059-ntopng-live-apply` |
 | `open_webui` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
 | `openbao` | `2026-03-22-adr-0043-openbao-live-apply` |
+| `ops_portal` | `2026-03-24-adr-0093-interactive-ops-portal-live-apply` |
 | `platform_context` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
 | `portainer` | `2026-03-22-adr-0055-portainer-live-apply` |
 | `postgres_vm` | `2026-03-22-adr-0026-postgres-vm-live-apply` |
@@ -342,6 +343,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure Mail Platform](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-mail-platform.md)
 - [Configure Mattermost](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-mattermost.md)
 - [Configure NetBox](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-netbox.md)
+- [Configure Ntfy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-ntfy.md)
 - [Configure ntopng Private Flow Visibility](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-ntopng.md)
 - [Configure Open WebUI](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-open-webui.md)
 - [Configure OpenBao](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-openbao.md)
@@ -376,6 +378,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Initial Access Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/initial-access.md)
 - [Install Proxmox Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/install-proxmox.md)
 - [Integration Test Suite](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/integration-test-suite.md)
+- [Runbook: Keycloak Down](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/keycloak-down.md)
 - [Live Apply Receipts And Verification Evidence](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/live-apply-receipts-and-verification-evidence.md)
 - [LLM Implementation Prompts — ADRs 0082–0091](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/llm-implementation-prompts.md)
 - [Maintenance Windows](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/maintenance-windows.md)
@@ -383,6 +386,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Mutation Audit Log](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/mutation-audit-log.md)
 - [Mutation Ledger](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/mutation-ledger.md)
 - [Network Policy Reference](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/network-policy-reference.md)
+- [Runbook: OpenBao Sealed](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/openbao-sealed.md)
 - [Operator Offboarding](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/operator-offboarding.md)
 - [Operator Onboarding](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/operator-onboarding.md)
 - [Ops Portal Down](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/ops-portal-down.md)
@@ -397,6 +401,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Platform Operations Portal](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/platform-operations-portal.md)
 - [Platform Release Management](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/platform-release-management.md)
 - [Playbook Execution Model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/playbook-execution-model.md)
+- [Runbook: Postgres Down](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/postgres-down.md)
 - [PostgreSQL Failover Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/postgres-failover.md)
 - [Prepare Mail Platform Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/prepare-mail-platform-rollout.md)
 - [Private-First API Publication](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/private-first-api-publication.md)
@@ -411,6 +416,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Secret Rotation And Lifecycle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/secret-rotation-and-lifecycle.md)
 - [Security Posture Reporting](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/security-posture-reporting.md)
 - [Service Capability Catalog](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/service-capability-catalog.md)
+- [Runbook: SLO Fast Burn](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/slo-fast-burn.md)
 - [SLO Tracking](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/slo-tracking.md)
 - [Staging And Production Topology](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/staging-and-production-topology.md)
 - [Subdomain Governance](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/subdomain-governance.md)
@@ -656,7 +662,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.113.0` |
+| Repository version | `0.114.1` |
 | Platform version | `0.105.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -760,9 +766,10 @@ This repository is intentionally opinionated:
 | `0090` | Unified platform CLI | `merged` | [adr-0090-platform-cli.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0090-platform-cli.md) |
 | `0091` | Continuous drift detection and reconciliation | `merged` | [adr-0091-drift-detection.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0091-drift-detection.md) |
 | `0091` | Continuous drift detection and reconciliation | `merged` | [adr-0091-drift-detection.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0091-drift-detection.md) |
-| `0093` | Interactive ops portal with live actions | `merged` | [adr-0093-interactive-ops-portal.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0093-interactive-ops-portal.md) |
+| `0093` | Interactive ops portal with live actions | `live_applied` | [adr-0093-interactive-ops-portal.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0093-interactive-ops-portal.md) |
 | `0094` | Developer portal and service documentation site | `live_applied` | [adr-0094-developer-portal.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0094-developer-portal.md) |
 | `0096` | SLO definitions and error budget tracking | `merged` | [adr-0096-slo-tracking.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0096-slo-tracking.md) |
+| `0097` | Alerting routing and on-call runbook model | `merged` | [adr-0097-alerting-routing.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0097-alerting-routing.md) |
 | `0098` | Postgres high availability and automated failover | `merged` | [adr-0098-postgres-ha.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0098-postgres-ha.md) |
 | `0099` | Automated backup restore verification | `merged` | [adr-0099-backup-restore-verification.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0099-backup-restore-verification.md) |
 | `0100` | RTO/RPO targets and disaster recovery playbook | `merged` | [adr-0100-disaster-recovery-playbook.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0100-disaster-recovery-playbook.md) |

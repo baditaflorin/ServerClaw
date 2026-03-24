@@ -1421,10 +1421,10 @@ workstreams:
   - id: adr-0093-interactive-ops-portal
     adr: "0093"
     title: Interactive ops portal with live actions
-    status: merged
+    status: live_applied
     owner: codex
-    branch: codex/adr-0093-interactive-ops-portal
-    worktree_path: ../proxmox_florin_server-interactive-ops-portal
+    branch: codex/live-apply-0093
+    worktree_path: .worktrees/live-apply-0093
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0093-interactive-ops-portal.md
     depends_on:
       - adr-0092-platform-api-gateway
@@ -1441,7 +1441,7 @@ workstreams:
       - nginx edge ops.lv3.org vhost
       - config/service-capability-catalog.json
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0094-developer-portal
     adr: "0094"

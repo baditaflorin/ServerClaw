@@ -22,6 +22,12 @@ REPO_ROOT: Final[Path] = repo_path()
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+# controller_automation_toolkit may have imported the stdlib platform module first.
+# Drop that non-package entry so the repo's platform/ package can be imported.
+loaded_platform = sys.modules.get("platform")
+if loaded_platform is not None and not hasattr(loaded_platform, "__path__"):
+    sys.modules.pop("platform", None)
+
 from platform.ledger import LedgerWriter  # noqa: E402
 
 

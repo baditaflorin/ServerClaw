@@ -48,7 +48,6 @@
     "docs/adr/0093-interactive-ops-portal.md",
     "docs/workstreams/adr-0093-interactive-ops-portal.md",
     "docs/runbooks/ops-portal-down.md",
-    "docs/release-notes/0.106.1.md",
     "versions/stack.yaml"
   ],
   "notes": [

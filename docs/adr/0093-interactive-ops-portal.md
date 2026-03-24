@@ -2,8 +2,8 @@
 
 - Status: Accepted
 - Implementation Status: Implemented
-- Implemented In Repo Version: 0.106.1
-- Implemented In Platform Version: 0.106.1
+- Implemented In Repo Version: 0.97.0
+- Implemented In Platform Version: 0.105.0
 - Implemented On: 2026-03-24
 - Date: 2026-03-23
 
@@ -115,7 +115,7 @@ The repository implementation delivered in `0.97.0` includes:
 - catalog updates for the interactive runtime contract in `config/service-capability-catalog.json`, `config/health-probe-catalog.json`, `config/subdomain-catalog.json`, and `config/api-gateway-catalog.json`
 - legacy static snapshot archiving through `receipts/ops-portal-snapshot.html`
 
-The live cutover from the existing static portal was completed on 2026-03-24 from the `0.106.1` automation snapshot, including the `8092` runtime publish correction, guest firewall synchronization, and public edge proxy update.
+The live cutover from the existing static portal was completed on 2026-03-24, including the `8092` runtime publish correction, guest firewall synchronization, and public edge proxy update on the current `0.105.0` platform release.
 
 ## Consequences
 
