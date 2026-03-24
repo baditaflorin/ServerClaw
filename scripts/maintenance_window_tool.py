@@ -17,8 +17,15 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
+    del sys.modules["platform"]
+
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path, write_json
 from mutation_audit import build_event, emit_event_best_effort
+from platform.events import build_envelope
 
 
 HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
@@ -389,7 +396,8 @@ async def get_bucket(js: Any, *, create: bool) -> Any | None:
 
 
 async def publish_event(nc: Any, subject: str, payload: dict[str, Any]) -> None:
-    await nc.publish(subject, json.dumps(payload, separators=(",", ":")).encode())
+    envelope = build_envelope(subject, payload, actor_id="service/maintenance-window-tool")
+    await nc.publish(subject, json.dumps(envelope, separators=(",", ":")).encode())
     await nc.flush(timeout=5)
 
 
@@ -460,7 +468,7 @@ async def open_window_async(
 
         await publish_event(
             nc,
-            "maintenance.opened",
+            "platform.maintenance.opened",
             {
                 "window": window,
                 "key": key,
@@ -522,7 +530,7 @@ async def close_window_async(
         if closed_windows:
             await publish_event(
                 nc,
-                "maintenance.force_closed" if force else "maintenance.closed",
+                "platform.maintenance.force_closed" if force else "platform.maintenance.closed",
                 {
                     "bucket": MAINTENANCE_BUCKET,
                     "service_id": service_id,

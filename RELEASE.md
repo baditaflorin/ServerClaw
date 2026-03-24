@@ -1,17 +1,21 @@
-# Release 0.128.0
+# Release 0.130.0
 
 - Date: 2026-03-24
 
 ## Summary
-- Implemented ADR 0133 so operator-facing portal services now default to authentication instead of public exposure.
-- Added explicit auth classification to every governed hostname in `config/subdomain-catalog.json`, with schema and validator enforcement for justified public exceptions.
-- Protected `docs.lv3.org` and `changelog.lv3.org` with the shared Keycloak-backed edge auth flow, while keeping `ops.lv3.org` on the same pattern and preserving Grafana's non-anonymous login boundary.
-- Expanded the shared portal auth proxy to issue a `.lv3.org` cookie so one Keycloak session covers the protected browser portals.
-- Added focused validation and role tests, plus the ADR 0133 workstream and runbook documentation for the auth-by-default policy.
+- Implemented ADR 0133 so portal services now default to authentication instead of public exposure.
+- Updated the governed subdomain catalog to require `edge_oidc` for `docs.lv3.org`, `changelog.lv3.org`, and `ops.lv3.org`, while preserving Grafana's `upstream_auth` login boundary.
+- Kept the ADR 0139 subdomain exposure registry model and schema intact while correcting the catalog to reflect the now-hardened live portal state.
+- Expanded repository validation with `scripts/validate_portal_auth.py` and focused tests so protected portal hostnames cannot silently drift back to unauthenticated exposure.
 - Corrected the edge template lookup used for protected hostnames so the intended auth policy actually renders into live NGINX configuration.
 
 ## Platform Impact
-- repository version advances to 0.128.0; live platform version advances to 0.114.7 after ADR 0133 was applied on nginx-lv3 and unauthenticated access to `ops.lv3.org`, `docs.lv3.org`, and `changelog.lv3.org` was blocked at the edge
+- repository version advances to `0.130.0`
+- live platform version advances to `0.114.7` because ADR 0133 was applied and verified on nginx-lv3 on 2026-03-24
+
+## Residual Risk
+- `status.lv3.org`, `uptime.lv3.org`, and other intentionally public informational surfaces still rely on correct catalog classification; future portal additions must not bypass that review path.
+- the protected portal policy currently depends on the shared edge auth proxy configuration, so regressions in hostname-to-policy mapping need to keep the new validation and template test coverage in place.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

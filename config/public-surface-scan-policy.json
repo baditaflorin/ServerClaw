@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0.0",
+  "required_headers": [
+    {
+      "id": "strict_transport_security",
+      "name": "Strict-Transport-Security",
+      "match": "contains",
+      "value": "max-age=63072000",
+      "severity": "medium",
+      "summary": "Strict-Transport-Security is missing or too weak."
+    },
+    {
+      "id": "strict_transport_security_preload",
+      "name": "Strict-Transport-Security",
+      "match": "contains",
+      "value": "preload",
+      "severity": "low",
+      "summary": "Strict-Transport-Security is missing preload."
+    },
+    {
+      "id": "x_content_type_options",
+      "name": "X-Content-Type-Options",
+      "match": "equals",
+      "value": "nosniff",
+      "severity": "medium",
+      "summary": "X-Content-Type-Options is missing or incorrect."
+    },
+    {
+      "id": "x_frame_options",
+      "name": "X-Frame-Options",
+      "match": "one_of",
+      "values": [
+        "DENY",
+        "SAMEORIGIN"
+      ],
+      "severity": "medium",
+      "summary": "X-Frame-Options is missing or incorrect."
+    },
+    {
+      "id": "referrer_policy",
+      "name": "Referrer-Policy",
+      "match": "contains",
+      "value": "strict-origin",
+      "severity": "medium",
+      "summary": "Referrer-Policy is missing or too permissive."
+    },
+    {
+      "id": "x_robots_tag",
+      "name": "X-Robots-Tag",
+      "match": "contains",
+      "value": "noindex",
+      "severity": "medium",
+      "summary": "X-Robots-Tag is missing or does not prevent indexing."
+    }
+  ],
+  "auth_redirect": {
+    "expected_host": "sso.lv3.org",
+    "forbidden_headers": [
+      "X-Auth-Request-User"
+    ],
+    "forbidden_body_patterns": [
+      "dashboard",
+      "ops portal",
+      "grafana",
+      "uptime kuma"
+    ]
+  },
+  "version_headers": {
+    "exact": [
+      "X-Powered-By",
+      "X-Grafana-Version",
+      "X-Windmill-Version"
+    ],
+    "regex": [
+      "^X-.*-Version$"
+    ],
+    "server_requires_version_pattern": true
+  },
+  "nuclei": {
+    "target": "https://lv3.org",
+    "tags": [
+      "redirect",
+      "misconfig"
+    ],
+    "severity": [
+      "medium",
+      "high",
+      "critical"
+    ]
+  }
+}

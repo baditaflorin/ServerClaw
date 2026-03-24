@@ -14,5 +14,8 @@ if [[ "${SKIP_REMOTE_GATE:-0}" == "1" ]]; then
   exit 0
 fi
 
+echo "validation gate: validating canonical NATS topics"
+uv run --with pyyaml python scripts/validate_nats_topics.py --validate
+
 echo "validation gate: running remote pre-push gate"
 scripts/remote_exec.sh pre-push-gate --local-fallback

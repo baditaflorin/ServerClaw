@@ -119,7 +119,7 @@ def materialize_surface(
             connection.commit()
 
     if event_publisher is not None:
-        event_publisher("world_state.refreshed", event)
+        event_publisher("platform.world_state.refreshed", event)
     return event
 
 

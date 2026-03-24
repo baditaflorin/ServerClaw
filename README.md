@@ -81,8 +81,10 @@ The repository now also ships ADR 0117 dependency-graph runtime primitives: the 
 The repository now also ships ADR 0121 local search: a repo-managed search fabric under `scripts/search_fabric/`, a persisted local index at `build/search-index/documents.json`, the `lv3 search` CLI command, the `/v1/search` API surface, and an ops-portal search panel backed by the same corpus.
 The repository now also ships ADR 0122 browser-first operator access management: a repo-managed Windmill admin app at `f/lv3/operator_access_admin` backed by the governed ADR 0108 onboarding, off-boarding, reconciliation, and inventory workflows.
 The repository now also ships ADR 0130 agent state persistence: `platform.agent.AgentStateClient`, the `agent.state` schema migration, and `lv3 agent state show|delete|verify` provide a governed scratch-state path for resumable agent work and post-handoff integrity validation; the first live schema apply from `main` is still pending.
+The repository now also ships ADR 0131 multi-agent handoffs: `platform.handoff`, the `handoff.transfers` schema migration, mutation-ledger event types, and `lv3 handoff send|list|view|accept|refuse|complete` provide a durable transfer path between agents and operators, with concurrent burst coverage verified in-repo; the first live transport integration from `main` is still pending.
 The developer portal generator now stamps published docs pages with sensitivity metadata, keeps `RESTRICTED` ADRs and runbooks summary-only in portal output, and leaves `CONFIDENTIAL` documents source-only until a dedicated admin-view path exists.
 Portal access is now authentication-by-default on the live platform: `ops.lv3.org`, `docs.lv3.org`, and `changelog.lv3.org` are gated by the shared Keycloak edge auth flow, and Grafana no longer serves anonymous dashboards.
+The repository now also ships ADR 0142 public-surface security scanning: `make public-surface-security-scan ENV=production` writes structured receipts under `receipts/security-scan/`, uses `testssl.sh` and `nuclei` container runners for the live public HTTP or HTTPS surface, and can publish high or critical findings on `platform.security.*`; the live weekly schedule still requires apply from `main`.
 
 <!-- BEGIN GENERATED: platform-status -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_status_docs.py). Do not edit this block by hand.
@@ -90,9 +92,9 @@ Portal access is now authentication-by-default on the live platform: `ops.lv3.or
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.128.0` |
+| Repository version | `0.130.0` |
 | Platform version | `0.114.7` |
-| Observed check date | `2026-03-24` |
+| Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
 | Observed kernel | `6.17.13-2-pve` |
@@ -189,7 +191,7 @@ password SSH disabled on host and guests
 | `command` | Command Lane | `ssh` | 2 | Use SSH only for command-lane access. |
 | `api` | API Lane | `https` | 11 | Default new APIs to internal-only or operator-only publication. |
 | `message` | Message Lane | `authenticated_submission` | 2 | Submit platform mail through the internal mail platform rather than arbitrary external SMTP relays. |
-| `event` | Event Lane | `mixed` | 6 | Event sinks must be documented and intentionally reachable. |
+| `event` | Event Lane | `mixed` | 10 | Event sinks must be documented and intentionally reachable. |
 
 ### Current Governed Surfaces
 | Surface | Lane | Kind | Endpoint |
@@ -211,15 +213,19 @@ password SSH disabled on host and guests
 | `proxmox-host-operator-notifications` | `message` | `notification_profile` | `lv3-ops-email sendmail endpoint with catch-all matcher to baditaflorin@gmail.com` |
 | `stalwart-mail-events` | `event` | `webhook` | `http://10.10.10.20:8081/webhooks/stalwart` |
 | `mattermost-incoming-webhooks` | `event` | `webhook` | `http://10.10.10.20:8065/hooks/<managed-id>` |
-| `platform-finding-subjects` | `event` | `event_subject` | `platform.findings.*` |
+| `platform-finding-subjects` | `event` | `event_subject` | `platform.findings.observation` |
+| `platform-api-request-events` | `event` | `event_subject` | `platform.api.request` |
 | `platform-drift-subjects` | `event` | `event_subject` | `platform.drift.*` |
 | `platform-security-subjects` | `event` | `event_subject` | `platform.security.*` |
-| `maintenance-window-subjects` | `event` | `event_subject` | `maintenance.*` |
+| `maintenance-window-subjects` | `event` | `event_subject` | `platform.maintenance.*` |
+| `platform-backup-subjects` | `event` | `event_subject` | `platform.backup.restore-verification.*` |
+| `platform-world-state-events` | `event` | `event_subject` | `platform.world_state.refreshed` |
+| `platform-ledger-events` | `event` | `event_subject` | `platform.ledger.event_written` |
 
 ### API Publication Tiers
 | Tier | Title | Surfaces | Summary |
 | --- | --- | --- | --- |
-| `internal-only` | Internal-Only | 9 | Reachable only from LV3 private networks, loopback paths, or explicitly trusted control-plane hosts. |
+| `internal-only` | Internal-Only | 13 | Reachable only from LV3 private networks, loopback paths, or explicitly trusted control-plane hosts. |
 | `operator-only` | Operator-Only | 7 | Reachable only from approved operator devices over private access such as Tailscale. |
 | `public-edge` | Public Edge | 1 | Intentionally published on a public domain through the named edge model. |
 
@@ -239,10 +245,14 @@ password SSH disabled on host and guests
 | `platform-context-api` | `operator-only` | `api` | `http://100.118.189.95:8010` | Reachable only through the Proxmox host Tailscale proxy on port 8010 and requires the controller-local bearer token. |
 | `stalwart-mail-events` | `internal-only` | `event` | `http://10.10.10.20:8081/webhooks/stalwart` | Reachable only from the private mail-platform stack on docker-runtime-lv3. |
 | `mattermost-incoming-webhooks` | `internal-only` | `event` | `http://10.10.10.20:8065/hooks/<managed-id>` | Reachable on the private Mattermost runtime at docker-runtime-lv3:8065, with mirrored webhook ids retained under .local/mattermost for controlled routing. |
-| `platform-finding-subjects` | `internal-only` | `event` | `platform.findings.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
+| `platform-finding-subjects` | `internal-only` | `event` | `platform.findings.observation` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
+| `platform-api-request-events` | `internal-only` | `event` | `platform.api.request` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
 | `platform-drift-subjects` | `internal-only` | `event` | `platform.drift.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
 | `platform-security-subjects` | `internal-only` | `event` | `platform.security.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
-| `maintenance-window-subjects` | `internal-only` | `event` | `maintenance.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
+| `maintenance-window-subjects` | `internal-only` | `event` | `platform.maintenance.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
+| `platform-backup-subjects` | `internal-only` | `event` | `platform.backup.restore-verification.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
+| `platform-world-state-events` | `internal-only` | `event` | `platform.world_state.refreshed` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
+| `platform-ledger-events` | `internal-only` | `event` | `platform.ledger.event_written` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
 <!-- END GENERATED: control-plane-lanes -->
 
 The current host security posture is:
@@ -411,6 +421,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Platform Hardening And Agentic Extensibility Roadmap](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/plan-platform-hardening-and-agentic-extensibility.md)
 - [Visual And Agent Operations Roadmap](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/plan-visual-agent-operations.md)
 - [Platform CLI](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/platform-cli.md)
+- [Platform Event Taxonomy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/platform-event-taxonomy.md)
 - [Platform Facts Library](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/platform-facts-library.md)
 - [Platform Operations Portal](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/platform-operations-portal.md)
 - [Platform Release Management](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/platform-release-management.md)
@@ -423,6 +434,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Provision Guests Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/provision-guests.md)
 - [Proxmox API Automation Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/proxmox-api-automation.md)
 - [Public Status Page](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/public-status-page.md)
+- [Public Surface Security Scan](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/public-surface-security-scan.md)
 - [Published Artifact Secret Scanning](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/published-artifact-secret-scanning.md)
 - [RAG Platform Context](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/rag-platform-context.md)
 - [Remote Build Gateway](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/remote-build-gateway.md)
@@ -572,6 +584,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0121: Local Search and Indexing Fabric](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0121-local-search-and-indexing-fabric.md)
 - [ADR 0122: Windmill Operator Access Admin Surface](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0122-windmill-operator-access-admin.md)
 - [ADR 0123: Service Uptime Contracts And Monitor-Backed Health](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0123-service-uptime-contracts-and-monitor-backed-health.md)
+- [ADR 0124: Platform Event Taxonomy And Canonical NATS Topics](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0124-platform-event-taxonomy-and-canonical-nats-topics.md)
 - [ADR 0127: Intent Deduplication and Conflict Resolution](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0127-intent-deduplication-and-conflict-resolution.md)
 - [ADR 0128: Platform Health Composite Index](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0128-platform-health-composite-index.md)
 - [ADR 0130: Agent State Persistence Across Workflow Boundaries](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0130-agent-state-persistence-across-workflow-boundaries.md)
@@ -581,6 +594,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0138: Published Artifact Secret Scanning](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0138-published-artifact-secret-scanning.md)
 - [ADR 0139: Subdomain Exposure Audit and Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0139-subdomain-exposure-audit-and-registry.md)
 - [ADR 0140: Grafana Public Access Hardening](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0140-grafana-public-access-hardening.md)
+- [ADR 0142: Public Surface Automated Security Scan](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0142-public-surface-automated-security-scan.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -679,6 +693,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0121: Local Search and Indexing Fabric](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0121-search-indexing-fabric.md)
 - [Workstream ADR 0122: Windmill Operator Access Admin Surface](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0122-operator-access-admin.md)
 - [Workstream ADR 0123: Service Uptime Contracts And Monitor-Backed Health](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0123-service-uptime-contracts.md)
+- [Workstream ADR 0124: Platform Event Taxonomy And Canonical NATS Topics](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0124-platform-event-taxonomy.md)
 - [Workstream ADR 0127: Intent Conflict Resolution](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0127-intent-conflict-resolution.md)
 - [Workstream ADR 0128: Platform Health Composite Index](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0128-platform-health-composite-index.md)
 - [Workstream ADR 0130: Agent State Persistence Across Workflow Boundaries](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0130-agent-state-persistence.md)
@@ -688,6 +703,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0138: Published Artifact Secret Scanning](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0138-published-artifact-secret-scanning.md)
 - [Workstream ADR 0139: Subdomain Exposure Audit And Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0139-subdomain-exposure-audit.md)
 - [Workstream ADR 0140: Grafana Public Access Hardening](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0140-grafana-public-access-hardening.md)
+- [Workstream ADR 0142: Public Surface Automated Security Scan](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0142-public-surface-security-scan.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
@@ -705,7 +721,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.128.0` |
+| Repository version | `0.130.0` |
 | Platform version | `0.114.7` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -840,6 +856,7 @@ This repository is intentionally opinionated:
 | `0121` | Local search and indexing fabric | `merged` | [adr-0121-search-indexing-fabric.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0121-search-indexing-fabric.md) |
 | `0122` | Windmill operator access admin surface | `live_applied` | [adr-0122-operator-access-admin.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0122-operator-access-admin.md) |
 | `0123` | Service uptime contracts and monitor-backed health | `merged` | [adr-0123-service-uptime-contracts.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0123-service-uptime-contracts.md) |
+| `0124` | Platform event taxonomy and canonical NATS topics | `merged` | [adr-0124-platform-event-taxonomy.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0124-platform-event-taxonomy.md) |
 | `0127` | Intent deduplication and conflict resolution | `merged` | [adr-0127-intent-conflict-resolution.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0127-intent-conflict-resolution.md) |
 | `0128` | Platform health composite index | `merged` | [adr-0128-platform-health-composite-index.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0128-platform-health-composite-index.md) |
 | `0130` | Agent state persistence across workflow boundaries | `merged` | [adr-0130-agent-state-persistence.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0130-agent-state-persistence.md) |
@@ -847,7 +864,9 @@ This repository is intentionally opinionated:
 | `0133` | Portal authentication by default | `merged` | [adr-0133-portal-authentication-by-default.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0133-portal-authentication-by-default.md) |
 | `0135` | Developer portal sensitivity classification | `merged` | [adr-0135-developer-portal-sensitivity-classification.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0135-developer-portal-sensitivity-classification.md) |
 | `0138` | Published artifact secret scanning | `merged` | [adr-0138-published-artifact-secret-scanning.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0138-published-artifact-secret-scanning.md) |
+| `0139` | Subdomain exposure audit and registry | `merged` | [adr-0139-subdomain-exposure-audit.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0139-subdomain-exposure-audit.md) |
 | `0140` | Grafana public access hardening | `merged` | [adr-0140-grafana-public-access-hardening.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0140-grafana-public-access-hardening.md) |
+| `0142` | Public surface automated security scan | `merged` | [adr-0142-public-surface-security-scan.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0142-public-surface-security-scan.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

@@ -24,7 +24,7 @@
 - create `config/windmill/scripts/world-state/refresh-openbao-leases.py` — OpenBao lease expiry reader
 - create `config/windmill/scripts/world-state/refresh-maintenance-windows.py` — maintenance window store reader
 - register all refresh workers as Windmill scheduled workflows with per-surface intervals from ADR 0113
-- publish `world_state.refreshed` NATS event after each successful snapshot insert
+- publish `platform.world_state.refreshed` NATS event after each successful snapshot insert
 
 ## Non-Goals
 
@@ -57,7 +57,7 @@
 
 - `world_state.current_view` in Postgres contains rows for all 9 implemented surfaces
 - No surface has `is_expired = true` during normal operation
-- `world_state.refreshed` NATS messages are visible via `nats sub world_state.refreshed`
+- `platform.world_state.refreshed` NATS messages are visible via `nats sub platform.world_state.refreshed`
 - `WorldStateClient().get("proxmox_vms")` returns a non-empty list from the controller
 
 ## Verification

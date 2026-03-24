@@ -129,7 +129,7 @@ Optional environment variables:
 - `LV3_MUTATION_AUDIT_CORRELATION_ID`: default correlation id for Ansible callback events
 - `LV3_MUTATION_AUDIT_WEBHOOK`: webhook endpoint for the seeded Windmill helper
 - `LV3_LEDGER_DSN`: optional Postgres DSN that enables dual-write from the controller emitter into `ledger.events`
-- `LV3_LEDGER_NATS_URL`: optional NATS URL override for `ledger.event_written` fan-out after successful inserts
+- `LV3_LEDGER_NATS_URL`: optional NATS URL override for `platform.ledger.event_written` fan-out after successful inserts
 
 ## Notes
 

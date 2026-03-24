@@ -5,7 +5,7 @@
   "recorded_on": "2026-03-24",
   "recorded_by": "codex",
   "source_commit": "d00d80ea13cd0380416cf6a67154bafd9ff9d12d",
-  "repo_version_context": "0.128.0",
+  "repo_version_context": "0.130.0",
   "workflow_id": "configure-edge-publication",
   "adr": "0133",
   "summary": "Applied ADR 0133 on nginx-lv3 so portal services are authentication-by-default, with Keycloak-backed edge protection for ops, docs, and changelog and verified anonymous access blocked for Grafana.",
@@ -63,7 +63,7 @@
   "evidence_refs": [
     "docs/adr/0133-portal-authentication-by-default.md",
     "docs/runbooks/portal-authentication-by-default.md",
-    "docs/release-notes/0.128.0.md",
+    "docs/release-notes/0.130.0.md",
     "versions/stack.yaml"
   ],
   "notes": [

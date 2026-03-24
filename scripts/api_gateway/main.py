@@ -16,6 +16,12 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urljoin, urlparse
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
+    del sys.modules["platform"]
+
 import httpx
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
@@ -58,6 +64,7 @@ except Exception as exc:  # noqa: BLE001
         pass
 
     GRAPH_RUNTIME_IMPORT_ERROR = str(exc)
+from platform.events import build_envelope
 from platform.health import HealthCompositeClient, ServiceHealthNotFoundError
 from platform.world_state.client import SurfaceNotFoundError, WorldStateClient, WorldStateUnavailable
 from platform.world_state.materializer import SQLITE_CURRENT_VIEW_NAME, SQLITE_SNAPSHOTS_TABLE_NAME
@@ -266,7 +273,8 @@ class NatsEventEmitter:
             return
         host = self._parsed.hostname or "127.0.0.1"
         port = self._parsed.port or 4222
-        encoded = json.dumps(payload, separators=(",", ":")).encode()
+        envelope = build_envelope(subject, payload, actor_id="service/api-gateway")
+        encoded = json.dumps(envelope, separators=(",", ":")).encode()
         await asyncio.to_thread(self._publish, host, port, subject, encoded)
 
     @staticmethod

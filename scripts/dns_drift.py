@@ -8,6 +8,7 @@ import json
 from typing import Any
 
 from controller_automation_toolkit import load_json, repo_path
+from drift_lib import drift_event_topic
 
 
 SUBDOMAIN_CATALOG_PATH = repo_path("config", "subdomain-catalog.json")
@@ -49,7 +50,7 @@ def collect_drift(*, dns_server: str | None = None, include_planned: bool = Fals
         records.append(
             {
                 "source": "dns",
-                "event": "platform.drift.warn",
+                "event": drift_event_topic("warn"),
                 "severity": "warn",
                 "service": entry.get("service_id"),
                 "resource": fqdn,
