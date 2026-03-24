@@ -348,11 +348,11 @@ export-mcp-tools:
 
 preflight:
 	@if [ -z "$(WORKFLOW)" ]; then \
-		$(REPO_ROOT)/scripts/preflight_controller_local.py --list; \
+		uv run --with pyyaml python $(REPO_ROOT)/scripts/preflight_controller_local.py --list; \
 		echo "set WORKFLOW=<workflow-id>"; \
 		exit 0; \
 	else \
-		$(REPO_ROOT)/scripts/preflight_controller_local.py --workflow $(WORKFLOW); \
+		uv run --with pyyaml python $(REPO_ROOT)/scripts/preflight_controller_local.py --workflow $(WORKFLOW); \
 	fi
 
 syntax-check:

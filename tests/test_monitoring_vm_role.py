@@ -7,6 +7,9 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULTS_PATH = REPO_ROOT / "roles" / "monitoring_vm" / "defaults" / "main.yml"
 TASKS_PATH = REPO_ROOT / "roles" / "monitoring_vm" / "tasks" / "main.yml"
 VERIFY_PATH = REPO_ROOT / "roles" / "monitoring_vm" / "tasks" / "verify.yml"
+PLATFORM_DASHBOARD_TEMPLATE = REPO_ROOT / "roles" / "monitoring_vm" / "templates" / "lv3-platform-overview.json.j2"
+MAIL_DASHBOARD_TEMPLATE = REPO_ROOT / "roles" / "monitoring_vm" / "templates" / "lv3-mail-platform.json.j2"
+VM_DASHBOARD_TEMPLATE = REPO_ROOT / "roles" / "monitoring_vm" / "templates" / "lv3-vm-detail.json.j2"
 
 
 def load_tasks(path: Path) -> list[dict]:
@@ -53,3 +56,8 @@ def test_verify_tasks_check_public_dashboard_lockdown() -> None:
     assert redirect_check["ansible.builtin.uri"]["status_code"] == 302
     assert health_check["ansible.builtin.uri"]["status_code"] == 404
     assert headers_check["ansible.builtin.command"]["argv"][0] == "curl"
+
+
+def test_dashboard_templates_do_not_use_bare_jinja_null_literals() -> None:
+    for template in (PLATFORM_DASHBOARD_TEMPLATE, MAIL_DASHBOARD_TEMPLATE, VM_DASHBOARD_TEMPLATE):
+        assert " null" not in template.read_text()
