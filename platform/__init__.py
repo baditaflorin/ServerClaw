@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib
 import importlib.util
 import sysconfig
 from pathlib import Path
@@ -18,5 +19,17 @@ for _name in dir(_stdlib_platform):
         continue
     globals()[_name] = getattr(_stdlib_platform, _name)
 
+_REPO_SUBMODULES = {"diff_engine", "goal_compiler", "ledger", "world_state"}
+
+
+def __getattr__(name: str):  # pragma: no cover - exercised indirectly through imports
+    if name in _REPO_SUBMODULES:
+        module = importlib.import_module(f"{__name__}.{name}")
+        globals()[name] = module
+        return module
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
 __all__ = list(getattr(_stdlib_platform, "__all__", []))
+__all__.extend(sorted(_REPO_SUBMODULES))
 __doc__ = getattr(_stdlib_platform, "__doc__", __doc__)
