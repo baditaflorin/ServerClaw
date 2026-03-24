@@ -17,6 +17,20 @@ from pathlib import Path
 from typing import Any
 
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path, write_json
+
+
+REPO_ROOT = repo_path()
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+# controller_automation_toolkit may have imported the stdlib platform module first.
+# Drop that non-package entry so the repo's platform/ package can be imported.
+loaded_platform = sys.modules.get("platform")
+if loaded_platform is not None and not hasattr(loaded_platform, "__path__"):
+    loaded_platform_file = getattr(loaded_platform, "__file__", "")
+    if not str(loaded_platform_file).startswith(str(REPO_ROOT / "platform")):
+        sys.modules.pop("platform", None)
+
 from drift_lib import (
     isoformat,
     load_controller_context,
@@ -28,9 +42,6 @@ from drift_lib import (
 from mutation_audit import build_event, emit_event_best_effort
 from platform_observation_tool import maybe_read_secret_path, post_json_webhook
 from subdomain_catalog import load_public_edge_defaults, load_subdomain_catalog
-
-
-REPO_ROOT = repo_path()
 DEFAULT_ENVIRONMENT = "production"
 DEFAULT_POLICY_PATH = repo_path("config", "public-surface-scan-policy.json")
 DEFAULT_RECEIPT_DIR = repo_path("receipts", "security-scan")

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -18,6 +19,19 @@ def test_repo_policy_loads() -> None:
 
     assert policy["schema_version"] == "1.0.0"
     assert policy["nuclei"]["target"] == "https://lv3.org"
+
+
+def test_public_surface_scan_cli_help_runs() -> None:
+    completed = subprocess.run(
+        [sys.executable, str(REPO_ROOT / "scripts" / "public_surface_scan.py"), "--help"],
+        cwd=REPO_ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert completed.returncode == 0
+    assert "public-surface security scan" in completed.stdout
 
 
 def test_discover_scan_targets_only_includes_active_public_https_targets() -> None:
