@@ -15,6 +15,7 @@ Versioned release notes live under [docs/release-notes/README.md](/Users/live/Do
 - Implemented ADR 0122 with a repo-managed Windmill operator access admin app for browser-first operator onboarding, off-boarding, roster reconciliation, and per-operator inventory lookup.
 - Seeded the existing operator workflow wrappers and the new raw app bundle through `windmill_runtime`, so the private Windmill workspace can be bootstrapped from repository state.
 - Added the ADR 0122 runbook plus focused tests for the raw app bundle, Windmill seed metadata, and the new roster and inventory wrapper scripts.
+- Hardened the OpenBao runtime converge to enforce managed ownership of `/opt/openbao/logs/audit.log`, preventing the service from resealing itself after Docker restarts.
 
 ## Latest Release
 
