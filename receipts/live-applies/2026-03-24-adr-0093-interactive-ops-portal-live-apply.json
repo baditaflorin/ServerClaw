@@ -4,7 +4,7 @@
   "applied_on": "2026-03-24",
   "recorded_on": "2026-03-24",
   "recorded_by": "codex",
-  "source_commit": "56a2baa91f44894f6b49d50babdd531d63fa317e",
+  "source_commit": "d3538abee966d86ea4dcd4ce7a9e0d40073798cb",
   "repo_version_context": "0.106.1",
   "workflow_id": "configure-edge-publication",
   "adr": "0093",
