@@ -32,6 +32,14 @@ class SubdomainCatalogTests(unittest.TestCase):
         self.assertIn("docs", reserved_prefixes)
         self.assertIn("ops", reserved_prefixes)
         self.assertIn("mail", reserved_prefixes)
+        self.assertEqual(
+            subdomain_catalog.get_subdomain_entry(self.catalog, "ops.lv3.org")["auth_requirement"],
+            "edge_oidc",
+        )
+        self.assertEqual(
+            subdomain_catalog.get_subdomain_entry(self.catalog, "database.lv3.org")["auth_requirement"],
+            "private_network",
+        )
 
     def test_missing_edge_route_entry_fails(self) -> None:
         broken_catalog = copy.deepcopy(self.catalog)
@@ -59,6 +67,38 @@ class SubdomainCatalogTests(unittest.TestCase):
         with self.assertRaisesRegex(
             ValueError,
             "uses reserved prefix 'internal' without an explicit allowlist entry",
+        ):
+            subdomain_catalog.validate_subdomain_catalog(
+                broken_catalog,
+                self.service_catalog,
+                self.host_vars,
+                self.public_edge_defaults,
+            )
+
+    def test_edge_oidc_requires_authenticated_edge_site(self) -> None:
+        broken_catalog = copy.deepcopy(self.catalog)
+        entry = subdomain_catalog.get_subdomain_entry(broken_catalog, "docs.lv3.org")
+        entry["auth_requirement"] = "edge_oidc"
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "missing from public_edge_authenticated_sites",
+        ):
+            subdomain_catalog.validate_subdomain_catalog(
+                broken_catalog,
+                self.service_catalog,
+                self.host_vars,
+                self.public_edge_defaults,
+            )
+
+    def test_private_only_requires_private_network_auth(self) -> None:
+        broken_catalog = copy.deepcopy(self.catalog)
+        entry = subdomain_catalog.get_subdomain_entry(broken_catalog, "database.lv3.org")
+        entry["auth_requirement"] = "upstream_auth"
+
+        with self.assertRaisesRegex(
+            ValueError,
+            "must be 'private_network' for private-only hostnames",
         ):
             subdomain_catalog.validate_subdomain_catalog(
                 broken_catalog,

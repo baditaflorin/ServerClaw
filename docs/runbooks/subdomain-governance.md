@@ -36,6 +36,19 @@ cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
 HETZNER_DNS_API_TOKEN=... make provision-subdomain FQDN=ops.lv3.org
 ```
 
+## Exposure Audit
+
+The governed catalog is now paired with a derived exposure registry and live audit.
+
+Use it after catalog or edge-routing changes:
+
+```bash
+uvx --from pyyaml python scripts/subdomain_exposure_audit.py --write-registry
+make subdomain-exposure-audit
+```
+
+See [subdomain exposure audit](subdomain-exposure-audit.md) for the full operator workflow and finding types.
+
 What the target does:
 
 - validates the catalog and checks that the selected FQDN is provisionable

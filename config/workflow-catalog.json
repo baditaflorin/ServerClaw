@@ -211,7 +211,7 @@
       "validation_targets": [
         "validate"
       ],
-      "live_impact": "guest_live",
+      "live_impact": "repo_only",
       "owner_runbook": "docs/runbooks/integration-test-suite.md",
       "implementation_refs": [
         "Makefile",
@@ -1335,6 +1335,57 @@
         "max_steps": 300,
         "max_concurrent_instances": 1,
         "max_touched_hosts": 2,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "abort_silently"
+      }
+    },
+    "subdomain-exposure-audit": {
+      "description": "Run the ADR 0139 subdomain exposure registry audit, check live DNS and edge auth behavior, and store one receipt.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "subdomain-exposure-audit",
+        "command": "make subdomain-exposure-audit"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "hetzner_dns_api_token"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "validate-generated-docs"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/subdomain-exposure-audit.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/subdomain-catalog.json",
+        "config/subdomain-exposure-registry.json",
+        "docs/schema/subdomain-exposure-registry.schema.json",
+        "config/windmill/scripts/subdomain-exposure-audit.py",
+        "scripts/subdomain_catalog.py",
+        "scripts/subdomain_exposure_audit.py",
+        "roles/nginx_edge_publication/defaults/main.yml",
+        "receipts/subdomain-exposure-audit",
+        "docs/runbooks/subdomain-exposure-audit.md"
+      ],
+      "outputs": [
+        "A timestamped receipt that records repo contract drift, live DNS status drift, optional Hetzner zone discrepancies, and any missing edge OIDC enforcement for tracked hostnames."
+      ],
+      "verification_commands": [
+        "uvx --from pyyaml python scripts/subdomain_exposure_audit.py --validate",
+        "uv run --with pytest --with pyyaml --with jsonschema --with jinja2 pytest -q tests/test_subdomain_catalog.py tests/test_subdomain_exposure_audit.py tests/test_docs_site.py",
+        "python3 config/windmill/scripts/subdomain-exposure-audit.py --help"
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 120,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
         "max_restarts": 0,
         "max_rollback_depth": 1,
         "escalation_action": "abort_silently"

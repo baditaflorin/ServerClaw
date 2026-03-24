@@ -35,6 +35,9 @@ class DocsSiteTests(unittest.TestCase):
             self.assertIn("sensitivity: INTERNAL", keycloak_md)
             self.assertIn("sensitivity: PUBLIC", api_md)
             self.assertIn("portal_display: full", keycloak_md)
+            subdomains_md = (temp_dir / "reference" / "subdomains.md").read_text(encoding="utf-8")
+            self.assertIn("edge_oidc", subdomains_md)
+            self.assertIn("upstream_auth", subdomains_md)
         finally:
             shutil.rmtree(temp_dir)
 
