@@ -87,6 +87,24 @@
   loop_control:
     label: "{{ item.dest }}"
 
+- name: Sync the platform package for gateway graph support
+  ansible.builtin.copy:
+    src: "{{ api_gateway_repo_root }}/platform/"
+    dest: "{{ api_gateway_service_dir }}/platform/"
+    owner: root
+    group: root
+    mode: "0644"
+    directory_mode: "0755"
+
+- name: Sync the shared search fabric package for gateway search routes
+  ansible.builtin.copy:
+    src: "{{ api_gateway_repo_root }}/scripts/search_fabric/"
+    dest: "{{ api_gateway_service_dir }}/search_fabric/"
+    owner: root
+    group: root
+    mode: "0644"
+    directory_mode: "0755"
+
 - name: Sync the API gateway runtime config bundle
   ansible.builtin.copy:
     src: "{{ item.src }}"
@@ -137,6 +155,8 @@
       COPY controller_automation_toolkit.py ./controller_automation_toolkit.py
       COPY api_gateway_catalog.py ./api_gateway_catalog.py
       COPY api_gateway ./api_gateway
+      COPY platform ./platform
+      COPY search_fabric ./search_fabric
       EXPOSE 8080
       CMD ["uvicorn", "api_gateway.main:app", "--host", "0.0.0.0", "--port", "8080"]
 

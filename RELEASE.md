@@ -1,4 +1,4 @@
-# Release 0.127.0
+# Release 0.128.0
 
 - Date: 2026-03-24
 
@@ -11,7 +11,7 @@
 - Corrected the edge template lookup used for protected hostnames so the intended auth policy actually renders into live NGINX configuration.
 
 ## Platform Impact
-- repository version advances to 0.127.0; live platform version advances to 0.114.7 after ADR 0133 was applied on nginx-lv3 and unauthenticated access to `ops.lv3.org`, `docs.lv3.org`, and `changelog.lv3.org` was blocked at the edge
+- repository version advances to 0.128.0; live platform version advances to 0.114.7 after ADR 0133 was applied on nginx-lv3 and unauthenticated access to `ops.lv3.org`, `docs.lv3.org`, and `changelog.lv3.org` was blocked at the edge
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

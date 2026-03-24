@@ -1,7 +1,7 @@
 # Subdomain Reference
 
-| Hostname | Service | Status | Exposure | Target | TLS |
-| --- | --- | --- | --- | --- | --- |
+| Hostname | Service | Status | Exposure | Auth | Target | TLS |
+| --- | --- | --- | --- | --- | --- | --- |
 {% for row in rows -%}
-| `{{ row.fqdn }}` | {% if row.service_link %}[{{ row.service_name }}]({{ row.service_link }}){% else %}{{ row.service_name }}{% endif %} | {{ row.status }} | {{ row.exposure }} | `{{ row.target }}:{{ row.target_port }}` | {{ row.tls_provider }} |
+| `{{ row.fqdn }}` | {% if row.service_link %}[{{ row.service_name }}]({{ row.service_link }}){% else %}{{ row.service_name }}{% endif %} | {{ row.status }} | {{ row.exposure }} | `{{ row.auth_requirement }}` | `{{ row.target }}:{{ row.target_port }}` | {{ row.tls_provider }} |
 {% endfor %}

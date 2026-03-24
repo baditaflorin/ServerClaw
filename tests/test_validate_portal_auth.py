@@ -21,33 +21,25 @@ class ValidatePortalAuthTests(unittest.TestCase):
     def test_repo_portal_auth_validates(self) -> None:
         validate_portal_auth.validate_portal_auth(self.catalog, self.public_edge_defaults)
 
-    def test_public_classification_requires_justification(self) -> None:
-        broken = copy.deepcopy(self.catalog)
-        broken["subdomains"][1]["justification"] = None
-
-        with self.assertRaisesRegex(ValueError, "public auth classifications must include a non-empty justification"):
-            validate_portal_auth.validate_portal_auth(broken, self.public_edge_defaults)
-
-    def test_docs_portal_must_be_readonly_keycloak(self) -> None:
+    def test_docs_portal_must_be_edge_oidc(self) -> None:
         broken = copy.deepcopy(self.catalog)
         docs_entry = next(entry for entry in broken["subdomains"] if entry["fqdn"] == "docs.lv3.org")
-        docs_entry["auth_requirement"] = "public_informational"
-        docs_entry["justification"] = "broken"
+        docs_entry["auth_requirement"] = "none"
 
         with self.assertRaisesRegex(
             ValueError,
-            "portal hostname 'docs.lv3.org' must declare auth_requirement='keycloak_oidc_readonly'",
+            "portal hostname 'docs.lv3.org' must declare auth_requirement='edge_oidc'",
         ):
             validate_portal_auth.validate_portal_auth(broken, self.public_edge_defaults)
 
     def test_protected_edge_hostname_must_stay_keycloak_gated(self) -> None:
         broken = copy.deepcopy(self.catalog)
         ops_entry = next(entry for entry in broken["subdomains"] if entry["fqdn"] == "ops.lv3.org")
-        ops_entry["auth_requirement"] = "token_auth"
+        ops_entry["auth_requirement"] = "upstream_auth"
 
         with self.assertRaisesRegex(
             ValueError,
-            "portal hostname 'ops.lv3.org' must declare auth_requirement='keycloak_oidc'",
+            "portal hostname 'ops.lv3.org' must declare auth_requirement='edge_oidc'",
         ):
             validate_portal_auth.validate_portal_auth(broken, self.public_edge_defaults)
 

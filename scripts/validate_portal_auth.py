@@ -10,20 +10,17 @@ from controller_automation_toolkit import emit_cli_error
 
 
 ALLOWED_AUTH_REQUIREMENTS = {
-    "keycloak_oidc",
-    "keycloak_oidc_readonly",
-    "token_auth",
-    "private_network_only",
-    "public_intentional",
-    "public_informational",
+    "edge_oidc",
+    "none",
+    "private_network",
+    "upstream_auth",
 }
-PUBLIC_AUTH_REQUIREMENTS = {"public_intentional", "public_informational"}
-KEYCLOAK_AUTH_REQUIREMENTS = {"keycloak_oidc", "keycloak_oidc_readonly"}
+EDGE_OIDC_REQUIREMENTS = {"edge_oidc"}
 PORTAL_REQUIREMENTS = {
-    "changelog.lv3.org": "keycloak_oidc",
-    "docs.lv3.org": "keycloak_oidc_readonly",
-    "grafana.lv3.org": "keycloak_oidc",
-    "ops.lv3.org": "keycloak_oidc",
+    "changelog.lv3.org": "edge_oidc",
+    "docs.lv3.org": "edge_oidc",
+    "grafana.lv3.org": "upstream_auth",
+    "ops.lv3.org": "edge_oidc",
 }
 
 
@@ -50,22 +47,12 @@ def validate_portal_auth(
         entry = subdomain_catalog.require_mapping(entry, f"subdomains[{index}]")
         fqdn = subdomain_catalog.require_hostname(entry.get("fqdn"), f"subdomains[{index}].fqdn")
         auth_requirement = require_auth_requirement(entry, f"subdomains[{index}]")
-        audience = subdomain_catalog.require_str(entry.get("audience"), f"subdomains[{index}].audience")
-        justification = require_optional_justification(entry, f"subdomains[{index}]")
         exposure = subdomain_catalog.require_str(entry.get("exposure"), f"subdomains[{index}].exposure")
-
-        if audience == "public" and auth_requirement not in PUBLIC_AUTH_REQUIREMENTS:
-            raise ValueError(
-                f"subdomains[{index}].audience=public requires a public_* auth_requirement classification"
-            )
-        if auth_requirement in PUBLIC_AUTH_REQUIREMENTS and not justification:
-            raise ValueError(
-                f"subdomains[{index}] public auth classifications must include a non-empty justification"
-            )
-        if auth_requirement == "private_network_only" and exposure != "private-only":
-            raise ValueError(
-                f"subdomains[{index}].auth_requirement=private_network_only requires exposure=private-only"
-            )
+        justification = require_optional_justification(entry, f"subdomains[{index}]")
+        if justification is not None:
+            subdomain_catalog.require_str(justification, f"subdomains[{index}].justification")
+        if auth_requirement == "private_network" and exposure != "private-only":
+            raise ValueError(f"subdomains[{index}].auth_requirement=private_network requires exposure=private-only")
 
         entries_by_fqdn[fqdn] = entry
 
@@ -87,9 +74,9 @@ def validate_portal_auth(
         if fqdn not in entries_by_fqdn:
             raise ValueError(f"protected edge hostname '{fqdn}' is missing from config/subdomain-catalog.json")
         auth_requirement = entries_by_fqdn[fqdn]["auth_requirement"]
-        if auth_requirement not in KEYCLOAK_AUTH_REQUIREMENTS:
+        if auth_requirement not in EDGE_OIDC_REQUIREMENTS:
             raise ValueError(
-                f"protected edge hostname '{fqdn}' must use a Keycloak auth requirement, found '{auth_requirement}'"
+                f"protected edge hostname '{fqdn}' must use edge_oidc auth, found '{auth_requirement}'"
             )
 
 

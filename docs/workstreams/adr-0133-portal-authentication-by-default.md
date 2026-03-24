@@ -50,7 +50,7 @@
 
 ## Outcome
 
-- repository implementation is complete on `main` in repo release `0.127.0`
+- repository implementation is complete on `main` in repo release `0.128.0`
 - the shared edge auth proxy now protects `ops.lv3.org`, `changelog.lv3.org`, and `docs.lv3.org` with a shared `.lv3.org` session cookie
 - the governed subdomain catalog now records explicit auth posture for every hostname and rejects undocumented public exceptions
 - platform version `0.114.7` is the first live platform version where ADR 0133 is true

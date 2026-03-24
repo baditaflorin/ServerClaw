@@ -15,15 +15,8 @@ PUBLIC_EDGE_DEFAULTS_PATH = repo_path("roles", "nginx_edge_publication", "defaul
 
 ALLOWED_STATUSES = {"active", "planned", "reserved", "retiring"}
 ALLOWED_EXPOSURES = {"edge-published", "informational-only", "private-only"}
-ALLOWED_AUTH_REQUIREMENTS = {
-    "keycloak_oidc",
-    "keycloak_oidc_readonly",
-    "token_auth",
-    "private_network_only",
-    "public_intentional",
-    "public_informational",
-}
 ALLOWED_TLS_PROVIDERS = {"letsencrypt", "step-ca", "none"}
+ALLOWED_AUTH_REQUIREMENTS = {"none", "edge_oidc", "upstream_auth", "private_network"}
 EDGE_ROUTE_EXPOSURES = {"edge-published", "informational-only"}
 PROVISIONABLE_STATUSES = {"active", "planned"}
 HOSTNAME_PATTERN = re.compile(r"^[a-z0-9-]+(\.[a-z0-9-]+)+$")
@@ -190,6 +183,14 @@ def collect_edge_route_hostnames(
     return hostnames
 
 
+def collect_authenticated_edge_hostnames(public_edge_defaults: dict[str, Any]) -> set[str]:
+    authenticated_sites = require_mapping(
+        public_edge_defaults.get("public_edge_authenticated_sites", {}),
+        "public_edge_authenticated_sites",
+    )
+    return {require_hostname(hostname, f"public_edge_authenticated_sites key '{hostname}'") for hostname in authenticated_sites}
+
+
 def get_subdomain_entry(catalog: dict[str, Any], fqdn: str) -> dict[str, Any]:
     fqdn = require_hostname(fqdn, "fqdn")
     for index, entry in enumerate(require_list(catalog.get("subdomains"), "subdomains")):
@@ -237,8 +238,10 @@ def validate_subdomain_catalog(
         raise ValueError("subdomains must not be empty")
 
     edge_route_hostnames: set[str] = set()
+    authenticated_edge_hostnames: set[str] = set()
     if host_vars is not None and public_edge_defaults is not None:
         edge_route_hostnames = collect_edge_route_hostnames(host_vars, public_edge_defaults)
+        authenticated_edge_hostnames = collect_authenticated_edge_hostnames(public_edge_defaults)
 
     seen_fqdns: set[str] = set()
     for index, entry in enumerate(subdomains):
@@ -263,25 +266,15 @@ def validate_subdomain_catalog(
             raise ValueError(
                 f"subdomains[{index}].exposure must be one of {sorted(ALLOWED_EXPOSURES)}"
             )
+
         auth_requirement = require_str(
             entry.get("auth_requirement"),
             f"subdomains[{index}].auth_requirement",
         )
         if auth_requirement not in ALLOWED_AUTH_REQUIREMENTS:
             raise ValueError(
-                f"subdomains[{index}].auth_requirement must be one of {sorted(ALLOWED_AUTH_REQUIREMENTS)}"
-            )
-        require_str(entry.get("audience"), f"subdomains[{index}].audience")
-        justification = entry.get("justification")
-        if justification is not None:
-            require_str(justification, f"subdomains[{index}].justification")
-        if auth_requirement in {"public_intentional", "public_informational"} and not justification:
-            raise ValueError(
-                f"subdomains[{index}] public auth classifications require a non-empty justification"
-            )
-        if auth_requirement == "private_network_only" and exposure != "private-only":
-            raise ValueError(
-                f"subdomains[{index}].auth_requirement=private_network_only requires exposure=private-only"
+                f"subdomains[{index}].auth_requirement must be one of "
+                f"{sorted(ALLOWED_AUTH_REQUIREMENTS)}"
             )
 
         require_str(entry.get("target"), f"subdomains[{index}].target")
@@ -327,6 +320,34 @@ def validate_subdomain_catalog(
         if exposure == "private-only" and provider == "letsencrypt":
             raise ValueError(
                 f"subdomains[{index}] private-only hostnames must not use Let's Encrypt"
+            )
+        if exposure == "private-only" and auth_requirement != "private_network":
+            raise ValueError(
+                f"subdomains[{index}].auth_requirement must be 'private_network' for private-only hostnames"
+            )
+        if exposure != "private-only" and auth_requirement == "private_network":
+            raise ValueError(
+                f"subdomains[{index}].auth_requirement must not be 'private_network' for publicly exposed hostnames"
+            )
+        if auth_requirement == "edge_oidc" and status == "active" and fqdn not in edge_route_hostnames:
+            raise ValueError(
+                f"subdomain '{fqdn}' requires edge_oidc but has no repo-managed NGINX route"
+            )
+        if (
+            auth_requirement == "edge_oidc"
+            and fqdn in edge_route_hostnames
+            and fqdn not in authenticated_edge_hostnames
+        ):
+            raise ValueError(
+                f"subdomain '{fqdn}' requires edge_oidc but is missing from public_edge_authenticated_sites"
+            )
+        if (
+            authenticated_edge_hostnames
+            and fqdn in authenticated_edge_hostnames
+            and auth_requirement != "edge_oidc"
+        ):
+            raise ValueError(
+                f"subdomain '{fqdn}' is protected in public_edge_authenticated_sites but auth_requirement is '{auth_requirement}'"
             )
 
     for prefix, allowed_fqdns in allowed_fqdns_by_prefix.items():

@@ -90,7 +90,7 @@ Portal access is now authentication-by-default on the live platform: `ops.lv3.or
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.127.0` |
+| Repository version | `0.128.0` |
 | Platform version | `0.114.7` |
 | Observed check date | `2026-03-24` |
 | Observed OS | `Debian 13` |
@@ -327,6 +327,7 @@ this is still same-host recovery, not off-host disaster recovery
 
 ### Runbooks
 - [Add A New Service](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/add-a-new-service.md)
+- [Agent Handoff Protocol](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/agent-handoff-protocol.md)
 - [Agent Observation Loop](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/agent-observation-loop.md)
 - [Agent State Store](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/agent-state-store.md)
 - [Agent Tool Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/agent-tool-registry.md)
@@ -437,6 +438,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Runbook: SLO Fast Burn](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/slo-fast-burn.md)
 - [SLO Tracking](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/slo-tracking.md)
 - [Staging And Production Topology](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/staging-and-production-topology.md)
+- [Subdomain Exposure Audit](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/subdomain-exposure-audit.md)
 - [Subdomain Governance](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/subdomain-governance.md)
 - [OpenTofu VM Import](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/tofu-vm-import.md)
 - [OpenTofu VM Lifecycle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/tofu-vm-lifecycle.md)
@@ -573,9 +575,11 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0127: Intent Deduplication and Conflict Resolution](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0127-intent-deduplication-and-conflict-resolution.md)
 - [ADR 0128: Platform Health Composite Index](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0128-platform-health-composite-index.md)
 - [ADR 0130: Agent State Persistence Across Workflow Boundaries](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0130-agent-state-persistence-across-workflow-boundaries.md)
+- [ADR 0131: Multi-Agent Handoff Protocol](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0131-multi-agent-handoff-protocol.md)
 - [ADR 0133: Portal Authentication by Default](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0133-portal-authentication-by-default.md)
 - [ADR 0135: Developer Portal Sensitivity Classification](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0135-developer-portal-sensitivity-classification.md)
 - [ADR 0138: Published Artifact Secret Scanning](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0138-published-artifact-secret-scanning.md)
+- [ADR 0139: Subdomain Exposure Audit and Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0139-subdomain-exposure-audit-and-registry.md)
 - [ADR 0140: Grafana Public Access Hardening](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0140-grafana-public-access-hardening.md)
 
 ### Workstream Documents
@@ -678,9 +682,11 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0127: Intent Conflict Resolution](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0127-intent-conflict-resolution.md)
 - [Workstream ADR 0128: Platform Health Composite Index](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0128-platform-health-composite-index.md)
 - [Workstream ADR 0130: Agent State Persistence Across Workflow Boundaries](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0130-agent-state-persistence.md)
+- [Workstream ADR 0131: Multi-Agent Handoff Protocol](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0131-agent-handoff-protocol.md)
 - [Workstream ADR 0133: Portal Authentication By Default](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0133-portal-authentication-by-default.md)
 - [Workstream ADR 0135: Developer Portal Sensitivity Classification](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0135-developer-portal-sensitivity-classification.md)
 - [Workstream ADR 0138: Published Artifact Secret Scanning](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0138-published-artifact-secret-scanning.md)
+- [Workstream ADR 0139: Subdomain Exposure Audit And Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0139-subdomain-exposure-audit.md)
 - [Workstream ADR 0140: Grafana Public Access Hardening](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0140-grafana-public-access-hardening.md)
 <!-- END GENERATED: document-index -->
 
@@ -699,7 +705,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.127.0` |
+| Repository version | `0.128.0` |
 | Platform version | `0.114.7` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -837,6 +843,7 @@ This repository is intentionally opinionated:
 | `0127` | Intent deduplication and conflict resolution | `merged` | [adr-0127-intent-conflict-resolution.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0127-intent-conflict-resolution.md) |
 | `0128` | Platform health composite index | `merged` | [adr-0128-platform-health-composite-index.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0128-platform-health-composite-index.md) |
 | `0130` | Agent state persistence across workflow boundaries | `merged` | [adr-0130-agent-state-persistence.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0130-agent-state-persistence.md) |
+| `0131` | Multi-agent handoff protocol | `merged` | [adr-0131-agent-handoff-protocol.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0131-agent-handoff-protocol.md) |
 | `0133` | Portal authentication by default | `merged` | [adr-0133-portal-authentication-by-default.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0133-portal-authentication-by-default.md) |
 | `0135` | Developer portal sensitivity classification | `merged` | [adr-0135-developer-portal-sensitivity-classification.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0135-developer-portal-sensitivity-classification.md) |
 | `0138` | Published artifact secret scanning | `merged` | [adr-0138-published-artifact-secret-scanning.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0138-published-artifact-secret-scanning.md) |

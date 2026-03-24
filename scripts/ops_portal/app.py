@@ -469,15 +469,15 @@ async def ensure_session(request: Request) -> dict[str, str]:
             forwarded_token = forwarded_token.removeprefix("Bearer ").strip()
         if forwarded_token:
             session["api_token"] = forwarded_token
-        else:
-            static_token = request.app.state.settings.static_api_token
-            if static_token:
-                session["api_token"] = static_token
     return {
         "operator_id": session.get("operator_id", "operator"),
         "operator_email": session.get("operator_email", ""),
         "api_token": session.get("api_token", ""),
     }
+
+
+def read_api_token(session: dict[str, str], settings: PortalSettings) -> str | None:
+    return session.get("api_token") or settings.static_api_token
 
 
 @lru_cache(maxsize=1)
@@ -511,7 +511,9 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
     changelog_notes = repository.changelog_notes()
 
     try:
-        health_payload = await gateway.fetch_platform_health(token=session.get("api_token") or None)
+        health_payload = await gateway.fetch_platform_health(
+            token=read_api_token(session, request.app.state.settings),
+        )
     except Exception as exc:  # noqa: BLE001
         health_payload = {"warning": str(exc)}
 
@@ -630,7 +632,10 @@ def create_app(
         session = await ensure_session(request)
         gateway = request.app.state.gateway_client
         try:
-            result = await gateway.fetch_service_health(service_id, token=session.get("api_token") or None)
+            result = await gateway.fetch_service_health(
+                service_id,
+                token=read_api_token(session, request.app.state.settings),
+            )
             status = result.get("status", "unknown")
             detail = result.get("detail") or result.get("message") or "Health check completed."
             tone = status_tone(status)
@@ -776,7 +781,11 @@ def create_app(
             context["search_error"] = "Enter a query to search the platform corpus."
             return templates.TemplateResponse(request=request, name="partials/search.html", context=context)
         try:
-            payload = await gateway.search(query, collection=collection or None, token=session.get("api_token") or None)
+            payload = await gateway.search(
+                query,
+                collection=collection or None,
+                token=read_api_token(session, request.app.state.settings),
+            )
             context["search_results"] = payload.get("results", [])
             context["search_expanded_query"] = payload.get("expanded_query", query)
         except Exception as exc:  # noqa: BLE001

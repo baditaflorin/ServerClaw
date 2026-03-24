@@ -2306,6 +2306,26 @@ workstreams:
       - docs/runbooks/
     ready_to_merge: false
     live_applied: true
+  - id: adr-0131-agent-handoff-protocol
+    adr: "0131"
+    title: Multi-agent handoff protocol
+    status: merged
+    owner: codex
+    branch: codex/adr-0131-handoff-protocol
+    worktree_path: .worktrees/adr-0131
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0131-agent-handoff-protocol.md
+    depends_on:
+      - adr-0090-platform-cli
+      - adr-0115-mutation-ledger
+    conflicts_with: []
+    shared_surfaces:
+      - platform/handoff/
+      - scripts/lv3_cli.py
+      - config/ledger-event-types.yaml
+      - migrations/0015_handoff_schema.sql
+      - docs/runbooks/
+    ready_to_merge: false
+    live_applied: false
   - id: adr-0140-grafana-public-access-hardening
     adr: "0140"
     title: Grafana public access hardening

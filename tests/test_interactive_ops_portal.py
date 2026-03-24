@@ -11,12 +11,15 @@ from scripts.ops_portal.app import PortalSettings, create_app, normalize_health
 
 class FakeGatewayClient:
     def __init__(self) -> None:
+        self.platform_health_tokens: list[str | None] = []
+        self.service_health_calls: list[dict[str, object]] = []
         self.deploy_calls: list[dict[str, object]] = []
         self.secret_calls: list[str] = []
         self.runbook_calls: list[dict[str, object]] = []
         self.search_calls: list[dict[str, object]] = []
 
     async def fetch_platform_health(self, token: str | None = None) -> dict[str, object]:
+        self.platform_health_tokens.append(token)
         return {
             "services": [
                 {"service_id": "grafana", "status": "healthy", "detail": "Dashboards are green"},
@@ -25,6 +28,7 @@ class FakeGatewayClient:
         }
 
     async def fetch_service_health(self, service_id: str, token: str | None = None) -> dict[str, object]:
+        self.service_health_calls.append({"service_id": service_id, "token": token})
         return {"service": service_id, "status": "healthy", "detail": f"{service_id} responded in 320ms"}
 
     async def trigger_deploy(
@@ -60,7 +64,7 @@ class FakeGatewayClient:
         token: str | None = None,
         limit: int = 8,
     ) -> dict[str, object]:
-        self.search_calls.append({"query": query, "collection": collection, "limit": limit})
+        self.search_calls.append({"query": query, "collection": collection, "limit": limit, "token": token})
         return {
             "expanded_query": query,
             "results": [
@@ -192,7 +196,7 @@ def portal_client(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient]:
 
 
 def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
-    client, _gateway = portal_client
+    client, gateway = portal_client
 
     response = client.get("/")
 
@@ -203,6 +207,7 @@ def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, F
     assert "Search Fabric" in response.text
     assert "Runbook Launcher" in response.text
     assert "Recent Live Applies" in response.text
+    assert gateway.platform_health_tokens == ["test-token"]
 
 
 def test_dashboard_uses_same_origin_static_stylesheet(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
@@ -215,13 +220,14 @@ def test_dashboard_uses_same_origin_static_stylesheet(portal_client: tuple[TestC
 
 
 def test_health_check_action_returns_fragment(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
-    client, _gateway = portal_client
+    client, gateway = portal_client
 
     response = client.post("/actions/services/grafana/health-check")
 
     assert response.status_code == 200
     assert "grafana responded in 320ms" in response.text
     assert "Health check: grafana" in response.text
+    assert gateway.service_health_calls == [{"service_id": "grafana", "token": "test-token"}]
 
 
 def test_deploy_action_records_gateway_call(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
@@ -251,7 +257,7 @@ def test_search_action_renders_results(portal_client: tuple[TestClient, FakeGate
 
     assert response.status_code == 200
     assert "Rotate Certificates" in response.text
-    assert gateway.search_calls == [{"query": "tls cert expires", "collection": "runbooks", "limit": 8}]
+    assert gateway.search_calls == [{"query": "tls cert expires", "collection": "runbooks", "limit": 8, "token": "test-token"}]
 
 
 def test_normalize_health_accepts_service_id_list_payload() -> None:
