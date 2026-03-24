@@ -98,6 +98,9 @@ class OperatorBackend(Protocol):
     def offboard_operator(self, operator: dict[str, Any], reason: str | None) -> dict[str, Any]:
         ...
 
+    def recover_totp(self, operator: dict[str, Any]) -> dict[str, Any]:
+        ...
+
     def inventory_operator(self, operator: dict[str, Any], state: dict[str, Any], offline: bool) -> dict[str, Any]:
         ...
 
@@ -702,6 +705,28 @@ class LiveBackend:
             raise OperatorManagerError(f"Keycloak user '{username}' does not expose an id.")
         return user_id
 
+    def _keycloak_user_details(self, username: str) -> dict[str, Any]:
+        user_id = self._keycloak_user_id(username)
+        details = json_request(
+            f"{service_url('keycloak', prefer_public=True)}/admin/realms/{KEYCLOAK_REALM}/users/{user_id}",
+            headers=self._keycloak_headers(),
+            expected_status=(200,),
+        )
+        if not isinstance(details, dict):
+            raise OperatorManagerError(f"Keycloak user '{username}' did not return a valid detail payload.")
+        return details
+
+    def _keycloak_user_credentials(self, username: str) -> list[dict[str, Any]]:
+        user_id = self._keycloak_user_id(username)
+        payload = json_request(
+            f"{service_url('keycloak', prefer_public=True)}/admin/realms/{KEYCLOAK_REALM}/users/{user_id}/credentials",
+            headers=self._keycloak_headers(),
+            expected_status=(200,),
+        )
+        if not isinstance(payload, list):
+            raise OperatorManagerError(f"Keycloak credentials for '{username}' did not return a list.")
+        return [entry for entry in payload if isinstance(entry, dict)]
+
     def _openbao_headers(self) -> dict[str, str]:
         if self._openbao_root_token is None:
             self._openbao_root_token = load_openbao_root_token()
@@ -1034,6 +1059,64 @@ class LiveBackend:
             "audit": audit,
         }
 
+    def recover_totp(self, operator: dict[str, Any]) -> dict[str, Any]:
+        username = operator["keycloak"]["username"]
+        user_id = self._keycloak_user_id(username)
+        details = self._keycloak_user_details(username)
+        removed_credentials: list[dict[str, str]] = []
+        for credential in self._keycloak_user_credentials(username):
+            if credential.get("type") != "otp":
+                continue
+            credential_id = credential.get("id")
+            if not isinstance(credential_id, str) or not credential_id:
+                continue
+            json_request(
+                f"{service_url('keycloak', prefer_public=True)}/admin/realms/{KEYCLOAK_REALM}/users/{user_id}/credentials/{credential_id}",
+                method="DELETE",
+                headers=self._keycloak_headers(),
+                expected_status=(200, 204),
+            )
+            removed_credentials.append(
+                {
+                    "id": credential_id,
+                    "userLabel": str(credential.get("userLabel") or ""),
+                }
+            )
+
+        required_actions = details.get("requiredActions")
+        if not isinstance(required_actions, list):
+            required_actions = []
+        normalized_required_actions = [str(action) for action in required_actions if str(action).strip()]
+        if "CONFIGURE_TOTP" not in normalized_required_actions:
+            normalized_required_actions.append("CONFIGURE_TOTP")
+        details["requiredActions"] = normalized_required_actions
+        json_request(
+            f"{service_url('keycloak', prefer_public=True)}/admin/realms/{KEYCLOAK_REALM}/users/{user_id}",
+            method="PUT",
+            headers=self._keycloak_headers(),
+            body=details,
+            expected_status=(204,),
+        )
+        json_request(
+            f"{service_url('keycloak', prefer_public=True)}/admin/realms/{KEYCLOAK_REALM}/attack-detection/brute-force/users/{user_id}",
+            method="DELETE",
+            headers=self._keycloak_headers(),
+            expected_status=(200, 204),
+        )
+        self._keycloak_user_cache.pop(username, None)
+        audit = self._emit_audit("operator.totp_recovered", operator["id"])
+        return {
+            "keycloak": {
+                "status": "totp-reset",
+                "username": username,
+                "user_id": user_id,
+                "removed_otp_credentials": removed_credentials,
+                "required_actions": normalized_required_actions,
+                "failure_counters_cleared": True,
+            },
+            "audit": audit,
+        }
+
     def inventory_operator(self, operator: dict[str, Any], state: dict[str, Any], offline: bool) -> dict[str, Any]:
         ssh_enabled = ROLE_DEFINITIONS[operator["role"]].ssh_enabled
         summary = {
@@ -1141,6 +1224,16 @@ class NoopBackend:
             "status": "dry-run",
             "operator_id": operator["id"],
             "reason": reason or "",
+        }
+
+    def recover_totp(self, operator: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "keycloak": {
+                "status": "dry-run",
+                "username": operator["keycloak"]["username"],
+                "required_actions": ["CONFIGURE_TOTP"],
+                "failure_counters_cleared": True,
+            }
         }
 
     def inventory_operator(self, operator: dict[str, Any], state: dict[str, Any], offline: bool) -> dict[str, Any]:
@@ -1258,6 +1351,30 @@ def offboard(
         "status": "dry-run" if dry_run else "ok",
         "operator": updated_operator,
         "roster_path": str(roster_path),
+        "state_path": str(state_path),
+        "result": result,
+    }
+
+
+def recover_totp(
+    *,
+    roster_path: Path,
+    state_dir: Path,
+    operator_id: str,
+    actor_id: str,
+    actor_class: str,
+    dry_run: bool,
+) -> dict[str, Any]:
+    roster = load_operator_roster(roster_path)
+    operator = find_operator(roster, operator_id)
+    backend = select_backend(dry_run=dry_run, actor_class=actor_class, actor_id=actor_id)
+    result = backend.recover_totp(operator)
+    state_path = operator_state_path(operator_id, state_dir)
+    if not dry_run:
+        state_path = persist_state(operator_id, "recover-totp", result, state_dir=state_dir)
+    return {
+        "status": "dry-run" if dry_run else "ok",
+        "operator": operator,
         "state_path": str(state_path),
         "result": result,
     }
@@ -1411,6 +1528,13 @@ def build_parser() -> argparse.ArgumentParser:
     offboard_parser.add_argument("--reason")
     offboard_parser.add_argument("--dry-run", action="store_true")
 
+    recover_totp_parser = subparsers.add_parser(
+        "recover-totp",
+        help="Reset one operator's Keycloak TOTP enrollment and require fresh setup on next login.",
+    )
+    recover_totp_parser.add_argument("--id", required=True)
+    recover_totp_parser.add_argument("--dry-run", action="store_true")
+
     inventory_parser = subparsers.add_parser("inventory", help="Show the access inventory for one operator.")
     inventory_parser.add_argument("--id", required=True)
     inventory_parser.add_argument("--offline", action="store_true")
@@ -1464,6 +1588,15 @@ def main(argv: list[str] | None = None) -> int:
                 actor_id=args.actor_id,
                 actor_class=args.actor_class,
                 reason=args.reason,
+                dry_run=args.dry_run,
+            )
+        elif args.command == "recover-totp":
+            payload = recover_totp(
+                roster_path=roster_path,
+                state_dir=state_dir,
+                operator_id=args.id,
+                actor_id=args.actor_id,
+                actor_class=args.actor_class,
                 dry_run=args.dry_run,
             )
         elif args.command == "inventory":

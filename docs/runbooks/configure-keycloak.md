@@ -66,6 +66,26 @@ Run these checks after converge:
 5. `curl -s --data "grant_type=client_credentials&client_id=lv3-agent-hub&client_secret=$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/lv3-agent-hub-client-secret.txt)" https://sso.lv3.org/realms/lv3/protocol/openid-connect/token`
 6. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'python3 - <<'"'"'PY'"'"'\nimport smtplib\nfrom pathlib import Path\npassword = Path(\"/etc/lv3/mail-platform/server-mailbox-password\").read_text().strip()\nclient = smtplib.SMTP(\"10.10.10.20\", 1587, timeout=10)\nclient.ehlo()\nprint(client.login(\"server\", password))\nclient.quit()\nPY'`
 
+## TOTP Recovery
+
+If an operator can enter the correct password but Keycloak rejects the one-time code with `Invalid authenticator code`, first verify the authenticator device clock is set automatically and synced to network time.
+
+If the failure persists, remove the stored Keycloak OTP credential and require fresh enrollment on next login:
+
+```bash
+uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/operator_manager.py \
+  recover-totp \
+  --id florin-badita
+```
+
+The recovery action:
+
+- deletes the user's current Keycloak OTP credential(s)
+- clears the Keycloak brute-force failure counters for that user
+- adds `CONFIGURE_TOTP` back to the user's required actions
+
+After the command succeeds, sign in again with the existing password and complete TOTP enrollment with a newly scanned QR code.
+
 ## Notes
 
 - Keycloak is the shared SSO broker. It does not replace OpenBao for secrets or `step-ca` for SSH and internal TLS.
