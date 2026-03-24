@@ -284,6 +284,45 @@
     mode: "0600"
   no_log: true
 
+- name: Check whether the Docker nat chain exists before mail-platform rotation recreates published ports
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: mail_platform_rotation_docker_nat_chain
+  changed_when: false
+  failed_when: false
+
+- name: Restore Docker networking when the nat chain is missing before mail-platform rotation
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+  when: mail_platform_rotation_docker_nat_chain.rc != 0
+
+- name: Force-recreate the mail platform runtime with rotated secret material after Docker networking recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ mail_platform_compose_file }}"
+      - up
+      - -d
+      - --force-recreate
+      - stalwart
+      - mail-gateway
+  args:
+    chdir: "{{ mail_platform_site_dir }}"
+  register: mail_platform_rotation_up
+  changed_when: >-
+    'Recreating' in mail_platform_rotation_up.stdout
+    or 'Creating' in mail_platform_rotation_up.stdout
+    or 'Starting' in mail_platform_rotation_up.stdout
+  when: mail_platform_rotation_docker_nat_chain.rc != 0
+
 - name: Restart the mail platform runtime with rotated secret material
   ansible.builtin.command:
     argv:
@@ -303,6 +342,7 @@
     'Recreating' in mail_platform_rotation_up.stdout
     or 'Creating' in mail_platform_rotation_up.stdout
     or 'Starting' in mail_platform_rotation_up.stdout
+  when: mail_platform_rotation_docker_nat_chain.rc == 0
 
 - name: Wait for the Stalwart management API after rotation
   ansible.builtin.wait_for:

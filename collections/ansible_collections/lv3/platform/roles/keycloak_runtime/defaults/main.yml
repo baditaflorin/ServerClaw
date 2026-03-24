@@ -16,7 +16,7 @@ keycloak_openbao_policy_name: lv3-service-keycloak-runtime
 keycloak_openbao_approle_name: keycloak-runtime
 keycloak_database_name: keycloak
 keycloak_database_user: keycloak
-keycloak_database_host: "{{ (hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('postgres')).public_hostname }}"
+keycloak_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
 keycloak_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/database-password.txt
 keycloak_internal_http_port: 8091
 keycloak_local_http_port: 18080

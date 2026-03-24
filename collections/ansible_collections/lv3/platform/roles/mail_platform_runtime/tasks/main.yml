@@ -494,6 +494,58 @@
     or 'writing image sha256' in mail_platform_gateway_build.stdout
     or 'exporting to image' in mail_platform_gateway_build.stdout
 
+- name: Check whether the Docker nat chain exists before recreating mail-platform published ports
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: mail_platform_docker_nat_chain
+  changed_when: false
+  failed_when: false
+
+- name: Restore Docker networking when the nat chain is missing before mail-platform startup
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+  when: mail_platform_docker_nat_chain.rc != 0
+
+- name: Check whether the Stalwart management port is already published locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ mail_platform_stalwart_http_port }}"
+    delay: 0
+    timeout: 1
+  register: mail_platform_stalwart_port_probe
+  changed_when: false
+  failed_when: false
+
+- name: Record whether the mail platform startup needs a force recreate
+  ansible.builtin.set_fact:
+    mail_platform_force_recreate: "{{ mail_platform_docker_nat_chain.rc != 0 or (mail_platform_stalwart_port_probe.failed | default(false)) }}"
+
+- name: Force-recreate the mail platform stack after Docker networking recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ mail_platform_compose_file }}"
+      - up
+      - -d
+      - --force-recreate
+      - --remove-orphans
+  args:
+    chdir: "{{ mail_platform_site_dir }}"
+  register: mail_platform_up
+  changed_when: >-
+    'Creating' in mail_platform_up.stdout
+    or 'Recreating' in mail_platform_up.stdout
+    or 'Starting' in mail_platform_up.stdout
+  when: mail_platform_force_recreate
+
 - name: Start the mail platform stack
   ansible.builtin.command:
     argv:
@@ -511,6 +563,7 @@
     'Creating' in mail_platform_up.stdout
     or 'Recreating' in mail_platform_up.stdout
     or 'Starting' in mail_platform_up.stdout
+  when: not mail_platform_force_recreate
 
 - name: Wait for the Stalwart management API to listen locally
   ansible.builtin.wait_for:
