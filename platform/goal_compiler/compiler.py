@@ -16,6 +16,7 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 from maintenance_window_tool import list_active_windows_best_effort
+from platform.agent_policy import AgentPolicyEngine, PolicyOutcome
 from platform.conflict import infer_resource_claims
 from platform.health import HealthCompositeClient, ServiceHealthNotFoundError
 
@@ -44,6 +45,7 @@ PlatformLLMClient = _LLM_MODULE.PlatformLLMClient
 
 
 COMPILER_VERSION = "goal-compiler/0.1.0"
+COMPILER_REQUIRED_READ_SURFACES = ["maintenance_windows", "world_state"]
 RISK_RANK = {
     RiskClass.LOW: 1,
     RiskClass.MEDIUM: 2,
@@ -94,7 +96,7 @@ class GoalCompiler:
         self.world_state = WorldStateClient(self.repo_root)
         self.health = HealthCompositeClient(self.repo_root)
         self.llm_client = llm_client or self._build_llm_client()
-        self.llm_client = llm_client or self._build_llm_client()
+        self.policy_engine = AgentPolicyEngine(self.repo_root)
 
     def compile(
         self,
@@ -102,9 +104,17 @@ class GoalCompiler:
         *,
         dispatch_args: dict[str, Any] | None = None,
         force_unsafe_health: bool = False,
+        actor_id: str | None = None,
+        autonomous: bool = False,
     ) -> CompilationResult:
         normalized = self.normalize(raw_input)
-        direct_workflow = self._match_direct_workflow(normalized, dispatch_args=dispatch_args)
+        direct_workflow = self._match_direct_workflow(
+            normalized,
+            dispatch_args=dispatch_args,
+            actor_id=actor_id,
+            autonomous=autonomous,
+            raw_input=raw_input,
+        )
         if direct_workflow is not None:
             return direct_workflow
 
@@ -159,6 +169,7 @@ class GoalCompiler:
             ttl_seconds=rule.ttl_seconds,
             requires_approval=requires_approval,
             compiled_by=COMPILER_VERSION,
+            required_read_surfaces=list(COMPILER_REQUIRED_READ_SURFACES),
             resource_claims=[],
             risk_score=RiskScore(
                 source="rule_table",
@@ -167,6 +178,14 @@ class GoalCompiler:
             ),
         )
         intent = self._with_resource_claims(intent, workflow_id=workflow_id, dispatch_payload=workflow_payload)
+        if actor_id and workflow_id:
+            self._enforce_policy(
+                actor_id=actor_id,
+                workflow_id=workflow_id,
+                risk_class=risk_class,
+                raw_input=raw_input,
+                autonomous=autonomous,
+            )
         return CompilationResult(
             intent=intent,
             matched_rule_id=rule.rule_id,
@@ -254,6 +273,9 @@ class GoalCompiler:
         normalized: str,
         *,
         dispatch_args: dict[str, Any] | None,
+        actor_id: str | None,
+        autonomous: bool,
+        raw_input: str,
     ) -> CompilationResult | None:
         workflows = self._load_workflow_catalog()
         if normalized not in workflows and "/" not in normalized:
@@ -275,10 +297,19 @@ class GoalCompiler:
             ttl_seconds=300,
             requires_approval=RISK_RANK[risk_class] >= RISK_RANK[RiskClass.HIGH],
             compiled_by=COMPILER_VERSION,
+            required_read_surfaces=list(COMPILER_REQUIRED_READ_SURFACES),
             resource_claims=[],
             risk_score=RiskScore(source="workflow_catalog", value=RISK_SCORE[risk_class], reasons=["direct workflow invocation"]),
         )
         intent = self._with_resource_claims(intent, workflow_id=workflow_id, dispatch_payload=dispatch_args or {})
+        if actor_id:
+            self._enforce_policy(
+                actor_id=actor_id,
+                workflow_id=workflow_id,
+                risk_class=risk_class,
+                raw_input=raw_input,
+                autonomous=autonomous,
+            )
         return CompilationResult(
             intent=intent,
             matched_rule_id="direct-workflow-id",
@@ -483,4 +514,38 @@ class GoalCompiler:
         return replace(
             intent,
             resource_claims=[claim.as_dict() for claim in infer_resource_claims(payload, repo_root=self.repo_root)],
+        )
+
+    def _enforce_policy(
+        self,
+        *,
+        actor_id: str,
+        workflow_id: str,
+        risk_class: RiskClass,
+        raw_input: str,
+        autonomous: bool,
+    ) -> None:
+        try:
+            decision = self.policy_engine.evaluate(
+                actor_id=actor_id,
+                workflow_id=workflow_id,
+                risk_class=risk_class,
+                required_read_surfaces=list(COMPILER_REQUIRED_READ_SURFACES),
+                autonomous=autonomous,
+            )
+        except KeyError as exc:
+            raise GoalCompilationError(
+                code="ACTOR_POLICY_MISSING",
+                message=str(exc),
+                raw_input=raw_input,
+                details={"actor_id": actor_id, "workflow_id": workflow_id},
+            ) from exc
+        if decision.outcome == PolicyOutcome.ALLOW:
+            return
+        code = "CAPABILITY_ESCALATION_REQUIRED" if decision.outcome == PolicyOutcome.ESCALATE else "CAPABILITY_DENIED"
+        raise GoalCompilationError(
+            code=code,
+            message=decision.message,
+            raw_input=raw_input,
+            details={"actor_id": actor_id, **decision.as_dict()},
         )

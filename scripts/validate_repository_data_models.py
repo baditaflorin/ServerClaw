@@ -65,6 +65,7 @@ WORKSTREAMS_PATH = repo_path("workstreams.yaml")
 TRIAGE_RULES_PATH = repo_path("config", "triage-rules.yaml")
 TRIAGE_AUTO_CHECK_ALLOWLIST_PATH = repo_path("config", "triage-auto-check-allowlist.yaml")
 CHANGELOG_REDACTION_PATH = repo_path("config", "changelog-redaction.yaml")
+AGENT_POLICIES_PATH = repo_path("config", "agent-policies.yaml")
 
 SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -86,6 +87,8 @@ MONITOR_TYPES = {"http", "port"}
 PROBE_KINDS = {"http", "tcp", "command", "systemd"}
 HTTP_METHODS = {"DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"}
 IDENTITY_CLASSES = {"human_operator", "service", "agent", "break_glass"}
+AGENT_POLICY_IDENTITY_CLASSES = {"operator-agent", "service-agent"}
+TRUST_TIERS = {"T1", "T2", "T3", "T4"}
 NETWORK_POLICY_PROTOCOLS = {"tcp", "udp", "vrrp"}
 IMAGE_SOURCE_KINDS = {"upstream", "local_build"}
 IMAGE_PIN_STATUSES = {"pinned", "unpinned", "local_build"}
@@ -1463,6 +1466,72 @@ def validate_triage_rule_contracts() -> None:
 def validate_changelog_redaction_contract() -> None:
     validate_redaction_policy(load_redaction_policy(CHANGELOG_REDACTION_PATH), path=CHANGELOG_REDACTION_PATH)
 
+def validate_agent_policies(workflow_catalog: dict[str, Any]) -> None:
+    payload = load_yaml(AGENT_POLICIES_PATH)
+    if not isinstance(payload, list) or not payload:
+        raise ValueError(f"{AGENT_POLICIES_PATH} must define a non-empty list")
+    workflows = workflow_catalog.get("workflows")
+    if not isinstance(workflows, dict):
+        raise ValueError("workflow catalog must define a workflows object before agent policies are validated")
+    allowed_surfaces = {
+        "health_probes",
+        "ledger",
+        "loki_logs",
+        "maintenance_windows",
+        "netbox",
+        "opentofu_state",
+        "search",
+        "world_state",
+    }
+    seen_ids: set[str] = set()
+    for index, item in enumerate(payload):
+        path = f"{AGENT_POLICIES_PATH}[{index}]"
+        entry = require_mapping(item, path)
+        agent_id = require_str(entry.get("agent_id"), f"{path}.agent_id")
+        if agent_id in seen_ids:
+            raise ValueError(f"{path}.agent_id duplicates '{agent_id}'")
+        seen_ids.add(agent_id)
+        require_str(entry.get("description"), f"{path}.description")
+        identity_class = require_enum(entry.get("identity_class"), f"{path}.identity_class", AGENT_POLICY_IDENTITY_CLASSES)
+        trust_tier = require_enum(entry.get("trust_tier"), f"{path}.trust_tier", TRUST_TIERS)
+        read_surfaces = require_string_list(entry.get("read_surfaces"), f"{path}.read_surfaces")
+        unknown_surfaces = sorted(set(read_surfaces) - allowed_surfaces)
+        if unknown_surfaces:
+            raise ValueError(f"{path}.read_surfaces references unknown surfaces: {', '.join(unknown_surfaces)}")
+
+        autonomous_actions = require_mapping(entry.get("autonomous_actions"), f"{path}.autonomous_actions")
+        require_enum(
+            autonomous_actions.get("max_risk_class"),
+            f"{path}.autonomous_actions.max_risk_class",
+            {"LOW", "MEDIUM", "HIGH", "CRITICAL"},
+        )
+        allowed_tags = require_string_list(
+            autonomous_actions.get("allowed_workflow_tags"),
+            f"{path}.autonomous_actions.allowed_workflow_tags",
+        )
+        for tag_index, tag in enumerate(allowed_tags):
+            require_identifier(tag, f"{path}.autonomous_actions.allowed_workflow_tags[{tag_index}]")
+        disallowed_workflow_ids = require_string_list(
+            autonomous_actions.get("disallowed_workflow_ids"),
+            f"{path}.autonomous_actions.disallowed_workflow_ids",
+        )
+        for workflow_id in disallowed_workflow_ids:
+            if workflow_id not in workflows:
+                raise ValueError(f"{path}.autonomous_actions.disallowed_workflow_ids references unknown workflow '{workflow_id}'")
+        require_int(
+            autonomous_actions.get("max_daily_autonomous_executions"),
+            f"{path}.autonomous_actions.max_daily_autonomous_executions",
+            0,
+        )
+
+        escalation = require_mapping(entry.get("escalation"), f"{path}.escalation")
+        require_enum(escalation.get("on_risk_above"), f"{path}.escalation.on_risk_above", {"LOW", "MEDIUM", "HIGH", "CRITICAL"})
+        require_str(escalation.get("escalation_target"), f"{path}.escalation.escalation_target")
+        require_str(escalation.get("escalation_event"), f"{path}.escalation.escalation_event")
+
+        if identity_class == "service-agent" and trust_tier == "T4":
+            raise ValueError(f"{path}.trust_tier T4 is reserved for operator-agent identities")
+
 
 def validate_identity_taxonomy(
     desired_state: dict[str, Any],
@@ -2086,6 +2155,7 @@ def validate_repository_data_models() -> int:
     validate_secret_manifest(secret_manifest)
     workflow_catalog = load_workflow_catalog()
     validate_workflow_catalog(workflow_catalog, secret_manifest)
+    validate_agent_policies(workflow_catalog)
     command_catalog = load_command_catalog()
     validate_command_catalog(command_catalog, workflow_catalog, secret_manifest)
     validate_container_image_catalog(load_image_catalog())

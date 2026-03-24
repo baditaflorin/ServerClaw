@@ -51,6 +51,7 @@ class ExecutionIntent:
     ttl_seconds: int
     requires_approval: bool
     compiled_by: str
+    required_read_surfaces: list[str] = field(default_factory=list)
     risk_score: RiskScore | None = None
     resource_claims: list[dict[str, Any]] = field(default_factory=list)
     conflict_warnings: list[dict[str, Any]] = field(default_factory=list)

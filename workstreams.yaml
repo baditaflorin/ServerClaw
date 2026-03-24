@@ -2241,6 +2241,32 @@ workstreams:
     ready_to_merge: false
     live_applied: false
 
+  - id: adr-0125-agent-capability-bounds
+    adr: "0125"
+    title: Agent capability bounds and autonomous action policy
+    status: merged
+    owner: codex
+    branch: codex/adr-0125-agent-capability-bounds
+    worktree_path: .worktrees/adr-0125
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0125-agent-capability-bounds.md
+    depends_on:
+      - adr-0046-identity-classes
+      - adr-0069-agent-tool-registry
+      - adr-0112-goal-compiler
+      - adr-0119-budgeted-workflow-scheduler
+    conflicts_with:
+      - adr-0112-goal-compiler
+      - adr-0119-budgeted-workflow-scheduler
+    shared_surfaces:
+      - config/agent-policies.yaml
+      - config/workflow-catalog.json
+      - platform/agent_policy/
+      - platform/goal_compiler/
+      - platform/scheduler/
+      - scripts/lv3_cli.py
+    ready_to_merge: true
+    live_applied: false
+
   - id: adr-0126-observation-to-action-closure-loop
     adr: "0126"
     title: Observation-to-action closure loop

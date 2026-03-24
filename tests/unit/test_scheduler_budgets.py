@@ -20,6 +20,7 @@ def write_scheduler_repo(
     *,
     workflows: dict[str, Any],
     default_budget: dict[str, Any] | None = None,
+    agent_policies: str | None = None,
 ) -> None:
     (repo_root / "config").mkdir(parents=True, exist_ok=True)
     (repo_root / "config" / "workflow-defaults.yaml").write_text(
@@ -37,6 +38,33 @@ def write_scheduler_repo(
     )
     (repo_root / "config" / "workflow-catalog.json").write_text(
         json.dumps({"workflows": workflows}, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    default_policies = """
+- agent_id: operator:lv3-cli
+  description: operator
+  identity_class: operator-agent
+  trust_tier: T3
+  read_surfaces:
+    - search
+    - world_state
+  autonomous_actions:
+    max_risk_class: MEDIUM
+    allowed_workflow_tags:
+      - converge
+      - diagnostic
+      - mutation
+      - validation
+    disallowed_workflow_ids:
+      - destroy-vm
+    max_daily_autonomous_executions: 50
+  escalation:
+    on_risk_above: MEDIUM
+    escalation_target: operator
+    escalation_event: platform.intent.rejected
+""".strip()
+    (repo_root / "config" / "agent-policies.yaml").write_text(
+        (agent_policies if agent_policies is not None else default_policies) + "\n",
         encoding="utf-8",
     )
 
@@ -292,3 +320,57 @@ def test_scheduler_submits_waits_and_records_completion(tmp_path: Path) -> None:
     assert lock_manager.last_token is not None
     assert lock_manager.last_token.released is True
     assert store.list_active_jobs() == []
+
+
+def test_scheduler_rejects_when_autonomous_daily_cap_is_reached(tmp_path: Path) -> None:
+    write_scheduler_repo(
+        tmp_path,
+        workflows={
+            "validate": {
+                "description": "Validate repository",
+                "live_impact": "repo_only",
+                "execution_class": "diagnostic",
+                "required_read_surfaces": ["search"],
+            }
+        },
+        agent_policies="""
+- agent_id: agent/triage-loop
+  description: triage
+  identity_class: service-agent
+  trust_tier: T2
+  read_surfaces:
+    - search
+  autonomous_actions:
+    max_risk_class: LOW
+    allowed_workflow_tags:
+      - diagnostic
+      - validation
+    disallowed_workflow_ids: []
+    max_daily_autonomous_executions: 1
+  escalation:
+    on_risk_above: LOW
+    escalation_target: mattermost:#platform-incidents
+    escalation_event: platform.intent.rejected
+""".strip()
+        + "\n",
+    )
+    scheduler = BudgetedWorkflowScheduler(
+        windmill_client=FakeWindmillClient(statuses=[{"completed": True, "success": True, "result": {"ok": True}}]),
+        repo_root=tmp_path,
+        lock_manager=FakeLockManager(),
+        sleep_fn=lambda _seconds: None,
+    )
+
+    first = scheduler.submit(
+        SimpleNamespace(workflow_id="validate", arguments={"mode": "strict"}, final_risk_class="LOW"),
+        requested_by="agent/triage-loop",
+        autonomous=True,
+    )
+    second = scheduler.submit(
+        SimpleNamespace(workflow_id="validate", arguments={"mode": "strict"}, final_risk_class="LOW"),
+        requested_by="agent/triage-loop",
+        autonomous=True,
+    )
+
+    assert first.status == "completed"
+    assert second.status == "autonomy_limit_reached"

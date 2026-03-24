@@ -13,7 +13,9 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Protocol
 
+from platform.agent_policy import AgentPolicyEngine, DailyExecutionCounter, PolicyOutcome, normalize_actor_id
 from platform.conflict import IntentConflictRegistry
+from platform.goal_compiler.schema import RiskClass
 from platform.ledger import LedgerReader, LedgerWriter
 
 from .budgets import HostTouchEstimate, WorkflowPolicy, estimate_touched_hosts, load_workflow_policy
@@ -266,6 +268,7 @@ class BudgetedWorkflowScheduler:
         state_store: SchedulerStateStore | None = None,
         rollback_guard: RollbackGuard | None = None,
         watchdog: Watchdog | None = None,
+        daily_execution_counter: DailyExecutionCounter | None = None,
         conflict_registry: IntentConflictRegistry | None = None,
         poll_interval_seconds: float = 2.0,
         sleep_fn: Any = time.sleep,
@@ -280,6 +283,10 @@ class BudgetedWorkflowScheduler:
             windmill_client=windmill_client,
             state_store=self._state_store,
             ledger_writer=ledger_writer,
+        )
+        self._policy_engine = AgentPolicyEngine(self._repo_root)
+        self._daily_execution_counter = daily_execution_counter or DailyExecutionCounter(
+            self._repo_root / ".local" / "state" / "agent-policy" / "daily-autonomous-executions.json"
         )
         self._conflict_registry = conflict_registry or IntentConflictRegistry(repo_root=self._repo_root)
         self._poll_interval_seconds = poll_interval_seconds
@@ -419,11 +426,113 @@ class BudgetedWorkflowScheduler:
             metadata=metadata,
         )
 
-    def submit(self, intent: Any, *, requested_by: str = "operator:lv3_cli") -> SchedulerResult:
+    def _write_policy_decision_event(
+        self,
+        *,
+        status: str,
+        policy: WorkflowPolicy,
+        requested_by: str,
+        actor_intent_id: str,
+        metadata: dict[str, Any],
+    ) -> None:
+        if self._ledger_writer is None:
+            return
+        event_type = "execution.escalated" if status == "capability_escalated" else "execution.rejected"
+        self._ledger_writer.write(
+            event_type=event_type,
+            actor="scheduler:budgeted-workflow-scheduler",
+            actor_intent_id=actor_intent_id,
+            target_kind="workflow",
+            target_id=policy.workflow_id,
+            metadata={"requested_by": requested_by, **metadata},
+        )
+
+    @staticmethod
+    def _risk_class_for_submission(intent: Any, policy: WorkflowPolicy) -> RiskClass:
+        for attr in ("final_risk_class", "risk_class"):
+            value = getattr(intent, attr, None)
+            if isinstance(value, RiskClass):
+                return value
+            if isinstance(value, str) and value.strip():
+                return RiskClass(value.strip())
+        mapping = {
+            "repo_only": RiskClass.LOW,
+            "guest_live": RiskClass.MEDIUM,
+            "external_live": RiskClass.MEDIUM,
+            "host_live": RiskClass.HIGH,
+            "host_and_guest_live": RiskClass.HIGH,
+        }
+        return mapping.get(policy.live_impact, RiskClass.MEDIUM)
+
+    @staticmethod
+    def _required_read_surfaces(intent: Any) -> list[str]:
+        value = getattr(intent, "required_read_surfaces", [])
+        if not isinstance(value, list):
+            return []
+        return [str(item).strip() for item in value if isinstance(item, str) and str(item).strip()]
+
+    def submit(
+        self,
+        intent: Any,
+        *,
+        requested_by: str = "operator:lv3-cli",
+        autonomous: bool = False,
+    ) -> SchedulerResult:
         policy = load_workflow_policy(intent.workflow_id, repo_root=self._repo_root)
+        requested_by = normalize_actor_id(requested_by)
         actor_intent_id = self._resolve_actor_intent_id(intent)
         parent_actor_intent_id = self._parent_actor_intent_id(getattr(intent, "arguments", {}) or {})
         host_touch_estimate = estimate_touched_hosts(intent, policy)
+        risk_class = self._risk_class_for_submission(intent, policy)
+        current_daily_executions = self._daily_execution_counter.get(requested_by) if autonomous else None
+
+        try:
+            decision = self._policy_engine.evaluate(
+                actor_id=requested_by,
+                workflow_id=policy.workflow_id,
+                risk_class=risk_class,
+                required_read_surfaces=self._required_read_surfaces(intent),
+                autonomous=autonomous,
+                current_daily_executions=current_daily_executions,
+            )
+        except KeyError as exc:
+            metadata = {"reason": "actor_policy_missing", "actor_id": requested_by, "error": str(exc)}
+            self._write_policy_decision_event(
+                status="capability_denied",
+                policy=policy,
+                requested_by=requested_by,
+                actor_intent_id=actor_intent_id,
+                metadata=metadata,
+            )
+            return SchedulerResult(
+                status="capability_denied",
+                workflow_id=policy.workflow_id,
+                actor_intent_id=actor_intent_id,
+                reason="actor_policy_missing",
+                budget=policy.budget.as_dict(),
+                metadata=metadata,
+            )
+
+        if decision.outcome != PolicyOutcome.ALLOW:
+            status = "capability_escalated" if decision.outcome == PolicyOutcome.ESCALATE else "capability_denied"
+            if decision.reason == "daily_autonomous_limit_reached":
+                status = "autonomy_limit_reached"
+            metadata = decision.as_dict()
+            self._write_policy_decision_event(
+                status=status,
+                policy=policy,
+                requested_by=requested_by,
+                actor_intent_id=actor_intent_id,
+                metadata=metadata,
+            )
+            return SchedulerResult(
+                status=status,
+                workflow_id=policy.workflow_id,
+                actor_intent_id=actor_intent_id,
+                reason=decision.reason,
+                budget=policy.budget.as_dict(),
+                metadata=metadata,
+            )
 
         if (
             policy.execution_class == "mutation"
@@ -474,6 +583,8 @@ class BudgetedWorkflowScheduler:
                 )
 
         try:
+            if autonomous:
+                self._daily_execution_counter.increment(requested_by)
             conflict_result = self._conflict_registry.register_intent(
                 intent,
                 actor_intent_id=actor_intent_id,

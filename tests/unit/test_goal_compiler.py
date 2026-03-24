@@ -43,12 +43,101 @@ def compiler_repo(tmp_path: Path) -> Path:
         json.dumps(
             {
                 "workflows": {
-                    "validate": {"description": "Validate repository", "live_impact": "repo_only"},
-                    "converge-netbox": {"description": "Converge NetBox", "live_impact": "guest_live"},
-                    "converge-monitoring": {"description": "Converge monitoring", "live_impact": "guest_live"},
+                    "validate": {
+                        "description": "Validate repository",
+                        "live_impact": "repo_only",
+                        "execution_class": "diagnostic",
+                        "required_read_surfaces": ["search"],
+                    },
+                    "converge-netbox": {
+                        "description": "Converge NetBox",
+                        "live_impact": "guest_live",
+                        "execution_class": "mutation",
+                        "required_read_surfaces": ["world_state"],
+                    },
+                    "converge-monitoring": {
+                        "description": "Converge monitoring",
+                        "live_impact": "guest_live",
+                        "execution_class": "mutation",
+                        "required_read_surfaces": ["world_state"],
+                    },
+                    "converge-guest-network-policy": {
+                        "description": "Converge guest network policy",
+                        "live_impact": "host_and_guest_live",
+                        "execution_class": "mutation",
+                        "required_read_surfaces": ["world_state"],
+                    },
                 }
             }
         )
+        + "\n",
+    )
+    write(
+        tmp_path / "config" / "agent-policies.yaml",
+        """
+- agent_id: operator:lv3-cli
+  description: operator
+  identity_class: operator-agent
+  trust_tier: T3
+  read_surfaces:
+    - maintenance_windows
+    - search
+    - world_state
+  autonomous_actions:
+    max_risk_class: MEDIUM
+    allowed_workflow_tags:
+      - diagnostic
+      - converge
+      - mutation
+      - validation
+    disallowed_workflow_ids:
+      - destroy-vm
+    max_daily_autonomous_executions: 50
+  escalation:
+    on_risk_above: MEDIUM
+    escalation_target: operator
+    escalation_event: platform.intent.rejected
+- agent_id: agent/triage-loop
+  description: triage
+  identity_class: service-agent
+  trust_tier: T2
+  read_surfaces:
+    - maintenance_windows
+    - search
+    - world_state
+  autonomous_actions:
+    max_risk_class: LOW
+    allowed_workflow_tags:
+      - diagnostic
+      - validation
+    disallowed_workflow_ids:
+      - destroy-vm
+    max_daily_autonomous_executions: 20
+  escalation:
+    on_risk_above: LOW
+    escalation_target: mattermost:#platform-incidents
+    escalation_event: platform.intent.rejected
+- agent_id: agent/claude-code
+  description: claude
+  identity_class: operator-agent
+  trust_tier: T3
+  read_surfaces:
+    - maintenance_windows
+    - search
+    - world_state
+  autonomous_actions:
+    max_risk_class: MEDIUM
+    allowed_workflow_tags:
+      - converge
+      - diagnostic
+    disallowed_workflow_ids:
+      - destroy-vm
+    max_daily_autonomous_executions: 50
+  escalation:
+    on_risk_above: MEDIUM
+    escalation_target: operator
+    escalation_event: platform.intent.rejected
+""".strip()
         + "\n",
     )
     write(
@@ -96,10 +185,6 @@ def test_compile_deploy_service_with_scope_binding(compiler_repo: Path) -> None:
     assert result.intent.scope.allowed_hosts == ["netbox-lv3"]
     assert result.intent.scope.allowed_vmids == [130]
     assert result.intent.requires_approval is True
-    assert result.intent.resource_claims == [
-        {"resource": "service:netbox", "access": "write"},
-        {"resource": "vm:netbox-lv3", "access": "read"},
-    ]
     assert result.intent.resource_claims == [
         {"resource": "service:netbox", "access": "write"},
         {"resource": "vm:netbox-lv3", "access": "read"},
@@ -175,7 +260,6 @@ def test_compile_force_unsafe_health_allows_instruction(compiler_repo: Path) -> 
     assert result.dispatch_workflow_id == "converge-netbox"
     assert result.intent.requires_approval is True
 
-
 def test_compile_uses_llm_fallback_for_unmatched_instruction(compiler_repo: Path) -> None:
     class FakeLLMClient:
         def __init__(self) -> None:
@@ -220,3 +304,23 @@ def test_compile_parse_error_only_calls_llm_once(compiler_repo: Path) -> None:
         "llm_normalized_input": "still unknown",
     }
     assert llm_client.calls == 1
+
+
+def test_compile_denies_out_of_bounds_workflow_tags(compiler_repo: Path) -> None:
+    compiler = GoalCompiler(compiler_repo)
+
+    with pytest.raises(GoalCompilationError) as excinfo:
+        compiler.compile("deploy netbox", actor_id="agent/triage-loop", autonomous=True)
+
+    assert excinfo.value.code == "CAPABILITY_DENIED"
+    assert excinfo.value.details["reason"] == "workflow_tag_not_allowed"
+
+
+def test_compile_escalates_risk_above_actor_limit(compiler_repo: Path) -> None:
+    compiler = GoalCompiler(compiler_repo)
+
+    with pytest.raises(GoalCompilationError) as excinfo:
+        compiler.compile("converge-guest-network-policy", actor_id="agent/claude-code", autonomous=True)
+
+    assert excinfo.value.code == "CAPABILITY_ESCALATION_REQUIRED"
+    assert excinfo.value.details["reason"] == "capability_bound_exceeded"

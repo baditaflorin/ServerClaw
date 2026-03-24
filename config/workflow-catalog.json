@@ -31,6 +31,12 @@
       "verification_commands": [
         "make validate"
       ],
+      "required_read_surfaces": [
+        "search"
+      ],
+      "tags": [
+        "validation"
+      ],
       "execution_class": "diagnostic",
       "budget": {
         "max_duration_seconds": 900,
@@ -284,6 +290,16 @@
       "verification_commands": [
         "python3 scripts/incident_triage.py --service netbox --alert-name netbox_health_probe_failed --signal recent_deployment_within_2h=true",
         "python3 config/windmill/scripts/run-triage.py"
+      ],
+      "required_read_surfaces": [
+        "health_probes",
+        "ledger",
+        "loki_logs",
+        "search",
+        "world_state"
+      ],
+      "tags": [
+        "auto_check"
       ],
       "execution_class": "diagnostic",
       "dedup_window_seconds": 0,
@@ -571,6 +587,9 @@
         "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo pve-firewall compile >/dev/null && sudo ls /etc/pve/firewall/*.fw'",
         "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'nc -z -w 2 10.10.10.50 5432'",
         "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.50 'nc -z -w 2 10.10.10.20 8083'"
+      ],
+      "required_read_surfaces": [
+        "world_state"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -1905,6 +1924,13 @@
         "make syntax-check-secret-rotation",
         "make rotate-secret SECRET_ID=windmill_database_password ROTATION_ARGS=\"--plan\""
       ],
+      "required_read_surfaces": [
+        "ledger",
+        "world_state"
+      ],
+      "tags": [
+        "rotate_secret"
+      ],
       "execution_class": "mutation",
       "resource_claims": [
         {
@@ -2194,6 +2220,11 @@
         "curl -s -o /dev/null -w '%{http_code}\\n' http://100.118.189.95:8004/login/",
         "curl -s -H \"Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/netbox/api-token.txt)\" http://100.118.189.95:8004/api/virtualization/virtual-machines/?limit=20",
         "uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/netbox_inventory_sync.py --api-url http://100.118.189.95:8004 --api-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/netbox/api-token.txt --host-vars /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml --stack /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml --lane-catalog /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/control-plane-lanes.json"
+      ],
+      "required_read_surfaces": [
+        "netbox",
+        "opentofu_state",
+        "world_state"
       ],
       "execution_class": "mutation",
       "resource_claims": [

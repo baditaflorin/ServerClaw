@@ -131,6 +131,20 @@ def validate_workflow_catalog(catalog: dict, secret_manifest: dict) -> None:
         if dedup_window is not None and (isinstance(dedup_window, bool) or not isinstance(dedup_window, int) or dedup_window < 0):
             raise ValueError(f"workflow '{workflow_id}' dedup_window_seconds must be an integer >= 0")
         validate_resource_claims(workflow.get("resource_claims"), workflow_id)
+        tags = workflow.get("tags", [])
+        if not isinstance(tags, list):
+            raise ValueError(f"workflow '{workflow_id}' tags must be a list")
+        for index, tag in enumerate(tags):
+            if not isinstance(tag, str) or not tag.strip():
+                raise ValueError(f"workflow '{workflow_id}' tags[{index}] must be a non-empty string")
+        required_read_surfaces = workflow.get("required_read_surfaces", [])
+        if not isinstance(required_read_surfaces, list):
+            raise ValueError(f"workflow '{workflow_id}' required_read_surfaces must be a list")
+        for index, surface in enumerate(required_read_surfaces):
+            if not isinstance(surface, str) or not surface.strip():
+                raise ValueError(
+                    f"workflow '{workflow_id}' required_read_surfaces[{index}] must be a non-empty string"
+                )
 
         budget = dict(defaults_payload)
         workflow_budget = workflow.get("budget", {})

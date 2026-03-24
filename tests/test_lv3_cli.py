@@ -213,18 +213,79 @@ all:
         json.dumps(
             {
                 "workflows": {
-                    "windmill_healthcheck": {"description": "Healthcheck"},
-                    "operator-onboard": {"description": "Operator onboarding", "live_impact": "guest_live"},
-                    "operator-offboard": {"description": "Operator offboarding", "live_impact": "guest_live"},
-                    "converge-netbox": {"description": "NetBox converge", "live_impact": "guest_live"},
-                    "disaster-recovery-runbook": {"description": "DR runbook"},
-                    "check-cert-expiry": {"description": "Check certificate expiry"},
-                    "renew-service-cert": {"description": "Renew service certificate"},
-                    "validate": {"description": "Validate repository", "live_impact": "repo_only"},
+                    "windmill_healthcheck": {"description": "Healthcheck", "execution_class": "diagnostic"},
+                    "operator-onboard": {"description": "Operator onboarding", "live_impact": "guest_live", "execution_class": "mutation"},
+                    "operator-offboard": {"description": "Operator offboarding", "live_impact": "guest_live", "execution_class": "mutation"},
+                    "converge-netbox": {
+                        "description": "NetBox converge",
+                        "live_impact": "guest_live",
+                        "execution_class": "mutation",
+                        "required_read_surfaces": ["world_state"],
+                    },
+                    "disaster-recovery-runbook": {"description": "DR runbook", "execution_class": "diagnostic"},
+                    "check-cert-expiry": {"description": "Check certificate expiry", "execution_class": "diagnostic"},
+                    "renew-service-cert": {
+                        "description": "Renew service certificate",
+                        "live_impact": "guest_live",
+                        "execution_class": "mutation",
+                    },
+                    "validate": {
+                        "description": "Validate repository",
+                        "live_impact": "repo_only",
+                        "execution_class": "diagnostic",
+                        "required_read_surfaces": ["search"],
+                    },
                 }
             },
             indent=2,
         )
+        + "\n"
+    )
+    (tmp_path / "config" / "agent-policies.yaml").write_text(
+        """
+- agent_id: operator:lv3-cli
+  description: operator
+  identity_class: operator-agent
+  trust_tier: T3
+  read_surfaces:
+    - maintenance_windows
+    - search
+    - world_state
+  autonomous_actions:
+    max_risk_class: MEDIUM
+    allowed_workflow_tags:
+      - diagnostic
+      - converge
+      - mutation
+      - validation
+    disallowed_workflow_ids:
+      - destroy-vm
+    max_daily_autonomous_executions: 50
+  escalation:
+    on_risk_above: MEDIUM
+    escalation_target: operator
+    escalation_event: platform.intent.rejected
+- agent_id: agent/triage-loop
+  description: triage
+  identity_class: service-agent
+  trust_tier: T2
+  read_surfaces:
+    - maintenance_windows
+    - search
+    - world_state
+  autonomous_actions:
+    max_risk_class: LOW
+    allowed_workflow_tags:
+      - diagnostic
+      - validation
+    disallowed_workflow_ids:
+      - converge-netbox
+    max_daily_autonomous_executions: 1
+  escalation:
+    on_risk_above: LOW
+    escalation_target: mattermost:#platform-incidents
+    escalation_event: platform.intent.rejected
+""".strip()
         + "\n"
     )
     (tmp_path / "config" / "command-catalog.json").write_text(
@@ -548,6 +609,18 @@ def test_runbook_execute_dry_run_renders_steps(
 def test_runbook_completion_suggests_runbooks(minimal_repo: Path) -> None:
     candidates = lv3_cli.completion_candidates(["lv3", "runbook", "execute", "renew"], "renew")
     assert candidates == ["renew-certificate"]
+
+def test_run_rejects_autonomous_out_of_bounds_action(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    exit_code = lv3_cli.main(["run", "deploy", "netbox", "--actor-id", "agent/triage-loop", "--autonomous"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 2
+    assert "CAPABILITY_DENIED" in captured.err
+    ledger_path = minimal_repo / ".local" / "state" / "ledger" / "ledger.events.jsonl"
+    events = [json.loads(line) for line in ledger_path.read_text().splitlines()]
+    assert events[-1]["event_type"] == "intent.rejected"
 
 
 def test_vm_list_uses_inventory(

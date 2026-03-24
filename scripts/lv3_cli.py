@@ -45,6 +45,7 @@ from platform.health import HealthCompositeClient, ServiceHealthNotFoundError
 from platform.scheduler import build_scheduler
 from scripts.risk_scorer import ExecutionIntent, assemble_context, compile_workflow_intent, score_intent
 CLI_VERSION = "0.1.0"
+DEFAULT_RUN_ACTOR_ID = "operator:lv3-cli"
 DEFAULT_STATUS_TIMEOUT_SECONDS = 3.0
 DEFAULT_LOG_LINES = 20
 DEFAULT_LOG_SINCE = "1h"
@@ -61,11 +62,13 @@ SERVICE_ALIASES = {
 GOAL_COMPILER_MODULE = load_repo_package("lv3_goal_compiler", CODE_ROOT / "platform" / "goal_compiler")
 LEDGER_MODULE = load_repo_package("lv3_platform_ledger", CODE_ROOT / "platform" / "ledger")
 AGENT_MODULE = load_repo_package("lv3_platform_agent", CODE_ROOT / "platform" / "agent")
+AGENT_POLICY_MODULE = load_repo_package("lv3_agent_policy", CODE_ROOT / "platform" / "agent_policy")
 HANDOFF_MODULE = load_repo_package("lv3_platform_handoff", CODE_ROOT / "platform" / "handoff")
 GoalCompilationError = GOAL_COMPILER_MODULE.GoalCompilationError
 GoalCompiler = GOAL_COMPILER_MODULE.GoalCompiler
 LedgerWriter = LEDGER_MODULE.LedgerWriter
 AgentStateClient = AGENT_MODULE.AgentStateClient
+normalize_actor_id = AGENT_POLICY_MODULE.normalize_actor_id
 CLOSURE_LOOP_MODULE = load_repo_package("lv3_platform_closure_loop", CODE_ROOT / "platform" / "closure_loop")
 ClosureLoop = CLOSURE_LOOP_MODULE.ClosureLoop
 HandoffClient = HANDOFF_MODULE.HandoffClient
@@ -918,7 +921,9 @@ def run_windmill_request(
     dry_run: bool,
     explain: bool,
     no_color: bool,
-    intent: ExecutionIntent | None = None,
+    intent: Any | None = None,
+    actor_id: str = DEFAULT_RUN_ACTOR_ID,
+    autonomous: bool = False,
 ) -> int:
     service_map = load_service_map()
     base_url = windmill_url(service_map)
@@ -959,12 +964,24 @@ def run_windmill_request(
         target_vm=payload.get("target_vm") or payload.get("target"),
     )
     try:
-        result = scheduler.submit(scheduler_intent, requested_by="operator:lv3_cli")
+        result = scheduler.submit(
+            scheduler_intent,
+            requested_by=normalize_actor_id(actor_id),
+            autonomous=autonomous,
+        )
     except (urllib.error.URLError, RuntimeError) as exc:
         print(f"Windmill API error: {exc}", file=sys.stderr)
         return 1
 
-    if result.status in {"concurrency_limit", "rollback_depth_exceeded", "budget_exceeded", "conflict_rejected"}:
+    if result.status in {
+        "autonomy_limit_reached",
+        "budget_exceeded",
+        "capability_denied",
+        "capability_escalated",
+        "concurrency_limit",
+        "conflict_rejected",
+        "rollback_depth_exceeded",
+    }:
         print(
             f"Scheduler rejected {workflow_name}: {result.status}"
             + (f" ({result.reason})" if result.reason else ""),
@@ -999,6 +1016,8 @@ def run_windmill_workflow(
     no_color: bool,
     approve_risk: bool = False,
     risk_override: bool = False,
+    actor_id: str = DEFAULT_RUN_ACTOR_ID,
+    autonomous: bool = False,
 ) -> int:
     intent = build_execution_intent(workflow_name, args)
     maybe_write_compiled_intent_event(intent)
@@ -1014,6 +1033,8 @@ def run_windmill_workflow(
         explain=explain,
         no_color=no_color,
         intent=intent,
+        actor_id=actor_id,
+        autonomous=autonomous,
     )
 
 
@@ -1030,6 +1051,8 @@ def run_compiled_instruction(
     explain: bool,
     no_color: bool,
     force_unsafe_health: bool = False,
+    actor_id: str = DEFAULT_RUN_ACTOR_ID,
+    autonomous: bool = False,
 ) -> int:
     compiler = GoalCompiler(REPO_ROOT)
     ledger = LedgerWriter(
@@ -1042,6 +1065,8 @@ def run_compiled_instruction(
             instruction,
             dispatch_args=parsed_args,
             force_unsafe_health=force_unsafe_health,
+            actor_id=normalize_actor_id(actor_id),
+            autonomous=autonomous,
         )
     except GoalCompilationError as exc:
         ledger.write(
@@ -1084,6 +1109,8 @@ def run_compiled_instruction(
                 dry_run=True,
                 explain=explain,
                 no_color=no_color,
+                actor_id=actor_id,
+                autonomous=autonomous,
             )
         return 0
 
@@ -1128,7 +1155,19 @@ def run_compiled_instruction(
         dry_run=False,
         explain=False,
         no_color=no_color,
-        intent=scheduler_intent,
+        intent=SimpleNamespace(
+            id=result.intent.id,
+            workflow_id=result.dispatch_workflow_id,
+            arguments=result.dispatch_payload,
+            target_service_id=result.intent.target.services[0] if result.intent.target.services else None,
+            target_vm=result.intent.scope.allowed_hosts[0] if result.intent.scope.allowed_hosts else None,
+            resource_claims=result.intent.resource_claims,
+            conflict_warnings=result.intent.conflict_warnings,
+            risk_class=result.intent.risk_class,
+            required_read_surfaces=result.intent.required_read_surfaces,
+        ),
+        actor_id=actor_id,
+        autonomous=autonomous,
     )
 
 
@@ -2173,6 +2212,8 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Bypass the health composite gate and record the override in the ledger.",
     )
+    run.add_argument("--actor-id", default=DEFAULT_RUN_ACTOR_ID)
+    run.add_argument("--autonomous", action="store_true", help="Apply autonomous agent policy bounds.")
     run.add_argument("--dry-run", action="store_true")
     run.add_argument("--explain", action="store_true")
 
@@ -2468,6 +2509,8 @@ def main(argv: list[str] | None = None) -> int:
                 no_color=no_color,
                 approve_risk=args.approve_risk,
                 risk_override=args.risk_override,
+                actor_id=args.actor_id,
+                autonomous=args.autonomous,
             )
         return run_compiled_instruction(
             instruction,
@@ -2476,6 +2519,8 @@ def main(argv: list[str] | None = None) -> int:
             explain=args.explain,
             no_color=no_color,
             force_unsafe_health=args.force_unsafe_health,
+            actor_id=args.actor_id,
+            autonomous=args.autonomous,
         )
     if args.command == "intent":
         if args.intent_action == "check":
