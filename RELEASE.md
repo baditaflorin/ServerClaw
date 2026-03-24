@@ -1,14 +1,14 @@
-# Release 0.119.0
+# Release 0.119.1
 
 - Date: 2026-03-24
 
 ## Summary
-- Implemented ADR 0121 local search and indexing fabric with repo-managed collectors, a persisted local index, and query-time synonym expansion.
-- Added the shared search surfaces across the platform: `lv3 search`, `/v1/search`, the ops-portal search panel, and the Windmill rebuild helper.
-- Marked ADR 0121 implemented on `main` and ADR 0095 superseded by the delivered search fabric contract.
+- Fixed the `ops.lv3.org` login redirect so oauth2-proxy no longer requests an invalid literal `groups` scope from Keycloak.
+- Added a regression test for the public-edge OIDC auth role and documented the `invalid_scope` recovery path in the ops portal runbook.
+- Re-converged the live public edge so the running auth proxy now redirects with `scope=openid profile email`.
 
 ## Platform Impact
-- no live platform version bump; this release adds ADR 0121 local search across the CLI, API gateway, ops portal, and Windmill index rebuild automation
+- repository version advances to `0.119.1`; live platform version advances to `0.114.3` after the auth-proxy scope fix was applied on `nginx-lv3`
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

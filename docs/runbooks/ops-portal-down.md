@@ -8,6 +8,7 @@ Recover the interactive ops portal runtime when `ops.lv3.org` or the local `http
 
 - `https://ops.lv3.org/health` no longer returns `200`
 - the portal renders an NGINX `502` or the login flow completes but the app shell never loads
+- the login flow redirects to `/oauth2/callback?...error=invalid_scope`
 - `docker compose ps` on `docker-runtime-lv3` shows the `ops-portal` container exited or unhealthy
 
 ## Immediate Checks
@@ -45,6 +46,8 @@ ansible-playbook playbooks/public-edge.yml
 ```
 
 3. If gateway-backed actions fail while the UI shell loads, confirm the configured `GATEWAY_URL` from `/opt/ops-portal/ops-portal.env` and verify the API gateway separately before restarting the portal.
+
+4. If the callback includes `error=invalid_scope`, verify the rendered oauth2-proxy config on `nginx-lv3` does not request a custom `groups` scope. The portal relies on a client-mapped `groups` claim, so the requested scope must stay `openid profile email` unless a real Keycloak client scope named `groups` is added and assigned.
 
 ## Static Fallback
 
