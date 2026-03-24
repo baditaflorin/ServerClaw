@@ -282,7 +282,7 @@ def test_run_dry_run_redacts_token(
     exit_code = lv3_cli.main(["run", "windmill_healthcheck", "--args", "probe=manual", "--dry-run"])
     captured = capsys.readouterr()
     assert exit_code == 0
-    assert "Compiled Intent:" in captured.out
+    assert "Compiled intent:" in captured.out
     assert "<redacted>" in captured.out
     assert "secret-token" not in captured.out
 
