@@ -17,6 +17,7 @@ Versioned release notes live under [docs/release-notes/README.md](/Users/live/Do
 - Added the ADR 0122 runbook plus focused tests for the raw app bundle, Windmill seed metadata, and the new roster and inventory wrapper scripts.
 - Hardened the OpenBao runtime converge to enforce managed ownership of `/opt/openbao/logs/audit.log`, preventing the service from resealing itself after Docker restarts.
 - Hardened the Windmill runtime converge to reset stale compose network state when Docker restarts leave the `windmill_default` bridge missing behind recreated containers.
+- Corrected the Windmill runtime database host to use the selected Postgres guest address instead of the controller-facing `database.lv3.org` hostname, which was unreachable from `docker-runtime-lv3`.
 
 ## Latest Release
 
