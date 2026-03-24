@@ -143,6 +143,21 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
         {
             "services": [
                 {
+                    "id": "postgres",
+                    "name": "Postgres",
+                    "description": "database",
+                    "category": "data",
+                    "lifecycle_status": "active",
+                    "vm": "postgres-lv3",
+                    "vmid": 150,
+                    "internal_url": "postgres://10.10.10.55:5432",
+                    "health_probe_id": "postgres",
+                    "adr": "0098",
+                    "runbook": "docs/runbooks/postgres-failover.md",
+                    "tags": ["database"],
+                    "environments": {"production": {"status": "active", "url": "postgres://10.10.10.55:5432"}},
+                },
+                {
                     "id": "windmill",
                     "name": "Windmill",
                     "description": "workflow runtime",
@@ -219,6 +234,10 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
         tmp_path / "docs" / "runbooks" / "configure-windmill.md",
         "# Configure Windmill\n\nDeploy service runtime.\n",
     )
+    write_yaml(
+        tmp_path / "docs" / "runbooks" / "postgres-failover.md",
+        "# Postgres Failover\n\nHandle the failover path.\n",
+    )
     write_json(
         tmp_path / "receipts" / "drift-reports" / "2026-03-23-test.json",
         {"summary": {"status": "warn", "warn_count": 1, "critical_count": 0}},
@@ -292,7 +311,16 @@ def test_gateway_proxy_and_platform_endpoints(tmp_path: Path) -> None:
 
                     services = await client.get("/v1/platform/services", headers=headers)
                     assert services.status_code == 200
-                    assert services.json()["count"] == 1
+                    assert services.json()["count"] == 2
+
+                    platform_health = await client.get("/v1/platform/health", headers=headers)
+                    assert platform_health.status_code == 200
+                    assert platform_health.json()["service_count"] == 2
+                    assert platform_health.json()["source"] == "world_state"
+
+                    postgres_health = await client.get("/v1/platform/health/postgres", headers=headers)
+                    assert postgres_health.status_code == 200
+                    assert postgres_health.json()["status"] == "degraded"
 
                     drift = await client.get("/v1/platform/drift", headers=headers)
                     assert drift.status_code == 200

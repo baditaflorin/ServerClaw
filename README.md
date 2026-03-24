@@ -87,8 +87,8 @@ The repository now also ships ADR 0122 browser-first operator access management:
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.120.0` |
-| Platform version | `0.114.4` |
+| Repository version | `0.121.0` |
+| Platform version | `0.114.6` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -135,8 +135,8 @@ Template VM: `9000` `debian13-cloud-template`
 | `docker_runtime` | `2026-03-22-adr-0023-docker-runtime-live-apply` |
 | `guest_network_policy` | `2026-03-22-adr-0067-guest-network-policy-live-apply` |
 | `identity_taxonomy` | `2026-03-22-adr-0046-identity-classes-live-apply` |
-| `keycloak` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
-| `mail_platform` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
+| `keycloak` | `2026-03-24-keycloak-password-reset-mail-live-apply` |
+| `mail_platform` | `2026-03-24-keycloak-password-reset-mail-live-apply` |
 | `mattermost` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
 | `monitoring` | `2026-03-22-adr-0052-loki-live-apply` |
 | `mutation_audit` | `2026-03-23-adr-0066-mutation-audit-live-apply` |
@@ -157,7 +157,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `step_ca` | `2026-03-22-adr-0042-step-ca-live-apply` |
 | `tempo_tracing` | `2026-03-22-adr-0053-tempo-traces-live-apply` |
 | `uptime_kuma` | `2026-03-22-adr-0027-uptime-kuma-live-apply` |
-| `windmill` | `2026-03-24-adr-0122-windmill-operator-access-admin-live-apply` |
+| `windmill` | `2026-03-24-adr-0122-windmill-operator-access-admin-hotfix-live-apply` |
 <!-- END GENERATED: platform-status -->
 
 The current access posture is:
@@ -204,7 +204,7 @@ password SSH disabled on host and guests
 | `mattermost-operator-api` | `api` | `service_api` | `http://100.118.189.95:8066/api/v4` |
 | `open-webui-operator-workbench` | `api` | `service_api` | `http://100.118.189.95:8008` |
 | `platform-context-api` | `api` | `service_api` | `http://100.118.189.95:8010` |
-| `mail-platform-submission` | `message` | `mail_submission` | `10.10.10.20:587` |
+| `mail-platform-submission` | `message` | `mail_submission` | `10.10.10.20:1587` |
 | `proxmox-host-operator-notifications` | `message` | `notification_profile` | `lv3-ops-email sendmail endpoint with catch-all matcher to baditaflorin@gmail.com` |
 | `stalwart-mail-events` | `event` | `webhook` | `http://10.10.10.20:8081/webhooks/stalwart` |
 | `mattermost-incoming-webhooks` | `event` | `webhook` | `http://10.10.10.20:8065/hooks/<managed-id>` |
@@ -425,6 +425,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Security Posture Reporting](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/security-posture-reporting.md)
 - [Service Capability Catalog](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/service-capability-catalog.md)
 - [Service Dependency Graph Runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/service-dependency-graph-runtime.md)
+- [Service Uptime Contracts](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/service-uptime-contracts.md)
 - [Runbook: SLO Fast Burn](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/slo-fast-burn.md)
 - [SLO Tracking](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/slo-tracking.md)
 - [Staging And Production Topology](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/staging-and-production-topology.md)
@@ -560,6 +561,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0120: Dry-Run Semantic Diff Engine](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0120-dry-run-semantic-diff-engine.md)
 - [ADR 0121: Local Search and Indexing Fabric](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0121-local-search-and-indexing-fabric.md)
 - [ADR 0122: Windmill Operator Access Admin Surface](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0122-windmill-operator-access-admin.md)
+- [ADR 0123: Service Uptime Contracts And Monitor-Backed Health](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0123-service-uptime-contracts-and-monitor-backed-health.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -657,6 +659,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0120: Dry-Run Semantic Diff Engine](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0120-dry-run-diff-engine.md)
 - [Workstream ADR 0121: Local Search and Indexing Fabric](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0121-search-indexing-fabric.md)
 - [Workstream ADR 0122: Windmill Operator Access Admin Surface](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0122-operator-access-admin.md)
+- [Workstream ADR 0123: Service Uptime Contracts And Monitor-Backed Health](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0123-service-uptime-contracts.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
@@ -674,8 +677,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.120.0` |
-| Platform version | `0.114.4` |
+| Repository version | `0.121.0` |
+| Platform version | `0.114.6` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -808,6 +811,7 @@ This repository is intentionally opinionated:
 | `0120` | Dry-run semantic diff engine | `merged` | [adr-0120-dry-run-diff-engine.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0120-dry-run-diff-engine.md) |
 | `0121` | Local search and indexing fabric | `merged` | [adr-0121-search-indexing-fabric.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0121-search-indexing-fabric.md) |
 | `0122` | Windmill operator access admin surface | `live_applied` | [adr-0122-operator-access-admin.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0122-operator-access-admin.md) |
+| `0123` | Service uptime contracts and monitor-backed health | `merged` | [adr-0123-service-uptime-contracts.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0123-service-uptime-contracts.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

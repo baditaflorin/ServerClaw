@@ -350,7 +350,7 @@ def normalize_health(payload: dict[str, Any], services: list[dict[str, Any]]) ->
     raw_services = payload.get("services") if isinstance(payload, dict) else None
     if isinstance(raw_services, list):
         for item in raw_services:
-            service_id = item.get("service") or item.get("id")
+            service_id = item.get("service_id") or item.get("service") or item.get("id")
             if service_id in health_map:
                 health_map[service_id] = {
                     "status": str(item.get("status", "unknown")),
@@ -368,7 +368,7 @@ def normalize_health(payload: dict[str, Any], services: list[dict[str, Any]]) ->
                 "detail": str(item.get("detail") or item.get("message") or "No detail"),
             }
     elif isinstance(payload, dict):
-        service_id = payload.get("service") or payload.get("id")
+        service_id = payload.get("service_id") or payload.get("service") or payload.get("id")
         if service_id in health_map:
             health_map[service_id] = {
                 "status": str(payload.get("status", "unknown")),

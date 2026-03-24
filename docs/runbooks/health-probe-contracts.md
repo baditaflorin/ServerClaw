@@ -13,7 +13,7 @@ Each service contract declares:
 - `liveness`: the lightest useful probe that proves the process answers on its intended listener or control surface
 - `readiness`: a deeper probe that proves the service can handle real platform traffic or a repo-managed bootstrap path
 - `timeout_seconds`, `retries`, `delay_seconds`: the convergence wait budget used by the role verify task
-- `uptime_kuma`: whether the service is mirrored into [config/uptime-kuma/monitors.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/uptime-kuma/monitors.json)
+- `uptime_kuma`: whether the service is mirrored into the generated [config/uptime-kuma/monitors.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/uptime-kuma/monitors.json)
 
 Services without dedicated service roles today still need catalog entries. At the moment, `proxmox_ui` and `docker_build` are catalog-only surfaces because they do not have standalone service roles.
 
@@ -63,4 +63,5 @@ make validate-data-models
 
 - Uptime Kuma is complementary, not authoritative. The role verify task is the convergence gate.
 - Authenticated readiness probes keep using repo-managed local artifacts; the catalog documents the contract, not the secret material.
-- If a service changes listener, auth path, or readiness semantics, update the role verify task, the catalog, and the Uptime Kuma monitor entry in the same change.
+- If a service changes listener, auth path, or readiness semantics, update the role verify task, the catalog, and regenerate the Uptime Kuma monitor artifact in the same change.
+- The dedicated contract workflow now lives in `docs/runbooks/service-uptime-contracts.md`.

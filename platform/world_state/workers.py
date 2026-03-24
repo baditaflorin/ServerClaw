@@ -137,6 +137,12 @@ def url_for_service(service: dict[str, Any]) -> str | None:
     return production.get("url") or service.get("internal_url") or service.get("public_url")
 
 
+def health_probe_catalog(repo_root: Path) -> dict[str, dict[str, Any]]:
+    payload = read_repo_json(repo_root, "config/health-probe-catalog.json", {"services": {}})
+    services = payload.get("services", {})
+    return services if isinstance(services, dict) else {}
+
+
 def probe_service(url: str) -> tuple[str, int | None, str | None]:
     parsed = urllib.parse.urlparse(url)
     if parsed.scheme not in {"http", "https"}:
@@ -153,27 +159,117 @@ def probe_service(url: str) -> tuple[str, int | None, str | None]:
         return "down", None, str(exc)
 
 
+def probe_http_contract(probe: dict[str, Any]) -> tuple[str, int | None, str | None]:
+    url = str(probe.get("url", ""))
+    method = str(probe.get("method", "GET")).upper()
+    timeout = int(probe.get("timeout_seconds", 10))
+    headers = probe.get("headers") if isinstance(probe.get("headers"), dict) else {}
+    expected = probe.get("expected_status") if isinstance(probe.get("expected_status"), list) else [200]
+    request = urllib.request.Request(url, headers=headers, method=method)
+    context = None
+    if url.startswith("https://") and probe.get("validate_tls") is False:
+        context = ssl._create_unverified_context()  # noqa: SLF001
+    try:
+        with urllib.request.urlopen(request, timeout=timeout, context=context) as response:
+            status_code = getattr(response, "status", None)
+        status = "ok" if status_code in expected else "degraded"
+        detail = f"HTTP {status_code}" if status_code is not None else "HTTP response"
+        return status, status_code, detail
+    except urllib.error.HTTPError as exc:
+        status = "ok" if exc.code in expected else "degraded"
+        return status, exc.code, f"HTTP {exc.code}"
+    except (urllib.error.URLError, TimeoutError, ssl.SSLError) as exc:
+        return "down", None, str(exc)
+
+
+def probe_tcp_contract(probe: dict[str, Any]) -> tuple[str, int | None, str | None]:
+    host = str(probe.get("host", ""))
+    port = int(probe.get("port", 0))
+    timeout = int(probe.get("timeout_seconds", 10))
+    try:
+        with socket.create_connection((host, port), timeout=timeout):
+            return "ok", None, f"TCP {host}:{port}"
+    except OSError as exc:
+        return "down", None, str(exc)
+
+
+def probe_via_contract(service: dict[str, Any], contract: dict[str, Any]) -> dict[str, Any]:
+    for source in ("readiness", "liveness"):
+        probe = contract.get(source)
+        if not isinstance(probe, dict):
+            continue
+        kind = probe.get("kind")
+        if kind == "http":
+            status, http_status, detail = probe_http_contract(probe)
+            return {
+                "status": status,
+                "http_status": http_status,
+                "error": None if status == "ok" else detail,
+                "detail": detail,
+                "probe_source": source,
+                "probe_kind": kind,
+            }
+        if kind == "tcp":
+            status, http_status, detail = probe_tcp_contract(probe)
+            return {
+                "status": status,
+                "http_status": http_status,
+                "error": None if status == "ok" else detail,
+                "detail": detail,
+                "probe_source": source,
+                "probe_kind": kind,
+            }
+    url = url_for_service(service)
+    status, http_status, detail = probe_service(url) if url else ("unknown", None, "missing URL")
+    return {
+        "status": status,
+        "http_status": http_status,
+        "error": None if status == "ok" else detail,
+        "detail": detail,
+        "probe_source": "service_catalog",
+        "probe_kind": "url",
+    }
+
+
 def collect_service_health(repo_root: Path) -> dict[str, Any]:
     fixture = fixture_payload("service_health")
     if fixture is not None:
         return fixture
 
     catalog = read_repo_json(repo_root, "config/service-capability-catalog.json", {"services": []})
+    probe_catalog = health_probe_catalog(repo_root)
     services: list[dict[str, Any]] = []
     for service in catalog.get("services", []):
         if service.get("lifecycle_status") != "active":
             continue
         url = url_for_service(service)
-        status, http_status, error = probe_service(url) if url else ("unknown", None, "missing URL")
+        health_probe_id = str(service.get("health_probe_id") or service.get("id") or "")
+        contract = probe_catalog.get(health_probe_id, {})
+        if contract:
+            result = probe_via_contract(service, contract)
+        else:
+            status, http_status, detail = probe_service(url) if url else ("unknown", None, "missing URL")
+            result = {
+                "status": status,
+                "http_status": http_status,
+                "error": None if status == "ok" else detail,
+                "detail": detail,
+                "probe_source": "service_catalog",
+                "probe_kind": "url",
+            }
         services.append(
             {
                 "service_id": service["id"],
                 "vm": service.get("vm"),
                 "vmid": service.get("vmid"),
                 "url": url,
-                "status": status,
-                "http_status": http_status,
-                "error": error,
+                "status": result["status"],
+                "http_status": result["http_status"],
+                "error": result["error"],
+                "detail": result["detail"],
+                "probe_source": result["probe_source"],
+                "probe_kind": result["probe_kind"],
+                "uptime_monitor_name": service.get("uptime_monitor_name"),
             }
         )
     status_counts: dict[str, int] = {}

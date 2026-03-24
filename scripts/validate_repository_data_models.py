@@ -41,6 +41,7 @@ from workflow_catalog import (
     validate_secret_manifest,
     validate_workflow_catalog,
 )
+from uptime_contract import build_uptime_monitors
 
 
 STACK_PATH = repo_path("versions", "stack.yaml")
@@ -805,7 +806,6 @@ def validate_health_probe_catalog(host_vars_context: dict[str, Any]) -> None:
             "config/health-probe-catalog.json.services must define exactly the canonical lv3_service_topology services"
         )
 
-    expected_monitors: dict[str, dict[str, Any]] = {}
     for service_id, topology_entry in topology.items():
         service_path = f"config/health-probe-catalog.json.services.{service_id}"
         service = require_mapping(services.get(service_id), service_path)
@@ -843,33 +843,28 @@ def validate_health_probe_catalog(host_vars_context: dict[str, Any]) -> None:
         enabled = require_bool(uptime_kuma.get("enabled"), f"{service_path}.uptime_kuma.enabled")
         if enabled:
             monitor = require_mapping(uptime_kuma.get("monitor"), f"{service_path}.uptime_kuma.monitor")
-            name = validate_monitor(monitor, f"{service_path}.uptime_kuma.monitor")
-            if name in expected_monitors:
-                raise ValueError(f"duplicate Uptime Kuma monitor contract in health probe catalog: {name}")
-            expected_monitors[name] = monitor
+            validate_monitor(monitor, f"{service_path}.uptime_kuma.monitor")
         elif "reason" in uptime_kuma:
             require_str(uptime_kuma.get("reason"), f"{service_path}.uptime_kuma.reason")
 
+    expected_monitors = build_uptime_monitors(catalog)
     actual_monitors = require_list(
         json.loads(UPTIME_MONITORS_PATH.read_text()),
         str(UPTIME_MONITORS_PATH),
     )
-    actual_monitors_by_name: dict[str, dict[str, Any]] = {}
     for index, monitor in enumerate(actual_monitors):
-        name = validate_monitor(monitor, f"config/uptime-kuma/monitors.json[{index}]")
-        if name in actual_monitors_by_name:
-            raise ValueError(f"duplicate monitor name in config/uptime-kuma/monitors.json: {name}")
-        actual_monitors_by_name[name] = monitor
+        validate_monitor(monitor, f"config/uptime-kuma/monitors.json[{index}]")
 
-    if set(actual_monitors_by_name.keys()) != set(expected_monitors.keys()):
+    if len(actual_monitors) != len(expected_monitors):
         raise ValueError(
             "config/uptime-kuma/monitors.json must match the enabled uptime_kuma monitors in config/health-probe-catalog.json"
         )
-
-    for name, expected_monitor in expected_monitors.items():
-        if actual_monitors_by_name[name] != expected_monitor:
+    for index, expected_monitor in enumerate(expected_monitors):
+        actual_monitor = actual_monitors[index]
+        if actual_monitor != expected_monitor:
             raise ValueError(
-                f"config/uptime-kuma/monitors.json monitor '{name}' does not match the health probe catalog contract"
+                "config/uptime-kuma/monitors.json must preserve the generated monitor order and fields from "
+                "config/health-probe-catalog.json"
             )
 
 

@@ -4,12 +4,14 @@ import importlib.util
 import json
 import sqlite3
 import sys
+import threading
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 import pytest
 
 from platform.world_state.materializer import current_view_rows
-from platform.world_state.workers import collect_dns_records, collect_openbao_secret_expiry, run_worker
+from platform.world_state.workers import collect_dns_records, collect_openbao_secret_expiry, collect_service_health, run_worker
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -207,6 +209,104 @@ def test_collect_openbao_secret_expiry_uses_repo_metadata(worker_repo: Path) -> 
     payload = collect_openbao_secret_expiry(worker_repo)
     assert payload["summary"]["total"] == 1
     assert payload["leases"][0]["secret_id"] == "windmill_superadmin_secret"
+
+
+def test_collect_service_health_uses_http_contract_expected_status(tmp_path: Path) -> None:
+    class UnauthorizedButHealthyHandler(BaseHTTPRequestHandler):
+        def do_GET(self) -> None:  # noqa: N802
+            self.send_response(401)
+            self.end_headers()
+            self.wfile.write(b"unauthorized")
+
+        def log_message(self, format: str, *args: object) -> None:  # noqa: A003
+            return
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), UnauthorizedButHealthyHandler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    port = server.server_address[1]
+
+    try:
+        write(
+            tmp_path / "config" / "service-capability-catalog.json",
+            json.dumps(
+                {
+                    "services": [
+                        {
+                            "id": "windmill",
+                            "name": "Windmill",
+                            "description": "workflow runtime",
+                            "category": "automation",
+                            "lifecycle_status": "active",
+                            "vm": "docker-runtime-lv3",
+                            "vmid": 120,
+                            "internal_url": f"http://127.0.0.1:{port}/api/version",
+                            "health_probe_id": "windmill",
+                            "environments": {
+                                "production": {
+                                    "status": "active",
+                                    "url": f"http://127.0.0.1:{port}/api/version",
+                                }
+                            },
+                        }
+                    ]
+                },
+                indent=2,
+            )
+            + "\n",
+        )
+        write(
+            tmp_path / "config" / "health-probe-catalog.json",
+            json.dumps(
+                {
+                    "schema_version": "1.0.0",
+                    "services": {
+                        "windmill": {
+                            "service_name": "windmill",
+                            "owning_vm": "docker-runtime-lv3",
+                            "role": "windmill_runtime",
+                            "verify_file": "roles/windmill_runtime/tasks/verify.yml",
+                            "liveness": {
+                                "kind": "http",
+                                "description": "basic health",
+                                "timeout_seconds": 5,
+                                "retries": 1,
+                                "delay_seconds": 0,
+                                "url": f"http://127.0.0.1:{port}/health",
+                                "method": "GET",
+                                "expected_status": [200],
+                            },
+                            "readiness": {
+                                "kind": "http",
+                                "description": "api version requires auth but proves readiness",
+                                "timeout_seconds": 5,
+                                "retries": 1,
+                                "delay_seconds": 0,
+                                "url": f"http://127.0.0.1:{port}/api/version",
+                                "method": "GET",
+                                "expected_status": [401],
+                            },
+                            "uptime_kuma": {
+                                "enabled": False,
+                                "reason": "covered elsewhere",
+                            },
+                        }
+                    },
+                },
+                indent=2,
+            )
+            + "\n",
+        )
+
+        payload = collect_service_health(tmp_path)
+
+        assert payload["summary"]["statuses"]["ok"] == 1
+        assert payload["services"][0]["service_id"] == "windmill"
+        assert payload["services"][0]["probe_source"] == "readiness"
+        assert payload["services"][0]["detail"] == "HTTP 401"
+    finally:
+        server.shutdown()
+        server.server_close()
 
 
 def test_worker_script_wrapper_delegates_to_run_worker(monkeypatch: pytest.MonkeyPatch) -> None:

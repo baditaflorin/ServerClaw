@@ -10,7 +10,7 @@ This runbook converges Uptime Kuma on the Docker runtime VM and publishes it thr
 - `docker-runtime-lv3` runs Uptime Kuma from `/opt/uptime-kuma`
 - `nginx-lv3` reverse proxies `uptime.lv3.org` and expands the shared edge certificate when needed
 - local control-machine auth for future monitor management is stored under `.local/uptime-kuma/`
-- the first repo-managed monitor set is applied from `config/uptime-kuma/monitors.json`
+- the first repo-managed monitor set is applied from generated `config/uptime-kuma/monitors.json`
 - the public status-page definition is reconciled from `config/uptime-kuma/status-page.json`
 
 ## Commands
@@ -41,6 +41,7 @@ Re-apply the repo-managed monitor seed later:
 
 ```bash
 cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+python3 scripts/uptime_contract.py --write
 make uptime-kuma-manage ACTION=ensure-monitors
 ```
 
@@ -97,5 +98,6 @@ curl -I https://status.lv3.org
 
 - Uptime Kuma's built-in API key support is useful for metrics endpoints, but monitor management still uses the internal Socket.IO application flow. The repo client script is built around that supported behavior.
 - Keep `.local/uptime-kuma/` local-only. It contains the durable auth material needed for future repo-driven monitor changes.
+- Do not hand-edit `config/uptime-kuma/monitors.json`; regenerate it from `config/health-probe-catalog.json`.
 - The NGINX role in this repo now expands the shared `lv3-edge` certificate when a new published hostname is added, so future edge applications should use the same publication path.
 - The public status page runbook lives in `docs/runbooks/public-status-page.md` and covers the independent Uptime Robot monitor contract alongside the Uptime Kuma definition.

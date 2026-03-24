@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from scripts.ops_portal.app import PortalSettings, create_app
+from scripts.ops_portal.app import PortalSettings, create_app, normalize_health
 
 
 class FakeGatewayClient:
@@ -18,10 +18,10 @@ class FakeGatewayClient:
 
     async def fetch_platform_health(self, token: str | None = None) -> dict[str, object]:
         return {
-            "services": {
-                "grafana": {"status": "healthy", "detail": "Dashboards are green"},
-                "ops_portal": {"status": "healthy", "detail": "Portal runtime is ready"},
-            }
+            "services": [
+                {"service_id": "grafana", "status": "healthy", "detail": "Dashboards are green"},
+                {"service_id": "ops_portal", "status": "healthy", "detail": "Portal runtime is ready"},
+            ]
         }
 
     async def fetch_service_health(self, service_id: str, token: str | None = None) -> dict[str, object]:
@@ -252,3 +252,18 @@ def test_search_action_renders_results(portal_client: tuple[TestClient, FakeGate
     assert response.status_code == 200
     assert "Rotate Certificates" in response.text
     assert gateway.search_calls == [{"query": "tls cert expires", "collection": "runbooks", "limit": 8}]
+
+
+def test_normalize_health_accepts_service_id_list_payload() -> None:
+    services = [{"id": "grafana"}, {"id": "ops_portal"}]
+    payload = {
+        "services": [
+            {"service_id": "grafana", "status": "healthy", "detail": "Dashboards are green"},
+            {"service_id": "ops_portal", "status": "degraded", "detail": "Maintenance window"},
+        ]
+    }
+
+    result = normalize_health(payload, services)
+
+    assert result["grafana"]["status"] == "healthy"
+    assert result["ops_portal"]["detail"] == "Maintenance window"
