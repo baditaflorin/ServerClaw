@@ -51,7 +51,7 @@ workstreams:
   - id: adr-0020-backups
     adr: "0020"
     title: Initial storage and backup model
-    status: merged
+    status: ready
     owner: codex
     branch: codex/adr-0020-backups
     worktree_path: ../proxmox_florin_server-backups
@@ -1395,10 +1395,10 @@ workstreams:
   - id: adr-0092-platform-api-gateway
     adr: "0092"
     title: Unified platform API gateway
-    status: live_applied
+    status: ready
     owner: codex
-    branch: codex/integration-0092-live
-    worktree_path: .worktrees/integration-0092
+    branch: codex/adr-0092-unified-platform-api-gateway
+    worktree_path: .worktrees/adr-0092
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0092-platform-api-gateway.md
     depends_on:
       - adr-0021-nginx-edge
@@ -1416,15 +1416,15 @@ workstreams:
       - Compose stack docker-runtime-lv3
       - nginx edge config
     ready_to_merge: false
-    live_applied: true
+    live_applied: false
 
   - id: adr-0093-interactive-ops-portal
     adr: "0093"
     title: Interactive ops portal with live actions
-    status: live_applied
+    status: merged
     owner: codex
-    branch: codex/live-apply-0093
-    worktree_path: .worktrees/live-apply-0093
+    branch: codex/adr-0093-interactive-ops-portal
+    worktree_path: ../proxmox_florin_server-interactive-ops-portal
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0093-interactive-ops-portal.md
     depends_on:
       - adr-0092-platform-api-gateway
@@ -1441,7 +1441,7 @@ workstreams:
       - nginx edge ops.lv3.org vhost
       - config/service-capability-catalog.json
     ready_to_merge: false
-    live_applied: true
+    live_applied: false
 
   - id: adr-0094-developer-portal
     adr: "0094"
@@ -1487,39 +1487,6 @@ workstreams:
     ready_to_merge: false
     live_applied: false
 
-  - id: adr-0121-search-indexing-fabric
-    adr: "0121"
-    title: Local search and indexing fabric
-    status: merged
-    owner: codex
-    branch: codex/adr-0121-local-search-indexing-fabric
-    worktree_path: .worktrees/adr-0121
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0121-search-indexing-fabric.md
-    depends_on:
-      - adr-0048-command-catalog
-      - adr-0052-loki-logs
-      - adr-0061-glitchtip-failure-signals
-      - adr-0090-platform-cli
-      - adr-0092-platform-api-gateway
-      - adr-0093-interactive-ops-portal
-      - adr-0095-unified-search
-      - adr-0098-postgres-ha
-      - adr-0113-world-state-materializer
-      - adr-0115-mutation-ledger
-      - adr-0118-failure-case-library
-    conflicts_with: []
-    shared_surfaces:
-      - scripts/search_fabric/
-      - migrations/0014_search_schema.sql
-      - config/search-synonyms.yaml
-      - config/windmill/scripts/rebuild-search-index.py
-      - scripts/api_gateway/main.py
-      - scripts/lv3_cli.py
-      - scripts/ops_portal/
-      - docs/runbooks/search-indexing-fabric.md
-    ready_to_merge: false
-    live_applied: false
-
   - id: adr-0096-slo-tracking
     adr: "0096"
     title: SLO definitions and error budget tracking
@@ -1549,10 +1516,10 @@ workstreams:
   - id: adr-0097-alerting-routing
     adr: "0097"
     title: Alerting routing and on-call runbook model
-    status: merged
+    status: ready
     owner: codex
     branch: codex/adr-0097-alerting-routing
-    worktree_path: ../.worktrees/adr-0097-alerting-routing
+    worktree_path: ../proxmox_florin_server-alerting-routing
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0097-alerting-routing.md
     depends_on:
       - adr-0011-monitoring
@@ -1613,7 +1580,7 @@ workstreams:
       - scripts/
       - Windmill workflows
       - receipts/
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: false
 
   - id: adr-0100-disaster-recovery
@@ -1747,10 +1714,10 @@ workstreams:
   - id: adr-0105-capacity-model
     adr: "0105"
     title: Platform capacity model and resource quota enforcement
-    status: merged
+    status: ready
     owner: codex
     branch: codex/adr-0105-capacity-model
-    worktree_path: .worktrees/adr-0105
+    worktree_path: ../proxmox_florin_server-capacity-model
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0105-capacity-model.md
     depends_on:
       - adr-0010-vm-topology
@@ -1763,7 +1730,7 @@ workstreams:
       - config/
       - scripts/promotion_pipeline.py
       - config/grafana/dashboards/
-    ready_to_merge: true
+    ready_to_merge: false
     live_applied: false
 
   - id: adr-0106-ephemeral-lifecycle
@@ -1924,167 +1891,6 @@ workstreams:
     ready_to_merge: false
     live_applied: false
 
-  - id: adr-0112-goal-compiler
-    adr: "0112"
-    title: Deterministic goal compiler
-    status: merged
-    owner: codex
-    branch: codex/adr-0112-goal-compiler
-    worktree_path: .worktrees/adr-0112
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0112-goal-compiler.md
-    depends_on:
-      - adr-0048-command-catalog
-      - adr-0069-agent-tool-registry
-      - adr-0090-platform-cli
-    conflicts_with:
-      - adr-0113-world-state-materializer
-      - adr-0115-mutation-ledger
-    shared_surfaces:
-      - platform/goal_compiler/
-      - platform/ledger/
-      - platform/world_state/
-      - config/goal-compiler-rules.yaml
-      - config/goal-compiler-aliases.yaml
-      - scripts/lv3_cli.py
-    ready_to_merge: false
-    live_applied: false
-
-  - id: adr-0116-change-risk-scoring
-    adr: "0116"
-    title: Deterministic workflow change risk scoring
-    status: merged
-    owner: codex
-    branch: codex/adr-0116-risk-scoring
-    worktree_path: .worktrees/adr-0116
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0116-change-risk-scoring.md
-    depends_on:
-      - adr-0075-service-capability-catalog
-      - adr-0080-maintenance-windows
-      - adr-0090-platform-cli
-      - adr-0112-goal-compiler
-      - adr-0113-world-state-materializer
-      - adr-0115-mutation-ledger
-      - adr-0117-dependency-graph-runtime
-    conflicts_with: []
-    shared_surfaces:
-      - scripts/risk_scorer
-      - scripts/lv3_cli.py
-      - config/risk-scoring-weights.yaml
-      - config/risk-scoring-overrides.yaml
-      - config/windmill/scripts/calibrate-risk-scoring.py
-      - docs/runbooks/change-risk-scoring.md
-    ready_to_merge: false
-    live_applied: false
-
-  - id: adr-0117-dependency-graph-runtime
-    adr: "0117"
-    title: Service dependency graph as first-class runtime
-    status: merged
-    owner: codex
-    branch: codex/adr-0117-dependency-graph
-    worktree_path: ../proxmox_florin_server-dependency-graph
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0117-dependency-graph-runtime.md
-    depends_on:
-      - adr-0048-command-catalog
-      - adr-0054-netbox-topology
-      - adr-0058-nats-event-bus
-      - adr-0075-service-capability-catalog
-      - adr-0092-platform-api-gateway
-      - adr-0098-postgres-ha
-      - adr-0113-world-state-materializer
-    conflicts_with:
-      - adr-0113-world-state-materializer
-    shared_surfaces:
-      - platform/graph/
-      - config/dependency-graph.yaml
-      - config/windmill/scripts/graph/
-      - scripts/api_gateway/main.py
-      - scripts/risk_scorer/context.py
-      - migrations/0012_graph_schema.sql
-    ready_to_merge: false
-    live_applied: false
-
-  - id: adr-0119-budgeted-workflow-scheduler
-    adr: "0119"
-    title: Budgeted workflow scheduler
-    status: merged
-    owner: codex
-    branch: codex/adr-0119-budgeted-scheduler
-    worktree_path: .worktrees/adr-0119
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0119-budgeted-workflow-scheduler.md
-    depends_on:
-      - adr-0044-windmill
-      - adr-0048-command-catalog
-      - adr-0058-nats-event-bus
-      - adr-0071-agent-observation-loop
-      - adr-0098-postgres-ha
-      - adr-0112-goal-compiler
-      - adr-0115-mutation-ledger
-      - adr-0116-change-risk-scoring
-    conflicts_with:
-      - adr-0112-goal-compiler
-    shared_surfaces:
-      - platform/scheduler
-      - scripts/lv3_cli.py
-      - config/workflow-catalog.json
-      - config/workflow-defaults.yaml
-      - windmill/scheduler/watchdog-loop.py
-      - docs/runbooks/budgeted-workflow-scheduler.md
-    ready_to_merge: false
-    live_applied: false
-
-  - id: adr-0120-dry-run-diff-engine
-    adr: "0120"
-    title: Dry-run semantic diff engine
-    status: merged
-    owner: codex
-    branch: codex/adr-0120-diff-engine
-    worktree_path: ../proxmox_florin_server-diff-engine
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0120-dry-run-diff-engine.md
-    depends_on:
-      - adr-0048-command-catalog
-      - adr-0085-opentofu-vm-lifecycle
-      - adr-0090-platform-cli
-      - adr-0112-goal-compiler
-      - adr-0113-world-state-materializer
-      - adr-0115-mutation-ledger
-      - adr-0116-change-risk-scoring
-    conflicts_with: []
-    shared_surfaces:
-      - platform/diff_engine/
-      - config/diff-adapters.yaml
-      - scripts/risk_scorer/context.py
-      - scripts/risk_scorer/models.py
-      - scripts/risk_scorer/dimensions.py
-      - scripts/lv3_cli.py
-      - docs/runbooks/dry-run-semantic-diff-engine.md
-    ready_to_merge: false
-    live_applied: false
-
-  - id: adr-0115-mutation-ledger
-    adr: "0115"
-    title: Event-sourced mutation ledger
-    status: merged
-    owner: codex
-    branch: codex/adr-0115-mutation-ledger
-    worktree_path: ../proxmox_florin_server-mutation-ledger
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0115-mutation-ledger.md
-    depends_on:
-      - adr-0058-nats-event-bus
-      - adr-0066-mutation-audit-log
-      - adr-0098-postgres-ha
-    conflicts_with:
-      - adr-0112-goal-compiler
-      - adr-0114-triage-engine
-    shared_surfaces:
-      - platform/ledger/
-      - ledger.events
-      - config/ledger-event-types.yaml
-      - windmill/ledger/
-      - scripts/mutation_audit.py
-    ready_to_merge: false
-    live_applied: false
-
   - id: adr-0114-incident-triage
     adr: "0114"
     title: Rule-based incident triage engine
@@ -2114,51 +1920,3 @@ workstreams:
       - docs/runbooks/incident-triage-engine.md
     ready_to_merge: true
     live_applied: false
-
-  - id: adr-0113-world-state-materializer
-    adr: "0113"
-    title: World-state materializer
-    status: merged
-    owner: codex
-    branch: codex/adr-0113-world-state-materializer
-    worktree_path: ../proxmox_florin_server-world-state
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0113-world-state-materializer.md
-    depends_on:
-      - adr-0054-netbox-topology
-      - adr-0058-nats-event-bus
-      - adr-0064-health-probe-contracts
-      - adr-0080-maintenance-windows
-      - adr-0085-opentofu-vm-lifecycle
-      - adr-0091-drift-detection
-      - adr-0098-postgres-ha
-    conflicts_with:
-      - adr-0117-dependency-graph-runtime
-    shared_surfaces:
-      - platform/world_state/
-      - config/windmill/scripts/world-state/
-      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
-      - migrations/0010_world_state_schema.sql
-    ready_to_merge: false
-    live_applied: false
-
-  - id: adr-0122-operator-access-admin
-    adr: "0122"
-    title: Windmill operator access admin surface
-    status: live_applied
-    owner: codex
-    branch: codex/adr-0122-operator-admin-ui
-    worktree_path: .worktrees/adr-0122-operator-admin-ui
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0122-operator-access-admin.md
-    depends_on:
-      - adr-0044-windmill
-      - adr-0056-keycloak
-      - adr-0066-mutation-audit-log
-      - adr-0108-operator-onboarding
-    conflicts_with: []
-    shared_surfaces:
-      - config/windmill/scripts/
-      - config/windmill/apps/
-      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/
-      - docs/runbooks/operator-onboarding.md
-    ready_to_merge: false
-    live_applied: true
