@@ -3,6 +3,8 @@
 - ADR: [ADR 0121](../adr/0121-local-search-and-indexing-fabric.md)
 - Title: Postgres-native BM25 + trigram search over ADRs, runbooks, receipts, cases, alerts, configs, command catalog, and topology — no vector DB, no embeddings, no external service
 - Status: merged
+- Implemented In Repo Version: 0.119.0
+- Implemented On: 2026-03-24
 - Branch: `codex/adr-0121-local-search-indexing-fabric`
 - Worktree: `.worktrees/adr-0121`
 - Owner: codex
