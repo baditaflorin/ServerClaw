@@ -41,4 +41,5 @@ make deploy-docs-portal
 - `build/docs-portal/services/keycloak/index.html` exists
 - `build/docs-portal/reference/ports/index.html` exists
 - unauthenticated `curl -Ik https://docs.lv3.org/` returns `302` to `/oauth2/sign_in`
-- the authenticated site still returns the `X-Robots-Tag: noindex` header until the platform reaches `1.0.0`
+- the rendered site carries `<meta name="robots" content="noindex, nofollow">`
+- the published site returns `X-Robots-Tag: noindex, nofollow`

@@ -2459,6 +2459,29 @@ workstreams:
     ready_to_merge: false
     live_applied: false
 
+  - id: adr-0137-robots-crawl-policy
+    adr: "0137"
+    title: Robots.txt and crawl policy
+    status: merged
+    owner: codex
+    branch: codex/adr-0137-public-surface
+    worktree_path: .worktrees/adr-0137
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0137-robots-and-crawl-policy.md
+    depends_on:
+      - adr-0076-subdomain-governance
+      - adr-0101-certificate-lifecycle
+    conflicts_with: []
+    shared_surfaces:
+      - roles/nginx_edge_publication/
+      - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/
+      - inventory/group_vars/platform.yml
+      - config/certificate-catalog.json
+      - mkdocs.yml
+      - scripts/portal_utils.py
+      - docs/runbooks/configure-edge-publication.md
+    ready_to_merge: false
+    live_applied: false
+
   - id: adr-0139-subdomain-exposure-audit
     adr: "0139"
     title: Subdomain exposure audit and registry

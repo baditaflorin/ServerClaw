@@ -92,6 +92,13 @@ class DocsSiteTests(unittest.TestCase):
         finally:
             shutil.rmtree(temp_dir)
 
+    def test_mkdocs_build_uses_global_robots_override(self) -> None:
+        mkdocs_config = (REPO_ROOT / "mkdocs.yml").read_text(encoding="utf-8")
+        override_template = (REPO_ROOT / "docs" / "theme-overrides" / "main.html").read_text(encoding="utf-8")
+
+        self.assertIn("custom_dir: docs/theme-overrides", mkdocs_config)
+        self.assertIn('<meta name="robots" content="noindex, nofollow">', override_template)
+
 
 if __name__ == "__main__":
     unittest.main()

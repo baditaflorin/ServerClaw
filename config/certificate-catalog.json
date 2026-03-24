@@ -169,6 +169,30 @@
       }
     },
     {
+      "id": "lv3-org-apex-edge",
+      "service_id": "nginx_edge",
+      "status": "active",
+      "summary": "Shared NGINX edge certificate served for the lv3.org apex crawl-policy endpoint.",
+      "expected_issuer": "letsencrypt",
+      "endpoint": {
+        "host": "lv3.org",
+        "port": 443,
+        "server_name": "lv3.org"
+      },
+      "policy": {
+        "warn_days": 21,
+        "critical_days": 14
+      },
+      "renewal": {
+        "agent": "certbot-dns-hetzner",
+        "managed_by_repo": false,
+        "host": "nginx-lv3"
+      },
+      "material": {
+        "bundle_path": "/etc/letsencrypt/live/lv3-edge/fullchain.pem"
+      }
+    },
+    {
       "id": "openbao-proxy",
       "service_id": "openbao",
       "status": "active",
