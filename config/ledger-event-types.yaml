@@ -36,6 +36,7 @@
 
 # Observability
 - alert.fired
+- graph.health_propagated
 - triage.report_created
 - incident.opened
 - incident.resolved

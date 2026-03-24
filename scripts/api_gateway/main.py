@@ -22,6 +22,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from api_gateway_catalog import load_api_gateway_catalog
+from platform.graph import DependencyGraphClient, NodeNotFoundError
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -112,6 +113,8 @@ class GatewayConfig:
     deploy_webhook_url: str | None
     secret_rotation_webhook_url: str | None
     openapi_include_upstreams: bool
+    graph_dsn: str | None = None
+    world_state_dsn: str | None = None
     clock_skew_seconds: int = 30
 
 
@@ -250,6 +253,11 @@ class GatewayRuntime:
             client=self.http_client,
         )
         self.event_emitter = NatsEventEmitter(config.nats_url)
+        self.graph_client = (
+            DependencyGraphClient(dsn=config.graph_dsn, world_state_dsn=config.world_state_dsn or config.graph_dsn)
+            if config.graph_dsn
+            else None
+        )
 
     async def close(self) -> None:
         await self.http_client.aclose()
@@ -352,6 +360,13 @@ def build_config() -> GatewayConfig:
         nats_url=os.environ.get("NATS_URL") or None,
         deploy_webhook_url=os.environ.get("LV3_GATEWAY_DEPLOY_WEBHOOK_URL") or None,
         secret_rotation_webhook_url=os.environ.get("LV3_GATEWAY_SECRET_ROTATION_WEBHOOK_URL") or None,
+        graph_dsn=os.environ.get("LV3_GATEWAY_GRAPH_DSN")
+        or os.environ.get("LV3_GRAPH_DSN")
+        or os.environ.get("WORLD_STATE_DSN")
+        or None,
+        world_state_dsn=os.environ.get("LV3_GATEWAY_WORLD_STATE_DSN")
+        or os.environ.get("WORLD_STATE_DSN")
+        or None,
         openapi_include_upstreams=os.environ.get("LV3_GATEWAY_INCLUDE_UPSTREAM_OPENAPI", "false").lower()
         in {"1", "true", "yes"},
     )
@@ -418,6 +433,12 @@ async def emit_request_event(
         await runtime.event_emitter.emit("platform.api.request", payload)
     except Exception:  # noqa: BLE001
         return
+
+
+def require_graph_runtime(runtime: GatewayRuntime) -> DependencyGraphClient:
+    if runtime.graph_client is None:
+        raise HTTPException(status_code=503, detail="dependency graph runtime is not configured")
+    return runtime.graph_client
 
 
 def create_app(config: GatewayConfig | None = None) -> FastAPI:
@@ -534,6 +555,98 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
             "guest_catalog": platform_vars.get("platform_guest_catalog", {}),
             "service_topology": platform_vars.get("platform_service_topology", {}),
             "public_edge": platform_vars.get("public_edge_service_topology", {}),
+        }
+
+    @app.get("/v1/graph/nodes")
+    async def graph_nodes(
+        request: Request,
+        identity: dict[str, Any] = Depends(require_identity),
+    ) -> dict[str, Any]:
+        started_at = time.perf_counter()
+        if not has_required_role(identity, "platform-read"):
+            raise HTTPException(status_code=403, detail="missing required role 'platform-read'")
+        runtime: GatewayRuntime = request.app.state.runtime
+        graph_client = require_graph_runtime(runtime)
+        nodes = graph_client.list_nodes()
+        await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
+        return {"count": len(nodes), "nodes": nodes}
+
+    @app.get("/v1/graph/nodes/{node_id:path}/descendants")
+    async def graph_descendants(
+        node_id: str,
+        request: Request,
+        identity: dict[str, Any] = Depends(require_identity),
+    ) -> dict[str, Any]:
+        started_at = time.perf_counter()
+        if not has_required_role(identity, "platform-read"):
+            raise HTTPException(status_code=403, detail="missing required role 'platform-read'")
+        runtime: GatewayRuntime = request.app.state.runtime
+        graph_client = require_graph_runtime(runtime)
+        try:
+            descendants = graph_client.descendants(node_id)
+        except NodeNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
+        return {"node_id": node_id, "count": len(descendants), "nodes": descendants}
+
+    @app.get("/v1/graph/nodes/{node_id:path}/ancestors")
+    async def graph_ancestors(
+        node_id: str,
+        request: Request,
+        identity: dict[str, Any] = Depends(require_identity),
+    ) -> dict[str, Any]:
+        started_at = time.perf_counter()
+        if not has_required_role(identity, "platform-read"):
+            raise HTTPException(status_code=403, detail="missing required role 'platform-read'")
+        runtime: GatewayRuntime = request.app.state.runtime
+        graph_client = require_graph_runtime(runtime)
+        try:
+            ancestors = graph_client.ancestors(node_id)
+        except NodeNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
+        return {"node_id": node_id, "count": len(ancestors), "nodes": ancestors}
+
+    @app.get("/v1/graph/nodes/{node_id:path}/health")
+    async def graph_health(
+        node_id: str,
+        request: Request,
+        identity: dict[str, Any] = Depends(require_identity),
+    ) -> dict[str, Any]:
+        started_at = time.perf_counter()
+        if not has_required_role(identity, "platform-read"):
+            raise HTTPException(status_code=403, detail="missing required role 'platform-read'")
+        runtime: GatewayRuntime = request.app.state.runtime
+        graph_client = require_graph_runtime(runtime)
+        try:
+            payload = graph_client.node_health(node_id)
+        except NodeNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
+        return payload
+
+    @app.get("/v1/graph/path")
+    async def graph_path(
+        from_node: str,
+        to_node: str,
+        request: Request,
+        identity: dict[str, Any] = Depends(require_identity),
+    ) -> dict[str, Any]:
+        started_at = time.perf_counter()
+        if not has_required_role(identity, "platform-read"):
+            raise HTTPException(status_code=403, detail="missing required role 'platform-read'")
+        runtime: GatewayRuntime = request.app.state.runtime
+        graph_client = require_graph_runtime(runtime)
+        try:
+            path_nodes = graph_client.path(from_node, to_node)
+        except NodeNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
+        return {
+            "from_node": from_node,
+            "to_node": to_node,
+            "path": path_nodes,
+            "hop_count": max(len(path_nodes) - 1, 0),
         }
 
     @app.post("/v1/platform/deploy", status_code=202)

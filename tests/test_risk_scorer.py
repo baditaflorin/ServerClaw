@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
+import sqlite3
 
 import pytest
 
@@ -266,6 +267,43 @@ def test_maintenance_window_lowers_score(risk_repo: Path, monkeypatch: pytest.Mo
 
     assert inside_context.in_maintenance_window is True
     assert inside_score.score < outside_score.score
+
+
+def test_graph_client_supplies_downstream_count_when_graph_dsn_is_set(
+    risk_repo: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    graph_path = risk_repo / "graph.sqlite3"
+    connection = sqlite3.connect(graph_path)
+    connection.execute(
+        "CREATE TABLE graph_nodes (id TEXT PRIMARY KEY, kind TEXT NOT NULL, label TEXT NOT NULL, tier INTEGER, metadata TEXT NOT NULL)"
+    )
+    connection.execute(
+        "CREATE TABLE graph_edges (id INTEGER PRIMARY KEY AUTOINCREMENT, from_node TEXT NOT NULL, to_node TEXT NOT NULL, edge_kind TEXT NOT NULL, metadata TEXT NOT NULL)"
+    )
+    connection.executemany(
+        "INSERT INTO graph_nodes (id, kind, label, tier, metadata) VALUES (?, ?, ?, ?, ?)",
+        [
+            ("service:openbao", "service", "OpenBao", 1, '{"service_id":"openbao"}'),
+            ("service:windmill", "service", "Windmill", 2, '{"service_id":"windmill"}'),
+        ],
+    )
+    connection.execute(
+        "INSERT INTO graph_edges (from_node, to_node, edge_kind, metadata) VALUES (?, ?, ?, ?)",
+        ("service:windmill", "service:openbao", "depends_on", '{"source":"test"}'),
+    )
+    connection.commit()
+    connection.close()
+    monkeypatch.setenv("LV3_GRAPH_DSN", f"sqlite:///{graph_path}")
+
+    intent = compile_workflow_intent(
+        "rotate-secret",
+        {"secret_id": "openbao_controller_approle"},
+        repo_root=risk_repo,
+    )
+    context = assemble_context(intent, repo_root=risk_repo)
+
+    assert context.downstream_count == 1
 
 
 def test_lv3_run_dry_run_prints_compiled_intent(capsys: pytest.CaptureFixture[str], risk_repo: Path) -> None:

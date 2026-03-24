@@ -1,5 +1,6 @@
 import base64
 import json
+import sqlite3
 import sys
 import time
 from pathlib import Path
@@ -50,6 +51,89 @@ def write_yaml(path: Path, content: str) -> None:
     path.write_text(content)
 
 
+def prepare_graph_db(path: Path) -> str:
+    connection = sqlite3.connect(path)
+    connection.execute(
+        """
+        CREATE TABLE graph_nodes (
+            id TEXT PRIMARY KEY,
+            kind TEXT NOT NULL,
+            label TEXT NOT NULL,
+            tier INTEGER,
+            metadata TEXT NOT NULL
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE graph_edges (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            from_node TEXT NOT NULL,
+            to_node TEXT NOT NULL,
+            edge_kind TEXT NOT NULL,
+            metadata TEXT NOT NULL
+        )
+        """
+    )
+    connection.executemany(
+        "INSERT INTO graph_nodes (id, kind, label, tier, metadata) VALUES (?, ?, ?, ?, ?)",
+        [
+            ("service:postgres", "service", "Postgres", 1, json.dumps({"service_id": "postgres"})),
+            ("service:windmill", "service", "Windmill", 2, json.dumps({"service_id": "windmill"})),
+            ("host:docker-runtime-lv3", "host", "docker-runtime-lv3", None, json.dumps({})),
+        ],
+    )
+    connection.executemany(
+        "INSERT INTO graph_edges (from_node, to_node, edge_kind, metadata) VALUES (?, ?, ?, ?)",
+        [
+            ("service:windmill", "service:postgres", "depends_on", json.dumps({"source": "test"})),
+            ("service:windmill", "host:docker-runtime-lv3", "hosted_on", json.dumps({"source": "test"})),
+        ],
+    )
+    connection.commit()
+    connection.close()
+    return f"sqlite:///{path}"
+
+
+def prepare_world_state_db(path: Path) -> str:
+    connection = sqlite3.connect(path)
+    connection.execute(
+        """
+        CREATE TABLE world_state_snapshots (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            surface TEXT NOT NULL,
+            collected_at TEXT NOT NULL,
+            data TEXT NOT NULL,
+            stale INTEGER NOT NULL DEFAULT 0
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE world_state_current_view (
+            surface TEXT PRIMARY KEY,
+            data TEXT NOT NULL,
+            collected_at TEXT NOT NULL,
+            stale INTEGER NOT NULL DEFAULT 0,
+            is_expired INTEGER NOT NULL DEFAULT 0
+        )
+        """
+    )
+    payload = {
+        "services": [
+            {"service_id": "postgres", "status": "degraded"},
+            {"service_id": "windmill", "status": "ok"},
+        ]
+    }
+    connection.execute(
+        "INSERT INTO world_state_current_view (surface, data, collected_at, stale, is_expired) VALUES (?, ?, ?, ?, ?)",
+        ("service_health", json.dumps(payload), "2026-03-24T10:00:00+00:00", 0, 0),
+    )
+    connection.commit()
+    connection.close()
+    return f"sqlite:///{path}"
+
+
 def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
     private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
     public_numbers = private_key.public_key().public_numbers()
@@ -86,6 +170,14 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
         },
     )
     write_json(
+        tmp_path / "config" / "dependency-graph.json",
+        {
+            "schema_version": "1.0.0",
+            "nodes": [{"id": "windmill", "tier": 2}],
+            "edges": [],
+        },
+    )
+    write_json(
         tmp_path / "config" / "api-gateway-catalog.json",
         {
             "schema_version": "1.0.0",
@@ -112,6 +204,8 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
         tmp_path / "receipts" / "drift-reports" / "2026-03-23-test.json",
         {"summary": {"status": "warn", "warn_count": 1, "critical_count": 0}},
     )
+    graph_dsn = prepare_graph_db(tmp_path / "graph.sqlite3")
+    world_state_dsn = prepare_world_state_db(tmp_path / "world-state.sqlite3")
     write_json(
         tmp_path / "jwks.json",
         {
@@ -142,6 +236,8 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
         deploy_webhook_url=None,
         secret_rotation_webhook_url=None,
         openapi_include_upstreams=False,
+        graph_dsn=graph_dsn,
+        world_state_dsn=world_state_dsn,
     )
     token = sign_token(private_key, roles=["platform-operator"], issuer=config.issuer or "")
     return config, token
@@ -186,6 +282,30 @@ def test_gateway_proxy_and_platform_endpoints(tmp_path: Path) -> None:
                     topology = await client.get("/v1/platform/topology", headers=headers)
                     assert topology.status_code == 200
                     assert "windmill" in topology.json()["service_topology"]
+
+                    graph_nodes = await client.get("/v1/graph/nodes", headers=headers)
+                    assert graph_nodes.status_code == 200
+                    assert graph_nodes.json()["count"] == 3
+
+                    descendants = await client.get("/v1/graph/nodes/service:postgres/descendants", headers=headers)
+                    assert descendants.status_code == 200
+                    assert descendants.json()["nodes"] == ["service:windmill"]
+
+                    ancestors = await client.get("/v1/graph/nodes/service:windmill/ancestors", headers=headers)
+                    assert ancestors.status_code == 200
+                    assert "service:postgres" in ancestors.json()["nodes"]
+
+                    graph_health = await client.get("/v1/graph/nodes/service:windmill/health", headers=headers)
+                    assert graph_health.status_code == 200
+                    assert graph_health.json()["derived_status"] == "degraded"
+
+                    path_response = await client.get(
+                        "/v1/graph/path",
+                        params={"from_node": "service:windmill", "to_node": "service:postgres"},
+                        headers=headers,
+                    )
+                    assert path_response.status_code == 200
+                    assert path_response.json()["path"] == ["service:windmill", "service:postgres"]
 
                     proxied = await client.get("/v1/windmill/api/version", headers=headers)
                     assert proxied.status_code == 200

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 from hashlib import sha1
 from dataclasses import dataclass
@@ -14,6 +15,7 @@ if str(SCRIPTS_DIR) not in sys.path:
 
 from controller_automation_toolkit import load_json, load_yaml, repo_path
 from maintenance_window_tool import list_active_windows_best_effort
+from platform.graph import DependencyGraphClient
 
 from .models import ExecutionIntent, RiskClass
 
@@ -253,6 +255,13 @@ def dependency_graph_descendants(
 ) -> int:
     if not service_id:
         return 0
+    graph_dsn = os.environ.get("LV3_GRAPH_DSN", "").strip() or os.environ.get("WORLD_STATE_DSN", "").strip()
+    if graph_dsn:
+        try:
+            client = DependencyGraphClient(dsn=graph_dsn)
+            return len([node_id for node_id in client.descendants(f"service:{service_id}") if node_id.startswith("service:")])
+        except Exception as exc:  # noqa: BLE001
+            stale_reasons.append(f"dependency fanout for {service_id} fell back to repo graph because {exc}")
     base = repo_root or repo_path()
     payload = load_json(base / "config" / "dependency-graph.json", default={})
     nodes = payload.get("nodes", [])

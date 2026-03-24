@@ -77,6 +77,7 @@ The repository now also ships continuous drift detection across OpenTofu, Ansibl
 The repository now also ships ADR 0100 disaster-recovery targets, a structured recovery runbook, and `make dr-status` / `lv3 release status` readiness views; the live off-site copy of `backup-lv3` is still pending external storage credentials.
 The repository now also ships ADR 0096 SLO tracking: a canonical SLO catalog, generated Prometheus rules and blackbox targets, a Grafana SLO dashboard, an ops-portal SLO section, a `/v1/platform/slos` API surface, and promotion-gate enforcement for low remaining error budget.
 The repository now also ships ADR 0115 mutation-ledger primitives: the `ledger.events` Postgres schema migration, the `platform.ledger` writer/reader/replay package, the one-time `audit_log` migration helper, and optional dual-write from the existing mutation-audit emitter when `LV3_LEDGER_DSN` is configured; live migration from `main` is still pending.
+The repository now also ships ADR 0117 dependency-graph runtime primitives: the `platform.graph` traversal client, the `graph.nodes` / `graph.edges` schema migration, the repo-managed graph manifest and Windmill rebuild helpers, `/v1/graph/*` gateway routes, and risk-scorer integration via live `DependencyGraphClient().descendants()` when `LV3_GRAPH_DSN` is configured; the first live apply from `main` is still pending.
 
 <!-- BEGIN GENERATED: platform-status -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_status_docs.py). Do not edit this block by hand.
@@ -84,7 +85,7 @@ The repository now also ships ADR 0115 mutation-ledger primitives: the `ledger.e
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.115.0` |
+| Repository version | `0.117.0` |
 | Platform version | `0.114.2` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -418,6 +419,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Secret Rotation And Lifecycle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/secret-rotation-and-lifecycle.md)
 - [Security Posture Reporting](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/security-posture-reporting.md)
 - [Service Capability Catalog](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/service-capability-catalog.md)
+- [Service Dependency Graph Runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/service-dependency-graph-runtime.md)
 - [Runbook: SLO Fast Burn](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/slo-fast-burn.md)
 - [SLO Tracking](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/slo-tracking.md)
 - [Staging And Production Topology](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/staging-and-production-topology.md)
@@ -664,7 +666,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.115.0` |
+| Repository version | `0.117.0` |
 | Platform version | `0.114.2` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -791,6 +793,7 @@ This repository is intentionally opinionated:
 | `0114` | Rule-based incident triage engine | `merged` | [adr-0114-incident-triage-engine.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0114-incident-triage-engine.md) |
 | `0115` | Event-sourced mutation ledger | `merged` | [adr-0115-mutation-ledger.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0115-mutation-ledger.md) |
 | `0116` | Deterministic workflow change risk scoring | `merged` | [adr-0116-change-risk-scoring.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0116-change-risk-scoring.md) |
+| `0117` | Service dependency graph as first-class runtime | `merged` | [adr-0117-dependency-graph-runtime.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0117-dependency-graph-runtime.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

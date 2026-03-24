@@ -126,6 +126,21 @@ windmill_seed_scripts:
     language: python3
     summary: Refresh world-state maintenance windows
     description: Repo-managed ADR 0113 worker that refreshes active maintenance windows.
+  - path: f/lv3/graph/import_from_catalog
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/graph/import-from-catalog.py"
+    language: python3
+    summary: Rebuild the dependency graph from repo metadata
+    description: Repo-managed ADR 0117 worker that rebuilds graph.nodes and graph.edges from the service catalog, workflow catalog, and dependency manifest.
+  - path: f/lv3/graph/import_from_netbox
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/graph/import-from-netbox.py"
+    language: python3
+    summary: Rebuild the dependency graph from NetBox world state
+    description: Repo-managed ADR 0117 worker that rebuilds graph.nodes and graph.edges after folding in the latest NetBox topology and DNS world-state surfaces.
+  - path: f/lv3/graph/propagate_health
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/graph/propagate-health.py"
+    language: python3
+    summary: Emit derived health degradation events
+    description: Repo-managed ADR 0117 helper that walks dependency descendants for degraded upstream services and emits derived_health_degraded events plus ledger records.
 windmill_seed_schedules:
   - path: f/lv3/platform_observation_loop_every_4h
     schedule: "0 0 */4 * * *"
@@ -243,4 +258,22 @@ windmill_seed_schedules:
     enabled: false
     summary: ADR 0113 maintenance window world-state refresh
     description: Repo-managed minute refresh definition for the maintenance window world-state surface; enable after the worker checkout is applied from main.
+    no_flow_overlap: true
+  - path: f/lv3/graph/import_from_catalog_every_5m
+    schedule: "0 */5 * * * *"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/graph/import_from_catalog
+    args: {}
+    enabled: false
+    summary: ADR 0117 dependency graph rebuild from repo metadata
+    description: Repo-managed five-minute placeholder for rebuilding the dependency graph from repo metadata after the graph schema is applied live from main.
+    no_flow_overlap: true
+  - path: f/lv3/graph/import_from_netbox_every_5m
+    schedule: "30 */5 * * * *"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/graph/import_from_netbox
+    args: {}
+    enabled: false
+    summary: ADR 0117 dependency graph rebuild from NetBox world state
+    description: Repo-managed five-minute placeholder for rebuilding the dependency graph after the NetBox topology world-state refresh completes.
     no_flow_overlap: true
