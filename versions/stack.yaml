@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.120.0
-platform_version: 0.114.4
+repo_version: 0.120.1
+platform_version: 0.114.5
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -19,7 +19,7 @@ live_apply_evidence:
     mail_platform: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
     step_ca: 2026-03-22-adr-0042-step-ca-live-apply
     openbao: 2026-03-22-adr-0043-openbao-live-apply
-    windmill: 2026-03-24-adr-0122-windmill-operator-access-admin-live-apply
+    windmill: 2026-03-24-adr-0122-windmill-operator-access-admin-hotfix-live-apply
     mattermost: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
     portainer: 2026-03-22-adr-0055-portainer-live-apply
     short_lived_credentials_and_mtls: 2026-03-22-adr-0047-short-lived-credentials-live-apply
