@@ -2188,3 +2188,24 @@ workstreams:
       - docs/runbooks/
     ready_to_merge: false
     live_applied: false
+
+  - id: adr-0130-agent-state-persistence
+    adr: "0130"
+    title: Agent state persistence across workflow boundaries
+    status: merged
+    owner: codex
+    branch: codex/adr-0130-agent-state
+    worktree_path: .worktrees/adr-0130-agent-state
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0130-agent-state-persistence.md
+    depends_on:
+      - adr-0044-windmill
+      - adr-0098-postgres-ha
+      - adr-0115-mutation-ledger
+    conflicts_with: []
+    shared_surfaces:
+      - platform/agent/
+      - migrations/0015_agent_state_schema.sql
+      - scripts/lv3_cli.py
+      - docs/runbooks/agent-state-store.md
+    ready_to_merge: false
+    live_applied: false

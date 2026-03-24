@@ -80,6 +80,7 @@ The repository now also ships ADR 0115 mutation-ledger primitives: the `ledger.e
 The repository now also ships ADR 0117 dependency-graph runtime primitives: the `platform.graph` traversal client, the `graph.nodes` / `graph.edges` schema migration, the repo-managed graph manifest and Windmill rebuild helpers, `/v1/graph/*` gateway routes, and risk-scorer integration via live `DependencyGraphClient().descendants()` when `LV3_GRAPH_DSN` is configured; the first live apply from `main` is still pending.
 The repository now also ships ADR 0121 local search: a repo-managed search fabric under `scripts/search_fabric/`, a persisted local index at `build/search-index/documents.json`, the `lv3 search` CLI command, the `/v1/search` API surface, and an ops-portal search panel backed by the same corpus.
 The repository now also ships ADR 0122 browser-first operator access management: a repo-managed Windmill admin app at `f/lv3/operator_access_admin` backed by the governed ADR 0108 onboarding, off-boarding, reconciliation, and inventory workflows.
+The repository now also ships ADR 0130 agent state persistence: `platform.agent.AgentStateClient`, the `agent.state` schema migration, and `lv3 agent state show|delete|verify` provide a governed scratch-state path for resumable agent work and post-handoff integrity validation; the first live schema apply from `main` is still pending.
 
 <!-- BEGIN GENERATED: platform-status -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_status_docs.py). Do not edit this block by hand.
@@ -87,7 +88,7 @@ The repository now also ships ADR 0122 browser-first operator access management:
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.121.0` |
+| Repository version | `0.122.0` |
 | Platform version | `0.114.6` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -325,6 +326,7 @@ this is still same-host recovery, not off-host disaster recovery
 ### Runbooks
 - [Add A New Service](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/add-a-new-service.md)
 - [Agent Observation Loop](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/agent-observation-loop.md)
+- [Agent State Store](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/agent-state-store.md)
 - [Agent Tool Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/agent-tool-registry.md)
 - [Ansible Collection Development](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/ansible-collection-development.md)
 - [Backup Restore Verification](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/backup-restore-verification.md)
@@ -562,6 +564,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0121: Local Search and Indexing Fabric](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0121-local-search-and-indexing-fabric.md)
 - [ADR 0122: Windmill Operator Access Admin Surface](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0122-windmill-operator-access-admin.md)
 - [ADR 0123: Service Uptime Contracts And Monitor-Backed Health](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0123-service-uptime-contracts-and-monitor-backed-health.md)
+- [ADR 0130: Agent State Persistence Across Workflow Boundaries](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0130-agent-state-persistence-across-workflow-boundaries.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -660,6 +663,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0121: Local Search and Indexing Fabric](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0121-search-indexing-fabric.md)
 - [Workstream ADR 0122: Windmill Operator Access Admin Surface](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0122-operator-access-admin.md)
 - [Workstream ADR 0123: Service Uptime Contracts And Monitor-Backed Health](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0123-service-uptime-contracts.md)
+- [Workstream ADR 0130: Agent State Persistence Across Workflow Boundaries](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0130-agent-state-persistence.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
@@ -677,7 +681,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.121.0` |
+| Repository version | `0.122.0` |
 | Platform version | `0.114.6` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -812,6 +816,7 @@ This repository is intentionally opinionated:
 | `0121` | Local search and indexing fabric | `merged` | [adr-0121-search-indexing-fabric.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0121-search-indexing-fabric.md) |
 | `0122` | Windmill operator access admin surface | `live_applied` | [adr-0122-operator-access-admin.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0122-operator-access-admin.md) |
 | `0123` | Service uptime contracts and monitor-backed health | `merged` | [adr-0123-service-uptime-contracts.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0123-service-uptime-contracts.md) |
+| `0130` | Agent state persistence across workflow boundaries | `merged` | [adr-0130-agent-state-persistence.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0130-agent-state-persistence.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

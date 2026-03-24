@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import sqlite3
 import sys
 import types
 from pathlib import Path
@@ -8,6 +9,29 @@ from pathlib import Path
 import pytest
 
 import lv3_cli
+
+
+def prepare_agent_state_db(path: Path) -> Path:
+    connection = sqlite3.connect(path)
+    connection.execute(
+        """
+        CREATE TABLE agent_state (
+            state_id TEXT,
+            agent_id TEXT NOT NULL,
+            task_id TEXT NOT NULL,
+            key TEXT NOT NULL,
+            value TEXT NOT NULL,
+            context_id TEXT,
+            written_at TEXT NOT NULL,
+            expires_at TEXT NOT NULL,
+            version INTEGER NOT NULL DEFAULT 1,
+            UNIQUE(agent_id, task_id, key)
+        )
+        """
+    )
+    connection.commit()
+    connection.close()
+    return path
 
 
 @pytest.fixture()
@@ -542,3 +566,97 @@ def test_operator_add_viewer_dry_run_does_not_require_ssh_key(
 def test_validate_completion_suggests_services(minimal_repo: Path) -> None:
     candidates = lv3_cli.completion_candidates(["lv3", "validate", "--service"], "g")
     assert candidates == ["grafana"]
+
+
+def test_agent_state_show_prints_rows(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    db_path = prepare_agent_state_db(minimal_repo / "agent-state.sqlite3")
+    client = lv3_cli.AgentStateClient(
+        agent_id="agent/triage-loop",
+        task_id="incident:inc-2026-03-24-001",
+        dsn=f"sqlite:///{db_path}",
+    )
+    client.write("hypothesis.1", {"confidence": 0.85, "id": "recent-deployment"})
+    monkeypatch.setenv("LV3_AGENT_STATE_DSN", f"sqlite:///{db_path}")
+
+    exit_code = lv3_cli.main(
+        [
+            "agent",
+            "state",
+            "show",
+            "--agent",
+            "agent/triage-loop",
+            "--task",
+            "incident:inc-2026-03-24-001",
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "hypothesis.1" in captured.out
+    assert "recent-deployment" in captured.out
+
+
+def test_agent_state_delete_removes_key(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    db_path = prepare_agent_state_db(minimal_repo / "agent-state.sqlite3")
+    client = lv3_cli.AgentStateClient(
+        agent_id="agent/triage-loop",
+        task_id="incident:inc-2026-03-24-001",
+        dsn=f"sqlite:///{db_path}",
+    )
+    client.write("question_queue.1", {"question": "Rotate the password now?"})
+    monkeypatch.setenv("LV3_AGENT_STATE_DSN", f"sqlite:///{db_path}")
+
+    exit_code = lv3_cli.main(
+        [
+            "agent",
+            "state",
+            "delete",
+            "--agent",
+            "agent/triage-loop",
+            "--task",
+            "incident:inc-2026-03-24-001",
+            "--key",
+            "question_queue.1",
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "Deleted question_queue.1" in captured.out
+    assert client.read("question_queue.1") is None
+
+
+def test_agent_state_verify_reports_integrity_match(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    db_path = prepare_agent_state_db(minimal_repo / "agent-state.sqlite3")
+    client = lv3_cli.AgentStateClient(
+        agent_id="agent/runbook-executor",
+        task_id="runbook-run:run-abc-123",
+        dsn=f"sqlite:///{db_path}",
+        checkpoint_publisher=None,
+    )
+    checkpoint = client.checkpoint({"resume_at": "verify-health"})
+    monkeypatch.setenv("LV3_AGENT_STATE_DSN", f"sqlite:///{db_path}")
+
+    exit_code = lv3_cli.main(
+        [
+            "agent",
+            "state",
+            "verify",
+            "--agent",
+            "agent/runbook-executor",
+            "--task",
+            "runbook-run:run-abc-123",
+            "--digest",
+            str(checkpoint["state_digest"]),
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "Integrity: ok" in captured.out
