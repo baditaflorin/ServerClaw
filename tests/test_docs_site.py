@@ -32,6 +32,9 @@ class DocsSiteTests(unittest.TestCase):
             self.assertIn("18080", ports_md)
             self.assertIn("docs.lv3.org", ports_md)
             self.assertIn("OpenAPI browser", api_md)
+            self.assertIn("sensitivity: INTERNAL", keycloak_md)
+            self.assertIn("sensitivity: PUBLIC", api_md)
+            self.assertIn("portal_display: full", keycloak_md)
         finally:
             shutil.rmtree(temp_dir)
 
@@ -42,6 +45,47 @@ class DocsSiteTests(unittest.TestCase):
             payload = json.loads((temp_dir / "api" / "openapi.json").read_text(encoding="utf-8"))
             self.assertEqual(payload["openapi"], "3.1.0")
             self.assertIn("paths", payload)
+        finally:
+            shutil.rmtree(temp_dir)
+
+    def test_build_portal_document_defaults_to_internal_sensitivity(self) -> None:
+        temp_dir = Path(tempfile.mkdtemp(prefix="docs-site-test-"))
+        try:
+            path = temp_dir / "example.md"
+            path.write_text("# Example\n\nInternal by default.\n", encoding="utf-8")
+
+            document = docs_site.build_portal_document(path)
+
+            self.assertEqual(document.sensitivity, "INTERNAL")
+            self.assertEqual(document.portal_display, "full")
+            self.assertTrue(document.publish_in_portal)
+        finally:
+            shutil.rmtree(temp_dir)
+
+    def test_restricted_document_renders_summary_only_page(self) -> None:
+        temp_dir = Path(tempfile.mkdtemp(prefix="docs-site-test-"))
+        try:
+            path = temp_dir / "restricted.md"
+            path.write_text(
+                "---\n"
+                "sensitivity: RESTRICTED\n"
+                "portal_summary: Safe operator summary.\n"
+                "justification: Contains sensitive recovery steps.\n"
+                "---\n"
+                "# Restricted Runbook\n\n"
+                "Full recovery token format and privileged steps.\n",
+                encoding="utf-8",
+            )
+
+            document = docs_site.build_portal_document(path)
+            rendered = docs_site.render_portal_document(document, Path("runbooks/restricted.md"))
+
+            self.assertEqual(document.sensitivity, "RESTRICTED")
+            self.assertEqual(document.portal_display, "summary")
+            self.assertIn("sensitivity: RESTRICTED", rendered)
+            self.assertIn("portal_display: summary", rendered)
+            self.assertIn("Safe operator summary.", rendered)
+            self.assertNotIn("Full recovery token format", rendered)
         finally:
             shutil.rmtree(temp_dir)
 

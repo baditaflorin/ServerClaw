@@ -76,6 +76,7 @@ OpenTofu VM lifecycle automation is now implemented under `tofu/`, the six produ
 The repository now also ships continuous drift detection across OpenTofu, Ansible check mode, runtime Docker image digests, DNS records, and TLS posture, with receipts under `receipts/drift-reports/`, an ops-portal Drift Status panel, and `lv3 diff` routed to `make drift-report`; the live schedule and dashboard metric feed still require apply from `main`.
 The repository now also ships ADR 0100 disaster-recovery targets, a structured recovery runbook, and `make dr-status` / `lv3 release status` readiness views; the live off-site copy of `backup-lv3` is still pending external storage credentials.
 The repository now also ships ADR 0096 SLO tracking: a canonical SLO catalog, generated Prometheus rules and blackbox targets, a Grafana SLO dashboard, an ops-portal SLO section, a `/v1/platform/slos` API surface, and promotion-gate enforcement for low remaining error budget.
+The developer portal generator now stamps published pages with sensitivity metadata, keeps `RESTRICTED` ADRs and runbooks summary-only in the portal output, and leaves `CONFIDENTIAL` documents source-only until a dedicated admin-view path exists.
 
 <!-- BEGIN GENERATED: platform-status -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_status_docs.py). Do not edit this block by hand.
@@ -83,7 +84,7 @@ The repository now also ships ADR 0096 SLO tracking: a canonical SLO catalog, ge
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.111.0` |
+| Repository version | `0.112.0` |
 | Platform version | `0.105.0` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -540,6 +541,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0120: Dry-Run Semantic Diff Engine](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0120-dry-run-semantic-diff-engine.md)
 - [ADR 0121: Local Search and Indexing Fabric](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0121-local-search-and-indexing-fabric.md)
 - [ADR 0134: Changelog Portal Content Redaction](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0134-changelog-portal-content-redaction.md)
+- [ADR 0135: Developer Portal Sensitivity Classification](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0135-developer-portal-sensitivity-classification.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -637,6 +639,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0120: Dry-Run Semantic Diff Engine](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0120-dry-run-diff-engine.md)
 - [Workstream ADR 0121: Local Search and Indexing Fabric](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0121-search-indexing-fabric.md)
 - [Workstream ADR 0134: Changelog Portal Content Redaction](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0134-changelog-redaction.md)
+- [Workstream ADR 0135: Developer Portal Sensitivity Classification](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0135-developer-portal-sensitivity-classification.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
@@ -654,7 +657,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.111.0` |
+| Repository version | `0.112.0` |
 | Platform version | `0.105.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -776,6 +779,7 @@ This repository is intentionally opinionated:
 | `0111` | End-to-end integration test suite | `merged` | [adr-0111-integration-test-suite.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0111-integration-test-suite.md) |
 | `0114` | Rule-based incident triage engine | `merged` | [adr-0114-incident-triage-engine.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0114-incident-triage-engine.md) |
 | `0134` | Changelog portal content redaction | `merged` | [adr-0134-changelog-redaction.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0134-changelog-redaction.md) |
+| `0135` | Developer portal sensitivity classification | `merged` | [adr-0135-developer-portal-sensitivity-classification.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0135-developer-portal-sensitivity-classification.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

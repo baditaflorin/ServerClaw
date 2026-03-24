@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import tempfile
 from collections import defaultdict
+from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -41,6 +42,22 @@ TEMPLATE_DIR = repo_path("docs", "templates")
 OPENAPI_DEFAULT_URL = "https://api.lv3.org/v1/openapi.json"
 REPO_ROOT = repo_path()
 LINK_PATTERN = re.compile(r"(!?\[[^\]]*])\(([^)]+)\)")
+SENSITIVITY_LEVELS = ("PUBLIC", "INTERNAL", "RESTRICTED", "CONFIDENTIAL")
+DEFAULT_SENSITIVITY = "INTERNAL"
+SOURCE_ONLY_SENSITIVITY = {"CONFIDENTIAL"}
+
+
+@dataclass(frozen=True)
+class PortalDocument:
+    source_path: Path
+    title: str
+    metadata: dict[str, str]
+    content: str
+    sensitivity: str
+    portal_summary: str
+    justification: str | None
+    portal_display: str
+    publish_in_portal: bool
 
 
 def build_env() -> Environment:
@@ -76,6 +93,232 @@ def parse_metadata_block(path: Path) -> dict[str, str]:
             continue
         metadata[key.strip()] = value.strip()
     return metadata
+
+
+def split_frontmatter(content: str) -> tuple[dict[str, str], str]:
+    if not content.startswith("---\n"):
+        return {}, content
+    end = content.find("\n---\n", 4)
+    if end == -1:
+        return {}, content
+
+    metadata: dict[str, str] = {}
+    for line in content[4:end].splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        key, _, value = stripped.partition(":")
+        if not value:
+            continue
+        metadata[key.strip().lower()] = value.strip().strip("'\"")
+    return metadata, content[end + 5 :]
+
+
+def strip_leading_metadata_block(content: str) -> str:
+    lines = content.splitlines()
+    heading_index = next((index for index, line in enumerate(lines) if line.startswith("# ")), None)
+    if heading_index is None:
+        return content
+
+    index = heading_index + 1
+    while index < len(lines) and not lines[index].strip():
+        index += 1
+
+    block_start = index
+    while index < len(lines) and lines[index].startswith("- "):
+        index += 1
+    if index == block_start:
+        return content
+
+    while index < len(lines) and not lines[index].strip():
+        index += 1
+
+    stripped_lines = lines[:block_start] + lines[index:]
+    stripped = "\n".join(stripped_lines)
+    if content.endswith("\n"):
+        stripped += "\n"
+    return stripped
+
+
+def normalize_sensitivity(raw_value: str | None) -> str:
+    if not raw_value:
+        return DEFAULT_SENSITIVITY
+    candidate = raw_value.strip().upper()
+    if candidate not in SENSITIVITY_LEVELS:
+        raise ValueError(f"unsupported sensitivity classification: {raw_value}")
+    return candidate
+
+
+def metadata_value(frontmatter: dict[str, str], metadata: dict[str, str], *keys: str) -> str | None:
+    for key in keys:
+        if key in frontmatter and frontmatter[key]:
+            return frontmatter[key]
+        if key in metadata and metadata[key]:
+            return metadata[key]
+    return None
+
+
+def first_content_paragraph(content: str) -> str:
+    paragraphs = re.split(r"\n\s*\n", strip_leading_metadata_block(content).strip())
+    for paragraph in paragraphs:
+        candidate = " ".join(paragraph.strip().split())
+        if not candidate or candidate.startswith("#"):
+            continue
+        return candidate
+    return ""
+
+
+def default_portal_summary(path: Path, title: str, sensitivity: str) -> str:
+    if sensitivity == "RESTRICTED":
+        doc_type = "runbook" if path.parent.name == "runbooks" else "architecture decision"
+        return f"Sensitive {doc_type} summary for {title}. Full content is reserved for platform administrators."
+    if sensitivity == "CONFIDENTIAL":
+        return f"{title} is classified as confidential and is intentionally excluded from the published developer portal."
+    return ""
+
+
+def build_portal_document(path: Path) -> PortalDocument:
+    raw_content = path.read_text(encoding="utf-8")
+    frontmatter, body = split_frontmatter(raw_content)
+    metadata = parse_metadata_block(path)
+    title = read_h1(path)
+    sensitivity = normalize_sensitivity(metadata_value(frontmatter, metadata, "sensitivity", "Sensitivity"))
+    justification = metadata_value(frontmatter, metadata, "justification", "Justification")
+    portal_summary = metadata_value(
+        frontmatter,
+        metadata,
+        "portal_summary",
+        "summary",
+        "Portal Summary",
+        "Summary",
+    )
+    if portal_summary is None and sensitivity in {"PUBLIC", "INTERNAL"}:
+        portal_summary = first_content_paragraph(body)
+    if not portal_summary:
+        portal_summary = default_portal_summary(path, title, sensitivity)
+
+    portal_display = "full"
+    publish_in_portal = True
+    if sensitivity == "RESTRICTED":
+        portal_display = "summary"
+    elif sensitivity == "CONFIDENTIAL":
+        portal_display = "hidden"
+        publish_in_portal = False
+
+    return PortalDocument(
+        source_path=path,
+        title=title,
+        metadata=metadata,
+        content=body,
+        sensitivity=sensitivity,
+        portal_summary=portal_summary,
+        justification=justification,
+        portal_display=portal_display,
+        publish_in_portal=publish_in_portal,
+    )
+
+
+def build_page_frontmatter(
+    *,
+    sensitivity: str,
+    portal_display: str,
+    tags: list[str] | None = None,
+    search_exclude: bool = False,
+) -> str:
+    lines = [
+        "---",
+        f"sensitivity: {sensitivity}",
+        f"portal_display: {portal_display}",
+    ]
+    if tags:
+        lines.append("tags:")
+        for tag in tags:
+            lines.append(f"  - {tag}")
+    if search_exclude:
+        lines.extend(["search:", "  exclude: true"])
+    lines.append("---")
+    return "\n".join(lines) + "\n\n"
+
+
+def portal_notice(document: PortalDocument) -> str:
+    if document.sensitivity == "PUBLIC":
+        return (
+            '!!! note "Sensitivity: PUBLIC"\n'
+            "    This page is safe to share externally and is fully visible in the developer portal.\n"
+        )
+    if document.sensitivity == "INTERNAL":
+        return (
+            '!!! note "Sensitivity: INTERNAL"\n'
+            "    This page is intended for authenticated operators and internal collaborators.\n"
+        )
+    if document.sensitivity == "RESTRICTED":
+        lines = [
+            '!!! warning "Sensitivity: RESTRICTED"',
+            "    The developer portal publishes only a summary for this document.",
+            "    Request temporary platform-admin access through `#platform-admin` when the full source is needed.",
+        ]
+        if document.justification:
+            lines.append(f"    Justification: {document.justification}")
+        return "\n".join(lines) + "\n"
+    return (
+        '!!! danger "Sensitivity: CONFIDENTIAL"\n'
+        "    This document is intentionally excluded from the published developer portal.\n"
+    )
+
+
+def render_portal_document(document: PortalDocument, target_path: Path) -> str:
+    frontmatter = build_page_frontmatter(
+        sensitivity=document.sensitivity,
+        portal_display=document.portal_display,
+        tags=[document.sensitivity.lower(), target_path.parent.name],
+        search_exclude=document.sensitivity == "CONFIDENTIAL",
+    )
+    notice = portal_notice(document)
+
+    if document.portal_display == "summary":
+        summary = document.portal_summary or default_portal_summary(
+            document.source_path,
+            document.title,
+            document.sensitivity,
+        )
+        body = (
+            f"# {document.title}\n\n"
+            f"{notice}\n"
+            "## Portal Summary\n\n"
+            f"{summary}\n"
+        )
+        return frontmatter + body
+
+    rewritten = rewrite_markdown_links(document.content, document.source_path, target_path)
+    return frontmatter + notice + "\n" + rewritten.lstrip()
+
+
+def wrap_generated_page(
+    content: str,
+    *,
+    sensitivity: str,
+    portal_display: str = "full",
+    tags: list[str] | None = None,
+) -> str:
+    frontmatter = build_page_frontmatter(
+        sensitivity=sensitivity,
+        portal_display=portal_display,
+        tags=tags,
+    )
+    notice = portal_notice(
+        PortalDocument(
+            source_path=REPO_ROOT,
+            title="Generated page",
+            metadata={},
+            content=content,
+            sensitivity=sensitivity,
+            portal_summary="",
+            justification=None,
+            portal_display=portal_display,
+            publish_in_portal=True,
+        )
+    )
+    return frontmatter + notice + "\n" + content.lstrip()
 
 
 @lru_cache(maxsize=1)
@@ -263,6 +506,13 @@ def adr_lookup() -> dict[str, Path]:
     }
 
 
+def portal_document_lookup(directory: Path) -> dict[Path, PortalDocument]:
+    return {
+        path: build_portal_document(path)
+        for path in sorted(directory.glob("*.md"))
+    }
+
+
 def subdomains_by_service(entries: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
     grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for entry in entries:
@@ -323,22 +573,27 @@ def build_service_page_context(
     service: dict[str, Any],
     *,
     adr_paths: dict[str, Path],
+    adr_documents: dict[Path, PortalDocument],
     service_subdomains: list[dict[str, Any]],
     secrets: dict[str, dict[str, Any]],
+    runbook_documents: dict[Path, PortalDocument],
 ) -> dict[str, Any]:
     adr_link = None
     if service.get("adr") in adr_paths:
-        adr_link = relative_site_link(
-            Path("services") / f"{service['id']}.md",
-            site_path_for_repo_path(adr_paths[service["adr"]]) or Path(),
-        )
+        adr_path = adr_paths[service["adr"]]
+        if adr_documents.get(adr_path, build_portal_document(adr_path)).publish_in_portal:
+            adr_link = relative_site_link(
+                Path("services") / f"{service['id']}.md",
+                site_path_for_repo_path(adr_path) or Path(),
+            )
 
     runbook_link = None
     runbook_title = None
     runbook_path = repo_path(service["runbook"]) if service.get("runbook") else None
     if runbook_path and runbook_path.exists():
+        document = runbook_documents.get(runbook_path, build_portal_document(runbook_path))
         mapped = site_path_for_repo_path(runbook_path)
-        if mapped is not None:
+        if mapped is not None and document.publish_in_portal:
             runbook_link = relative_site_link(Path("services") / f"{service['id']}.md", mapped)
             runbook_title = read_h1(runbook_path)
 
@@ -398,6 +653,7 @@ def build_services_index_context(
     services: list[dict[str, Any]],
     *,
     adr_paths: dict[str, Path],
+    adr_documents: dict[Path, PortalDocument],
 ) -> dict[str, Any]:
     grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
     totals = {
@@ -417,7 +673,10 @@ def build_services_index_context(
                         Path("services/index.md"),
                         site_path_for_repo_path(adr_paths[service["adr"]]) or Path(),
                     )
-                    if service.get("adr") in adr_paths
+                    if (
+                        service.get("adr") in adr_paths
+                        and adr_documents.get(adr_paths[service["adr"]], build_portal_document(adr_paths[service["adr"]])).publish_in_portal
+                    )
                     else None
                 ),
             }
@@ -443,13 +702,28 @@ def render_runbook_pages(output_dir: Path) -> list[dict[str, str]]:
     }
     featured = []
 
-    for path in sorted(RUNBOOK_DIR.glob("*.md")):
+    for path, document in portal_document_lookup(RUNBOOK_DIR).items():
+        if not document.publish_in_portal:
+            continue
         target = Path("runbooks", path.name)
-        copy_transformed_markdown(output_dir, path, target)
-        item = {"title": read_h1(path), "link": path.name, "stem": path.stem}
+        write_generated(output_dir, target, render_portal_document(document, target))
+        item = {
+            "title": document.title,
+            "link": path.name,
+            "stem": path.stem,
+            "sensitivity": document.sensitivity,
+            "portal_display": document.portal_display,
+        }
         runbook_items.append(item)
         if path.stem in featured_stems:
-            featured.append({"title": item["title"], "link": item["link"]})
+            featured.append(
+                {
+                    "title": item["title"],
+                    "link": item["link"],
+                    "sensitivity": item["sensitivity"],
+                    "portal_display": item["portal_display"],
+                }
+            )
 
     runbook_items.sort(key=lambda item: item["title"])
     featured.sort(key=lambda item: item["title"])
@@ -463,16 +737,22 @@ def render_runbook_pages(output_dir: Path) -> list[dict[str, str]]:
 
 def render_adr_pages(output_dir: Path) -> list[dict[str, str]]:
     entries = []
-    for path in sorted(ADR_DIR.glob("*.md")):
+    sensitivity_totals = {level: 0 for level in SENSITIVITY_LEVELS}
+    for path, document in portal_document_lookup(ADR_DIR).items():
+        sensitivity_totals[document.sensitivity] += 1
+        if not document.publish_in_portal:
+            continue
         target = Path("architecture", "decisions", path.name)
-        copy_transformed_markdown(output_dir, path, target)
-        metadata = parse_metadata_block(path)
+        write_generated(output_dir, target, render_portal_document(document, target))
+        metadata = document.metadata
         entries.append(
             {
                 "id": path.name.split("-", 1)[0],
-                "title": read_h1(path).split(": ", 1)[-1],
+                "title": document.title.split(": ", 1)[-1],
                 "status": metadata.get("Status", "unknown"),
                 "implementation_status": metadata.get("Implementation Status", "unknown"),
+                "sensitivity": document.sensitivity,
+                "portal_display": document.portal_display,
                 "link": f"decisions/{path.name}",
             }
         )
@@ -481,21 +761,29 @@ def render_adr_pages(output_dir: Path) -> list[dict[str, str]]:
         "total": len(entries),
         "implemented": sum(1 for entry in entries if entry["implementation_status"] == "Implemented"),
         "proposed": sum(1 for entry in entries if entry["status"] == "Proposed"),
+        "public": sensitivity_totals["PUBLIC"],
+        "internal": sensitivity_totals["INTERNAL"],
+        "restricted": sensitivity_totals["RESTRICTED"],
+        "confidential": sensitivity_totals["CONFIDENTIAL"],
     }
     write_generated(
         output_dir,
         "architecture/index.md",
-        render_template(
-            "architecture-index.md.j2",
-            totals=totals,
-            adrs=entries,
-            generated_pages=[
-                {
-                    "title": "Service Dependency Graph",
-                    "description": "Recovery tiers and Mermaid service-dependency diagram generated from config/dependency-graph.json.",
-                    "link": "dependency-graph.md",
-                }
-            ],
+        wrap_generated_page(
+            render_template(
+                "architecture-index.md.j2",
+                totals=totals,
+                adrs=entries,
+                generated_pages=[
+                    {
+                        "title": "Service Dependency Graph",
+                        "description": "Recovery tiers and Mermaid service-dependency diagram generated from config/dependency-graph.json.",
+                        "link": "dependency-graph.md",
+                    }
+                ],
+            ),
+            sensitivity="INTERNAL",
+            tags=["architecture", "index"],
         ),
     )
     return entries
@@ -506,7 +794,11 @@ def render_dependency_graph_page(output_dir: Path) -> None:
     write_generated(
         output_dir,
         Path("architecture", "dependency-graph.md"),
-        render_dependency_markdown(graph),
+        wrap_generated_page(
+            render_dependency_markdown(graph),
+            sensitivity="INTERNAL",
+            tags=["architecture", "dependency-graph"],
+        ),
     )
 
 
@@ -514,11 +806,21 @@ def render_release_notes(output_dir: Path) -> list[dict[str, str]]:
     releases = []
     readme_path = RELEASE_NOTES_DIR / "README.md"
     if readme_path.exists():
-        copy_transformed_markdown(output_dir, readme_path, Path("releases", "index-source.md"))
+        content = rewrite_markdown_links(
+            readme_path.read_text(encoding="utf-8"),
+            readme_path,
+            Path("releases", "index-source.md"),
+        )
+        write_generated(
+            output_dir,
+            Path("releases", "index-source.md"),
+            wrap_generated_page(content, sensitivity="INTERNAL", tags=["releases", "source"]),
+        )
 
     for path in sorted(RELEASE_NOTES_DIR.glob("[0-9]*.md"), key=version_key, reverse=True):
         target = Path("releases", path.name)
-        copy_transformed_markdown(output_dir, path, target)
+        content = rewrite_markdown_links(path.read_text(encoding="utf-8"), path, target)
+        write_generated(output_dir, target, wrap_generated_page(content, sensitivity="INTERNAL", tags=["releases"]))
         date = "unknown"
         for line in path.read_text(encoding="utf-8").splitlines():
             if line.startswith("- Date: "):
@@ -529,7 +831,11 @@ def render_release_notes(output_dir: Path) -> list[dict[str, str]]:
     write_generated(
         output_dir,
         "releases/index.md",
-        render_template("releases-index.md.j2", releases=releases),
+        wrap_generated_page(
+            render_template("releases-index.md.j2", releases=releases),
+            sensitivity="INTERNAL",
+            tags=["releases", "index"],
+        ),
     )
     stale_readme = output_dir / "releases" / "index-source.md"
     if stale_readme.exists():
@@ -544,7 +850,15 @@ def render_reference_pages(
     subdomains: list[dict[str, Any]],
     secrets: dict[str, dict[str, Any]],
 ) -> None:
-    write_generated(output_dir, "reference/index.md", render_template("reference-index.md.j2"))
+    write_generated(
+        output_dir,
+        "reference/index.md",
+        wrap_generated_page(
+            render_template("reference-index.md.j2"),
+            sensitivity="INTERNAL",
+            tags=["reference", "index"],
+        ),
+    )
 
     subdomains_index = subdomains_by_service(subdomains)
     port_rows = []
@@ -560,7 +874,15 @@ def render_reference_pages(
                 }
             )
     port_rows.sort(key=lambda row: (row["port"], row["service_name"], row["surface"]))
-    write_generated(output_dir, "reference/ports.md", render_template("reference-ports.md.j2", rows=port_rows))
+    write_generated(
+        output_dir,
+        "reference/ports.md",
+        wrap_generated_page(
+            render_template("reference-ports.md.j2", rows=port_rows),
+            sensitivity="INTERNAL",
+            tags=["reference", "ports"],
+        ),
+    )
 
     service_names = {service["id"]: service["name"] for service in services}
     subdomain_rows = []
@@ -581,7 +903,11 @@ def render_reference_pages(
     write_generated(
         output_dir,
         "reference/subdomains.md",
-        render_template("reference-subdomains.md.j2", rows=subdomain_rows),
+        wrap_generated_page(
+            render_template("reference-subdomains.md.j2", rows=subdomain_rows),
+            sensitivity="INTERNAL",
+            tags=["reference", "subdomains"],
+        ),
     )
 
     identity_taxonomy = load_yaml(VERSIONS_STACK_PATH)["desired_state"]["identity_taxonomy"]
@@ -609,7 +935,11 @@ def render_reference_pages(
     write_generated(
         output_dir,
         "reference/identities.md",
-        render_template("reference-identities.md.j2", classes=classes, identities=identities),
+        wrap_generated_page(
+            render_template("reference-identities.md.j2", classes=classes, identities=identities),
+            sensitivity="INTERNAL",
+            tags=["reference", "identities"],
+        ),
     )
 
     secret_rows = []
@@ -627,7 +957,11 @@ def render_reference_pages(
     write_generated(
         output_dir,
         "reference/secrets.md",
-        render_template("reference-secrets.md.j2", secrets=secret_rows),
+        wrap_generated_page(
+            render_template("reference-secrets.md.j2", secrets=secret_rows),
+            sensitivity="INTERNAL",
+            tags=["reference", "secrets"],
+        ),
     )
 
 
@@ -703,14 +1037,26 @@ def render_api_pages(output_dir: Path, openapi_url: str | None) -> None:
     write_generated(
         output_dir,
         "api/index.md",
-        render_template(
-            "api-index.md.j2",
-            catalog_missing=api_gateway_catalog_missing,
-            surfaces=surface_rows,
-            openapi_source=source,
+        wrap_generated_page(
+            render_template(
+                "api-index.md.j2",
+                catalog_missing=api_gateway_catalog_missing,
+                surfaces=surface_rows,
+                openapi_source=source,
+            ),
+            sensitivity="PUBLIC",
+            tags=["api", "index"],
         ),
     )
-    write_generated(output_dir, "api/openapi.md", render_template("openapi-page.md.j2"))
+    write_generated(
+        output_dir,
+        "api/openapi.md",
+        wrap_generated_page(
+            render_template("openapi-page.md.j2"),
+            sensitivity="PUBLIC",
+            tags=["api", "openapi"],
+        ),
+    )
 
 
 def render_changelog_page(output_dir: Path, releases: list[dict[str, str]]) -> None:
@@ -718,23 +1064,35 @@ def render_changelog_page(output_dir: Path, releases: list[dict[str, str]]) -> N
     write_generated(
         output_dir,
         "changelog.md",
-        render_template(
-            "changelog.md.j2",
-            current_version=VERSION_PATH.read_text(encoding="utf-8").strip(),
-            releases=releases,
-            unreleased=extract_unreleased_section(changelog_text),
+        wrap_generated_page(
+            render_template(
+                "changelog.md.j2",
+                current_version=VERSION_PATH.read_text(encoding="utf-8").strip(),
+                releases=releases,
+                unreleased=extract_unreleased_section(changelog_text),
+            ),
+            sensitivity="INTERNAL",
+            tags=["releases", "changelog"],
         ),
     )
 
 
 def render_home_and_upgrade(output_dir: Path) -> None:
     for path in SITE_SOURCE_DOCS:
-        copy_transformed_markdown(output_dir, path, site_path_for_repo_path(path) or Path(path.name))
+        target_path = site_path_for_repo_path(path) or Path(path.name)
+        content = rewrite_markdown_links(path.read_text(encoding="utf-8"), path, target_path)
+        write_generated(
+            output_dir,
+            target_path,
+            wrap_generated_page(content, sensitivity="INTERNAL", tags=[target_path.parent.name or "home"]),
+        )
 
 
 def render_services(output_dir: Path) -> None:
     services = load_json(SERVICE_CATALOG_PATH)["services"]
     adr_paths = adr_lookup()
+    adr_documents = portal_document_lookup(ADR_DIR)
+    runbook_documents = portal_document_lookup(RUNBOOK_DIR)
     subdomains = load_json(SUBDOMAIN_CATALOG_PATH)["subdomains"]
     secrets = secret_lookup()
     grouped_subdomains = subdomains_by_service(subdomains)
@@ -743,21 +1101,31 @@ def render_services(output_dir: Path) -> None:
         context = build_service_page_context(
             service,
             adr_paths=adr_paths,
+            adr_documents=adr_documents,
             service_subdomains=grouped_subdomains.get(service["id"], []),
             secrets=secrets,
+            runbook_documents=runbook_documents,
         )
         write_generated(
             output_dir,
             Path("services", f"{service['id']}.md"),
-            render_template("service-page.md.j2", service=context),
+            wrap_generated_page(
+                render_template("service-page.md.j2", service=context),
+                sensitivity="INTERNAL",
+                tags=["services", service["id"]],
+            ),
         )
 
     write_generated(
         output_dir,
         "services/index.md",
-        render_template(
-            "services-index.md.j2",
-            **build_services_index_context(services, adr_paths=adr_paths),
+        wrap_generated_page(
+            render_template(
+                "services-index.md.j2",
+                **build_services_index_context(services, adr_paths=adr_paths, adr_documents=adr_documents),
+            ),
+            sensitivity="INTERNAL",
+            tags=["services", "index"],
         ),
     )
     render_reference_pages(output_dir, services=services, subdomains=subdomains, secrets=secrets)
