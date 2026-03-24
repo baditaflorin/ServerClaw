@@ -2,9 +2,9 @@
 
 flush ruleset
 
-{% set policy = hostvars[linux_guest_firewall_host_id].network_policy %}
-{% set guest_ip_map = dict(hostvars[linux_guest_firewall_host_id].proxmox_guests | map(attribute='name') | zip(hostvars[linux_guest_firewall_host_id].proxmox_guests | map(attribute='ipv4'))) %}
-{% set guest_role_map = dict(hostvars[linux_guest_firewall_host_id].proxmox_guests | map(attribute='name') | zip(hostvars[linux_guest_firewall_host_id].proxmox_guests | map(attribute='role'))) %}
+{% set policy = linux_guest_firewall_policy %}
+{% set guest_ip_map = linux_guest_firewall_guest_ip_map %}
+{% set guest_role_map = linux_guest_firewall_guest_role_map %}
 {% set guest_policy = policy.guests[inventory_hostname] %}
 {% macro render_match(rule) -%}
 {% if rule.protocol == 'vrrp' -%}
@@ -32,6 +32,25 @@ ip protocol vrrp
     ip saddr {{ rule.source }} {{ render_match(rule) }} accept
 {% endif %}
 {%- endmacro %}
+{% macro render_forward_rule(rule) -%}
+{% if rule.source == 'public' %}
+    accept
+{% elif rule.source == 'management' %}
+{% for source in policy.guest_management_sources %}
+    ip saddr {{ source }} accept
+{% endfor %}
+{% elif rule.source == 'host' %}
+    ip saddr {{ policy.host_source }} accept
+{% elif rule.source == 'all_guests' %}
+{% for guest_name, guest_ip in guest_ip_map.items() | sort if guest_name != inventory_hostname %}
+    ip saddr {{ guest_ip }}/32 accept
+{% endfor %}
+{% elif rule.source in guest_ip_map %}
+    ip saddr {{ guest_ip_map[rule.source] }}/32 accept
+{% else %}
+    ip saddr {{ rule.source }} accept
+{% endif %}
+{%- endmacro %}
 
 table inet filter {
   chain input {
@@ -51,10 +70,14 @@ table inet filter {
     ct state established,related accept
 {% if guest_role_map[inventory_hostname] in ['docker-runtime', 'docker-build'] %}
     ip saddr 172.16.0.0/12 accept
-{% endif %}
+{% for rule in guest_policy.allowed_inbound %}
+{{ render_forward_rule(rule) }}
+{% endfor %}
+{% else %}
 {% for rule in guest_policy.allowed_inbound %}
 {{ render_rule(rule) }}
 {% endfor %}
+{% endif %}
   }
 
   chain output {

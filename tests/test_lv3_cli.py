@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import sqlite3
 import sys
 import types
 from pathlib import Path
@@ -10,10 +11,34 @@ import pytest
 import lv3_cli
 
 
+def prepare_agent_state_db(path: Path) -> Path:
+    connection = sqlite3.connect(path)
+    connection.execute(
+        """
+        CREATE TABLE agent_state (
+            state_id TEXT,
+            agent_id TEXT NOT NULL,
+            task_id TEXT NOT NULL,
+            key TEXT NOT NULL,
+            value TEXT NOT NULL,
+            context_id TEXT,
+            written_at TEXT NOT NULL,
+            expires_at TEXT NOT NULL,
+            version INTEGER NOT NULL DEFAULT 1,
+            UNIQUE(agent_id, task_id, key)
+        )
+        """
+    )
+    connection.commit()
+    connection.close()
+    return path
+
+
 @pytest.fixture()
 def minimal_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     (tmp_path / "config").mkdir()
     (tmp_path / "docs" / "adr").mkdir(parents=True)
+    (tmp_path / "docs" / "runbooks").mkdir(parents=True)
     (tmp_path / "inventory").mkdir()
     (tmp_path / "receipts" / "live-applies").mkdir(parents=True)
     (tmp_path / "receipts" / "dr-table-top-reviews").mkdir(parents=True)
@@ -30,6 +55,7 @@ def minimal_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
                 "remote-exec:",
                 "rotate-secret:",
                 "promote:",
+                "capacity-report:",
                 "fixture-up:",
                 "fixture-down:",
                 "fixture-list:",
@@ -49,6 +75,8 @@ all:
           ansible_host: 10.10.10.20
         nginx-lv3:
           ansible_host: 10.10.10.10
+        netbox-lv3:
+          ansible_host: 10.10.10.30
 """.strip()
         + "\n"
     )
@@ -82,6 +110,15 @@ all:
                         "public_url": "https://ops.lv3.org",
                         "environments": {"production": {"status": "planned", "url": "https://ops.lv3.org"}},
                     },
+                    {
+                        "id": "netbox",
+                        "name": "NetBox",
+                        "vm": "netbox-lv3",
+                        "lifecycle_status": "active",
+                        "internal_url": "http://127.0.0.1:18082",
+                        "health_probe_id": "netbox",
+                        "environments": {"production": {"status": "active", "url": "http://127.0.0.1:18082"}},
+                    },
                 ]
             },
             indent=2,
@@ -94,6 +131,7 @@ all:
                 "services": {
                     "grafana": {"readiness": {"validate_tls": True}},
                     "windmill": {"readiness": {"validate_tls": True}},
+                    "netbox": {"readiness": {"validate_tls": True}},
                 }
             },
             indent=2,
@@ -126,6 +164,13 @@ all:
                         "vm": "nginx-lv3",
                         "tier": 1,
                     },
+                    {
+                        "id": "netbox",
+                        "service": "netbox",
+                        "name": "NetBox",
+                        "vm": "netbox-lv3",
+                        "tier": 1,
+                    },
                 ],
                 "edges": [
                     {
@@ -156,7 +201,25 @@ all:
             {
                 "workflows": {
                     "windmill_healthcheck": {"description": "Healthcheck"},
+                    "operator-onboard": {"description": "Operator onboarding", "live_impact": "guest_live"},
+                    "operator-offboard": {"description": "Operator offboarding", "live_impact": "guest_live"},
+                    "converge-netbox": {"description": "NetBox converge", "live_impact": "guest_live"},
                     "disaster-recovery-runbook": {"description": "DR runbook"},
+                    "validate": {"description": "Validate repository", "live_impact": "repo_only"},
+                }
+            },
+            indent=2,
+        )
+        + "\n"
+    )
+    (tmp_path / "config" / "command-catalog.json").write_text(
+        json.dumps(
+            {
+                "commands": {
+                    "converge-netbox": {
+                        "description": "Deploy the NetBox service.",
+                        "workflow_id": "deploy-and-promote",
+                    }
                 }
             },
             indent=2,
@@ -198,6 +261,9 @@ backups:
     )
     (tmp_path / "docs" / "adr" / "0109-public-status-page.md").write_text(
         "- Status: Proposed\n- Implementation Status: Not Implemented\n"
+    )
+    (tmp_path / "docs" / "runbooks" / "rotate-certificates.md").write_text(
+        "# Rotate Certificates\n\nRenew the TLS certificate before it expires.\n"
     )
     (tmp_path / "receipts" / "dr-table-top-reviews" / "2026-03-23-review.json").write_text(
         json.dumps({"reviewed_on": "2026-03-23", "result": "completed_with_gaps"}) + "\n"
@@ -258,8 +324,59 @@ def test_run_dry_run_redacts_token(
     exit_code = lv3_cli.main(["run", "windmill_healthcheck", "--args", "probe=manual", "--dry-run"])
     captured = capsys.readouterr()
     assert exit_code == 0
+    assert "Compiled intent:" in captured.out
+    assert "budgeted scheduler" in captured.out
     assert "<redacted>" in captured.out
     assert "secret-token" not in captured.out
+
+
+def test_run_dry_run_compiles_natural_language_instruction(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    exit_code = lv3_cli.main(["run", "deploy", "netbox", "--dry-run"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "Compiled Intent:" in captured.out
+    assert "action: deploy" in captured.out
+    assert "Dispatch Workflow: converge-netbox" in captured.out
+    ledger_path = minimal_repo / ".local" / "state" / "ledger" / "ledger.events.jsonl"
+    events = [json.loads(line) for line in ledger_path.read_text().splitlines()]
+    assert events[-1]["event_type"] == "intent.compiled"
+
+
+def test_run_parse_error_is_clean(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    exit_code = lv3_cli.main(["run", "dploy", "netbox"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 2
+    assert "PARSE_ERROR" in captured.err
+    ledger_path = minimal_repo / ".local" / "state" / "ledger" / "ledger.events.jsonl"
+    events = [json.loads(line) for line in ledger_path.read_text().splitlines()]
+    assert events[-1]["event_type"] == "intent.rejected"
+
+
+def test_run_requires_approval_and_writes_lifecycle_events(
+    minimal_repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    calls: list[tuple[str, dict[str, str]]] = []
+
+    monkeypatch.setattr(lv3_cli, "prompt_for_intent_approval", lambda: True)
+    monkeypatch.setattr(
+        lv3_cli,
+        "run_windmill_request",
+        lambda workflow_name, payload, **_kwargs: calls.append((workflow_name, payload)) or 0,
+    )
+
+    exit_code = lv3_cli.main(["run", "deploy", "netbox"])
+
+    assert exit_code == 0
+    assert calls == [("converge-netbox", {"service": "netbox", "target": "netbox"})]
+    ledger_path = minimal_repo / ".local" / "state" / "ledger" / "ledger.events.jsonl"
+    event_types = [json.loads(line)["event_type"] for line in ledger_path.read_text().splitlines()]
+    assert event_types == ["intent.compiled", "intent.approved"]
 
 
 def test_vm_list_uses_inventory(
@@ -295,6 +412,15 @@ def test_fixture_list_dry_run_prints_make_target(
     assert "make fixture-list" in captured.out
 
 
+def test_capacity_dry_run_prints_make_target(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    exit_code = lv3_cli.main(["capacity", "--format", "json", "--no-live-metrics", "--dry-run"])
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "make capacity-report FORMAT=json NO_LIVE_METRICS=true" in captured.out
+
+
 def test_validate_service_dry_run_uses_local_completeness_command(
     capsys: pytest.CaptureFixture[str], minimal_repo: Path
 ) -> None:
@@ -303,6 +429,13 @@ def test_validate_service_dry_run_uses_local_completeness_command(
     assert exit_code == 0
     assert "ADR 0107 completeness check" in captured.out
     assert "scripts/validate_service_completeness.py --service grafana" in captured.out
+
+
+def test_search_command_returns_catalog_match(capsys: pytest.CaptureFixture[str], minimal_repo: Path) -> None:
+    exit_code = lv3_cli.main(["search", "converge netbox", "--collection", "command_catalog"])
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "converge-netbox" in captured.out
 
 
 def test_impact_command_prints_dependency_summary(
@@ -394,7 +527,7 @@ def test_operator_add_dry_run_uses_windmill_workflow(
     )
     captured = capsys.readouterr()
     assert exit_code == 0
-    assert "controller -> Windmill API" in captured.out
+    assert "budgeted scheduler" in captured.out
     assert "operator-onboard" in captured.out
     assert "alice@example.com" in captured.out
 
@@ -433,3 +566,97 @@ def test_operator_add_viewer_dry_run_does_not_require_ssh_key(
 def test_validate_completion_suggests_services(minimal_repo: Path) -> None:
     candidates = lv3_cli.completion_candidates(["lv3", "validate", "--service"], "g")
     assert candidates == ["grafana"]
+
+
+def test_agent_state_show_prints_rows(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    db_path = prepare_agent_state_db(minimal_repo / "agent-state.sqlite3")
+    client = lv3_cli.AgentStateClient(
+        agent_id="agent/triage-loop",
+        task_id="incident:inc-2026-03-24-001",
+        dsn=f"sqlite:///{db_path}",
+    )
+    client.write("hypothesis.1", {"confidence": 0.85, "id": "recent-deployment"})
+    monkeypatch.setenv("LV3_AGENT_STATE_DSN", f"sqlite:///{db_path}")
+
+    exit_code = lv3_cli.main(
+        [
+            "agent",
+            "state",
+            "show",
+            "--agent",
+            "agent/triage-loop",
+            "--task",
+            "incident:inc-2026-03-24-001",
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "hypothesis.1" in captured.out
+    assert "recent-deployment" in captured.out
+
+
+def test_agent_state_delete_removes_key(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    db_path = prepare_agent_state_db(minimal_repo / "agent-state.sqlite3")
+    client = lv3_cli.AgentStateClient(
+        agent_id="agent/triage-loop",
+        task_id="incident:inc-2026-03-24-001",
+        dsn=f"sqlite:///{db_path}",
+    )
+    client.write("question_queue.1", {"question": "Rotate the password now?"})
+    monkeypatch.setenv("LV3_AGENT_STATE_DSN", f"sqlite:///{db_path}")
+
+    exit_code = lv3_cli.main(
+        [
+            "agent",
+            "state",
+            "delete",
+            "--agent",
+            "agent/triage-loop",
+            "--task",
+            "incident:inc-2026-03-24-001",
+            "--key",
+            "question_queue.1",
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "Deleted question_queue.1" in captured.out
+    assert client.read("question_queue.1") is None
+
+
+def test_agent_state_verify_reports_integrity_match(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    db_path = prepare_agent_state_db(minimal_repo / "agent-state.sqlite3")
+    client = lv3_cli.AgentStateClient(
+        agent_id="agent/runbook-executor",
+        task_id="runbook-run:run-abc-123",
+        dsn=f"sqlite:///{db_path}",
+        checkpoint_publisher=None,
+    )
+    checkpoint = client.checkpoint({"resume_at": "verify-health"})
+    monkeypatch.setenv("LV3_AGENT_STATE_DSN", f"sqlite:///{db_path}")
+
+    exit_code = lv3_cli.main(
+        [
+            "agent",
+            "state",
+            "verify",
+            "--agent",
+            "agent/runbook-executor",
+            "--task",
+            "runbook-run:run-abc-123",
+            "--digest",
+            str(checkpoint["state_digest"]),
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "Integrity: ok" in captured.out

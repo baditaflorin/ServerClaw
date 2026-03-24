@@ -11,6 +11,7 @@ from controller_automation_toolkit import (
     WORKFLOW_CATALOG_PATH,
     emit_cli_error,
     load_json,
+    load_yaml,
     parse_make_targets,
 )
 
@@ -23,6 +24,8 @@ ALLOWED_LIVE_IMPACTS = {
     "external_live",
 }
 ALLOWED_LIFECYCLE_STATUSES = {"active", "blocked"}
+ALLOWED_EXECUTION_CLASSES = {"mutation", "diagnostic"}
+ALLOWED_ESCALATION_ACTIONS = {"notify_and_abort", "abort_silently", "escalate_to_operator"}
 WORKFLOW_SECRET_FIELDS = ("required_secret_ids", "generated_secret_ids", "blocked_secret_ids")
 
 
@@ -38,6 +41,40 @@ def load_workflow_catalog() -> dict:
     return load_json(WORKFLOW_CATALOG_PATH)
 
 
+def load_workflow_defaults() -> dict:
+    return load_yaml(REPO_ROOT / "config" / "workflow-defaults.yaml")
+
+
+def validate_budget_payload(payload: dict, workflow_id: str) -> None:
+    if not isinstance(payload, dict):
+        raise ValueError(f"workflow '{workflow_id}' budget must be a mapping")
+    required_int_fields = (
+        "max_duration_seconds",
+        "max_steps",
+        "max_concurrent_instances",
+        "max_touched_hosts",
+        "max_restarts",
+        "max_rollback_depth",
+    )
+    for field in required_int_fields:
+        value = payload.get(field)
+        if isinstance(value, bool) or not isinstance(value, int):
+            raise ValueError(f"workflow '{workflow_id}' budget field '{field}' must be an integer")
+        if value < 0:
+            raise ValueError(f"workflow '{workflow_id}' budget field '{field}' must be >= 0")
+    if payload["max_duration_seconds"] < 1:
+        raise ValueError(f"workflow '{workflow_id}' budget field 'max_duration_seconds' must be >= 1")
+    if payload["max_steps"] < 1:
+        raise ValueError(f"workflow '{workflow_id}' budget field 'max_steps' must be >= 1")
+    if payload["max_concurrent_instances"] < 1:
+        raise ValueError(f"workflow '{workflow_id}' budget field 'max_concurrent_instances' must be >= 1")
+    escalation_action = payload.get("escalation_action")
+    if escalation_action not in ALLOWED_ESCALATION_ACTIONS:
+        raise ValueError(
+            f"workflow '{workflow_id}' budget escalation_action must be one of {sorted(ALLOWED_ESCALATION_ACTIONS)}"
+        )
+
+
 def validate_secret_manifest(manifest: dict) -> None:
     secrets = manifest.get("secrets")
     if not isinstance(secrets, dict):
@@ -48,6 +85,10 @@ def validate_workflow_catalog(catalog: dict, secret_manifest: dict) -> None:
     workflows = catalog.get("workflows")
     secrets = secret_manifest["secrets"]
     make_targets = parse_make_targets()
+    defaults_payload = load_workflow_defaults().get("default_budget")
+    if not isinstance(defaults_payload, dict):
+        raise ValueError("config/workflow-defaults.yaml must define default_budget")
+    validate_budget_payload(defaults_payload, "default_budget")
 
     if not isinstance(workflows, dict):
         raise ValueError("workflow catalog must define an object-valued 'workflows' key")
@@ -61,6 +102,21 @@ def validate_workflow_catalog(catalog: dict, secret_manifest: dict) -> None:
             raise ValueError(
                 f"workflow '{workflow_id}' has invalid lifecycle_status '{lifecycle_status}'"
             )
+
+        execution_class = workflow.get("execution_class", "mutation")
+        if execution_class not in ALLOWED_EXECUTION_CLASSES:
+            raise ValueError(
+                f"workflow '{workflow_id}' has invalid execution_class '{execution_class}'"
+            )
+
+        budget = dict(defaults_payload)
+        workflow_budget = workflow.get("budget", {})
+        if workflow_budget is None:
+            workflow_budget = {}
+        if not isinstance(workflow_budget, dict):
+            raise ValueError(f"workflow '{workflow_id}' budget must be a mapping")
+        budget.update(workflow_budget)
+        validate_budget_payload(budget, workflow_id)
 
         preferred_entrypoint = workflow.get("preferred_entrypoint")
         if not isinstance(preferred_entrypoint, dict):
@@ -153,7 +209,8 @@ def list_workflows(catalog: dict) -> int:
         command = workflow["preferred_entrypoint"]["command"]
         impact = workflow["live_impact"]
         status = workflow["lifecycle_status"]
-        print(f"  - {workflow_id} [{status}, {impact}]: {command}")
+        execution_class = workflow.get("execution_class", "mutation")
+        print(f"  - {workflow_id} [{status}, {impact}, {execution_class}]: {command}")
     return 0
 
 
@@ -167,8 +224,17 @@ def show_workflow(catalog: dict, workflow_id: str) -> int:
     print(f"Description: {workflow['description']}")
     print(f"Lifecycle: {workflow['lifecycle_status']}")
     print(f"Live impact: {workflow['live_impact']}")
+    print(f"Execution class: {workflow.get('execution_class', 'mutation')}")
     print(f"Entrypoint: {workflow['preferred_entrypoint']['command']}")
     print(f"Runbook: {workflow['owner_runbook']}")
+    print("Budget:")
+    defaults = load_workflow_defaults().get("default_budget", {})
+    budget = dict(defaults if isinstance(defaults, dict) else {})
+    workflow_budget = workflow.get("budget", {})
+    if isinstance(workflow_budget, dict):
+        budget.update(workflow_budget)
+    for key, value in budget.items():
+        print(f"  - {key}: {value}")
     print("Validation targets:")
     for target in workflow["validation_targets"]:
         print(f"  - make {target}")

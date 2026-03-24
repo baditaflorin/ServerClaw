@@ -3,6 +3,15 @@
   "schema_version": "1.0.0",
   "nodes": [
     {
+      "id": "alertmanager",
+      "service": "alertmanager",
+      "name": "Alertmanager",
+      "vm": "monitoring-lv3",
+      "tier": 1,
+      "category": "observability",
+      "adr": "0097"
+    },
+    {
       "id": "api_gateway",
       "service": "api_gateway",
       "name": "Platform API Gateway",
@@ -109,6 +118,15 @@
       "tier": 1,
       "category": "infrastructure",
       "adr": "0021"
+    },
+    {
+      "id": "ntfy",
+      "service": "ntfy",
+      "name": "ntfy",
+      "vm": "docker-runtime-lv3",
+      "tier": 1,
+      "category": "communication",
+      "adr": "0097"
     },
     {
       "id": "ntopng",
@@ -220,6 +238,18 @@
     }
   ],
   "edges": [
+    {
+      "from": "alertmanager",
+      "to": "mattermost",
+      "type": "soft",
+      "description": "Alertmanager forwards warning, info, and mirrored critical notifications into Mattermost channels, but operators can still inspect active alerts directly if chat delivery is degraded."
+    },
+    {
+      "from": "alertmanager",
+      "to": "ntfy",
+      "type": "soft",
+      "description": "Critical paging depends on ntfy delivery, but Mattermost still provides a lower-fidelity fallback notification path."
+    },
     {
       "from": "api_gateway",
       "to": "keycloak",

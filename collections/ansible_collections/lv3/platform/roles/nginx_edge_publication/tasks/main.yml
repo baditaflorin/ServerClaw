@@ -141,6 +141,7 @@
     src: /etc/nginx/sites-available/lv3-edge.conf
     dest: /etc/nginx/sites-enabled/lv3-edge.conf
     state: link
+    force: true
 
 - name: Disable the default NGINX site
   ansible.builtin.file:

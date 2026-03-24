@@ -20,11 +20,26 @@ import webbrowser
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any, Iterable
 
-from dependency_graph import dependency_summary, load_dependency_graph
+import yaml
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+from dependency_graph import dependency_summary, load_dependency_graph
+from repo_package_loader import load_repo_package
+
+try:
+    from search_fabric import SearchClient
+except ImportError:  # pragma: no cover - packaged entrypoint path
+    from scripts.search_fabric import SearchClient
+
+CODE_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = CODE_ROOT
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from platform.scheduler import build_scheduler
+from scripts.risk_scorer import ExecutionIntent, assemble_context, compile_workflow_intent, score_intent
 CLI_VERSION = "0.1.0"
 DEFAULT_STATUS_TIMEOUT_SECONDS = 3.0
 DEFAULT_LOG_LINES = 20
@@ -37,6 +52,14 @@ SERVICE_ALIASES = {
     "changelog": "changelog_portal",
     "proxmox": "proxmox_ui",
 }
+
+GOAL_COMPILER_MODULE = load_repo_package("lv3_goal_compiler", CODE_ROOT / "platform" / "goal_compiler")
+LEDGER_MODULE = load_repo_package("lv3_platform_ledger", CODE_ROOT / "platform" / "ledger")
+AGENT_MODULE = load_repo_package("lv3_platform_agent", CODE_ROOT / "platform" / "agent")
+GoalCompilationError = GOAL_COMPILER_MODULE.GoalCompilationError
+GoalCompiler = GOAL_COMPILER_MODULE.GoalCompiler
+LedgerWriter = LEDGER_MODULE.LedgerWriter
+AgentStateClient = AGENT_MODULE.AgentStateClient
 
 
 @dataclass(frozen=True)
@@ -66,6 +89,10 @@ def load_json(path: Path, *, default: Any | None = None) -> Any:
             return default
         raise FileNotFoundError(path)
     return json.loads(path.read_text())
+
+
+def emit_json(payload: Any) -> None:
+    print(json.dumps(payload, indent=2, sort_keys=True))
 
 
 def load_service_catalog() -> list[dict[str, Any]]:
@@ -156,6 +183,13 @@ def format_duration(seconds: float) -> str:
         return f"{seconds:.1f}s"
     minutes, remainder = divmod(int(round(seconds)), 60)
     return f"{minutes}m {remainder:02d}s"
+
+
+def compact_json(value: Any, *, limit: int = 80) -> str:
+    rendered = json.dumps(value, sort_keys=True, separators=(",", ":"))
+    if len(rendered) <= limit:
+        return rendered
+    return f"{rendered[: limit - 3]}..."
 
 
 def strip_ansi(text: str) -> str:
@@ -348,6 +382,17 @@ def secret_rotate_command(secret_id: str) -> CommandPlan:
     )
 
 
+def resolve_capacity_command(output_format: str, *, no_live_metrics: bool) -> CommandPlan:
+    command = ["make", "capacity-report", f"FORMAT={output_format}"]
+    if no_live_metrics:
+        command.append("NO_LIVE_METRICS=true")
+    return CommandPlan(
+        label=f"capacity --format {output_format}",
+        route="controller local capacity model report",
+        command=command,
+    )
+
+
 def fixture_command(
     action: str,
     fixture_name: str | None = None,
@@ -460,17 +505,144 @@ def parse_kv_pairs(pairs: list[str]) -> dict[str, Any]:
     return payload
 
 
-def run_windmill_workflow(workflow_name: str, args: list[str], *, dry_run: bool, explain: bool, no_color: bool) -> int:
+def build_execution_intent(workflow_name: str, args: list[str]) -> ExecutionIntent:
+    payload = parse_kv_pairs(args)
+    compiled = compile_workflow_intent(workflow_name, payload, repo_root=REPO_ROOT)
+    context = assemble_context(compiled, repo_root=REPO_ROOT)
+    risk = score_intent(compiled, context, repo_root=REPO_ROOT)
+    return ExecutionIntent(
+        intent_id=compiled["intent_id"],
+        workflow_id=compiled["workflow_id"],
+        workflow_description=compiled["workflow_description"],
+        arguments=payload,
+        live_impact=compiled["live_impact"],
+        target_service_id=compiled["target_service_id"],
+        target_vm=compiled["target_vm"],
+        rule_risk_class=compiled["rule_risk_class"],
+        computed_risk_class=risk.risk_class,
+        final_risk_class=risk.final_risk_class,
+        requires_approval=risk.approval_gate in {"HARD", "BLOCK"},
+        rollback_verified=compiled["rollback_verified"],
+        expected_change_count=compiled["expected_change_count"],
+        irreversible_count=compiled["irreversible_count"],
+        unknown_count=compiled["unknown_count"],
+        scoring_context=context.as_dict(),
+        risk_score=risk,
+        semantic_diff=compiled.get("semantic_diff"),
+    )
+
+
+def semantic_diff_symbol(change_kind: str, confidence: str) -> str:
+    if confidence == "unknown" or change_kind == "unknown":
+        return "?"
+    return {
+        "create": "+",
+        "update": "~",
+        "delete": "-",
+        "restart": "!",
+        "renew": "!",
+        "replace": "!",
+    }.get(change_kind, "~")
+
+
+def print_semantic_diff(intent: ExecutionIntent) -> None:
+    diff = intent.semantic_diff
+    if diff is None:
+        print("Predicted changes: unavailable")
+        return
+    print(f"Predicted changes ({diff.total_changes} objects):")
+    if not diff.changed_objects:
+        print("  none")
+    for item in diff.changed_objects:
+        symbol = semantic_diff_symbol(item.change_kind, item.confidence)
+        detail = item.notes or ""
+        print(f"  {symbol} {item.surface}:{item.object_id} {item.change_kind} {detail}".rstrip())
+    adapters = ", ".join(diff.adapters_used) if diff.adapters_used else "none"
+    print(
+        f"Irreversible: {diff.irreversible_count}   Unknown: {diff.unknown_count}   "
+        f"Adapters used: {adapters}"
+    )
+
+
+def print_compiled_intent(intent: ExecutionIntent) -> None:
+    print_semantic_diff(intent)
+    print("Compiled intent:")
+    print(yaml.safe_dump(intent.as_dict(), sort_keys=False, default_flow_style=False).rstrip())
+
+
+def maybe_write_compiled_intent_event(
+    intent: ExecutionIntent,
+    *,
+    dsn: str | None = None,
+    writer_factory: Any | None = None,
+) -> dict[str, Any] | None:
+    resolved_dsn = (dsn if dsn is not None else os.environ.get("LV3_LEDGER_DSN", "")).strip()
+    if not resolved_dsn or resolved_dsn.lower() == "off":
+        return None
+    if writer_factory is None:
+        from platform.ledger import LedgerWriter
+
+        writer_factory = LedgerWriter
+
+    target_id = intent.target_service_id or intent.workflow_id
+    target_kind = "service" if intent.target_service_id else "workflow"
+    return writer_factory(dsn=resolved_dsn).write(
+        event_type="intent.compiled",
+        actor="operator:lv3_cli",
+        actor_intent_id=intent.intent_id,
+        tool_id="lv3_cli",
+        target_kind=target_kind,
+        target_id=target_id,
+        before_state=intent.semantic_diff.as_dict() if intent.semantic_diff is not None else None,
+        after_state=intent.as_dict(),
+    )
+
+
+def print_goal_compiled_intent(result: Any) -> None:
+    print("Compiled Intent:")
+    print(yaml.safe_dump(result.intent.as_dict(), sort_keys=False).rstrip())
+    print(f"Matched Rule: {result.matched_rule_id}")
+    if result.dispatch_workflow_id:
+        print(f"Dispatch Workflow: {result.dispatch_workflow_id}")
+
+
+def enforce_risk_gate(intent: ExecutionIntent, *, approve_risk: bool, risk_override: bool) -> int:
+    if intent.risk_score.approval_gate == "BLOCK" and not risk_override:
+        print(
+            f"Risk gate BLOCK: {intent.workflow_id} scored {intent.risk_score.score:.1f} "
+            f"({intent.final_risk_class.value}). Re-run with --risk-override to proceed.",
+            file=sys.stderr,
+        )
+        return 2
+    if intent.risk_score.approval_gate == "HARD" and not approve_risk:
+        print(
+            f"Risk gate HARD: {intent.workflow_id} scored {intent.risk_score.score:.1f} "
+            f"({intent.final_risk_class.value}). Re-run with --approve-risk to proceed.",
+            file=sys.stderr,
+        )
+        return 2
+    return 0
+
+
+def run_windmill_request(
+    workflow_name: str,
+    payload: dict[str, Any],
+    *,
+    dry_run: bool,
+    explain: bool,
+    no_color: bool,
+    intent: ExecutionIntent | None = None,
+) -> int:
     service_map = load_service_map()
     base_url = windmill_url(service_map)
     token = load_secret_file("windmill_superadmin_secret")
     script_path = workflow_name if "/" in workflow_name else f"f/lv3/{workflow_name}"
     encoded_path = urllib.parse.quote(script_path, safe="")
     url = f"{base_url}/api/w/lv3/jobs/run_wait_result/p/{encoded_path}"
-    payload = json.dumps(parse_kv_pairs(args)).encode("utf-8")
+    encoded_payload = json.dumps(payload).encode("utf-8")
     plan = CommandPlan(
         label=f"run {workflow_name}",
-        route="controller -> Windmill API",
+        route="controller -> budgeted scheduler -> Windmill API",
         command=[
             "curl",
             "-X",
@@ -481,32 +653,180 @@ def run_windmill_workflow(workflow_name: str, args: list[str], *, dry_run: bool,
             "Content-Type: application/json",
             url,
             "--data-binary",
-            payload.decode("utf-8"),
+            encoded_payload.decode("utf-8"),
         ],
     )
     print_plan(plan, no_color=no_color)
     if dry_run or explain:
         return 0
 
-    request = urllib.request.Request(
-        url,
-        data=payload,
-        headers={
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json",
-        },
-        method="POST",
+    scheduler = build_scheduler(
+        base_url=base_url,
+        token=token,
+        workspace="lv3",
+        repo_root=REPO_ROOT,
+    )
+    scheduler_intent = intent or SimpleNamespace(
+        workflow_id=workflow_name,
+        arguments=payload,
+        target_vm=payload.get("target_vm") or payload.get("target"),
     )
     try:
-        with urllib.request.urlopen(request, timeout=30) as response:
-            body = response.read().decode("utf-8")
-    except urllib.error.URLError as exc:
+        result = scheduler.submit(scheduler_intent, requested_by="operator:lv3_cli")
+    except (urllib.error.URLError, RuntimeError) as exc:
         print(f"Windmill API error: {exc}", file=sys.stderr)
         return 1
 
-    if body.strip():
-        print(body)
+    if result.status in {"concurrency_limit", "rollback_depth_exceeded", "budget_exceeded"}:
+        print(
+            f"Scheduler rejected {workflow_name}: {result.status}"
+            + (f" ({result.reason})" if result.reason else ""),
+            file=sys.stderr,
+        )
+        return 1
+    if result.output is not None:
+        if isinstance(result.output, str):
+            print(result.output)
+        else:
+            print(json.dumps(result.output, indent=2, sort_keys=True))
+    if result.status in {"failed", "aborted"}:
+        print(
+            f"Workflow {workflow_name} ended with status {result.status}.",
+            file=sys.stderr,
+        )
+        return 1
     return 0
+
+
+def run_windmill_workflow(
+    workflow_name: str,
+    args: list[str],
+    *,
+    dry_run: bool,
+    explain: bool,
+    no_color: bool,
+    approve_risk: bool = False,
+    risk_override: bool = False,
+) -> int:
+    intent = build_execution_intent(workflow_name, args)
+    maybe_write_compiled_intent_event(intent)
+    print_compiled_intent(intent)
+    if not (dry_run or explain):
+        blocked = enforce_risk_gate(intent, approve_risk=approve_risk, risk_override=risk_override)
+        if blocked:
+            return blocked
+    return run_windmill_request(
+        workflow_name,
+        intent.arguments,
+        dry_run=dry_run,
+        explain=explain,
+        no_color=no_color,
+        intent=intent,
+    )
+
+
+def prompt_for_intent_approval() -> bool:
+    response = input("Approval required. Execute this intent? [y/N]: ").strip().lower()
+    return response in {"y", "yes"}
+
+
+def run_compiled_instruction(
+    instruction: str,
+    args: list[str],
+    *,
+    dry_run: bool,
+    explain: bool,
+    no_color: bool,
+) -> int:
+    compiler = GoalCompiler(REPO_ROOT)
+    ledger = LedgerWriter(
+        file_path=REPO_ROOT / ".local" / "state" / "ledger" / "ledger.events.jsonl",
+        nats_publisher=None,
+    )
+    parsed_args = parse_kv_pairs(args)
+    try:
+        result = compiler.compile(instruction, dispatch_args=parsed_args)
+    except GoalCompilationError as exc:
+        ledger.write(
+            event_type="intent.rejected",
+            actor="operator:lv3-cli",
+            target_kind="instruction",
+            target_id=instruction,
+            metadata={
+                "error_code": exc.code,
+                "error_message": exc.message,
+                "raw_input": exc.raw_input,
+                "details": exc.details,
+            },
+        )
+        print(str(exc), file=sys.stderr)
+        return 2
+
+    print_goal_compiled_intent(result)
+    ledger.write(
+        event_type="intent.compiled",
+        actor="operator:lv3-cli",
+        target_kind=result.intent.target.kind,
+        target_id=result.intent.target.name,
+        actor_intent_id=result.intent.id,
+        after_state=result.intent.as_dict(),
+        metadata={
+            "matched_rule_id": result.matched_rule_id,
+            "normalized_input": result.normalized_input,
+            "dispatch_workflow_id": result.dispatch_workflow_id,
+        },
+    )
+
+    if dry_run or explain:
+        if result.dispatch_workflow_id:
+            return run_windmill_request(
+                result.dispatch_workflow_id,
+                result.dispatch_payload,
+                dry_run=True,
+                explain=explain,
+                no_color=no_color,
+            )
+        return 0
+
+    if result.intent.requires_approval:
+        if not prompt_for_intent_approval():
+            ledger.write(
+                event_type="intent.rejected",
+                actor="operator:lv3-cli",
+                target_kind=result.intent.target.kind,
+                target_id=result.intent.target.name,
+                actor_intent_id=result.intent.id,
+                metadata={"reason": "approval_denied", "dispatch_workflow_id": result.dispatch_workflow_id},
+            )
+            print("Execution cancelled.", file=sys.stderr)
+            return 1
+        ledger.write(
+            event_type="intent.approved",
+            actor="operator:lv3-cli",
+            target_kind=result.intent.target.kind,
+            target_id=result.intent.target.name,
+            actor_intent_id=result.intent.id,
+            after_state=result.intent.as_dict(),
+            metadata={"dispatch_workflow_id": result.dispatch_workflow_id},
+        )
+
+    if result.dispatch_workflow_id is None:
+        print("No workflow route is available for this intent.", file=sys.stderr)
+        return 1
+
+    return run_windmill_request(
+        result.dispatch_workflow_id,
+        result.dispatch_payload,
+        dry_run=False,
+        explain=False,
+        no_color=no_color,
+    )
+
+
+def should_run_direct_workflow(instruction: str) -> bool:
+    normalized = instruction.strip()
+    workflows = load_workflow_catalog()
+    return normalized in workflows or "/" in normalized
 
 
 def open_service_url(service_id: str, environment: str, *, dry_run: bool, explain: bool, no_color: bool) -> int:
@@ -842,6 +1162,87 @@ def logs_command(service_id: str, *, tail: int, since: str, dry_run: bool, expla
     return 0
 
 
+def search_command(query: str, *, collection: str | None, limit: int, rebuild: bool) -> int:
+    client = SearchClient(REPO_ROOT)
+    payload = client.query(query, collection=collection, limit=limit, rebuild=rebuild)
+    if not payload["results"]:
+        print(f"No results for '{query}'.")
+        return 0
+    for result in payload["results"]:
+        print(f"[{result['collection']}] {result['title']}  {result['score']:.2f}  {result.get('url') or '-'}")
+    return 0
+
+
+def agent_state_client(agent_id: str, task_id: str) -> AgentStateClient:
+    return AgentStateClient(agent_id=agent_id, task_id=task_id)
+
+
+def agent_state_show_command(agent_id: str, task_id: str, *, json_output: bool) -> int:
+    entries = agent_state_client(agent_id, task_id).list_entries()
+    if json_output:
+        emit_json(
+            {
+                "agent_id": agent_id,
+                "task_id": task_id,
+                "entries": [
+                    {
+                        "key": entry.key,
+                        "value": entry.value,
+                        "context_id": entry.context_id,
+                        "written_at": entry.written_at.isoformat(),
+                        "expires_at": entry.expires_at.isoformat(),
+                        "version": entry.version,
+                    }
+                    for entry in entries
+                ],
+            }
+        )
+        return 0
+    if not entries:
+        print("No non-expired state entries found.")
+        return 0
+    print(f"{'KEY':<24} {'VALUE':<80} {'WRITTEN_AT':<20} {'EXPIRES_AT':<20} {'VER':>3}")
+    for entry in entries:
+        print(
+            f"{entry.key:<24} "
+            f"{compact_json(entry.value):<80} "
+            f"{entry.written_at.strftime('%Y-%m-%dT%H:%M:%SZ'):<20} "
+            f"{entry.expires_at.strftime('%Y-%m-%dT%H:%M:%SZ'):<20} "
+            f"{entry.version:>3}"
+        )
+    return 0
+
+
+def agent_state_delete_command(agent_id: str, task_id: str, *, key: str) -> int:
+    deleted = agent_state_client(agent_id, task_id).delete(key)
+    if deleted:
+        print(f"Deleted {key} from {agent_id}/{task_id}.")
+        return 0
+    print(f"State key not found: {key}", file=sys.stderr)
+    return 1
+
+
+def agent_state_verify_command(agent_id: str, task_id: str, *, digest: str, json_output: bool) -> int:
+    result = agent_state_client(agent_id, task_id).validate_handoff(digest)
+    if json_output:
+        emit_json(
+            {
+                "agent_id": result.agent_id,
+                "task_id": result.task_id,
+                "expected_digest": result.expected_digest,
+                "actual_digest": result.actual_digest,
+                "matched": result.matched,
+                "key_count": result.key_count,
+            }
+        )
+    else:
+        print(f"Integrity: {'ok' if result.matched else 'mismatch'}")
+        print(f"Expected:  {result.expected_digest}")
+        print(f"Observed:  {result.actual_digest}")
+        print(f"Key count: {result.key_count}")
+    return 0 if result.matched else 1
+
+
 def generate_completion_script(shell_name: str) -> str:
     function_name = "_lv3_completion"
     if shell_name == "bash":
@@ -889,16 +1290,19 @@ def install_completion(shell_name: str) -> int:
 
 def completion_candidates(words: list[str], current: str) -> list[str]:
     top_level = [
+        "agent",
         "deploy",
         "impact",
         "lint",
         "validate",
+        "search",
         "status",
         "vm",
         "secret",
         "fixture",
         "scaffold",
         "diff",
+        "capacity",
         "promote",
         "run",
         "logs",
@@ -934,6 +1338,10 @@ def completion_candidates(words: list[str], current: str) -> list[str]:
         return [action for action in ["get", "rotate"] if action.startswith(current)]
     if words[1] == "operator" and len(words) == 3:
         return [action for action in ["add", "remove", "inventory"] if action.startswith(current)]
+    if words[1] == "agent" and len(words) == 3:
+        return [action for action in ["state"] if action.startswith(current)]
+    if words[1:3] == ["agent", "state"] and len(words) == 4:
+        return [action for action in ["show", "delete", "verify"] if action.startswith(current)]
     if words[1] == "release" and len(words) == 3:
         return [action for action in ["status", "tag"] if action.startswith(current)]
     return []
@@ -975,6 +1383,12 @@ def build_parser() -> argparse.ArgumentParser:
     validate.add_argument("--service")
     validate.add_argument("--dry-run", action="store_true")
     validate.add_argument("--explain", action="store_true")
+
+    search = subparsers.add_parser("search", help="Query the local platform search fabric.")
+    search.add_argument("query")
+    search.add_argument("--collection")
+    search.add_argument("--limit", type=int, default=10)
+    search.add_argument("--rebuild", action="store_true")
 
     status = subparsers.add_parser("status", help="Show service health status.")
     status.add_argument("service", nargs="?")
@@ -1048,6 +1462,12 @@ def build_parser() -> argparse.ArgumentParser:
     diff.add_argument("--dry-run", action="store_true")
     diff.add_argument("--explain", action="store_true")
 
+    capacity = subparsers.add_parser("capacity", help="Render the platform capacity report.")
+    capacity.add_argument("--format", choices=["text", "markdown", "json", "prometheus"], default="text")
+    capacity.add_argument("--no-live-metrics", action="store_true")
+    capacity.add_argument("--dry-run", action="store_true")
+    capacity.add_argument("--explain", action="store_true")
+
     promote = subparsers.add_parser("promote", help="Run the promotion pipeline.")
     promote.add_argument("branch")
     promote.add_argument("--service", required=True)
@@ -1056,9 +1476,11 @@ def build_parser() -> argparse.ArgumentParser:
     promote.add_argument("--dry-run", action="store_true")
     promote.add_argument("--explain", action="store_true")
 
-    run = subparsers.add_parser("run", help="Trigger one Windmill workflow.")
-    run.add_argument("workflow")
+    run = subparsers.add_parser("run", help="Compile and trigger one platform instruction.")
+    run.add_argument("instruction", nargs="+")
     run.add_argument("--args", nargs="*", default=[])
+    run.add_argument("--approve-risk", action="store_true", help="Acknowledge a HIGH risk score and proceed.")
+    run.add_argument("--risk-override", action="store_true", help="Override a BLOCK gate for a CRITICAL risk score.")
     run.add_argument("--dry-run", action="store_true")
     run.add_argument("--explain", action="store_true")
 
@@ -1121,6 +1543,27 @@ def build_parser() -> argparse.ArgumentParser:
     operator_inventory.add_argument("--dry-run", action="store_true")
     operator_inventory.add_argument("--explain", action="store_true")
 
+    agent = subparsers.add_parser("agent", help="Inspect persisted agent scratch state.")
+    agent_subparsers = agent.add_subparsers(dest="agent_action", required=True)
+    agent_state = agent_subparsers.add_parser("state", help="Inspect one persisted agent task namespace.")
+    agent_state_subparsers = agent_state.add_subparsers(dest="agent_state_action", required=True)
+
+    agent_state_show = agent_state_subparsers.add_parser("show", help="Show active keys for one agent/task.")
+    agent_state_show.add_argument("--agent", required=True)
+    agent_state_show.add_argument("--task", required=True)
+    agent_state_show.add_argument("--json", action="store_true")
+
+    agent_state_delete = agent_state_subparsers.add_parser("delete", help="Delete one persisted state key.")
+    agent_state_delete.add_argument("--agent", required=True)
+    agent_state_delete.add_argument("--task", required=True)
+    agent_state_delete.add_argument("--key", required=True)
+
+    agent_state_verify = agent_state_subparsers.add_parser("verify", help="Verify a handoff state digest.")
+    agent_state_verify.add_argument("--agent", required=True)
+    agent_state_verify.add_argument("--task", required=True)
+    agent_state_verify.add_argument("--digest", required=True)
+    agent_state_verify.add_argument("--json", action="store_true")
+
     completion = subparsers.add_parser("__complete")
     completion.add_argument("current", nargs="?", default="")
 
@@ -1159,6 +1602,8 @@ def main(argv: list[str] | None = None) -> int:
             explain=args.explain,
             no_color=no_color,
         )
+    if args.command == "search":
+        return search_command(args.query, collection=args.collection, limit=args.limit, rebuild=args.rebuild)
     if args.command == "status":
         return status_command(args.service, args.env, timeout=args.timeout, no_color=no_color)
     if args.command == "vm":
@@ -1191,6 +1636,13 @@ def main(argv: list[str] | None = None) -> int:
         return run_plan(scaffold_command(args.name), dry_run=args.dry_run, explain=args.explain, no_color=no_color)
     if args.command == "diff":
         return run_plan(resolve_diff_command(args.env), dry_run=args.dry_run, explain=args.explain, no_color=no_color)
+    if args.command == "capacity":
+        return run_plan(
+            resolve_capacity_command(args.format, no_live_metrics=args.no_live_metrics),
+            dry_run=args.dry_run,
+            explain=args.explain,
+            no_color=no_color,
+        )
     if args.command == "promote":
         return run_plan(
             promote_command(args.branch, args.service, args.staging_receipt, args.dry_run),
@@ -1199,7 +1651,24 @@ def main(argv: list[str] | None = None) -> int:
             no_color=no_color,
         )
     if args.command == "run":
-        return run_windmill_workflow(args.workflow, args.args, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
+        instruction = " ".join(args.instruction)
+        if should_run_direct_workflow(instruction):
+            return run_windmill_workflow(
+                instruction,
+                args.args,
+                dry_run=args.dry_run,
+                explain=args.explain,
+                no_color=no_color,
+                approve_risk=args.approve_risk,
+                risk_override=args.risk_override,
+            )
+        return run_compiled_instruction(
+            instruction,
+            args.args,
+            dry_run=args.dry_run,
+            explain=args.explain,
+            no_color=no_color,
+        )
     if args.command == "logs":
         return logs_command(args.service, tail=args.tail, since=args.since, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
     if args.command == "ssh":
@@ -1237,6 +1706,14 @@ def main(argv: list[str] | None = None) -> int:
         if args.dry_run:
             forwarded_args.append("--dry-run")
         return release_manager.main(forwarded_args)
+    if args.command == "agent":
+        if args.agent_action == "state":
+            if args.agent_state_action == "show":
+                return agent_state_show_command(args.agent, args.task, json_output=args.json)
+            if args.agent_state_action == "delete":
+                return agent_state_delete_command(args.agent, args.task, key=args.key)
+            if args.agent_state_action == "verify":
+                return agent_state_verify_command(args.agent, args.task, digest=args.digest, json_output=args.json)
     if args.command == "operator":
         if args.operator_action == "add":
             workflow_args = [

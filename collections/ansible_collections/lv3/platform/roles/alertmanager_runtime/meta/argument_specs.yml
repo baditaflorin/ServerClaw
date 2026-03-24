@@ -1,0 +1,29 @@
+---
+argument_specs:
+  main:
+    short_description: Converge Alertmanager routing and Prometheus rule files on monitoring-lv3.
+    options:
+      alertmanager_runtime_package:
+        type: str
+        required: true
+      alertmanager_runtime_service_name:
+        type: str
+        required: true
+      alertmanager_runtime_config_template:
+        type: path
+        required: true
+      alertmanager_runtime_config_file:
+        type: path
+        required: true
+      alertmanager_runtime_data_dir:
+        type: path
+        required: true
+      alertmanager_runtime_rules_dir:
+        type: path
+        required: true
+      alertmanager_runtime_ntfy_password_local_file:
+        type: path
+        required: true
+      alertmanager_runtime_mattermost_webhook_manifest_local_file:
+        type: path
+        required: true

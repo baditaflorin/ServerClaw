@@ -50,6 +50,27 @@
     group: prometheus
     mode: "0755"
 
+- name: Ensure Prometheus rules directory exists
+  ansible.builtin.file:
+    path: "{{ monitoring_prometheus_rules_dir }}"
+    state: directory
+    owner: root
+    group: prometheus
+    mode: "0755"
+
+- name: Load the health probe catalog for blackbox scrape generation
+  ansible.builtin.set_fact:
+    monitoring_health_probe_catalog: "{{ lookup('ansible.builtin.file', monitoring_health_probe_catalog_path) | from_json }}"
+
+- name: Render blackbox exporter configuration
+  ansible.builtin.template:
+    src: blackbox.yml.j2
+    dest: "{{ monitoring_blackbox_exporter_config_file }}"
+    owner: root
+    group: prometheus
+    mode: "0640"
+  notify: Restart Blackbox Exporter
+
 - name: Render Prometheus configuration
   ansible.builtin.template:
     src: prometheus.yml.j2
@@ -99,6 +120,12 @@
     state: started
     daemon_reload: true
 
+- name: Enable and start the blackbox exporter
+  ansible.builtin.systemd:
+    name: "{{ monitoring_blackbox_exporter_service_name }}"
+    enabled: true
+    state: started
+
 - name: Enable and start Tempo
   ansible.builtin.systemd:
     name: tempo
@@ -123,6 +150,16 @@
   retries: 20
   delay: 3
   until: monitoring_prometheus_ready.status == 200
+
+- name: Wait for blackbox exporter readiness
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ monitoring_blackbox_exporter_port }}/-/healthy"
+    method: GET
+    status_code: 200
+  register: monitoring_blackbox_exporter_ready
+  retries: 20
+  delay: 3
+  until: monitoring_blackbox_exporter_ready.status == 200
 
 - name: Wait for Tempo readiness
   ansible.builtin.uri:

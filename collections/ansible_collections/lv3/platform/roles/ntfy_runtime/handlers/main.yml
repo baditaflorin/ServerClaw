@@ -1,0 +1,14 @@
+---
+- name: Restart ntfy stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ ntfy_runtime_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ ntfy_runtime_site_dir }}"
+  changed_when: true

@@ -46,7 +46,7 @@ uvx --from pre-commit pre-commit run --all-files
 
 The authoritative gate manifest is [config/validation-gate.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/validation-gate.json).
 
-It defines these nine blocking checks:
+It defines these blocking checks:
 
 - `ansible-lint`
 - `yaml-lint`
@@ -57,11 +57,14 @@ It defines these nine blocking checks:
 - `tofu-validate`
 - `packer-validate`
 - `security-scan`
+- `artifact-secret-scan`
 - `service-completeness`
 
 `scripts/run_gate.py` reads that manifest and executes the checks in parallel via [scripts/parallel_check.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/parallel_check.py).
 
 The `integration-tests` stage runs [scripts/integration_suite.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/integration_suite.py) in `gate` mode against the `staging` environment. If the service catalog does not currently expose any active staging endpoints and no `LV3_INTEGRATION_*` overrides are supplied, the check records a structured skip and exits successfully instead of failing the gate.
+
+The `artifact-secret-scan` stage runs [scripts/published_artifact_secret_scan.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/published_artifact_secret_scan.py) in the security runner image so published receipts and generated portal/search artifacts are checked with `gitleaks` before merge.
 
 ## Bypass Model
 

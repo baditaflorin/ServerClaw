@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
+from capacity_report import check_capacity_gate, load_capacity_model
 from command_catalog import evaluate_approval, load_command_catalog, validate_command_catalog
 from controller_automation_toolkit import (
     REPO_ROOT,
@@ -305,6 +306,10 @@ def check_promotion_gate(
     if blocking_findings:
         reasons.append(f"open critical findings exist for service '{service_id}'")
 
+    capacity_model = load_capacity_model()
+    capacity_approved, capacity_reasons = check_capacity_gate(capacity_model)
+    reasons.extend(capacity_reasons)
+
     slo_gate = evaluate_slo_gate()
     if not slo_gate["checked"]:
         reasons.append(f"SLO gate could not evaluate: {slo_gate['reason']}")
@@ -324,6 +329,10 @@ def check_promotion_gate(
         "staging_health_check": stage_health,
         "approval": approval,
         "blocking_findings": blocking_findings,
+        "capacity_gate": {
+            "approved": capacity_approved,
+            "reasons": capacity_reasons,
+        },
         "slo_gate": slo_gate,
         "gate_decision": "approved" if not reasons else "rejected",
         "reasons": reasons,

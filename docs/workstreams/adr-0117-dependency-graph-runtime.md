@@ -2,13 +2,13 @@
 
 - ADR: [ADR 0117](../adr/0117-service-dependency-graph-runtime.md)
 - Title: Persist a machine-usable DAG of service/host/network/cert dependencies in Postgres; expose traversal API for blast-radius, health propagation, and incident correlation used by triage and risk scoring
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0117-dependency-graph`
 - Worktree: `../proxmox_florin_server-dependency-graph`
 - Owner: codex
 - Depends On: `adr-0048-command-catalog`, `adr-0054-netbox-topology`, `adr-0058-nats-event-bus`, `adr-0075-service-capability-catalog`, `adr-0092-platform-api-gateway`, `adr-0098-postgres-ha`, `adr-0113-world-state-materializer`
 - Conflicts With: `adr-0113-world-state-materializer` (both read from NetBox; coordinate on refresh timing to avoid stampede)
-- Shared Surfaces: `platform/graph/`, `graph.nodes` and `graph.edges` Postgres schema, `config/dependency-graph.yaml`, `/v1/graph/*` API gateway endpoints
+- Shared Surfaces: `platform/graph/`, `graph.nodes` and `graph.edges` Postgres schema, `config/dependency-graph.yaml`, `config/windmill/scripts/graph/`, `/v1/graph/*` API gateway endpoints
 
 ## Scope
 
@@ -16,9 +16,9 @@
 - create `config/dependency-graph.yaml` — initial manual edge declarations for all platform services (netbox→postgres, keycloak→postgres, windmill→postgres, mattermost→postgres, grafana→loki, grafana→prometheus, all services→step-ca, all services→docker-runtime-lv3)
 - create `platform/graph/__init__.py`
 - create `platform/graph/client.py` — `DependencyGraphClient` with `descendants()`, `ancestors()`, `path()`, `neighbourhood()`, `health_propagation()` methods using recursive CTEs
-- create `windmill/graph/import-from-netbox.py` — Windmill workflow: imports device→rack, IP, VLAN edges from NetBox world-state snapshot
-- create `windmill/graph/import-from-catalog.py` — Windmill workflow: imports `depends_on` edges from `config/workflow-catalog.json`
-- create `windmill/graph/propagate-health.py` — Windmill workflow subscribed to `world_state.refreshed` on `service_health` surface; runs health propagation and emits `derived_health_degraded` NATS events
+- create `config/windmill/scripts/graph/import-from-netbox.py` — Windmill workflow: imports device→rack, IP, VLAN edges from NetBox world-state snapshot
+- create `config/windmill/scripts/graph/import-from-catalog.py` — Windmill workflow: imports `depends_on` edges from `config/workflow-catalog.json`
+- create `config/windmill/scripts/graph/propagate-health.py` — Windmill workflow subscribed to `world_state.refreshed` on `service_health` surface; runs health propagation and emits `derived_health_degraded` NATS events
 - register `/v1/graph/*` routes on the platform API gateway (ADR 0092): `GET /v1/graph/nodes`, `GET /v1/graph/nodes/{id}/descendants`, `GET /v1/graph/nodes/{id}/ancestors`, `GET /v1/graph/nodes/{id}/health`, `GET /v1/graph/path`
 - write `tests/unit/test_graph_client.py` — test recursive traversal, cycle detection, empty graph, single-node graph
 
@@ -34,9 +34,9 @@
 - `config/dependency-graph.yaml`
 - `platform/graph/__init__.py`
 - `platform/graph/client.py`
-- `windmill/graph/import-from-netbox.py`
-- `windmill/graph/import-from-catalog.py`
-- `windmill/graph/propagate-health.py`
+- `config/windmill/scripts/graph/import-from-netbox.py`
+- `config/windmill/scripts/graph/import-from-catalog.py`
+- `config/windmill/scripts/graph/propagate-health.py`
 - `docs/adr/0117-service-dependency-graph-runtime.md`
 - `docs/workstreams/adr-0117-dependency-graph-runtime.md`
 

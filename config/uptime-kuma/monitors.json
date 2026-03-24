@@ -1,16 +1,5 @@
 [
   {
-    "name": "Uptime Kuma Public",
-    "type": "http",
-    "url": "https://uptime.lv3.org",
-    "description": "Public Uptime Kuma entrypoint through the NGINX edge.",
-    "interval": 60,
-    "retryInterval": 60,
-    "maxretries": 0,
-    "maxredirects": 10,
-    "accepted_statuscodes": ["200-399"]
-  },
-  {
     "name": "NGINX Edge Public",
     "type": "http",
     "url": "https://nginx.lv3.org",
@@ -19,7 +8,9 @@
     "retryInterval": 60,
     "maxretries": 0,
     "maxredirects": 10,
-    "accepted_statuscodes": ["200-399"]
+    "accepted_statuscodes": [
+      "200-399"
+    ]
   },
   {
     "name": "Grafana Public",
@@ -30,7 +21,9 @@
     "retryInterval": 60,
     "maxretries": 0,
     "maxredirects": 10,
-    "accepted_statuscodes": ["200-399"]
+    "accepted_statuscodes": [
+      "200-399"
+    ]
   },
   {
     "name": "Keycloak OIDC Discovery",
@@ -41,7 +34,22 @@
     "retryInterval": 60,
     "maxretries": 0,
     "maxredirects": 5,
-    "accepted_statuscodes": ["200-299"]
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
+    "name": "Platform API Gateway Public",
+    "type": "http",
+    "url": "https://api.lv3.org/healthz",
+    "description": "Public edge entrypoint for the unified LV3 API gateway.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 5,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
   },
   {
     "name": "Ops Portal Public",
@@ -52,7 +60,9 @@
     "retryInterval": 60,
     "maxretries": 0,
     "maxredirects": 5,
-    "accepted_statuscodes": ["200-299"]
+    "accepted_statuscodes": [
+      "200-299"
+    ]
   },
   {
     "name": "Proxmox UI Port",
@@ -63,7 +73,9 @@
     "interval": 60,
     "retryInterval": 60,
     "maxretries": 0,
-    "accepted_statuscodes": ["200-299"]
+    "accepted_statuscodes": [
+      "200-299"
+    ]
   },
   {
     "name": "Docker Build SSH",
@@ -74,29 +86,35 @@
     "interval": 60,
     "retryInterval": 60,
     "maxretries": 0,
-    "accepted_statuscodes": ["200-299"]
+    "accepted_statuscodes": [
+      "200-299"
+    ]
   },
   {
-    "name": "PostgreSQL VIP Port",
-    "type": "port",
-    "hostname": "10.10.10.55",
-    "port": 5432,
-    "description": "Private PostgreSQL VIP listener managed by Patroni and keepalived.",
+    "name": "Uptime Kuma Public",
+    "type": "http",
+    "url": "https://uptime.lv3.org",
+    "description": "Public Uptime Kuma entrypoint through the NGINX edge.",
     "interval": 60,
     "retryInterval": 60,
     "maxretries": 0,
-    "accepted_statuscodes": ["200-299"]
+    "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-399"
+    ]
   },
   {
-    "name": "Backup PBS Port",
-    "type": "port",
-    "hostname": "10.10.10.60",
-    "port": 8007,
-    "description": "Private PBS listener on backup-lv3.",
+    "name": "Mail Platform Gateway Private",
+    "type": "http",
+    "url": "http://10.10.10.20:8081/healthz",
+    "description": "Private mail gateway health endpoint on docker-runtime-lv3.",
     "interval": 60,
     "retryInterval": 60,
     "maxretries": 0,
-    "accepted_statuscodes": ["200-299"]
+    "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
   },
   {
     "name": "Step CA Private",
@@ -107,7 +125,9 @@
     "retryInterval": 60,
     "maxretries": 0,
     "maxredirects": 10,
-    "accepted_statuscodes": ["200-299"],
+    "accepted_statuscodes": [
+      "200-299"
+    ],
     "ignoreTls": true
   },
   {
@@ -119,7 +139,9 @@
     "retryInterval": 60,
     "maxretries": 0,
     "maxredirects": 10,
-    "accepted_statuscodes": ["200-299"]
+    "accepted_statuscodes": [
+      "200-299"
+    ]
   },
   {
     "name": "Mattermost Private",
@@ -130,7 +152,9 @@
     "retryInterval": 60,
     "maxretries": 0,
     "maxredirects": 10,
-    "accepted_statuscodes": ["200-299"]
+    "accepted_statuscodes": [
+      "200-299"
+    ]
   },
   {
     "name": "NetBox Private",
@@ -141,7 +165,9 @@
     "retryInterval": 60,
     "maxretries": 0,
     "maxredirects": 10,
-    "accepted_statuscodes": ["200-299"]
+    "accepted_statuscodes": [
+      "200-299"
+    ]
   },
   {
     "name": "Open WebUI Private",
@@ -152,7 +178,9 @@
     "retryInterval": 60,
     "maxretries": 0,
     "maxredirects": 10,
-    "accepted_statuscodes": ["200-299"]
+    "accepted_statuscodes": [
+      "200-299"
+    ]
   },
   {
     "name": "Platform Context Private",
@@ -163,29 +191,9 @@
     "retryInterval": 60,
     "maxretries": 0,
     "maxredirects": 10,
-    "accepted_statuscodes": ["200-299"]
-  },
-  {
-    "name": "Mail Platform Gateway Private",
-    "type": "http",
-    "url": "http://10.10.10.20:8081/healthz",
-    "description": "Private mail gateway health endpoint on docker-runtime-lv3.",
-    "interval": 60,
-    "retryInterval": 60,
-    "maxretries": 0,
-    "maxredirects": 10,
-    "accepted_statuscodes": ["200-299"]
-  },
-  {
-    "name": "Platform API Gateway Public",
-    "type": "http",
-    "url": "https://api.lv3.org/healthz",
-    "description": "Public edge entrypoint for the unified LV3 API gateway.",
-    "interval": 60,
-    "retryInterval": 60,
-    "maxretries": 0,
-    "maxredirects": 5,
-    "accepted_statuscodes": ["200-299"]
+    "accepted_statuscodes": [
+      "200-299"
+    ]
   },
   {
     "name": "Portainer Private",
@@ -196,7 +204,35 @@
     "retryInterval": 60,
     "maxretries": 0,
     "maxredirects": 10,
-    "accepted_statuscodes": ["200-299"],
+    "accepted_statuscodes": [
+      "200-299"
+    ],
     "ignoreTls": true
+  },
+  {
+    "name": "PostgreSQL VIP Port",
+    "type": "port",
+    "hostname": "10.10.10.55",
+    "port": 5432,
+    "description": "Private PostgreSQL VIP listener managed by Patroni and keepalived.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
+    "name": "Backup PBS Port",
+    "type": "port",
+    "hostname": "10.10.10.60",
+    "port": 8007,
+    "description": "Private PBS listener on backup-lv3.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
   }
 ]

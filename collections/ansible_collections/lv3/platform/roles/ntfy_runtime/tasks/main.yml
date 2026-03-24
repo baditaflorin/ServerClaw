@@ -1,0 +1,173 @@
+---
+- name: Validate ntfy runtime inputs
+  ansible.builtin.assert:
+    that:
+      - ntfy_runtime_image | length > 0
+      - ntfy_runtime_container_name | length > 0
+      - ntfy_runtime_site_dir | length > 0
+      - ntfy_runtime_data_dir | length > 0
+      - ntfy_runtime_compose_file | length > 0
+      - ntfy_runtime_config_template | length > 0
+      - ntfy_runtime_password_local_file | length > 0
+      - ntfy_runtime_username | length > 0
+      - ntfy_runtime_port | int > 0
+    fail_msg: "ntfy_runtime requires image, compose, config, and password inputs."
+
+- name: Ensure python bcrypt support is present
+  ansible.builtin.apt:
+    name:
+      - openssl
+      - python3-bcrypt
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure controller-local ntfy artifact directory exists
+  ansible.builtin.file:
+    path: "{{ ntfy_runtime_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Ensure controller-local ntfy password exists
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ ntfy_runtime_password_local_file }}" ]; then
+      umask 077
+      openssl rand -base64 24 > "{{ ntfy_runtime_password_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: ntfy_runtime_password_generation
+  changed_when: "'changed' in ntfy_runtime_password_generation.stdout"
+  no_log: true
+
+- name: Read controller-local ntfy password
+  ansible.builtin.slurp:
+    src: "{{ ntfy_runtime_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: ntfy_runtime_password_raw
+  no_log: true
+
+- name: Record ntfy password fact
+  ansible.builtin.set_fact:
+    ntfy_runtime_password: "{{ ntfy_runtime_password_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Ensure ntfy directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - "{{ ntfy_runtime_site_dir }}"
+    - "{{ ntfy_runtime_data_dir }}"
+    - "{{ ntfy_runtime_attachment_dir }}"
+
+- name: Generate ntfy password hash
+  ansible.builtin.command:
+    argv:
+      - python3
+      - -c
+      - |
+        import bcrypt, os, pathlib
+        password = os.environ["NTFY_RUNTIME_PASSWORD"].encode()
+        output = pathlib.Path("{{ ntfy_runtime_password_hash_remote_file }}")
+        if output.exists():
+            existing = output.read_text(encoding="utf-8").strip().encode()
+            if bcrypt.checkpw(password, existing):
+                print("unchanged")
+                raise SystemExit(0)
+        output.write_text(bcrypt.hashpw(password, bcrypt.gensalt()).decode() + "\n", encoding="utf-8")
+        print("changed")
+  environment:
+    NTFY_RUNTIME_PASSWORD: "{{ ntfy_runtime_password }}"
+  register: ntfy_runtime_password_hash_generation
+  changed_when: "'changed' in ntfy_runtime_password_hash_generation.stdout"
+  no_log: true
+
+- name: Read ntfy password hash
+  ansible.builtin.slurp:
+    src: "{{ ntfy_runtime_password_hash_remote_file }}"
+  register: ntfy_runtime_password_hash_raw
+  no_log: true
+
+- name: Record ntfy password hash fact
+  ansible.builtin.set_fact:
+    ntfy_runtime_password_hash: "{{ ntfy_runtime_password_hash_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Render ntfy server config
+  ansible.builtin.template:
+    src: "{{ ntfy_runtime_config_template }}"
+    dest: "{{ ntfy_runtime_config_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  no_log: true
+
+- name: Render ntfy compose file
+  ansible.builtin.copy:
+    dest: "{{ ntfy_runtime_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      services:
+        ntfy:
+          image: {{ ntfy_runtime_image }}
+          container_name: {{ ntfy_runtime_container_name }}
+          restart: unless-stopped
+          command:
+            - serve
+            - --config
+            - /etc/ntfy/server.yml
+          ports:
+            - "{{ ntfy_runtime_port }}:{{ ntfy_runtime_port }}"
+          volumes:
+            - {{ ntfy_runtime_config_file }}:/etc/ntfy/server.yml:ro
+            - {{ ntfy_runtime_data_dir }}:{{ ntfy_runtime_data_dir }}
+
+- name: Pull the ntfy image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ ntfy_runtime_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ ntfy_runtime_site_dir }}"
+  register: ntfy_runtime_pull
+  changed_when: >-
+    'Pulling' in ntfy_runtime_pull.stdout
+    or 'Downloaded newer image' in ntfy_runtime_pull.stdout
+    or 'Pull complete' in ntfy_runtime_pull.stdout
+
+- name: Start the ntfy stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ ntfy_runtime_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ ntfy_runtime_site_dir }}"
+  register: ntfy_runtime_up
+  changed_when: >-
+    'Creating' in ntfy_runtime_up.stdout
+    or 'Recreating' in ntfy_runtime_up.stdout
+    or 'Starting' in ntfy_runtime_up.stdout
+
+- name: Verify ntfy runtime health probes
+  ansible.builtin.import_tasks: verify.yml

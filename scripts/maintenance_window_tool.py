@@ -10,6 +10,8 @@ import subprocess
 import sys
 import time
 import uuid
+import urllib.error
+import urllib.request
 from contextlib import contextmanager
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -30,6 +32,7 @@ MAINTENANCE_BUCKET = "maintenance-windows"
 MAINTENANCE_BUCKET_MAX_AGE_SECONDS = 2 * 60 * 60
 MAINTENANCE_KEY_PREFIX = "maintenance/"
 MAINTENANCE_STATE_FILE_ENV = "LV3_MAINTENANCE_WINDOWS_FILE"
+MAINTENANCE_ALERTMANAGER_SILENCES_ENV = "LV3_ENABLE_ALERTMANAGER_SILENCES"
 
 DEFAULT_OPENED_BY_CLASS = "operator"
 DEFAULT_OPENED_BY_ID = "ops-linux"
@@ -202,6 +205,32 @@ def nats_tunnel(context: dict[str, Any]) -> int:
                 process.wait(timeout=3)
 
 
+@contextmanager
+def alertmanager_tunnel(context: dict[str, Any]) -> int:
+    local_port = reserve_local_port()
+    command = build_guest_ssh_command(
+        context,
+        "monitoring-lv3",
+        "-N",
+        "-L",
+        f"127.0.0.1:{local_port}:127.0.0.1:9093",
+        "-o",
+        "ExitOnForwardFailure=yes",
+    )
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    try:
+        wait_for_tunnel(process, local_port)
+        yield local_port
+    finally:
+        if process.poll() is None:
+            process.terminate()
+            try:
+                process.wait(timeout=3)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait(timeout=3)
+
+
 def maintenance_key(service_id: str) -> str:
     return f"{MAINTENANCE_KEY_PREFIX}{service_id}"
 
@@ -244,6 +273,9 @@ def validate_maintenance_window(window: dict[str, Any], path: str = "maintenance
     correlation_id = window.get("correlation_id")
     if correlation_id is not None:
         require_string(correlation_id, f"{path}.correlation_id")
+    alertmanager_silence_id = window.get("alertmanager_silence_id")
+    if alertmanager_silence_id is not None:
+        require_string(alertmanager_silence_id, f"{path}.alertmanager_silence_id")
     return window
 
 
@@ -613,6 +645,68 @@ def sync_status_page_maintenance(window: dict[str, Any], *, remove: bool) -> dic
         client.disconnect()
 
 
+def alertmanager_silence_enabled() -> bool:
+    return os.environ.get(MAINTENANCE_ALERTMANAGER_SILENCES_ENV, "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+    }
+
+
+def build_alertmanager_silence(window: dict[str, Any]) -> dict[str, Any]:
+    service_id = window["service_id"]
+    matcher = (
+        {"name": "service", "value": ".+", "isRegex": True}
+        if service_id == "all"
+        else {"name": "service", "value": service_id, "isRegex": False}
+    )
+    return {
+        "matchers": [matcher],
+        "startsAt": window["opened_at"],
+        "endsAt": window["auto_close_at"],
+        "createdBy": window["opened_by"]["id"],
+        "comment": f"Maintenance window: {window['reason']}",
+    }
+
+
+def create_alertmanager_silence(window: dict[str, Any], context: dict[str, Any] | None = None) -> str | None:
+    if state_file_path() is not None and not alertmanager_silence_enabled():
+        return None
+    context = context or load_controller_context()
+    payload = json.dumps(build_alertmanager_silence(window)).encode()
+    with alertmanager_tunnel(context) as local_port:
+        request = urllib.request.Request(
+            f"http://127.0.0.1:{local_port}/api/v2/silences",
+            data=payload,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(request, timeout=10) as response:
+            result = json.loads(response.read().decode())
+    silence_id = result.get("silenceID") or result.get("silenceId")
+    if not silence_id:
+        raise RuntimeError("Alertmanager did not return a silence id")
+    return str(silence_id)
+
+
+def delete_alertmanager_silence(silence_id: str, context: dict[str, Any] | None = None) -> None:
+    if state_file_path() is not None and not alertmanager_silence_enabled():
+        return
+    context = context or load_controller_context()
+    with alertmanager_tunnel(context) as local_port:
+        request = urllib.request.Request(
+            f"http://127.0.0.1:{local_port}/api/v2/silence/{silence_id}",
+            method="DELETE",
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=10):
+                return
+        except urllib.error.HTTPError as exc:
+            if exc.code == 404:
+                return
+            raise
+
+
 def list_active_windows(context: dict[str, Any] | None = None) -> dict[str, dict[str, Any]]:
     if state_file_path() is not None:
         return load_local_state()
@@ -652,6 +746,11 @@ def open_window(
         opened_by_id=opened_by_id,
         correlation_id=correlation_id,
     )
+    if state_file_path() is None or alertmanager_silence_enabled():
+        context = context or load_controller_context()
+        silence_id = create_alertmanager_silence(window, context)
+        if silence_id:
+            window["alertmanager_silence_id"] = silence_id
 
     if state_file_path() is not None:
         state = load_local_state()
@@ -708,6 +807,11 @@ def close_window(
                 )
             )
 
+    windows_with_silences = [window for window in result.get("windows", []) if window.get("alertmanager_silence_id")]
+    if windows_with_silences and (state_file_path() is None or alertmanager_silence_enabled()):
+        context = context or load_controller_context()
+        for window in windows_with_silences:
+            delete_alertmanager_silence(window["alertmanager_silence_id"], context)
     if result.get("windows"):
         result["uptime_kuma_status_page"] = [
             sync_status_page_maintenance(window, remove=True) for window in result["windows"]

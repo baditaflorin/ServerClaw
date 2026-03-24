@@ -1,0 +1,72 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  group_by:
+    - alertname
+    - service
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  receiver: mattermost-warning
+  routes:
+    - matchers:
+        - severity="critical"
+      receiver: ntfy-critical
+      continue: true
+    - matchers:
+        - severity="critical"
+      receiver: mattermost-critical
+    - matchers:
+        - severity="info"
+      receiver: mattermost-info
+
+receivers:
+  - name: ntfy-critical
+    webhook_configs:
+      - url: "{{ alertmanager_runtime_ntfy_publish_url }}?title=LV3%20critical%20alert&priority=5&tags=warning%2Crotating_light"
+        send_resolved: true
+        http_config:
+          basic_auth:
+            username: "{{ alertmanager_runtime_ntfy_username }}"
+            password_file: "{{ alertmanager_runtime_ntfy_password_file }}"
+
+  - name: mattermost-critical
+    slack_configs:
+      - api_url: "{{ alertmanager_runtime_mattermost_critical_webhook_url }}"
+        send_resolved: true
+        channel: "#platform-alerts-critical"
+        title: "[{{ '{{' }} .Status | toUpper {{ '}}' }}] {{ '{{' }} .CommonLabels.alertname {{ '}}' }}"
+        text: >-
+          {{ '{{' }} range .Alerts {{ '}}' }}
+          *Service:* {{ '{{' }} .Labels.service {{ '}}' }}
+          *Summary:* {{ '{{' }} .Annotations.summary {{ '}}' }}
+          *Runbook:* {{ '{{' }} .Annotations.runbook_url {{ '}}' }}
+          {{ '{{' }} if .Annotations.dashboard_url {{ '}}' }}*Dashboard:* {{ '{{' }} .Annotations.dashboard_url {{ '}}' }}{{ '{{' }} end {{ '}}' }}
+          {{ '{{' }} end {{ '}}' }}
+
+  - name: mattermost-warning
+    slack_configs:
+      - api_url: "{{ alertmanager_runtime_mattermost_warning_webhook_url }}"
+        send_resolved: true
+        channel: "#platform-alerts"
+        title: "[{{ '{{' }} .Status | toUpper {{ '}}' }}] {{ '{{' }} .CommonLabels.alertname {{ '}}' }}"
+        text: >-
+          {{ '{{' }} range .Alerts {{ '}}' }}
+          *Service:* {{ '{{' }} .Labels.service {{ '}}' }}
+          *Summary:* {{ '{{' }} .Annotations.summary {{ '}}' }}
+          *Runbook:* {{ '{{' }} .Annotations.runbook_url {{ '}}' }}
+          {{ '{{' }} if .Annotations.dashboard_url {{ '}}' }}*Dashboard:* {{ '{{' }} .Annotations.dashboard_url {{ '}}' }}{{ '{{' }} end {{ '}}' }}
+          {{ '{{' }} end {{ '}}' }}
+
+  - name: mattermost-info
+    slack_configs:
+      - api_url: "{{ alertmanager_runtime_mattermost_info_webhook_url }}"
+        send_resolved: false
+        channel: "#platform-ops"
+        title: "{{ '{{' }} .CommonLabels.alertname {{ '}}' }}"
+        text: >-
+          {{ '{{' }} range .Alerts {{ '}}' }}
+          *Service:* {{ '{{' }} .Labels.service {{ '}}' }}
+          *Summary:* {{ '{{' }} .Annotations.summary {{ '}}' }}
+          {{ '{{' }} end {{ '}}' }}

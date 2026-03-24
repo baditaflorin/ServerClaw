@@ -85,6 +85,11 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertIn("site.root_proxy_path is defined", self.template)
         self.assertIn("location = / {", self.template)
 
+    def test_template_supports_proxy_header_stripping_and_blocked_paths(self) -> None:
+        self.assertIn("site.proxy_hide_headers | default([])", self.template)
+        self.assertIn("site.blocked_exact_paths | default([])", self.template)
+        self.assertIn("proxy_hide_header {{ header_name }};", self.template)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -74,8 +74,35 @@ argument_specs:
         required: true
         description:
           - Repo-managed scripts that should be present in the workspace after convergence.
+      windmill_seed_raw_apps:
+        type: list
+        elements: dict
+        required: false
+        description:
+          - Repo-managed raw apps that should be pushed into the workspace after the script seed sync.
       windmill_private_base_url:
         type: str
         required: false
         description:
           - Guest-local base URL used for bootstrap verification.
+      windmill_worker_checkout_repo_root_local_dir:
+        type: path
+        required: false
+        description:
+          - Controller-local repository root used to stage the worker checkout content.
+      windmill_worker_repo_checkout_host_path:
+        type: path
+        required: false
+        description:
+          - Host path that should contain the repo-backed worker checkout.
+      windmill_worker_repo_checkout_container_path:
+        type: path
+        required: false
+        description:
+          - Container path where the worker checkout is bind-mounted for Windmill jobs.
+      windmill_worker_checkout_sync_paths:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Repo paths copied from the controller checkout onto the Windmill worker host before runtime startup.

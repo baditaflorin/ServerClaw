@@ -20,6 +20,7 @@ The current implementation covers:
 - NATS KV-backed maintenance-window state in the `maintenance-windows` bucket
 - governed `make open-maintenance-window` and `make close-maintenance-window` command surfaces
 - observation-loop suppression for non-security findings
+- Alertmanager silence creation and deletion for live maintenance windows under ADR 0097
 - internal NATS events on `maintenance.opened`, `maintenance.closed`, and `maintenance.force_closed`
 - an agent-tool query surface for active windows
 - best-effort publication of matching maintenances into the Uptime Kuma public status page
@@ -44,6 +45,7 @@ The command:
 - ensures the `maintenance-windows` KV bucket exists
 - writes `maintenance/<service-id>` with the ADR 0080 JSON payload
 - sets per-message TTL so the key expires at `auto_close_at`
+- creates an Alertmanager silence for the matching `service` label when live API access is enabled
 - emits `maintenance.opened` on the internal NATS event plane
 - attempts to create or update a matching Uptime Kuma maintenance bound to the public status page
 
@@ -61,7 +63,7 @@ Force-close every active window:
 make close-maintenance-window SERVICE=all FORCE=true
 ```
 
-The close command deletes the active KV entry, emits either `maintenance.closed` or `maintenance.force_closed`, and attempts to remove the matching Uptime Kuma maintenance entry.
+The close command deletes the active KV entry, removes any stored Alertmanager silence, emits either `maintenance.closed` or `maintenance.force_closed`, and attempts to remove the matching Uptime Kuma maintenance entry.
 
 ## Query Active Windows
 
@@ -95,6 +97,10 @@ Suppressed findings now carry:
 - `suppressed: true`
 - `maintenance_windows`
 
+Opened windows may also carry:
+
+- `alertmanager_silence_id`
+
 ## Windmill Usage
 
 The shared Windmill wrapper is:
@@ -127,10 +133,11 @@ Live verification:
 
 1. `make open-maintenance-window SERVICE=grafana REASON="test" DURATION_MINUTES=2`
 2. `uv run --with pyyaml --with nats-py python scripts/maintenance_window_tool.py list`
-3. `uvx --from pyyaml python scripts/platform_observation_tool.py --checks check-service-health`
-4. `make uptime-kuma-manage ACTION=list-maintenances`
-5. Confirm any grafana-only service-health failure is written as `suppressed`, is not routed to Mattermost, and the Uptime Kuma maintenance exists with the expected title.
-6. `make close-maintenance-window SERVICE=grafana`
+3. Confirm the returned window payload includes `alertmanager_silence_id` when running against the live Alertmanager API.
+4. `uvx --from pyyaml python scripts/platform_observation_tool.py --checks check-service-health`
+5. `make uptime-kuma-manage ACTION=list-maintenances`
+6. Confirm any grafana-only service-health failure is written as `suppressed`, is not routed to Mattermost, the Uptime Kuma maintenance exists with the expected title, and the Alertmanager silence is visible.
+7. `make close-maintenance-window SERVICE=grafana`
 
 ## Test Harness Override
 
@@ -141,3 +148,9 @@ export LV3_MAINTENANCE_WINDOWS_FILE=/tmp/maintenance-windows.json
 ```
 
 When this variable is set, the controller script uses the local JSON file instead of the live NATS KV bucket.
+
+If you want local-state tests to exercise Alertmanager silences as well, also set:
+
+```bash
+export LV3_ENABLE_ALERTMANAGER_SILENCES=true
+```

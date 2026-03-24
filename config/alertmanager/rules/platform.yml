@@ -6,17 +6,106 @@ groups:
         for: 15m
         labels:
           severity: warning
-          runbook_url: docs/runbooks/cert-expired.md
+          service: certificate_lifecycle
         annotations:
           summary: TLS certificate enters the warning renewal window
           description: One or more tracked certificates have fewer than 21 days remaining.
+          runbook_url: https://docs.lv3.org/runbooks/cert-expired/
 
       - alert: LV3CertificateExpiryCritical
         expr: lv3_certificate_days_remaining < 14
         for: 15m
         labels:
           severity: critical
-          runbook_url: docs/runbooks/cert-expired.md
+          service: certificate_lifecycle
         annotations:
           summary: TLS certificate enters the critical expiry window
           description: One or more tracked certificates have fewer than 14 days remaining or renewal automation has stalled.
+          runbook_url: https://docs.lv3.org/runbooks/cert-expired/
+
+  - name: platform_core_alerts
+    rules:
+      - alert: KeycloakDown
+        expr: probe_success{service="keycloak",probe_kind="readiness"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: keycloak
+        annotations:
+          summary: Keycloak OIDC discovery is unreachable.
+          description: The Keycloak readiness probe has been failing for at least two minutes.
+          runbook_url: https://docs.lv3.org/runbooks/keycloak-down/
+          dashboard_url: https://grafana.lv3.org/d/lv3-platform-overview/lv3-platform-overview
+
+      - alert: PostgresDown
+        expr: probe_success{service="postgres",probe_kind="readiness"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: postgres
+        annotations:
+          summary: PostgreSQL is unreachable on the private service port.
+          description: The PostgreSQL TCP readiness probe has been failing for at least two minutes.
+          runbook_url: https://docs.lv3.org/runbooks/postgres-down/
+          dashboard_url: https://grafana.lv3.org/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3
+
+      - alert: OpenBaoSealed
+        expr: probe_success{service="openbao",probe_kind="readiness"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: openbao
+        annotations:
+          summary: OpenBao is sealed or otherwise unavailable on the mTLS endpoint.
+          description: The OpenBao readiness probe has been failing for at least two minutes.
+          runbook_url: https://docs.lv3.org/runbooks/openbao-sealed/
+          dashboard_url: https://grafana.lv3.org/d/lv3-vm-docker-runtime-lv3/lv3-vm-docker-runtime-lv3
+
+      - alert: CertificateExpiringSoon
+        expr: |
+          (probe_ssl_earliest_cert_expiry{service=~"grafana|keycloak|mail_platform|portainer|step_ca|uptime_kuma"} - time())
+          < (14 * 24 * 60 * 60)
+        for: 15m
+        labels:
+          severity: warning
+          service: '{{ $labels.service }}'
+        annotations:
+          summary: 'The {{ $labels.service }} certificate expires within 14 days.'
+          description: 'The earliest observed TLS certificate for {{ $labels.service }} is approaching expiry.'
+          runbook_url: https://docs.lv3.org/runbooks/cert-expired/
+          dashboard_url: https://grafana.lv3.org/d/lv3-platform-overview/lv3-platform-overview
+
+  - name: lv3-platform-capacity
+    rules:
+      - alert: HostRamCommittedHigh
+        expr: lv3_capacity_committed_ram_gb{scope="active",host="proxmox_florin"} / lv3_capacity_target_ram_gb{host="proxmox_florin"} > 0.90
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: Host RAM commitment is above 90 percent of the configured target
+          runbook_url: https://docs.lv3.org/runbooks/capacity-model/
+      - alert: HostDiskCommittedHigh
+        expr: lv3_capacity_committed_disk_gb{scope="active",host="proxmox_florin"} / lv3_capacity_target_disk_gb{host="proxmox_florin"} > 0.80
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: Host disk commitment is above 80 percent of the configured target
+          runbook_url: https://docs.lv3.org/runbooks/capacity-model/
+      - alert: HostDiskCommittedCritical
+        expr: lv3_capacity_committed_disk_gb{scope="active",host="proxmox_florin"} / lv3_capacity_target_disk_gb{host="proxmox_florin"} > 0.90
+        for: 15m
+        labels:
+          severity: critical
+        annotations:
+          summary: Host disk commitment is above 90 percent of the configured target
+          runbook_url: https://docs.lv3.org/runbooks/capacity-model/
+      - alert: GuestRamActualNearAllocation
+        expr: lv3_guest_actual_ram_gb / lv3_guest_allocated_ram_gb > 0.90
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: Guest RAM usage is above 90 percent of its current allocation
+          runbook_url: https://docs.lv3.org/runbooks/capacity-model/

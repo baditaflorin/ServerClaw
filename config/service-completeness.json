@@ -21,6 +21,14 @@
     }
   },
   "services": {
+    "alertmanager": {
+      "service_type": "vm-service",
+      "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_secrets": false,
+      "requires_compose_secrets": false,
+      "suppression_preset": "legacy-service"
+    },
     "api_gateway": {
       "service_type": "compose",
       "requires_subdomain": true,
@@ -122,6 +130,14 @@
       "requires_subdomain": false,
       "requires_oidc": false,
       "requires_secrets": false,
+      "requires_compose_secrets": false,
+      "suppression_preset": "legacy-service"
+    },
+    "ntfy": {
+      "service_type": "compose",
+      "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_secrets": true,
       "requires_compose_secrets": false,
       "suppression_preset": "legacy-service"
     },

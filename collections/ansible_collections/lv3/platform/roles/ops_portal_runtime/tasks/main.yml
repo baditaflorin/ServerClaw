@@ -113,6 +113,15 @@
     mode: "0644"
     directory_mode: "0755"
 
+- name: Sync the shared search fabric package
+  ansible.builtin.copy:
+    src: "{{ ops_portal_repo_root }}/scripts/search_fabric/"
+    dest: "{{ ops_portal_service_dir }}/search_fabric/"
+    owner: root
+    group: root
+    mode: "0644"
+    directory_mode: "0755"
+
 - name: Sync the ops portal requirements file
   ansible.builtin.copy:
     src: "{{ ops_portal_repo_root }}/requirements/ops-portal.txt"
@@ -154,6 +163,9 @@
   args:
     chdir: "{{ ops_portal_site_dir }}"
   register: ops_portal_up
+  retries: 3
+  delay: 5
+  until: ops_portal_up.rc == 0
   changed_when: >-
     'Creating' in ops_portal_up.stdout
     or 'Recreating' in ops_portal_up.stdout

@@ -29,6 +29,14 @@
   changed_when: false
   no_log: true
 
+- name: Verify the private mail submission relay listens on the Docker runtime host
+  ansible.builtin.wait_for:
+    host: "{{ ansible_host }}"
+    port: "{{ mail_platform_internal_submission_port }}"
+    delay: 0
+    timeout: 30
+  changed_when: false
+
 - name: Verify the mail domain exists in Stalwart
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ mail_platform_stalwart_http_port }}/api/principal?types=domain"

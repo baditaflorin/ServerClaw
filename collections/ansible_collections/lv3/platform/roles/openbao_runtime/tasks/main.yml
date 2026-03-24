@@ -129,6 +129,16 @@
       owner: "{{ openbao_runtime_uid }}"
       group: "{{ openbao_runtime_gid }}"
 
+- name: Ensure the OpenBao audit log file exists with managed ownership
+  ansible.builtin.file:
+    path: "{{ openbao_log_dir }}/audit.log"
+    state: touch
+    owner: "{{ openbao_runtime_uid }}"
+    group: "{{ openbao_runtime_gid }}"
+    mode: "0640"
+    access_time: preserve
+    modification_time: preserve
+
 - name: Mirror the step-ca root certificate for OpenBao TLS trust
   ansible.builtin.copy:
     remote_src: true

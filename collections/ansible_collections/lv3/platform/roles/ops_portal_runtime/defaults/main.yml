@@ -7,7 +7,10 @@ ops_portal_compose_file: "{{ ops_portal_site_dir }}/docker-compose.yml"
 ops_portal_env_file: "{{ ops_portal_site_dir }}/ops-portal.env"
 ops_portal_session_secret_file: "{{ ops_portal_secret_dir }}/session-secret.txt"
 ops_portal_container_name: ops-portal
-ops_portal_internal_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.ops_portal_port | default(8090) }}"
+ops_portal_bind_address: 0.0.0.0
+ops_portal_container_port: "{{ ops_portal_internal_port }}"
+ops_portal_verify_address: "{{ ansible_host | default('127.0.0.1') }}"
+ops_portal_internal_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.ops_portal_port | default(8092) }}"
 ops_portal_gateway_url: http://api-gateway:8080
 ops_portal_public_base_url: https://ops.lv3.org
 ops_portal_docs_base_url: https://docs.lv3.org

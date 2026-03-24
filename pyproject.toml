@@ -14,4 +14,4 @@ dependencies = ["PyYAML>=6.0"]
 lv3 = "scripts.lv3_cli:main"
 
 [tool.setuptools.packages.find]
-include = ["scripts*"]
+include = ["platform*", "scripts*"]

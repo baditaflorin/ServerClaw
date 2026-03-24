@@ -19,7 +19,9 @@ public_edge_oidc_auth_allowed_groups:
   - /lv3-platform-admins
 public_edge_oidc_auth_email_domains:
   - "*"
-public_edge_oidc_auth_scope: openid profile email groups
+# The Keycloak client maps the groups claim directly, so requesting a literal
+# "groups" scope causes invalid_scope redirects unless a matching client scope exists.
+public_edge_oidc_auth_scope: openid profile email
 public_edge_oidc_auth_cookie_domain: ops.lv3.org
 public_edge_oidc_auth_cookie_expire: 8h
 public_edge_oidc_auth_cookie_refresh: 1h

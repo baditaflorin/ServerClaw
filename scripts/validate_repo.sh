@@ -17,7 +17,7 @@ export ANSIBLE_COLLECTIONS_PATH="$REPO_ROOT/collections:$ANSIBLE_COLLECTIONS_DIR
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|shell|json|compose-runtime-envs|data-models|generated-docs|generated-portals|health-probes|tofu]...
+  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|shell|json|compose-runtime-envs|data-models|generated-docs|generated-portals|health-probes|alert-rules|tofu]...
 
 Examples:
   scripts/validate_repo.sh
@@ -207,6 +207,7 @@ validate_generated_portals() {
 validate_health_probes() {
   local role
   local roles=(
+    alertmanager_runtime
     docker_runtime
     postgres_vm
     monitoring_vm
@@ -217,6 +218,7 @@ validate_health_probes() {
     mattermost_runtime
     mail_platform_runtime
     nginx_edge_publication
+    ntfy_runtime
     uptime_kuma_runtime
     netbox_runtime
     open_webui_runtime
@@ -239,6 +241,12 @@ validate_health_probes() {
       exit 1
     fi
   done
+}
+
+validate_alert_rules() {
+  echo "Alert rule validation"
+  uv run --with pyyaml python "$REPO_ROOT/scripts/generate_slo_rules.py" --check >/dev/null
+  uv run --with pyyaml python "$REPO_ROOT/scripts/validate_alert_rules.py"
 }
 
 validate_tofu() {
@@ -264,6 +272,7 @@ for stage in "$@"; do
       validate_json
       validate_compose_runtime_envs
       validate_health_probes
+      validate_alert_rules
       validate_tofu
       validate_data_models
       validate_generated_docs
@@ -298,6 +307,9 @@ for stage in "$@"; do
       ;;
     health-probes)
       validate_health_probes
+      ;;
+    alert-rules)
+      validate_alert_rules
       ;;
     tofu)
       validate_tofu

@@ -100,6 +100,9 @@
   ansible.builtin.command: iptables -t nat -S DOCKER
   register: docker_runtime_nat_chain_recheck
   changed_when: false
+  retries: 6
+  delay: 2
+  until: docker_runtime_nat_chain_recheck.rc == 0
   when: docker_runtime_require_nat_chain | bool
 
 - name: Assert Docker nat chain is present

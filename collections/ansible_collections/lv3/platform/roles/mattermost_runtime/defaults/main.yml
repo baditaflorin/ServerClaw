@@ -37,12 +37,24 @@ mattermost_message_retention_hours: 17520
 mattermost_file_retention_hours: 17520
 mattermost_retention_deletion_job_start_time: "03:00"
 mattermost_channels:
+  - id: platform-alerts-critical
+    name: platform-alerts-critical
+    display_name: Platform Alerts Critical
+    purpose: Immediate critical incident routing and paging context.
+    header: Repo-managed critical incident channel for LV3 paging and escalation context.
+    webhook_key: alerts_critical
   - id: platform-alerts
     name: platform-alerts
     display_name: Platform Alerts
     purpose: Alert acknowledgements and operational incident routing.
     header: Repo-managed Grafana and platform alert intake for LV3 operators and agents.
     webhook_key: alerts
+  - id: platform-ops
+    name: platform-ops
+    display_name: Platform Ops
+    purpose: Informational events, resolves, and non-urgent operational updates.
+    header: Repo-managed informational operations stream for low-urgency platform events.
+    webhook_key: ops
   - id: workflow-events
     name: workflow-events
     display_name: Workflow Events

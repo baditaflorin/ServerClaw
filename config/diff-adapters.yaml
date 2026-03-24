@@ -1,0 +1,28 @@
+schema_version: 1.0.0
+
+adapters:
+  ansible:
+    class: platform.diff_engine.adapters.ansible_adapter.AnsibleAdapter
+    surface: ansible
+    enabled: true
+    timeout_seconds: 90
+  opentofu:
+    class: platform.diff_engine.adapters.opentofu_adapter.OpenTofuAdapter
+    surface: opentofu
+    enabled: true
+    timeout_seconds: 180
+  docker:
+    class: platform.diff_engine.adapters.docker_adapter.DockerAdapter
+    surface: docker
+    enabled: true
+    timeout_seconds: 30
+  dns:
+    class: platform.diff_engine.adapters.dns_adapter.DNSAdapter
+    surface: dns
+    enabled: true
+    timeout_seconds: 30
+  cert:
+    class: platform.diff_engine.adapters.cert_adapter.CertAdapter
+    surface: cert
+    enabled: true
+    timeout_seconds: 30

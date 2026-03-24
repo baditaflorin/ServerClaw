@@ -86,6 +86,36 @@
         }
       }
     },
+    "alertmanager": {
+      "service_name": "alertmanager",
+      "owning_vm": "monitoring-lv3",
+      "role": "alertmanager_runtime",
+      "verify_file": "roles/alertmanager_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "Alertmanager responds on its local health endpoint.",
+        "timeout_seconds": 60,
+        "retries": 20,
+        "delay_seconds": 3,
+        "url": "http://127.0.0.1:9093/-/healthy",
+        "method": "GET",
+        "expected_status": [200]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "Alertmanager responds on its local readiness endpoint after routing config loads.",
+        "timeout_seconds": 60,
+        "retries": 20,
+        "delay_seconds": 3,
+        "url": "http://127.0.0.1:9093/-/ready",
+        "method": "GET",
+        "expected_status": [200]
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "Alertmanager is private-only and its operator value is already covered by role verification on monitoring-lv3."
+      }
+    },
     "keycloak": {
       "service_name": "keycloak",
       "owning_vm": "docker-runtime-lv3",
@@ -138,7 +168,7 @@
         "timeout_seconds": 90,
         "retries": 18,
         "delay_seconds": 5,
-        "url": "http://127.0.0.1:8080/healthz",
+        "url": "http://127.0.0.1:8083/healthz",
         "method": "GET",
         "expected_status": [200]
       },
@@ -148,7 +178,7 @@
         "timeout_seconds": 90,
         "retries": 1,
         "delay_seconds": 0,
-        "url": "http://127.0.0.1:8080/v1/health",
+        "url": "http://127.0.0.1:8083/v1/health",
         "method": "GET",
         "expected_status": [401]
       },
@@ -178,7 +208,7 @@
         "timeout_seconds": 120,
         "retries": 24,
         "delay_seconds": 5,
-        "url": "http://127.0.0.1:8090/health",
+        "url": "http://10.10.10.20:8092/health",
         "method": "GET",
         "expected_status": [200]
       },
@@ -188,7 +218,7 @@
         "timeout_seconds": 120,
         "retries": 24,
         "delay_seconds": 5,
-        "url": "http://127.0.0.1:8090/",
+        "url": "http://10.10.10.20:8092/",
         "method": "GET",
         "expected_status": [200]
       },
@@ -551,6 +581,36 @@
           "maxredirects": 10,
           "accepted_statuscodes": ["200-299"]
         }
+      }
+    },
+    "ntfy": {
+      "service_name": "ntfy",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "ntfy_runtime",
+      "verify_file": "roles/ntfy_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The private ntfy health endpoint responds on docker-runtime-lv3.",
+        "timeout_seconds": 60,
+        "retries": 20,
+        "delay_seconds": 3,
+        "url": "http://127.0.0.1:2586/v1/health",
+        "method": "GET",
+        "expected_status": [200]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The private ntfy health endpoint remains reachable after auth config loads.",
+        "timeout_seconds": 60,
+        "retries": 20,
+        "delay_seconds": 3,
+        "url": "http://127.0.0.1:2586/v1/health",
+        "method": "GET",
+        "expected_status": [200]
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "The paging gateway is private-only and verified directly by the role and Alertmanager integration."
       }
     },
     "netbox": {

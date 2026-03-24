@@ -17,16 +17,22 @@ CAPACITY_MODEL_PATH = repo_path("config", "capacity-model.json")
 
 def load_ephemeral_range() -> tuple[int, int]:
     payload = load_json(CAPACITY_MODEL_PATH)
-    pool = payload.get("ephemeral_pool")
+    reservations = payload.get("reservations")
+    if not isinstance(reservations, list):
+        raise ValueError("config/capacity-model.json must define reservations")
+    pool = next(
+        (reservation for reservation in reservations if isinstance(reservation, dict) and reservation.get("kind") == "ephemeral_pool"),
+        None,
+    )
     if not isinstance(pool, dict):
-        raise ValueError("config/capacity-model.json must define ephemeral_pool")
+        raise ValueError("config/capacity-model.json must define one reservation with kind=ephemeral_pool")
     vmid_range = pool.get("vmid_range")
-    if not isinstance(vmid_range, list) or len(vmid_range) != 2:
-        raise ValueError("config/capacity-model.json.ephemeral_pool.vmid_range must be a two-item list")
-    start = int(vmid_range[0])
-    end = int(vmid_range[1])
+    if not isinstance(vmid_range, dict):
+        raise ValueError("config/capacity-model.json reservations.ephemeral_pool.vmid_range must be a mapping")
+    start = int(vmid_range.get("start"))
+    end = int(vmid_range.get("end"))
     if start > end:
-        raise ValueError("config/capacity-model.json.ephemeral_pool.vmid_range must be ascending")
+        raise ValueError("config/capacity-model.json reservations.ephemeral_pool.vmid_range must be ascending")
     return start, end
 
 

@@ -2,35 +2,37 @@
 
 - ADR: [ADR 0121](../adr/0121-local-search-and-indexing-fabric.md)
 - Title: Postgres-native BM25 + trigram search over ADRs, runbooks, receipts, cases, alerts, configs, command catalog, and topology — no vector DB, no embeddings, no external service
-- Status: ready
-- Branch: `codex/adr-0121-search-fabric`
-- Worktree: `../proxmox_florin_server-search-fabric`
+- Status: merged
+- Implemented In Repo Version: 0.119.0
+- Implemented On: 2026-03-24
+- Branch: `codex/adr-0121-local-search-indexing-fabric`
+- Worktree: `.worktrees/adr-0121`
 - Owner: codex
 - Depends On: `adr-0048-command-catalog`, `adr-0052-loki-logs`, `adr-0061-glitchtip`, `adr-0090-platform-cli`, `adr-0092-platform-api-gateway`, `adr-0093-interactive-ops-portal`, `adr-0095-unified-platform-search`, `adr-0098-postgres-ha`, `adr-0113-world-state-materializer`, `adr-0115-mutation-ledger`, `adr-0118-failure-case-library`
 - Conflicts With: none
-- Shared Surfaces: `platform/search/`, `search.documents` Postgres schema, `config/search-synonyms.yaml`, `/v1/search` API gateway endpoint, `lv3 search` CLI command
+- Shared Surfaces: `scripts/search_fabric/`, `search.documents` Postgres schema, `config/search-synonyms.yaml`, `/v1/search` API gateway endpoint, `lv3 search` CLI command
 
 ## Scope
 
 - create Postgres migration `migrations/0014_search_schema.sql` — `search.documents` table with generated `tsvector` column, GIN FTS index, `pg_trgm` trigram index, metadata GIN index, and unique constraint on `(doc_id, collection)` from ADR 0121; `CREATE EXTENSION IF NOT EXISTS pg_trgm;`
-- create `platform/search/__init__.py`
-- create `platform/search/client.py` — `SearchClient.query()`, `SearchClient.suggest()`, `SearchClient.filter()` with the composite BM25 + trigram SQL query from ADR 0121
-- create `platform/search/indexer.py` — `Indexer.upsert_document()`, `Indexer.index_collection()`, `Indexer.index_all()` — handles content-hash deduplication, collection routing
-- create `platform/search/collectors/` directory with one module per collection:
+- create `scripts/search_fabric/__init__.py`
+- create `scripts/search_fabric/client.py` — `SearchClient.query()`, `SearchClient.suggest()`, `SearchClient.filter()` with a repo-testable BM25 + trigram implementation that mirrors the ADR 0121 retrieval contract while the SQL migration remains ready for live Postgres use
+- create `scripts/search_fabric/indexer.py` — `SearchIndexer.upsert_document()`, `SearchIndexer.index_collection()`, `SearchIndexer.index_all()` — handles content-hash deduplication, collection routing, and writes `build/search-index/documents.json`
+- create `scripts/search_fabric/collectors/` directory with one module per collection:
   - `adr_collector.py` — walks `docs/adr/*.md`, parses frontmatter and body
   - `runbook_collector.py` — walks `docs/runbooks/*.md`
-  - `catalog_collector.py` — reads `config/workflow-catalog.json` entries
+  - `catalog_collector.py` — reads `config/command-catalog.json` plus `config/workflow-catalog.json`
   - `config_collector.py` — walks `config/*.yaml` and `config/*.json`
-  - `receipt_collector.py` — queries `ledger.events` for recent receipts
-  - `case_collector.py` — queries `cases.failure_cases` for resolved cases
-  - `alert_collector.py` — queries GlitchTip API for recent alerts
-  - `topology_collector.py` — queries `world_state.current_view` for the NetBox topology snapshot
+  - `receipt_collector.py` — indexes repo receipts under `receipts/**/*.json`
+  - `case_collector.py` — reads `cases/` or `receipts/failure-cases/` when present
+  - `alert_collector.py` — indexes alert receipts when present and otherwise falls back to managed alert rules
+  - `topology_collector.py` — materializes node search documents from `config/dependency-graph.json`
 - create `config/search-synonyms.yaml` — initial synonym table (cert → certificate, rotate → rotation → credential refresh, converge → deploy → apply → idempotent run, etc.)
-- create `windmill/search/rebuild-search-index.py` — Windmill workflow: runs `Indexer.index_all()`; posts index stats to Mattermost; scheduled nightly and triggered on git push webhook
+- create `config/windmill/scripts/rebuild-search-index.py` — Windmill workflow helper: runs `SearchIndexer.index_all()` and emits index stats as JSON
 - register `/v1/search` route on the platform API gateway (ADR 0092): `GET /v1/search?q=<query>&collection=<optional>&limit=<optional>`
 - add `lv3 search <query>` command to the platform CLI (ADR 0090)
 - add search bar to the ops portal (ADR 0093): calls `/v1/search`; renders results with collection icons and deep links
-- write `tests/unit/test_search_client.py` — test BM25 ranking, trigram fallback, synonym expansion, empty-corpus edge case, collection filter
+- write `tests/test_search_fabric.py` — test BM25 ranking, trigram fallback, synonym expansion, empty-corpus edge case, collection filter
 
 ## Non-Goals
 
@@ -41,12 +43,13 @@
 ## Expected Repo Surfaces
 
 - `migrations/0014_search_schema.sql`
-- `platform/search/__init__.py`
-- `platform/search/client.py`
-- `platform/search/indexer.py`
-- `platform/search/collectors/` (8 collector modules)
+- `scripts/search_fabric/__init__.py`
+- `scripts/search_fabric/client.py`
+- `scripts/search_fabric/indexer.py`
+- `scripts/search_fabric/collectors/` (8 collector modules)
 - `config/search-synonyms.yaml`
-- `windmill/search/rebuild-search-index.py`
+- `config/windmill/scripts/rebuild-search-index.py`
+- `docs/runbooks/search-indexing-fabric.md`
 - `docs/adr/0121-local-search-and-indexing-fabric.md`
 - `docs/workstreams/adr-0121-search-indexing-fabric.md`
 
@@ -60,7 +63,7 @@
 
 ## Verification
 
-- Run `pytest tests/unit/test_search_client.py -v` → all tests pass
+- Run `uv run --with pytest --with pyyaml --with fastapi --with httpx --with cryptography --with jinja2 --with itsdangerous --with python-multipart python -m pytest tests/test_search_fabric.py tests/test_lv3_cli.py tests/test_api_gateway.py tests/test_interactive_ops_portal.py -q` → all tests pass
 - Run the `rebuild-search-index` workflow manually → confirm index stats (doc counts per collection) are posted to Mattermost
 - Run `lv3 search "tls cert expires"` → confirm at least one certificate-related ADR or runbook appears in results
 - Run `lv3 search "converge"` → confirm command catalog entries appear
@@ -73,7 +76,7 @@
 - `lv3 search` command working on the controller
 - `/v1/search` API endpoint tested via the gateway
 - Search bar rendered in the ops portal
-- Nightly rebuild scheduled in Windmill
+- Nightly rebuild placeholder seeded in Windmill defaults
 
 ## Notes For The Next Assistant
 

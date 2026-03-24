@@ -3,8 +3,8 @@
 - Status: Accepted
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.97.0
-- Implemented In Platform Version: not yet
-- Implemented On: 2026-03-23
+- Implemented In Platform Version: 0.105.0
+- Implemented On: 2026-03-24
 - Date: 2026-03-23
 
 ## Context
@@ -85,7 +85,7 @@ services:
   ops-portal:
     image: registry.lv3.org/platform/ops-portal:latest
     ports:
-      - "8090:8090"
+      - "8092:8090"
     environment:
       GATEWAY_URL: "http://api-gateway:8080"
       KEYCLOAK_URL: "https://sso.lv3.org"
@@ -93,7 +93,7 @@ services:
       KEYCLOAK_CLIENT_ID: "ops-portal"
       NATS_URL: "nats://nats:4222"
     healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:8090/health"]
+      test: ["CMD", "curl", "-sf", "http://localhost:8092/health"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -115,7 +115,7 @@ The repository implementation delivered in `0.97.0` includes:
 - catalog updates for the interactive runtime contract in `config/service-capability-catalog.json`, `config/health-probe-catalog.json`, `config/subdomain-catalog.json`, and `config/api-gateway-catalog.json`
 - legacy static snapshot archiving through `receipts/ops-portal-snapshot.html`
 
-The live cutover from the existing static portal is still intentionally pending until applied from `main`.
+The live cutover from the existing static portal was completed on 2026-03-24, including the `8092` runtime publish correction, guest firewall synchronization, and public edge proxy update on the current `0.105.0` platform release.
 
 ## Consequences
 

@@ -1,0 +1,36 @@
+schema_version: 1.0.0
+groups:
+  - canonical: certificate
+    aliases:
+      - cert
+      - certs
+      - tls cert
+      - tls certs
+    expand:
+      - renewal
+      - expiry
+      - expires
+  - canonical: rotate
+    aliases:
+      - rotation
+      - refresh
+      - credential refresh
+    expand:
+      - secret
+      - credential
+  - canonical: converge
+    aliases:
+      - deploy
+      - apply
+      - idempotent run
+    expand:
+      - rollout
+      - reconcile
+  - canonical: postgres
+    aliases:
+      - postgresql
+      - db
+      - database
+    expand:
+      - connection pool
+      - replication

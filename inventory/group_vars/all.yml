@@ -1,4 +1,4 @@
-repo_version: 0.103.0
+repo_version: 0.106.1
 platform_version: 0.40.0
 container_image_catalog_path: "{{ playbook_dir }}/../config/image-catalog.json"
 container_image_catalog: "{{ lookup('file', container_image_catalog_path) | from_json }}"
@@ -104,6 +104,7 @@ monitoring_grafana_repo_keyring: /etc/apt/keyrings/grafana.asc
 monitoring_grafana_repo_file: /etc/apt/sources.list.d/grafana.list
 monitoring_proxmox_writer_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/proxmox-writer.token
 monitoring_guest_writer_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/guest-writer.token
+keycloak_agent_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/lv3-agent-hub-client-secret.txt
 monitoring_influxdb_repo_key_url: https://repos.influxdata.com/influxdata-archive.key
 monitoring_influxdb_repo_keyring: /etc/apt/keyrings/influxdata-archive.gpg
 monitoring_influxdb_repo_file: /etc/apt/sources.list.d/influxdata.list

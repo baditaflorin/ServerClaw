@@ -58,6 +58,7 @@ services:
     volumes:
       - {{ windmill_mutation_audit_dir }}:/var/log/platform
       - /var/run/docker.sock:/var/run/docker.sock
+      - {{ windmill_worker_repo_checkout_host_path }}:{{ windmill_worker_repo_checkout_container_path }}
       - worker_dependency_cache:/tmp/windmill/cache
       - worker_logs:/tmp/windmill/logs
 
@@ -80,6 +81,7 @@ services:
         condition: service_started
     volumes:
       - {{ windmill_mutation_audit_dir }}:/var/log/platform
+      - {{ windmill_worker_repo_checkout_host_path }}:{{ windmill_worker_repo_checkout_container_path }}
       - worker_logs:/tmp/windmill/logs
 
   windmill_extra:

@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from scripts.ops_portal.app import PortalSettings, create_app
+from scripts.ops_portal.app import PortalSettings, create_app, normalize_health
 
 
 class FakeGatewayClient:
@@ -14,13 +14,14 @@ class FakeGatewayClient:
         self.deploy_calls: list[dict[str, object]] = []
         self.secret_calls: list[str] = []
         self.runbook_calls: list[dict[str, object]] = []
+        self.search_calls: list[dict[str, object]] = []
 
     async def fetch_platform_health(self, token: str | None = None) -> dict[str, object]:
         return {
-            "services": {
-                "grafana": {"status": "healthy", "detail": "Dashboards are green"},
-                "ops_portal": {"status": "healthy", "detail": "Portal runtime is ready"},
-            }
+            "services": [
+                {"service_id": "grafana", "status": "healthy", "detail": "Dashboards are green"},
+                {"service_id": "ops_portal", "status": "healthy", "detail": "Portal runtime is ready"},
+            ]
         }
 
     async def fetch_service_health(self, service_id: str, token: str | None = None) -> dict[str, object]:
@@ -50,6 +51,28 @@ class FakeGatewayClient:
     ) -> dict[str, object]:
         self.runbook_calls.append({"workflow_id": workflow_id, "parameters": parameters or {}})
         return {"message": "Runbook accepted by gateway"}
+
+    async def search(
+        self,
+        query: str,
+        *,
+        collection: str | None = None,
+        token: str | None = None,
+        limit: int = 8,
+    ) -> dict[str, object]:
+        self.search_calls.append({"query": query, "collection": collection, "limit": limit})
+        return {
+            "expanded_query": query,
+            "results": [
+                {
+                    "title": "Rotate Certificates",
+                    "collection": "runbooks",
+                    "score": 0.91,
+                    "url": "docs/runbooks/rotate-certificates.md",
+                    "snippet": "Renew the TLS certificate before it expires.",
+                }
+            ],
+        }
 
 
 @pytest.fixture()
@@ -81,7 +104,7 @@ def portal_client(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient]:
                         "category": "access",
                         "lifecycle_status": "planned",
                         "public_url": "https://ops.lv3.org",
-                        "internal_url": "http://10.10.10.20:8090",
+                        "internal_url": "http://10.10.10.20:8092",
                         "runbook": "docs/runbooks/ops-portal-down.md",
                         "adr": "0093",
                     },
@@ -177,8 +200,18 @@ def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, F
     assert "Interactive Ops Portal" in response.text
     assert "Platform Overview" in response.text
     assert "Deployment Console" in response.text
+    assert "Search Fabric" in response.text
     assert "Runbook Launcher" in response.text
     assert "Recent Live Applies" in response.text
+
+
+def test_dashboard_uses_same_origin_static_stylesheet(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
+    client, _gateway = portal_client
+
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert '<link rel="stylesheet" href="/static/portal.css">' in response.text
 
 
 def test_health_check_action_returns_fragment(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
@@ -209,3 +242,28 @@ def test_runbook_action_accepts_json_parameters(portal_client: tuple[TestClient,
     assert response.status_code == 200
     assert "Runbook accepted by gateway" in response.text
     assert gateway.runbook_calls == [{"workflow_id": "rotate-secret", "parameters": {"service": "grafana"}}]
+
+
+def test_search_action_renders_results(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
+    client, gateway = portal_client
+
+    response = client.post("/actions/search", data={"query": "tls cert expires", "collection": "runbooks"})
+
+    assert response.status_code == 200
+    assert "Rotate Certificates" in response.text
+    assert gateway.search_calls == [{"query": "tls cert expires", "collection": "runbooks", "limit": 8}]
+
+
+def test_normalize_health_accepts_service_id_list_payload() -> None:
+    services = [{"id": "grafana"}, {"id": "ops_portal"}]
+    payload = {
+        "services": [
+            {"service_id": "grafana", "status": "healthy", "detail": "Dashboards are green"},
+            {"service_id": "ops_portal", "status": "degraded", "detail": "Maintenance window"},
+        ]
+    }
+
+    result = normalize_health(payload, services)
+
+    assert result["grafana"]["status"] == "healthy"
+    assert result["ops_portal"]["detail"] == "Maintenance window"

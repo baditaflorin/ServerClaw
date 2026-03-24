@@ -32,6 +32,7 @@ services:
       - "587:587"
       - "993:993"
       - "8080:8080"
+      - "{{ ansible_host }}:{{ mail_platform_internal_submission_port }}:{{ mail_platform_internal_submission_port }}"
 
   mail-gateway:
     build: {{ mail_platform_gateway_app_dir }}

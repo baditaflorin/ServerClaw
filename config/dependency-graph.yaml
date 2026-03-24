@@ -1,0 +1,63 @@
+schema_version: 1.0.0
+
+extra_nodes:
+  - id: cert:step-ca-internal
+    kind: cert
+    label: step-ca internal PKI
+    metadata:
+      service_id: step_ca
+      source: manifest
+  - id: service:loki
+    kind: service
+    label: Loki
+    tier: 1
+    metadata:
+      category: observability
+      source: manifest
+  - id: service:prometheus
+    kind: service
+    label: Prometheus
+    tier: 1
+    metadata:
+      category: observability
+      source: manifest
+  - id: network:vlan:10
+    kind: network
+    label: guest-network
+    metadata:
+      prefix: 10.10.10.0/24
+      source: manifest
+
+extra_edges:
+  - from: service:grafana
+    to: service:loki
+    edge_kind: depends_on
+    metadata:
+      source: manifest
+      relationship: log_queries
+      strength: hard
+      description: Grafana dashboards query Loki for aggregated platform logs.
+  - from: service:grafana
+    to: service:prometheus
+    edge_kind: depends_on
+    metadata:
+      source: manifest
+      relationship: metrics_queries
+      strength: hard
+      description: Grafana dashboards depend on Prometheus for platform metrics and alert rule state.
+  - from: service:api_gateway
+    to: service:windmill
+    edge_kind: depends_on
+    metadata:
+      source: manifest
+      relationship: governed_execution
+      strength: soft
+      description: The gateway delegates governed workflow execution to Windmill when execute=true is requested.
+  - from: service:alertmanager
+    to: service:grafana
+    edge_kind: depends_on
+    metadata:
+      source: manifest
+      relationship: alert_review
+      strength: soft
+      description: Alert triage is materially degraded when operators cannot pivot from Alertmanager to Grafana dashboards.

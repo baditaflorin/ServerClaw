@@ -48,6 +48,11 @@ argument_specs:
         required: false
         description:
           - HTTP port exposed by the Stalwart admin surface.
+      mail_platform_internal_submission_port:
+        type: int
+        required: false
+        description:
+          - Private SMTP submission port exposed only for local platform workloads on docker-runtime-lv3.
       mail_platform_gateway_bind_port:
         type: int
         required: false

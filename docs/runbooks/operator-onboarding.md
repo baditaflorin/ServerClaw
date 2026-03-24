@@ -42,6 +42,12 @@ The workflow:
 6. posts a welcome summary to Mattermost when a webhook is configured
 7. emits a mutation-audit event and writes controller-local state under `.local/state/operator-access/`
 
+## Browser-First Path
+
+The same governed backend is also available through the Windmill admin app documented in [windmill-operator-access-admin.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0122-operator-admin-ui/docs/runbooks/windmill-operator-access-admin.md).
+
+Use that app when you need a non-terminal path from a new workstation. It calls the same ADR 0108 wrappers and does not create a second provisioning path.
+
 ## Direct Script Usage
 
 Use the controller-side script when you need to run the logic without the CLI wrapper:

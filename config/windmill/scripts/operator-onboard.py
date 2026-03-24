@@ -1,4 +1,5 @@
 import json
+import os
 import shlex
 import subprocess
 from pathlib import Path
@@ -33,8 +34,9 @@ def main(
         return {"status": "blocked", "reason": f"missing required inputs: {', '.join(sorted(missing))}"}
 
     command = [
-        "uvx",
-        "--from",
+        "uv",
+        "run",
+        "--with",
         "pyyaml",
         "python",
         str(workflow),
@@ -62,7 +64,9 @@ def main(
     if dry_run:
         command.append("--dry-run")
 
-    result = subprocess.run(command, cwd=repo_root, text=True, capture_output=True, check=False)
+    env = dict(os.environ)
+    env["PYTHONPATH"] = f"{repo_root}:{env['PYTHONPATH']}" if env.get("PYTHONPATH") else str(repo_root)
+    result = subprocess.run(command, cwd=repo_root, env=env, text=True, capture_output=True, check=False)
     payload = {
         "status": "ok" if result.returncode == 0 else "error",
         "command": " ".join(shlex.quote(part) for part in command),

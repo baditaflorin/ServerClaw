@@ -1,0 +1,225 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/schema/capacity-model.schema.json",
+  "title": "LV3 Capacity Model",
+  "type": "object",
+  "required": [
+    "$schema",
+    "schema_version",
+    "host",
+    "guests",
+    "reservations"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "docs/schema/capacity-model.schema.json"
+    },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "host": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "metrics_host",
+        "physical",
+        "target_utilisation",
+        "reserved_for_platform"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "metrics_host": {
+          "type": "string"
+        },
+        "physical": {
+          "$ref": "#/$defs/resourceTriplet"
+        },
+        "target_utilisation": {
+          "type": "object",
+          "required": [
+            "ram_percent",
+            "vcpu_percent",
+            "disk_percent"
+          ],
+          "properties": {
+            "ram_percent": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "vcpu_percent": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "disk_percent": {
+              "type": "number",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          "additionalProperties": false
+        },
+        "reserved_for_platform": {
+          "$ref": "#/$defs/resourceTriplet"
+        },
+        "notes": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "guests": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/guestEntry"
+      }
+    },
+    "reservations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/reservationEntry"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "resourceTriplet": {
+      "type": "object",
+      "required": [
+        "ram_gb",
+        "vcpu",
+        "disk_gb"
+      ],
+      "properties": {
+        "ram_gb": {
+          "type": "number",
+          "minimum": 0
+        },
+        "vcpu": {
+          "type": "number",
+          "minimum": 0
+        },
+        "disk_gb": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "guestEntry": {
+      "type": "object",
+      "required": [
+        "vmid",
+        "name",
+        "status",
+        "environment",
+        "metrics_host",
+        "allocated",
+        "budget"
+      ],
+      "properties": {
+        "vmid": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "name": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "active",
+            "planned"
+          ]
+        },
+        "environment": {
+          "enum": [
+            "production",
+            "staging"
+          ]
+        },
+        "metrics_host": {
+          "type": "string"
+        },
+        "allocated": {
+          "$ref": "#/$defs/resourceTriplet"
+        },
+        "budget": {
+          "$ref": "#/$defs/resourceTriplet"
+        },
+        "disk_paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "reservationEntry": {
+      "type": "object",
+      "required": [
+        "id",
+        "kind",
+        "status",
+        "reserved"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "ephemeral_pool",
+            "planned_growth"
+          ]
+        },
+        "status": {
+          "enum": [
+            "reserved",
+            "planned"
+          ]
+        },
+        "reserved": {
+          "$ref": "#/$defs/resourceTriplet"
+        },
+        "vmid_range": {
+          "type": "object",
+          "required": [
+            "start",
+            "end"
+          ],
+          "properties": {
+            "start": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "end": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        "max_concurrent_vms": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "notes": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -11,7 +11,26 @@ import urllib.request
 from pathlib import Path
 from typing import Any, Final
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path
+
+
+REPO_ROOT: Final[Path] = repo_path()
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+# controller_automation_toolkit may have imported the stdlib platform module first.
+# Drop that non-package entry so the repo's platform/ package can be imported.
+loaded_platform = sys.modules.get("platform")
+if loaded_platform is not None and not hasattr(loaded_platform, "__path__"):
+    loaded_platform_file = getattr(loaded_platform, "__file__", "")
+    if not str(loaded_platform_file).startswith(str(REPO_ROOT / "platform")):
+        sys.modules.pop("platform", None)
+
+from platform.ledger import LedgerWriter  # noqa: E402
 
 
 SCHEMA_PATH: Final[Path] = repo_path("docs", "schema", "mutation-audit-event.json")
@@ -255,6 +274,10 @@ def emit_event(
     resolved_loki_url = resolve_loki_url(loki_url)
     if resolved_loki_url:
         push_event_to_loki(event, resolved_loki_url, resolve_loki_labels(loki_labels, event))
+
+    ledger_dsn = os.environ.get("LV3_LEDGER_DSN", "").strip()
+    if ledger_dsn and ledger_dsn.lower() != "off":
+        LedgerWriter(dsn=ledger_dsn).write_mutation_audit_event(event)
 
     return event
 

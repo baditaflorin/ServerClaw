@@ -123,6 +123,41 @@ argument_specs:
         required: true
         description:
           - Controller-local file used to mirror the named-operator password.
+      keycloak_mail_platform_submission_username:
+        type: str
+        required: true
+        description:
+          - SMTP login username used by Keycloak for reset and action emails through the private mail relay.
+      keycloak_mail_platform_submission_password_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file containing the managed mailbox password used for Keycloak mail submission.
+      keycloak_mail_platform_submission_host:
+        type: str
+        required: true
+        description:
+          - Hostname or IP for the private mail submission relay.
+      keycloak_mail_platform_submission_port:
+        type: int
+        required: true
+        description:
+          - TCP port for the private mail submission relay.
+      keycloak_mail_platform_from_address:
+        type: str
+        required: true
+        description:
+          - Sender address used for Keycloak transactional mail.
+      keycloak_mail_platform_reply_to_address:
+        type: str
+        required: true
+        description:
+          - Reply-to address used for Keycloak transactional mail.
+      keycloak_realm_smtp_server:
+        type: dict
+        required: true
+        description:
+          - Repo-managed SMTP configuration applied to the Keycloak realm.
       keycloak_grafana_client_id:
         type: str
         required: true

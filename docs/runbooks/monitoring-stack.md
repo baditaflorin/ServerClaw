@@ -8,6 +8,8 @@ This runbook converges the dedicated monitoring VM `140` at `10.10.10.40` with:
 - InfluxDB 2 on port `8086`
 - Loki on loopback port `3100`
 - Prometheus on loopback port `9090`
+- Alertmanager on loopback port `9093`
+- the Prometheus blackbox exporter on loopback port `9115`
 - Tempo on loopback port `3200`
 - a shared OpenTelemetry collector on private-network ports `4317` and `4318`
 - a provisioned Grafana data source for the Proxmox metrics bucket
@@ -24,6 +26,7 @@ This runbook converges the dedicated monitoring VM `140` at `10.10.10.40` with:
 - Docker container log shipping from `docker-runtime-lv3`
 
 Grafana is available both on the private VM and at [https://grafana.lv3.org](https://grafana.lv3.org).
+The public hostname is operator-facing only: anonymous dashboard access is denied, public dashboard sharing is disabled, and the public edge now returns `404` for `/api/health` so the external surface does not disclose the running Grafana version.
 
 ## Command
 
@@ -37,20 +40,22 @@ make converge-monitoring
 2. Installs and starts `grafana`, `influxdb2`, `influxdb2-cli`, and `loki`.
 3. Installs Prometheus from Debian plus pinned `tempo` and `otelcol-contrib` Debian packages.
 4. Configures a managed Prometheus service with the remote-write receiver enabled plus the `exemplar-storage` and `native-histograms` features required by Tempo span metrics and service-graph metrics.
-5. Configures Tempo with local-block storage, a 7-day trace retention window, and metrics generation into Prometheus.
-6. Configures the OpenTelemetry collector as the shared OTLP ingestion path for internal services and automation.
-7. Initializes InfluxDB with the `lv3` organization and the `proxmox` bucket.
-8. Creates separate InfluxDB tokens for Proxmox metric writes and Grafana bucket reads.
-9. Provisions Grafana datasources for InfluxDB, Loki, Prometheus, and Tempo automatically.
-10. Creates a dedicated guest-writer token for guest-side telemetry and mirrors it to `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/guest-writer.token`.
-11. Renders the managed dashboard JSON from repo and imports the overview plus VM detail dashboards into Grafana over the local Grafana API.
-12. Creates or updates the Proxmox metric server `influxdb-http` to send metrics to `10.10.10.40:8086`.
-13. Converges shared guest observability plumbing for service-level Telegraf on managed guests that ship into InfluxDB.
-14. Converges `nginx-lv3` with loopback-only `stub_status` as a thin extension on top of that shared guest observability framework.
-15. Converges `docker-build-lv3` with a repo-managed Docker CLI wrapper plus Telegraf shipping build count and duration events as another thin extension on the same framework.
-16. Converges `docker-runtime-lv3` with Telegraf's Docker input plugin so container CPU, memory, network, status, and health data land in InfluxDB and the managed runtime detail dashboard.
-17. Exposes a shared OTLP endpoint for traced internal services such as the private mail gateway.
-18. Installs Grafana Alloy on `proxmox_florin` and every managed guest, labels log streams consistently, and ships host journald, guest journald, NGINX file logs, and Docker container logs into Loki.
+5. Configures Alertmanager routing for severity-based notification delivery into Mattermost and the private ntfy paging gateway.
+6. Configures the blackbox exporter plus generated HTTP and TCP probe jobs from `config/health-probe-catalog.json`.
+7. Configures Tempo with local-block storage, a 7-day trace retention window, and metrics generation into Prometheus.
+8. Configures the OpenTelemetry collector as the shared OTLP ingestion path for internal services and automation.
+9. Initializes InfluxDB with the `lv3` organization and the `proxmox` bucket.
+10. Creates separate InfluxDB tokens for Proxmox metric writes and Grafana bucket reads.
+11. Provisions Grafana datasources for InfluxDB, Loki, Prometheus, and Tempo automatically.
+12. Creates a dedicated guest-writer token for guest-side telemetry and mirrors it to `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/guest-writer.token`.
+13. Renders the managed dashboard JSON from repo and imports the overview plus VM detail dashboards into Grafana over the local Grafana API.
+14. Creates or updates the Proxmox metric server `influxdb-http` to send metrics to `10.10.10.40:8086`.
+15. Converges shared guest observability plumbing for service-level Telegraf on managed guests that ship into InfluxDB.
+16. Converges `nginx-lv3` with loopback-only `stub_status` as a thin extension on top of that shared guest observability framework.
+17. Converges `docker-build-lv3` with a repo-managed Docker CLI wrapper plus Telegraf shipping build count and duration events as another thin extension on the same framework.
+18. Converges `docker-runtime-lv3` with Telegraf's Docker input plugin so container CPU, memory, network, status, and health data land in InfluxDB and the managed runtime detail dashboard.
+19. Exposes a shared OTLP endpoint for traced internal services such as the private mail gateway.
+20. Installs Grafana Alloy on `proxmox_florin` and every managed guest, labels log streams consistently, and ships host journald, guest journald, NGINX file logs, and Docker container logs into Loki.
 
 ## Operator Access Flow
 
@@ -86,7 +91,7 @@ make syntax-check-monitoring
 Verify the monitoring services on VM `140`:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'systemctl is-active influxdb grafana-server loki alloy tempo otelcol-contrib lv3-prometheus'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'systemctl is-active influxdb grafana-server loki alloy tempo otelcol-contrib lv3-prometheus prometheus-alertmanager prometheus-blackbox-exporter'
 ```
 
 Verify the Grafana health endpoint locally on the guest:
@@ -100,6 +105,29 @@ Verify the managed overview dashboard exists and has the expected title:
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'curl -fsS -u admin:$(sudo cat /etc/lv3/monitoring/grafana-admin-password) http://127.0.0.1:3000/api/dashboards/uid/lv3-platform-overview'
 ```
+
+Verify unauthenticated public dashboard URLs do not expose dashboard content:
+
+```bash
+curl -I https://grafana.lv3.org/d/lv3-platform-overview/lv3-platform-overview
+```
+
+Expected result:
+
+- `302 Found`
+- `Location: /login...`
+
+Verify the public edge blocks the Grafana health API and strips version headers:
+
+```bash
+curl -i https://grafana.lv3.org/api/health
+curl -I https://grafana.lv3.org/login
+```
+
+Expected result:
+
+- `/api/health` returns `404 Not Found`
+- the response headers do not include `X-Grafana-Version` or `Via`
 
 Verify the Grafana Loki datasource exists:
 
@@ -154,6 +182,18 @@ Verify Tempo span metrics are present in Prometheus:
 
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'curl -fsS --get --data-urlencode '\''query=traces_spanmetrics_calls_total'\'' http://127.0.0.1:9090/api/v1/query'
+```
+
+Verify Alertmanager is healthy:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'curl -fsS http://127.0.0.1:9093/-/healthy'
+```
+
+Verify the blackbox exporter is healthy:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'curl -fsS http://127.0.0.1:9115/-/healthy'
 ```
 
 Verify nginx guest telemetry is present in InfluxDB:

@@ -25,6 +25,8 @@ server {
 
 {% for site in public_edge_sites %}
 {% set protected_site = public_edge_authenticated_sites.get(site.hostname) %}
+{% set proxy_hide_headers = site.proxy_hide_headers | default([]) %}
+{% set blocked_exact_paths = site.blocked_exact_paths | default([]) %}
 server {
     listen 80;
     listen [::]:80;
@@ -116,6 +118,9 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Forwarded-Host $host;
         proxy_set_header X-Forwarded-Port $server_port;
+{% for header_name in proxy_hide_headers %}
+        proxy_hide_header {{ header_name }};
+{% endfor %}
     }
 {% endfor %}
 
@@ -150,6 +155,11 @@ server {
 {% endif %}
 
 {% if site.kind == 'proxy' %}
+{% for blocked_path in blocked_exact_paths %}
+    location = {{ blocked_path.path }} {
+        return {{ blocked_path.status | default(404) }};
+    }
+{% endfor %}
 {% if site.root_proxy_path is defined %}
     location = / {
         proxy_pass {{ site.upstream }}{{ site.root_proxy_path }};
@@ -163,6 +173,9 @@ server {
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
         proxy_read_timeout 300s;
+{% for header_name in proxy_hide_headers %}
+        proxy_hide_header {{ header_name }};
+{% endfor %}
     }
 
 {% endif %}
@@ -188,6 +201,9 @@ server {
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
         proxy_read_timeout 300s;
+{% for header_name in proxy_hide_headers %}
+        proxy_hide_header {{ header_name }};
+{% endfor %}
     }
 {% elif site.kind == 'static_dir' %}
     root {{ public_edge_generated_static_root }}/{{ site.source_dir }};

@@ -34,6 +34,11 @@ argument_specs:
         required: true
         description:
           - Path where the primary platform overview dashboard is rendered.
+      monitoring_grafana_public_url:
+        type: str
+        required: false
+        description:
+          - Public HTTPS base URL used to verify unauthenticated Grafana behavior through the edge.
       monitoring_grafana_vm_dashboard_dir:
         type: path
         required: true

@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0119](../adr/0119-budgeted-workflow-scheduler.md)
 - Title: Orchestration layer between the goal compiler and Windmill — enforces hard per-workflow budgets (duration, steps, concurrency, host count, restart depth) and terminates or escalates on violation
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0119-budgeted-scheduler`
 - Worktree: `../proxmox_florin_server-budgeted-scheduler`
 - Owner: codex
@@ -38,8 +38,9 @@
 - `config/workflow-defaults.yaml`
 - `config/workflow-catalog.json` (patched: budget blocks added)
 - `windmill/scheduler/watchdog-loop.py`
+- `docs/runbooks/budgeted-workflow-scheduler.md`
 - `docs/adr/0119-budgeted-workflow-scheduler.md`
-- `docs/workstreams/adr-0119-budgeted-scheduler.md`
+- `docs/workstreams/adr-0119-budgeted-workflow-scheduler.md`
 
 ## Expected Live Surfaces
 

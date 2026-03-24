@@ -1,0 +1,16 @@
+---
+ntfy_runtime_image: binwiederhier/ntfy:v2.14.0
+ntfy_runtime_container_name: ntfy
+ntfy_runtime_site_dir: /opt/ntfy
+ntfy_runtime_data_dir: /var/lib/ntfy
+ntfy_runtime_attachment_dir: "{{ ntfy_runtime_data_dir }}/attachments"
+ntfy_runtime_cache_file: "{{ ntfy_runtime_data_dir }}/cache.db"
+ntfy_runtime_compose_file: "{{ ntfy_runtime_site_dir }}/docker-compose.yml"
+ntfy_runtime_config_template: "{{ inventory_dir | dirname }}/config/ntfy/server.yml"
+ntfy_runtime_config_file: "{{ ntfy_runtime_site_dir }}/server.yml"
+ntfy_runtime_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ntfy
+ntfy_runtime_password_local_file: "{{ ntfy_runtime_local_artifact_dir }}/alertmanager-password.txt"
+ntfy_runtime_password_hash_remote_file: "{{ ntfy_runtime_site_dir }}/password.hash"
+ntfy_runtime_username: alertmanager
+ntfy_runtime_port: 2586
+ntfy_runtime_base_url: "http://{{ hostvars['proxmox_florin'].platform_guest_catalog.by_name['docker-runtime-lv3'].ipv4 }}:2586"

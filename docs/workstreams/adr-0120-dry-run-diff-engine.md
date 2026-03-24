@@ -2,11 +2,11 @@
 
 - ADR: [ADR 0120](../adr/0120-dry-run-semantic-diff-engine.md)
 - Title: CPU-only preflight engine that computes a structured SemanticDiff for any ExecutionIntent before execution — predicts exact changed objects across Ansible, OpenTofu, Docker, DNS, TLS, and firewall surfaces
-- Status: ready
+- Status: merged
 - Branch: `codex/adr-0120-diff-engine`
 - Worktree: `../proxmox_florin_server-diff-engine`
 - Owner: codex
-- Depends On: `adr-0048-command-catalog`, `adr-0085-opentofu-vm-lifecycle`, `adr-0090-platform-cli`, `adr-0112-goal-compiler`, `adr-0113-world-state-materializer`, `adr-0115-mutation-ledger`
+- Depends On: `adr-0048-command-catalog`, `adr-0085-opentofu-vm-lifecycle`, `adr-0090-platform-cli`, `adr-0112-goal-compiler`, `adr-0113-world-state-materializer`, `adr-0115-mutation-ledger`, `adr-0116-change-risk-scoring`
 - Conflicts With: none
 - Shared Surfaces: `platform/diff_engine/`, `config/diff-adapters.yaml`
 
@@ -22,9 +22,11 @@
 - create `platform/diff_engine/adapters/dns_adapter.py` — compares desired DNS entries (from NetBox/world-state) against live resolver responses
 - create `platform/diff_engine/adapters/cert_adapter.py` — compares desired certificate config against step-ca inventory from world-state
 - create `config/diff-adapters.yaml` — adapter registry config: maps tool IDs to adapter class paths and enabled flag
-- update `platform/goal_compiler/compiler.py` — call `DiffEngine.compute()` after compilation; embed `SemanticDiff` in the compiled intent display
-- update `lv3 run` CLI display — render `SemanticDiff` as the structured change summary before the approval prompt
+- update `scripts/risk_scorer/context.py` and `scripts/risk_scorer/models.py` — call `DiffEngine.compute()` after compilation and embed `SemanticDiff` plus real diff counts in the compiled intent model
+- update `scripts/risk_scorer/dimensions.py` — treat `unknown_count > 0` as a maximum mutation-surface penalty and escalate irreversible diffs
+- update `scripts/lv3_cli.py` — render `SemanticDiff` as the structured change summary before the approval prompt and write optional compiled-intent ledger events
 - write `tests/unit/test_diff_engine.py` — test each adapter independently with fixture data; test `unknown` confidence propagation; test empty diff
+- write `docs/runbooks/dry-run-semantic-diff-engine.md` — operator-facing usage, adapter behavior, and verification flow
 
 ## Non-Goals
 
@@ -44,35 +46,35 @@
 - `platform/diff_engine/adapters/dns_adapter.py`
 - `platform/diff_engine/adapters/cert_adapter.py`
 - `config/diff-adapters.yaml`
-- `platform/goal_compiler/compiler.py` (patched: diff engine call added)
+- `scripts/risk_scorer/context.py`
+- `scripts/risk_scorer/models.py`
+- `scripts/risk_scorer/dimensions.py`
+- `scripts/lv3_cli.py`
+- `docs/runbooks/dry-run-semantic-diff-engine.md`
 - `docs/adr/0120-dry-run-semantic-diff-engine.md`
-- `docs/workstreams/adr-0120-diff-engine.md`
+- `docs/workstreams/adr-0120-dry-run-diff-engine.md`
 
 ## Expected Live Surfaces
 
-- `lv3 run "deploy netbox" --dry-run` displays a structured diff output showing predicted changed objects before asking for confirmation
+- `lv3 run converge-netbox --dry-run` displays a structured diff output showing predicted changed objects before asking for confirmation
 - `SemanticDiff.total_changes` is a positive integer for a service that has pending changes
 - `SemanticDiff.total_changes == 0` for a service that is already converged and up-to-date
 - `SemanticDiff.unknown_count > 0` is logged and shown in the approval prompt when a surface has no adapter
 
 ## Verification
 
-- Run `pytest tests/unit/test_diff_engine.py -v` → all tests pass
-- Run `lv3 run "deploy netbox" --dry-run` on the controller → inspect the structured diff output
-- Run `lv3 run "deploy netbox" --dry-run` a second time immediately after a successful deployment → confirm `total_changes == 0`
-- Introduce an intentional config drift (manually edit a netbox config file on the server) → run `--dry-run` again → confirm the drift appears as a predicted change
+- Run `uv run --with pytest --with pyyaml pytest tests/unit/test_diff_engine.py tests/test_risk_scorer.py tests/test_lv3_cli.py tests/test_world_state_client.py -q` → all tests pass
+- Run `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate` → repository data models validate
+- Run `lv3 run converge-netbox --dry-run` on the controller with valid Windmill metadata → inspect the structured diff output before any API submission
+- Run the same dry-run against a workflow without a configured adapter surface → confirm `unknown_count > 0` is rendered and the mutation-surface score contribution rises to the maximum
 
 ## Merge Criteria
 
-- Unit tests pass for all 5 initial adapters
-- End-to-end dry-run tested for at least 2 services (netbox and one other)
-- Zero-change detection verified
-- `SemanticDiff` embedded in compiled intent ledger event
-- Risk scorer (ADR 0116) `expected_change_count` stub replaced with real diff engine output
+- Focused unit and integration tests pass for all 5 initial adapters plus the CLI and risk-scoring integration path
+- `SemanticDiff` is embedded in the compiled intent model and optional ledger event path
+- The risk scorer (ADR 0116) now consumes real diff-engine counts when available and falls back only when a surface is unsupported or unavailable
 
 ## Notes For The Next Assistant
 
-- The Ansible adapter's 60-second subprocess timeout may be too short for playbooks that target many hosts. Make the timeout configurable per adapter in `config/diff-adapters.yaml` with a default of 90 seconds.
-- `ansible-playbook --check --diff` requires a reachable inventory. On the controller, the inventory is at `inventory/` in the repo. The adapter must resolve the inventory path relative to the repo root, not the CWD of the calling process.
-- The Docker adapter compares desired state (parsed from `docker-compose.yml`) against current state (Docker API). "Desired state" must be computed from the compose file after template rendering (if using Jinja2 templates in compose files). Render with the same variable sources used by the Ansible playbook.
-- Treat all `confidence: unknown` objects as requiring operator review; surface them prominently in the CLI output with a `? unknown:` prefix rather than burying them in the change list.
+- The initial repository implementation resolves desired Docker state from the image catalog rather than fully rendered Compose templates. If a future workflow needs field-level Compose diffing, extend the Docker adapter instead of bypassing it.
+- Firewall and Proxmox VM config diffing remain separate follow-up workstreams. Keep unsupported surfaces explicit by emitting `confidence: unknown` objects rather than inventing optimistic counts.

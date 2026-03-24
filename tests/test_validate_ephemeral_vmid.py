@@ -18,14 +18,17 @@ def validation_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
         json.dumps(
             {
                 "schema_version": "1.0.0",
-                "ephemeral_pool": {
-                    "vmid_range": [910, 979],
-                    "max_concurrent_vms": 5,
-                    "reserved_ram_gb": 20,
-                    "reserved_vcpu": 8,
-                    "reserved_disk_gb": 100,
-                    "notes": "test pool",
-                },
+                "reservations": [
+                    {
+                        "id": "ephemeral-pool",
+                        "kind": "ephemeral_pool",
+                        "status": "reserved",
+                        "vmid_range": {"start": 910, "end": 979},
+                        "max_concurrent_vms": 5,
+                        "reserved": {"ram_gb": 20, "vcpu": 8, "disk_gb": 100},
+                        "notes": "test pool",
+                    }
+                ],
             }
         )
         + "\n"

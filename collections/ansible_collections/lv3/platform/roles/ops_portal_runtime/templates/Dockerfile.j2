@@ -7,10 +7,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN useradd --system --create-home --uid 10001 opsportal
 
 COPY ops_portal ./ops_portal
+COPY search_fabric ./search_fabric
 RUN chown -R opsportal:opsportal /app
 
 EXPOSE 8090
 
 USER opsportal
 
-CMD ["uvicorn", "ops_portal.app:app", "--host", "0.0.0.0", "--port", "8090"]
+CMD ["uvicorn", "ops_portal.app:app", "--host", "0.0.0.0", "--port", "8090", "--proxy-headers", "--forwarded-allow-ips", "*"]

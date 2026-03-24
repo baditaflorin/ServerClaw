@@ -22,6 +22,7 @@
 
   roles:
     - role: lv3.platform.monitoring_vm
+    - role: lv3.platform.alertmanager_runtime
 
   post_tasks:
     - name: Run shared post-verify checks
@@ -29,6 +30,11 @@
       vars:
         service_health_probe_id: grafana
         playbook_execution_post_verify_audit_action: playbook.verify.grafana
+    - name: Run shared Alertmanager post-verify checks
+      ansible.builtin.import_tasks: ../tasks/post-verify.yml
+      vars:
+        service_health_probe_id: alertmanager
+        playbook_execution_post_verify_audit_action: playbook.verify.alertmanager
     - name: Run shared completion notifications
       ansible.builtin.import_tasks: ../tasks/notify.yml
       vars:

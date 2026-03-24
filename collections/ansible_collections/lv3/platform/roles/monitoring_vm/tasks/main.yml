@@ -161,15 +161,6 @@
       ARGS="--config.file={{ monitoring_blackbox_exporter_config_file }} --web.listen-address=127.0.0.1:{{ monitoring_blackbox_exporter_port }}"
   notify: Restart Blackbox Exporter
 
-- name: Copy blackbox exporter configuration
-  ansible.builtin.copy:
-    src: "{{ monitoring_blackbox_exporter_source_file }}"
-    dest: "{{ monitoring_blackbox_exporter_config_file }}"
-    owner: root
-    group: prometheus
-    mode: "0644"
-  notify: Restart Blackbox Exporter
-
 - name: Copy Prometheus SLO recording rules
   ansible.builtin.copy:
     src: "{{ monitoring_prometheus_slo_rules_source_file }}"
@@ -264,6 +255,33 @@
     path: /etc/grafana/grafana.ini
     section: auth.anonymous
     option: enabled
+    value: "false"
+    mode: "0640"
+  notify: Restart Grafana
+
+- name: Keep the Grafana login form available for recovery
+  community.general.ini_file:
+    path: /etc/grafana/grafana.ini
+    section: auth
+    option: disable_login_form
+    value: "false"
+    mode: "0640"
+  notify: Restart Grafana
+
+- name: Disable Grafana public dashboards
+  community.general.ini_file:
+    path: /etc/grafana/grafana.ini
+    section: public_dashboards
+    option: enabled
+    value: "false"
+    mode: "0640"
+  notify: Restart Grafana
+
+- name: Disable Grafana embedding
+  community.general.ini_file:
+    path: /etc/grafana/grafana.ini
+    section: security
+    option: allow_embedding
     value: "false"
     mode: "0640"
   notify: Restart Grafana

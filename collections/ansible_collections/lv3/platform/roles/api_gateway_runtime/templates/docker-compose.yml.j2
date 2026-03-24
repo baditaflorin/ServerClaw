@@ -10,6 +10,9 @@ services:
       - {{ api_gateway_env_file }}
     ports:
       - "{{ api_gateway_internal_port }}:8080"
+    networks:
+      - default
+      - keycloak
     volumes:
       - {{ api_gateway_config_dir }}:/config:ro
       - {{ api_gateway_data_dir }}:/data:ro
@@ -20,3 +23,8 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+
+networks:
+  keycloak:
+    external: true
+    name: {{ api_gateway_keycloak_docker_network }}

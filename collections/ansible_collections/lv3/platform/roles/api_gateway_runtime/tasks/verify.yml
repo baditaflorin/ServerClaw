@@ -17,3 +17,51 @@
     status_code: 401
   register: api_gateway_auth_check
   changed_when: false
+
+- name: Check whether the controller-local API gateway verification client secret exists
+  ansible.builtin.stat:
+    path: "{{ api_gateway_verify_client_secret_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: api_gateway_verify_client_secret_stat
+
+- name: Read the controller-local API gateway verification client secret
+  ansible.builtin.slurp:
+    src: "{{ api_gateway_verify_client_secret_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: api_gateway_verify_client_secret_raw
+  when: api_gateway_verify_client_secret_stat.stat.exists
+  no_log: true
+
+- name: Request a Keycloak bearer token for API gateway verification
+  ansible.builtin.uri:
+    url: "{{ api_gateway_keycloak_verify_base_url }}/realms/lv3/protocol/openid-connect/token"
+    method: POST
+    body_format: form-urlencoded
+    body:
+      grant_type: client_credentials
+      client_id: "{{ api_gateway_verify_client_id }}"
+      client_secret: "{{ api_gateway_verify_client_secret_raw.content | b64decode | trim }}"
+    status_code: 200
+  register: api_gateway_verify_token_response
+  when: api_gateway_verify_client_secret_stat.stat.exists
+  no_log: true
+  changed_when: false
+
+- name: Record the API gateway verification bearer token
+  ansible.builtin.set_fact:
+    api_gateway_verify_access_token: "{{ api_gateway_verify_token_response.json.access_token }}"
+  when: api_gateway_verify_client_secret_stat.stat.exists
+  no_log: true
+
+- name: Verify the authenticated platform service catalog endpoint succeeds with a real bearer token
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ api_gateway_internal_port }}/v1/platform/services"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ api_gateway_verify_access_token }}"
+    status_code: 200
+  register: api_gateway_platform_services_check
+  when: api_gateway_verify_client_secret_stat.stat.exists
+  changed_when: false

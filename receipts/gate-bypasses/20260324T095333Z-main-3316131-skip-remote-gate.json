@@ -1,0 +1,8 @@
+{
+  "created_at": "2026-03-24T09:53:33+00:00",
+  "bypass": "skip-remote-gate",
+  "reason": "ADR 0121 mainline fast-forward push bypassed after the remote pre-push gate failed on unrelated packer-validate and schema-validation worktree/build-host issues; focused ADR 0121 pytest and runtime smoke checks passed on the integrated 0.119.0 tree.",
+  "source": "git-push",
+  "branch": "main",
+  "commit": "331613192c6b7687d3c0e50e03a9084c79796d81"
+}

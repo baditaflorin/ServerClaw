@@ -17,11 +17,20 @@ from urllib.parse import urljoin, urlparse
 import httpx
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
-from fastapi import Depends, FastAPI, HTTPException, Request, Response
+from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from api_gateway_catalog import load_api_gateway_catalog
+from platform.graph import DependencyGraphClient, NodeNotFoundError
+from platform.world_state.client import SurfaceNotFoundError, WorldStateClient, WorldStateUnavailable
+from platform.world_state.materializer import SQLITE_CURRENT_VIEW_NAME, SQLITE_SNAPSHOTS_TABLE_NAME
+from platform.world_state.workers import collect_service_health
+
+try:
+    from search_fabric import SearchClient
+except ImportError:  # pragma: no cover - packaged import path
+    from scripts.search_fabric import SearchClient
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -112,6 +121,8 @@ class GatewayConfig:
     deploy_webhook_url: str | None
     secret_rotation_webhook_url: str | None
     openapi_include_upstreams: bool
+    graph_dsn: str | None = None
+    world_state_dsn: str | None = None
     clock_skew_seconds: int = 30
 
 
@@ -242,6 +253,7 @@ class GatewayRuntime:
         self.services = [GatewayService(**service) for service in normalized_catalog]
         self.service_by_prefix = sorted(self.services, key=lambda service: len(service.gateway_prefix), reverse=True)
         self.http_client = httpx.AsyncClient(follow_redirects=False)
+        self.search_client = SearchClient(config.repo_root)
         self.verifier = KeycloakJWTVerifier(
             jwks_url=config.jwks_url,
             issuer=config.issuer,
@@ -250,6 +262,11 @@ class GatewayRuntime:
             client=self.http_client,
         )
         self.event_emitter = NatsEventEmitter(config.nats_url)
+        self.graph_client = (
+            DependencyGraphClient(dsn=config.graph_dsn, world_state_dsn=config.world_state_dsn or config.graph_dsn)
+            if config.graph_dsn
+            else None
+        )
 
     async def close(self) -> None:
         await self.http_client.aclose()
@@ -262,6 +279,13 @@ class GatewayRuntime:
 
     def platform_vars(self) -> dict[str, Any]:
         return yaml_file(self.config.platform_vars_path, {})
+
+    def world_state_client(self) -> WorldStateClient:
+        kwargs: dict[str, Any] = {}
+        if (self.config.world_state_dsn or "").startswith("sqlite:///"):
+            kwargs["current_view_name"] = SQLITE_CURRENT_VIEW_NAME
+            kwargs["snapshots_table_name"] = SQLITE_SNAPSHOTS_TABLE_NAME
+        return WorldStateClient(repo_root=self.config.repo_root, dsn=self.config.world_state_dsn, **kwargs)
 
     def drift_receipt(self) -> tuple[Path | None, dict[str, Any] | None]:
         if not self.config.drift_receipts_dir.exists():
@@ -322,6 +346,71 @@ class GatewayRuntime:
                 "error": str(exc),
             }
 
+    def collect_platform_health(self) -> dict[str, Any]:
+        try:
+            payload = self.world_state_client().get("service_health", allow_stale=True)
+            source = "world_state"
+        except (SurfaceNotFoundError, WorldStateUnavailable, OSError, RuntimeError):
+            payload = collect_service_health(self.config.repo_root)
+            source = "live_probe"
+
+        catalog = self.primary_service_catalog()
+        items = payload.get("services", []) if isinstance(payload, dict) else []
+        services_by_id = {
+            str(item.get("service_id") or item.get("id")): item
+            for item in items
+            if isinstance(item, dict) and (item.get("service_id") or item.get("id"))
+        }
+
+        services: list[dict[str, Any]] = []
+        for service in catalog.get("services", []):
+            if not isinstance(service, dict) or service.get("lifecycle_status") != "active":
+                continue
+            service_id = str(service.get("id"))
+            health = services_by_id.get(service_id, {})
+            status = str(health.get("status", "unknown"))
+            detail = (
+                health.get("detail")
+                or health.get("error")
+                or (
+                    f"HTTP {health['http_status']}"
+                    if isinstance(health, dict) and health.get("http_status") is not None
+                    else "No live health data"
+                )
+            )
+            services.append(
+                {
+                    "service_id": service_id,
+                    "name": service.get("name", service_id),
+                    "status": status,
+                    "detail": str(detail),
+                    "vm": service.get("vm"),
+                    "vmid": service.get("vmid"),
+                    "public_url": service.get("public_url"),
+                    "internal_url": service.get("internal_url"),
+                    "uptime_monitor_name": service.get("uptime_monitor_name"),
+                    "probe_source": health.get("probe_source"),
+                    "probe_kind": health.get("probe_kind"),
+                    "http_status": health.get("http_status"),
+                }
+            )
+
+        statuses = {item["status"] for item in services}
+        overall = "healthy"
+        if any(status in {"down", "error", "failed"} for status in statuses):
+            overall = "degraded"
+        elif any(status in {"degraded", "warn", "warning", "unhealthy", "unreachable"} for status in statuses):
+            overall = "degraded"
+        elif statuses and statuses == {"unknown"}:
+            overall = "unknown"
+
+        return {
+            "status": overall,
+            "service_count": len(services),
+            "services": services,
+            "source": source,
+        }
+
 
 def build_config() -> GatewayConfig:
     repo_root = Path(os.environ.get("LV3_GATEWAY_REPO_ROOT", REPO_ROOT))
@@ -352,6 +441,13 @@ def build_config() -> GatewayConfig:
         nats_url=os.environ.get("NATS_URL") or None,
         deploy_webhook_url=os.environ.get("LV3_GATEWAY_DEPLOY_WEBHOOK_URL") or None,
         secret_rotation_webhook_url=os.environ.get("LV3_GATEWAY_SECRET_ROTATION_WEBHOOK_URL") or None,
+        graph_dsn=os.environ.get("LV3_GATEWAY_GRAPH_DSN")
+        or os.environ.get("LV3_GRAPH_DSN")
+        or os.environ.get("WORLD_STATE_DSN")
+        or None,
+        world_state_dsn=os.environ.get("LV3_GATEWAY_WORLD_STATE_DSN")
+        or os.environ.get("WORLD_STATE_DSN")
+        or None,
         openapi_include_upstreams=os.environ.get("LV3_GATEWAY_INCLUDE_UPSTREAM_OPENAPI", "false").lower()
         in {"1", "true", "yes"},
     )
@@ -420,6 +516,12 @@ async def emit_request_event(
         return
 
 
+def require_graph_runtime(runtime: GatewayRuntime) -> DependencyGraphClient:
+    if runtime.graph_client is None:
+        raise HTTPException(status_code=503, detail="dependency graph runtime is not configured")
+    return runtime.graph_client
+
+
 def create_app(config: GatewayConfig | None = None) -> FastAPI:
     gateway_config = config or build_config()
 
@@ -475,7 +577,30 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
         request: Request,
         identity: dict[str, Any] = Depends(require_identity),
     ) -> dict[str, Any]:
-        return await gateway_health(request, identity)
+        started_at = time.perf_counter()
+        if not has_required_role(identity, "platform-read"):
+            raise HTTPException(status_code=403, detail="missing required role 'platform-read'")
+        runtime: GatewayRuntime = request.app.state.runtime
+        payload = await asyncio.to_thread(runtime.collect_platform_health)
+        await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
+        return payload
+
+    @app.get("/v1/platform/health/{service_id}")
+    async def platform_service_health(
+        service_id: str,
+        request: Request,
+        identity: dict[str, Any] = Depends(require_identity),
+    ) -> dict[str, Any]:
+        started_at = time.perf_counter()
+        if not has_required_role(identity, "platform-read"):
+            raise HTTPException(status_code=403, detail="missing required role 'platform-read'")
+        runtime: GatewayRuntime = request.app.state.runtime
+        payload = await asyncio.to_thread(runtime.collect_platform_health)
+        for service in payload["services"]:
+            if service["service_id"] == service_id:
+                await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
+                return service
+        raise HTTPException(status_code=404, detail=f"unknown service '{service_id}'")
 
     @app.get("/v1/platform/services")
     async def platform_services(
@@ -534,6 +659,124 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
             "guest_catalog": platform_vars.get("platform_guest_catalog", {}),
             "service_topology": platform_vars.get("platform_service_topology", {}),
             "public_edge": platform_vars.get("public_edge_service_topology", {}),
+        }
+
+    @app.get("/v1/search")
+    async def platform_search(
+        request: Request,
+        q: str = Query(min_length=2),
+        collection: str | None = Query(default=None),
+        limit: int = Query(default=10, ge=1, le=25),
+        identity: dict[str, Any] = Depends(require_identity),
+    ) -> dict[str, Any]:
+        started_at = time.perf_counter()
+        if not has_required_role(identity, "platform-read"):
+            raise HTTPException(status_code=403, detail="missing required role 'platform-read'")
+        runtime: GatewayRuntime = request.app.state.runtime
+        payload = runtime.search_client.query(q, collection=collection, limit=limit)
+        await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
+        return payload
+
+    @app.get("/v1/platform/search")
+    async def platform_search_legacy(
+        request: Request,
+        q: str = Query(min_length=2),
+        collection: str | None = Query(default=None),
+        limit: int = Query(default=10, ge=1, le=25),
+        identity: dict[str, Any] = Depends(require_identity),
+    ) -> dict[str, Any]:
+        return await platform_search(request, q=q, collection=collection, limit=limit, identity=identity)
+
+    @app.get("/v1/graph/nodes")
+    async def graph_nodes(
+        request: Request,
+        identity: dict[str, Any] = Depends(require_identity),
+    ) -> dict[str, Any]:
+        started_at = time.perf_counter()
+        if not has_required_role(identity, "platform-read"):
+            raise HTTPException(status_code=403, detail="missing required role 'platform-read'")
+        runtime: GatewayRuntime = request.app.state.runtime
+        graph_client = require_graph_runtime(runtime)
+        nodes = graph_client.list_nodes()
+        await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
+        return {"count": len(nodes), "nodes": nodes}
+
+    @app.get("/v1/graph/nodes/{node_id:path}/descendants")
+    async def graph_descendants(
+        node_id: str,
+        request: Request,
+        identity: dict[str, Any] = Depends(require_identity),
+    ) -> dict[str, Any]:
+        started_at = time.perf_counter()
+        if not has_required_role(identity, "platform-read"):
+            raise HTTPException(status_code=403, detail="missing required role 'platform-read'")
+        runtime: GatewayRuntime = request.app.state.runtime
+        graph_client = require_graph_runtime(runtime)
+        try:
+            descendants = graph_client.descendants(node_id)
+        except NodeNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
+        return {"node_id": node_id, "count": len(descendants), "nodes": descendants}
+
+    @app.get("/v1/graph/nodes/{node_id:path}/ancestors")
+    async def graph_ancestors(
+        node_id: str,
+        request: Request,
+        identity: dict[str, Any] = Depends(require_identity),
+    ) -> dict[str, Any]:
+        started_at = time.perf_counter()
+        if not has_required_role(identity, "platform-read"):
+            raise HTTPException(status_code=403, detail="missing required role 'platform-read'")
+        runtime: GatewayRuntime = request.app.state.runtime
+        graph_client = require_graph_runtime(runtime)
+        try:
+            ancestors = graph_client.ancestors(node_id)
+        except NodeNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
+        return {"node_id": node_id, "count": len(ancestors), "nodes": ancestors}
+
+    @app.get("/v1/graph/nodes/{node_id:path}/health")
+    async def graph_health(
+        node_id: str,
+        request: Request,
+        identity: dict[str, Any] = Depends(require_identity),
+    ) -> dict[str, Any]:
+        started_at = time.perf_counter()
+        if not has_required_role(identity, "platform-read"):
+            raise HTTPException(status_code=403, detail="missing required role 'platform-read'")
+        runtime: GatewayRuntime = request.app.state.runtime
+        graph_client = require_graph_runtime(runtime)
+        try:
+            payload = graph_client.node_health(node_id)
+        except NodeNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
+        return payload
+
+    @app.get("/v1/graph/path")
+    async def graph_path(
+        from_node: str,
+        to_node: str,
+        request: Request,
+        identity: dict[str, Any] = Depends(require_identity),
+    ) -> dict[str, Any]:
+        started_at = time.perf_counter()
+        if not has_required_role(identity, "platform-read"):
+            raise HTTPException(status_code=403, detail="missing required role 'platform-read'")
+        runtime: GatewayRuntime = request.app.state.runtime
+        graph_client = require_graph_runtime(runtime)
+        try:
+            path_nodes = graph_client.path(from_node, to_node)
+        except NodeNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
+        return {
+            "from_node": from_node,
+            "to_node": to_node,
+            "path": path_nodes,
+            "hop_count": max(len(path_nodes) - 1, 0),
         }
 
     @app.post("/v1/platform/deploy", status_code=202)

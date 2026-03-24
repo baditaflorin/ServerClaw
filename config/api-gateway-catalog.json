@@ -82,7 +82,7 @@
     {
       "id": "ops_portal",
       "name": "Ops Portal",
-      "upstream": "http://10.10.10.20:8090",
+      "upstream": "http://10.10.10.20:8092",
       "gateway_prefix": "/v1/ops-portal",
       "auth": "keycloak_jwt",
       "required_role": "platform-operator",

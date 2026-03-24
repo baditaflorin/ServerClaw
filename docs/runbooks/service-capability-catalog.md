@@ -50,6 +50,7 @@ Validation checks:
 - coverage for every service in `config/health-probe-catalog.json`
 - runbook paths exist
 - referenced Uptime Kuma monitors exist
+- generated monitor bindings stay aligned with `config/health-probe-catalog.json`
 - referenced health probes, images, and secrets exist
 - active services match the canonical host/service topology where applicable
 

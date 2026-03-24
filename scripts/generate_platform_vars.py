@@ -20,14 +20,17 @@ GENERATED_HEADER = (
     "# inventory/host_vars/proxmox_florin.yml. Do not edit by hand.\n"
 )
 PORT_KEYS = (
+    "alertmanager_port",
     "monitoring_grafana_port",
     "monitoring_influxdb_port",
     "monitoring_loki_port",
+    "monitoring_blackbox_exporter_port",
     "monitoring_prometheus_port",
     "monitoring_tempo_http_port",
     "monitoring_otlp_grpc_port",
     "monitoring_otlp_http_port",
     "mail_platform_gateway_port",
+    "ntfy_port",
     "openbao_http_port",
     "openbao_proxy_port",
     "windmill_server_port",
@@ -41,6 +44,7 @@ PORT_KEYS = (
     "api_gateway_internal_port",
     "platform_context_internal_port",
     "platform_context_host_proxy_port",
+    "ops_portal_port",
     "ntopng_http_port",
     "ntopng_proxy_port",
     "portainer_https_port",
@@ -99,19 +103,27 @@ def resolve_dns_target(target: str, host_vars: dict[str, Any]) -> str:
         return require_string(
             host_vars.get("management_tailscale_ipv4"), "host_vars.management_tailscale_ipv4"
         )
-    return target
+    resolved = resolve_host_var_template(target, host_vars, "dns target")
+    if resolved is target:
+        return target
+    return require_string(resolved, "dns target")
 
 
 def resolve_host_var_template(value: Any, host_vars: dict[str, Any], path: str) -> Any:
     if not isinstance(value, str):
         return value
-    match = re.fullmatch(r"{{\s*([a-z0-9_]+)\s*}}", value)
+    match = re.fullmatch(r"{{\s*([a-z0-9_]+(?:\.[a-z0-9_]+)*)\s*}}", value)
     if match is None:
         return value
-    key = match.group(1)
-    if key not in host_vars:
-        raise ValueError(f"{path} references unknown host var {key!r}")
-    return host_vars[key]
+    keys = match.group(1).split(".")
+    current: Any = host_vars
+    traversed = []
+    for key in keys:
+        traversed.append(key)
+        if not isinstance(current, dict) or key not in current:
+            raise ValueError(f"{path} references unknown host var {'.'.join(traversed)!r}")
+        current = current[key]
+    return current
 
 
 def extract_port(raw_url: str, path: str) -> int:
@@ -210,7 +222,10 @@ def build_service_urls(
     if public_hostname:
         urls["public"] = f"https://{public_hostname}"
 
-    if service_id == "grafana":
+    if service_id == "alertmanager":
+        urls["internal"] = service_url("http", private_ip, ports["alertmanager_port"])
+        port_map["internal"] = ports["alertmanager_port"]
+    elif service_id == "grafana":
         urls["internal"] = service_url("http", private_ip, ports["monitoring_grafana_port"])
         urls["influxdb"] = service_url("http", private_ip, ports["monitoring_influxdb_port"])
         urls["loki_push"] = service_url(
@@ -270,6 +285,15 @@ def build_service_urls(
         urls["controller"] = service_url("http", tailscale_ipv4, ports["platform_context_host_proxy_port"])
         port_map["internal"] = ports["platform_context_internal_port"]
         port_map["controller"] = ports["platform_context_host_proxy_port"]
+    elif service_id == "ntfy":
+        urls["internal"] = service_url("http", private_ip, ports["ntfy_port"])
+        port_map["internal"] = ports["ntfy_port"]
+    elif service_id == "ops_portal":
+        urls["internal"] = service_url("http", private_ip, ports["ops_portal_port"])
+        port_map["internal"] = ports["ops_portal_port"]
+    elif service_id == "status_page":
+        urls["internal"] = service_url("http", private_ip, 3001)
+        port_map["internal"] = 3001
     elif service_id == "ntopng":
         urls["internal"] = service_url("http", "127.0.0.1", ports["ntopng_http_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["ntopng_proxy_port"])
@@ -312,10 +336,22 @@ def build_service_topology(
         service = copy.deepcopy(raw_service)
         owning_vm = require_string(service.get("owning_vm"), f"host_vars.lv3_service_topology.{service_id}.owning_vm")
         if "private_ip" in service:
-            private_ip = require_string(
+            private_ip_candidate = require_string(
                 service.get("private_ip"),
                 f"host_vars.lv3_service_topology.{service_id}.private_ip",
             )
+            private_ip_candidate = require_string(
+                resolve_host_var_template(
+                    private_ip_candidate,
+                    host_vars,
+                    f"host_vars.lv3_service_topology.{service_id}.private_ip",
+                ),
+                f"host_vars.lv3_service_topology.{service_id}.private_ip",
+            )
+            if "proxmox_guests" in private_ip_candidate:
+                private_ip = tailscale_ipv4 if owning_vm == host_id else guest_ipv4_by_name[owning_vm]
+            else:
+                private_ip = private_ip_candidate
         else:
             private_ip = tailscale_ipv4 if owning_vm == host_id else guest_ipv4_by_name[owning_vm]
         service["service_id"] = service_id
@@ -489,6 +525,7 @@ def build_platform_vars(
             },
         },
         "platform_ports": resolved_ports,
+        "platform_port_assignments": copy.deepcopy(resolved_ports),
         "platform_guest_catalog": guest_catalog,
         "platform_service_topology": service_topology,
         "platform_dns_records": dns_records,

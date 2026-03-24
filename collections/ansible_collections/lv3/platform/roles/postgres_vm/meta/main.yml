@@ -1,7 +1,3 @@
 ---
 dependencies:
   - role: lv3.platform.preflight
-    vars:
-      preflight_required_vars:
-        - postgres_vm_version
-        - postgres_vm_admin_user
