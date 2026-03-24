@@ -273,7 +273,7 @@
     - name: Reset the stale Windmill compose network before retrying startup
       ansible.builtin.shell: |
         set -euo pipefail
-        docker compose --file "{{ windmill_compose_file }}" rm -fsv windmill_server windmill_worker windmill_worker_native >/dev/null 2>&1 || true
+        docker compose --file "{{ windmill_compose_file }}" down --remove-orphans >/dev/null 2>&1 || true
         docker network rm windmill_default >/dev/null 2>&1 || true
         echo changed
       args:
