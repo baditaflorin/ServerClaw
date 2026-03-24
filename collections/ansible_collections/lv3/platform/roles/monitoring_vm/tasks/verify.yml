@@ -113,6 +113,48 @@
   changed_when: false
   no_log: true
 
+- name: Verify public Grafana dashboard URLs redirect unauthenticated viewers to login
+  ansible.builtin.uri:
+    url: "{{ monitoring_grafana_public_url }}/d/{{ monitoring_grafana_dashboard_uid }}/{{ monitoring_grafana_dashboard_uid }}"
+    method: GET
+    follow_redirects: none
+    status_code: 302
+  delegate_to: localhost
+  become: false
+  register: monitoring_verify_public_dashboard_redirect
+  changed_when: false
+
+- name: Assert the public Grafana dashboard redirect points at login
+  ansible.builtin.assert:
+    that:
+      - "'/login' in (monitoring_verify_public_dashboard_redirect.location | default(''))"
+    fail_msg: "Unauthenticated requests to the public Grafana dashboard URL are not being redirected to login."
+
+- name: Verify the public Grafana health endpoint is not exposed
+  ansible.builtin.uri:
+    url: "{{ monitoring_grafana_public_url }}/api/health"
+    method: GET
+    status_code: 404
+  delegate_to: localhost
+  become: false
+  register: monitoring_verify_public_health_block
+  changed_when: false
+
+- name: Verify Grafana version headers are stripped at the public edge
+  ansible.builtin.command:
+    argv:
+      - curl
+      - -fsSI
+      - "{{ monitoring_grafana_public_url }}/login"
+  delegate_to: localhost
+  become: false
+  register: monitoring_verify_public_login_headers
+  changed_when: false
+  failed_when: >-
+    monitoring_verify_public_login_headers.rc != 0
+    or 'X-Grafana-Version:' in monitoring_verify_public_login_headers.stdout
+    or 'Via:' in monitoring_verify_public_login_headers.stdout
+
 - name: Verify Prometheus SLO rules are loaded
   ansible.builtin.uri:
     url: "{{ monitoring_prometheus_url }}/api/v1/rules"

@@ -26,6 +26,7 @@ This runbook converges the dedicated monitoring VM `140` at `10.10.10.40` with:
 - Docker container log shipping from `docker-runtime-lv3`
 
 Grafana is available both on the private VM and at [https://grafana.lv3.org](https://grafana.lv3.org).
+The public hostname is operator-facing only: anonymous dashboard access is denied, public dashboard sharing is disabled, and the public edge now returns `404` for `/api/health` so the external surface does not disclose the running Grafana version.
 
 ## Command
 
@@ -104,6 +105,29 @@ Verify the managed overview dashboard exists and has the expected title:
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'curl -fsS -u admin:$(sudo cat /etc/lv3/monitoring/grafana-admin-password) http://127.0.0.1:3000/api/dashboards/uid/lv3-platform-overview'
 ```
+
+Verify unauthenticated public dashboard URLs do not expose dashboard content:
+
+```bash
+curl -I https://grafana.lv3.org/d/lv3-platform-overview/lv3-platform-overview
+```
+
+Expected result:
+
+- `302 Found`
+- `Location: /login...`
+
+Verify the public edge blocks the Grafana health API and strips version headers:
+
+```bash
+curl -i https://grafana.lv3.org/api/health
+curl -I https://grafana.lv3.org/login
+```
+
+Expected result:
+
+- `/api/health` returns `404 Not Found`
+- the response headers do not include `X-Grafana-Version` or `Via`
 
 Verify the Grafana Loki datasource exists:
 

@@ -595,8 +595,15 @@ lv3_service_topology:
     edge:
       enabled: true
       tls: true
+      noindex: true
       kind: proxy
       upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring-lv3') | map(attribute='ipv4') | first) }}:3000"
+      proxy_hide_headers:
+        - X-Grafana-Version
+        - Via
+      blocked_exact_paths:
+        - path: /api/health
+          status: 404
   alertmanager:
     service_name: alertmanager
     owning_vm: monitoring-lv3

@@ -35,6 +35,7 @@ monitoring_grafana_dashboard_dir: /var/lib/grafana/dashboards/lv3
 monitoring_grafana_dashboard_file: /var/lib/grafana/dashboards/lv3/lv3-platform-overview.json
 monitoring_grafana_dashboard_uid: lv3-platform-overview
 monitoring_grafana_dashboard_title: LV3 Platform Overview
+monitoring_grafana_public_url: "https://{{ hostvars[groups['proxmox_hosts'][0]].lv3_service_topology.grafana.public_hostname }}"
 monitoring_grafana_vm_dashboard_dir: /var/lib/grafana/dashboards/lv3/vms
 monitoring_grafana_mail_dashboard_file: /var/lib/grafana/dashboards/lv3/lv3-mail-platform.json
 monitoring_grafana_mail_dashboard_uid: lv3-mail-platform

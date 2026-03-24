@@ -642,8 +642,15 @@ platform_service_topology:
     edge:
       enabled: true
       tls: true
+      noindex: true
       kind: proxy
       upstream: http://10.10.10.40:3000
+      proxy_hide_headers:
+        - X-Grafana-Version
+        - Via
+      blocked_exact_paths:
+        - path: /api/health
+          status: 404
     service_id: grafana
     ports:
       internal: 3000
@@ -1267,8 +1274,15 @@ public_edge_service_topology:
     edge:
       enabled: true
       tls: true
+      noindex: true
       kind: proxy
       upstream: http://10.10.10.40:3000
+      proxy_hide_headers:
+        - X-Grafana-Version
+        - Via
+      blocked_exact_paths:
+        - path: /api/health
+          status: 404
     service_id: grafana
     ports:
       internal: 3000

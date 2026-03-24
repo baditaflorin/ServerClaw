@@ -7,6 +7,7 @@ This runbook converges public `lv3.org` subdomain publication on the NGINX edge 
 ## Result
 
 - `grafana.lv3.org` reverse proxies to Grafana on `10.10.10.40:3000`
+- `grafana.lv3.org/api/health` is intentionally blocked at the edge so unauthenticated callers cannot read the Grafana version banner
 - `nginx.lv3.org` serves the edge landing page
 - `proxmox.lv3.org`, `docker.lv3.org`, and `build.lv3.org` serve explicit informational pages instead of the default Debian NGINX page
 - the edge obtains a Let's Encrypt certificate for the published subdomains and redirects HTTP to HTTPS
@@ -22,6 +23,8 @@ ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i /Users/live/Documents/GITHUB
 
 ```bash
 curl -I https://grafana.lv3.org
+curl -i https://grafana.lv3.org/api/health
+curl -I https://grafana.lv3.org/d/lv3-platform-overview/lv3-platform-overview
 curl -I https://nginx.lv3.org
 curl -I https://proxmox.lv3.org
 curl -I https://docker.lv3.org
@@ -30,7 +33,8 @@ curl -I https://build.lv3.org
 
 Expected result:
 
-- Grafana responds with a Grafana-origin redirect or login page
+- Grafana responds with a login redirect for dashboard URLs, not an anonymously readable dashboard
+- `https://grafana.lv3.org/api/health` returns `404 Not Found`
 - the other subdomains no longer return the default Debian NGINX page
 
 ## Notes

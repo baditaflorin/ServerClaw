@@ -259,6 +259,33 @@
     mode: "0640"
   notify: Restart Grafana
 
+- name: Keep the Grafana login form available for recovery
+  community.general.ini_file:
+    path: /etc/grafana/grafana.ini
+    section: auth
+    option: disable_login_form
+    value: "false"
+    mode: "0640"
+  notify: Restart Grafana
+
+- name: Disable Grafana public dashboards
+  community.general.ini_file:
+    path: /etc/grafana/grafana.ini
+    section: public_dashboards
+    option: enabled
+    value: "false"
+    mode: "0640"
+  notify: Restart Grafana
+
+- name: Disable Grafana embedding
+  community.general.ini_file:
+    path: /etc/grafana/grafana.ini
+    section: security
+    option: allow_embedding
+    value: "false"
+    mode: "0640"
+  notify: Restart Grafana
+
 - name: Bound Grafana annotation retention
   community.general.ini_file:
     path: /etc/grafana/grafana.ini
