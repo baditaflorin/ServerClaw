@@ -11,3 +11,4 @@
       - --remove-orphans
   args:
     chdir: "{{ ntfy_runtime_site_dir }}"
+  changed_when: true
