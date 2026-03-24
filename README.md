@@ -144,11 +144,11 @@ Template VM: `9000` `debian13-cloud-template`
 | `ntopng` | `2026-03-22-adr-0059-ntopng-live-apply` |
 | `open_webui` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
 | `openbao` | `2026-03-22-adr-0043-openbao-live-apply` |
-| `ops_portal` | `2026-03-24-adr-0093-interactive-ops-portal-live-apply` |
+| `ops_portal` | `2026-03-24-adr-0093-ops-portal-invalid-scope-live-apply` |
 | `platform_context` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
 | `portainer` | `2026-03-22-adr-0055-portainer-live-apply` |
 | `postgres_vm` | `2026-03-22-adr-0026-postgres-vm-live-apply` |
-| `public_edge_publication` | `2026-03-24-adr-0094-developer-portal-live-apply` |
+| `public_edge_publication` | `2026-03-24-adr-0093-ops-portal-invalid-scope-live-apply` |
 | `remote_build_gateway` | `2026-03-23-adr-0082-remote-build-gateway-live-apply` |
 | `runtime_container_telemetry` | `2026-03-22-adr-0040-runtime-container-telemetry-live-apply` |
 | `secret_rotation` | `2026-03-23-adr-0065-secret-rotation-live-apply` |

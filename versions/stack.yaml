@@ -7,7 +7,7 @@ live_apply_evidence:
   latest_receipts:
     monitoring: 2026-03-22-adr-0052-loki-live-apply
     mutation_audit: 2026-03-23-adr-0066-mutation-audit-live-apply
-    public_edge_publication: 2026-03-24-adr-0094-developer-portal-live-apply
+    public_edge_publication: 2026-03-24-adr-0093-ops-portal-invalid-scope-live-apply
     api_gateway: 2026-03-24-adr-0092-platform-api-gateway-live-apply
     docker_runtime: 2026-03-22-adr-0023-docker-runtime-live-apply
     postgres_vm: 2026-03-22-adr-0026-postgres-vm-live-apply
@@ -36,7 +36,7 @@ live_apply_evidence:
     remote_build_gateway: 2026-03-23-adr-0082-remote-build-gateway-live-apply
     tempo_tracing: 2026-03-22-adr-0053-tempo-traces-live-apply
     secret_rotation: 2026-03-23-adr-0065-secret-rotation-live-apply
-    ops_portal: 2026-03-24-adr-0093-interactive-ops-portal-live-apply
+    ops_portal: 2026-03-24-adr-0093-ops-portal-invalid-scope-live-apply
 
 desired_state:
   host_id: proxmox_florin
