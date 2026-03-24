@@ -1,3 +1,7 @@
+import json
+import os
+import shlex
+import subprocess
 from pathlib import Path
 
 
@@ -14,12 +18,29 @@ def main(repo_path: str = "/srv/proxmox_florin_server"):
     try:
         import yaml
     except ModuleNotFoundError:
-        return {
-            "status": "blocked",
-            "reason": "PyYAML is required on the worker to read config/operators.yaml",
-        }
+        workflow = repo_root / "scripts" / "operator_manager.py"
+        if not workflow.exists():
+            return {
+                "status": "blocked",
+                "reason": "repo checkout not mounted on the worker",
+                "expected_repo_path": str(repo_root),
+            }
+        command = ["uv", "run", "--with", "pyyaml", "python", str(workflow), "validate"]
+        env = dict(os.environ)
+        env["PYTHONPATH"] = f"{repo_root}:{env['PYTHONPATH']}" if env.get("PYTHONPATH") else str(repo_root)
+        result = subprocess.run(command, cwd=repo_root, env=env, text=True, capture_output=True, check=False)
+        if result.returncode != 0:
+            return {
+                "status": "error",
+                "command": " ".join(shlex.quote(part) for part in command),
+                "returncode": result.returncode,
+                "stdout": result.stdout.strip(),
+                "stderr": result.stderr.strip(),
+            }
+        payload = json.loads(result.stdout) if result.stdout.strip() else {}
+    else:
+        payload = yaml.safe_load(roster_path.read_text(encoding="utf-8")) or {}
 
-    payload = yaml.safe_load(roster_path.read_text(encoding="utf-8")) or {}
     operators = payload.get("operators")
     if not isinstance(operators, list):
         return {"status": "error", "reason": "config/operators.yaml does not define an operators list"}

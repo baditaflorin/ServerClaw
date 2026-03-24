@@ -28,6 +28,14 @@ type RosterPayload = {
   operators: OperatorRecord[];
 };
 
+type RosterPayloadError = {
+  status?: string;
+  reason?: string;
+  stderr?: string;
+  error?: string;
+  message?: string;
+};
+
 type ActionPayload = {
   status: string;
   returncode: number;
@@ -105,6 +113,18 @@ function formatDate(value?: string): string {
   return date.toLocaleString();
 }
 
+function extractRosterError(payload: RosterPayloadError): string {
+  return payload.reason || payload.stderr || payload.error || payload.message || "Windmill returned an invalid operator roster payload.";
+}
+
+function isRosterPayload(payload: unknown): payload is RosterPayload {
+  if (!payload || typeof payload !== "object") {
+    return false;
+  }
+  const candidate = payload as Partial<RosterPayload>;
+  return candidate.status === "ok" && Array.isArray(candidate.operators);
+}
+
 function App() {
   const [roster, setRoster] = useState<RosterPayload | null>(null);
   const [rosterLoading, setRosterLoading] = useState(true);
@@ -129,7 +149,14 @@ function App() {
     setRosterLoading(true);
     setRosterError("");
     try {
-      const payload = (await backend.list_operators({})) as RosterPayload;
+      const payload = await backend.list_operators({});
+      if (!isRosterPayload(payload)) {
+        setRoster(null);
+        setSelectedOperatorId("");
+        setOffboard(initialOffboardState);
+        setRosterError(extractRosterError((payload ?? {}) as RosterPayloadError));
+        return;
+      }
       setRoster(payload);
       if (!selectedOperatorId && payload.operators.length > 0) {
         const first = payload.operators[0].id;

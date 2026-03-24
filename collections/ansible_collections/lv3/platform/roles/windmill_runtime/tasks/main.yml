@@ -54,6 +54,54 @@
         mode: "0755"
       - path: "{{ windmill_secret_dir }}"
         mode: "0700"
+      - path: "{{ windmill_worker_repo_checkout_host_path }}"
+        mode: "0755"
+
+- name: Create a local staging archive path for the Windmill worker checkout
+  ansible.builtin.tempfile:
+    state: file
+    suffix: .tar.gz
+  delegate_to: localhost
+  become: false
+  register: windmill_worker_checkout_archive_local
+
+- name: Build the local staging archive for the Windmill worker checkout
+  vars:
+    mutation_audit_action: sync.windmill_worker_checkout
+    mutation_audit_target: "{{ windmill_worker_repo_checkout_host_path }}"
+  ansible.builtin.shell: |
+    set -euo pipefail
+    tar -C "{{ windmill_worker_checkout_repo_root_local_dir }}" -czf "{{ windmill_worker_checkout_archive_local.path }}" {{ windmill_worker_checkout_sync_paths | map('quote') | join(' ') }}
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  tags:
+    - mutation
+
+- name: Copy the staged Windmill worker checkout archive to the guest
+  ansible.builtin.copy:
+    src: "{{ windmill_worker_checkout_archive_local.path }}"
+    dest: "{{ windmill_site_dir }}/worker-checkout.tar.gz"
+    mode: "0600"
+
+- name: Expand the staged Windmill worker checkout on the guest
+  ansible.builtin.unarchive:
+    src: "{{ windmill_site_dir }}/worker-checkout.tar.gz"
+    dest: "{{ windmill_worker_repo_checkout_host_path }}"
+    remote_src: true
+
+- name: Remove the staged Windmill worker checkout archive from the guest
+  ansible.builtin.file:
+    path: "{{ windmill_site_dir }}/worker-checkout.tar.gz"
+    state: absent
+
+- name: Remove the local staging archive for the Windmill worker checkout
+  ansible.builtin.file:
+    path: "{{ windmill_worker_checkout_archive_local.path }}"
+    state: absent
+  delegate_to: localhost
+  become: false
 
 - name: Ensure the platform mutation-audit directory exists
   ansible.builtin.file:
@@ -509,6 +557,22 @@
       password: "{{ windmill_superadmin_secret }}"
     return_content: true
     status_code: 200
+  changed_when: false
+  no_log: true
+
+- name: Delete existing repo-managed Windmill scripts before reseeding
+  ansible.builtin.uri:
+    url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id | urlencode }}/scripts/delete/p/{{ item.path | urlencode }}"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ windmill_superadmin_secret }}"
+    return_content: true
+    status_code:
+      - 200
+      - 404
+  loop: "{{ windmill_seed_scripts }}"
+  loop_control:
+    label: "{{ item.path }}"
   changed_when: false
   no_log: true
 

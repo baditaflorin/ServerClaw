@@ -39,6 +39,8 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert defaults["windmill_bootstrap_identity_email"] == "superadmin_secret@windmill.dev"
     assert defaults["windmill_bootstrap_identity_username"] == "superadmin_secret"
     assert defaults["windmill_bootstrap_identity_login_type"] == "password"
+    assert defaults["windmill_worker_checkout_repo_root_local_dir"] == "{{ playbook_dir }}/.."
+    assert defaults["windmill_worker_checkout_sync_paths"] == ["config", "platform", "scripts"]
     weekly_schedule = next(entry for entry in defaults["windmill_seed_schedules"] if entry["path"] == "f/lv3/build_cache_maintenance_weekly")
     assert weekly_schedule["schedule"] == "0 0 4 * * 7"
 
@@ -53,6 +55,19 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     assert package["dependencies"]["react"] == "19.0.0"
     assert package["dependencies"]["windmill-client"] == "^1"
     assert "Operator Access Admin" in app_source
+    assert "isRosterPayload" in app_source
+    assert "candidate.status === \"ok\" && Array.isArray(candidate.operators)" in app_source
+    assert "extractRosterError" in app_source
+    roster_script = (REPO_ROOT / "config/windmill/scripts/operator-roster.py").read_text()
+    onboard_script = (REPO_ROOT / "config/windmill/scripts/operator-onboard.py").read_text()
+    offboard_script = (REPO_ROOT / "config/windmill/scripts/operator-offboard.py").read_text()
+    sync_script = (REPO_ROOT / "config/windmill/scripts/sync-operators.py").read_text()
+    inventory_script = (REPO_ROOT / "config/windmill/scripts/operator-inventory.py").read_text()
+    for script_source in (roster_script, onboard_script, offboard_script, sync_script, inventory_script):
+        assert "\"uv\"" in script_source
+        assert "\"run\"" in script_source
+        assert "\"pyyaml\"" in script_source
+        assert "\"PYTHONPATH\"" in script_source
     assert "backend.create_operator" in app_source
     assert "backend.offboard_operator" in app_source
     assert "backend.sync_operators" in app_source
@@ -126,6 +141,12 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     tasks = (
         REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml"
     ).read_text()
+    compose_template = (
+        REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/docker-compose.yml.j2"
+    ).read_text()
+    defaults = yaml.safe_load(
+        (REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml").read_text()
+    )
 
     assert "Ensure the Windmill bootstrap workspace identity is consistent" in tasks
     assert "INSERT INTO password" in tasks
@@ -136,9 +157,17 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "/api/users/set_login_type/" in tasks
     assert "Ensure the Windmill bootstrap admin password matches the managed secret" in tasks
     assert "/api/users/set_password_of/" in tasks
+    assert "/api/w/{{ windmill_workspace_id | urlencode }}/scripts/delete/p/" in tasks
     assert "Create repo-managed Windmill schedules" in tasks
     assert "status_code:\n      - 200\n      - 201\n      - 400" in tasks
     assert "Sync repo-managed Windmill raw apps" in tasks
     assert "wmill sync push" in tasks
     assert "--skip-branch-validation" in tasks
     assert "WM_TOKEN" in tasks
+    assert "Build the local staging archive for the Windmill worker checkout" in tasks
+    assert "Expand the staged Windmill worker checkout on the guest" in tasks
+    assert "windmill_worker_checkout_repo_root_local_dir" in tasks
+    assert "windmill_worker_checkout_sync_paths" in tasks
+    assert defaults["windmill_worker_repo_checkout_host_path"] == "/srv/proxmox_florin_server"
+    assert defaults["windmill_worker_repo_checkout_container_path"] == "/srv/proxmox_florin_server"
+    assert "{{ windmill_worker_repo_checkout_host_path }}:{{ windmill_worker_repo_checkout_container_path }}" in compose_template

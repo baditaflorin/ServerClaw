@@ -17,7 +17,7 @@ It wraps the existing ADR 0108 backend so operators can:
 - Windmill workspace: `lv3`
 - Raw app path: `f/lv3/operator_access_admin`
 - Windmill base URL: `http://100.118.189.95:8005`
-- Direct app route: `http://100.118.189.95:8005/apps/get/f/lv3/operator_access_admin`
+- Direct app route: `http://100.118.189.95:8005/apps/get/p/f/lv3/operator_access_admin`
 
 The app is private to the Windmill workspace. It is not published anonymously.
 
@@ -76,5 +76,5 @@ ANSIBLE_CONFIG=ansible.cfg ANSIBLE_COLLECTIONS_PATH=collections uvx --from ansib
 ## Notes
 
 - The bootstrap password is intentionally shown once in the onboarding result and is not written to git.
-- The app depends on the worker checkout being mounted at `/srv/proxmox_florin_server`, the same assumption used by the existing ADR 0108 Windmill wrappers.
+- The app depends on the worker checkout being mounted at `/srv/proxmox_florin_server`; the Windmill runtime now bind-mounts that host checkout into both worker pools.
 - The app is a Windmill-private admin surface; `ops.lv3.org` remains a separate portal.
