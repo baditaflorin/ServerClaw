@@ -3,9 +3,11 @@ from __future__ import annotations
 import asyncio
 import base64
 import hashlib
+import importlib.util
 import json
 import os
 import socket
+import sys
 import time
 import uuid
 from contextlib import asynccontextmanager
@@ -21,8 +23,41 @@ from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_PLATFORM_ROOT = REPO_ROOT / "platform"
+
+
+def _load_repo_platform_package() -> None:
+    current = sys.modules.get("platform")
+    current_file = getattr(current, "__file__", "") or ""
+    if current_file.startswith(str(REPO_PLATFORM_ROOT)):
+        return
+    spec = importlib.util.spec_from_file_location(
+        "platform",
+        REPO_PLATFORM_ROOT / "__init__.py",
+        submodule_search_locations=[str(REPO_PLATFORM_ROOT)],
+    )
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"unable to load repo platform package from {REPO_PLATFORM_ROOT}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["platform"] = module
+    spec.loader.exec_module(module)
+
+
+_load_repo_platform_package()
+
 from api_gateway_catalog import load_api_gateway_catalog
-from platform.graph import DependencyGraphClient, NodeNotFoundError
+GRAPH_RUNTIME_IMPORT_ERROR: str | None = None
+
+try:
+    from platform.graph import DependencyGraphClient, NodeNotFoundError
+except Exception as exc:  # noqa: BLE001
+    DependencyGraphClient = Any  # type: ignore[assignment]
+
+    class NodeNotFoundError(RuntimeError):
+        pass
+
+    GRAPH_RUNTIME_IMPORT_ERROR = str(exc)
 from platform.health import HealthCompositeClient, ServiceHealthNotFoundError
 from platform.world_state.client import SurfaceNotFoundError, WorldStateClient, WorldStateUnavailable
 from platform.world_state.materializer import SQLITE_CURRENT_VIEW_NAME, SQLITE_SNAPSHOTS_TABLE_NAME
@@ -32,9 +67,6 @@ try:
     from search_fabric import SearchClient
 except ImportError:  # pragma: no cover - packaged import path
     from scripts.search_fabric import SearchClient
-
-
-REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 def b64url_decode(value: str) -> bytes:
@@ -263,11 +295,12 @@ class GatewayRuntime:
             client=self.http_client,
         )
         self.event_emitter = NatsEventEmitter(config.nats_url)
-        self.graph_client = (
-            DependencyGraphClient(dsn=config.graph_dsn, world_state_dsn=config.world_state_dsn or config.graph_dsn)
-            if config.graph_dsn
-            else None
-        )
+        self.graph_client = None
+        if config.graph_dsn and GRAPH_RUNTIME_IMPORT_ERROR is None:
+            self.graph_client = DependencyGraphClient(
+                dsn=config.graph_dsn,
+                world_state_dsn=config.world_state_dsn or config.graph_dsn,
+            )
         self.health_client = HealthCompositeClient(
             repo_root=config.repo_root,
             dsn=config.world_state_dsn or config.graph_dsn,
@@ -521,7 +554,10 @@ async def emit_request_event(
 
 def require_graph_runtime(runtime: GatewayRuntime) -> DependencyGraphClient:
     if runtime.graph_client is None:
-        raise HTTPException(status_code=503, detail="dependency graph runtime is not configured")
+        detail = "dependency graph runtime is not configured"
+        if GRAPH_RUNTIME_IMPORT_ERROR:
+            detail = f"dependency graph runtime unavailable: {GRAPH_RUNTIME_IMPORT_ERROR}"
+        raise HTTPException(status_code=503, detail=detail)
     return runtime.graph_client
 
 

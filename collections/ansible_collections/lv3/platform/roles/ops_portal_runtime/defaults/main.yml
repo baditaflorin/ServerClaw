@@ -1,4 +1,5 @@
 ---
+ops_portal_gateway_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('api_gateway') }}"
 ops_portal_site_dir: /opt/ops-portal
 ops_portal_service_dir: "{{ ops_portal_site_dir }}/service"
 ops_portal_data_dir: "{{ ops_portal_site_dir }}/data"
@@ -11,13 +12,14 @@ ops_portal_bind_address: 0.0.0.0
 ops_portal_container_port: "{{ ops_portal_internal_port }}"
 ops_portal_verify_address: "{{ ansible_host | default('127.0.0.1') }}"
 ops_portal_internal_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.ops_portal_port | default(8092) }}"
-ops_portal_gateway_url: http://api-gateway:8080
+ops_portal_gateway_url: >-
+  http://{{ ops_portal_gateway_service_topology.private_ip }}:{{ hostvars['proxmox_florin'].platform_port_assignments.api_gateway_internal_port | default(8083) }}
 ops_portal_public_base_url: https://ops.lv3.org
 ops_portal_docs_base_url: https://docs.lv3.org
 ops_portal_grafana_logs_url: https://grafana.lv3.org/explore?left=%7B%22queries%22:%5B%5D%7D
 ops_portal_service_image_name: lv3-ops-portal
 ops_portal_repo_root: "{{ playbook_dir | dirname }}"
-ops_portal_static_api_token: ""
+ops_portal_static_api_token: "{{ lookup('ansible.builtin.file', ops_portal_repo_root ~ '/.local/platform-context/api-token.txt', errors='ignore') | trim }}"
 ops_portal_maintenance_windows_file: ""
 ops_portal_file_sources:
   - src: "{{ ops_portal_repo_root }}/config/service-capability-catalog.json"
