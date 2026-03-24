@@ -205,6 +205,15 @@ def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, F
     assert "Recent Live Applies" in response.text
 
 
+def test_dashboard_uses_same_origin_static_stylesheet(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
+    client, _gateway = portal_client
+
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert '<link rel="stylesheet" href="/static/portal.css">' in response.text
+
+
 def test_health_check_action_returns_fragment(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
     client, _gateway = portal_client
 

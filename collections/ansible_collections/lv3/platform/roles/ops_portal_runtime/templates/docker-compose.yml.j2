@@ -13,6 +13,9 @@ services:
       - 0.0.0.0
       - --port
       - "{{ ops_portal_container_port }}"
+      - --proxy-headers
+      - --forwarded-allow-ips
+      - "*"
     env_file:
       - {{ ops_portal_env_file }}
     ports:
