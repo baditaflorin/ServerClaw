@@ -44,6 +44,10 @@ EXCEPTION_OWNER ?=
 EXCEPTION_REVIEW_BY ?=
 SECRET_ID ?=
 ROTATION_ARGS ?=
+TOKEN_ID ?=
+TOKEN_LIFECYCLE_ARGS ?=
+EXPOSURE_SOURCE ?=
+EXPOSURE_NOTES ?=
 COLLECTION_NAMESPACE ?= lv3
 COLLECTION_NAME ?= platform
 COLLECTION_ROOT := $(REPO_ROOT)/collections/ansible_collections/$(COLLECTION_NAMESPACE)/$(COLLECTION_NAME)
@@ -66,7 +70,7 @@ CHECK_RUNNER_PYTHON_IMAGE ?= $(CHECK_RUNNER_REGISTRY)/python:$(CHECK_RUNNER_PYTH
 CHECK_RUNNER_INFRA_IMAGE ?= $(CHECK_RUNNER_REGISTRY)/infra:$(CHECK_RUNNER_INFRA_TAG)
 CHECK_RUNNER_SECURITY_IMAGE ?= $(CHECK_RUNNER_REGISTRY)/security:$(CHECK_RUNNER_SECURITY_TAG)
 
-.PHONY: validate validate-generated-vars validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-shell validate-json validate-compose-runtime-envs validate-data-models validate-health-probes validate-alert-rules validate-tofu generate-platform-vars show-platform-facts generate-slo-rules validate-generated-slo generate-status-docs generate-status generate-ops-portal generate-changelog-portal generate-dependency-diagram generate-uptime-kuma-monitors validate-generated-uptime-kuma-monitors docs deploy-ops-portal deploy-changelog-portal deploy-docs-portal validate-generated-docs validate-generated-portals receipts receipt-info workflows workflow-info commands command-info services show-service environments environment-info lanes lane-info api-publication api-publication-info agent-tools agent-tool-info export-mcp-tools check-image-freshness upgrade-container-image pin-image scaffold-service install-hooks pre-push-gate gate-status dr-status dr-runbook post-merge-gate integration-tests nightly-integration-tests scheduler-watchdog-loop triage-alert triage-calibration search-index-rebuild setup preflight syntax-check syntax-check-monitoring syntax-check-ntfy syntax-check-ntopng syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-openbao syntax-check-step-ca syntax-check-windmill syntax-check-keycloak syntax-check-netbox syntax-check-open-webui syntax-check-mattermost syntax-check-portainer syntax-check-rag-context syntax-check-secret-rotation collection-sync collection-build collection-publish collection-install check-platform-drift drift-report security-posture-report open-maintenance-window close-maintenance-window operator-onboard operator-offboard sync-operators quarterly-access-review install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-guest-network-policy converge-monitoring converge-ntfy converge-ntopng converge-docker-runtime converge-postgres-vm converge-mail-platform converge-openbao converge-step-ca converge-windmill converge-control-plane-recovery converge-keycloak converge-netbox converge-open-webui converge-mattermost converge-portainer converge-rag-context rotate-secret deploy-uptime-kuma uptime-kuma-manage uptime-robot-manage portainer-manage configure-backups configure-backup-vm database-dns provision-subdomain start-workstream capacity-report weekly-capacity-report promote live-apply-group live-apply-service live-apply-site build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-reaper install-cli update-cli validate-packer remote-packer-validate packer-template-rebuild remote-tofu-plan remote-tofu-apply tofu-drift tofu-import
+.PHONY: validate validate-generated-vars validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-shell validate-json validate-compose-runtime-envs validate-data-models validate-health-probes validate-tofu generate-platform-vars show-platform-facts generate-slo-rules validate-generated-slo generate-status-docs generate-status generate-ops-portal generate-changelog-portal generate-dependency-diagram docs deploy-ops-portal deploy-changelog-portal deploy-docs-portal validate-generated-docs validate-generated-portals receipts receipt-info workflows workflow-info commands command-info services show-service environments environment-info lanes lane-info api-publication api-publication-info agent-tools agent-tool-info export-mcp-tools check-image-freshness upgrade-container-image pin-image scaffold-service install-hooks pre-push-gate gate-status dr-status dr-runbook post-merge-gate integration-tests nightly-integration-tests triage-alert triage-calibration setup preflight syntax-check syntax-check-monitoring syntax-check-ntopng syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-openbao syntax-check-step-ca syntax-check-windmill syntax-check-keycloak syntax-check-netbox syntax-check-open-webui syntax-check-mattermost syntax-check-portainer syntax-check-rag-context syntax-check-secret-rotation collection-sync collection-build collection-publish collection-install check-platform-drift drift-report security-posture-report open-maintenance-window close-maintenance-window operator-onboard operator-offboard sync-operators quarterly-access-review install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-guest-network-policy converge-monitoring converge-ntopng converge-docker-runtime converge-postgres-vm converge-mail-platform converge-openbao converge-step-ca converge-windmill converge-control-plane-recovery converge-keycloak converge-netbox converge-open-webui converge-mattermost converge-portainer converge-rag-context rotate-secret deploy-uptime-kuma uptime-kuma-manage uptime-robot-manage portainer-manage configure-backups configure-backup-vm database-dns provision-subdomain start-workstream promote live-apply-group live-apply-service live-apply-site build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-reaper install-cli update-cli validate-packer remote-packer-validate packer-template-rebuild remote-tofu-plan remote-tofu-apply tofu-drift tofu-import
 
 validate:
 	$(REPO_ROOT)/scripts/validate_repo.sh
@@ -123,12 +127,6 @@ integration-tests:
 
 nightly-integration-tests:
 	python3 $(REPO_ROOT)/config/windmill/scripts/nightly-integration-tests.py --repo-path $(REPO_ROOT)
-
-scheduler-watchdog-loop:
-	python3 $(REPO_ROOT)/windmill/scheduler/watchdog-loop.py --repo-path $(REPO_ROOT)
-
-search-index-rebuild:
-	python3 $(REPO_ROOT)/config/windmill/scripts/rebuild-search-index.py --repo-path $(REPO_ROOT)
 
 triage-alert:
 	python3 $(REPO_ROOT)/scripts/incident_triage.py $(TRIAGE_ARGS)
@@ -195,20 +193,11 @@ generate-slo-rules:
 validate-generated-slo:
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/generate_slo_rules.py --check
 
-generate-uptime-kuma-monitors:
-	python3 $(REPO_ROOT)/scripts/uptime_contract.py --write
-
-validate-generated-uptime-kuma-monitors:
-	python3 $(REPO_ROOT)/scripts/uptime_contract.py --check
-
 show-platform-facts:
 	uvx --from ansible-core ansible-inventory -i $(ANSIBLE_INVENTORY) --host $(HOST) --yaml
 
 validate-health-probes:
 	$(REPO_ROOT)/scripts/validate_repo.sh health-probes
-
-validate-alert-rules:
-	$(REPO_ROOT)/scripts/validate_repo.sh alert-rules
 
 validate-tofu:
 	$(REPO_ROOT)/scripts/tofu_exec.sh validate all
@@ -352,9 +341,6 @@ syntax-check:
 
 syntax-check-monitoring:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/monitoring-stack.yml --syntax-check
-
-syntax-check-ntfy:
-	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/ntfy.yml --syntax-check
 
 syntax-check-ntopng:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/ntopng.yml --syntax-check
@@ -500,10 +486,6 @@ converge-monitoring:
 	$(MAKE) preflight WORKFLOW=converge-monitoring
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/monitoring-stack.yml --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 
-converge-ntfy:
-	$(MAKE) preflight WORKFLOW=converge-ntfy
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/ntfy.yml --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
-
 converge-ntopng:
 	$(MAKE) preflight WORKFLOW=converge-ntopng
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/ntopng.yml --private-key $(BOOTSTRAP_KEY)
@@ -538,10 +520,6 @@ converge-keycloak:
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/keycloak.yml --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 
-converge-api-gateway:
-	$(MAKE) preflight WORKFLOW=converge-api-gateway
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/api-gateway.yml --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
-
 converge-control-plane-recovery:
 	$(MAKE) preflight WORKFLOW=converge-control-plane-recovery
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/control-plane-recovery.yml --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
@@ -549,6 +527,10 @@ converge-control-plane-recovery:
 converge-netbox:
 	$(MAKE) preflight WORKFLOW=converge-netbox
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/netbox.yml --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+
+converge-api-gateway:
+	$(MAKE) preflight WORKFLOW=converge-api-gateway
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/api-gateway.yml --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 
 converge-open-webui:
 	$(MAKE) preflight WORKFLOW=converge-open-webui
@@ -570,6 +552,29 @@ rotate-secret:
 	$(MAKE) preflight WORKFLOW=rotate-secret
 	@test -n "$(SECRET_ID)" || (echo "set SECRET_ID=<secret-id>"; exit 1)
 	python3 $(REPO_ROOT)/scripts/secret_rotation.py --secret $(SECRET_ID) $(ROTATION_ARGS)
+
+token-inventory-audit:
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/token_lifecycle.py audit $(TOKEN_LIFECYCLE_ARGS)
+
+token-exposure-response:
+	@test -n "$(TOKEN_ID)" || (echo "set TOKEN_ID=<token-id>"; exit 1)
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/token_lifecycle.py exposure-response --token-id "$(TOKEN_ID)" $(if $(EXPOSURE_SOURCE),--exposure-source "$(EXPOSURE_SOURCE)",) $(if $(EXPOSURE_NOTES),--notes "$(EXPOSURE_NOTES)",) $(TOKEN_LIFECYCLE_ARGS)
+
+rotate-keycloak-client-secret:
+	@test -n "$(TOKEN_ID)" || (echo "set TOKEN_ID=<token-id>"; exit 1)
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/token_lifecycle.py rotate --token-id "$(TOKEN_ID)" $(TOKEN_LIFECYCLE_ARGS)
+
+rotate-windmill-token:
+	@test -n "$(TOKEN_ID)" || (echo "set TOKEN_ID=<token-id>"; exit 1)
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/token_lifecycle.py rotate --token-id "$(TOKEN_ID)" $(TOKEN_LIFECYCLE_ARGS)
+
+rotate-grafana-service-token:
+	@test -n "$(TOKEN_ID)" || (echo "set TOKEN_ID=<token-id>"; exit 1)
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/token_lifecycle.py rotate --token-id "$(TOKEN_ID)" $(TOKEN_LIFECYCLE_ARGS)
+
+rotate-platform-cli-token:
+	@test -n "$(TOKEN_ID)" || (echo "set TOKEN_ID=<token-id>"; exit 1)
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/token_lifecycle.py rotate --token-id "$(TOKEN_ID)" $(TOKEN_LIFECYCLE_ARGS)
 
 deploy-uptime-kuma:
 	$(MAKE) preflight WORKFLOW=deploy-uptime-kuma
@@ -620,12 +625,6 @@ provision-subdomain:
 start-workstream:
 	@test -n "$(WORKSTREAM)" || (echo "set WORKSTREAM=<workstream-id>"; exit 1)
 	$(REPO_ROOT)/scripts/create-workstream.sh $(WORKSTREAM)
-
-capacity-report:
-	uvx --from pyyaml python $(REPO_ROOT)/scripts/capacity_report.py $(if $(FORMAT),--format "$(FORMAT)",) $(if $(filter true,$(NO_LIVE_METRICS)),--no-live-metrics,) $(EXTRA_ARGS)
-
-weekly-capacity-report:
-	uvx --from pyyaml python $(REPO_ROOT)/config/windmill/scripts/weekly-capacity-report.py --repo-path "$(REPO_ROOT)" $(if $(filter true,$(NO_LIVE_METRICS)),--no-live-metrics,)
 
 promote:
 	@test -n "$(SERVICE)" || (echo "set SERVICE=<service-id>"; exit 1)

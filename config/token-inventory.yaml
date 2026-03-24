@@ -1,0 +1,87 @@
+schema_version: 1.0.0
+tokens:
+  - id: keycloak-grafana-client-secret
+    token_class: keycloak_client_secret
+    owner_service: grafana
+    subject: grafana
+    issued_at: 2026-03-24T00:00:00Z
+    storage_ref: .local/keycloak/grafana-client-secret.txt
+    permissions:
+      - grafana_oidc_login
+      - grafana_oidc_callback
+    workflows:
+      rotate: rotate-keycloak-client-secret
+      exposure_response: token-exposure-response
+  - id: keycloak-ops-portal-client-secret
+    token_class: keycloak_client_secret
+    owner_service: ops_portal
+    subject: ops-portal
+    issued_at: 2026-03-24T00:00:00Z
+    storage_ref: .local/keycloak/ops-portal-client-secret.txt
+    permissions:
+      - oauth2_proxy_upstream_auth
+      - edge_login_broker
+    workflows:
+      rotate: rotate-keycloak-client-secret
+      exposure_response: token-exposure-response
+  - id: keycloak-agent-hub-client-secret
+    token_class: keycloak_client_secret
+    owner_service: keycloak
+    subject: lv3-agent-hub
+    issued_at: 2026-03-24T00:00:00Z
+    storage_ref: .local/keycloak/lv3-agent-hub-client-secret.txt
+    permissions:
+      - agent_client_credentials
+      - gateway_verification
+    workflows:
+      rotate: rotate-keycloak-client-secret
+      exposure_response: token-exposure-response
+  - id: keycloak-api-gateway-client-secret
+    token_class: keycloak_client_secret
+    owner_service: api_gateway
+    subject: api-gateway
+    issued_at: 2026-03-24T00:00:00Z
+    storage_ref: .local/keycloak/api-gateway-client-secret.txt
+    permissions:
+      - gateway_client_credentials
+      - upstream_jwt_exchange
+    workflows:
+      rotate: rotate-keycloak-client-secret
+      exposure_response: token-exposure-response
+  - id: windmill-superadmin-token
+    token_class: windmill_api_token
+    owner_service: windmill
+    subject: windmill-superadmin
+    issued_at: 2026-03-22T00:00:00Z
+    storage_ref: windmill_superadmin_secret
+    permissions:
+      - workspace_admin
+      - workflow_dispatch
+      - token_management
+    workflows:
+      rotate: rotate-windmill-token
+      exposure_response: token-exposure-response
+  - id: grafana-service-account-token
+    token_class: grafana_service_account_token
+    owner_service: grafana
+    subject: grafana-reader
+    issued_at: 2026-03-24T00:00:00Z
+    storage_ref: /etc/lv3/monitoring/grafana-reader.token
+    permissions:
+      - grafana_api_read
+      - datasource_queries
+    workflows:
+      rotate: rotate-grafana-service-token
+      exposure_response: token-exposure-response
+  - id: local-platform-cli
+    token_class: platform_cli_token
+    owner_service: ops_portal
+    subject: local-platform-cli
+    issued_at: 2026-03-24T00:00:00Z
+    storage_ref: .config/lv3/token
+    permissions:
+      - gateway_api
+      - operator_read_write
+    workflows:
+      rotate: rotate-platform-cli-token
+      exposure_response: token-exposure-response

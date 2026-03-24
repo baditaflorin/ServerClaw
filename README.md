@@ -87,7 +87,7 @@ The repository now also ships ADR 0122 browser-first operator access management:
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.121.0` |
+| Repository version | `0.122.0` |
 | Platform version | `0.114.6` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -432,6 +432,8 @@ this is still same-host recovery, not off-host disaster recovery
 - [Subdomain Governance](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/subdomain-governance.md)
 - [OpenTofu VM Import](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/tofu-vm-import.md)
 - [OpenTofu VM Lifecycle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/tofu-vm-lifecycle.md)
+- [Token Exposure Response](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/token-exposure-response.md)
+- [Token Lifecycle Management](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/token-lifecycle-management.md)
 - [Validate Repository Automation Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/validate-repository-automation.md)
 - [Validation Gate Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/validation-gate.md)
 - [Windmill Operator Access Admin](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/windmill-operator-access-admin.md)
@@ -562,6 +564,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0121: Local Search and Indexing Fabric](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0121-local-search-and-indexing-fabric.md)
 - [ADR 0122: Windmill Operator Access Admin Surface](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0122-windmill-operator-access-admin.md)
 - [ADR 0123: Service Uptime Contracts And Monitor-Backed Health](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0123-service-uptime-contracts-and-monitor-backed-health.md)
+- [ADR 0141: API Token Lifecycle and Exposure Response](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0141-api-token-lifecycle-and-exposure-response.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -660,6 +663,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0121: Local Search and Indexing Fabric](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0121-search-indexing-fabric.md)
 - [Workstream ADR 0122: Windmill Operator Access Admin Surface](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0122-operator-access-admin.md)
 - [Workstream ADR 0123: Service Uptime Contracts And Monitor-Backed Health](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0123-service-uptime-contracts.md)
+- [Workstream ADR 0141: API Token Lifecycle and Exposure Response](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0141-api-token-lifecycle.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
@@ -677,7 +681,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.121.0` |
+| Repository version | `0.122.0` |
 | Platform version | `0.114.6` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -812,6 +816,7 @@ This repository is intentionally opinionated:
 | `0121` | Local search and indexing fabric | `merged` | [adr-0121-search-indexing-fabric.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0121-search-indexing-fabric.md) |
 | `0122` | Windmill operator access admin surface | `live_applied` | [adr-0122-operator-access-admin.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0122-operator-access-admin.md) |
 | `0123` | Service uptime contracts and monitor-backed health | `merged` | [adr-0123-service-uptime-contracts.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0123-service-uptime-contracts.md) |
+| `0141` | API token lifecycle and exposure response | `merged` | [adr-0141-api-token-lifecycle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0141-api-token-lifecycle.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

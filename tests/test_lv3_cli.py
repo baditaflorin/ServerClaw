@@ -542,3 +542,85 @@ def test_operator_add_viewer_dry_run_does_not_require_ssh_key(
 def test_validate_completion_suggests_services(minimal_repo: Path) -> None:
     candidates = lv3_cli.completion_candidates(["lv3", "validate", "--service"], "g")
     assert candidates == ["grafana"]
+
+
+def test_auth_login_stores_token_metadata(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    token_path = tmp_path / "token.json"
+    monkeypatch.setenv("LV3_TOKEN_FILE", str(token_path))
+
+    exit_code = lv3_cli.main(
+        [
+            "auth",
+            "login",
+            "--token",
+            "opaque-token",
+            "--expires-at",
+            "2026-03-25T00:00:00Z",
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert token_path.is_file()
+    payload = json.loads(token_path.read_text(encoding="utf-8"))
+    assert payload["expires_at"] == "2026-03-25T00:00:00Z"
+    assert '"status": "ok"' in captured.out
+
+
+def test_auth_status_reports_warning_window(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    token_path = tmp_path / "token.json"
+    token_path.write_text(
+        json.dumps(
+            {
+                "access_token": "opaque-token",
+                "source": "manual",
+                "issued_at": "2026-03-24T00:00:00Z",
+                "expires_at": (lv3_cli.datetime.now(lv3_cli.UTC) + lv3_cli.timedelta(hours=12))
+                .replace(microsecond=0)
+                .isoformat()
+                .replace("+00:00", "Z"),
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("LV3_TOKEN_FILE", str(token_path))
+
+    exit_code = lv3_cli.main(["auth", "status", "--json"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    payload = json.loads(captured.out)
+    assert payload["status"] == "warning"
+
+
+def test_non_auth_command_prints_token_expiry_warning(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    token_path = tmp_path / "token.json"
+    token_path.write_text(
+        json.dumps(
+            {
+                "access_token": "opaque-token",
+                "source": "manual",
+                "issued_at": "2026-03-24T00:00:00Z",
+                "expires_at": (lv3_cli.datetime.now(lv3_cli.UTC) + lv3_cli.timedelta(hours=6))
+                .replace(microsecond=0)
+                .isoformat()
+                .replace("+00:00", "Z"),
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("LV3_TOKEN_FILE", str(token_path))
+
+    exit_code = lv3_cli.main(["impact", "grafana"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "stored platform token expires in" in captured.err
