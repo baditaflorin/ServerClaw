@@ -245,7 +245,7 @@
         {
           "id": "mail-platform-submission",
           "kind": "mail_submission",
-          "endpoint": "10.10.10.20:587",
+          "endpoint": "10.10.10.20:1587",
           "auth": "Managed mailbox or service-specific credentials handled by the internal mail platform.",
           "service_refs": [
             "mail_platform"
@@ -253,7 +253,7 @@
           "workflow_refs": [
             "converge-mail-platform"
           ],
-          "notes": "Stalwart on docker-runtime-lv3 is the default internal submission path for governed platform mail."
+          "notes": "Stalwart on docker-runtime-lv3 exposes a private submission relay on port 1587 for local platform workloads while public client submission remains on port 587."
         },
         {
           "id": "proxmox-host-operator-notifications",

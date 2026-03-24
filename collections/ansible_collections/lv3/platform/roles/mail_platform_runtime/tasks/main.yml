@@ -519,6 +519,13 @@
     delay: 0
     timeout: 120
 
+- name: Wait for the private mail submission relay to listen
+  ansible.builtin.wait_for:
+    host: "{{ ansible_host }}"
+    port: "{{ mail_platform_internal_submission_port }}"
+    delay: 0
+    timeout: 120
+
 - name: Wait for the local mail gateway API to listen
   ansible.builtin.wait_for:
     host: 127.0.0.1

@@ -30,6 +30,20 @@
       Run the Keycloak PostgreSQL converge first so the runtime can connect to postgres-lv3.
   when: not keycloak_database_password_local.stat.exists
 
+- name: Ensure the Keycloak mail submission password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ keycloak_mail_platform_submission_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: keycloak_mail_platform_submission_password_local
+
+- name: Fail if the Keycloak mail submission password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ keycloak_mail_platform_submission_password_local_file }} is missing on the control machine.
+      Converge the mail platform first so Keycloak can send password-reset and required-action mail.
+  when: not keycloak_mail_platform_submission_password_local.stat.exists
+
 - name: Ensure the Keycloak runtime packages are present
   ansible.builtin.apt:
     name:
@@ -283,6 +297,7 @@
         access_token_lifespan: 300
         sso_session_idle_timeout: 28800
         sso_session_max_lifespan: 43200
+        smtp_server: "{{ keycloak_realm_smtp_server }}"
         state: present
         auth_client_id: admin-cli
         auth_keycloak_url: "{{ keycloak_local_admin_url }}"

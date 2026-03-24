@@ -9,6 +9,10 @@ protocol = "smtp"
 bind = "[::]:587"
 protocol = "smtp"
 
+[server.listener.internal_submission]
+bind = "[::]:{{ mail_platform_internal_submission_port }}"
+protocol = "smtp"
+
 [server.listener.imaptls]
 bind = "[::]:993"
 protocol = "imap"
@@ -33,6 +37,21 @@ compression = "lz4"
 [directory.internal]
 type = "internal"
 store = "rocksdb"
+
+[session.auth]
+mechanisms = [
+  { if = "listener == 'internal_submission'", then = "[plain, login]" },
+  { if = "listener != 'smtp' && is_tls", then = "[plain, login]" },
+  { else = false }
+]
+directory = [ { if = "listener != 'smtp'", then = "'internal'" }, { else = false } ]
+require = [ { if = "listener != 'smtp'", then = true }, { else = false } ]
+allow-plain-text = true
+must-match-sender = true
+
+[session.auth.errors]
+total = 3
+wait = "5s"
 
 [tracer.log]
 type = "log"

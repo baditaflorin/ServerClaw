@@ -31,6 +31,24 @@ keycloak_operator_password_remote_file: "{{ keycloak_secret_dir }}/florin.badita
 keycloak_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak
 keycloak_bootstrap_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/bootstrap-admin-password.txt
 keycloak_operator_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/florin.badita-password.txt
+keycloak_mail_platform_submission_username: server
+keycloak_mail_platform_submission_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/server-mailbox-password.txt
+keycloak_mail_platform_submission_host: "{{ (hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('mail_platform')).private_ip }}"
+keycloak_mail_platform_submission_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.mail_platform_internal_submission_port | default(1587) }}"
+keycloak_mail_platform_from_address: server@lv3.org
+keycloak_mail_platform_reply_to_address: server@lv3.org
+keycloak_realm_smtp_server:
+  host: "{{ keycloak_mail_platform_submission_host }}"
+  port: "{{ keycloak_mail_platform_submission_port }}"
+  from: "{{ keycloak_mail_platform_from_address }}"
+  fromDisplayName: "{{ keycloak_realm_display_name }}"
+  replyTo: "{{ keycloak_mail_platform_reply_to_address }}"
+  replyToDisplayName: "{{ keycloak_realm_display_name }}"
+  auth: true
+  user: "{{ keycloak_mail_platform_submission_username }}"
+  password: "{{ lookup('ansible.builtin.file', keycloak_mail_platform_submission_password_local_file) | trim }}"
+  starttls: false
+  ssl: false
 keycloak_grafana_client_id: grafana-oauth
 keycloak_grafana_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/grafana-client-secret.txt
 keycloak_ops_portal_client_id: ops-portal-oauth

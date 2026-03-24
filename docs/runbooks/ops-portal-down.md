@@ -10,6 +10,7 @@ Recover the interactive ops portal runtime when `ops.lv3.org` or the local `http
 - the portal renders an NGINX `502` or the login flow completes but the app shell never loads
 - the login flow redirects to `/oauth2/callback?...error=invalid_scope`
 - the Keycloak login form accepts a submit and then renders `We are sorry... Unexpected error when handling authentication request to identity provider.`
+- password reset or required-action flows claim success but the reset email never arrives
 - `docker compose ps` on `docker-runtime-lv3` shows the `ops-portal` container exited or unhealthy
 
 ## Immediate Checks
@@ -83,6 +84,24 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
 curl -I https://sso.lv3.org/realms/lv3/.well-known/openid-configuration
 curl -I https://ops.lv3.org/oauth2/sign_in
 ```
+
+7. If login is healthy but password-reset mail is still broken, verify the realm SMTP path and the private relay on `docker-runtime-lv3`:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  -o IdentitiesOnly=yes \
+  -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 -W %h:%p' \
+  ops@10.10.10.20 \
+  'python3 - <<'"'"'PY'"'"'\nimport smtplib\nfrom pathlib import Path\npassword = Path("/etc/lv3/mail-platform/server-mailbox-password").read_text().strip()\nclient = smtplib.SMTP("10.10.10.20", 1587, timeout=10)\nclient.ehlo()\nprint(client.login("server", password))\nclient.quit()\nPY'
+
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+  -o IdentitiesOnly=yes \
+  -o ProxyCommand='ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 -W %h:%p' \
+  ops@10.10.10.20 \
+  'docker logs --tail 120 keycloak-keycloak-1 | grep -i -E "smtp|reset_password|required.action"'
+```
+
+Use the base login URLs (`https://ops.lv3.org` or `https://ops.lv3.org/oauth2/sign_in`) when retesting. A stale `login-actions/...` or `reset-credentials?...` URL without the matching browser cookie can still render Keycloak's generic `We are sorry...` page even when the live service is healthy.
 
 ## Static Fallback
 
