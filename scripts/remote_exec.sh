@@ -9,6 +9,7 @@ RSYNC_EXCLUDE_FILE="${REMOTE_EXEC_EXCLUDE_FILE:-$REPO_ROOT/.rsync-exclude}"
 SSH_BIN="${REMOTE_EXEC_SSH_BIN:-ssh}"
 RSYNC_BIN="${REMOTE_EXEC_RSYNC_BIN:-rsync}"
 PYTHON_BIN="${REMOTE_EXEC_PYTHON_BIN:-python3}"
+TAILSCALE_BIN="${REMOTE_EXEC_TAILSCALE_BIN:-/Applications/Tailscale.app/Contents/MacOS/Tailscale}"
 CONNECT_TIMEOUT="${REMOTE_EXEC_CONNECT_TIMEOUT:-5}"
 VERBOSE="${REMOTE_EXEC_VERBOSE:-0}"
 LOCAL_FALLBACK=false
@@ -334,6 +335,28 @@ remote_reachable() {
   "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "true" >/dev/null 2>&1
 }
 
+mesh_proxy_configured() {
+  [[ "$SSH_OPTIONS_NL" =~ 100\.[0-9]+\.[0-9]+\.[0-9]+ ]]
+}
+
+local_mesh_diagnostic() {
+  local status_output=""
+
+  mesh_proxy_configured || return 0
+  [[ -x "$TAILSCALE_BIN" ]] || return 0
+
+  status_output="$("$TAILSCALE_BIN" status 2>&1 || true)"
+
+  if [[ "$status_output" == *"You are logged out"* || "$status_output" == *"unexpected state: NoState"* ]]; then
+    printf '%s' "; controller appears logged out of the Headscale/Tailscale mesh"
+    return 0
+  fi
+
+  if [[ "$status_output" == *"Unable to connect to the Tailscale coordination server"* || "$status_output" == *"fetch control key:"* ]]; then
+    printf '%s' "; controller cannot reach the Headscale/Tailscale coordination server"
+  fi
+}
+
 sync_remote_gate_status_back() {
   local remote_status=""
   local local_status=""
@@ -600,7 +623,7 @@ main() {
     return $?
   fi
 
-  fail "build server $REMOTE_HOST is unreachable; rerun with --local-fallback to execute locally"
+  fail "build server $REMOTE_HOST is unreachable$(local_mesh_diagnostic); rerun with --local-fallback to execute locally"
 }
 
 main "$@"

@@ -58,6 +58,22 @@ fi
     )
 
 
+def make_fake_tailscale(path: Path, *, status_output: str) -> None:
+    write_executable(
+        path,
+        f"""#!/usr/bin/env bash
+set -euo pipefail
+if [[ "${{1:-}}" == "status" ]]; then
+  cat <<'EOF'
+{status_output}
+EOF
+  exit 0
+fi
+exit 1
+""",
+    )
+
+
 def build_config(
     path: Path,
     *,
@@ -139,6 +155,7 @@ def run_remote_exec(
     tmp_path: Path,
     *args: str,
     extra_env: dict[str, str] | None = None,
+    ssh_options: list[str] | None = None,
 ) -> subprocess.CompletedProcess[str]:
     ssh_log = tmp_path / "ssh.log"
     rsync_log = tmp_path / "rsync.log"
@@ -153,6 +170,7 @@ def run_remote_exec(
         config_path,
         workspace_root="/opt/builds/proxmox_florin_server",
         local_command="printf local-fallback > \"$REMOTE_EXEC_MARKER\"",
+        ssh_options=ssh_options,
     )
     build_manifest(manifest_path)
     exclude_path.write_text(".local/\n")
@@ -317,6 +335,31 @@ def test_remote_exec_mounts_packer_cache_for_infra_runners(tmp_path: Path) -> No
 
     assert completed.returncode == 0, completed.stderr
     assert "/opt/builds/.packer.d:/root/.packer.d" in completed.stderr
+
+
+def test_remote_exec_reports_local_mesh_logout_for_headscale_proxy_failures(tmp_path: Path) -> None:
+    tailscale_bin = tmp_path / "tailscale"
+    make_fake_tailscale(
+        tailscale_bin,
+        status_output=(
+            "# Health check:\n"
+            "#     - You are logged out. The last login error was: fetch control key: 504 Gateway Timeout\n"
+            "unexpected state: NoState\n"
+        ),
+    )
+
+    completed = run_remote_exec(
+        tmp_path,
+        "check-build-server",
+        extra_env={
+            "REMOTE_EXEC_SSH_FAIL": "1",
+            "REMOTE_EXEC_TAILSCALE_BIN": str(tailscale_bin),
+        },
+        ssh_options=["-o", "ProxyCommand=ssh ops@100.64.0.1 -W %h:%p"],
+    )
+
+    assert completed.returncode != 0
+    assert "controller appears logged out of the Headscale/Tailscale mesh" in completed.stderr
 
 
 def test_remote_exec_materializes_worktree_git_metadata_for_remote_workspace(tmp_path: Path) -> None:

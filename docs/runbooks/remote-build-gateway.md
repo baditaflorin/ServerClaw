@@ -34,7 +34,7 @@ $EDITOR inventory/build_server.yml
 On the current live platform the build VM does not have a controller-reachable Tailscale IP of its own. The verified route is:
 
 - controller bootstrap key: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519`
-- jump host: `ops@100.118.189.95`
+- jump host: `ops@100.64.0.1`
 - build VM target: `ops@10.10.10.30`
 - remote workspace root: `/home/ops/builds/proxmox_florin_server`
 - remote session checkout layout: `/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/<session_slug>/repo`
@@ -115,7 +115,8 @@ Review `.rsync-exclude` before adding any new local secret material.
 | Symptom | Likely cause | Action |
 |---|---|---|
 | `build server ... is unreachable` | wrong host, key, or Tailscale path | run `make check-build-server`, then verify `config/build-server.json` |
-| host is reachable but the build VM is not | missing or broken ProxyCommand jump path | verify the Proxmox host hop to `100.118.189.95` and the guest target `10.10.10.30` |
+| `build server ... is unreachable; controller appears logged out...` | the local workstation is no longer enrolled in the Headscale-managed mesh | check `'/Applications/Tailscale.app/Contents/MacOS/Tailscale' status`, re-authenticate the workstation to `https://headscale.lv3.org`, and confirm `ops@100.64.0.1` works again before retrying |
+| host is reachable but the build VM is not | missing or broken ProxyCommand jump path | verify the Proxmox host hop to `100.64.0.1` and the guest target `10.10.10.30` |
 | rsync fails before SSH starts | missing `rsync` locally or remotely | install `rsync` on both ends |
 | command runs remotely but not in Docker | runner manifest missing for that label | add `config/check-runner-manifest.json` in ADR 0083 or keep using shell mode |
 | local fallback runs unexpectedly | SSH connectivity probe failed | inspect key permissions, host reachability, and `ConnectTimeout=5` behavior |
