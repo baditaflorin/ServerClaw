@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.143.1",
-  "platform_version": "0.130.3",
-  "generated_at": "2026-03-25T09:59:29Z",
-  "next_refresh_at": "2026-03-25T10:59:29Z",
+  "repo_version": "0.151.0",
+  "platform_version": "0.130.4",
+  "generated_at": "2026-03-25T13:15:14Z",
+  "next_refresh_at": "2026-03-25T14:15:14Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -106,6 +106,17 @@
         "last_live_apply": "2026-03-25T00:00:00Z",
         "slo_status": "unknown"
       },
+      "headscale": {
+        "service_name": "Headscale",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://headscale.lv3.org",
+        "last_live_apply": "2026-03-25T00:00:00Z"
+      },
       "keycloak": {
         "service_name": "Keycloak",
         "status": "healthy",
@@ -137,7 +148,18 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
-        "primary_url": "http://100.118.189.95:8066",
+        "primary_url": "http://100.64.0.1:8066",
+        "last_live_apply": "2026-03-25T00:00:00Z"
+      },
+      "n8n": {
+        "service_name": "n8n",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://n8n.lv3.org",
         "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "netbox": {
@@ -148,7 +170,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "http://100.118.189.95:8004",
+        "primary_url": "http://100.64.0.1:8004",
         "last_live_apply": "2026-03-25T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -183,7 +205,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
-        "primary_url": "http://100.118.189.95:3001",
+        "primary_url": "http://100.64.0.1:3001",
         "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "ollama": {
@@ -205,7 +227,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "http://100.118.189.95:8008",
+        "primary_url": "http://100.64.0.1:8008",
         "last_live_apply": "2026-03-25T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -217,7 +239,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
-        "primary_url": "https://100.118.189.95:8200",
+        "primary_url": "https://100.64.0.1:8200",
         "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "ops_portal": {
@@ -239,7 +261,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "http://100.118.189.95:8010",
+        "primary_url": "http://100.64.0.1:8010",
         "last_live_apply": "2026-03-25T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -251,7 +273,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
-        "primary_url": "https://100.118.189.95:9444",
+        "primary_url": "https://100.64.0.1:9444",
         "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "postgres": {
@@ -296,7 +318,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
-        "primary_url": "https://100.118.189.95:9443",
+        "primary_url": "https://100.64.0.1:9443",
         "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "uptime_kuma": {
@@ -311,6 +333,18 @@
         "last_live_apply": "2026-03-25T00:00:00Z",
         "slo_status": "unknown"
       },
+      "vaultwarden": {
+        "service_name": "Vaultwarden",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://vault.lv3.org",
+        "last_live_apply": "2026-03-25T00:00:00Z",
+        "slo_status": "unknown"
+      },
       "windmill": {
         "service_name": "Windmill",
         "status": "healthy",
@@ -319,7 +353,7 @@
         "source": "repo_evidence",
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
-        "primary_url": "http://100.118.189.95:8005",
+        "primary_url": "http://100.64.0.1:8005",
         "last_live_apply": "2026-03-25T00:00:00Z",
         "slo_status": "unknown"
       }
@@ -750,6 +784,32 @@
         "runbook": "docs/runbooks/configure-guest-network-policy.md"
       },
       {
+        "id": "converge-headscale",
+        "description": "Deploy the repo-managed Headscale control plane on the Proxmox host, publish it through the shared NGINX edge, and reconcile the public DNS record for headscale.lv3.org.",
+        "tags": [
+          "converge-headscale",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1500,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-headscale.md"
+      },
+      {
         "id": "converge-keycloak",
         "description": "Converge Keycloak on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at sso.lv3.org, and wire Grafana through the shared SSO broker.",
         "tags": [
@@ -852,6 +912,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/monitoring-stack.md"
+      },
+      {
+        "id": "converge-n8n",
+        "description": "Converge n8n on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and publish it at n8n.lv3.org with a protected editor path and public webhook ingress.",
+        "tags": [
+          "converge-n8n",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1200,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-n8n.md"
       },
       {
         "id": "converge-netbox",
@@ -1112,6 +1198,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-step-ca.md"
+      },
+      {
+        "id": "converge-vaultwarden",
+        "description": "Converge private Vaultwarden on docker-runtime-lv3, provision its PostgreSQL backend, publish the Tailscale-only HTTPS hostname, and persist the controller-local bootstrap admin artifacts.",
+        "tags": [
+          "converge-vaultwarden",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1500,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-vaultwarden.md"
       },
       {
         "id": "converge-windmill",
@@ -2004,7 +2116,7 @@
       },
       {
         "id": "scheduler-watchdog-loop",
-        "description": "Run one ADR 0119 watchdog pass over active mutation jobs and cancel budget violations.",
+        "description": "Run one ADR 0172 watchdog pass over running mutation jobs, abort stale executions, and emit a heartbeat.",
         "tags": [
           "diagnostic",
           "repo-only",
@@ -2416,6 +2528,16 @@
         ]
       },
       {
+        "id": "configure-headscale",
+        "title": "Configure Headscale",
+        "agent_trust_required": "T3",
+        "steps": 10,
+        "path": "docs/runbooks/configure-headscale.md",
+        "workflow_ids": [
+          "converge-headscale"
+        ]
+      },
+      {
         "id": "configure-keycloak",
         "title": "Configure Keycloak",
         "agent_trust_required": "T3",
@@ -2443,6 +2565,16 @@
         "path": "docs/runbooks/configure-mattermost.md",
         "workflow_ids": [
           "converge-mattermost"
+        ]
+      },
+      {
+        "id": "configure-n8n",
+        "title": "Configure n8n",
+        "agent_trust_required": "T3",
+        "steps": 3,
+        "path": "docs/runbooks/configure-n8n.md",
+        "workflow_ids": [
+          "converge-n8n"
         ]
       },
       {
@@ -2567,10 +2699,20 @@
         ]
       },
       {
+        "id": "configure-vaultwarden",
+        "title": "Configure Vaultwarden",
+        "agent_trust_required": "T3",
+        "steps": 15,
+        "path": "docs/runbooks/configure-vaultwarden.md",
+        "workflow_ids": [
+          "converge-vaultwarden"
+        ]
+      },
+      {
         "id": "configure-windmill",
         "title": "Configure Windmill",
         "agent_trust_required": "T3",
-        "steps": 9,
+        "steps": 11,
         "path": "docs/runbooks/configure-windmill.md",
         "workflow_ids": [
           "converge-windmill"
@@ -2934,10 +3076,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.143.0",
+    "last_version": "0.149.0",
     "deployed_at": "2026-03-25",
-    "summary": "finalize ADR 0096 live apply on `monitoring-lv3` by re-converging the blackbox exporter, generated Prometheus SLO rules and probe targets, Alertmanager runtime validation, and the `LV3 SLO Overview` Grafana dashboard checks fix fresh-worktree live-apply prerequisites by teaching Alertmanager to derive fallback Mattermost webhook URLs from the current controller manifest and by aligning ops-portal and service-catalog validation with the already-active portal surfaces",
-    "release_notes_url": "docs/release-notes/0.143.1.md"
+    "summary": "implement ADR 0161 with a shared `platform.agent.coordination` runtime, closure-loop and observation-loop publishers, the authenticated `/v1/platform/agents` gateway route, and live coordination rendering in both ops-portal surfaces add the operator runbook and snapshot helper for committed coordination receipts under `receipts/agent-coordination/`",
+    "release_notes_url": "docs/release-notes/0.151.0.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -3007,6 +3149,69 @@
       "status": "Proposed",
       "implementation_status": "Not Implemented",
       "path": "docs/adr/0118-replayable-failure-case-library.md"
+    },
+    {
+      "adr": "0154",
+      "title": "VM-Scoped Parallel Execution Lanes",
+      "status": "Proposed",
+      "implementation_status": "Not Implemented",
+      "path": "docs/adr/0154-vm-scoped-parallel-execution-lanes.md"
+    },
+    {
+      "adr": "0157",
+      "title": "Per-VM Concurrency Budget and Resource Reservation",
+      "status": "Proposed",
+      "implementation_status": "Not Implemented",
+      "path": "docs/adr/0157-per-vm-concurrency-budget-and-resource-reservation.md"
+    },
+    {
+      "adr": "0158",
+      "title": "Conflict-Free Configuration Merge Protocol",
+      "status": "Proposed",
+      "implementation_status": "Not Implemented",
+      "path": "docs/adr/0158-conflict-free-configuration-merge-protocol.md"
+    },
+    {
+      "adr": "0164",
+      "title": "Circuit Breaker Pattern for External Service Calls",
+      "status": "Proposed",
+      "implementation_status": "Not Implemented",
+      "path": "docs/adr/0164-circuit-breaker-pattern-for-external-service-calls.md"
+    },
+    {
+      "adr": "0165",
+      "title": "Workflow Idempotency Keys and Double-Execution Prevention",
+      "status": "Proposed",
+      "implementation_status": "Not Implemented",
+      "path": "docs/adr/0165-workflow-idempotency-keys-and-double-execution-prevention.md"
+    },
+    {
+      "adr": "0166",
+      "title": "Canonical Error Response Format and Error Code Registry",
+      "status": "Proposed",
+      "implementation_status": "Not Implemented",
+      "path": "docs/adr/0166-canonical-error-response-format-and-error-code-registry.md"
+    },
+    {
+      "adr": "0167",
+      "title": "Graceful Degradation Mode Declarations",
+      "status": "Proposed",
+      "implementation_status": "Not Implemented",
+      "path": "docs/adr/0167-graceful-degradation-mode-declarations.md"
+    },
+    {
+      "adr": "0170",
+      "title": "Platform-Wide Timeout Hierarchy",
+      "status": "Proposed",
+      "implementation_status": "Not Implemented",
+      "path": "docs/adr/0170-platform-wide-timeout-hierarchy.md"
+    },
+    {
+      "adr": "0171",
+      "title": "Controlled Fault Injection for Resilience Validation",
+      "status": "Proposed",
+      "implementation_status": "Not Implemented",
+      "path": "docs/adr/0171-controlled-fault-injection-for-resilience-validation.md"
     }
   ]
 }

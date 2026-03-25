@@ -17,8 +17,8 @@ Generated from `config/dependency-graph.json`.
 
 | Tier | Services |
 | --- | --- |
-| `1` | Alertmanager, Docker Build VM, Docker Runtime VM, Grafana, Mail Platform, NGINX Edge, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Uptime Kuma, ntfy, ntopng, step-ca |
-| `2` | Changelog Portal, Developer Portal, Keycloak, Mattermost, NetBox, Open WebUI, Public Status Page, Vaultwarden, Windmill |
+| `1` | Alertmanager, Docker Build VM, Docker Runtime VM, Grafana, Headscale, Mail Platform, NGINX Edge, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Uptime Kuma, ntfy, ntopng, step-ca |
+| `2` | Changelog Portal, Developer Portal, Keycloak, Mattermost, NetBox, Open WebUI, Public Status Page, Vaultwarden, Windmill, n8n |
 | `3` | Platform API Gateway |
 | `4` | Ops Portal |
 
@@ -30,6 +30,7 @@ graph TD
     docker_build["Docker Build VM\nTier 1"]
     docker_runtime["Docker Runtime VM\nTier 1"]
     grafana["Grafana\nTier 1"]
+    headscale["Headscale\nTier 1"]
     mail_platform["Mail Platform\nTier 1"]
     nginx_edge["NGINX Edge\nTier 1"]
     ntfy["ntfy\nTier 1"]
@@ -47,6 +48,7 @@ graph TD
     docs_portal["Developer Portal\nTier 2"]
     keycloak["Keycloak\nTier 2"]
     mattermost["Mattermost\nTier 2"]
+    n8n["n8n\nTier 2"]
     netbox["NetBox\nTier 2"]
     open_webui["Open WebUI\nTier 2"]
     status_page["Public Status Page\nTier 2"]
@@ -62,6 +64,7 @@ graph TD
     docs_portal -->|hard| nginx_edge
     grafana -->|soft| keycloak
     grafana -->|soft| nginx_edge
+    headscale -->|soft| nginx_edge
     keycloak -->|soft| nginx_edge
     keycloak -->|startup_only| openbao
     keycloak -->|hard| postgres
@@ -70,6 +73,10 @@ graph TD
     mail_platform -->|startup_only| openbao
     mattermost -->|startup_only| openbao
     mattermost -->|hard| postgres
+    n8n -->|soft| keycloak
+    n8n -->|soft| nginx_edge
+    n8n -->|startup_only| openbao
+    n8n -->|hard| postgres
     netbox -->|startup_only| openbao
     netbox -->|hard| postgres
     open_webui -->|soft| keycloak
