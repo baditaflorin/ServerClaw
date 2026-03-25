@@ -59,6 +59,11 @@ argument_specs:
         elements: str
         description:
           - Hostnames and local listener addresses accepted by Homepage.
+      homepage_config_generator_local_python:
+        type: path
+        required: true
+        description:
+          - Controller-local Python interpreter used to run the Homepage config generator.
       homepage_config_generator_local_script:
         type: path
         required: true

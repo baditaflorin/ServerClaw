@@ -24,7 +24,7 @@
         )
       }}
     state: present
-    update_cache: true
+    update_cache: "{{ public_edge_update_apt_cache | bool }}"
     force_apt_get: true
 
 - name: Ensure public edge directories exist
@@ -123,6 +123,7 @@
   register: public_edge_generated_site_sync
   changed_when: "'<<CHANGED>>' in public_edge_generated_site_sync.stdout"
   loop: "{{ public_edge_extra_sites | selectattr('kind', 'equalto', 'static_dir') | list }}"
+  when: public_edge_sync_generated_static_dirs | bool
 
 - name: Check whether the public edge certificate exists
   ansible.builtin.stat:

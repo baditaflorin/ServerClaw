@@ -14,4 +14,5 @@ homepage_allowed_hosts:
   - "{{ homepage_bind_host }}:{{ homepage_port }}"
   - "127.0.0.1:{{ homepage_port }}"
   - "localhost:{{ homepage_port }}"
+homepage_config_generator_local_python: "{{ ansible_playbook_python }}"
 homepage_config_generator_local_script: "{{ playbook_dir }}/../scripts/generate_homepage_config.py"

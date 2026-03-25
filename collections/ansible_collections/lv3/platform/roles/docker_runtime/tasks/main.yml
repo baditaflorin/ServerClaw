@@ -73,7 +73,6 @@
     dest: /etc/docker/daemon.json
     mode: "0644"
   notify: Restart Docker
-
 - name: Check whether nftables config exists
   ansible.builtin.stat:
     path: "{{ docker_runtime_nftables_config_file }}"

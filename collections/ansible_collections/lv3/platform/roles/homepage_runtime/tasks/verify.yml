@@ -10,17 +10,34 @@
   until: homepage_verify_http.status == 200
   changed_when: false
 
-- name: Verify Homepage renders the LV3 dashboard title
+- name: Verify Homepage publishes the rendered services catalog
   ansible.builtin.uri:
-    url: "{{ homepage_internal_url }}"
+    url: "{{ homepage_internal_url }}/api/services"
     method: GET
     return_content: true
     status_code: 200
-  register: homepage_verify_content
+  register: homepage_verify_services
   changed_when: false
 
-- name: Assert Homepage rendered the expected dashboard title
+- name: Assert Homepage rendered the expected services catalog
   ansible.builtin.assert:
     that:
-      - "'LV3 Unified Dashboard' in homepage_verify_content.content"
-    fail_msg: "Homepage started, but the repo-managed dashboard title was not rendered."
+      - "'Homepage' in homepage_verify_services.content"
+      - "'https://home.lv3.org' in homepage_verify_services.content"
+    fail_msg: "Homepage started, but the repo-managed services catalog was not rendered."
+
+- name: Verify Homepage publishes the rendered bookmarks catalog
+  ansible.builtin.uri:
+    url: "{{ homepage_internal_url }}/api/bookmarks"
+    method: GET
+    return_content: true
+    status_code: 200
+  register: homepage_verify_bookmarks
+  changed_when: false
+
+- name: Assert Homepage rendered the expected bookmarks catalog
+  ansible.builtin.assert:
+    that:
+      - "'Ops Portal' in homepage_verify_bookmarks.content"
+      - "'https://ops.lv3.org' in homepage_verify_bookmarks.content"
+    fail_msg: "Homepage started, but the repo-managed bookmarks catalog was not rendered."

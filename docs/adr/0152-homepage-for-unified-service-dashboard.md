@@ -1,10 +1,10 @@
 # ADR 0152: Homepage for Unified Service Dashboard
 
-- Status: Implemented
-- Implementation Status: Implemented
+- Status: Accepted
+- Implementation Status: Partial
 - Implemented In Repo Version: 0.144.0
-- Implemented In Platform Version: 0.131.0
-- Implemented On: 2026-03-25
+- Implemented In Platform Version: not yet
+- Implemented On: not yet
 - Date: 2026-03-24
 
 ## Context
@@ -80,12 +80,18 @@ Homepage does not own an application-level auth integration. It is protected at 
 
 ## Verification
 
-The first live implementation from `main` on 2026-03-25 verified:
+Repository implementation in `0.144.0` verified on 2026-03-25:
 
-- `make converge-homepage` completed successfully
-- `curl -fsS http://10.10.10.20:3090/` returned the generated Homepage UI
-- `curl -Ik https://home.lv3.org` redirected through the shared authenticated edge as expected for an unauthenticated request
-- Uptime Kuma contained the `Homepage Public` monitor after `make uptime-kuma-manage ACTION=ensure-monitors`
+- the focused Homepage pytest suite passed
+- `make syntax-check-homepage` passed
+- repository data-model validation passed
+- Homepage served the repo-generated `/api/services`, `/api/bookmarks`, and `/api/widgets` endpoints on `docker-runtime-lv3`
+
+Live platform rollout is still incomplete as of 2026-03-25:
+
+- `home.lv3.org` was not publicly resolvable from `1.1.1.1`
+- forcing `Host: home.lv3.org` to `65.108.75.123` returned the generic `LV3 Edge` default page, not the Homepage route
+- the controller could not complete the `nginx-lv3` publication play because Proxmox public SSH, Tailscale SSH, and the build-gateway path were all unreachable
 
 ## Related ADRs
 

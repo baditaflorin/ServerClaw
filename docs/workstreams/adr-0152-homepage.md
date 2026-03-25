@@ -2,9 +2,9 @@
 
 - ADR: [ADR 0152](../adr/0152-homepage-for-unified-service-dashboard.md)
 - Title: Repo-generated Homepage dashboard on docker-runtime-lv3 with authenticated publication at `home.lv3.org`
-- Status: live_applied
-- Branch: `codex/adr-0152-homepage-dashboard`
-- Worktree: `../proxmox_florin_server-homepage-dashboard`
+- Status: ready
+- Branch: `codex/adr-0152-homepage-main`
+- Worktree: `../proxmox_florin_server-homepage-integration`
 - Owner: codex
 - Depends On: `adr-0075-service-capability-catalog`, `adr-0076-subdomain-governance`, `adr-0093-interactive-ops-portal`, `adr-0133-portal-authentication-by-default`
 - Conflicts With: none
@@ -59,12 +59,14 @@
 
 ## Outcome
 
-- `make converge-homepage` completed successfully on 2026-03-25
-- Homepage responded on `http://10.10.10.20:3090/` with the repo-managed dashboard title
-- `home.lv3.org` published through the shared edge and redirected unauthenticated requests into oauth2-proxy as expected
-- `make uptime-kuma-manage ACTION=ensure-monitors` added the `Homepage Public` monitor
+- Repository implementation landed on the workstream branch and the focused Homepage validation suite passed on 2026-03-25.
+- Homepage config generation and runtime verification succeeded on `docker-runtime-lv3`, including the generated `/api/services`, `/api/bookmarks`, and `/api/widgets` endpoints.
+- Public rollout is still incomplete: on 2026-03-25 `home.lv3.org` did not resolve from `1.1.1.1`, and forcing `Host: home.lv3.org` to `65.108.75.123` returned the generic `LV3 Edge` default page instead of Homepage.
+- The live apply is blocked by management-plane reachability from the controller: `65.108.75.123:22` times out, `100.118.189.95:22` refuses connections, and the remote build gateway through `docker-build-lv3` is unreachable.
 
 ## Notes For The Next Assistant
 
 - Keep Homepage config generation anchored to the canonical service and subdomain catalogs rather than ad hoc per-service files.
 - Edge auth for `home.lv3.org` is shared infrastructure. Do not add a separate Homepage auth stack unless the broader portal-auth model changes.
+- Resume from `../proxmox_florin_server-homepage-integration` on `codex/adr-0152-homepage-main`; local code changes for the runtime and edge roles are already present there.
+- After management access is restored, finish the second `nginx-lv3` play in `playbooks/homepage.yml`, provision `home.lv3.org` DNS if still missing, verify the public endpoint, then update release and ADR/platform metadata from the current `origin/main` base.

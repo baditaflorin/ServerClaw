@@ -23,6 +23,16 @@ argument_specs:
         required: false
         description:
           - ACME challenge method for the shared edge certificate (`webroot` or `dns-hetzner`).
+      public_edge_update_apt_cache:
+        type: bool
+        required: false
+        description:
+          - Whether the role should refresh the APT cache before ensuring edge packages are present.
+      public_edge_sync_generated_static_dirs:
+        type: bool
+        required: false
+        description:
+          - Whether controller-generated static portal directories should be copied to the edge host.
       public_edge_static_root:
         type: path
         required: true
