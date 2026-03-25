@@ -109,6 +109,18 @@ domains:
             - event
             - kind
             - generated_at
+      - name: platform.security.high-finding
+        description: One high-severity security finding emitted from the posture report.
+        status: active
+        delivery: at_least_once
+        retention: 90d
+        producers:
+          - adr-0102-security-posture-reporting
+        payload:
+          required:
+            - event
+            - kind
+            - generated_at
 
   maintenance:
     description: Planned maintenance-window state transitions.
@@ -311,6 +323,39 @@ domains:
           required:
             - intent_id
             - budget_name
+      - name: platform.execution.deadlock_detected
+        description: A distributed deadlock cycle was detected across the lock registry, intent queue, or coordination map.
+        status: active
+        delivery: at_least_once
+        retention: 30d
+        producers:
+          - adr-0162-deadlock-detector
+        payload:
+          required:
+            - cycle_nodes
+      - name: platform.execution.deadlock_aborted
+        description: The detector aborted and requeued one participant to break a deadlock cycle.
+        status: active
+        delivery: at_least_once
+        retention: 30d
+        producers:
+          - adr-0162-deadlock-detector
+        payload:
+          required:
+            - intent_id
+            - victim_context_id
+            - cycle_nodes
+      - name: platform.execution.livelock_detected
+        description: A queued intent exceeded the livelock threshold without making progress.
+        status: active
+        delivery: at_least_once
+        retention: 30d
+        producers:
+          - adr-0162-deadlock-detector
+        payload:
+          required:
+            - intent_id
+            - attempts
 
   health:
     description: Health-state transition events.

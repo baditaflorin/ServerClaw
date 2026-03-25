@@ -11,6 +11,7 @@
 - execution.completed
 - execution.failed
 - execution.aborted
+- execution.deadlock_aborted
 - execution.budget_exceeded
 
 # Service mutations

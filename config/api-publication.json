@@ -217,6 +217,15 @@
       "publication_tier": "internal-only",
       "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
       "approval_notes": "ADR 0115 ledger fan-out stays private-first because it exposes operator and automation mutations in near real time."
+    },
+    {
+      "id": "platform-execution-events",
+      "title": "Execution lifecycle event subjects",
+      "lane": "event",
+      "lane_surface_ref": "platform-execution-events",
+      "publication_tier": "internal-only",
+      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "approval_notes": "Execution lifecycle and deadlock-detection subjects stay private-first because they expose live mutation flow control, blocked work, and retry timing."
     }
   ]
 }

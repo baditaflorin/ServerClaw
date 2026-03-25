@@ -423,6 +423,19 @@
           ],
           "workflow_refs": [],
           "notes": "Each committed mutation-ledger row fans out on the canonical platform.ledger.event_written subject for downstream mirrors and reactive consumers."
+        },
+        {
+          "id": "platform-execution-events",
+          "kind": "event_subject",
+          "endpoint": "platform.execution.*",
+          "auth": "Internal NATS publication from ADR 0119 and ADR 0162 through the private docker-runtime-lv3 event bus runtime.",
+          "owner_refs": [
+            "proxmox_florin"
+          ],
+          "workflow_refs": [
+            "converge-windmill"
+          ],
+          "notes": "Execution lifecycle publishers emit canonical execution subjects, including deadlock detection and livelock findings, so operators and future schedulers can react without polling worker state files."
         }
       ]
     }

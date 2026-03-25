@@ -196,6 +196,11 @@ windmill_seed_scripts:
     language: python3
     summary: Refresh the platform health composite index
     description: Repo-managed ADR 0128 worker that aggregates service health, SLO, drift, incident, maintenance, and mutation signals into the canonical composite index.
+  - path: f/lv3/detect_deadlocks
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/detect-deadlocks.py"
+    language: python3
+    summary: ADR 0162 distributed deadlock detector
+    description: Repo-managed ADR 0162 worker that scans the lock registry, intent queue, and coordination map for deadlock cycles and requeues the lowest-priority participant.
 windmill_seed_schedules:
   - path: f/lv3/platform_observation_loop_every_4h
     schedule: "0 0 */4 * * *"
@@ -232,6 +237,15 @@ windmill_seed_schedules:
     enabled: false
     summary: Disabled ADR 0089 weekly cache maintenance placeholder
     description: Repo-managed weekly cache maintenance definition that purges the shared pip cache and checks apt-cacher-ng after the cache host is applied live from main.
+    no_flow_overlap: true
+  - path: f/lv3/detect_deadlocks_every_30s
+    schedule: "*/30 * * * * *"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/detect_deadlocks
+    args: {}
+    enabled: true
+    summary: ADR 0162 deadlock detector
+    description: Repo-managed 30-second deadlock detector schedule for the worker-shared lock, queue, and coordination state.
     no_flow_overlap: true
   - path: f/lv3/world_state/refresh_proxmox_vms_every_minute
     schedule: "0 * * * * *"

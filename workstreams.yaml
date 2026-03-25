@@ -14,6 +14,29 @@ release_policy:
   breaking_change_criteria: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/version-semantics.json
 
 workstreams:
+  - id: adr-0162-deadlock-detector
+    adr: "0162"
+    title: Distributed deadlock detection and resolution
+    status: in_progress
+    owner: codex
+    branch: codex/adr-0162-deadlock-detector
+    worktree_path: .worktrees/adr-0162-deadlock-detector
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0162-deadlock-detector.md
+    depends_on:
+      - adr-0115-mutation-ledger
+      - adr-0119-budgeted-scheduler
+      - adr-0124-event-taxonomy
+    conflicts_with: []
+    shared_surfaces:
+      - platform/locking/
+      - platform/coordination/
+      - platform/intent_queue/
+      - config/windmill/scripts/
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/
+      - config/event-taxonomy.yaml
+    ready_to_merge: false
+    live_applied: false
+
   - id: adr-0138-published-artifact-secret-scanning
     adr: "0138"
     title: Published artifact secret scanning
