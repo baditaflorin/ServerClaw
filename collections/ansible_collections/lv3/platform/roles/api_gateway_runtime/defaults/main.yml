@@ -16,6 +16,8 @@ api_gateway_service_catalog_src: "{{ api_gateway_repo_root }}/config/service-cap
 api_gateway_workflow_catalog_src: "{{ api_gateway_repo_root }}/config/workflow-catalog.json"
 api_gateway_retry_policy_src: "{{ api_gateway_repo_root }}/config/retry-policies.yaml"
 api_gateway_circuit_policies_src: "{{ api_gateway_repo_root }}/config/circuit-policies.yaml"
+api_gateway_ledger_event_types_src: "{{ api_gateway_repo_root }}/config/ledger-event-types.yaml"
+api_gateway_event_taxonomy_src: "{{ api_gateway_repo_root }}/config/event-taxonomy.yaml"
 api_gateway_timeout_hierarchy_src: "{{ api_gateway_repo_root }}/config/timeout-hierarchy.yaml"
 api_gateway_platform_vars_src: "{{ api_gateway_repo_root }}/inventory/group_vars/platform.yml"
 api_gateway_drift_receipts_glob: "{{ api_gateway_repo_root }}/receipts/drift-reports/*.json"
@@ -42,6 +44,10 @@ api_gateway_config_sources:
     dest: retry-policies.yaml
   - src: "{{ api_gateway_circuit_policies_src }}"
     dest: circuit-policies.yaml
+  - src: "{{ api_gateway_ledger_event_types_src }}"
+    dest: ledger-event-types.yaml
+  - src: "{{ api_gateway_event_taxonomy_src }}"
+    dest: event-taxonomy.yaml
   - src: "{{ api_gateway_timeout_hierarchy_src }}"
     dest: timeout-hierarchy.yaml
   - src: "{{ api_gateway_platform_vars_src }}"
