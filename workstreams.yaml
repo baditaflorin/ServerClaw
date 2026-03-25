@@ -106,7 +106,7 @@ workstreams:
       - /etc/pve/jobs.cfg
       - backup_policy
       - guest_provisioning
-    ready_to_merge: true
+    ready_to_merge: false
     live_applied: true
 
   - id: adr-0023-docker-runtime
