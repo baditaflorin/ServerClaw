@@ -165,7 +165,17 @@ def build_dns_records(
     service_topology: dict[str, Any],
     host_vars: dict[str, Any],
 ) -> dict[str, list[dict[str, Any]]]:
-    records = {"public": [], "tailnet": []}
+    records = {
+        "public": [
+            {
+                "name": "@",
+                "type": "A",
+                "value": require_string(host_vars.get("management_ipv4"), "host_vars.management_ipv4"),
+                "ttl": 60,
+            }
+        ],
+        "tailnet": [],
+    }
     for service in service_topology.values():
         dns = service.get("dns")
         if not dns or not dns.get("managed"):
