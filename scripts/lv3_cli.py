@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import concurrent.futures
 import json
 import os
@@ -47,6 +48,7 @@ CLI_VERSION = "0.1.0"
 DEFAULT_STATUS_TIMEOUT_SECONDS = 3.0
 DEFAULT_LOG_LINES = 20
 DEFAULT_LOG_SINCE = "1h"
+TOKEN_EXPIRY_WARNING_WINDOW = timedelta(hours=24)
 ACTIVE_BINDING_STATES = {"active", "planned"}
 COMPLETION_SENTINEL = "# >>> lv3 completion >>>"
 NO_COLOR = bool(os.environ.get("NO_COLOR"))
@@ -140,6 +142,118 @@ def load_secret_manifest() -> dict[str, Any]:
     if not isinstance(secrets, dict):
         raise ValueError("config/controller-local-secrets.json must define a secrets object")
     return secrets
+
+
+def cli_token_file_path() -> Path:
+    candidate = os.environ.get("LV3_TOKEN_FILE", "").strip()
+    if candidate:
+        return Path(candidate).expanduser()
+    return Path.home() / ".config" / "lv3" / "token"
+
+
+def parse_timestamp(value: str) -> datetime:
+    parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=UTC)
+    return parsed.astimezone(UTC)
+
+
+def decode_jwt_expiry(token: str) -> datetime | None:
+    parts = token.split(".")
+    if len(parts) != 3:
+        return None
+    try:
+        payload = parts[1] + "=" * (-len(parts[1]) % 4)
+        decoded = base64.urlsafe_b64decode(payload.encode("ascii"))
+        claims = json.loads(decoded.decode("utf-8"))
+    except (UnicodeDecodeError, ValueError, json.JSONDecodeError):
+        return None
+    expiry = claims.get("exp")
+    if not isinstance(expiry, int):
+        return None
+    return datetime.fromtimestamp(expiry, tz=UTC)
+
+
+def load_cli_token_record(path: Path | None = None) -> dict[str, Any] | None:
+    token_path = cli_token_file_path() if path is None else path
+    if not token_path.exists():
+        return None
+    raw = token_path.read_text(encoding="utf-8").strip()
+    if not raw:
+        return None
+
+    try:
+        payload = json.loads(raw)
+    except json.JSONDecodeError:
+        payload = {"access_token": raw}
+    if not isinstance(payload, dict):
+        return None
+
+    access_token = payload.get("access_token") or payload.get("token")
+    expires_at = payload.get("expires_at")
+    if isinstance(access_token, str) and not expires_at:
+        inferred = decode_jwt_expiry(access_token)
+        if inferred is not None:
+            expires_at = inferred.isoformat().replace("+00:00", "Z")
+    return {
+        "path": str(token_path),
+        "access_token": access_token,
+        "source": payload.get("source", "manual"),
+        "issued_at": payload.get("issued_at"),
+        "expires_at": expires_at,
+    }
+
+
+def store_cli_token(*, token: str, expires_at: datetime, source: str, path: Path | None = None) -> dict[str, Any]:
+    token_path = cli_token_file_path() if path is None else path
+    token_path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "access_token": token,
+        "source": source,
+        "issued_at": datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        "expires_at": expires_at.astimezone(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+    }
+    token_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    return {"path": str(token_path), **payload}
+
+
+def expiry_status(record: dict[str, Any]) -> tuple[str, timedelta | None]:
+    raw_expiry = record.get("expires_at")
+    if not isinstance(raw_expiry, str) or not raw_expiry.strip():
+        return "unknown", None
+    expires_at = parse_timestamp(raw_expiry)
+    remaining = expires_at - datetime.now(UTC)
+    if remaining <= timedelta(0):
+        return "expired", remaining
+    if remaining <= TOKEN_EXPIRY_WARNING_WINDOW:
+        return "warning", remaining
+    return "valid", remaining
+
+
+def format_remaining(delta: timedelta) -> str:
+    total_seconds = int(abs(delta.total_seconds()))
+    hours, remainder = divmod(total_seconds, 3600)
+    minutes = remainder // 60
+    if hours:
+        return f"{hours}h {minutes:02d}m"
+    return f"{minutes}m"
+
+
+def maybe_warn_cli_token_expiry() -> None:
+    record = load_cli_token_record()
+    if record is None:
+        return
+    status, remaining = expiry_status(record)
+    if status == "expired" and remaining is not None:
+        print(
+            f"Warning: stored platform token expired {format_remaining(remaining)} ago. Run `lv3 auth login` to renew.",
+            file=sys.stderr,
+        )
+    elif status == "warning" and remaining is not None:
+        print(
+            f"Warning: stored platform token expires in {format_remaining(remaining)}. Run `lv3 auth login` to renew.",
+            file=sys.stderr,
+        )
 
 
 def parse_make_targets() -> set[str]:
@@ -504,6 +618,81 @@ def load_secret_file(secret_id: str) -> str:
     if not secret_path.exists():
         raise SystemExit(f"Secret file not found: {secret_path}")
     return secret_path.read_text(encoding="utf-8").strip()
+
+
+def auth_login_command(
+    *,
+    token: str | None,
+    token_file: str | None,
+    expires_at: str | None,
+    source: str,
+    dry_run: bool,
+) -> int:
+    if bool(token) == bool(token_file):
+        raise SystemExit("Provide exactly one of --token or --token-file.")
+
+    resolved_token = token
+    if token_file:
+        resolved_token = Path(token_file).expanduser().read_text(encoding="utf-8").strip()
+    assert resolved_token is not None
+    if not resolved_token:
+        raise SystemExit("Token value must not be empty.")
+
+    resolved_expiry = parse_timestamp(expires_at) if expires_at else decode_jwt_expiry(resolved_token)
+    if resolved_expiry is None:
+        raise SystemExit("Token expiry could not be inferred. Pass --expires-at.")
+
+    preview = {
+        "path": str(cli_token_file_path()),
+        "source": source,
+        "expires_at": resolved_expiry.isoformat().replace("+00:00", "Z"),
+        "dry_run": dry_run,
+    }
+    if dry_run:
+        print(json.dumps(preview, indent=2))
+        return 0
+
+    stored = store_cli_token(token=resolved_token, expires_at=resolved_expiry, source=source)
+    print(json.dumps({"status": "ok", "path": stored["path"], "expires_at": stored["expires_at"]}, indent=2))
+    return 0
+
+
+def auth_status_command(*, json_output: bool) -> int:
+    record = load_cli_token_record()
+    if record is None:
+        if json_output:
+            print(json.dumps({"status": "missing", "path": str(cli_token_file_path())}, indent=2))
+        else:
+            print(f"No stored platform token at {cli_token_file_path()}.")
+        return 1
+
+    status, remaining = expiry_status(record)
+    payload = {
+        "status": status,
+        "path": record["path"],
+        "source": record.get("source"),
+        "expires_at": record.get("expires_at"),
+    }
+    if remaining is not None:
+        payload["remaining"] = format_remaining(remaining)
+    if json_output:
+        print(json.dumps(payload, indent=2))
+    else:
+        print(f"Path: {payload['path']}")
+        print(f"Source: {payload['source']}")
+        print(f"Status: {payload['status']}")
+        print(f"Expires: {payload['expires_at']}")
+        if remaining is not None:
+            print(f"Remaining: {payload['remaining']}")
+    return 0 if status in {"valid", "warning"} else 1
+
+
+def auth_logout_command() -> int:
+    token_path = cli_token_file_path()
+    if token_path.exists():
+        token_path.unlink()
+    print(f"Removed stored platform token at {token_path}.")
+    return 0
 
 
 def parse_kv_pairs(pairs: list[str]) -> dict[str, Any]:
@@ -1629,6 +1818,7 @@ def install_completion(shell_name: str) -> int:
 def completion_candidates(words: list[str], current: str) -> list[str]:
     top_level = [
         "agent",
+        "auth",
         "deploy",
         "impact",
         "lint",
@@ -1662,6 +1852,8 @@ def completion_candidates(words: list[str], current: str) -> list[str]:
         return [service_id for service_id in candidates if service_id.startswith(current)]
     if words[1] == "run":
         return [workflow_id for workflow_id in sorted(load_workflow_catalog()) if workflow_id.startswith(current)]
+    if words[1] == "auth" and len(words) == 3:
+        return [action for action in ["login", "status", "logout"] if action.startswith(current)]
     if words[1] == "runbook" and len(words) == 3:
         return [action for action in ["execute", "status", "approve"] if action.startswith(current)]
     if words[1] == "runbook" and len(words) in {3, 4} and words[2] == "execute":
@@ -1779,6 +1971,18 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--install-completion", choices=["bash", "zsh"], help="Install shell completion into the default rc file.")
 
     subparsers = parser.add_subparsers(dest="command")
+
+    auth = subparsers.add_parser("auth", help="Manage the locally stored platform API token.")
+    auth_subparsers = auth.add_subparsers(dest="auth_action", required=True)
+    auth_login = auth_subparsers.add_parser("login", help="Store one platform token locally with expiry metadata.")
+    auth_login.add_argument("--token")
+    auth_login.add_argument("--token-file")
+    auth_login.add_argument("--expires-at", help="RFC3339 timestamp. Optional for JWTs with an exp claim.")
+    auth_login.add_argument("--source", default="manual")
+    auth_login.add_argument("--dry-run", action="store_true")
+    auth_status = auth_subparsers.add_parser("status", help="Show the currently stored platform token metadata.")
+    auth_status.add_argument("--json", action="store_true")
+    auth_logout = auth_subparsers.add_parser("logout", help="Remove the stored platform token.")
 
     deploy = subparsers.add_parser("deploy", help="Deploy one service.")
     deploy.add_argument("service")
@@ -2095,6 +2299,21 @@ def main(argv: list[str] | None = None) -> int:
     if not args.command:
         parser.print_help()
         return 0
+    if args.command != "auth":
+        maybe_warn_cli_token_expiry()
+
+    if args.command == "auth":
+        if args.auth_action == "login":
+            return auth_login_command(
+                token=args.token,
+                token_file=args.token_file,
+                expires_at=args.expires_at,
+                source=args.source,
+                dry_run=args.dry_run,
+            )
+        if args.auth_action == "status":
+            return auth_status_command(json_output=args.json)
+        return auth_logout_command()
 
     if args.command == "deploy":
         return run_plan(resolve_deploy_command(args.service, args.env), dry_run=args.dry_run, explain=args.explain, no_color=no_color)

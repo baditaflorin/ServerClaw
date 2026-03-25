@@ -1596,6 +1596,272 @@
         "escalation_action": "abort_silently"
       }
     },
+    "audit-token-inventory": {
+      "description": "Run the ADR 0141 token inventory audit against the canonical token policy and emit a receipt plus ledger event.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "token-inventory-audit",
+        "command": "make token-inventory-audit TOKEN_LIFECYCLE_ARGS='--dry-run --print-report-json'"
+      },
+      "preflight": {
+        "required": false,
+        "required_secret_ids": []
+      },
+      "validation_targets": [
+        "validate-data-models"
+      ],
+      "live_impact": "repo_only",
+      "owner_runbook": "docs/runbooks/token-lifecycle-management.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/token-policy.yaml",
+        "config/token-inventory.yaml",
+        "config/windmill/scripts/audit-token-inventory.py",
+        "docs/runbooks/token-lifecycle-management.md",
+        "scripts/token_lifecycle.py",
+        "tests/test_token_lifecycle.py"
+      ],
+      "outputs": [
+        "A token inventory audit receipt under receipts/token-lifecycle/ with healthy, warning, expired, and remediation counts.",
+        "A mutation-ledger file event describing the audit summary."
+      ],
+      "verification_commands": [
+        "uv run --with pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/token_lifecycle.py validate",
+        "make token-inventory-audit TOKEN_LIFECYCLE_ARGS='--dry-run --print-report-json'",
+        "uv run --with pytest --with pyyaml pytest -q /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests/test_token_lifecycle.py"
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 120,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 0,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "abort_silently"
+      }
+    },
+    "token-exposure-response": {
+      "description": "Run the ADR 0141 exposure response workflow for one governed token, including revocation, replacement, incident receipt generation, and session invalidation when required.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "token-exposure-response",
+        "command": "make token-exposure-response TOKEN_ID=keycloak-agent-hub-client-secret EXPOSURE_SOURCE=git_diff TOKEN_LIFECYCLE_ARGS='--dry-run --print-report-json'"
+      },
+      "preflight": {
+        "required": false,
+        "required_secret_ids": []
+      },
+      "validation_targets": [
+        "validate-data-models"
+      ],
+      "live_impact": "external_live",
+      "owner_runbook": "docs/runbooks/token-exposure-response.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/token-policy.yaml",
+        "config/token-inventory.yaml",
+        "config/windmill/scripts/token-exposure-response.py",
+        "docs/runbooks/token-exposure-response.md",
+        "receipts/security-incidents/.gitkeep",
+        "scripts/token_lifecycle.py",
+        "tests/test_token_lifecycle.py"
+      ],
+      "outputs": [
+        "An exposure incident receipt under receipts/security-incidents/ capturing the exposure window, revocation, replacement, session invalidation, and impact steps.",
+        "Mutation-ledger file events for revocation and incident creation when the required hooks succeed."
+      ],
+      "verification_commands": [
+        "make token-exposure-response TOKEN_ID=keycloak-agent-hub-client-secret EXPOSURE_SOURCE=git_diff TOKEN_LIFECYCLE_ARGS='--dry-run --print-report-json'",
+        "uv run --with pytest --with pyyaml pytest -q /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests/test_token_lifecycle.py"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 150,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "rotate-keycloak-client-secret": {
+      "description": "Rotate one ADR 0141 governed Keycloak client secret through the configured token hook contract.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "rotate-keycloak-client-secret",
+        "command": "make rotate-keycloak-client-secret TOKEN_ID=keycloak-agent-hub-client-secret TOKEN_LIFECYCLE_ARGS='--dry-run --print-report-json'"
+      },
+      "preflight": {
+        "required": false,
+        "required_secret_ids": []
+      },
+      "validation_targets": [
+        "validate-data-models"
+      ],
+      "live_impact": "external_live",
+      "owner_runbook": "docs/runbooks/token-lifecycle-management.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/token-policy.yaml",
+        "config/token-inventory.yaml",
+        "docs/runbooks/token-lifecycle-management.md",
+        "scripts/token_lifecycle.py",
+        "tests/test_token_lifecycle.py"
+      ],
+      "outputs": [
+        "A hook-backed or planned Keycloak client secret rotation result for the requested token id."
+      ],
+      "verification_commands": [
+        "make rotate-keycloak-client-secret TOKEN_ID=keycloak-agent-hub-client-secret TOKEN_LIFECYCLE_ARGS='--dry-run --print-report-json'",
+        "uv run --with pytest --with pyyaml pytest -q /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests/test_token_lifecycle.py"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 120,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "rotate-windmill-token": {
+      "description": "Rotate one ADR 0141 governed Windmill API token through the configured token hook contract.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "rotate-windmill-token",
+        "command": "make rotate-windmill-token TOKEN_ID=windmill-superadmin-token TOKEN_LIFECYCLE_ARGS='--dry-run --print-report-json'"
+      },
+      "preflight": {
+        "required": false,
+        "required_secret_ids": []
+      },
+      "validation_targets": [
+        "validate-data-models"
+      ],
+      "live_impact": "external_live",
+      "owner_runbook": "docs/runbooks/token-lifecycle-management.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/token-policy.yaml",
+        "config/token-inventory.yaml",
+        "docs/runbooks/token-lifecycle-management.md",
+        "scripts/token_lifecycle.py",
+        "tests/test_token_lifecycle.py"
+      ],
+      "outputs": [
+        "A hook-backed or planned Windmill token rotation result for the requested token id."
+      ],
+      "verification_commands": [
+        "make rotate-windmill-token TOKEN_ID=windmill-superadmin-token TOKEN_LIFECYCLE_ARGS='--dry-run --print-report-json'",
+        "uv run --with pytest --with pyyaml pytest -q /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests/test_token_lifecycle.py"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 120,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "rotate-grafana-service-token": {
+      "description": "Rotate one ADR 0141 governed Grafana service account token through the configured token hook contract.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "rotate-grafana-service-token",
+        "command": "make rotate-grafana-service-token TOKEN_ID=grafana-service-account-token TOKEN_LIFECYCLE_ARGS='--dry-run --print-report-json'"
+      },
+      "preflight": {
+        "required": false,
+        "required_secret_ids": []
+      },
+      "validation_targets": [
+        "validate-data-models"
+      ],
+      "live_impact": "external_live",
+      "owner_runbook": "docs/runbooks/token-lifecycle-management.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/token-policy.yaml",
+        "config/token-inventory.yaml",
+        "docs/runbooks/token-lifecycle-management.md",
+        "scripts/token_lifecycle.py",
+        "tests/test_token_lifecycle.py"
+      ],
+      "outputs": [
+        "A hook-backed or planned Grafana token rotation result for the requested token id."
+      ],
+      "verification_commands": [
+        "make rotate-grafana-service-token TOKEN_ID=grafana-service-account-token TOKEN_LIFECYCLE_ARGS='--dry-run --print-report-json'",
+        "uv run --with pytest --with pyyaml pytest -q /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests/test_token_lifecycle.py"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 120,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "rotate-platform-cli-token": {
+      "description": "Rotate one ADR 0141 governed local platform CLI token through the configured token hook contract.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "rotate-platform-cli-token",
+        "command": "make rotate-platform-cli-token TOKEN_ID=local-platform-cli TOKEN_LIFECYCLE_ARGS='--dry-run --print-report-json'"
+      },
+      "preflight": {
+        "required": false,
+        "required_secret_ids": []
+      },
+      "validation_targets": [
+        "validate-data-models"
+      ],
+      "live_impact": "repo_only",
+      "owner_runbook": "docs/runbooks/token-lifecycle-management.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/token-policy.yaml",
+        "config/token-inventory.yaml",
+        "docs/runbooks/token-lifecycle-management.md",
+        "scripts/lv3_cli.py",
+        "scripts/token_lifecycle.py",
+        "tests/test_lv3_cli.py",
+        "tests/test_token_lifecycle.py"
+      ],
+      "outputs": [
+        "A hook-backed or planned local platform CLI token rotation result for the requested token id."
+      ],
+      "verification_commands": [
+        "make rotate-platform-cli-token TOKEN_ID=local-platform-cli TOKEN_LIFECYCLE_ARGS='--dry-run --print-report-json'",
+        "uv run --with pytest --with pyyaml pytest -q /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests/test_lv3_cli.py /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/tests/test_token_lifecycle.py"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 120,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 0,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "rotate-secret": {
       "description": "Plan or apply one repo-managed secret rotation, update the owning service without a full reconverge, and persist the rotated value in OpenBao.",
       "lifecycle_status": "active",

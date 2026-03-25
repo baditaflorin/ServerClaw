@@ -43,7 +43,6 @@ from workflow_catalog import (
     validate_secret_manifest,
     validate_workflow_catalog,
 )
-from uptime_contract import build_uptime_monitors
 
 
 STACK_PATH = repo_path("versions", "stack.yaml")
@@ -53,6 +52,8 @@ UPTIME_MONITORS_PATH = repo_path("config", "uptime-kuma", "monitors.json")
 HEALTH_PROBE_CATALOG_PATH = repo_path("config", "health-probe-catalog.json")
 CERTIFICATE_CATALOG_PATH = repo_path("config", "certificate-catalog.json")
 SECRET_CATALOG_PATH = repo_path("config", "secret-catalog.json")
+TOKEN_POLICY_PATH = repo_path("config", "token-policy.yaml")
+TOKEN_INVENTORY_PATH = repo_path("config", "token-inventory.yaml")
 IMAGE_CATALOG_PATH = repo_path("config", "image-catalog.json")
 PLATFORM_FINDING_SCHEMA_PATH = repo_path("docs", "schema", "platform-finding.json")
 MAINTENANCE_WINDOW_SCHEMA_PATH = repo_path("docs", "schema", "maintenance-window.json")
@@ -240,6 +241,8 @@ def validate_no_scaffold_placeholders() -> None:
         HEALTH_PROBE_CATALOG_PATH: load_json(HEALTH_PROBE_CATALOG_PATH),
         CERTIFICATE_CATALOG_PATH: load_json(CERTIFICATE_CATALOG_PATH),
         SECRET_CATALOG_PATH: load_json(SECRET_CATALOG_PATH),
+        TOKEN_POLICY_PATH: load_yaml(TOKEN_POLICY_PATH),
+        TOKEN_INVENTORY_PATH: load_yaml(TOKEN_INVENTORY_PATH),
         IMAGE_CATALOG_PATH: load_json(IMAGE_CATALOG_PATH),
         repo_path("config", "service-capability-catalog.json"): load_json(
             repo_path("config", "service-capability-catalog.json")
@@ -809,6 +812,7 @@ def validate_health_probe_catalog(host_vars_context: dict[str, Any]) -> None:
             "config/health-probe-catalog.json.services must define exactly the canonical lv3_service_topology services"
         )
 
+    expected_monitors: dict[str, dict[str, Any]] = {}
     for service_id, topology_entry in topology.items():
         service_path = f"config/health-probe-catalog.json.services.{service_id}"
         service = require_mapping(services.get(service_id), service_path)
@@ -846,28 +850,33 @@ def validate_health_probe_catalog(host_vars_context: dict[str, Any]) -> None:
         enabled = require_bool(uptime_kuma.get("enabled"), f"{service_path}.uptime_kuma.enabled")
         if enabled:
             monitor = require_mapping(uptime_kuma.get("monitor"), f"{service_path}.uptime_kuma.monitor")
-            validate_monitor(monitor, f"{service_path}.uptime_kuma.monitor")
+            name = validate_monitor(monitor, f"{service_path}.uptime_kuma.monitor")
+            if name in expected_monitors:
+                raise ValueError(f"duplicate Uptime Kuma monitor contract in health probe catalog: {name}")
+            expected_monitors[name] = monitor
         elif "reason" in uptime_kuma:
             require_str(uptime_kuma.get("reason"), f"{service_path}.uptime_kuma.reason")
 
-    expected_monitors = build_uptime_monitors(catalog)
     actual_monitors = require_list(
         json.loads(UPTIME_MONITORS_PATH.read_text()),
         str(UPTIME_MONITORS_PATH),
     )
+    actual_monitors_by_name: dict[str, dict[str, Any]] = {}
     for index, monitor in enumerate(actual_monitors):
-        validate_monitor(monitor, f"config/uptime-kuma/monitors.json[{index}]")
+        name = validate_monitor(monitor, f"config/uptime-kuma/monitors.json[{index}]")
+        if name in actual_monitors_by_name:
+            raise ValueError(f"duplicate monitor name in config/uptime-kuma/monitors.json: {name}")
+        actual_monitors_by_name[name] = monitor
 
-    if len(actual_monitors) != len(expected_monitors):
+    if set(actual_monitors_by_name.keys()) != set(expected_monitors.keys()):
         raise ValueError(
             "config/uptime-kuma/monitors.json must match the enabled uptime_kuma monitors in config/health-probe-catalog.json"
         )
-    for index, expected_monitor in enumerate(expected_monitors):
-        actual_monitor = actual_monitors[index]
-        if actual_monitor != expected_monitor:
+
+    for name, expected_monitor in expected_monitors.items():
+        if actual_monitors_by_name[name] != expected_monitor:
             raise ValueError(
-                "config/uptime-kuma/monitors.json must preserve the generated monitor order and fields from "
-                "config/health-probe-catalog.json"
+                f"config/uptime-kuma/monitors.json monitor '{name}' does not match the health probe catalog contract"
             )
 
 
@@ -1076,6 +1085,84 @@ def validate_secret_catalog(secret_manifest: dict[str, Any]) -> None:
 
         require_str(secret.get("event_subject"), f"{path}.event_subject")
         require_str(secret.get("glitchtip_component"), f"{path}.glitchtip_component")
+
+
+def validate_token_policy() -> set[str]:
+    payload = require_mapping(load_yaml(TOKEN_POLICY_PATH), str(TOKEN_POLICY_PATH))
+    require_semver(payload.get("schema_version"), "config/token-policy.yaml.schema_version")
+    classes = require_list(payload.get("token_classes"), "config/token-policy.yaml.token_classes")
+    if not classes:
+        raise ValueError("config/token-policy.yaml.token_classes must not be empty")
+
+    class_names: set[str] = set()
+    for index, item in enumerate(classes):
+        path = f"config/token-policy.yaml.token_classes[{index}]"
+        item = require_mapping(item, path)
+        class_name = require_identifier(item.get("class"), f"{path}.class")
+        if class_name in class_names:
+            raise ValueError(f"duplicate token policy class: {class_name}")
+        class_names.add(class_name)
+        max_ttl_days = require_int(item.get("max_ttl_days"), f"{path}.max_ttl_days", 1)
+        warning_window_days = require_int(item.get("warning_window_days"), f"{path}.warning_window_days", 0)
+        require_int(item.get("enforcement_grace_days"), f"{path}.enforcement_grace_days", 0)
+        if warning_window_days > max_ttl_days:
+            raise ValueError(f"{path}.warning_window_days must not exceed max_ttl_days")
+        require_str(item.get("rotation_trigger"), f"{path}.rotation_trigger")
+        require_str(item.get("storage"), f"{path}.storage")
+        require_identifier(item.get("revocation_workflow"), f"{path}.revocation_workflow")
+        require_str(item.get("on_exposure"), f"{path}.on_exposure")
+    return class_names
+
+
+def validate_token_inventory(token_classes: set[str], workflow_catalog: dict[str, Any]) -> None:
+    payload = require_mapping(load_yaml(TOKEN_INVENTORY_PATH), str(TOKEN_INVENTORY_PATH))
+    require_semver(payload.get("schema_version"), "config/token-inventory.yaml.schema_version")
+    tokens = require_list(payload.get("tokens"), "config/token-inventory.yaml.tokens")
+    if not tokens:
+        raise ValueError("config/token-inventory.yaml.tokens must not be empty")
+    workflows = require_mapping(workflow_catalog.get("workflows"), "config/workflow-catalog.json.workflows")
+    token_ids: set[str] = set()
+    for index, token in enumerate(tokens):
+        path = f"config/token-inventory.yaml.tokens[{index}]"
+        token = require_mapping(token, path)
+        token_id = require_identifier(token.get("id"), f"{path}.id")
+        if token_id in token_ids:
+            raise ValueError(f"duplicate token inventory id: {token_id}")
+        token_ids.add(token_id)
+        token_class = require_identifier(token.get("token_class"), f"{path}.token_class")
+        if token_class not in token_classes:
+            raise ValueError(f"{path}.token_class references unknown policy class '{token_class}'")
+        require_identifier(token.get("owner_service"), f"{path}.owner_service")
+        require_str(token.get("subject"), f"{path}.subject")
+        require_str(token.get("issued_at"), f"{path}.issued_at")
+        expires_at = token.get("expires_at")
+        if expires_at is not None:
+            require_str(expires_at, f"{path}.expires_at")
+        require_str(token.get("storage_ref"), f"{path}.storage_ref")
+        permissions = token.get("permissions", [])
+        if permissions:
+            require_string_list(permissions, f"{path}.permissions")
+        workflow_refs = require_mapping(token.get("workflows", {}), f"{path}.workflows")
+        for workflow_name, workflow_id in workflow_refs.items():
+            require_identifier(workflow_name, f"{path}.workflows key '{workflow_name}'")
+            workflow_id = require_identifier(workflow_id, f"{path}.workflows.{workflow_name}")
+            if workflow_id not in workflows:
+                raise ValueError(f"{path}.workflows.{workflow_name} references unknown workflow '{workflow_id}'")
+        hooks = require_mapping(token.get("hooks", {}), f"{path}.hooks")
+        for hook_name, hook in hooks.items():
+            hook_path = f"{path}.hooks.{hook_name}"
+            require_identifier(hook_name, f"{path}.hooks key '{hook_name}'")
+            hook = require_mapping(hook, hook_path)
+            require_enum(hook.get("kind"), f"{hook_path}.kind", {"command"})
+            command = require_list(hook.get("command"), f"{hook_path}.command")
+            if not command:
+                raise ValueError(f"{hook_path}.command must not be empty")
+            for command_index, part in enumerate(command):
+                require_str(part, f"{hook_path}.command[{command_index}]")
+            env = require_mapping(hook.get("env", {}), f"{hook_path}.env")
+            for env_key, env_value in env.items():
+                require_str(env_key, f"{hook_path}.env key '{env_key}'")
+                require_str(env_value, f"{hook_path}.env.{env_key}")
 
 
 def validate_legacy_image_catalog(host_vars_context: dict[str, Any]) -> None:
@@ -2018,6 +2105,8 @@ def validate_repository_data_models() -> int:
     validate_data_catalog(load_data_catalog())
     validate_slo_catalog_assets()
     validate_secret_catalog(secret_manifest)
+    token_classes = validate_token_policy()
+    validate_token_inventory(token_classes, workflow_catalog)
     validate_version_semantics()
     validate_workstreams_release_policy()
     validate_triage_rule_contracts()

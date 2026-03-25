@@ -20,7 +20,9 @@
 - service.config_changed
 
 # Secret management
+- secret.audited
 - secret.rotated
+- secret.revoked
 - secret.accessed
 - secret.expiry_extended
 

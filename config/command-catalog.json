@@ -2166,6 +2166,156 @@
           "Prefer rerunning the idempotent sync over manual point fixes when only part of the roster applied."
         ]
       }
+    },
+    "token-exposure-response": {
+      "description": "Run the ADR 0141 exposure-response workflow for one governed token and record the resulting incident receipt.",
+      "workflow_id": "token-exposure-response",
+      "scope": "external_service",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "TOKEN_ID",
+          "kind": "operator_parameter",
+          "required": true,
+          "source": "config/token-inventory.yaml",
+          "description": "Governed token inventory id that should be revoked and replaced."
+        },
+        {
+          "name": "EXPOSURE_SOURCE",
+          "kind": "operator_parameter",
+          "required": false,
+          "source": "Makefile",
+          "description": "Optional exposure source label such as git_diff, log_capture, or screenshot."
+        },
+        {
+          "name": "EXPOSURE_NOTES",
+          "kind": "operator_parameter",
+          "required": false,
+          "source": "Makefile",
+          "description": "Optional operator notes recorded in the incident receipt."
+        }
+      ],
+      "expected_preconditions": [
+        "uv run --with pyyaml python scripts/token_lifecycle.py validate passes",
+        "The selected TOKEN_ID exists in config/token-inventory.yaml and defines the required revoke hook before live execution",
+        "Operators have identified the suspected exposure source and confirmed the blast radius before revocation starts"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the token id, exposure source, replacement outcome, and resulting receipts/security-incidents incident file."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the selected token id is not governed by the inventory or if the revoke hook is missing.",
+          "Stop if replacement or session invalidation fails after revocation so the incident can be handled explicitly."
+        ],
+        "rollback_guidance": [
+          "Do not recreate exposed credentials manually outside the governed hook contract.",
+          "Treat partial revocation or replacement as a security incident and reconcile it through the documented runbook plus receipts."
+        ]
+      }
+    },
+    "rotate-keycloak-client-secret": {
+      "description": "Rotate one governed Keycloak client secret through the ADR 0141 token lifecycle hook contract.",
+      "workflow_id": "rotate-keycloak-client-secret",
+      "scope": "external_service",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "TOKEN_ID",
+          "kind": "operator_parameter",
+          "required": true,
+          "source": "config/token-inventory.yaml",
+          "description": "Governed Keycloak client-secret token id to rotate."
+        }
+      ],
+      "expected_preconditions": [
+        "uv run --with pyyaml python scripts/token_lifecycle.py validate passes",
+        "The selected TOKEN_ID belongs to the keycloak_client_secret class and defines a rotate hook in config/token-inventory.yaml",
+        "Operators have confirmed the dependent service can accept the replacement secret before rotation starts"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the token id, hook outcome, and any dependent service update performed by the rotation contract."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the selected token id is not a governed Keycloak client secret.",
+          "Stop if the rotate hook fails or leaves the dependent service with mismatched credentials."
+        ],
+        "rollback_guidance": [
+          "Rerun the governed rotation after correcting the hook environment instead of setting ad hoc secrets.",
+          "Treat failed secret publication to the dependent service as an explicit incident requiring follow-up before retry."
+        ]
+      }
+    },
+    "rotate-windmill-token": {
+      "description": "Rotate one governed Windmill API token through the ADR 0141 token lifecycle hook contract.",
+      "workflow_id": "rotate-windmill-token",
+      "scope": "external_service",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "TOKEN_ID",
+          "kind": "operator_parameter",
+          "required": true,
+          "source": "config/token-inventory.yaml",
+          "description": "Governed Windmill token id to rotate."
+        }
+      ],
+      "expected_preconditions": [
+        "uv run --with pyyaml python scripts/token_lifecycle.py validate passes",
+        "The selected TOKEN_ID belongs to the windmill_api_token class and defines a rotate hook in config/token-inventory.yaml",
+        "Operators have confirmed the replacement token can be distributed to its consumers after rotation"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the token id, hook outcome, and the resulting replacement metadata."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the selected token id is not a governed Windmill token.",
+          "Stop if the rotate hook cannot publish the replacement token to the intended storage boundary."
+        ],
+        "rollback_guidance": [
+          "Prefer rerunning the governed hook after fixing the environment rather than minting ad hoc API tokens.",
+          "Treat a revoked-but-unpublished replacement token as an operational incident that needs explicit recovery."
+        ]
+      }
+    },
+    "rotate-grafana-service-token": {
+      "description": "Rotate one governed Grafana service-account token through the ADR 0141 token lifecycle hook contract.",
+      "workflow_id": "rotate-grafana-service-token",
+      "scope": "external_service",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "TOKEN_ID",
+          "kind": "operator_parameter",
+          "required": true,
+          "source": "config/token-inventory.yaml",
+          "description": "Governed Grafana service-account token id to rotate."
+        }
+      ],
+      "expected_preconditions": [
+        "uv run --with pyyaml python scripts/token_lifecycle.py validate passes",
+        "The selected TOKEN_ID belongs to the grafana_service_account_token class and defines a rotate hook in config/token-inventory.yaml",
+        "Operators have confirmed the consuming automation can accept the replacement service token before rotation starts"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the token id, hook outcome, and any downstream automation update tied to the replacement token."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the selected token id is not a governed Grafana service-account token.",
+          "Stop if the rotate hook fails or the dependent automation can no longer authenticate after the change."
+        ],
+        "rollback_guidance": [
+          "Rerun the governed rotation after fixing hook prerequisites instead of issuing unmanaged Grafana tokens.",
+          "Keep the replacement workflow and incident trail in receipts rather than patching consumers manually."
+        ]
+      }
     }
   }
 }
