@@ -61,6 +61,7 @@
             "converge-mail-platform",
             "converge-rag-context",
             "converge-portainer",
+            "converge-vaultwarden",
             "deploy-uptime-kuma",
             "configure-backup-vm",
             "database-dns"
@@ -173,6 +174,19 @@
             "portainer-manage"
           ],
           "notes": "This is the private Docker runtime operations console and API published only through the Proxmox host Tailscale proxy."
+        },
+        {
+          "id": "vaultwarden-api",
+          "kind": "service_api",
+          "endpoint": "https://vault.lv3.org",
+          "auth": "Named Vaultwarden operator accounts for routine use; the controller-local admin token is reserved for bounded bootstrap and recovery-safe automation.",
+          "service_refs": [
+            "vaultwarden"
+          ],
+          "workflow_refs": [
+            "converge-vaultwarden"
+          ],
+          "notes": "This is the private shared credential-vault API and web surface exposed only through the Proxmox host Tailscale path with an internal CA certificate."
         },
         {
           "id": "mail-gateway-api",

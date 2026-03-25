@@ -137,6 +137,21 @@
       "notes": "Object-change history should remain available through at least one quarterly planning cycle without growing unbounded."
     },
     {
+      "id": "vaultwarden-shared-vault",
+      "service": "vaultwarden",
+      "name": "Vaultwarden shared credential vault",
+      "class": "secret",
+      "retention_days": null,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "Vaultwarden PostgreSQL database",
+        "/opt/vaultwarden/data"
+      ],
+      "notes": "Shared operator credentials, recovery codes, and TOTP seeds remain until explicit deletion or rotation removes them from the private vault."
+    },
+    {
       "id": "live-apply-receipts",
       "service": "platform_control_plane",
       "name": "Live-apply receipts",

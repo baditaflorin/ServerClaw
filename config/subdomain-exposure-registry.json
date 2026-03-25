@@ -18,6 +18,7 @@
       "route_kind": "proxy",
       "edge_auth": "none",
       "unauthenticated_paths": [],
+      "unauthenticated_prefix_paths": [],
       "repo_route_service_id": "api_gateway",
       "repo_route_metadata": {
         "enabled": true,
@@ -47,6 +48,7 @@
       "route_kind": "static",
       "edge_auth": "none",
       "unauthenticated_paths": [],
+      "unauthenticated_prefix_paths": [],
       "repo_route_service_id": "docker_build",
       "repo_route_metadata": {
         "enabled": true,
@@ -79,6 +81,7 @@
       "route_kind": "static_dir",
       "edge_auth": "oauth2_proxy",
       "unauthenticated_paths": [],
+      "unauthenticated_prefix_paths": [],
       "repo_route_service_id": null,
       "repo_route_metadata": {
         "source_dir": "changelog-portal"
@@ -106,6 +109,7 @@
       "route_kind": null,
       "edge_auth": "none",
       "unauthenticated_paths": [],
+      "unauthenticated_prefix_paths": [],
       "repo_route_service_id": null,
       "repo_route_metadata": {},
       "tls": {
@@ -130,6 +134,7 @@
       "route_kind": "static",
       "edge_auth": "none",
       "unauthenticated_paths": [],
+      "unauthenticated_prefix_paths": [],
       "repo_route_service_id": "docker_runtime",
       "repo_route_metadata": {
         "enabled": true,
@@ -162,6 +167,7 @@
       "route_kind": "static_dir",
       "edge_auth": "oauth2_proxy",
       "unauthenticated_paths": [],
+      "unauthenticated_prefix_paths": [],
       "repo_route_service_id": null,
       "repo_route_metadata": {
         "source_dir": "docs-portal"
@@ -189,6 +195,7 @@
       "route_kind": "proxy",
       "edge_auth": "none",
       "unauthenticated_paths": [],
+      "unauthenticated_prefix_paths": [],
       "repo_route_service_id": "grafana",
       "repo_route_metadata": {
         "enabled": true,
@@ -229,6 +236,7 @@
       "route_kind": null,
       "edge_auth": "none",
       "unauthenticated_paths": [],
+      "unauthenticated_prefix_paths": [],
       "repo_route_service_id": null,
       "repo_route_metadata": {},
       "tls": {
@@ -254,6 +262,7 @@
       "route_kind": "proxy",
       "edge_auth": "none",
       "unauthenticated_paths": [],
+      "unauthenticated_prefix_paths": [],
       "repo_route_service_id": "headscale",
       "repo_route_metadata": {
         "enabled": true,
@@ -283,8 +292,45 @@
       "route_kind": null,
       "edge_auth": "none",
       "unauthenticated_paths": [],
+      "unauthenticated_prefix_paths": [],
       "repo_route_service_id": null,
       "repo_route_metadata": {},
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "live_tracking_expected": true
+    },
+    {
+      "fqdn": "n8n.lv3.org",
+      "service_id": "n8n",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0151",
+      "dns_record_type": "A",
+      "route_mode": "edge",
+      "route_source": "service_topology",
+      "route_kind": "proxy",
+      "edge_auth": "oauth2_proxy",
+      "unauthenticated_paths": [
+        "/healthz"
+      ],
+      "unauthenticated_prefix_paths": [
+        "/webhook/",
+        "/webhook-test/",
+        "/webhook-waiting/"
+      ],
+      "repo_route_service_id": "n8n",
+      "repo_route_metadata": {
+        "enabled": true,
+        "tls": true,
+        "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.n8n_port }}"
+      },
       "tls": {
         "provider": "letsencrypt",
         "cert_path": "/etc/letsencrypt/live/lv3-edge/",
@@ -308,6 +354,7 @@
       "route_kind": "static",
       "edge_auth": "none",
       "unauthenticated_paths": [],
+      "unauthenticated_prefix_paths": [],
       "repo_route_service_id": "nginx_edge",
       "repo_route_metadata": {
         "enabled": true,
@@ -342,6 +389,7 @@
       "unauthenticated_paths": [
         "/health"
       ],
+      "unauthenticated_prefix_paths": [],
       "repo_route_service_id": "ops_portal",
       "repo_route_metadata": {
         "enabled": true,
@@ -371,6 +419,7 @@
       "route_kind": null,
       "edge_auth": "none",
       "unauthenticated_paths": [],
+      "unauthenticated_prefix_paths": [],
       "repo_route_service_id": null,
       "repo_route_metadata": {},
       "tls": {
@@ -396,6 +445,7 @@
       "route_kind": "static",
       "edge_auth": "none",
       "unauthenticated_paths": [],
+      "unauthenticated_prefix_paths": [],
       "repo_route_service_id": "proxmox_ui",
       "repo_route_metadata": {
         "enabled": true,
@@ -430,6 +480,7 @@
       "route_kind": "proxy",
       "edge_auth": "none",
       "unauthenticated_paths": [],
+      "unauthenticated_prefix_paths": [],
       "repo_route_service_id": "keycloak",
       "repo_route_metadata": {
         "enabled": true,
@@ -459,6 +510,7 @@
       "route_kind": null,
       "edge_auth": "none",
       "unauthenticated_paths": [],
+      "unauthenticated_prefix_paths": [],
       "repo_route_service_id": null,
       "repo_route_metadata": {},
       "tls": {
@@ -484,6 +536,7 @@
       "route_kind": "proxy",
       "edge_auth": "none",
       "unauthenticated_paths": [],
+      "unauthenticated_prefix_paths": [],
       "repo_route_service_id": "status_page",
       "repo_route_metadata": {
         "enabled": true,
@@ -514,6 +567,7 @@
       "route_kind": "proxy",
       "edge_auth": "none",
       "unauthenticated_paths": [],
+      "unauthenticated_prefix_paths": [],
       "repo_route_service_id": "uptime_kuma",
       "repo_route_metadata": {
         "enabled": true,
@@ -543,6 +597,7 @@
       "route_kind": null,
       "edge_auth": "none",
       "unauthenticated_paths": [],
+      "unauthenticated_prefix_paths": [],
       "repo_route_service_id": null,
       "repo_route_metadata": {},
       "tls": {
@@ -551,15 +606,41 @@
         "auto_renew": true
       },
       "live_tracking_expected": false
+    },
+    {
+      "fqdn": "vault.lv3.org",
+      "service_id": "vaultwarden",
+      "environment": "production",
+      "status": "active",
+      "exposure": "private-only",
+      "auth_requirement": "private_network",
+      "target": "100.118.189.95",
+      "target_port": 443,
+      "owner_adr": "0147",
+      "dns_record_type": "A",
+      "route_mode": "dns-only",
+      "route_source": "dns-only",
+      "route_kind": null,
+      "edge_auth": "none",
+      "unauthenticated_paths": [],
+      "unauthenticated_prefix_paths": [],
+      "repo_route_service_id": null,
+      "repo_route_metadata": {},
+      "tls": {
+        "provider": "step-ca",
+        "cert_path": "/opt/vaultwarden/tls",
+        "auto_renew": true
+      },
+      "live_tracking_expected": false
     }
   ],
   "summary": {
-    "catalog_total": 19,
-    "active_total": 15,
-    "active_public_dns_total": 14,
-    "active_private_total": 1,
+    "catalog_total": 21,
+    "active_total": 17,
+    "active_public_dns_total": 15,
+    "active_private_total": 2,
     "planned_total": 4,
-    "edge_total": 13,
-    "edge_oidc_total": 4
+    "edge_total": 14,
+    "edge_oidc_total": 5
   }
 }

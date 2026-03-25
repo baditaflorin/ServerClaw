@@ -40,6 +40,7 @@ PORT_KEYS = (
     "netbox_server_port",
     "netbox_host_proxy_port",
     "ollama_api_port",
+    "n8n_port",
     "open_webui_port",
     "open_webui_host_proxy_port",
     "api_gateway_internal_port",
@@ -52,6 +53,8 @@ PORT_KEYS = (
     "portainer_host_proxy_port",
     "step_ca_api_port",
     "step_ca_proxy_port",
+    "headscale_http_port",
+    "vaultwarden_https_port",
     "headscale_http_port",
 )
 
@@ -282,6 +285,9 @@ def build_service_urls(
     elif service_id == "ollama":
         urls["internal"] = service_url("http", private_ip, ports["ollama_api_port"])
         port_map["internal"] = ports["ollama_api_port"]
+    elif service_id == "n8n":
+        urls["internal"] = service_url("http", private_ip, ports["n8n_port"])
+        port_map["internal"] = ports["n8n_port"]
     elif service_id == "open_webui":
         urls["internal"] = service_url("http", private_ip, ports["open_webui_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["open_webui_host_proxy_port"])
@@ -322,6 +328,14 @@ def build_service_urls(
         urls["controller"] = service_url("https", tailscale_ipv4, ports["portainer_host_proxy_port"])
         port_map["internal"] = ports["portainer_https_port"]
         port_map["controller"] = ports["portainer_host_proxy_port"]
+    elif service_id == "vaultwarden":
+        urls["internal"] = service_url("https", private_ip, ports["vaultwarden_https_port"])
+        if public_hostname:
+            urls["controller"] = f"https://{public_hostname}"
+        else:
+            urls["controller"] = service_url("https", tailscale_ipv4, 443)
+        port_map["internal"] = ports["vaultwarden_https_port"]
+        port_map["controller"] = 443
     elif service_id == "postgres":
         urls["internal"] = service_url("postgresql", service.get("public_hostname", private_ip), 5432)
         urls["controller"] = service_url("postgresql", tailscale_ipv4, 5432)
@@ -469,6 +483,7 @@ def build_platform_vars(
     openbao_service = service_topology["openbao"]
     platform_context_service = service_topology["platform_context_api"]
     portainer_service = service_topology["portainer"]
+    vaultwarden_service = service_topology["vaultwarden"]
     postgres_service = service_topology["postgres"]
     step_ca_service = service_topology["step_ca"]
     uptime_kuma_service = service_topology["uptime_kuma"]
@@ -559,6 +574,7 @@ def build_platform_vars(
             resolved_ports["mattermost_host_proxy_port"],
             resolved_ports["platform_context_host_proxy_port"],
             resolved_ports["portainer_host_proxy_port"],
+            443,
         ],
         "public_edge_service_topology": copy.deepcopy(service_topology),
         "uptime_kuma_service_topology": copy.deepcopy(uptime_kuma_service),
@@ -588,6 +604,8 @@ def build_platform_vars(
         "platform_context_controller_url": platform_context_service["urls"]["controller"],
         "portainer_host_proxy_port": resolved_ports["portainer_host_proxy_port"],
         "portainer_controller_url": portainer_service["urls"]["controller"],
+        "vaultwarden_https_port": resolved_ports["vaultwarden_https_port"],
+        "vaultwarden_controller_url": vaultwarden_service["urls"]["controller"],
         "step_ca_api_port": resolved_ports["step_ca_api_port"],
         "step_ca_proxy_port": resolved_ports["step_ca_proxy_port"],
         "step_ca_internal_url": step_ca_service["urls"]["internal"],
@@ -606,6 +624,7 @@ def build_platform_vars(
             resolved_ports["mattermost_host_proxy_port"],
             resolved_ports["platform_context_host_proxy_port"],
             resolved_ports["portainer_host_proxy_port"],
+            443,
         ],
         "mail_platform_private_api_url": mail_service["urls"]["private_api"],
     }

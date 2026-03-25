@@ -2223,6 +2223,60 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-n8n": {
+      "description": "Converge n8n on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and publish it at n8n.lv3.org with a protected editor path and public webhook ingress.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-n8n",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-n8n"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "n8n_database_password",
+          "n8n_owner_password",
+          "n8n_encryption_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-n8n"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-n8n.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/n8n.yml",
+        "roles/n8n_postgres/tasks/main.yml",
+        "roles/n8n_runtime/tasks/main.yml",
+        "roles/nginx_edge_publication/templates/lv3-edge.conf.j2",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/uptime-kuma/monitors.json"
+      ],
+      "outputs": [
+        "A repo-managed n8n runtime on docker-runtime-lv3 with PostgreSQL persistence and public webhook ingress while the editor remains behind the shared edge auth flow."
+      ],
+      "verification_commands": [
+        "make syntax-check-n8n",
+        "curl -fsS https://n8n.lv3.org/healthz",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'curl -fsS http://127.0.0.1:5678/healthz/readiness'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-netbox": {
       "description": "Converge private NetBox on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish the host-side Tailscale proxy, and synchronize canonical repo inventory into the API.",
       "lifecycle_status": "active",
@@ -2544,6 +2598,60 @@
         "make syntax-check-portainer",
         "curl -sk https://100.64.0.1:9444/api/system/status",
         "make portainer-manage ACTION=list-containers PORTAINER_ARGS='--all'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1500,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "converge-vaultwarden": {
+      "description": "Converge private Vaultwarden on docker-runtime-lv3, provision its PostgreSQL backend, publish the Tailscale-only HTTPS hostname, and persist the controller-local bootstrap admin artifacts.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-vaultwarden",
+        "command": "make converge-vaultwarden"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "vaultwarden_database_password",
+          "vaultwarden_admin_token",
+          "vaultwarden_admin_token_hash"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-vaultwarden"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-vaultwarden.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/vaultwarden.yml",
+        "roles/vaultwarden_postgres",
+        "roles/vaultwarden_runtime",
+        "roles/proxmox_tailscale_proxy",
+        "roles/proxmox_security",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/service-capability-catalog.json"
+      ],
+      "outputs": [
+        "A private Vaultwarden runtime on docker-runtime-lv3 with a PostgreSQL backend, step-ca issued TLS, a Tailscale-only hostname at vault.lv3.org, and controller-local bootstrap admin artifacts under .local/vaultwarden."
+      ],
+      "verification_commands": [
+        "make syntax-check-vaultwarden",
+        "curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt https://vault.lv3.org/alive",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose --file /opt/vaultwarden/docker-compose.yml ps'"
       ],
       "execution_class": "mutation",
       "budget": {

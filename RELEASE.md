@@ -1,12 +1,13 @@
-# Release 0.146.2
+# Release 0.148.0
 
 - Date: 2026-03-25
 
 ## Summary
-- Implemented ADR 0172 watchdog escalation and stale-job self-healing in the repository, including stale-job aborts, Windmill job discovery, repeated-action escalation, and watchdog heartbeat emission; the first live apply remains pending because the Windmill runtime converge is currently blocked in the pre-existing OpenBao secret-injection path and the public-host SSH jump to `docker-runtime-lv3` became unstable during the rollout attempt.
+- Implemented ADR 0151 with repo-managed `n8n` on `docker-runtime-lv3`, PostgreSQL persistence on `postgres-lv3`, edge publication at `https://n8n.lv3.org`, and public webhook path handling under the shared ingress model.
+- Added the `n8n_postgres` and `n8n_runtime` roles, service and secret catalog wiring, edge auth path exceptions, the operator runbook, and the pinned image-scan receipts for the new automation surface.
 
 ## Platform Impact
-- no live platform version bump; ADR 0172 repository implementation is merged, but the first live apply is still pending because the limited playbooks/windmill.yml --limit docker-runtime-lv3 rollout failed while waiting for the local OpenBao API and then hit SSH banner-exchange timeouts through the public Proxmox host jump
+- no live platform version bump yet; this release merges ADR 0151 with the repo-managed n8n runtime, PostgreSQL-backed persistence, shared-edge publication, and the bounded webhook exposure model before the first mainline live apply
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

@@ -101,7 +101,7 @@ The repository now also ships ADR 0137 crawl policy automation: the shared publi
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.146.3` |
+| Repository version | `0.148.1` |
 | Platform version | `0.130.4` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -131,12 +131,14 @@ Template VM: `9000` `debian13-cloud-template`
 | `grafana.lv3.org` | `grafana` | `edge-published` | `monitoring-lv3` |
 | `headscale.lv3.org` | `headscale` | `edge-published` | `proxmox_florin` |
 | `mail.lv3.org` | `mail-platform` | `informational-only` | `docker-runtime-lv3` |
+| `n8n.lv3.org` | `n8n` | `edge-published` | `docker-runtime-lv3` |
 | `nginx.lv3.org` | `nginx-edge` | `edge-static` | `nginx-lv3` |
 | `ops.lv3.org` | `ops-portal` | `edge-published` | `docker-runtime-lv3` |
 | `proxmox.lv3.org` | `proxmox-ui` | `informational-only` | `proxmox_florin` |
 | `sso.lv3.org` | `keycloak` | `edge-published` | `docker-runtime-lv3` |
 | `status.lv3.org` | `status-page` | `edge-published` | `docker-runtime-lv3` |
 | `uptime.lv3.org` | `uptime-kuma` | `edge-published` | `docker-runtime-lv3` |
+| `vault.lv3.org` | `vaultwarden` | `private-only` | `docker-runtime-lv3` |
 
 ### Latest Live-Apply Evidence
 | Capability | Receipt |
@@ -201,7 +203,7 @@ password SSH disabled on host and guests
 | Lane | Title | Transport | Surfaces | Primary Rule |
 | --- | --- | --- | --- | --- |
 | `command` | Command Lane | `ssh` | 2 | Use SSH only for command-lane access. |
-| `api` | API Lane | `https` | 13 | Default new APIs to internal-only or operator-only publication. |
+| `api` | API Lane | `https` | 14 | Default new APIs to internal-only or operator-only publication. |
 | `message` | Message Lane | `authenticated_submission` | 2 | Submit platform mail through the internal mail platform rather than arbitrary external SMTP relays. |
 | `event` | Event Lane | `mixed` | 11 | Event sinks must be documented and intentionally reachable. |
 
@@ -217,6 +219,7 @@ password SSH disabled on host and guests
 | `windmill-api` | `api` | `service_api` | `http://100.64.0.1:8005/api` |
 | `netbox-api` | `api` | `service_api` | `http://100.64.0.1:8004/api/` |
 | `portainer-api` | `api` | `service_api` | `https://100.64.0.1:9444` |
+| `vaultwarden-api` | `api` | `service_api` | `https://vault.lv3.org` |
 | `mail-gateway-api` | `api` | `service_api` | `http://10.10.10.20:8081` |
 | `mattermost-operator-api` | `api` | `service_api` | `http://100.64.0.1:8066/api/v4` |
 | `headscale-control-plane` | `api` | `service_api` | `https://headscale.lv3.org` |
@@ -241,7 +244,7 @@ password SSH disabled on host and guests
 | Tier | Title | Surfaces | Summary |
 | --- | --- | --- | --- |
 | `internal-only` | Internal-Only | 15 | Reachable only from LV3 private networks, loopback paths, or explicitly trusted control-plane hosts. |
-| `operator-only` | Operator-Only | 7 | Reachable only from approved operator devices over private access such as Tailscale. |
+| `operator-only` | Operator-Only | 8 | Reachable only from approved operator devices over private access such as Tailscale. |
 | `public-edge` | Public Edge | 2 | Intentionally published on a public domain through the named edge model. |
 
 ### Classified API And Webhook Surfaces
@@ -255,6 +258,7 @@ password SSH disabled on host and guests
 | `windmill-api` | `operator-only` | `api` | `http://100.64.0.1:8005/api` | Reachable only through the Proxmox host Tailscale proxy on port 8005. |
 | `netbox-api` | `operator-only` | `api` | `http://100.64.0.1:8004/api/` | Reachable only through the Proxmox host Tailscale proxy on port 8004. |
 | `portainer-api` | `operator-only` | `api` | `https://100.64.0.1:9444` | Reachable only through the Proxmox host Tailscale proxy on port 9444. |
+| `vaultwarden-api` | `operator-only` | `api` | `https://vault.lv3.org` | Reachable only through the Proxmox host Tailscale proxy at https://vault.lv3.org with the internal CA trust chain. |
 | `mail-gateway-api` | `internal-only` | `api` | `http://10.10.10.20:8081` | Reachable only on the LV3 private guest network at docker-runtime-lv3:8081. |
 | `mattermost-operator-api` | `operator-only` | `api` | `http://100.64.0.1:8066/api/v4` | Reachable only through the Proxmox host Tailscale proxy on port 8066. |
 | `open-webui-operator-workbench` | `operator-only` | `api` | `http://100.64.0.1:8008` | Reachable only through the Proxmox host Tailscale proxy on port 8008. |
@@ -385,6 +389,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure Keycloak](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-keycloak.md)
 - [Configure Mail Platform](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-mail-platform.md)
 - [Configure Mattermost](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-mattermost.md)
+- [Configure n8n](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-n8n.md)
 - [Configure NetBox](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-netbox.md)
 - [Configure Ntfy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-ntfy.md)
 - [Configure ntopng Private Flow Visibility](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-ntopng.md)
@@ -398,6 +403,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure step-ca](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-step-ca.md)
 - [Configure Storage And Backups](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-storage-and-backups.md)
 - [Configure Tailscale Private Access](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-tailscale-access.md)
+- [Configure Vaultwarden](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-vaultwarden.md)
 - [Configure Windmill](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-windmill.md)
 - [Container Image Policy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/container-image-policy.md)
 - [Control-Plane Communication Lanes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/control-plane-communication-lanes.md)
@@ -637,6 +643,8 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0142: Public Surface Automated Security Scan](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0142-public-surface-automated-security-scan.md)
 - [ADR 0144: Headscale For Zero-Trust Mesh VPN](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0144-headscale-for-zero-trust-mesh-vpn.md)
 - [ADR 0145: Ollama for Local LLM Inference API](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0145-ollama-for-local-llm-inference.md)
+- [ADR 0147: Vaultwarden for Operator Credential Management](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0147-vaultwarden-for-operator-credential-management.md)
+- [ADR 0151: n8n for Webhook and API Integration Automation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0151-n8n-for-webhook-and-api-integration-automation.md)
 - [ADR 0153: Distributed Resource Lock Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0153-distributed-resource-lock-registry.md)
 - [ADR 0154: VM-Scoped Parallel Execution Lanes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0154-vm-scoped-parallel-execution-lanes.md)
 - [ADR 0155: Intent Queue with Release-Triggered Scheduling](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0155-intent-queue-with-release-triggered-scheduling.md)
@@ -769,6 +777,8 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0142: Public Surface Automated Security Scan](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0142-public-surface-security-scan.md)
 - [Workstream ADR 0144: Headscale Mesh Control Plane](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0144-headscale.md)
 - [Workstream ADR 0145: Ollama for Local LLM Inference API](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0145-ollama.md)
+- [Workstream ADR 0147: Vaultwarden for Operator Credential Management](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0147-vaultwarden.md)
+- [Workstream ADR 0151: n8n for Webhook and API Integration Automation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0151-n8n.md)
 - [Workstream ADR 0156: Agent Session Workspace Isolation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0156-agent-session-workspace-isolation.md)
 - [Workstream ADR 0159: Speculative Parallel Execution with Compensating Transactions](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0159-speculative-parallel-execution.md)
 - [Workstream ADR 0160: Parallel Dry-Run Fan-Out](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0160-parallel-dry-run-fan-out.md)
@@ -792,7 +802,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.146.3` |
+| Repository version | `0.148.1` |
 | Platform version | `0.130.4` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -947,6 +957,8 @@ This repository is intentionally opinionated:
 | `0141` | API token lifecycle and exposure response | `merged` | [adr-0141-api-token-lifecycle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0141-api-token-lifecycle.md) |
 | `0142` | Public surface automated security scan | `merged` | [adr-0142-public-surface-security-scan.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0142-public-surface-security-scan.md) |
 | `0145` | Ollama for local LLM inference | `live_applied` | [adr-0145-ollama.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0145-ollama.md) |
+| `0147` | Vaultwarden for operator credential management | `merged` | [adr-0147-vaultwarden.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0147-vaultwarden.md) |
+| `0151` | n8n for webhook and API integration automation | `merged` | [adr-0151-n8n.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0151-n8n.md) |
 | `0156` | Agent session workspace isolation | `merged` | [adr-0156-agent-session-workspace-isolation.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0156-agent-session-workspace-isolation.md) |
 | `0159` | Speculative parallel execution with compensating transactions | `merged` | [adr-0159-speculative-parallel-execution.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0159-speculative-parallel-execution.md) |
 | `0160` | Parallel dry-run fan-out for intent batch validation | `merged` | [adr-0160-parallel-dry-run-fan-out.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0160-parallel-dry-run-fan-out.md) |

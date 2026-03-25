@@ -18,7 +18,7 @@ Generated from `config/dependency-graph.json`.
 | Tier | Services |
 | --- | --- |
 | `1` | Alertmanager, Docker Build VM, Docker Runtime VM, Grafana, Mail Platform, NGINX Edge, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Uptime Kuma, ntfy, ntopng, step-ca |
-| `2` | Changelog Portal, Developer Portal, Keycloak, Mattermost, NetBox, Open WebUI, Public Status Page, Windmill |
+| `2` | Changelog Portal, Developer Portal, Keycloak, Mattermost, NetBox, Open WebUI, Public Status Page, Vaultwarden, Windmill |
 | `3` | Platform API Gateway |
 | `4` | Ops Portal |
 
@@ -50,6 +50,7 @@ graph TD
     netbox["NetBox\nTier 2"]
     open_webui["Open WebUI\nTier 2"]
     status_page["Public Status Page\nTier 2"]
+    vaultwarden["Vaultwarden\nTier 2"]
     windmill["Windmill\nTier 2"]
     api_gateway["Platform API Gateway\nTier 3"]
     ops_portal["Ops Portal\nTier 4"]
@@ -81,6 +82,8 @@ graph TD
     platform_context_api -->|reads_from| step_ca
     status_page -->|hard| nginx_edge
     status_page -->|hard| uptime_kuma
+    vaultwarden -->|hard| postgres
+    vaultwarden -->|startup_only| step_ca
     windmill -->|startup_only| openbao
     windmill -->|hard| postgres
 ```

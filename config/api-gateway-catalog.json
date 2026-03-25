@@ -114,6 +114,17 @@
       "healthcheck_path": "/api/status"
     },
     {
+      "id": "vaultwarden",
+      "name": "Vaultwarden",
+      "upstream": "https://10.10.10.20:8222",
+      "gateway_prefix": "/v1/vaultwarden",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 20,
+      "healthcheck_path": "/alive"
+    },
+    {
       "id": "uptime_kuma",
       "name": "Uptime Kuma",
       "upstream": "http://10.10.10.20:3001",

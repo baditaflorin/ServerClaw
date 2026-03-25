@@ -435,6 +435,45 @@
       }
     },
     {
+      "id": "n8n",
+      "name": "n8n",
+      "description": "Repo-managed webhook and API integration automation runtime with a public edge hostname and PostgreSQL-backed persistence.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:5678",
+      "public_url": "https://n8n.lv3.org",
+      "subdomain": "n8n.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "n8n Public Health",
+      "health_probe_id": "n8n",
+      "image_catalog_ids": [
+        "n8n_runtime"
+      ],
+      "secret_catalog_ids": [
+        "n8n_database_password",
+        "n8n_owner_password",
+        "n8n_encryption_key"
+      ],
+      "adr": "0151",
+      "runbook": "docs/runbooks/configure-n8n.md",
+      "tags": [
+        "automation",
+        "webhooks",
+        "integrations",
+        "workflows"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://n8n.lv3.org",
+          "subdomain": "n8n.lv3.org",
+          "notes": "The editor is protected by the shared oauth2-proxy and Keycloak edge flow while selected webhook paths remain intentionally public."
+        }
+      }
+    },
+    {
       "id": "open_webui",
       "name": "Open WebUI",
       "description": "Private operator and agent workbench for governed platform interactions.",
@@ -643,6 +682,42 @@
         "production": {
           "status": "active",
           "url": "https://100.64.0.1:9444"
+        }
+      }
+    },
+    {
+      "id": "vaultwarden",
+      "name": "Vaultwarden",
+      "description": "Private Bitwarden-compatible credential vault for operator-managed passwords, recovery codes, and TOTP material.",
+      "category": "security",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "https://vault.lv3.org",
+      "subdomain": "vault.lv3.org",
+      "exposure": "private-only",
+      "health_probe_id": "vaultwarden",
+      "image_catalog_ids": [
+        "vaultwarden_runtime"
+      ],
+      "secret_catalog_ids": [
+        "vaultwarden_admin_token",
+        "vaultwarden_database_password"
+      ],
+      "adr": "0147",
+      "runbook": "docs/runbooks/configure-vaultwarden.md",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-vaultwarden/lv3-vaultwarden",
+      "tags": [
+        "credentials",
+        "totp",
+        "vault",
+        "private"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://vault.lv3.org",
+          "subdomain": "vault.lv3.org"
         }
       }
     },

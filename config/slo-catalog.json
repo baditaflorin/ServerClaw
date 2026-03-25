@@ -95,6 +95,16 @@
       "description": "NetBox remains reachable for inventory, IPAM, and topology workflows."
     },
     {
+      "id": "vaultwarden-availability",
+      "service_id": "vaultwarden",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "https://vault.lv3.org/alive",
+      "probe_module": "http_2xx_insecure_tls",
+      "description": "Vaultwarden remains reachable on the private Tailscale operator path."
+    },
+    {
       "id": "platform-context-api-availability",
       "service_id": "platform_context_api",
       "indicator": "availability",

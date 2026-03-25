@@ -40,6 +40,10 @@ class SubdomainCatalogTests(unittest.TestCase):
             subdomain_catalog.get_subdomain_entry(self.catalog, "database.lv3.org")["auth_requirement"],
             "private_network",
         )
+        self.assertEqual(
+            subdomain_catalog.get_subdomain_entry(self.catalog, "n8n.lv3.org")["auth_requirement"],
+            "edge_oidc",
+        )
 
     def test_missing_edge_route_entry_fails(self) -> None:
         broken_catalog = copy.deepcopy(self.catalog)
