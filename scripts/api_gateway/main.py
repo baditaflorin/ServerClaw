@@ -16,7 +16,16 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urljoin, urlparse
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+
+def _resolve_repo_root(script_path: Path | None = None) -> Path:
+    resolved_path = (script_path or Path(__file__)).resolve()
+    for candidate in resolved_path.parents:
+        if (candidate / "platform" / "__init__.py").exists():
+            return candidate
+    raise RuntimeError(f"unable to resolve repo root for {resolved_path}")
+
+
+REPO_ROOT = _resolve_repo_root()
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
@@ -29,7 +38,6 @@ from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
 REPO_PLATFORM_ROOT = REPO_ROOT / "platform"
 
 

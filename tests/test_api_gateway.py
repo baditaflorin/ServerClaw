@@ -17,6 +17,20 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 from api_gateway.main import GatewayConfig, GatewayRuntime, create_app  # noqa: E402
+import api_gateway.main as gateway_main  # noqa: E402
+
+
+def test_resolve_repo_root_supports_container_layout(tmp_path: Path) -> None:
+    app_root = tmp_path / "app"
+    platform_dir = app_root / "platform"
+    platform_dir.mkdir(parents=True)
+    (platform_dir / "__init__.py").write_text("", encoding="utf-8")
+
+    script_path = app_root / "api_gateway" / "main.py"
+    script_path.parent.mkdir(parents=True)
+    script_path.write_text("# containerized gateway entrypoint\n", encoding="utf-8")
+
+    assert gateway_main._resolve_repo_root(script_path) == app_root
 
 
 def b64url_encode(data: bytes) -> str:
