@@ -2847,7 +2847,7 @@ workstreams:
   - id: adr-0157-per-vm-concurrency-budget
     adr: "0157"
     title: Per-VM concurrency budget and resource reservation
-    status: in_progress
+    status: merged
     owner: codex
     branch: codex/live-apply-0157
     worktree_path: .worktrees/live-apply-0157

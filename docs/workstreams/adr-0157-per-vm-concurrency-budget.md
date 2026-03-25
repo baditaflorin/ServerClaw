@@ -2,7 +2,7 @@
 
 - ADR: 0157
 - Title: Per-VM concurrency budget and resource reservation
-- Status: in_progress
+- Status: merged
 - Branch: codex/live-apply-0157
 - Worktree: .worktrees/live-apply-0157
 - Owner: codex
@@ -70,3 +70,10 @@
 ## Notes For The Next Assistant
 
 - if live apply is blocked, leave the receipt uncommitted and keep the ADR implementation status honest
+
+## Live Apply Notes
+
+- Repository implementation merged and released in `0.151.0` on `2026-03-25`.
+- The production live apply attempt on `2026-03-25` failed before guest convergence because `make live-apply-service service=windmill env=production` could not reach `proxmox_florin` over SSH at `100.64.0.1:22` (`Connection refused`).
+- Direct fallback checks from the same controller also failed on `ops@100.118.189.95:22` (`Connection refused`), `ops@65.108.75.123:22` (`Operation timed out`), and `https://proxmox.lv3.org:8006/api2/json/version` (`Timeout was reached`).
+- Do not mark this workstream `live_applied` or bump `platform_version` until host access is restored and the Windmill service apply plus checkout verification succeed.
