@@ -198,6 +198,7 @@ validate_generated_docs() {
   echo "Generated status document validation"
   uvx --from pyyaml python "$REPO_ROOT/scripts/generate_status_docs.py" --check >/dev/null
   uv run --with jsonschema python "$REPO_ROOT/scripts/generate_dependency_diagram.py" --check >/dev/null
+  uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/platform_manifest.py" --check >/dev/null
 }
 
 validate_generated_portals() {
