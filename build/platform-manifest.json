@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.151.0",
+  "repo_version": "0.156.0",
   "platform_version": "0.130.4",
-  "generated_at": "2026-03-25T13:15:14Z",
-  "next_refresh_at": "2026-03-25T14:15:14Z",
+  "generated_at": "2026-03-25T13:23:24Z",
+  "next_refresh_at": "2026-03-25T14:23:24Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -1582,6 +1582,31 @@
         "runbook": "docs/runbooks/install-proxmox.md"
       },
       {
+        "id": "merge-config-changes",
+        "description": "Merge pending ADR 0158 staged config changes into the merge-eligible registry files and emit conflict or merged events for downstream consumers.",
+        "tags": [
+          "guest-live",
+          "merge-config-changes",
+          "mutation",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 300,
+          "max_steps": 100,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/config-merge-protocol.md"
+      },
+      {
         "id": "nightly-integration-tests",
         "description": "Run the ADR 0111 nightly integration suite, post the summary to Mattermost, and emit GlitchTip failures when checks regress.",
         "tags": [
@@ -2468,6 +2493,16 @@
         ]
       },
       {
+        "id": "config-merge-protocol",
+        "title": "Config Merge Protocol",
+        "agent_trust_required": "T3",
+        "steps": 2,
+        "path": "docs/runbooks/config-merge-protocol.md",
+        "workflow_ids": [
+          "merge-config-changes"
+        ]
+      },
+      {
         "id": "configure-api-gateway",
         "title": "Configure API Gateway",
         "agent_trust_required": "T3",
@@ -2712,7 +2747,7 @@
         "id": "configure-windmill",
         "title": "Configure Windmill",
         "agent_trust_required": "T3",
-        "steps": 11,
+        "steps": 13,
         "path": "docs/runbooks/configure-windmill.md",
         "workflow_ids": [
           "converge-windmill"
@@ -3076,10 +3111,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.149.0",
+    "last_version": "0.154.0",
     "deployed_at": "2026-03-25",
     "summary": "implement ADR 0161 with a shared `platform.agent.coordination` runtime, closure-loop and observation-loop publishers, the authenticated `/v1/platform/agents` gateway route, and live coordination rendering in both ops-portal surfaces add the operator runbook and snapshot helper for committed coordination receipts under `receipts/agent-coordination/`",
-    "release_notes_url": "docs/release-notes/0.151.0.md"
+    "release_notes_url": "docs/release-notes/0.156.0.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -3156,34 +3191,6 @@
       "status": "Proposed",
       "implementation_status": "Not Implemented",
       "path": "docs/adr/0154-vm-scoped-parallel-execution-lanes.md"
-    },
-    {
-      "adr": "0157",
-      "title": "Per-VM Concurrency Budget and Resource Reservation",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0157-per-vm-concurrency-budget-and-resource-reservation.md"
-    },
-    {
-      "adr": "0158",
-      "title": "Conflict-Free Configuration Merge Protocol",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0158-conflict-free-configuration-merge-protocol.md"
-    },
-    {
-      "adr": "0164",
-      "title": "Circuit Breaker Pattern for External Service Calls",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0164-circuit-breaker-pattern-for-external-service-calls.md"
-    },
-    {
-      "adr": "0165",
-      "title": "Workflow Idempotency Keys and Double-Execution Prevention",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0165-workflow-idempotency-keys-and-double-execution-prevention.md"
     },
     {
       "adr": "0166",

@@ -3,7 +3,7 @@
 - ADR: [ADR 0161](../adr/0161-real-time-agent-coordination-map.md)
 - Title: JetStream-backed live agent session map surfaced through the API gateway, ops portal, static portal, and agent publishers
 - Status: merged
-- Implemented In Repo Version: 0.151.0
+- Implemented In Repo Version: 0.156.0
 - Implemented In Platform Version: not yet
 - Implemented On: 2026-03-25
 - Branch: `codex/adr-0161-real-time-agent-coordination-map`
@@ -69,7 +69,7 @@
 
 ## Outcome
 
-- repository implementation is merged in repo release `0.151.0`
+- repository implementation is merged in repo release `0.156.0`
 - the coordination runtime, gateway route, interactive ops-portal panel, static snapshot panel, runbook, and snapshot helper are all committed on `main`
 - focused ADR 0161 test coverage passed on the integrated mainline for the coordination store, gateway route, interactive ops portal, static ops portal, closure-loop publishing, and observation-loop publishing
 - the first coordination snapshot receipt is committed as `receipts/agent-coordination/2026-03-25-adr-0161-agent-coordination-snapshot.json`

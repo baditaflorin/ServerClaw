@@ -3081,7 +3081,7 @@ workstreams:
       - inventory/group_vars/all.yml
       - docs/runbooks/
 
-   - id: adr-0161-real-time-agent-coordination-map
+  - id: adr-0161-real-time-agent-coordination-map
     adr: "0161"
     title: Real-time agent coordination map
     status: merged
