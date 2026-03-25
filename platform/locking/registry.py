@@ -128,6 +128,8 @@ class ResourceLockRegistry:
         return self.release(holder=holder)
 
     def heartbeat(self, lock_id: str, *, ttl_seconds: int = 300) -> LockEntry | None:
+        if ttl_seconds <= 0:
+            raise ValueError("ttl_seconds must be positive")
         with locked_json_state(self._state_path, default_factory=self._empty_state) as state:
             self._purge_locked(state)
             payload = state["locks"].get(lock_id)
@@ -146,6 +148,10 @@ class ResourceLockRegistry:
             )
             state["locks"][lock_id] = updated.as_dict()
             return updated
+
+    @property
+    def state_path(self) -> Path:
+        return self._state_path
 
     def _entries_locked(self, state: dict[str, Any]) -> list[LockEntry]:
         return [LockEntry.from_dict(payload) for payload in state["locks"].values() if isinstance(payload, dict)]
