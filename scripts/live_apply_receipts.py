@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -69,6 +70,16 @@ def resolve_receipt_path(receipt_ref: str) -> Path:
     if not candidate.is_absolute():
         candidate = REPO_ROOT / candidate
     return candidate
+
+
+def receipt_id_with_session(base_receipt_id: str, session_suffix: str | None = None) -> str:
+    suffix = session_suffix or os.environ.get("LV3_SESSION_RECEIPT_SUFFIX", "").strip()
+    normalized_suffix = re.sub(r"[^a-z0-9-]+", "-", suffix.lower()).strip("-")
+    if not normalized_suffix:
+        return base_receipt_id
+    if base_receipt_id.endswith(f"-{normalized_suffix}"):
+        return base_receipt_id
+    return f"{base_receipt_id}-{normalized_suffix}"
 
 
 def validate_receipt(receipt: dict, path: Path, workflow_catalog: dict) -> None:

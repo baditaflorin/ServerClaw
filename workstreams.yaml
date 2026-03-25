@@ -94,6 +94,28 @@ workstreams:
     ready_to_merge: false
     live_applied: true
 
+  - id: adr-0144-headscale
+    adr: "0144"
+    title: Headscale mesh control plane
+    status: implemented
+    owner: codex
+    branch: codex/adr-0144-headscale
+    worktree_path: ../proxmox_florin_server-headscale
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0144-headscale.md
+    depends_on:
+      - adr-0014-tailscale
+    conflicts_with: []
+    shared_surfaces:
+      - proxmox_host_access
+      - guest_access
+      - private_network
+      - inventory/hosts.yml
+      - inventory/host_vars/proxmox_florin.yml
+      - config/service-capability-catalog.json
+      - config/control-plane-lanes.json
+    ready_to_merge: true
+    live_applied: true
+
   - id: adr-0020-backups
     adr: "0020"
     title: Initial storage and backup model
@@ -242,6 +264,31 @@ workstreams:
       - roles/monitoring_vm
     ready_to_merge: false
     live_applied: true
+
+  - id: adr-0151-n8n
+    adr: "0151"
+    title: n8n for webhook and API integration automation
+    status: merged
+    owner: codex
+    branch: codex/adr-0151-n8n
+    worktree_path: .worktrees/adr-0151
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0151-n8n.md
+    depends_on:
+      - adr-0025-docker-compose-stacks
+      - adr-0026-postgres-vm
+      - adr-0043-openbao
+      - adr-0056-keycloak-sso
+    conflicts_with: []
+    shared_surfaces:
+      - roles/n8n_postgres
+      - roles/n8n_runtime
+      - roles/nginx_edge_publication
+      - inventory/host_vars/proxmox_florin.yml
+      - config/service-capability-catalog.json
+      - config/workflow-catalog.json
+      - config/subdomain-catalog.json
+    ready_to_merge: false
+    live_applied: false
 
   - id: adr-0040-runtime-container-telemetry
     adr: "0040"
@@ -2375,6 +2422,28 @@ workstreams:
     ready_to_merge: false
     live_applied: false
 
+  - id: adr-0160-parallel-dry-run-fan-out
+    adr: "0160"
+    title: Parallel dry-run fan-out for intent batch validation
+    status: merged
+    owner: codex
+    branch: codex/adr-0160-live-apply
+    worktree_path: .worktrees/adr-0160-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0160-parallel-dry-run-fan-out.md
+    depends_on:
+      - adr-0112-goal-compiler
+      - adr-0115-mutation-ledger
+      - adr-0120-dry-run-diff-engine
+      - adr-0127-intent-conflict-resolution
+    conflicts_with: []
+    shared_surfaces:
+      - platform/goal_compiler/
+      - scripts/lv3_cli.py
+      - config/ledger-event-types.yaml
+      - docs/runbooks/parallel-intent-batch-validation.md
+    ready_to_merge: false
+    live_applied: false
+
   - id: adr-0130-agent-state-persistence
     adr: "0130"
     title: Agent state persistence across workflow boundaries
@@ -2700,3 +2769,147 @@ workstreams:
       - config/dependency-graph.json
     ready_to_merge: false
     live_applied: true
+
+  - id: adr-0147-vaultwarden
+    adr: "0147"
+    title: Vaultwarden for operator credential management
+    status: merged
+    owner: codex
+    branch: codex/adr-0147-vaultwarden
+    worktree_path: .worktrees/adr-0147
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0147-vaultwarden.md
+    depends_on:
+      - adr-0026-postgres-vm
+      - adr-0042-step-ca
+      - adr-0067-guest-network-policy
+    conflicts_with: []
+    shared_surfaces:
+      - roles/vaultwarden_runtime
+      - roles/vaultwarden_postgres
+      - playbooks/vaultwarden.yml
+      - inventory/host_vars/proxmox_florin.yml
+      - config/service-capability-catalog.json
+      - config/workflow-catalog.json
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0156-agent-session-workspace-isolation
+    adr: "0156"
+    title: Agent session workspace isolation
+    status: merged
+    owner: codex
+    branch: codex/adr-0156-agent-session-workspace-isolation
+    worktree_path: .worktrees/adr-0156
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0156-agent-session-workspace-isolation.md
+    depends_on:
+      - adr-0082-remote-build-gateway
+      - adr-0087-validation-gate
+      - adr-0115-mutation-ledger
+      - adr-0119-budgeted-workflow-scheduler
+      - adr-0127-intent-conflict-resolution
+    conflicts_with: []
+    shared_surfaces:
+      - scripts/remote_exec.sh
+      - scripts/session_workspace.py
+      - scripts/run_gate.py
+      - platform/scheduler/watchdog.py
+      - platform/ledger/writer.py
+      - scripts/live_apply_receipts.py
+      - scripts/promotion_pipeline.py
+      - docs/runbooks/
+
+  - id: adr-0159-speculative-parallel-execution
+    adr: "0159"
+    title: Speculative parallel execution with compensating transactions
+    status: merged
+    owner: codex
+    branch: codex/live-apply-0159
+    worktree_path: ../proxmox_florin_server-live-apply-0159
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0159-speculative-parallel-execution.md
+    depends_on:
+      - adr-0115-mutation-ledger
+      - adr-0119-budgeted-workflow-scheduler
+      - adr-0124-platform-event-taxonomy
+      - adr-0127-intent-conflict-resolution
+    conflicts_with: []
+    shared_surfaces:
+      - platform/scheduler/
+      - platform/conflict/
+      - platform/goal_compiler/
+      - scripts/lv3_cli.py
+      - scripts/workflow_catalog.py
+      - config/ledger-event-types.yaml
+      - docs/runbooks/speculative-workflow-execution.md
+  - id: adr-0172-watchdog-escalation
+    adr: "0172"
+    title: Watchdog escalation and stale job self-healing
+    status: merged
+    owner: codex
+    branch: codex/adr-0172-watchdog
+    worktree_path: .worktrees/codex-adr-0172-watchdog
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0172-watchdog-escalation-and-stale-job-self-healing.md
+    depends_on:
+      - adr-0044-windmill
+      - adr-0115-mutation-ledger
+      - adr-0119-budgeted-workflow-scheduler
+    conflicts_with: []
+    shared_surfaces:
+      - platform/scheduler/watchdog.py
+      - platform/scheduler/scheduler.py
+      - windmill/scheduler/watchdog-loop.py
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+      - config/workflow-catalog.json
+      - config/ledger-event-types.yaml
+      - docs/runbooks/budgeted-workflow-scheduler.md
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0168-idempotency-ci
+    adr: "0168"
+    title: Ansible role idempotency CI enforcement
+    status: merged
+    owner: codex
+    branch: codex/adr-0168-idempotency-ci
+    worktree_path: .worktrees/adr-0168-idempotency-ci
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0168-idempotency-ci.md
+    depends_on:
+      - adr-0083-docker-check-runner
+      - adr-0087-validation-gate
+    conflicts_with: []
+    shared_surfaces:
+      - config/ansible-role-idempotency.yml
+      - scripts/ansible_role_idempotency.py
+      - scripts/validate_repo.sh
+      - tests/idempotency/
+      - docs/runbooks/ansible-role-idempotency-ci.md
+      - docs/adr/0168-ansible-role-idempotency-ci-enforcement.md
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0169-structured-log-contract
+    adr: "0169"
+    title: Structured log field contract
+    status: merged
+    owner: codex
+    branch: codex/live-apply-0169
+    worktree_path: .worktrees/adr-0169
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0169-structured-log-field-contract.md
+    depends_on:
+      - adr-0052-loki-logs
+      - adr-0075-service-capability-catalog
+      - adr-0092-platform-api-gateway
+      - adr-0123-service-uptime-contracts
+      - adr-0166-canonical-error-response-format
+    conflicts_with: []
+    shared_surfaces:
+      - platform/
+      - scripts/api_gateway/
+      - scripts/platform_context_service.py
+      - scripts/promotion_pipeline.py
+      - config/windmill/scripts/
+      - collections/ansible_collections/lv3/platform/plugins/callback/
+      - Makefile
+      - inventory/group_vars/all.yml
+      - docs/runbooks/
+    ready_to_merge: false
+    live_applied: false

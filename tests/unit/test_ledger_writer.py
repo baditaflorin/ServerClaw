@@ -215,6 +215,33 @@ def test_writer_inserts_event_and_publishes_asynchronously() -> None:
     assert record["metadata"] == {"change": "deploy"}
 
 
+def test_writer_adds_session_workspace_metadata_from_environment(monkeypatch: pytest.MonkeyPatch) -> None:
+    connection = FakeConnection()
+    monkeypatch.setenv("LV3_SESSION_ID", "test-session")
+    monkeypatch.setenv("LV3_SESSION_SLUG", "test-session")
+    monkeypatch.setenv("LV3_SESSION_LOCAL_ROOT", "/tmp/lv3/test-session")
+    monkeypatch.setenv("LV3_SESSION_NATS_PREFIX", "platform.ws.test-session")
+    monkeypatch.setenv("LV3_SESSION_STATE_NAMESPACE", "ws:test-session")
+
+    writer = LedgerWriter(connection=connection, nats_publisher=None)
+    record = writer.write(
+        event_type="service.deployed",
+        actor="operator:florin",
+        target_kind="service",
+        target_id="netbox",
+        metadata={"change": "deploy"},
+    )
+
+    assert record["metadata"]["change"] == "deploy"
+    assert record["metadata"]["session_workspace"] == {
+        "session_id": "test-session",
+        "session_slug": "test-session",
+        "local_state_root": "/tmp/lv3/test-session",
+        "nats_prefix": "platform.ws.test-session",
+        "state_namespace": "ws:test-session",
+    }
+
+
 def test_writer_rejects_duplicate_event_id() -> None:
     connection = FakeConnection()
     writer = LedgerWriter(connection=connection, nats_publisher=None)
@@ -255,6 +282,22 @@ def test_writer_falls_back_to_file_sink(tmp_path: Path) -> None:
     assert sink_path.exists()
     persisted = [json.loads(line) for line in sink_path.read_text(encoding="utf-8").splitlines()]
     assert persisted == [record]
+
+
+def test_writer_accepts_speculative_execution_event_types() -> None:
+    connection = FakeConnection()
+    writer = LedgerWriter(connection=connection, nats_publisher=None)
+
+    record = writer.write(
+        event_type="execution.speculative_committed",
+        actor="scheduler:test",
+        target_kind="workflow",
+        target_id="rotate-netbox-db-password",
+        actor_intent_id="intent-spec",
+        metadata={"conflict_detected": False},
+    )
+
+    assert record["event_type"] == "execution.speculative_committed"
 
 
 def test_writer_maps_legacy_mutation_audit_events() -> None:

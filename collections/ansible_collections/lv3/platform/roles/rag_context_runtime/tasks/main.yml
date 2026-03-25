@@ -148,6 +148,7 @@
       WORKDIR /app
       COPY requirements.txt ./requirements.txt
       RUN pip install --no-cache-dir -r requirements.txt
+      COPY platform ./platform
       COPY platform_context_corpus.py ./platform_context_corpus.py
       COPY platform_context_service.py ./platform_context_service.py
       EXPOSE 8010
@@ -164,6 +165,15 @@
     group: root
     mode: "0644"
   loop: "{{ platform_context_service_sources }}"
+
+- name: Sync the shared platform package for platform-context runtime helpers
+  ansible.builtin.copy:
+    src: "{{ platform_context_repo_root }}/platform/"
+    dest: "{{ platform_context_service_dir }}/platform/"
+    owner: root
+    group: root
+    mode: "0644"
+    directory_mode: "0755"
 
 - name: Ensure platform context corpus parent directories exist
   ansible.builtin.file:

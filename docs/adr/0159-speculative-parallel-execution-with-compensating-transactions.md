@@ -1,216 +1,146 @@
 # ADR 0159: Speculative Parallel Execution with Compensating Transactions
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Implemented
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.144.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-25
 - Date: 2026-03-24
 
 ## Context
 
-The resource lock registry (ADR 0153) and conflict detection (ADR 0127) use a **pessimistic concurrency** model: before executing, an agent acquires all required locks and checks for semantic conflicts. If a conflict is detected, the intent waits in the queue (ADR 0155) until locks are available.
+ADR 0119 and ADR 0127 give the platform a safe pessimistic scheduler:
 
-Pessimistic concurrency is correct but over-conservative for a significant class of operations:
+- per-workflow concurrency limits stop duplicate workflow fan-out
+- resource claims reject overlapping writes before a second workflow starts
+- duplicate suppression reuses recent outputs when the same intent is submitted twice
 
-**Observation**: Two intents that lock different resources at the service level may still be independent in practice. But the conflict detector errs on the side of caution and may queue an intent that would have completed successfully if allowed to run in parallel.
+That model is correct, but conservative. Some workflows are reversible and can safely start even when another workflow already holds a conflicting write claim. Secret rotation and similar API-scoped changes are the main example: waiting for the first writer to finish is safe, but not always necessary if the later writer can detect a conflict and compensate cleanly.
 
-Example: Two agents are running simultaneously:
-- Agent A: `converge-netbox` — applying an Ansible config change to NetBox's Django settings.
-- Agent B: `rotate-keycloak-client-secret` — calling the Keycloak API to rotate a client credential.
+The platform needed a way to:
 
-These two operations do not share any files, containers, or API endpoints. They would never conflict if run in parallel. But under pessimistic locking, if Agent A holds an `exclusive` lock on `vm:120/service:netbox` and Agent B needs to touch `vm:120/service:keycloak`, and both are in `lane:docker-runtime`, the lane's `max_concurrent_ops` budget might cause one to queue.
-
-**Optimistic approach**: Allow both intents to run in parallel and detect a conflict only if it actually manifests at execution time. If it does, roll back the lower-priority intent using a compensating transaction.
-
-This is only safe when:
-1. Both operations are **reversible** (have a defined compensating transaction).
-2. The conflict is **detectable** at execution time before it causes external observable harm.
-3. The rollback cost is lower than the wait cost.
-
-For the class of light-weight, idempotent, API-call-based operations (secret rotation, OIDC client config updates, DNS record updates, metric threshold changes), all three conditions are typically met.
+1. let explicitly reversible workflows bypass the pessimistic conflict rejection path
+2. keep the audit trail explicit in the mutation ledger
+3. run a post-execution probe before treating the speculative result as committed
+4. launch a compensating workflow automatically when the speculative execution loses
 
 ## Decision
 
-We will implement **speculative parallel execution** as an opt-in mode for operations that declare reversibility. Operations that are speculative-eligible run immediately in parallel, monitored for runtime conflicts. If a conflict manifests, the lower-priority operation is rolled back via its compensating transaction.
+The repository now implements speculative execution as an opt-in extension of the existing scheduler and conflict registry.
 
-### Speculative eligibility criteria
+The first implementation in `0.144.0` adds:
 
-A workflow is speculative-eligible if it declares all three in its workflow catalog entry:
+- a `speculative` policy block in `config/workflow-catalog.json`
+- goal-compiler support for `allow_speculative=True` and CLI support for `lv3 run --allow-speculative`
+- scheduler support for speculative conflict registration, probe execution, commit, and compensating rollback
+- persisted speculative execution state under `.local/scheduler/speculative-executions.json`
+- ledger event types for `execution.speculative_started`, `execution.speculative_probing`, `execution.speculative_committed`, and `execution.speculative_rolled_back`
 
-```yaml
-# config/workflow-catalog.yaml
+## Implementation
 
-- workflow_id: rotate-keycloak-client-secret
-  speculative_eligible: true
-  compensating_workflow_id: restore-keycloak-client-secret  # The undo operation
-  conflict_detection_hook: check-keycloak-client-conflict   # Runtime conflict probe
-  rollback_window_seconds: 300   # Max time after execution to detect and rollback
+### Catalog schema
 
-- workflow_id: update-dns-record
-  speculative_eligible: true
-  compensating_workflow_id: restore-dns-record
-  conflict_detection_hook: check-dns-record-conflict
-  rollback_window_seconds: 60
+Workflows opt in with a `speculative` block:
 
-- workflow_id: rotate-openbao-token
-  speculative_eligible: true
-  compensating_workflow_id: restore-openbao-token
-  conflict_detection_hook: check-openbao-token-conflict
-  rollback_window_seconds: 120
-
-# NOT speculative-eligible (no safe compensating transaction):
-- workflow_id: converge-netbox
-  speculative_eligible: false   # OS-level convergence is not easily reversible
-
-- workflow_id: run-db-migration
-  speculative_eligible: false   # Schema changes may be irreversible
+```json
+{
+  "speculative": {
+    "eligible": true,
+    "compensating_workflow_id": "restore-netbox-db-password",
+    "conflict_probe": {
+      "path": "platform/scheduler/speculative_hooks.py",
+      "callable": "probe_netbox_secret_rotation"
+    },
+    "probe_delay_seconds": 30,
+    "rollback_window_seconds": 300
+  }
+}
 ```
 
-### Speculative execution lifecycle
+The repository validator rejects incomplete speculative metadata. A speculative workflow must declare:
 
-```
-Standard (pessimistic):           Speculative:
-  acquire lock                      submit immediately (no lock)
-  wait if locked                    run in parallel with other specs
-  execute                           runtime conflict probe at +30s
-  release lock                      if conflict: run compensating tx
-                                    if no conflict: commit to ledger
-```
+- `eligible: true`
+- a valid `compensating_workflow_id`
+- a probe callable loaded by `path` or `module`
+- integer `probe_delay_seconds` and `rollback_window_seconds`
 
-A speculative intent progresses through states:
+### Goal compiler and CLI
 
-```
-SPECULATIVE_EXECUTING → SPECULATIVE_PROBING → SPECULATIVE_COMMITTED
-                                            ↘ SPECULATIVE_ROLLED_BACK
-```
+The goal compiler keeps pessimistic mode as the default. When the caller explicitly opts in and the workflow catalog marks the workflow speculative-eligible, the compiled intent changes to:
 
-### Runtime conflict detection
+- `execution_mode: speculative`
+- `compensating_workflow_id: ...`
+- `rollback_window_seconds: ...`
 
-The `conflict_detection_hook` is a lightweight diagnostic workflow that runs 30 seconds after speculative execution completes. It checks whether another concurrent operation caused an inconsistency:
+The CLI exposes this through:
 
-```python
-# config/windmill/scripts/check-keycloak-client-conflict.py
-
-def check_keycloak_client_conflict(intent: ExecutionIntent) -> ConflictReport:
-    """
-    Verify that the Keycloak client secret rotation completed cleanly
-    and no other operation has since overwritten it.
-    """
-    # Read the actual current secret from Keycloak
-    current_secret = keycloak.get_client_secret(intent.params["client_id"])
-
-    # Compare with what our execution wrote to OpenBao
-    our_secret = openbao.get(f"keycloak/clients/{intent.params['client_id']}/secret")
-
-    if current_secret != our_secret:
-        # Another operation wrote a different secret after us
-        return ConflictReport(
-            conflict_detected=True,
-            conflict_type="post_execution_overwrite",
-            other_intent_id=ledger.find_last_writer(f"keycloak/client/{intent.params['client_id']}"),
-            priority_winner=determine_priority_winner(intent, other_intent)
-        )
-
-    return ConflictReport(conflict_detected=False)
+```bash
+lv3 run --allow-speculative "deploy netbox"
 ```
 
-### Compensating transaction execution
+Direct workflow IDs use the same path when `--allow-speculative` is present so the intent and scheduler metadata stay aligned.
 
-If a conflict is detected and the current intent is the lower-priority one:
+### Scheduler path
 
-```python
-# platform/execution/speculative.py
+The scheduler still enforces actor policy, host-touch budgets, rollback-depth limits, and deduplication. The speculative differences are:
 
-def handle_conflict(intent: ExecutionIntent, conflict: ConflictReport):
-    if conflict.priority_winner == intent.intent_id:
-        # We win; the other operation's output is rolled back by their compensating tx
-        ledger.write(
-            event_type="execution.speculative_committed",
-            intent_id=intent.intent_id,
-            metadata={"conflict_resolved_in_our_favour": True}
-        )
-    else:
-        # We lose; run our compensating transaction
-        comp_workflow = load_workflow(intent.compensating_workflow_id)
-        comp_intent = goal_compiler.compile_direct(
-            workflow_id=comp_workflow.workflow_id,
-            params=build_compensating_params(intent),
-            actor_id="agent/speculative-rollback",
-            parent_intent_id=intent.intent_id,
-        )
-        ledger.write(
-            event_type="execution.speculative_rolled_back",
-            intent_id=intent.intent_id,
-            metadata={"compensating_intent_id": str(comp_intent.intent_id)}
-        )
-        # Re-queue the original intent to run after the winner completes
-        intent_queue.enqueue(intent, priority=intent.priority, queue_after_intent=conflict.other_intent_id)
-```
+1. workflow-level concurrency locks are skipped
+2. conflicting resource claims are registered with `allow_conflicts=True` instead of being rejected
+3. the forward workflow runs normally
+4. after a successful terminal state, the scheduler records `execution.speculative_probing` and runs the configured probe
+5. if the probe reports no conflict, the execution is committed
+6. if the probe reports that another intent won, the scheduler launches the compensating workflow automatically and records `execution.speculative_rolled_back`
 
-### Priority winner determination
+The claim remains active through the probe and rollback window so other submissions still see the in-flight speculative mutation until it is committed or rolled back.
 
-When two speculative intents conflict, the winner is determined by:
-1. Priority score (lower number = higher priority; ADR 0155 priority scale).
-2. If equal priority: earlier `started_at` wins (first in, first kept).
-3. If an incident-response intent conflicts with any other intent: incident response always wins.
+### Probe loading and rollback arguments
 
-### Agent awareness
+The repository implementation loads probe callables from either:
 
-When the goal compiler compiles an intent for a speculative-eligible workflow, it includes the speculative mode in the response:
+- `speculative.conflict_probe.path`
+- `speculative.conflict_probe.module`
 
-```python
-intent = goal_compiler.compile(
-    instruction="rotate keycloak client secret for agent/triage-loop",
-    allow_speculative=True,  # Opt-in; default is pessimistic
-)
-if intent.execution_mode == "speculative":
-    print(f"Executing speculatively. Conflict check in 30s.")
-    print(f"Compensating workflow: {intent.compensating_workflow_id}")
-```
+The callable receives a dictionary context containing:
 
-### Speculative execution monitoring
+- `workflow_id`
+- `actor_intent_id`
+- `job_id`
+- original `arguments`
+- `requested_by`
+- inferred `resource_claims`
+- the initially conflicting intent id, when one existed
 
-All speculative executions are tracked in a dedicated table:
+Compensating workflows receive the original arguments plus scheduler-added rollback metadata such as:
 
-```sql
-CREATE TABLE platform.speculative_executions (
-    intent_id           UUID PRIMARY KEY REFERENCES platform.execution_intents,
-    probe_due_at        TIMESTAMPTZ NOT NULL,
-    probe_workflow_id   TEXT NOT NULL,
-    status              TEXT DEFAULT 'probing',  -- probing | committed | rolled_back
-    conflict_with       UUID REFERENCES platform.execution_intents,
-    compensating_intent UUID REFERENCES platform.execution_intents
-);
-```
-
-The observation loop (ADR 0126) monitors `speculative_executions` for probe_due_at entries that have not been resolved in time (indicating the probe workflow failed or timed out). Unresolved probes trigger a CRITICAL finding.
+- `parent_actor_intent_id`
+- `rollback_parent_intent_id`
+- `speculative_rollback_of`
+- `speculative_original_workflow_id`
+- `speculative_conflict`
 
 ## Consequences
 
-**Positive**
+### Positive
 
-- Operations that are empirically non-conflicting (the common case for lightweight API operations) complete in parallel without queuing, significantly reducing overall latency for multi-agent workloads.
-- The compensating transaction model makes rollback first-class: it is defined at workflow-authoring time, tested alongside the forward workflow, and invoked automatically on conflict detection.
+- reversible workflows can bypass pessimistic write rejection without bypassing the rest of the scheduler contract
+- speculative executions now have first-class ledger events and persisted probe state
+- rollback is automatic and auditable instead of being an operator-only follow-up
 
-**Negative / Trade-offs**
+### Trade-offs
 
-- Speculative execution is only safe for reversible operations. Determining reversibility correctly is the hardest part; an incorrect `compensating_workflow_id` (that doesn't actually undo the forward operation) creates inconsistency that is worse than the original conflict.
-- There is a window between speculative execution and the conflict probe during which the platform is in a potentially inconsistent state (two concurrent writes have happened, neither confirmed). External systems that query platform state in this window may observe inconsistency. This is acceptable for most operations but rules out speculative mode for changes with immediate external visibility (e.g., DNS record changes that propagate before the probe window).
-- Rollback of a rolled-back intent followed by re-queuing adds to queue depth. If many speculative intents conflict simultaneously, the queue fills rapidly.
+- the framework is implemented, but current `main` intentionally does not mark production workflows speculative-eligible until each one has a reviewed probe and a trustworthy compensating path
+- probe quality is the safety boundary; a weak probe turns speculative mode into guesswork
+- speculative rollback currently runs as an internal scheduler action, not as a human-approved top-level intent
 
 ## Boundaries
 
-- Speculative execution is opt-in at the workflow level. The default mode is pessimistic (lock before execute). No workflow is forced into speculative mode.
-- Speculative mode is not applicable to Ansible convergence, Docker Compose operations, database migrations, or any operation with filesystem side effects. These are inherently non-reversible at the platform level.
+- speculative mode is opt-in and mutation-only
+- diagnostic workflows remain unchanged
+- the first repository implementation is controller-side only; no platform version bump is claimed until a speculative-enabled workflow is applied and validated from `main`
 
 ## Related ADRs
 
-- ADR 0044: Windmill (compensating workflows are Windmill jobs)
-- ADR 0112: Deterministic goal compiler (speculative mode flag)
-- ADR 0115: Event-sourced mutation ledger (speculative_committed / speculative_rolled_back events)
-- ADR 0124: Platform event taxonomy (new speculative execution event types)
-- ADR 0153: Distributed resource lock registry (speculative intents skip lock acquisition)
-- ADR 0155: Intent queue (rolled-back intents re-queued here)
-- ADR 0126: Observation-to-action closure loop (unresolved probe findings)
-- ADR 0162: Distributed deadlock detection (compensating transactions don't create new locks; deadlock-safe by design)
+- ADR 0115: Event-sourced mutation ledger
+- ADR 0119: Budgeted workflow scheduler
+- ADR 0124: Platform event taxonomy and canonical NATS topics
+- ADR 0127: Intent deduplication and conflict resolution

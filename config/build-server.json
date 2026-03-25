@@ -9,7 +9,7 @@
     "-o",
     "UserKnownHostsFile=/dev/null",
     "-o",
-    "ProxyCommand=ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@100.118.189.95 -W %h:%p"
+    "ProxyCommand=ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@100.64.0.1 -W %h:%p"
   ],
   "workspace_root": "/home/ops/builds/proxmox_florin_server",
   "default_timeout_seconds": 900,

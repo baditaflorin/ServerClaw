@@ -1,0 +1,44 @@
+---
+- name: Verify the n8n health endpoint
+  ansible.builtin.uri:
+    url: "{{ n8n_internal_base_url }}/healthz"
+    method: GET
+    status_code: 200
+  register: n8n_verify_health
+  retries: 24
+  delay: 5
+  until: n8n_verify_health.status == 200
+  changed_when: false
+
+- name: Verify the n8n readiness endpoint
+  ansible.builtin.uri:
+    url: "{{ n8n_internal_base_url }}/healthz/readiness"
+    method: GET
+    status_code: 200
+  register: n8n_verify_readiness
+  retries: 24
+  delay: 5
+  until: n8n_verify_readiness.status == 200
+  changed_when: false
+
+- name: Verify n8n owner sign-in works
+  ansible.builtin.uri:
+    url: "{{ n8n_internal_base_url }}/rest/login"
+    method: POST
+    body_format: json
+    body:
+      emailOrLdapLoginId: "{{ n8n_owner_email }}"
+      password: "{{ n8n_owner_password }}"
+    return_content: true
+    status_code: 200
+  register: n8n_verify_login
+  changed_when: false
+  no_log: true
+
+- name: Assert the n8n sign-in returned the expected account
+  ansible.builtin.assert:
+    that:
+      - n8n_verify_login.json.data.email == n8n_owner_email
+      - n8n_verify_login.json.data.role == 'global:owner'
+    fail_msg: "n8n answered locally, but the repo-managed owner account could not authenticate."
+  no_log: true

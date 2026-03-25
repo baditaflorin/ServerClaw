@@ -75,6 +75,27 @@ def write_conflict_repo(repo_root: Path) -> None:
         + "\n",
         encoding="utf-8",
     )
+    (repo_root / "config" / "agent-policies.yaml").write_text(
+        (
+            "- agent_id: operator:lv3-cli\n"
+            "  description: test operator\n"
+            "  identity_class: operator-agent\n"
+            "  trust_tier: T3\n"
+            "  read_surfaces:\n"
+            "    - maintenance_windows\n"
+            "    - world_state\n"
+            "  autonomous_actions:\n"
+            "    max_risk_class: HIGH\n"
+            "    allowed_workflow_tags:\n"
+            "      - mutation\n"
+            "  workflow_permissions:\n"
+            "    allow:\n"
+            "      - converge-netbox\n"
+            "      - rotate-netbox-db-password\n"
+            "      - converge-postgres\n"
+        ),
+        encoding="utf-8",
+    )
 
 
 class FakeLockToken:
@@ -206,6 +227,28 @@ def test_scheduler_returns_duplicate_recent_result(tmp_path: Path) -> None:
     assert second.status == "duplicate"
     assert windmill.submit_calls == ["converge-netbox"]
     assert second.output == {"job_id": "job-converge-netbox"}
+
+
+def test_registry_can_register_speculative_conflict_without_rejecting(tmp_path: Path) -> None:
+    write_conflict_repo(tmp_path)
+    registry = IntentConflictRegistry(repo_root=tmp_path, state_path=tmp_path / ".local" / "conflicts.json")
+    first = registry.register_intent(
+        {"workflow_id": "converge-netbox", "arguments": {}, "target_service_id": "netbox"},
+        actor_intent_id="intent-a",
+        actor="agent:test",
+        ttl_seconds=120,
+    )
+    second = registry.register_intent(
+        {"workflow_id": "rotate-netbox-db-password", "arguments": {"secret_id": "netbox/db"}, "target_service_id": "netbox"},
+        actor_intent_id="intent-b",
+        actor="agent:test",
+        ttl_seconds=120,
+        allow_conflicts=True,
+    )
+
+    assert first.status == "clear"
+    assert second.status == "speculative"
+    assert second.conflicting_intent_id == "intent-a"
 
 
 def test_preview_warns_when_dependency_is_already_mutating(tmp_path: Path) -> None:

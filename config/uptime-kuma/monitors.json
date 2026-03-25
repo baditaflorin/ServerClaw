@@ -78,6 +78,17 @@
     ]
   },
   {
+    "name": "Headscale Public Health",
+    "type": "http",
+    "url": "https://headscale.lv3.org/health",
+    "description": "Public Headscale health endpoint published through the shared NGINX edge.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 5,
+    "accepted_statuscodes": ["200-299"]
+  },
+  {
     "name": "Docker Build SSH",
     "type": "port",
     "hostname": "10.10.10.30",
@@ -178,6 +189,19 @@
     "retryInterval": 60,
     "maxretries": 0,
     "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
+    "name": "n8n Public Health",
+    "type": "http",
+    "url": "https://n8n.lv3.org/healthz",
+    "description": "n8n edge-published health endpoint behind the shared NGINX edge VM.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 5,
     "accepted_statuscodes": [
       "200-299"
     ]

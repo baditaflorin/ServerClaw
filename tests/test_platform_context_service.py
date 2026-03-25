@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import httpx
+
 import platform_context_service
 from platform_context_service import PlatformContextService, ServiceConfig, TokenHashEmbedder
 
@@ -138,3 +140,39 @@ def test_dependency_graph_methods_return_expected_payload(tmp_path: Path) -> Non
     assert any(node["id"] == "step_ca" for node in graph["nodes"])
     assert impact["service"] == "step_ca"
     assert impact["affected"] == []
+
+
+def test_platform_context_http_sets_trace_header(tmp_path: Path) -> None:
+    repo_root = make_repo(tmp_path)
+    service = PlatformContextService(
+        ServiceConfig(
+            api_token="test-token",
+            corpus_root=repo_root,
+            collection_name="test",
+            qdrant_url=None,
+            qdrant_location=":memory:",
+            embedding_backend="token-hash",
+            embedding_model="unused",
+            embedding_dimension=384,
+        )
+    )
+
+    previous_service = platform_context_service.service
+    platform_context_service.service = service
+    async def run() -> None:
+        try:
+            transport = httpx.ASGITransport(app=platform_context_service.app)
+            async with httpx.AsyncClient(transport=transport, base_url="http://platform-context.test") as client:
+                response = await client.get(
+                    "/v1/platform-summary",
+                    headers={"Authorization": "Bearer test-token", "X-Trace-Id": "trace-context-123"},
+                )
+                assert response.status_code == 200
+                assert response.headers["X-Trace-Id"] == "trace-context-123"
+                assert response.json()["repo_version"] == "1.2.3"
+        finally:
+            platform_context_service.service = previous_service
+
+    import asyncio
+
+    asyncio.run(run())

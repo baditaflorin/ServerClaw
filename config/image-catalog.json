@@ -86,6 +86,34 @@
         "converge-netbox"
       ]
     },
+    "n8n_runtime": {
+      "kind": "runtime",
+      "service_id": "n8n",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "n8n",
+      "registry_ref": "docker.n8n.io/n8nio/n8n",
+      "tag": "2.2.6",
+      "digest": "sha256:1ecc41c012acc5a425e43ff4b87193d8c08d00832876df367656eb7e5ee7fc5b",
+      "ref": "docker.n8n.io/n8nio/n8n:2.2.6@sha256:1ecc41c012acc5a425e43ff4b87193d8c08d00832876df367656eb7e5ee7fc5b",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-25",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-25-n8n-runtime.json",
+      "exception": {
+        "reason": "The current official upstream n8n image reports critical and high findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-25",
+        "review_by": "2026-04-08"
+      },
+      "consumers": [
+        "roles/n8n_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-n8n"
+      ]
+    },
     "open_webui_runtime": {
       "kind": "runtime",
       "service_id": "open_webui",
@@ -218,6 +246,28 @@
       ],
       "apply_targets": [
         "converge-step-ca"
+      ]
+    },
+    "vaultwarden_runtime": {
+      "kind": "runtime",
+      "service_id": "vaultwarden",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "vaultwarden",
+      "registry_ref": "docker.io/vaultwarden/server",
+      "tag": "1.35.4",
+      "digest": "sha256:73f9a159204917843875eb12c5ccd9acbcbf8f15ff7f2ce43cf912eef9f97eff",
+      "ref": "docker.io/vaultwarden/server:1.35.4@sha256:73f9a159204917843875eb12c5ccd9acbcbf8f15ff7f2ce43cf912eef9f97eff",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-25",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-25-vaultwarden-runtime.json",
+      "consumers": [
+        "roles/vaultwarden_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-vaultwarden"
       ]
     },
     "uptime_kuma_runtime": {

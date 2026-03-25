@@ -82,5 +82,9 @@
   when:
     - hetzner_dns_matching_records | length == 1
     - hetzner_dns_matching_records[0].value != hetzner_dns_record.value
-      or (hetzner_dns_matching_records[0].ttl | int) != (hetzner_dns_record.ttl | default(60) | int)
+      or (
+        hetzner_dns_matching_records[0].ttl
+        | default(hetzner_dns_record.ttl | default(60))
+        | int
+      ) != (hetzner_dns_record.ttl | default(60) | int)
   no_log: true

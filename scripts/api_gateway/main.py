@@ -66,6 +66,7 @@ except Exception as exc:  # noqa: BLE001
     GRAPH_RUNTIME_IMPORT_ERROR = str(exc)
 from platform.events import build_envelope
 from platform.health import HealthCompositeClient, ServiceHealthNotFoundError
+from platform.logging import clear_context, generate_trace_id, get_logger, set_context
 from platform.world_state.client import SurfaceNotFoundError, WorldStateClient, WorldStateUnavailable
 from platform.world_state.materializer import SQLITE_CURRENT_VIEW_NAME, SQLITE_SNAPSHOTS_TABLE_NAME
 from platform.world_state.workers import collect_service_health
@@ -74,6 +75,10 @@ try:
     from search_fabric import SearchClient
 except ImportError:  # pragma: no cover - packaged import path
     from scripts.search_fabric import SearchClient
+
+
+HTTP_LOGGER = get_logger("api_gateway", "http", name="lv3.api_gateway.http")
+RUNTIME_LOGGER = get_logger("api_gateway", "runtime", name="lv3.api_gateway.runtime")
 
 
 def b64url_decode(value: str) -> bytes:
@@ -523,6 +528,7 @@ async def require_identity(request: Request) -> dict[str, Any]:
             "subject": "platform-context-legacy-token",
             "token": token,
         }
+        set_context(actor_id=identity["subject"])
         request.state.identity = identity
         return identity
     runtime: GatewayRuntime = request.app.state.runtime
@@ -533,6 +539,7 @@ async def require_identity(request: Request) -> dict[str, Any]:
         "subject": subject_from_claims(claims),
         "token": token,
     }
+    set_context(actor_id=identity["subject"])
     request.state.identity = identity
     return identity
 
@@ -547,6 +554,7 @@ async def emit_request_event(
     runtime: GatewayRuntime = request.app.state.runtime
     payload = {
         "request_id": getattr(request.state, "request_id", ""),
+        "trace_id": getattr(request.state, "trace_id", ""),
         "method": request.method,
         "path": request.url.path,
         "status_code": status_code,
@@ -576,6 +584,14 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
     async def lifespan(app: FastAPI):
         runtime = GatewayRuntime(gateway_config)
         app.state.runtime = runtime
+        RUNTIME_LOGGER.info(
+            "Gateway runtime initialized",
+            extra={
+                "trace_id": "startup",
+                "workflow_id": "converge-api-gateway",
+                "target": "service:api_gateway",
+            },
+        )
         try:
             yield
         finally:
@@ -591,8 +607,40 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
     @app.middleware("http")
     async def inject_request_id(request: Request, call_next):
         request.state.request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
-        response = await call_next(request)
+        request.state.trace_id = request.headers.get("X-Trace-Id") or generate_trace_id()
+        set_context(trace_id=request.state.trace_id, request_id=request.state.request_id)
+        started_at = time.perf_counter()
+        try:
+            response = await call_next(request)
+        except Exception:
+            HTTP_LOGGER.exception(
+                "Unhandled request failure",
+                extra={
+                    "path": request.url.path,
+                    "method": request.method,
+                    "status_code": 500,
+                    "duration_ms": round((time.perf_counter() - started_at) * 1000, 3),
+                    "target": request.url.path,
+                },
+            )
+            clear_context()
+            raise
+
         response.headers["X-Gateway-Request-ID"] = request.state.request_id
+        response.headers["X-Trace-Id"] = request.state.trace_id
+        identity = getattr(request.state, "identity", None)
+        HTTP_LOGGER.info(
+            "Request completed",
+            extra={
+                "path": request.url.path,
+                "method": request.method,
+                "status_code": response.status_code,
+                "duration_ms": round((time.perf_counter() - started_at) * 1000, 3),
+                "actor_id": identity["subject"] if identity else "anonymous",
+                "target": request.url.path,
+            },
+        )
+        clear_context()
         return response
 
     @app.get("/healthz")
@@ -856,6 +904,7 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
                 "service_id": body.service_id,
                 "environment": body.environment,
                 "requested_by": identity["subject"],
+                "trace_id": request.state.trace_id,
                 "parameters": body.parameters,
             }
             webhook_response = await runtime.http_client.post(
@@ -898,6 +947,7 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
                 "workflow_id": "rotate-secret",
                 "secret_id": body.secret_id,
                 "requested_by": identity["subject"],
+                "trace_id": request.state.trace_id,
                 "parameters": body.parameters,
             }
             webhook_response = await runtime.http_client.post(
@@ -975,9 +1025,13 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
                 "connection",
                 "content-length",
                 "host",
+                "x-trace-id",
+                "x-gateway-request-id",
+                "x-caller-identity",
             }
         }
         headers["X-Gateway-Request-ID"] = request.state.request_id
+        headers["X-Trace-Id"] = request.state.trace_id
         headers["X-Caller-Identity"] = identity["subject"]
 
         if service.forward_authorization:

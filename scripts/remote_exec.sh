@@ -16,6 +16,7 @@ COMMAND_LABEL=""
 
 REMOTE_HOST=""
 SSH_KEY_PATH=""
+WORKSPACE_ROOT_BASE=""
 WORKSPACE_ROOT=""
 DEFAULT_TIMEOUT_SECONDS=""
 DOCKER_SOCKET=""
@@ -34,6 +35,13 @@ BUILD_SERVER_ANSIBLE_COLLECTION_CACHE=""
 BUILD_SERVER_ANSIBLE_REQUIREMENTS_SHA_FILE=""
 BUILD_SERVER_APT_PROXY_URL=""
 RUNNER_CACHE_MOUNTS_NL=""
+LV3_SESSION_ID="${LV3_SESSION_ID:-}"
+LV3_SESSION_SLUG="${LV3_SESSION_SLUG:-}"
+LV3_SESSION_LOCAL_ROOT="${LV3_SESSION_LOCAL_ROOT:-}"
+LV3_SESSION_NATS_PREFIX="${LV3_SESSION_NATS_PREFIX:-}"
+LV3_SESSION_STATE_NAMESPACE="${LV3_SESSION_STATE_NAMESPACE:-}"
+LV3_SESSION_RECEIPT_SUFFIX="${LV3_SESSION_RECEIPT_SUFFIX:-}"
+LV3_REMOTE_WORKSPACE_ROOT="${LV3_REMOTE_WORKSPACE_ROOT:-}"
 
 SSH_BASE_CMD=()
 
@@ -129,7 +137,7 @@ timeout_seconds = command_spec.get(
 
 shell_assign("REMOTE_HOST", config["host"])
 shell_assign("SSH_KEY_PATH", os.path.expanduser(config.get("ssh_key", "")))
-shell_assign("WORKSPACE_ROOT", config["workspace_root"])
+shell_assign("WORKSPACE_ROOT_BASE", config["workspace_root"])
 shell_assign("DEFAULT_TIMEOUT_SECONDS", config.get("default_timeout_seconds", 900))
 shell_assign("DOCKER_SOCKET", config.get("docker_socket", ""))
 shell_assign("BUILD_SERVER_PIP_CACHE_VOLUME", config.get("pip_cache_volume", ""))
@@ -157,8 +165,20 @@ PY
   )"
 
   [[ -n "$REMOTE_HOST" ]] || fail "remote host is empty in $BUILD_SERVER_CONFIG"
-  [[ -n "$WORKSPACE_ROOT" ]] || fail "workspace_root is empty in $BUILD_SERVER_CONFIG"
+  [[ -n "$WORKSPACE_ROOT_BASE" ]] || fail "workspace_root is empty in $BUILD_SERVER_CONFIG"
   [[ -n "$TIMEOUT_SECONDS" ]] || TIMEOUT_SECONDS="$DEFAULT_TIMEOUT_SECONDS"
+}
+
+load_session_workspace() {
+  eval "$(
+    "$PYTHON_BIN" "$REPO_ROOT/scripts/session_workspace.py" \
+      --repo-root "$REPO_ROOT" \
+      --remote-workspace-base "$WORKSPACE_ROOT_BASE" \
+      --format shell
+  )"
+  WORKSPACE_ROOT="$LV3_REMOTE_WORKSPACE_ROOT"
+  LV3_SESSION_LOCAL_ROOT="$WORKSPACE_ROOT/.local/session-workspaces/$LV3_SESSION_SLUG"
+  [[ -n "$WORKSPACE_ROOT" ]] || fail "failed to derive a session-scoped remote workspace path"
 }
 
 build_ssh_command() {
@@ -210,7 +230,21 @@ remote_env_exports() {
   local prefix=""
   local name=""
   local dynamic_name=""
-  for name in COMMAND IMAGE SERVICE ENV ENVIRONMENT HOST WORKFLOW; do
+  for name in \
+    COMMAND \
+    IMAGE \
+    SERVICE \
+    ENV \
+    ENVIRONMENT \
+    HOST \
+    WORKFLOW \
+    LV3_SESSION_ID \
+    LV3_SESSION_SLUG \
+    LV3_SESSION_LOCAL_ROOT \
+    LV3_SESSION_NATS_PREFIX \
+    LV3_SESSION_STATE_NAMESPACE \
+    LV3_SESSION_RECEIPT_SUFFIX \
+    LV3_REMOTE_WORKSPACE_ROOT; do
     if [[ -n "${!name:-}" ]]; then
       printf -v prefix "%sexport %s=%q; " "$prefix" "$name" "${!name}"
     fi
@@ -233,7 +267,21 @@ remote_docker_env_args() {
   local args=()
   local name=""
   local dynamic_name=""
-  for name in COMMAND IMAGE SERVICE ENV ENVIRONMENT HOST WORKFLOW; do
+  for name in \
+    COMMAND \
+    IMAGE \
+    SERVICE \
+    ENV \
+    ENVIRONMENT \
+    HOST \
+    WORKFLOW \
+    LV3_SESSION_ID \
+    LV3_SESSION_SLUG \
+    LV3_SESSION_LOCAL_ROOT \
+    LV3_SESSION_NATS_PREFIX \
+    LV3_SESSION_STATE_NAMESPACE \
+    LV3_SESSION_RECEIPT_SUFFIX \
+    LV3_REMOTE_WORKSPACE_ROOT; do
     if [[ -n "${!name:-}" ]]; then
       args+=("-e" "$name=${!name}")
     fi
@@ -306,7 +354,10 @@ sync_remote_gate_status_back() {
 }
 
 ensure_remote_workspace() {
-  "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "mkdir -p $(quote_shell "$WORKSPACE_ROOT")" >/dev/null
+  local session_root="$WORKSPACE_ROOT_BASE/.lv3-session-workspaces"
+  "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" \
+    "mkdir -p $(quote_shell "$WORKSPACE_ROOT") $(quote_shell "$session_root") && find $(quote_shell "$session_root") -mindepth 1 -maxdepth 1 -type d ! -name $(quote_shell "$LV3_SESSION_SLUG") -mtime +2 -exec rm -rf {} + >/dev/null 2>&1 || true" \
+    >/dev/null
 }
 
 remote_remove_paths() {
@@ -442,7 +493,8 @@ run_builtin_check_build_server() {
   echo "Checking SSH connectivity to $REMOTE_HOST"
   "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "printf 'build-server-ok\n'"
 
-  echo "Checking remote workspace root $WORKSPACE_ROOT"
+  echo "Checking remote workspace root $WORKSPACE_ROOT_BASE"
+  echo "Checking remote session workspace $WORKSPACE_ROOT"
   ensure_remote_workspace
   "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "cd $(quote_shell "$WORKSPACE_ROOT") && pwd"
 
@@ -535,6 +587,7 @@ run_remote_command() {
 main() {
   parse_args "$@"
   load_command_configuration
+  load_session_workspace
   build_ssh_command
 
   if remote_reachable; then

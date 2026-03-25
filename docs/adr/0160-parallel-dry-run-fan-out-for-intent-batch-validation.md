@@ -1,10 +1,10 @@
 # ADR 0160: Parallel Dry-Run Fan-Out for Intent Batch Validation
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Implemented
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.145.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-25
 - Date: 2026-03-24
 
 ## Context
@@ -31,171 +31,54 @@ After fan-out dry-runs complete, conflict detection runs on the **combined outpu
 
 ## Decision
 
-We will implement a **parallel dry-run fan-out** for multi-intent batches: all dry-runs in a batch execute in parallel, and conflict detection operates on the combined result set before any execution begins.
+We implement a controller-local **parallel dry-run fan-out** for multi-intent batches: all semantic dry-runs in a batch execute concurrently, cross-intent conflict analysis runs on the combined result set, and the platform emits a staged execution plan before any batch is submitted for mutation.
+
+## Implementation Notes
+
+Repository implementation landed in `0.145.0` with the following surfaces:
+
+- `GoalCompiler.compile_batch()` in [platform/goal_compiler/compiler.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/goal_compiler/compiler.py)
+- `IntentBatchPlanner` and the batch plan dataclasses in [platform/goal_compiler/batch.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/goal_compiler/batch.py)
+- operator preview in [scripts/lv3_cli.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/lv3_cli.py)
+- batch-plan ledger event registration in [config/ledger-event-types.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/ledger-event-types.yaml)
 
 ### Batch compilation
 
-The goal compiler (ADR 0112) is extended with a `compile_batch()` method:
+`GoalCompiler.compile_batch()` compiles a list of instructions into a single `CompiledIntentBatch`. Each instruction still uses the normal single-intent compiler path, including scope binding, health gating, resource-claim inference, and actor-policy enforcement.
 
-```python
-# platform/compiler/goal_compiler.py
+### Fan-out execution
 
-def compile_batch(
-    self,
-    instructions: list[str],
-    actor_id: str,
-    context_id: UUID,
-    batch_id: UUID = None,
-) -> IntentBatch:
-    """
-    Compile multiple instructions into an IntentBatch.
-    Each intent is compiled independently; cross-intent dependencies are
-    analysed during the fan-out dry-run phase.
-    """
-    if batch_id is None:
-        batch_id = uuid4()
+`IntentBatchPlanner.plan()` fans out semantic diff computation with a bounded thread pool. The current repository implementation uses the existing ADR 0120 diff engine directly rather than a Windmill `forloop_parallel` flow, which keeps the batch validator aligned with the current controller-local intent tooling.
 
-    intents = [
-        self.compile(instr, actor_id, context_id, skip_dry_run=True)
-        for instr in instructions
-    ]
+If one dry-run fails, that intent is marked rejected with a `dry_run_failed` reason while the rest of the batch still receives a plan.
 
-    return IntentBatch(
-        batch_id=batch_id,
-        intents=intents,
-        context_id=context_id,
-        actor_id=actor_id,
-        submitted_at=now(),
-    )
-```
+### Combined diff and conflict classification
 
-`skip_dry_run=True` defers the individual dry-run; it will run as part of the fan-out.
+The planner merges two evidence sources per intent:
 
-### Fan-out dry-run execution
+- declared `resource_claims`
+- `SemanticDiff.changed_objects`
 
-The batch validation workflow `validate-intent-batch` executes all dry-runs in parallel using Windmill's parallel step execution:
-
-```python
-# config/windmill/flows/validate-intent-batch.yaml (Windmill flow definition)
-
-flow:
-  name: validate-intent-batch
-  steps:
-    - id: fan_out_dry_runs
-      type: forloop_parallel        # Windmill parallel loop
-      items: "{{ batch.intents }}"
-      max_parallelism: 5            # At most 5 concurrent dry-runs
-      step:
-        id: dry_run
-        type: script
-        path: f/platform/intent/dry_run_single_intent
-        args:
-          intent_id: "{{ item.intent_id }}"
-          workspace_schema: "{{ batch.workspace_schema }}"  # Isolated per-intent (ADR 0156)
-
-    - id: combine_diff_outputs
-      type: script
-      path: f/platform/intent/combine_diff_outputs
-      args:
-        batch_id: "{{ batch.batch_id }}"
-        dry_run_results: "{{ steps.fan_out_dry_runs.results }}"
-
-    - id: cross_intent_conflict_detection
-      type: script
-      path: f/platform/intent/cross_intent_conflict_check
-      args:
-        combined_diff: "{{ steps.combine_diff_outputs.result }}"
-        intents: "{{ batch.intents }}"
-
-    - id: generate_execution_plan
-      type: script
-      path: f/platform/intent/generate_execution_plan
-      args:
-        conflict_report: "{{ steps.cross_intent_conflict_detection.result }}"
-        intents: "{{ batch.intents }}"
-        batch_id: "{{ batch.batch_id }}"
-```
-
-### Combined diff and cross-intent conflict detection
-
-The `combine_diff_outputs` step merges the diff outputs from all individual dry-runs into a unified change set:
-
-```python
-# config/windmill/scripts/combine-diff-outputs.py
-
-def combine_diff_outputs(batch_id: UUID, dry_run_results: list[DryRunResult]) -> CombinedDiff:
-    """
-    Merge all individual dry-run diffs into a unified change set.
-    Tracks which intent "owns" each change.
-    """
-    file_changes = defaultdict(list)   # {file_path: [(intent_id, change)]}
-    service_restarts = defaultdict(list)
-    config_writes = defaultdict(list)
-
-    for result in dry_run_results:
-        for change in result.file_changes:
-            file_changes[change.path].append((result.intent_id, change))
-        for restart in result.service_restarts:
-            service_restarts[restart.service_id].append((result.intent_id, restart))
-        for write in result.config_writes:
-            config_writes[write.target].append((result.intent_id, write))
-
-    # Flag any resource touched by more than one intent
-    cross_intent_touches = {
-        path: intents
-        for path, intents in file_changes.items()
-        if len(set(i for i, _ in intents)) > 1
-    }
-
-    return CombinedDiff(
-        file_changes=file_changes,
-        service_restarts=service_restarts,
-        config_writes=config_writes,
-        cross_intent_touches=cross_intent_touches,
-    )
-```
-
-The `cross_intent_conflict_check` step classifies cross-intent touches:
+This combined touch map is then classified into the currently implemented outcomes:
 
 | Cross-intent touch pattern | Classification | Action |
 |---|---|---|
-| Two intents write the same file | `write_write_conflict` | Reject lower-priority intent; re-queue |
-| Intent A writes file; Intent B reads same file after A's write | `read_after_write_dependency` | Order: A must complete before B starts |
-| Intent A restarts service X; Intent B writes X's config | `restart_during_config` | Order: B must complete before A starts |
-| Two intents restart different services, no shared files | `safe_parallel` | Execute in parallel |
+| two intents write the same resource | `write_write_conflict` | reject the later intent in submitted order |
+| one intent writes a resource that another only reads | `read_after_write_dependency` | order writer before reader |
+| one intent restarts a resource while another mutates it | `restart_during_config` | order config change before restart |
 
 ### Execution plan generation
 
-From the conflict analysis, the `generate_execution_plan` step produces an ordered, parallelism-aware execution plan:
+The planner converts the dependency set into ordered `ExecutionStage` rows. Independent intents share the same `parallelism: full` stage; dependent intents become later sequential stages with `wait_for_stage` references. The resulting plan is recorded as `intent.batch_plan` when a ledger sink is configured.
 
-```python
-# Output of generate_execution_plan:
-execution_plan = ExecutionPlan(
-    batch_id=batch_id,
-    stages=[
-        ExecutionStage(
-            stage_id=1,
-            intents=["intent-A", "intent-C"],  # No dependencies between these two
-            parallelism="full",
-        ),
-        ExecutionStage(
-            stage_id=2,
-            intents=["intent-B"],              # Depends on stage 1 completing first
-            parallelism="sequential",
-            wait_for_stage=1,
-        ),
-        ExecutionStage(
-            stage_id=3,
-            intents=["intent-D", "intent-E"],  # Can run after stage 2
-            parallelism="full",
-        ),
-    ],
-    rejected_intents=["intent-F"],             # write_write_conflict with intent-A
-    rejected_reasons={"intent-F": "write_write_conflict on /etc/netbox/config.py"},
-)
-```
+### CLI surface
 
-The execution plan is committed to the mutation ledger (ADR 0115) as `intent.batch_plan` event and executed by the intent queue dispatcher (ADR 0155) using stage-aware scheduling.
+`lv3 intent batch --instruction ... --instruction ...` now provides an operator-facing preview of:
+
+- dry-run failures
+- cross-intent conflict classification
+- staged execution order
+- rejected intents and reasons
 
 ### Performance comparison
 
@@ -217,21 +100,21 @@ The execution plan is committed to the mutation ledger (ADR 0115) as `intent.bat
 
 - Parallel dry-runs consume concurrency budget (ADR 0157) on the target VMs simultaneously. For large batches targeting the same VM, the fan-out may need throttling (hence `max_parallelism: 5`).
 - The combined diff and conflict detection logic is complex. A bug in cross-intent dependency classification could either over-block (too many `read_after_write_dependency` classifications causing unnecessary serialisation) or under-block (missing `write_write_conflict` classifications causing data corruption).
-- Windmill's parallel loop (`forloop_parallel`) has a different execution model from sequential steps. Error handling in a parallel loop requires careful design: if 3 of 5 dry-runs succeed and 2 fail, the batch should report the failures and execute the 3 successful intents, not abort the whole batch.
+- The first implementation is controller-local. The batch plan is not yet dispatched through ADR 0155's queue or rendered in the ops portal.
 
 ## Boundaries
 
-- Fan-out validation is triggered by the `compile_batch()` API. Single-intent compilations continue to use the sequential (compile → dry-run → check → execute) pipeline.
-- The execution plan is advisory for cross-VM operations; within a single VM, the execution plan ordering is enforced by lane scheduling (ADR 0154).
+- Fan-out validation is triggered by `compile_batch()` / `validate_batch()` and the CLI preview surface. Single-intent compilation remains unchanged.
+- `intent.batch_plan` is currently a planning event, not a scheduler submission. Stage-by-stage execution by ADR 0155 remains follow-up work.
+- No platform live-apply claim is made for this release; `Implemented In Platform Version` remains `not yet`.
 
 ## Related ADRs
 
-- ADR 0044: Windmill (parallel loop execution in the fan-out flow)
-- ADR 0112: Deterministic goal compiler (compile_batch() API; skip_dry_run flag)
+- ADR 0112: Deterministic goal compiler (batch compilation entry point)
 - ADR 0115: Event-sourced mutation ledger (intent.batch_plan event)
 - ADR 0120: Dry-run semantic diff engine (individual dry-runs that are fanned out)
-- ADR 0126: Observation-to-action closure loop (multiple simultaneous findings trigger compile_batch)
-- ADR 0154: VM-scoped execution lanes (execution plan staged per lane)
-- ADR 0155: Intent queue (execution plan stages dispatched stage-by-stage)
-- ADR 0156: Agent session workspace isolation (each dry-run gets workspace-scoped scratch space)
+- ADR 0126: Observation-to-action closure loop (future batch caller)
+- ADR 0127: Intent deduplication and conflict resolution (resource-claim input reused during batch planning)
+- ADR 0154: VM-scoped execution lanes (future execution consumer of staged plans)
+- ADR 0155: Intent queue (future stage-by-stage dispatcher for planned batches)
 - ADR 0157: Per-VM concurrency budget (fan-out respects max_parallelism budget)

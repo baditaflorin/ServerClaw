@@ -63,3 +63,11 @@ def test_validate_receipt_accepts_legacy_live_apply_workflow_ids(
         Path("2026-03-23-adr-0077-compose-runtime-secrets-live-apply.json"),
         {"workflows": {"test-workflow": {}}},
     )
+
+
+def test_receipt_id_with_session_appends_normalized_suffix(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("LV3_SESSION_RECEIPT_SUFFIX", "ADR 0156 / Test")
+
+    receipt_id = live_apply_receipts.receipt_id_with_session("2026-03-25-adr-0156-live-apply")
+
+    assert receipt_id == "2026-03-25-adr-0156-live-apply-adr-0156-test"

@@ -20,6 +20,13 @@ from platform.ledger import LedgerReader, LedgerWriter
 
 from .budgets import HostTouchEstimate, WorkflowPolicy, estimate_touched_hosts, load_workflow_policy
 from .rollback_guard import RollbackGuard
+from .speculative import (
+    ConflictProbeResult,
+    SpeculativeExecutionRecord,
+    SpeculativeStateStore,
+    build_compensating_arguments,
+    run_conflict_probe,
+)
 from .watchdog import ActiveJobRecord, SchedulerStateStore, Watchdog
 
 
@@ -37,6 +44,9 @@ class WindmillClient(Protocol):
         ...
 
     def get_job(self, job_id: str) -> dict[str, Any]:
+        ...
+
+    def list_jobs(self, *, running: bool | None = None) -> list[dict[str, Any]]:
         ...
 
     def cancel_job(self, job_id: str, *, reason: str | None = None) -> dict[str, Any] | None:
@@ -237,6 +247,23 @@ class HttpWindmillClient:
             raise RuntimeError(f"unexpected Windmill job response: {response!r}")
         return response
 
+    def list_jobs(self, *, running: bool | None = None) -> list[dict[str, Any]]:
+        query: dict[str, str] = {}
+        if running is not None:
+            query["running"] = "true" if running else "false"
+        path = f"/api/w/{self._workspace}/jobs/list"
+        if query:
+            path = f"{path}?{urllib.parse.urlencode(query)}"
+        response = self._request(path, method="GET")
+        if isinstance(response, list):
+            return [item for item in response if isinstance(item, dict)]
+        if isinstance(response, dict):
+            for key in ("jobs", "items", "results", "data"):
+                value = response.get(key)
+                if isinstance(value, list):
+                    return [item for item in value if isinstance(item, dict)]
+        raise RuntimeError(f"unexpected Windmill jobs response: {response!r}")
+
     def cancel_job(self, job_id: str, *, reason: str | None = None) -> dict[str, Any] | None:
         encoded = urllib.parse.quote(job_id, safe="")
         payload = {"reason": reason} if reason else None
@@ -270,6 +297,7 @@ class BudgetedWorkflowScheduler:
         watchdog: Watchdog | None = None,
         daily_execution_counter: DailyExecutionCounter | None = None,
         conflict_registry: IntentConflictRegistry | None = None,
+        speculative_state_store: SpeculativeStateStore | None = None,
         poll_interval_seconds: float = 2.0,
         sleep_fn: Any = time.sleep,
     ) -> None:
@@ -289,6 +317,9 @@ class BudgetedWorkflowScheduler:
             self._repo_root / ".local" / "state" / "agent-policy" / "daily-autonomous-executions.json"
         )
         self._conflict_registry = conflict_registry or IntentConflictRegistry(repo_root=self._repo_root)
+        self._speculative_state_store = speculative_state_store or SpeculativeStateStore(
+            self._repo_root / ".local" / "scheduler" / "speculative-executions.json"
+        )
         self._poll_interval_seconds = poll_interval_seconds
         self._sleep = sleep_fn
         if lock_manager is not None:
@@ -405,6 +436,7 @@ class BudgetedWorkflowScheduler:
         parent_actor_intent_id: str | None,
         job_id: str | None,
         host_touch_estimate: HostTouchEstimate,
+        execution_mode: str = "pessimistic",
     ) -> None:
         if self._ledger_writer is None:
             return
@@ -414,6 +446,7 @@ class BudgetedWorkflowScheduler:
             "budget": policy.budget.as_dict(),
             "execution_class": policy.execution_class,
             "host_touch_estimate": host_touch_estimate.as_dict(),
+            "execution_mode": execution_mode,
         }
         if parent_actor_intent_id:
             metadata["parent_actor_intent_id"] = parent_actor_intent_id
@@ -425,6 +458,15 @@ class BudgetedWorkflowScheduler:
             target_id=policy.workflow_id,
             metadata=metadata,
         )
+        if execution_mode == "speculative":
+            self._ledger_writer.write(
+                event_type="execution.speculative_started",
+                actor="scheduler:budgeted-workflow-scheduler",
+                actor_intent_id=actor_intent_id,
+                target_kind="workflow",
+                target_id=policy.workflow_id,
+                metadata=metadata,
+            )
 
     def _write_policy_decision_event(
         self,
@@ -470,6 +512,162 @@ class BudgetedWorkflowScheduler:
         if not isinstance(value, list):
             return []
         return [str(item).strip() for item in value if isinstance(item, str) and str(item).strip()]
+
+    @staticmethod
+    def _speculative_requested(intent: Any, policy: WorkflowPolicy) -> bool:
+        if not policy.speculative.eligible or policy.execution_class != "mutation":
+            return False
+        execution_mode = getattr(intent, "execution_mode", None)
+        if isinstance(execution_mode, str) and execution_mode.strip() == "speculative":
+            return True
+        arguments = getattr(intent, "arguments", {}) or {}
+        if not isinstance(arguments, dict):
+            return False
+        if arguments.get("execution_mode") == "speculative":
+            return True
+        return bool(arguments.get("allow_speculative"))
+
+    @staticmethod
+    def _terminal_status(payload: dict[str, Any]) -> str:
+        if payload.get("canceled") is True:
+            return "aborted"
+        if payload.get("success") is False:
+            return "failed"
+        return "completed"
+
+    def _write_execution_terminal_event(
+        self,
+        *,
+        event_type: str,
+        actor_intent_id: str,
+        workflow_id: str,
+        actor: str = "scheduler:budgeted-workflow-scheduler",
+        metadata: dict[str, Any] | None = None,
+    ) -> None:
+        if self._ledger_writer is None:
+            return
+        self._ledger_writer.write(
+            event_type=event_type,
+            actor=actor,
+            actor_intent_id=actor_intent_id,
+            target_kind="workflow",
+            target_id=workflow_id,
+            metadata=dict(metadata or {}),
+        )
+
+    def _run_probe(
+        self,
+        *,
+        policy: WorkflowPolicy,
+        actor_intent_id: str,
+        job_id: str | None,
+        requested_by: str,
+        arguments: dict[str, Any],
+        conflict_result: Any,
+    ) -> ConflictProbeResult:
+        probe_due_at = datetime.now(UTC).isoformat()
+        self._speculative_state_store.upsert(
+            SpeculativeExecutionRecord(
+                actor_intent_id=actor_intent_id,
+                workflow_id=policy.workflow_id,
+                status="probing",
+                probe_due_at=probe_due_at,
+                updated_at=probe_due_at,
+                job_id=job_id,
+                conflict_with=getattr(conflict_result, "conflicting_intent_id", None),
+                compensating_workflow_id=policy.speculative.compensating_workflow_id,
+                metadata={
+                    "requested_by": requested_by,
+                    "resource_claims": [
+                        claim.as_dict() for claim in getattr(conflict_result, "resource_claims", [])
+                    ],
+                },
+            )
+        )
+        self._write_execution_terminal_event(
+            event_type="execution.speculative_probing",
+            actor_intent_id=actor_intent_id,
+            workflow_id=policy.workflow_id,
+            metadata={"job_id": job_id, "probe_due_at": probe_due_at},
+        )
+        if policy.speculative.probe_delay_seconds > 0:
+            self._sleep(policy.speculative.probe_delay_seconds)
+        return run_conflict_probe(
+            repo_root=self._repo_root,
+            probe_spec=policy.speculative.conflict_probe or {},
+            context={
+                "workflow_id": policy.workflow_id,
+                "actor_intent_id": actor_intent_id,
+                "job_id": job_id,
+                "arguments": dict(arguments),
+                "requested_by": requested_by,
+                "resource_claims": [claim.as_dict() for claim in getattr(conflict_result, "resource_claims", [])],
+                "conflicting_intent_id": getattr(conflict_result, "conflicting_intent_id", None),
+            },
+        )
+
+    def _run_compensating_workflow(
+        self,
+        *,
+        original_policy: WorkflowPolicy,
+        actor_intent_id: str,
+        job_id: str | None,
+        arguments: dict[str, Any],
+        conflict: ConflictProbeResult,
+    ) -> tuple[str, str | None, Any]:
+        compensating_workflow_id = original_policy.speculative.compensating_workflow_id
+        if not compensating_workflow_id:
+            return "failed", None, {"reason": "missing_compensating_workflow"}
+        policy = load_workflow_policy(compensating_workflow_id, repo_root=self._repo_root)
+        compensating_actor_intent_id = str(uuid.uuid4())
+        payload = build_compensating_arguments(
+            original_arguments=arguments,
+            original_workflow_id=original_policy.workflow_id,
+            actor_intent_id=actor_intent_id,
+            job_id=job_id,
+            conflict=conflict,
+        )
+        submission = self._windmill_client.submit_workflow(
+            compensating_workflow_id,
+            payload,
+            timeout_seconds=policy.budget.max_duration_seconds,
+        )
+        compensating_job_id = submission.get("job_id")
+        self._write_started_event(
+            policy=policy,
+            requested_by="agent/speculative-rollback",
+            actor_intent_id=compensating_actor_intent_id,
+            parent_actor_intent_id=actor_intent_id,
+            job_id=str(compensating_job_id) if compensating_job_id else None,
+            host_touch_estimate=HostTouchEstimate(count=0, advisory_only=True, source="speculative_rollback"),
+        )
+        if not compensating_job_id:
+            status = "completed" if submission.get("success", True) else "failed"
+            self._write_execution_terminal_event(
+                event_type="execution.completed" if status == "completed" else "execution.failed",
+                actor_intent_id=compensating_actor_intent_id,
+                workflow_id=compensating_workflow_id,
+                actor="scheduler:speculative-rollback",
+                metadata={"windmill_submission": submission},
+            )
+            return status, None, submission.get("result")
+        while True:
+            status_payload = self._windmill_client.get_job(str(compensating_job_id))
+            if status_payload.get("completed") or status_payload.get("success") is not None or status_payload.get("canceled") is True:
+                status = self._terminal_status(status_payload)
+                self._write_execution_terminal_event(
+                    event_type=(
+                        "execution.completed"
+                        if status == "completed"
+                        else "execution.aborted" if status == "aborted" else "execution.failed"
+                    ),
+                    actor_intent_id=compensating_actor_intent_id,
+                    workflow_id=compensating_workflow_id,
+                    actor="scheduler:speculative-rollback",
+                    metadata={"windmill_status": status_payload, "parent_actor_intent_id": actor_intent_id},
+                )
+                return status, str(compensating_job_id), status_payload.get("result")
+            self._sleep(self._poll_interval_seconds)
 
     def submit(
         self,
@@ -566,9 +764,11 @@ class BudgetedWorkflowScheduler:
                     },
                 )
 
+        speculative_requested = self._speculative_requested(intent, policy)
         lock_token = None
         registered_claim = False
-        if policy.execution_class == "mutation":
+        claim_closed = False
+        if policy.execution_class == "mutation" and not speculative_requested:
             lock_token = self._lock_manager.acquire(
                 policy.workflow_id,
                 max_instances=policy.budget.max_concurrent_instances,
@@ -589,7 +789,12 @@ class BudgetedWorkflowScheduler:
                 intent,
                 actor_intent_id=actor_intent_id,
                 actor=requested_by,
-                ttl_seconds=policy.budget.max_duration_seconds + 60,
+                ttl_seconds=(
+                    policy.budget.max_duration_seconds
+                    + (policy.speculative.rollback_window_seconds if speculative_requested else 0)
+                    + 60
+                ),
+                allow_conflicts=speculative_requested,
             )
             if conflict_result.status == "conflict":
                 self._write_conflict_rejected_event(
@@ -629,6 +834,19 @@ class BudgetedWorkflowScheduler:
                 resource_claims=[claim.as_dict() for claim in conflict_result.resource_claims],
                 warnings=[warning.as_dict() for warning in conflict_result.warnings],
             )
+            if speculative_requested and conflict_result.status == "speculative":
+                self._speculative_state_store.upsert(
+                    SpeculativeExecutionRecord(
+                        actor_intent_id=actor_intent_id,
+                        workflow_id=policy.workflow_id,
+                        status="executing",
+                        probe_due_at=datetime.now(UTC).isoformat(),
+                        updated_at=datetime.now(UTC).isoformat(),
+                        conflict_with=conflict_result.conflicting_intent_id,
+                        compensating_workflow_id=policy.speculative.compensating_workflow_id,
+                        metadata={"requested_by": requested_by},
+                    )
+                )
             submission = self._windmill_client.submit_workflow(
                 policy.workflow_id,
                 getattr(intent, "arguments", {}) or {},
@@ -642,21 +860,119 @@ class BudgetedWorkflowScheduler:
                 parent_actor_intent_id=parent_actor_intent_id,
                 job_id=str(job_id) if job_id else None,
                 host_touch_estimate=host_touch_estimate,
+                execution_mode="speculative" if speculative_requested else "pessimistic",
             )
 
             if not job_id:
                 status = "completed" if submission.get("success", True) else "failed"
-                if self._ledger_writer is not None:
-                    self._ledger_writer.write(
+                if status != "completed" or not speculative_requested:
+                    self._write_execution_terminal_event(
                         event_type="execution.completed" if status == "completed" else "execution.failed",
-                        actor="scheduler:budgeted-workflow-scheduler",
                         actor_intent_id=actor_intent_id,
-                        target_kind="workflow",
-                        target_id=policy.workflow_id,
+                        workflow_id=policy.workflow_id,
                         metadata={"windmill_submission": submission},
                     )
-                if registered_claim:
-                    self._conflict_registry.complete_intent(actor_intent_id, status=status, output=submission.get("result"))
+                    if registered_claim:
+                        self._conflict_registry.complete_intent(
+                            actor_intent_id,
+                            status=status,
+                            output=submission.get("result"),
+                        )
+                        claim_closed = True
+                else:
+                    probe_result = self._run_probe(
+                        policy=policy,
+                        actor_intent_id=actor_intent_id,
+                        job_id=None,
+                        requested_by=requested_by,
+                        arguments=getattr(intent, "arguments", {}) or {},
+                        conflict_result=conflict_result,
+                    )
+                    if not probe_result.conflict_detected or probe_result.winning_intent_id in {None, actor_intent_id}:
+                        self._speculative_state_store.mark_status(
+                            actor_intent_id,
+                            status="committed",
+                            metadata=probe_result.as_dict(),
+                        )
+                        self._write_execution_terminal_event(
+                            event_type="execution.completed",
+                            actor_intent_id=actor_intent_id,
+                            workflow_id=policy.workflow_id,
+                            metadata={
+                                "windmill_submission": submission,
+                                "execution_mode": "speculative",
+                            },
+                        )
+                        self._write_execution_terminal_event(
+                            event_type="execution.speculative_committed",
+                            actor_intent_id=actor_intent_id,
+                            workflow_id=policy.workflow_id,
+                            metadata=probe_result.as_dict(),
+                        )
+                        if registered_claim:
+                            self._conflict_registry.complete_intent(
+                                actor_intent_id,
+                                status="completed",
+                                output=submission.get("result"),
+                            )
+                            claim_closed = True
+                        status = "completed"
+                    else:
+                        compensating_status, compensating_job_id, compensating_output = self._run_compensating_workflow(
+                            original_policy=policy,
+                            actor_intent_id=actor_intent_id,
+                            job_id=None,
+                            arguments=getattr(intent, "arguments", {}) or {},
+                            conflict=probe_result,
+                        )
+                        if compensating_status == "completed":
+                            self._speculative_state_store.mark_status(
+                                actor_intent_id,
+                                status="rolled_back",
+                                conflict_with=probe_result.conflicting_intent_id,
+                                compensating_workflow_id=policy.speculative.compensating_workflow_id,
+                                compensating_job_id=compensating_job_id,
+                                metadata=probe_result.as_dict(),
+                            )
+                            self._write_execution_terminal_event(
+                                event_type="execution.speculative_rolled_back",
+                                actor_intent_id=actor_intent_id,
+                                workflow_id=policy.workflow_id,
+                                metadata={
+                                    **probe_result.as_dict(),
+                                    "compensating_workflow_id": policy.speculative.compensating_workflow_id,
+                                    "compensating_job_id": compensating_job_id,
+                                },
+                            )
+                            if registered_claim:
+                                self._conflict_registry.complete_intent(actor_intent_id, status="rolled_back")
+                                claim_closed = True
+                            status = "rolled_back"
+                            submission["result"] = compensating_output
+                        else:
+                            self._speculative_state_store.mark_status(
+                                actor_intent_id,
+                                status="rollback_failed",
+                                conflict_with=probe_result.conflicting_intent_id,
+                                compensating_workflow_id=policy.speculative.compensating_workflow_id,
+                                compensating_job_id=compensating_job_id,
+                                metadata=probe_result.as_dict(),
+                            )
+                            self._write_execution_terminal_event(
+                                event_type="execution.failed",
+                                actor_intent_id=actor_intent_id,
+                                workflow_id=policy.workflow_id,
+                                metadata={
+                                    **probe_result.as_dict(),
+                                    "reason": "compensating_workflow_failed",
+                                    "compensating_workflow_id": policy.speculative.compensating_workflow_id,
+                                    "compensating_job_id": compensating_job_id,
+                                },
+                            )
+                            if registered_claim:
+                                self._conflict_registry.complete_intent(actor_intent_id, status="failed")
+                                claim_closed = True
+                            status = "failed"
                 return SchedulerResult(
                     status=status,
                     workflow_id=policy.workflow_id,
@@ -678,7 +994,10 @@ class BudgetedWorkflowScheduler:
                 execution_class=policy.execution_class,
                 started_at=datetime.now(UTC).isoformat(),
                 budget=policy.budget if policy.execution_class == "mutation" else None,
-                metadata={"host_touch_estimate": host_touch_estimate.as_dict()},
+                metadata={
+                    "host_touch_estimate": host_touch_estimate.as_dict(),
+                    "execution_mode": "speculative" if speculative_requested else "pessimistic",
+                },
             )
             self._state_store.upsert(active_job)
 
@@ -689,6 +1008,7 @@ class BudgetedWorkflowScheduler:
                     payload = self._watchdog.handle_violation(active_job, status, violation)
                     if registered_claim:
                         self._conflict_registry.complete_intent(actor_intent_id, status="budget_exceeded")
+                        claim_closed = True
                     return SchedulerResult(
                         status="budget_exceeded",
                         workflow_id=policy.workflow_id,
@@ -700,13 +1020,99 @@ class BudgetedWorkflowScheduler:
                     )
                 if self._watchdog.is_terminal(status):
                     self._watchdog.handle_terminal(active_job, status)
-                    final_status = "completed"
-                    if status.get("canceled") is True:
-                        final_status = "aborted"
-                    elif status.get("success") is False:
-                        final_status = "failed"
-                    if registered_claim:
-                        self._conflict_registry.complete_intent(actor_intent_id, status=final_status, output=status.get("result"))
+                    final_status = self._terminal_status(status)
+                    if final_status == "completed" and speculative_requested:
+                        probe_result = self._run_probe(
+                            policy=policy,
+                            actor_intent_id=actor_intent_id,
+                            job_id=str(job_id),
+                            requested_by=requested_by,
+                            arguments=getattr(intent, "arguments", {}) or {},
+                            conflict_result=conflict_result,
+                        )
+                        if not probe_result.conflict_detected or probe_result.winning_intent_id in {None, actor_intent_id}:
+                            self._speculative_state_store.mark_status(
+                                actor_intent_id,
+                                status="committed",
+                                metadata=probe_result.as_dict(),
+                            )
+                            self._write_execution_terminal_event(
+                                event_type="execution.speculative_committed",
+                                actor_intent_id=actor_intent_id,
+                                workflow_id=policy.workflow_id,
+                                metadata={**probe_result.as_dict(), "job_id": str(job_id)},
+                            )
+                            if registered_claim:
+                                self._conflict_registry.complete_intent(
+                                    actor_intent_id,
+                                    status="completed",
+                                    output=status.get("result"),
+                                )
+                                claim_closed = True
+                        else:
+                            compensating_status, compensating_job_id, _compensating_output = self._run_compensating_workflow(
+                                original_policy=policy,
+                                actor_intent_id=actor_intent_id,
+                                job_id=str(job_id),
+                                arguments=getattr(intent, "arguments", {}) or {},
+                                conflict=probe_result,
+                            )
+                            if compensating_status == "completed":
+                                final_status = "rolled_back"
+                                self._speculative_state_store.mark_status(
+                                    actor_intent_id,
+                                    status="rolled_back",
+                                    conflict_with=probe_result.conflicting_intent_id,
+                                    compensating_workflow_id=policy.speculative.compensating_workflow_id,
+                                    compensating_job_id=compensating_job_id,
+                                    metadata=probe_result.as_dict(),
+                                )
+                                self._write_execution_terminal_event(
+                                    event_type="execution.speculative_rolled_back",
+                                    actor_intent_id=actor_intent_id,
+                                    workflow_id=policy.workflow_id,
+                                    metadata={
+                                        **probe_result.as_dict(),
+                                        "job_id": str(job_id),
+                                        "compensating_workflow_id": policy.speculative.compensating_workflow_id,
+                                        "compensating_job_id": compensating_job_id,
+                                    },
+                                )
+                                if registered_claim:
+                                    self._conflict_registry.complete_intent(actor_intent_id, status="rolled_back")
+                                    claim_closed = True
+                            else:
+                                final_status = "failed"
+                                self._speculative_state_store.mark_status(
+                                    actor_intent_id,
+                                    status="rollback_failed",
+                                    conflict_with=probe_result.conflicting_intent_id,
+                                    compensating_workflow_id=policy.speculative.compensating_workflow_id,
+                                    compensating_job_id=compensating_job_id,
+                                    metadata=probe_result.as_dict(),
+                                )
+                                self._write_execution_terminal_event(
+                                    event_type="execution.failed",
+                                    actor_intent_id=actor_intent_id,
+                                    workflow_id=policy.workflow_id,
+                                    metadata={
+                                        **probe_result.as_dict(),
+                                        "reason": "compensating_workflow_failed",
+                                        "compensating_workflow_id": policy.speculative.compensating_workflow_id,
+                                        "compensating_job_id": compensating_job_id,
+                                    },
+                                )
+                                if registered_claim:
+                                    self._conflict_registry.complete_intent(actor_intent_id, status="failed")
+                                    claim_closed = True
+                    else:
+                        if registered_claim:
+                            self._conflict_registry.complete_intent(
+                                actor_intent_id,
+                                status=final_status,
+                                output=status.get("result"),
+                            )
+                            claim_closed = True
                     return SchedulerResult(
                         status=final_status,
                         workflow_id=policy.workflow_id,
@@ -721,7 +1127,7 @@ class BudgetedWorkflowScheduler:
                     )
                 self._sleep(self._poll_interval_seconds)
         finally:
-            if registered_claim:
+            if registered_claim and not claim_closed:
                 self._conflict_registry.complete_intent(actor_intent_id, status="aborted")
             if lock_token is not None:
                 lock_token.release()

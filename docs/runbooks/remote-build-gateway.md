@@ -37,6 +37,7 @@ On the current live platform the build VM does not have a controller-reachable T
 - jump host: `ops@100.118.189.95`
 - build VM target: `ops@10.10.10.30`
 - remote workspace root: `/home/ops/builds/proxmox_florin_server`
+- remote session checkout layout: `/home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/<session_slug>/repo`
 
 Confirm the gateway can reach the server and dry-run a workspace sync:
 
@@ -76,6 +77,12 @@ Inspect the exact `docker run` command the gateway would execute when runner met
 REMOTE_EXEC_VERBOSE=1 make remote-lint
 ```
 
+Run a remote command under a human-readable session namespace:
+
+```bash
+LV3_SESSION_ID=debug-grafana make remote-lint
+```
+
 ## Fallback Mode
 
 If the build server is unavailable, add `--local-fallback` through the make target or call the script directly:
@@ -89,6 +96,8 @@ Fallback mode intentionally runs the repo-defined local command, not the remote 
 ## Rsync Safety Contract
 
 The remote workspace root is ephemeral and never authoritative.
+
+Each remote run now gets a session-scoped checkout beneath `.lv3-session-workspaces/`. This prevents one active worktree or agent session from deleting another session's remote checkout during `rsync --delete`.
 
 The sync excludes:
 
@@ -115,4 +124,5 @@ Review `.rsync-exclude` before adding any new local secret material.
 ## Notes
 
 - `check-build-server` is intentionally a dry-run sync plus SSH health check. It should be safe to run repeatedly.
+- the gateway preserves a stable session namespace per checkout by default; set `LV3_SESSION_ID` when you need a human-readable namespace for debugging or live verification
 - ADR 0083 extends this gateway with pinned check-runner images. Until then, commands without runner metadata execute as managed remote shell commands.

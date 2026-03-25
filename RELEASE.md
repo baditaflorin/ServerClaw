@@ -1,15 +1,13 @@
-# Release 0.142.0
+# Release 0.148.0
 
 - Date: 2026-03-25
 
 ## Summary
-- Implemented ADR 0145 with a repo-managed Ollama runtime on `docker-runtime-lv3`, a pinned `ollama/ollama:0.18.2` image, a declarative startup model catalog, and health/dependency/catalog wiring for the new private inference service.
-- Added `platform/llm/client.py` plus bounded goal-compiler fallback routing so unmatched instructions can use local inference without breaking deterministic rule matches, and recorded those calls under the new `llm.inference` ledger event type.
-- Wired Open WebUI to the private Ollama endpoint through `host.docker.internal`, added controller and guest runbooks for the local inference path, and verified live Ollama connectivity with startup-model presence plus a three-run latency probe on `llama3.2:3b`.
-- Recorded the mainline live-apply receipts for the private Ollama runtime and the Open WebUI connector after re-converging both stacks on 2026-03-25.
+- Implemented ADR 0151 with repo-managed `n8n` on `docker-runtime-lv3`, PostgreSQL persistence on `postgres-lv3`, edge publication at `https://n8n.lv3.org`, and public webhook path handling under the shared ingress model.
+- Added the `n8n_postgres` and `n8n_runtime` roles, service and secret catalog wiring, edge auth path exceptions, the operator runbook, and the pinned image-scan receipts for the new automation surface.
 
 ## Platform Impact
-- repository version advances to 0.142.0; platform version advances to 0.130.2 after the ADR 0145 private Ollama runtime and Open WebUI connector are live-applied from `main`
+- no live platform version bump yet; this release merges ADR 0151 with the repo-managed n8n runtime, PostgreSQL-backed persistence, shared-edge publication, and the bounded webhook exposure model before the first mainline live apply
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

@@ -1,0 +1,36 @@
+services:
+  openbao-agent:
+    image: {{ n8n_openbao_agent_image }}
+    container_name: {{ n8n_openbao_agent_container_name }}
+    user: "0:0"
+    environment:
+      BAO_SKIP_DROP_ROOT: "true"
+    command:
+      - agent
+      - -config=/openbao-agent/agent.hcl
+    network_mode: host
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -s {{ n8n_env_file }}
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    volumes:
+      - {{ n8n_openbao_agent_dir }}:/openbao-agent:ro
+      - {{ n8n_env_file | dirname }}:{{ n8n_env_file | dirname }}
+
+  n8n:
+    image: {{ n8n_image }}
+    container_name: {{ n8n_container_name }}
+    restart: unless-stopped
+    ports:
+      - "{{ n8n_port }}:5678"
+    env_file:
+      - {{ n8n_env_file }}
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+    volumes:
+      - {{ n8n_data_dir }}:/home/node/.n8n

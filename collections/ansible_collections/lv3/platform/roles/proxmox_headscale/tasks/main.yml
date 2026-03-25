@@ -1,0 +1,188 @@
+---
+- name: Validate Proxmox Headscale inputs
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: assert_vars
+  vars:
+    common_assert_vars_required:
+      - headscale_deb_url
+      - headscale_deb_file
+      - headscale_server_url
+      - headscale_listen_addr
+      - headscale_metrics_listen_addr
+      - headscale_grpc_listen_addr
+      - headscale_config_file
+      - headscale_policy_source_file
+      - headscale_policy_file
+      - headscale_state_dir
+      - headscale_database_path
+      - headscale_healthcheck_url
+    common_assert_vars_fail_msg: >-
+      proxmox_headscale requires the pinned package URL, listener settings, managed
+      policy source, and health-check URL.
+
+- name: Ensure Headscale package prerequisites are present
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Download the pinned Headscale Debian package
+  ansible.builtin.get_url:
+    url: "{{ headscale_deb_url }}"
+    dest: "{{ headscale_deb_file }}"
+    mode: "0644"
+
+- name: Install Headscale from the pinned Debian package
+  ansible.builtin.apt:
+    deb: "{{ headscale_deb_file }}"
+
+- name: Ensure Headscale directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ headscale_config_dir }}"
+      owner: root
+      group: root
+      mode: "0755"
+    - path: "{{ headscale_state_dir }}"
+      owner: "{{ headscale_linux_user }}"
+      group: "{{ headscale_linux_group }}"
+      mode: "0750"
+    - path: "{{ headscale_tls_cache_dir }}"
+      owner: "{{ headscale_linux_user }}"
+      group: "{{ headscale_linux_group }}"
+      mode: "0750"
+
+- name: Pin the Headscale public hostname to the internal edge on the Proxmox host
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: '^\s*\d+\.\d+\.\d+\.\d+\s+{{ headscale_public_hostname | regex_escape() }}(?:\s|$)'
+    line: "{{ headscale_public_edge_ipv4 }} {{ headscale_public_hostname }}"
+    state: present
+
+- name: Render the managed Headscale configuration
+  ansible.builtin.template:
+    src: config.yaml.j2
+    dest: "{{ headscale_config_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart headscale
+
+- name: Install the managed Headscale ACL policy
+  ansible.builtin.copy:
+    src: "{{ headscale_policy_source_file }}"
+    dest: "{{ headscale_policy_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart headscale
+
+- name: Ensure the Headscale service is enabled and started
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: systemd_unit
+  vars:
+    common_systemd_unit_name: headscale
+    common_systemd_unit_verify_active: false
+
+- name: Check whether Headscale is already active
+  ansible.builtin.command:
+    argv:
+      - systemctl
+      - is-active
+      - headscale
+  register: proxmox_headscale_service_state
+  failed_when: false
+  changed_when: false
+
+- name: Restart Headscale when the unit is not active
+  ansible.builtin.systemd_service:
+    name: headscale
+    state: restarted
+  when: proxmox_headscale_service_state.rc != 0
+
+- name: Flush Headscale handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Wait for the local Headscale health endpoint
+  ansible.builtin.uri:
+    url: "{{ headscale_healthcheck_url }}"
+    method: GET
+    status_code: 200
+  register: proxmox_headscale_health
+  retries: 20
+  delay: 3
+  until: proxmox_headscale_health.status == 200
+  changed_when: false
+
+- name: Verify the Headscale CLI can query the user catalog
+  ansible.builtin.command:
+    argv:
+      - headscale
+      - --config
+      - "{{ headscale_config_file }}"
+      - users
+      - list
+      - --output
+      - json
+  register: proxmox_headscale_users
+  changed_when: false
+
+- name: Query the Headscale node catalog
+  ansible.builtin.command:
+    argv:
+      - headscale
+      - --config
+      - "{{ headscale_config_file }}"
+      - nodes
+      - list
+      - --output
+      - json
+  register: proxmox_headscale_nodes
+  changed_when: false
+
+- name: Select the managed subnet-router node
+  ansible.builtin.set_fact:
+    proxmox_headscale_subnet_router_node: >-
+      {{
+        (
+          proxmox_headscale_nodes.stdout | from_json
+          | selectattr('name', 'equalto', headscale_subnet_router_node_name)
+          | list
+          | first
+        ) | default({})
+      }}
+
+- name: Determine whether advertised routes still need approval
+  ansible.builtin.set_fact:
+    proxmox_headscale_routes_pending_approval: >-
+      {{
+        headscale_auto_approved_routes
+        | difference(proxmox_headscale_subnet_router_node.approved_routes | default([]))
+      }}
+
+- name: Approve the managed subnet routes for the Proxmox node
+  ansible.builtin.command:
+    argv:
+      - headscale
+      - --config
+      - "{{ headscale_config_file }}"
+      - nodes
+      - approve-routes
+      - --identifier
+      - "{{ proxmox_headscale_subnet_router_node.id | string }}"
+      - --routes
+      - "{{ headscale_auto_approved_routes | join(',') }}"
+  when:
+    - headscale_auto_approved_routes | length > 0
+    - proxmox_headscale_subnet_router_node != {}
+    - proxmox_headscale_routes_pending_approval | length > 0
+  changed_when: true

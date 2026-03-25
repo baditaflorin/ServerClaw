@@ -13,6 +13,11 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
+if str(Path(__file__).resolve().parents[1]) not in sys.path:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
+    del sys.modules["platform"]
+
 from capacity_report import check_capacity_gate, load_capacity_model
 from command_catalog import evaluate_approval, load_command_catalog, validate_command_catalog
 from controller_automation_toolkit import (
@@ -26,6 +31,7 @@ from controller_automation_toolkit import (
 from live_apply_receipts import (
     RECEIPTS_DIR,
     load_receipt,
+    receipt_id_with_session,
     receipt_relative_path,
     resolve_receipt_path,
     validate_receipt,
@@ -36,6 +42,7 @@ from dependency_graph import (
     deployment_order as resolve_deployment_order,
     load_dependency_graph,
 )
+from platform.logging import get_logger, set_context
 from slo_tracking import build_slo_status_entries, default_prometheus_url, find_budget_breaches
 from workflow_catalog import (
     load_secret_manifest,
@@ -54,6 +61,8 @@ DEPENDENCY_GRAPH_PATH = REPO_ROOT / "config" / "dependency-graph.json"
 FINDINGS_PATH = REPO_ROOT / ".local" / "platform-observation" / "latest" / "findings.json"
 ALLOWED_GATE_DECISIONS = {"approved", "rejected", "bypassed"}
 ALLOWED_GATE_ACTOR_CLASSES = {"operator", "agent", "service", "automation"}
+TRACE_ID = os.environ.get("PLATFORM_TRACE_ID", "").strip() or uuid.uuid4().hex
+LOGGER = get_logger("windmill", "promotion_pipeline", name="lv3.windmill.promotion_pipeline")
 
 
 def require_mapping(value: Any, path: str) -> dict[str, Any]:
@@ -491,7 +500,7 @@ def validate_promotion_receipts() -> int:
 
 
 def run_make(target: str, *vars_: str) -> dict[str, Any]:
-    command = ["make", target, *vars_]
+    command = ["make", target, f"PLATFORM_TRACE_ID={TRACE_ID}", *vars_]
     result = run_command(command, cwd=REPO_ROOT)
     return {
         "command": " ".join(shlex.quote(part) for part in command),
@@ -579,7 +588,9 @@ def promote_service(
         raise ValueError(f"production live apply failed:\n{prod_apply['stderr'] or prod_apply['stdout']}")
 
     service = load_service_index()[service_id]
-    prod_receipt_id = f"{today_utc()}-{service_id}-production-promotion-{promotion_id.rsplit('-', 1)[-1]}"
+    prod_receipt_id = receipt_id_with_session(
+        f"{today_utc()}-{service_id}-production-promotion-{promotion_id.rsplit('-', 1)[-1]}"
+    )
     prod_receipt = build_live_apply_receipt(
         receipt_id=prod_receipt_id,
         workflow_id="deploy-and-promote",
@@ -696,6 +707,7 @@ def main() -> int:
     parser.add_argument("--actor-id", help="Actor id for the break-glass bypass event.")
     parser.add_argument("--correlation-id", help="Explicit correlation id for the break-glass bypass event.")
     args = parser.parse_args()
+    set_context(trace_id=TRACE_ID, workflow_id="deploy-and-promote")
 
     try:
         if args.validate:
@@ -723,6 +735,7 @@ def main() -> int:
         if args.promote:
             if not args.service or not args.staging_receipt:
                 raise ValueError("--promote requires --service and --staging-receipt")
+            LOGGER.info("Running promotion pipeline", extra={"target": f"service:{args.service}"})
             payload = promote_service(
                 service_id=args.service,
                 staging_receipt_ref=args.staging_receipt,
@@ -738,6 +751,14 @@ def main() -> int:
         parser.print_help()
         return 0
     except (OSError, ValueError, json.JSONDecodeError) as exc:
+        LOGGER.error(
+            "Promotion pipeline failed",
+            extra={
+                "target": f"service:{args.service}" if args.service else "promotion-pipeline",
+                "error_code": "PROMOTION_PIPELINE_FAILED",
+                "error_detail": str(exc),
+            },
+        )
         return emit_cli_error("Promotion pipeline", exc)
 
 

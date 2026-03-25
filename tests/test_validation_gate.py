@@ -94,6 +94,10 @@ def test_run_gate_writes_status_file(tmp_path: Path, capsys) -> None:
     payload = json.loads(status_path.read_text(encoding="utf-8"))
     assert payload["status"] == "passed"
     assert payload["source"] == "test"
+    assert payload["session_workspace"]["session_slug"]
+    assert payload["session_workspace"]["local_state_root"].endswith(
+        f".local/session-workspaces/{payload['session_workspace']['session_slug']}"
+    )
     assert [check["id"] for check in payload["checks"]] == ["alpha", "beta"]
 
 

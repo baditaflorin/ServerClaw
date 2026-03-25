@@ -1,0 +1,347 @@
+---
+- name: Validate Vaultwarden runtime inputs
+  ansible.builtin.assert:
+    that:
+      - vaultwarden_image | length > 0
+      - vaultwarden_container_name | length > 0
+      - vaultwarden_site_dir | length > 0
+      - vaultwarden_data_dir | length > 0
+      - vaultwarden_tls_dir | length > 0
+      - vaultwarden_compose_file | length > 0
+      - vaultwarden_https_port | int > 0
+      - vaultwarden_internal_base_url | length > 0
+      - vaultwarden_controller_url | length > 0
+      - vaultwarden_public_base_url | length > 0
+      - vaultwarden_database_name | length > 0
+      - vaultwarden_database_user | length > 0
+      - vaultwarden_database_host | length > 0
+      - vaultwarden_database_password_local_file | length > 0
+      - vaultwarden_admin_token_local_file | length > 0
+      - vaultwarden_admin_token_hash_local_file | length > 0
+      - vaultwarden_bootstrap_operator_email | length > 0
+      - step_ca_internal_url | default('') | length > 0
+      - step_ca_services_password_file | default('') | length > 0
+      - step_ca_remote_root_certificate_file | default('') | length > 0
+    fail_msg: >-
+      vaultwarden_runtime requires image, compose paths, private URLs, PostgreSQL inputs,
+      bootstrap artifacts, and step-ca certificate issuance inputs.
+
+- name: Ensure the Vaultwarden local artifact directory exists
+  ansible.builtin.file:
+    path: "{{ vaultwarden_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Ensure the Vaultwarden bootstrap admin token exists locally
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ vaultwarden_admin_token_local_file }}" ]; then
+      umask 077
+      openssl rand -base64 36 | tr -d '\n' > "{{ vaultwarden_admin_token_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: vaultwarden_admin_token_generation
+  changed_when: "'changed' in vaultwarden_admin_token_generation.stdout"
+  no_log: true
+
+- name: Read the Vaultwarden database password from the control machine
+  ansible.builtin.slurp:
+    src: "{{ vaultwarden_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: vaultwarden_database_password_raw
+  no_log: true
+
+- name: Read the Vaultwarden admin token from the control machine
+  ansible.builtin.slurp:
+    src: "{{ vaultwarden_admin_token_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: vaultwarden_admin_token_raw
+  no_log: true
+
+- name: Record Vaultwarden bootstrap facts
+  ansible.builtin.set_fact:
+    vaultwarden_database_password: "{{ vaultwarden_database_password_raw.content | b64decode | trim }}"
+    vaultwarden_admin_token: "{{ vaultwarden_admin_token_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Ensure the Vaultwarden runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - curl
+      - openssl
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure Vaultwarden runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - "{{ vaultwarden_site_dir }}"
+    - "{{ vaultwarden_data_dir }}"
+    - "{{ vaultwarden_tls_dir }}"
+
+- name: Pull the Vaultwarden image so the bootstrap hash helper is available
+  ansible.builtin.command:
+    argv:
+      - docker
+      - pull
+      - "{{ vaultwarden_image }}"
+  register: vaultwarden_image_pull
+  changed_when: >-
+    'Downloaded newer image' in vaultwarden_image_pull.stdout
+    or 'Pull complete' in vaultwarden_image_pull.stdout
+    or 'Status: Downloaded newer image' in vaultwarden_image_pull.stdout
+
+- name: Check whether the Vaultwarden admin token hash already exists locally
+  ansible.builtin.stat:
+    path: "{{ vaultwarden_admin_token_hash_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: vaultwarden_admin_token_hash_local
+
+- name: Generate the Vaultwarden admin token hash on the runtime host when missing
+  ansible.builtin.shell: |
+    set -euo pipefail
+    printf '%s\n%s\n' "{{ vaultwarden_admin_token }}" "{{ vaultwarden_admin_token }}" | \
+      docker run --rm -i "{{ vaultwarden_image }}" /vaultwarden hash | tail -n 1
+  args:
+    executable: /bin/bash
+  register: vaultwarden_admin_token_hash_generation
+  changed_when: true
+  when: not vaultwarden_admin_token_hash_local.stat.exists
+  no_log: true
+
+- name: Persist the Vaultwarden admin token hash locally when newly generated
+  ansible.builtin.copy:
+    dest: "{{ vaultwarden_admin_token_hash_local_file }}"
+    content: "{{ vaultwarden_admin_token_hash_generation.stdout | trim }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  when: not vaultwarden_admin_token_hash_local.stat.exists
+  no_log: true
+
+- name: Read the Vaultwarden admin token hash from the control machine
+  ansible.builtin.slurp:
+    src: "{{ vaultwarden_admin_token_hash_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: vaultwarden_admin_token_hash_raw
+  no_log: true
+
+- name: Record the Vaultwarden admin token hash fact
+  ansible.builtin.set_fact:
+    vaultwarden_admin_token_hash: "{{ vaultwarden_admin_token_hash_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Issue or renew the Vaultwarden TLS certificate
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ -s "{{ vaultwarden_tls_server_cert_host_file }}" ] && \
+      openssl x509 -checkend {{ vaultwarden_tls_cert_renew_before_seconds }} -noout -in "{{ vaultwarden_tls_server_cert_host_file }}" >/dev/null 2>&1; then
+      exit 0
+    fi
+
+    step ca certificate \
+      --force \
+      --provisioner services \
+      --provisioner-password-file "{{ step_ca_services_password_file }}" \
+      --ca-url "{{ step_ca_internal_url }}" \
+      --root "{{ step_ca_remote_root_certificate_file }}" \
+    {% for san in vaultwarden_tls_server_sans %}
+      --san "{{ san }}" \
+    {% endfor %}
+      --not-after "{{ vaultwarden_tls_certificate_not_after }}" \
+      "{{ vaultwarden_tls_certificate_subject }}" \
+      "{{ vaultwarden_tls_server_cert_host_file }}" \
+      "{{ vaultwarden_tls_server_key_host_file }}"
+
+    chmod 0644 "{{ vaultwarden_tls_server_cert_host_file }}"
+    chmod 0600 "{{ vaultwarden_tls_server_key_host_file }}"
+    echo changed
+  args:
+    executable: /bin/bash
+  register: vaultwarden_tls_certificate_issue
+  changed_when: "'changed' in vaultwarden_tls_certificate_issue.stdout"
+  no_log: true
+
+- name: Render the Vaultwarden compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ vaultwarden_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  no_log: true
+
+- name: Start the Vaultwarden stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ vaultwarden_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ vaultwarden_site_dir }}"
+  register: vaultwarden_up
+  changed_when: >-
+    'Creating' in vaultwarden_up.stdout
+    or 'Recreating' in vaultwarden_up.stdout
+    or 'Starting' in vaultwarden_up.stdout
+
+- name: Install the Vaultwarden TLS renewal timer
+  ansible.builtin.include_role:
+    name: lv3.platform.cert_renewal_timer
+  vars:
+    cert_renewal_timer_name: "{{ vaultwarden_tls_renewal_timer_name }}"
+    cert_renewal_timer_description: Vaultwarden TLS certificate renewal
+    cert_renewal_timer_script_path: "{{ vaultwarden_tls_renewal_script_path }}"
+    cert_renewal_timer_service_path: "{{ vaultwarden_tls_renewal_service_path }}"
+    cert_renewal_timer_timer_path: "{{ vaultwarden_tls_renewal_timer_path }}"
+    cert_renewal_timer_on_calendar: "{{ vaultwarden_tls_renewal_on_calendar }}"
+    cert_renewal_timer_randomized_delay_seconds: "{{ vaultwarden_tls_renewal_randomized_delay_seconds }}"
+    cert_renewal_timer_issue_command: |
+      if [ -s "{{ vaultwarden_tls_server_cert_host_file }}" ] && \
+        openssl x509 -checkend {{ vaultwarden_tls_cert_renew_before_seconds }} -noout -in "{{ vaultwarden_tls_server_cert_host_file }}" >/dev/null 2>&1; then
+        exit 0
+      fi
+
+      step ca certificate \
+        --force \
+        --provisioner services \
+        --provisioner-password-file "{{ step_ca_services_password_file }}" \
+        --ca-url "{{ step_ca_internal_url }}" \
+        --root "{{ step_ca_remote_root_certificate_file }}" \
+      {% for san in vaultwarden_tls_server_sans %}
+        --san "{{ san }}" \
+      {% endfor %}
+        --not-after "{{ vaultwarden_tls_certificate_not_after }}" \
+        "{{ vaultwarden_tls_certificate_subject }}" \
+        "{{ vaultwarden_tls_server_cert_host_file }}" \
+        "{{ vaultwarden_tls_server_key_host_file }}"
+
+      chmod 0644 "{{ vaultwarden_tls_server_cert_host_file }}"
+      chmod 0600 "{{ vaultwarden_tls_server_key_host_file }}"
+      echo changed
+    cert_renewal_timer_reload_command: "{{ vaultwarden_tls_reload_command }}"
+
+- name: Wait for Vaultwarden to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ vaultwarden_https_port }}"
+    delay: 0
+    timeout: 180
+
+- name: Verify the Vaultwarden liveness endpoint locally
+  ansible.builtin.uri:
+    url: "{{ vaultwarden_local_health_url }}/alive"
+    method: GET
+    status_code: 200
+    validate_certs: false
+  register: vaultwarden_alive
+  retries: 24
+  delay: 5
+  until: vaultwarden_alive.status == 200
+  changed_when: false
+
+- name: Query Vaultwarden admin state and invite the bootstrap operator when needed
+  ansible.builtin.shell: |
+    set -euo pipefail
+    cookie_file="$(mktemp)"
+    body_file="$(mktemp)"
+    cleanup() {
+      rm -f "$cookie_file" "$body_file"
+    }
+    trap cleanup EXIT
+
+    login_code="$(
+      curl -sk \
+        --output /dev/null \
+        --write-out '%{http_code}' \
+        --cookie-jar "$cookie_file" \
+        --data-urlencode "token={{ vaultwarden_admin_token }}" \
+        "{{ vaultwarden_local_health_url }}/admin/"
+    )"
+
+    if [ "$login_code" != "200" ] && [ "$login_code" != "302" ]; then
+      echo "LOGIN_HTTP_STATUS=$login_code"
+      exit 1
+    fi
+
+    lookup_code="$(
+      curl -sk \
+        --output "$body_file" \
+        --write-out '%{http_code}' \
+        --cookie "$cookie_file" \
+        "{{ vaultwarden_local_health_url }}/admin/users/by-mail/{{ vaultwarden_bootstrap_operator_email | urlencode }}"
+    )"
+
+    invite_status="skipped"
+    if [ "$lookup_code" = "404" ]; then
+      invite_code="$(
+        curl -sk \
+          --output /dev/null \
+          --write-out '%{http_code}' \
+          --cookie "$cookie_file" \
+          --header 'Content-Type: application/json' \
+          --data '{"email":"{{ vaultwarden_bootstrap_operator_email }}"}' \
+          "{{ vaultwarden_local_health_url }}/admin/invite"
+      )"
+      if [ "$invite_code" != "200" ] && [ "$invite_code" != "204" ] && [ "$invite_code" != "409" ]; then
+        echo "LOGIN_HTTP_STATUS=$login_code"
+        echo "LOOKUP_HTTP_STATUS=$lookup_code"
+        echo "INVITE_HTTP_STATUS=$invite_code"
+        exit 1
+      fi
+      invite_status="$invite_code"
+    fi
+
+    printf 'LOGIN_HTTP_STATUS=%s\n' "$login_code"
+    printf 'LOOKUP_HTTP_STATUS=%s\n' "$lookup_code"
+    printf 'INVITE_HTTP_STATUS=%s\n' "$invite_status"
+  args:
+    executable: /bin/bash
+  register: vaultwarden_bootstrap_admin
+  changed_when: "'INVITE_HTTP_STATUS=200' in vaultwarden_bootstrap_admin.stdout or 'INVITE_HTTP_STATUS=204' in vaultwarden_bootstrap_admin.stdout"
+  no_log: true
+
+- name: Persist Vaultwarden bootstrap state locally
+  ansible.builtin.copy:
+    dest: "{{ vaultwarden_bootstrap_state_local_file }}"
+    content: >-
+      {{
+        {
+          'controller_url': vaultwarden_public_base_url,
+          'internal_url': vaultwarden_internal_base_url,
+          'bootstrap_operator_email': vaultwarden_bootstrap_operator_email,
+          'admin_token_file': vaultwarden_admin_token_local_file,
+          'admin_token_hash_file': vaultwarden_admin_token_hash_local_file,
+          'login_status': (vaultwarden_bootstrap_admin.stdout | regex_search('LOGIN_HTTP_STATUS=([0-9]+)', '\\1') | first | default('')),
+          'lookup_status': (vaultwarden_bootstrap_admin.stdout | regex_search('LOOKUP_HTTP_STATUS=([0-9]+)', '\\1') | first | default('')),
+          'invite_status': (vaultwarden_bootstrap_admin.stdout | regex_search('INVITE_HTTP_STATUS=([^\\n]+)', '\\1') | first | default(''))
+        } | to_nice_json
+      }}
+      {{ '\n' }}
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Import Vaultwarden verification tasks
+  ansible.builtin.import_tasks: verify.yml

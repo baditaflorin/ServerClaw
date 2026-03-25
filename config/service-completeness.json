@@ -165,6 +165,14 @@
       "requires_compose_secrets": true,
       "suppression_preset": "legacy-service"
     },
+    "n8n": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": false,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "suppression_preset": "legacy-service"
+    },
     "ops_portal": {
       "service_type": "nginx-plugin",
       "requires_subdomain": true,
@@ -189,6 +197,16 @@
       "requires_compose_secrets": true,
       "suppression_preset": "legacy-service"
     },
+    "vaultwarden": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": false,
+      "requires_secrets": true,
+      "requires_compose_secrets": false,
+      "dashboard_file": "config/grafana/dashboards/vaultwarden.json",
+      "alert_rule_file": "config/alertmanager/rules/vaultwarden.yml",
+      "suppressed_checks": {}
+    },
     "postgres": {
       "service_type": "vm-service",
       "requires_subdomain": true,
@@ -201,6 +219,14 @@
       "service_type": "vm-service",
       "requires_subdomain": true,
       "requires_oidc": true,
+      "requires_secrets": true,
+      "requires_compose_secrets": false,
+      "suppression_preset": "legacy-service"
+    },
+    "headscale": {
+      "service_type": "vm-service",
+      "requires_subdomain": true,
+      "requires_oidc": false,
       "requires_secrets": true,
       "requires_compose_secrets": false,
       "suppression_preset": "legacy-service"

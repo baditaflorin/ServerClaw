@@ -15,6 +15,7 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from scripts import parallel_check
+from scripts.session_workspace import resolve_session_workspace
 
 
 DEFAULT_MANIFEST = Path("config/validation-gate.json")
@@ -98,10 +99,18 @@ def build_status_payload(
     results: list[parallel_check.CheckResult],
 ) -> dict[str, Any]:
     passed = all(result.status == "passed" for result in results)
+    session_workspace = resolve_session_workspace(repo_root=workspace)
     return {
         "status": "passed" if passed else "failed",
         "source": source,
         "workspace": str(workspace.resolve()),
+        "session_workspace": {
+            "session_id": session_workspace.session_id,
+            "session_slug": session_workspace.session_slug,
+            "local_state_root": session_workspace.local_state_root,
+            "nats_prefix": session_workspace.nats_prefix,
+            "state_namespace": session_workspace.state_namespace,
+        },
         "manifest": str(manifest_path.resolve()),
         "executed_at": datetime.now(timezone.utc).isoformat(),
         "checks": [

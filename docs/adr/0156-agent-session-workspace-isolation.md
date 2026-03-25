@@ -1,188 +1,98 @@
 # ADR 0156: Agent Session Workspace Isolation
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Implemented
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.143.2
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
-- Date: 2026-03-24
+- Implemented On: 2026-03-25
+- Date: 2026-03-25
 
 ## Context
 
-Multiple agents running concurrently on the same platform share several mutable namespaces:
+The repository already supports parallel ADR work through separate branches and git worktrees, but several runtime surfaces still shared mutable paths when two agent sessions ran at the same time:
 
-**The agent state store** (ADR 0130) partitions by `(agent_id, task_id)`, which prevents one agent from overwriting another's state. However, agents reading each other's intermediate state is possible: a triage agent can query the state store for a task owned by a runbook executor agent, potentially reading partial or inconsistent state from an in-progress multi-step task.
+- `scripts/remote_exec.sh` rsynced every build-server run into the same remote checkout under `config/build-server.json.workspace_root`, so one session could delete or overwrite another session's build or validation workspace.
+- controller-side runtime state such as the scheduler watchdog store defaulted to a shared `.local` path unless the caller manually overrode it.
+- generated status payloads and receipts carried no session namespace, which made it harder to distinguish concurrent runs in downstream audit surfaces.
+- promotion-generated live-apply receipts used one base id per operation and had no built-in session suffix when the same promotion flow was exercised concurrently.
 
-**The Postgres scratch space**: Several platform workflows create temporary tables, use `pg_temp` schemas, or write to shared tables during execution (e.g., the diff engine ADR 0120 writes dry-run results to `platform.diff_results`). Two concurrent dry-run executions targeting different services both write to `platform.diff_results` using `service_id` as a partition key — which is correct for reads, but a TRUNCATE on the table by one workflow clears the other's results.
-
-**The file system on `docker-build-lv3`**: Build workflows write to working directories on the build VM. The convention is `$BUILD_DIR/{workflow_run_id}` but this is not enforced. A build workflow that uses a hardcoded `/tmp/build` path will corrupt a concurrent build.
-
-**The NATS subject namespace**: Agents publish to canonical subjects like `platform.agent.context.{agent_id}`. Two concurrent sessions of the same agent type (e.g., two Claude Code sessions) share the same `agent_id` and will mix their published state.
-
-**The live-apply receipt file**: The platform commits receipts to `receipts/{date}-{workflow_id}.json`. If two concurrent workflows have the same `workflow_id` root (e.g., both are `converge-netbox`), the receipt filename collision causes one receipt to overwrite the other.
-
-These are correctness bugs under concurrent agent load, not just performance issues. Each is individually fixable, but the correct fix is a **uniform workspace isolation model** that gives every concurrent agent session its own namespace for every mutable surface.
+The platform needed one reusable session-workspace model that could be resolved from the current checkout or an explicit `LV3_SESSION_ID`, then threaded through every mutable surface that exists today.
 
 ## Decision
 
-We will implement **agent session workspace isolation**: every concurrent session gets an ephemeral, automatically-provisioned and automatically-cleaned-up isolated namespace for each mutable surface it uses.
+We implement a checkout-aware session workspace contract for controller automation.
 
-### Session workspace model
+Each session resolves a stable workspace identity with:
 
-A workspace is created by the session bootstrap (ADR 0123) and destroyed when the session ends:
+- `session_id`: explicit `LV3_SESSION_ID` when present, otherwise a stable checkout-derived identifier
+- `session_slug`: normalized session identifier suitable for paths and NATS subjects
+- `local_state_root`: `.local/session-workspaces/<session_slug>` under the current checkout
+- `remote_workspace_root`: `<workspace_root>/.lv3-session-workspaces/<session_slug>/repo` on the build server
+- `nats_prefix`: `platform.ws.<session_slug>`
+- `state_namespace`: `ws:<session_slug>`
+- `receipt_suffix`: `<session_slug>`
 
-```python
-# platform/workspace/session.py
+## Implementation Notes
 
-@dataclass
-class SessionWorkspace:
-    context_id: UUID        # From SessionContext (ADR 0123)
-    session_id: str         # Unique session identifier: "{agent_id}:{context_id_short}"
+### Session workspace resolver
 
-    # Workspace roots (all unique per session)
-    postgres_schema: str    # e.g., "ws_a1b2c3"
-    build_dir: Path         # e.g., "/data/builds/a1b2c3"
-    nats_prefix: str        # e.g., "platform.ws.a1b2c3"
-    receipt_prefix: str     # e.g., "receipts/2026-03-24/a1b2c3"
-    state_namespace: str    # e.g., "ws:a1b2c3" (appended to task_id in state store)
+`scripts/session_workspace.py` is the canonical resolver for session metadata. It:
+
+- prefers `LV3_SESSION_ID` when the caller wants a human-chosen namespace
+- falls back to a stable checkout-derived id so separate git worktrees do not collide
+- emits either JSON or shell assignments so both Python tools and shell entrypoints can reuse the same contract
+
+### Remote build-server isolation
+
+`scripts/remote_exec.sh` now resolves a session workspace before contacting `docker-build-lv3`.
+
+Instead of syncing into one shared checkout, it now uses:
+
+```text
+<workspace_root>/.lv3-session-workspaces/<session_slug>/repo
 ```
 
-### 1. Ephemeral Postgres schema
+The remote gateway also:
 
-Each session creates an isolated Postgres schema for all temporary/scratch data:
+- exports the session metadata into shell-mode and Docker-mode remote executions
+- writes remote session-local state under the isolated checkout instead of a laptop-specific path
+- prunes stale session directories older than two days as a best-effort cleanup step
 
-```python
-# On session start (bootstrap, ADR 0123)
-def create_workspace_schema(ctx: SessionContext) -> str:
-    schema_name = f"ws_{ctx.context_id.hex[:8]}"
-    db.execute(f"CREATE SCHEMA IF NOT EXISTS {schema_name}")
-    # Grant usage to the platform service account
-    db.execute(f"GRANT ALL ON SCHEMA {schema_name} TO platform_service")
-    return schema_name
-```
+### Controller-local state scoping
 
-All session-local scratch tables are created in this schema:
+`platform.scheduler.watchdog.SchedulerStateStore` now uses `LV3_SESSION_LOCAL_ROOT` when present, so session-aware callers no longer share one `active-jobs.json` path.
 
-```python
-# In the diff engine (ADR 0120) — uses workspace schema instead of public platform schema
-db.execute(f"""
-    CREATE TABLE {workspace.postgres_schema}.diff_results (
-        service_id TEXT, diff_summary JSONB, created_at TIMESTAMPTZ DEFAULT now()
-    )
-""")
-```
+`scripts/run_gate.py` records the resolved session workspace in the gate status payload so operators can trace which session produced a result.
 
-On session end (success, failure, or TTL expiry), the schema is dropped:
+### Audit and receipt scoping
 
-```python
-# On session cleanup (called by Windmill job finaliser)
-def destroy_workspace_schema(workspace: SessionWorkspace):
-    db.execute(f"DROP SCHEMA IF EXISTS {workspace.postgres_schema} CASCADE")
-```
+`platform.ledger.writer.LedgerWriter` now attaches session workspace metadata to emitted records when the session environment is present.
 
-Schema cleanup is also enforced by a nightly Windmill workflow `cleanup-abandoned-workspaces` that drops any `ws_*` schemas older than 2 hours with no active context_id in the session registry.
-
-### 2. Isolated build directory
-
-Build workflows receive the session build directory, not a hardcoded path:
-
-```python
-# In Windmill build script
-workspace = get_session_workspace()  # Injected by Windmill job context
-build_dir = workspace.build_dir      # /data/builds/{context_id_short}
-build_dir.mkdir(parents=True, exist_ok=True)
-
-# Ansible Packer run uses workspace-scoped temp files
-run_packer(work_dir=build_dir / "packer", output_dir=build_dir / "artifacts")
-```
-
-The `docker-build-lv3` VM mounts `/data/builds` as a Docker volume with per-session subdirectories. On session end, the build directory is deleted unless the session produced an artifact that is being kept (e.g., a container image that was pushed, or a receipt that was committed).
-
-### 3. Scoped NATS subjects
-
-Agents publishing ephemeral state (in-progress diagnostics, partial triage reports, intermediate goal compiler state) publish to the session-scoped NATS prefix rather than the canonical agent prefix:
-
-```python
-# Instead of:
-nats.publish("platform.agent.state.agent/triage-loop", partial_state)
-
-# Use:
-nats.publish(f"{workspace.nats_prefix}.state", partial_state)
-# → "platform.ws.a1b2c3.state"
-```
-
-The canonical agent subjects (`platform.agent.state.{agent_id}`) remain for **committed** state that should be visible to all agents. The workspace-scoped subjects are for ephemeral in-progress data that should not be visible to other sessions.
-
-The real-time agent coordination map (ADR 0161) aggregates workspace-scoped subjects into a per-session view for operators, without exposing partial state from one session to other sessions.
-
-### 4. Collision-safe receipt filenames
-
-Receipt files are written to a workspace-scoped path:
-
-```python
-# receipts/{YYYY-MM-DD}/{workflow_id}_{context_id_short}.receipt.json
-receipt_path = f"receipts/{today}/{intent.workflow_id}_{workspace.context_id_short}.receipt.json"
-```
-
-This eliminates the filename collision problem: two concurrent `converge-netbox` runs produce `converge-netbox_a1b2c3.receipt.json` and `converge-netbox_d4e5f6.receipt.json` respectively.
-
-### 5. State store namespace scoping
-
-The agent state store (ADR 0130) partitions by `(agent_id, task_id)`. Under concurrent sessions, the same agent running multiple tasks concurrently could mix state entries. Workspace isolation adds the `context_id` as a third partition dimension:
-
-```sql
--- Updated primary key for agent.state table
-ALTER TABLE agent.state ADD COLUMN context_id UUID;
-ALTER TABLE agent.state DROP CONSTRAINT agent_state_pkey;
-ALTER TABLE agent.state ADD PRIMARY KEY (agent_id, task_id, key, context_id);
-```
-
-Old state entries (from before this ADR) have `context_id = NULL` and continue to work. New entries always include `context_id`.
-
-### Workspace registry
-
-Active workspaces are tracked in a Postgres table for cleanup and monitoring:
-
-```sql
-CREATE TABLE platform.session_workspaces (
-    context_id      UUID PRIMARY KEY,
-    agent_id        TEXT NOT NULL,
-    postgres_schema TEXT NOT NULL,
-    build_dir       TEXT,
-    nats_prefix     TEXT NOT NULL,
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
-    expires_at      TIMESTAMPTZ NOT NULL,
-    status          TEXT NOT NULL DEFAULT 'active'  -- active | completed | expired | cleaning
-);
-```
-
-The real-time coordination map (ADR 0161) reads this table to show which workspaces are active.
+`scripts.live_apply_receipts.receipt_id_with_session()` provides the canonical helper for appending a normalized session suffix to generated live-apply receipt ids. The ADR 0073 promotion pipeline now uses that helper for its production apply receipt id.
 
 ## Consequences
 
-**Positive**
+### Positive
 
-- Concurrent sessions are fully isolated from each other's intermediate state. A triage agent running two concurrent diagnoses of different services cannot mix their scratch data.
-- The receipt filename collision problem is eliminated by design.
-- Workspace cleanup is automatic and systematic; abandoned workspaces (from crashed sessions) are removed by the nightly cleanup job.
+- separate git worktrees now map to separate remote build-server checkouts by default
+- session-aware controller tools can isolate local state without inventing their own path layout
+- audit records and gate payloads now retain enough session context to understand which concurrent run produced them
 
-**Negative / Trade-offs**
+### Trade-offs
 
-- The ephemeral Postgres schema model requires that all scratch SQL uses the workspace schema name rather than a hardcoded schema. Every existing workflow that writes to `platform.*` scratch tables must be audited and updated.
-- The build directory scoping requires every build script to use `workspace.build_dir` rather than a hardcoded path. This is a convention that must be enforced by code review or a linter.
-- Workspace schemas accumulate in Postgres between the session end and the next nightly cleanup run. In a high-frequency session environment, this could create dozens of schemas. The `pg_schemas` catalog has no hard limit, but schema proliferation should be monitored.
+- stale remote session directories are cleaned up opportunistically by the gateway rather than by a dedicated long-running janitor service
+- the contract depends on callers exporting or preserving `LV3_SESSION_*` variables when they spawn nested tools outside the normal gateway flow
 
 ## Boundaries
 
-- Workspace isolation covers scratch and ephemeral data. Committed data (mutation ledger entries, final receipts, search index documents) always goes to the canonical shared tables and is not workspace-scoped.
-- The state store workspace scoping (new `context_id` column) is backward-compatible. Existing agents that do not set `context_id` continue to use the `NULL` partition.
+- This ADR covers the mutable controller and build-server surfaces that exist in the current repository implementation.
+- It does not yet introduce database-backed session registries or per-session Postgres schemas because those surfaces are not active runtime dependencies in the current repo-managed controller path.
+- Canonical committed data still lives in the shared ledger, receipts, and repo history. Session scoping applies to ephemeral or intermediate execution state.
 
 ## Related ADRs
 
-- ADR 0036: Live-apply receipts (collision-safe filename from this ADR)
-- ADR 0115: Event-sourced mutation ledger (canonical committed data; not workspace-scoped)
-- ADR 0120: Dry-run semantic diff engine (diff_results table moved to workspace schema)
-- ADR 0123: Agent session bootstrap (workspace created/destroyed alongside session context)
-- ADR 0130: Agent state persistence (context_id added as partition dimension)
-- ADR 0154: VM-scoped execution lanes (lane scheduler references workspace for lock acquisition)
-- ADR 0161: Real-time agent coordination map (reads workspace registry for per-session view)
+- ADR 0082: Remote build execution gateway
+- ADR 0087: Repository validation gate
+- ADR 0115: Event-sourced mutation ledger
+- ADR 0119: Budgeted workflow scheduler
+- ADR 0127: Intent deduplication and conflict resolution

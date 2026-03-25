@@ -8,6 +8,8 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SCRIPT_PATH = REPO_ROOT / "scripts" / "remote_exec.sh"
+SESSION_ID = "test-session"
+REMOTE_WORKSPACE_ROOT = f"/opt/builds/proxmox_florin_server/.lv3-session-workspaces/{SESSION_ID}/repo"
 
 
 def write_executable(path: Path, contents: str) -> None:
@@ -167,9 +169,10 @@ def run_remote_exec(
             "REMOTE_EXEC_RSYNC_BIN": str(fake_rsync),
             "REMOTE_EXEC_SSH_LOG": str(ssh_log),
             "REMOTE_EXEC_RSYNC_LOG": str(rsync_log),
-            "REMOTE_EXEC_WORKSPACE_ROOT": "/opt/builds/proxmox_florin_server",
+            "REMOTE_EXEC_WORKSPACE_ROOT": REMOTE_WORKSPACE_ROOT,
             "REMOTE_EXEC_MARKER": str(marker),
             "REMOTE_EXEC_STATUS_PAYLOAD": '{"status":"passed","source":"build-server"}\n',
+            "LV3_SESSION_ID": SESSION_ID,
         }
     )
     if extra_env:
@@ -197,6 +200,7 @@ def test_remote_exec_uses_docker_runner_metadata(tmp_path: Path) -> None:
     assert "registry.lv3.org/check-runner/ansible:0.1.0" in completed.stderr
     assert "/opt/builds/.ansible/collections:/opt/builds/.ansible/collections" in completed.stderr
     assert "LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/opt/builds/.ansible/requirements.sha" in completed.stderr
+    assert f"{REMOTE_WORKSPACE_ROOT}:/workspace" in completed.stderr
     assert "docker run" in completed.ssh_log.read_text()  # type: ignore[attr-defined]
     assert "--checksum" in completed.rsync_log.read_text()  # type: ignore[attr-defined]
 
@@ -248,6 +252,7 @@ def test_check_build_server_uses_rsync_dry_run(tmp_path: Path) -> None:
     assert "--dry-run" in rsync_log
     assert "--verbose" in rsync_log
     assert "build-server-ok" in completed.stdout
+    assert REMOTE_WORKSPACE_ROOT in completed.stdout
 
 
 def test_remote_exec_applies_configured_ssh_options(tmp_path: Path) -> None:
@@ -280,8 +285,9 @@ def test_remote_exec_applies_configured_ssh_options(tmp_path: Path) -> None:
             "REMOTE_EXEC_RSYNC_BIN": str(fake_rsync),
             "REMOTE_EXEC_SSH_LOG": str(ssh_log),
             "REMOTE_EXEC_RSYNC_LOG": str(rsync_log),
-            "REMOTE_EXEC_WORKSPACE_ROOT": "/opt/builds/proxmox_florin_server",
+            "REMOTE_EXEC_WORKSPACE_ROOT": REMOTE_WORKSPACE_ROOT,
             "REMOTE_EXEC_MARKER": str(tmp_path / "marker.txt"),
+            "LV3_SESSION_ID": SESSION_ID,
         }
     )
 
@@ -323,6 +329,7 @@ def test_remote_exec_materializes_worktree_git_metadata_for_remote_workspace(tmp
     assert ".git-remote/common" in ssh_log
     assert ".git-remote/worktree/gitdir" in ssh_log
     assert "scripts/cases" in ssh_log
+    assert REMOTE_WORKSPACE_ROOT in ssh_log
     assert ".git-remote/worktree/" in rsync_log
     assert ".git-remote/common/" in rsync_log
     assert "./HEAD" in rsync_log
@@ -356,3 +363,6 @@ def test_remote_exec_forwards_packer_related_environment_variables(tmp_path: Pat
     assert "PKR_VAR_proxmox_api_token_secret=secret-value" in ssh_log
     assert "PROXMOX_API_TOKEN_ID=" in ssh_log
     assert "lv3-automation@pve" in ssh_log
+    assert f"LV3_SESSION_ID={SESSION_ID}" in ssh_log
+    assert "LV3_SESSION_SLUG=test-session" in ssh_log
+    assert f"LV3_SESSION_LOCAL_ROOT={REMOTE_WORKSPACE_ROOT}/.local/session-workspaces/test-session" in ssh_log

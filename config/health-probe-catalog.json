@@ -278,6 +278,45 @@
         }
       }
     },
+    "headscale": {
+      "service_name": "headscale",
+      "owning_vm": "proxmox_florin",
+      "role": "proxmox_headscale",
+      "verify_file": "roles/proxmox_headscale/tasks/main.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The Headscale local health endpoint responds on the Proxmox host.",
+        "timeout_seconds": 60,
+        "retries": 20,
+        "delay_seconds": 3,
+        "url": "http://127.0.0.1:8080/health",
+        "method": "GET",
+        "expected_status": [200]
+      },
+      "readiness": {
+        "kind": "command",
+        "description": "The Headscale CLI can query the managed user catalog through the local config file.",
+        "timeout_seconds": 30,
+        "retries": 1,
+        "delay_seconds": 0,
+        "argv": ["headscale", "--config", "/etc/headscale/config.yaml", "users", "list", "--output", "json"],
+        "success_rc": 0
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Headscale Public Health",
+          "type": "http",
+          "url": "https://headscale.lv3.org/health",
+          "description": "Public Headscale health endpoint published through the shared NGINX edge.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": ["200-299"]
+        }
+      }
+    },
     "docker_runtime": {
       "service_name": "docker-runtime",
       "owning_vm": "docker-runtime-lv3",
@@ -722,6 +761,46 @@
         "reason": "The Ollama inference API remains private to the docker-runtime VM and internal guest network."
       }
     },
+    "n8n": {
+      "service_name": "n8n",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "n8n_runtime",
+      "verify_file": "roles/n8n_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The n8n health endpoint responds on the local listener.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:5678/healthz",
+        "method": "GET",
+        "expected_status": [200]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The n8n readiness endpoint reports a ready runtime after startup and database bootstrap.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:5678/healthz/readiness",
+        "method": "GET",
+        "expected_status": [200]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "n8n Public Health",
+          "type": "http",
+          "url": "https://n8n.lv3.org/healthz",
+          "description": "n8n edge-published health endpoint behind the shared NGINX edge VM.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": ["200-299"]
+        }
+      }
+    },
     "platform_context_api": {
       "service_name": "platform-context-api",
       "owning_vm": "docker-runtime-lv3",
@@ -940,6 +1019,41 @@
           "maxretries": 0,
           "accepted_statuscodes": ["200-299"]
         }
+      }
+    },
+    "vaultwarden": {
+      "service_name": "vaultwarden",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "vaultwarden_runtime",
+      "verify_file": "roles/vaultwarden_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "tcp",
+        "description": "Vaultwarden accepts TLS connections on the private runtime listener.",
+        "timeout_seconds": 180,
+        "retries": 1,
+        "delay_seconds": 0,
+        "host": "127.0.0.1",
+        "port": 8222
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "Vaultwarden returns success from the managed liveness endpoint over HTTPS.",
+        "timeout_seconds": 60,
+        "retries": 12,
+        "delay_seconds": 5,
+        "url": "https://127.0.0.1:8222/alive",
+        "method": "GET",
+        "expected_status": [
+          200
+        ],
+        "validate_tls": false
+      },
+      "tls_certificate_ids": [
+        "vaultwarden-private"
+      ],
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "Vaultwarden is private-only and uses an internal CA trust chain, so repo-managed role verification is the current health contract."
       }
     }
   }

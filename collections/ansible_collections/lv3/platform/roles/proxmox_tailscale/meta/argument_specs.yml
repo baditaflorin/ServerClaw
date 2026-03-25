@@ -65,3 +65,9 @@ argument_specs:
         required: false
         description:
           - Optional Tailscale tags attached at login time.
+      proxmox_tailscale_forwarding_interfaces:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Interfaces that should have IPv4 forwarding enabled for subnet routing.

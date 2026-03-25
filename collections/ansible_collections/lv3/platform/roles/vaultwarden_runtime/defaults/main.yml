@@ -1,0 +1,50 @@
+---
+vaultwarden_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('vaultwarden') }}"
+vaultwarden_image: "{{ container_image_catalog.images.vaultwarden_runtime.ref }}"
+vaultwarden_container_name: vaultwarden
+vaultwarden_site_dir: /opt/vaultwarden
+vaultwarden_data_dir: "{{ vaultwarden_site_dir }}/data"
+vaultwarden_tls_dir: "{{ vaultwarden_site_dir }}/tls"
+vaultwarden_compose_file: "{{ vaultwarden_site_dir }}/docker-compose.yml"
+vaultwarden_https_port: "{{ platform_service_topology | platform_service_port('vaultwarden', 'internal') }}"
+vaultwarden_internal_base_url: "{{ platform_service_topology | platform_service_url('vaultwarden', 'internal') }}"
+vaultwarden_controller_url: "{{ platform_service_topology | platform_service_url('vaultwarden', 'controller') }}"
+vaultwarden_public_base_url: "https://{{ vaultwarden_service_topology.public_hostname }}"
+vaultwarden_database_name: vaultwarden
+vaultwarden_database_user: vaultwarden_admin
+vaultwarden_database_host: "{{ (hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('postgres')).public_hostname }}"
+vaultwarden_database_port: 5432
+vaultwarden_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/vaultwarden
+vaultwarden_database_password_local_file: "{{ vaultwarden_local_artifact_dir }}/database-password.txt"
+vaultwarden_admin_token_local_file: "{{ vaultwarden_local_artifact_dir }}/admin-token.txt"
+vaultwarden_admin_token_hash_local_file: "{{ vaultwarden_local_artifact_dir }}/admin-token-argon2.txt"
+vaultwarden_bootstrap_state_local_file: "{{ vaultwarden_local_artifact_dir }}/bootstrap.json"
+vaultwarden_bootstrap_operator_email: ops@lv3.org
+vaultwarden_org_creation_users:
+  - ops@lv3.org
+vaultwarden_signups_allowed: false
+vaultwarden_invitations_allowed: true
+vaultwarden_admin_enabled: true
+vaultwarden_sends_allowed: false
+vaultwarden_websocket_enabled: true
+vaultwarden_local_health_url: "https://127.0.0.1:{{ vaultwarden_https_port }}"
+vaultwarden_tls_server_cert_host_file: "{{ vaultwarden_tls_dir }}/server.crt"
+vaultwarden_tls_server_key_host_file: "{{ vaultwarden_tls_dir }}/server.key"
+vaultwarden_tls_server_cert_file: /ssl/server.crt
+vaultwarden_tls_server_key_file: /ssl/server.key
+vaultwarden_tls_certificate_subject: "{{ vaultwarden_service_topology.public_hostname }}"
+vaultwarden_tls_server_sans:
+  - "{{ vaultwarden_service_topology.public_hostname }}"
+  - "{{ platform_host.management.tailscale_ipv4 }}"
+  - localhost
+  - 127.0.0.1
+  - "{{ ansible_host }}"
+vaultwarden_tls_certificate_not_after: 24h
+vaultwarden_tls_cert_renew_before_seconds: 86400
+vaultwarden_tls_renewal_timer_name: lv3-vaultwarden-cert-renew
+vaultwarden_tls_renewal_script_path: "/usr/local/libexec/{{ vaultwarden_tls_renewal_timer_name }}.sh"
+vaultwarden_tls_renewal_service_path: "/etc/systemd/system/{{ vaultwarden_tls_renewal_timer_name }}.service"
+vaultwarden_tls_renewal_timer_path: "/etc/systemd/system/{{ vaultwarden_tls_renewal_timer_name }}.timer"
+vaultwarden_tls_renewal_on_calendar: "*:0/15"
+vaultwarden_tls_renewal_randomized_delay_seconds: 60
+vaultwarden_tls_reload_command: "docker compose --file {{ vaultwarden_compose_file }} restart {{ vaultwarden_container_name }}"

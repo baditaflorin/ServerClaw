@@ -51,6 +51,9 @@ class ExecutionIntent:
     ttl_seconds: int
     requires_approval: bool
     compiled_by: str
+    execution_mode: str = "pessimistic"
+    compensating_workflow_id: str | None = None
+    rollback_window_seconds: int | None = None
     required_read_surfaces: list[str] = field(default_factory=list)
     risk_score: RiskScore | None = None
     resource_claims: list[dict[str, Any]] = field(default_factory=list)

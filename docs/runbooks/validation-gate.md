@@ -86,6 +86,8 @@ The gate writes the last local or remote-triggered run to:
 
 - `.local/validation-gate/last-run.json`
 
+That payload now includes a `session_workspace` object so operators can tell which controller session or worktree produced the latest result.
+
 The Windmill post-merge gate writes its most recent result to:
 
 - `.local/validation-gate/post-merge-last-run.json`
@@ -106,6 +108,7 @@ That workflow re-runs the same `config/validation-gate.json` manifest after merg
 
 - if `make install-hooks` fails during `pre-commit` bootstrap, rerun it with working internet access so `pre-commit` can fetch hook environments
 - if the build server is unreachable, rerun `make pre-push-gate`; the wrapper already falls back to local Docker execution
+- if two remote gate runs appear to reuse one checkout, set distinct `LV3_SESSION_ID` values and rerun so each session gets its own build-server workspace
 - if a remote gate run fails with `fatal: not a git repository` from a worktree path, rerun on the updated `main`; the remote sync now rewrites worktree metadata into `.git-remote/` inside the build workspace
 - if `packer-validate` falls back locally, inspect the build-worker plugin cache under `/opt/builds/.packer.d`; the remote gate expects the `github.com/hashicorp/proxmox` plugin to be prewarmed there when outbound GitHub access is unavailable
 - if a local fallback fails because Docker is unavailable, fix the local Docker daemon or restore build-server reachability before pushing

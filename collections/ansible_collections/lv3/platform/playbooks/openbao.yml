@@ -16,7 +16,7 @@
 
   roles:
     - role: lv3.platform.linux_guest_firewall
-    - role: lv3.platform.postgres_ha
+    - role: lv3.platform.postgres_vm
     - role: lv3.platform.openbao_postgres_backend
 
 - name: Converge OpenBao on the Docker runtime VM

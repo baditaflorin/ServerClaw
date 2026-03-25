@@ -66,6 +66,7 @@ AGENT_POLICY_MODULE = load_repo_package("lv3_agent_policy", CODE_ROOT / "platfor
 HANDOFF_MODULE = load_repo_package("lv3_platform_handoff", CODE_ROOT / "platform" / "handoff")
 GoalCompilationError = GOAL_COMPILER_MODULE.GoalCompilationError
 GoalCompiler = GOAL_COMPILER_MODULE.GoalCompiler
+IntentBatchPlanner = GOAL_COMPILER_MODULE.IntentBatchPlanner
 LedgerWriter = LEDGER_MODULE.LedgerWriter
 AgentStateClient = AGENT_MODULE.AgentStateClient
 normalize_actor_id = AGENT_POLICY_MODULE.normalize_actor_id
@@ -851,6 +852,60 @@ def print_conflict_preview(result: Any) -> None:
             print(f"  - {warning.message}")
 
 
+def print_batch_validation(result: Any) -> None:
+    intent_map = {entry.intent_id: entry for entry in result.dry_runs}
+    print(f"Intent batch: {result.batch.batch_id}")
+    print(
+        f"Instructions: {len(result.batch.instructions)}   "
+        f"Predicted changes: {result.combined_diff.total_changes}   "
+        f"Validation: {result.validation_elapsed_ms} ms"
+    )
+    print()
+
+    failures = [entry for entry in result.dry_runs if entry.error]
+    if failures:
+        print("Dry-run failures:")
+        for entry in failures:
+            print(f"  - {entry.instruction}: {entry.error}")
+        print()
+
+    if result.execution_plan.conflicts:
+        print("Cross-intent analysis:")
+        for conflict in result.execution_plan.conflicts:
+            labels = []
+            for intent_id in conflict.intent_ids:
+                entry = intent_map.get(intent_id)
+                labels.append(entry.instruction if entry is not None else intent_id)
+            print(
+                f"  - {conflict.conflict_type} on {conflict.resource}: "
+                f"{' ; '.join(labels)} -> {conflict.resolution}"
+            )
+        print()
+
+    print("Execution stages:")
+    if not result.execution_plan.stages:
+        print("  none")
+    for stage in result.execution_plan.stages:
+        wait_text = f" (wait for stage {stage.wait_for_stage})" if stage.wait_for_stage is not None else ""
+        print(f"  Stage {stage.stage_id} [{stage.parallelism}]{wait_text}")
+        for intent_id in stage.intent_ids:
+            entry = intent_map.get(intent_id)
+            if entry is None:
+                print(f"    - {intent_id}")
+                continue
+            workflow_id = entry.workflow_id or "unrouted"
+            print(f"    - {entry.instruction} -> {workflow_id}")
+
+    if result.execution_plan.rejected_intents:
+        print()
+        print("Rejected intents:")
+        for intent_id in result.execution_plan.rejected_intents:
+            entry = intent_map.get(intent_id)
+            label = entry.instruction if entry is not None else intent_id
+            reason = result.execution_plan.rejected_reasons.get(intent_id, "rejected")
+            print(f"  - {label}: {reason}")
+
+
 def preview_conflicts(intent: Any, *, actor_intent_id: str, actor: str = "operator:lv3_cli") -> Any:
     registry = IntentConflictRegistry(repo_root=REPO_ROOT)
     return registry.preview_intent(
@@ -998,7 +1053,7 @@ def run_windmill_request(
             print(result.output)
         else:
             print(json.dumps(result.output, indent=2, sort_keys=True))
-    if result.status in {"failed", "aborted"}:
+    if result.status in {"failed", "aborted", "rolled_back"}:
         print(
             f"Workflow {workflow_name} ended with status {result.status}.",
             file=sys.stderr,
@@ -1050,6 +1105,7 @@ def run_compiled_instruction(
     dry_run: bool,
     explain: bool,
     no_color: bool,
+    allow_speculative: bool = False,
     force_unsafe_health: bool = False,
     actor_id: str = DEFAULT_RUN_ACTOR_ID,
     autonomous: bool = False,
@@ -1064,6 +1120,7 @@ def run_compiled_instruction(
         result = compiler.compile(
             instruction,
             dispatch_args=parsed_args,
+            allow_speculative=allow_speculative,
             force_unsafe_health=force_unsafe_health,
             actor_id=normalize_actor_id(actor_id),
             autonomous=autonomous,
@@ -1144,6 +1201,7 @@ def run_compiled_instruction(
         id=result.intent.id,
         workflow_id=result.dispatch_workflow_id,
         arguments=result.dispatch_payload,
+        execution_mode=result.intent.execution_mode,
         target_service_id=result.intent.target.services[0] if result.intent.target.services else None,
         target_vm=result.intent.scope.allowed_hosts[0] if result.intent.scope.allowed_hosts else None,
         resource_claims=result.intent.resource_claims,
@@ -1159,6 +1217,7 @@ def run_compiled_instruction(
             id=result.intent.id,
             workflow_id=result.dispatch_workflow_id,
             arguments=result.dispatch_payload,
+            execution_mode=result.intent.execution_mode,
             target_service_id=result.intent.target.services[0] if result.intent.target.services else None,
             target_vm=result.intent.scope.allowed_hosts[0] if result.intent.scope.allowed_hosts else None,
             resource_claims=result.intent.resource_claims,
@@ -1200,6 +1259,37 @@ def check_intent_conflicts(instruction: str, args: list[str]) -> int:
     preview = preview_conflicts(scheduler_intent, actor_intent_id=result.intent.id)
     print_conflict_preview(preview)
     return 0 if preview.status in {"clear", "duplicate"} else 1
+
+
+def plan_intent_batch(
+    instructions: list[str],
+    *,
+    actor_id: str,
+    autonomous: bool,
+    force_unsafe_health: bool,
+    max_parallelism: int,
+    as_json: bool,
+) -> int:
+    compiler = GoalCompiler(REPO_ROOT)
+    ledger_writer = LedgerWriter(file_path=REPO_ROOT / ".local" / "state" / "ledger" / "ledger.events.jsonl")
+    try:
+        result = compiler.validate_batch(
+            instructions,
+            actor_id=actor_id,
+            autonomous=autonomous,
+            force_unsafe_health=force_unsafe_health,
+            max_parallelism=max_parallelism,
+            ledger_writer=ledger_writer,
+        )
+    except GoalCompilationError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+
+    if as_json:
+        emit_json(result.as_dict())
+    else:
+        print_batch_validation(result)
+    return 1 if result.execution_plan.rejected_intents else 0
 
 
 def should_run_direct_workflow(instruction: str) -> bool:
@@ -2214,6 +2304,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     run.add_argument("--actor-id", default=DEFAULT_RUN_ACTOR_ID)
     run.add_argument("--autonomous", action="store_true", help="Apply autonomous agent policy bounds.")
+    run.add_argument("--allow-speculative", action="store_true", help="Opt into speculative execution when eligible.")
     run.add_argument("--dry-run", action="store_true")
     run.add_argument("--explain", action="store_true")
 
@@ -2222,6 +2313,20 @@ def build_parser() -> argparse.ArgumentParser:
     intent_check = intent_subparsers.add_parser("check", help="Preview resource claims and conflict status.")
     intent_check.add_argument("instruction", nargs="+")
     intent_check.add_argument("--args", nargs="*", default=[])
+    intent_batch = intent_subparsers.add_parser(
+        "batch",
+        help="Compile multiple instructions, fan out dry-runs, and render a staged execution plan.",
+    )
+    intent_batch.add_argument("--instruction", action="append", required=True)
+    intent_batch.add_argument("--actor-id", default=DEFAULT_RUN_ACTOR_ID)
+    intent_batch.add_argument("--autonomous", action="store_true")
+    intent_batch.add_argument(
+        "--force-unsafe-health",
+        action="store_true",
+        help="Bypass the health composite gate and keep the batch plan explicit.",
+    )
+    intent_batch.add_argument("--max-parallelism", type=int, default=5)
+    intent_batch.add_argument("--json", action="store_true")
 
     health = subparsers.add_parser("health", help="Show the composite health index.")
     health.add_argument("service", nargs="?")
@@ -2500,7 +2605,7 @@ def main(argv: list[str] | None = None) -> int:
         )
     if args.command == "run":
         instruction = " ".join(args.instruction)
-        if should_run_direct_workflow(instruction):
+        if should_run_direct_workflow(instruction) and not args.allow_speculative:
             return run_windmill_workflow(
                 instruction,
                 args.args,
@@ -2518,6 +2623,7 @@ def main(argv: list[str] | None = None) -> int:
             dry_run=args.dry_run,
             explain=args.explain,
             no_color=no_color,
+            allow_speculative=args.allow_speculative,
             force_unsafe_health=args.force_unsafe_health,
             actor_id=args.actor_id,
             autonomous=args.autonomous,
@@ -2525,6 +2631,15 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "intent":
         if args.intent_action == "check":
             return check_intent_conflicts(" ".join(args.instruction), args.args)
+        if args.intent_action == "batch":
+            return plan_intent_batch(
+                args.instruction,
+                actor_id=args.actor_id,
+                autonomous=args.autonomous,
+                force_unsafe_health=args.force_unsafe_health,
+                max_parallelism=args.max_parallelism,
+                as_json=args.json,
+            )
     if args.command == "runbook":
         if args.runbook_action == "execute":
             return runbook_execute_command(args.runbook, args.args, dry_run=args.dry_run, explain=args.explain)

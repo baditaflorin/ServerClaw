@@ -6,6 +6,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 
+from platform.conflict import IntentConflictRegistry
 from platform.scheduler import (
     ActiveJobRecord,
     BudgetedWorkflowScheduler,
@@ -111,8 +112,16 @@ class FakeLockManager:
 
 
 class FakeWindmillClient:
-    def __init__(self, *, statuses: list[dict[str, Any]] | None = None) -> None:
+    def __init__(
+        self,
+        *,
+        statuses: list[dict[str, Any]] | None = None,
+        statuses_by_job: dict[str, list[dict[str, Any]] | dict[str, Any]] | None = None,
+        remote_jobs: list[dict[str, Any]] | None = None,
+    ) -> None:
         self.statuses = statuses or []
+        self.statuses_by_job = statuses_by_job or {}
+        self.remote_jobs = remote_jobs or []
         self.submit_calls: list[tuple[str, dict[str, Any], int | None]] = []
         self.cancel_calls: list[tuple[str, str | None]] = []
 
@@ -127,14 +136,57 @@ class FakeWindmillClient:
         return {"job_id": "job-1", "running": True}
 
     def get_job(self, job_id: str) -> dict[str, Any]:
+        if job_id in self.statuses_by_job:
+            payload = self.statuses_by_job[job_id]
+            if isinstance(payload, list):
+                if len(payload) > 1:
+                    return payload.pop(0)
+                return payload[0]
+            return payload
         if len(self.statuses) > 1:
             return self.statuses.pop(0)
         if self.statuses:
             return self.statuses[0]
         return {"completed": True, "success": True, "result": {"job_id": job_id}}
 
+    def list_jobs(self, *, running: bool | None = None) -> list[dict[str, Any]]:
+        if running is None:
+            return list(self.remote_jobs)
+        return [
+            job
+            for job in self.remote_jobs
+            if job.get("running") is running or "running" not in job
+        ]
+
     def cancel_job(self, job_id: str, *, reason: str | None = None) -> dict[str, Any]:
         self.cancel_calls.append((job_id, reason))
+        return {"job_id": job_id, "canceled": True}
+
+
+class SequencedWindmillClient:
+    def __init__(self, *, submit_responses: list[dict[str, Any]], statuses_by_job: dict[str, list[dict[str, Any]]]) -> None:
+        self.submit_responses = list(submit_responses)
+        self.statuses_by_job = {key: list(value) for key, value in statuses_by_job.items()}
+        self.submit_calls: list[tuple[str, dict[str, Any], int | None]] = []
+
+    def submit_workflow(
+        self,
+        workflow_id: str,
+        arguments: dict[str, Any],
+        *,
+        timeout_seconds: int | None = None,
+    ) -> dict[str, Any]:
+        self.submit_calls.append((workflow_id, arguments, timeout_seconds))
+        response = self.submit_responses.pop(0)
+        return dict(response)
+
+    def get_job(self, job_id: str) -> dict[str, Any]:
+        statuses = self.statuses_by_job[job_id]
+        if len(statuses) > 1:
+            return statuses.pop(0)
+        return statuses[0]
+
+    def cancel_job(self, job_id: str, *, reason: str | None = None) -> dict[str, Any]:
         return {"job_id": job_id, "canceled": True}
 
 
@@ -268,6 +320,14 @@ def test_watchdog_cancels_duration_budget_violations(tmp_path: Path) -> None:
     assert store.list_active_jobs() == []
 
 
+def test_scheduler_state_store_uses_session_local_root(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("LV3_SESSION_LOCAL_ROOT", str(tmp_path / ".local" / "session-workspaces" / "test-session"))
+
+    store = SchedulerStateStore()
+
+    assert str(store._path).endswith(".local/session-workspaces/test-session/scheduler/active-jobs.json")
+
+
 def test_scheduler_submits_waits_and_records_completion(tmp_path: Path) -> None:
     write_scheduler_repo(
         tmp_path,
@@ -320,6 +380,368 @@ def test_scheduler_submits_waits_and_records_completion(tmp_path: Path) -> None:
     assert lock_manager.last_token is not None
     assert lock_manager.last_token.released is True
     assert store.list_active_jobs() == []
+
+
+def test_scheduler_skips_lock_and_commits_speculative_workflow(tmp_path: Path) -> None:
+    probe_path = tmp_path / "tests" / "fixtures" / "spec_probe.py"
+    probe_path.parent.mkdir(parents=True, exist_ok=True)
+    probe_path.write_text(
+        "def probe(context):\n    return {'conflict_detected': False, 'metadata': {'checked': True}}\n",
+        encoding="utf-8",
+    )
+    write_scheduler_repo(
+        tmp_path,
+        workflows={
+            "rotate-netbox-db-password": {
+                "description": "Rotate NetBox secret",
+                "live_impact": "guest_live",
+                "execution_class": "mutation",
+                "resource_claims": [{"resource": "service:netbox", "access": "write"}],
+                "speculative": {
+                    "eligible": True,
+                    "compensating_workflow_id": "restore-netbox-db-password",
+                    "conflict_probe": {"path": str(probe_path.relative_to(tmp_path)), "callable": "probe"},
+                    "probe_delay_seconds": 0,
+                    "rollback_window_seconds": 120,
+                },
+            },
+            "restore-netbox-db-password": {
+                "description": "Restore NetBox secret",
+                "live_impact": "guest_live",
+                "execution_class": "mutation",
+            },
+            "converge-netbox": {
+                "description": "Deploy NetBox",
+                "live_impact": "guest_live",
+                "execution_class": "mutation",
+                "resource_claims": [{"resource": "service:netbox", "access": "write"}],
+            },
+        },
+    )
+    registry = IntentConflictRegistry(repo_root=tmp_path, state_path=tmp_path / ".local" / "conflicts.json")
+    registry.register_intent(
+        {"workflow_id": "converge-netbox", "arguments": {}, "target_service_id": "netbox"},
+        actor_intent_id="intent-existing",
+        actor="agent:test",
+        ttl_seconds=120,
+    )
+    windmill = SequencedWindmillClient(
+        submit_responses=[{"job_id": "job-rotate", "running": True}],
+        statuses_by_job={
+            "job-rotate": [
+                {"running": True, "started_at": datetime.now(UTC).isoformat()},
+                {"completed": True, "success": True, "result": {"status": "ok"}},
+            ]
+        },
+    )
+    ledger = RecordingLedgerWriter()
+    lock_manager = FakeLockManager(available=False)
+    scheduler = BudgetedWorkflowScheduler(
+        windmill_client=windmill,
+        repo_root=tmp_path,
+        lock_manager=lock_manager,
+        ledger_writer=ledger,
+        conflict_registry=registry,
+        sleep_fn=lambda _seconds: None,
+    )
+
+    result = scheduler.submit(
+        SimpleNamespace(
+            id="intent-spec",
+            workflow_id="rotate-netbox-db-password",
+            execution_mode="speculative",
+            arguments={"secret_id": "netbox/db", "execution_mode": "speculative"},
+            target_service_id="netbox",
+        )
+    )
+
+    assert result.status == "completed"
+    assert lock_manager.acquired == []
+    assert [call[0] for call in windmill.submit_calls] == ["rotate-netbox-db-password"]
+    assert "execution.speculative_committed" in [event["event_type"] for event in ledger.events]
+
+
+def test_scheduler_rolls_back_speculative_loser(tmp_path: Path) -> None:
+    probe_path = tmp_path / "tests" / "fixtures" / "spec_probe_conflict.py"
+    probe_path.parent.mkdir(parents=True, exist_ok=True)
+    probe_path.write_text(
+        (
+            "def probe(context):\n"
+            "    return {\n"
+            "        'conflict_detected': True,\n"
+            "        'winning_intent_id': 'intent-existing',\n"
+            "        'conflicting_intent_id': 'intent-existing',\n"
+            "        'message': 'existing writer wins',\n"
+            "    }\n"
+        ),
+        encoding="utf-8",
+    )
+    write_scheduler_repo(
+        tmp_path,
+        workflows={
+            "rotate-netbox-db-password": {
+                "description": "Rotate NetBox secret",
+                "live_impact": "guest_live",
+                "execution_class": "mutation",
+                "resource_claims": [{"resource": "service:netbox", "access": "write"}],
+                "speculative": {
+                    "eligible": True,
+                    "compensating_workflow_id": "restore-netbox-db-password",
+                    "conflict_probe": {"path": str(probe_path.relative_to(tmp_path)), "callable": "probe"},
+                    "probe_delay_seconds": 0,
+                    "rollback_window_seconds": 120,
+                },
+            },
+            "restore-netbox-db-password": {
+                "description": "Restore NetBox secret",
+                "live_impact": "guest_live",
+                "execution_class": "mutation",
+            },
+            "converge-netbox": {
+                "description": "Deploy NetBox",
+                "live_impact": "guest_live",
+                "execution_class": "mutation",
+                "resource_claims": [{"resource": "service:netbox", "access": "write"}],
+            },
+        },
+    )
+    registry = IntentConflictRegistry(repo_root=tmp_path, state_path=tmp_path / ".local" / "conflicts.json")
+    registry.register_intent(
+        {"workflow_id": "converge-netbox", "arguments": {}, "target_service_id": "netbox"},
+        actor_intent_id="intent-existing",
+        actor="agent:test",
+        ttl_seconds=120,
+    )
+    windmill = SequencedWindmillClient(
+        submit_responses=[
+            {"job_id": "job-rotate", "running": True},
+            {"job_id": "job-restore", "running": True},
+        ],
+        statuses_by_job={
+            "job-rotate": [
+                {"running": True, "started_at": datetime.now(UTC).isoformat()},
+                {"completed": True, "success": True, "result": {"status": "rotated"}},
+            ],
+            "job-restore": [
+                {"running": True, "started_at": datetime.now(UTC).isoformat()},
+                {"completed": True, "success": True, "result": {"status": "restored"}},
+            ],
+        },
+    )
+    ledger = RecordingLedgerWriter()
+    scheduler = BudgetedWorkflowScheduler(
+        windmill_client=windmill,
+        repo_root=tmp_path,
+        lock_manager=FakeLockManager(available=False),
+        ledger_writer=ledger,
+        conflict_registry=registry,
+        sleep_fn=lambda _seconds: None,
+    )
+
+    result = scheduler.submit(
+        SimpleNamespace(
+            id="intent-spec",
+            workflow_id="rotate-netbox-db-password",
+            execution_mode="speculative",
+            arguments={"secret_id": "netbox/db", "execution_mode": "speculative"},
+            target_service_id="netbox",
+        )
+    )
+
+    assert result.status == "rolled_back"
+    assert [call[0] for call in windmill.submit_calls] == [
+        "rotate-netbox-db-password",
+        "restore-netbox-db-password",
+    ]
+    assert "execution.speculative_rolled_back" in [event["event_type"] for event in ledger.events]
+
+
+def test_load_workflow_policy_rejects_invalid_speculative_config(tmp_path: Path) -> None:
+    write_scheduler_repo(
+        tmp_path,
+        workflows={
+            "rotate-netbox-db-password": {
+                "description": "Rotate NetBox secret",
+                "live_impact": "guest_live",
+                "execution_class": "mutation",
+                "speculative": {"eligible": True},
+            }
+        },
+    )
+
+    try:
+        load_workflow_policy("rotate-netbox-db-password", repo_root=tmp_path)
+    except ValueError as exc:
+        assert "compensating_workflow_id" in str(exc)
+    else:  # pragma: no cover - defensive guard for failing assertion
+        raise AssertionError("expected invalid speculative config to raise ValueError")
+
+
+def test_watchdog_cancels_stale_jobs_and_emits_heartbeat(tmp_path: Path) -> None:
+    store = SchedulerStateStore(tmp_path / ".local" / "scheduler" / "active-jobs.json")
+    write_scheduler_repo(
+        tmp_path,
+        workflows={
+            "converge-netbox": {
+                "description": "Deploy NetBox",
+                "live_impact": "guest_live",
+                "execution_class": "mutation",
+            }
+        },
+    )
+    policy = load_workflow_policy("converge-netbox", repo_root=tmp_path)
+    started_at = (datetime.now(UTC) - timedelta(minutes=5)).isoformat()
+    updated_at = (datetime.now(UTC) - timedelta(minutes=3)).isoformat()
+    store.upsert(
+        ActiveJobRecord(
+            job_id="job-stale",
+            workflow_id="converge-netbox",
+            actor_intent_id="intent-stale",
+            requested_by="operator:test",
+            execution_class="mutation",
+            started_at=started_at,
+            budget=policy.budget,
+        )
+    )
+    windmill = FakeWindmillClient(
+        statuses=[
+            {
+                "running": True,
+                "started_at": started_at,
+                "updated_at": updated_at,
+            }
+        ]
+    )
+    ledger = RecordingLedgerWriter()
+    subjects: list[tuple[str, dict[str, Any]]] = []
+    watchdog = Watchdog(
+        windmill_client=windmill,
+        state_store=store,
+        ledger_writer=ledger,
+        escalation_handler=lambda subject, payload: subjects.append((subject, payload)),
+        repo_root=tmp_path,
+    )
+
+    summary = watchdog.monitor_once(now=datetime.now(UTC))
+
+    assert [event["event_type"] for event in ledger.events] == [
+        "execution.stale_job_detected",
+        "execution.aborted",
+    ]
+    assert windmill.cancel_calls == [
+        ("job-stale", "workflow converge-netbox appears stale (180.0s since the last observed activity)")
+    ]
+    assert summary["heartbeat_file"].endswith("watchdog-heartbeat.json")
+    heartbeat = json.loads((tmp_path / ".local" / "scheduler" / "watchdog-heartbeat.json").read_text(encoding="utf-8"))
+    assert heartbeat["poll_interval_seconds"] == 10
+    assert [subject for subject, _payload in subjects] == [
+        "platform.watchdog.stale_job_aborted",
+        "platform.watchdog.heartbeat",
+    ]
+
+
+def test_watchdog_discovers_running_jobs_from_windmill_listing(tmp_path: Path) -> None:
+    write_scheduler_repo(
+        tmp_path,
+        workflows={
+            "converge-netbox": {
+                "description": "Deploy NetBox",
+                "live_impact": "guest_live",
+                "execution_class": "mutation",
+            }
+        },
+    )
+    started_at = datetime.now(UTC).isoformat()
+    windmill = FakeWindmillClient(
+        statuses_by_job={
+            "job-remote": {
+                "running": True,
+                "started_at": started_at,
+                "updated_at": started_at,
+                "completed_steps": 1,
+            }
+        },
+        remote_jobs=[
+            {
+                "id": "job-remote",
+                "running": True,
+                "script_path": "f/lv3/converge_netbox",
+                "started_at": started_at,
+                "args": {"actor_intent_id": "intent-remote"},
+                "created_by": "operator:remote",
+            }
+        ],
+    )
+    watchdog = Watchdog(
+        windmill_client=windmill,
+        state_store=SchedulerStateStore(tmp_path / ".local" / "scheduler" / "active-jobs.json"),
+        repo_root=tmp_path,
+        escalation_handler=lambda *_args: None,
+    )
+
+    jobs = watchdog.list_monitored_jobs()
+    assert len(jobs) == 1
+    assert jobs[0].job_id == "job-remote"
+    assert jobs[0].workflow_id == "converge-netbox"
+    assert jobs[0].requested_by == "operator:remote"
+
+
+def test_watchdog_escalates_repeated_self_healing_actions(tmp_path: Path) -> None:
+    store = SchedulerStateStore(tmp_path / ".local" / "scheduler" / "active-jobs.json")
+    write_scheduler_repo(
+        tmp_path,
+        workflows={
+            "converge-netbox": {
+                "description": "Deploy NetBox",
+                "live_impact": "guest_live",
+                "execution_class": "mutation",
+            }
+        },
+    )
+    policy = load_workflow_policy("converge-netbox", repo_root=tmp_path)
+    now = datetime.now(UTC)
+    for index in range(3):
+        store.upsert(
+            ActiveJobRecord(
+                job_id=f"job-{index}",
+                workflow_id="converge-netbox",
+                actor_intent_id=f"intent-{index}",
+                requested_by="operator:test",
+                execution_class="mutation",
+                started_at=(now - timedelta(minutes=5)).isoformat(),
+                budget=policy.budget,
+            )
+        )
+    windmill = FakeWindmillClient(
+        statuses_by_job={
+            "job-0": {
+                "running": True,
+                "started_at": (now - timedelta(minutes=5)).isoformat(),
+                "updated_at": (now - timedelta(minutes=3)).isoformat(),
+            },
+            "job-1": {
+                "running": True,
+                "started_at": (now - timedelta(minutes=5)).isoformat(),
+                "updated_at": (now - timedelta(minutes=3)).isoformat(),
+            },
+            "job-2": {
+                "running": True,
+                "started_at": (now - timedelta(minutes=5)).isoformat(),
+                "updated_at": (now - timedelta(minutes=3)).isoformat(),
+            },
+        }
+    )
+    subjects: list[tuple[str, dict[str, Any]]] = []
+    watchdog = Watchdog(
+        windmill_client=windmill,
+        state_store=store,
+        escalation_handler=lambda subject, payload: subjects.append((subject, payload)),
+        repo_root=tmp_path,
+    )
+
+    watchdog.monitor_once(now=now)
+
+    assert "platform.findings.watchdog_repeated_action" in [subject for subject, _payload in subjects]
 
 
 def test_scheduler_rejects_when_autonomous_daily_cap_is_reached(tmp_path: Path) -> None:

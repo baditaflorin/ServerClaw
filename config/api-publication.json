@@ -30,6 +30,16 @@
       "approval_notes": "ADR 0092 approves this single public-edge gateway surface so downstream service APIs can stay internal implementation detail."
     },
     {
+      "id": "headscale-control-plane",
+      "title": "Headscale control plane",
+      "lane": "api",
+      "lane_surface_ref": "headscale-control-plane",
+      "publication_tier": "public-edge",
+      "public_hostnames": ["headscale.lv3.org"],
+      "reachability": "Reachable on https://headscale.lv3.org through the shared NGINX edge, with node-registration keys and API keys enforcing access to the mesh control plane.",
+      "approval_notes": "ADR 0144 explicitly approves this public hostname because the mesh control plane must be reachable for client registration while node-to-node traffic stays private."
+    },
+    {
       "id": "proxmox-management-api",
       "title": "Proxmox management API",
       "lane": "api",
@@ -82,6 +92,15 @@
       "publication_tier": "operator-only",
       "reachability": "Reachable only through the Proxmox host Tailscale proxy on port 9444.",
       "approval_notes": "Portainer stays private-only for operator and governed wrapper use; do not publish it through public DNS or the NGINX edge."
+    },
+    {
+      "id": "vaultwarden-api",
+      "title": "Vaultwarden API",
+      "lane": "api",
+      "lane_surface_ref": "vaultwarden-api",
+      "publication_tier": "operator-only",
+      "reachability": "Reachable only through the Proxmox host Tailscale proxy at https://vault.lv3.org with the internal CA trust chain.",
+      "approval_notes": "Vaultwarden remains private-only for named operators and bounded bootstrap automation; do not publish it through public DNS or the NGINX edge."
     },
     {
       "id": "mail-gateway-api",
@@ -154,6 +173,15 @@
       "publication_tier": "internal-only",
       "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
       "approval_notes": "ADR 0071 finding events stay private-first and use one canonical subject so subscribers do not depend on producer-specific topic naming."
+    },
+    {
+      "id": "platform-watchdog-subjects",
+      "title": "Platform watchdog event subjects",
+      "lane": "event",
+      "lane_surface_ref": "platform-watchdog-subjects",
+      "publication_tier": "internal-only",
+      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "approval_notes": "ADR 0172 watchdog heartbeat and stale-job abort events stay private-first because they expose live control-plane recovery behavior."
     },
     {
       "id": "platform-api-request-events",

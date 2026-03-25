@@ -506,6 +506,47 @@
         ]
       }
     },
+    "converge-headscale": {
+      "description": "Converge Headscale on the Proxmox host, publish headscale.lv3.org through the shared edge, and provision the public DNS record.",
+      "workflow_id": "converge-headscale",
+      "scope": "host_and_guest",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used for the Proxmox host and the NGINX edge VM."
+        },
+        {
+          "name": "hetzner_dns_api_token",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "DNS token used for the Headscale edge certificate and DNS publication path."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-headscale passes",
+        "make validate passes before the apply",
+        "Operators keep one working private SSH session open until the migrated Headscale path is verified"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record DNS publication, local Headscale health, public edge health, node migration, and route-verification evidence."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if DNS publication, Headscale startup, or the shared edge publication fails.",
+          "Stop if node migration removes the documented management path before the replacement Headscale path is verified."
+        ],
+        "rollback_guidance": [
+          "Keep the existing tailnet path active until the Headscale host and one operator workstation are both verified.",
+          "If migration fails, reattach the host to the prior control plane before closing the original SSH session."
+        ]
+      }
+    },
     "provision-guests": {
       "description": "Provision or update the declared Proxmox template and guest fleet.",
       "workflow_id": "provision-guests",
@@ -1250,6 +1291,47 @@
         ]
       }
     },
+    "converge-n8n": {
+      "description": "Converge n8n with PostgreSQL persistence and publish it at n8n.lv3.org while keeping the editor behind edge auth and public webhooks reachable.",
+      "workflow_id": "converge-n8n",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        },
+        {
+          "name": "hetzner_dns_api_token",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "DNS token used to publish n8n.lv3.org and expand the shared edge certificate."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-n8n passes",
+        "make validate passes before the apply",
+        "The public webhook exposure and editor auth boundary are reviewed before live rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the source commit, n8n.lv3.org health verification, local readiness, owner sign-in verification, and public webhook reachability."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if PostgreSQL, n8n runtime, or shared-edge publication verification fails.",
+          "Stop if the editor becomes reachable without the intended edge-auth boundary or if webhook ingress stops matching the documented public paths."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good n8n runtime and edge configuration from version control before retrying.",
+          "Do not compensate for a broken rollout by hand-editing the n8n UI or nginx edge configuration outside the repo."
+        ]
+      }
+    },
     "converge-netbox": {
       "description": "Converge the private NetBox runtime, PostgreSQL backend, host-side proxy, and repo-managed inventory synchronization.",
       "workflow_id": "converge-netbox",
@@ -1450,6 +1532,40 @@
         "rollback_guidance": [
           "Restore the last known-good Portainer runtime state before retrying.",
           "Do not compensate for a broken converge with undocumented UI changes or ad hoc Docker shell edits."
+        ]
+      }
+    },
+    "converge-vaultwarden": {
+      "description": "Converge the private Vaultwarden runtime, PostgreSQL backend, host-side Tailscale HTTPS proxy, and controller-local bootstrap admin artifacts.",
+      "workflow_id": "converge-vaultwarden",
+      "scope": "host_and_guest",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-vaultwarden passes",
+        "make validate passes before the apply",
+        "The private trust model for vault.lv3.org and the controller-local admin token path are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record PostgreSQL, runtime, Tailscale proxy, internal TLS, and bootstrap invite verification together with the generated Vaultwarden controller-local artifacts."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the runtime, database setup, private TLS issuance, or host-side proxy verification fails.",
+          "Stop if Vaultwarden would become reachable outside the documented private-only access boundary."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good Vaultwarden runtime and proxy state before retrying.",
+          "Do not compensate for a broken converge with undocumented manual changes inside the admin panel or direct container shell edits."
         ]
       }
     },
