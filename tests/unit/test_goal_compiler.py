@@ -292,6 +292,16 @@ def test_compile_force_unsafe_health_allows_instruction(compiler_repo: Path) -> 
     assert result.dispatch_workflow_id == "converge-netbox"
     assert result.intent.requires_approval is True
 
+
+def test_compile_batch_preserves_instruction_order(compiler_repo: Path) -> None:
+    compiler = GoalCompiler(compiler_repo)
+
+    batch = compiler.compile_batch(["deploy netbox", "deploy grafana"], actor_id="operator:lv3-cli")
+
+    assert batch.actor_id == "operator:lv3-cli"
+    assert batch.instructions == ("deploy netbox", "deploy grafana")
+    assert [item.dispatch_workflow_id for item in batch.results] == ["converge-netbox", "converge-grafana"]
+
 def test_compile_uses_llm_fallback_for_unmatched_instruction(compiler_repo: Path) -> None:
     class FakeLLMClient:
         def __init__(self) -> None:

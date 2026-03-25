@@ -2352,6 +2352,28 @@ workstreams:
     ready_to_merge: false
     live_applied: false
 
+  - id: adr-0160-parallel-dry-run-fan-out
+    adr: "0160"
+    title: Parallel dry-run fan-out for intent batch validation
+    status: merged
+    owner: codex
+    branch: codex/adr-0160-live-apply
+    worktree_path: .worktrees/adr-0160-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0160-parallel-dry-run-fan-out.md
+    depends_on:
+      - adr-0112-goal-compiler
+      - adr-0115-mutation-ledger
+      - adr-0120-dry-run-diff-engine
+      - adr-0127-intent-conflict-resolution
+    conflicts_with: []
+    shared_surfaces:
+      - platform/goal_compiler/
+      - scripts/lv3_cli.py
+      - config/ledger-event-types.yaml
+      - docs/runbooks/parallel-intent-batch-validation.md
+    ready_to_merge: false
+    live_applied: false
+
   - id: adr-0130-agent-state-persistence
     adr: "0130"
     title: Agent state persistence across workflow boundaries
