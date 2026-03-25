@@ -1,10 +1,10 @@
 # ADR 0125: Agent Capability Bounds and Autonomous Action Policy
 
-- Status: Accepted
+- Status: Implemented
 - Implementation Status: Implemented
-- Implemented In Repo Version: 0.122.0
+- Implemented In Repo Version: 0.143.0
 - Implemented In Platform Version: not yet
-- Implemented On: 2026-03-24
+- Implemented On: 2026-03-25
 - Date: 2026-03-24
 
 ## Context
@@ -30,7 +30,7 @@ That gap made trust elevation hard to review and autonomous behavior hard to aud
 
 We will define an **agent capability policy** as a per-identity configuration in [`config/agent-policies.yaml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/agent-policies.yaml). Every automation identity must have a policy entry before it can submit autonomous work through the goal compiler or scheduler.
 
-The first repository implementation in `0.122.0` lands in:
+The first repository implementation in `0.143.0` lands in:
 
 - [`config/agent-policies.yaml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/agent-policies.yaml)
 - [`platform/agent_policy/`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/agent_policy)

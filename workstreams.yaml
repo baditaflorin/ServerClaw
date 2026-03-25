@@ -1764,7 +1764,7 @@ workstreams:
       - scripts/generate_ops_portal.py
       - scripts/platform_context_service.py
       - scripts/lv3_cli.py
-    ready_to_merge: true
+    ready_to_merge: false
     live_applied: false
 
   - id: adr-0105-capacity-model
@@ -2264,7 +2264,7 @@ workstreams:
       - platform/goal_compiler/
       - platform/scheduler/
       - scripts/lv3_cli.py
-    ready_to_merge: true
+    ready_to_merge: false
     live_applied: false
 
   - id: adr-0126-observation-to-action-closure-loop

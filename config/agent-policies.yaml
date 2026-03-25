@@ -13,6 +13,7 @@
     allowed_workflow_tags:
       - diagnostic
       - auto_check
+    disallowed_workflow_ids: []
     max_daily_autonomous_executions: 20
   escalation:
     on_risk_above: LOW

@@ -123,7 +123,13 @@ class GoalCompiler:
         if matched is None:
             llm_normalized = self._try_llm_normalize(raw_input, normalized)
             if llm_normalized and llm_normalized != normalized:
-                direct_workflow = self._match_direct_workflow(llm_normalized, dispatch_args=dispatch_args)
+                direct_workflow = self._match_direct_workflow(
+                    llm_normalized,
+                    dispatch_args=dispatch_args,
+                    actor_id=actor_id,
+                    autonomous=autonomous,
+                    raw_input=raw_input,
+                )
                 if direct_workflow is not None:
                     return direct_workflow
                 matched = match_rule(llm_normalized, self.rules)
