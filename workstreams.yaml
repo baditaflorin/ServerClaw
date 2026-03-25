@@ -2391,6 +2391,35 @@ workstreams:
     ready_to_merge: false
     live_applied: false
 
+  - id: adr-0132-platform-manifest
+    adr: "0132"
+    title: Self-describing platform manifest
+    status: merged
+    owner: codex
+    branch: codex/adr-0132-platform-manifest-v2
+    worktree_path: .worktrees/adr-0132-v2
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0132-self-describing-platform-manifest.md
+    depends_on:
+      - adr-0037-schema-validated-repository-data-models
+      - adr-0087-validation-gate
+      - adr-0090-platform-cli
+      - adr-0110-platform-versioning
+      - adr-0113-world-state-materializer
+    conflicts_with: []
+    shared_surfaces:
+      - scripts/platform_manifest.py
+      - config/manifest-static.yaml
+      - docs/schema/platform-manifest.schema.json
+      - build/platform-manifest.json
+      - scripts/lv3_cli.py
+      - Makefile
+      - scripts/validate_repo.sh
+      - config/check-runner-manifest.json
+      - config/validation-gate.json
+      - docs/runbooks/platform-manifest.md
+    ready_to_merge: false
+    live_applied: false
+
   - id: adr-0133-portal-authentication-by-default
     adr: "0133"
     title: Portal authentication by default

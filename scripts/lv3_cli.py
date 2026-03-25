@@ -996,6 +996,70 @@ def open_service_url(service_id: str, environment: str, *, dry_run: bool, explai
     return 0 if webbrowser.open(url) else 1
 
 
+def manifest_show_command(*, as_json: bool, refresh: bool) -> int:
+    import platform_manifest
+
+    manifest_path = repo_path("build", "platform-manifest.json")
+    if refresh or not manifest_path.exists():
+        args = ["--output", str(manifest_path)]
+        if refresh:
+            args.append("--write")
+        payload = platform_manifest.build_manifest()
+        if refresh:
+            platform_manifest.write_json(manifest_path, payload, indent=2)
+    else:
+        payload = platform_manifest.load_json(manifest_path)
+        platform_manifest.validate_manifest(payload)
+
+    if as_json:
+        print(json.dumps(payload, indent=2))
+        return 0
+
+    services = payload["health"]["services"]
+    unsafe = sum(1 for item in services.values() if not item["safe_to_act"])
+    print(
+        f"Platform: {payload['identity']['platform_name']} (repo {payload['repo_version']}, "
+        f"platform {payload['platform_version']}) | Health: {payload['health']['summary']}"
+    )
+    print(
+        f"Open incidents: {payload['incidents']['open_count']} | "
+        f"Maintenance windows: {len(payload['maintenance']['active_windows'])} active | "
+        f"Unsafe services: {unsafe}"
+    )
+    if unsafe:
+        print("\nUnsafe services:")
+        for service_id, item in sorted(services.items()):
+            if item["safe_to_act"]:
+                continue
+            print(f"  {service_id}  {item['status']}  {item['score']:.2f}  - {item['reason']}")
+    if payload["known_gaps"]:
+        print("\nKnown gaps:")
+        for gap in payload["known_gaps"][:10]:
+            print(f"  ADR {gap['adr']}  {gap['title']}")
+    return 0
+
+
+def manifest_refresh_command(*, no_color: bool) -> int:
+    plan = CommandPlan(
+        label="manifest refresh",
+        route="controller local manifest generator",
+        command=[
+            "uv",
+            "run",
+            "--with",
+            "pyyaml",
+            "--with",
+            "jsonschema",
+            "python",
+            str(repo_path("scripts", "platform_manifest.py")),
+            "--write",
+        ],
+    )
+    print_plan(plan, no_color=no_color)
+    completed = subprocess.run(plan.command, cwd=REPO_ROOT, text=True, check=False)
+    return completed.returncode
+
+
 def impact_command(service_id: str) -> int:
     graph = load_dependency_graph(
         repo_path("config", "dependency-graph.json"),
@@ -1647,6 +1711,7 @@ def completion_candidates(words: list[str], current: str) -> list[str]:
         "logs",
         "ssh",
         "open",
+        "manifest",
         "loop",
         "operator",
         "release",
@@ -1691,6 +1756,8 @@ def completion_candidates(words: list[str], current: str) -> list[str]:
         return [action for action in ["state"] if action.startswith(current)]
     if words[1:3] == ["agent", "state"] and len(words) == 4:
         return [action for action in ["show", "delete", "verify"] if action.startswith(current)]
+    if words[1] == "manifest" and len(words) == 3:
+        return [action for action in ["show", "refresh"] if action.startswith(current)]
     if words[1] == "loop" and len(words) == 3:
         return [action for action in ["start", "status", "approve", "close"] if action.startswith(current)]
     if words[1] == "release" and len(words) == 3:
@@ -1948,6 +2015,14 @@ def build_parser() -> argparse.ArgumentParser:
     open_parser.add_argument("--dry-run", action="store_true")
     open_parser.add_argument("--explain", action="store_true")
 
+    manifest = subparsers.add_parser("manifest", help="Inspect or refresh the platform manifest.")
+    manifest_subparsers = manifest.add_subparsers(dest="manifest_action", required=True)
+    manifest_show = manifest_subparsers.add_parser("show", help="Show the generated platform manifest.")
+    manifest_show.add_argument("--json", action="store_true")
+    manifest_show.add_argument("--refresh", action="store_true", help="Regenerate before showing.")
+    manifest_refresh = manifest_subparsers.add_parser("refresh", help="Regenerate the committed platform manifest artifact.")
+    manifest_refresh.add_argument("--json", action="store_true", help="Show the refreshed manifest after writing it.")
+
     release = subparsers.add_parser("release", help="Prepare repository releases and show readiness.")
     release.add_argument("--version", help="Explicit release version to prepare.")
     release.add_argument("--bump", choices=["major", "minor", "patch"], help="Semantic version bump to prepare.")
@@ -2199,6 +2274,15 @@ def main(argv: list[str] | None = None) -> int:
         return ssh_command(args.vm_name, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
     if args.command == "open":
         return open_service_url(args.service, args.env, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
+    if args.command == "manifest":
+        if args.manifest_action == "show":
+            return manifest_show_command(as_json=args.json, refresh=args.refresh)
+        exit_code = manifest_refresh_command(no_color=no_color)
+        if exit_code != 0:
+            return exit_code
+        if args.json:
+            return manifest_show_command(as_json=True, refresh=False)
+        return 0
     if args.command == "loop":
         return loop_command(
             args.loop_action,
