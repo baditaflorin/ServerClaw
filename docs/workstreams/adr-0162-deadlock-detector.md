@@ -3,7 +3,7 @@
 - ADR: [ADR 0162](../adr/0162-distributed-deadlock-detection-and-resolution.md)
 - Title: Worker-shared lock registry, coordination map, intent queue, and 30-second Windmill deadlock detector with automatic loser requeue
 - Status: merged
-- Implemented In Repo Version: 0.149.0
+- Implemented In Repo Version: 0.150.0
 - Implemented In Platform Version: not yet
 - Implemented On: 2026-03-25
 - Branch: `codex/adr-0162-deadlock-detector`

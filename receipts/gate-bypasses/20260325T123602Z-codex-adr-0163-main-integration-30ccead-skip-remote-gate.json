@@ -1,0 +1,8 @@
+{
+  "created_at": "2026-03-25T12:36:02.992451+00:00",
+  "bypass": "skip_remote_gate",
+  "reason": "ADR 0163 mainline push; remote pre-push gate local fallback timed out on unrelated heavy repo checks from this arm64 controller. Focused retry tests, API gateway catalog validation, retry guard, repository data-model validation, and generated status-doc checks passed locally.",
+  "source": "git-push",
+  "branch": "codex/adr-0163-main-integration",
+  "commit": "30cceadc18e44d9e9ab1db7f35c2204e940087ef"
+}

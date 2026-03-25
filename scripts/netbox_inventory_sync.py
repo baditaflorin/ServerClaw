@@ -6,7 +6,6 @@ import argparse
 import json
 import re
 import sys
-import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -14,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml
+from platform.retry import MaxRetriesExceeded, policy_for_surface, with_retry
 
 
 HOSTNAME_PORT_PATTERN = re.compile(r":(\d+)(?:/|$)")
@@ -94,8 +94,7 @@ class NetBoxClient:
         self.changed = False
         self.created = 0
         self.updated = 0
-        self.max_attempts = 5
-        self.retry_delay_seconds = 2
+        self.retry_policy = policy_for_surface("internal_api")
 
     def request(
         self,
@@ -120,27 +119,26 @@ class NetBoxClient:
             headers["Content-Type"] = "application/json"
 
         request = urllib.request.Request(url, data=data, headers=headers, method=method)
-        last_error: Exception | None = None
-        for attempt in range(1, self.max_attempts + 1):
-            try:
-                with urllib.request.urlopen(request) as response:
-                    raw = response.read().decode()
-                break
-            except urllib.error.HTTPError as exc:
-                body = exc.read().decode()
-                last_error = RuntimeError(f"{method} {url} failed with {exc.code}: {body}")
-                if exc.code >= 500 and attempt < self.max_attempts:
-                    time.sleep(self.retry_delay_seconds)
-                    continue
-                raise last_error from exc
-            except urllib.error.URLError as exc:
-                last_error = RuntimeError(f"{method} {url} failed: {exc.reason}")
-                if attempt < self.max_attempts:
-                    time.sleep(self.retry_delay_seconds)
-                    continue
-                raise last_error from exc
-        else:
-            raise RuntimeError(f"{method} {url} failed after {self.max_attempts} attempts: {last_error}")
+        try:
+            with with_retry(
+                lambda: urllib.request.urlopen(request),
+                policy=self.retry_policy,
+                error_context=f"netbox {method} {path}",
+            ) as response:
+                raw = response.read().decode()
+        except urllib.error.HTTPError as exc:
+            body = exc.read().decode()
+            raise RuntimeError(f"{method} {url} failed with {exc.code}: {body}") from exc
+        except urllib.error.URLError as exc:
+            raise RuntimeError(f"{method} {url} failed: {exc.reason}") from exc
+        except MaxRetriesExceeded as exc:
+            last_error = exc.last_error
+            if isinstance(last_error, urllib.error.HTTPError):
+                body = last_error.read().decode()
+                raise RuntimeError(f"{method} {url} failed with {last_error.code}: {body}") from last_error
+            if isinstance(last_error, urllib.error.URLError):
+                raise RuntimeError(f"{method} {url} failed: {last_error.reason}") from last_error
+            raise RuntimeError(f"{method} {url} failed after retries") from last_error
 
         if not raw:
             return {}

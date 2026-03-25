@@ -6,6 +6,7 @@ import time
 from pathlib import Path
 
 import httpx
+from platform.retry import RetryPolicy
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 
@@ -443,3 +444,64 @@ def test_gateway_requires_bearer_token(tmp_path: Path) -> None:
     import asyncio
 
     asyncio.run(run())
+
+
+def test_gateway_retries_safe_proxy_reads(tmp_path: Path) -> None:
+    upstream_calls = {"count": 0}
+
+    def upstream(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/health":
+            return httpx.Response(200, json={"status": "ok"})
+        if request.url.path == "/api/version":
+            upstream_calls["count"] += 1
+            if upstream_calls["count"] < 3:
+                raise httpx.ConnectTimeout("timed out", request=request)
+            return httpx.Response(200, json={"path": request.url.path, "method": request.method})
+        return httpx.Response(200, json={"path": request.url.path, "method": request.method})
+
+    def jwks(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json=json.loads((tmp_path / "jwks.json").read_text()))
+
+    transport = httpx.MockTransport(lambda request: upstream(request) if request.url.host == "upstream.test" else jwks(request))
+    config, token = make_repo(tmp_path, "http://upstream.test")
+    app = create_app(config)
+
+    async def run() -> None:
+        async with httpx.AsyncClient(transport=transport) as runtime_client:
+            runtime = GatewayRuntime(config)
+            await runtime.http_client.aclose()
+            runtime.http_client = runtime_client
+            runtime.verifier._client = runtime_client
+            runtime.verifier._retry_policy = RetryPolicy(
+                max_attempts=4,
+                base_delay_s=0.0,
+                max_delay_s=0.0,
+                multiplier=2.0,
+                jitter=False,
+                transient_max=2,
+            )
+            runtime.internal_api_retry_policy = RetryPolicy(
+                max_attempts=4,
+                base_delay_s=0.0,
+                max_delay_s=0.0,
+                multiplier=2.0,
+                jitter=False,
+                transient_max=2,
+            )
+            app.state.runtime = runtime
+            try:
+                transport_app = httpx.ASGITransport(app=app)
+                async with httpx.AsyncClient(transport=transport_app, base_url="http://gateway.test") as client:
+                    response = await client.get(
+                        "/v1/windmill/api/version",
+                        headers={"Authorization": f"Bearer {token}"},
+                    )
+                    assert response.status_code == 200
+                    assert response.json()["path"] == "/api/version"
+            finally:
+                await runtime.close()
+
+    import asyncio
+
+    asyncio.run(run())
+    assert upstream_calls["count"] == 3

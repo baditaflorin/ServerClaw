@@ -17,7 +17,7 @@ export ANSIBLE_COLLECTIONS_PATH="$REPO_ROOT/collections:$ANSIBLE_COLLECTIONS_DIR
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|ansible-idempotency|shell|json|compose-runtime-envs|data-models|generated-docs|generated-portals|health-probes|alert-rules|tofu]...
+  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|ansible-idempotency|shell|json|compose-runtime-envs|retry-guard|data-models|generated-docs|generated-portals|health-probes|alert-rules|tofu]...
 
 Examples:
   scripts/validate_repo.sh
@@ -182,6 +182,11 @@ validate_compose_runtime_envs() {
   fi
 }
 
+validate_retry_guard() {
+  echo "Retry guard"
+  python3 "$REPO_ROOT/scripts/check_ad_hoc_retry.py" >/dev/null
+}
+
 validate_data_models() {
   echo "Repository data model validation"
   uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/validate_repository_data_models.py" --validate >/dev/null
@@ -282,6 +287,7 @@ for stage in "$@"; do
       validate_shell
       validate_json
       validate_compose_runtime_envs
+      validate_retry_guard
       validate_health_probes
       validate_alert_rules
       validate_tofu
@@ -315,6 +321,9 @@ for stage in "$@"; do
       ;;
     compose-runtime-envs)
       validate_compose_runtime_envs
+      ;;
+    retry-guard)
+      validate_retry_guard
       ;;
     data-models)
       validate_data_models

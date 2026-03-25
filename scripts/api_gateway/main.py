@@ -67,6 +67,7 @@ except Exception as exc:  # noqa: BLE001
 from platform.events import build_envelope
 from platform.health import HealthCompositeClient, ServiceHealthNotFoundError
 from platform.logging import clear_context, generate_trace_id, get_logger, set_context
+from platform.retry import async_with_retry, policy_for_surface
 from platform.world_state.client import SurfaceNotFoundError, WorldStateClient, WorldStateUnavailable
 from platform.world_state.materializer import SQLITE_CURRENT_VIEW_NAME, SQLITE_SNAPSHOTS_TABLE_NAME
 from platform.world_state.workers import collect_service_health
@@ -119,6 +120,9 @@ def extract_roles(claims: dict[str, Any]) -> set[str]:
         if isinstance(group, str) and group.strip():
             roles.add(group.lstrip("/"))
     return roles
+
+
+RETRY_SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
 
 
 class DeployRequest(BaseModel):
@@ -189,6 +193,7 @@ class KeycloakJWTVerifier:
         self._jwks_cache: dict[str, Any] | None = None
         self._jwks_cache_expiry = 0.0
         self._lock = asyncio.Lock()
+        self._retry_policy = policy_for_surface("internal_api")
 
     async def _load_jwks(self) -> dict[str, Any]:
         now = time.time()
@@ -199,7 +204,11 @@ class KeycloakJWTVerifier:
             now = time.time()
             if self._jwks_cache is not None and now < self._jwks_cache_expiry:
                 return self._jwks_cache
-            response = await self._client.get(self._jwks_url, timeout=10)
+            response = await async_with_retry(
+                lambda: self._client.get(self._jwks_url, timeout=10),
+                policy=self._retry_policy,
+                error_context="keycloak jwks fetch",
+            )
             response.raise_for_status()
             self._jwks_cache = response.json()
             self._jwks_cache_expiry = now + 300
@@ -272,6 +281,7 @@ class KeycloakJWTVerifier:
 class NatsEventEmitter:
     def __init__(self, nats_url: str | None) -> None:
         self._parsed = urlparse(nats_url) if nats_url else None
+        self._retry_policy = policy_for_surface("nats_publish")
 
     async def emit(self, subject: str, payload: dict[str, Any]) -> None:
         if self._parsed is None:
@@ -280,7 +290,11 @@ class NatsEventEmitter:
         port = self._parsed.port or 4222
         envelope = build_envelope(subject, payload, actor_id="service/api-gateway")
         encoded = json.dumps(envelope, separators=(",", ":")).encode()
-        await asyncio.to_thread(self._publish, host, port, subject, encoded)
+        await async_with_retry(
+            lambda: asyncio.to_thread(self._publish, host, port, subject, encoded),
+            policy=self._retry_policy,
+            error_context=f"gateway nats publish {subject}",
+        )
 
     @staticmethod
     def _publish(host: str, port: int, subject: str, payload: bytes) -> None:
@@ -308,6 +322,7 @@ class GatewayRuntime:
             client=self.http_client,
         )
         self.event_emitter = NatsEventEmitter(config.nats_url)
+        self.internal_api_retry_policy = policy_for_surface("internal_api")
         self.graph_client = None
         if config.graph_dsn and GRAPH_RUNTIME_IMPORT_ERROR is None:
             self.graph_client = DependencyGraphClient(
@@ -375,7 +390,11 @@ class GatewayRuntime:
         if token:
             headers["Authorization"] = f"Bearer {token}"
         try:
-            response = await self.http_client.get(url, timeout=service.timeout_seconds, headers=headers)
+            response = await async_with_retry(
+                lambda: self.http_client.get(url, timeout=service.timeout_seconds, headers=headers),
+                policy=self.internal_api_retry_policy,
+                error_context=f"gateway health probe {service.id}",
+            )
             healthy = 200 <= response.status_code < 400
             body: Any
             try:
@@ -985,7 +1004,11 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
                 if token:
                     headers["Authorization"] = f"Bearer {token}"
                 try:
-                    response = await runtime.http_client.get(url, timeout=service.timeout_seconds, headers=headers)
+                    response = await async_with_retry(
+                        lambda: runtime.http_client.get(url, timeout=service.timeout_seconds, headers=headers),
+                        policy=runtime.internal_api_retry_policy,
+                        error_context=f"gateway openapi fetch {service.id}",
+                    )
                     if response.status_code == 200:
                         upstream_schemas[service.id] = response.json()
                 except Exception:  # noqa: BLE001
@@ -1043,7 +1066,7 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
 
         url = urljoin(service.upstream + "/", upstream_path.lstrip("/"))
         body = await request.body()
-        upstream_response = await runtime.http_client.request(
+        request_upstream = lambda: runtime.http_client.request(
             request.method,
             url,
             params=request.query_params,
@@ -1051,6 +1074,14 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
             headers=headers,
             timeout=service.timeout_seconds,
         )
+        if request.method in RETRY_SAFE_METHODS:
+            upstream_response = await async_with_retry(
+                request_upstream,
+                policy=runtime.internal_api_retry_policy,
+                error_context=f"gateway proxy {service.id} {request.method} {upstream_path}",
+            )
+        else:
+            upstream_response = await request_upstream()
 
         await emit_request_event(
             request,
