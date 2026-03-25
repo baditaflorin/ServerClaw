@@ -38,6 +38,27 @@ argument_specs:
         required: true
         description:
           - Hostname used by the edge health probe contract.
+      public_edge_apex_hostname:
+        type: str
+        required: false
+        description:
+          - Apex hostname that should return the shared crawl-policy endpoint.
+      public_edge_additional_certificate_domains:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Extra hostnames appended to the shared edge certificate request.
+      public_edge_robots_meta_content:
+        type: str
+        required: false
+        description:
+          - Global crawl-policy value rendered into `X-Robots-Tag` and HTML robots meta tags.
+      public_edge_robots_txt_content:
+        type: str
+        required: false
+        description:
+          - Shared `robots.txt` body served on the apex and all published hostnames.
       public_edge_dns_hetzner_plugin_version:
         type: str
         required: false

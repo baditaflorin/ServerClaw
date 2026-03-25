@@ -15,7 +15,17 @@ public_edge_dns_hetzner_plugin_version: 3.0.0
 public_edge_dns_hetzner_credentials_file: /etc/letsencrypt/hetzner.ini
 public_edge_dns_hetzner_propagation_seconds: 30
 public_edge_dns_hetzner_virtualenv: /opt/certbot-dns-hetzner
+public_edge_apex_hostname: lv3.org
 public_edge_probe_hostname: "{{ public_edge_service_topology.nginx_edge.public_hostname }}"
+public_edge_additional_certificate_domains:
+  - "{{ public_edge_apex_hostname }}"
+public_edge_robots_meta_content: "noindex, nofollow"
+public_edge_robots_txt_content: |
+  User-agent: *
+  Disallow: /
+
+  # This domain is a private homelab infrastructure platform.
+  # There is no public content intended for indexing.
 public_edge_generated_build_root: "{{ playbook_dir }}/../build"
 public_edge_static_sites: "{{ public_edge_service_topology | service_topology_edge_static_sites }}"
 public_edge_extra_sites:
@@ -25,7 +35,6 @@ public_edge_extra_sites:
   - hostname: docs.lv3.org
     kind: static_dir
     source_dir: docs-portal
-    noindex: true
 public_edge_authenticated_sites:
   changelog.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
@@ -40,6 +49,7 @@ public_edge_certificate_domains: >-
     (
       (public_edge_service_topology | service_topology_edge_certificate_domains)
       + (public_edge_extra_sites | map(attribute='hostname') | list)
+      + public_edge_additional_certificate_domains
     ) | unique
   }}
 public_edge_sites: "{{ (public_edge_service_topology | service_topology_edge_sites) + public_edge_extra_sites }}"

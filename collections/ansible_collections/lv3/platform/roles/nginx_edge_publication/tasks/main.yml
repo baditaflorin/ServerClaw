@@ -85,6 +85,12 @@
     mode: "0644"
   loop: "{{ public_edge_static_sites }}"
 
+- name: Render the crawl policy robots.txt
+  ansible.builtin.template:
+    src: robots.txt.j2
+    dest: "{{ public_edge_static_root }}/robots.txt"
+    mode: "0644"
+
 - name: Publish generated static site directories
   ansible.builtin.copy:
     src: "{{ public_edge_generated_build_root }}/{{ item.source_dir }}/"

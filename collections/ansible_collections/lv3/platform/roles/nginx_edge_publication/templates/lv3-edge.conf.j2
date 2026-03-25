@@ -1,3 +1,14 @@
+{% macro crawl_policy_headers() -%}
+    add_header X-Robots-Tag "{{ public_edge_robots_meta_content }}" always;
+{%- endmacro %}
+{% macro robots_txt_location() -%}
+    location = /robots.txt {
+        root {{ public_edge_static_root }};
+        default_type text/plain;
+        add_header X-Robots-Tag "{{ public_edge_robots_meta_content }}" always;
+        try_files /robots.txt =404;
+    }
+{%- endmacro %}
 map $http_upgrade $connection_upgrade {
     default upgrade;
     '' close;
@@ -8,6 +19,9 @@ server {
     listen [::]:80 default_server;
     server_name _;
 
+{{ crawl_policy_headers() }}
+{{ robots_txt_location() }}
+
     location /.well-known/acme-challenge/ {
         root {{ public_edge_acme_root }};
         allow all;
@@ -16,12 +30,56 @@ server {
 
     location / {
 {% if public_edge_tls_enabled %}
-        return 308 https://nginx.lv3.org$request_uri;
+        return 308 https://{{ public_edge_probe_hostname }}$request_uri;
 {% else %}
-        return 302 http://nginx.lv3.org$request_uri;
+        return 302 http://{{ public_edge_probe_hostname }}$request_uri;
 {% endif %}
     }
 }
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name {{ public_edge_apex_hostname }};
+
+{{ crawl_policy_headers() }}
+{{ robots_txt_location() }}
+
+    location /.well-known/acme-challenge/ {
+        root {{ public_edge_acme_root }};
+        allow all;
+        try_files $uri =404;
+    }
+
+    location / {
+{% if public_edge_tls_enabled %}
+        return 308 https://{{ public_edge_probe_hostname }}$request_uri;
+{% else %}
+        return 302 http://{{ public_edge_probe_hostname }}$request_uri;
+{% endif %}
+    }
+}
+
+{% if public_edge_tls_enabled %}
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name {{ public_edge_apex_hostname }};
+
+{{ crawl_policy_headers() }}
+{{ robots_txt_location() }}
+
+    ssl_certificate /etc/letsencrypt/live/{{ public_edge_cert_name }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ public_edge_cert_name }}/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers off;
+
+    location / {
+        return 308 https://{{ public_edge_probe_hostname }}$request_uri;
+    }
+}
+{% endif %}
 
 {% for site in public_edge_sites %}
 {% set protected_site = public_edge_authenticated_sites[site.hostname] if site.hostname in public_edge_authenticated_sites else none %}
@@ -32,9 +90,8 @@ server {
     listen [::]:80;
     server_name {{ site.hostname }}{% if site.aliases is defined and site.aliases | length > 0 %} {{ site.aliases | join(' ') }}{% endif %};
 
-{% if site.noindex | default(false) %}
-    add_header X-Robots-Tag "noindex" always;
-{% endif %}
+{{ crawl_policy_headers() }}
+{{ robots_txt_location() }}
 
     root {{ public_edge_static_root }};
 
@@ -98,9 +155,8 @@ server {
     http2 on;
     server_name {{ site.hostname }}{% if site.aliases is defined and site.aliases | length > 0 %} {{ site.aliases | join(' ') }}{% endif %};
 
-{% if site.noindex | default(false) %}
-    add_header X-Robots-Tag "noindex" always;
-{% endif %}
+{{ crawl_policy_headers() }}
+{{ robots_txt_location() }}
 
     ssl_certificate /etc/letsencrypt/live/{{ public_edge_cert_name }}/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/{{ public_edge_cert_name }}/privkey.pem;

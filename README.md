@@ -598,6 +598,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0133: Portal Authentication by Default](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0133-portal-authentication-by-default.md)
 - [ADR 0134: Changelog Portal Content Redaction](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0134-changelog-portal-content-redaction.md)
 - [ADR 0135: Developer Portal Sensitivity Classification](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0135-developer-portal-sensitivity-classification.md)
+- [ADR 0137: Robots.txt and Crawl Policy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0137-robots-and-crawl-policy.md)
 - [ADR 0138: Published Artifact Secret Scanning](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0138-published-artifact-secret-scanning.md)
 - [ADR 0139: Subdomain Exposure Audit and Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0139-subdomain-exposure-audit-and-registry.md)
 - [ADR 0140: Grafana Public Access Hardening](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0140-grafana-public-access-hardening.md)
@@ -711,6 +712,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0133: Portal Authentication By Default](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0133-portal-authentication-by-default.md)
 - [Workstream ADR 0134: Changelog Portal Content Redaction](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0134-changelog-redaction.md)
 - [Workstream ADR 0135: Developer Portal Sensitivity Classification](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0135-developer-portal-sensitivity-classification.md)
+- [Workstream ADR 0137: Robots And Crawl Policy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0137-robots-and-crawl-policy.md)
 - [Workstream ADR 0138: Published Artifact Secret Scanning](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0138-published-artifact-secret-scanning.md)
 - [Workstream ADR 0139: Subdomain Exposure Audit And Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0139-subdomain-exposure-audit.md)
 - [Workstream ADR 0140: Grafana Public Access Hardening](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0140-grafana-public-access-hardening.md)
@@ -878,6 +880,7 @@ This repository is intentionally opinionated:
 | `0133` | Portal authentication by default | `merged` | [adr-0133-portal-authentication-by-default.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0133-portal-authentication-by-default.md) |
 | `0134` | Changelog portal content redaction | `merged` | [adr-0134-changelog-redaction.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0134-changelog-redaction.md) |
 | `0135` | Developer portal sensitivity classification | `merged` | [adr-0135-developer-portal-sensitivity-classification.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0135-developer-portal-sensitivity-classification.md) |
+| `0137` | Robots.txt and crawl policy | `merged` | [adr-0137-robots-and-crawl-policy.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0137-robots-and-crawl-policy.md) |
 | `0138` | Published artifact secret scanning | `merged` | [adr-0138-published-artifact-secret-scanning.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0138-published-artifact-secret-scanning.md) |
 | `0139` | Subdomain exposure audit and registry | `merged` | [adr-0139-subdomain-exposure-audit.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0139-subdomain-exposure-audit.md) |
 | `0140` | Grafana public access hardening | `live_applied` | [adr-0140-grafana-public-access-hardening.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0140-grafana-public-access-hardening.md) |

@@ -1137,6 +1137,10 @@ platform_service_topology:
     urls: {}
 platform_dns_records:
   public: &id001
+    - name: '@'
+      type: A
+      value: 65.108.75.123
+      ttl: 60
     - name: nginx
       type: A
       value: 65.108.75.123

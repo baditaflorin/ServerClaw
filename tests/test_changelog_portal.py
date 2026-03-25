@@ -48,6 +48,7 @@ class ChangelogPortalTests(unittest.TestCase):
 
             self.assertIn("Deployment History Portal", index_html)
             self.assertIn("2026-03-22-adr-0011-monitoring-live-apply", index_html)
+            self.assertIn('<meta name="robots" content="noindex, nofollow">', index_html)
             self.assertIn("promotion-1", promotions_html)
             self.assertIn("Grafana", grafana_html)
             self.assertIn("mutation-audit-log.md", grafana_html)

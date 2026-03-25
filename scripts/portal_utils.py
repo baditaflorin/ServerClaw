@@ -26,6 +26,9 @@ def render_external_link(href: str, label: str) -> str:
     )
 
 
+ROBOTS_META_CONTENT = "noindex, nofollow"
+
+
 def page_template(
     *,
     title: str,
@@ -44,6 +47,7 @@ def page_template(
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="{ROBOTS_META_CONTENT}">
     <title>{escape(title)} | LV3 Platform</title>
     <link rel="stylesheet" href="{escape(page_path)}styles.css">
   </head>
