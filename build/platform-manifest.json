@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.140.0",
-  "platform_version": "0.130.1",
-  "generated_at": "2026-03-25T06:24:51Z",
-  "next_refresh_at": "2026-03-25T07:24:51Z",
+  "repo_version": "0.142.0",
+  "platform_version": "0.130.2",
+  "generated_at": "2026-03-25T08:13:39Z",
+  "next_refresh_at": "2026-03-25T09:13:39Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -37,7 +37,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://api.lv3.org",
-        "last_live_apply": "2026-03-24T00:00:00Z"
+        "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "backup_pbs": {
         "service_name": "Proxmox Backup Server",
@@ -59,7 +59,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://build.lv3.org",
-        "last_live_apply": "2026-03-24T00:00:00Z"
+        "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "docker_runtime": {
         "service_name": "Docker Runtime VM",
@@ -70,7 +70,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://docker.lv3.org",
-        "last_live_apply": "2026-03-24T00:00:00Z"
+        "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "grafana": {
         "service_name": "Grafana",
@@ -81,7 +81,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://grafana.lv3.org",
-        "last_live_apply": "2026-03-24T00:00:00Z",
+        "last_live_apply": "2026-03-25T00:00:00Z",
         "slo_status": "unknown"
       },
       "keycloak": {
@@ -93,7 +93,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://sso.lv3.org",
-        "last_live_apply": "2026-03-24T00:00:00Z",
+        "last_live_apply": "2026-03-25T00:00:00Z",
         "slo_status": "unknown"
       },
       "mail_platform": {
@@ -105,7 +105,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://mail.lv3.org",
-        "last_live_apply": "2026-03-24T00:00:00Z"
+        "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "mattermost": {
         "service_name": "Mattermost",
@@ -116,7 +116,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://100.118.189.95:8066",
-        "last_live_apply": "2026-03-24T00:00:00Z"
+        "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "netbox": {
         "service_name": "NetBox",
@@ -127,7 +127,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.118.189.95:8004",
-        "last_live_apply": "2026-03-24T00:00:00Z",
+        "last_live_apply": "2026-03-25T00:00:00Z",
         "slo_status": "unknown"
       },
       "nginx_edge": {
@@ -139,7 +139,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://nginx.lv3.org",
-        "last_live_apply": "2026-03-24T00:00:00Z",
+        "last_live_apply": "2026-03-25T00:00:00Z",
         "slo_status": "unknown"
       },
       "ntfy": {
@@ -151,7 +151,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.20:2586",
-        "last_live_apply": "2026-03-24T00:00:00Z"
+        "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "ntopng": {
         "service_name": "ntopng",
@@ -162,7 +162,18 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://100.118.189.95:3001",
-        "last_live_apply": "2026-03-24T00:00:00Z"
+        "last_live_apply": "2026-03-25T00:00:00Z"
+      },
+      "ollama": {
+        "service_name": "Ollama",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "http://10.10.10.20:11434",
+        "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "open_webui": {
         "service_name": "Open WebUI",
@@ -173,7 +184,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.118.189.95:8008",
-        "last_live_apply": "2026-03-24T00:00:00Z",
+        "last_live_apply": "2026-03-25T00:00:00Z",
         "slo_status": "unknown"
       },
       "openbao": {
@@ -185,7 +196,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.118.189.95:8200",
-        "last_live_apply": "2026-03-24T00:00:00Z"
+        "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "platform_context_api": {
         "service_name": "Platform Context API",
@@ -196,7 +207,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.118.189.95:8010",
-        "last_live_apply": "2026-03-24T00:00:00Z",
+        "last_live_apply": "2026-03-25T00:00:00Z",
         "slo_status": "unknown"
       },
       "portainer": {
@@ -208,7 +219,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.118.189.95:9444",
-        "last_live_apply": "2026-03-24T00:00:00Z"
+        "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "postgres": {
         "service_name": "PostgreSQL",
@@ -219,7 +230,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "postgres://database.lv3.org:5432",
-        "last_live_apply": "2026-03-24T00:00:00Z"
+        "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "proxmox_ui": {
         "service_name": "Proxmox UI",
@@ -230,7 +241,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://proxmox.lv3.org",
-        "last_live_apply": "2026-03-24T00:00:00Z"
+        "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "status_page": {
         "service_name": "Public Status Page",
@@ -241,7 +252,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://status.lv3.org",
-        "last_live_apply": "2026-03-24T00:00:00Z",
+        "last_live_apply": "2026-03-25T00:00:00Z",
         "slo_status": "unknown"
       },
       "step_ca": {
@@ -253,7 +264,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.118.189.95:9443",
-        "last_live_apply": "2026-03-24T00:00:00Z"
+        "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "uptime_kuma": {
         "service_name": "Uptime Kuma",
@@ -264,7 +275,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://uptime.lv3.org",
-        "last_live_apply": "2026-03-24T00:00:00Z",
+        "last_live_apply": "2026-03-25T00:00:00Z",
         "slo_status": "unknown"
       },
       "windmill": {
@@ -276,7 +287,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.118.189.95:8005",
-        "last_live_apply": "2026-03-24T00:00:00Z",
+        "last_live_apply": "2026-03-25T00:00:00Z",
         "slo_status": "unknown"
       }
     }
@@ -886,6 +897,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-ntopng.md"
+      },
+      {
+        "id": "converge-ollama",
+        "description": "Deploy the private Ollama runtime on docker-runtime-lv3, sync the repo-managed startup model catalog, and verify local inference health.",
+        "tags": [
+          "converge-ollama",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 3600,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-ollama.md"
       },
       {
         "id": "converge-open-webui",
@@ -2406,6 +2443,16 @@
         ]
       },
       {
+        "id": "configure-ollama",
+        "title": "Configure Ollama",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-ollama.md",
+        "workflow_ids": [
+          "converge-ollama"
+        ]
+      },
+      {
         "id": "configure-open-webui",
         "title": "Configure Open WebUI",
         "agent_trust_required": "T3",
@@ -2854,10 +2901,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.135.0",
+    "last_version": "0.141.0",
     "deployed_at": "2026-03-25",
-    "summary": "implemented ADR 0132 in repository automation with a self-describing platform manifest generator, committed `build/platform-manifest.json` output, and the matching JSON schema added `lv3 manifest show` and `lv3 manifest refresh`, plus validation-gate enforcement that fails when the committed manifest drifts from canonical repo inputs",
-    "release_notes_url": "docs/release-notes/0.140.0.md"
+    "summary": "Implemented ADR 0145 with a repo-managed Ollama runtime on `docker-runtime-lv3`, a pinned `ollama/ollama:0.18.2` image, a declarative startup model catalog, and health/dependency/catalog wiring for the new private inference service. Added `platform/llm/client.py` plus bounded goal-compiler fallback routing so unmatched instructions can use local inference without breaking deterministic rule matches, and recorded those calls under the new `llm.inference` ledger event type.",
+    "release_notes_url": "docs/release-notes/0.142.0.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

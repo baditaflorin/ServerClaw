@@ -6,8 +6,8 @@ Generated from `config/dependency-graph.json`.
 
 | Tier | Services |
 | --- | --- |
-| `1` | Alertmanager, Docker Build VM, Docker Runtime VM, Grafana, Mail Platform, NGINX Edge, Open WebUI, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Uptime Kuma, ntfy, ntopng, step-ca |
-| `2` | Changelog Portal, Developer Portal, Keycloak, Mattermost, NetBox, Public Status Page, Windmill |
+| `1` | Alertmanager, Docker Build VM, Docker Runtime VM, Grafana, Mail Platform, NGINX Edge, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Uptime Kuma, ntfy, ntopng, step-ca |
+| `2` | Changelog Portal, Developer Portal, Keycloak, Mattermost, NetBox, Open WebUI, Public Status Page, Windmill |
 | `3` | Platform API Gateway |
 | `4` | Ops Portal |
 
@@ -23,7 +23,7 @@ graph TD
     nginx_edge["NGINX Edge\nTier 1"]
     ntfy["ntfy\nTier 1"]
     ntopng["ntopng\nTier 1"]
-    open_webui["Open WebUI\nTier 1"]
+    ollama["Ollama\nTier 1"]
     openbao["OpenBao\nTier 1"]
     platform_context_api["Platform Context API\nTier 1"]
     portainer["Portainer\nTier 1"]
@@ -37,6 +37,7 @@ graph TD
     keycloak["Keycloak\nTier 2"]
     mattermost["Mattermost\nTier 2"]
     netbox["NetBox\nTier 2"]
+    open_webui["Open WebUI\nTier 2"]
     status_page["Public Status Page\nTier 2"]
     windmill["Windmill\nTier 2"]
     api_gateway["Platform API Gateway\nTier 3"]
@@ -60,6 +61,7 @@ graph TD
     netbox -->|startup_only| openbao
     netbox -->|hard| postgres
     open_webui -->|soft| keycloak
+    open_webui -->|hard| ollama
     open_webui -->|startup_only| openbao
     ops_portal -->|hard| api_gateway
     ops_portal -->|hard| keycloak
