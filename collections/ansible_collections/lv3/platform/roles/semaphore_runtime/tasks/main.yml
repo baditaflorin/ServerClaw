@@ -139,6 +139,39 @@
   delegate_to: localhost
   become: false
 
+- name: Check whether the local Semaphore admin password already exists
+  ansible.builtin.stat:
+    path: "{{ semaphore_admin_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: semaphore_admin_password_local
+
+- name: Check whether the persisted Semaphore admin password exists on the guest
+  ansible.builtin.stat:
+    path: "{{ semaphore_admin_password_guest_file }}"
+  register: semaphore_admin_password_guest
+
+- name: Read the persisted Semaphore admin password from the guest when the local copy is missing
+  ansible.builtin.slurp:
+    src: "{{ semaphore_admin_password_guest_file }}"
+  register: semaphore_admin_password_guest_raw
+  when:
+    - not semaphore_admin_password_local.stat.exists
+    - semaphore_admin_password_guest.stat.exists
+  no_log: true
+
+- name: Restore the Semaphore admin password to the control machine from the guest copy
+  ansible.builtin.copy:
+    dest: "{{ semaphore_admin_password_local_file }}"
+    content: "{{ semaphore_admin_password_guest_raw.content | b64decode | trim }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  when:
+    - not semaphore_admin_password_local.stat.exists
+    - semaphore_admin_password_guest.stat.exists
+  no_log: true
+
 - name: Generate the Semaphore admin password
   ansible.builtin.shell: |
     set -euo pipefail
@@ -153,6 +186,15 @@
   become: false
   register: semaphore_admin_password_generation
   changed_when: "'changed' in semaphore_admin_password_generation.stdout"
+  no_log: true
+
+- name: Persist the Semaphore admin password on the guest
+  ansible.builtin.copy:
+    src: "{{ semaphore_admin_password_local_file }}"
+    dest: "{{ semaphore_admin_password_guest_file }}"
+    owner: root
+    group: root
+    mode: "0600"
   no_log: true
 
 - name: Read the Semaphore admin password

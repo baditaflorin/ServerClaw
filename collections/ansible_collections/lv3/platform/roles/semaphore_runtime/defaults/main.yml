@@ -23,6 +23,7 @@ semaphore_database_port: 5432
 semaphore_database_password_local_file: "{{ playbook_dir }}/../.local/semaphore/database-password.txt"
 semaphore_local_artifact_dir: "{{ playbook_dir }}/../.local/semaphore"
 semaphore_admin_password_local_file: "{{ semaphore_local_artifact_dir }}/admin-password.txt"
+semaphore_admin_password_guest_file: "{{ semaphore_secret_dir }}/admin-password"
 semaphore_api_token_local_file: "{{ semaphore_local_artifact_dir }}/api-token.txt"
 semaphore_admin_auth_local_file: "{{ semaphore_local_artifact_dir }}/admin-auth.json"
 semaphore_bootstrap_spec_local_file: "{{ semaphore_local_artifact_dir }}/bootstrap-spec.json"
