@@ -220,6 +220,31 @@ workstreams:
     ready_to_merge: false
     live_applied: true
 
+  - id: adr-0151-n8n
+    adr: "0151"
+    title: n8n for webhook and API integration automation
+    status: merged
+    owner: codex
+    branch: codex/adr-0151-n8n
+    worktree_path: .worktrees/adr-0151
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0151-n8n.md
+    depends_on:
+      - adr-0025-docker-compose-stacks
+      - adr-0026-postgres-vm
+      - adr-0043-openbao
+      - adr-0056-keycloak-sso
+    conflicts_with: []
+    shared_surfaces:
+      - roles/n8n_postgres
+      - roles/n8n_runtime
+      - roles/nginx_edge_publication
+      - inventory/host_vars/proxmox_florin.yml
+      - config/service-capability-catalog.json
+      - config/workflow-catalog.json
+      - config/subdomain-catalog.json
+    ready_to_merge: true
+    live_applied: true
+
   - id: adr-0040-runtime-container-telemetry
     adr: "0040"
     title: Docker runtime container telemetry

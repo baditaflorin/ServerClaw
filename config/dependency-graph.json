@@ -165,6 +165,15 @@
       "adr": "0043"
     },
     {
+      "id": "n8n",
+      "service": "n8n",
+      "name": "n8n",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "automation",
+      "adr": "0151"
+    },
+    {
       "id": "ops_portal",
       "service": "ops_portal",
       "name": "Ops Portal",
@@ -363,6 +372,30 @@
       "to": "openbao",
       "type": "startup_only",
       "description": "NetBox receives its database and Redis credentials from the OpenBao agent before the application containers start."
+    },
+    {
+      "from": "n8n",
+      "to": "postgres",
+      "type": "hard",
+      "description": "n8n stores workflow, credential, and execution state in Postgres."
+    },
+    {
+      "from": "n8n",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "n8n reads its mirrored database password and encryption key through the OpenBao agent before startup."
+    },
+    {
+      "from": "n8n",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public reachability for n8n.lv3.org depends on the shared edge publication path."
+    },
+    {
+      "from": "n8n",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "The public n8n editor path is gated behind oauth2-proxy and Keycloak-backed browser authentication."
     },
     {
       "from": "open_webui",

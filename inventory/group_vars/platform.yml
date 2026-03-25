@@ -125,6 +125,7 @@ platform_ports:
   netbox_server_port: 8082
   netbox_host_proxy_port: 8004
   ollama_api_port: 11434
+  n8n_port: 5678
   open_webui_port: 8088
   open_webui_host_proxy_port: 8008
   api_gateway_internal_port: 8083
@@ -159,6 +160,7 @@ platform_port_assignments:
   netbox_server_port: 8082
   netbox_host_proxy_port: 8004
   ollama_api_port: 11434
+  n8n_port: 5678
   open_webui_port: 8088
   open_webui_host_proxy_port: 8008
   api_gateway_internal_port: 8083
@@ -958,6 +960,33 @@ platform_service_topology:
       internal: 11434
     urls:
       internal: http://10.10.10.20:11434
+  n8n:
+    service_name: n8n
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: n8n.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: n8n
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:5678
+    service_id: n8n
+    ports:
+      internal: 5678
+    urls:
+      public: https://n8n.lv3.org
+      internal: http://10.10.10.20:5678
   api_gateway:
     service_name: api-gateway
     owning_vm: docker-runtime-lv3
@@ -1219,6 +1248,10 @@ platform_dns_records:
       value: 65.108.75.123
       ttl: 60
     - name: mail
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: n8n
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -1639,6 +1672,33 @@ public_edge_service_topology:
       internal: 11434
     urls:
       internal: http://10.10.10.20:11434
+  n8n:
+    service_name: n8n
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: n8n.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: n8n
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:5678
+    service_id: n8n
+    ports:
+      internal: 5678
+    urls:
+      public: https://n8n.lv3.org
+      internal: http://10.10.10.20:5678
   api_gateway:
     service_name: api-gateway
     owning_vm: docker-runtime-lv3
@@ -1952,6 +2012,7 @@ openbao_proxy_port: 8200
 windmill_server_port: 8000
 netbox_server_port: 8082
 ollama_api_port: 11434
+n8n_port: 5678
 open_webui_port: 8088
 ops_portal_port: 8092
 ntopng_http_port: 3000

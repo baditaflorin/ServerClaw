@@ -37,6 +37,7 @@ platform_port_assignments:
   netbox_server_port: 8082
   netbox_host_proxy_port: 8004
   ollama_api_port: 11434
+  n8n_port: 5678
   open_webui_port: 8088
   open_webui_host_proxy_port: 8008
   api_gateway_internal_port: 8083
@@ -331,6 +332,21 @@ network_policy:
         - source: all_guests
           protocol: tcp
           ports:
+            - 5678
+          description: Private guest-to-guest access to the n8n automation runtime
+        - source: 172.16.0.0/12
+          protocol: tcp
+          ports:
+            - 5678
+          description: Local Docker workloads that call the private n8n automation runtime
+        - source: 192.168.0.0/16
+          protocol: tcp
+          ports:
+            - 5678
+          description: Local Docker workloads that call the private n8n automation runtime
+        - source: all_guests
+          protocol: tcp
+          ports:
             - 11434
           description: Private guest-to-guest Ollama inference traffic
         - source: 172.16.0.0/12
@@ -343,6 +359,11 @@ network_policy:
           ports:
             - 11434
           description: Local Docker workloads that use the private Ollama inference API
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
+            - 5678
+          description: Reverse proxy access to the n8n editor, health checks, and public webhook ingress
         - source: nginx-lv3
           protocol: tcp
           ports:
@@ -831,6 +852,27 @@ lv3_service_topology:
     observability:
       guest_dashboard: false
       service_telemetry: false
+  n8n:
+    service_name: n8n
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: n8n.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: n8n
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.n8n_port }}"
   api_gateway:
     service_name: api-gateway
     owning_vm: docker-runtime-lv3

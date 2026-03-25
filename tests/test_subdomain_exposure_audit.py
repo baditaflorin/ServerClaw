@@ -21,6 +21,11 @@ class SubdomainExposureAuditTests(unittest.TestCase):
         registry = audit.build_registry()
         by_fqdn = {entry["fqdn"]: entry for entry in registry["subdomains"]}
 
+        self.assertEqual(by_fqdn["n8n.lv3.org"]["auth_requirement"], "edge_oidc")
+        self.assertEqual(
+            by_fqdn["n8n.lv3.org"]["unauthenticated_prefix_paths"],
+            ["/webhook/", "/webhook-test/", "/webhook-waiting/"],
+        )
         self.assertEqual(by_fqdn["ops.lv3.org"]["auth_requirement"], "edge_oidc")
         self.assertEqual(by_fqdn["ops.lv3.org"]["edge_auth"], "oauth2_proxy")
         self.assertEqual(by_fqdn["docs.lv3.org"]["route_source"], "public_edge_extra_sites")
