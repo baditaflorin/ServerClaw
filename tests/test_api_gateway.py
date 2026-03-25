@@ -285,7 +285,14 @@ def test_gateway_proxy_and_platform_endpoints(tmp_path: Path) -> None:
     def upstream(request: httpx.Request) -> httpx.Response:
         if request.url.path == "/health":
             return httpx.Response(200, json={"status": "ok"})
-        return httpx.Response(200, json={"path": request.url.path, "method": request.method})
+        return httpx.Response(
+            200,
+            json={
+                "path": request.url.path,
+                "method": request.method,
+                "trace_id": request.headers.get("X-Trace-Id"),
+            },
+        )
 
     def jwks(request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, json=json.loads((tmp_path / "jwks.json").read_text()))
@@ -304,10 +311,11 @@ def test_gateway_proxy_and_platform_endpoints(tmp_path: Path) -> None:
             try:
                 transport_app = httpx.ASGITransport(app=app)
                 async with httpx.AsyncClient(transport=transport_app, base_url="http://gateway.test") as client:
-                    headers = {"Authorization": f"Bearer {token}"}
+                    headers = {"Authorization": f"Bearer {token}", "X-Trace-Id": "trace-test-123"}
                     health = await client.get("/v1/health", headers=headers)
                     assert health.status_code == 200
                     assert health.json()["status"] == "healthy"
+                    assert health.headers["X-Trace-Id"] == "trace-test-123"
 
                     services = await client.get("/v1/platform/services", headers=headers)
                     assert services.status_code == 200
@@ -362,6 +370,53 @@ def test_gateway_proxy_and_platform_endpoints(tmp_path: Path) -> None:
                     proxied = await client.get("/v1/windmill/api/version", headers=headers)
                     assert proxied.status_code == 200
                     assert proxied.json()["path"] == "/api/version"
+                    assert proxied.json()["trace_id"] == "trace-test-123"
+            finally:
+                await runtime.close()
+
+    import asyncio
+
+    asyncio.run(run())
+
+
+def test_gateway_deploy_forwards_trace_id_to_webhook(tmp_path: Path) -> None:
+    received_payloads: list[dict[str, object]] = []
+
+    def upstream(request: httpx.Request) -> httpx.Response:
+        if request.url.host == "jwks.test":
+            return httpx.Response(200, json=json.loads((tmp_path / "jwks.json").read_text()))
+        if request.url.host == "deploy-hook.test":
+            received_payloads.append(json.loads(request.content.decode()))
+            return httpx.Response(202, json={"queued": True})
+        return httpx.Response(200, json={"status": "ok"})
+
+    transport = httpx.MockTransport(upstream)
+    config, token = make_repo(tmp_path, "http://upstream.test")
+    config = GatewayConfig(
+        **{
+            **config.__dict__,
+            "deploy_webhook_url": "http://deploy-hook.test/deploy",
+        }
+    )
+    app = create_app(config)
+
+    async def run() -> None:
+        async with httpx.AsyncClient(transport=transport) as runtime_client:
+            runtime = GatewayRuntime(config)
+            await runtime.http_client.aclose()
+            runtime.http_client = runtime_client
+            runtime.verifier._client = runtime_client
+            app.state.runtime = runtime
+            try:
+                transport_app = httpx.ASGITransport(app=app)
+                async with httpx.AsyncClient(transport=transport_app, base_url="http://gateway.test") as client:
+                    response = await client.post(
+                        "/v1/platform/deploy",
+                        headers={"Authorization": f"Bearer {token}", "X-Trace-Id": "trace-webhook-123"},
+                        json={"service_id": "windmill", "environment": "production", "execute": True},
+                    )
+                    assert response.status_code == 202
+                    assert received_payloads[0]["trace_id"] == "trace-webhook-123"
             finally:
                 await runtime.close()
 

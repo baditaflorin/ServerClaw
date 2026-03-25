@@ -2771,3 +2771,31 @@ workstreams:
       - docs/adr/0168-ansible-role-idempotency-ci-enforcement.md
     ready_to_merge: false
     live_applied: false
+
+  - id: adr-0169-structured-log-contract
+    adr: "0169"
+    title: Structured log field contract
+    status: live_applied
+    owner: codex
+    branch: codex/live-apply-0169
+    worktree_path: .worktrees/adr-0169
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0169-structured-log-field-contract.md
+    depends_on:
+      - adr-0052-loki-logs
+      - adr-0075-service-capability-catalog
+      - adr-0092-platform-api-gateway
+      - adr-0123-service-uptime-contracts
+      - adr-0166-canonical-error-response-format
+    conflicts_with: []
+    shared_surfaces:
+      - platform/
+      - scripts/api_gateway/
+      - scripts/platform_context_service.py
+      - scripts/promotion_pipeline.py
+      - config/windmill/scripts/
+      - collections/ansible_collections/lv3/platform/plugins/callback/
+      - Makefile
+      - inventory/group_vars/all.yml
+      - docs/runbooks/
+    ready_to_merge: false
+    live_applied: true

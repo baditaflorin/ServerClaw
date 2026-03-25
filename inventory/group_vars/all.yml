@@ -243,10 +243,17 @@ playbook_execution_env: "{{ env | default('production') }}"
 playbook_execution_allowed_envs:
   - production
   - staging
+platform_trace_id: "{{ lookup('ansible.builtin.env', 'PLATFORM_TRACE_ID') | default('', true) }}"
+platform_intent_id: "{{ lookup('ansible.builtin.env', 'PLATFORM_INTENT_ID') | default('', true) }}"
 playbook_execution_preflight_connection_timeout: 30
 playbook_execution_check_connectivity: true
 playbook_execution_emit_audit: true
-playbook_execution_correlation_id: "playbook:{{ playbook_execution_env }}:{{ lookup('ansible.builtin.env', 'USER') | default('unknown', true) }}"
+playbook_execution_correlation_id: >-
+  {{
+    (platform_trace_id | trim)
+    if (platform_trace_id | trim | length > 0)
+    else 'playbook:' ~ playbook_execution_env ~ ':' ~ (lookup('ansible.builtin.env', 'USER') | default('unknown', true))
+  }}
 playbook_execution_controller_secret_manifest_path: "{{ inventory_dir | dirname }}/config/controller-local-secrets.json"
 playbook_execution_health_probe_catalog_path: "{{ inventory_dir | dirname }}/config/health-probe-catalog.json"
 playbook_execution_mutation_audit_script: "{{ inventory_dir | dirname }}/scripts/mutation_audit.py"

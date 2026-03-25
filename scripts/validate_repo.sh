@@ -195,7 +195,7 @@ validate_data_models() {
   uvx --from pyyaml python "$REPO_ROOT/scripts/subdomain_exposure_audit.py" --validate >/dev/null
   uv run --with pyyaml python "$REPO_ROOT/scripts/validate_nats_topics.py" --validate >/dev/null
   python3 "$REPO_ROOT/scripts/validate_service_completeness.py" --validate >/dev/null
-  "$REPO_ROOT/scripts/agent_tool_registry.py" --export-mcp >/dev/null
+  uv run --with pyyaml python "$REPO_ROOT/scripts/agent_tool_registry.py" --export-mcp >/dev/null
   python3 "$REPO_ROOT/scripts/mutation_audit.py" --validate-schema >/dev/null
 }
 

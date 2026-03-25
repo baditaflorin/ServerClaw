@@ -97,6 +97,19 @@ domains:
             - environment
             - generated_at
             - summary
+      - name: platform.security.high-finding
+        description: One high-severity security finding emitted from the public-surface or posture scan workflows.
+        status: active
+        delivery: at_least_once
+        retention: 90d
+        producers:
+          - adr-0102-security-posture-reporting
+          - adr-0142-public-surface-automated-security-scan
+        payload:
+          required:
+            - event
+            - kind
+            - generated_at
       - name: platform.security.critical-finding
         description: One critical security finding emitted from the posture report.
         status: active

@@ -27,6 +27,8 @@ service ?=
 group ?=
 env ?= production
 EXTRA_ARGS ?=
+PLATFORM_TRACE_ID ?= $(shell python3 -c 'import uuid; print(uuid.uuid4().hex)')
+PLATFORM_INTENT_ID ?=
 SURFACE ?=
 HOST ?= proxmox_florin
 TOOL ?=
@@ -65,6 +67,7 @@ CHECK_RUNNER_ANSIBLE_IMAGE ?= $(CHECK_RUNNER_REGISTRY)/ansible:$(CHECK_RUNNER_AN
 CHECK_RUNNER_PYTHON_IMAGE ?= $(CHECK_RUNNER_REGISTRY)/python:$(CHECK_RUNNER_PYTHON_TAG)
 CHECK_RUNNER_INFRA_IMAGE ?= $(CHECK_RUNNER_REGISTRY)/infra:$(CHECK_RUNNER_INFRA_TAG)
 CHECK_RUNNER_SECURITY_IMAGE ?= $(CHECK_RUNNER_REGISTRY)/security:$(CHECK_RUNNER_SECURITY_TAG)
+ANSIBLE_TRACE_ARGS := -e platform_trace_id=$(PLATFORM_TRACE_ID) $(if $(PLATFORM_INTENT_ID),-e platform_intent_id=$(PLATFORM_INTENT_ID),)
 
 .PHONY: validate validate-generated-vars validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-ansible-idempotency validate-shell validate-json validate-compose-runtime-envs validate-data-models validate-health-probes validate-alert-rules validate-tofu generate-platform-vars show-platform-facts generate-slo-rules validate-generated-slo generate-status-docs generate-platform-manifest generate-status generate-ops-portal generate-changelog-portal generate-dependency-diagram generate-uptime-kuma-monitors validate-generated-uptime-kuma-monitors docs deploy-ops-portal deploy-changelog-portal deploy-docs-portal validate-generated-docs validate-generated-portals receipts receipt-info workflows workflow-info commands command-info services show-service environments environment-info lanes lane-info api-publication api-publication-info agent-tools agent-tool-info export-mcp-tools check-image-freshness upgrade-container-image pin-image scaffold-service install-hooks pre-push-gate gate-status dr-status dr-runbook runbook-executor post-merge-gate integration-tests nightly-integration-tests scheduler-watchdog-loop platform-observation-loop triage-alert triage-calibration search-index-rebuild scan-published-artifacts setup preflight syntax-check syntax-check-monitoring syntax-check-ntfy syntax-check-ntopng syntax-check-api-gateway syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-openbao syntax-check-step-ca syntax-check-windmill syntax-check-keycloak syntax-check-netbox syntax-check-ollama syntax-check-open-webui syntax-check-mattermost syntax-check-portainer syntax-check-rag-context syntax-check-secret-rotation collection-sync collection-build collection-publish collection-install check-platform-drift drift-report subdomain-exposure-audit security-posture-report security-headers-audit public-surface-security-scan open-maintenance-window close-maintenance-window operator-onboard operator-offboard sync-operators quarterly-access-review install-proxmox configure-network configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-guest-network-policy converge-monitoring converge-ntfy converge-ntopng converge-api-gateway converge-docker-runtime converge-postgres-vm converge-mail-platform converge-openbao converge-step-ca converge-windmill converge-control-plane-recovery converge-keycloak converge-netbox converge-ollama converge-open-webui converge-mattermost converge-portainer converge-rag-context rotate-secret token-inventory-audit token-exposure-response rotate-keycloak-client-secret rotate-windmill-token rotate-grafana-service-token rotate-platform-cli-token deploy-uptime-kuma uptime-kuma-manage uptime-robot-manage portainer-manage configure-backups configure-backup-vm database-dns provision-subdomain start-workstream capacity-report weekly-capacity-report promote live-apply-group live-apply-service live-apply-site build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-reaper install-cli update-cli validate-packer remote-packer-validate packer-template-rebuild remote-tofu-plan remote-tofu-apply tofu-drift tofu-import
 
@@ -570,7 +573,7 @@ converge-keycloak:
 
 converge-api-gateway:
 	$(MAKE) preflight WORKFLOW=converge-api-gateway
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/api-gateway.yml --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/api-gateway.yml --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS)
 
 converge-control-plane-recovery:
 	$(MAKE) preflight WORKFLOW=converge-control-plane-recovery
@@ -590,7 +593,7 @@ converge-open-webui:
 
 converge-rag-context:
 	$(MAKE) preflight WORKFLOW=converge-rag-context
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/rag-context.yml --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/rag-context.yml --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS)
 
 converge-portainer:
 	$(MAKE) preflight WORKFLOW=converge-portainer
@@ -694,20 +697,20 @@ live-apply-group:
 	@if [ "$(env)" = "production" ] && printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])bypass_promotion=true([[:space:]]|$$)'; then \
 		python3 $(REPO_ROOT)/scripts/promotion_pipeline.py --emit-bypass-event --service "group:$(group)" --actor-id "$${USER:-unknown}" --correlation-id "break-glass:group:$(group):$$(date -u +%Y%m%dT%H%M%SZ)"; \
 	fi
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/groups/$(group).yml --private-key $(BOOTSTRAP_KEY) -e env=$(env) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(EXTRA_ARGS)
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/groups/$(group).yml --private-key $(BOOTSTRAP_KEY) -e env=$(env) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
 
 live-apply-service:
 	@test -n "$(service)" || (echo "set service=<service-id>"; exit 1)
 	@if [ "$(env)" = "production" ] && printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])bypass_promotion=true([[:space:]]|$$)'; then \
 		python3 $(REPO_ROOT)/scripts/promotion_pipeline.py --emit-bypass-event --service "$(service)" --actor-id "$${USER:-unknown}" --correlation-id "break-glass:service:$(service):$$(date -u +%Y%m%dT%H%M%SZ)"; \
 	fi
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/services/$(service).yml --private-key $(BOOTSTRAP_KEY) -e env=$(env) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(EXTRA_ARGS)
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/services/$(service).yml --private-key $(BOOTSTRAP_KEY) -e env=$(env) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
 
 live-apply-site:
 	@if [ "$(env)" = "production" ] && printf '%s' "$(EXTRA_ARGS)" | grep -Eq '(^|[[:space:]])bypass_promotion=true([[:space:]]|$$)'; then \
 		python3 $(REPO_ROOT)/scripts/promotion_pipeline.py --emit-bypass-event --service "site" --actor-id "$${USER:-unknown}" --correlation-id "break-glass:site:$$(date -u +%Y%m%dT%H%M%SZ)"; \
 	fi
-	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/site.yml --private-key $(BOOTSTRAP_KEY) -e env=$(env) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(EXTRA_ARGS)
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/site.yml --private-key $(BOOTSTRAP_KEY) -e env=$(env) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump $(ANSIBLE_TRACE_ARGS) $(EXTRA_ARGS)
 
 ## Remote build execution (ADR 0082)
 .PHONY: remote-lint remote-validate remote-pre-push remote-packer-build remote-image-build remote-exec check-build-server remote-tofu-plan remote-tofu-apply tofu-drift tofu-import
