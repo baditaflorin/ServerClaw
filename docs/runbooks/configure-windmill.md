@@ -41,10 +41,14 @@ The workflow manages these live surfaces:
 - seeded script `f/lv3/rotate_credentials`
 - seeded script `f/lv3/deploy_and_promote`
 - seeded helper `f/lv3/mutation_audit_emit`
+- seeded helper `f/lv3/lane_scheduler`
+- seeded helper `f/lv3/scheduler_watchdog`
 - enabled schedule `f/lv3/scheduler_watchdog_loop_every_10s`
 - seeded helper `f/lv3/config_merge/merge_config_changes`
 - enabled schedule `f/lv3/config_merge/merge_config_changes_every_minute`
 - PostgreSQL table `config_change_staging` in the Windmill database
+- enabled schedule `f/lv3/lane_scheduler_every_2s`
+- enabled schedule `f/lv3/scheduler_watchdog_every_30s`
 
 ## Generated Local Artifacts
 
@@ -67,6 +71,7 @@ Run these checks after converge:
 8. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'test -s /srv/proxmox_florin_server/.local/scheduler/watchdog-heartbeat.json && sudo cat /srv/proxmox_florin_server/.local/scheduler/watchdog-heartbeat.json'`
 9. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.50 "psql -d windmill -Atqc \"SELECT to_regclass('public.config_change_staging')\""`
 10. `curl -s -X POST -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" -H "Content-Type: application/json" -d '{}' http://100.64.0.1:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fconfig_merge%2Fmerge_config_changes`
+11. `curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" http://100.64.0.1:8005/api/w/lv3/schedules/list | jq '.[] | select(.path=="f/lv3/lane_scheduler_every_2s" or .path=="f/lv3/scheduler_watchdog_every_30s" or .path=="f/lv3/config_merge/merge_config_changes_every_minute") | {path, enabled, schedule}'`
 
 ## Notes
 

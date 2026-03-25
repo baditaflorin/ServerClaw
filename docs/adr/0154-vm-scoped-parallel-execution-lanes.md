@@ -1,214 +1,97 @@
 # ADR 0154: VM-Scoped Parallel Execution Lanes
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.149.0
+- Implemented In Platform Version: 0.131.0
+- Implemented On: 2026-03-25
 - Date: 2026-03-24
 
 ## Context
 
-The platform runs on a single Proxmox host with seven VMs. Each VM is operationally independent: a change on `monitoring-lv3` (VM 140) does not directly affect services on `docker-runtime-lv3` (VM 120). Yet the current execution model is effectively serialised: the goal compiler (ADR 0112) and conflict detector (ADR 0127) treat all active intents as potentially conflicting and block a new intent if any execution is in progress on the same service, regardless of which VM it targets.
+The platform already has enough orchestration to compile goals, reject semantic conflicts, and submit Windmill workflows, but its mutation path still degrades to "first workflow wins". A change to `netbox` and a change to `windmill` are independent at the service level, yet both land on `docker-runtime-lv3`; a change to `grafana` should not block a change to `netbox`, because those run on different VMs. Without an explicit per-VM concurrency model, multiple agents either collide on the same host or over-serialize unrelated work.
 
-In a multi-agent scenario where three concurrent sessions are working on different goals:
-- Agent A: Rotate Grafana service account token on `monitoring-lv3`
-- Agent B: Update NetBox IPAM prefixes on `docker-runtime-lv3`
-- Agent C: Rebuild the docs portal on `docker-build-lv3`
+The practical isolation boundary on this platform is the VM:
 
-None of these operations share any resources at the VM level. They could all execute simultaneously in 3 minutes instead of sequentially in 9 minutes. But today they serialise.
+- Proxmox schedules CPU and memory per guest.
+- Ansible connects to each guest independently.
+- Compose-managed services on one guest do not restart services on another guest.
+- The Proxmox host and platform-wide control surfaces still need a bounded shared lane for host-only and cross-VM operations.
 
-The Proxmox VM is the natural unit of isolation for infrastructure operations:
-- Ansible connects to each VM via SSH independently.
-- Docker Compose restarts on one VM do not affect containers on another.
-- A failed deployment to one VM does not cascade to others (absent an application-level dependency).
-- The Proxmox hypervisor schedules VM CPU/memory independently.
-
-Formalising this into explicit **execution lanes** — one lane per VM — makes the parallelism model explicit, auditable, and toolable: agents request a lane, operations in different lanes run concurrently, operations in the same lane queue.
+The platform needs a declared lane catalog, a lane resolver, a shared state registry that survives multiple local worktrees, and a queue/dispatcher pair that can defer work when a lane is saturated instead of rejecting it outright.
 
 ## Decision
 
-We will define **VM-scoped parallel execution lanes** as the primary unit of concurrency in the platform. Each VM has exactly one execution lane. Operations within a lane are serialised; operations in different lanes run in parallel.
+We will treat the Proxmox host plus each managed VM as an **execution lane** with explicit capacity, and the scheduler will use that lane model before it submits mutation workflows.
 
-### Lane definitions
+The first production implementation lands in repo release `0.149.0` and platform version `0.131.0` with these concrete surfaces:
+
+- [`config/execution-lanes.yaml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/execution-lanes.yaml) declares the canonical lane catalog and per-lane slot count.
+- [`platform/execution_lanes/catalog.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/execution_lanes/catalog.py) resolves an intent's primary lane and dependency lanes from the service catalog, dependency graph, and optional workflow lane overrides.
+- [`platform/execution_lanes/registry.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/execution_lanes/registry.py) stores active lane leases and queued intents under the shared git common-dir so separate worktrees coordinate instead of diverging.
+- [`platform/scheduler/scheduler.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/scheduler/scheduler.py) now queues mutation intents when a lane is saturated, dispatches queued work asynchronously, and records required lanes in scheduler metadata.
+- [`platform/scheduler/watchdog.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/scheduler/watchdog.py) releases lane leases and conflict claims when a queued job completes or violates a budget.
+- [`config/windmill/scripts/lane-scheduler.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/lane-scheduler.py) plus the seeded Windmill schedules provide the live dequeue loop.
+
+### Lane catalog
+
+The lane catalog is repo-managed and validated:
 
 ```yaml
-# config/execution-lanes.yaml
-
+schema_version: 1.0.0
 lanes:
-  - lane_id: lane:nginx
-    vm_id: 110
-    hostname: nginx-lv3
-    services: [nginx]
-    max_concurrent_ops: 1        # Only 1 op at a time on this VM
-    serialisation: strict        # No pipeline; each op completes before next starts
-
-  - lane_id: lane:docker-runtime
-    vm_id: 120
+  lane:docker-runtime:
     hostname: docker-runtime-lv3
+    vmid: 120
     services:
       - netbox
-      - keycloak
       - windmill
-      - mattermost
-      - open-webui
-      - platform-api
-      - gitea
-      - ollama
-      - vaultwarden
-      - searxng
-      - n8n
-      - langfuse
-      - dozzle-hub
-    max_concurrent_ops: 3        # Up to 3 concurrent ops on this VM
-    # Services within this lane can run concurrently because Docker Compose
-    # restarts are container-scoped; they don't affect each other.
-    serialisation: resource_lock  # Parallelism governed by lock registry (ADR 0153)
-
-  - lane_id: lane:build
-    vm_id: 130
-    hostname: docker-build-lv3
-    services: [build-worker, gitea-runner]
-    max_concurrent_ops: 2
+      - keycloak
+      - openbao
+    max_concurrent_ops: 3
     serialisation: resource_lock
-
-  - lane_id: lane:monitoring
-    vm_id: 140
-    hostname: monitoring-lv3
-    services: [grafana, prometheus, alertmanager, loki, tempo]
-    max_concurrent_ops: 2
-    serialisation: resource_lock
-
-  - lane_id: lane:postgres
-    vm_id: 150
-    hostname: postgres-lv3
-    services: [postgresql]
-    max_concurrent_ops: 1        # DB schema migrations must be strictly serialised
-    serialisation: strict
-
-  - lane_id: lane:postgres-replica
-    vm_id: 151
-    hostname: postgres-replica-lv3
-    services: [postgresql-standby]
-    max_concurrent_ops: 1
-    serialisation: strict
-
-  - lane_id: lane:backup
-    vm_id: 160
-    hostname: backup-lv3
-    services: [proxmox-backup-server]
-    max_concurrent_ops: 1
-    serialisation: strict
-
-  # Cross-VM operations that span multiple lanes
-  - lane_id: lane:platform
-    vm_id: null                  # Not VM-specific; covers platform-wide operations
-    services: [keycloak-realm-config, dns-zone, openbao-policies]
-    max_concurrent_ops: 1
-    serialisation: strict
-    # This lane is acquired when an operation affects config that is read by
-    # services on multiple VMs (e.g., a Keycloak realm change affects all OIDC clients)
 ```
 
-### Lane assignment in the goal compiler
+Strict lanes (`serialisation: strict`) allow one operation per slot and are typically sized to `1`. Resource-lock lanes allow several concurrent operations on the same VM, but the existing conflict registry still blocks overlapping writes to the same service or secret.
 
-The goal compiler (ADR 0112) resolves which lanes an ExecutionIntent requires before calling the lock registry (ADR 0153):
+### Required lane resolution
 
-```python
-# platform/locking/lanes.py
+Compiled intents and direct workflow intents now carry `required_lanes`. Resolution uses three sources, in order:
 
-def resolve_lanes(intent: ExecutionIntent) -> list[str]:
-    """Determine which execution lanes an intent requires."""
-    catalog_entry = capability_catalog.get(intent.service_id)
-    primary_lane = f"lane:{catalog_entry.vm_hostname.split('-')[0]}"
+1. the target service's VM in `config/service-capability-catalog.json`
+2. the target host name in inventory-derived intent scope
+3. optional workflow catalog lane overrides for host-wide or platform-wide flows
 
-    lanes = [primary_lane]
+Dependency edges in `config/dependency-graph.json` contribute additional read-side lanes. If a mutation spans more than one primary VM lane, the resolver falls back to `lane:platform` as the primary serialising lane.
 
-    # Cross-VM service dependencies
-    for dep in catalog_entry.dependencies:
-        dep_entry = capability_catalog.get(dep)
-        dep_lane = f"lane:{dep_entry.vm_hostname.split('-')[0]}"
-        if dep_lane != primary_lane:
-            lanes.append(dep_lane)
-            # Acquiring a dependency's lane is shared (read), not exclusive.
-            # The primary lane is exclusive (write).
+### Queueing and dispatch
 
-    return lanes
+If the primary lane has no free slots, the scheduler now writes an `intent.queued` ledger event and persists the request in the shared lane queue instead of returning a hard conflict. The repo-managed Windmill `lane_scheduler` script runs every two seconds, acquires newly free lane slots, and re-submits those queued intents to the scheduler in asynchronous mode.
 
-# Goal compiler integration
-intent.required_lanes = resolve_lanes(intent)
-for lane in intent.required_lanes:
-    registry.acquire(f"vm:{lane_vmid(lane)}", lock_type=LockType.EXCLUSIVE if lane == primary_lane else LockType.SHARED)
-```
+The existing scheduler watchdog remains the authority for completion and cleanup. In this ADR it now releases:
 
-### Lane scheduler
-
-The lane scheduler is a Windmill workflow `lane-scheduler` that runs as a persistent service (Windmill recurring trigger, every 2 seconds). It monitors the lane state and dequeues the next intent from the intent queue (ADR 0155) for each lane that has available capacity:
-
-```python
-# config/windmill/scripts/lane-scheduler.py
-
-def tick():
-    for lane in load_lane_definitions():
-        current_ops = count_executing_ops_in_lane(lane.lane_id)
-        available = lane.max_concurrent_ops - current_ops
-        if available <= 0:
-            continue
-        # Dequeue the next intent for this lane (ADR 0155)
-        next_intents = intent_queue.peek(lane_id=lane.lane_id, count=available)
-        for intent in next_intents:
-            if can_acquire_locks(intent):
-                intent_queue.dequeue(intent.intent_id)
-                submit_to_windmill(intent)
-```
-
-### Parallelism visualisation
-
-The ops portal (ADR 0093) and Homepage dashboard (ADR 0152) display a live lane grid:
-
-```
-╔═══════════════════════════════════════════════════════════════════╗
-║ EXECUTION LANES                           2026-03-24 14:32:01    ║
-╠══════════════════╦═════════════════════════╦═════════════════════╣
-║ lane:docker-rt   ║ ████ rotate-keycloak    ║ 1/3 slots           ║
-║ lane:monitoring  ║ ████ update-grafana-ds  ║ 1/2 slots           ║
-║ lane:build       ║ [idle]                  ║ 0/2 slots           ║
-║ lane:nginx       ║ [idle]                  ║ 0/1 slots           ║
-║ lane:postgres    ║ QUEUED: netbox-migrate  ║ 0/1 slots (blocked) ║
-╚══════════════════╩═════════════════════════╩═════════════════════╝
-
-3 ops running in parallel across 2 lanes.
-Estimated completion: rotate-keycloak 2m | update-grafana-ds 4m
-```
-
-### Cross-lane operations (service dependency graph)
-
-Some operations require coordination across lanes. For example, deploying a new version of Keycloak (`lane:docker-runtime`) requires verifying that `ops.lv3.org` (nginx, `lane:nginx`) will still reach it. Cross-lane operations:
-
-1. Acquire the primary lane as `exclusive`.
-2. Acquire each dependency's lane as `shared` (intent lock only — reading state, not mutating).
-3. If any required lane cannot be acquired within the wait budget (ADR 0157), the intent is queued (ADR 0155) rather than rejected.
+- the active conflict claim for the intent
+- the active lane lease for the intent
+- the active-job state record used by budget monitoring
 
 ## Consequences
 
 **Positive**
 
-- The throughput for multi-agent parallel workloads increases proportionally to the number of independent lanes. With 7 VMs, up to 7 completely independent operations can run simultaneously, plus 5+ concurrent container-level operations within `lane:docker-runtime`.
-- The lane model is simple to reason about: "will these two operations conflict?" reduces to "do they require the same lane exclusively?"
-- The lane grid in the ops portal gives operators and agents instant situational awareness: which VMs are busy, which are idle, what is queued.
+- Mutations on different VMs can progress in parallel without separate agents trampling the same guest.
+- Multiple local worktrees now share the same execution-lane state because the lane registry uses the git common-dir, not a per-worktree temp file.
+- Saturated lanes degrade to a queue instead of a failure, which is safer for operator-triggered or agent-triggered retries.
 
-**Negative / Trade-offs**
+**Trade-offs**
 
-- `lane:docker-runtime` hosts the most services (15+). It is the most likely to become the bottleneck. The `max_concurrent_ops: 3` limit is a tuning parameter that must be calibrated against the actual CPU and memory headroom on that VM.
-- Cross-lane dependency detection requires the service capability catalog to declare inter-VM dependencies accurately. Missing or wrong dependency declarations cause either missed blocking (unsafe) or excessive blocking (slow).
+- The first implementation still uses a repo-managed JSON registry rather than the future distributed lock backend proposed in later ADRs.
+- Direct host-wide workflows that lack a target service or explicit lane override remain on the fallback path until their workflow metadata is tightened.
+- Goal-compiler and CLI regression tests remain slower than the fast unit tests because health preconditions still wait on the existing maintenance-window best-effort tunnel timeout.
 
 ## Related ADRs
 
-- ADR 0075: Service capability catalog (VM placement and dependencies used for lane resolution)
-- ADR 0112: Deterministic goal compiler (lane assignment integrated here)
-- ADR 0115: Event-sourced mutation ledger (lane IDs recorded in intent events)
-- ADR 0127: Intent conflict detection (semantic layer; lane conflicts are structural)
-- ADR 0153: Distributed resource lock registry (lock acquisition per lane)
-- ADR 0155: Intent queue with release-triggered scheduling (lane scheduler dequeues from this)
-- ADR 0157: Per-VM concurrency budget (capacity limits per lane)
-- ADR 0161: Real-time agent coordination map (displays live lane occupancy)
+- ADR 0044: Windmill workflow runtime
+- ADR 0075: Service capability catalog
+- ADR 0112: Deterministic goal compiler
+- ADR 0119: Budgeted workflow scheduler
+- ADR 0127: Intent conflict resolution

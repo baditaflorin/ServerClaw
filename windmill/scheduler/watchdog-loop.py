@@ -76,8 +76,11 @@ def main(repo_path: str = "/srv/proxmox_florin_server") -> dict[str, Any]:
         sys.path.insert(0, str(repo_root))
 
     try:
+        from platform.conflict import IntentConflictRegistry
+        from platform.execution_lanes import LaneRegistry
+        from platform.idempotency import IdempotencyStore
         from platform.ledger import LedgerWriter
-        from platform.scheduler import HttpWindmillClient, SchedulerStateStore, Watchdog
+        from platform.scheduler import FileLaneReservationStore, HttpWindmillClient, SchedulerStateStore, Watchdog
     except ModuleNotFoundError as exc:
         if exc.name != "yaml":
             raise
@@ -122,6 +125,10 @@ def main(repo_path: str = "/srv/proxmox_florin_server") -> dict[str, Any]:
         windmill_client=client,
         state_store=state_store,
         ledger_writer=ledger_writer,
+        conflict_registry=IntentConflictRegistry(repo_root=repo_root),
+        lane_registry=LaneRegistry(repo_root=repo_root),
+        lane_budget_store=FileLaneReservationStore(repo_root / ".local" / "scheduler" / "lane-reservations.json"),
+        idempotency_store=IdempotencyStore(repo_root=repo_root),
     )
     summary = watchdog.monitor_once()
     summary["status"] = "ok"

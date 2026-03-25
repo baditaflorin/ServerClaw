@@ -789,6 +789,7 @@ def build_execution_intent(workflow_name: str, args: list[str]) -> ExecutionInte
         scoring_context=context.as_dict(),
         risk_score=risk,
         semantic_diff=compiled.get("semantic_diff"),
+        required_lanes=compiled.get("required_lanes"),
         resource_claims=compiled.get("resource_claims"),
         conflict_warnings=compiled.get("conflict_warnings"),
     )
@@ -1101,6 +1102,7 @@ def run_windmill_request(
         arguments=payload,
         target_service_id=payload.get("service") or payload.get("service_id"),
         target_vm=payload.get("target_vm") or payload.get("target"),
+        required_lanes=[],
     )
     try:
         result = scheduler.submit(
@@ -1119,6 +1121,7 @@ def run_windmill_request(
         "capability_escalated",
         "concurrency_limit",
         "conflict_rejected",
+        "lane_busy",
         "rollback_depth_exceeded",
     }:
         print(
@@ -1145,6 +1148,21 @@ def run_windmill_request(
         if job:
             message += f" Existing job: {job}."
         print(message, file=sys.stderr)
+        return 0
+    if result.status == "queued":
+        print(
+            json.dumps(
+                {
+                    "status": "queued",
+                    "workflow_id": workflow_name,
+                    "queue_id": result.metadata.get("queue_id"),
+                    "primary_lane_id": result.metadata.get("primary_lane_id"),
+                    "required_lanes": result.metadata.get("required_lanes", []),
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
         return 0
     warnings = result.metadata.get("conflict_warnings", []) if isinstance(result.metadata, dict) else []
     for warning in warnings:
@@ -1317,6 +1335,7 @@ def run_compiled_instruction(
         execution_mode=result.intent.execution_mode,
         target_service_id=result.intent.target.services[0] if result.intent.target.services else None,
         target_vm=result.intent.scope.allowed_hosts[0] if result.intent.scope.allowed_hosts else None,
+        required_lanes=result.intent.required_lanes,
         resource_claims=result.intent.resource_claims,
         conflict_warnings=result.intent.conflict_warnings,
     )
@@ -1337,6 +1356,7 @@ def run_compiled_instruction(
             conflict_warnings=result.intent.conflict_warnings,
             risk_class=result.intent.risk_class,
             required_read_surfaces=result.intent.required_read_surfaces,
+            required_lanes=result.intent.required_lanes,
         ),
         actor_id=actor_id,
         autonomous=autonomous,
@@ -1366,6 +1386,7 @@ def check_intent_conflicts(instruction: str, args: list[str]) -> int:
         arguments=result.dispatch_payload,
         target_service_id=result.intent.target.services[0] if result.intent.target.services else None,
         target_vm=result.intent.scope.allowed_hosts[0] if result.intent.scope.allowed_hosts else None,
+        required_lanes=result.intent.required_lanes,
         resource_claims=result.intent.resource_claims,
         conflict_warnings=result.intent.conflict_warnings,
     )

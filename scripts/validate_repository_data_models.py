@@ -28,6 +28,7 @@ from control_plane_lanes import load_lane_catalog
 from data_catalog import load_data_catalog, validate_data_catalog
 from dependency_graph import load_dependency_graph
 from data_catalog import load_data_catalog, validate_data_catalog
+from execution_lanes import load_execution_lane_catalog
 from live_apply_receipts import RECEIPTS_DIR, iter_receipt_paths, validate_receipts
 from platform.circuit import load_circuit_policies
 from generate_platform_vars import PLATFORM_VARS_PATH, PORT_KEYS, build_platform_vars
@@ -2192,6 +2193,7 @@ def validate_repository_data_models() -> int:
     api_gateway_catalog, _ = load_api_gateway_catalog()
     validate_api_gateway_catalog(api_gateway_catalog)
     lane_catalog, _ = load_lane_catalog()
+    load_execution_lane_catalog(repo_root=REPO_ROOT)
     api_publication_catalog, _, _ = load_api_publication_catalog()
     validate_api_publication_catalog(api_publication_catalog, lane_catalog)
     load_service_completeness_context()

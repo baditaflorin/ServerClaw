@@ -398,6 +398,62 @@ lanes:
     assert reservation_store.snapshot() == {}
 
 
+def test_watchdog_releases_lane_budget_for_async_submission(tmp_path: Path) -> None:
+    write_scheduler_repo(
+        tmp_path,
+        workflows={
+            "converge-netbox": {
+                "description": "Deploy NetBox",
+                "live_impact": "guest_live",
+                "execution_class": "mutation",
+            }
+        },
+    )
+    write_execution_lanes(
+        tmp_path,
+        """
+schema_version: 1.0.0
+lanes:
+  - lane_id: lane:test
+    vm_id: 120
+    hostname: docker-runtime-lv3
+    services: []
+    max_concurrent_ops: 2
+    serialisation: resource_lock
+    admission_policy: soft
+    vm_budget:
+      total_cpu_milli: 1000
+      total_memory_mb: 512
+      total_disk_iops: 100
+""",
+    )
+    reservation_store = FileLaneReservationStore(tmp_path / ".local" / "scheduler" / "lane-reservations.json")
+    state_store = SchedulerStateStore(tmp_path / ".local" / "scheduler" / "active-jobs.json")
+    windmill = FakeWindmillClient(statuses=[{"completed": True, "success": True, "result": {"ok": True}}])
+    scheduler = BudgetedWorkflowScheduler(
+        windmill_client=windmill,
+        repo_root=tmp_path,
+        lock_manager=FakeLockManager(),
+        lane_budget_store=reservation_store,
+        state_store=state_store,
+        sleep_fn=lambda _seconds: None,
+    )
+
+    result = scheduler.submit(
+        SimpleNamespace(workflow_id="converge-netbox", arguments={}, target_vm="docker-runtime-lv3"),
+        wait_for_completion=False,
+    )
+
+    assert result.status == "submitted"
+    assert reservation_store.snapshot()
+
+    summary = scheduler._watchdog.monitor_once(now=datetime.now(UTC))
+
+    assert summary["completed_jobs"] == 1
+    assert reservation_store.snapshot() == {}
+    assert state_store.list_active_jobs() == []
+
+
 def test_scheduler_blocks_rollback_chain_beyond_budget(tmp_path: Path) -> None:
     write_scheduler_repo(
         tmp_path,

@@ -55,6 +55,7 @@ class ExecutionIntent:
     compensating_workflow_id: str | None = None
     rollback_window_seconds: int | None = None
     required_read_surfaces: list[str] = field(default_factory=list)
+    required_lanes: list[str] = field(default_factory=list)
     risk_score: RiskScore | None = None
     resource_claims: list[dict[str, Any]] = field(default_factory=list)
     conflict_warnings: list[dict[str, Any]] = field(default_factory=list)

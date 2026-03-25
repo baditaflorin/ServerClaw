@@ -213,6 +213,10 @@ class Watchdog:
         windmill_client: Any,
         state_store: SchedulerStateStore,
         ledger_writer: Any | None = None,
+        conflict_registry: Any | None = None,
+        lane_registry: Any | None = None,
+        lane_budget_store: Any | None = None,
+        idempotency_store: Any | None = None,
         escalation_handler: Callable[[str, dict[str, Any]], None] | None = _default_escalation_handler,
         advisory_host_limit: bool = True,
         repo_root: Path | None = None,
@@ -226,6 +230,10 @@ class Watchdog:
         self._windmill_client = windmill_client
         self._state_store = state_store
         self._ledger_writer = ledger_writer
+        self._conflict_registry = conflict_registry
+        self._lane_registry = lane_registry
+        self._lane_budget_store = lane_budget_store
+        self._idempotency_store = idempotency_store
         self._escalation_handler = escalation_handler
         self._advisory_host_limit = advisory_host_limit
         self._repo_root = repo_root or REPO_ROOT
@@ -539,6 +547,26 @@ class Watchdog:
 
     def handle_terminal(self, job: ActiveJobRecord, status: dict[str, Any]) -> dict[str, Any]:
         self._state_store.remove(job.job_id)
+        if self._conflict_registry is not None:
+            final_status = "completed"
+            if status.get("canceled") is True:
+                final_status = "aborted"
+            elif status.get("success") is False:
+                final_status = "failed"
+            self._conflict_registry.complete_intent(job.actor_intent_id, status=final_status, output=status.get("result"))
+        if self._lane_registry is not None:
+            self._lane_registry.release(job.actor_intent_id)
+        if self._lane_budget_store is not None:
+            self._lane_budget_store.release(job.actor_intent_id)
+        if self._idempotency_store is not None:
+            record = self._idempotency_store.record_for_intent(job.actor_intent_id)
+            if record is not None:
+                self._idempotency_store.complete(
+                    record.idempotency_key,
+                    status=final_status,
+                    result=status.get("result"),
+                    job_id=job.job_id,
+                )
         metadata = {
             "job_id": job.job_id,
             "requested_by": job.requested_by,
@@ -592,6 +620,21 @@ class Watchdog:
 
         self._windmill_client.cancel_job(job.job_id, reason=violation.message)
         self._state_store.remove(job.job_id)
+        if self._conflict_registry is not None:
+            self._conflict_registry.complete_intent(job.actor_intent_id, status="budget_exceeded")
+        if self._lane_registry is not None:
+            self._lane_registry.release(job.actor_intent_id)
+        if self._lane_budget_store is not None:
+            self._lane_budget_store.release(job.actor_intent_id)
+        if self._idempotency_store is not None:
+            record = self._idempotency_store.record_for_intent(job.actor_intent_id)
+            if record is not None:
+                self._idempotency_store.complete(
+                    record.idempotency_key,
+                    status="budget_exceeded",
+                    result=status.get("result"),
+                    job_id=job.job_id,
+                )
         action_type = "budget_violation_aborted"
         event_type = "execution.budget_exceeded"
         subject = None
@@ -639,6 +682,9 @@ class Watchdog:
         }
         for job in self.list_monitored_jobs():
             summary["active_jobs"] += 1
+            lane_reservation_ttl = job.metadata.get("lane_reservation_ttl_seconds")
+            if self._lane_budget_store is not None and isinstance(lane_reservation_ttl, int) and lane_reservation_ttl > 0:
+                self._lane_budget_store.renew(job.actor_intent_id, ttl_seconds=lane_reservation_ttl, now=current_time)
             try:
                 status = self._windmill_client.get_job(job.job_id)
             except Exception as exc:

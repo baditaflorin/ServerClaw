@@ -207,42 +207,50 @@ def load_execution_lanes(
     if not path.exists():
         return {}
     payload = _load_yaml(path)
-    lanes_payload = _require_list(payload.get("lanes"), f"{path}.lanes")
+    lanes_payload = payload.get("lanes")
     lanes: dict[str, ExecutionLane] = {}
     hostnames: set[str] = set()
-    for index, raw_lane in enumerate(lanes_payload):
-        lane = _require_mapping(raw_lane, f"{path}.lanes[{index}]")
-        lane_id = _require_str(lane.get("lane_id"), f"{path}.lanes[{index}].lane_id")
+    lane_entries: list[tuple[dict[str, Any], str]]
+    if isinstance(lanes_payload, dict):
+        lane_entries = []
+        for lane_id, raw_lane in lanes_payload.items():
+            lane = _require_mapping(raw_lane, f"{path}.lanes.{lane_id}")
+            lane_entries.append(({**lane, "lane_id": lane_id}, f"{path}.lanes.{lane_id}"))
+    else:
+        raw_lanes = _require_list(lanes_payload, f"{path}.lanes")
+        lane_entries = [
+            (_require_mapping(raw_lane, f"{path}.lanes[{index}]"), f"{path}.lanes[{index}]")
+            for index, raw_lane in enumerate(raw_lanes)
+        ]
+
+    for lane, lane_path in lane_entries:
+        lane_id = _require_str(lane.get("lane_id"), f"{lane_path}.lane_id")
         if lane_id in lanes:
             raise ValueError(f"duplicate execution lane '{lane_id}'")
-        hostname = _require_str(lane.get("hostname"), f"{path}.lanes[{index}].hostname")
+        hostname = _require_str(lane.get("hostname"), f"{lane_path}.hostname")
         if hostname in hostnames:
             raise ValueError(f"duplicate execution lane hostname '{hostname}'")
         hostnames.add(hostname)
-        vm_id_raw = lane.get("vm_id")
-        vm_id = None if vm_id_raw is None else _require_int(vm_id_raw, f"{path}.lanes[{index}].vm_id", minimum=1)
+        vm_id_raw = lane.get("vm_id", lane.get("vmid"))
+        vm_id = None if vm_id_raw is None else _require_int(vm_id_raw, f"{lane_path}.vm_id", minimum=1)
         max_concurrent_ops = _require_int(
             lane.get("max_concurrent_ops"),
-            f"{path}.lanes[{index}].max_concurrent_ops",
+            f"{lane_path}.max_concurrent_ops",
             minimum=1,
         )
-        serialisation = _require_str(lane.get("serialisation"), f"{path}.lanes[{index}].serialisation")
+        serialisation = _require_str(lane.get("serialisation"), f"{lane_path}.serialisation")
         if serialisation not in ALLOWED_SERIALISATION:
-            raise ValueError(
-                f"{path}.lanes[{index}].serialisation must be one of {sorted(ALLOWED_SERIALISATION)}"
-            )
+            raise ValueError(f"{lane_path}.serialisation must be one of {sorted(ALLOWED_SERIALISATION)}")
         admission_policy = _require_str(
             lane.get("admission_policy"),
-            f"{path}.lanes[{index}].admission_policy",
+            f"{lane_path}.admission_policy",
         )
         if admission_policy not in ALLOWED_ADMISSION_POLICIES:
-            raise ValueError(
-                f"{path}.lanes[{index}].admission_policy must be one of {sorted(ALLOWED_ADMISSION_POLICIES)}"
-            )
-        budget = _require_mapping(lane.get("vm_budget"), f"{path}.lanes[{index}].vm_budget")
-        services_payload = _require_list(lane.get("services", []), f"{path}.lanes[{index}].services")
+            raise ValueError(f"{lane_path}.admission_policy must be one of {sorted(ALLOWED_ADMISSION_POLICIES)}")
+        budget = _require_mapping(lane.get("vm_budget"), f"{lane_path}.vm_budget")
+        services_payload = _require_list(lane.get("services", []), f"{lane_path}.services")
         services = tuple(
-            _require_str(item, f"{path}.lanes[{index}].services[{service_index}]")
+            _require_str(item, f"{lane_path}.services[{service_index}]")
             for service_index, item in enumerate(services_payload)
         )
         lanes[lane_id] = ExecutionLane(
@@ -255,17 +263,17 @@ def load_execution_lanes(
             budget=LaneBudget(
                 total_cpu_milli=_require_int(
                     budget.get("total_cpu_milli"),
-                    f"{path}.lanes[{index}].vm_budget.total_cpu_milli",
+                    f"{lane_path}.vm_budget.total_cpu_milli",
                     minimum=1,
                 ),
                 total_memory_mb=_require_int(
                     budget.get("total_memory_mb"),
-                    f"{path}.lanes[{index}].vm_budget.total_memory_mb",
+                    f"{lane_path}.vm_budget.total_memory_mb",
                     minimum=1,
                 ),
                 total_disk_iops=_require_int(
                     budget.get("total_disk_iops"),
-                    f"{path}.lanes[{index}].vm_budget.total_disk_iops",
+                    f"{lane_path}.vm_budget.total_disk_iops",
                     minimum=1,
                 ),
             ),

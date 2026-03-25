@@ -11,6 +11,7 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any, Protocol
 
 from platform.agent_policy import AgentPolicyEngine, DailyExecutionCounter, PolicyOutcome, normalize_actor_id
@@ -20,6 +21,8 @@ from platform.goal_compiler.schema import RiskClass
 from platform.idempotency import IdempotencyStore, compute_idempotency_key
 from platform.ledger import LedgerReader, LedgerWriter
 from platform.retry import policy_for_surface, with_retry
+
+from platform.execution_lanes import LaneLease, LaneRegistry, resolve_lanes
 
 from .budgets import HostTouchEstimate, WorkflowPolicy, estimate_touched_hosts, load_workflow_policy
 from .lanes import FileLaneReservationStore, resolve_execution_lane
@@ -331,6 +334,7 @@ class BudgetedWorkflowScheduler:
         watchdog: Watchdog | None = None,
         daily_execution_counter: DailyExecutionCounter | None = None,
         conflict_registry: IntentConflictRegistry | None = None,
+        lane_registry: LaneRegistry | None = None,
         speculative_state_store: SpeculativeStateStore | None = None,
         lane_budget_store: FileLaneReservationStore | None = None,
         idempotency_store: IdempotencyStore | None = None,
@@ -343,16 +347,12 @@ class BudgetedWorkflowScheduler:
         self._ledger_writer = ledger_writer
         self._ledger_reader = ledger_reader
         self._rollback_guard = rollback_guard or RollbackGuard(ledger_reader)
-        self._watchdog = watchdog or Watchdog(
-            windmill_client=windmill_client,
-            state_store=self._state_store,
-            ledger_writer=ledger_writer,
-        )
         self._policy_engine = AgentPolicyEngine(self._repo_root)
         self._daily_execution_counter = daily_execution_counter or DailyExecutionCounter(
             self._repo_root / ".local" / "state" / "agent-policy" / "daily-autonomous-executions.json"
         )
         self._conflict_registry = conflict_registry or IntentConflictRegistry(repo_root=self._repo_root)
+        self._lane_registry = lane_registry or LaneRegistry(repo_root=self._repo_root)
         self._speculative_state_store = speculative_state_store or SpeculativeStateStore(
             self._repo_root / ".local" / "scheduler" / "speculative-executions.json"
         )
@@ -360,10 +360,15 @@ class BudgetedWorkflowScheduler:
             self._repo_root / ".local" / "scheduler" / "lane-reservations.json"
         )
         self._idempotency_store = idempotency_store or IdempotencyStore(repo_root=self._repo_root)
-        self._lane_budget_store = lane_budget_store or FileLaneReservationStore(
-            self._repo_root / ".local" / "scheduler" / "lane-reservations.json"
+        self._watchdog = watchdog or Watchdog(
+            windmill_client=windmill_client,
+            state_store=self._state_store,
+            ledger_writer=ledger_writer,
+            conflict_registry=self._conflict_registry,
+            lane_registry=self._lane_registry,
+            lane_budget_store=self._lane_budget_store,
+            idempotency_store=self._idempotency_store,
         )
-        self._idempotency_store = idempotency_store or IdempotencyStore(repo_root=self._repo_root)
         self._poll_interval_seconds = poll_interval_seconds
         self._sleep = sleep_fn
         if lock_manager is not None:
@@ -396,6 +401,7 @@ class BudgetedWorkflowScheduler:
         requested_by: str,
         resource_claims: list[dict[str, str]],
         warnings: list[dict[str, Any]],
+        required_lanes: list[str],
     ) -> None:
         if self._ledger_writer is None:
             return
@@ -408,6 +414,32 @@ class BudgetedWorkflowScheduler:
             metadata={
                 "resource_claims": resource_claims,
                 "conflict_warnings": warnings,
+                "required_lanes": required_lanes,
+            },
+        )
+
+    def _write_queued_event(
+        self,
+        *,
+        policy: WorkflowPolicy,
+        actor_intent_id: str,
+        requested_by: str,
+        queue_id: str,
+        primary_lane_id: str,
+        required_lanes: list[str],
+    ) -> None:
+        if self._ledger_writer is None:
+            return
+        self._ledger_writer.write(
+            event_type="intent.queued",
+            actor=requested_by,
+            actor_intent_id=actor_intent_id,
+            target_kind="workflow",
+            target_id=policy.workflow_id,
+            metadata={
+                "queue_id": queue_id,
+                "primary_lane_id": primary_lane_id,
+                "required_lanes": required_lanes,
             },
         )
 
@@ -605,6 +637,65 @@ class BudgetedWorkflowScheduler:
             return []
         return [str(item).strip() for item in value if isinstance(item, str) and str(item).strip()]
 
+    def _required_lanes(self, intent: Any) -> list[str]:
+        value = getattr(intent, "required_lanes", None)
+        if isinstance(value, list):
+            normalized = [str(item).strip() for item in value if isinstance(item, str) and str(item).strip()]
+            if normalized:
+                return normalized
+        resolution = resolve_lanes(intent, repo_root=self._repo_root)
+        return list(resolution.required_lanes)
+
+    def dispatch_queued(self, *, max_dispatches: int = 10) -> dict[str, Any]:
+        queued_entries = self._lane_registry.lease_dispatchable(max_items=max_dispatches)
+        dispatched: list[dict[str, Any]] = []
+        for entry in queued_entries:
+            payload = dict(entry.intent_payload)
+            payload["id"] = payload.get("id") or entry.actor_intent_id
+            payload["intent_id"] = payload.get("intent_id") or entry.actor_intent_id
+            payload["required_lanes"] = list(entry.required_lanes)
+            intent = SimpleNamespace(**payload)
+            lane_lease = LaneLease(
+                actor_intent_id=entry.actor_intent_id,
+                primary_lane_id=entry.primary_lane_id,
+                required_lanes=entry.required_lanes,
+                leased_at=entry.queued_at,
+                expires_at=entry.expires_at,
+            )
+            try:
+                result = self.submit(
+                    intent,
+                    requested_by=entry.requested_by,
+                    autonomous=entry.autonomous,
+                    wait_for_completion=False,
+                    queue_if_lane_unavailable=False,
+                    lane_lease=lane_lease,
+                )
+            except Exception as exc:
+                self._lane_registry.release(entry.actor_intent_id)
+                dispatched.append(
+                    {
+                        "actor_intent_id": entry.actor_intent_id,
+                        "primary_lane_id": entry.primary_lane_id,
+                        "status": "dispatch_failed",
+                        "error": str(exc),
+                    }
+                )
+                continue
+            dispatched.append(
+                {
+                    "actor_intent_id": entry.actor_intent_id,
+                    "primary_lane_id": entry.primary_lane_id,
+                    "status": result.status,
+                    "job_id": result.job_id,
+                }
+            )
+        return {
+            "queued_examined": len(queued_entries),
+            "dispatched": dispatched,
+            "lane_state": self._lane_registry.snapshot(),
+        }
+
     @staticmethod
     def _speculative_requested(intent: Any, policy: WorkflowPolicy) -> bool:
         if not policy.speculative.eligible or policy.execution_class != "mutation":
@@ -791,6 +882,9 @@ class BudgetedWorkflowScheduler:
         *,
         requested_by: str = "operator:lv3-cli",
         autonomous: bool = False,
+        wait_for_completion: bool = True,
+        queue_if_lane_unavailable: bool = True,
+        lane_lease: LaneLease | None = None,
     ) -> SchedulerResult:
         policy = load_workflow_policy(intent.workflow_id, repo_root=self._repo_root)
         requested_by = normalize_actor_id(requested_by)
@@ -799,6 +893,7 @@ class BudgetedWorkflowScheduler:
         parent_actor_intent_id = self._parent_actor_intent_id(arguments)
         host_touch_estimate = estimate_touched_hosts(intent, policy)
         risk_class = self._risk_class_for_submission(intent, policy)
+        required_lanes = self._required_lanes(intent)
         current_daily_executions = self._daily_execution_counter.get(requested_by) if autonomous else None
 
         try:
@@ -918,7 +1013,7 @@ class BudgetedWorkflowScheduler:
                     "completed_at": idempotency_claim.record.completed_at,
                 },
             )
-        if idempotency_claim.action == "in_flight":
+        if idempotency_claim.action == "in_flight" and idempotency_claim.record.actor_intent_id != actor_intent_id:
             return SchedulerResult(
                 status="in_flight",
                 workflow_id=policy.workflow_id,
@@ -932,70 +1027,136 @@ class BudgetedWorkflowScheduler:
                     "submitted_at": idempotency_claim.record.submitted_at,
                 },
             )
+        effective_wait_for_completion = wait_for_completion or speculative_requested
+        intent_ttl_seconds = (
+            policy.budget.max_duration_seconds
+            + (policy.speculative.rollback_window_seconds if speculative_requested else 0)
+            + 60
+        )
         lock_token = None
         lane_decision = None
         lane_reservation_ttl = None
         registered_claim = False
         claim_closed = False
-        if policy.execution_class == "mutation":
-            if not speculative_requested:
-                lock_token = self._lock_manager.acquire(
-                    policy.workflow_id,
-                    max_instances=policy.budget.max_concurrent_instances,
-                )
-                if lock_token is None:
-                    self._idempotency_store.delete(idempotency_key)
-                    return SchedulerResult(
-                        status="concurrency_limit",
-                        workflow_id=policy.workflow_id,
-                        actor_intent_id=actor_intent_id,
-                        reason="workflow busy",
-                        budget=policy.budget.as_dict(),
-                    )
-            lane = resolve_execution_lane(
-                intent,
-                workflow=policy.workflow,
-                repo_root=self._repo_root,
-            )
-            if lane is not None and policy.resource_reservation is not None:
-                lane_reservation_ttl = max(1, policy.resource_reservation.estimated_duration_seconds * 2)
-                lane_decision = self._lane_budget_store.reserve(
-                    lane=lane,
-                    reservation=policy.resource_reservation,
-                    actor_intent_id=actor_intent_id,
-                    workflow_id=policy.workflow_id,
-                    requested_by=requested_by,
-                    ttl_seconds=lane_reservation_ttl,
-                )
-                if not lane_decision.allowed:
-                    metadata = lane_decision.as_dict()
-                    self._write_budget_exceeded_event(
-                        policy=policy,
-                        requested_by=requested_by,
-                        actor_intent_id=actor_intent_id,
-                        metadata={"reason": "lane_budget_exceeded", **metadata},
-                    )
-                    return SchedulerResult(
-                        status="budget_exceeded",
-                        workflow_id=policy.workflow_id,
-                        actor_intent_id=actor_intent_id,
-                        reason="lane_budget_exceeded",
-                        budget=policy.budget.as_dict(),
-                        metadata=metadata,
-                    )
+        release_lane_on_exit = False
+        release_budget_on_exit = False
 
         try:
+            if policy.execution_class == "mutation":
+                if lane_lease is not None:
+                    release_lane_on_exit = True
+                else:
+                    lane_result = self._lane_registry.reserve(
+                        intent,
+                        actor_intent_id=actor_intent_id,
+                        ttl_seconds=intent_ttl_seconds,
+                    )
+                    if lane_result.status == "busy":
+                        if not queue_if_lane_unavailable:
+                            self._idempotency_store.delete(idempotency_key)
+                            return SchedulerResult(
+                                status="lane_busy",
+                                workflow_id=policy.workflow_id,
+                                actor_intent_id=actor_intent_id,
+                                reason=f"{lane_result.resolution.primary_lane_id} is at capacity",
+                                budget=policy.budget.as_dict(),
+                                metadata=lane_result.as_dict(),
+                            )
+                        queue_entry = self._lane_registry.enqueue(
+                            intent,
+                            actor_intent_id=actor_intent_id,
+                            requested_by=requested_by,
+                            ttl_seconds=intent_ttl_seconds,
+                            autonomous=autonomous,
+                        )
+                        if queue_entry is None:
+                            self._idempotency_store.delete(idempotency_key)
+                            return SchedulerResult(
+                                status="lane_busy",
+                                workflow_id=policy.workflow_id,
+                                actor_intent_id=actor_intent_id,
+                                reason=f"{lane_result.resolution.primary_lane_id} is at capacity",
+                                budget=policy.budget.as_dict(),
+                                metadata=lane_result.as_dict(),
+                            )
+                        self._write_queued_event(
+                            policy=policy,
+                            actor_intent_id=actor_intent_id,
+                            requested_by=requested_by,
+                            queue_id=queue_entry.queue_id,
+                            primary_lane_id=queue_entry.primary_lane_id,
+                            required_lanes=list(queue_entry.required_lanes),
+                        )
+                        return SchedulerResult(
+                            status="queued",
+                            workflow_id=policy.workflow_id,
+                            actor_intent_id=actor_intent_id,
+                            reason=f"{queue_entry.primary_lane_id} is busy",
+                            budget=policy.budget.as_dict(),
+                            metadata={
+                                "queue_id": queue_entry.queue_id,
+                                "primary_lane_id": queue_entry.primary_lane_id,
+                                "required_lanes": list(queue_entry.required_lanes),
+                            },
+                        )
+                    release_lane_on_exit = lane_result.status == "acquired"
+
+                if not speculative_requested:
+                    lock_token = self._lock_manager.acquire(
+                        policy.workflow_id,
+                        max_instances=policy.budget.max_concurrent_instances,
+                    )
+                    if lock_token is None:
+                        self._idempotency_store.delete(idempotency_key)
+                        return SchedulerResult(
+                            status="concurrency_limit",
+                            workflow_id=policy.workflow_id,
+                            actor_intent_id=actor_intent_id,
+                            reason="workflow busy",
+                            budget=policy.budget.as_dict(),
+                        )
+
+                lane = resolve_execution_lane(
+                    intent,
+                    workflow=policy.workflow,
+                    repo_root=self._repo_root,
+                )
+                if lane is not None and policy.resource_reservation is not None:
+                    lane_reservation_ttl = max(1, policy.resource_reservation.estimated_duration_seconds * 2)
+                    lane_decision = self._lane_budget_store.reserve(
+                        lane=lane,
+                        reservation=policy.resource_reservation,
+                        actor_intent_id=actor_intent_id,
+                        workflow_id=policy.workflow_id,
+                        requested_by=requested_by,
+                        ttl_seconds=lane_reservation_ttl,
+                    )
+                    if not lane_decision.allowed:
+                        metadata = lane_decision.as_dict()
+                        self._write_budget_exceeded_event(
+                            policy=policy,
+                            requested_by=requested_by,
+                            actor_intent_id=actor_intent_id,
+                            metadata={"reason": "lane_budget_exceeded", **metadata},
+                        )
+                        self._idempotency_store.delete(idempotency_key)
+                        return SchedulerResult(
+                            status="budget_exceeded",
+                            workflow_id=policy.workflow_id,
+                            actor_intent_id=actor_intent_id,
+                            reason="lane_budget_exceeded",
+                            budget=policy.budget.as_dict(),
+                            metadata=metadata,
+                        )
+                    release_budget_on_exit = True
+
             if autonomous:
                 self._daily_execution_counter.increment(requested_by)
             conflict_result = self._conflict_registry.register_intent(
                 intent,
                 actor_intent_id=actor_intent_id,
                 actor=requested_by,
-                ttl_seconds=(
-                    policy.budget.max_duration_seconds
-                    + (policy.speculative.rollback_window_seconds if speculative_requested else 0)
-                    + 60
-                ),
+                ttl_seconds=intent_ttl_seconds,
                 allow_conflicts=speculative_requested,
             )
             if conflict_result.status == "conflict":
@@ -1037,6 +1198,7 @@ class BudgetedWorkflowScheduler:
                 requested_by=requested_by,
                 resource_claims=[claim.as_dict() for claim in conflict_result.resource_claims],
                 warnings=[warning.as_dict() for warning in conflict_result.warnings],
+                required_lanes=required_lanes,
             )
             if speculative_requested and conflict_result.status == "speculative":
                 self._speculative_state_store.upsert(
@@ -1194,6 +1356,7 @@ class BudgetedWorkflowScheduler:
                     metadata={
                         "windmill_submission": submission,
                         "conflict_warnings": [warning.as_dict() for warning in conflict_result.warnings],
+                        "required_lanes": required_lanes,
                         "lane_budget": lane_decision.as_dict() if lane_decision is not None else None,
                     },
                 )
@@ -1210,9 +1373,27 @@ class BudgetedWorkflowScheduler:
                 metadata={
                     "host_touch_estimate": host_touch_estimate.as_dict(),
                     "execution_mode": "speculative" if speculative_requested else "pessimistic",
+                    "required_lanes": required_lanes,
+                    "lane_reservation_ttl_seconds": lane_reservation_ttl,
                 },
             )
             self._state_store.upsert(active_job)
+            if not effective_wait_for_completion:
+                registered_claim = False
+                release_lane_on_exit = False
+                release_budget_on_exit = False
+                return SchedulerResult(
+                    status="submitted",
+                    workflow_id=policy.workflow_id,
+                    job_id=str(job_id),
+                    actor_intent_id=actor_intent_id,
+                    budget=policy.budget.as_dict(),
+                    metadata={
+                        "required_lanes": required_lanes,
+                        "conflict_warnings": [warning.as_dict() for warning in conflict_result.warnings],
+                        "lane_budget": lane_decision.as_dict() if lane_decision is not None else None,
+                    },
+                )
 
             while True:
                 if lane_decision is not None and lane_reservation_ttl is not None:
@@ -1220,7 +1401,7 @@ class BudgetedWorkflowScheduler:
                 status = self._windmill_client.get_job(str(job_id))
                 violation = self._watchdog.evaluate(active_job, status)
                 if violation is not None and not violation.advisory_only:
-                    payload = self._watchdog.handle_violation(active_job, status, violation)
+                    payload = self._watchdog.handle_violation(active_job, status, violation, now=datetime.now(UTC))
                     self._idempotency_store.complete(
                         idempotency_key,
                         status="budget_exceeded",
@@ -1350,6 +1531,7 @@ class BudgetedWorkflowScheduler:
                         metadata={
                             "windmill_status": status,
                             "conflict_warnings": [warning.as_dict() for warning in conflict_result.warnings],
+                            "required_lanes": required_lanes,
                             "lane_budget": lane_decision.as_dict() if lane_decision is not None else None,
                         },
                     )
@@ -1357,8 +1539,10 @@ class BudgetedWorkflowScheduler:
         finally:
             if registered_claim and not claim_closed:
                 self._conflict_registry.complete_intent(actor_intent_id, status="aborted")
-            if lane_decision is not None:
+            if release_budget_on_exit and lane_decision is not None:
                 self._lane_budget_store.release(actor_intent_id)
+            if release_lane_on_exit:
+                self._lane_registry.release(actor_intent_id)
             if lock_token is not None:
                 lock_token.release()
 
