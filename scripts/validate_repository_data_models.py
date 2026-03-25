@@ -14,6 +14,7 @@ from api_gateway_catalog import load_api_gateway_catalog, validate_api_gateway_c
 from api_publication import load_api_publication_catalog, validate_api_publication_catalog
 from capacity_report import load_capacity_model
 from container_image_policy import load_image_catalog, validate_image_catalog as validate_container_image_catalog
+from changelog_redaction import load_redaction_policy, validate_redaction_policy
 from controller_automation_toolkit import REPO_ROOT, emit_cli_error, load_json, load_yaml, repo_path
 from control_plane_lanes import load_lane_catalog
 from data_catalog import load_data_catalog, validate_data_catalog
@@ -63,6 +64,7 @@ VERSION_SEMANTICS_PATH = repo_path("config", "version-semantics.json")
 WORKSTREAMS_PATH = repo_path("workstreams.yaml")
 TRIAGE_RULES_PATH = repo_path("config", "triage-rules.yaml")
 TRIAGE_AUTO_CHECK_ALLOWLIST_PATH = repo_path("config", "triage-auto-check-allowlist.yaml")
+CHANGELOG_REDACTION_PATH = repo_path("config", "changelog-redaction.yaml")
 
 SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -1458,6 +1460,10 @@ def validate_triage_rule_contracts() -> None:
             )
 
 
+def validate_changelog_redaction_contract() -> None:
+    validate_redaction_policy(load_redaction_policy(CHANGELOG_REDACTION_PATH), path=CHANGELOG_REDACTION_PATH)
+
+
 def validate_identity_taxonomy(
     desired_state: dict[str, Any],
     observed_state: dict[str, Any],
@@ -2104,6 +2110,7 @@ def validate_repository_data_models() -> int:
     validate_version_semantics()
     validate_workstreams_release_policy()
     validate_triage_rule_contracts()
+    validate_changelog_redaction_contract()
     validate_platform_finding_schema()
     validate_maintenance_window_schema()
     validate_capacity_model_schema()
