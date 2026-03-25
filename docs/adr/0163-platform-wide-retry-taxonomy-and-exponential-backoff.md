@@ -1,10 +1,10 @@
 # ADR 0163: Platform-Wide Retry Taxonomy and Exponential Backoff
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.149.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-25
 - Date: 2026-03-24
 
 ## Context
@@ -231,6 +231,7 @@ A Gitea Actions CI check (`scripts/check_ad_hoc_retry.py`) scans for raw `time.s
 ## Boundaries
 
 - This ADR covers the retry behaviour for calls made by platform code. It does not govern Ansible's built-in `retries:` directive (which is handled in individual task definitions) or Windmill's own job retry mechanism (which is controlled by the workflow engine).
+- Non-idempotent mutation submissions remain single-shot until ADR 0165 lands the replay-safe idempotency keys required to retry those writes without risking double execution.
 - The `FATAL` class triggers immediate operator paging. It must be used sparingly — only for genuinely unrecoverable states (e.g., OpenBao seal detected, Postgres WAL corruption). Overuse of `FATAL` will desensitise the operator.
 
 ## Related ADRs

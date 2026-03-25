@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0163](../adr/0163-platform-wide-retry-taxonomy-and-exponential-backoff.md)
 - Title: shared retry classification, per-surface policy config, jittered backoff helpers, and runtime adoption for gateway, scheduler transport, NetBox sync, and NATS publication
-- Status: in_progress
+- Status: merged
 - Branch: `codex/adr-0163-retry-taxonomy`
 - Worktree: `.worktrees/adr-0163`
 - Owner: codex
@@ -62,4 +62,6 @@
 
 ## Outcome
 
-- pending implementation completion, release bump, and live apply from `main`
+- repository implementation is complete on `main` in repo release `0.149.0`
+- the repo now ships the shared retry taxonomy, per-surface retry config, API-gateway retry adoption, Windmill transport read retries, NetBox retry migration, shared NATS publication retries, and the ad hoc retry guard
+- live apply is still pending because the documented Tailscale path and the public-IP fallback were unreachable from the execution environment during this turn
