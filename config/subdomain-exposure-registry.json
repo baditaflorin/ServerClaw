@@ -69,7 +69,7 @@
       "environment": "production",
       "status": "active",
       "exposure": "edge-published",
-      "auth_requirement": "none",
+      "auth_requirement": "edge_oidc",
       "target": "65.108.75.123",
       "target_port": 443,
       "owner_adr": "0081",
@@ -77,7 +77,7 @@
       "route_mode": "edge",
       "route_source": "public_edge_extra_sites",
       "route_kind": "static_dir",
-      "edge_auth": "none",
+      "edge_auth": "oauth2_proxy",
       "unauthenticated_paths": [],
       "repo_route_service_id": null,
       "repo_route_metadata": {
@@ -152,7 +152,7 @@
       "environment": "production",
       "status": "active",
       "exposure": "edge-published",
-      "auth_requirement": "none",
+      "auth_requirement": "edge_oidc",
       "target": "65.108.75.123",
       "target_port": 443,
       "owner_adr": "0094",
@@ -160,12 +160,11 @@
       "route_mode": "edge",
       "route_source": "public_edge_extra_sites",
       "route_kind": "static_dir",
-      "edge_auth": "none",
+      "edge_auth": "oauth2_proxy",
       "unauthenticated_paths": [],
       "repo_route_service_id": null,
       "repo_route_metadata": {
-        "source_dir": "docs-portal",
-        "noindex": true
+        "source_dir": "docs-portal"
       },
       "tls": {
         "provider": "letsencrypt",
@@ -194,7 +193,18 @@
       "repo_route_metadata": {
         "enabled": true,
         "tls": true,
-        "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring-lv3') | map(attribute='ipv4') | first) }}:3000"
+        "noindex": true,
+        "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring-lv3') | map(attribute='ipv4') | first) }}:3000",
+        "proxy_hide_headers": [
+          "X-Grafana-Version",
+          "Via"
+        ],
+        "blocked_exact_paths": [
+          {
+            "path": "/api/health",
+            "status": 404
+          }
+        ]
       },
       "tls": {
         "provider": "letsencrypt",
@@ -521,6 +531,6 @@
     "active_private_total": 1,
     "planned_total": 4,
     "edge_total": 12,
-    "edge_oidc_total": 2
+    "edge_oidc_total": 4
   }
 }
