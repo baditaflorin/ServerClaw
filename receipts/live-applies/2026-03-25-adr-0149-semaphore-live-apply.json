@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-25-adr-0149-semaphore-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-25",
+  "recorded_on": "2026-03-25",
+  "recorded_by": "codex",
+  "source_commit": "2a1b61f1712ce18ecdf82d0cba2d888f1c7a449f",
+  "repo_version_context": "0.157.4",
+  "workflow_id": "converge-semaphore",
+  "adr": "0149",
+  "summary": "Applied the private Semaphore runtime live on docker-runtime-lv3 with the PostgreSQL backend on postgres-lv3, exposed the UI and API through the Proxmox-host Tailscale proxy, and verified the seeded Semaphore self-test through the live task runner.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 130,
+      "address": "10.10.10.30"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "semaphore-private-api",
+      "address": "http://100.64.0.1:8020"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Repo-managed Semaphore converge",
+      "result": "pass",
+      "observed": "`make converge-semaphore` completed successfully with `docker-runtime-lv3 : ok=127 changed=8 failed=0`, `postgres-lv3 : ok=50 changed=0 failed=0`, and `proxmox_florin : ok=28 changed=1 failed=0`."
+    },
+    {
+      "check": "Private proxy health endpoint",
+      "result": "pass",
+      "observed": "`curl -fsS http://100.64.0.1:8020/api/ping` returned the Semaphore API health payload through the Proxmox-host Tailscale proxy."
+    },
+    {
+      "check": "Seeded Semaphore self-test template",
+      "result": "pass",
+      "observed": "`python3 scripts/semaphore_tool.py --auth-file .local/semaphore/admin-auth.json run-template --template 'Semaphore Self-Test' --wait --timeout 300` finished with `status: success` and TaskRunner output showing the localhost verification play passed."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0149-semaphore-for-ansible-job-management-ui-and-api.md",
+    "docs/runbooks/configure-semaphore.md",
+    "docs/workstreams/adr-0149-semaphore.md"
+  ],
+  "notes": [
+    "This receipt records the first successful live apply from `codex/adr-0149-semaphore` after rebasing onto current `origin/main` and fixing runtime checkout writability, forced compose recreation, and Semaphore API status-code handling.",
+    "The integrated mainline repo and platform versions remain pending until the workstream is merged, a numbered release is cut, and the same converge path is applied from `main` under the repository release policy."
+  ]
+}
