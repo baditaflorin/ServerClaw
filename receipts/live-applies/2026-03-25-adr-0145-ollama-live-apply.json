@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-25-adr-0145-ollama-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-25",
+  "recorded_on": "2026-03-25",
+  "recorded_by": "codex",
+  "source_commit": "0ebd893da396e3d4aeab588b23a258b9a75a84f1",
+  "repo_version_context": "0.142.0",
+  "workflow_id": "converge-ollama",
+  "adr": "0145",
+  "summary": "Applied the private Ollama runtime live on docker-runtime-lv3 from the integrated 0.142.0 mainline, kept startup-model pulls idempotent on re-converge, and verified the repo-managed startup model plus local generation latency.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "ollama-private-api",
+      "address": "10.10.10.20:11434"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Repo-managed Ollama converge",
+      "result": "pass",
+      "observed": "`make converge-ollama` completed successfully from commit `0ebd893da396e3d4aeab588b23a258b9a75a84f1`; the runtime health probes passed and the startup-model pull step was skipped because `llama3.2:3b` was already present."
+    },
+    {
+      "check": "Guest-local version endpoint",
+      "result": "pass",
+      "observed": "An Ansible probe on docker-runtime-lv3 returned `{\"version\":\"0.18.2\"}` from `http://127.0.0.1:11434/api/version`."
+    },
+    {
+      "check": "Repo-managed startup model presence",
+      "result": "pass",
+      "observed": "`sudo docker exec ollama ollama show llama3.2:3b` succeeded and reported the installed `llama` architecture, `3.2B` parameters, `131072` context length, and `Q4_K_M` quantization."
+    },
+    {
+      "check": "Local generation latency",
+      "result": "pass",
+      "observed": "A three-run guest-local `/api/generate` probe on `llama3.2:3b` reported `min=2357.8ms`, `avg=3062.2ms`, `p95=4396.5ms`, and `max=4396.5ms`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0145-ollama-for-local-llm-inference.md",
+    "docs/runbooks/configure-ollama.md",
+    "docs/workstreams/adr-0145-ollama.md",
+    "docs/release-notes/0.142.0.md",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "The first mainline converge attempt timed out while calling `/api/pull` for a startup model that was already present. The final live rollout adds a pre-check with `ollama show` and only pulls missing startup models."
+  ]
+}

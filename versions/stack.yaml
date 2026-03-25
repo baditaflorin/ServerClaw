@@ -1,6 +1,6 @@
 schema_version: 1.0.0
 repo_version: 0.142.0
-platform_version: 0.130.1
+platform_version: 0.130.2
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -32,11 +32,12 @@ live_apply_evidence:
     keycloak: 2026-03-24-keycloak-password-reset-mail-live-apply
     platform_context: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
     ntopng: 2026-03-22-adr-0059-ntopng-live-apply
-    open_webui: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
+    open_webui: 2026-03-25-adr-0145-open-webui-ollama-connector-live-apply
     remote_build_gateway: 2026-03-23-adr-0082-remote-build-gateway-live-apply
     tempo_tracing: 2026-03-22-adr-0053-tempo-traces-live-apply
     secret_rotation: 2026-03-23-adr-0065-secret-rotation-live-apply
     ops_portal: 2026-03-24-adr-0133-portal-authentication-by-default-live-apply
+    ollama: 2026-03-25-adr-0145-ollama-live-apply
 
 desired_state:
   host_id: proxmox_florin
@@ -619,6 +620,20 @@ observed_state:
     telegraf_active: true
     container_telemetry_flow_verified: true
     guest_network_recovered_after_mac_match_update: true
+  ollama:
+    runtime_vm: 10.10.10.20
+    private_http_url: http://10.10.10.20:11434
+    container_running: true
+    api_version: 0.18.2
+    default_model: llama3.2:3b
+    default_model_present: true
+    startup_model_repulled_when_already_present: false
+    open_webui_connector_verified: true
+    generation_latency_ms:
+      min: 2357.8
+      avg: 3062.2
+      p95: 4396.5
+      max: 4396.5
   portainer:
     runtime_vm: 10.10.10.20
     host_tailscale_proxy_url: https://100.118.189.95:9444
@@ -708,6 +723,9 @@ observed_state:
     image_generation_permission: false
     code_interpreter_permission: false
     direct_tool_servers_permission: false
+    ollama_connector_enabled: true
+    ollama_connector_url: http://host.docker.internal:11434
+    ollama_connector_verified: true
   platform_context_api:
     runtime_vm: 10.10.10.20
     host_tailscale_proxy_url: http://100.118.189.95:8010
@@ -860,5 +878,5 @@ release_tracks:
     current: 0.142.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.1
+    current: 0.130.2
     meaning: intended platform release for the actual server configuration

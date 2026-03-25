@@ -72,6 +72,8 @@ Mattermost is now live on `docker-runtime-lv3` and reachable privately at `http:
 
 Portainer is now live on `docker-runtime-lv3` and reachable privately at `https://100.118.189.95:9444`, with controller-local bootstrap artifacts under `.local/portainer` and a governed wrapper for read-mostly runtime inspection plus bounded restarts.
 
+Private Ollama is now live on `docker-runtime-lv3` at `10.10.10.20:11434`, the repo-managed `llama3.2:3b` startup model is present, and Open WebUI now uses that connector privately through `host.docker.internal:11434` without publishing Ollama on the public edge.
+
 The repository now also ships the repo-managed `lv3` operator CLI for terminal-first discovery, validation, status checks, and private control-plane entrypoints.
 The new ADR 0107 extension model is now implemented in the repository: `make scaffold-service` writes the cross-cutting integration artifacts for a new service, and `lv3 validate --service <service_id>` enforces the completeness checklist with legacy per-check grandfathering until `2026-09-23`.
 OpenTofu VM lifecycle automation is now implemented under `tofu/`, the six production VMs are imported into OpenTofu state through the build-server path, and `make tofu-drift ENV=production` now verifies the current production guest declarations without planned changes.
@@ -96,8 +98,8 @@ The repository now also ships ADR 0137 crawl policy automation: the shared publi
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.141.0` |
-| Platform version | `0.130.1` |
+| Repository version | `0.142.0` |
+| Platform version | `0.130.2` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -152,7 +154,8 @@ Template VM: `9000` `debian13-cloud-template`
 | `netbox` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
 | `notification_profiles` | `2026-03-22-adr-0050-notification-profiles-live-apply` |
 | `ntopng` | `2026-03-22-adr-0059-ntopng-live-apply` |
-| `open_webui` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
+| `ollama` | `2026-03-25-adr-0145-ollama-live-apply` |
+| `open_webui` | `2026-03-25-adr-0145-open-webui-ollama-connector-live-apply` |
 | `openbao` | `2026-03-22-adr-0043-openbao-live-apply` |
 | `ops_portal` | `2026-03-24-adr-0133-portal-authentication-by-default-live-apply` |
 | `platform_context` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
@@ -193,7 +196,7 @@ password SSH disabled on host and guests
 | Lane | Title | Transport | Surfaces | Primary Rule |
 | --- | --- | --- | --- | --- |
 | `command` | Command Lane | `ssh` | 2 | Use SSH only for command-lane access. |
-| `api` | API Lane | `https` | 11 | Default new APIs to internal-only or operator-only publication. |
+| `api` | API Lane | `https` | 12 | Default new APIs to internal-only or operator-only publication. |
 | `message` | Message Lane | `authenticated_submission` | 2 | Submit platform mail through the internal mail platform rather than arbitrary external SMTP relays. |
 | `event` | Event Lane | `mixed` | 10 | Event sinks must be documented and intentionally reachable. |
 
@@ -212,6 +215,7 @@ password SSH disabled on host and guests
 | `mail-gateway-api` | `api` | `service_api` | `http://10.10.10.20:8081` |
 | `mattermost-operator-api` | `api` | `service_api` | `http://100.118.189.95:8066/api/v4` |
 | `open-webui-operator-workbench` | `api` | `service_api` | `http://100.118.189.95:8008` |
+| `ollama-local-inference-api` | `api` | `service_api` | `http://10.10.10.20:11434` |
 | `platform-context-api` | `api` | `service_api` | `http://100.118.189.95:8010` |
 | `mail-platform-submission` | `message` | `mail_submission` | `10.10.10.20:1587` |
 | `proxmox-host-operator-notifications` | `message` | `notification_profile` | `lv3-ops-email sendmail endpoint with catch-all matcher to baditaflorin@gmail.com` |
@@ -229,7 +233,7 @@ password SSH disabled on host and guests
 ### API Publication Tiers
 | Tier | Title | Surfaces | Summary |
 | --- | --- | --- | --- |
-| `internal-only` | Internal-Only | 13 | Reachable only from LV3 private networks, loopback paths, or explicitly trusted control-plane hosts. |
+| `internal-only` | Internal-Only | 14 | Reachable only from LV3 private networks, loopback paths, or explicitly trusted control-plane hosts. |
 | `operator-only` | Operator-Only | 7 | Reachable only from approved operator devices over private access such as Tailscale. |
 | `public-edge` | Public Edge | 1 | Intentionally published on a public domain through the named edge model. |
 
@@ -246,6 +250,7 @@ password SSH disabled on host and guests
 | `mail-gateway-api` | `internal-only` | `api` | `http://10.10.10.20:8081` | Reachable only on the LV3 private guest network at docker-runtime-lv3:8081. |
 | `mattermost-operator-api` | `operator-only` | `api` | `http://100.118.189.95:8066/api/v4` | Reachable only through the Proxmox host Tailscale proxy on port 8066. |
 | `open-webui-operator-workbench` | `operator-only` | `api` | `http://100.118.189.95:8008` | Reachable only through the Proxmox host Tailscale proxy on port 8008. |
+| `ollama-local-inference-api` | `internal-only` | `api` | `http://10.10.10.20:11434` | Reachable only on the LV3 private guest network at docker-runtime-lv3:11434. |
 | `platform-context-api` | `operator-only` | `api` | `http://100.118.189.95:8010` | Reachable only through the Proxmox host Tailscale proxy on port 8010 and requires the controller-local bearer token. |
 | `stalwart-mail-events` | `internal-only` | `event` | `http://10.10.10.20:8081/webhooks/stalwart` | Reachable only from the private mail-platform stack on docker-runtime-lv3. |
 | `mattermost-incoming-webhooks` | `internal-only` | `event` | `http://10.10.10.20:8065/hooks/<managed-id>` | Reachable on the private Mattermost runtime at docker-runtime-lv3:8065, with mirrored webhook ids retained under .local/mattermost for controlled routing. |
@@ -370,6 +375,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure NetBox](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-netbox.md)
 - [Configure Ntfy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-ntfy.md)
 - [Configure ntopng Private Flow Visibility](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-ntopng.md)
+- [Configure Ollama](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-ollama.md)
 - [Configure Open WebUI](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-open-webui.md)
 - [Configure OpenBao](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-openbao.md)
 - [Configure Portainer](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-portainer.md)
@@ -612,6 +618,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0140: Grafana Public Access Hardening](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0140-grafana-public-access-hardening.md)
 - [ADR 0141: API Token Lifecycle and Exposure Response](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0141-api-token-lifecycle-and-exposure-response.md)
 - [ADR 0142: Public Surface Automated Security Scan](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0142-public-surface-automated-security-scan.md)
+- [ADR 0145: Ollama for Local LLM Inference API](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0145-ollama-for-local-llm-inference.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -728,6 +735,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0140: Grafana Public Access Hardening](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0140-grafana-public-access-hardening.md)
 - [Workstream ADR 0141: API Token Lifecycle and Exposure Response](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0141-api-token-lifecycle.md)
 - [Workstream ADR 0142: Public Surface Automated Security Scan](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0142-public-surface-security-scan.md)
+- [Workstream ADR 0145: Ollama for Local LLM Inference API](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0145-ollama.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
@@ -745,8 +753,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.141.0` |
-| Platform version | `0.130.1` |
+| Repository version | `0.142.0` |
+| Platform version | `0.130.2` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -898,6 +906,7 @@ This repository is intentionally opinionated:
 | `0140` | Grafana public access hardening | `live_applied` | [adr-0140-grafana-public-access-hardening.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0140-grafana-public-access-hardening.md) |
 | `0141` | API token lifecycle and exposure response | `merged` | [adr-0141-api-token-lifecycle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0141-api-token-lifecycle.md) |
 | `0142` | Public surface automated security scan | `merged` | [adr-0142-public-surface-security-scan.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0142-public-surface-security-scan.md) |
+| `0145` | Ollama for local LLM inference | `live_applied` | [adr-0145-ollama.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0145-ollama.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

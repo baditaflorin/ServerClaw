@@ -66,7 +66,7 @@
 - `make converge-open-webui` completed successfully on 2026-03-25 with the repo-managed Ollama connector enabled
 - guest-local Ollama returned `{"version":"0.18.2"}` and `docker exec ollama ollama show llama3.2:3b` succeeded
 - the Open WebUI container reached `http://host.docker.internal:11434/api/version`
-- the three-run local generation probe measured `min=2038.3ms`, `avg=2801.9ms`, `p95=4073.5ms`, `max=4073.5ms`
+- the three-run local generation probe measured `min=2357.8ms`, `avg=3062.2ms`, `p95=4396.5ms`, `max=4396.5ms`
 
 ## Notes For The Next Assistant
 

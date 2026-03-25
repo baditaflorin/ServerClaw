@@ -1,9 +1,9 @@
 # ADR 0145: Ollama for Local LLM Inference API
 
-- Status: Accepted
+- Status: Implemented
 - Implementation Status: Implemented
-- Implemented In Repo Version: 0.121.0
-- Implemented In Platform Version: 0.114.7
+- Implemented In Repo Version: 0.142.0
+- Implemented In Platform Version: 0.130.2
 - Implemented On: 2026-03-25
 - Date: 2026-03-24
 
@@ -80,12 +80,12 @@ The compose template adds `host.docker.internal:host-gateway` so the Open WebUI 
 
 ## Verification
 
-The first live implementation on 2026-03-25 verified:
+The first live implementation from `main` on 2026-03-25 verified:
 
 - `curl -fsS http://127.0.0.1:11434/api/version` returned `{"version":"0.18.2"}`
 - `docker exec ollama ollama show llama3.2:3b` succeeded on `docker-runtime-lv3`
 - the Open WebUI container could reach `http://host.docker.internal:11434/api/version`
-- a three-run local generation probe against `llama3.2:3b` reported `min=2038.3ms`, `avg=2801.9ms`, `p95=4073.5ms`, `max=4073.5ms`
+- a three-run local generation probe against `llama3.2:3b` reported `min=2357.8ms`, `avg=3062.2ms`, `p95=4396.5ms`, `max=4396.5ms`
 
 ## Related ADRs
 
