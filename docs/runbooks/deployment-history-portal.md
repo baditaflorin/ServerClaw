@@ -33,7 +33,21 @@ The generator reads:
 - `receipts/live-applies/**/*.json`
 - `receipts/promotions/**/*.json`
 - `config/service-capability-catalog.json`
+- `config/changelog-redaction.yaml`
 - mutation audit events from Loki when configured, or an optional local JSONL file
+
+## Redaction Boundary
+
+Portal output and the governed `get-deployment-history` read surface pass through the changelog redaction policy in `config/changelog-redaction.yaml`.
+
+The redacted view keeps timestamps, service names, workflow IDs, and outcomes, but masks or strips:
+
+- actor emails and branch-like agent identifiers
+- private IPs and internal hostnames such as `*-lv3`, `*-vm`, and `*.lv3.internal`
+- inline credential material such as `password=...`, `token=...`, bearer tokens, and OpenBao tokens
+- mutation-audit `params`, `env_vars`, `error_detail`, `stack_trace`, and `job_payload` fields
+
+If the portal shows `[details omitted]` or `[redacted]`, inspect the authoritative receipt or audit source directly instead of weakening the shared read model.
 
 ## Audit Source
 
