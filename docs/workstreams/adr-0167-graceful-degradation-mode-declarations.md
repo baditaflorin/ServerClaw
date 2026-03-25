@@ -67,6 +67,6 @@
 
 ## Outcome
 
-- repository implementation is complete on `main` in repo release `0.145.0`
+- repository implementation is complete on `main` in repo release `0.146.0`
 - the mainline now carries the declaration schema, gateway degraded-mode runtime, health surfacing, and operator runbooks
 - live platform state should move to `live_applied` only after the updated API gateway runtime is converged from `main`
