@@ -16,7 +16,6 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urljoin, urlparse
 
-
 def _resolve_repo_root(script_path: Path | None = None) -> Path:
     resolved_path = (script_path or Path(__file__)).resolve()
     for candidate in resolved_path.parents:
@@ -26,11 +25,6 @@ def _resolve_repo_root(script_path: Path | None = None) -> Path:
 
 
 REPO_ROOT = _resolve_repo_root()
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
-    del sys.modules["platform"]
-
 import httpx
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
@@ -39,6 +33,14 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 REPO_PLATFORM_ROOT = REPO_ROOT / "platform"
+REPO_SCRIPTS_ROOT = REPO_ROOT / "scripts"
+
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+if str(REPO_SCRIPTS_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_SCRIPTS_ROOT))
+if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
+    del sys.modules["platform"]
 
 
 def _load_repo_platform_package() -> None:

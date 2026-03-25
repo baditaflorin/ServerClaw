@@ -105,6 +105,24 @@
     mode: "0644"
     directory_mode: "0755"
 
+- name: Sync the shared scripts tree required by packaged platform modules
+  ansible.builtin.copy:
+    src: "{{ api_gateway_repo_root }}/scripts/"
+    dest: "{{ api_gateway_service_dir }}/scripts/"
+    owner: root
+    group: root
+    mode: "0644"
+    directory_mode: "0755"
+
+- name: Sync the shared repo config tree required by packaged platform modules
+  ansible.builtin.copy:
+    src: "{{ api_gateway_repo_root }}/config/"
+    dest: "{{ api_gateway_config_dir }}/"
+    owner: root
+    group: root
+    mode: "0644"
+    directory_mode: "0755"
+
 - name: Sync the API gateway runtime config bundle
   ansible.builtin.copy:
     src: "{{ item.src }}"
@@ -154,8 +172,11 @@
       RUN pip install --no-cache-dir -r requirements.txt
       COPY controller_automation_toolkit.py ./controller_automation_toolkit.py
       COPY api_gateway_catalog.py ./api_gateway_catalog.py
+      COPY maintenance_window_tool.py ./maintenance_window_tool.py
+      COPY slo_tracking.py ./slo_tracking.py
       COPY api_gateway ./api_gateway
       COPY platform ./platform
+      COPY scripts ./scripts
       COPY search_fabric ./search_fabric
       EXPOSE 8080
       CMD ["uvicorn", "api_gateway.main:app", "--host", "0.0.0.0", "--port", "8080"]

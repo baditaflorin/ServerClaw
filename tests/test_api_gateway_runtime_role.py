@@ -13,6 +13,17 @@ DEFAULTS_PATH = (
     / "defaults"
     / "main.yml"
 )
+TASKS_PATH = (
+    REPO_ROOT
+    / "collections"
+    / "ansible_collections"
+    / "lv3"
+    / "platform"
+    / "roles"
+    / "api_gateway_runtime"
+    / "tasks"
+    / "main.yml"
+)
 COMPOSE_TEMPLATE_PATH = (
     REPO_ROOT
     / "collections"
@@ -45,3 +56,18 @@ def test_api_gateway_compose_mounts_config_into_app_root() -> None:
 
     assert "{{ api_gateway_config_dir }}:/config:ro" in compose_template
     assert "{{ api_gateway_config_dir }}:/app/config:ro" in compose_template
+
+
+def test_api_gateway_role_packages_shared_platform_helpers() -> None:
+    defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
+    tasks = TASKS_PATH.read_text(encoding="utf-8")
+
+    assert "scripts/maintenance_window_tool.py" in defaults
+    assert "scripts/slo_tracking.py" in defaults
+    assert "Sync the shared scripts tree required by packaged platform modules" in tasks
+    assert 'src: "{{ api_gateway_repo_root }}/scripts/"' in tasks
+    assert "Sync the shared repo config tree required by packaged platform modules" in tasks
+    assert 'src: "{{ api_gateway_repo_root }}/config/"' in tasks
+    assert "COPY maintenance_window_tool.py ./maintenance_window_tool.py" in tasks
+    assert "COPY slo_tracking.py ./slo_tracking.py" in tasks
+    assert "COPY scripts ./scripts" in tasks

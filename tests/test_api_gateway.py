@@ -16,6 +16,7 @@ SCRIPTS_DIR = REPO_ROOT / "scripts"
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
+import api_gateway.main as gateway_main  # noqa: E402
 from api_gateway.main import GatewayConfig, GatewayRuntime, create_app  # noqa: E402
 import api_gateway.main as gateway_main  # noqa: E402
 
@@ -568,6 +569,42 @@ def test_gateway_retries_safe_proxy_reads(tmp_path: Path) -> None:
 
     asyncio.run(run())
     assert upstream_calls["count"] == 3
+
+
+def test_resolve_repo_root_supports_container_layout(tmp_path: Path) -> None:
+    app_root = tmp_path / "app"
+    script_path = app_root / "api_gateway" / "main.py"
+    script_path.parent.mkdir(parents=True, exist_ok=True)
+    script_path.write_text("# test\n", encoding="utf-8")
+    (app_root / "platform").mkdir(parents=True, exist_ok=True)
+    (app_root / "platform" / "__init__.py").write_text("", encoding="utf-8")
+
+    assert gateway_main._resolve_repo_root(script_path) == app_root
+
+
+def test_resolve_repo_root_supports_repo_layout(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    script_path = repo_root / "scripts" / "api_gateway" / "main.py"
+    script_path.parent.mkdir(parents=True, exist_ok=True)
+    script_path.write_text("# test\n", encoding="utf-8")
+    (repo_root / "platform").mkdir(parents=True, exist_ok=True)
+    (repo_root / "platform" / "__init__.py").write_text("", encoding="utf-8")
+
+    assert gateway_main._resolve_repo_root(script_path) == repo_root
+
+
+def test_gateway_runtime_root_exposes_scripts_tree(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    scripts_root = repo_root / "scripts"
+    script_path = scripts_root / "api_gateway" / "main.py"
+    script_path.parent.mkdir(parents=True, exist_ok=True)
+    script_path.write_text("# test\n", encoding="utf-8")
+    (repo_root / "platform").mkdir(parents=True, exist_ok=True)
+    (repo_root / "platform" / "__init__.py").write_text("", encoding="utf-8")
+
+    resolved_root = gateway_main._resolve_repo_root(script_path)
+
+    assert resolved_root / "scripts" == scripts_root
 
 
 def test_gateway_returns_retry_after_when_keycloak_circuit_is_open(tmp_path: Path) -> None:
