@@ -37,6 +37,12 @@ def prepare_agent_state_db(path: Path) -> Path:
 
 @pytest.fixture()
 def minimal_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    for key in ("LV3_HEALTH_DSN", "WORLD_STATE_DSN", "LV3_GRAPH_DSN", "LV3_LEDGER_DSN"):
+        monkeypatch.delenv(key, raising=False)
+    maintenance_state = tmp_path / ".local" / "state" / "maintenance-windows.json"
+    maintenance_state.parent.mkdir(parents=True, exist_ok=True)
+    maintenance_state.write_text("{}\n", encoding="utf-8")
+    monkeypatch.setenv("LV3_MAINTENANCE_WINDOWS_FILE", str(maintenance_state))
     (tmp_path / "config").mkdir()
     (tmp_path / "docs" / "adr").mkdir(parents=True)
     (tmp_path / "docs" / "runbooks").mkdir(parents=True)

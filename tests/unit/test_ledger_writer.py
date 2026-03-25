@@ -284,6 +284,22 @@ def test_writer_falls_back_to_file_sink(tmp_path: Path) -> None:
     assert persisted == [record]
 
 
+def test_writer_accepts_speculative_execution_event_types() -> None:
+    connection = FakeConnection()
+    writer = LedgerWriter(connection=connection, nats_publisher=None)
+
+    record = writer.write(
+        event_type="execution.speculative_committed",
+        actor="scheduler:test",
+        target_kind="workflow",
+        target_id="rotate-netbox-db-password",
+        actor_intent_id="intent-spec",
+        metadata={"conflict_detected": False},
+    )
+
+    assert record["event_type"] == "execution.speculative_committed"
+
+
 def test_writer_maps_legacy_mutation_audit_events() -> None:
     connection = FakeConnection()
     writer = LedgerWriter(connection=connection, nats_publisher=None)

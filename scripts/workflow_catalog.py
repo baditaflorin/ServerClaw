@@ -238,6 +238,67 @@ def validate_workflow_catalog(catalog: dict, secret_manifest: dict) -> None:
                 f"workflow '{workflow_id}' must define a non-empty verification_commands list"
             )
 
+        speculative = workflow.get("speculative")
+        if speculative is not None:
+            if not isinstance(speculative, dict):
+                raise ValueError(f"workflow '{workflow_id}' speculative config must be a mapping")
+            eligible = speculative.get("eligible", False)
+            if not isinstance(eligible, bool):
+                raise ValueError(f"workflow '{workflow_id}' speculative.eligible must be boolean")
+            if eligible:
+                compensating_workflow_id = speculative.get("compensating_workflow_id")
+                if not isinstance(compensating_workflow_id, str) or not compensating_workflow_id.strip():
+                    raise ValueError(
+                        f"workflow '{workflow_id}' speculative.compensating_workflow_id must be a non-empty string"
+                    )
+                if compensating_workflow_id not in workflows:
+                    raise ValueError(
+                        f"workflow '{workflow_id}' speculative.compensating_workflow_id references "
+                        f"unknown workflow '{compensating_workflow_id}'"
+                    )
+                conflict_probe = speculative.get("conflict_probe")
+                if not isinstance(conflict_probe, dict):
+                    raise ValueError(
+                        f"workflow '{workflow_id}' speculative.conflict_probe must be a mapping"
+                    )
+                callable_name = conflict_probe.get("callable")
+                if not isinstance(callable_name, str) or not callable_name.strip():
+                    raise ValueError(
+                        f"workflow '{workflow_id}' speculative.conflict_probe.callable must be a non-empty string"
+                    )
+                path_value = conflict_probe.get("path")
+                module_value = conflict_probe.get("module")
+                if path_value is None and module_value is None:
+                    raise ValueError(
+                        f"workflow '{workflow_id}' speculative.conflict_probe must define either path or module"
+                    )
+                if path_value is not None and (not isinstance(path_value, str) or not path_value.strip()):
+                    raise ValueError(
+                        f"workflow '{workflow_id}' speculative.conflict_probe.path must be a non-empty string"
+                    )
+                if module_value is not None and (not isinstance(module_value, str) or not module_value.strip()):
+                    raise ValueError(
+                        f"workflow '{workflow_id}' speculative.conflict_probe.module must be a non-empty string"
+                    )
+                probe_delay_seconds = speculative.get("probe_delay_seconds", 30)
+                if isinstance(probe_delay_seconds, bool) or not isinstance(probe_delay_seconds, int):
+                    raise ValueError(
+                        f"workflow '{workflow_id}' speculative.probe_delay_seconds must be an integer"
+                    )
+                if probe_delay_seconds < 0:
+                    raise ValueError(
+                        f"workflow '{workflow_id}' speculative.probe_delay_seconds must be >= 0"
+                    )
+                rollback_window_seconds = speculative.get("rollback_window_seconds", 300)
+                if isinstance(rollback_window_seconds, bool) or not isinstance(rollback_window_seconds, int):
+                    raise ValueError(
+                        f"workflow '{workflow_id}' speculative.rollback_window_seconds must be an integer"
+                    )
+                if rollback_window_seconds < 1:
+                    raise ValueError(
+                        f"workflow '{workflow_id}' speculative.rollback_window_seconds must be >= 1"
+                    )
+
 
 def list_workflows(catalog: dict) -> int:
     print(f"Workflow catalog: {WORKFLOW_CATALOG_PATH}")

@@ -24,6 +24,12 @@ def write(path: Path, content: str) -> None:
 
 @pytest.fixture()
 def compiler_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    for key in ("LV3_HEALTH_DSN", "WORLD_STATE_DSN", "LV3_GRAPH_DSN", "LV3_LEDGER_DSN"):
+        monkeypatch.delenv(key, raising=False)
+    maintenance_state = tmp_path / ".local" / "state" / "maintenance-windows.json"
+    maintenance_state.parent.mkdir(parents=True, exist_ok=True)
+    maintenance_state.write_text("{}\n", encoding="utf-8")
+    monkeypatch.setenv("LV3_MAINTENANCE_WINDOWS_FILE", str(maintenance_state))
     write(
         tmp_path / "config" / "service-capability-catalog.json",
         json.dumps(
@@ -166,9 +172,6 @@ all:
         )
         + "\n",
     )
-    maintenance_state = tmp_path / ".local" / "state" / "maintenance" / "windows.json"
-    write(maintenance_state, "{}\n")
-    monkeypatch.setenv("LV3_MAINTENANCE_WINDOWS_FILE", str(maintenance_state))
     return tmp_path
 
 
@@ -213,6 +216,32 @@ def test_compile_direct_workflow_keeps_compatibility(compiler_repo: Path) -> Non
     assert result.dispatch_workflow_id == "validate"
     assert result.dispatch_payload == {"mode": "strict"}
     assert result.intent.action == "execute"
+
+
+def test_compile_enables_speculative_mode_when_requested(compiler_repo: Path) -> None:
+    catalog_path = compiler_repo / "config" / "workflow-catalog.json"
+    payload = json.loads(catalog_path.read_text(encoding="utf-8"))
+    payload["workflows"]["converge-netbox"]["speculative"] = {
+        "eligible": True,
+        "compensating_workflow_id": "rollback-netbox",
+        "conflict_probe": {"path": "tests/fixtures/speculative_probe.py", "callable": "probe"},
+        "probe_delay_seconds": 0,
+        "rollback_window_seconds": 120,
+    }
+    payload["workflows"]["rollback-netbox"] = {
+        "description": "Rollback NetBox",
+        "live_impact": "guest_live",
+    }
+    catalog_path.write_text(json.dumps(payload) + "\n", encoding="utf-8")
+
+    compiler = GoalCompiler(compiler_repo)
+    result = compiler.compile("deploy netbox", allow_speculative=True)
+
+    assert result.intent.execution_mode == "speculative"
+    assert result.intent.compensating_workflow_id == "rollback-netbox"
+    assert result.intent.rollback_window_seconds == 120
+    assert result.dispatch_payload["execution_mode"] == "speculative"
+    assert any("speculative execution enabled" in item for item in result.intent.preconditions)
 
 
 def test_compile_parse_error_is_explicit(compiler_repo: Path) -> None:

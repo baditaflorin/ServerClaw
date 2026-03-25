@@ -1053,7 +1053,7 @@ def run_windmill_request(
             print(result.output)
         else:
             print(json.dumps(result.output, indent=2, sort_keys=True))
-    if result.status in {"failed", "aborted"}:
+    if result.status in {"failed", "aborted", "rolled_back"}:
         print(
             f"Workflow {workflow_name} ended with status {result.status}.",
             file=sys.stderr,
@@ -1105,6 +1105,7 @@ def run_compiled_instruction(
     dry_run: bool,
     explain: bool,
     no_color: bool,
+    allow_speculative: bool = False,
     force_unsafe_health: bool = False,
     actor_id: str = DEFAULT_RUN_ACTOR_ID,
     autonomous: bool = False,
@@ -1119,6 +1120,7 @@ def run_compiled_instruction(
         result = compiler.compile(
             instruction,
             dispatch_args=parsed_args,
+            allow_speculative=allow_speculative,
             force_unsafe_health=force_unsafe_health,
             actor_id=normalize_actor_id(actor_id),
             autonomous=autonomous,
@@ -1199,6 +1201,7 @@ def run_compiled_instruction(
         id=result.intent.id,
         workflow_id=result.dispatch_workflow_id,
         arguments=result.dispatch_payload,
+        execution_mode=result.intent.execution_mode,
         target_service_id=result.intent.target.services[0] if result.intent.target.services else None,
         target_vm=result.intent.scope.allowed_hosts[0] if result.intent.scope.allowed_hosts else None,
         resource_claims=result.intent.resource_claims,
@@ -1214,6 +1217,7 @@ def run_compiled_instruction(
             id=result.intent.id,
             workflow_id=result.dispatch_workflow_id,
             arguments=result.dispatch_payload,
+            execution_mode=result.intent.execution_mode,
             target_service_id=result.intent.target.services[0] if result.intent.target.services else None,
             target_vm=result.intent.scope.allowed_hosts[0] if result.intent.scope.allowed_hosts else None,
             resource_claims=result.intent.resource_claims,
@@ -2300,6 +2304,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     run.add_argument("--actor-id", default=DEFAULT_RUN_ACTOR_ID)
     run.add_argument("--autonomous", action="store_true", help="Apply autonomous agent policy bounds.")
+    run.add_argument("--allow-speculative", action="store_true", help="Opt into speculative execution when eligible.")
     run.add_argument("--dry-run", action="store_true")
     run.add_argument("--explain", action="store_true")
 
@@ -2600,7 +2605,7 @@ def main(argv: list[str] | None = None) -> int:
         )
     if args.command == "run":
         instruction = " ".join(args.instruction)
-        if should_run_direct_workflow(instruction):
+        if should_run_direct_workflow(instruction) and not args.allow_speculative:
             return run_windmill_workflow(
                 instruction,
                 args.args,
@@ -2618,6 +2623,7 @@ def main(argv: list[str] | None = None) -> int:
             dry_run=args.dry_run,
             explain=args.explain,
             no_color=no_color,
+            allow_speculative=args.allow_speculative,
             force_unsafe_health=args.force_unsafe_health,
             actor_id=args.actor_id,
             autonomous=args.autonomous,
