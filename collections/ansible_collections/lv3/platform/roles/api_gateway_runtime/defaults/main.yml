@@ -15,6 +15,7 @@ api_gateway_gateway_catalog_src: "{{ api_gateway_repo_root }}/config/api-gateway
 api_gateway_service_catalog_src: "{{ api_gateway_repo_root }}/config/service-capability-catalog.json"
 api_gateway_workflow_catalog_src: "{{ api_gateway_repo_root }}/config/workflow-catalog.json"
 api_gateway_retry_policy_src: "{{ api_gateway_repo_root }}/config/retry-policies.yaml"
+api_gateway_circuit_policies_src: "{{ api_gateway_repo_root }}/config/circuit-policies.yaml"
 api_gateway_platform_vars_src: "{{ api_gateway_repo_root }}/inventory/group_vars/platform.yml"
 api_gateway_drift_receipts_glob: "{{ api_gateway_repo_root }}/receipts/drift-reports/*.json"
 api_gateway_platform_context_token_local_file: "{{ api_gateway_repo_root }}/.local/platform-context/api-token.txt"
@@ -38,6 +39,8 @@ api_gateway_config_sources:
     dest: workflow-catalog.json
   - src: "{{ api_gateway_retry_policy_src }}"
     dest: retry-policies.yaml
+  - src: "{{ api_gateway_circuit_policies_src }}"
+    dest: circuit-policies.yaml
   - src: "{{ api_gateway_platform_vars_src }}"
     dest: platform.yml
 api_gateway_keycloak_internal_base_url: http://keycloak:8080

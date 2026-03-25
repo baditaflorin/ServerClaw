@@ -56,6 +56,20 @@ from api_gateway_catalog import load_api_gateway_catalog
 GRAPH_RUNTIME_IMPORT_ERROR: str | None = None
 
 try:
+    from platform.circuit import CircuitOpenError, CircuitRegistry, should_count_httpx_exception, should_count_socket_exception
+except Exception as exc:  # noqa: BLE001
+    CircuitOpenError = RuntimeError  # type: ignore[assignment]
+    CircuitRegistry = Any  # type: ignore[assignment]
+
+    def should_count_httpx_exception(exc: BaseException) -> bool:
+        return isinstance(exc, Exception)
+
+    def should_count_socket_exception(exc: BaseException) -> bool:
+        return isinstance(exc, Exception)
+
+    GRAPH_RUNTIME_IMPORT_ERROR = str(exc) if GRAPH_RUNTIME_IMPORT_ERROR is None else GRAPH_RUNTIME_IMPORT_ERROR
+
+try:
     from platform.graph import DependencyGraphClient, NodeNotFoundError
 except Exception as exc:  # noqa: BLE001
     DependencyGraphClient = Any  # type: ignore[assignment]
@@ -170,6 +184,7 @@ class GatewayConfig:
     deploy_webhook_url: str | None
     secret_rotation_webhook_url: str | None
     openapi_include_upstreams: bool
+    circuit_policy_path: Path
     graph_dsn: str | None = None
     world_state_dsn: str | None = None
     clock_skew_seconds: int = 30
@@ -184,12 +199,14 @@ class KeycloakJWTVerifier:
         expected_audience: str | None,
         clock_skew_seconds: int,
         client: httpx.AsyncClient,
+        circuit_breaker: Any | None = None,
     ) -> None:
         self._jwks_url = jwks_url
         self._issuer = issuer
         self._expected_audience = expected_audience
         self._clock_skew_seconds = clock_skew_seconds
         self._client = client
+        self._circuit_breaker = circuit_breaker
         self._jwks_cache: dict[str, Any] | None = None
         self._jwks_cache_expiry = 0.0
         self._lock = asyncio.Lock()
@@ -204,13 +221,44 @@ class KeycloakJWTVerifier:
             now = time.time()
             if self._jwks_cache is not None and now < self._jwks_cache_expiry:
                 return self._jwks_cache
-            response = await async_with_retry(
-                lambda: self._client.get(self._jwks_url, timeout=10),
-                policy=self._retry_policy,
-                error_context="keycloak jwks fetch",
-            )
-            response.raise_for_status()
-            self._jwks_cache = response.json()
+
+            async def fetch_jwks() -> dict[str, Any]:
+                response = await async_with_retry(
+                    lambda: self._client.get(self._jwks_url, timeout=10),
+                    policy=self._retry_policy,
+                    error_context="keycloak jwks fetch",
+                )
+                response.raise_for_status()
+                return response.json()
+
+            try:
+                if self._circuit_breaker is not None:
+                    self._jwks_cache = await self._circuit_breaker.call(fetch_jwks)
+                else:
+                    self._jwks_cache = await fetch_jwks()
+            except CircuitOpenError as exc:
+                if self._jwks_cache is not None and now < self._jwks_cache_expiry:
+                    return self._jwks_cache
+                raise HTTPException(
+                    status_code=503,
+                    detail={
+                        "code": "GATE_CIRCUIT_OPEN",
+                        "circuit": "keycloak",
+                        "message": "Keycloak JWKS is temporarily unavailable.",
+                        "retry_after": exc.retry_after,
+                    },
+                    headers={"Retry-After": str(exc.retry_after)},
+                ) from exc
+            except Exception as exc:  # noqa: BLE001
+                raise HTTPException(
+                    status_code=503,
+                    detail={
+                        "code": "GATE_DEPENDENCY_UNAVAILABLE",
+                        "circuit": "keycloak",
+                        "message": f"Keycloak JWKS fetch failed: {exc}",
+                    },
+                ) from exc
+
             self._jwks_cache_expiry = now + 300
             return self._jwks_cache
 
@@ -279,9 +327,10 @@ class KeycloakJWTVerifier:
 
 
 class NatsEventEmitter:
-    def __init__(self, nats_url: str | None) -> None:
+    def __init__(self, nats_url: str | None, *, circuit_breaker: Any | None = None) -> None:
         self._parsed = urlparse(nats_url) if nats_url else None
         self._retry_policy = policy_for_surface("nats_publish")
+        self._circuit_breaker = circuit_breaker
 
     async def emit(self, subject: str, payload: dict[str, Any]) -> None:
         if self._parsed is None:
@@ -290,11 +339,20 @@ class NatsEventEmitter:
         port = self._parsed.port or 4222
         envelope = build_envelope(subject, payload, actor_id="service/api-gateway")
         encoded = json.dumps(envelope, separators=(",", ":")).encode()
-        await async_with_retry(
-            lambda: asyncio.to_thread(self._publish, host, port, subject, encoded),
-            policy=self._retry_policy,
-            error_context=f"gateway nats publish {subject}",
-        )
+        async def publish() -> None:
+            await async_with_retry(
+                lambda: asyncio.to_thread(self._publish, host, port, subject, encoded),
+                policy=self._retry_policy,
+                error_context=f"gateway nats publish {subject}",
+            )
+
+        try:
+            if self._circuit_breaker is not None:
+                await self._circuit_breaker.call(publish)
+            else:
+                await publish()
+        except CircuitOpenError:
+            return
 
     @staticmethod
     def _publish(host: str, port: int, subject: str, payload: bytes) -> None:
@@ -314,14 +372,33 @@ class GatewayRuntime:
         self.service_by_prefix = sorted(self.services, key=lambda service: len(service.gateway_prefix), reverse=True)
         self.http_client = httpx.AsyncClient(follow_redirects=False)
         self.search_client = SearchClient(config.repo_root)
+        self.circuit_registry = CircuitRegistry(
+            config.repo_root,
+            policies_path=config.circuit_policy_path,
+            nats_url=config.nats_url,
+        )
         self.verifier = KeycloakJWTVerifier(
             jwks_url=config.jwks_url,
             issuer=config.issuer,
             expected_audience=config.expected_audience,
             clock_skew_seconds=config.clock_skew_seconds,
             client=self.http_client,
+            circuit_breaker=self.circuit_registry.async_breaker(
+                "keycloak",
+                exception_classifier=should_count_httpx_exception,
+            )
+            if self.circuit_registry.has_policy("keycloak")
+            else None,
         )
-        self.event_emitter = NatsEventEmitter(config.nats_url)
+        self.event_emitter = NatsEventEmitter(
+            config.nats_url,
+            circuit_breaker=self.circuit_registry.async_breaker(
+                "nats",
+                exception_classifier=should_count_socket_exception,
+            )
+            if self.circuit_registry.has_policy("nats")
+            else None,
+        )
         self.internal_api_retry_policy = policy_for_surface("internal_api")
         self.graph_client = None
         if config.graph_dsn and GRAPH_RUNTIME_IMPORT_ERROR is None:
@@ -334,6 +411,14 @@ class GatewayRuntime:
             dsn=config.world_state_dsn or config.graph_dsn,
             world_state_dsn=config.world_state_dsn,
             ledger_dsn=config.world_state_dsn or config.graph_dsn,
+        )
+
+    def service_circuit(self, service_id: str) -> Any | None:
+        if not self.circuit_registry.has_policy(service_id):
+            return None
+        return self.circuit_registry.async_breaker(
+            service_id,
+            exception_classifier=should_count_httpx_exception,
         )
 
     async def close(self) -> None:
@@ -390,11 +475,20 @@ class GatewayRuntime:
         if token:
             headers["Authorization"] = f"Bearer {token}"
         try:
-            response = await async_with_retry(
-                lambda: self.http_client.get(url, timeout=service.timeout_seconds, headers=headers),
-                policy=self.internal_api_retry_policy,
-                error_context=f"gateway health probe {service.id}",
-            )
+            async def fetch() -> httpx.Response:
+                response = await async_with_retry(
+                    lambda: self.http_client.get(url, timeout=service.timeout_seconds, headers=headers),
+                    policy=self.internal_api_retry_policy,
+                    error_context=f"gateway health probe {service.id}",
+                )
+                response.raise_for_status()
+                return response
+
+            circuit = self.service_circuit(service.id)
+            if circuit is not None:
+                response = await circuit.call(fetch)
+            else:
+                response = await fetch()
             healthy = 200 <= response.status_code < 400
             body: Any
             try:
@@ -408,6 +502,15 @@ class GatewayRuntime:
                 "status": "healthy" if healthy else "unhealthy",
                 "http_status": response.status_code,
                 "details": body,
+            }
+        except CircuitOpenError as exc:
+            return {
+                "service_id": service.id,
+                "gateway_prefix": service.gateway_prefix,
+                "upstream": service.upstream,
+                "status": "circuit_open",
+                "error": f"circuit open for {exc.retry_after}s",
+                "retry_after": exc.retry_after,
             }
         except Exception as exc:  # noqa: BLE001
             return {
@@ -513,6 +616,9 @@ def build_config() -> GatewayConfig:
         or os.environ.get("LV3_GRAPH_DSN")
         or os.environ.get("WORLD_STATE_DSN")
         or None,
+        circuit_policy_path=Path(
+            os.environ.get("LV3_GATEWAY_CIRCUIT_POLICY_PATH", repo_root / "config" / "circuit-policies.yaml")
+        ),
         world_state_dsn=os.environ.get("LV3_GATEWAY_WORLD_STATE_DSN")
         or os.environ.get("WORLD_STATE_DSN")
         or None,
@@ -1004,11 +1110,20 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
                 if token:
                     headers["Authorization"] = f"Bearer {token}"
                 try:
-                    response = await async_with_retry(
-                        lambda: runtime.http_client.get(url, timeout=service.timeout_seconds, headers=headers),
-                        policy=runtime.internal_api_retry_policy,
-                        error_context=f"gateway openapi fetch {service.id}",
-                    )
+                    async def fetch() -> httpx.Response:
+                        response = await async_with_retry(
+                            lambda: runtime.http_client.get(url, timeout=service.timeout_seconds, headers=headers),
+                            policy=runtime.internal_api_retry_policy,
+                            error_context=f"gateway openapi fetch {service.id}",
+                        )
+                        response.raise_for_status()
+                        return response
+
+                    circuit = runtime.service_circuit(service.id)
+                    if circuit is not None:
+                        response = await circuit.call(fetch)
+                    else:
+                        response = await fetch()
                     if response.status_code == 200:
                         upstream_schemas[service.id] = response.json()
                 except Exception:  # noqa: BLE001
@@ -1066,22 +1181,63 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
 
         url = urljoin(service.upstream + "/", upstream_path.lstrip("/"))
         body = await request.body()
-        request_upstream = lambda: runtime.http_client.request(
-            request.method,
-            url,
-            params=request.query_params,
-            content=body,
-            headers=headers,
-            timeout=service.timeout_seconds,
-        )
-        if request.method in RETRY_SAFE_METHODS:
-            upstream_response = await async_with_retry(
-                request_upstream,
-                policy=runtime.internal_api_retry_policy,
-                error_context=f"gateway proxy {service.id} {request.method} {upstream_path}",
+        async def forward_request() -> httpx.Response:
+            return await runtime.http_client.request(
+                request.method,
+                url,
+                params=request.query_params,
+                content=body,
+                headers=headers,
+                timeout=service.timeout_seconds,
             )
-        else:
-            upstream_response = await request_upstream()
+
+        async def execute_request() -> httpx.Response:
+            if request.method in RETRY_SAFE_METHODS:
+                return await async_with_retry(
+                    forward_request,
+                    policy=runtime.internal_api_retry_policy,
+                    error_context=f"gateway proxy {service.id} {request.method} {upstream_path}",
+                )
+            return await forward_request()
+
+        try:
+            circuit = runtime.service_circuit(service.id)
+            if circuit is not None:
+                upstream_response = await circuit.call(execute_request)
+            else:
+                upstream_response = await execute_request()
+        except CircuitOpenError as exc:
+            await emit_request_event(
+                request,
+                identity=identity,
+                status_code=503,
+                started_at=started_at,
+            )
+            return JSONResponse(
+                status_code=503,
+                headers={"Retry-After": str(exc.retry_after)},
+                content={
+                    "code": "GATE_CIRCUIT_OPEN",
+                    "circuit": service.id,
+                    "message": f"{service.name} is temporarily unavailable.",
+                    "retry_after": exc.retry_after,
+                },
+            )
+        except httpx.HTTPError as exc:
+            await emit_request_event(
+                request,
+                identity=identity,
+                status_code=502,
+                started_at=started_at,
+            )
+            return JSONResponse(
+                status_code=502,
+                content={
+                    "code": "GATE_DEPENDENCY_UNAVAILABLE",
+                    "service": service.id,
+                    "message": str(exc),
+                },
+            )
 
         await emit_request_event(
             request,

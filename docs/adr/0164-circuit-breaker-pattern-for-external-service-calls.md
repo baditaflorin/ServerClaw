@@ -1,10 +1,10 @@
 # ADR 0164: Circuit Breaker Pattern for External Service Calls
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.144.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-25
 - Date: 2026-03-24
 
 ## Context
@@ -18,237 +18,111 @@ The platform makes synchronous calls to several external and internal services o
 - **NATS** (`docker-runtime-lv3`): Every platform event publication.
 - **Anthropic/Ollama API**: Every LLM inference call in agent workflows.
 
-The current error handling model (ADR 0163 retry taxonomy) handles transient failures well: a single timeout triggers exponential backoff and retries. But it does not handle **service outages** well: if Keycloak is restarting for 90 seconds, every API gateway request will attempt a connection, wait for the timeout (10 seconds), retry (2–3 more times with backoff), and then fail — with each caller independently spending 30+ seconds discovering that Keycloak is down. This is 30 seconds of wasted latency multiplied by every concurrent request.
+The current error handling model from ADR 0163 handles transient failures with retries and backoff. It does not handle dependency outages well: when a dependency is fully unavailable, each caller burns the same timeout and retry budget before independently discovering the outage.
 
 The correct model for service outages is the **circuit breaker pattern**:
-- **CLOSED** (normal): calls pass through; failures are counted.
-- **OPEN** (outage detected): calls fail immediately without attempting a connection; no timeout wait.
-- **HALF-OPEN** (probe): after a recovery window, one probe request is allowed through; if it succeeds, the circuit closes.
 
-A circuit breaker converts "wait 30 seconds to discover Keycloak is down on every request" into "fail immediately after the first 5 failures discover Keycloak is down."
+- **CLOSED**: calls pass through and failures are counted.
+- **OPEN**: calls fail immediately without attempting a connection.
+- **HALF_OPEN**: after a recovery window, a probe call is allowed through and closes the circuit if it succeeds.
+
+A circuit breaker turns "wait 30 seconds to rediscover Keycloak is down on every request" into "fail immediately after the configured threshold has already established the outage."
 
 ## Decision
 
-We will implement a **circuit breaker** for every external and high-impact internal service call in the platform, backed by NATS JetStream KV for distributed state so that all agents share a single circuit state.
+We implement a shared, repo-managed **circuit breaker layer** for external and high-impact internal service calls.
+
+The first integrated repository implementation lands in:
+
+- `platform/circuit/` for policy loading, state backends, and sync plus async breaker wrappers
+- `config/circuit-policies.yaml` as the canonical circuit contract
+- `scripts/api_gateway/main.py` for Keycloak JWKS fetches, proxied upstream calls, and gateway-side NATS request-event publishing
+- `platform/llm/client.py` for Ollama and fallback LLM calls
+- `platform/scheduler/scheduler.py` and `scripts/runbook_executor.py` for Windmill-facing execution paths
+- `collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/` so the gateway converge path bundles the circuit policy file
 
 ### Circuit breaker state machine
 
+```text
+  CLOSED --(failure threshold exceeded)--> OPEN
+    ^                                      |
+    |                                      |
+    +--(probe succeeds)---- HALF_OPEN <----+
+                ^             |
+                +--(recovery window elapsed)
 ```
-  CLOSED ──(failure_threshold exceeded)──→ OPEN
-    ↑                                         │
-    └──(probe succeeds)── HALF_OPEN ←──(recovery_window elapsed)──┘
-```
 
-### Distributed circuit state
+### Distributed and local circuit state
 
-Circuit state is shared across all agents via NATS JetStream KV:
+The preferred shared state backend is NATS JetStream KV. The implementation uses the `platform-circuits` KV bucket when `LV3_NATS_URL` or an equivalent circuit-state NATS URL is configured.
 
-```python
-# platform/circuit/breaker.py
+When NATS is unavailable or not configured, the circuit layer falls back to:
 
-CIRCUIT_KV_BUCKET = "platform.circuits"
+- a JSON file backend when `LV3_CIRCUIT_STATE_FILE` is set
+- otherwise, local in-memory state inside the process
 
-@dataclass
-class CircuitState:
-    name: str                  # Circuit identifier: e.g., "keycloak", "openbao"
-    state: str                 # "closed" | "open" | "half_open"
-    failure_count: int
-    last_failure_at: datetime
-    opened_at: datetime | None
-    recovery_window_s: int
-    failure_threshold: int
-    success_threshold: int     # Consecutive successes in HALF_OPEN to close
-    consecutive_successes: int
-
-class CircuitBreaker:
-
-    def __init__(self, name: str, policy: CircuitPolicy):
-        self.name = name
-        self.policy = policy
-        self.kv = nats.kv_bucket(CIRCUIT_KV_BUCKET)
-
-    def call(self, fn: Callable, *args, **kwargs) -> Any:
-        state = self._load_state()
-
-        if state.state == "open":
-            if self._should_attempt_probe(state):
-                self._transition(state, "half_open")
-            else:
-                raise CircuitOpenError(
-                    circuit=self.name,
-                    opened_at=state.opened_at,
-                    retry_after=state.recovery_window_s,
-                )
-
-        try:
-            result = fn(*args, **kwargs)
-            self._record_success(state)
-            return result
-        except Exception as e:
-            self._record_failure(state, e)
-            raise
-
-    def _record_failure(self, state: CircuitState, exc: Exception):
-        state.failure_count += 1
-        state.last_failure_at = now()
-        state.consecutive_successes = 0
-        if state.failure_count >= state.policy.failure_threshold:
-            self._transition(state, "open")
-            nats.publish(f"platform.circuit.opened.{self.name}", {
-                "circuit": self.name,
-                "failure_count": state.failure_count,
-                "opened_at": state.opened_at.isoformat(),
-            })
-        self._save_state(state)
-
-    def _record_success(self, state: CircuitState):
-        if state.state == "half_open":
-            state.consecutive_successes += 1
-            if state.consecutive_successes >= state.policy.success_threshold:
-                self._transition(state, "closed")
-                nats.publish(f"platform.circuit.closed.{self.name}", {"circuit": self.name})
-        elif state.state == "closed":
-            # Reset failure count on success
-            if state.failure_count > 0:
-                state.failure_count = max(0, state.failure_count - 1)
-        self._save_state(state)
-```
+That keeps the implementation deployable in both the distributed runtime and local test harnesses without inventing ad hoc state stores.
 
 ### Circuit policy per service
 
-```yaml
-# config/circuit-policies.yaml
+`config/circuit-policies.yaml` is the single source of truth for circuit thresholds, recovery windows, and success thresholds.
 
-circuits:
-  - name: keycloak
-    service: Keycloak OIDC / JWKS
-    failure_threshold: 5        # 5 consecutive failures → open
-    recovery_window_s: 30       # Try one probe after 30 seconds
-    success_threshold: 2        # 2 consecutive probe successes → close
-    timeout_s: 10               # Per-call timeout before counting as failure
+The initial integrated policy set covers:
 
-  - name: openbao
-    service: OpenBao secret store
-    failure_threshold: 3        # OpenBao failures are critical; open sooner
-    recovery_window_s: 20
-    success_threshold: 1
-    timeout_s: 5
+- `keycloak`
+- `openbao`
+- `windmill`
+- `nats`
+- `hetzner_dns`
+- `anthropic_api`
+- `ollama`
 
-  - name: windmill
-    service: Windmill workflow engine
-    failure_threshold: 5
-    recovery_window_s: 60       # Windmill restarts take longer
-    success_threshold: 2
-    timeout_s: 15
+### Integrated callers
 
-  - name: nats
-    service: NATS event bus
-    failure_threshold: 10       # NATS is local; should be highly available
-    recovery_window_s: 10
-    success_threshold: 3
-    timeout_s: 2
+The initial repository implementation wraps these concrete dependency paths:
 
-  - name: hetzner_dns
-    service: Hetzner DNS API (external)
-    failure_threshold: 3
-    recovery_window_s: 120      # External API; longer recovery window
-    success_threshold: 2
-    timeout_s: 30
+- Keycloak JWKS fetches in the API gateway
+- proxied API gateway upstream service calls
+- gateway-side NATS request-event publishing
+- local Ollama model discovery and generation
+- fallback external LLM completions
+- Windmill job submission and status paths in the scheduler and runbook executor
 
-  - name: anthropic_api
-    service: Anthropic Claude API
-    failure_threshold: 3
-    recovery_window_s: 300      # API outages last minutes
-    success_threshold: 1
-    timeout_s: 60
+### Operator-facing behaviour
 
-  - name: ollama
-    service: Ollama local inference
-    failure_threshold: 5
-    recovery_window_s: 30
-    success_threshold: 2
-    timeout_s: 120              # Local inference can be slow; generous timeout
-```
+When a dependency circuit is open:
 
-### Integration points
-
-Every platform call to an external/internal service is wrapped in a circuit breaker:
-
-```python
-# platform/identity/keycloak.py
-keycloak_circuit = CircuitBreaker("keycloak", load_policy("keycloak"))
-
-def validate_jwt(token: str) -> Claims:
-    return keycloak_circuit.call(_validate_jwt_inner, token)
-
-# platform/secrets/openbao.py
-openbao_circuit = CircuitBreaker("openbao", load_policy("openbao"))
-
-def get_secret(path: str) -> str:
-    return openbao_circuit.call(_get_secret_inner, path)
-```
-
-### Circuit open behaviour per service
-
-When a circuit opens, the platform does not simply fail — it degrades gracefully (ADR 0167):
-
-| Circuit | `OPEN` behaviour |
-|---|---|
-| `keycloak` | API gateway serves `503 Service Unavailable` with `Retry-After: 30`. Ops portal uses cached session for read-only access. |
-| `openbao` | Workflows that need secrets are queued (ADR 0155), not immediately run. Cached secrets (TTL-bounded, ADR 0167) are used for read-only access. |
-| `windmill` | Intents are queued in the intent queue (ADR 0155); no new jobs submitted until circuit closes. |
-| `nats` | Events are buffered in Postgres `platform.nats_outbox` and flushed when circuit closes. |
-| `hetzner_dns` | DNS operations are queued; platform logs a finding that DNS changes are delayed. |
-| `anthropic_api` | LLM calls fall back to local Ollama (ADR 0145); if Ollama also fails, non-LLM degraded mode. |
-| `ollama` | LLM calls use external Anthropic API; if that circuit is also open, LLM calls return `ServiceUnavailable`. |
-
-### Circuit state in the coordination map
-
-The real-time agent coordination map (ADR 0161) includes the current circuit breaker state for all registered circuits, giving operators immediate visibility into which services are degraded:
-
-```
-CIRCUIT BREAKERS                    2026-03-24 14:32:01
-  keycloak          ● CLOSED    failures: 0/5
-  openbao           ● CLOSED    failures: 0/3
-  windmill          ● CLOSED    failures: 0/5
-  nats              ● CLOSED    failures: 0/10
-  hetzner_dns       ○ OPEN      opened: 2m ago  recovery in: 58s
-  anthropic_api     ● CLOSED    failures: 1/3
-  ollama            ● CLOSED    failures: 0/5
-```
-
-### Circuit state observability
-
-NATS events `platform.circuit.opened.*` and `platform.circuit.closed.*` are:
-1. Written to the mutation ledger as `circuit.opened` / `circuit.closed` events.
-2. Published to Mattermost `#platform-security` for `openbao` and `keycloak` circuits (credential infrastructure).
-3. Published to Mattermost `#platform-ops` for all other circuits.
-4. Tracked in Grafana as a gauge metric: `platform_circuit_state{circuit="keycloak"}` (0=closed, 1=open).
+- the API gateway returns `503` with `Retry-After`
+- the shared LLM client falls back to the configured alternate provider without repeatedly burning the primary timeout budget
+- Windmill-facing callers fail fast instead of repeatedly attempting the same unavailable endpoint
 
 ## Consequences
 
 **Positive**
 
-- When Keycloak is restarting, the first 5 failures open the circuit. All subsequent API requests receive an immediate `503` with `Retry-After: 30` instead of waiting 10 seconds each. A 90-second Keycloak restart that would have caused 270+ seconds of cumulative caller wait (30 concurrent requests × 9 seconds average) now causes 150 seconds of circuit-open rejections, reducing total wasted time by 45%.
-- Cascading failures are broken at the circuit level. A slow OpenBao (perhaps due to unsealing after a restart) cannot cause every agent workflow to hang simultaneously.
-- The distributed circuit state via NATS KV ensures all agents share the same view. Agent A opening a circuit immediately prevents Agent B from attempting the same failing call.
+- repeated dependency outages stop consuming the same timeout budget on every request
+- the platform fails faster and more predictably during Keycloak, Windmill, Ollama, or NATS outages
+- policy values are centralized in one repo-managed contract instead of being duplicated across callers
+- the gateway converge path now bundles the circuit policy file so live rollout can use the same config
 
 **Negative / Trade-offs**
 
-- Circuit breakers introduce a new failure mode: a circuit that opens too aggressively (low `failure_threshold`) will reject calls that would have succeeded, causing false unavailability. Threshold calibration is critical and must be reviewed after each incident.
-- The NATS KV backing for circuit state creates a dependency: if NATS is unavailable, circuit state cannot be read. The circuit breaker falls back to a **local in-memory state** in this case (each process tracks its own circuit independently). This means different agents may have different views of circuit state during a NATS outage, which is acceptable — each agent errs on the side of attempting the call locally.
+- circuits can open too aggressively if thresholds are tuned poorly
+- when NATS is unavailable, processes fall back to local state and may temporarily disagree about circuit status
+- the first integrated implementation does not yet implement the deeper queueing and buffering behaviors described in ADR 0167
 
 ## Boundaries
 
-- Circuit breakers govern calls made by platform code. They do not govern Ansible SSH connections (those use retry logic directly) or Proxmox VM-level networking.
-- The circuit state is advisory for the `soft` degradation policy services. Critical path services (`openbao`, `keycloak`, `nats`) use `hard` policy: an open circuit is a hard error that must be surfaced.
+- circuit breakers govern platform code paths, not raw Ansible SSH transport or Proxmox VM networking
+- this ADR implements fail-fast protection and shared policy management; it does not, by itself, claim a completed live rollout
+- graceful degradation side effects such as intent queueing or outbox flushing remain covered by later work
 
 ## Related ADRs
 
-- ADR 0058: NATS event bus (JetStream KV for distributed circuit state; nats_outbox for event buffering)
-- ADR 0092: Platform API gateway (keycloak circuit wraps JWKS validation)
-- ADR 0115: Event-sourced mutation ledger (circuit.opened events)
-- ADR 0145: Ollama (fallback when anthropic_api circuit opens)
-- ADR 0161: Real-time agent coordination map (circuit state displayed)
-- ADR 0163: Retry taxonomy (circuit_open error class → BACKOFF retry; do not retry into an open circuit)
-- ADR 0167: Graceful degradation mode declarations (per-circuit OPEN behaviour)
+- ADR 0058: NATS event bus
+- ADR 0092: Platform API gateway
+- ADR 0119: Budgeted workflow scheduler
+- ADR 0129: Runbook automation executor
+- ADR 0145: Ollama
+- ADR 0163: Retry taxonomy
+- ADR 0167: Graceful degradation mode declarations

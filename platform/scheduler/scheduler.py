@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any, Protocol
 
 from platform.agent_policy import AgentPolicyEngine, DailyExecutionCounter, PolicyOutcome, normalize_actor_id
+from platform.circuit import CircuitRegistry, should_count_urllib_exception
 from platform.conflict import IntentConflictRegistry
 from platform.goal_compiler.schema import RiskClass
 from platform.ledger import LedgerReader, LedgerWriter
@@ -164,12 +165,22 @@ class HttpWindmillClient:
         token: str,
         workspace: str = "lv3",
         request_timeout_seconds: float = 30.0,
+        circuit_breaker: Any | None = None,
+        circuit_registry: CircuitRegistry | None = None,
     ) -> None:
         self._base_url = base_url.rstrip("/")
         self._token = token
         self._workspace = workspace
         self._request_timeout_seconds = request_timeout_seconds
         self._internal_api_retry_policy = policy_for_surface("internal_api")
+        self._circuit_breaker = circuit_breaker
+        if self._circuit_breaker is None:
+            registry = circuit_registry or CircuitRegistry(REPO_ROOT)
+            if registry.has_policy("windmill"):
+                self._circuit_breaker = registry.sync_breaker(
+                    "windmill",
+                    exception_classifier=should_count_urllib_exception,
+                )
 
     def _request(
         self,
@@ -191,21 +202,27 @@ class HttpWindmillClient:
             headers=headers,
             method=method,
         )
-        open_request = lambda: urllib.request.urlopen(
-            request,
-            timeout=timeout or self._request_timeout_seconds,
-        )
-        response_cm = (
-            with_retry(
-                open_request,
-                policy=self._internal_api_retry_policy,
-                error_context=f"windmill {method} {path}",
+        def execute() -> str:
+            open_request = lambda: urllib.request.urlopen(
+                request,
+                timeout=timeout or self._request_timeout_seconds,
             )
-            if retry
-            else open_request()
-        )
-        with response_cm as response:
-            body = response.read().decode("utf-8")
+            response_cm = (
+                with_retry(
+                    open_request,
+                    policy=self._internal_api_retry_policy,
+                    error_context=f"windmill {method} {path}",
+                )
+                if retry
+                else open_request()
+            )
+            with response_cm as response:
+                return response.read().decode("utf-8")
+
+        if self._circuit_breaker is not None:
+            body = self._circuit_breaker.call(execute)
+        else:
+            body = execute()
         if not body.strip():
             return None
         try:

@@ -21,6 +21,7 @@ from data_catalog import load_data_catalog, validate_data_catalog
 from dependency_graph import load_dependency_graph
 from data_catalog import load_data_catalog, validate_data_catalog
 from live_apply_receipts import RECEIPTS_DIR, iter_receipt_paths, validate_receipts
+from platform.circuit import load_circuit_policies
 from generate_platform_vars import PLATFORM_VARS_PATH, PORT_KEYS, build_platform_vars
 from mutation_audit import load_mutation_audit_schema, validate_mutation_audit_schema
 from operator_manager import ROSTER_PATH, validate_operator_roster
@@ -66,6 +67,7 @@ TRIAGE_RULES_PATH = repo_path("config", "triage-rules.yaml")
 TRIAGE_AUTO_CHECK_ALLOWLIST_PATH = repo_path("config", "triage-auto-check-allowlist.yaml")
 CHANGELOG_REDACTION_PATH = repo_path("config", "changelog-redaction.yaml")
 AGENT_POLICIES_PATH = repo_path("config", "agent-policies.yaml")
+CIRCUIT_POLICIES_PATH = repo_path("config", "circuit-policies.yaml")
 
 SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -1168,6 +1170,20 @@ def validate_token_inventory(token_classes: set[str], workflow_catalog: dict[str
                 require_str(env_value, f"{hook_path}.env.{env_key}")
 
 
+def validate_circuit_policies() -> None:
+    policies = load_circuit_policies(CIRCUIT_POLICIES_PATH)
+    if not policies:
+        raise ValueError("config/circuit-policies.yaml must define at least one circuit")
+    for name, policy in policies.items():
+        require_identifier(name, f"config/circuit-policies.yaml {name}.name")
+        require_str(policy.service, f"config/circuit-policies.yaml {name}.service")
+        require_int(policy.failure_threshold, f"config/circuit-policies.yaml {name}.failure_threshold", 1)
+        require_int(policy.recovery_window_s, f"config/circuit-policies.yaml {name}.recovery_window_s", 1)
+        require_int(policy.success_threshold, f"config/circuit-policies.yaml {name}.success_threshold", 1)
+        if policy.timeout_s is not None and float(policy.timeout_s) <= 0:
+            raise ValueError(f"config/circuit-policies.yaml {name}.timeout_s must be > 0 when set")
+
+
 def validate_legacy_image_catalog(host_vars_context: dict[str, Any]) -> None:
     catalog = require_mapping(load_json(IMAGE_CATALOG_PATH), str(IMAGE_CATALOG_PATH))
     require_semver(catalog.get("schema_version"), "config/image-catalog.json.schema_version")
@@ -2177,6 +2193,7 @@ def validate_repository_data_models() -> int:
     validate_secret_catalog(secret_manifest)
     token_classes = validate_token_policy()
     validate_token_inventory(token_classes, workflow_catalog)
+    validate_circuit_policies()
     validate_version_semantics()
     validate_workstreams_release_policy()
     validate_triage_rule_contracts()

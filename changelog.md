@@ -12,6 +12,9 @@ Versioned release notes live under [docs/release-notes/README.md](/Users/live/Do
 
 ## Unreleased
 
+- Implement ADR 0144 by moving the management mesh control plane to repo-managed Headscale, publishing `headscale.lv3.org`, and updating canonical host access to `100.64.0.1`.
+- Implement ADR 0162 with a file-backed lock registry, coordination map, intent queue, and Windmill deadlock detector runtime; live apply remains pending while the Proxmox host is unreachable.
+- Implement ADR 0164 by adding shared circuit breaker policies and fail-fast dependency guards for Keycloak, Windmill, Ollama, gateway upstream calls, and NATS publishing.
 ## Latest Release
 
 - [0.151.0 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.151.0.md)

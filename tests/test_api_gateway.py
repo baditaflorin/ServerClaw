@@ -6,9 +6,9 @@ import time
 from pathlib import Path
 
 import httpx
-from platform.retry import RetryPolicy
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
+from platform.retry import RetryPolicy
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -224,6 +224,32 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
         },
     )
     write_yaml(
+        tmp_path / "config" / "circuit-policies.yaml",
+        """
+schema_version: 1.0.0
+circuits:
+  - name: keycloak
+    service: Keycloak OIDC / JWKS
+    failure_threshold: 5
+    recovery_window_s: 30
+    success_threshold: 2
+    timeout_s: 10
+  - name: windmill
+    service: Windmill workflow engine
+    failure_threshold: 5
+    recovery_window_s: 60
+    success_threshold: 2
+    timeout_s: 15
+  - name: nats
+    service: NATS event bus
+    failure_threshold: 10
+    recovery_window_s: 10
+    success_threshold: 3
+    timeout_s: 2
+""".strip()
+        + "\n",
+    )
+    write_yaml(
         tmp_path / "inventory" / "group_vars" / "platform.yml",
         "platform_service_topology:\n  windmill:\n    urls:\n      internal: http://10.10.10.20:8000\n",
     )
@@ -275,6 +301,7 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
         deploy_webhook_url=None,
         secret_rotation_webhook_url=None,
         openapi_include_upstreams=False,
+        circuit_policy_path=tmp_path / "config" / "circuit-policies.yaml",
         graph_dsn=graph_dsn,
         world_state_dsn=world_state_dsn,
     )
@@ -505,3 +532,57 @@ def test_gateway_retries_safe_proxy_reads(tmp_path: Path) -> None:
 
     asyncio.run(run())
     assert upstream_calls["count"] == 3
+
+
+def test_gateway_returns_retry_after_when_keycloak_circuit_is_open(tmp_path: Path) -> None:
+    jwks_calls = {"count": 0}
+
+    def upstream(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"status": "ok"})
+
+    def jwks(_request: httpx.Request) -> httpx.Response:
+        jwks_calls["count"] += 1
+        return httpx.Response(503, json={"error": "keycloak restarting"})
+
+    transport = httpx.MockTransport(lambda request: upstream(request) if request.url.host == "upstream.test" else jwks(request))
+    config, token = make_repo(tmp_path, "http://upstream.test")
+    write_yaml(
+        tmp_path / "config" / "circuit-policies.yaml",
+        """
+schema_version: 1.0.0
+circuits:
+  - name: keycloak
+    service: Keycloak OIDC / JWKS
+    failure_threshold: 1
+    recovery_window_s: 60
+    success_threshold: 1
+    timeout_s: 10
+""".strip()
+        + "\n",
+    )
+    app = create_app(config)
+
+    async def run() -> None:
+        async with httpx.AsyncClient(transport=transport) as runtime_client:
+            runtime = GatewayRuntime(config)
+            await runtime.http_client.aclose()
+            runtime.http_client = runtime_client
+            runtime.verifier._client = runtime_client
+            app.state.runtime = runtime
+            try:
+                transport_app = httpx.ASGITransport(app=app)
+                async with httpx.AsyncClient(transport=transport_app, base_url="http://gateway.test") as client:
+                    headers = {"Authorization": f"Bearer {token}"}
+                    first = await client.get("/v1/health", headers=headers)
+                    second = await client.get("/v1/health", headers=headers)
+
+                    assert first.status_code == 503
+                    assert second.status_code == 503
+                    assert second.headers["Retry-After"] == "60"
+                    assert jwks_calls["count"] == 1
+            finally:
+                await runtime.close()
+
+    import asyncio
+
+    asyncio.run(run())
