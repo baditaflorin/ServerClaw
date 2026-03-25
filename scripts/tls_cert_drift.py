@@ -6,7 +6,7 @@ import argparse
 import json
 from typing import Any
 
-from drift_lib import isoformat, utc_now
+from drift_lib import drift_event_topic, isoformat, utc_now
 from tls_cert_probe import collect_certificate_results
 
 
@@ -23,7 +23,7 @@ def collect_drift(*, timeout_seconds: float = 5.0) -> list[dict[str, Any]]:
             detail = f"certificate expires in {result['days_remaining']} days"
         record = {
             "source": "tls",
-            "event": f"platform.drift.{severity}",
+            "event": drift_event_topic(severity),
             "severity": severity,
             "service": result["service_id"],
             "resource": result["certificate_id"],

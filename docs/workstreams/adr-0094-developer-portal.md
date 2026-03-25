@@ -73,6 +73,7 @@
 - repo release `0.105.0` hardens shared edge publication by building all portal artifacts before apply, fixes TLS SAN parsing for hostnames such as `ops.lv3.org`, and restores the collection-scoped mutation audit callback import path
 - `docs.lv3.org` now resolves publicly to `65.108.75.123` from both `1.1.1.1` and the Hetzner authoritative nameserver
 - HTTPS verification against the live edge returns `HTTP/2 200` for both `https://docs.lv3.org/` and `https://docs.lv3.org/services/keycloak/`, with the expected `X-Robots-Tag: noindex, nofollow, noarchive` header
+- repo release `0.122.0` and platform version `0.114.7` supersede the original public-readability assumption by gating `docs.lv3.org` behind the shared Keycloak portal auth flow from ADR 0133
 - platform version `0.105.0` is now the first live platform version where ADR 0094 is true
 
 ## Notes For The Next Assistant

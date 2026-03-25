@@ -191,6 +191,11 @@ windmill_seed_scripts:
     language: python3
     summary: Emit derived health degradation events
     description: Repo-managed ADR 0117 helper that walks dependency descendants for degraded upstream services and emits derived_health_degraded events plus ledger records.
+  - path: f/lv3/health/refresh_composite
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/health/refresh-composite.py"
+    language: python3
+    summary: Refresh the platform health composite index
+    description: Repo-managed ADR 0128 worker that aggregates service health, SLO, drift, incident, maintenance, and mutation signals into the canonical composite index.
 windmill_seed_schedules:
   - path: f/lv3/platform_observation_loop_every_4h
     schedule: "0 0 */4 * * *"
@@ -326,6 +331,15 @@ windmill_seed_schedules:
     enabled: false
     summary: ADR 0117 dependency graph rebuild from NetBox world state
     description: Repo-managed five-minute placeholder for rebuilding the dependency graph after the NetBox topology world-state refresh completes.
+    no_flow_overlap: true
+  - path: f/lv3/health/refresh_composite_every_minute
+    schedule: "15 * * * * *"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/health/refresh_composite
+    args: {}
+    enabled: false
+    summary: ADR 0128 health composite refresh
+    description: Repo-managed minute refresh definition for the platform health composite index; enable it after the health schema is applied live from main.
     no_flow_overlap: true
   - path: f/lv3/rebuild_search_index_nightly
     schedule: "0 0 2 * * *"

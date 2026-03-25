@@ -49,7 +49,7 @@ make validate
 3. Set `WORLD_STATE_DSN` for the worker runtime to the platform Postgres instance.
 4. Enable the ADR 0113 schedules in Windmill.
 5. Confirm rows appear in `world_state.current_view`.
-6. Verify `world_state.refreshed` events are published on NATS.
+6. Verify `platform.world_state.refreshed` events are published on NATS.
 
 ## Quick Checks
 

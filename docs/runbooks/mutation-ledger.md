@@ -53,7 +53,7 @@ When `LV3_LEDGER_DSN` is exported, the existing controller emitter writes the le
 
 Optional fan-out after insert:
 
-- `LV3_LEDGER_NATS_URL` or `LV3_NATS_URL`: publish `ledger.event_written`
+- `LV3_LEDGER_NATS_URL` or `LV3_NATS_URL`: publish `platform.ledger.event_written`
 
 Example:
 

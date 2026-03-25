@@ -87,7 +87,7 @@ When ADR 0080 suppression is active, a finding may be emitted with:
 
 ## Routing Notes
 
-- NATS publication uses the live `lv3-nats-jetstream` runtime on `docker-runtime-lv3` and emits one event per check on `platform.findings.<check-name>`.
+- NATS publication uses the live `lv3-nats-jetstream` runtime on `docker-runtime-lv3` and emits one canonical event per finding on `platform.findings.observation`.
 - Mattermost and GlitchTip routing stay local-secret-driven so the repo does not commit chat or issue-tracker credentials.
 - Active maintenance windows are read from the private `maintenance-windows` NATS KV bucket unless `LV3_MAINTENANCE_WINDOWS_FILE` is set for test or offline use.
 - The current Open WebUI integration is file-based: operators can review the digest artifact from the existing private workbench until a richer governed tool path lands.
@@ -97,7 +97,7 @@ When ADR 0080 suppression is active, a finding may be emitted with:
 The repo-managed dead-man contract is five hours:
 
 - if `.local/platform-observation/latest/findings.json` is older than five hours, treat the observation loop itself as stale
-- if NATS publication is enabled, the lack of fresh `platform.findings.*` events over the same window is the event-lane equivalent signal
+- if NATS publication is enabled, the lack of fresh `platform.findings.observation` events over the same window is the event-lane equivalent signal
 
 ## Verification
 

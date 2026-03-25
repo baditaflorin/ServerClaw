@@ -1,10 +1,10 @@
 # ADR 0126: Observation-to-Action Closure Loop
 
-- Status: Accepted
+- Status: Implemented
 - Implementation Status: Implemented
-- Implemented In Repo Version: 0.125.0
+- Implemented In Repo Version: 0.131.0
 - Implemented In Platform Version: not yet
-- Implemented On: 2026-03-24
+- Implemented On: 2026-03-25
 - Date: 2026-03-24
 
 ## Context

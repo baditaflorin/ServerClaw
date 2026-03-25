@@ -172,21 +172,21 @@ groups:
           indicator: availability
       - record: slo:keycloak_latency:success_ratio_5m
         expr: avg_over_time((probe_duration_seconds{job="slo-blackbox",slo_id="keycloak-latency"}
-          < bool 0.5)[5m])
+          < bool 0.5)[5m:])
         labels:
           slo_id: keycloak-latency
           service_id: keycloak
           indicator: latency
       - record: slo:keycloak_latency:success_ratio_1h
         expr: avg_over_time((probe_duration_seconds{job="slo-blackbox",slo_id="keycloak-latency"}
-          < bool 0.5)[1h])
+          < bool 0.5)[1h:])
         labels:
           slo_id: keycloak-latency
           service_id: keycloak
           indicator: latency
       - record: slo:keycloak_latency:success_ratio_30d
         expr: avg_over_time((probe_duration_seconds{job="slo-blackbox",slo_id="keycloak-latency"}
-          < bool 0.5)[30d])
+          < bool 0.5)[30d:])
         labels:
           slo_id: keycloak-latency
           service_id: keycloak

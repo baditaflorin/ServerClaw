@@ -316,11 +316,12 @@ def test_gateway_proxy_and_platform_endpoints(tmp_path: Path) -> None:
                     platform_health = await client.get("/v1/platform/health", headers=headers)
                     assert platform_health.status_code == 200
                     assert platform_health.json()["service_count"] == 2
-                    assert platform_health.json()["source"] == "world_state"
+                    assert platform_health.json()["source"] == "health_composite"
 
                     postgres_health = await client.get("/v1/platform/health/postgres", headers=headers)
                     assert postgres_health.status_code == 200
                     assert postgres_health.json()["status"] == "degraded"
+                    assert postgres_health.json()["composite_status"] == "degraded"
 
                     drift = await client.get("/v1/platform/drift", headers=headers)
                     assert drift.status_code == 200

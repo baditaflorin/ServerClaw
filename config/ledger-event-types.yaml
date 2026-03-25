@@ -45,6 +45,15 @@
 - incident.escalated
 - incident.resolved
 
+# Agent handoffs
+- handoff.transfer_recorded
+- handoff.accepted
+- handoff.refused
+- handoff.timed_out
+- handoff.escalated_to_operator
+- handoff.closed_unaccepted
+- handoff.completed
+
 # Corrections and annotations
 - correction
 - operator.annotation

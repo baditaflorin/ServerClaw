@@ -3,9 +3,11 @@ from __future__ import annotations
 import asyncio
 import base64
 import hashlib
+import importlib.util
 import json
 import os
 import socket
+import sys
 import time
 import uuid
 from contextlib import asynccontextmanager
@@ -14,6 +16,12 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urljoin, urlparse
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
+    del sys.modules["platform"]
+
 import httpx
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
@@ -21,8 +29,43 @@ from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_PLATFORM_ROOT = REPO_ROOT / "platform"
+
+
+def _load_repo_platform_package() -> None:
+    current = sys.modules.get("platform")
+    current_file = getattr(current, "__file__", "") or ""
+    if current_file.startswith(str(REPO_PLATFORM_ROOT)):
+        return
+    spec = importlib.util.spec_from_file_location(
+        "platform",
+        REPO_PLATFORM_ROOT / "__init__.py",
+        submodule_search_locations=[str(REPO_PLATFORM_ROOT)],
+    )
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"unable to load repo platform package from {REPO_PLATFORM_ROOT}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["platform"] = module
+    spec.loader.exec_module(module)
+
+
+_load_repo_platform_package()
+
 from api_gateway_catalog import load_api_gateway_catalog
-from platform.graph import DependencyGraphClient, NodeNotFoundError
+GRAPH_RUNTIME_IMPORT_ERROR: str | None = None
+
+try:
+    from platform.graph import DependencyGraphClient, NodeNotFoundError
+except Exception as exc:  # noqa: BLE001
+    DependencyGraphClient = Any  # type: ignore[assignment]
+
+    class NodeNotFoundError(RuntimeError):
+        pass
+
+    GRAPH_RUNTIME_IMPORT_ERROR = str(exc)
+from platform.events import build_envelope
+from platform.health import HealthCompositeClient, ServiceHealthNotFoundError
 from platform.world_state.client import SurfaceNotFoundError, WorldStateClient, WorldStateUnavailable
 from platform.world_state.materializer import SQLITE_CURRENT_VIEW_NAME, SQLITE_SNAPSHOTS_TABLE_NAME
 from platform.world_state.workers import collect_service_health
@@ -31,9 +74,6 @@ try:
     from search_fabric import SearchClient
 except ImportError:  # pragma: no cover - packaged import path
     from scripts.search_fabric import SearchClient
-
-
-REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 def b64url_decode(value: str) -> bytes:
@@ -233,7 +273,8 @@ class NatsEventEmitter:
             return
         host = self._parsed.hostname or "127.0.0.1"
         port = self._parsed.port or 4222
-        encoded = json.dumps(payload, separators=(",", ":")).encode()
+        envelope = build_envelope(subject, payload, actor_id="service/api-gateway")
+        encoded = json.dumps(envelope, separators=(",", ":")).encode()
         await asyncio.to_thread(self._publish, host, port, subject, encoded)
 
     @staticmethod
@@ -262,10 +303,17 @@ class GatewayRuntime:
             client=self.http_client,
         )
         self.event_emitter = NatsEventEmitter(config.nats_url)
-        self.graph_client = (
-            DependencyGraphClient(dsn=config.graph_dsn, world_state_dsn=config.world_state_dsn or config.graph_dsn)
-            if config.graph_dsn
-            else None
+        self.graph_client = None
+        if config.graph_dsn and GRAPH_RUNTIME_IMPORT_ERROR is None:
+            self.graph_client = DependencyGraphClient(
+                dsn=config.graph_dsn,
+                world_state_dsn=config.world_state_dsn or config.graph_dsn,
+            )
+        self.health_client = HealthCompositeClient(
+            repo_root=config.repo_root,
+            dsn=config.world_state_dsn or config.graph_dsn,
+            world_state_dsn=config.world_state_dsn,
+            ledger_dsn=config.world_state_dsn or config.graph_dsn,
         )
 
     async def close(self) -> None:
@@ -347,19 +395,10 @@ class GatewayRuntime:
             }
 
     def collect_platform_health(self) -> dict[str, Any]:
-        try:
-            payload = self.world_state_client().get("service_health", allow_stale=True)
-            source = "world_state"
-        except (SurfaceNotFoundError, WorldStateUnavailable, OSError, RuntimeError):
-            payload = collect_service_health(self.config.repo_root)
-            source = "live_probe"
-
         catalog = self.primary_service_catalog()
-        items = payload.get("services", []) if isinstance(payload, dict) else []
         services_by_id = {
-            str(item.get("service_id") or item.get("id")): item
-            for item in items
-            if isinstance(item, dict) and (item.get("service_id") or item.get("id"))
+            entry.service_id: entry.as_dict()
+            for entry in self.health_client.get_all(allow_stale=True)
         }
 
         services: list[dict[str, Any]] = []
@@ -367,49 +406,54 @@ class GatewayRuntime:
             if not isinstance(service, dict) or service.get("lifecycle_status") != "active":
                 continue
             service_id = str(service.get("id"))
-            health = services_by_id.get(service_id, {})
-            status = str(health.get("status", "unknown"))
-            detail = (
-                health.get("detail")
-                or health.get("error")
-                or (
-                    f"HTTP {health['http_status']}"
-                    if isinstance(health, dict) and health.get("http_status") is not None
-                    else "No live health data"
-                )
-            )
-            services.append(
+            health = services_by_id.get(service_id) or {
+                "service_id": service_id,
+                "status": "unknown",
+                "composite_status": "unknown",
+                "composite_score": 0.0,
+                "safe_to_act": False,
+                "signals": [],
+                "reason": "health composite entry unavailable",
+                "stale": True,
+            }
+            item = dict(health)
+            item.update(
                 {
                     "service_id": service_id,
                     "name": service.get("name", service_id),
-                    "status": status,
-                    "detail": str(detail),
                     "vm": service.get("vm"),
                     "vmid": service.get("vmid"),
                     "public_url": service.get("public_url"),
                     "internal_url": service.get("internal_url"),
                     "uptime_monitor_name": service.get("uptime_monitor_name"),
-                    "probe_source": health.get("probe_source"),
-                    "probe_kind": health.get("probe_kind"),
-                    "http_status": health.get("http_status"),
                 }
             )
+            services.append(item)
 
-        statuses = {item["status"] for item in services}
+        statuses = {item["composite_status"] for item in services}
         overall = "healthy"
-        if any(status in {"down", "error", "failed"} for status in statuses):
+        if any(status == "critical" for status in statuses):
             overall = "degraded"
-        elif any(status in {"degraded", "warn", "warning", "unhealthy", "unreachable"} for status in statuses):
+        elif any(status == "degraded" for status in statuses):
             overall = "degraded"
-        elif statuses and statuses == {"unknown"}:
+        elif statuses and statuses <= {"unknown"}:
             overall = "unknown"
 
         return {
             "status": overall,
             "service_count": len(services),
+            "safe_service_count": sum(1 for item in services if item.get("safe_to_act") is True),
+            "unsafe_service_count": sum(1 for item in services if item.get("safe_to_act") is False),
             "services": services,
-            "source": source,
+            "source": "health_composite",
         }
+
+    def collect_platform_service_health(self, service_id: str) -> dict[str, Any]:
+        payload = self.collect_platform_health()
+        for service in payload["services"]:
+            if service["service_id"] == service_id:
+                return service
+        raise ServiceHealthNotFoundError(service_id)
 
 
 def build_config() -> GatewayConfig:
@@ -518,7 +562,10 @@ async def emit_request_event(
 
 def require_graph_runtime(runtime: GatewayRuntime) -> DependencyGraphClient:
     if runtime.graph_client is None:
-        raise HTTPException(status_code=503, detail="dependency graph runtime is not configured")
+        detail = "dependency graph runtime is not configured"
+        if GRAPH_RUNTIME_IMPORT_ERROR:
+            detail = f"dependency graph runtime unavailable: {GRAPH_RUNTIME_IMPORT_ERROR}"
+        raise HTTPException(status_code=503, detail=detail)
     return runtime.graph_client
 
 
@@ -595,12 +642,12 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
         if not has_required_role(identity, "platform-read"):
             raise HTTPException(status_code=403, detail="missing required role 'platform-read'")
         runtime: GatewayRuntime = request.app.state.runtime
-        payload = await asyncio.to_thread(runtime.collect_platform_health)
-        for service in payload["services"]:
-            if service["service_id"] == service_id:
-                await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
-                return service
-        raise HTTPException(status_code=404, detail=f"unknown service '{service_id}'")
+        try:
+            payload = await asyncio.to_thread(runtime.collect_platform_service_health, service_id)
+        except ServiceHealthNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
+        return payload
 
     @app.get("/v1/platform/services")
     async def platform_services(

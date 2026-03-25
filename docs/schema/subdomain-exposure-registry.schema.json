@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/schema/subdomain-exposure-registry.schema.json",
+  "title": "Subdomain Exposure Registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "zone_name", "subdomains", "summary"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "zone_name": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+(\\.[a-z0-9-]+)+$"
+    },
+    "subdomains": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "fqdn",
+          "environment",
+          "status",
+          "exposure",
+          "auth_requirement",
+          "target",
+          "owner_adr",
+          "dns_record_type",
+          "route_mode",
+          "route_source",
+          "edge_auth",
+          "tls",
+          "live_tracking_expected"
+        ],
+        "properties": {
+          "fqdn": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+(\\.[a-z0-9-]+)+$"
+          },
+          "service_id": {
+            "type": ["string", "null"]
+          },
+          "environment": {
+            "type": "string",
+            "enum": ["production", "staging"]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["active", "planned", "reserved", "retiring"]
+          },
+          "exposure": {
+            "type": "string",
+            "enum": ["edge-published", "informational-only", "private-only"]
+          },
+          "auth_requirement": {
+            "type": "string",
+            "enum": ["none", "edge_oidc", "upstream_auth", "private_network"]
+          },
+          "target": {
+            "type": "string"
+          },
+          "target_port": {
+            "type": ["integer", "null"]
+          },
+          "owner_adr": {
+            "type": "string",
+            "pattern": "^\\d{4}$"
+          },
+          "dns_record_type": {
+            "type": "string",
+            "enum": ["A", "AAAA", "CNAME"]
+          },
+          "route_mode": {
+            "type": "string",
+            "enum": ["edge", "dns-only"]
+          },
+          "route_source": {
+            "type": "string",
+            "enum": ["service_topology", "public_edge_extra_sites", "dns-only"]
+          },
+          "route_kind": {
+            "type": ["string", "null"]
+          },
+          "edge_auth": {
+            "type": "string",
+            "enum": ["none", "oauth2_proxy"]
+          },
+          "unauthenticated_paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "repo_route_service_id": {
+            "type": ["string", "null"]
+          },
+          "repo_route_metadata": {
+            "type": "object"
+          },
+          "tls": {
+            "type": "object"
+          },
+          "live_tracking_expected": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "catalog_total",
+        "active_total",
+        "active_public_dns_total",
+        "active_private_total",
+        "planned_total",
+        "edge_total",
+        "edge_oidc_total"
+      ],
+      "properties": {
+        "catalog_total": {"type": "integer", "minimum": 0},
+        "active_total": {"type": "integer", "minimum": 0},
+        "active_public_dns_total": {"type": "integer", "minimum": 0},
+        "active_private_total": {"type": "integer", "minimum": 0},
+        "planned_total": {"type": "integer", "minimum": 0},
+        "edge_total": {"type": "integer", "minimum": 0},
+        "edge_oidc_total": {"type": "integer", "minimum": 0}
+      }
+    }
+  }
+}

@@ -1340,6 +1340,57 @@
         "escalation_action": "abort_silently"
       }
     },
+    "subdomain-exposure-audit": {
+      "description": "Run the ADR 0139 subdomain exposure registry audit, check live DNS and edge auth behavior, and store one receipt.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "subdomain-exposure-audit",
+        "command": "make subdomain-exposure-audit"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "hetzner_dns_api_token"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "validate-generated-docs"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/subdomain-exposure-audit.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/subdomain-catalog.json",
+        "config/subdomain-exposure-registry.json",
+        "docs/schema/subdomain-exposure-registry.schema.json",
+        "config/windmill/scripts/subdomain-exposure-audit.py",
+        "scripts/subdomain_catalog.py",
+        "scripts/subdomain_exposure_audit.py",
+        "roles/nginx_edge_publication/defaults/main.yml",
+        "receipts/subdomain-exposure-audit",
+        "docs/runbooks/subdomain-exposure-audit.md"
+      ],
+      "outputs": [
+        "A timestamped receipt that records repo contract drift, live DNS status drift, optional Hetzner zone discrepancies, and any missing edge OIDC enforcement for tracked hostnames."
+      ],
+      "verification_commands": [
+        "uvx --from pyyaml python scripts/subdomain_exposure_audit.py --validate",
+        "uv run --with pytest --with pyyaml --with jsonschema --with jinja2 pytest -q tests/test_subdomain_catalog.py tests/test_subdomain_exposure_audit.py tests/test_docs_site.py",
+        "python3 config/windmill/scripts/subdomain-exposure-audit.py --help"
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 120,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "abort_silently"
+      }
+    },
     "restore-verification": {
       "description": "Run the ADR 0099 backup-restore verification workflow, write one receipt, emit the mutation-audit event, and optionally publish NATS and Mattermost summaries.",
       "lifecycle_status": "active",
@@ -1443,6 +1494,54 @@
         "max_steps": 250,
         "max_concurrent_instances": 1,
         "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "abort_silently"
+      }
+    },
+    "weekly-security-scan": {
+      "description": "Run the ADR 0142 public-surface security scan, store a receipt, and publish high or critical findings.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "public-surface-security-scan",
+        "command": "make public-surface-security-scan ENV=production"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "nats_jetstream_admin_password"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "repo_only",
+      "owner_runbook": "docs/runbooks/public-surface-security-scan.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/control-plane-lanes.json",
+        "config/public-surface-scan-policy.json",
+        "config/windmill/scripts/weekly-security-scan.py",
+        "config/workflow-catalog.json",
+        "docs/runbooks/public-surface-security-scan.md",
+        "receipts/security-scan",
+        "scripts/public_surface_scan.py"
+      ],
+      "outputs": [
+        "A timestamped public-surface security receipt covering HTTP headers, auth redirects, version disclosure, TLS findings, and nuclei open-redirect results."
+      ],
+      "verification_commands": [
+        "python3 -m py_compile scripts/public_surface_scan.py config/windmill/scripts/weekly-security-scan.py",
+        "python3 scripts/public_surface_scan.py --env production --skip-testssl --skip-nuclei --print-report-json",
+        "uv run --with pytest --with pyyaml --with nats-py pytest -q tests/test_public_surface_scan.py"
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 3600,
+        "max_steps": 200,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 0,
         "max_restarts": 0,
         "max_rollback_depth": 1,
         "escalation_action": "abort_silently"
@@ -2849,7 +2948,7 @@
         "config/windmill/scripts/maintenance-window.py"
       ],
       "outputs": [
-        "One active maintenance window stored in the private maintenance-windows KV bucket together with a maintenance.opened event on the internal event bus."
+        "One active maintenance window stored in the private maintenance-windows KV bucket together with a platform.maintenance.opened event on the internal event bus."
       ],
       "verification_commands": [
         "uv run --with pyyaml --with nats-py python scripts/maintenance_window_tool.py list",
@@ -2867,7 +2966,7 @@
       }
     },
     "close-maintenance-window": {
-      "description": "Close one ADR 0080 maintenance window and emit the matching maintenance.closed or maintenance.force_closed event.",
+      "description": "Close one ADR 0080 maintenance window and emit the matching platform.maintenance.closed or platform.maintenance.force_closed event.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",

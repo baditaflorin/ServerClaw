@@ -50,6 +50,7 @@
           "environment",
           "status",
           "exposure",
+          "auth_requirement",
           "target",
           "owner_adr",
           "tls"
@@ -74,6 +75,10 @@
           "exposure": {
             "type": "string",
             "enum": ["edge-published", "informational-only", "private-only"]
+          },
+          "auth_requirement": {
+            "type": "string",
+            "enum": ["none", "edge_oidc", "upstream_auth", "private_network"]
           },
           "target": {
             "type": "string",

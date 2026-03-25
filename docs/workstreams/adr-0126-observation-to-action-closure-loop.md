@@ -53,6 +53,12 @@
 - paused runs can be approved or closed from the CLI
 - ledger transition events are emitted for each state change
 
+## Outcome
+
+- repository implementation is complete on `main` in repo release `0.131.0`
+- the closure loop now terminates explicitly when triage or verification proves the service goal is already satisfied
+- observation findings can now create durable runs through Windmill and be inspected or approved through `lv3 loop`
+
 ## Notes For The Next Assistant
 
 - the first implementation deliberately uses current repo surfaces for policy, conflict, and health rather than waiting on ADRs 0125, 0127, and 0128

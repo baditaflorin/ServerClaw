@@ -127,7 +127,7 @@ ledger.write(
 )
 ```
 
-The writer publishes a `ledger.event_written` message to NATS (ADR 0058) after each successful insert. Downstream consumers (the triage engine, the dashboard, the search fabric) react to these events in real time.
+The writer publishes a `platform.ledger.event_written` message to NATS (ADR 0058) after each successful insert. Downstream consumers (the triage engine, the dashboard, the search fabric) react to these events in real time.
 
 ### Replay API
 

@@ -25,6 +25,11 @@ from typing import Any, Iterable
 
 import yaml
 
+CODE_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = CODE_ROOT
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 from dependency_graph import dependency_summary, load_dependency_graph
 from platform.conflict import IntentConflictRegistry
 from repo_package_loader import load_repo_package
@@ -34,11 +39,7 @@ try:
 except ImportError:  # pragma: no cover - packaged entrypoint path
     from scripts.search_fabric import SearchClient
 
-CODE_ROOT = Path(__file__).resolve().parent.parent
-REPO_ROOT = CODE_ROOT
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-
+from platform.health import HealthCompositeClient, ServiceHealthNotFoundError
 from platform.scheduler import build_scheduler
 from scripts.risk_scorer import ExecutionIntent, assemble_context, compile_workflow_intent, score_intent
 CLI_VERSION = "0.1.0"
@@ -57,15 +58,18 @@ SERVICE_ALIASES = {
 GOAL_COMPILER_MODULE = load_repo_package("lv3_goal_compiler", CODE_ROOT / "platform" / "goal_compiler")
 LEDGER_MODULE = load_repo_package("lv3_platform_ledger", CODE_ROOT / "platform" / "ledger")
 AGENT_MODULE = load_repo_package("lv3_platform_agent", CODE_ROOT / "platform" / "agent")
+HANDOFF_MODULE = load_repo_package("lv3_platform_handoff", CODE_ROOT / "platform" / "handoff")
 GoalCompilationError = GOAL_COMPILER_MODULE.GoalCompilationError
 GoalCompiler = GOAL_COMPILER_MODULE.GoalCompiler
 LedgerWriter = LEDGER_MODULE.LedgerWriter
 AgentStateClient = AGENT_MODULE.AgentStateClient
 CLOSURE_LOOP_MODULE = load_repo_package("lv3_platform_closure_loop", CODE_ROOT / "platform" / "closure_loop")
-GoalCompilationError = GOAL_COMPILER_MODULE.GoalCompilationError
-GoalCompiler = GOAL_COMPILER_MODULE.GoalCompiler
-LedgerWriter = LEDGER_MODULE.LedgerWriter
 ClosureLoop = CLOSURE_LOOP_MODULE.ClosureLoop
+HandoffClient = HANDOFF_MODULE.HandoffClient
+HandoffMessage = HANDOFF_MODULE.HandoffMessage
+HandoffStore = HANDOFF_MODULE.HandoffStore
+default_handoff_dsn = HANDOFF_MODULE.default_sqlite_dsn
+parse_handoff_timestamp = HANDOFF_MODULE.parse_timestamp
 
 
 @dataclass(frozen=True)
@@ -780,6 +784,7 @@ def run_compiled_instruction(
     dry_run: bool,
     explain: bool,
     no_color: bool,
+    force_unsafe_health: bool = False,
 ) -> int:
     compiler = GoalCompiler(REPO_ROOT)
     ledger = LedgerWriter(
@@ -788,7 +793,11 @@ def run_compiled_instruction(
     )
     parsed_args = parse_kv_pairs(args)
     try:
-        result = compiler.compile(instruction, dispatch_args=parsed_args)
+        result = compiler.compile(
+            instruction,
+            dispatch_args=parsed_args,
+            force_unsafe_health=force_unsafe_health,
+        )
     except GoalCompilationError as exc:
         ledger.write(
             event_type="intent.rejected",
@@ -800,6 +809,7 @@ def run_compiled_instruction(
                 "error_message": exc.message,
                 "raw_input": exc.raw_input,
                 "details": exc.details,
+                "force_unsafe_health": force_unsafe_health,
             },
         )
         print(str(exc), file=sys.stderr)
@@ -817,6 +827,7 @@ def run_compiled_instruction(
             "matched_rule_id": result.matched_rule_id,
             "normalized_input": result.normalized_input,
             "dispatch_workflow_id": result.dispatch_workflow_id,
+            "force_unsafe_health": force_unsafe_health,
         },
     )
 
@@ -1073,6 +1084,59 @@ def print_status_table(results: list[tuple[dict[str, Any], ProbeResult]], *, no_
         raise SystemExit(1)
 
 
+def print_health_summary(entries: list[dict[str, Any]], *, no_color: bool) -> None:
+    enabled = not no_color and not NO_COLOR
+    print(f"{'SERVICE':<20} {'STATUS':<12} {'SCORE':>6} {'SAFE':<5} {'AGE':>5}")
+    for entry in entries:
+        status = str(entry["composite_status"])
+        color = "32" if status in {"healthy", "maintenance"} else "31" if status == "critical" else "33"
+        status_label = colorize(status, color, enabled=enabled)
+        print(
+            f"{entry['service_id']:<20} "
+            f"{status_label if enabled else status:<12} "
+            f"{entry['composite_score']:>6.2f} "
+            f"{yes_no(entry['safe_to_act']):<5} "
+            f"{str(entry['age_seconds']) + 's':>5}"
+        )
+
+
+def health_command(service_id: str | None, *, verbose: bool, json_output: bool, no_color: bool) -> int:
+    client = HealthCompositeClient(REPO_ROOT)
+    if service_id:
+        entry = client.get(service_id, allow_stale=True).as_dict()
+        if json_output:
+            print(json.dumps(entry, indent=2, sort_keys=True))
+        else:
+            print(f"composite_status: {entry['composite_status']}")
+            print(f"composite_score:  {entry['composite_score']:.2f}")
+            print(f"safe_to_act:     {yes_no(entry['safe_to_act'])}")
+            print(f"computed_at:     {entry['computed_at']}")
+            if verbose:
+                print("\nsignals:")
+                for signal in entry["signals"]:
+                    print(
+                        f"  {signal['name']:<18} "
+                        f"{signal['score']:.2f}  "
+                        f"(weight {signal['weight']:.2f})  "
+                        f"{signal['reason']}"
+                    )
+            else:
+                print(f"reason:          {entry['reason']}")
+        return 0 if entry["safe_to_act"] else 1
+
+    entries = [entry.as_dict() for entry in client.get_all(allow_stale=True)]
+    payload = {
+        "status": "healthy" if all(entry["safe_to_act"] for entry in entries) else "degraded",
+        "service_count": len(entries),
+        "services": entries,
+    }
+    if json_output:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+    else:
+        print_health_summary(entries, no_color=no_color)
+    return 0 if all(entry["safe_to_act"] for entry in entries) else 1
+
+
 def status_command(service_id: str | None, environment: str, *, timeout: float, no_color: bool) -> int:
     service_map = load_service_map()
     health_probes = load_health_probe_catalog()
@@ -1326,6 +1390,140 @@ def agent_state_verify_command(agent_id: str, task_id: str, *, digest: str, json
         print(f"Key count: {result.key_count}")
     return 0 if result.matched else 1
 
+def handoff_store() -> Any:
+    dsn = os.environ.get("LV3_HANDOFF_DSN", "").strip() or default_handoff_dsn(REPO_ROOT)
+    store = HandoffStore(dsn=dsn)
+    store.ensure_schema()
+    return store
+
+
+def handoff_client() -> Any:
+    ledger_enabled = bool(os.environ.get("LV3_LEDGER_DSN", "").strip() or os.environ.get("LV3_LEDGER_FILE", "").strip())
+    ledger_writer = LedgerWriter() if ledger_enabled else None
+    return HandoffClient(store=handoff_store(), ledger_writer=ledger_writer)
+
+
+def parse_handoff_payload(*, payload_json: str | None, payload_file: str | None) -> dict[str, Any]:
+    if payload_json and payload_file:
+        raise SystemExit("Use either --payload-json or --payload-file, not both.")
+    if payload_file:
+        return json.loads(Path(payload_file).read_text(encoding="utf-8"))
+    if payload_json:
+        return json.loads(payload_json)
+    return {}
+
+
+def format_handoff_age(sent_at: str) -> str:
+    created = parse_handoff_timestamp(sent_at)
+    if created is None:
+        return "-"
+    delta = datetime.now(UTC) - created
+    if delta < timedelta(minutes=1):
+        return f"{int(delta.total_seconds())}s"
+    if delta < timedelta(hours=1):
+        return f"{int(delta.total_seconds() // 60)}m"
+    return f"{int(delta.total_seconds() // 3600)}h"
+
+
+def print_handoff_table(transfers: list[Any]) -> None:
+    print("HANDOFF_ID                            FROM                   TO                     TYPE      STATUS      AGE")
+    for transfer in transfers:
+        print(
+            f"{transfer.handoff_id:<36} "
+            f"{transfer.from_agent[:22]:<22} "
+            f"{transfer.to_agent[:22]:<22} "
+            f"{transfer.handoff_type:<9} "
+            f"{transfer.status:<11} "
+            f"{format_handoff_age(transfer.sent_at)}"
+        )
+
+
+def handoff_send_command(args: argparse.Namespace) -> int:
+    try:
+        payload = parse_handoff_payload(payload_json=args.payload_json, payload_file=args.payload_file)
+    except (FileNotFoundError, json.JSONDecodeError) as exc:
+        print(f"Invalid handoff payload: {exc}", file=sys.stderr)
+        return 1
+    message_kwargs = dict(
+        from_agent=args.from_agent,
+        to_agent=args.to_agent,
+        task_id=args.task,
+        context_id=args.context_id,
+        subject=args.subject,
+        payload=payload,
+        handoff_type=args.handoff_type,
+        requires_accept=args.requires_accept,
+        timeout_seconds=args.timeout_seconds,
+        fallback=args.fallback,
+        reply_subject=args.reply_subject,
+        max_retries=args.max_retries,
+        backoff_seconds=args.backoff_seconds,
+    )
+    if args.handoff_id:
+        message_kwargs["handoff_id"] = args.handoff_id
+    message = HandoffMessage(**message_kwargs)
+    transfer = handoff_client().send(message)
+    print(json.dumps(transfer.to_dict(), indent=2, sort_keys=True))
+    return 0
+
+
+def handoff_list_command(args: argparse.Namespace) -> int:
+    transfers = handoff_store().list_transfers(
+        task_id=args.task,
+        to_agent=args.to_agent,
+        from_agent=args.from_agent,
+        status=args.status,
+        limit=args.limit,
+    )
+    if not transfers:
+        print("No handoffs found.")
+        return 0
+    print_handoff_table(transfers)
+    return 0
+
+
+def handoff_view_command(handoff_id: str) -> int:
+    transfer = handoff_store().get_transfer(handoff_id)
+    if transfer is None:
+        print(f"Unknown handoff '{handoff_id}'.", file=sys.stderr)
+        return 1
+    print(json.dumps(transfer.to_dict(), indent=2, sort_keys=True))
+    return 0
+
+
+def handoff_accept_command(args: argparse.Namespace) -> int:
+    try:
+        transfer = handoff_client().accept(
+            args.handoff_id,
+            actor=args.actor,
+            estimated_completion_seconds=args.estimate_seconds,
+        )
+    except KeyError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+    print(json.dumps(transfer.to_dict(), indent=2, sort_keys=True))
+    return 0
+
+
+def handoff_refuse_command(args: argparse.Namespace) -> int:
+    try:
+        transfer = handoff_client().refuse(args.handoff_id, actor=args.actor, reason=args.reason)
+    except KeyError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+    print(json.dumps(transfer.to_dict(), indent=2, sort_keys=True))
+    return 0
+
+
+def handoff_complete_command(args: argparse.Namespace) -> int:
+    try:
+        transfer = handoff_client().complete(args.handoff_id, actor=args.actor)
+    except KeyError as exc:
+        print(str(exc), file=sys.stderr)
+        return 1
+    print(json.dumps(transfer.to_dict(), indent=2, sort_keys=True))
+    return 0
+
 
 def generate_completion_script(shell_name: str) -> str:
     function_name = "_lv3_completion"
@@ -1395,6 +1593,7 @@ def completion_candidates(words: list[str], current: str) -> list[str]:
         "loop",
         "operator",
         "release",
+        "handoff",
     ]
     if len(words) <= 1:
         return [candidate for candidate in top_level if candidate.startswith(current)]
@@ -1431,6 +1630,8 @@ def completion_candidates(words: list[str], current: str) -> list[str]:
         return [action for action in ["start", "status", "approve", "close"] if action.startswith(current)]
     if words[1] == "release" and len(words) == 3:
         return [action for action in ["status", "tag"] if action.startswith(current)]
+    if words[1] == "handoff" and len(words) == 3:
+        return [action for action in ["send", "list", "view", "accept", "refuse", "complete"] if action.startswith(current)]
     return []
 
 
@@ -1631,6 +1832,11 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--args", nargs="*", default=[])
     run.add_argument("--approve-risk", action="store_true", help="Acknowledge a HIGH risk score and proceed.")
     run.add_argument("--risk-override", action="store_true", help="Override a BLOCK gate for a CRITICAL risk score.")
+    run.add_argument(
+        "--force-unsafe-health",
+        action="store_true",
+        help="Bypass the health composite gate and record the override in the ledger.",
+    )
     run.add_argument("--dry-run", action="store_true")
     run.add_argument("--explain", action="store_true")
 
@@ -1639,6 +1845,11 @@ def build_parser() -> argparse.ArgumentParser:
     intent_check = intent_subparsers.add_parser("check", help="Preview resource claims and conflict status.")
     intent_check.add_argument("instruction", nargs="+")
     intent_check.add_argument("--args", nargs="*", default=[])
+
+    health = subparsers.add_parser("health", help="Show the composite health index.")
+    health.add_argument("service", nargs="?")
+    health.add_argument("--verbose", action="store_true")
+    health.add_argument("--json", action="store_true")
 
     logs = subparsers.add_parser("logs", help="Query service logs from Loki.")
     logs.add_argument("service")
@@ -1672,6 +1883,44 @@ def build_parser() -> argparse.ArgumentParser:
     release_tag.add_argument("--version", help="Version to tag. Defaults to the current VERSION file.")
     release_tag.add_argument("--push", action="store_true")
     release_tag.add_argument("--dry-run", action="store_true")
+
+    handoff = subparsers.add_parser("handoff", help="Create and manage inter-agent handoffs.")
+    handoff_subparsers = handoff.add_subparsers(dest="handoff_action", required=True)
+    handoff_send = handoff_subparsers.add_parser("send", help="Persist and dispatch one handoff.")
+    handoff_send.add_argument("--handoff-id")
+    handoff_send.add_argument("--from-agent", required=True)
+    handoff_send.add_argument("--to-agent", required=True)
+    handoff_send.add_argument("--task", required=True)
+    handoff_send.add_argument("--context-id")
+    handoff_send.add_argument("--subject", required=True)
+    handoff_send.add_argument("--payload-json")
+    handoff_send.add_argument("--payload-file")
+    handoff_send.add_argument("--type", dest="handoff_type", choices=["delegate", "escalate", "inform"], default="delegate")
+    handoff_send.add_argument("--requires-accept", action="store_true")
+    handoff_send.add_argument("--timeout-seconds", type=int, default=60)
+    handoff_send.add_argument("--fallback", choices=["operator", "close", "retry_self"], default="operator")
+    handoff_send.add_argument("--reply-subject")
+    handoff_send.add_argument("--max-retries", type=int, default=0)
+    handoff_send.add_argument("--backoff-seconds", type=int, default=5)
+    handoff_list = handoff_subparsers.add_parser("list", help="List known handoffs.")
+    handoff_list.add_argument("--task")
+    handoff_list.add_argument("--to-agent")
+    handoff_list.add_argument("--from-agent")
+    handoff_list.add_argument("--status")
+    handoff_list.add_argument("--limit", type=int, default=20)
+    handoff_view = handoff_subparsers.add_parser("view", help="Show one handoff.")
+    handoff_view.add_argument("handoff_id")
+    handoff_accept = handoff_subparsers.add_parser("accept", help="Accept one pending handoff.")
+    handoff_accept.add_argument("handoff_id")
+    handoff_accept.add_argument("--actor", default="operator")
+    handoff_accept.add_argument("--estimate-seconds", type=int)
+    handoff_refuse = handoff_subparsers.add_parser("refuse", help="Refuse one pending handoff.")
+    handoff_refuse.add_argument("handoff_id")
+    handoff_refuse.add_argument("--actor", default="operator")
+    handoff_refuse.add_argument("--reason", required=True)
+    handoff_complete = handoff_subparsers.add_parser("complete", help="Mark one accepted handoff complete.")
+    handoff_complete.add_argument("handoff_id")
+    handoff_complete.add_argument("--actor", required=True)
 
     operator = subparsers.add_parser("operator", help="Manage human operator access.")
     operator_subparsers = operator.add_subparsers(dest="operator_action", required=True)
@@ -1785,6 +2034,12 @@ def main(argv: list[str] | None = None) -> int:
         return search_command(args.query, collection=args.collection, limit=args.limit, rebuild=args.rebuild)
     if args.command == "status":
         return status_command(args.service, args.env, timeout=args.timeout, no_color=no_color)
+    if args.command == "health":
+        try:
+            return health_command(args.service, verbose=args.verbose, json_output=args.json, no_color=no_color)
+        except ServiceHealthNotFoundError as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
     if args.command == "vm":
         if args.vm_action == "list":
             return vm_list_command(args.env)
@@ -1847,6 +2102,7 @@ def main(argv: list[str] | None = None) -> int:
             dry_run=args.dry_run,
             explain=args.explain,
             no_color=no_color,
+            force_unsafe_health=args.force_unsafe_health,
         )
     if args.command == "intent":
         if args.intent_action == "check":
@@ -1900,6 +2156,26 @@ def main(argv: list[str] | None = None) -> int:
         if args.dry_run:
             forwarded_args.append("--dry-run")
         return release_manager.main(forwarded_args)
+    if args.command == "agent":
+        if args.agent_action == "state":
+            if args.agent_state_action == "show":
+                return agent_state_show_command(args.agent, args.task, json_output=args.json)
+            if args.agent_state_action == "delete":
+                return agent_state_delete_command(args.agent, args.task, key=args.key)
+            if args.agent_state_action == "verify":
+                return agent_state_verify_command(args.agent, args.task, digest=args.digest, json_output=args.json)
+    if args.command == "handoff":
+        if args.handoff_action == "send":
+            return handoff_send_command(args)
+        if args.handoff_action == "list":
+            return handoff_list_command(args)
+        if args.handoff_action == "view":
+            return handoff_view_command(args.handoff_id)
+        if args.handoff_action == "accept":
+            return handoff_accept_command(args)
+        if args.handoff_action == "refuse":
+            return handoff_refuse_command(args)
+        return handoff_complete_command(args)
     if args.command == "agent":
         if args.agent_action == "state":
             if args.agent_state_action == "show":

@@ -33,7 +33,7 @@ Loop components:
    - `check-secret-ages` — compare last-rotated timestamps in `secret-catalog.json` against rotation periods (ADR 0065)
    - `check-certificate-expiry` — query step-ca for certificates expiring within 14 days
    - `check-backup-recency` — verify the most recent PBS backup is within the declared retention window
-3. **finding format** — each check emits a structured finding to NATS (`platform.findings.<check-name>`):
+3. **finding format** — each check emits a structured finding to NATS (`platform.findings.observation`):
    ```json
    { "check": "check-image-freshness", "severity": "warning|critical|ok",
      "summary": "3 images are more than 30 days behind upstream",

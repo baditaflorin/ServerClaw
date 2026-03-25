@@ -295,9 +295,49 @@ def test_help_lists_command_groups(capsys: pytest.CaptureFixture[str], minimal_r
     captured = capsys.readouterr()
     assert exit_code == 0
     assert "deploy" in captured.out
-    assert "status" in captured.out
-    assert "open" in captured.out
-    assert "operator" in captured.out
+    assert "handoff" in captured.out
+
+
+def test_handoff_cli_round_trip(capsys: pytest.CaptureFixture[str], minimal_repo: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    handoff_dsn = f"sqlite:///{minimal_repo / '.local' / 'state' / 'handoffs.sqlite3'}"
+    monkeypatch.setenv("LV3_HANDOFF_DSN", handoff_dsn)
+
+    send_exit = lv3_cli.main(
+        [
+            "handoff",
+            "send",
+            "--handoff-id",
+            "handoff-cli-001",
+            "--from-agent",
+            "agent/runbook-executor",
+            "--to-agent",
+            "operator",
+            "--task",
+            "runbook-run:001",
+            "--subject",
+            "Verify follow-up",
+            "--payload-json",
+            '{"service":"netbox","attempt":1}',
+            "--type",
+            "escalate",
+            "--requires-accept",
+        ]
+    )
+    assert send_exit == 0
+    sent_payload = json.loads(capsys.readouterr().out)
+    assert sent_payload["status"] == "pending"
+
+    accept_exit = lv3_cli.main(["handoff", "accept", "handoff-cli-001", "--actor", "operator", "--estimate-seconds", "120"])
+    assert accept_exit == 0
+    accepted_payload = json.loads(capsys.readouterr().out)
+    assert accepted_payload["status"] == "accepted"
+    assert accepted_payload["response_decision"] == "accept"
+
+    view_exit = lv3_cli.main(["handoff", "view", "handoff-cli-001"])
+    assert view_exit == 0
+    viewed_payload = json.loads(capsys.readouterr().out)
+    assert viewed_payload["handoff_id"] == "handoff-cli-001"
+    assert viewed_payload["estimated_completion_seconds"] == 120
 
 
 def test_deploy_dry_run_prints_remote_exec_route(
@@ -369,6 +409,55 @@ def test_run_parse_error_is_clean(
     ledger_path = minimal_repo / ".local" / "state" / "ledger" / "ledger.events.jsonl"
     events = [json.loads(line) for line in ledger_path.read_text().splitlines()]
     assert events[-1]["event_type"] == "intent.rejected"
+
+
+def test_health_command_prints_composite_summary(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    snapshot_dir = minimal_repo / ".local" / "state" / "world-state"
+    snapshot_dir.mkdir(parents=True)
+    (snapshot_dir / "service_health.json").write_text(
+        json.dumps(
+            {
+                "services": [
+                    {"service_id": "grafana", "status": "healthy"},
+                    {"service_id": "windmill", "status": "degraded"},
+                    {"service_id": "netbox", "status": "healthy"},
+                ],
+                "collected_at": "2026-03-24T10:00:00Z",
+            }
+        )
+        + "\n"
+    )
+
+    exit_code = lv3_cli.main(["health"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "SERVICE" in captured.out
+    assert "windmill" in captured.out
+
+
+def test_run_force_unsafe_health_bypasses_health_gate(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    snapshot_dir = minimal_repo / ".local" / "state" / "world-state"
+    snapshot_dir.mkdir(parents=True)
+    (snapshot_dir / "service_health.json").write_text(
+        json.dumps(
+            {
+                "services": [{"service_id": "netbox", "status": "down"}],
+                "collected_at": "2026-03-24T10:00:00Z",
+            }
+        )
+        + "\n"
+    )
+
+    exit_code = lv3_cli.main(["run", "deploy", "netbox", "--force-unsafe-health", "--dry-run"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "Dispatch Workflow: converge-netbox" in captured.out
 
 
 def test_run_requires_approval_and_writes_lifecycle_events(

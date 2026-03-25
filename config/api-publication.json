@@ -144,7 +144,16 @@
       "lane_surface_ref": "platform-finding-subjects",
       "publication_tier": "internal-only",
       "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
-      "approval_notes": "ADR 0071 finding subjects stay private-first and should not be bridged outside the internal event plane without an explicit follow-up ADR."
+      "approval_notes": "ADR 0071 finding events stay private-first and use one canonical subject so subscribers do not depend on producer-specific topic naming."
+    },
+    {
+      "id": "platform-api-request-events",
+      "title": "Platform API request events",
+      "lane": "event",
+      "lane_surface_ref": "platform-api-request-events",
+      "publication_tier": "internal-only",
+      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "approval_notes": "ADR 0092 request events stay private-first because they expose operator and service call patterns that should not leave the internal event plane."
     },
     {
       "id": "platform-drift-subjects",
@@ -172,6 +181,33 @@
       "publication_tier": "internal-only",
       "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
       "approval_notes": "ADR 0080 maintenance subjects stay private-first because they disclose planned change timing and active alert-suppression scope."
+    },
+    {
+      "id": "platform-backup-subjects",
+      "title": "Backup verification event subjects",
+      "lane": "event",
+      "lane_surface_ref": "platform-backup-subjects",
+      "publication_tier": "internal-only",
+      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "approval_notes": "ADR 0099 backup verification events stay private-first because they disclose restore posture and recent backup health."
+    },
+    {
+      "id": "platform-world-state-events",
+      "title": "World-state refresh events",
+      "lane": "event",
+      "lane_surface_ref": "platform-world-state-events",
+      "publication_tier": "internal-only",
+      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "approval_notes": "ADR 0113 world-state refresh events stay private-first because they expose live collection cadence and surface freshness for internal automation."
+    },
+    {
+      "id": "platform-ledger-events",
+      "title": "Mutation-ledger fan-out events",
+      "lane": "event",
+      "lane_surface_ref": "platform-ledger-events",
+      "publication_tier": "internal-only",
+      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "approval_notes": "ADR 0115 ledger fan-out stays private-first because it exposes operator and automation mutations in near real time."
     }
   ]
 }

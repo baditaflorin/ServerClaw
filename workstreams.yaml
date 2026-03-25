@@ -894,7 +894,7 @@ workstreams:
     conflicts_with: []
     shared_surfaces:
       - Windmill workflows
-      - NATS platform.findings.*
+      - NATS platform.findings.observation
       - Mattermost platform-findings channel
       - GlitchTip issue tracking
       - Open WebUI daily digest
@@ -2212,6 +2212,35 @@ workstreams:
     ready_to_merge: false
     live_applied: false
 
+  - id: adr-0124-platform-event-taxonomy
+    adr: "0124"
+    title: Platform event taxonomy and canonical NATS topics
+    status: merged
+    owner: codex
+    branch: codex/adr-0124-platform-event-taxonomy
+    worktree_path: .worktrees/adr-0124
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0124-platform-event-taxonomy.md
+    depends_on:
+      - adr-0058-nats-event-bus
+      - adr-0071-agent-observation-loop
+      - adr-0080-maintenance-windows
+      - adr-0092-platform-api-gateway
+      - adr-0099-backup-restore-verification
+      - adr-0102-security-posture-reporting
+      - adr-0113-world-state-materializer
+      - adr-0115-mutation-ledger
+    conflicts_with: []
+    shared_surfaces:
+      - config/event-taxonomy.yaml
+      - config/nats-streams.yaml
+      - config/control-plane-lanes.json
+      - config/api-publication.json
+      - platform/events/
+      - scripts/validate_nats_topics.py
+      - docs/runbooks/platform-event-taxonomy.md
+    ready_to_merge: false
+    live_applied: false
+
   - id: adr-0126-observation-to-action-closure-loop
     adr: "0126"
     title: Observation-to-action closure loop
@@ -2267,6 +2296,36 @@ workstreams:
     ready_to_merge: false
     live_applied: false
 
+  - id: adr-0128-platform-health-composite-index
+    adr: "0128"
+    title: Platform health composite index
+    status: merged
+    owner: codex
+    branch: codex/adr-0128-health-composite-index
+    worktree_path: .worktrees/adr-0128
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0128-platform-health-composite-index.md
+    depends_on:
+      - adr-0064-health-probe-contracts
+      - adr-0080-maintenance-windows
+      - adr-0091-drift-detection
+      - adr-0096-slo-tracking
+      - adr-0113-world-state-materializer
+      - adr-0114-incident-triage
+      - adr-0115-mutation-ledger
+      - adr-0123-service-uptime-contracts
+    conflicts_with: []
+    shared_surfaces:
+      - platform/health/
+      - scripts/api_gateway/
+      - scripts/lv3_cli.py
+      - platform/goal_compiler/
+      - config/windmill/scripts/health/
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/
+      - migrations/0013_health_schema.sql
+      - docs/runbooks/health-composite-index.md
+    ready_to_merge: false
+    live_applied: false
+
   - id: adr-0130-agent-state-persistence
     adr: "0130"
     title: Agent state persistence across workflow boundaries
@@ -2285,28 +2344,53 @@ workstreams:
       - migrations/0015_agent_state_schema.sql
       - scripts/lv3_cli.py
       - docs/runbooks/agent-state-store.md
-  - id: adr-0140-grafana-public-access-hardening
-    adr: "0140"
-    title: Grafana public access hardening
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0131-agent-handoff-protocol
+    adr: "0131"
+    title: Multi-agent handoff protocol
     status: merged
     owner: codex
-    branch: codex/adr-0140-grafana-hardening
-    worktree_path: .worktrees/adr-0140-grafana-hardening
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0140-grafana-public-access-hardening.md
+    branch: codex/adr-0131-handoff-protocol
+    worktree_path: .worktrees/adr-0131
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0131-agent-handoff-protocol.md
+    depends_on:
+      - adr-0090-platform-cli
+      - adr-0115-mutation-ledger
+    conflicts_with: []
+    shared_surfaces:
+      - platform/handoff/
+      - scripts/lv3_cli.py
+      - config/ledger-event-types.yaml
+      - migrations/0015_handoff_schema.sql
+      - docs/runbooks/
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0133-portal-authentication-by-default
+    adr: "0133"
+    title: Portal authentication by default
+    status: merged
+    owner: codex
+    branch: codex/adr-0133-portal-auth-default
+    worktree_path: .worktrees/adr-0133-auth-default
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0133-portal-authentication-by-default.md
     depends_on:
       - adr-0011-monitoring
       - adr-0056-keycloak-sso
-      - adr-0109-public-status-page
+      - adr-0074-ops-portal
+      - adr-0081-changelog-portal
+      - adr-0094-developer-portal
     conflicts_with: []
     shared_surfaces:
-      - inventory/host_vars/proxmox_florin.yml
-      - collections/ansible_collections/lv3/platform/plugins/filter/service_topology.py
-      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/
+      - config/subdomain-catalog.json
       - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/
+      - collections/ansible_collections/lv3/platform/roles/public_edge_oidc_auth/
+      - collections/ansible_collections/lv3/platform/roles/grafana_sso/
       - docs/runbooks/
-      - tests/
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0135-data-governance
     adr: "0135"
@@ -2327,5 +2411,76 @@ workstreams:
       - docs/templates/
       - scripts/generate_docs_site.py
       - tests/test_docs_site.py
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0139-subdomain-exposure-audit
+    adr: "0139"
+    title: Subdomain exposure audit and registry
+    status: merged
+    owner: codex
+    branch: codex/adr-0139-subdomain-exposure-audit
+    worktree_path: .worktrees/adr-0139
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0139-subdomain-exposure-audit.md
+    depends_on:
+      - adr-0076-subdomain-governance
+      - adr-0091-drift-detection
+    conflicts_with: []
+    shared_surfaces:
+      - config/subdomain-catalog.json
+      - config/subdomain-exposure-registry.json
+      - scripts/subdomain_exposure_audit.py
+      - config/workflow-catalog.json
+      - roles/nginx_edge_publication/defaults/main.yml
+      - receipts/subdomain-exposure-audit
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0140-grafana-public-access-hardening
+    adr: "0140"
+    title: Grafana public access hardening
+    status: live_applied
+    owner: codex
+    branch: codex/adr-0140-grafana-hardening
+    worktree_path: .worktrees/adr-0140-grafana-hardening
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0140-grafana-public-access-hardening.md
+    depends_on:
+      - adr-0011-monitoring
+      - adr-0056-keycloak-sso
+      - adr-0109-public-status-page
+    conflicts_with: []
+    shared_surfaces:
+      - inventory/host_vars/proxmox_florin.yml
+      - collections/ansible_collections/lv3/platform/plugins/filter/service_topology.py
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/
+      - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/
+      - docs/runbooks/
+      - tests/
+    ready_to_merge: false
+    live_applied: true
+
+  - id: adr-0142-public-surface-security-scan
+    adr: "0142"
+    title: Public surface automated security scan
+    status: merged
+    owner: codex
+    branch: codex/adr-0142-public-surface-scan
+    worktree_path: .worktrees/adr-0142
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0142-public-surface-security-scan.md
+    depends_on:
+      - adr-0044-windmill
+      - adr-0057-mattermost-chatops
+      - adr-0061-glitchtip-failure-signals
+      - adr-0083-docker-check-runner
+      - adr-0102-security-posture-reporting
+    conflicts_with: []
+    shared_surfaces:
+      - config/public-surface-scan-policy.json
+      - scripts/public_surface_scan.py
+      - config/windmill/scripts/weekly-security-scan.py
+      - config/workflow-catalog.json
+      - config/control-plane-lanes.json
+      - receipts/security-scan/
+      - docs/runbooks/public-surface-security-scan.md
     ready_to_merge: false
     live_applied: false

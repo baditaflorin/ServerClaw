@@ -18,7 +18,7 @@
 - create `platform/graph/client.py` — `DependencyGraphClient` with `descendants()`, `ancestors()`, `path()`, `neighbourhood()`, `health_propagation()` methods using recursive CTEs
 - create `config/windmill/scripts/graph/import-from-netbox.py` — Windmill workflow: imports device→rack, IP, VLAN edges from NetBox world-state snapshot
 - create `config/windmill/scripts/graph/import-from-catalog.py` — Windmill workflow: imports `depends_on` edges from `config/workflow-catalog.json`
-- create `config/windmill/scripts/graph/propagate-health.py` — Windmill workflow subscribed to `world_state.refreshed` on `service_health` surface; runs health propagation and emits `derived_health_degraded` NATS events
+- create `config/windmill/scripts/graph/propagate-health.py` — Windmill workflow subscribed to `platform.world_state.refreshed` on `service_health` surface; runs health propagation and emits `derived_health_degraded` NATS events
 - register `/v1/graph/*` routes on the platform API gateway (ADR 0092): `GET /v1/graph/nodes`, `GET /v1/graph/nodes/{id}/descendants`, `GET /v1/graph/nodes/{id}/ancestors`, `GET /v1/graph/nodes/{id}/health`, `GET /v1/graph/path`
 - write `tests/unit/test_graph_client.py` — test recursive traversal, cycle detection, empty graph, single-node graph
 

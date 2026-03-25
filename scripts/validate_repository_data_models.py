@@ -24,6 +24,7 @@ from generate_platform_vars import PLATFORM_VARS_PATH, PORT_KEYS, build_platform
 from mutation_audit import load_mutation_audit_schema, validate_mutation_audit_schema
 from operator_manager import ROSTER_PATH, validate_operator_roster
 from promotion_pipeline import validate_promotion_receipts
+from public_surface_scan import load_public_surface_scan_policy
 from validate_ephemeral_vmid import validate_ephemeral_vmid_ranges
 from generate_slo_rules import outputs_match as slo_outputs_match
 from slo_tracking import (
@@ -2018,6 +2019,7 @@ def validate_repository_data_models() -> int:
     validate_maintenance_window_schema()
     validate_capacity_model_schema()
     validate_capacity_model()
+    load_public_surface_scan_policy()
     validate_vm_template_manifest(host_vars_context["proxmox_vm_templates"])
     validate_operator_roster(load_yaml(ROSTER_PATH))
     validate_versions_stack(host_vars_context)

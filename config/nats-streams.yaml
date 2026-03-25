@@ -1,0 +1,12 @@
+schema_version: 1.0.0
+
+streams:
+  - name: PLATFORM_EVENTS
+    subjects:
+      - platform.>
+    retention: limits
+    max_age: 90d
+    storage: file
+    replicas: 1
+    discard: old
+    duplicate_window: 2m

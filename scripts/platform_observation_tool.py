@@ -19,8 +19,15 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
+    del sys.modules["platform"]
+
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path, write_json
 from maintenance_window_tool import list_active_windows_best_effort, suppress_findings_for_maintenance
+from platform.events import build_envelope
 from tls_cert_probe import collect_certificate_results
 
 
@@ -885,7 +892,8 @@ def build_daily_digest(findings: list[dict[str, Any]]) -> str:
 
 
 def publish_nats(context: dict[str, Any], subject: str, payload: dict[str, Any]) -> None:
-    encoded = base64.b64encode(json.dumps(payload, separators=(",", ":")).encode()).decode()
+    envelope = build_envelope(subject, payload, actor_id="agent/observation-loop", ts=payload.get("ts"))
+    encoded = base64.b64encode(json.dumps(envelope, separators=(",", ":")).encode()).decode()
     remote_command = (
         "python3 - <<'PY'\n"
         "import base64, socket\n"
@@ -948,7 +956,7 @@ def run_checks(args: argparse.Namespace) -> int:
 
     if args.publish_nats:
         for finding in findings:
-            publish_nats(context, f"platform.findings.{finding['check']}", finding)
+            publish_nats(context, "platform.findings.observation", finding)
 
     mattermost_url = args.mattermost_webhook_url or maybe_read_secret_path(
         context["secret_manifest"], "mattermost_platform_findings_webhook_url"

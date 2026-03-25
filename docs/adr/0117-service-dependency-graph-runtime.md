@@ -97,7 +97,7 @@ affected = graph.health_propagation("service:postgres", status="degraded")
 
 ### Health propagation
 
-Health propagation runs as a Windmill workflow triggered on every `world_state.refreshed` event for the `service_health` surface. For each service that transitioned to `degraded` or `down`, the propagation workflow:
+Health propagation runs as a Windmill workflow triggered on every `platform.world_state.refreshed` event for the `service_health` surface. For each service that transitioned to `degraded` or `down`, the propagation workflow:
 
 1. Traverses `ancestors` in reverse (find everything that depends on the degraded service).
 2. For each downstream service whose own health probe is still passing, emits a `derived_health_degraded` event to NATS.

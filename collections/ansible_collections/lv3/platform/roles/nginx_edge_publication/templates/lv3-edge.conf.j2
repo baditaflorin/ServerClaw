@@ -24,7 +24,7 @@ server {
 }
 
 {% for site in public_edge_sites %}
-{% set protected_site = public_edge_authenticated_sites.get(site.hostname) %}
+{% set protected_site = public_edge_authenticated_sites[site.hostname] if site.hostname in public_edge_authenticated_sites else none %}
 {% set proxy_hide_headers = site.proxy_hide_headers | default([]) %}
 {% set blocked_exact_paths = site.blocked_exact_paths | default([]) %}
 server {

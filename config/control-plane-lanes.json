@@ -314,7 +314,7 @@
         {
           "id": "platform-finding-subjects",
           "kind": "event_subject",
-          "endpoint": "platform.findings.*",
+          "endpoint": "platform.findings.observation",
           "auth": "Internal NATS publication from ADR 0071 through the private docker-runtime-lv3 event bus runtime.",
           "owner_refs": [
             "proxmox_florin"
@@ -322,7 +322,18 @@
           "workflow_refs": [
             "check-platform-drift"
           ],
-          "notes": "Each observation-loop check emits a structured finding on its own subject so future consumers can subscribe without scraping shell output."
+          "notes": "The observation loop now emits each structured finding on the canonical platform.findings.observation subject so consumers subscribe to one stable contract instead of per-check topic names."
+        },
+        {
+          "id": "platform-api-request-events",
+          "kind": "event_subject",
+          "endpoint": "platform.api.request",
+          "auth": "Internal NATS publication from ADR 0092 through the private docker-runtime-lv3 event bus runtime.",
+          "service_refs": [
+            "api_gateway"
+          ],
+          "workflow_refs": [],
+          "notes": "The API gateway emits one canonical request event per completed HTTP request so downstream analytics and audit consumers can subscribe without scraping HTTP logs."
         },
         {
           "id": "platform-drift-subjects",
@@ -341,20 +352,21 @@
           "id": "platform-security-subjects",
           "kind": "event_subject",
           "endpoint": "platform.security.*",
-          "auth": "Internal NATS publication from ADR 0102 through the private docker-runtime-lv3 event bus runtime.",
+          "auth": "Internal NATS publication from ADR 0102 and ADR 0142 through the private docker-runtime-lv3 event bus runtime.",
           "owner_refs": [
             "proxmox_florin"
           ],
           "workflow_refs": [
-            "security-posture-scan"
+            "security-posture-scan",
+            "weekly-security-scan"
           ],
-          "notes": "Each scheduled security posture run publishes a summary event plus critical findings so operators and future automation can react without polling the receipt directory."
+          "notes": "Scheduled security workflows publish summary events plus high or critical findings so operators and future automation can react without polling the receipt directories."
         },
         {
           "id": "maintenance-window-subjects",
           "kind": "event_subject",
-          "endpoint": "maintenance.*",
-          "auth": "Internal NATS publication for ADR 0080 maintenance.opened, maintenance.closed, and maintenance.force_closed events through the private docker-runtime-lv3 event bus runtime.",
+          "endpoint": "platform.maintenance.*",
+          "auth": "Internal NATS publication for ADR 0080 platform.maintenance.opened, platform.maintenance.closed, and platform.maintenance.force_closed events through the private docker-runtime-lv3 event bus runtime.",
           "owner_refs": [
             "proxmox_florin"
           ],
@@ -363,6 +375,41 @@
             "close-maintenance-window"
           ],
           "notes": "Maintenance-window state changes are published on named internal subjects so operators and future automation can see when alert suppression begins or ends."
+        },
+        {
+          "id": "platform-backup-subjects",
+          "kind": "event_subject",
+          "endpoint": "platform.backup.restore-verification.*",
+          "auth": "Internal NATS publication from ADR 0099 through the private docker-runtime-lv3 event bus runtime.",
+          "owner_refs": [
+            "proxmox_florin"
+          ],
+          "workflow_refs": [
+            "restore-verification"
+          ],
+          "notes": "Restore verification emits canonical completion and failure subjects so backup policy consumers can react without polling receipts."
+        },
+        {
+          "id": "platform-world-state-events",
+          "kind": "event_subject",
+          "endpoint": "platform.world_state.refreshed",
+          "auth": "Internal NATS publication from ADR 0113 through the private docker-runtime-lv3 event bus runtime.",
+          "owner_refs": [
+            "proxmox_florin"
+          ],
+          "workflow_refs": [],
+          "notes": "Each successful world-state materialization refresh emits one canonical platform.world_state.refreshed event for downstream graph, health, and automation consumers."
+        },
+        {
+          "id": "platform-ledger-events",
+          "kind": "event_subject",
+          "endpoint": "platform.ledger.event_written",
+          "auth": "Internal NATS publication from ADR 0115 through the private docker-runtime-lv3 event bus runtime.",
+          "owner_refs": [
+            "proxmox_florin"
+          ],
+          "workflow_refs": [],
+          "notes": "Each committed mutation-ledger row fans out on the canonical platform.ledger.event_written subject for downstream mirrors and reactive consumers."
         }
       ]
     }

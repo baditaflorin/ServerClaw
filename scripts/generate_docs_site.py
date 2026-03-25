@@ -895,6 +895,7 @@ def render_reference_pages(
                 "service_link": f"../services/{service_id}.md" if service_id in service_names else None,
                 "status": entry["status"],
                 "exposure": entry["exposure"],
+                "auth_requirement": entry["auth_requirement"],
                 "target": entry["target"],
                 "target_port": entry["target_port"],
                 "tls_provider": entry["tls"]["provider"],
