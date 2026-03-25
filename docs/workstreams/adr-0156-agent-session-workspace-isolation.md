@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0156](../adr/0156-agent-session-workspace-isolation.md)
 - Title: per-session controller state, remote build workspace isolation, and session-aware receipt metadata
-- Status: live_applied
+- Status: merged
 - Branch: `codex/adr-0156-agent-session-workspace-isolation`
 - Worktree: `.worktrees/adr-0156`
 - Owner: codex
@@ -65,4 +65,4 @@
 ## Outcome
 
 - repository implementation is complete on `main` in repo release `0.143.2`
-- live verification was completed from `main` on `2026-03-25`, and platform version `0.130.4` records the session-scoped remote workspace contract as current live truth
+- live verification from `main` is still pending because the current `docker-build-lv3` SSH jump path was unreachable during the 2026-03-25 integration run
