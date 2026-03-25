@@ -1546,9 +1546,9 @@ workstreams:
   - id: adr-0096-slo-tracking
     adr: "0096"
     title: SLO definitions and error budget tracking
-    status: merged
+    status: live_applied
     owner: codex
-    branch: codex/adr-0096-slo-tracking
+    branch: codex/live-apply-0096
     worktree_path: .worktrees/adr-0096
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0096-slo-tracking.md
     depends_on:
@@ -1567,7 +1567,7 @@ workstreams:
       - scripts/generate_ops_portal.py
       - collections/ansible_collections/lv3/platform/roles/monitoring_vm/
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0097-alerting-routing
     adr: "0097"

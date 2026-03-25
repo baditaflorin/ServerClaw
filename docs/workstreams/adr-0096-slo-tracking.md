@@ -2,8 +2,8 @@
 
 - ADR: [ADR 0096](../adr/0096-slo-definitions-and-error-budget-tracking.md)
 - Title: Machine-readable SLO catalog with generated Prometheus rules, blackbox probe targets, Grafana dashboard, and promotion-gate enforcement
-- Status: merged
-- Branch: `codex/adr-0096-slo-tracking`
+- Status: live_applied
+- Branch: `codex/live-apply-0096`
 - Worktree: `.worktrees/adr-0096`
 - Owner: codex
 - Depends On: `adr-0011-monitoring`, `adr-0064-health-probes`, `adr-0073-promotion-gate`, `adr-0092-platform-api-gateway`
@@ -26,7 +26,7 @@
 
 - Alert routing policy ownership beyond Prometheus-native rule definitions; ADR 0097 still owns notification routing.
 - Automatic remediation based on burn rate.
-- Claiming live platform rollout or `platform_version` change without a deliberate apply from `main`.
+- Claiming unrelated platform rollout outside the deliberate monitoring and ingress apply needed for this ADR's live surface.
 
 ## Expected Repo Surfaces
 
@@ -68,4 +68,5 @@
 ## Outcome
 
 - repository implementation is complete on `main` in repo release `0.106.0`
-- no live apply has been claimed yet; `platform_version` remains unchanged until the monitoring stack is converged from `main`
+- live apply completed on `2026-03-25` from `b203c2e`, with the monitoring converge passing on `monitoring-lv3` and the public Grafana edge controls re-rendered from repo state on `nginx-lv3`
+- `platform_version` advances to `0.130.3` for the first live claim of ADR 0096

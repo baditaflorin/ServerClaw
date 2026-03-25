@@ -1,10 +1,10 @@
 # ADR 0096: SLO Definitions and Error Budget Tracking
 
-- Status: Accepted
+- Status: Implemented
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.106.0
-- Implemented In Platform Version: not yet
-- Implemented On: 2026-03-23
+- Implemented In Platform Version: 0.130.3
+- Implemented On: 2026-03-25
 - Date: 2026-03-23
 
 ## Context
@@ -103,6 +103,7 @@ This keeps the promotion contract aligned with platform reliability instead of o
 
 ## Outcome
 
-- repository implementation is complete on `main` in repo release `0.106.0`
-- the repo now ships the SLO catalog, generated Prometheus rule and target files, the generated Grafana dashboard, monitoring-role convergence for blackbox probing, the `/v1/platform/slos` API surface, the ops-portal SLO summary, and promotion-gate enforcement
-- no live platform version bump is claimed yet; monitoring convergence and alert routing still require apply from `main`
+- repository implementation became true on `main` in repo release `0.106.0`
+- live platform implementation became true on `2026-03-25` in platform version `0.130.3`
+- `monitoring-lv3` now runs the repo-managed `prometheus-blackbox-exporter`, the generated `slo-rules.yml` and `slo-alerts.yml` rule sets, and the `LV3 SLO Overview` Grafana dashboard verification contract
+- the public Grafana edge verification that protects the SLO dashboard path is aligned live again: dashboard URLs redirect unauthenticated viewers to login and `https://grafana.lv3.org/api/health` returns `404`
