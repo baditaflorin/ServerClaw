@@ -1,0 +1,350 @@
+---
+- name: Validate Gitea runtime inputs
+  ansible.builtin.assert:
+    that:
+      - gitea_site_dir | length > 0
+      - gitea_data_dir | length > 0
+      - gitea_secret_dir | length > 0
+      - gitea_compose_file | length > 0
+      - gitea_env_file | length > 0
+      - gitea_image | length > 0
+      - gitea_http_port | int > 0
+      - gitea_public_hostname | length > 0
+      - gitea_private_base_url | length > 0
+      - gitea_controller_url | length > 0
+      - gitea_database_name | length > 0
+      - gitea_database_user | length > 0
+      - gitea_database_host | length > 0
+      - gitea_database_password_local_file | length > 0
+      - gitea_oidc_client_id | length > 0
+      - gitea_oidc_client_secret_local_file | length > 0
+      - gitea_oidc_discovery_url | length > 0
+      - gitea_oidc_internal_discovery_url | length > 0
+      - gitea_admin_username | length > 0
+      - gitea_admin_email | length > 0
+      - gitea_admin_password_remote_file | length > 0
+      - gitea_admin_password_local_file | length > 0
+      - gitea_admin_token_remote_file | length > 0
+      - gitea_admin_token_local_file | length > 0
+      - gitea_runner_registration_token_remote_file | length > 0
+      - gitea_runner_registration_token_local_file | length > 0
+      - gitea_webhook_secret_remote_file | length > 0
+      - gitea_webhook_secret_local_file | length > 0
+      - gitea_repo_org | length > 0
+      - gitea_repo_name | length > 0
+    fail_msg: "gitea_runtime requires runtime paths, database credentials, OIDC inputs, and bootstrap artifact paths."
+
+- name: Ensure the Gitea database password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ gitea_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: gitea_database_password_local
+
+- name: Fail if the Gitea database password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ gitea_database_password_local_file }} is missing on the control machine.
+      Run the Gitea PostgreSQL converge first so the runtime can connect to postgres-lv3.
+  when: not gitea_database_password_local.stat.exists
+
+- name: Ensure the Gitea OIDC client secret exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ gitea_oidc_client_secret_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: gitea_oidc_client_secret_local
+
+- name: Fail if the Gitea OIDC client secret is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ gitea_oidc_client_secret_local_file }} is missing on the control machine.
+      Re-run the Keycloak converge so the Gitea OIDC client is provisioned before bootstrapping Gitea.
+  when: not gitea_oidc_client_secret_local.stat.exists
+
+- name: Ensure Gitea runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - docker-compose-plugin
+      - postgresql-client
+      - python3
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the Gitea directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ gitea_site_dir }}"
+      owner: root
+      group: root
+      mode: "0755"
+    - path: "{{ gitea_data_dir }}"
+      owner: "1000"
+      group: "1000"
+      mode: "0755"
+    - path: "{{ gitea_secret_dir }}"
+      owner: root
+      group: root
+      mode: "0700"
+
+- name: Generate the Gitea admin password when missing
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ gitea_admin_password_remote_file }}" ]; then
+      umask 077
+      openssl rand -base64 24 > "{{ gitea_admin_password_remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: gitea_admin_password_generation
+  changed_when: "'changed' in gitea_admin_password_generation.stdout"
+  no_log: true
+
+- name: Generate the Gitea webhook secret when missing
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ gitea_webhook_secret_remote_file }}" ]; then
+      umask 077
+      openssl rand -hex 32 > "{{ gitea_webhook_secret_remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: gitea_webhook_secret_generation
+  changed_when: "'changed' in gitea_webhook_secret_generation.stdout"
+  no_log: true
+
+- name: Read the Gitea admin password
+  ansible.builtin.slurp:
+    src: "{{ gitea_admin_password_remote_file }}"
+  register: gitea_admin_password_raw
+  no_log: true
+
+- name: Read the Gitea webhook secret
+  ansible.builtin.slurp:
+    src: "{{ gitea_webhook_secret_remote_file }}"
+  register: gitea_webhook_secret_raw
+  no_log: true
+
+- name: Record Gitea secret facts
+  ansible.builtin.set_fact:
+    gitea_admin_password: "{{ gitea_admin_password_raw.content | b64decode | trim }}"
+    gitea_database_password: "{{ lookup('ansible.builtin.file', gitea_database_password_local_file) | trim }}"
+    gitea_oidc_client_secret: "{{ lookup('ansible.builtin.file', gitea_oidc_client_secret_local_file) | trim }}"
+    gitea_webhook_secret: "{{ gitea_webhook_secret_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Build Gitea runtime secret payload
+  ansible.builtin.set_fact:
+    gitea_runtime_secret_payload:
+      GITEA__database__PASSWD: "{{ gitea_database_password }}"
+      GITEA_ADMIN_PASSWORD: "{{ gitea_admin_password }}"
+      GITEA_KEYCLOAK_CLIENT_SECRET: "{{ gitea_oidc_client_secret }}"
+      GITEA_WEBHOOK_SECRET: "{{ gitea_webhook_secret }}"
+  no_log: true
+
+- name: Ensure the local Gitea artifact directory exists
+  ansible.builtin.file:
+    path: "{{ gitea_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Mirror the Gitea admin password to the control machine
+  ansible.builtin.copy:
+    dest: "{{ gitea_admin_password_local_file }}"
+    content: "{{ gitea_admin_password }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Mirror the Gitea webhook secret to the control machine
+  ansible.builtin.copy:
+    dest: "{{ gitea_webhook_secret_local_file }}"
+    content: "{{ gitea_webhook_secret }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Prepare OpenBao agent runtime secret injection for Gitea
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: gitea
+    common_openbao_compose_env_agent_dir: "{{ gitea_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ gitea_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ gitea_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ gitea_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ gitea_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ gitea_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ gitea_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ gitea_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ gitea_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ gitea_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ gitea_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: runtime.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ gitea_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ gitea_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ gitea_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ gitea_legacy_env_file }}"
+  no_log: true
+
+- name: Render the Gitea environment file
+  ansible.builtin.template:
+    src: runtime.env.j2
+    dest: "{{ gitea_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Render the Gitea compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ gitea_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the Gitea bootstrap script
+  ansible.builtin.template:
+    src: bootstrap-gitea.sh.j2
+    dest: "{{ gitea_bootstrap_script }}"
+    owner: root
+    group: root
+    mode: "0750"
+  no_log: true
+
+- name: Render the managed Gitea pre-receive hook template
+  ansible.builtin.template:
+    src: pre-receive.validation-hook.j2
+    dest: "{{ gitea_prereceive_hook_template }}"
+    owner: root
+    group: root
+    mode: "0750"
+
+- name: Pull the Gitea image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ gitea_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ gitea_site_dir }}"
+  register: gitea_pull
+  changed_when: >-
+    'Pulling' in gitea_pull.stdout
+    or 'Downloaded newer image' in gitea_pull.stdout
+    or 'Pull complete' in gitea_pull.stdout
+
+- name: Start the Gitea stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ gitea_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ gitea_site_dir }}"
+  register: gitea_up
+  changed_when: >-
+    'Creating' in gitea_up.stdout
+    or 'Recreating' in gitea_up.stdout
+    or 'Starting' in gitea_up.stdout
+
+- name: Wait for Gitea to listen locally
+  ansible.builtin.wait_for:
+    host: "{{ ansible_host }}"
+    port: "{{ gitea_http_port }}"
+    delay: 0
+    timeout: 240
+
+- name: Wait for the Gitea sign-in page
+  ansible.builtin.uri:
+    url: "{{ gitea_private_base_url }}/user/login"
+    method: GET
+    status_code: 200
+  register: gitea_login_page
+  retries: 24
+  delay: 5
+  until: gitea_login_page.status == 200
+  changed_when: false
+
+- name: Run the Gitea bootstrap script
+  ansible.builtin.command:
+    argv:
+      - /bin/bash
+      - "{{ gitea_bootstrap_script }}"
+  environment:
+    GITEA_ADMIN_PASSWORD: "{{ gitea_admin_password }}"
+    GITEA_DATABASE_PASSWORD: "{{ gitea_database_password }}"
+    GITEA_KEYCLOAK_CLIENT_SECRET: "{{ gitea_oidc_client_secret }}"
+  register: gitea_bootstrap
+  changed_when: "'GITEA_BOOTSTRAP_CHANGED=true' in gitea_bootstrap.stdout"
+  no_log: true
+
+- name: Assert the Gitea bootstrap produced the expected artifact files
+  ansible.builtin.assert:
+    that:
+      - gitea_bootstrap.rc == 0
+    fail_msg: "The managed Gitea bootstrap script failed."
+
+- name: Read the mirrored Gitea admin token from the managed host
+  ansible.builtin.slurp:
+    src: "{{ gitea_admin_token_remote_file }}"
+  register: gitea_admin_token_remote
+  no_log: true
+
+- name: Read the mirrored Gitea runner registration token from the managed host
+  ansible.builtin.slurp:
+    src: "{{ gitea_runner_registration_token_remote_file }}"
+  register: gitea_runner_registration_token_remote
+  no_log: true
+
+- name: Mirror the Gitea admin token to the control machine
+  ansible.builtin.copy:
+    dest: "{{ gitea_admin_token_local_file }}"
+    content: "{{ gitea_admin_token_remote.content | b64decode | trim }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Mirror the Gitea runner registration token to the control machine
+  ansible.builtin.copy:
+    dest: "{{ gitea_runner_registration_token_local_file }}"
+    content: "{{ gitea_runner_registration_token_remote.content | b64decode | trim }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Verify Gitea health probes
+  ansible.builtin.import_tasks: verify.yml

@@ -33,6 +33,17 @@
     "accepted_statuscodes": ["200-399"]
   },
   {
+    "name": "Gitea Private",
+    "type": "http",
+    "url": "http://10.10.10.20:3003/api/healthz",
+    "description": "Private Gitea health endpoint on docker-runtime-lv3.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": ["200-299"]
+  },
+  {
     "name": "Keycloak OIDC Discovery",
     "type": "http",
     "url": "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration",

@@ -7,7 +7,7 @@ import dependency_graph
 
 def test_dependency_graph_validates_against_service_catalog() -> None:
     graph = dependency_graph.load_dependency_graph(validate_schema=True)
-    assert len(graph.nodes) == 24
+    assert len(graph.nodes) == 25
     assert graph.nodes["ops_portal"].tier == 4
 
 
@@ -15,7 +15,7 @@ def test_compute_impact_for_postgres_includes_direct_and_transitive_failures() -
     graph = dependency_graph.load_dependency_graph(validate_schema=False)
     impact = dependency_graph.compute_impact("postgres", graph)
 
-    assert set(impact.direct_hard) == {"keycloak", "mattermost", "netbox", "windmill"}
+    assert set(impact.direct_hard) == {"gitea", "keycloak", "mattermost", "netbox", "windmill"}
     assert set(impact.transitive_hard) == {"api_gateway", "ops_portal"}
 
 

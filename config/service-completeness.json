@@ -69,6 +69,14 @@
       "requires_compose_secrets": false,
       "suppression_preset": "legacy-service"
     },
+    "gitea": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": true,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "keycloak_client_generated": true
+    },
     "grafana": {
       "service_type": "vm-service",
       "requires_subdomain": true,

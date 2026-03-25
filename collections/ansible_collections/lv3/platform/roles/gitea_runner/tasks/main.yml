@@ -1,0 +1,125 @@
+---
+- name: Validate Gitea runner inputs
+  ansible.builtin.assert:
+    that:
+      - gitea_runner_site_dir | length > 0
+      - gitea_runner_data_dir | length > 0
+      - gitea_runner_compose_file | length > 0
+      - gitea_runner_compose_bin | length > 0
+      - gitea_runner_config_file | length > 0
+      - gitea_runner_image | length > 0
+      - gitea_runner_container_name | length > 0
+      - gitea_runner_instance_url | length > 0
+      - gitea_runner_registration_token_local_file | length > 0
+      - gitea_runner_name | length > 0
+      - gitea_runner_labels | length > 0
+    fail_msg: "gitea_runner requires runtime paths, image metadata, and a mirrored registration token."
+
+- name: Ensure the Gitea runner registration token exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ gitea_runner_registration_token_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: gitea_runner_token_local
+
+- name: Fail if the Gitea runner registration token is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ gitea_runner_registration_token_local_file }} is missing on the control machine.
+      Converge the Gitea runtime first so the runner registration token is bootstrapped.
+  when: not gitea_runner_token_local.stat.exists
+
+- name: Record the Gitea runner registration token
+  ansible.builtin.set_fact:
+    gitea_runner_registration_token: "{{ lookup('ansible.builtin.file', gitea_runner_registration_token_local_file) | trim }}"
+  no_log: true
+
+- name: Verify Docker Compose plugin is available
+  ansible.builtin.command:
+    argv:
+      - "{{ gitea_runner_compose_bin }}"
+      - compose
+      - version
+  register: gitea_runner_compose_version
+  changed_when: false
+
+- name: Ensure the Gitea runner directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - "{{ gitea_runner_site_dir }}"
+    - "{{ gitea_runner_data_dir }}"
+
+- name: Render the Gitea runner config
+  ansible.builtin.template:
+    src: config.yaml.j2
+    dest: "{{ gitea_runner_config_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the Gitea runner compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ gitea_runner_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the Gitea runner image
+  ansible.builtin.command:
+    argv:
+      - "{{ gitea_runner_compose_bin }}"
+      - compose
+      - --file
+      - "{{ gitea_runner_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ gitea_runner_site_dir }}"
+  register: gitea_runner_pull
+  changed_when: >-
+    'Pulling' in gitea_runner_pull.stdout
+    or 'Downloaded newer image' in gitea_runner_pull.stdout
+    or 'Pull complete' in gitea_runner_pull.stdout
+
+- name: Start the Gitea runner stack
+  ansible.builtin.command:
+    argv:
+      - "{{ gitea_runner_compose_bin }}"
+      - compose
+      - --file
+      - "{{ gitea_runner_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ gitea_runner_site_dir }}"
+  register: gitea_runner_up
+  changed_when: >-
+    'Creating' in gitea_runner_up.stdout
+    or 'Recreating' in gitea_runner_up.stdout
+    or 'Starting' in gitea_runner_up.stdout
+
+- name: Verify the Gitea runner container is running
+  ansible.builtin.command:
+    argv:
+      - docker
+      - ps
+      - --filter
+      - "name={{ gitea_runner_container_name }}"
+      - --filter
+      - status=running
+      - --format
+      - "{{ '{{' }}.Names{{ '}}' }}"
+  register: gitea_runner_verify_running
+  changed_when: false
+
+- name: Assert the Gitea runner container is running
+  ansible.builtin.assert:
+    that:
+      - gitea_runner_verify_running.stdout_lines | select('equalto', gitea_runner_container_name) | list | length == 1
+    fail_msg: "Gitea runner container is not running."

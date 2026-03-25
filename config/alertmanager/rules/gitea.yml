@@ -1,0 +1,12 @@
+groups:
+  - name: lv3-gitea
+    rules:
+      - alert: LV3GiteaUnavailable
+        expr: probe_success{instance="http://10.10.10.20:3003/api/healthz"} == 0
+        for: 10m
+        labels:
+          severity: critical
+          runbook_url: docs/runbooks/configure-gitea.md
+        annotations:
+          summary: Private Gitea is unavailable
+          description: The private Gitea health endpoint on docker-runtime-lv3 has been failing blackbox checks for at least 10 minutes.

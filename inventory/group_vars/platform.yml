@@ -69,6 +69,11 @@ platform_host:
         listen_port: 8066
         upstream_host: 10.10.10.20
         upstream_port: 8065
+      - name: gitea
+        listen_address: 100.118.189.95
+        listen_port: 3009
+        upstream_host: 10.10.10.20
+        upstream_port: 3003
       - name: netbox
         listen_address: 100.118.189.95
         listen_port: 8004
@@ -114,6 +119,8 @@ platform_ports:
   windmill_host_proxy_port: 8005
   mattermost_server_port: 8065
   mattermost_host_proxy_port: 8066
+  gitea_http_port: 3003
+  gitea_host_proxy_port: 3009
   netbox_server_port: 8082
   netbox_host_proxy_port: 8004
   open_webui_port: 8088
@@ -831,6 +838,34 @@ platform_service_topology:
     urls:
       internal: http://10.10.10.20:8000
       controller: http://100.118.189.95:8005
+  gitea:
+    service_name: gitea
+    owning_vm: docker-runtime-lv3
+    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
+      | map(attribute=''ipv4'') | first) }}'
+    public_hostname: git.lv3.org
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: true
+    dns:
+      managed: true
+      visibility: tailnet
+      name: git
+      type: A
+      target: 100.118.189.95
+      ttl: 60
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.118.189.95:3009
+    service_id: gitea
+    ports:
+      internal: 3003
+      controller: 3009
+    urls:
+      public: http://git.lv3.org:3009
+      internal: http://10.10.10.20:3003
+      controller: http://100.118.189.95:3009
   mattermost:
     service_name: mattermost
     owning_vm: docker-runtime-lv3
@@ -1154,12 +1189,17 @@ platform_dns_records:
       value: '"brevo-code:b5e6a2e60000b8da96b912f8ea4c2e9a"'
       ttl: 300
   tailnet:
+    - name: git
+      type: A
+      value: 100.118.189.95
+      ttl: 60
     - name: database
       type: A
       value: '{{ postgres_ha.vip_ipv4 }}'
       ttl: 60
 platform_management_allowed_tcp_ports:
   - 3001
+  - 3009
   - 8004
   - 9443
   - 8200
@@ -1446,6 +1486,34 @@ public_edge_service_topology:
     urls:
       internal: http://10.10.10.20:8000
       controller: http://100.118.189.95:8005
+  gitea:
+    service_name: gitea
+    owning_vm: docker-runtime-lv3
+    private_ip: '{{ (proxmox_guests | selectattr(''name'', ''equalto'', ''docker-runtime-lv3'')
+      | map(attribute=''ipv4'') | first) }}'
+    public_hostname: git.lv3.org
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: true
+    dns:
+      managed: true
+      visibility: tailnet
+      name: git
+      type: A
+      target: 100.118.189.95
+      ttl: 60
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.118.189.95:3009
+    service_id: gitea
+    ports:
+      internal: 3003
+      controller: 3009
+    urls:
+      public: http://git.lv3.org:3009
+      internal: http://10.10.10.20:3003
+      controller: http://100.118.189.95:3009
   mattermost:
     service_name: mattermost
     owning_vm: docker-runtime-lv3
@@ -1739,6 +1807,11 @@ mattermost_server_port: 8065
 mattermost_host_proxy_port: 8066
 mattermost_private_base_url: http://10.10.10.20:8065
 mattermost_controller_url: http://100.118.189.95:8066
+gitea_http_port: 3003
+gitea_host_proxy_port: 3009
+gitea_root_url: http://git.lv3.org:3009
+gitea_private_base_url: http://10.10.10.20:3003
+gitea_controller_url: http://100.118.189.95:3009
 platform_context_internal_port: 8010
 platform_context_host_proxy_port: 8010
 platform_context_private_url: http://10.10.10.20:8010
@@ -1754,6 +1827,7 @@ windmill_controller_url: http://100.118.189.95:8005
 monitoring_loki_push_api_url: http://10.10.10.40:3100/loki/api/v1/push
 proxmox_management_allowed_tcp_ports:
   - 3001
+  - 3009
   - 8004
   - 9443
   - 8200

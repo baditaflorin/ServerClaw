@@ -57,6 +57,15 @@
       "adr": "0094"
     },
     {
+      "id": "gitea",
+      "service": "gitea",
+      "name": "Gitea",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "automation",
+      "adr": "0143"
+    },
+    {
       "id": "grafana",
       "service": "grafana",
       "name": "Grafana",
@@ -243,6 +252,30 @@
       "to": "nginx_edge",
       "type": "hard",
       "description": "The generated developer portal is published as static content on nginx-lv3."
+    },
+    {
+      "from": "gitea",
+      "to": "docker_build",
+      "type": "soft",
+      "description": "Gitea Actions jobs are delegated to the dedicated runner on docker-build-lv3, but repository hosting remains available without the runner."
+    },
+    {
+      "from": "gitea",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Operator SSO into Gitea prefers Keycloak, while the repo-managed bootstrap admin remains the break-glass fallback."
+    },
+    {
+      "from": "gitea",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Gitea loads its mirrored database, webhook, and OIDC client secrets from the OpenBao sidecar before startup."
+    },
+    {
+      "from": "gitea",
+      "to": "postgres",
+      "type": "hard",
+      "description": "Gitea persists repositories, metadata, and issue state in Postgres."
     },
     {
       "from": "grafana",

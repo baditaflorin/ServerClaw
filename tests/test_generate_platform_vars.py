@@ -8,3 +8,29 @@ def test_resolve_tcp_proxy_port_supports_platform_port_assignments_templates() -
         ports,
     )
     assert resolved == 8010
+
+
+def test_build_service_urls_supports_private_gitea_proxy_and_root_url() -> None:
+    ports = {
+        "gitea_http_port": 3003,
+        "gitea_host_proxy_port": 3009,
+    }
+    service = {
+        "owning_vm": "docker-runtime-lv3",
+        "public_hostname": "git.lv3.org",
+    }
+    port_map, urls = generate_platform_vars.build_service_urls(
+        "gitea",
+        service,
+        {"management_tailscale_ipv4": "100.118.189.95"},
+        {"docker-runtime-lv3": "10.10.10.20"},
+        ports,
+        {"desired_state": {"host_id": "proxmox_florin"}},
+    )
+
+    assert port_map == {"internal": 3003, "controller": 3009}
+    assert urls == {
+        "public": "http://git.lv3.org:3009",
+        "internal": "http://10.10.10.20:3003",
+        "controller": "http://100.118.189.95:3009",
+    }
