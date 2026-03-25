@@ -2775,7 +2775,7 @@ workstreams:
   - id: adr-0169-structured-log-contract
     adr: "0169"
     title: Structured log field contract
-    status: live_applied
+    status: merged
     owner: codex
     branch: codex/live-apply-0169
     worktree_path: .worktrees/adr-0169
@@ -2798,4 +2798,4 @@ workstreams:
       - inventory/group_vars/all.yml
       - docs/runbooks/
     ready_to_merge: false
-    live_applied: true
+    live_applied: false

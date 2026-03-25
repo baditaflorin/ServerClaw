@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0169](../adr/0169-structured-log-field-contract.md)
 - Title: shared JSON logging, trace propagation, structured Ansible task logs, and validator coverage
-- Status: live_applied
+- Status: merged
 - Branch: `codex/live-apply-0169`
 - Worktree: `.worktrees/adr-0169`
 - Owner: codex
@@ -64,5 +64,4 @@
 ## Outcome
 
 - repository implementation shipped in `0.146.1`
-- platform runtime applied from `main` in platform version `0.130.4`
-- production docker-runtime surfaces now emit repo-managed structured JSON logs with propagated `trace_id`
+- live verification from `main` is still pending because controller-to-Proxmox SSH reachability to both `100.118.189.95` and `65.108.75.123` became unstable during the 2026-03-25 integration run

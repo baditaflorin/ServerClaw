@@ -1,9 +1,9 @@
 # ADR 0169: Structured Log Field Contract
 
-- Status: Accepted
+- Status: Implemented
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.146.1
-- Implemented In Platform Version: 0.130.4
+- Implemented In Platform Version: not yet
 - Implemented On: 2026-03-25
 - Date: 2026-03-24
 
