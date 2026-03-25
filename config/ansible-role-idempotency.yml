@@ -217,8 +217,14 @@ roles:
             status: 200
             json:
               data:
-                data:
+              data:
                   password: s3cr3t
+  semaphore_postgres:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  semaphore_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   step_ca_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.

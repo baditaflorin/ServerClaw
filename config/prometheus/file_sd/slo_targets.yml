@@ -75,3 +75,10 @@
     slo_id: platform-context-api-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
+- targets:
+    - http://10.10.10.20:3002/api/ping
+  labels:
+    service_id: semaphore
+    slo_id: semaphore-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects

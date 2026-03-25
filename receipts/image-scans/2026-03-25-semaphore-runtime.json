@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "semaphore_runtime",
+  "image_ref": "docker.io/semaphoreui/semaphore:v2.17.29@sha256:fb758310e067140ba58d8cfa31de3856ebcfb44cec3d6b466aada6aecb09b4db",
+  "scanner": "trivy",
+  "scanner_image": "local/homebrew/trivy:0.69.3",
+  "scanned_on": "2026-03-25",
+  "summary": {
+    "critical": 7,
+    "high": 24
+  },
+  "targets_with_findings": [
+    {
+      "target": "usr/local/bin/semaphore",
+      "class": "lang-pkgs",
+      "type": "gobinary",
+      "critical": 1,
+      "high": 3
+    },
+    {
+      "target": "usr/local/bin/terraform",
+      "class": "lang-pkgs",
+      "type": "gobinary",
+      "critical": 2,
+      "high": 9
+    },
+    {
+      "target": "usr/local/bin/terragrunt",
+      "class": "lang-pkgs",
+      "type": "gobinary",
+      "critical": 2,
+      "high": 8
+    },
+    {
+      "target": "usr/local/bin/tofu",
+      "class": "lang-pkgs",
+      "type": "gobinary",
+      "critical": 2,
+      "high": 4
+    }
+  ],
+  "raw_report": "receipts/image-scans/2026-03-25-semaphore-runtime.trivy.json"
+}
