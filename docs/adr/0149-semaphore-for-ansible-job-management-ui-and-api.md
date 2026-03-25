@@ -1,8 +1,8 @@
 # ADR 0149: Semaphore For Ansible Job Management UI And API
 
 - Status: Accepted
-- Implementation Status: Implemented on workstream branch
-- Implemented In Repo Version: not yet
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.158.0
 - Implemented In Platform Version: not yet
 - Implemented On: 2026-03-25
 - Date: 2026-03-25
@@ -57,4 +57,4 @@ Initial implementation scope:
 - The initial seeded verification path is the repo-managed [playbooks/semaphore-self.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/semaphore-self.yml) template, which proves UI/API task execution without silently expanding infrastructure credential scope.
 - Repo implementation is complete on the ADR workstream branch after rebasing onto current `main`, hardening the bootstrap and runtime idempotency paths, and passing the Semaphore-specific validation stack.
 - The first live apply on `codex/adr-0149-semaphore` completed on 2026-03-25: `make converge-semaphore` succeeded, the private Tailscale proxy answered on `http://100.64.0.1:8020/api/ping`, and the seeded `Semaphore Self-Test` template completed successfully through the Semaphore task runner.
-- `Implemented In Repo Version` and `Implemented In Platform Version` remain `not yet` until the workstream is merged and the integrated mainline version is applied live under the repository release policy.
+- `Implemented In Platform Version` remains `not yet` until the integrated mainline converge is rerun and verified from `main` under the repository release policy.
