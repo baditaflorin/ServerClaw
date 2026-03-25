@@ -1,0 +1,53 @@
+{
+  "$schema": "docs/schema/service-capability-catalog.schema.json",
+  "schema_version": "1.0.0",
+  "services": [
+    {
+      "id": "grafana",
+      "name": "Grafana",
+      "description": "Metrics dashboards and alerting for the platform.",
+      "category": "observability",
+      "lifecycle_status": "active",
+      "vm": "monitoring-lv3",
+      "vmid": 140,
+      "internal_url": "http://10.10.10.40:3000",
+      "public_url": "https://grafana.lv3.org",
+      "subdomain": "grafana.lv3.org",
+      "exposure": "edge-published",
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://grafana.lv3.org",
+          "subdomain": "grafana.lv3.org"
+        }
+      },
+      "uptime_monitor_name": "Grafana Public",
+      "health_probe_id": "grafana",
+      "adr": "0011",
+      "runbook": "docs/runbooks/monitoring-stack.md",
+      "degradation_modes": [
+        {
+          "dependency": "postgres",
+          "dependency_type": "soft",
+          "degraded_behaviour": "Continue serving cached dashboards.",
+          "degraded_for_seconds_max": 300,
+          "recovery_signal": "database connection restored",
+          "tested_by": "fault:grafana-cache"
+        },
+        {
+          "dependency": "postgres",
+          "dependency_type": "soft",
+          "degraded_behaviour": "Continue serving cached dashboards.",
+          "degraded_for_seconds_max": 60,
+          "recovery_signal": "database connection restored",
+          "tested_by": "fault:grafana-cache-repeat"
+        }
+      ],
+      "tags": [
+        "dashboards",
+        "metrics",
+        "monitoring"
+      ]
+    }
+  ]
+}

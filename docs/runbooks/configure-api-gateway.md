@@ -50,10 +50,21 @@ From an operator workstation with a valid Keycloak token:
 curl https://api.lv3.org/healthz
 curl -H "Authorization: Bearer $LV3_TOKEN" https://api.lv3.org/v1/health
 curl -H "Authorization: Bearer $LV3_TOKEN" https://api.lv3.org/v1/platform/services
+curl -H "Authorization: Bearer $LV3_TOKEN" https://api.lv3.org/v1/platform/degradations
+```
+
+From `docker-runtime-lv3`, confirm the writable data volume now holds the gateway degradation state and any temporary NATS outbox:
+
+```bash
+sudo ls -l /opt/api-gateway/data
+sudo test -f /opt/api-gateway/data/degradation-state.json && sudo cat /opt/api-gateway/data/degradation-state.json || true
+sudo test -f /opt/api-gateway/data/nats-outbox.jsonl && sudo cat /opt/api-gateway/data/nats-outbox.jsonl || true
 ```
 
 ## Notes
 
 - The gateway validates Keycloak JWTs directly against the realm JWKS.
+- When Keycloak is unavailable but the JWKS cache is still valid, the gateway now stays in a declared degraded mode instead of failing authentication immediately.
+- When NATS publication fails, the gateway now buffers request events in `/opt/api-gateway/data/nats-outbox.jsonl` and flushes them on recovery.
 - Native `/v1/platform/*` endpoints read repo-synced catalogs copied into the runtime bundle.
 - The public edge certificate for `api.lv3.org` is part of the shared `lv3-edge` certificate on `nginx-lv3`.

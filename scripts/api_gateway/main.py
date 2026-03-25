@@ -66,6 +66,7 @@ except Exception as exc:  # noqa: BLE001
     GRAPH_RUNTIME_IMPORT_ERROR = str(exc)
 from platform.events import build_envelope
 from platform.health import HealthCompositeClient, ServiceHealthNotFoundError
+from platform.degradation import DegradationStateStore
 from platform.world_state.client import SurfaceNotFoundError, WorldStateClient, WorldStateUnavailable
 from platform.world_state.materializer import SQLITE_CURRENT_VIEW_NAME, SQLITE_SNAPSHOTS_TABLE_NAME
 from platform.world_state.workers import collect_service_health
@@ -160,10 +161,13 @@ class GatewayConfig:
     nats_url: str | None
     deploy_webhook_url: str | None
     secret_rotation_webhook_url: str | None
+    degradation_state_path: Path
+    nats_outbox_path: Path
     openapi_include_upstreams: bool
     graph_dsn: str | None = None
     world_state_dsn: str | None = None
     clock_skew_seconds: int = 30
+    keycloak_retry_after_seconds: int = 30
 
 
 class KeycloakJWTVerifier:
@@ -175,30 +179,84 @@ class KeycloakJWTVerifier:
         expected_audience: str | None,
         clock_skew_seconds: int,
         client: httpx.AsyncClient,
+        degradation_store: DegradationStateStore | None,
+        degradation_mode: dict[str, Any] | None,
+        retry_after_seconds: int,
     ) -> None:
         self._jwks_url = jwks_url
         self._issuer = issuer
         self._expected_audience = expected_audience
         self._clock_skew_seconds = clock_skew_seconds
         self._client = client
+        self._degradation_store = degradation_store
+        self._degradation_mode = degradation_mode
+        self._retry_after_seconds = retry_after_seconds
         self._jwks_cache: dict[str, Any] | None = None
         self._jwks_cache_expiry = 0.0
         self._lock = asyncio.Lock()
+        self._refresh_window_seconds = 30
+
+    def _activate_degradation(self, error: str, *, stale_until: float | None = None) -> None:
+        if self._degradation_store is None:
+            return
+        metadata: dict[str, Any] = {}
+        if stale_until is not None:
+            metadata["cache_valid_until_epoch"] = int(stale_until)
+        self._degradation_store.activate(
+            "api_gateway",
+            self._degradation_mode,
+            source="keycloak_jwks",
+            last_error=error,
+            metadata=metadata,
+        )
+
+    def _clear_degradation(self) -> None:
+        if self._degradation_store is None:
+            return
+        dependency = str((self._degradation_mode or {}).get("dependency") or "keycloak")
+        self._degradation_store.clear("api_gateway", dependency)
+
+    async def _refresh_jwks(self, *, allow_stale: bool) -> dict[str, Any]:
+        now = time.time()
+        try:
+            response = await self._client.get(self._jwks_url, timeout=10)
+            response.raise_for_status()
+            self._jwks_cache = response.json()
+            self._jwks_cache_expiry = now + 300
+            self._clear_degradation()
+            return self._jwks_cache
+        except Exception as exc:  # noqa: BLE001
+            cached_valid = self._jwks_cache is not None and now < self._jwks_cache_expiry
+            if allow_stale and cached_valid:
+                self._activate_degradation(str(exc), stale_until=self._jwks_cache_expiry)
+                return self._jwks_cache
+            self._activate_degradation(str(exc))
+            raise HTTPException(
+                status_code=503,
+                detail={
+                    "error_code": "GATE_CIRCUIT_OPEN",
+                    "message": "Keycloak is unavailable and the JWKS cache has expired.",
+                    "dependency": "keycloak",
+                    "retry_after_s": self._retry_after_seconds,
+                },
+                headers={"Retry-After": str(self._retry_after_seconds)},
+            ) from exc
 
     async def _load_jwks(self) -> dict[str, Any]:
         now = time.time()
         if self._jwks_cache is not None and now < self._jwks_cache_expiry:
+            if now >= self._jwks_cache_expiry - self._refresh_window_seconds:
+                async with self._lock:
+                    return await self._refresh_jwks(allow_stale=True)
             return self._jwks_cache
 
         async with self._lock:
             now = time.time()
             if self._jwks_cache is not None and now < self._jwks_cache_expiry:
+                if now >= self._jwks_cache_expiry - self._refresh_window_seconds:
+                    return await self._refresh_jwks(allow_stale=True)
                 return self._jwks_cache
-            response = await self._client.get(self._jwks_url, timeout=10)
-            response.raise_for_status()
-            self._jwks_cache = response.json()
-            self._jwks_cache_expiry = now + 300
-            return self._jwks_cache
+            return await self._refresh_jwks(allow_stale=False)
 
     async def verify(self, token: str) -> dict[str, Any]:
         try:
@@ -265,8 +323,18 @@ class KeycloakJWTVerifier:
 
 
 class NatsEventEmitter:
-    def __init__(self, nats_url: str | None) -> None:
+    def __init__(
+        self,
+        nats_url: str | None,
+        *,
+        outbox_path: Path,
+        degradation_store: DegradationStateStore | None,
+        degradation_mode: dict[str, Any] | None,
+    ) -> None:
         self._parsed = urlparse(nats_url) if nats_url else None
+        self._outbox_path = outbox_path
+        self._degradation_store = degradation_store
+        self._degradation_mode = degradation_mode
 
     async def emit(self, subject: str, payload: dict[str, Any]) -> None:
         if self._parsed is None:
@@ -275,7 +343,64 @@ class NatsEventEmitter:
         port = self._parsed.port or 4222
         envelope = build_envelope(subject, payload, actor_id="service/api-gateway")
         encoded = json.dumps(envelope, separators=(",", ":")).encode()
-        await asyncio.to_thread(self._publish, host, port, subject, encoded)
+        await asyncio.to_thread(self._emit_with_outbox, host, port, subject, encoded)
+
+    def _activate_degradation(self, error: str) -> None:
+        if self._degradation_store is None:
+            return
+        self._degradation_store.activate(
+            "api_gateway",
+            self._degradation_mode,
+            source="nats_publish",
+            last_error=error,
+            metadata={"outbox_path": str(self._outbox_path)},
+        )
+
+    def _clear_degradation(self) -> None:
+        if self._degradation_store is None:
+            return
+        dependency = str((self._degradation_mode or {}).get("dependency") or "nats")
+        self._degradation_store.clear("api_gateway", dependency)
+
+    def _append_outbox(self, subject: str, payload: bytes) -> None:
+        self._outbox_path.parent.mkdir(parents=True, exist_ok=True)
+        entry = {"subject": subject, "payload": payload.decode("utf-8")}
+        with self._outbox_path.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(entry, separators=(",", ":")) + "\n")
+
+    def _flush_outbox(self, host: str, port: int) -> None:
+        if not self._outbox_path.exists():
+            return
+        lines = self._outbox_path.read_text(encoding="utf-8").splitlines()
+        remaining: list[str] = []
+        for index, line in enumerate(lines):
+            if not line.strip():
+                continue
+            try:
+                entry = json.loads(line)
+                subject = str(entry["subject"])
+                payload = str(entry["payload"]).encode("utf-8")
+            except (KeyError, TypeError, ValueError):
+                continue
+            try:
+                self._publish(host, port, subject, payload)
+            except Exception:  # noqa: BLE001
+                remaining = lines[index:]
+                break
+        if remaining:
+            self._outbox_path.write_text("\n".join(remaining) + "\n", encoding="utf-8")
+            raise ConnectionError("unable to flush buffered NATS events")
+        self._outbox_path.unlink(missing_ok=True)
+
+    def _emit_with_outbox(self, host: str, port: int, subject: str, payload: bytes) -> None:
+        try:
+            self._flush_outbox(host, port)
+            self._publish(host, port, subject, payload)
+        except Exception as exc:  # noqa: BLE001
+            self._append_outbox(subject, payload)
+            self._activate_degradation(str(exc))
+            return
+        self._clear_degradation()
 
     @staticmethod
     def _publish(host: str, port: int, subject: str, payload: bytes) -> None:
@@ -291,18 +416,28 @@ class GatewayRuntime:
             config.catalog_path,
             service_catalog_path=config.service_catalog_path,
         )
+        self._service_catalog = json_file(config.service_catalog_path, {"services": []})
         self.services = [GatewayService(**service) for service in normalized_catalog]
         self.service_by_prefix = sorted(self.services, key=lambda service: len(service.gateway_prefix), reverse=True)
         self.http_client = httpx.AsyncClient(follow_redirects=False)
         self.search_client = SearchClient(config.repo_root)
+        self.degradation_store = DegradationStateStore(config.degradation_state_path)
         self.verifier = KeycloakJWTVerifier(
             jwks_url=config.jwks_url,
             issuer=config.issuer,
             expected_audience=config.expected_audience,
             clock_skew_seconds=config.clock_skew_seconds,
             client=self.http_client,
+            degradation_store=self.degradation_store,
+            degradation_mode=self.degradation_mode("api_gateway", "keycloak"),
+            retry_after_seconds=config.keycloak_retry_after_seconds,
         )
-        self.event_emitter = NatsEventEmitter(config.nats_url)
+        self.event_emitter = NatsEventEmitter(
+            config.nats_url,
+            outbox_path=config.nats_outbox_path,
+            degradation_store=self.degradation_store,
+            degradation_mode=self.degradation_mode("api_gateway", "nats"),
+        )
         self.graph_client = None
         if config.graph_dsn and GRAPH_RUNTIME_IMPORT_ERROR is None:
             self.graph_client = DependencyGraphClient(
@@ -320,7 +455,20 @@ class GatewayRuntime:
         await self.http_client.aclose()
 
     def primary_service_catalog(self) -> dict[str, Any]:
-        return json_file(self.config.service_catalog_path, {"services": []})
+        return self._service_catalog
+
+    def degradation_mode(self, service_id: str, dependency: str) -> dict[str, Any] | None:
+        services = self._service_catalog.get("services", [])
+        for service in services:
+            if not isinstance(service, dict) or service.get("id") != service_id:
+                continue
+            for mode in service.get("degradation_modes", []):
+                if isinstance(mode, dict) and mode.get("dependency") == dependency:
+                    return mode
+        return None
+
+    def active_degradations(self) -> dict[str, list[dict[str, Any]]]:
+        return self.degradation_store.all_active()
 
     def workflow_catalog(self) -> dict[str, Any]:
         return json_file(self.config.workflow_catalog_path, {"workflows": {}})
@@ -400,6 +548,7 @@ class GatewayRuntime:
             entry.service_id: entry.as_dict()
             for entry in self.health_client.get_all(allow_stale=True)
         }
+        active_degradations = self.active_degradations()
 
         services: list[dict[str, Any]] = []
         for service in catalog.get("services", []):
@@ -428,6 +577,11 @@ class GatewayRuntime:
                     "uptime_monitor_name": service.get("uptime_monitor_name"),
                 }
             )
+            item["active_degradations"] = active_degradations.get(service_id, [])
+            if item["active_degradations"] and item.get("composite_status") == "healthy":
+                item["status"] = "degraded"
+                item["composite_status"] = "degraded"
+                item["safe_to_act"] = False
             services.append(item)
 
         statuses = {item["composite_status"] for item in services}
@@ -438,6 +592,8 @@ class GatewayRuntime:
             overall = "degraded"
         elif statuses and statuses <= {"unknown"}:
             overall = "unknown"
+        if any(item["active_degradations"] for item in services):
+            overall = "degraded"
 
         return {
             "status": overall,
@@ -445,6 +601,7 @@ class GatewayRuntime:
             "safe_service_count": sum(1 for item in services if item.get("safe_to_act") is True),
             "unsafe_service_count": sum(1 for item in services if item.get("safe_to_act") is False),
             "services": services,
+            "degraded_service_count": sum(1 for item in services if item["active_degradations"]),
             "source": "health_composite",
         }
 
@@ -485,6 +642,12 @@ def build_config() -> GatewayConfig:
         nats_url=os.environ.get("NATS_URL") or None,
         deploy_webhook_url=os.environ.get("LV3_GATEWAY_DEPLOY_WEBHOOK_URL") or None,
         secret_rotation_webhook_url=os.environ.get("LV3_GATEWAY_SECRET_ROTATION_WEBHOOK_URL") or None,
+        degradation_state_path=Path(
+            os.environ.get("LV3_GATEWAY_DEGRADATION_STATE_PATH", "/data/degradation-state.json")
+        ),
+        nats_outbox_path=Path(
+            os.environ.get("LV3_GATEWAY_NATS_OUTBOX_PATH", "/data/nats-outbox.jsonl")
+        ),
         graph_dsn=os.environ.get("LV3_GATEWAY_GRAPH_DSN")
         or os.environ.get("LV3_GRAPH_DSN")
         or os.environ.get("WORLD_STATE_DSN")
@@ -494,6 +657,7 @@ def build_config() -> GatewayConfig:
         or None,
         openapi_include_upstreams=os.environ.get("LV3_GATEWAY_INCLUDE_UPSTREAM_OPENAPI", "false").lower()
         in {"1", "true", "yes"},
+        keycloak_retry_after_seconds=int(os.environ.get("LV3_GATEWAY_KEYCLOAK_RETRY_AFTER_SECONDS", "30")),
     )
 
 
@@ -660,6 +824,7 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
         runtime: GatewayRuntime = request.app.state.runtime
         catalog = runtime.primary_service_catalog()
         gateway_services = {service.id: service for service in runtime.services}
+        active_degradations = runtime.active_degradations()
         services = []
         for service in catalog.get("services", []):
             if not isinstance(service, dict):
@@ -668,9 +833,27 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
             gateway = gateway_services.get(item.get("id"))
             if gateway:
                 item["gateway_prefix"] = gateway.gateway_prefix
+            item["active_degradations"] = active_degradations.get(str(item.get("id")), [])
             services.append(item)
         await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
         return {"count": len(services), "services": services}
+
+    @app.get("/v1/platform/degradations")
+    async def platform_degradations(
+        request: Request,
+        identity: dict[str, Any] = Depends(require_identity),
+    ) -> dict[str, Any]:
+        started_at = time.perf_counter()
+        if not has_required_role(identity, "platform-read"):
+            raise HTTPException(status_code=403, detail="missing required role 'platform-read'")
+        runtime: GatewayRuntime = request.app.state.runtime
+        services = runtime.active_degradations()
+        await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
+        return {
+            "service_count": len(services),
+            "degradation_count": sum(len(items) for items in services.values()),
+            "services": services,
+        }
 
     @app.get("/v1/platform/drift")
     async def platform_drift(

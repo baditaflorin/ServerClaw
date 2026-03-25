@@ -11,6 +11,7 @@ It answers:
 - how operators reach it
 - which runbook owns it
 - which health probe, images, and secrets are attached to it
+- which dependency failures are expected to degrade it and what the declared fallback mode is
 
 ## Update Rules
 
@@ -21,6 +22,7 @@ Update the catalog when:
 3. its owning VM changes
 4. its runbook or ADR changes
 5. its health probe, image, or secret references change
+6. its graceful-degradation declarations change
 
 The catalog is the input for:
 
@@ -52,6 +54,7 @@ Validation checks:
 - referenced Uptime Kuma monitors exist
 - generated monitor bindings stay aligned with `config/health-probe-catalog.json`
 - referenced health probes, images, and secrets exist
+- degradation-mode declarations use valid dependency types, unique dependency ids per service, and `fault:*` verification references
 - active services match the canonical host/service topology where applicable
 
 ## Querying All Services
@@ -66,4 +69,4 @@ make services
 make show-service SERVICE=grafana
 ```
 
-This prints the lifecycle state, VM, URLs, health probe, image or secret references, runbook, dashboard, and tags for the selected service.
+This prints the lifecycle state, VM, URLs, health probe, image or secret references, degradation modes, runbook, dashboard, and tags for the selected service.
