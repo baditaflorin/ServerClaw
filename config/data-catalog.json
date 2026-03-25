@@ -167,6 +167,22 @@
       "notes": "Object-change history should remain available through at least one quarterly planning cycle without growing unbounded."
     },
     {
+      "id": "gitea-repositories",
+      "service": "gitea",
+      "name": "Gitea repositories and metadata",
+      "class": "confidential",
+      "retention_days": 1825,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "Gitea PostgreSQL database",
+        "/opt/gitea/data/git/repositories",
+        "/opt/gitea/data/gitea"
+      ],
+      "notes": "Repositories, issues, webhook configuration, and audit metadata are operational records that should remain restorable for multi-year incident and change reconstruction."
+    },
+    {
       "id": "vaultwarden-shared-vault",
       "service": "vaultwarden",
       "name": "Vaultwarden shared credential vault",

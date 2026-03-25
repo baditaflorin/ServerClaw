@@ -16,6 +16,14 @@
       "notes": "Reserved for the generated developer portal and documentation site."
     },
     {
+      "prefix": "git",
+      "owner_adr": "0143",
+      "allowed_fqdns": [
+        "git.lv3.org"
+      ],
+      "notes": "Reserved for the private self-hosted Gitea control-plane surface."
+    },
+    {
       "prefix": "internal",
       "owner_adr": "0076",
       "notes": "Reserved for future internal-only routing or split-horizon publication."
@@ -179,6 +187,21 @@
         "cert_path": "/etc/letsencrypt/live/lv3-edge/",
         "auto_renew": true
       }
+    },
+    {
+      "fqdn": "git.lv3.org",
+      "service_id": "gitea",
+      "environment": "production",
+      "status": "active",
+      "exposure": "private-only",
+      "target": "100.64.0.1",
+      "target_port": 3009,
+      "owner_adr": "0143",
+      "tls": {
+        "provider": "none",
+        "auto_renew": false
+      },
+      "notes": "Tailnet-only TCP proxy for the private Gitea runtime on docker-runtime-lv3."
     },
     {
       "fqdn": "mail.lv3.org",

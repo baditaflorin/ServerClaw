@@ -111,7 +111,6 @@
       - docker_runtime_nat_chain_recheck.rc == 0
     fail_msg: "Docker is running but the nat DOCKER chain is missing; published ports will fail."
   when: docker_runtime_require_nat_chain | bool
-
 - name: Check whether nftables config exists
   ansible.builtin.stat:
     path: "{{ docker_runtime_nftables_config_file }}"
@@ -171,6 +170,64 @@
     - docker_runtime_container_forward_compat_enabled | bool
     - docker_runtime_nftables_config_stat.stat.exists
     - docker_runtime_nftables_forward_patch.changed
+
+- name: Ensure Docker service is enabled and running
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: systemd_unit
+  vars:
+    common_systemd_unit_name: docker
+
+- name: Flush Docker handlers before chain health checks
+  ansible.builtin.meta: flush_handlers
+
+- name: Check whether Docker nat chain exists
+  ansible.builtin.command: iptables -t nat -S DOCKER
+  register: docker_runtime_nat_chain_check
+  changed_when: false
+  failed_when: docker_runtime_nat_chain_check.rc not in [0, 1]
+  when: docker_runtime_require_nat_chain | bool
+
+- name: Check whether Docker forward chain exists
+  ansible.builtin.command: iptables -t filter -S DOCKER-FORWARD
+  register: docker_runtime_forward_chain_check
+  changed_when: false
+  failed_when: docker_runtime_forward_chain_check.rc not in [0, 1]
+  when: docker_runtime_require_nat_chain | bool
+
+- name: Restart Docker when required chains are missing
+  ansible.builtin.systemd:
+    name: docker
+    state: restarted
+  when:
+    - docker_runtime_require_nat_chain | bool
+    - docker_runtime_nat_chain_check.rc == 1 or docker_runtime_forward_chain_check.rc == 1
+
+- name: Recheck Docker nat chain after restart
+  ansible.builtin.command: iptables -t nat -S DOCKER
+  register: docker_runtime_nat_chain_recheck
+  changed_when: false
+  when: docker_runtime_require_nat_chain | bool
+
+- name: Recheck Docker forward chain after restart
+  ansible.builtin.command: iptables -t filter -S DOCKER-FORWARD
+  register: docker_runtime_forward_chain_recheck
+  changed_when: false
+  when: docker_runtime_require_nat_chain | bool
+
+- name: Assert Docker nat chain is present
+  ansible.builtin.assert:
+    that:
+      - docker_runtime_nat_chain_recheck.rc == 0
+    fail_msg: "Docker is running but the nat DOCKER chain is missing; published ports will fail."
+  when: docker_runtime_require_nat_chain | bool
+
+- name: Assert Docker filter forward chain is present
+  ansible.builtin.assert:
+    that:
+      - docker_runtime_forward_chain_recheck.rc == 0
+    fail_msg: "Docker is running but the filter DOCKER-FORWARD chain is missing; bridge networking will fail."
+  when: docker_runtime_require_nat_chain | bool
 
 - name: Verify Docker runtime health probes
   ansible.builtin.import_tasks: verify.yml

@@ -1,0 +1,21 @@
+name: validate
+
+on:
+  push:
+    branches:
+      - main
+      - "codex/**"
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate repository data models
+        run: python3 scripts/validate_repository_data_models.py
+
+      - name: Validate service completeness
+        run: python3 scripts/service_completeness.py

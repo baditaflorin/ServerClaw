@@ -19,3 +19,29 @@ def test_build_platform_vars_includes_langfuse_publication_topology() -> None:
     assert langfuse["ports"]["internal"] == 3002
     assert langfuse["urls"]["public"] == "https://langfuse.lv3.org"
     assert langfuse["urls"]["internal"] == "http://10.10.10.20:3002"
+
+
+def test_build_service_urls_supports_private_gitea_proxy_and_root_url() -> None:
+    ports = {
+        "gitea_http_port": 3003,
+        "gitea_host_proxy_port": 3009,
+    }
+    service = {
+        "owning_vm": "docker-runtime-lv3",
+        "public_hostname": "git.lv3.org",
+    }
+    port_map, urls = generate_platform_vars.build_service_urls(
+        "gitea",
+        service,
+        {"management_tailscale_ipv4": "100.64.0.1"},
+        {"docker-runtime-lv3": "10.10.10.20"},
+        ports,
+        {"desired_state": {"host_id": "proxmox_florin"}},
+    )
+
+    assert port_map == {"internal": 3003, "controller": 3009}
+    assert urls == {
+        "public": "http://git.lv3.org:3009",
+        "internal": "http://10.10.10.20:3003",
+        "controller": "http://100.64.0.1:3009",
+    }

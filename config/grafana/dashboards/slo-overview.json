@@ -2749,6 +2749,217 @@
           "legendFormat": "Budget Exhaustion (days)"
         }
       ]
+    },
+    {
+      "id": 61,
+      "type": "text",
+      "title": "gitea-availability",
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 84
+      },
+      "options": {
+        "content": "### gitea-availability\n\nThe private Gitea runtime remains reachable for repository hosting, webhooks, and self-hosted CI orchestration.\n\nService: `gitea`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=gitea-availability)",
+        "mode": "markdown"
+      }
+    },
+    {
+      "id": 62,
+      "type": "stat",
+      "title": "30d Compliance",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "lv3-prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 87
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "slo:gitea_availability:success_ratio_30d",
+          "legendFormat": "30d Compliance"
+        }
+      ]
+    },
+    {
+      "id": 63,
+      "type": "stat",
+      "title": "Budget Remaining",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "lv3-prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 87
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.1
+              },
+              {
+                "color": "green",
+                "value": 0.5
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "slo:gitea_availability:budget_remaining",
+          "legendFormat": "Budget Remaining"
+        }
+      ]
+    },
+    {
+      "id": 64,
+      "type": "stat",
+      "title": "Burn Rate (1h)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "lv3-prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 87
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "slo:gitea_availability:burn_rate_1h",
+          "legendFormat": "Burn Rate (1h)"
+        }
+      ]
+    },
+    {
+      "id": 65,
+      "type": "stat",
+      "title": "Budget Exhaustion (days)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "lv3-prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 87
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "d"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "slo:gitea_availability:time_to_budget_exhaustion_days",
+          "legendFormat": "Budget Exhaustion (days)"
+        }
+      ]
     }
   ],
   "refresh": "1m",
@@ -2765,7 +2976,7 @@
         "name": "slo",
         "label": "SLO",
         "type": "custom",
-        "query": "status-page-availability,grafana-availability,keycloak-availability,keycloak-latency,langfuse-availability,uptime-kuma-availability,nginx-edge-availability,open-webui-availability,windmill-availability,netbox-availability,vaultwarden-availability,platform-context-api-availability,semaphore-availability",
+        "query": "status-page-availability,grafana-availability,keycloak-availability,keycloak-latency,langfuse-availability,uptime-kuma-availability,nginx-edge-availability,open-webui-availability,windmill-availability,netbox-availability,vaultwarden-availability,platform-context-api-availability,semaphore-availability,gitea-availability",
         "current": {
           "selected": false,
           "text": "all",

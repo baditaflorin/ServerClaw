@@ -1,0 +1,14 @@
+---
+gitea_runner_site_dir: /opt/gitea-runner
+gitea_runner_data_dir: "{{ gitea_runner_site_dir }}/data"
+gitea_runner_compose_file: "{{ gitea_runner_site_dir }}/docker-compose.yml"
+gitea_runner_config_file: "{{ gitea_runner_site_dir }}/config.yaml"
+gitea_runner_compose_bin: docker
+gitea_runner_image: docker.io/gitea/act_runner:0.2.12@sha256:55f9fcb59ac6159b4015549afa96712a8dde0b1017ffee5551b9c34173c87171
+gitea_runner_container_name: lv3-gitea-runner
+gitea_runner_network_name: gitea_runner_default
+gitea_runner_network_subnet: 172.16.241.0/24
+gitea_runner_instance_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('gitea', 'internal') }}"
+gitea_runner_registration_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/runner-registration-token.txt
+gitea_runner_name: docker-build-lv3
+gitea_runner_labels: self-hosted:host,linux:host,amd64:host,docker:docker

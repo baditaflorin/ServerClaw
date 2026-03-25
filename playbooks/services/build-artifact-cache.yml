@@ -18,4 +18,6 @@
           - "{{ playbook_execution_required_hosts.docker_build[playbook_execution_env] }}"
 
   roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
     - role: lv3.platform.build_server

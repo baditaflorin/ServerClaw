@@ -1,2 +1,3 @@
 ---
+- import_playbook: ../services/gitea.yml
 - import_playbook: ../services/windmill.yml

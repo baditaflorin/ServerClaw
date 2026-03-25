@@ -79,6 +79,46 @@ groups:
           summary: grafana-availability has less than 10% error budget remaining
           description: Grafana remains reachable through the public LV3 edge.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_gitea_availability
+        expr: (slo:gitea_availability:error_rate_5m > (14 * 0.005000)) and (slo:gitea_availability:error_rate_1h
+          > (14 * 0.005000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: gitea
+          slo_id: gitea-availability
+          indicator: availability
+        annotations:
+          summary: gitea-availability is burning its error budget at 14x
+          description: The private Gitea runtime remains reachable for repository
+            hosting, webhooks, and self-hosted CI orchestration.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_gitea_availability
+        expr: slo:gitea_availability:error_rate_1h > (3 * 0.005000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: gitea
+          slo_id: gitea-availability
+          indicator: availability
+        annotations:
+          summary: gitea-availability is burning its error budget at 3x
+          description: The private Gitea runtime remains reachable for repository
+            hosting, webhooks, and self-hosted CI orchestration.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_gitea_availability
+        expr: slo:gitea_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: gitea
+          slo_id: gitea-availability
+          indicator: availability
+        annotations:
+          summary: gitea-availability has less than 10% error budget remaining
+          description: The private Gitea runtime remains reachable for repository
+            hosting, webhooks, and self-hosted CI orchestration.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_keycloak_availability
         expr: (slo:keycloak_availability:error_rate_5m > (14 * 0.003000)) and (slo:keycloak_availability:error_rate_1h
           > (14 * 0.003000))

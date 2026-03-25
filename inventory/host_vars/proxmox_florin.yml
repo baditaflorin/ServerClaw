@@ -36,6 +36,8 @@ platform_port_assignments:
   windmill_host_proxy_port: 8005
   mattermost_server_port: 8065
   mattermost_host_proxy_port: 8066
+  gitea_http_port: 3003
+  gitea_host_proxy_port: 3009
   netbox_server_port: 8082
   netbox_host_proxy_port: 8004
   langfuse_port: 3002
@@ -104,6 +106,11 @@ proxmox_tailscale_tcp_proxies:
     listen_port: "{{ platform_port_assignments.mattermost_host_proxy_port }}"
     upstream_host: 10.10.10.20
     upstream_port: 8065
+  - name: gitea
+    listen_address: "{{ management_tailscale_ipv4 }}"
+    listen_port: "{{ platform_port_assignments.gitea_host_proxy_port }}"
+    upstream_host: 10.10.10.20
+    upstream_port: "{{ platform_port_assignments.gitea_http_port }}"
   - name: netbox
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.netbox_host_proxy_port }}"
@@ -331,6 +338,7 @@ network_policy:
         - source: host
           protocol: tcp
           ports:
+            - 3003
             - 3004
             - 8000
             - 8010
@@ -371,6 +379,11 @@ network_policy:
           ports:
             - 11434
           description: Local Docker workloads that use the private Ollama inference API
+        - source: docker-build-lv3
+          protocol: tcp
+          ports:
+            - 3003
+          description: Gitea Actions runner access from docker-build-lv3
         - source: nginx-lv3
           protocol: tcp
           ports:
@@ -855,6 +868,25 @@ lv3_service_topology:
     access:
       kind: tailscale-tcp-proxy
       url: "{{ windmill_controller_url }}"
+  gitea:
+    service_name: gitea
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: git.lv3.org
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: true
+    dns:
+      managed: true
+      visibility: tailnet
+      name: git
+      type: A
+      target: "{{ management_tailscale_ipv4 }}"
+      ttl: 60
+    access:
+      kind: tailscale-tcp-proxy
+      url: "{{ gitea_controller_url }}"
   mattermost:
     service_name: mattermost
     owning_vm: docker-runtime-lv3

@@ -1,0 +1,18 @@
+#!/bin/bash
+set -euo pipefail
+
+tmpdir="$(mktemp -d)"
+cleanup() {
+  rm -rf "${tmpdir}"
+}
+trap cleanup EXIT
+
+while read -r _oldrev newrev _refname; do
+  git --work-tree "${tmpdir}" checkout "${newrev}" -- .
+done
+
+if ! make -C "${tmpdir}" validate-data-models >/tmp/gitea-pre-receive.log 2>&1; then
+  cat /tmp/gitea-pre-receive.log
+  echo "Repository validation failed. Push rejected."
+  exit 1
+fi
