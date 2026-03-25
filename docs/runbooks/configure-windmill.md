@@ -8,7 +8,7 @@ It covers:
 
 - PostgreSQL database and role provisioning on `postgres-lv3`
 - private Windmill runtime deployment on `docker-runtime-lv3`
-- a host-side Tailscale TCP proxy on `proxmox_florin` for operator access
+- a host-side mesh TCP proxy on `proxmox_florin` for operator access
 - repo-managed workspace bootstrap and seeded script verification
 - controller-local bootstrap secrets mirrored under `.local/windmill/`
 
@@ -18,7 +18,7 @@ Before running the workflow, confirm:
 
 1. the controller has the SSH key at `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519`
 2. `postgres-lv3` and `docker-runtime-lv3` are already reachable through the Proxmox jump path
-3. the Proxmox host is reachable on its Tailscale address `100.118.189.95`
+3. the Proxmox host is reachable on its Headscale-managed mesh address `100.64.0.1`
 
 ## Entrypoints
 
@@ -33,7 +33,7 @@ The workflow manages these live surfaces:
 - PostgreSQL database `windmill` on `postgres-lv3`
 - PostgreSQL login role `windmill_admin` plus support role `windmill_user` on `postgres-lv3`
 - Windmill runtime under `/opt/windmill` on `docker-runtime-lv3`
-- Tailscale-only operator entrypoint at `http://100.118.189.95:8005`
+- private operator entrypoint at `http://100.64.0.1:8005`
 - password-login bootstrap admin `superadmin_secret@windmill.dev` backed by the managed Windmill secret
 - repo-managed workspace `lv3`
 - seeded script `f/lv3/windmill_healthcheck`
@@ -58,15 +58,15 @@ After a successful converge, these controller-local files should exist:
 Run these checks after converge:
 
 1. `make syntax-check-windmill`
-2. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose --file /opt/windmill/docker-compose.yml ps && sudo ls -l /opt/windmill/openbao /run/lv3-secrets/windmill && sudo test ! -e /opt/windmill/windmill.env'`
-3. `curl -s http://100.118.189.95:8005/api/version`
-4. `curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" http://100.118.189.95:8005/api/users/whoami`
-5. `curl -s -X POST -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" -H "Content-Type: application/json" -d '{"probe":"manual-run"}' http://100.118.189.95:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fwindmill_healthcheck`
-6. `curl -s -X POST http://100.118.189.95:8005/api/auth/login -H "Content-Type: application/json" -d "{\"email\":\"superadmin_secret@windmill.dev\",\"password\":\"$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)\"}"`
-7. `curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" http://100.118.189.95:8005/api/w/lv3/schedules/list | grep scheduler_watchdog_loop_every_10s`
-8. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'test -s /srv/proxmox_florin_server/.local/scheduler/watchdog-heartbeat.json && sudo cat /srv/proxmox_florin_server/.local/scheduler/watchdog-heartbeat.json'`
-9. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.50 "psql -d windmill -Atqc \"SELECT to_regclass('public.config_change_staging')\""`
-10. `curl -s -X POST -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" -H "Content-Type: application/json" -d '{}' http://100.118.189.95:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fconfig_merge%2Fmerge_config_changes`
+2. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/windmill/docker-compose.yml ps && sudo ls -l /opt/windmill/openbao /run/lv3-secrets/windmill && sudo test ! -e /opt/windmill/windmill.env'`
+3. `curl -s http://100.64.0.1:8005/api/version`
+4. `curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" http://100.64.0.1:8005/api/users/whoami`
+5. `curl -s -X POST -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" -H "Content-Type: application/json" -d '{"probe":"manual-run"}' http://100.64.0.1:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fwindmill_healthcheck`
+6. `curl -s -X POST http://100.64.0.1:8005/api/auth/login -H "Content-Type: application/json" -d "{\"email\":\"superadmin_secret@windmill.dev\",\"password\":\"$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)\"}"`
+7. `curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" http://100.64.0.1:8005/api/w/lv3/schedules/list | grep scheduler_watchdog_loop_every_10s`
+8. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'test -s /srv/proxmox_florin_server/.local/scheduler/watchdog-heartbeat.json && sudo cat /srv/proxmox_florin_server/.local/scheduler/watchdog-heartbeat.json'`
+9. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.50 "psql -d windmill -Atqc \"SELECT to_regclass('public.config_change_staging')\""`
+10. `curl -s -X POST -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" -H "Content-Type: application/json" -d '{}' http://100.64.0.1:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fconfig_merge%2Fmerge_config_changes`
 
 ## Notes
 

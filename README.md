@@ -103,7 +103,7 @@ The repository now also ships ADR 0137 crawl policy automation: the shared publi
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.153.0` |
+| Repository version | `0.154.0` |
 | Platform version | `0.130.4` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -206,7 +206,7 @@ password SSH disabled on host and guests
 | `command` | Command Lane | `ssh` | 2 | Use SSH only for command-lane access. |
 | `api` | API Lane | `https` | 14 | Default new APIs to internal-only or operator-only publication. |
 | `message` | Message Lane | `authenticated_submission` | 2 | Submit platform mail through the internal mail platform rather than arbitrary external SMTP relays. |
-| `event` | Event Lane | `mixed` | 12 | Event sinks must be documented and intentionally reachable. |
+| `event` | Event Lane | `mixed` | 13 | Event sinks must be documented and intentionally reachable. |
 
 ### Current Governed Surfaces
 | Surface | Lane | Kind | Endpoint |
@@ -241,11 +241,12 @@ password SSH disabled on host and guests
 | `platform-world-state-events` | `event` | `event_subject` | `platform.world_state.refreshed` |
 | `platform-ledger-events` | `event` | `event_subject` | `platform.ledger.event_written` |
 | `platform-execution-events` | `event` | `event_subject` | `platform.execution.*` |
+| `platform-config-merge-events` | `event` | `event_subject` | `platform.config.*` |
 
 ### API Publication Tiers
 | Tier | Title | Surfaces | Summary |
 | --- | --- | --- | --- |
-| `internal-only` | Internal-Only | 16 | Reachable only from LV3 private networks, loopback paths, or explicitly trusted control-plane hosts. |
+| `internal-only` | Internal-Only | 17 | Reachable only from LV3 private networks, loopback paths, or explicitly trusted control-plane hosts. |
 | `operator-only` | Operator-Only | 8 | Reachable only from approved operator devices over private access such as Tailscale. |
 | `public-edge` | Public Edge | 2 | Intentionally published on a public domain through the named edge model. |
 
@@ -278,6 +279,7 @@ password SSH disabled on host and guests
 | `platform-world-state-events` | `internal-only` | `event` | `platform.world_state.refreshed` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
 | `platform-ledger-events` | `internal-only` | `event` | `platform.ledger.event_written` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
 | `platform-execution-events` | `internal-only` | `event` | `platform.execution.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
+| `platform-config-merge-events` | `internal-only` | `event` | `platform.config.*` | Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers. |
 <!-- END GENERATED: control-plane-lanes -->
 
 The current host security posture is:
@@ -381,6 +383,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Command Catalog And Approval Gates](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/command-catalog-and-approval-gates.md)
 - [Complete Security Baseline Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/complete-security-baseline.md)
 - [Compose Runtime Secrets Injection](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/compose-secrets-injection.md)
+- [Config Merge Protocol](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/config-merge-protocol.md)
 - [Configure API Gateway](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-api-gateway.md)
 - [Configure Backup VM](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-backup-vm.md)
 - [Configure Build Artifact Cache](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-build-artifact-cache.md)
@@ -796,6 +799,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0151: n8n for Webhook and API Integration Automation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0151-n8n.md)
 - [Workstream ADR 0156: Agent Session Workspace Isolation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0156-agent-session-workspace-isolation.md)
 - [ADR 0157 Workstream](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0157-per-vm-concurrency-budget.md)
+- [Workstream ADR 0158: Conflict-Free Configuration Merge Protocol](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0158-config-merge-protocol.md)
 - [Workstream ADR 0159: Speculative Parallel Execution with Compensating Transactions](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0159-speculative-parallel-execution.md)
 - [Workstream ADR 0160: Parallel Dry-Run Fan-Out](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0160-parallel-dry-run-fan-out.md)
 - [Workstream ADR 0162: Distributed Deadlock Detection and Resolution](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0162-deadlock-detector.md)
@@ -822,7 +826,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.153.0` |
+| Repository version | `0.154.0` |
 | Platform version | `0.130.4` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -981,6 +985,7 @@ This repository is intentionally opinionated:
 | `0151` | n8n for webhook and API integration automation | `merged` | [adr-0151-n8n.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0151-n8n.md) |
 | `0156` | Agent session workspace isolation | `merged` | [adr-0156-agent-session-workspace-isolation.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0156-agent-session-workspace-isolation.md) |
 | `0157` | Per-VM concurrency budget and resource reservation | `merged` | [adr-0157-per-vm-concurrency-budget.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0157-per-vm-concurrency-budget.md) |
+| `0158` | Conflict-free configuration merge protocol | `merged` | [adr-0158-config-merge-protocol.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0158-config-merge-protocol.md) |
 | `0159` | Speculative parallel execution with compensating transactions | `merged` | [adr-0159-speculative-parallel-execution.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0159-speculative-parallel-execution.md) |
 | `0160` | Parallel dry-run fan-out for intent batch validation | `merged` | [adr-0160-parallel-dry-run-fan-out.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0160-parallel-dry-run-fan-out.md) |
 | `0162` | Distributed deadlock detection and resolution | `merged` | [adr-0162-deadlock-detector.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0162-deadlock-detector.md) |

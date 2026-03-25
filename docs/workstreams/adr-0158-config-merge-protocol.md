@@ -2,15 +2,15 @@
 
 - ADR: [ADR 0158](../adr/0158-conflict-free-configuration-merge-protocol.md)
 - Title: queue append-heavy registry changes into `config_change_staging` and merge them through one governed Windmill writer
-- Status: live_applied
-- Implemented In Repo Version: 0.144.0
-- Live Applied In Platform Version: 0.130.4
+- Status: merged
+- Implemented In Repo Version: 0.154.0
+- Live Applied In Platform Version: not yet
 - Implemented On: 2026-03-25
-- Live Applied On: 2026-03-25
+- Live Applied On: not yet
 - Branch: `codex/adr-0158-config-merge-protocol`
 - Worktree: `.worktrees/adr-0158-config-merge`
 - Owner: codex
-- Depends On: `adr-0031-repository-validation-pipeline`, `adr-0044-windmill`, `adr-0075-service-capability-catalog`, `adr-0076-subdomain-governance`, `adr-0115-mutation-ledger`, `adr-0124-platform-event-taxonomy`
+- Depends On: `adr-0044-windmill`, `adr-0075-service-capability-catalog`, `adr-0076-subdomain-governance`, `adr-0087-validation-gate`, `adr-0115-mutation-ledger`, `adr-0124-platform-event-taxonomy`
 - Conflicts With: none
 - Shared Surfaces: `platform/config_merge/`, `scripts/config_merge_protocol.py`, `config/merge-eligible-files.yaml`, `config/event-taxonomy.yaml`, `config/control-plane-lanes.json`, `config/api-publication.json`, `config/workflow-catalog.json`, `config/command-catalog.json`, `migrations/0016_config_merge_schema.sql`, `collections/ansible_collections/lv3/platform/roles/windmill_runtime/`, `docs/runbooks/config-merge-protocol.md`
 
@@ -63,8 +63,8 @@
 - `uv run --with pytest --with pyyaml pytest -q tests/test_config_merge_protocol.py tests/test_config_merge_repo_surfaces.py tests/test_config_merge_windmill.py tests/unit/test_event_taxonomy.py`
 - `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`
 - `make syntax-check-windmill`
-- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.50 "psql -d windmill -Atqc \"SELECT to_regclass('public.config_change_staging')\""`
-- `curl -s -X POST -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" -H "Content-Type: application/json" -d '{}' http://100.118.189.95:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fconfig_merge%2Fmerge_config_changes`
+- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.50 "psql -d windmill -Atqc \"SELECT to_regclass('public.config_change_staging')\""`
+- `curl -s -X POST -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" -H "Content-Type: application/json" -d '{}' http://100.64.0.1:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fconfig_merge%2Fmerge_config_changes`
 
 ## Merge Criteria
 
@@ -72,3 +72,9 @@
 - list-backed and mapping-backed registries both merge correctly from staged rows
 - the Windmill runtime converge applies the migration and seeds the config-merge worker
 - the live Windmill worker returns a successful run result from the production control plane
+
+## Outcome
+
+- repository implementation is complete on `main` in repo release `0.154.0`
+- the repo now ships the merge-eligible catalog, staging-table migration, `platform.config_merge`, the operator CLI, the Windmill merge worker, canonical config-merge events, and focused repo plus Windmill tests
+- live apply is still pending because `make converge-windmill` failed immediately on `proxmox_florin` with `ssh: connect to host 100.64.0.1 port 22: Connection refused`, the public fallback `ops@65.108.75.123:22` timed out, and the private Proxmox API probe `https://100.64.0.1:8006` also failed during the same window
