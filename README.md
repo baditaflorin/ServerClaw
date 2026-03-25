@@ -105,7 +105,7 @@ The repository now also ships ADR 0137 crawl policy automation: the shared publi
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.157.0` |
+| Repository version | `0.157.1` |
 | Platform version | `0.130.4` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -836,7 +836,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.157.0` |
+| Repository version | `0.157.1` |
 | Platform version | `0.130.4` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |

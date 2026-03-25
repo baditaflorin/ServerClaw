@@ -91,3 +91,9 @@ def test_windmill_defaults_seed_scheduler_watchdog() -> None:
     assert "f/lv3/scheduler_watchdog_loop" in script_paths
     assert "f/lv3/scheduler_watchdog_loop_every_10s" in schedules
     assert schedules["f/lv3/scheduler_watchdog_loop_every_10s"]["enabled"] is True
+
+
+def test_scheduler_watchdog_wrapper_exists_for_preflight() -> None:
+    wrapper_path = REPO_ROOT / "config" / "windmill" / "scripts" / "scheduler-watchdog-loop.py"
+
+    assert wrapper_path.exists()
