@@ -144,7 +144,7 @@ class SemaphoreClient:
         return True
 
     def create_api_token(self) -> str:
-        _status, payload = self._request("/api/user/tokens", method="POST", payload={})
+        _status, payload = self._request("/api/user/tokens", method="POST", payload={}, expected_statuses={201})
         token_id = payload.get("id")
         if not isinstance(token_id, str) or not token_id:
             raise SemaphoreError("Semaphore did not return a usable API token id")
@@ -168,8 +168,9 @@ class SemaphoreClient:
             method="PUT",
             payload=payload,
             use_bearer=use_bearer,
+            expected_statuses={200, 204},
         )
-        return response
+        return response or payload
 
     def list_project_keys(self, project_id: int, *, use_bearer: bool = True) -> list[dict[str, Any]]:
         _status, payload = self._request(f"/api/project/{project_id}/keys", use_bearer=use_bearer)
@@ -195,8 +196,9 @@ class SemaphoreClient:
             method="PUT",
             payload=payload,
             use_bearer=use_bearer,
+            expected_statuses={200, 204},
         )
-        return response
+        return response or payload
 
     def list_inventories(self, project_id: int, *, use_bearer: bool = True) -> list[dict[str, Any]]:
         _status, payload = self._request(f"/api/project/{project_id}/inventory", use_bearer=use_bearer)
@@ -218,8 +220,9 @@ class SemaphoreClient:
             method="PUT",
             payload=payload,
             use_bearer=use_bearer,
+            expected_statuses={200, 204},
         )
-        return response
+        return response or payload
 
     def list_templates(self, project_id: int, *, use_bearer: bool = True) -> list[dict[str, Any]]:
         _status, payload = self._request(f"/api/project/{project_id}/templates", use_bearer=use_bearer)
@@ -241,8 +244,9 @@ class SemaphoreClient:
             method="PUT",
             payload=payload,
             use_bearer=use_bearer,
+            expected_statuses={200, 204},
         )
-        return response
+        return response or payload
 
     def start_task(
         self,

@@ -156,3 +156,33 @@ def test_ensure_template_updates_when_inventory_changes() -> None:
             },
         )
     ]
+
+
+def test_create_api_token_accepts_created_status() -> None:
+    client = semaphore.SemaphoreClient("http://example.test", verify_ssl=False)
+
+    def fake_request(path, *, method="GET", payload=None, use_bearer=False, expected_statuses=None, accept_json=True):
+        assert path == "/api/user/tokens"
+        assert method == "POST"
+        assert payload == {}
+        assert expected_statuses == {201}
+        return 201, {"id": "token-123"}
+
+    client._request = fake_request  # type: ignore[method-assign]
+
+    assert client.create_api_token() == "token-123"
+
+
+def test_update_project_accepts_no_content_status() -> None:
+    client = semaphore.SemaphoreClient("http://example.test", verify_ssl=False)
+    payload = {"id": 1, "name": "LV3 Semaphore", "type": "", "alert": False, "max_parallel_tasks": 0}
+
+    def fake_request(path, *, method="GET", payload=None, use_bearer=False, expected_statuses=None, accept_json=True):
+        assert path == "/api/project/1"
+        assert method == "PUT"
+        assert expected_statuses == {200, 204}
+        return 204, None
+
+    client._request = fake_request  # type: ignore[method-assign]
+
+    assert client.update_project(1, payload) == payload

@@ -1255,7 +1255,7 @@
         "timeout_seconds": 60,
         "retries": 18,
         "delay_seconds": 5,
-        "url": "http://127.0.0.1:3002/api/ping",
+        "url": "http://127.0.0.1:3004/api/ping",
         "method": "GET",
         "expected_status": [
           200
@@ -1267,7 +1267,7 @@
         "timeout_seconds": 60,
         "retries": 1,
         "delay_seconds": 0,
-        "url": "http://127.0.0.1:3002/api/ping",
+        "url": "http://127.0.0.1:3004/api/ping",
         "method": "GET",
         "expected_status": [
           200
@@ -1278,7 +1278,7 @@
         "monitor": {
           "name": "Semaphore Private",
           "type": "http",
-          "url": "http://10.10.10.20:3002/api/ping",
+          "url": "http://10.10.10.20:3004/api/ping",
           "description": "Private Semaphore ping endpoint on docker-runtime-lv3.",
           "interval": 60,
           "retryInterval": 60,

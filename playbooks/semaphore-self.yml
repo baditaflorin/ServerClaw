@@ -5,7 +5,7 @@
   gather_facts: false
 
   vars:
-    semaphore_self_probe_url: "{{ lookup('ansible.builtin.env', 'SEMAPHORE_SELF_PROBE_URL') | default('http://127.0.0.1:3002/api/ping', true) }}"
+    semaphore_self_probe_url: "{{ lookup('ansible.builtin.env', 'SEMAPHORE_SELF_PROBE_URL') | default('http://127.0.0.1:3004/api/ping', true) }}"
 
   tasks:
     - name: Read the local Semaphore ping endpoint

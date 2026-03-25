@@ -264,7 +264,7 @@
   {
     "name": "Semaphore Private",
     "type": "http",
-    "url": "http://10.10.10.20:3002/api/ping",
+    "url": "http://10.10.10.20:3004/api/ping",
     "description": "Private Semaphore ping endpoint on docker-runtime-lv3.",
     "interval": 60,
     "retryInterval": 60,

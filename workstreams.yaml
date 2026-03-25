@@ -60,7 +60,7 @@ workstreams:
       - config/windmill/scripts/
       - collections/ansible_collections/lv3/platform/roles/windmill_runtime/
       - config/event-taxonomy.yaml
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: true
 
   - id: adr-0138-published-artifact-secret-scanning
@@ -106,7 +106,7 @@ workstreams:
   - id: adr-0149-semaphore
     adr: "0149"
     title: Semaphore for Ansible job management UI and API
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/adr-0149-semaphore
     worktree_path: ../proxmox_florin_server-adr-0149
@@ -128,7 +128,7 @@ workstreams:
       - config/command-catalog.json
       - config/dependency-graph.json
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0014-tailscale
     adr: "0014"

@@ -88,7 +88,7 @@ platform_host:
         listen_address: 100.64.0.1
         listen_port: 8020
         upstream_host: 10.10.10.20
-        upstream_port: 3002
+        upstream_port: 3004
       - name: open-webui
         listen_address: 100.64.0.1
         listen_port: 8008
@@ -123,7 +123,7 @@ platform_ports:
   ntfy_port: 2586
   openbao_http_port: 8201
   openbao_proxy_port: 8200
-  semaphore_server_port: 3002
+  semaphore_server_port: 3004
   semaphore_host_proxy_port: 8020
   windmill_server_port: 8000
   windmill_host_proxy_port: 8005
@@ -161,7 +161,7 @@ platform_port_assignments:
   ntfy_port: 2586
   openbao_http_port: 8201
   openbao_proxy_port: 8200
-  semaphore_server_port: 3002
+  semaphore_server_port: 3004
   semaphore_host_proxy_port: 8020
   windmill_server_port: 8000
   windmill_host_proxy_port: 8005
@@ -926,10 +926,10 @@ platform_service_topology:
       url: http://100.64.0.1:8020
     service_id: semaphore
     ports:
-      internal: 3002
+      internal: 3004
       controller: 8020
     urls:
-      internal: http://10.10.10.20:3002
+      internal: http://10.10.10.20:3004
       controller: http://100.64.0.1:8020
   windmill:
     service_name: windmill
@@ -1689,10 +1689,10 @@ public_edge_service_topology:
       url: http://100.64.0.1:8020
     service_id: semaphore
     ports:
-      internal: 3002
+      internal: 3004
       controller: 8020
     urls:
-      internal: http://10.10.10.20:3002
+      internal: http://10.10.10.20:3004
       controller: http://100.64.0.1:8020
   windmill:
     service_name: windmill
@@ -2063,9 +2063,9 @@ hetzner_dns_records: *id001
 platform_postgres_host: database.lv3.org
 openbao_postgres_host: database.lv3.org
 openbao_controller_url: https://100.64.0.1:8200
-semaphore_server_port: 3002
+semaphore_server_port: 3004
 semaphore_host_proxy_port: 8020
-semaphore_private_base_url: http://10.10.10.20:3002
+semaphore_private_base_url: http://10.10.10.20:3004
 semaphore_controller_url: http://100.64.0.1:8020
 netbox_host_proxy_port: 8004
 netbox_controller_url: http://100.64.0.1:8004

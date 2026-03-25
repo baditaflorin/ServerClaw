@@ -73,6 +73,8 @@
     tar -C "{{ semaphore_repo_checkout_repo_root_local_dir }}" -czf "{{ semaphore_repo_checkout_archive_local.path }}" {{ semaphore_repo_checkout_sync_paths | map('quote') | join(' ') }}
   args:
     executable: /bin/bash
+  environment:
+    COPYFILE_DISABLE: "1"
   delegate_to: localhost
   become: false
   changed_when: false
@@ -83,11 +85,39 @@
     dest: "{{ semaphore_site_dir }}/repo-checkout.tar.gz"
     mode: "0600"
 
+- name: Reset the staged Semaphore repo checkout on the guest
+  ansible.builtin.file:
+    path: "{{ semaphore_repo_checkout_host_path }}"
+    state: absent
+
+- name: Recreate the staged Semaphore repo checkout root on the guest
+  ansible.builtin.file:
+    path: "{{ semaphore_repo_checkout_host_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
 - name: Expand the staged Semaphore repo checkout on the guest
   ansible.builtin.unarchive:
     src: "{{ semaphore_site_dir }}/repo-checkout.tar.gz"
     dest: "{{ semaphore_repo_checkout_host_path }}"
     remote_src: true
+    extra_opts:
+      - --no-same-owner
+
+- name: Ensure Galaxy namespace directories exist in the staged Semaphore repo checkout
+  ansible.builtin.file:
+    path: "{{ semaphore_repo_checkout_host_path }}/{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0775"
+  loop:
+    - collections
+    - collections/ansible_collections
+    - collections/ansible_collections/ansible
+    - collections/ansible_collections/community
 
 - name: Remove the staged Semaphore repo checkout archive from the guest
   ansible.builtin.file:
@@ -156,10 +186,36 @@
       fact_name: semaphore_access_key_encryption_raw
     - path: "{{ semaphore_secret_dir }}/cookie-hash"
       fact_name: semaphore_cookie_hash_raw
-    - path: "{{ semaphore_secret_dir }}/cookie-encryption"
-      fact_name: semaphore_cookie_encryption_raw
   register: semaphore_secret_generation
   changed_when: "'changed' in semaphore_secret_generation.stdout"
+  no_log: true
+
+- name: Ensure the Semaphore cookie encryption secret is present and valid
+  ansible.builtin.shell: |
+    set -euo pipefail
+    secret_file="{{ semaphore_secret_dir }}/cookie-encryption"
+    if [ -s "$secret_file" ] && python3 -c '
+    import base64
+    import sys
+    from pathlib import Path
+
+    value = Path(sys.argv[1]).read_text(encoding="utf-8").strip()
+    try:
+        decoded = base64.b64decode(value, validate=True)
+    except Exception:
+        raise SystemExit(1)
+    raise SystemExit(0 if len(decoded) in {16, 24, 32} else 1)
+    ' "$secret_file"; then
+      exit 0
+    fi
+
+    umask 077
+    openssl rand -base64 32 | tr -d '\n' > "$secret_file"
+    echo changed
+  args:
+    executable: /bin/bash
+  register: semaphore_cookie_encryption_generation
+  changed_when: "'changed' in semaphore_cookie_encryption_generation.stdout"
   no_log: true
 
 - name: Read the Semaphore encryption secrets
@@ -262,6 +318,9 @@
     or 'Downloaded newer image' in semaphore_pull.stdout
     or 'Pull complete' in semaphore_pull.stdout
 
+- name: Reset SSH connection before Docker nat checks for Semaphore startup
+  ansible.builtin.meta: reset_connection
+
 - name: Check whether Docker nat chain exists before Semaphore startup
   ansible.builtin.command: iptables -t nat -S DOCKER
   register: semaphore_docker_nat_chain_check
@@ -274,6 +333,17 @@
     state: restarted
   when: semaphore_docker_nat_chain_check.rc == 1
 
+- name: Recheck Docker nat chain before Semaphore startup
+  ansible.builtin.command: iptables -t nat -S DOCKER
+  register: semaphore_docker_nat_chain_recheck
+  changed_when: false
+
+- name: Assert Docker nat chain is present before Semaphore startup
+  ansible.builtin.assert:
+    that:
+      - semaphore_docker_nat_chain_recheck.rc == 0
+    fail_msg: "Docker is running but the nat DOCKER chain is missing; Semaphore published ports will fail."
+
 - name: Start the Semaphore stack
   ansible.builtin.command:
     argv:
@@ -283,6 +353,7 @@
       - "{{ semaphore_compose_file }}"
       - up
       - -d
+      - --force-recreate
       - --remove-orphans
   args:
     chdir: "{{ semaphore_site_dir }}"
@@ -307,6 +378,22 @@
   delegate_to: localhost
   become: false
   no_log: true
+
+- name: Wait for the controller-facing Semaphore API to answer
+  ansible.builtin.uri:
+    url: "{{ semaphore_controller_url }}/api/ping"
+    method: GET
+    return_content: true
+    status_code: 200
+  delegate_to: localhost
+  become: false
+  register: semaphore_controller_ping
+  retries: 24
+  delay: 2
+  until:
+    - semaphore_controller_ping.status == 200
+    - semaphore_controller_ping.content | trim == "pong"
+  changed_when: false
 
 - name: Bootstrap the Semaphore project and controller auth artifacts
   ansible.builtin.command:

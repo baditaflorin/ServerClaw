@@ -1,10 +1,10 @@
 # ADR 0149: Semaphore For Ansible Job Management UI And API
 
 - Status: Accepted
-- Implementation Status: In Progress
+- Implementation Status: Implemented on workstream branch
 - Implemented In Repo Version: not yet
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-25
 - Date: 2026-03-25
 
 ## Context
@@ -55,5 +55,6 @@ Initial implementation scope:
 - The live implementation will use [roles/semaphore_postgres](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/semaphore_postgres) and [roles/semaphore_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/semaphore_runtime).
 - Project, inventory, template, and API-token bootstrap are handled through [platform/ansible/semaphore.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/ansible/semaphore.py) and [scripts/semaphore_bootstrap.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/semaphore_bootstrap.py).
 - The initial seeded verification path is the repo-managed [playbooks/semaphore-self.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/semaphore-self.yml) template, which proves UI/API task execution without silently expanding infrastructure credential scope.
-- Repo implementation is complete on the ADR workstream branch after rebasing onto current `main` and passing the Semaphore-specific validation stack plus the broader repository validation stages.
-- Platform implementation remains pending until the Proxmox host and its management tailnet endpoint are reachable from the execution environment so `make converge-semaphore` can complete and the seeded self-test can be verified live.
+- Repo implementation is complete on the ADR workstream branch after rebasing onto current `main`, hardening the bootstrap and runtime idempotency paths, and passing the Semaphore-specific validation stack.
+- The first live apply on `codex/adr-0149-semaphore` completed on 2026-03-25: `make converge-semaphore` succeeded, the private Tailscale proxy answered on `http://100.64.0.1:8020/api/ping`, and the seeded `Semaphore Self-Test` template completed successfully through the Semaphore task runner.
+- `Implemented In Repo Version` and `Implemented In Platform Version` remain `not yet` until the workstream is merged and the integrated mainline version is applied live under the repository release policy.

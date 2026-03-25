@@ -5,6 +5,11 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import sys
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 from controller_automation_toolkit import emit_cli_error, write_json
 from platform.ansible.semaphore import SemaphoreClient, apply_bootstrap_spec
@@ -13,7 +18,10 @@ from platform.ansible.semaphore import SemaphoreClient, apply_bootstrap_spec
 def load_text(path: str | None) -> str | None:
     if not path:
         return None
-    return Path(path).expanduser().read_text(encoding="utf-8").strip()
+    resolved = Path(path).expanduser()
+    if not resolved.exists():
+        return None
+    return resolved.read_text(encoding="utf-8").strip()
 
 
 def build_parser() -> argparse.ArgumentParser:

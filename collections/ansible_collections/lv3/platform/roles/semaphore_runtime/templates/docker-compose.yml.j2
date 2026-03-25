@@ -34,4 +34,4 @@ services:
       - "{{ semaphore_server_port }}:{{ semaphore_server_port }}"
     volumes:
       - {{ semaphore_data_dir }}:/var/lib/semaphore
-      - {{ semaphore_repo_checkout_host_path }}:{{ semaphore_repo_checkout_container_path }}:ro
+      - {{ semaphore_repo_checkout_host_path }}:{{ semaphore_repo_checkout_container_path }}

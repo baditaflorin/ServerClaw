@@ -120,7 +120,7 @@
       "indicator": "availability",
       "objective_percent": 99.5,
       "window_days": 30,
-      "target_url": "http://10.10.10.20:3002/api/ping",
+      "target_url": "http://10.10.10.20:3004/api/ping",
       "probe_module": "http_2xx_follow_redirects",
       "description": "Semaphore stays reachable for private Ansible job launches and API-based task inspection."
     }

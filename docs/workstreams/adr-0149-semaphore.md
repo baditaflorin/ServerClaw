@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0149](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0149-semaphore-for-ansible-job-management-ui-and-api.md)
 - Title: Private Semaphore runtime for bounded Ansible job execution
-- Status: in_progress
+- Status: live_applied
 - Branch: `codex/adr-0149-semaphore`
 - Worktree: `../proxmox_florin_server-adr-0149`
 - Owner: codex
@@ -61,8 +61,14 @@
 - the repo-managed Semaphore converge path applies cleanly from `main`
 - private access, controller-local auth artifacts, and the seeded Ansible self-test are verified live
 
+## Outcome
+
+- `make converge-semaphore` completed successfully on 2026-03-25 after rebasing the workstream onto current `origin/main`.
+- `curl -fsS http://100.64.0.1:8020/api/ping` returned the Semaphore API health payload through the private Proxmox-host Tailscale proxy.
+- `python3 scripts/semaphore_tool.py --auth-file .local/semaphore/admin-auth.json run-template --template 'Semaphore Self-Test' --wait --timeout 300` completed with `status: success`, proving the seeded project, repository checkout, Galaxy install path, and task runner all work live.
+
 ## Notes For The Next Assistant
 
-- Repo implementation is complete on `codex/adr-0149-semaphore` after rebasing onto current `origin/main` and revalidating the merged catalogs, generated vars, and supporting docs.
-- Live apply remains blocked from this workstation as of 2026-03-25: `make converge-semaphore` now fails immediately with `ssh: connect to host 100.64.0.1 port 22: Connection refused`, while direct SSH to `65.108.75.123` currently returns `No route to host` and the Proxmox API on `:8006` is unreachable on both addresses.
-- if a later workstream wants Semaphore to run broader platform converges, design that around an explicit internal inventory, dedicated SSH credential scope, and documented `.local` secret mirroring rather than silently reusing controller assumptions
+- The live fixes that made the final apply succeed are in the worktree changes to `roles/semaphore_runtime`, `platform/ansible/semaphore.py`, `scripts/semaphore_bootstrap.py`, `scripts/semaphore_tool.py`, and the generated service catalogs.
+- The remaining integration step is mainline release work: merge, bump `VERSION`, update `changelog.md`, update `versions/stack.yaml`, and record the integrated live-apply metadata from `main`.
+- If a later workstream wants Semaphore to run broader platform converges, design that around an explicit internal inventory, dedicated SSH credential scope, and documented `.local` secret mirroring rather than silently reusing controller assumptions.
