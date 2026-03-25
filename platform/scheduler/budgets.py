@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -52,12 +52,34 @@ class WorkflowBudget:
 
 
 @dataclass(frozen=True)
+class SpeculativeWorkflowPolicy:
+    eligible: bool = False
+    compensating_workflow_id: str | None = None
+    conflict_probe: dict[str, str] | None = None
+    probe_delay_seconds: int = 30
+    rollback_window_seconds: int = 300
+
+    def as_dict(self) -> dict[str, Any]:
+        payload: dict[str, Any] = {
+            "eligible": self.eligible,
+            "probe_delay_seconds": self.probe_delay_seconds,
+            "rollback_window_seconds": self.rollback_window_seconds,
+        }
+        if self.compensating_workflow_id:
+            payload["compensating_workflow_id"] = self.compensating_workflow_id
+        if self.conflict_probe:
+            payload["conflict_probe"] = dict(self.conflict_probe)
+        return payload
+
+
+@dataclass(frozen=True)
 class WorkflowPolicy:
     workflow_id: str
     execution_class: str
     live_impact: str
     budget: WorkflowBudget
     workflow: dict[str, Any]
+    speculative: SpeculativeWorkflowPolicy = field(default_factory=SpeculativeWorkflowPolicy)
 
 
 @dataclass(frozen=True)
@@ -120,6 +142,82 @@ def _validate_budget_payload(payload: dict[str, Any], *, path: str) -> dict[str,
     }
 
 
+def _validate_speculative_payload(
+    workflow_id: str,
+    workflow: dict[str, Any],
+    workflows: dict[str, Any],
+) -> SpeculativeWorkflowPolicy:
+    raw = workflow.get("speculative")
+    if raw is None:
+        return SpeculativeWorkflowPolicy()
+    if not isinstance(raw, dict):
+        raise ValueError(f"workflow '{workflow_id}' speculative config must be a mapping")
+
+    eligible = raw.get("eligible", False)
+    if not isinstance(eligible, bool):
+        raise ValueError(f"workflow '{workflow_id}' speculative.eligible must be boolean")
+    if not eligible:
+        return SpeculativeWorkflowPolicy(eligible=False)
+
+    compensating_workflow_id = raw.get("compensating_workflow_id")
+    if not isinstance(compensating_workflow_id, str) or not compensating_workflow_id.strip():
+        raise ValueError(
+            f"workflow '{workflow_id}' speculative.compensating_workflow_id must be a non-empty string"
+        )
+    compensating_workflow_id = compensating_workflow_id.strip()
+    if compensating_workflow_id not in workflows:
+        raise ValueError(
+            f"workflow '{workflow_id}' speculative.compensating_workflow_id references "
+            f"unknown workflow '{compensating_workflow_id}'"
+        )
+
+    conflict_probe = raw.get("conflict_probe")
+    if not isinstance(conflict_probe, dict):
+        raise ValueError(f"workflow '{workflow_id}' speculative.conflict_probe must be a mapping")
+    callable_name = conflict_probe.get("callable")
+    if not isinstance(callable_name, str) or not callable_name.strip():
+        raise ValueError(
+            f"workflow '{workflow_id}' speculative.conflict_probe.callable must be a non-empty string"
+        )
+    path_value = conflict_probe.get("path")
+    module_value = conflict_probe.get("module")
+    if path_value is None and module_value is None:
+        raise ValueError(
+            f"workflow '{workflow_id}' speculative.conflict_probe must define either path or module"
+        )
+    normalized_probe: dict[str, str] = {"callable": callable_name.strip()}
+    if path_value is not None:
+        if not isinstance(path_value, str) or not path_value.strip():
+            raise ValueError(
+                f"workflow '{workflow_id}' speculative.conflict_probe.path must be a non-empty string"
+            )
+        normalized_probe["path"] = path_value.strip()
+    if module_value is not None:
+        if not isinstance(module_value, str) or not module_value.strip():
+            raise ValueError(
+                f"workflow '{workflow_id}' speculative.conflict_probe.module must be a non-empty string"
+            )
+        normalized_probe["module"] = module_value.strip()
+
+    probe_delay_seconds = _require_int(
+        raw.get("probe_delay_seconds", 30),
+        f"workflow '{workflow_id}'.speculative.probe_delay_seconds",
+        minimum=0,
+    )
+    rollback_window_seconds = _require_int(
+        raw.get("rollback_window_seconds", 300),
+        f"workflow '{workflow_id}'.speculative.rollback_window_seconds",
+        minimum=1,
+    )
+    return SpeculativeWorkflowPolicy(
+        eligible=True,
+        compensating_workflow_id=compensating_workflow_id,
+        conflict_probe=normalized_probe,
+        probe_delay_seconds=probe_delay_seconds,
+        rollback_window_seconds=rollback_window_seconds,
+    )
+
+
 def infer_execution_class(workflow_id: str, workflow: dict[str, Any]) -> str:
     value = workflow.get("execution_class")
     if isinstance(value, str) and value in ALLOWED_EXECUTION_CLASSES:
@@ -174,12 +272,14 @@ def load_workflow_policy(
         raise ValueError(
             f"workflow '{workflow_id}' execution_class must be one of {sorted(ALLOWED_EXECUTION_CLASSES)}"
         )
+    speculative = _validate_speculative_payload(workflow_id, workflow, workflows)
     return WorkflowPolicy(
         workflow_id=workflow_id,
         execution_class=execution_class,
         live_impact=str(workflow.get("live_impact", "guest_live")),
         budget=WorkflowBudget(**normalized),
         workflow=workflow,
+        speculative=speculative,
     )
 
 

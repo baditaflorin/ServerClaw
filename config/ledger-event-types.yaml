@@ -8,10 +8,16 @@
 
 # Execution lifecycle
 - execution.started
+- execution.rejected
+- execution.escalated
 - execution.completed
 - execution.failed
 - execution.aborted
 - execution.budget_exceeded
+- execution.speculative_started
+- execution.speculative_probing
+- execution.speculative_committed
+- execution.speculative_rolled_back
 
 # Service mutations
 - service.deployed

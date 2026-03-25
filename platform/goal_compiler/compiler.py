@@ -103,6 +103,7 @@ class GoalCompiler:
         raw_input: str,
         *,
         dispatch_args: dict[str, Any] | None = None,
+        allow_speculative: bool = False,
         force_unsafe_health: bool = False,
         actor_id: str | None = None,
         autonomous: bool = False,
@@ -111,6 +112,7 @@ class GoalCompiler:
         direct_workflow = self._match_direct_workflow(
             normalized,
             dispatch_args=dispatch_args,
+            allow_speculative=allow_speculative,
             actor_id=actor_id,
             autonomous=autonomous,
             raw_input=raw_input,
@@ -126,6 +128,7 @@ class GoalCompiler:
                 direct_workflow = self._match_direct_workflow(
                     llm_normalized,
                     dispatch_args=dispatch_args,
+                    allow_speculative=allow_speculative,
                     actor_id=actor_id,
                     autonomous=autonomous,
                     raw_input=raw_input,
@@ -184,6 +187,12 @@ class GoalCompiler:
             ),
         )
         intent = self._with_resource_claims(intent, workflow_id=workflow_id, dispatch_payload=workflow_payload)
+        intent, workflow_payload = self._maybe_enable_speculative(
+            intent,
+            workflow_id=workflow_id,
+            dispatch_payload=workflow_payload,
+            allow_speculative=allow_speculative,
+        )
         if actor_id and workflow_id:
             self._enforce_policy(
                 actor_id=actor_id,
@@ -279,6 +288,7 @@ class GoalCompiler:
         normalized: str,
         *,
         dispatch_args: dict[str, Any] | None,
+        allow_speculative: bool,
         actor_id: str | None,
         autonomous: bool,
         raw_input: str,
@@ -308,6 +318,12 @@ class GoalCompiler:
             risk_score=RiskScore(source="workflow_catalog", value=RISK_SCORE[risk_class], reasons=["direct workflow invocation"]),
         )
         intent = self._with_resource_claims(intent, workflow_id=workflow_id, dispatch_payload=dispatch_args or {})
+        intent, dispatch_payload = self._maybe_enable_speculative(
+            intent,
+            workflow_id=workflow_id,
+            dispatch_payload=dispatch_args or {},
+            allow_speculative=allow_speculative,
+        )
         if actor_id:
             self._enforce_policy(
                 actor_id=actor_id,
@@ -321,7 +337,7 @@ class GoalCompiler:
             matched_rule_id="direct-workflow-id",
             normalized_input=normalized,
             dispatch_workflow_id=workflow_id,
-            dispatch_payload=dispatch_args or {},
+            dispatch_payload=dispatch_payload,
         )
 
     def _resolve_target(self, rule: GoalRule, captures: dict[str, str]) -> IntentTarget:
@@ -501,6 +517,36 @@ class GoalCompiler:
 
     def _utc_now(self) -> str:
         return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+    def _maybe_enable_speculative(
+        self,
+        intent: ExecutionIntent,
+        *,
+        workflow_id: str | None,
+        dispatch_payload: dict[str, Any],
+        allow_speculative: bool,
+    ) -> tuple[ExecutionIntent, dict[str, Any]]:
+        if not allow_speculative or not workflow_id:
+            return intent, dispatch_payload
+        workflow = self._load_workflow_catalog().get(workflow_id)
+        if not isinstance(workflow, dict):
+            return intent, dispatch_payload
+        speculative = workflow.get("speculative")
+        if not isinstance(speculative, dict) or not speculative.get("eligible"):
+            return intent, dispatch_payload
+        payload = dict(dispatch_payload)
+        payload["execution_mode"] = "speculative"
+        preconditions = list(intent.preconditions)
+        probe_delay_seconds = speculative.get("probe_delay_seconds", 30)
+        preconditions.append(f"speculative execution enabled with conflict probe at +{probe_delay_seconds}s")
+        updated = replace(
+            intent,
+            execution_mode="speculative",
+            compensating_workflow_id=str(speculative.get("compensating_workflow_id")),
+            rollback_window_seconds=int(speculative.get("rollback_window_seconds", 300)),
+            preconditions=preconditions,
+        )
+        return updated, payload
 
     def _with_resource_claims(
         self,

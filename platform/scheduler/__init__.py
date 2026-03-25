@@ -1,4 +1,12 @@
-from .budgets import HostTouchEstimate, WorkflowBudget, WorkflowPolicy, estimate_touched_hosts, load_default_budget, load_workflow_policy
+from .budgets import (
+    HostTouchEstimate,
+    SpeculativeWorkflowPolicy,
+    WorkflowBudget,
+    WorkflowPolicy,
+    estimate_touched_hosts,
+    load_default_budget,
+    load_workflow_policy,
+)
 from .rollback_guard import RollbackDepthResult, RollbackGuard
 from .scheduler import (
     BudgetedWorkflowScheduler,
@@ -8,6 +16,7 @@ from .scheduler import (
     SchedulerResult,
     build_scheduler,
 )
+from .speculative import ConflictProbeResult, SpeculativeExecutionRecord, SpeculativeStateStore
 from .watchdog import ActiveJobRecord, SchedulerStateStore, Watchdog, WatchdogViolation
 
 __all__ = [
@@ -21,6 +30,10 @@ __all__ = [
     "RollbackGuard",
     "SchedulerResult",
     "SchedulerStateStore",
+    "SpeculativeExecutionRecord",
+    "SpeculativeStateStore",
+    "SpeculativeWorkflowPolicy",
+    "ConflictProbeResult",
     "Watchdog",
     "WatchdogViolation",
     "WorkflowBudget",

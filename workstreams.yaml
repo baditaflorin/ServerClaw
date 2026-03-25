@@ -2702,5 +2702,28 @@ workstreams:
       - scripts/live_apply_receipts.py
       - scripts/promotion_pipeline.py
       - docs/runbooks/
+
+  - id: adr-0159-speculative-parallel-execution
+    adr: "0159"
+    title: Speculative parallel execution with compensating transactions
+    status: merged
+    owner: codex
+    branch: codex/live-apply-0159
+    worktree_path: ../proxmox_florin_server-live-apply-0159
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0159-speculative-parallel-execution.md
+    depends_on:
+      - adr-0115-mutation-ledger
+      - adr-0119-budgeted-workflow-scheduler
+      - adr-0124-platform-event-taxonomy
+      - adr-0127-intent-conflict-resolution
+    conflicts_with: []
+    shared_surfaces:
+      - platform/scheduler/
+      - platform/conflict/
+      - platform/goal_compiler/
+      - scripts/lv3_cli.py
+      - scripts/workflow_catalog.py
+      - config/ledger-event-types.yaml
+      - docs/runbooks/speculative-workflow-execution.md
     ready_to_merge: false
     live_applied: false

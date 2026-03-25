@@ -328,6 +328,7 @@ class IntentConflictRegistry:
         actor_intent_id: str,
         actor: str,
         ttl_seconds: int,
+        allow_conflicts: bool = False,
     ) -> ConflictCheckResult:
         candidate = self._candidate(intent, actor_intent_id=actor_intent_id, actor=actor, ttl_seconds=ttl_seconds)
         with self._locked_state() as state:
@@ -348,6 +349,19 @@ class IntentConflictRegistry:
                 )
             conflict = self._claim_conflict(state, candidate)
             if conflict is not None:
+                if allow_conflicts:
+                    active = state.setdefault("active", {})
+                    active[candidate.actor_intent_id] = candidate.as_dict()
+                    return ConflictCheckResult(
+                        status="speculative",
+                        resolution="allow_with_probe",
+                        conflicting_intent_id=conflict.actor_intent_id,
+                        conflicting_actor=conflict.actor,
+                        conflict_type="write_write",
+                        message=f"{conflict.workflow_id} already holds a conflicting claim",
+                        resource_claims=candidate.claims,
+                        warnings=warnings,
+                    )
                 return ConflictCheckResult(
                     status="conflict",
                     resolution="reject",
