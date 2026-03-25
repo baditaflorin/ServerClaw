@@ -1063,6 +1063,10 @@ def run_windmill_request(
     intent: Any | None = None,
     actor_id: str = DEFAULT_RUN_ACTOR_ID,
     autonomous: bool = False,
+    queue_if_conflicted: bool = False,
+    queue_priority: int | None = None,
+    queue_expires_in_seconds: int | None = None,
+    queue_notify_channel: str | None = None,
 ) -> int:
     service_map = load_service_map()
     base_url = windmill_url(service_map)
@@ -1097,13 +1101,28 @@ def run_windmill_request(
         workspace="lv3",
         repo_root=REPO_ROOT,
     )
-    scheduler_intent = intent or SimpleNamespace(
-        workflow_id=workflow_name,
-        arguments=payload,
-        target_service_id=payload.get("service") or payload.get("service_id"),
-        target_vm=payload.get("target_vm") or payload.get("target"),
-        required_lanes=[],
-    )
+    if intent is None:
+        scheduler_intent = SimpleNamespace(
+            workflow_id=workflow_name,
+            arguments=payload,
+            target_service_id=payload.get("service") or payload.get("service_id"),
+            target_vm=payload.get("target_vm") or payload.get("target"),
+            required_lanes=[],
+            queue_if_conflicted=queue_if_conflicted,
+            queue_priority=queue_priority,
+            queue_expires_in_seconds=queue_expires_in_seconds,
+            queue_notify_channel=queue_notify_channel,
+        )
+    elif queue_if_conflicted or queue_priority is not None or queue_expires_in_seconds is not None or queue_notify_channel:
+        scheduler_intent = SimpleNamespace(
+            **getattr(intent, "__dict__", {}),
+            queue_if_conflicted=queue_if_conflicted,
+            queue_priority=queue_priority,
+            queue_expires_in_seconds=queue_expires_in_seconds,
+            queue_notify_channel=queue_notify_channel,
+        )
+    else:
+        scheduler_intent = intent
     try:
         result = scheduler.submit(
             scheduler_intent,
@@ -1150,18 +1169,24 @@ def run_windmill_request(
         print(message, file=sys.stderr)
         return 0
     if result.status == "queued":
+        queued_payload = {
+            "status": "queued",
+            "workflow_id": workflow_name,
+            "queue_id": result.metadata.get("queue_id"),
+        }
+        for key in (
+            "primary_lane_id",
+            "required_lanes",
+            "queue_position",
+            "queue_depth",
+            "priority",
+            "queued_at",
+            "expires_at",
+        ):
+            if key in result.metadata:
+                queued_payload[key] = result.metadata.get(key)
         print(
-            json.dumps(
-                {
-                    "status": "queued",
-                    "workflow_id": workflow_name,
-                    "queue_id": result.metadata.get("queue_id"),
-                    "primary_lane_id": result.metadata.get("primary_lane_id"),
-                    "required_lanes": result.metadata.get("required_lanes", []),
-                },
-                indent=2,
-                sort_keys=True,
-            )
+            json.dumps(queued_payload, indent=2, sort_keys=True)
         )
         return 0
     warnings = result.metadata.get("conflict_warnings", []) if isinstance(result.metadata, dict) else []
@@ -1204,6 +1229,10 @@ def run_windmill_workflow(
     risk_override: bool = False,
     actor_id: str = DEFAULT_RUN_ACTOR_ID,
     autonomous: bool = False,
+    queue_if_conflicted: bool = False,
+    queue_priority: int | None = None,
+    queue_expires_in_seconds: int | None = None,
+    queue_notify_channel: str | None = None,
 ) -> int:
     intent = build_execution_intent(workflow_name, args)
     maybe_write_compiled_intent_event(intent)
@@ -1221,6 +1250,10 @@ def run_windmill_workflow(
         intent=intent,
         actor_id=actor_id,
         autonomous=autonomous,
+        queue_if_conflicted=queue_if_conflicted,
+        queue_priority=queue_priority,
+        queue_expires_in_seconds=queue_expires_in_seconds,
+        queue_notify_channel=queue_notify_channel,
     )
 
 
@@ -1240,6 +1273,10 @@ def run_compiled_instruction(
     force_unsafe_health: bool = False,
     actor_id: str = DEFAULT_RUN_ACTOR_ID,
     autonomous: bool = False,
+    queue_if_conflicted: bool = False,
+    queue_priority: int | None = None,
+    queue_expires_in_seconds: int | None = None,
+    queue_notify_channel: str | None = None,
 ) -> int:
     compiler = GoalCompiler(REPO_ROOT)
     ledger = LedgerWriter(
@@ -1299,6 +1336,10 @@ def run_compiled_instruction(
                 no_color=no_color,
                 actor_id=actor_id,
                 autonomous=autonomous,
+                queue_if_conflicted=queue_if_conflicted,
+                queue_priority=queue_priority,
+                queue_expires_in_seconds=queue_expires_in_seconds,
+                queue_notify_channel=queue_notify_channel,
             )
         return 0
 
@@ -1357,9 +1398,17 @@ def run_compiled_instruction(
             risk_class=result.intent.risk_class,
             required_read_surfaces=result.intent.required_read_surfaces,
             required_lanes=result.intent.required_lanes,
+            queue_if_conflicted=queue_if_conflicted,
+            queue_priority=queue_priority,
+            queue_expires_in_seconds=queue_expires_in_seconds,
+            queue_notify_channel=queue_notify_channel,
         ),
         actor_id=actor_id,
         autonomous=autonomous,
+        queue_if_conflicted=queue_if_conflicted,
+        queue_priority=queue_priority,
+        queue_expires_in_seconds=queue_expires_in_seconds,
+        queue_notify_channel=queue_notify_channel,
     )
 
 
@@ -2439,6 +2488,10 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--actor-id", default=DEFAULT_RUN_ACTOR_ID)
     run.add_argument("--autonomous", action="store_true", help="Apply autonomous agent policy bounds.")
     run.add_argument("--allow-speculative", action="store_true", help="Opt into speculative execution when eligible.")
+    run.add_argument("--queue-if-conflicted", action="store_true", help="Queue instead of failing when blocked by conflicts or workflow concurrency.")
+    run.add_argument("--queue-priority", type=int, help="Explicit ADR 0155 queue priority (lower is higher priority).")
+    run.add_argument("--queue-expires-in", dest="queue_expires_in_seconds", type=int, help="ADR 0155 queue TTL in seconds.")
+    run.add_argument("--queue-notify-channel", help="Notification channel recorded on the queued intent.")
     run.add_argument("--dry-run", action="store_true")
     run.add_argument("--explain", action="store_true")
 
@@ -2752,6 +2805,10 @@ def main(argv: list[str] | None = None) -> int:
                 risk_override=args.risk_override,
                 actor_id=args.actor_id,
                 autonomous=args.autonomous,
+                queue_if_conflicted=args.queue_if_conflicted,
+                queue_priority=args.queue_priority,
+                queue_expires_in_seconds=args.queue_expires_in_seconds,
+                queue_notify_channel=args.queue_notify_channel,
             )
         return run_compiled_instruction(
             instruction,
@@ -2763,6 +2820,10 @@ def main(argv: list[str] | None = None) -> int:
             force_unsafe_health=args.force_unsafe_health,
             actor_id=args.actor_id,
             autonomous=args.autonomous,
+            queue_if_conflicted=args.queue_if_conflicted,
+            queue_priority=args.queue_priority,
+            queue_expires_in_seconds=args.queue_expires_in_seconds,
+            queue_notify_channel=args.queue_notify_channel,
         )
     if args.command == "intent":
         if args.intent_action == "check":

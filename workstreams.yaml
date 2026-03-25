@@ -2874,6 +2874,33 @@ workstreams:
     ready_to_merge: false
     live_applied: true
 
+  - id: adr-0155-intent-queue-with-release-triggered-scheduling
+    adr: "0155"
+    title: Intent queue with release-triggered scheduling
+    status: merged
+    owner: codex
+    branch: codex/adr-0155-main-live
+    worktree_path: /private/tmp/proxmox_florin_server-main-0155-v2
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0155-intent-queue-with-release-triggered-scheduling.md
+    depends_on:
+      - adr-0044-windmill
+      - adr-0119-budgeted-workflow-scheduler
+      - adr-0127-intent-conflict-resolution
+      - adr-0154-vm-scoped-execution-lanes
+      - adr-0162-deadlock-detector
+    conflicts_with: []
+    shared_surfaces:
+      - platform/intent_queue/
+      - platform/scheduler/
+      - scripts/lv3_cli.py
+      - scripts/intent_queue_dispatcher.py
+      - config/windmill/scripts/
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/
+      - config/ledger-event-types.yaml
+      - docs/runbooks/intent-queue.md
+    ready_to_merge: false
+    live_applied: false
+
   - id: adr-0156-agent-session-workspace-isolation
     adr: "0156"
     title: Agent session workspace isolation

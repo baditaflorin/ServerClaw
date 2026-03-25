@@ -6,6 +6,7 @@
 - intent.deduplicated
 - intent.queued
 - intent.rejected
+- intent.dispatched
 - intent.expired
 
 # Execution lifecycle

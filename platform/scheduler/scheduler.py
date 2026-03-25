@@ -3,6 +3,8 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import subprocess
+import sys
 import time
 import urllib.error
 import urllib.parse
@@ -19,6 +21,7 @@ from platform.circuit import CircuitRegistry, should_count_urllib_exception
 from platform.conflict import IntentConflictRegistry
 from platform.goal_compiler.schema import RiskClass
 from platform.idempotency import IdempotencyStore, compute_idempotency_key
+from platform.intent_queue import SchedulerIntentQueueStore
 from platform.ledger import LedgerReader, LedgerWriter
 from platform.retry import policy_for_surface, with_retry
 from platform.timeouts import default_timeout, resolve_timeout_seconds
@@ -339,6 +342,7 @@ class BudgetedWorkflowScheduler:
         speculative_state_store: SpeculativeStateStore | None = None,
         lane_budget_store: FileLaneReservationStore | None = None,
         idempotency_store: IdempotencyStore | None = None,
+        intent_queue_store: SchedulerIntentQueueStore | None = None,
         poll_interval_seconds: float = 2.0,
         sleep_fn: Any = time.sleep,
     ) -> None:
@@ -361,6 +365,7 @@ class BudgetedWorkflowScheduler:
             self._repo_root / ".local" / "scheduler" / "lane-reservations.json"
         )
         self._idempotency_store = idempotency_store or IdempotencyStore(repo_root=self._repo_root)
+        self._intent_queue_store = intent_queue_store or SchedulerIntentQueueStore(repo_root=self._repo_root)
         self._watchdog = watchdog or Watchdog(
             windmill_client=windmill_client,
             state_store=self._state_store,
@@ -426,22 +431,41 @@ class BudgetedWorkflowScheduler:
         actor_intent_id: str,
         requested_by: str,
         queue_id: str,
-        primary_lane_id: str,
-        required_lanes: list[str],
+        primary_lane_id: str | None = None,
+        required_lanes: list[str] | None = None,
+        position: int | None = None,
+        reason: str | None = None,
+        queued_at: str | None = None,
+        expires_at: str | None = None,
+        priority: int | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         if self._ledger_writer is None:
             return
+        payload: dict[str, Any] = {"queue_id": queue_id}
+        if primary_lane_id is not None:
+            payload["primary_lane_id"] = primary_lane_id
+        if required_lanes is not None:
+            payload["required_lanes"] = required_lanes
+        if position is not None:
+            payload["queue_position"] = position
+        if reason is not None:
+            payload["reason"] = reason
+        if queued_at is not None:
+            payload["queued_at"] = queued_at
+        if expires_at is not None:
+            payload["expires_at"] = expires_at
+        if priority is not None:
+            payload["priority"] = priority
+        if metadata:
+            payload.update(metadata)
         self._ledger_writer.write(
             event_type="intent.queued",
             actor=requested_by,
             actor_intent_id=actor_intent_id,
             target_kind="workflow",
             target_id=policy.workflow_id,
-            metadata={
-                "queue_id": queue_id,
-                "primary_lane_id": primary_lane_id,
-                "required_lanes": required_lanes,
-            },
+            metadata=payload,
         )
 
     def _write_conflict_rejected_event(
@@ -638,6 +662,50 @@ class BudgetedWorkflowScheduler:
             return []
         return [str(item).strip() for item in value if isinstance(item, str) and str(item).strip()]
 
+    @staticmethod
+    def _queue_requested(intent: Any) -> bool:
+        return bool(getattr(intent, "queue_if_conflicted", False))
+
+    @staticmethod
+    def _queue_priority(intent: Any) -> int | None:
+        value = getattr(intent, "queue_priority", None)
+        if isinstance(value, int):
+            return value
+        if isinstance(value, str) and value.strip().lstrip("-").isdigit():
+            return int(value.strip())
+        return None
+
+    @staticmethod
+    def _queue_notify_channel(intent: Any) -> str | None:
+        value = getattr(intent, "queue_notify_channel", None)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+        return None
+
+    @staticmethod
+    def _queue_expiry_seconds(intent: Any, policy: WorkflowPolicy) -> int:
+        for field in ("queue_expires_in_seconds", "queue_ttl_seconds"):
+            value = getattr(intent, field, None)
+            if isinstance(value, int) and value > 0:
+                return value
+            if isinstance(value, str) and value.strip().isdigit():
+                return max(int(value.strip()), 1)
+        return max(policy.budget.max_duration_seconds * 3, 900)
+
+    @staticmethod
+    def _released_resource_hints(resource_claims: list[dict[str, Any]]) -> list[str]:
+        seen: set[str] = set()
+        hints: list[str] = []
+        for claim in resource_claims:
+            if not isinstance(claim, dict):
+                continue
+            resource = str(claim.get("resource", "")).strip()
+            if not resource or resource in seen:
+                continue
+            seen.add(resource)
+            hints.append(resource)
+        return hints
+
     def _required_lanes(self, intent: Any) -> list[str]:
         value = getattr(intent, "required_lanes", None)
         if isinstance(value, list):
@@ -695,6 +763,224 @@ class BudgetedWorkflowScheduler:
             "queued_examined": len(queued_entries),
             "dispatched": dispatched,
             "lane_state": self._lane_registry.snapshot(),
+        }
+
+    def _write_queue_terminal_event(
+        self,
+        *,
+        event_type: str,
+        actor_intent_id: str,
+        workflow_id: str,
+        requested_by: str,
+        queue_id: str,
+        metadata: dict[str, Any] | None = None,
+    ) -> None:
+        if self._ledger_writer is None:
+            return
+        payload = {"queue_id": queue_id}
+        if metadata:
+            payload.update(metadata)
+        self._ledger_writer.write(
+            event_type=event_type,
+            actor=requested_by,
+            actor_intent_id=actor_intent_id,
+            target_kind="workflow",
+            target_id=workflow_id,
+            metadata=payload,
+        )
+
+    def _enqueue_intent(
+        self,
+        *,
+        intent: Any,
+        policy: WorkflowPolicy,
+        actor_intent_id: str,
+        requested_by: str,
+        autonomous: bool,
+        reason: str,
+        last_conflict: str | None = None,
+    ) -> SchedulerResult:
+        queue_intent = SimpleNamespace(
+            actor_intent_id=actor_intent_id,
+            id=actor_intent_id,
+            intent_id=actor_intent_id,
+            workflow_id=getattr(intent, "workflow_id", policy.workflow_id),
+            arguments=getattr(intent, "arguments", {}) or {},
+            target_service_id=getattr(intent, "target_service_id", None),
+            target_vm=getattr(intent, "target_vm", None),
+            resource_claims=getattr(intent, "resource_claims", None),
+            required_read_surfaces=getattr(intent, "required_read_surfaces", []),
+            risk_class=getattr(intent, "risk_class", None),
+            final_risk_class=getattr(intent, "final_risk_class", None),
+            queue_if_conflicted=True,
+            queue_priority=getattr(intent, "queue_priority", None),
+            queue_expires_in_seconds=getattr(intent, "queue_expires_in_seconds", None),
+            queue_notify_channel=getattr(intent, "queue_notify_channel", None),
+        )
+        queued = self._intent_queue_store.enqueue(
+            queue_intent,
+            requested_by=requested_by,
+            autonomous=autonomous,
+            expires_in_seconds=self._queue_expiry_seconds(queue_intent, policy),
+            priority=self._queue_priority(queue_intent),
+            last_conflict=last_conflict or reason,
+            notify_channel=self._queue_notify_channel(queue_intent),
+        )
+        position = self._intent_queue_store.position_for(queued.queue_id)
+        stats = self._intent_queue_store.stats()
+        self._write_queued_event(
+            policy=policy,
+            actor_intent_id=actor_intent_id,
+            requested_by=requested_by,
+            queue_id=queued.queue_id,
+            position=position,
+            reason=reason,
+            queued_at=queued.queued_at,
+            expires_at=queued.expires_at,
+            priority=queued.priority,
+            metadata={"queue_depth": stats.get("depth")},
+        )
+        return SchedulerResult(
+            status="queued",
+            workflow_id=policy.workflow_id,
+            actor_intent_id=actor_intent_id,
+            reason=reason,
+            budget=policy.budget.as_dict(),
+            metadata={
+                "queue_id": queued.queue_id,
+                "queue_position": position,
+                "queue_depth": stats.get("depth"),
+                "priority": queued.priority,
+                "queued_at": queued.queued_at,
+                "expires_at": queued.expires_at,
+            },
+        )
+
+    def _spawn_queue_dispatcher(
+        self,
+        *,
+        resource_hints: list[str],
+        workflow_hints: list[str],
+        max_items: int = 5,
+    ) -> None:
+        script_path = self._repo_root / "scripts" / "intent_queue_dispatcher.py"
+        if not script_path.exists():
+            return
+        command = [sys.executable, str(script_path), "--repo-root", str(self._repo_root), "--max-items", str(max_items)]
+        for hint in resource_hints:
+            if hint:
+                command.extend(["--resource-hint", hint])
+        for hint in workflow_hints:
+            if hint:
+                command.extend(["--workflow-hint", hint])
+        try:
+            subprocess.Popen(
+                command,
+                cwd=self._repo_root,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                start_new_session=True,
+            )
+        except OSError:
+            return
+
+    def drain_queued_intents(
+        self,
+        *,
+        resource_hints: list[str] | None = None,
+        workflow_hints: list[str] | None = None,
+        max_items: int = 5,
+    ) -> dict[str, Any]:
+        expired = self._intent_queue_store.expire_waiting()
+        for item in expired:
+            self._write_queue_terminal_event(
+                event_type="intent.expired",
+                actor_intent_id=item.actor_intent_id,
+                workflow_id=item.workflow_id,
+                requested_by=item.requested_by,
+                queue_id=item.queue_id,
+                metadata={
+                    "expires_at": item.expires_at,
+                    "queued_at": item.queued_at,
+                    "reason": item.last_conflict or "queue TTL exceeded",
+                },
+            )
+
+        claimed = self._intent_queue_store.claim_ready(
+            resource_hints=resource_hints,
+            workflow_hints=workflow_hints,
+            limit=max(max_items, 1),
+        )
+        dispatched: list[dict[str, Any]] = []
+        for item in claimed:
+            try:
+                result = self.submit(
+                    item.as_scheduler_intent(),
+                    requested_by=item.requested_by,
+                    autonomous=item.autonomous,
+                    from_queue=True,
+                )
+            except Exception as exc:
+                self._intent_queue_store.requeue(item.queue_id, reason=str(exc))
+                dispatched.append(
+                    {
+                        "queue_id": item.queue_id,
+                        "workflow_id": item.workflow_id,
+                        "status": "requeued",
+                        "reason": str(exc),
+                    }
+                )
+                continue
+
+            if result.status in {"concurrency_limit", "conflict_rejected"}:
+                self._intent_queue_store.requeue(item.queue_id, reason=result.reason or result.status)
+                dispatched.append(
+                    {
+                        "queue_id": item.queue_id,
+                        "workflow_id": item.workflow_id,
+                        "status": "requeued",
+                        "scheduler_status": result.status,
+                        "reason": result.reason,
+                    }
+                )
+                continue
+
+            terminal_metadata = {
+                "scheduler_status": result.status,
+                "reason": result.reason,
+                "job_id": result.job_id,
+            }
+            if result.metadata:
+                terminal_metadata["scheduler_metadata"] = result.metadata
+            self._intent_queue_store.mark_dispatched(
+                item.queue_id,
+                completion_status=result.status,
+                metadata=terminal_metadata,
+            )
+            self._write_queue_terminal_event(
+                event_type="intent.dispatched",
+                actor_intent_id=item.actor_intent_id,
+                workflow_id=item.workflow_id,
+                requested_by=item.requested_by,
+                queue_id=item.queue_id,
+                metadata=terminal_metadata,
+            )
+            dispatched.append(
+                {
+                    "queue_id": item.queue_id,
+                    "workflow_id": item.workflow_id,
+                    "status": "dispatched",
+                    "scheduler_status": result.status,
+                    "job_id": result.job_id,
+                }
+            )
+
+        return {
+            "status": "ok",
+            "expired_count": len(expired),
+            "claimed_count": len(claimed),
+            "results": dispatched,
+            "queue": self._intent_queue_store.stats(),
         }
 
     @staticmethod
@@ -886,6 +1172,7 @@ class BudgetedWorkflowScheduler:
         wait_for_completion: bool = True,
         queue_if_lane_unavailable: bool = True,
         lane_lease: LaneLease | None = None,
+        from_queue: bool = False,
     ) -> SchedulerResult:
         policy = load_workflow_policy(intent.workflow_id, repo_root=self._repo_root)
         requested_by = normalize_actor_id(requested_by)
@@ -1041,6 +1328,9 @@ class BudgetedWorkflowScheduler:
         claim_closed = False
         release_lane_on_exit = False
         release_budget_on_exit = False
+        released_resource_hints: list[str] = []
+        released_workflow_hints: list[str] = []
+        conflict_result: Any | None = None
 
         try:
             if policy.execution_class == "mutation":
@@ -1108,6 +1398,17 @@ class BudgetedWorkflowScheduler:
                         max_instances=policy.budget.max_concurrent_instances,
                     )
                     if lock_token is None:
+                        if self._queue_requested(intent) and not from_queue:
+                            self._idempotency_store.delete(idempotency_key)
+                            return self._enqueue_intent(
+                                intent=intent,
+                                policy=policy,
+                                actor_intent_id=actor_intent_id,
+                                requested_by=requested_by,
+                                autonomous=autonomous,
+                                reason="workflow busy",
+                                last_conflict="concurrency_limit",
+                            )
                         self._idempotency_store.delete(idempotency_key)
                         return SchedulerResult(
                             status="concurrency_limit",
@@ -1151,8 +1452,6 @@ class BudgetedWorkflowScheduler:
                         )
                     release_budget_on_exit = True
 
-            if autonomous:
-                self._daily_execution_counter.increment(requested_by)
             conflict_result = self._conflict_registry.register_intent(
                 intent,
                 actor_intent_id=actor_intent_id,
@@ -1161,6 +1460,17 @@ class BudgetedWorkflowScheduler:
                 allow_conflicts=speculative_requested,
             )
             if conflict_result.status == "conflict":
+                if self._queue_requested(intent) and not speculative_requested and not from_queue:
+                    self._idempotency_store.delete(idempotency_key)
+                    return self._enqueue_intent(
+                        intent=intent,
+                        policy=policy,
+                        actor_intent_id=actor_intent_id,
+                        requested_by=requested_by,
+                        autonomous=autonomous,
+                        reason=conflict_result.message,
+                        last_conflict="conflict_rejected",
+                    )
                 self._idempotency_store.delete(idempotency_key)
                 self._write_conflict_rejected_event(
                     policy=policy,
@@ -1193,6 +1503,12 @@ class BudgetedWorkflowScheduler:
                     metadata=conflict_result.as_dict(),
                 )
             registered_claim = True
+            released_resource_hints = self._released_resource_hints(
+                [claim.as_dict() for claim in conflict_result.resource_claims]
+            )
+            released_workflow_hints = [policy.workflow_id]
+            if autonomous:
+                self._daily_execution_counter.increment(requested_by)
             self._write_claim_registered_event(
                 policy=policy,
                 actor_intent_id=actor_intent_id,
@@ -1546,6 +1862,13 @@ class BudgetedWorkflowScheduler:
                 self._lane_registry.release(actor_intent_id)
             if lock_token is not None:
                 lock_token.release()
+                if policy.workflow_id not in released_workflow_hints:
+                    released_workflow_hints.append(policy.workflow_id)
+            if released_resource_hints or released_workflow_hints:
+                self._spawn_queue_dispatcher(
+                    resource_hints=released_resource_hints,
+                    workflow_hints=released_workflow_hints,
+                )
 
 
 def build_scheduler(
