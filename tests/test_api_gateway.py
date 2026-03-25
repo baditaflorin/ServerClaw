@@ -298,6 +298,8 @@ circuits:
         issuer="https://sso.example.test/realms/lv3",
         expected_audience=None,
         nats_url=None,
+        nats_username=None,
+        nats_password=None,
         deploy_webhook_url=None,
         secret_rotation_webhook_url=None,
         openapi_include_upstreams=False,
@@ -366,6 +368,10 @@ def test_gateway_proxy_and_platform_endpoints(tmp_path: Path) -> None:
                     topology = await client.get("/v1/platform/topology", headers=headers)
                     assert topology.status_code == 200
                     assert "windmill" in topology.json()["service_topology"]
+
+                    agents = await client.get("/v1/platform/agents", headers=headers)
+                    assert agents.status_code == 200
+                    assert agents.json()["summary"]["count"] == 0
 
                     graph_nodes = await client.get("/v1/graph/nodes", headers=headers)
                     assert graph_nodes.status_code == 200

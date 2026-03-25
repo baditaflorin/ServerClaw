@@ -45,6 +45,7 @@ SNAPSHOT_PATH = repo_path("receipts", "ops-portal-snapshot.html")
 DRIFT_RECEIPTS_DIR = repo_path("receipts", "drift-reports")
 FIXTURE_RECEIPTS_DIR = repo_path("receipts", "fixtures")
 SECURITY_RECEIPTS_DIR = repo_path("receipts", "security-reports")
+AGENT_COORDINATION_RECEIPTS_DIR = repo_path("receipts", "agent-coordination")
 
 NAV = [
     ("index.html", "Service Map"),
@@ -258,6 +259,20 @@ def latest_drift_report() -> tuple[Path | None, dict[str, Any] | None]:
 def latest_security_report() -> tuple[Path | None, dict[str, Any] | None]:
     reports = sorted(
         SECURITY_RECEIPTS_DIR.glob("*.json"),
+        key=lambda path: path.stat().st_mtime,
+        reverse=True,
+    )
+    for report in reports:
+        try:
+            return report, load_json(report)
+        except Exception:  # noqa: BLE001
+            continue
+    return None, None
+
+
+def latest_agent_coordination_snapshot() -> tuple[Path | None, dict[str, Any] | None]:
+    reports = sorted(
+        AGENT_COORDINATION_RECEIPTS_DIR.glob("*.json"),
         key=lambda path: path.stat().st_mtime,
         reverse=True,
     )
@@ -799,6 +814,51 @@ def render_adrs() -> str:
 
 
 def render_agents(tools: list[dict[str, Any]]) -> str:
+    snapshot_path, snapshot_payload = latest_agent_coordination_snapshot()
+    coordination_panel = ""
+    if snapshot_path and isinstance(snapshot_payload, dict):
+        summary = snapshot_payload.get("summary", {})
+        entries = snapshot_payload.get("entries", [])
+        rows = []
+        if isinstance(entries, list):
+            for item in entries[:8]:
+                if not isinstance(item, dict):
+                    continue
+                rows.append(
+                    "<tr>"
+                    f"<td>{escape(str(item.get('agent_id', 'unknown')))}</td>"
+                    f"<td>{escape(str(item.get('current_phase', 'unknown')))}</td>"
+                    f"<td>{escape(str(item.get('current_target') or 'n/a'))}</td>"
+                    f"<td>{render_badge(str(item.get('status', 'unknown')), 'ok' if item.get('status') == 'active' else 'warn' if item.get('status') in {'blocked', 'escalated'} else 'neutral')}</td>"
+                    f"<td>{escape(str(item.get('last_heartbeat', 'n/a')))}</td>"
+                    "</tr>"
+                )
+        coordination_panel = (
+            '<section class="panel">'
+            '<div class="card-head">'
+            '<div><h2>Agent Coordination Map</h2><p class="muted">Latest recorded snapshot of active agent sessions.</p></div>'
+            f"<div>{render_badge(str(summary.get('count', 0)), 'neutral')}</div>"
+            "</div>"
+            '<div class="meta-list">'
+            f"<div><strong>Generated</strong><span>{escape(str(summary.get('generated_at', 'unknown')))}</span></div>"
+            f"<div><strong>Active</strong><span>{escape(summary.get('active', 0))}</span></div>"
+            f"<div><strong>Blocked</strong><span>{escape(summary.get('blocked', 0))}</span></div>"
+            f"<div><strong>Escalated</strong><span>{escape(summary.get('escalated', 0))}</span></div>"
+            "</div>"
+            f'<div class="chip-row">{render_external_link(repo_view_link(snapshot_path), "Snapshot Receipt")}</div>'
+            '<div class="table-scroll"><table>'
+            "<thead><tr><th>Agent</th><th>Phase</th><th>Target</th><th>Status</th><th>Heartbeat</th></tr></thead>"
+            f"<tbody>{''.join(rows) if rows else '<tr><td colspan=\"5\">No active sessions recorded.</td></tr>'}</tbody></table></div>"
+            "</section>"
+        )
+    else:
+        coordination_panel = (
+            '<section class="panel">'
+            '<div class="card-head"><div><h2>Agent Coordination Map</h2><p class="muted">No coordination snapshot receipt is committed yet.</p></div>'
+            f"<div>{render_badge('none', 'neutral')}</div></div>"
+            "</section>"
+        )
+
     cards = []
     for tool in sorted(tools, key=lambda item: (item["category"], item["name"])):
         cards.append(
@@ -821,7 +881,7 @@ def render_agents(tools: list[dict[str, Any]]) -> str:
             )
             + "</article>"
         )
-    return f'<section class="card-grid">{"".join(cards)}</section>'
+    return coordination_panel + f'<section class="card-grid">{"".join(cards)}</section>'
 
 
 def load_agent_registry_best_effort() -> tuple[dict[str, Any], dict[str, Any]]:

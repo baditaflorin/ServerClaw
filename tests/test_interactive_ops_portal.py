@@ -12,6 +12,7 @@ from scripts.ops_portal.app import PortalSettings, create_app, normalize_health
 class FakeGatewayClient:
     def __init__(self) -> None:
         self.platform_health_tokens: list[str | None] = []
+        self.agent_coordination_tokens: list[str | None] = []
         self.service_health_calls: list[dict[str, object]] = []
         self.deploy_calls: list[dict[str, object]] = []
         self.secret_calls: list[str] = []
@@ -25,6 +26,46 @@ class FakeGatewayClient:
                 {"service_id": "grafana", "status": "healthy", "detail": "Dashboards are green"},
                 {"service_id": "ops_portal", "status": "healthy", "detail": "Portal runtime is ready"},
             ]
+        }
+
+    async def fetch_agent_coordination(self, token: str | None = None) -> dict[str, object]:
+        self.agent_coordination_tokens.append(token)
+        return {
+            "summary": {
+                "count": 2,
+                "active": 1,
+                "blocked": 1,
+                "escalated": 0,
+                "completing": 0,
+                "generated_at": "2026-03-25T09:00:00Z",
+            },
+            "entries": [
+                {
+                    "agent_id": "agent/observation-loop",
+                    "session_label": "observation-loop wm-job-1",
+                    "current_phase": "executing",
+                    "current_target": "service:grafana",
+                    "current_workflow_id": "platform-observation-loop",
+                    "status": "active",
+                    "progress_pct": 0.5,
+                    "held_locks": ["service:grafana"],
+                    "held_lanes": [],
+                    "last_heartbeat": "2026-03-25T09:00:00Z",
+                    "started_at": "2026-03-25T08:58:00Z",
+                },
+                {
+                    "agent_id": "agent/triage-loop",
+                    "session_label": "triage-loop wm-job-2",
+                    "current_phase": "blocked",
+                    "current_target": "service:keycloak",
+                    "status": "blocked",
+                    "blocked_reason": "waiting for operator approval",
+                    "held_locks": [],
+                    "held_lanes": ["lane:identity"],
+                    "last_heartbeat": "2026-03-25T09:00:00Z",
+                    "started_at": "2026-03-25T08:57:30Z",
+                },
+            ],
         }
 
     async def fetch_service_health(self, service_id: str, token: str | None = None) -> dict[str, object]:
@@ -204,10 +245,13 @@ def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, F
     assert "Interactive Ops Portal" in response.text
     assert "Platform Overview" in response.text
     assert "Deployment Console" in response.text
+    assert "Agent Coordination" in response.text
+    assert "agent/observation-loop" in response.text
     assert "Search Fabric" in response.text
     assert "Runbook Launcher" in response.text
     assert "Recent Live Applies" in response.text
     assert gateway.platform_health_tokens == ["test-token"]
+    assert gateway.agent_coordination_tokens == ["test-token"]
 
 
 def test_dashboard_uses_same_origin_static_stylesheet(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:

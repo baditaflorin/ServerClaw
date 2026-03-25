@@ -1,0 +1,98 @@
+{% if coordination_warning %}
+<div class="banner warning">Agent coordination data is degraded: {{ coordination_warning }}</div>
+{% endif %}
+
+<div class="overview-grid">
+  <section class="panel summary-panel">
+    <div class="stat-block">
+      <span class="label">Sessions</span>
+      <strong>{{ coordination.summary.count }}</strong>
+    </div>
+    <div class="stat-block">
+      <span class="label">Active</span>
+      <strong>{{ coordination.summary.active }}</strong>
+    </div>
+    <div class="stat-block">
+      <span class="label">Blocked</span>
+      <strong>{{ coordination.summary.blocked }}</strong>
+    </div>
+    <div class="stat-block">
+      <span class="label">Escalated</span>
+      <strong>{{ coordination.summary.escalated }}</strong>
+    </div>
+  </section>
+
+  <section class="panel summary-panel">
+    <h3>Snapshot</h3>
+    <p class="muted">
+      {% if coordination.summary.generated_at %}
+      {{ coordination.summary.generated_at|humanize_timestamp }}
+      {% else %}
+      Not recorded
+      {% endif %}
+    </p>
+  </section>
+</div>
+
+<div class="service-grid">
+  {% if coordination.entries %}
+    {% for entry in coordination.entries %}
+    <article class="service-card">
+      <div class="service-head">
+        <div>
+          <p class="service-category">agent session</p>
+          <h3>{{ entry.agent_id }}</h3>
+          <p class="muted">{{ entry.session_label }}</p>
+        </div>
+        <span class="status-dot {{ entry.status|status_tone }}">{{ entry.status }}</span>
+      </div>
+
+      <dl class="service-meta">
+        <div>
+          <dt>Phase</dt>
+          <dd>{{ entry.current_phase }}</dd>
+        </div>
+        <div>
+          <dt>Target</dt>
+          <dd>{{ entry.current_target or "Not recorded" }}</dd>
+        </div>
+        <div>
+          <dt>Workflow</dt>
+          <dd>{{ entry.current_workflow_id or "Not recorded" }}</dd>
+        </div>
+        <div>
+          <dt>Heartbeat</dt>
+          <dd>{{ entry.last_heartbeat|humanize_timestamp }}</dd>
+        </div>
+      </dl>
+
+      {% if entry.progress_pct is not none %}
+      <div class="hint-strip">
+        <span>Progress {{ (entry.progress_pct * 100) | round(0) | int }}%</span>
+      </div>
+      {% endif %}
+
+      {% if entry.blocked_reason %}
+      <div class="hint-strip">
+        <span>{{ entry.blocked_reason }}</span>
+      </div>
+      {% endif %}
+
+      {% if entry.held_locks or entry.held_lanes %}
+      <div class="link-row">
+        {% if entry.held_locks %}
+        <span>Locks: {{ entry.held_locks|join(", ") }}</span>
+        {% endif %}
+        {% if entry.held_lanes %}
+        <span>Lanes: {{ entry.held_lanes|join(", ") }}</span>
+        {% endif %}
+      </div>
+      {% endif %}
+    </article>
+    {% endfor %}
+  {% else %}
+  <section class="panel">
+    <p class="muted">No active agent sessions are currently published in the coordination map.</p>
+  </section>
+  {% endif %}
+</div>

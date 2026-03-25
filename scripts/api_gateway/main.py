@@ -78,6 +78,7 @@ except Exception as exc:  # noqa: BLE001
         pass
 
     GRAPH_RUNTIME_IMPORT_ERROR = str(exc)
+from platform.agent import AgentCoordinationStore
 from platform.events import build_envelope
 from platform.health import HealthCompositeClient, ServiceHealthNotFoundError
 from platform.logging import clear_context, generate_trace_id, get_logger, set_context
@@ -181,6 +182,8 @@ class GatewayConfig:
     issuer: str | None
     expected_audience: str | None
     nats_url: str | None
+    nats_username: str | None
+    nats_password: str | None
     deploy_webhook_url: str | None
     secret_rotation_webhook_url: str | None
     openapi_include_upstreams: bool
@@ -400,6 +403,14 @@ class GatewayRuntime:
             else None,
         )
         self.internal_api_retry_policy = policy_for_surface("internal_api")
+        coordination_credentials = {}
+        if config.nats_username and config.nats_password:
+            coordination_credentials = {"user": config.nats_username, "password": config.nats_password}
+        self.coordination_store = AgentCoordinationStore(
+            repo_root=config.repo_root,
+            nats_url=config.nats_url,
+            nats_credentials=coordination_credentials,
+        )
         self.graph_client = None
         if config.graph_dsn and GRAPH_RUNTIME_IMPORT_ERROR is None:
             self.graph_client = DependencyGraphClient(
@@ -448,6 +459,9 @@ class GatewayRuntime:
             return None, None
         path = paths[-1]
         return path, json.loads(path.read_text())
+
+    def coordination_snapshot(self) -> dict[str, Any]:
+        return self.coordination_store.snapshot()
 
     def upstream_token(self, service: GatewayService) -> str | None:
         if not service.upstream_auth_env_var:
@@ -610,6 +624,8 @@ def build_config() -> GatewayConfig:
         issuer=os.environ.get("KEYCLOAK_ISSUER_URL", "https://sso.lv3.org/realms/lv3"),
         expected_audience=os.environ.get("KEYCLOAK_EXPECTED_AUDIENCE") or None,
         nats_url=os.environ.get("NATS_URL") or None,
+        nats_username=os.environ.get("LV3_NATS_USERNAME") or None,
+        nats_password=os.environ.get("LV3_NATS_PASSWORD") or None,
         deploy_webhook_url=os.environ.get("LV3_GATEWAY_DEPLOY_WEBHOOK_URL") or None,
         secret_rotation_webhook_url=os.environ.get("LV3_GATEWAY_SECRET_ROTATION_WEBHOOK_URL") or None,
         graph_dsn=os.environ.get("LV3_GATEWAY_GRAPH_DSN")
@@ -880,6 +896,19 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
             "service_topology": platform_vars.get("platform_service_topology", {}),
             "public_edge": platform_vars.get("public_edge_service_topology", {}),
         }
+
+    @app.get("/v1/platform/agents")
+    async def platform_agents(
+        request: Request,
+        identity: dict[str, Any] = Depends(require_identity),
+    ) -> dict[str, Any]:
+        started_at = time.perf_counter()
+        if not has_required_role(identity, "platform-read"):
+            raise HTTPException(status_code=403, detail="missing required role 'platform-read'")
+        runtime: GatewayRuntime = request.app.state.runtime
+        payload = await asyncio.to_thread(runtime.coordination_snapshot)
+        await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
+        return payload
 
     @app.get("/v1/search")
     async def platform_search(

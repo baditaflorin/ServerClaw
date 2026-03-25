@@ -3080,6 +3080,32 @@ workstreams:
       - Makefile
       - inventory/group_vars/all.yml
       - docs/runbooks/
+
+   - id: adr-0161-real-time-agent-coordination-map
+    adr: "0161"
+    title: Real-time agent coordination map
+    status: in_progress
+    owner: codex
+    branch: codex/adr-0161-real-time-agent-coordination-map
+    worktree_path: .worktrees/adr-0161-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0161-real-time-agent-coordination-map.md
+    depends_on:
+      - adr-0058-nats
+      - adr-0092-platform-api-gateway
+      - adr-0093-interactive-ops-portal
+      - adr-0126-observation-loop
+      - adr-0130-agent-state-persistence
+      - adr-0131-multi-agent-handoffs
+    conflicts_with: []
+    shared_surfaces:
+      - platform/agent
+      - platform/closure_loop
+      - scripts/api_gateway/main.py
+      - scripts/ops_portal
+      - scripts/generate_ops_portal.py
+      - config/windmill/scripts/platform-observation-loop.py
+      - receipts/agent-coordination
+      - docs/runbooks/agent-coordination-map.md
     ready_to_merge: false
     live_applied: false
 

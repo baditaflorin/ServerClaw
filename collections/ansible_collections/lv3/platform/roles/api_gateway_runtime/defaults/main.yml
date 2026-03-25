@@ -55,7 +55,10 @@ api_gateway_verify_client_secret_local_file: >-
     keycloak_agent_client_secret_local_file
     | default(api_gateway_repo_root ~ '/.local/keycloak/lv3-agent-hub-client-secret.txt')
   }}
-api_gateway_nats_url: ""
+api_gateway_nats_url: "nats://{{ api_gateway_service_topology.private_ip }}:4222"
+api_gateway_nats_username: jetstream-admin
+api_gateway_nats_password_local_file: "{{ api_gateway_repo_root }}/.local/nats/jetstream-admin-password.txt"
+api_gateway_nats_password: "{{ lookup('ansible.builtin.file', api_gateway_nats_password_local_file, errors='ignore') | trim }}"
 api_gateway_deploy_webhook_url: ""
 api_gateway_secret_rotation_webhook_url: ""
 api_gateway_include_upstream_openapi: false

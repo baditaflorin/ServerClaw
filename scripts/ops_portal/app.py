@@ -172,6 +172,9 @@ class GatewayClient:
     async def fetch_platform_health(self, token: str | None = None) -> dict[str, Any]:
         return await self._request("GET", "/v1/platform/health", token=token)
 
+    async def fetch_agent_coordination(self, token: str | None = None) -> dict[str, Any]:
+        return await self._request("GET", "/v1/platform/agents", token=token)
+
     async def fetch_service_health(self, service_id: str, token: str | None = None) -> dict[str, Any]:
         return await self._request("GET", f"/v1/platform/health/{service_id}", token=token)
 
@@ -381,7 +384,7 @@ def status_tone(status: str) -> str:
     value = status.lower()
     if value in {"healthy", "ok", "up", "success", "active"}:
         return "ok"
-    if value in {"warning", "warn", "degraded", "pending"}:
+    if value in {"warning", "warn", "degraded", "pending", "blocked", "escalated"}:
         return "warn"
     if value in {"critical", "down", "error", "failed"}:
         return "danger"
@@ -498,6 +501,52 @@ def build_runbook_models(workflows: list[dict[str, Any]]) -> list[dict[str, Any]
     return featured or workflows[:6]
 
 
+def normalize_agent_coordination(payload: dict[str, Any] | None) -> dict[str, Any]:
+    if not isinstance(payload, dict):
+        return {"summary": {"count": 0, "active": 0, "blocked": 0, "escalated": 0, "completing": 0}, "entries": []}
+    summary = payload.get("summary")
+    if not isinstance(summary, dict):
+        summary = {}
+    entries = payload.get("entries")
+    if not isinstance(entries, list):
+        entries = []
+
+    normalized_entries: list[dict[str, Any]] = []
+    for item in entries:
+        if not isinstance(item, dict):
+            continue
+        held_locks = item.get("held_locks")
+        held_lanes = item.get("held_lanes")
+        normalized_entries.append(
+            {
+                "agent_id": str(item.get("agent_id", "unknown")),
+                "session_label": str(item.get("session_label", "session")),
+                "current_phase": str(item.get("current_phase", "unknown")),
+                "current_target": item.get("current_target"),
+                "current_workflow_id": item.get("current_workflow_id"),
+                "status": str(item.get("status", "unknown")),
+                "blocked_reason": item.get("blocked_reason"),
+                "progress_pct": item.get("progress_pct"),
+                "held_locks": held_locks if isinstance(held_locks, list) else [],
+                "held_lanes": held_lanes if isinstance(held_lanes, list) else [],
+                "last_heartbeat": item.get("last_heartbeat"),
+                "started_at": item.get("started_at"),
+            }
+        )
+
+    return {
+        "summary": {
+            "count": int(summary.get("count", len(normalized_entries))),
+            "active": int(summary.get("active", 0)),
+            "blocked": int(summary.get("blocked", 0)),
+            "escalated": int(summary.get("escalated", 0)),
+            "completing": int(summary.get("completing", 0)),
+            "generated_at": summary.get("generated_at"),
+        },
+        "entries": normalized_entries,
+    }
+
+
 async def build_dashboard_context(request: Request) -> dict[str, Any]:
     session = await ensure_session(request)
     repository: PortalRepository = request.app.state.repository
@@ -516,8 +565,15 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         )
     except Exception as exc:  # noqa: BLE001
         health_payload = {"warning": str(exc)}
+    try:
+        coordination_payload = await gateway.fetch_agent_coordination(
+            token=read_api_token(session, request.app.state.settings),
+        )
+    except Exception as exc:  # noqa: BLE001
+        coordination_payload = {"warning": str(exc)}
 
     health = normalize_health(health_payload, services)
+    coordination = normalize_agent_coordination(coordination_payload)
     service_models = build_service_models(
         services,
         health,
@@ -541,6 +597,8 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         "drift_report": drift_report,
         "drift_summary": drift_summary,
         "health_warning": health_payload.get("warning") if isinstance(health_payload, dict) else None,
+        "coordination_warning": coordination_payload.get("warning") if isinstance(coordination_payload, dict) else None,
+        "coordination": coordination,
         "deployment_events": deployment_console_seed(),
         "generated_at": isoformat(utc_now()),
         "docs_base_url": request.app.state.settings.docs_base_url,
@@ -601,6 +659,11 @@ def create_app(
     async def drift_partial(request: Request) -> HTMLResponse:
         context = await build_dashboard_context(request)
         return templates.TemplateResponse(request=request, name="partials/drift.html", context=context)
+
+    @app.get("/partials/agents", response_class=HTMLResponse)
+    async def agents_partial(request: Request) -> HTMLResponse:
+        context = await build_dashboard_context(request)
+        return templates.TemplateResponse(request=request, name="partials/agents.html", context=context)
 
     @app.get("/partials/runbooks", response_class=HTMLResponse)
     async def runbooks_partial(request: Request) -> HTMLResponse:
