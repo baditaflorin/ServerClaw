@@ -16,12 +16,6 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urljoin, urlparse
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
-    del sys.modules["platform"]
-
 import httpx
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
@@ -29,8 +23,24 @@ from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+
+def discover_repo_root(module_file: Path | None = None) -> Path:
+    current_file = (module_file or Path(__file__)).resolve()
+    for candidate in current_file.parents:
+        platform_init = candidate / "platform" / "__init__.py"
+        packaged_gateway = candidate / "api_gateway" / "main.py"
+        source_gateway = candidate / "scripts" / "api_gateway" / "main.py"
+        if platform_init.exists() and (packaged_gateway.exists() or source_gateway.exists()):
+            return candidate
+    raise RuntimeError(f"unable to discover repo root for {current_file}")
+
+
+REPO_ROOT = discover_repo_root()
 REPO_PLATFORM_ROOT = REPO_ROOT / "platform"
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
+    del sys.modules["platform"]
 
 
 def _load_repo_platform_package() -> None:

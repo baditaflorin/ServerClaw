@@ -16,7 +16,7 @@ SCRIPTS_DIR = REPO_ROOT / "scripts"
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
-from api_gateway.main import GatewayConfig, GatewayRuntime, NatsEventEmitter, create_app  # noqa: E402
+from api_gateway.main import GatewayConfig, GatewayRuntime, NatsEventEmitter, create_app, discover_repo_root  # noqa: E402
 from platform.degradation import DegradationStateStore  # noqa: E402
 
 
@@ -51,6 +51,28 @@ def write_json(path: Path, payload: dict) -> None:
 def write_yaml(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content)
+
+
+def test_discover_repo_root_accepts_source_tree_layout(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    (repo_root / "platform").mkdir(parents=True)
+    (repo_root / "platform" / "__init__.py").write_text("")
+    (repo_root / "scripts" / "api_gateway").mkdir(parents=True)
+    module_file = repo_root / "scripts" / "api_gateway" / "main.py"
+    module_file.write_text("")
+
+    assert discover_repo_root(module_file) == repo_root
+
+
+def test_discover_repo_root_accepts_packaged_layout(tmp_path: Path) -> None:
+    package_root = tmp_path / "app"
+    (package_root / "platform").mkdir(parents=True)
+    (package_root / "platform" / "__init__.py").write_text("")
+    (package_root / "api_gateway").mkdir(parents=True)
+    module_file = package_root / "api_gateway" / "main.py"
+    module_file.write_text("")
+
+    assert discover_repo_root(module_file) == package_root
 
 
 def prepare_graph_db(path: Path) -> str:
