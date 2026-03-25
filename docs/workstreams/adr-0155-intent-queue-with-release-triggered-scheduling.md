@@ -2,9 +2,9 @@
 
 - ADR: [ADR 0155](../adr/0155-intent-queue-with-release-triggered-scheduling.md)
 - Title: Queue workflow-busy and conflict-blocked intents behind a durable scheduler queue with dispatcher replay and Windmill safety scheduling
-- Status: merged
+- Status: live_applied
 - Implemented In Repo Version: 0.158.0
-- Implemented In Platform Version: not yet
+- Implemented In Platform Version: 0.130.7
 - Implemented On: 2026-03-25
 - Branch: `codex/adr-0155-main-live`
 - Worktree: `/private/tmp/proxmox_florin_server-main-0155-v2`
@@ -61,8 +61,13 @@
 - Windmill seeds the dispatcher script and enabled minute safety schedule
 - the runbook explains queue state paths and the manual dispatcher entrypoint
 
+## Outcome
+
+- repository implementation completed in `0.158.0`
+- platform version advanced to `0.130.7` after the 2026-03-25 Windmill live apply succeeded
+- production Windmill now seeds `f/lv3/intent_queue_dispatcher`, enables `f/lv3/intent_queue_dispatcher_every_minute`, and carries the dispatcher files in the deployed worker checkout
+
 ## Notes For The Next Assistant
 
 - the current `main` branch already has ADR 0154 lane queueing; keep that queue distinct from the ADR 0155 scheduler intent queue
 - the current `platform/intent_queue/store.py` is still used by ADR 0162 deadlock detection and should not be repurposed
-- do not mark this workstream `live_applied` or bump `platform_version` until the merged Windmill runtime converge and script/schedule verification are complete

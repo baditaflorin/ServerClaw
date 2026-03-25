@@ -2904,7 +2904,7 @@ workstreams:
   - id: adr-0155-intent-queue-with-release-triggered-scheduling
     adr: "0155"
     title: Intent queue with release-triggered scheduling
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0155-main-live
     worktree_path: /private/tmp/proxmox_florin_server-main-0155-v2
@@ -2926,7 +2926,7 @@ workstreams:
       - config/ledger-event-types.yaml
       - docs/runbooks/intent-queue.md
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0156-agent-session-workspace-isolation
     adr: "0156"
