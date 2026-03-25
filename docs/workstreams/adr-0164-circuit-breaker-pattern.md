@@ -2,9 +2,9 @@
 
 - ADR: [ADR 0164](../adr/0164-circuit-breaker-pattern-for-external-service-calls.md)
 - Title: Shared circuit policies and fail-fast dependency guards for Keycloak, Windmill, Ollama, and gateway NATS publishing
-- Status: merged
+- Status: live_applied
 - Implemented In Repo Version: 0.152.0
-- Implemented In Platform Version: not yet
+- Implemented In Platform Version: 0.130.5
 - Implemented On: 2026-03-25
 - Branch: `codex/live-apply-0164`
 - Worktree: `.worktrees/live-apply-0164`
@@ -49,7 +49,7 @@
 
 ## Expected Live Surfaces
 
-- none claimed yet; the repository now contains the converge-ready gateway wiring and the shared circuit package, but no live receipt is recorded in this workstream
+- `docker-runtime-lv3` API gateway runtime with repo-managed circuit policies and the packaged gateway `platform`, `config`, plus `scripts` surfaces required by the live circuit-aware startup path
 
 ## Verification
 
@@ -69,4 +69,4 @@
 
 - repository implementation is complete in release `0.152.0`
 - the circuit layer now protects Keycloak JWKS fetches, gateway upstream calls, NATS request-event publishing, the shared LLM client, and the Windmill scheduler and runbook executor paths
-- platform version remains unchanged until a live deployment is converged from `main` and captured with a receipt
+- live apply completed on `docker-runtime-lv3` in platform version `0.130.5` with receipt `2026-03-25-adr-0164-circuit-breaker-live-apply`

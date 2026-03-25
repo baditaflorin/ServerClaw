@@ -43,7 +43,7 @@ workstreams:
   - id: adr-0162-deadlock-detector
     adr: "0162"
     title: Distributed deadlock detection and resolution
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0162-deadlock-detector
     worktree_path: .worktrees/adr-0162-deadlock-detector
@@ -61,7 +61,7 @@ workstreams:
       - collections/ansible_collections/lv3/platform/roles/windmill_runtime/
       - config/event-taxonomy.yaml
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0138-published-artifact-secret-scanning
     adr: "0138"
@@ -2980,7 +2980,7 @@ workstreams:
   - id: adr-0164-circuit-breaker-pattern
     adr: "0164"
     title: Circuit breaker pattern for external service calls
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/live-apply-0164
     worktree_path: .worktrees/live-apply-0164
@@ -3002,7 +3002,7 @@ workstreams:
       - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime
       - docs/runbooks/circuit-breaker-operations.md
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0165-workflow-idempotency
     adr: "0165"

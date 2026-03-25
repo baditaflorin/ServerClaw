@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-25-adr-0164-circuit-breaker-live-apply",
+  "applied_on": "2026-03-25",
+  "recorded_on": "2026-03-25",
+  "recorded_at": "2026-03-25T14:37:20Z",
+  "recorded_by": "codex",
+  "source_commit": "8c41f43ca3d222283fe690f8f07b064fbcf9ec9d",
+  "repo_version_context": "0.156.0",
+  "workflow_id": "converge-api-gateway",
+  "adr": "0164",
+  "summary": "Applied ADR 0164 live on docker-runtime-lv3 by fixing the API gateway runtime packaging so the shared circuit-breaker-enabled gateway stack can import the repo platform package, the repo config tree, and the repo scripts tree without crashing at startup.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Gateway health endpoint on docker-runtime-lv3",
+      "result": "pass",
+      "observed": "`curl http://127.0.0.1:8083/healthz` returned `HTTP/1.1 200 OK` with `{\"status\":\"ok\"}` after the rebuilt container started with the repo `platform`, `config`, and `scripts` surfaces available."
+    },
+    {
+      "check": "Authenticated API surface is serving requests",
+      "result": "pass",
+      "observed": "`curl http://127.0.0.1:8083/v1/health` returned `401 {\"detail\":\"missing bearer token\"}`, which confirms the live gateway is routing authenticated API paths instead of crashing during startup."
+    },
+    {
+      "check": "Runtime mounts include repo config for packaged platform modules",
+      "result": "pass",
+      "observed": "`docker inspect api-gateway` showed `/config /opt/api-gateway/config`, `/app/config /opt/api-gateway/config`, and `/data /opt/api-gateway/data`, matching the runtime packaging needed for circuit policy and ledger/event taxonomy lookups."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0164-circuit-breaker-pattern-for-external-service-calls.md",
+    "docs/workstreams/adr-0164-circuit-breaker-pattern.md",
+    "docs/runbooks/circuit-breaker-operations.md",
+    "docs/runbooks/configure-api-gateway.md",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "The first controller-side `ansible-playbook playbooks/api-gateway.yml` attempt on current `main` failed because the inventory still points `proxmox_florin` at the stale Tailscale IP `100.118.189.95`; the live converge used the working Proxmox jump path through `ops@100.64.0.1` instead.",
+    "Repeated full-role reruns over the jump path dropped SSH during the large recursive `platform/` sync, so the final live apply completed by streaming the exact repo-managed gateway files from the worktree into `/opt/api-gateway/service` and rebuilding the compose-managed `api-gateway` container in place.",
+    "The live runtime packaging fix had three parts: resolve repo root correctly inside the container layout, expose the repo config tree at both `/config` and `/app/config`, and bake the full repo `scripts/` tree into the image so transitive imports such as `maintenance_window_tool` and `mutation_audit` resolve at startup."
+  ]
+}
