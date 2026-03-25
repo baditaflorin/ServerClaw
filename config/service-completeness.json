@@ -77,6 +77,13 @@
       "requires_compose_secrets": false,
       "suppression_preset": "legacy-service"
     },
+    "dozzle": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": false,
+      "requires_secrets": false,
+      "requires_compose_secrets": false
+    },
     "gitea": {
       "service_type": "compose",
       "requires_subdomain": true,

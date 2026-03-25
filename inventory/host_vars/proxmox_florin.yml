@@ -41,6 +41,8 @@ platform_port_assignments:
   netbox_server_port: 8082
   netbox_host_proxy_port: 8004
   langfuse_port: 3002
+  dozzle_http_port: 8089
+  dozzle_agent_port: 7007
   ollama_api_port: 11434
   n8n_port: 5678
   open_webui_port: 8088
@@ -417,8 +419,28 @@ network_policy:
         - source: nginx-lv3
           protocol: tcp
           ports:
+            - 8089
+          description: Reverse proxy access to the Dozzle hub
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
             - 8083
           description: Edge access to the unified platform API gateway
+        - source: monitoring-lv3
+          protocol: tcp
+          ports:
+            - 8089
+          description: Private monitoring probes for the Dozzle hub
+        - source: docker-build-lv3
+          protocol: tcp
+          ports:
+            - 7007
+          description: Dozzle agent reachability from the hub host
+        - source: monitoring-lv3
+          protocol: tcp
+          ports:
+            - 7007
+          description: Dozzle agent reachability from the hub host
         - source: monitoring-lv3
           protocol: tcp
           ports:
@@ -432,6 +454,11 @@ network_policy:
           ports:
             - 22
           description: Operator and Ansible SSH access
+        - source: docker-runtime-lv3
+          protocol: tcp
+          ports:
+            - 7007
+          description: Dozzle hub access to the docker-build agent
     monitoring-lv3:
       allowed_inbound:
         - source: management
@@ -456,6 +483,11 @@ network_policy:
           ports:
             - 4318
           description: Mail platform OTLP trace export
+        - source: docker-runtime-lv3
+          protocol: tcp
+          ports:
+            - 7007
+          description: Dozzle hub access to the monitoring agent
         - source: nginx-lv3
           protocol: tcp
           ports:
@@ -914,6 +946,11 @@ lv3_service_topology:
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
     public_hostname: langfuse.lv3.org
+  dozzle:
+    service_name: dozzle
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: logs.lv3.org
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -922,6 +959,7 @@ lv3_service_topology:
       managed: true
       visibility: public
       name: langfuse
+      name: logs
       type: A
       target: "{{ management_ipv4 }}"
       ttl: 60
@@ -931,6 +969,28 @@ lv3_service_topology:
       noindex: true
       kind: proxy
       upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.langfuse_port }}"
+  dozzle:
+    service_name: dozzle
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: logs.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: logs
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      server_sent_events: true
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.dozzle_http_port }}"
   open_webui:
     service_name: open-webui
     owning_vm: docker-runtime-lv3

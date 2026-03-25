@@ -57,6 +57,15 @@
       "adr": "0023"
     },
     {
+      "id": "dozzle",
+      "service": "dozzle",
+      "name": "Dozzle",
+      "vm": "docker-runtime-lv3",
+      "tier": 1,
+      "category": "observability",
+      "adr": "0150"
+    },
+    {
       "id": "docs_portal",
       "service": "docs_portal",
       "name": "Developer Portal",
@@ -336,6 +345,18 @@
       "to": "nginx_edge",
       "type": "hard",
       "description": "The generated developer portal is published as static content on nginx-lv3."
+    },
+    {
+      "from": "dozzle",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Authenticated browser access to logs.lv3.org depends on the shared Keycloak-backed edge auth path, but the private hub remains reachable for controlled operator verification."
+    },
+    {
+      "from": "dozzle",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public operator access to logs.lv3.org depends on the shared NGINX edge publication while the private runtime remains reachable inside the guest network."
     },
     {
       "from": "gitea",

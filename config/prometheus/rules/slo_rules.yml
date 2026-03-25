@@ -114,6 +114,61 @@ groups:
           slo_id: grafana-availability
           service_id: grafana
           indicator: availability
+      - record: slo:dozzle_availability:success_ratio_5m
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="dozzle-availability"}[5m])
+        labels:
+          slo_id: dozzle-availability
+          service_id: dozzle
+          indicator: availability
+      - record: slo:dozzle_availability:success_ratio_1h
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="dozzle-availability"}[1h])
+        labels:
+          slo_id: dozzle-availability
+          service_id: dozzle
+          indicator: availability
+      - record: slo:dozzle_availability:success_ratio_30d
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="dozzle-availability"}[30d])
+        labels:
+          slo_id: dozzle-availability
+          service_id: dozzle
+          indicator: availability
+      - record: slo:dozzle_availability:error_rate_5m
+        expr: 1 - slo:dozzle_availability:success_ratio_5m
+        labels:
+          slo_id: dozzle-availability
+          service_id: dozzle
+          indicator: availability
+      - record: slo:dozzle_availability:error_rate_1h
+        expr: 1 - slo:dozzle_availability:success_ratio_1h
+        labels:
+          slo_id: dozzle-availability
+          service_id: dozzle
+          indicator: availability
+      - record: slo:dozzle_availability:error_rate_30d
+        expr: 1 - slo:dozzle_availability:success_ratio_30d
+        labels:
+          slo_id: dozzle-availability
+          service_id: dozzle
+          indicator: availability
+      - record: slo:dozzle_availability:budget_remaining
+        expr: clamp_min(1 - (slo:dozzle_availability:error_rate_30d / 0.010000), 0)
+        labels:
+          slo_id: dozzle-availability
+          service_id: dozzle
+          indicator: availability
+      - record: slo:dozzle_availability:burn_rate_1h
+        expr: slo:dozzle_availability:error_rate_1h / 0.010000
+        labels:
+          slo_id: dozzle-availability
+          service_id: dozzle
+          indicator: availability
+      - record: slo:dozzle_availability:time_to_budget_exhaustion_days
+        expr: (slo:dozzle_availability:budget_remaining * 30) / clamp_min(slo:dozzle_availability:burn_rate_1h,
+          0.001)
+        labels:
+          slo_id: dozzle-availability
+          service_id: dozzle
+          indicator: availability
       - record: slo:gitea_availability:success_ratio_5m
         expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="gitea-availability"}[5m])
         labels:

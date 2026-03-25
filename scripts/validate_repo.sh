@@ -234,6 +234,7 @@ validate_health_probes() {
   local roles=(
     alertmanager_runtime
     docker_runtime
+    dozzle_runtime
     postgres_vm
     monitoring_vm
     backup_vm

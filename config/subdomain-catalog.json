@@ -54,6 +54,12 @@
       "owner_adr": "0041",
       "allowed_fqdns": ["mail.lv3.org"],
       "notes": "Reserved for the primary platform mail surface."
+    },
+    {
+      "prefix": "logs",
+      "owner_adr": "0150",
+      "allowed_fqdns": ["logs.lv3.org"],
+      "notes": "Reserved for the Dozzle real-time container log surface."
     }
   ],
   "subdomains": [
@@ -187,6 +193,23 @@
         "cert_path": "/etc/letsencrypt/live/lv3-edge/",
         "auto_renew": true
       }
+    },
+    {
+      "fqdn": "logs.lv3.org",
+      "service_id": "dozzle",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0150",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
     },
     {
       "fqdn": "git.lv3.org",

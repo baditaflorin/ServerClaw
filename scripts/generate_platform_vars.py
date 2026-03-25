@@ -44,6 +44,11 @@ PORT_KEYS = (
     "netbox_server_port",
     "netbox_host_proxy_port",
     "langfuse_port",
+    "dozzle_http_port",
+    "dozzle_agent_port",
+    "langfuse_port",
+    "dozzle_http_port",
+    "dozzle_agent_port",
     "ollama_api_port",
     "n8n_port",
     "open_webui_port",
@@ -303,6 +308,15 @@ def build_service_urls(
     elif service_id == "langfuse":
         urls["internal"] = service_url("http", private_ip, ports["langfuse_port"])
         port_map["internal"] = ports["langfuse_port"]
+    elif service_id == "dozzle":
+        urls["internal"] = service_url("http", private_ip, ports["dozzle_http_port"])
+        port_map["internal"] = ports["dozzle_http_port"]
+    elif service_id == "langfuse":
+        urls["internal"] = service_url("http", private_ip, ports["langfuse_port"])
+        port_map["internal"] = ports["langfuse_port"]
+    elif service_id == "dozzle":
+        urls["internal"] = service_url("http", private_ip, ports["dozzle_http_port"])
+        port_map["internal"] = ports["dozzle_http_port"]
     elif service_id == "ollama":
         urls["internal"] = service_url("http", private_ip, ports["ollama_api_port"])
         port_map["internal"] = ports["ollama_api_port"]

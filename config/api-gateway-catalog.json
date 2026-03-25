@@ -3,6 +3,17 @@
   "schema_version": "1.0.0",
   "services": [
     {
+      "id": "dozzle",
+      "name": "Dozzle",
+      "upstream": "http://10.10.10.20:8089",
+      "gateway_prefix": "/v1/dozzle",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 60,
+      "healthcheck_path": "/healthcheck"
+    },
+    {
       "id": "grafana",
       "name": "Grafana",
       "upstream": "http://10.10.10.40:3000",

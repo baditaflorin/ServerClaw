@@ -277,6 +277,37 @@
       "live_tracking_expected": true
     },
     {
+      "fqdn": "logs.lv3.org",
+      "service_id": "dozzle",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0150",
+      "dns_record_type": "A",
+      "route_mode": "edge",
+      "route_source": "service_topology",
+      "route_kind": "proxy",
+      "edge_auth": "oauth2_proxy",
+      "unauthenticated_paths": [],
+      "unauthenticated_prefix_paths": [],
+      "repo_route_service_id": "dozzle",
+      "repo_route_metadata": {
+        "enabled": true,
+        "tls": true,
+        "server_sent_events": true,
+        "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.dozzle_http_port }}"
+      },
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "live_tracking_expected": true
+    },
+    {
       "fqdn": "mail.lv3.org",
       "service_id": "mail_platform",
       "environment": "production",
@@ -635,12 +666,12 @@
     }
   ],
   "summary": {
-    "catalog_total": 21,
-    "active_total": 17,
-    "active_public_dns_total": 15,
+    "catalog_total": 22,
+    "active_total": 18,
+    "active_public_dns_total": 16,
     "active_private_total": 2,
     "planned_total": 4,
-    "edge_total": 14,
-    "edge_oidc_total": 5
+    "edge_total": 15,
+    "edge_oidc_total": 6
   }
 }

@@ -124,6 +124,7 @@ server {
 {% set protected_site = public_edge_authenticated_sites[site.hostname] if site.hostname in public_edge_authenticated_sites else none %}
 {% set proxy_hide_headers = site.proxy_hide_headers | default([]) %}
 {% set blocked_exact_paths = site.blocked_exact_paths | default([]) %}
+{% set server_sent_events = site.server_sent_events | default(false) %}
 server {
     listen 80;
     listen [::]:80;
@@ -163,11 +164,18 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Forwarded-Host $host;
         proxy_set_header X-Forwarded-Port $server_port;
+{% if server_sent_events %}
+        proxy_set_header Connection '';
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 3600s;
+{% else %}
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
         proxy_redirect http:// https://;
         proxy_buffering off;
         proxy_read_timeout 300s;
+{% endif %}
     }
 
 {% endif %}
@@ -181,11 +189,18 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Forwarded-Host $host;
         proxy_set_header X-Forwarded-Port $server_port;
+{% if server_sent_events %}
+        proxy_set_header Connection '';
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 3600s;
+{% else %}
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
         proxy_redirect http:// https://;
         proxy_buffering off;
         proxy_read_timeout 300s;
+{% endif %}
     }
 {% else %}
     location / {
@@ -296,11 +311,18 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Forwarded-Host $host;
         proxy_set_header X-Forwarded-Port $server_port;
+{% if server_sent_events %}
+        proxy_set_header Connection '';
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 3600s;
+{% else %}
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
         proxy_redirect http:// https://;
         proxy_buffering off;
         proxy_read_timeout 300s;
+{% endif %}
 {% for header_name in proxy_hide_headers %}
         proxy_hide_header {{ header_name }};
 {% endfor %}
@@ -327,11 +349,18 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Forwarded-Host $host;
         proxy_set_header X-Forwarded-Port $server_port;
+{% if server_sent_events %}
+        proxy_set_header Connection '';
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 3600s;
+{% else %}
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
         proxy_redirect http:// https://;
         proxy_buffering off;
         proxy_read_timeout 300s;
+{% endif %}
 {% for header_name in proxy_hide_headers %}
         proxy_hide_header {{ header_name }};
 {% endfor %}

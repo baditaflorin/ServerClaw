@@ -128,6 +128,19 @@
     ]
   },
   {
+    "name": "Dozzle Private",
+    "type": "http",
+    "url": "http://10.10.10.20:8089/healthcheck",
+    "description": "Private Dozzle healthcheck on docker-runtime-lv3.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
     "name": "Uptime Kuma Public",
     "type": "http",
     "url": "https://uptime.lv3.org",

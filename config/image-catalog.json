@@ -42,6 +42,28 @@
         "converge-mail-platform"
       ]
     },
+    "dozzle_runtime": {
+      "kind": "runtime",
+      "service_id": "dozzle",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "dozzle",
+      "registry_ref": "docker.io/amir20/dozzle",
+      "tag": "v10.2.0",
+      "digest": "sha256:35da6eb0ce33dc413d85017877121e82b1626f9247c4fb2acf1f19427cbf47c7",
+      "ref": "docker.io/amir20/dozzle:v10.2.0@sha256:35da6eb0ce33dc413d85017877121e82b1626f9247c4fb2acf1f19427cbf47c7",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-25",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-25-dozzle-runtime.json",
+      "consumers": [
+        "roles/dozzle_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-dozzle"
+      ]
+    },
     "netbox_redis_runtime": {
       "kind": "runtime",
       "service_id": "netbox",

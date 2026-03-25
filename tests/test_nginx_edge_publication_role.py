@@ -68,9 +68,14 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
             protected_sites["n8n.lv3.org"]["unauthenticated_prefix_paths"],
             ["/webhook/", "/webhook-test/", "/webhook-waiting/"],
         )
+        self.assertEqual(
+            sorted(protected_sites),
+            ["changelog.lv3.org", "docs.lv3.org", "logs.lv3.org", "n8n.lv3.org", "ops.lv3.org"],
+        )
         self.assertEqual(protected_sites["ops.lv3.org"]["unauthenticated_paths"], ["/health"])
         self.assertNotIn("unauthenticated_paths", protected_sites["docs.lv3.org"])
         self.assertNotIn("unauthenticated_paths", protected_sites["changelog.lv3.org"])
+        self.assertNotIn("unauthenticated_paths", protected_sites["logs.lv3.org"])
 
     def test_tasks_include_dns_hetzner_plugin_and_credentials_flow(self) -> None:
         task_names = {task["name"] for task in self.tasks}
@@ -111,9 +116,11 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertEqual(security_defaults["x_content_type_options"], "nosniff")
         self.assertIn("frame-ancestors 'none'", security_defaults["content_security_policy"])
         self.assertIn("grafana.lv3.org", security_overrides)
+        self.assertIn("logs.lv3.org", security_overrides)
         self.assertIn("'unsafe-eval'", security_overrides["grafana.lv3.org"]["content_security_policy"])
         self.assertIn("wss://n8n.lv3.org", security_overrides["n8n.lv3.org"]["content_security_policy"])
         self.assertIn("https://fonts.googleapis.com", security_overrides["docs.lv3.org"]["content_security_policy"])
+        self.assertIn("https://cdn.jsdelivr.net", security_overrides["logs.lv3.org"]["content_security_policy"])
         self.assertIn("https://unpkg.com", security_overrides["ops.lv3.org"]["content_security_policy"])
 
     def test_template_supports_root_proxy_path_override(self) -> None:
@@ -134,9 +141,11 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
     def test_template_supports_proxy_header_stripping_and_blocked_paths(self) -> None:
         self.assertIn("site.proxy_hide_headers | default([])", self.template)
         self.assertIn("site.blocked_exact_paths | default([])", self.template)
+        self.assertIn("site.server_sent_events | default(false)", self.template)
         self.assertIn("proxy_hide_header {{ header_name }};", self.template)
         self.assertIn("protected_site.unauthenticated_prefix_paths | default([])", self.template)
         self.assertIn("location ^~ {{ path }} {", self.template)
+        self.assertIn("proxy_buffering off;", self.template)
 
     def test_template_renders_security_headers_from_default_and_override_maps(self) -> None:
         self.assertIn("public_edge_security_headers_default | combine(", self.template)

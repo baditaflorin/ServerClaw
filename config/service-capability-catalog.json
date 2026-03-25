@@ -733,6 +733,38 @@
       }
     },
     {
+      "id": "dozzle",
+      "name": "Dozzle",
+      "description": "Repo-managed real-time container log hub across the Docker guests.",
+      "category": "observability",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8089",
+      "public_url": "https://logs.lv3.org",
+      "subdomain": "logs.lv3.org",
+      "exposure": "edge-published",
+      "health_probe_id": "dozzle",
+      "image_catalog_ids": [
+        "dozzle_runtime"
+      ],
+      "adr": "0150",
+      "runbook": "docs/runbooks/configure-dozzle.md",
+      "tags": [
+        "logs",
+        "docker",
+        "realtime",
+        "observability"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://logs.lv3.org",
+          "subdomain": "logs.lv3.org"
+        }
+      }
+    },
+    {
       "id": "platform_context_api",
       "name": "Platform Context API",
       "description": "Private retrieval-augmented query API for repository and platform context.",

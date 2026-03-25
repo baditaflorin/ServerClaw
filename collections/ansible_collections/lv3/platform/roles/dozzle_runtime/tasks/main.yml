@@ -1,0 +1,98 @@
+---
+- name: Validate Dozzle runtime inputs
+  ansible.builtin.assert:
+    that:
+      - dozzle_runtime_site_dir | length > 0
+      - dozzle_runtime_compose_file | length > 0
+      - dozzle_runtime_image | length > 0
+      - dozzle_runtime_hub_container_name | length > 0
+      - dozzle_runtime_agent_container_name | length > 0
+      - dozzle_runtime_hub_port | int > 0
+      - dozzle_runtime_agent_port | int > 0
+      - dozzle_runtime_hub_inventory_host | length > 0
+      - dozzle_runtime_agent_inventory_hosts | length > 0
+    fail_msg: "dozzle_runtime requires the runtime paths, image reference, and hub or agent host settings."
+
+- name: Ensure the Dozzle runtime directory exists
+  ansible.builtin.file:
+    path: "{{ dozzle_runtime_site_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Initialize the Dozzle remote agent list
+  ansible.builtin.set_fact:
+    dozzle_runtime_remote_agents: "{{ ['dozzle-agent:' ~ (dozzle_runtime_agent_port | string)] if dozzle_runtime_is_hub else [] }}"
+
+- name: Add remote Dozzle agents for non-hub inventory hosts
+  ansible.builtin.set_fact:
+    dozzle_runtime_remote_agents: >-
+      {{
+        dozzle_runtime_remote_agents
+        + [hostvars[item].ansible_host ~ ':' ~ (dozzle_runtime_agent_port | string)]
+      }}
+  loop: "{{ dozzle_runtime_agent_inventory_hosts }}"
+  when:
+    - dozzle_runtime_is_hub
+    - item != inventory_hostname
+
+- name: Render the Dozzle compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ dozzle_runtime_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the Dozzle image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ dozzle_runtime_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ dozzle_runtime_site_dir }}"
+  register: dozzle_runtime_pull
+  changed_when: >-
+    'Pulling' in dozzle_runtime_pull.stdout
+    or 'Downloaded newer image' in dozzle_runtime_pull.stdout
+    or 'Pull complete' in dozzle_runtime_pull.stdout
+
+- name: Start the Dozzle runtime stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ dozzle_runtime_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ dozzle_runtime_site_dir }}"
+  register: dozzle_runtime_up
+  changed_when: >-
+    'Creating' in dozzle_runtime_up.stdout
+    or 'Recreating' in dozzle_runtime_up.stdout
+    or 'Starting' in dozzle_runtime_up.stdout
+
+- name: Wait for the Dozzle agent listener
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ dozzle_runtime_agent_port }}"
+    delay: 0
+    timeout: 180
+
+- name: Wait for the Dozzle hub listener on the hub node
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ dozzle_runtime_hub_port }}"
+    delay: 0
+    timeout: 180
+  when: dozzle_runtime_is_hub
+
+- name: Verify the Dozzle runtime
+  ansible.builtin.import_tasks: verify.yml

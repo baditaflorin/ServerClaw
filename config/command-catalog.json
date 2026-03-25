@@ -1556,6 +1556,40 @@
         ]
       }
     },
+    "converge-dozzle": {
+      "description": "Converge the Dozzle hub, remote agents, authenticated edge publication, and governed API route for real-time container log access.",
+      "workflow_id": "converge-dozzle",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-dozzle passes",
+        "make validate passes before the apply",
+        "The Dozzle agent topology, edge auth boundary, and network-policy exposure are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the hub healthcheck, remote agent-test results, and the authenticated edge publication verification for logs.lv3.org."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the Dozzle hub, any declared remote agent, or the shared edge publication fails to converge.",
+          "Stop if the rollout would expose the service outside the intended authenticated edge or private guest-network access boundary."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good Dozzle runtime and edge publication state before retrying.",
+          "Do not leave behind ad hoc compose, firewall, or NGINX changes after a failed rollout."
+        ]
+      }
+    },
     "converge-ntfy": {
       "description": "Converge the private ntfy paging gateway and the repo-managed Alertmanager credential on docker-runtime-lv3.",
       "workflow_id": "converge-ntfy",

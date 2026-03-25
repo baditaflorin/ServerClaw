@@ -24,6 +24,16 @@
       "description": "Grafana remains reachable through the public LV3 edge."
     },
     {
+      "id": "dozzle-availability",
+      "service_id": "dozzle",
+      "indicator": "availability",
+      "objective_percent": 99.0,
+      "window_days": 30,
+      "target_url": "http://10.10.10.20:8089/healthcheck",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The Dozzle hub remains reachable on the private runtime network for real-time container log access."
+    },
+    {
       "id": "gitea-availability",
       "service_id": "gitea",
       "indicator": "availability",

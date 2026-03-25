@@ -48,6 +48,22 @@
       "notes": "Operational logs may contain internal IP addresses, usernames, and error details."
     },
     {
+      "id": "dozzle-live-log-stream",
+      "service": "dozzle",
+      "name": "Dozzle live log stream cache",
+      "class": "internal",
+      "retention_days": null,
+      "backup_included": false,
+      "access_role": "platform-read",
+      "pii_risk": "medium",
+      "locations": [
+        "Docker stdout and stderr log buffers on docker-runtime-lv3",
+        "Docker stdout and stderr log buffers on docker-build-lv3",
+        "Docker stdout and stderr log buffers on monitoring-lv3"
+      ],
+      "notes": "Dozzle is read-only and does not persist its own datastore; it exposes recent container log buffers from the managed Docker hosts for real-time debugging."
+    },
+    {
       "id": "tempo-traces",
       "service": "grafana",
       "name": "Tempo trace blocks",

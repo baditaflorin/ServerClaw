@@ -536,6 +536,46 @@
         }
       }
     },
+    "dozzle": {
+      "service_name": "dozzle",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "dozzle_runtime",
+      "verify_file": "roles/dozzle_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The Dozzle hub healthcheck responds on the local listener.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8089/healthcheck",
+        "method": "GET",
+        "expected_status": [200]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The Dozzle hub responds on the local healthcheck endpoint.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8089/healthcheck",
+        "method": "GET",
+        "expected_status": [200]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Dozzle Private",
+          "type": "http",
+          "url": "http://10.10.10.20:8089/healthcheck",
+          "description": "Private Dozzle healthcheck on docker-runtime-lv3.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": ["200-299"]
+        }
+      }
+    },
     "uptime_kuma": {
       "service_name": "uptime-kuma",
       "owning_vm": "docker-runtime-lv3",
