@@ -165,6 +165,7 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "--skip-branch-validation" in tasks
     assert "WM_TOKEN" in tasks
     assert "Build the local staging archive for the Windmill worker checkout" in tasks
+    assert "changed_when: false" in tasks
     assert "Expand the staged Windmill worker checkout on the guest" in tasks
     assert "windmill_worker_checkout_repo_root_local_dir" in tasks
     assert "windmill_worker_checkout_sync_paths" in tasks

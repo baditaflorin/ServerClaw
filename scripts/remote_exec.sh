@@ -174,6 +174,11 @@ build_ssh_command() {
   fi
 }
 
+worktree_git_checkout() {
+  [[ -f "$REPO_ROOT/.git" ]] || return 1
+  grep -q '^gitdir:' "$REPO_ROOT/.git"
+}
+
 quote_shell() {
   printf "%q" "$1"
 }
@@ -304,11 +309,95 @@ ensure_remote_workspace() {
   "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "mkdir -p $(quote_shell "$WORKSPACE_ROOT")" >/dev/null
 }
 
+remote_remove_paths() {
+  "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "rm -rf $* || sudo -n rm -rf $*" >/dev/null
+}
+
+prune_remote_workspace_stale_paths() {
+  local stale_paths=("$WORKSPACE_ROOT/.git-remote")
+
+  if [[ ! -e "$REPO_ROOT/scripts/cases" ]]; then
+    stale_paths+=("$WORKSPACE_ROOT/scripts/cases")
+  fi
+
+  remote_remove_paths "$(printf '%q ' "${stale_paths[@]}")"
+}
+
+sync_worktree_git_metadata() {
+  local ssh_wrapper="$1"
+  local remote_git_root="$WORKSPACE_ROOT/.git-remote"
+  local worktree_git_dir=""
+  local common_git_dir=""
+  local worktree_path=""
+  local common_path=""
+  local worktree_paths=(
+    HEAD
+    index
+    ORIG_HEAD
+    logs/HEAD
+    config.worktree
+  )
+  local common_paths=(
+    config
+    packed-refs
+    refs
+    info
+    shallow
+  )
+
+  worktree_git_checkout || return 0
+
+  worktree_git_dir="$(git -C "$REPO_ROOT" rev-parse --path-format=absolute --git-dir)"
+  common_git_dir="$(git -C "$REPO_ROOT" rev-parse --path-format=absolute --git-common-dir)"
+
+  remote_remove_paths "$(quote_shell "$remote_git_root")"
+  "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" \
+    "mkdir -p $(quote_shell "$remote_git_root/worktree") $(quote_shell "$remote_git_root/common")" \
+    >/dev/null
+
+  for worktree_path in "${worktree_paths[@]}"; do
+    [[ -e "$worktree_git_dir/$worktree_path" ]] || continue
+    (
+      cd "$worktree_git_dir"
+      "$RSYNC_BIN" \
+        --archive \
+        --relative \
+        -e "$ssh_wrapper" \
+        "./$worktree_path" \
+        "$REMOTE_HOST:$remote_git_root/worktree/"
+    ) || return $?
+  done
+
+  for common_path in "${common_paths[@]}"; do
+    [[ -e "$common_git_dir/$common_path" ]] || continue
+    (
+      cd "$common_git_dir"
+      "$RSYNC_BIN" \
+        --archive \
+        --relative \
+        -e "$ssh_wrapper" \
+        "./$common_path" \
+        "$REMOTE_HOST:$remote_git_root/common/"
+    ) || return $?
+  done
+
+  "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" \
+    "printf '%s\n' '../common' > $(quote_shell "$remote_git_root/worktree/commondir") && printf '%s\n' '../../.git' > $(quote_shell "$remote_git_root/worktree/gitdir") && printf '%s\n' 'gitdir: .git-remote/worktree' > $(quote_shell "$WORKSPACE_ROOT/.git")" \
+    >/dev/null
+}
+
 sync_workspace() {
   local dry_run="${1:-false}"
   local rc=0
   local ssh_wrapper=""
-  local rsync_args=("--archive" "--checksum" "--delete" "--exclude-from=$RSYNC_EXCLUDE_FILE")
+  local rsync_args=(
+    "--archive"
+    "--checksum"
+    "--delete"
+    "--force"
+    "--exclude=.git-remote/"
+    "--exclude-from=$RSYNC_EXCLUDE_FILE"
+  )
 
   [[ "$dry_run" == "true" ]] && rsync_args+=("--dry-run" "--verbose")
 
@@ -321,11 +410,20 @@ sync_workspace() {
   } > "$ssh_wrapper"
   chmod 700 "$ssh_wrapper"
 
+  prune_remote_workspace_stale_paths || {
+    rm -f "$ssh_wrapper"
+    return $?
+  }
+
   "$RSYNC_BIN" \
     "${rsync_args[@]}" \
     -e "$ssh_wrapper" \
     "$REPO_ROOT/" \
     "$REMOTE_HOST:$WORKSPACE_ROOT/" || rc=$?
+
+  if [[ "$rc" -eq 0 ]]; then
+    sync_worktree_git_metadata "$ssh_wrapper" || rc=$?
+  fi
 
   rm -f "$ssh_wrapper"
   return "$rc"
