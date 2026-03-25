@@ -2347,6 +2347,29 @@ workstreams:
     ready_to_merge: false
     live_applied: false
 
+  - id: adr-0129-runbook-automation-executor
+    adr: "0129"
+    title: Runbook automation executor
+    status: merged
+    owner: codex
+    branch: codex/adr-0129-runbook-automation-executor
+    worktree_path: .worktrees/adr-0129
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0129-runbook-automation-executor.md
+    depends_on:
+      - adr-0044-windmill
+      - adr-0066-mutation-audit-log
+      - adr-0090-platform-cli
+      - adr-0119-budgeted-workflow-scheduler
+    conflicts_with: []
+    shared_surfaces:
+      - scripts/runbook_executor.py
+      - scripts/lv3_cli.py
+      - config/windmill/scripts/
+      - config/workflow-catalog.json
+      - docs/runbooks/
+    ready_to_merge: true
+    live_applied: false
+
   - id: adr-0131-agent-handoff-protocol
     adr: "0131"
     title: Multi-agent handoff protocol

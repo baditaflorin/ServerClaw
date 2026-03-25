@@ -85,6 +85,7 @@ The repository now also ships ADR 0131 multi-agent handoffs: `platform.handoff`,
 The developer portal generator now stamps published docs pages with sensitivity metadata, keeps `RESTRICTED` ADRs and runbooks summary-only in portal output, and leaves `CONFIDENTIAL` documents source-only until a dedicated admin-view path exists.
 Portal access is now authentication-by-default on the live platform: `ops.lv3.org`, `docs.lv3.org`, and `changelog.lv3.org` are gated by the shared Keycloak edge auth flow, and Grafana no longer serves anonymous dashboards.
 The repository now also ships ADR 0142 public-surface security scanning: `make public-surface-security-scan ENV=production` writes structured receipts under `receipts/security-scan/`, uses `testssl.sh` and `nuclei` container runners for the live public HTTP or HTTPS surface, and can publish high or critical findings on `platform.security.*`; the live weekly schedule still requires apply from `main`.
+The repository now also ships ADR 0129 runbook automation: structured YAML, JSON, and Markdown-front-matter runbooks can execute through `lv3 runbook`, persist resumable run state under `.local/runbooks/runs/`, and reuse the current Windmill plus mutation-audit surfaces.
 
 <!-- BEGIN GENERATED: platform-status -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_status_docs.py). Do not edit this block by hand.

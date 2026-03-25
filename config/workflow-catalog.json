@@ -303,6 +303,55 @@
         "escalation_action": "abort_silently"
       }
     },
+    "runbook-executor": {
+      "description": "Execute one structured runbook definition from YAML, JSON, or Markdown front matter, persist the step trace, and support resume after escalation.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "runbook-executor",
+        "command": "make runbook-executor RUNBOOK_EXECUTOR_ARGS='execute renew-certificate --param service=grafana'"
+      },
+      "preflight": {
+        "required": false,
+        "required_secret_ids": [
+          "windmill_superadmin_secret"
+        ]
+      },
+      "validation_targets": [
+        "validate-data-models"
+      ],
+      "live_impact": "repo_only",
+      "owner_runbook": "docs/runbooks/runbook-automation-executor.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/windmill/scripts/runbook-executor.py",
+        "docs/adr/0129-runbook-automation-executor.md",
+        "docs/runbooks/runbook-automation-executor.md",
+        "scripts/lv3_cli.py",
+        "scripts/runbook_executor.py",
+        "tests/test_lv3_cli.py",
+        "tests/test_runbook_executor.py",
+        "tests/test_runbook_executor_windmill.py"
+      ],
+      "outputs": [
+        "A persisted run record under .local/runbooks/runs/<run_id>.json together with mutation-audit events for start, resume, completion, and failed or escalated steps."
+      ],
+      "verification_commands": [
+        "uv run --with pytest --with pyyaml pytest tests/test_runbook_executor.py tests/test_runbook_executor_windmill.py tests/test_lv3_cli.py -q",
+        "uv run --with pyyaml python scripts/lv3_cli.py runbook execute docs/runbooks/renew-certificate.yaml --args service=grafana --dry-run",
+        "python3 -m py_compile scripts/runbook_executor.py config/windmill/scripts/runbook-executor.py"
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 200,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 0,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "abort_silently"
+      }
+    },
     "triage-calibration": {
       "description": "Calibrate ADR 0114 rule precision and recall against resolved incident cases and publish the weekly summary.",
       "lifecycle_status": "active",
