@@ -1,0 +1,8 @@
+{
+  "created_at": "2026-03-25T06:54:34.905023+00:00",
+  "bypass": "skip_remote_gate",
+  "reason": "ADR 0136 main push after rebase refresh; remote pre-push gate failed on unrelated packer-validate and schema-validation checks (unknown Make target platform-observation-loop). Focused ADR 0136 tests, syntax checks, live apply, security headers audit, curl probes, and nmap header checks passed on the integrated branch.",
+  "source": "manual",
+  "branch": "codex/integration-0136-main-v7",
+  "commit": "c14a25252dc1e1ac586c05bcb5a10fa881330f1b"
+}
