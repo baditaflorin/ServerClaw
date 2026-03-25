@@ -3,8 +3,8 @@
 - ADR: [ADR 0132](../adr/0132-self-describing-platform-manifest.md)
 - Title: Repo-generated platform manifest with schema validation, CLI access, and committed artifact output
 - Status: merged
-- Implemented In Repo Version: 0.121.0
-- Implemented On: 2026-03-24
+- Implemented In Repo Version: 0.140.0
+- Implemented On: 2026-03-25
 - Branch: `codex/adr-0132-platform-manifest-v2`
 - Worktree: `.worktrees/adr-0132-v2`
 - Owner: codex

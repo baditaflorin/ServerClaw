@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.121.0",
-  "platform_version": "0.105.0",
-  "generated_at": "2026-03-24T22:12:27Z",
-  "next_refresh_at": "2026-03-24T23:12:27Z",
+  "repo_version": "0.140.0",
+  "platform_version": "0.130.1",
+  "generated_at": "2026-03-25T06:21:18Z",
+  "next_refresh_at": "2026-03-25T07:21:18Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -81,7 +81,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://grafana.lv3.org",
-        "last_live_apply": "2026-03-23T00:00:00Z",
+        "last_live_apply": "2026-03-24T00:00:00Z",
         "slo_status": "unknown"
       },
       "keycloak": {
@@ -370,7 +370,7 @@
       },
       {
         "id": "close-maintenance-window",
-        "description": "Close one ADR 0080 maintenance window and emit the matching maintenance.closed or maintenance.force_closed event.",
+        "description": "Close one ADR 0080 maintenance window and emit the matching platform.maintenance.closed or platform.maintenance.force_closed event.",
         "tags": [
           "close-maintenance-window",
           "external-live",
@@ -1504,6 +1504,31 @@
         "runbook": "docs/runbooks/packer-vm-templates.md"
       },
       {
+        "id": "platform-observation-loop",
+        "description": "Run the ADR 0126 observation-to-action closure loop over one batch of observation findings and persist per-service loop runs.",
+        "tags": [
+          "diagnostic",
+          "platform-observation-loop",
+          "repo-only",
+          "validated"
+        ],
+        "risk_class": "LOW",
+        "automation_eligible": true,
+        "agent_trust_required": "T1",
+        "execution_class": "diagnostic",
+        "live_impact": "repo_only",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 0,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "abort_silently"
+        },
+        "runbook": "docs/runbooks/observation-to-action-closure-loop.md"
+      },
+      {
         "id": "portainer-manage",
         "description": "Run governed Portainer API actions such as listing containers, reading logs, or restarting one container through the repo-managed wrapper.",
         "tags": [
@@ -1758,6 +1783,31 @@
         "runbook": "docs/runbooks/incident-triage-engine.md"
       },
       {
+        "id": "runbook-executor",
+        "description": "Execute one structured runbook definition from YAML, JSON, or Markdown front matter, persist the step trace, and support resume after escalation.",
+        "tags": [
+          "diagnostic",
+          "repo-only",
+          "runbook-executor",
+          "validated"
+        ],
+        "risk_class": "LOW",
+        "automation_eligible": true,
+        "agent_trust_required": "T1",
+        "execution_class": "diagnostic",
+        "live_impact": "repo_only",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 200,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 0,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "abort_silently"
+        },
+        "runbook": "docs/runbooks/runbook-automation-executor.md"
+      },
+      {
         "id": "scheduler-watchdog-loop",
         "description": "Run one ADR 0119 watchdog pass over active mutation jobs and cancel budget violations.",
         "tags": [
@@ -1807,6 +1857,32 @@
           "escalation_action": "abort_silently"
         },
         "runbook": "docs/runbooks/security-posture-reporting.md"
+      },
+      {
+        "id": "subdomain-exposure-audit",
+        "description": "Run the ADR 0139 subdomain exposure registry audit, check live DNS and edge auth behavior, and store one receipt.",
+        "tags": [
+          "diagnostic",
+          "guest-live",
+          "preflight",
+          "subdomain-exposure-audit",
+          "validated"
+        ],
+        "risk_class": "MEDIUM",
+        "automation_eligible": true,
+        "agent_trust_required": "T2",
+        "execution_class": "diagnostic",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 120,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "abort_silently"
+        },
+        "runbook": "docs/runbooks/subdomain-exposure-audit.md"
       },
       {
         "id": "sync-operators",
@@ -1959,6 +2035,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/capacity-model.md"
+      },
+      {
+        "id": "weekly-security-scan",
+        "description": "Run the ADR 0142 public-surface security scan, store a receipt, and publish high or critical findings.",
+        "tags": [
+          "diagnostic",
+          "preflight",
+          "repo-only",
+          "validated",
+          "weekly-security-scan"
+        ],
+        "risk_class": "LOW",
+        "automation_eligible": true,
+        "agent_trust_required": "T1",
+        "execution_class": "diagnostic",
+        "live_impact": "repo_only",
+        "budget": {
+          "max_duration_seconds": 3600,
+          "max_steps": 200,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 0,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "abort_silently"
+        },
+        "runbook": "docs/runbooks/public-surface-security-scan.md"
       }
     ],
     "automation_eligible_runbooks": [
@@ -2370,6 +2472,16 @@
         ]
       },
       {
+        "id": "observation-to-action-closure-loop",
+        "title": "Observation-to-Action Closure Loop",
+        "agent_trust_required": "T1",
+        "steps": 0,
+        "path": "docs/runbooks/observation-to-action-closure-loop.md",
+        "workflow_ids": [
+          "platform-observation-loop"
+        ]
+      },
+      {
         "id": "operator-offboarding",
         "title": "Operator Offboarding",
         "agent_trust_required": "T3",
@@ -2442,6 +2554,16 @@
         ]
       },
       {
+        "id": "public-surface-security-scan",
+        "title": "Public Surface Security Scan",
+        "agent_trust_required": "T1",
+        "steps": 6,
+        "path": "docs/runbooks/public-surface-security-scan.md",
+        "workflow_ids": [
+          "weekly-security-scan"
+        ]
+      },
+      {
         "id": "rag-platform-context",
         "title": "RAG Platform Context",
         "agent_trust_required": "T3",
@@ -2449,6 +2571,16 @@
         "path": "docs/runbooks/rag-platform-context.md",
         "workflow_ids": [
           "converge-rag-context"
+        ]
+      },
+      {
+        "id": "runbook-automation-executor",
+        "title": "Runbook Automation Executor",
+        "agent_trust_required": "T1",
+        "steps": 0,
+        "path": "docs/runbooks/runbook-automation-executor.md",
+        "workflow_ids": [
+          "runbook-executor"
         ]
       },
       {
@@ -2469,6 +2601,16 @@
         "path": "docs/runbooks/security-posture-reporting.md",
         "workflow_ids": [
           "security-posture-scan"
+        ]
+      },
+      {
+        "id": "subdomain-exposure-audit",
+        "title": "Subdomain Exposure Audit",
+        "agent_trust_required": "T2",
+        "steps": 4,
+        "path": "docs/runbooks/subdomain-exposure-audit.md",
+        "workflow_ids": [
+          "subdomain-exposure-audit"
         ]
       },
       {
@@ -2538,10 +2680,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.120.2",
-    "deployed_at": "2026-03-24",
+    "last_version": "0.134.0",
+    "deployed_at": "2026-03-25",
     "summary": "implemented ADR 0132 in repository automation with a self-describing platform manifest generator, committed `build/platform-manifest.json` output, and the matching JSON schema added `lv3 manifest show` and `lv3 manifest refresh`, plus validation-gate enforcement that fails when the committed manifest drifts from canonical repo inputs",
-    "release_notes_url": "docs/release-notes/0.121.0.md"
+    "release_notes_url": "docs/release-notes/0.140.0.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -2611,279 +2753,6 @@
       "status": "Proposed",
       "implementation_status": "Not Implemented",
       "path": "docs/adr/0118-replayable-failure-case-library.md"
-    },
-    {
-      "adr": "0123",
-      "title": "Agent Session Bootstrap and Context Hydration",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0123-agent-session-bootstrap-and-context-hydration.md"
-    },
-    {
-      "adr": "0124",
-      "title": "Platform Event Taxonomy and Canonical NATS Topics",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0124-platform-event-taxonomy-and-canonical-nats-topics.md"
-    },
-    {
-      "adr": "0125",
-      "title": "Agent Capability Bounds and Autonomous Action Policy",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0125-agent-capability-bounds-and-autonomous-action-policy.md"
-    },
-    {
-      "adr": "0126",
-      "title": "Observation-to-Action Closure Loop",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0126-observation-to-action-closure-loop.md"
-    },
-    {
-      "adr": "0127",
-      "title": "Intent Deduplication and Conflict Resolution",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0127-intent-deduplication-and-conflict-resolution.md"
-    },
-    {
-      "adr": "0128",
-      "title": "Platform Health Composite Index",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0128-platform-health-composite-index.md"
-    },
-    {
-      "adr": "0129",
-      "title": "Runbook Automation Executor",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0129-runbook-automation-executor.md"
-    },
-    {
-      "adr": "0130",
-      "title": "Agent State Persistence Across Workflow Boundaries",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0130-agent-state-persistence-across-workflow-boundaries.md"
-    },
-    {
-      "adr": "0131",
-      "title": "Multi-Agent Handoff Protocol",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0131-multi-agent-handoff-protocol.md"
-    },
-    {
-      "adr": "0133",
-      "title": "Portal Authentication by Default",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0133-portal-authentication-by-default.md"
-    },
-    {
-      "adr": "0134",
-      "title": "Changelog Portal Content Redaction",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0134-changelog-portal-content-redaction.md"
-    },
-    {
-      "adr": "0135",
-      "title": "Developer Portal Sensitivity Classification",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0135-developer-portal-sensitivity-classification.md"
-    },
-    {
-      "adr": "0136",
-      "title": "HTTP Security Headers Hardening",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0136-http-security-headers-hardening.md"
-    },
-    {
-      "adr": "0137",
-      "title": "Robots.txt and Search Engine Crawl Policy",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0137-robots-and-crawl-policy.md"
-    },
-    {
-      "adr": "0138",
-      "title": "Published Artifact Secret Scanning",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0138-published-artifact-secret-scanning.md"
-    },
-    {
-      "adr": "0139",
-      "title": "Subdomain Exposure Audit and Registry",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0139-subdomain-exposure-audit-and-registry.md"
-    },
-    {
-      "adr": "0140",
-      "title": "Grafana Public Access Hardening",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0140-grafana-public-access-hardening.md"
-    },
-    {
-      "adr": "0141",
-      "title": "API Token Lifecycle and Exposure Response",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0141-api-token-lifecycle-and-exposure-response.md"
-    },
-    {
-      "adr": "0142",
-      "title": "Public Surface Automated Security Scan",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0142-public-surface-automated-security-scan.md"
-    },
-    {
-      "adr": "0143",
-      "title": "Gitea for Self-Hosted Git and Webhook-Driven Automation",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0143-gitea-for-self-hosted-git-and-ci.md"
-    },
-    {
-      "adr": "0144",
-      "title": "Headscale for Zero-Trust Mesh VPN",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0144-headscale-for-zero-trust-mesh-vpn.md"
-    },
-    {
-      "adr": "0145",
-      "title": "Ollama for Local LLM Inference API",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0145-ollama-for-local-llm-inference.md"
-    },
-    {
-      "adr": "0146",
-      "title": "Langfuse for LLM Agent Observability",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0146-langfuse-for-llm-agent-observability.md"
-    },
-    {
-      "adr": "0147",
-      "title": "Vaultwarden for Operator Credential Management",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0147-vaultwarden-for-operator-credential-management.md"
-    },
-    {
-      "adr": "0148",
-      "title": "SearXNG for Agent Web Search",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0148-searxng-for-agent-web-search.md"
-    },
-    {
-      "adr": "0149",
-      "title": "Semaphore for Ansible Job Management UI and API",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0149-semaphore-for-ansible-web-ui-and-api.md"
-    },
-    {
-      "adr": "0150",
-      "title": "Dozzle for Real-Time Container Log Access",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0150-dozzle-for-real-time-container-log-access.md"
-    },
-    {
-      "adr": "0151",
-      "title": "n8n for Webhook and API Integration Automation",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0151-n8n-for-webhook-and-api-integration-automation.md"
-    },
-    {
-      "adr": "0152",
-      "title": "Homepage for Unified Service Dashboard",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0152-homepage-for-unified-service-dashboard.md"
-    },
-    {
-      "adr": "0153",
-      "title": "Distributed Resource Lock Registry",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0153-distributed-resource-lock-registry.md"
-    },
-    {
-      "adr": "0154",
-      "title": "VM-Scoped Parallel Execution Lanes",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0154-vm-scoped-parallel-execution-lanes.md"
-    },
-    {
-      "adr": "0155",
-      "title": "Intent Queue with Release-Triggered Scheduling",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0155-intent-queue-with-release-triggered-scheduling.md"
-    },
-    {
-      "adr": "0156",
-      "title": "Agent Session Workspace Isolation",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0156-agent-session-workspace-isolation.md"
-    },
-    {
-      "adr": "0157",
-      "title": "Per-VM Concurrency Budget and Resource Reservation",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0157-per-vm-concurrency-budget-and-resource-reservation.md"
-    },
-    {
-      "adr": "0158",
-      "title": "Conflict-Free Configuration Merge Protocol",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0158-conflict-free-configuration-merge-protocol.md"
-    },
-    {
-      "adr": "0159",
-      "title": "Speculative Parallel Execution with Compensating Transactions",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0159-speculative-parallel-execution-with-compensating-transactions.md"
-    },
-    {
-      "adr": "0160",
-      "title": "Parallel Dry-Run Fan-Out for Intent Batch Validation",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0160-parallel-dry-run-fan-out-for-intent-batch-validation.md"
-    },
-    {
-      "adr": "0161",
-      "title": "Real-Time Agent Coordination Map",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0161-real-time-agent-coordination-map.md"
-    },
-    {
-      "adr": "0162",
-      "title": "Distributed Deadlock Detection and Resolution",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0162-distributed-deadlock-detection-and-resolution.md"
     }
   ]
 }
