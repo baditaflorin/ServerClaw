@@ -2868,6 +2868,36 @@ workstreams:
       - docs/runbooks/per-vm-concurrency-budgets.md
       - playbooks/windmill.yml
       - roles/windmill_runtime
+
+  - id: adr-0158-config-merge-protocol
+    adr: "0158"
+    title: Conflict-free configuration merge protocol
+    status: merged
+    owner: codex
+    branch: codex/adr-0158-config-merge-protocol
+    worktree_path: .worktrees/adr-0158-config-merge
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0158-config-merge-protocol.md
+    depends_on:
+      - adr-0044-windmill
+      - adr-0075-service-capability-catalog
+      - adr-0076-subdomain-governance
+      - adr-0087-validation-gate
+      - adr-0115-mutation-ledger
+      - adr-0124-platform-event-taxonomy
+    conflicts_with: []
+    shared_surfaces:
+      - platform/config_merge/
+      - scripts/config_merge_protocol.py
+      - config/merge-eligible-files.yaml
+      - config/workflow-catalog.json
+      - config/command-catalog.json
+      - config/event-taxonomy.yaml
+      - config/control-plane-lanes.json
+      - config/api-publication.json
+      - config/windmill/scripts/merge-config-changes.py
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/
+      - migrations/0016_config_merge_schema.sql
+      - docs/runbooks/config-merge-protocol.md
     ready_to_merge: false
     live_applied: false
 

@@ -42,6 +42,9 @@ The workflow manages these live surfaces:
 - seeded script `f/lv3/deploy_and_promote`
 - seeded helper `f/lv3/mutation_audit_emit`
 - enabled schedule `f/lv3/scheduler_watchdog_loop_every_10s`
+- seeded helper `f/lv3/config_merge/merge_config_changes`
+- enabled schedule `f/lv3/config_merge/merge_config_changes_every_minute`
+- PostgreSQL table `config_change_staging` in the Windmill database
 
 ## Generated Local Artifacts
 
@@ -62,6 +65,8 @@ Run these checks after converge:
 6. `curl -s -X POST http://100.118.189.95:8005/api/auth/login -H "Content-Type: application/json" -d "{\"email\":\"superadmin_secret@windmill.dev\",\"password\":\"$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)\"}"`
 7. `curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" http://100.118.189.95:8005/api/w/lv3/schedules/list | grep scheduler_watchdog_loop_every_10s`
 8. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'test -s /srv/proxmox_florin_server/.local/scheduler/watchdog-heartbeat.json && sudo cat /srv/proxmox_florin_server/.local/scheduler/watchdog-heartbeat.json'`
+9. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.50 "psql -d windmill -Atqc \"SELECT to_regclass('public.config_change_staging')\""`
+10. `curl -s -X POST -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" -H "Content-Type: application/json" -d '{}' http://100.118.189.95:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fconfig_merge%2Fmerge_config_changes`
 
 ## Notes
 
@@ -69,4 +74,5 @@ Run these checks after converge:
 - The current bootstrap uses a repo-managed superadmin secret mirrored locally so the repository can seed and verify the runtime without UI-only state. The same managed secret currently backs the password-login bootstrap admin for browser access. Replace that with narrower identities as ADR 0046, ADR 0047, and ADR 0056 are implemented.
 - No repo-managed Windmill job in this rollout stores long-lived third-party secrets inside Windmill. Secret-bearing workflows should wait for ADR 0043 or use another approved authority.
 - The seeded `f/lv3/rotate_credentials` script summarizes the canonical secret-rotation catalog and is the first Windmill surface for ADR 0065.
+- The seeded `f/lv3/config_merge/merge_config_changes` worker is the ADR 0158 merge writer for `config_change_staging`.
 - Backup coverage comes from the existing VM backup policy: `postgres-lv3` protects the Windmill database and `docker-runtime-lv3` protects the runtime filesystem and logs.

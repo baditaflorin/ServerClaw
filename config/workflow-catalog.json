@@ -1396,6 +1396,8 @@
       "owner_runbook": "docs/runbooks/configure-windmill.md",
       "implementation_refs": [
         "Makefile",
+        "migrations/0016_config_merge_schema.sql",
+        "config/windmill/scripts/merge-config-changes.py",
         "playbooks/windmill.yml",
         "config/windmill/scripts/lv3-healthcheck.py",
         "config/windmill/scripts/lv3-mutation-audit.py",
@@ -1404,7 +1406,7 @@
         "roles/proxmox_tailscale_proxy/tasks/main.yml"
       ],
       "outputs": [
-        "Windmill runtime deployed on docker-runtime-lv3 with a PostgreSQL backend on postgres-lv3 and an operator-only Tailscale proxy on the Proxmox host."
+        "Windmill runtime deployed on docker-runtime-lv3 with a PostgreSQL backend on postgres-lv3, an operator-only Tailscale proxy on the Proxmox host, and the repo-managed config-merge worker plus schedule seeded into the workspace."
       ],
       "verification_commands": [
         "make syntax-check-windmill",
@@ -1424,6 +1426,60 @@
         "max_steps": 300,
         "max_concurrent_instances": 1,
         "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "merge-config-changes": {
+      "description": "Merge pending ADR 0158 staged config changes into the merge-eligible registry files and emit conflict or merged events for downstream consumers.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "merge-config-changes",
+        "command": "make merge-config-changes"
+      },
+      "preflight": {
+        "required": false
+      },
+      "validation_targets": [
+        "validate-data-models"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/config-merge-protocol.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/merge-eligible-files.yaml",
+        "config/event-taxonomy.yaml",
+        "config/windmill/scripts/merge-config-changes.py",
+        "docs/runbooks/config-merge-protocol.md",
+        "migrations/0016_config_merge_schema.sql",
+        "platform/config_merge",
+        "scripts/config_merge_protocol.py",
+        "tests/test_config_merge_protocol.py",
+        "tests/test_config_merge_repo_surfaces.py",
+        "tests/test_config_merge_windmill.py"
+      ],
+      "outputs": [
+        "Merged config-registry files in the worker checkout plus merged or conflict status transitions in config_change_staging."
+      ],
+      "verification_commands": [
+        "uv run --with pyyaml python scripts/config_merge_protocol.py validate",
+        "uv run --with pytest --with pyyaml pytest -q tests/test_config_merge_protocol.py tests/test_config_merge_repo_surfaces.py tests/test_config_merge_windmill.py tests/unit/test_event_taxonomy.py"
+      ],
+      "required_read_surfaces": [
+        "ledger"
+      ],
+      "tags": [
+        "mutation",
+        "config_merge"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 300,
+        "max_steps": 100,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
         "max_restarts": 0,
         "max_rollback_depth": 1,
         "escalation_action": "notify_and_abort"

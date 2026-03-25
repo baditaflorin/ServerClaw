@@ -478,6 +478,19 @@
             "converge-windmill"
           ],
           "notes": "Execution lifecycle publishers emit canonical execution subjects, including deadlock detection and livelock findings, so operators and future schedulers can react without polling worker state files."
+        },
+        {
+          "id": "platform-config-merge-events",
+          "kind": "event_subject",
+          "endpoint": "platform.config.*",
+          "auth": "Internal NATS publication from ADR 0158 through the private docker-runtime-lv3 Windmill worker runtime.",
+          "owner_refs": [
+            "proxmox_florin"
+          ],
+          "workflow_refs": [
+            "merge-config-changes"
+          ],
+          "notes": "Each merge-eligible config change publishes merged or conflict events so downstream consumers can react without polling config_change_staging directly."
         }
       ]
     }

@@ -2432,6 +2432,40 @@
         ]
       }
     },
+    "merge-config-changes": {
+      "description": "Run the ADR 0158 Windmill-backed config-merge worker against the staged config_change_staging rows and the merge-eligible registry catalog.",
+      "workflow_id": "merge-config-changes",
+      "scope": "guest_runtime",
+      "approval_policy": "standard_live_change",
+      "inputs": [
+        {
+          "name": "LV3_CONFIG_MERGE_DSN",
+          "kind": "operator_parameter",
+          "required": true,
+          "source": "Windmill worker environment or controller shell environment",
+          "description": "Database DSN for the shared config_change_staging table, typically the managed Windmill DATABASE_URL."
+        }
+      ],
+      "expected_preconditions": [
+        "uv run --with pyyaml python scripts/config_merge_protocol.py validate passes",
+        "make converge-windmill has already applied migrations/0016_config_merge_schema.sql and seeded the merge worker into Windmill",
+        "Operators have reviewed any pending conflict rows before manually triggering another merge run"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the source commit, merged file set, and any conflict rows that remained pending after the run."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the merge-eligible catalog no longer validates or the worker cannot reach the staging database.",
+          "Stop if the merge run starts producing conflict rows for keys that should have remained independent."
+        ],
+        "rollback_guidance": [
+          "Disable the Windmill schedule and resolve the staged conflict rows before retrying the worker.",
+          "Repair the tracked registry file from git history if a bad merge was already written into the worker checkout."
+        ]
+      }
+    },
     "rotate-grafana-service-token": {
       "description": "Rotate one governed Grafana service-account token through the ADR 0141 token lifecycle hook contract.",
       "workflow_id": "rotate-grafana-service-token",

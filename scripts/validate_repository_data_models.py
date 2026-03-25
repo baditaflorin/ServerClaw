@@ -9,13 +9,21 @@ import subprocess
 import sys
 from typing import Any
 
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
+    del sys.modules["platform"]
+
 from command_catalog import load_command_catalog, validate_command_catalog
 from api_gateway_catalog import load_api_gateway_catalog, validate_api_gateway_catalog
 from api_publication import load_api_publication_catalog, validate_api_publication_catalog
 from capacity_report import load_capacity_model
 from container_image_policy import load_image_catalog, validate_image_catalog as validate_container_image_catalog
 from changelog_redaction import load_redaction_policy, validate_redaction_policy
-from controller_automation_toolkit import REPO_ROOT, emit_cli_error, load_json, load_yaml, repo_path
+from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 from control_plane_lanes import load_lane_catalog
 from data_catalog import load_data_catalog, validate_data_catalog
 from dependency_graph import load_dependency_graph
@@ -44,6 +52,7 @@ from workflow_catalog import (
     validate_secret_manifest,
     validate_workflow_catalog,
 )
+from platform.config_merge import validate_merge_eligible_catalog
 
 
 STACK_PATH = repo_path("versions", "stack.yaml")
@@ -68,6 +77,7 @@ TRIAGE_AUTO_CHECK_ALLOWLIST_PATH = repo_path("config", "triage-auto-check-allowl
 CHANGELOG_REDACTION_PATH = repo_path("config", "changelog-redaction.yaml")
 AGENT_POLICIES_PATH = repo_path("config", "agent-policies.yaml")
 CIRCUIT_POLICIES_PATH = repo_path("config", "circuit-policies.yaml")
+MERGE_ELIGIBLE_FILES_PATH = repo_path("config", "merge-eligible-files.yaml")
 
 SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -1456,6 +1466,10 @@ def validate_workstreams_release_policy() -> None:
         raise ValueError("workstreams.yaml.release_policy.breaking_change_criteria must point to config/version-semantics.json")
 
 
+def validate_merge_eligible_files_contract() -> None:
+    validate_merge_eligible_catalog(MERGE_ELIGIBLE_FILES_PATH)
+
+
 def validate_triage_rule_contracts() -> None:
     import incident_triage
 
@@ -2195,6 +2209,7 @@ def validate_repository_data_models() -> int:
     validate_token_inventory(token_classes, workflow_catalog)
     validate_circuit_policies()
     validate_version_semantics()
+    validate_merge_eligible_files_contract()
     validate_workstreams_release_policy()
     validate_triage_rule_contracts()
     validate_changelog_redaction_contract()

@@ -256,6 +256,39 @@ domains:
             - overall
             - results
 
+  config:
+    description: Conflict-free config-merge events for merge-eligible registry files.
+    topics:
+      - name: platform.config.merged
+        description: One staged config change was merged into a merge-eligible registry file.
+        status: active
+        delivery: at_least_once
+        retention: 14d
+        producers:
+          - adr-0158-config-merge-protocol
+        payload:
+          required:
+            - change_id
+            - file_path
+            - key_value
+            - operation
+            - status
+      - name: platform.config.merge_conflict
+        description: One staged config change could not be merged and now requires operator review.
+        status: active
+        delivery: at_least_once
+        retention: 30d
+        producers:
+          - adr-0158-config-merge-protocol
+        payload:
+          required:
+            - change_id
+            - file_path
+            - key_value
+            - operation
+            - status
+            - reason
+
   world_state:
     description: World-state refresh lifecycle events.
     topics:

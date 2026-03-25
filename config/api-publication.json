@@ -254,6 +254,15 @@
       "publication_tier": "internal-only",
       "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
       "approval_notes": "Execution lifecycle and deadlock-detection subjects stay private-first because they expose live mutation flow control, blocked work, and retry timing."
+    },
+    {
+      "id": "platform-config-merge-events",
+      "title": "Config-merge status events",
+      "lane": "event",
+      "lane_surface_ref": "platform-config-merge-events",
+      "publication_tier": "internal-only",
+      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "approval_notes": "ADR 0158 config-merge events stay private-first because they expose pending registry mutations and merge conflicts in near real time."
     }
   ]
 }

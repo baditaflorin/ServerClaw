@@ -1,0 +1,50 @@
+schema_version: 1.0.0
+
+merge_eligible:
+  - file: config/service-capability-catalog.json
+    format: json
+    collection_path:
+      - services
+    collection_type: list
+    key_field: id
+    conflict_resolution: reject_duplicate_key
+    allowed_operations:
+      - append
+      - update
+      - delete
+
+  - file: config/subdomain-catalog.json
+    format: json
+    collection_path:
+      - subdomains
+    collection_type: list
+    key_field: fqdn
+    conflict_resolution: reject_duplicate_key
+    allowed_operations:
+      - append
+      - update
+      - delete
+
+  - file: config/workflow-catalog.json
+    format: json
+    collection_path:
+      - workflows
+    collection_type: mapping
+    key_field: workflow_id
+    conflict_resolution: reject_duplicate_key
+    allowed_operations:
+      - append
+      - update
+      - delete
+    drop_key_field_on_write: true
+
+  - file: config/agent-policies.yaml
+    format: yaml
+    collection_path: []
+    collection_type: list
+    key_field: agent_id
+    conflict_resolution: last_write_wins
+    allowed_operations:
+      - append
+      - update
+      - delete

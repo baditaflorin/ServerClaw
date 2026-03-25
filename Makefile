@@ -717,6 +717,10 @@ capacity-report:
 weekly-capacity-report:
 	uv run --with pyyaml python $(REPO_ROOT)/config/windmill/scripts/weekly-capacity-report.py --repo-path $(REPO_ROOT) $(if $(filter true,$(NO_LIVE_METRICS)),--no-live-metrics,)
 
+merge-config-changes:
+	$(MAKE) preflight WORKFLOW=merge-config-changes
+	python3 $(REPO_ROOT)/scripts/config_merge_protocol.py --repo-root $(REPO_ROOT) merge --dsn "$${LV3_CONFIG_MERGE_DSN:-$${DATABASE_URL:-}}" $(if $(FILE),--file "$(FILE)",) $(if $(filter true,$(PUBLISH_NATS)),--publish-nats,) $(MERGE_ARGS)
+
 promote:
 	@test -n "$(SERVICE)" || (echo "set SERVICE=<service-id>"; exit 1)
 	@test -n "$(STAGING_RECEIPT)" || (echo "set STAGING_RECEIPT=receipts/live-applies/staging/<receipt>.json"; exit 1)

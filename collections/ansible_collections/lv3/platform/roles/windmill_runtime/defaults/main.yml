@@ -39,6 +39,7 @@ windmill_worker_repo_checkout_host_path: /srv/proxmox_florin_server
 windmill_worker_repo_checkout_container_path: /srv/proxmox_florin_server
 windmill_worker_checkout_sync_paths:
   - config
+  - migrations
   - platform
   - scripts
 windmill_seed_app_repo_root_local_dir: "{{ playbook_dir }}/../config/windmill/apps"
@@ -66,6 +67,11 @@ windmill_seed_scripts:
     language: python3
     summary: LV3 findings daily digest helper
     description: Repo-managed Windmill helper that formats ADR 0071 findings into Markdown for operator review.
+  - path: f/lv3/config_merge/merge_config_changes
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/merge-config-changes.py"
+    language: python3
+    summary: Merge staged config registry changes
+    description: Repo-managed ADR 0158 helper that merges pending change rows from config_change_staging into the merge-eligible registry files.
   - path: f/lv3/rebuild_rag_index
     local_file: "{{ playbook_dir }}/../config/windmill/scripts/rebuild-rag-index.py"
     language: python3
@@ -233,6 +239,15 @@ windmill_seed_schedules:
     enabled: false
     summary: Disabled ADR 0071 daily digest schedule placeholder
     description: Repo-managed Windmill schedule definition reserved for automatic findings digests after the observation loop is promoted into Windmill.
+    no_flow_overlap: true
+  - path: f/lv3/config_merge/merge_config_changes_every_minute
+    schedule: "0 * * * * *"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/config_merge/merge_config_changes
+    args: {}
+    enabled: true
+    summary: ADR 0158 config-merge worker
+    description: Repo-managed minute merge for pending config_change_staging rows against the merge-eligible registry catalog.
     no_flow_overlap: true
   - path: f/lv3/warm_build_cache_nightly
     schedule: "0 0 3 * * *"

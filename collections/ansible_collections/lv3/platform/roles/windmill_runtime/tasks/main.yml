@@ -561,6 +561,39 @@
   changed_when: false
   no_log: true
 
+- name: Create a temporary path for the ADR 0158 config-merge migration
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  ansible.builtin.tempfile:
+    state: file
+    suffix: .sql
+  register: windmill_config_merge_migration_tmp
+
+- name: Copy the ADR 0158 config-merge migration to the database host
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../migrations/0016_config_merge_schema.sql"
+    dest: "{{ windmill_config_merge_migration_tmp.path }}"
+    mode: "0600"
+
+- name: Apply the ADR 0158 config-merge migration in the Windmill database
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -f
+      - "{{ windmill_config_merge_migration_tmp.path }}"
+  changed_when: false
+
+- name: Remove the temporary ADR 0158 config-merge migration file
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  ansible.builtin.file:
+    path: "{{ windmill_config_merge_migration_tmp.path }}"
+    state: absent
+
 - name: Delete existing repo-managed Windmill scripts before reseeding
   ansible.builtin.uri:
     url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id | urlencode }}/scripts/delete/p/{{ item.path | urlencode }}"
