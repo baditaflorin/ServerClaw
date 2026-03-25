@@ -91,6 +91,48 @@
   no_log: true
   notify: Restart Alertmanager
 
+- name: Derive Alertmanager Mattermost webhook URLs
+  ansible.builtin.set_fact:
+    alertmanager_runtime_mattermost_critical_webhook_url: >-
+      {{
+        (
+          alertmanager_runtime_mattermost_webhooks.webhooks.get(
+            'alerts_critical',
+            alertmanager_runtime_mattermost_webhooks.webhooks.get('alerts', {}),
+          )
+        ).get('internal_url', '')
+      }}
+    alertmanager_runtime_mattermost_warning_webhook_url: >-
+      {{
+        (
+          alertmanager_runtime_mattermost_webhooks.webhooks.get('alerts', {})
+        ).get('internal_url', '')
+      }}
+    alertmanager_runtime_mattermost_info_webhook_url: >-
+      {{
+        (
+          alertmanager_runtime_mattermost_webhooks.webhooks.get(
+            'ops',
+            alertmanager_runtime_mattermost_webhooks.webhooks.get(
+              'workflows',
+              alertmanager_runtime_mattermost_webhooks.webhooks.get('alerts', {}),
+            ),
+          )
+        ).get('internal_url', '')
+      }}
+  no_log: true
+
+- name: Assert Alertmanager Mattermost webhook URLs are available
+  ansible.builtin.assert:
+    that:
+      - alertmanager_runtime_mattermost_critical_webhook_url | length > 0
+      - alertmanager_runtime_mattermost_warning_webhook_url | length > 0
+      - alertmanager_runtime_mattermost_info_webhook_url | length > 0
+    fail_msg: >-
+      Alertmanager requires repo-managed Mattermost incoming webhook URLs for
+      critical, warning, and informational notifications.
+  no_log: true
+
 - name: Render Alertmanager configuration
   ansible.builtin.template:
     src: "{{ alertmanager_runtime_config_template }}"
@@ -98,10 +140,6 @@
     owner: root
     group: root
     mode: "0644"
-  vars:
-    alertmanager_runtime_mattermost_critical_webhook_url: "{{ alertmanager_runtime_mattermost_webhooks.webhooks.alerts_critical.internal_url }}"
-    alertmanager_runtime_mattermost_warning_webhook_url: "{{ alertmanager_runtime_mattermost_webhooks.webhooks.alerts.internal_url }}"
-    alertmanager_runtime_mattermost_info_webhook_url: "{{ alertmanager_runtime_mattermost_webhooks.webhooks.ops.internal_url }}"
   no_log: true
   notify: Restart Alertmanager
 

@@ -28,7 +28,11 @@ from portal_utils import PORTAL_STYLES, escape, page_template, render_badge, ren
 from release_manager import build_release_status_snapshot
 from service_catalog import load_service_catalog, validate_service_catalog
 from slo_tracking import build_slo_status_entries
-from subdomain_catalog import load_subdomain_catalog, validate_subdomain_catalog
+from subdomain_catalog import (
+    load_public_edge_defaults,
+    load_subdomain_catalog,
+    validate_subdomain_catalog,
+)
 from agent_tool_registry import load_agent_tool_registry
 
 
@@ -870,13 +874,14 @@ def render_portal(
     environment_catalog = load_environment_topology()
     service_catalog = load_service_catalog()
     subdomain_catalog = load_subdomain_catalog()
+    public_edge_defaults = load_public_edge_defaults()
     agent_registry, _workflow_catalog = load_agent_registry_best_effort()
     stack = load_yaml(STACK_PATH)
     host_vars = load_yaml(HOST_VARS_PATH)
 
     validate_environment_topology(environment_catalog, host_vars)
     validate_service_catalog(service_catalog)
-    validate_subdomain_catalog(subdomain_catalog, service_catalog)
+    validate_subdomain_catalog(subdomain_catalog, service_catalog, host_vars, public_edge_defaults)
     validate_environment_references(environment_catalog, service_catalog, subdomain_catalog, host_vars)
 
     services = service_catalog["services"]

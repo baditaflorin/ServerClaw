@@ -504,7 +504,7 @@
       "name": "Deployment History Portal",
       "description": "Generated portal for browsing live applies, promotions, and mutation audit history.",
       "category": "access",
-      "lifecycle_status": "planned",
+      "lifecycle_status": "active",
       "vm": "nginx-lv3",
       "vmid": 110,
       "public_url": "https://changelog.lv3.org",
@@ -519,7 +519,7 @@
       ],
       "environments": {
         "production": {
-          "status": "planned",
+          "status": "active",
           "url": "https://changelog.lv3.org",
           "subdomain": "changelog.lv3.org"
         }
@@ -530,7 +530,7 @@
       "name": "Platform Operations Portal",
       "description": "Interactive operator portal with live service actions, drift visibility, runbook launchers, and deployment streaming.",
       "category": "access",
-      "lifecycle_status": "planned",
+      "lifecycle_status": "active",
       "vm": "docker-runtime-lv3",
       "vmid": 120,
       "internal_url": "http://10.10.10.20:8092",
@@ -548,7 +548,7 @@
       ],
       "environments": {
         "production": {
-          "status": "planned",
+          "status": "active",
           "url": "https://ops.lv3.org",
           "subdomain": "ops.lv3.org",
           "notes": "Interactive runtime now ships from the repo, but live cutover from the static portal still requires apply from main."
@@ -566,7 +566,7 @@
       "name": "Developer Portal",
       "description": "Generated public documentation site for services, ADRs, runbooks, release notes, and platform reference data.",
       "category": "access",
-      "lifecycle_status": "planned",
+      "lifecycle_status": "active",
       "vm": "nginx-lv3",
       "vmid": 110,
       "public_url": "https://docs.lv3.org",
@@ -581,7 +581,7 @@
       ],
       "environments": {
         "production": {
-          "status": "planned",
+          "status": "active",
           "url": "https://docs.lv3.org",
           "subdomain": "docs.lv3.org"
         }

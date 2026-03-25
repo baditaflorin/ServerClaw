@@ -278,7 +278,7 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
                     f"services[{index}].uptime_monitor_name references unknown monitor '{monitor_name}'"
                 )
 
-        if "health_probe_id" in service or lifecycle_status == "active":
+        if "health_probe_id" in service:
             health_probe_id = require_str(
                 service.get("health_probe_id"),
                 f"services[{index}].health_probe_id",
