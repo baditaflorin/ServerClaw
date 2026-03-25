@@ -70,6 +70,35 @@ class CompilationResult:
 
 
 @dataclass(frozen=True)
+class CompiledIntentBatch:
+    batch_id: str
+    compiled_at: str
+    instructions: tuple[str, ...]
+    results: tuple[CompilationResult, ...]
+    actor_id: str | None = None
+    autonomous: bool = False
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "batch_id": self.batch_id,
+            "compiled_at": self.compiled_at,
+            "actor_id": self.actor_id,
+            "autonomous": self.autonomous,
+            "instructions": list(self.instructions),
+            "results": [
+                {
+                    "intent": item.intent.as_dict(),
+                    "matched_rule_id": item.matched_rule_id,
+                    "normalized_input": item.normalized_input,
+                    "dispatch_workflow_id": item.dispatch_workflow_id,
+                    "dispatch_payload": item.dispatch_payload,
+                }
+                for item in self.results
+            ],
+        }
+
+
+@dataclass(frozen=True)
 class GoalCompilationError(Exception):
     code: str
     message: str
@@ -199,6 +228,64 @@ class GoalCompiler:
             dispatch_workflow_id=workflow_id,
             dispatch_payload=workflow_payload,
         )
+
+    def compile_batch(
+        self,
+        raw_inputs: list[str],
+        *,
+        force_unsafe_health: bool = False,
+        actor_id: str | None = None,
+        autonomous: bool = False,
+    ) -> CompiledIntentBatch:
+        instructions = tuple(item.strip() for item in raw_inputs if item and item.strip())
+        if not instructions:
+            raise GoalCompilationError(
+                code="EMPTY_BATCH",
+                message="At least one non-empty instruction is required to compile an intent batch.",
+                raw_input="",
+                details={"instructions": list(raw_inputs)},
+            )
+
+        return CompiledIntentBatch(
+            batch_id=str(uuid.uuid4()),
+            compiled_at=self._utc_now(),
+            instructions=instructions,
+            results=tuple(
+                self.compile(
+                    item,
+                    force_unsafe_health=force_unsafe_health,
+                    actor_id=actor_id,
+                    autonomous=autonomous,
+                )
+                for item in instructions
+            ),
+            actor_id=actor_id,
+            autonomous=autonomous,
+        )
+
+    def validate_batch(
+        self,
+        raw_inputs: list[str],
+        *,
+        force_unsafe_health: bool = False,
+        actor_id: str | None = None,
+        autonomous: bool = False,
+        max_parallelism: int = 5,
+        ledger_writer: Any | None = None,
+    ) -> Any:
+        from .batch import IntentBatchPlanner
+
+        batch = self.compile_batch(
+            raw_inputs,
+            force_unsafe_health=force_unsafe_health,
+            actor_id=actor_id,
+            autonomous=autonomous,
+        )
+        return IntentBatchPlanner(
+            repo_root=self.repo_root,
+            max_parallelism=max_parallelism,
+            ledger_writer=ledger_writer,
+        ).plan(batch)
 
     def _health_preconditions(self, target: IntentTarget, *, force_unsafe_health: bool) -> list[str]:
         if not target.services:

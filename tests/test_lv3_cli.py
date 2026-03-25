@@ -370,6 +370,10 @@ steps:
 """.strip()
         + "\n"
     )
+    maintenance_state = tmp_path / ".local" / "state" / "maintenance" / "windows.json"
+    maintenance_state.parent.mkdir(parents=True, exist_ok=True)
+    maintenance_state.write_text("{}\n", encoding="utf-8")
+    monkeypatch.setenv("LV3_MAINTENANCE_WINDOWS_FILE", str(maintenance_state))
     monkeypatch.setattr(lv3_cli, "REPO_ROOT", tmp_path)
     return tmp_path
 
@@ -593,6 +597,30 @@ def test_intent_check_reports_conflict(
     assert exit_code == 1
     assert "Conflict check: CONFLICT" in captured.out
     assert "intent-existing" in captured.out
+
+
+def test_intent_batch_renders_plan_and_writes_ledger(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    exit_code = lv3_cli.main(
+        [
+            "intent",
+            "batch",
+            "--instruction",
+            "deploy netbox",
+            "--instruction",
+            "deploy netbox",
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert exit_code == 1
+    assert "Intent batch:" in captured.out
+    assert "Rejected intents:" in captured.out
+    assert "write_write_conflict" in captured.out
+    ledger_path = minimal_repo / ".local" / "state" / "ledger" / "ledger.events.jsonl"
+    event_types = [json.loads(line)["event_type"] for line in ledger_path.read_text().splitlines()]
+    assert event_types == ["intent.batch_plan"]
 
 def test_runbook_execute_dry_run_renders_steps(
     capsys: pytest.CaptureFixture[str], minimal_repo: Path
