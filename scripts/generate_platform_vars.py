@@ -52,6 +52,7 @@ PORT_KEYS = (
     "portainer_host_proxy_port",
     "step_ca_api_port",
     "step_ca_proxy_port",
+    "headscale_http_port",
 )
 
 MANAGEMENT_IPV4_TOKEN = "{{ management_ipv4 }}"
@@ -289,6 +290,9 @@ def build_service_urls(
     elif service_id == "api_gateway":
         urls["internal"] = service_url("http", private_ip, ports["api_gateway_internal_port"])
         port_map["internal"] = ports["api_gateway_internal_port"]
+    elif service_id == "headscale":
+        urls["internal"] = service_url("http", private_ip, ports["headscale_http_port"])
+        port_map["internal"] = ports["headscale_http_port"]
     elif service_id == "openbao":
         urls["internal"] = service_url("https", private_ip, ports["openbao_proxy_port"])
         urls["controller"] = service_url("https", tailscale_ipv4, ports["openbao_proxy_port"])
@@ -461,6 +465,7 @@ def build_platform_vars(
     netbox_service = service_topology["netbox"]
     open_webui_service = service_topology["open_webui"]
     api_gateway_service = service_topology["api_gateway"]
+    headscale_service = service_topology["headscale"]
     openbao_service = service_topology["openbao"]
     platform_context_service = service_topology["platform_context_api"]
     portainer_service = service_topology["portainer"]
@@ -548,6 +553,7 @@ def build_platform_vars(
             resolved_ports["netbox_host_proxy_port"],
             resolved_ports["step_ca_proxy_port"],
             resolved_ports["openbao_proxy_port"],
+            resolved_ports["headscale_http_port"],
             resolved_ports["windmill_host_proxy_port"],
             resolved_ports["open_webui_host_proxy_port"],
             resolved_ports["mattermost_host_proxy_port"],
@@ -567,6 +573,9 @@ def build_platform_vars(
         "api_gateway_internal_port": resolved_ports["api_gateway_internal_port"],
         "api_gateway_public_url": api_gateway_service["urls"]["public"],
         "api_gateway_internal_url": api_gateway_service["urls"]["internal"],
+        "headscale_http_port": resolved_ports["headscale_http_port"],
+        "headscale_public_url": headscale_service["urls"]["public"],
+        "headscale_internal_url": headscale_service["urls"]["internal"],
         "ntopng_proxy_port": resolved_ports["ntopng_proxy_port"],
         "ntopng_operator_url": service_topology["ntopng"]["urls"]["controller"],
         "mattermost_server_port": resolved_ports["mattermost_server_port"],
@@ -591,6 +600,7 @@ def build_platform_vars(
             resolved_ports["netbox_host_proxy_port"],
             resolved_ports["step_ca_proxy_port"],
             resolved_ports["openbao_proxy_port"],
+            resolved_ports["headscale_http_port"],
             resolved_ports["windmill_host_proxy_port"],
             resolved_ports["open_webui_host_proxy_port"],
             resolved_ports["mattermost_host_proxy_port"],

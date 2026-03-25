@@ -89,7 +89,7 @@
       "status": "active",
       "exposure": "private-only",
       "auth_requirement": "private_network",
-      "target": "100.118.189.95",
+      "target": "100.64.0.1",
       "target_port": 5432,
       "owner_adr": "0026",
       "tls": {
@@ -212,6 +212,23 @@
         "auto_renew": true
       },
       "notes": "Interactive runtime is live behind oauth2-proxy and Keycloak on the shared NGINX edge."
+    },
+    {
+      "fqdn": "headscale.lv3.org",
+      "service_id": "headscale",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0144",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Published through the shared NGINX edge and proxied to the Proxmox host Headscale listener on 10.10.10.1:8080."
     },
     {
       "fqdn": "proxmox.lv3.org",

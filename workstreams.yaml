@@ -71,6 +71,28 @@ workstreams:
     ready_to_merge: false
     live_applied: true
 
+  - id: adr-0144-headscale
+    adr: "0144"
+    title: Headscale mesh control plane
+    status: implemented
+    owner: codex
+    branch: codex/adr-0144-headscale
+    worktree_path: ../proxmox_florin_server-headscale
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0144-headscale.md
+    depends_on:
+      - adr-0014-tailscale
+    conflicts_with: []
+    shared_surfaces:
+      - proxmox_host_access
+      - guest_access
+      - private_network
+      - inventory/hosts.yml
+      - inventory/host_vars/proxmox_florin.yml
+      - config/service-capability-catalog.json
+      - config/control-plane-lanes.json
+    ready_to_merge: true
+    live_applied: true
+
   - id: adr-0020-backups
     adr: "0020"
     title: Initial storage and backup model

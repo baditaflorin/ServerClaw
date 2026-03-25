@@ -210,6 +210,15 @@
       "adr": "0004"
     },
     {
+      "id": "headscale",
+      "service": "headscale",
+      "name": "Headscale",
+      "vm": "proxmox_florin",
+      "tier": 1,
+      "category": "access",
+      "adr": "0144"
+    },
+    {
       "id": "status_page",
       "service": "status_page",
       "name": "Public Status Page",
@@ -402,6 +411,12 @@
       "to": "step_ca",
       "type": "reads_from",
       "description": "The indexed corpus includes step-ca ADR and runbook content for operator query grounding."
+    },
+    {
+      "from": "headscale",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public registration and control-plane reachability for headscale.lv3.org depends on the shared NGINX edge publication path."
     },
     {
       "from": "status_page",

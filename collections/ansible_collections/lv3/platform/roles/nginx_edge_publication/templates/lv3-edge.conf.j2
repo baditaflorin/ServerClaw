@@ -165,6 +165,8 @@ server {
         proxy_set_header X-Forwarded-Port $server_port;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
+        proxy_redirect http:// https://;
+        proxy_buffering off;
         proxy_read_timeout 300s;
     }
 
@@ -181,6 +183,8 @@ server {
         proxy_set_header X-Forwarded-Port $server_port;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
+        proxy_redirect http:// https://;
+        proxy_buffering off;
         proxy_read_timeout 300s;
     }
 {% else %}
@@ -275,6 +279,8 @@ server {
         proxy_set_header X-Forwarded-Port $server_port;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
+        proxy_redirect http:// https://;
+        proxy_buffering off;
         proxy_read_timeout 300s;
 {% for header_name in proxy_hide_headers %}
         proxy_hide_header {{ header_name }};
@@ -304,6 +310,8 @@ server {
         proxy_set_header X-Forwarded-Port $server_port;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
+        proxy_redirect http:// https://;
+        proxy_buffering off;
         proxy_read_timeout 300s;
 {% for header_name in proxy_hide_headers %}
         proxy_hide_header {{ header_name }};

@@ -40,6 +40,61 @@ domains:
             - details
             - ts
             - run_id
+      - name: platform.findings.watchdog_repeated_action
+        description: The scheduler watchdog repeated the same self-healing action often enough to indicate a systemic fault.
+        status: active
+        delivery: at_least_once
+        retention: 14d
+        producers:
+          - adr-0172-watchdog-escalation-and-stale-job-self-healing
+        payload:
+          required:
+            - action_type
+            - count_in_window
+            - window_seconds
+            - threshold
+            - severity
+            - last_payload
+
+  watchdog:
+    description: Scheduler watchdog heartbeat and stale-job self-healing events.
+    topics:
+      - name: platform.watchdog.heartbeat
+        description: One scheduler watchdog heartbeat emitted after a monitoring tick completes.
+        status: active
+        delivery: at_least_once
+        retention: 14d
+        producers:
+          - adr-0172-watchdog-escalation-and-stale-job-self-healing
+        payload:
+          required:
+            - checked_at
+            - active_jobs
+            - completed_jobs
+            - violation_count
+            - warning_count
+            - poll_interval_seconds
+      - name: platform.watchdog.stale_job_aborted
+        description: The scheduler watchdog aborted one running mutation workflow after it went stale.
+        status: active
+        delivery: at_least_once
+        retention: 30d
+        producers:
+          - adr-0172-watchdog-escalation-and-stale-job-self-healing
+        payload:
+          required:
+            - job_id
+            - workflow_id
+            - actor_intent_id
+            - parent_actor_intent_id
+            - reason
+            - observed
+            - limit
+            - message
+            - escalation_action
+            - requested_by
+            - windmill_status
+            - recent_action_count
 
   drift:
     description: Drift detection and reconciliation findings.

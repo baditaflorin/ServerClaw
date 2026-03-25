@@ -199,9 +199,9 @@
       "summary": "OpenBao HTTPS endpoint exposed through the Proxmox host Tailscale proxy.",
       "expected_issuer": "step-ca",
       "endpoint": {
-        "host": "100.118.189.95",
+        "host": "100.64.0.1",
         "port": 8200,
-        "server_name": "100.118.189.95"
+        "server_name": "100.64.0.1"
       },
       "policy": {
         "warn_days": 21,
@@ -220,10 +220,10 @@
         "certificate_file": "/opt/openbao/tls/server.crt",
         "key_file": "/opt/openbao/tls/server.key",
         "root_file": "/opt/step-ca/home/certs/root_ca.crt",
-        "subject": "100.118.189.95",
+        "subject": "100.64.0.1",
         "sans": [
           "10.10.10.20",
-          "100.118.189.95"
+          "100.64.0.1"
         ],
         "ca_url": "https://10.10.10.20:9000",
         "provisioner": "services",
@@ -238,9 +238,9 @@
       "summary": "Portainer HTTPS endpoint exposed through the Proxmox host Tailscale proxy.",
       "expected_issuer": "any",
       "endpoint": {
-        "host": "100.118.189.95",
+        "host": "100.64.0.1",
         "port": 9444,
-        "server_name": "100.118.189.95"
+        "server_name": "100.64.0.1"
       },
       "policy": {
         "warn_days": 21,
@@ -284,7 +284,7 @@
       "summary": "Proxmox manager HTTPS certificate on the host listener.",
       "expected_issuer": "letsencrypt",
       "endpoint": {
-        "host": "100.118.189.95",
+        "host": "100.64.0.1",
         "port": 8006,
         "server_name": "proxmox.lv3.org"
       },
@@ -306,9 +306,9 @@
       "summary": "step-ca HTTPS endpoint exposed through the Proxmox host Tailscale proxy.",
       "expected_issuer": "step-ca",
       "endpoint": {
-        "host": "100.118.189.95",
+        "host": "100.64.0.1",
         "port": 9443,
-        "server_name": "100.118.189.95"
+        "server_name": "100.64.0.1"
       },
       "policy": {
         "warn_days": 21,

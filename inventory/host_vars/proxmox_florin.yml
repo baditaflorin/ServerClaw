@@ -1,7 +1,7 @@
 host_public_hostname: Debian-trixie-latest-amd64-base
 management_interface: enp7s0
 management_ipv4: 65.108.75.123
-management_tailscale_ipv4: 100.118.189.95
+management_tailscale_ipv4: 100.64.0.1
 management_ipv4_cidr: 26
 management_gateway4: 65.108.75.65
 management_ipv6: 2a01:4f9:6b:4b47::2
@@ -49,7 +49,10 @@ platform_port_assignments:
   portainer_host_proxy_port: 9444
   step_ca_api_port: 9000
   step_ca_proxy_port: 9443
+  headscale_http_port: 8080
 proxmox_tailscale_hostname: proxmox-florin-subnet-router
+proxmox_tailscale_login_server: https://headscale.lv3.org
+proxmox_tailscale_tags: []
 proxmox_tailscale_advertise_routes:
   - "{{ proxmox_internal_network }}"
 proxmox_tailscale_operator_target_guest: 10.10.10.30
@@ -620,6 +623,27 @@ lv3_service_topology:
       blocked_exact_paths:
         - path: /api/health
           status: 404
+  headscale:
+    service_name: headscale
+    owning_vm: proxmox_florin
+    private_ip: "{{ hostvars['proxmox_florin'].proxmox_internal_ipv4 }}"
+    public_hostname: headscale.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: headscale
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: "http://{{ hostvars['proxmox_florin'].proxmox_internal_ipv4 }}:{{ hostvars['proxmox_florin'].platform_port_assignments.headscale_http_port }}"
   alertmanager:
     service_name: alertmanager
     owning_vm: monitoring-lv3

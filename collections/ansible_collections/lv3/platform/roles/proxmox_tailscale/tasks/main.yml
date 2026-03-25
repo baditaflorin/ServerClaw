@@ -56,6 +56,27 @@
   vars:
     common_systemd_unit_name: tailscaled
 
+- name: Ensure IPv4 forwarding is enabled for subnet routing
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "1"
+    state: present
+    sysctl_set: true
+    reload: true
+  loop:
+    - name: net.ipv4.ip_forward
+    - name: net.ipv4.conf.all.forwarding
+    - name: net.ipv4.conf.default.forwarding
+
+- name: Ensure forwarding is enabled on Tailscale routing interfaces
+  ansible.posix.sysctl:
+    name: "net.ipv4.conf.{{ item }}.forwarding"
+    value: "1"
+    state: present
+    sysctl_set: true
+    reload: true
+  loop: "{{ proxmox_tailscale_forwarding_interfaces }}"
+
 - name: Install the LV3 Tailscale helper
   ansible.builtin.template:
     src: lv3-tailscale-up.sh.j2

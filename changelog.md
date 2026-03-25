@@ -12,6 +12,8 @@ Versioned release notes live under [docs/release-notes/README.md](/Users/live/Do
 
 ## Unreleased
 
+- Implement ADR 0144 by moving the management mesh control plane to repo-managed Headscale, publishing `headscale.lv3.org`, and updating canonical host access to `100.64.0.1`.
+
 ## Latest Release
 
 - [0.146.2 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.146.2.md)
