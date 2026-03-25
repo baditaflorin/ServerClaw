@@ -63,7 +63,7 @@ groups:
 
       - alert: CertificateExpiringSoon
         expr: |
-          (probe_ssl_earliest_cert_expiry{service=~"grafana|keycloak|mail_platform|portainer|step_ca|uptime_kuma"} - time())
+          (probe_ssl_earliest_cert_expiry{service=~"grafana|keycloak|mail_platform|portainer|step_ca|uptime_kuma|vaultwarden"} - time())
           < (14 * 24 * 60 * 60)
         for: 15m
         labels:

@@ -647,6 +647,42 @@
       }
     },
     {
+      "id": "vaultwarden",
+      "name": "Vaultwarden",
+      "description": "Private Bitwarden-compatible credential vault for operator-managed passwords, recovery codes, and TOTP material.",
+      "category": "security",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "https://vault.lv3.org",
+      "subdomain": "vault.lv3.org",
+      "exposure": "private-only",
+      "health_probe_id": "vaultwarden",
+      "image_catalog_ids": [
+        "vaultwarden_runtime"
+      ],
+      "secret_catalog_ids": [
+        "vaultwarden_admin_token",
+        "vaultwarden_database_password"
+      ],
+      "adr": "0147",
+      "runbook": "docs/runbooks/configure-vaultwarden.md",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-vaultwarden/lv3-vaultwarden",
+      "tags": [
+        "credentials",
+        "totp",
+        "vault",
+        "private"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://vault.lv3.org",
+          "subdomain": "vault.lv3.org"
+        }
+      }
+    },
+    {
       "id": "postgres",
       "name": "PostgreSQL",
       "description": "Managed high-availability PostgreSQL service for control-plane and future application state.",

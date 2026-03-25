@@ -82,7 +82,7 @@ domains:
             - severity
 
   security:
-    description: Security posture summaries and critical findings.
+    description: Security posture summaries plus high and critical findings.
     topics:
       - name: platform.security.report
         description: One generated security posture report summary.
@@ -117,6 +117,19 @@ domains:
         retention: 90d
         producers:
           - adr-0102-security-posture-reporting
+        payload:
+          required:
+            - event
+            - kind
+            - generated_at
+      - name: platform.security.high-finding
+        description: One high-severity security finding emitted from posture or public-surface scans.
+        status: active
+        delivery: at_least_once
+        retention: 90d
+        producers:
+          - adr-0102-security-posture-reporting
+          - adr-0142-public-surface-automated-security-scan
         payload:
           required:
             - event

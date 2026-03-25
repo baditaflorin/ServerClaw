@@ -192,6 +192,15 @@
       "adr": "0055"
     },
     {
+      "id": "vaultwarden",
+      "service": "vaultwarden",
+      "name": "Vaultwarden",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "security",
+      "adr": "0147"
+    },
+    {
       "id": "postgres",
       "service": "postgres",
       "name": "Postgres",
@@ -414,6 +423,18 @@
       "to": "uptime_kuma",
       "type": "hard",
       "description": "The public status page is rendered by the Uptime Kuma runtime and cannot function if that service is unavailable."
+    },
+    {
+      "from": "vaultwarden",
+      "to": "postgres",
+      "type": "hard",
+      "description": "Vaultwarden stores encrypted vault metadata and shared credential state in PostgreSQL."
+    },
+    {
+      "from": "vaultwarden",
+      "to": "step_ca",
+      "type": "startup_only",
+      "description": "Vaultwarden uses step-ca issued private TLS certificates for the Tailscale-only HTTPS surface and managed renewal path."
     },
     {
       "from": "windmill",

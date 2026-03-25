@@ -1,0 +1,23 @@
+services:
+  vaultwarden:
+    image: {{ vaultwarden_image }}
+    container_name: {{ vaultwarden_container_name }}
+    restart: unless-stopped
+    environment:
+      DOMAIN: {{ vaultwarden_public_base_url }}
+      DATABASE_URL: postgresql://{{ vaultwarden_database_user }}:{{ vaultwarden_database_password }}@{{ vaultwarden_database_host }}:{{ vaultwarden_database_port }}/{{ vaultwarden_database_name }}?sslmode=disable
+      ADMIN_TOKEN: {{ vaultwarden_admin_token_hash }}
+      SIGNUPS_ALLOWED: "{{ 'true' if vaultwarden_signups_allowed else 'false' }}"
+      INVITATIONS_ALLOWED: "{{ 'true' if vaultwarden_invitations_allowed else 'false' }}"
+      ORG_CREATION_USERS: {{ vaultwarden_org_creation_users | join(',') }}
+      SENDS_ALLOWED: "{{ 'true' if vaultwarden_sends_allowed else 'false' }}"
+      WEBSOCKET_ENABLED: "{{ 'true' if vaultwarden_websocket_enabled else 'false' }}"
+      ROCKET_ADDRESS: 0.0.0.0
+      ROCKET_PORT: "{{ vaultwarden_https_port }}"
+      ROCKET_TLS: '{certs="{{ vaultwarden_tls_server_cert_file }}",key="{{ vaultwarden_tls_server_key_file }}"}'
+    ports:
+      - "{{ vaultwarden_https_port }}:{{ vaultwarden_https_port }}"
+    volumes:
+      - {{ vaultwarden_data_dir }}:/data
+      - {{ vaultwarden_tls_server_cert_host_file }}:{{ vaultwarden_tls_server_cert_file }}:ro
+      - {{ vaultwarden_tls_server_key_host_file }}:{{ vaultwarden_tls_server_key_file }}:ro

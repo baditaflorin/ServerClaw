@@ -507,6 +507,62 @@ groups:
           slo_id: netbox-availability
           service_id: netbox
           indicator: availability
+      - record: slo:vaultwarden_availability:success_ratio_5m
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="vaultwarden-availability"}[5m])
+        labels:
+          slo_id: vaultwarden-availability
+          service_id: vaultwarden
+          indicator: availability
+      - record: slo:vaultwarden_availability:success_ratio_1h
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="vaultwarden-availability"}[1h])
+        labels:
+          slo_id: vaultwarden-availability
+          service_id: vaultwarden
+          indicator: availability
+      - record: slo:vaultwarden_availability:success_ratio_30d
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="vaultwarden-availability"}[30d])
+        labels:
+          slo_id: vaultwarden-availability
+          service_id: vaultwarden
+          indicator: availability
+      - record: slo:vaultwarden_availability:error_rate_5m
+        expr: 1 - slo:vaultwarden_availability:success_ratio_5m
+        labels:
+          slo_id: vaultwarden-availability
+          service_id: vaultwarden
+          indicator: availability
+      - record: slo:vaultwarden_availability:error_rate_1h
+        expr: 1 - slo:vaultwarden_availability:success_ratio_1h
+        labels:
+          slo_id: vaultwarden-availability
+          service_id: vaultwarden
+          indicator: availability
+      - record: slo:vaultwarden_availability:error_rate_30d
+        expr: 1 - slo:vaultwarden_availability:success_ratio_30d
+        labels:
+          slo_id: vaultwarden-availability
+          service_id: vaultwarden
+          indicator: availability
+      - record: slo:vaultwarden_availability:budget_remaining
+        expr: clamp_min(1 - (slo:vaultwarden_availability:error_rate_30d / 0.005000),
+          0)
+        labels:
+          slo_id: vaultwarden-availability
+          service_id: vaultwarden
+          indicator: availability
+      - record: slo:vaultwarden_availability:burn_rate_1h
+        expr: slo:vaultwarden_availability:error_rate_1h / 0.005000
+        labels:
+          slo_id: vaultwarden-availability
+          service_id: vaultwarden
+          indicator: availability
+      - record: slo:vaultwarden_availability:time_to_budget_exhaustion_days
+        expr: (slo:vaultwarden_availability:budget_remaining * 30) / clamp_min(slo:vaultwarden_availability:burn_rate_1h,
+          0.001)
+        labels:
+          slo_id: vaultwarden-availability
+          service_id: vaultwarden
+          indicator: availability
       - record: slo:platform_context_api_availability:success_ratio_5m
         expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="platform-context-api-availability"}[5m])
         labels:

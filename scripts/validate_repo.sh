@@ -232,6 +232,7 @@ validate_health_probes() {
     netbox_runtime
     open_webui_runtime
     portainer_runtime
+    vaultwarden_runtime
     proxmox_ntopng
   )
 
