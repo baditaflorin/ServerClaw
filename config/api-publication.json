@@ -111,6 +111,15 @@
       "approval_notes": "This conversational operator surface stays private and requires approved operator credentials; do not publish it through the public edge."
     },
     {
+      "id": "ollama-local-inference-api",
+      "title": "Ollama local inference API",
+      "lane": "api",
+      "lane_surface_ref": "ollama-local-inference-api",
+      "publication_tier": "internal-only",
+      "reachability": "Reachable only on the LV3 private guest network at docker-runtime-lv3:11434.",
+      "approval_notes": "This private local-inference surface is consumed only by repo-managed internal callers such as Open WebUI and bounded goal-compiler fallback routing; do not publish it through public DNS or the NGINX edge."
+    },
+    {
       "id": "platform-context-api",
       "title": "Platform context API",
       "lane": "api",

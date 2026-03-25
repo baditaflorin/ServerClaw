@@ -1,0 +1,136 @@
+---
+- name: Validate Ollama runtime inputs
+  ansible.builtin.assert:
+    that:
+      - ollama_runtime_site_dir | length > 0
+      - ollama_runtime_data_dir | length > 0
+      - ollama_runtime_model_dir | length > 0
+      - ollama_runtime_compose_file | length > 0
+      - ollama_runtime_container_name | length > 0
+      - ollama_runtime_image | length > 0
+      - ollama_runtime_port | int > 0
+      - ollama_runtime_base_url | length > 0
+      - ollama_runtime_model_catalog_path | length > 0
+      - ollama_runtime_default_model | length > 0
+    fail_msg: "ollama_runtime requires compose paths, image, service URLs, and a model catalog."
+
+- name: Load the repo-managed Ollama model catalog
+  ansible.builtin.set_fact:
+    ollama_runtime_model_catalog: "{{ lookup('ansible.builtin.file', ollama_runtime_model_catalog_path) | from_yaml }}"
+
+- name: Validate the Ollama model catalog structure
+  ansible.builtin.assert:
+    that:
+      - ollama_runtime_model_catalog is mapping
+      - ollama_runtime_model_catalog.models is sequence
+    fail_msg: "{{ ollama_runtime_model_catalog_path }} must define a models list."
+
+- name: Derive the Ollama startup model set
+  ansible.builtin.set_fact:
+    ollama_runtime_startup_models: >-
+      {{
+        ollama_runtime_model_catalog.models
+        | selectattr('pull_on_startup', 'defined')
+        | selectattr('pull_on_startup')
+        | map(attribute='name')
+        | list
+      }}
+
+- name: Ensure the Ollama directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - "{{ ollama_runtime_site_dir }}"
+    - "{{ ollama_runtime_data_dir }}"
+    - "{{ ollama_runtime_model_dir }}"
+
+- name: Render the Ollama compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ ollama_runtime_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the Ollama image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ ollama_runtime_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ ollama_runtime_site_dir }}"
+  register: ollama_runtime_pull
+  changed_when: >-
+    'Pulling' in ollama_runtime_pull.stdout
+    or 'Downloaded newer image' in ollama_runtime_pull.stdout
+    or 'Pull complete' in ollama_runtime_pull.stdout
+
+- name: Start the Ollama runtime
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ ollama_runtime_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ ollama_runtime_site_dir }}"
+  register: ollama_runtime_up
+  changed_when: >-
+    'Creating' in ollama_runtime_up.stdout
+    or 'Recreating' in ollama_runtime_up.stdout
+    or 'Starting' in ollama_runtime_up.stdout
+
+- name: Wait for Ollama to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ ollama_runtime_port }}"
+    delay: 0
+    timeout: 180
+
+- name: Wait for the Ollama version endpoint
+  ansible.builtin.uri:
+    url: "{{ ollama_runtime_base_url }}/api/version"
+    method: GET
+    status_code: 200
+  register: ollama_runtime_version
+  retries: 24
+  delay: 5
+  until: ollama_runtime_version.status == 200
+  changed_when: false
+
+- name: Pull the declared startup Ollama models
+  ansible.builtin.uri:
+    url: "{{ ollama_runtime_base_url }}/api/pull"
+    method: POST
+    body_format: json
+    body:
+      model: "{{ item }}"
+      stream: false
+    status_code: 200
+    timeout: 3600
+  loop: "{{ ollama_runtime_startup_models }}"
+  when: ollama_runtime_startup_models | length > 0
+  register: ollama_runtime_model_pull
+  changed_when: true
+
+- name: Verify the default Ollama model is present
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ ollama_runtime_container_name }}"
+      - ollama
+      - show
+      - "{{ ollama_runtime_default_model }}"
+  register: ollama_runtime_default_model_show
+  changed_when: false

@@ -39,6 +39,7 @@
 - cert.revoked
 
 # Observability
+- llm.inference
 - alert.fired
 - graph.health_propagated
 - loop.state_transition

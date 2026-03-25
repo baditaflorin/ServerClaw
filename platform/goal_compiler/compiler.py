@@ -35,6 +35,12 @@ _WORLD_STATE_MODULE = _LOADER_MODULE.load_repo_package(
 )
 WorldStateClient = _WORLD_STATE_MODULE.WorldStateClient
 WorldStateUnavailable = _WORLD_STATE_MODULE.WorldStateUnavailable
+_LLM_MODULE = _LOADER_MODULE.load_repo_package(
+    "lv3_goal_compiler_llm",
+    Path(__file__).resolve().parents[1] / "llm",
+)
+LLMUnavailableError = _LLM_MODULE.LLMUnavailableError
+PlatformLLMClient = _LLM_MODULE.PlatformLLMClient
 
 
 COMPILER_VERSION = "goal-compiler/0.1.0"
@@ -73,7 +79,7 @@ class GoalCompilationError(Exception):
 
 
 class GoalCompiler:
-    def __init__(self, repo_root: Path | str, *, stderr: Any = sys.stderr) -> None:
+    def __init__(self, repo_root: Path | str, *, stderr: Any = sys.stderr, llm_client: Any | None = None) -> None:
         self.repo_root = Path(repo_root)
         self.stderr = stderr
         default_repo_root = Path(__file__).resolve().parents[2]
@@ -87,6 +93,8 @@ class GoalCompiler:
         self.aliases = load_alias_config(aliases_path)
         self.world_state = WorldStateClient(self.repo_root)
         self.health = HealthCompositeClient(self.repo_root)
+        self.llm_client = llm_client or self._build_llm_client()
+        self.llm_client = llm_client or self._build_llm_client()
 
     def compile(
         self,
@@ -101,12 +109,25 @@ class GoalCompiler:
             return direct_workflow
 
         matched = match_rule(normalized, self.rules)
+        llm_normalized: str | None = None
         if matched is None:
+            llm_normalized = self._try_llm_normalize(raw_input, normalized)
+            if llm_normalized and llm_normalized != normalized:
+                direct_workflow = self._match_direct_workflow(llm_normalized, dispatch_args=dispatch_args)
+                if direct_workflow is not None:
+                    return direct_workflow
+                matched = match_rule(llm_normalized, self.rules)
+                if matched is not None:
+                    normalized = llm_normalized
+        if matched is None:
+            details = {"normalized_input": normalized}
+            if llm_normalized and llm_normalized != normalized:
+                details["llm_normalized_input"] = llm_normalized
             raise GoalCompilationError(
                 code="PARSE_ERROR",
                 message=f"Unrecognised instruction '{raw_input.strip()}'",
                 raw_input=raw_input,
-                details={"normalized_input": normalized},
+                details=details,
             )
         rule, captures = matched
         captures = {key: value.strip() for key, value in captures.items() if value is not None}
@@ -205,6 +226,28 @@ class GoalCompiler:
         for source, target in sorted(self.aliases.service_aliases.items(), key=lambda item: len(item[0]), reverse=True):
             normalized = re.sub(rf"\b{re.escape(source)}\b", target, normalized)
         return normalized
+
+    def _try_llm_normalize(self, raw_input: str, normalized: str) -> str | None:
+        if self.llm_client is None or not raw_input.strip():
+            return None
+        prompt = (
+            "Normalize this LV3 platform instruction to the shortest canonical command form. "
+            "Return only the rewritten command in lowercase with no commentary.\n"
+            f"Instruction: {raw_input.strip()}\n"
+            f"Existing normalized form: {normalized}"
+        )
+        try:
+            candidate = self.llm_client.complete(
+                prompt,
+                use_case="goal_compiler_normalisation",
+                max_tokens=48,
+                temperature=0.0,
+            )
+        except LLMUnavailableError:
+            return None
+        except Exception:
+            return None
+        return self.normalize(candidate)
 
     def _match_direct_workflow(
         self,
@@ -409,6 +452,15 @@ class GoalCompiler:
             "host_and_guest_live": RiskClass.HIGH,
         }
         return mapping.get(str(live_impact), RiskClass.MEDIUM)
+
+    def _build_llm_client(self) -> Any | None:
+        model_catalog_path = self.repo_root / "config" / "ollama-models.yaml"
+        if not model_catalog_path.exists():
+            return None
+        try:
+            return PlatformLLMClient(self.repo_root)
+        except Exception:
+            return None
 
     def _utc_now(self) -> str:
         return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")

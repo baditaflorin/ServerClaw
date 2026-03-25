@@ -693,6 +693,35 @@
         }
       }
     },
+    "ollama": {
+      "service_name": "ollama",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "ollama_runtime",
+      "verify_file": "roles/ollama_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The Ollama version endpoint responds on the local listener.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:11434/api/version",
+        "method": "GET",
+        "expected_status": [200]
+      },
+      "readiness": {
+        "kind": "command",
+        "description": "The repo-managed default Ollama model is available inside the runtime container.",
+        "timeout_seconds": 60,
+        "retries": 1,
+        "delay_seconds": 0,
+        "argv": ["docker", "exec", "ollama", "ollama", "show", "llama3.2:3b"],
+        "success_rc": 0
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "The Ollama inference API remains private to the docker-runtime VM and internal guest network."
+      }
+    },
     "platform_context_api": {
       "service_name": "platform-context-api",
       "owning_vm": "docker-runtime-lv3",

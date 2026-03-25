@@ -141,6 +141,14 @@
       "requires_compose_secrets": false,
       "suppression_preset": "legacy-service"
     },
+    "ollama": {
+      "service_type": "compose",
+      "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_secrets": false,
+      "requires_compose_secrets": false,
+      "suppression_preset": "legacy-service"
+    },
     "open_webui": {
       "service_type": "compose",
       "requires_subdomain": false,

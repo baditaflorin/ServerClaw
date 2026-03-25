@@ -29,6 +29,14 @@ extra_nodes:
       source: manifest
 
 extra_edges:
+  - from: service:open_webui
+    to: service:ollama
+    edge_kind: depends_on
+    metadata:
+      source: manifest
+      relationship: local_inference
+      strength: hard
+      description: Open WebUI uses the private Ollama runtime for repo-managed local model access.
   - from: service:grafana
     to: service:loki
     edge_kind: depends_on

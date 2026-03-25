@@ -1,0 +1,35 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the private Ollama runtime and declared local models.
+    options:
+      ollama_runtime_site_dir:
+        type: path
+        required: true
+      ollama_runtime_data_dir:
+        type: path
+        required: true
+      ollama_runtime_model_dir:
+        type: path
+        required: true
+      ollama_runtime_compose_file:
+        type: path
+        required: true
+      ollama_runtime_container_name:
+        type: str
+        required: true
+      ollama_runtime_image:
+        type: str
+        required: true
+      ollama_runtime_port:
+        type: int
+        required: true
+      ollama_runtime_base_url:
+        type: str
+        required: true
+      ollama_runtime_model_catalog_path:
+        type: path
+        required: true
+      ollama_runtime_default_model:
+        type: str
+        required: true

@@ -2272,6 +2272,55 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-ollama": {
+      "description": "Deploy the private Ollama runtime on docker-runtime-lv3, sync the repo-managed startup model catalog, and verify local inference health.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-ollama",
+        "command": "make converge-ollama"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": []
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-ollama"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-ollama.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/ollama.yml",
+        "roles/ollama_runtime",
+        "config/ollama-models.yaml",
+        "inventory/group_vars/all.yml",
+        "inventory/host_vars/proxmox_florin.yml",
+        "scripts/ollama_probe.py"
+      ],
+      "outputs": [
+        "A private Ollama inference runtime on docker-runtime-lv3 with the repo-managed startup models available for goal-compiler and Open WebUI local inference."
+      ],
+      "verification_commands": [
+        "make syntax-check-ollama",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'curl -fsS http://127.0.0.1:11434/api/version'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/ollama_probe.py --base-url http://127.0.0.1:11434 --runs 3 --json'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 3600,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-ntfy": {
       "description": "Deploy the private ntfy paging gateway on docker-runtime-lv3 and persist the repo-managed credential used by Alertmanager critical routing.",
       "lifecycle_status": "active",

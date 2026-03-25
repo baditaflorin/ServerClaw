@@ -1,6 +1,6 @@
 repo_version: 0.106.1
 platform_version: 0.40.0
-container_image_catalog_path: "{{ playbook_dir }}/../config/image-catalog.json"
+container_image_catalog_path: "{{ inventory_dir | dirname }}/config/image-catalog.json"
 container_image_catalog: "{{ lookup('file', container_image_catalog_path) | from_json }}"
 
 proxmox_release_major: 9
@@ -152,11 +152,18 @@ openbao_tls_dir: /opt/openbao/tls
 windmill_site_dir: /opt/windmill
 windmill_secret_dir: /etc/lv3/windmill
 windmill_env_file: /run/lv3-secrets/windmill/runtime.env
+ollama_version: 0.18.2
+ollama_image: "{{ container_image_catalog.images.ollama_runtime.ref }}"
+ollama_default_model: llama3.2:3b
 open_webui_version: 0.8.9
 open_webui_image: "{{ container_image_catalog.images.open_webui_runtime.ref }}"
 open_webui_admin_email: ops@lv3.org
 open_webui_admin_name: Florin Badita
 open_webui_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ open_webui_host_proxy_port }}"
+open_webui_enable_ollama_api: true
+open_webui_ollama_base_url: "http://host.docker.internal:11434"
+open_webui_default_models: "{{ ollama_default_model }}"
+open_webui_default_pinned_models: "{{ ollama_default_model }}"
 platform_context_host_proxy_port: 8010
 platform_context_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ platform_context_host_proxy_port }}"
 platform_context_embedding_backend: token-hash

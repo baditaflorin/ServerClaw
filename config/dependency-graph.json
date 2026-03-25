@@ -142,9 +142,18 @@
       "service": "open_webui",
       "name": "Open WebUI",
       "vm": "docker-runtime-lv3",
-      "tier": 1,
+      "tier": 2,
       "category": "automation",
       "adr": "0060"
+    },
+    {
+      "id": "ollama",
+      "service": "ollama",
+      "name": "Ollama",
+      "vm": "docker-runtime-lv3",
+      "tier": 1,
+      "category": "automation",
+      "adr": "0145"
     },
     {
       "id": "openbao",
@@ -345,6 +354,12 @@
       "to": "openbao",
       "type": "startup_only",
       "description": "NetBox receives its database and Redis credentials from the OpenBao agent before the application containers start."
+    },
+    {
+      "from": "open_webui",
+      "to": "ollama",
+      "type": "hard",
+      "description": "Open WebUI routes the repo-managed local model connector to the private Ollama runtime on docker-runtime-lv3."
     },
     {
       "from": "open_webui",

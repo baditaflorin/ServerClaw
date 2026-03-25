@@ -118,3 +118,8 @@ argument_specs:
         required: false
         description:
           - Whether Ollama-compatible upstream API access is enabled.
+      open_webui_ollama_base_url:
+        type: str
+        required: false
+        description:
+          - Base URL used by Open WebUI for the local Ollama connector.

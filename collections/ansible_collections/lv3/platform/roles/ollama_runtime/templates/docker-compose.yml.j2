@@ -1,0 +1,11 @@
+services:
+  ollama:
+    image: {{ ollama_runtime_image }}
+    container_name: {{ ollama_runtime_container_name }}
+    restart: unless-stopped
+    ports:
+      - "{{ ollama_runtime_port }}:11434"
+    volumes:
+      - {{ ollama_runtime_model_dir }}:/root/.ollama
+    mem_limit: {{ ollama_runtime_memory_limit }}
+    cpus: "{{ ollama_runtime_cpu_limit }}"

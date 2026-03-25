@@ -1,0 +1,13 @@
+---
+ollama_runtime_site_dir: /opt/ollama
+ollama_runtime_data_dir: /data/ollama
+ollama_runtime_model_dir: "{{ ollama_runtime_data_dir }}/models"
+ollama_runtime_compose_file: "{{ ollama_runtime_site_dir }}/docker-compose.yml"
+ollama_runtime_container_name: ollama
+ollama_runtime_image: "{{ container_image_catalog.images.ollama_runtime.ref }}"
+ollama_runtime_port: "{{ platform_service_topology | platform_service_port('ollama', 'internal') }}"
+ollama_runtime_base_url: "{{ platform_service_topology | platform_service_url('ollama', 'internal') }}"
+ollama_runtime_model_catalog_path: "{{ inventory_dir | dirname }}/config/ollama-models.yaml"
+ollama_runtime_default_model: llama3.2:3b
+ollama_runtime_memory_limit: 8g
+ollama_runtime_cpu_limit: 4

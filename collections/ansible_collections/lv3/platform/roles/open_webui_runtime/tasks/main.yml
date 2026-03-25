@@ -14,6 +14,7 @@
       - open_webui_admin_email | length > 0
       - open_webui_internal_base_url | length > 0
       - open_webui_webui_url | length > 0
+      - (not open_webui_enable_ollama_api | bool) or (open_webui_ollama_base_url | length > 0)
       - (not open_webui_enable_oidc | bool) or (open_webui_oidc_client_id | length > 0)
       - (not open_webui_enable_oidc | bool) or (open_webui_oidc_provider_url | length > 0)
     fail_msg: >-
@@ -218,30 +219,85 @@
     or 'Downloaded newer image' in open_webui_pull.stdout
     or 'Pull complete' in open_webui_pull.stdout
 
-- name: Start the Open WebUI stack
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ open_webui_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-  args:
-    chdir: "{{ open_webui_site_dir }}"
-  register: open_webui_up
-  changed_when: >-
-    'Creating' in open_webui_up.stdout
-    or 'Recreating' in open_webui_up.stdout
-    or 'Starting' in open_webui_up.stdout
+- name: Start Open WebUI and wait for the local socket
+  block:
+    - name: Start the Open WebUI stack
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ open_webui_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ open_webui_site_dir }}"
+      register: open_webui_up
+      changed_when: >-
+        'Creating' in open_webui_up.stdout
+        or 'Recreating' in open_webui_up.stdout
+        or 'Starting' in open_webui_up.stdout
 
-- name: Wait for Open WebUI to listen locally
-  ansible.builtin.wait_for:
-    host: 127.0.0.1
-    port: "{{ open_webui_port }}"
-    delay: 0
-    timeout: 180
+    - name: Wait for Open WebUI to listen locally
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: "{{ open_webui_port }}"
+        delay: 0
+        timeout: 180
+  rescue:
+    - name: Detect stale Open WebUI compose-network startup failures
+      ansible.builtin.set_fact:
+        open_webui_missing_network_failure: >-
+          {{
+            'network ' in (open_webui_up.stderr | default(''))
+            and ' does not exist' in (open_webui_up.stderr | default(''))
+          }}
+
+    - name: Reset the stale Open WebUI compose network before retrying startup
+      ansible.builtin.shell: |
+        set -euo pipefail
+        docker compose --file "{{ open_webui_compose_file }}" down --remove-orphans >/dev/null 2>&1 || true
+        docker network rm open-webui_default >/dev/null 2>&1 || true
+        echo changed
+      args:
+        chdir: "{{ open_webui_site_dir }}"
+        executable: /bin/bash
+      register: open_webui_network_reset
+      changed_when: "'changed' in open_webui_network_reset.stdout"
+      when: open_webui_missing_network_failure | bool
+
+    - name: Recreate the full Open WebUI stack after stale-network cleanup
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ open_webui_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ open_webui_site_dir }}"
+      register: open_webui_network_retry_up
+      changed_when: >-
+        'Creating' in open_webui_network_retry_up.stdout
+        or 'Recreating' in open_webui_network_retry_up.stdout
+        or 'Starting' in open_webui_network_retry_up.stdout
+      when: open_webui_missing_network_failure | bool
+
+    - name: Wait for Open WebUI to listen locally after stale-network cleanup
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: "{{ open_webui_port }}"
+        delay: 0
+        timeout: 180
+      when: open_webui_missing_network_failure | bool
+
+    - name: Fail when Open WebUI startup failed for a reason other than stale networking
+      ansible.builtin.fail:
+        msg: "{{ open_webui_up.stderr | default('Open WebUI startup failed without stderr output.') }}"
+      when: not (open_webui_missing_network_failure | bool)
 
 - name: Wait for the Open WebUI HTTP surface
   ansible.builtin.uri:

@@ -407,6 +407,34 @@
       }
     },
     {
+      "id": "ollama",
+      "name": "Ollama",
+      "description": "Private local LLM inference runtime for platform agents and operator workbenches.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:11434",
+      "exposure": "private-only",
+      "health_probe_id": "ollama",
+      "image_catalog_ids": [
+        "ollama_runtime"
+      ],
+      "adr": "0145",
+      "runbook": "docs/runbooks/configure-ollama.md",
+      "tags": [
+        "llm",
+        "inference",
+        "private"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://10.10.10.20:11434"
+        }
+      }
+    },
+    {
       "id": "open_webui",
       "name": "Open WebUI",
       "description": "Private operator and agent workbench for governed platform interactions.",

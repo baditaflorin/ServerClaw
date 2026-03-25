@@ -34,6 +34,7 @@ open_webui_oidc_provider_name: Keycloak
 open_webui_oidc_scopes: openid email profile
 open_webui_enable_openai_api: false
 open_webui_enable_ollama_api: false
+open_webui_ollama_base_url: http://host.docker.internal:11434
 open_webui_default_models: ""
 open_webui_default_pinned_models: ""
 open_webui_audit_log_level: METADATA

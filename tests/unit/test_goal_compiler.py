@@ -100,6 +100,10 @@ def test_compile_deploy_service_with_scope_binding(compiler_repo: Path) -> None:
         {"resource": "service:netbox", "access": "write"},
         {"resource": "vm:netbox-lv3", "access": "read"},
     ]
+    assert result.intent.resource_claims == [
+        {"resource": "service:netbox", "access": "write"},
+        {"resource": "vm:netbox-lv3", "access": "read"},
+    ]
 
 
 def test_compile_alias_group_uses_group_workflow(compiler_repo: Path) -> None:
@@ -130,7 +134,6 @@ def test_compile_parse_error_is_explicit(compiler_repo: Path) -> None:
         compiler.compile("dploy netbox")
 
     assert excinfo.value.code == "PARSE_ERROR"
-
 
 def test_compile_rejects_unsafe_health(compiler_repo: Path) -> None:
     snapshot_dir = compiler_repo / ".local" / "state" / "world-state"
@@ -171,3 +174,49 @@ def test_compile_force_unsafe_health_allows_instruction(compiler_repo: Path) -> 
 
     assert result.dispatch_workflow_id == "converge-netbox"
     assert result.intent.requires_approval is True
+
+
+def test_compile_uses_llm_fallback_for_unmatched_instruction(compiler_repo: Path) -> None:
+    class FakeLLMClient:
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def complete(self, prompt: str, *, use_case: str, max_tokens: int = 128, temperature: float = 0.0) -> str:
+            self.calls += 1
+            assert use_case == "goal_compiler_normalisation"
+            assert "please ship netbox" in prompt
+            return "deploy netbox"
+
+    llm_client = FakeLLMClient()
+    compiler = GoalCompiler(compiler_repo, llm_client=llm_client)
+
+    result = compiler.compile("please ship netbox")
+
+    assert result.dispatch_workflow_id == "converge-netbox"
+    assert result.normalized_input == "deploy netbox"
+    assert llm_client.calls == 1
+
+
+def test_compile_parse_error_only_calls_llm_once(compiler_repo: Path) -> None:
+    class FakeLLMClient:
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def complete(self, prompt: str, *, use_case: str, max_tokens: int = 128, temperature: float = 0.0) -> str:
+            self.calls += 1
+            assert use_case == "goal_compiler_normalisation"
+            assert "dploy netbox" in prompt
+            return "still unknown"
+
+    llm_client = FakeLLMClient()
+    compiler = GoalCompiler(compiler_repo, llm_client=llm_client)
+
+    with pytest.raises(GoalCompilationError) as excinfo:
+        compiler.compile("dploy netbox")
+
+    assert excinfo.value.code == "PARSE_ERROR"
+    assert excinfo.value.details == {
+        "normalized_input": "dploy netbox",
+        "llm_normalized_input": "still unknown",
+    }
+    assert llm_client.calls == 1
