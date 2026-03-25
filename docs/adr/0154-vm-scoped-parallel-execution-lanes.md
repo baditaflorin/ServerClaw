@@ -2,8 +2,8 @@
 
 - Status: Accepted
 - Implementation Status: Implemented
-- Implemented In Repo Version: 0.149.0
-- Implemented In Platform Version: 0.131.0
+- Implemented In Repo Version: 0.155.0
+- Implemented In Platform Version: not yet
 - Implemented On: 2026-03-25
 - Date: 2026-03-24
 
@@ -24,7 +24,7 @@ The platform needs a declared lane catalog, a lane resolver, a shared state regi
 
 We will treat the Proxmox host plus each managed VM as an **execution lane** with explicit capacity, and the scheduler will use that lane model before it submits mutation workflows.
 
-The first production implementation lands in repo release `0.149.0` and platform version `0.131.0` with these concrete surfaces:
+The first production implementation lands in repo release `0.155.0`. The first platform version remains pending until the next successful `main` live apply reaches the production Windmill runtime with these concrete surfaces:
 
 - [`config/execution-lanes.yaml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/execution-lanes.yaml) declares the canonical lane catalog and per-lane slot count.
 - [`platform/execution_lanes/catalog.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/execution_lanes/catalog.py) resolves an intent's primary lane and dependency lanes from the service catalog, dependency graph, and optional workflow lane overrides.

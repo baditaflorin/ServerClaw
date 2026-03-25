@@ -2,9 +2,9 @@
 
 - ADR: [ADR 0154](../adr/0154-vm-scoped-parallel-execution-lanes.md)
 - Title: per-VM execution lane catalog, queueing scheduler path, and Windmill lane dispatcher
-- Status: live_applied
-- Branch: `codex/adr-0154-vm-scoped-execution-lanes`
-- Worktree: `.worktrees/adr-0154`
+- Status: merged
+- Branch: `codex/integration-0154-main-v3`
+- Worktree: `.worktrees/integration-0154-main-v2`
 - Owner: codex
 - Depends On: `adr-0044-windmill`, `adr-0075-service-capability-catalog`, `adr-0112-goal-compiler`, `adr-0119-budgeted-workflow-scheduler`, `adr-0127-intent-conflict-resolution`
 - Conflicts With: none
@@ -68,6 +68,6 @@
 
 ## Outcome
 
-- repository implementation completed in `0.149.0`
-- platform version `0.131.0` is the first live claim of ADR 0154 from `main`
-- the live Windmill runtime now owns both the lane dispatcher and the scheduler watchdog schedules
+- repository implementation completed in `0.155.0`
+- first platform version: not yet
+- live apply from this session remains blocked because the production control paths attempted for Windmill were unreachable (`100.64.0.1`, `100.118.189.95`, and `65.108.75.123`)
