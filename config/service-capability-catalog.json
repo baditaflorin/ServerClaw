@@ -246,7 +246,7 @@
       "lifecycle_status": "active",
       "vm": "docker-runtime-lv3",
       "vmid": 120,
-      "internal_url": "http://100.118.189.95:8066",
+      "internal_url": "http://100.64.0.1:8066",
       "exposure": "private-only",
       "uptime_monitor_name": "Mattermost Private",
       "health_probe_id": "mattermost",
@@ -260,7 +260,7 @@
       "environments": {
         "production": {
           "status": "active",
-          "url": "http://100.118.189.95:8066"
+          "url": "http://100.64.0.1:8066"
         }
       }
     },
@@ -272,7 +272,7 @@
       "lifecycle_status": "active",
       "vm": "docker-runtime-lv3",
       "vmid": 120,
-      "internal_url": "http://100.118.189.95:8004",
+      "internal_url": "http://100.64.0.1:8004",
       "exposure": "private-only",
       "uptime_monitor_name": "NetBox Private",
       "health_probe_id": "netbox",
@@ -294,7 +294,7 @@
       "environments": {
         "production": {
           "status": "active",
-          "url": "http://100.118.189.95:8004"
+          "url": "http://100.64.0.1:8004"
         }
       }
     },
@@ -336,7 +336,7 @@
       "category": "observability",
       "lifecycle_status": "active",
       "vm": "proxmox_florin",
-      "internal_url": "http://100.118.189.95:3001",
+      "internal_url": "http://100.64.0.1:3001",
       "exposure": "private-only",
       "health_probe_id": "ntopng",
       "adr": "0059",
@@ -349,7 +349,7 @@
       "environments": {
         "production": {
           "status": "active",
-          "url": "http://100.118.189.95:3001"
+          "url": "http://100.64.0.1:3001"
         }
       }
     },
@@ -361,7 +361,7 @@
       "lifecycle_status": "active",
       "vm": "docker-runtime-lv3",
       "vmid": 120,
-      "internal_url": "http://100.118.189.95:8008",
+      "internal_url": "http://100.64.0.1:8008",
       "exposure": "private-only",
       "uptime_monitor_name": "Open WebUI Private",
       "health_probe_id": "open_webui",
@@ -382,7 +382,7 @@
       "environments": {
         "production": {
           "status": "active",
-          "url": "http://100.118.189.95:8008"
+          "url": "http://100.64.0.1:8008"
         }
       }
     },
@@ -394,7 +394,7 @@
       "lifecycle_status": "active",
       "vm": "docker-runtime-lv3",
       "vmid": 120,
-      "internal_url": "https://100.118.189.95:8200",
+      "internal_url": "https://100.64.0.1:8200",
       "exposure": "private-only",
       "health_probe_id": "openbao",
       "image_catalog_ids": [
@@ -414,7 +414,7 @@
       "environments": {
         "production": {
           "status": "active",
-          "url": "https://100.118.189.95:8200"
+          "url": "https://100.64.0.1:8200"
         }
       }
     },
@@ -514,7 +514,7 @@
       "lifecycle_status": "active",
       "vm": "docker-runtime-lv3",
       "vmid": 120,
-      "internal_url": "http://100.118.189.95:8010",
+      "internal_url": "http://100.64.0.1:8010",
       "exposure": "private-only",
       "uptime_monitor_name": "Platform Context Private",
       "health_probe_id": "platform_context_api",
@@ -529,7 +529,7 @@
       "environments": {
         "production": {
           "status": "active",
-          "url": "http://100.118.189.95:8010"
+          "url": "http://100.64.0.1:8010"
         }
       }
     },
@@ -541,7 +541,7 @@
       "lifecycle_status": "active",
       "vm": "docker-runtime-lv3",
       "vmid": 120,
-      "internal_url": "https://100.118.189.95:9444",
+      "internal_url": "https://100.64.0.1:9444",
       "exposure": "private-only",
       "uptime_monitor_name": "Portainer Private",
       "health_probe_id": "portainer",
@@ -561,7 +561,7 @@
       "environments": {
         "production": {
           "status": "active",
-          "url": "https://100.118.189.95:9444"
+          "url": "https://100.64.0.1:9444"
         }
       }
     },
@@ -602,7 +602,7 @@
       "category": "access",
       "lifecycle_status": "active",
       "vm": "proxmox_florin",
-      "internal_url": "https://100.118.189.95:8006",
+      "internal_url": "https://100.64.0.1:8006",
       "public_url": "https://proxmox.lv3.org",
       "subdomain": "proxmox.lv3.org",
       "exposure": "informational-only",
@@ -627,6 +627,38 @@
       }
     },
     {
+      "id": "headscale",
+      "name": "Headscale",
+      "description": "Repo-managed control plane for the LV3 zero-trust mesh VPN.",
+      "category": "access",
+      "lifecycle_status": "active",
+      "vm": "proxmox_florin",
+      "internal_url": "http://10.10.10.1:8080",
+      "public_url": "https://headscale.lv3.org",
+      "subdomain": "headscale.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Headscale Public Health",
+      "health_probe_id": "headscale",
+      "secret_catalog_ids": [
+        "headscale_api_key"
+      ],
+      "adr": "0144",
+      "runbook": "docs/runbooks/configure-headscale.md",
+      "tags": [
+        "mesh",
+        "vpn",
+        "headscale",
+        "zero-trust"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://headscale.lv3.org",
+          "subdomain": "headscale.lv3.org"
+        }
+      }
+    },
+    {
       "id": "step_ca",
       "name": "step-ca",
       "description": "Private certificate authority for internal TLS and SSH certificates.",
@@ -634,7 +666,7 @@
       "lifecycle_status": "active",
       "vm": "docker-runtime-lv3",
       "vmid": 120,
-      "internal_url": "https://100.118.189.95:9443",
+      "internal_url": "https://100.64.0.1:9443",
       "exposure": "private-only",
       "uptime_monitor_name": "Step CA Private",
       "health_probe_id": "step_ca",
@@ -652,7 +684,7 @@
       "environments": {
         "production": {
           "status": "active",
-          "url": "https://100.118.189.95:9443"
+          "url": "https://100.64.0.1:9443"
         }
       }
     },
@@ -730,7 +762,7 @@
       "lifecycle_status": "active",
       "vm": "docker-runtime-lv3",
       "vmid": 120,
-      "internal_url": "http://100.118.189.95:8005",
+      "internal_url": "http://100.64.0.1:8005",
       "exposure": "private-only",
       "uptime_monitor_name": "Windmill Private",
       "health_probe_id": "windmill",
@@ -752,7 +784,7 @@
       "environments": {
         "production": {
           "status": "active",
-          "url": "http://100.118.189.95:8005"
+          "url": "http://100.64.0.1:8005"
         }
       }
     }

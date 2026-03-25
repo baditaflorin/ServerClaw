@@ -1,0 +1,39 @@
+---
+headscale_version: 0.28.0
+headscale_deb_url: "https://github.com/juanfont/headscale/releases/download/v{{ headscale_version }}/headscale_{{ headscale_version }}_linux_amd64.deb"
+headscale_deb_file: "/tmp/headscale_{{ headscale_version }}_linux_amd64.deb"
+headscale_linux_user: headscale
+headscale_linux_group: headscale
+headscale_config_dir: /etc/headscale
+headscale_config_file: /etc/headscale/config.yaml
+headscale_policy_file: /etc/headscale/acl.hujson
+headscale_policy_source_file: "{{ lookup('env', 'PWD') }}/config/headscale-acl.hujson"
+headscale_state_dir: /var/lib/headscale
+headscale_tls_cache_dir: /var/lib/headscale/cache
+headscale_database_path: /var/lib/headscale/db.sqlite
+headscale_noise_private_key_path: /var/lib/headscale/noise_private.key
+headscale_derp_private_key_path: /var/lib/headscale/derp_server_private.key
+headscale_server_url: https://headscale.lv3.org
+headscale_listen_addr: "0.0.0.0:{{ platform_port_assignments.headscale_http_port }}"
+headscale_metrics_listen_addr: 127.0.0.1:9091
+headscale_grpc_listen_addr: 127.0.0.1:50443
+headscale_unix_socket: /var/lib/headscale/headscale.sock
+headscale_prefix_v4: 100.64.0.0/10
+headscale_prefix_v6: fd7a:115c:a1e0::/48
+headscale_derp_urls:
+  - https://controlplane.tailscale.com/derpmap/default
+headscale_dns_magic: false
+headscale_dns_base_domain: mesh.lv3.internal
+headscale_dns_override_local: false
+headscale_dns_nameservers_global:
+  - 1.1.1.1
+  - 1.0.0.1
+headscale_dns_search_domains: []
+headscale_log_level: info
+headscale_randomize_client_port: false
+headscale_healthcheck_url: "http://127.0.0.1:{{ platform_port_assignments.headscale_http_port }}/health"
+headscale_public_hostname: "{{ headscale_server_url | regex_replace('^https?://', '') | regex_replace('/.*$', '') }}"
+headscale_public_edge_ipv4: "{{ proxmox_public_edge_ipv4 }}"
+headscale_api_key_local_file: "{{ lookup('env', 'PWD') }}/.local/headscale/api-key.txt"
+headscale_subnet_router_node_name: "{{ proxmox_tailscale_hostname }}"
+headscale_auto_approved_routes: "{{ proxmox_tailscale_advertise_routes }}"

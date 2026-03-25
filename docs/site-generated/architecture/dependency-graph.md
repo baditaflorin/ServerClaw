@@ -6,7 +6,7 @@ Generated from `config/dependency-graph.json`.
 
 | Tier | Services |
 | --- | --- |
-| `1` | Docker Build VM, Docker Runtime VM, Grafana, Mail Platform, NGINX Edge, Open WebUI, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Uptime Kuma, ntopng, step-ca |
+| `1` | Docker Build VM, Docker Runtime VM, Grafana, Headscale, Mail Platform, NGINX Edge, Open WebUI, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Uptime Kuma, ntopng, step-ca |
 | `2` | Changelog Portal, Developer Portal, Keycloak, Mattermost, NetBox, Public Status Page, Windmill |
 | `3` | Platform API Gateway |
 | `4` | Ops Portal |
@@ -18,6 +18,7 @@ graph TD
     docker_build["Docker Build VM\nTier 1"]
     docker_runtime["Docker Runtime VM\nTier 1"]
     grafana["Grafana\nTier 1"]
+    headscale["Headscale\nTier 1"]
     mail_platform["Mail Platform\nTier 1"]
     nginx_edge["NGINX Edge\nTier 1"]
     ntopng["ntopng\nTier 1"]
@@ -45,6 +46,7 @@ graph TD
     docs_portal -->|hard| nginx_edge
     grafana -->|soft| keycloak
     grafana -->|soft| nginx_edge
+    headscale -->|soft| nginx_edge
     keycloak -->|soft| nginx_edge
     keycloak -->|startup_only| openbao
     keycloak -->|hard| postgres

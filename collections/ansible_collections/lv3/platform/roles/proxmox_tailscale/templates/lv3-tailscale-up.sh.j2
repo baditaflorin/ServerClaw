@@ -6,6 +6,9 @@ if [ -n "${TAILSCALE_AUTH_KEY:-}" ]; then
 fi
 
 exec /usr/bin/tailscale up \
+{% if proxmox_tailscale_login_server | trim | length > 0 %}
+  --login-server="{{ proxmox_tailscale_login_server }}" \
+{% endif %}
   --hostname="{{ proxmox_tailscale_hostname }}" \
   --accept-dns={{ proxmox_tailscale_accept_dns | bool | ternary('true', 'false') }} \
   --advertise-routes="{{ proxmox_tailscale_advertise_routes | join(',') }}" \

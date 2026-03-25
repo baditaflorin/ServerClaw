@@ -181,6 +181,14 @@
       "requires_compose_secrets": false,
       "suppression_preset": "legacy-service"
     },
+    "headscale": {
+      "service_type": "vm-service",
+      "requires_subdomain": true,
+      "requires_oidc": false,
+      "requires_secrets": true,
+      "requires_compose_secrets": false,
+      "suppression_preset": "legacy-service"
+    },
     "step_ca": {
       "service_type": "compose",
       "requires_subdomain": false,

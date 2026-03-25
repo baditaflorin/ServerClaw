@@ -14,7 +14,7 @@ platform_host:
     ipv6: 2a01:4f9:6b:4b47::2
     ipv6_cidr: 64
     gateway6: fe80::1
-    tailscale_ipv4: 100.118.189.95
+    tailscale_ipv4: 100.64.0.1
   network:
     wan_bridge: vmbr0
     internal_bridge: vmbr10
@@ -50,52 +50,52 @@ platform_host:
     tailscale_operator_target_guest: 10.10.10.30
     tailscale_tcp_proxies:
       - name: ntopng
-        listen_address: 100.118.189.95
+        listen_address: 100.64.0.1
         listen_port: 3001
         upstream_host: 127.0.0.1
         upstream_port: 3000
       - name: postgres-lv3
-        listen_address: 100.118.189.95
+        listen_address: 100.64.0.1
         listen_port: 5432
         upstream_host: 10.10.10.55
         upstream_port: 5432
       - name: windmill
-        listen_address: 100.118.189.95
+        listen_address: 100.64.0.1
         listen_port: 8005
         upstream_host: 10.10.10.20
         upstream_port: 8000
       - name: mattermost
-        listen_address: 100.118.189.95
+        listen_address: 100.64.0.1
         listen_port: 8066
         upstream_host: 10.10.10.20
         upstream_port: 8065
       - name: netbox
-        listen_address: 100.118.189.95
+        listen_address: 100.64.0.1
         listen_port: 8004
         upstream_host: 10.10.10.20
         upstream_port: 8082
       - name: step-ca
-        listen_address: 100.118.189.95
+        listen_address: 100.64.0.1
         listen_port: 9443
         upstream_host: 10.10.10.20
         upstream_port: 9000
       - name: openbao
-        listen_address: 100.118.189.95
+        listen_address: 100.64.0.1
         listen_port: 8200
         upstream_host: 10.10.10.20
         upstream_port: 8200
       - name: open-webui
-        listen_address: 100.118.189.95
+        listen_address: 100.64.0.1
         listen_port: 8008
         upstream_host: 10.10.10.20
         upstream_port: 8088
       - name: platform-context-api
-        listen_address: 100.118.189.95
+        listen_address: 100.64.0.1
         listen_port: 8010
         upstream_host: 10.10.10.20
         upstream_port: 8010
       - name: portainer
-        listen_address: 100.118.189.95
+        listen_address: 100.64.0.1
         listen_port: 9444
         upstream_host: 10.10.10.20
         upstream_port: 9443
@@ -127,6 +127,7 @@ platform_ports:
   portainer_host_proxy_port: 9444
   step_ca_api_port: 9000
   step_ca_proxy_port: 9443
+  headscale_http_port: 8080
 platform_guest_catalog:
   list:
     - vmid: 110
@@ -619,6 +620,33 @@ platform_service_topology:
       tempo: http://10.10.10.40:3200
       otlp_grpc: http://10.10.10.40:4317
       otlp_http: http://10.10.10.40:4318/v1/traces
+  headscale:
+    service_name: headscale
+    owning_vm: proxmox_florin
+    private_ip: '{{ hostvars[''proxmox_florin''].proxmox_internal_ipv4 }}'
+    public_hostname: headscale.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: headscale
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://100.64.0.1:8080
+    service_id: headscale
+    ports:
+      internal: 8080
+    urls:
+      public: https://headscale.lv3.org
+      internal: http://100.64.0.1:8080
   proxmox_ui:
     service_name: proxmox-ui
     owning_vm: proxmox_florin
@@ -643,7 +671,7 @@ platform_service_topology:
       title: Proxmox Administration
       description: Proxmox administration remains private and is reached over Tailscale
         instead of being published directly on the public edge.
-      action_url: https://100.118.189.95:8006/
+      action_url: https://100.64.0.1:8006/
       action_label: Open Private Proxmox UI
       meta: Use Tailscale host access for routine Proxmox administration.
     service_id: proxmox_ui
@@ -651,7 +679,7 @@ platform_service_topology:
       controller: 8006
     urls:
       public: https://proxmox.lv3.org
-      controller: https://100.118.189.95:8006/
+      controller: https://100.64.0.1:8006/
   docker_runtime:
     service_name: docker-runtime
     owning_vm: docker-runtime-lv3
@@ -804,14 +832,14 @@ platform_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: https://100.118.189.95:9443
+      url: https://100.64.0.1:9443
     service_id: step_ca
     ports:
       internal: 9000
       controller: 9443
     urls:
       internal: https://10.10.10.20:9000
-      controller: https://100.118.189.95:9443
+      controller: https://100.64.0.1:9443
   windmill:
     service_name: windmill
     owning_vm: docker-runtime-lv3
@@ -823,14 +851,14 @@ platform_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.118.189.95:8005
+      url: http://100.64.0.1:8005
     service_id: windmill
     ports:
       internal: 8000
       controller: 8005
     urls:
       internal: http://10.10.10.20:8000
-      controller: http://100.118.189.95:8005
+      controller: http://100.64.0.1:8005
   mattermost:
     service_name: mattermost
     owning_vm: docker-runtime-lv3
@@ -842,14 +870,14 @@ platform_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.118.189.95:8066
+      url: http://100.64.0.1:8066
     service_id: mattermost
     ports:
       internal: 8065
       controller: 8066
     urls:
       internal: http://10.10.10.20:8065
-      controller: http://100.118.189.95:8066
+      controller: http://100.64.0.1:8066
   netbox:
     service_name: netbox
     owning_vm: docker-runtime-lv3
@@ -861,14 +889,14 @@ platform_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.118.189.95:8004
+      url: http://100.64.0.1:8004
     service_id: netbox
     ports:
       internal: 8082
       controller: 8004
     urls:
       internal: http://10.10.10.20:8082
-      controller: http://100.118.189.95:8004
+      controller: http://100.64.0.1:8004
   open_webui:
     service_name: open-webui
     owning_vm: docker-runtime-lv3
@@ -880,14 +908,14 @@ platform_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.118.189.95:8008
+      url: http://100.64.0.1:8008
     service_id: open_webui
     ports:
       internal: 8088
       controller: 8008
     urls:
       internal: http://10.10.10.20:8088
-      controller: http://100.118.189.95:8008
+      controller: http://100.64.0.1:8008
   api_gateway:
     service_name: api-gateway
     owning_vm: docker-runtime-lv3
@@ -927,14 +955,14 @@ platform_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.118.189.95:8010
+      url: http://100.64.0.1:8010
     service_id: platform_context_api
     ports:
       internal: 8010
       controller: 8010
     urls:
       internal: http://10.10.10.20:8010
-      controller: http://100.118.189.95:8010
+      controller: http://100.64.0.1:8010
   keycloak:
     service_name: keycloak
     owning_vm: docker-runtime-lv3
@@ -998,14 +1026,14 @@ platform_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: https://100.118.189.95:8200
+      url: https://100.64.0.1:8200
     service_id: openbao
     ports:
       internal: 8200
       controller: 8200
     urls:
       internal: https://10.10.10.20:8200
-      controller: https://100.118.189.95:8200
+      controller: https://100.64.0.1:8200
   ntopng:
     service_name: ntopng
     owning_vm: proxmox_florin
@@ -1016,14 +1044,14 @@ platform_service_topology:
       service_telemetry: true
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.118.189.95:3001
+      url: http://100.64.0.1:3001
     service_id: ntopng
     ports:
       internal: 3000
       controller: 3001
     urls:
       internal: http://127.0.0.1:3000
-      controller: http://100.118.189.95:3001
+      controller: http://100.64.0.1:3001
   portainer:
     service_name: portainer
     owning_vm: docker-runtime-lv3
@@ -1035,14 +1063,14 @@ platform_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: https://100.118.189.95:9444
+      url: https://100.64.0.1:9444
     service_id: portainer
     ports:
       internal: 9443
       controller: 9444
     urls:
       internal: https://10.10.10.20:9443
-      controller: https://100.118.189.95:9444
+      controller: https://100.64.0.1:9444
   postgres:
     service_name: postgres
     owning_vm: postgres-lv3
@@ -1066,7 +1094,7 @@ platform_service_topology:
     urls:
       public: https://database.lv3.org
       internal: postgresql://database.lv3.org:5432
-      controller: postgresql://100.118.189.95:5432
+      controller: postgresql://100.64.0.1:5432
   backup_pbs:
     service_name: backup-pbs
     owning_vm: backup-lv3
@@ -1086,6 +1114,10 @@ platform_dns_records:
       value: 65.108.75.123
       ttl: 60
     - name: grafana
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: headscale
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -1163,6 +1195,7 @@ platform_management_allowed_tcp_ports:
   - 8004
   - 9443
   - 8200
+  - 8080
   - 8005
   - 8008
   - 8066
@@ -1234,6 +1267,33 @@ public_edge_service_topology:
       tempo: http://10.10.10.40:3200
       otlp_grpc: http://10.10.10.40:4317
       otlp_http: http://10.10.10.40:4318/v1/traces
+  headscale:
+    service_name: headscale
+    owning_vm: proxmox_florin
+    private_ip: '{{ hostvars[''proxmox_florin''].proxmox_internal_ipv4 }}'
+    public_hostname: headscale.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: headscale
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://100.64.0.1:8080
+    service_id: headscale
+    ports:
+      internal: 8080
+    urls:
+      public: https://headscale.lv3.org
+      internal: http://100.64.0.1:8080
   proxmox_ui:
     service_name: proxmox-ui
     owning_vm: proxmox_florin
@@ -1258,7 +1318,7 @@ public_edge_service_topology:
       title: Proxmox Administration
       description: Proxmox administration remains private and is reached over Tailscale
         instead of being published directly on the public edge.
-      action_url: https://100.118.189.95:8006/
+      action_url: https://100.64.0.1:8006/
       action_label: Open Private Proxmox UI
       meta: Use Tailscale host access for routine Proxmox administration.
     service_id: proxmox_ui
@@ -1266,7 +1326,7 @@ public_edge_service_topology:
       controller: 8006
     urls:
       public: https://proxmox.lv3.org
-      controller: https://100.118.189.95:8006/
+      controller: https://100.64.0.1:8006/
   docker_runtime:
     service_name: docker-runtime
     owning_vm: docker-runtime-lv3
@@ -1419,14 +1479,14 @@ public_edge_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: https://100.118.189.95:9443
+      url: https://100.64.0.1:9443
     service_id: step_ca
     ports:
       internal: 9000
       controller: 9443
     urls:
       internal: https://10.10.10.20:9000
-      controller: https://100.118.189.95:9443
+      controller: https://100.64.0.1:9443
   windmill:
     service_name: windmill
     owning_vm: docker-runtime-lv3
@@ -1438,14 +1498,14 @@ public_edge_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.118.189.95:8005
+      url: http://100.64.0.1:8005
     service_id: windmill
     ports:
       internal: 8000
       controller: 8005
     urls:
       internal: http://10.10.10.20:8000
-      controller: http://100.118.189.95:8005
+      controller: http://100.64.0.1:8005
   mattermost:
     service_name: mattermost
     owning_vm: docker-runtime-lv3
@@ -1457,14 +1517,14 @@ public_edge_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.118.189.95:8066
+      url: http://100.64.0.1:8066
     service_id: mattermost
     ports:
       internal: 8065
       controller: 8066
     urls:
       internal: http://10.10.10.20:8065
-      controller: http://100.118.189.95:8066
+      controller: http://100.64.0.1:8066
   netbox:
     service_name: netbox
     owning_vm: docker-runtime-lv3
@@ -1476,14 +1536,14 @@ public_edge_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.118.189.95:8004
+      url: http://100.64.0.1:8004
     service_id: netbox
     ports:
       internal: 8082
       controller: 8004
     urls:
       internal: http://10.10.10.20:8082
-      controller: http://100.118.189.95:8004
+      controller: http://100.64.0.1:8004
   open_webui:
     service_name: open-webui
     owning_vm: docker-runtime-lv3
@@ -1495,14 +1555,14 @@ public_edge_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.118.189.95:8008
+      url: http://100.64.0.1:8008
     service_id: open_webui
     ports:
       internal: 8088
       controller: 8008
     urls:
       internal: http://10.10.10.20:8088
-      controller: http://100.118.189.95:8008
+      controller: http://100.64.0.1:8008
   api_gateway:
     service_name: api-gateway
     owning_vm: docker-runtime-lv3
@@ -1542,14 +1602,14 @@ public_edge_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.118.189.95:8010
+      url: http://100.64.0.1:8010
     service_id: platform_context_api
     ports:
       internal: 8010
       controller: 8010
     urls:
       internal: http://10.10.10.20:8010
-      controller: http://100.118.189.95:8010
+      controller: http://100.64.0.1:8010
   keycloak:
     service_name: keycloak
     owning_vm: docker-runtime-lv3
@@ -1613,14 +1673,14 @@ public_edge_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: https://100.118.189.95:8200
+      url: https://100.64.0.1:8200
     service_id: openbao
     ports:
       internal: 8200
       controller: 8200
     urls:
       internal: https://10.10.10.20:8200
-      controller: https://100.118.189.95:8200
+      controller: https://100.64.0.1:8200
   ntopng:
     service_name: ntopng
     owning_vm: proxmox_florin
@@ -1631,14 +1691,14 @@ public_edge_service_topology:
       service_telemetry: true
     access:
       kind: tailscale-tcp-proxy
-      url: http://100.118.189.95:3001
+      url: http://100.64.0.1:3001
     service_id: ntopng
     ports:
       internal: 3000
       controller: 3001
     urls:
       internal: http://127.0.0.1:3000
-      controller: http://100.118.189.95:3001
+      controller: http://100.64.0.1:3001
   portainer:
     service_name: portainer
     owning_vm: docker-runtime-lv3
@@ -1650,14 +1710,14 @@ public_edge_service_topology:
       service_telemetry: false
     access:
       kind: tailscale-tcp-proxy
-      url: https://100.118.189.95:9444
+      url: https://100.64.0.1:9444
     service_id: portainer
     ports:
       internal: 9443
       controller: 9444
     urls:
       internal: https://10.10.10.20:9443
-      controller: https://100.118.189.95:9444
+      controller: https://100.64.0.1:9444
   postgres:
     service_name: postgres
     owning_vm: postgres-lv3
@@ -1681,7 +1741,7 @@ public_edge_service_topology:
     urls:
       public: https://database.lv3.org
       internal: postgresql://database.lv3.org:5432
-      controller: postgresql://100.118.189.95:5432
+      controller: postgresql://100.64.0.1:5432
   backup_pbs:
     service_name: backup-pbs
     owning_vm: backup-lv3
@@ -1725,38 +1785,42 @@ uptime_kuma_service_topology:
 hetzner_dns_records: *id001
 platform_postgres_host: database.lv3.org
 openbao_postgres_host: database.lv3.org
-openbao_controller_url: https://100.118.189.95:8200
+openbao_controller_url: https://100.64.0.1:8200
 netbox_host_proxy_port: 8004
-netbox_controller_url: http://100.118.189.95:8004
+netbox_controller_url: http://100.64.0.1:8004
 open_webui_host_proxy_port: 8008
-open_webui_controller_url: http://100.118.189.95:8008
+open_webui_controller_url: http://100.64.0.1:8008
 api_gateway_internal_port: 8080
 api_gateway_public_url: https://api.lv3.org
 api_gateway_internal_url: http://10.10.10.20:8080
+headscale_http_port: 8080
+headscale_public_url: https://headscale.lv3.org
+headscale_internal_url: http://100.64.0.1:8080
 ntopng_proxy_port: 3001
-ntopng_operator_url: http://100.118.189.95:3001
+ntopng_operator_url: http://100.64.0.1:3001
 mattermost_server_port: 8065
 mattermost_host_proxy_port: 8066
 mattermost_private_base_url: http://10.10.10.20:8065
-mattermost_controller_url: http://100.118.189.95:8066
+mattermost_controller_url: http://100.64.0.1:8066
 platform_context_internal_port: 8010
 platform_context_host_proxy_port: 8010
 platform_context_private_url: http://10.10.10.20:8010
-platform_context_controller_url: http://100.118.189.95:8010
+platform_context_controller_url: http://100.64.0.1:8010
 portainer_host_proxy_port: 9444
-portainer_controller_url: https://100.118.189.95:9444
+portainer_controller_url: https://100.64.0.1:9444
 step_ca_api_port: 9000
 step_ca_proxy_port: 9443
 step_ca_internal_url: https://10.10.10.20:9000
-step_ca_controller_url: https://100.118.189.95:9443
+step_ca_controller_url: https://100.64.0.1:9443
 windmill_host_proxy_port: 8005
-windmill_controller_url: http://100.118.189.95:8005
+windmill_controller_url: http://100.64.0.1:8005
 monitoring_loki_push_api_url: http://10.10.10.40:3100/loki/api/v1/push
 proxmox_management_allowed_tcp_ports:
   - 3001
   - 8004
   - 9443
   - 8200
+  - 8080
   - 8005
   - 8008
   - 8066
