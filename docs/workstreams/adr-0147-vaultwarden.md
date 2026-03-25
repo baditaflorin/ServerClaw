@@ -49,6 +49,11 @@
 - Run `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`
 - Run the runtime and admin bootstrap checks from `docs/runbooks/configure-vaultwarden.md`
 
+## Live Apply Note
+
+- The integrated `0.147.0` mainline was pushed on 2026-03-25 and `make converge-vaultwarden` was attempted from that integrated state.
+- The first live apply is still blocked because the Proxmox host is unreachable from the controller over both `ops@100.118.189.95:22` and `ops@65.108.75.123:22`, and `https://proxmox.lv3.org:8006/api2/json` also timed out during the same window.
+
 ## Merge Criteria
 
 - the Vaultwarden runtime converges repeatably from the repo
