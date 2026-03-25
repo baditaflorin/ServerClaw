@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0165](../adr/0165-workflow-idempotency-keys-and-double-execution-prevention.md)
 - Title: Deterministic workflow idempotency keys, durable duplicate suppression, and operator-visible idempotent-hit status
-- Status: merged
+- Status: live_applied
 - Branch: `codex/live-apply-0165`
 - Worktree: `.worktrees/live-apply-0165`
 - Owner: codex
@@ -27,11 +27,18 @@
 ## Live Apply Status
 
 - Repository implementation completed and merged for release `0.153.0`
-- Live apply not completed in this turn
-- Blocker observed on 2026-03-25: the documented operator SSH path to `ops@100.118.189.95` timed out from this execution environment, so the shared Postgres migration and any controller runtime rollout from `main` could not be verified live
+- Live apply completed on 2026-03-25 from `main` commit `129b5c733d6bb2583b9ccf41ff128342053d7654`
+- Production Windmill converge now applies `migrations/0016_idempotency_store.sql` on `postgres-lv3`, verifies `platform.idempotency_records`, and tolerates the current Windmill API delete semantics plus transient control-plane reconnects during schedule probes
 
 ## Notes For The Next Assistant
 
 - the scheduler now prefers deterministic `idempotent_hit` over the older heuristic `duplicate` path when the same actor resubmits the same workflow inside the key window
-- the live rollout still needs `migrations/0016_idempotency_store.sql` applied against the shared Postgres database before the Postgres-backed path can be claimed on the platform
+- the live rollout is now verified in platform version `0.130.6`; see the live-apply receipt for the manual OpenBao unseal and the temporary OpenBao container recreate that were required while recovering pre-existing runtime drift during the converge
 - the git-common-dir file fallback already protects parallel local worktrees, so the repo behavior is still correct for controller-local development and tests
+
+## Outcome
+
+- repository implementation completed in `0.153.0`
+- first platform version: `0.130.6`
+- production `postgres-lv3` now exposes `platform.idempotency_records` for scheduler runtimes reached through the repo-managed Windmill converge path
+- this session also hardened the production Windmill live-apply path by retrying Docker activation checks, constraining generated PostgreSQL passwords to URI-safe characters, and retrying schedule probes that can briefly drop the HTTP connection during control-plane restarts

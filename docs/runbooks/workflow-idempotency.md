@@ -31,6 +31,16 @@ Apply the live Postgres schema when the runtime DSN is available:
 psql "${LV3_IDEMPOTENCY_DSN:-$LV3_LEDGER_DSN}" -f migrations/0016_idempotency_store.sql
 ```
 
+Standard production converge:
+
+```bash
+ANSIBLE_CONFIG=ansible.cfg ANSIBLE_COLLECTIONS_PATH=collections \
+  uvx --from ansible-core ansible-playbook -i inventory/hosts.yml \
+  playbooks/services/windmill.yml --limit docker-runtime-lv3,postgres-lv3
+```
+
+The committed Windmill runtime role now copies and applies `migrations/0016_idempotency_store.sql` on `postgres-lv3` during the converge, then asserts that `platform.idempotency_records` exists before the play completes.
+
 ## Runtime Model
 
 - when `LV3_IDEMPOTENCY_DSN` is set, the scheduler uses the Postgres-backed `platform.idempotency_records` table

@@ -3,7 +3,7 @@
 - Status: Accepted
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.153.0
-- Implemented In Platform Version: not yet
+- Implemented In Platform Version: 0.130.6
 - Implemented On: 2026-03-25
 - Date: 2026-03-24
 
@@ -80,7 +80,7 @@ The closure loop now passes its `trigger_ref` into the scheduler as an explicit 
 
 ### Negative / Trade-offs
 
-- the first live apply still needs the Postgres schema migration from `main`
+- the live path now depends on the Windmill converge applying `migrations/0016_idempotency_store.sql` before scheduler runtimes rely on the Postgres-backed store
 - an ambiguous submission failure can leave an `in_flight` record without a job ID until the TTL expires
 - manual shell-triggered operations that bypass the scheduler still do not benefit from this protection
 

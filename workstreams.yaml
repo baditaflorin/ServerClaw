@@ -3008,7 +3008,7 @@ workstreams:
   - id: adr-0165-workflow-idempotency
     adr: "0165"
     title: Workflow idempotency keys and double-execution prevention
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/live-apply-0165
     worktree_path: .worktrees/live-apply-0165
@@ -3034,7 +3034,7 @@ workstreams:
       - docs/runbooks/workflow-idempotency.md
       - config/ledger-event-types.yaml
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0172-watchdog-escalation
     adr: "0172"

@@ -29,9 +29,10 @@
 - name: Generate the Windmill database password
   ansible.builtin.shell: |
     set -euo pipefail
-    if [ ! -s "{{ windmill_database_password_local_file }}" ]; then
+    if [ ! -s "{{ windmill_database_password_local_file }}" ] \
+      || ! grep -Eq '^[A-Za-z0-9_-]+$' "{{ windmill_database_password_local_file }}"; then
       umask 077
-      openssl rand -base64 24 | tr -d '\n' > "{{ windmill_database_password_local_file }}"
+      python3 -c "import secrets, string; alphabet = string.ascii_letters + string.digits + '-_'; print(''.join(secrets.choice(alphabet) for _ in range(32)), end='')" > "{{ windmill_database_password_local_file }}"
       echo changed
     fi
   args:
