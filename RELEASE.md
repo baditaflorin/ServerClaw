@@ -1,12 +1,13 @@
-# Release 0.155.0
+# Release 0.157.2
 
 - Date: 2026-03-25
 
 ## Summary
-- Implement ADR 0154 VM-scoped execution lanes on top of the current lane-budget scheduler mainline, including queued lane dispatch, watchdog cleanup, and Windmill seeding updates; first reachable live apply from `main` remains pending.
+- Fix the delegated Windmill config-merge migration so the live `main` converge executes `psql` as the PostgreSQL service user instead of `root`.
+- Keep the current ADR 0165 and Windmill rollout path unblocked by aligning the delegated migration step with the existing `windmill_postgres` task model.
 
 ## Platform Impact
-- ADR 0154 VM-scoped execution lanes are merged in-repo on top of the current lane-budget scheduler mainline; first production live apply remains pending because the target control path was unreachable from this session.
+- repository version advances to `0.157.2`; platform version remains `0.130.4` until the current `main` live apply is completed and verified
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)
