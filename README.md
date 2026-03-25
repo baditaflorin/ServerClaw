@@ -92,7 +92,7 @@ The repository now also ships ADR 0142 public-surface security scanning: `make p
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.134.0` |
+| Repository version | `0.135.0` |
 | Platform version | `0.130.1` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -733,7 +733,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.134.0` |
+| Repository version | `0.135.0` |
 | Platform version | `0.130.1` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |

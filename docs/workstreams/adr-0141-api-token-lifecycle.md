@@ -61,6 +61,6 @@
 
 ## Outcome
 
-- repository implementation is complete on `main` in repo release `0.134.0`
+- repository implementation is complete on `main` in repo release `0.135.0`
 - the repo now ships the canonical token policy and inventory, the audit and exposure-response engine, Windmill wrappers, and CLI token-expiry enforcement
 - platform version remains unchanged until executable provider hooks are applied from `main` and validated live
