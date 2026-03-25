@@ -19,9 +19,13 @@ def test_role_defaults_pin_private_model_storage() -> None:
     assert defaults["ollama_runtime_default_model"] == "llama3.2:3b"
 
 
-def test_role_pulls_declared_startup_models_via_api() -> None:
+def test_role_only_pulls_missing_startup_models_via_api() -> None:
     tasks = load_tasks()
-    pull_task = next(task for task in tasks if task.get("name") == "Pull the declared startup Ollama models")
+    check_task = next(
+        task for task in tasks if task.get("name") == "Check whether declared startup Ollama models are already present"
+    )
+    pull_task = next(task for task in tasks if task.get("name") == "Pull the missing startup Ollama models")
+    assert check_task["ansible.builtin.command"]["argv"][-2:] == ["show", "{{ item }}"]
     assert pull_task["ansible.builtin.uri"]["url"] == "{{ ollama_runtime_base_url }}/api/pull"
     assert pull_task["ansible.builtin.uri"]["body"]["model"] == "{{ item }}"
 

@@ -108,7 +108,32 @@
   until: ollama_runtime_version.status == 200
   changed_when: false
 
-- name: Pull the declared startup Ollama models
+- name: Check whether declared startup Ollama models are already present
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ ollama_runtime_container_name }}"
+      - ollama
+      - show
+      - "{{ item }}"
+  loop: "{{ ollama_runtime_startup_models }}"
+  when: ollama_runtime_startup_models | length > 0
+  register: ollama_runtime_startup_model_checks
+  failed_when: false
+  changed_when: false
+
+- name: Derive the missing startup Ollama models
+  ansible.builtin.set_fact:
+    ollama_runtime_missing_startup_models: >-
+      {{
+        (ollama_runtime_startup_model_checks.results | default([]))
+        | rejectattr('rc', 'equalto', 0)
+        | map(attribute='item')
+        | list
+      }}
+
+- name: Pull the missing startup Ollama models
   ansible.builtin.uri:
     url: "{{ ollama_runtime_base_url }}/api/pull"
     method: POST
@@ -118,8 +143,8 @@
       stream: false
     status_code: 200
     timeout: 3600
-  loop: "{{ ollama_runtime_startup_models }}"
-  when: ollama_runtime_startup_models | length > 0
+  loop: "{{ ollama_runtime_missing_startup_models }}"
+  when: ollama_runtime_missing_startup_models | length > 0
   register: ollama_runtime_model_pull
   changed_when: true
 
