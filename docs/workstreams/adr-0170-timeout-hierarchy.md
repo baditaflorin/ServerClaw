@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0170](../adr/0170-platform-wide-timeout-hierarchy.md)
 - Title: Canonical timeout hierarchy, deadline propagation helpers, validation, and runtime integration
-- Status: merged
+- Status: live_applied
 - Branch: `codex/adr-0170-timeout-hierarchy`
 - Worktree: `../proxmox_florin_server-timeout-hierarchy`
 - Owner: codex
@@ -25,6 +25,13 @@
 - `python3 scripts/check_hardcoded_timeouts.py`
 - `uv run --with pytest --with pyyaml --with httpx==0.28.1 --with fastapi==0.116.1 --with cryptography==45.0.6 pytest tests/test_timeout_hierarchy.py tests/test_api_gateway.py tests/test_world_state_workers.py tests/unit/test_scheduler_budgets.py -q`
 - live replay of the API gateway and Windmill converges
+
+## Outcome
+
+- the ADR is merged to `main`; the runtime hardening needed for the first honest live apply was released in `0.159.0`
+- the integrated mainline live apply advanced platform version to `0.130.8` on 2026-03-25
+- `make converge-windmill` completed successfully after the shared OpenBao helper learned to unseal locally before runtime secret injection
+- `make converge-openbao` still returns non-zero because `postgres-replica-lv3` is SSH-unreachable in the prep play, but the OpenBao runtime verification on `docker-runtime-lv3` passed and the receipt records that remaining replica issue
 
 ## Notes For The Next Assistant
 

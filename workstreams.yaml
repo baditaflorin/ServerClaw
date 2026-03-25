@@ -3193,7 +3193,7 @@ workstreams:
   - id: adr-0170-timeout-hierarchy
     adr: "0170"
     title: Platform-wide timeout hierarchy
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0170-timeout-hierarchy
     worktree_path: ../proxmox_florin_server-timeout-hierarchy
@@ -3219,7 +3219,7 @@ workstreams:
       - config/workflow-catalog.json
       - docs/runbooks/platform-timeout-hierarchy.md
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0172-watchdog-escalation
     adr: "0172"

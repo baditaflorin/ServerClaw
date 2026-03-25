@@ -3,7 +3,7 @@
 - Status: Accepted
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.157.0
-- Implemented In Platform Version: not yet
+- Implemented In Platform Version: 0.130.8
 - Implemented On: 2026-03-25
 - Date: 2026-03-25
 
@@ -131,6 +131,9 @@ The live scheduler watchdog seeding remains owned by ADR 0172. ADR 0170 depends 
 - Repository validation now runs both [`scripts/validate_timeout_hierarchy.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_timeout_hierarchy.py) and [`scripts/check_hardcoded_timeouts.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/check_hardcoded_timeouts.py) through [`scripts/validate_repo.sh`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_repo.sh).
 - The API gateway runtime now bundles `config/timeout-hierarchy.yaml` into `/config/timeout-hierarchy.yaml` and exports `LV3_TIMEOUT_HIERARCHY_PATH` so the live container reads the same hierarchy as the repo.
 - Windmill worker checkout already syncs the `windmill/` tree from ADR 0172; ADR 0170 reuses that live path rather than introducing a second watchdog entrypoint.
+- Repository implementation first landed in repository release `0.157.0`.
+- The integrated mainline live apply for repository release `0.159.0` completed on 2026-03-25: `make converge-api-gateway` succeeded after the runtime tree-sync and config-bind hardening, and `make converge-windmill` succeeded after the shared OpenBao compose-env helper learned to unseal the local API before runtime secret injection.
+- The mainline live apply advances platform version `0.130.8`; `make converge-openbao` still ended with `postgres-replica-lv3` unreachable in the prep play, but the active OpenBao runtime verification on `docker-runtime-lv3` passed end to end and the live-apply receipt records that remaining replica issue separately.
 
 ## Boundaries
 

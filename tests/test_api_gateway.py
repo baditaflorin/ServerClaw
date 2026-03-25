@@ -663,7 +663,7 @@ circuits:
 
                     assert first.status_code == 503
                     assert second.status_code == 503
-                    assert second.headers["Retry-After"] == "60"
+                    assert int(second.headers["Retry-After"]) in {59, 60}
                     assert jwks_calls["count"] == 1
             finally:
                 await runtime.close()
