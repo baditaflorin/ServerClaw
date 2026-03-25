@@ -40,6 +40,7 @@ PORT_KEYS = (
     "netbox_server_port",
     "netbox_host_proxy_port",
     "ollama_api_port",
+    "n8n_port",
     "open_webui_port",
     "open_webui_host_proxy_port",
     "api_gateway_internal_port",
@@ -281,6 +282,9 @@ def build_service_urls(
     elif service_id == "ollama":
         urls["internal"] = service_url("http", private_ip, ports["ollama_api_port"])
         port_map["internal"] = ports["ollama_api_port"]
+    elif service_id == "n8n":
+        urls["internal"] = service_url("http", private_ip, ports["n8n_port"])
+        port_map["internal"] = ports["n8n_port"]
     elif service_id == "open_webui":
         urls["internal"] = service_url("http", private_ip, ports["open_webui_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["open_webui_host_proxy_port"])
