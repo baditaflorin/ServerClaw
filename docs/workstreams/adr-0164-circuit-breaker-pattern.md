@@ -3,7 +3,7 @@
 - ADR: [ADR 0164](../adr/0164-circuit-breaker-pattern-for-external-service-calls.md)
 - Title: Shared circuit policies and fail-fast dependency guards for Keycloak, Windmill, Ollama, and gateway NATS publishing
 - Status: merged
-- Implemented In Repo Version: 0.144.0
+- Implemented In Repo Version: 0.152.0
 - Implemented In Platform Version: not yet
 - Implemented On: 2026-03-25
 - Branch: `codex/live-apply-0164`
@@ -67,6 +67,6 @@
 
 ## Outcome
 
-- repository implementation is complete in release `0.144.0`
+- repository implementation is complete in release `0.152.0`
 - the circuit layer now protects Keycloak JWKS fetches, gateway upstream calls, NATS request-event publishing, the shared LLM client, and the Windmill scheduler and runbook executor paths
 - platform version remains unchanged until a live deployment is converged from `main` and captured with a receipt

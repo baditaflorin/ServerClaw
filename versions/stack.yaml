@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.151.0
+repo_version: 0.152.0
 platform_version: 0.130.4
 
 live_apply_evidence:
@@ -38,7 +38,6 @@ live_apply_evidence:
     secret_rotation: 2026-03-23-adr-0065-secret-rotation-live-apply
     ops_portal: 2026-03-24-adr-0133-portal-authentication-by-default-live-apply
     ollama: 2026-03-25-adr-0145-ollama-live-apply
-    headscale: 2026-03-25-adr-0144-headscale-live-apply
 
 desired_state:
   host_id: proxmox_florin
@@ -888,7 +887,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.151.0
+    current: 0.152.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.130.4
