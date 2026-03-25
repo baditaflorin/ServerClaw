@@ -121,7 +121,7 @@
       "auth": "keycloak_jwt",
       "required_role": "platform-operator",
       "strip_prefix": true,
-      "timeout_seconds": 20,
+      "timeout_seconds": 30,
       "healthcheck_path": "/alive"
     },
     {
