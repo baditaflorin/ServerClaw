@@ -413,6 +413,7 @@ sync_worktree_git_metadata() {
   )
   local common_paths=(
     config
+    objects
     packed-refs
     refs
     info
@@ -456,7 +457,7 @@ sync_worktree_git_metadata() {
   done
 
   "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" \
-    "printf '%s\n' '../common' > $(quote_shell "$remote_git_root/worktree/commondir") && printf '%s\n' '../../.git' > $(quote_shell "$remote_git_root/worktree/gitdir") && printf '%s\n' 'gitdir: .git-remote/worktree' > $(quote_shell "$WORKSPACE_ROOT/.git")" \
+    "printf '%s\n' '../common' > $(quote_shell "$remote_git_root/worktree/commondir") && printf '%s\n' $(quote_shell "$WORKSPACE_ROOT/.git") > $(quote_shell "$remote_git_root/worktree/gitdir") && printf '%s\n' 'gitdir: .git-remote/worktree' > $(quote_shell "$WORKSPACE_ROOT/.git")" \
     >/dev/null
 }
 
