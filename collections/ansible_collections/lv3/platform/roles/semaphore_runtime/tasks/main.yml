@@ -1,0 +1,337 @@
+---
+- name: Validate Semaphore runtime inputs
+  ansible.builtin.assert:
+    that:
+      - semaphore_site_dir | length > 0
+      - semaphore_data_dir | length > 0
+      - semaphore_secret_dir | length > 0
+      - semaphore_compose_file | length > 0
+      - semaphore_env_file | length > 0
+      - semaphore_server_port | int > 0
+      - semaphore_image | length > 0
+      - semaphore_container_name | length > 0
+      - semaphore_controller_url | length > 0
+      - semaphore_database_name | length > 0
+      - semaphore_database_user | length > 0
+      - semaphore_database_host | length > 0
+      - semaphore_database_password_local_file | length > 0
+      - semaphore_admin_password_local_file | length > 0
+      - semaphore_api_token_local_file | length > 0
+      - semaphore_admin_auth_local_file | length > 0
+      - semaphore_bootstrap_spec_local_file | length > 0
+    fail_msg: "semaphore_runtime requires runtime paths, database inputs, and controller-local auth paths."
+
+- name: Ensure the Semaphore database password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ semaphore_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: semaphore_database_password_local
+
+- name: Fail if the Semaphore database password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ semaphore_database_password_local_file }} is missing on the control machine.
+      Run the Semaphore PostgreSQL converge first so the runtime can connect to postgres-lv3.
+  when: not semaphore_database_password_local.stat.exists
+
+- name: Ensure the Semaphore runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - openssl
+      - tar
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the Semaphore runtime directories exist
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: directory_tree
+  vars:
+    common_directory_tree_paths:
+      - path: "{{ semaphore_site_dir }}"
+        mode: "0755"
+      - path: "{{ semaphore_data_dir }}"
+        mode: "0755"
+      - path: "{{ semaphore_secret_dir }}"
+        mode: "0700"
+      - path: "{{ semaphore_repo_checkout_host_path }}"
+        mode: "0755"
+
+- name: Create a local staging archive path for the Semaphore repo checkout
+  ansible.builtin.tempfile:
+    state: file
+    suffix: .tar.gz
+  delegate_to: localhost
+  become: false
+  register: semaphore_repo_checkout_archive_local
+
+- name: Build the local staging archive for the Semaphore repo checkout
+  ansible.builtin.shell: |
+    set -euo pipefail
+    tar -C "{{ semaphore_repo_checkout_repo_root_local_dir }}" -czf "{{ semaphore_repo_checkout_archive_local.path }}" {{ semaphore_repo_checkout_sync_paths | map('quote') | join(' ') }}
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  changed_when: false
+
+- name: Copy the staged Semaphore repo checkout archive to the guest
+  ansible.builtin.copy:
+    src: "{{ semaphore_repo_checkout_archive_local.path }}"
+    dest: "{{ semaphore_site_dir }}/repo-checkout.tar.gz"
+    mode: "0600"
+
+- name: Expand the staged Semaphore repo checkout on the guest
+  ansible.builtin.unarchive:
+    src: "{{ semaphore_site_dir }}/repo-checkout.tar.gz"
+    dest: "{{ semaphore_repo_checkout_host_path }}"
+    remote_src: true
+
+- name: Remove the staged Semaphore repo checkout archive from the guest
+  ansible.builtin.file:
+    path: "{{ semaphore_site_dir }}/repo-checkout.tar.gz"
+    state: absent
+
+- name: Remove the local staging archive for the Semaphore repo checkout
+  ansible.builtin.file:
+    path: "{{ semaphore_repo_checkout_archive_local.path }}"
+    state: absent
+  delegate_to: localhost
+  become: false
+
+- name: Ensure the local Semaphore artifact directory exists
+  ansible.builtin.file:
+    path: "{{ semaphore_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Generate the Semaphore admin password
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ semaphore_admin_password_local_file }}" ]; then
+      umask 077
+      openssl rand -base64 24 | tr -d '\n' > "{{ semaphore_admin_password_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: semaphore_admin_password_generation
+  changed_when: "'changed' in semaphore_admin_password_generation.stdout"
+  no_log: true
+
+- name: Read the Semaphore admin password
+  ansible.builtin.slurp:
+    src: "{{ semaphore_admin_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: semaphore_admin_password_raw
+  no_log: true
+
+- name: Read the Semaphore database password
+  ansible.builtin.slurp:
+    src: "{{ semaphore_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: semaphore_database_password_raw
+  no_log: true
+
+- name: Generate the Semaphore encryption secrets
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ item.path }}" ]; then
+      umask 077
+      openssl rand -hex 32 > "{{ item.path }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  loop:
+    - path: "{{ semaphore_secret_dir }}/access-key-encryption"
+      fact_name: semaphore_access_key_encryption_raw
+    - path: "{{ semaphore_secret_dir }}/cookie-hash"
+      fact_name: semaphore_cookie_hash_raw
+    - path: "{{ semaphore_secret_dir }}/cookie-encryption"
+      fact_name: semaphore_cookie_encryption_raw
+  register: semaphore_secret_generation
+  changed_when: "'changed' in semaphore_secret_generation.stdout"
+  no_log: true
+
+- name: Read the Semaphore encryption secrets
+  ansible.builtin.slurp:
+    src: "{{ item.path }}"
+  loop:
+    - path: "{{ semaphore_secret_dir }}/access-key-encryption"
+      fact_name: semaphore_access_key_encryption_raw
+    - path: "{{ semaphore_secret_dir }}/cookie-hash"
+      fact_name: semaphore_cookie_hash_raw
+    - path: "{{ semaphore_secret_dir }}/cookie-encryption"
+      fact_name: semaphore_cookie_encryption_raw
+  register: semaphore_secret_slurps
+  no_log: true
+
+- name: Record the Semaphore runtime secrets
+  ansible.builtin.set_fact:
+    semaphore_admin_password: "{{ semaphore_admin_password_raw.content | b64decode | trim }}"
+    semaphore_database_password: "{{ semaphore_database_password_raw.content | b64decode | trim }}"
+    semaphore_access_key_encryption: "{{ (semaphore_secret_slurps.results | selectattr('item.fact_name', 'equalto', 'semaphore_access_key_encryption_raw') | first).content | b64decode | trim }}"
+    semaphore_cookie_hash: "{{ (semaphore_secret_slurps.results | selectattr('item.fact_name', 'equalto', 'semaphore_cookie_hash_raw') | first).content | b64decode | trim }}"
+    semaphore_cookie_encryption: "{{ (semaphore_secret_slurps.results | selectattr('item.fact_name', 'equalto', 'semaphore_cookie_encryption_raw') | first).content | b64decode | trim }}"
+  no_log: true
+
+- name: Build the Semaphore runtime secret payload
+  ansible.builtin.set_fact:
+    semaphore_runtime_secret_payload:
+      SEMAPHORE_DB_PASS: "{{ semaphore_database_password }}"
+      SEMAPHORE_ADMIN_PASSWORD: "{{ semaphore_admin_password }}"
+      SEMAPHORE_ACCESS_KEY_ENCRYPTION: "{{ semaphore_access_key_encryption }}"
+      SEMAPHORE_COOKIE_HASH: "{{ semaphore_cookie_hash }}"
+      SEMAPHORE_COOKIE_ENCRYPTION: "{{ semaphore_cookie_encryption }}"
+  no_log: true
+
+- name: Prepare OpenBao agent runtime secret injection for Semaphore
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: semaphore
+    common_openbao_compose_env_agent_dir: "{{ semaphore_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ semaphore_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ semaphore_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ semaphore_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ semaphore_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ semaphore_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ semaphore_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ semaphore_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ semaphore_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ semaphore_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ semaphore_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: semaphore.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ semaphore_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ semaphore_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ semaphore_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ semaphore_legacy_env_file }}"
+  no_log: true
+
+- name: Render the Semaphore environment file
+  ansible.builtin.template:
+    src: semaphore.env.j2
+    dest: "{{ semaphore_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Render the Semaphore compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ semaphore_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the Semaphore image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ semaphore_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ semaphore_site_dir }}"
+  register: semaphore_pull
+  changed_when: >-
+    'Pulling' in semaphore_pull.stdout
+    or 'Downloaded newer image' in semaphore_pull.stdout
+    or 'Pull complete' in semaphore_pull.stdout
+
+- name: Check whether Docker nat chain exists before Semaphore startup
+  ansible.builtin.command: iptables -t nat -S DOCKER
+  register: semaphore_docker_nat_chain_check
+  changed_when: false
+  failed_when: semaphore_docker_nat_chain_check.rc not in [0, 1]
+
+- name: Restart Docker when the nat chain is missing before Semaphore startup
+  ansible.builtin.systemd:
+    name: docker
+    state: restarted
+  when: semaphore_docker_nat_chain_check.rc == 1
+
+- name: Start the Semaphore stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ semaphore_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ semaphore_site_dir }}"
+  register: semaphore_up
+  changed_when: >-
+    'Creating' in semaphore_up.stdout
+    or 'Recreating' in semaphore_up.stdout
+    or 'Starting' in semaphore_up.stdout
+
+- name: Wait for Semaphore to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ semaphore_server_port }}"
+    delay: 0
+    timeout: 180
+
+- name: Render the Semaphore bootstrap specification locally
+  ansible.builtin.template:
+    src: bootstrap-spec.json.j2
+    dest: "{{ semaphore_bootstrap_spec_local_file }}"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Bootstrap the Semaphore project and controller auth artifacts
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ playbook_dir }}/../scripts/semaphore_bootstrap.py"
+      - --base-url
+      - "{{ semaphore_controller_url }}"
+      - --username
+      - "{{ semaphore_admin_username }}"
+      - --password-file
+      - "{{ semaphore_admin_password_local_file }}"
+      - --spec-file
+      - "{{ semaphore_bootstrap_spec_local_file }}"
+      - --auth-json-output
+      - "{{ semaphore_admin_auth_local_file }}"
+      - --api-token-output
+      - "{{ semaphore_api_token_local_file }}"
+      - --existing-token-file
+      - "{{ semaphore_api_token_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: semaphore_bootstrap
+  changed_when: false
+  no_log: true
+
+- name: Verify the Semaphore runtime
+  ansible.builtin.import_tasks: verify.yml

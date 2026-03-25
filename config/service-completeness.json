@@ -262,6 +262,13 @@
       "requires_secrets": true,
       "requires_compose_secrets": true,
       "suppression_preset": "legacy-service"
+    },
+    "semaphore": {
+      "service_type": "compose",
+      "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_secrets": true,
+      "requires_compose_secrets": true
     }
   }
 }

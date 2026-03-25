@@ -145,6 +145,17 @@
       "strip_prefix": true,
       "timeout_seconds": 30,
       "healthcheck_path": "/api/version"
+    },
+    {
+      "id": "semaphore",
+      "name": "Semaphore",
+      "upstream": "http://10.10.10.20:3002",
+      "gateway_prefix": "/v1/semaphore",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/api/ping"
     }
   ]
 }

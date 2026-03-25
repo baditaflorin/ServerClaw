@@ -353,6 +353,34 @@
       "apply_targets": [
         "converge-windmill"
       ]
+    },
+    "semaphore_runtime": {
+      "kind": "runtime",
+      "service_id": "semaphore",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "semaphore",
+      "registry_ref": "docker.io/semaphoreui/semaphore",
+      "tag": "v2.17.29",
+      "digest": "sha256:fb758310e067140ba58d8cfa31de3856ebcfb44cec3d6b466aada6aecb09b4db",
+      "ref": "docker.io/semaphoreui/semaphore:v2.17.29@sha256:fb758310e067140ba58d8cfa31de3856ebcfb44cec3d6b466aada6aecb09b4db",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-25",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-25-semaphore-runtime.json",
+      "exception": {
+        "reason": "The current official upstream image still reports high or critical Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-25",
+        "review_by": "2026-04-08"
+      },
+      "consumers": [
+        "roles/semaphore_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-semaphore"
+      ]
     }
   }
 }

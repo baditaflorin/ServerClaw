@@ -1,0 +1,43 @@
+---
+- name: Verify the Semaphore ping endpoint
+  ansible.builtin.uri:
+    url: "{{ semaphore_private_base_url }}/api/ping"
+    method: GET
+    return_content: true
+    status_code: 200
+  register: semaphore_verify_ping
+  retries: 18
+  delay: 5
+  until: semaphore_verify_ping.status == 200
+  changed_when: false
+
+- name: Assert the Semaphore ping endpoint returns pong
+  ansible.builtin.assert:
+    that:
+      - semaphore_verify_ping.content | trim == "pong"
+    fail_msg: "Semaphore API responded, but the expected ping payload was not returned."
+
+- name: Run the seeded Semaphore self-test template
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ playbook_dir }}/../scripts/semaphore_tool.py"
+      - --auth-file
+      - "{{ semaphore_admin_auth_local_file }}"
+      - run-template
+      - --template
+      - "{{ semaphore_self_test_template_name }}"
+      - --wait
+      - --timeout
+      - "300"
+  delegate_to: localhost
+  become: false
+  register: semaphore_verify_task
+  changed_when: false
+
+- name: Assert the seeded Semaphore self-test task succeeded
+  ansible.builtin.assert:
+    that:
+      - (semaphore_verify_task.stdout | from_json).status == "success"
+      - (semaphore_verify_task.stdout | from_json).finished | bool
+    fail_msg: "Semaphore UI/API bootstrap succeeded, but the seeded self-test template did not finish successfully."

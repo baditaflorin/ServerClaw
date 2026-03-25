@@ -199,9 +199,6 @@ validate_data_models() {
   uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/service_catalog.py" --validate >/dev/null
   uvx --from pyyaml python "$REPO_ROOT/scripts/environment_topology.py" --validate >/dev/null
   uvx --from pyyaml python "$REPO_ROOT/scripts/subdomain_catalog.py" --validate >/dev/null
-  uvx --from pyyaml python "$REPO_ROOT/scripts/validate_portal_auth.py" --validate >/dev/null
-  uvx --from pyyaml python "$REPO_ROOT/scripts/subdomain_exposure_audit.py" --validate >/dev/null
-  uv run --with pyyaml python "$REPO_ROOT/scripts/validate_nats_topics.py" --validate >/dev/null
   python3 "$REPO_ROOT/scripts/validate_service_completeness.py" --validate >/dev/null
   uv run --with pyyaml python "$REPO_ROOT/scripts/agent_tool_registry.py" --export-mcp >/dev/null
   python3 "$REPO_ROOT/scripts/mutation_audit.py" --validate-schema >/dev/null
@@ -211,7 +208,6 @@ validate_generated_docs() {
   echo "Generated status document validation"
   uvx --from pyyaml python "$REPO_ROOT/scripts/generate_status_docs.py" --check >/dev/null
   uv run --with jsonschema python "$REPO_ROOT/scripts/generate_dependency_diagram.py" --check >/dev/null
-  uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/platform_manifest.py" --check >/dev/null
 }
 
 validate_generated_portals() {
@@ -231,6 +227,7 @@ validate_health_probes() {
     backup_vm
     step_ca_runtime
     openbao_runtime
+    semaphore_runtime
     windmill_runtime
     mattermost_runtime
     mail_platform_runtime

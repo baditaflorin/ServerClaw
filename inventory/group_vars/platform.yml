@@ -84,6 +84,11 @@ platform_host:
         listen_port: 8200
         upstream_host: 10.10.10.20
         upstream_port: 8200
+      - name: semaphore
+        listen_address: 100.64.0.1
+        listen_port: 8020
+        upstream_host: 10.10.10.20
+        upstream_port: 3002
       - name: open-webui
         listen_address: 100.64.0.1
         listen_port: 8008
@@ -118,6 +123,8 @@ platform_ports:
   ntfy_port: 2586
   openbao_http_port: 8201
   openbao_proxy_port: 8200
+  semaphore_server_port: 3002
+  semaphore_host_proxy_port: 8020
   windmill_server_port: 8000
   windmill_host_proxy_port: 8005
   mattermost_server_port: 8065
@@ -154,6 +161,8 @@ platform_port_assignments:
   ntfy_port: 2586
   openbao_http_port: 8201
   openbao_proxy_port: 8200
+  semaphore_server_port: 3002
+  semaphore_host_proxy_port: 8020
   windmill_server_port: 8000
   windmill_host_proxy_port: 8005
   mattermost_server_port: 8065
@@ -904,6 +913,24 @@ platform_service_topology:
     urls:
       internal: https://10.10.10.20:9000
       controller: https://100.64.0.1:9443
+  semaphore:
+    service_name: semaphore
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:8020
+    service_id: semaphore
+    ports:
+      internal: 3002
+      controller: 8020
+    urls:
+      internal: http://10.10.10.20:3002
+      controller: http://100.64.0.1:8020
   windmill:
     service_name: windmill
     owning_vm: docker-runtime-lv3
@@ -1342,6 +1369,7 @@ platform_management_allowed_tcp_ports:
   - 8004
   - 9443
   - 8200
+  - 8020
   - 8080
   - 8005
   - 8008
@@ -1648,6 +1676,24 @@ public_edge_service_topology:
     urls:
       internal: https://10.10.10.20:9000
       controller: https://100.64.0.1:9443
+  semaphore:
+    service_name: semaphore
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:8020
+    service_id: semaphore
+    ports:
+      internal: 3002
+      controller: 8020
+    urls:
+      internal: http://10.10.10.20:3002
+      controller: http://100.64.0.1:8020
   windmill:
     service_name: windmill
     owning_vm: docker-runtime-lv3
@@ -2017,6 +2063,10 @@ hetzner_dns_records: *id001
 platform_postgres_host: database.lv3.org
 openbao_postgres_host: database.lv3.org
 openbao_controller_url: https://100.64.0.1:8200
+semaphore_server_port: 3002
+semaphore_host_proxy_port: 8020
+semaphore_private_base_url: http://10.10.10.20:3002
+semaphore_controller_url: http://100.64.0.1:8020
 netbox_host_proxy_port: 8004
 netbox_controller_url: http://100.64.0.1:8004
 open_webui_host_proxy_port: 8008
@@ -2053,6 +2103,7 @@ proxmox_management_allowed_tcp_ports:
   - 8004
   - 9443
   - 8200
+  - 8020
   - 8080
   - 8005
   - 8008

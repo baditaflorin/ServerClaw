@@ -3947,6 +3947,106 @@
         "python3 -m py_compile platform/closure_loop/*.py config/windmill/scripts/platform-observation-loop.py",
         "python3 config/windmill/scripts/platform-observation-loop.py --repo-path ."
       ]
+    },
+    "converge-semaphore": {
+      "description": "Converge the private Semaphore runtime on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish the Tailscale proxy on the Proxmox host, and seed the self-test project plus controller-local auth artifacts.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-semaphore",
+        "command": "make converge-semaphore"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "semaphore_database_password",
+          "semaphore_admin_password",
+          "semaphore_api_token",
+          "semaphore_admin_auth"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-semaphore"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-semaphore.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/semaphore.yml",
+        "playbooks/semaphore-self.yml",
+        "inventory/semaphore-localhost.yml",
+        "roles/semaphore_postgres",
+        "roles/semaphore_runtime",
+        "platform/ansible/semaphore.py",
+        "scripts/semaphore_bootstrap.py",
+        "scripts/semaphore_tool.py",
+        "inventory/host_vars/proxmox_florin.yml"
+      ],
+      "outputs": [
+        "Private Semaphore runtime on docker-runtime-lv3 with a PostgreSQL backend on postgres-lv3, a Tailscale-published controller URL on the Proxmox host, controller-local auth artifacts under .local/semaphore, and a seeded self-test project."
+      ],
+      "verification_commands": [
+        "make syntax-check-semaphore",
+        "curl -fsS http://100.118.189.95:8020/api/ping",
+        "make semaphore-manage ACTION=list-projects",
+        "make semaphore-manage ACTION=run-template SEMAPHORE_ARGS='--template \"Semaphore Self-Test\" --wait'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1500,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "semaphore-manage": {
+      "description": "Run governed Semaphore API actions such as listing projects, listing templates, launching the seeded self-test job, or reading one task output.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "semaphore-manage",
+        "command": "make semaphore-manage ACTION=list-projects"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "semaphore_admin_auth"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "external_live",
+      "owner_runbook": "docs/runbooks/configure-semaphore.md",
+      "implementation_refs": [
+        "Makefile",
+        "scripts/semaphore_tool.py",
+        "platform/ansible/semaphore.py"
+      ],
+      "outputs": [
+        "Governed Semaphore project inspection, seeded template execution, and task-output retrieval through the repo-managed wrapper instead of ad hoc API calls."
+      ],
+      "verification_commands": [
+        "make semaphore-manage ACTION=list-projects",
+        "make semaphore-manage ACTION=run-template SEMAPHORE_ARGS='--template \"Semaphore Self-Test\" --wait'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     }
   }
 }

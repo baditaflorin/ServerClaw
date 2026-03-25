@@ -271,6 +271,15 @@
       "tier": 2,
       "category": "automation",
       "adr": "0044"
+    },
+    {
+      "id": "semaphore",
+      "service": "semaphore",
+      "name": "Semaphore",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "automation",
+      "adr": "0149"
     }
   ],
   "edges": [
@@ -495,6 +504,18 @@
       "to": "openbao",
       "type": "startup_only",
       "description": "Windmill workers and the server runtime load mirrored secrets from the OpenBao agent before the containers start."
+    },
+    {
+      "from": "semaphore",
+      "to": "postgres",
+      "type": "hard",
+      "description": "Semaphore persists project metadata, inventories, templates, and task history in Postgres."
+    },
+    {
+      "from": "semaphore",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Semaphore loads database and bootstrap secrets from the OpenBao agent before the container starts."
     }
   ]
 }

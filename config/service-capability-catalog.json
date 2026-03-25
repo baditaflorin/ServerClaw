@@ -52,7 +52,7 @@
       ],
       "environments": {
         "production": {
-        "status": "active",
+          "status": "active",
           "url": "https://api.lv3.org",
           "subdomain": "api.lv3.org",
           "notes": "Repository automation is ready; live publication still requires apply from main."
@@ -941,6 +941,40 @@
         "production": {
           "status": "active",
           "url": "http://100.64.0.1:8005"
+        }
+      }
+    },
+    {
+      "id": "semaphore",
+      "name": "Semaphore",
+      "description": "Private Semaphore UI and API for bounded Ansible job execution.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://100.118.189.95:8020",
+      "exposure": "private-only",
+      "uptime_monitor_name": "Semaphore Private",
+      "health_probe_id": "semaphore",
+      "image_catalog_ids": [
+        "semaphore_runtime"
+      ],
+      "secret_catalog_ids": [
+        "semaphore_database_password",
+        "semaphore_admin_password",
+        "semaphore_api_token"
+      ],
+      "adr": "0149",
+      "runbook": "docs/runbooks/configure-semaphore.md",
+      "tags": [
+        "ansible",
+        "automation",
+        "jobs"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://100.118.189.95:8020"
         }
       }
     }

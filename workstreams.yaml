@@ -103,6 +103,33 @@ workstreams:
     ready_to_merge: false
     live_applied: true
 
+  - id: adr-0149-semaphore
+    adr: "0149"
+    title: Semaphore for Ansible job management UI and API
+    status: in_progress
+    owner: codex
+    branch: codex/adr-0149-semaphore
+    worktree_path: ../proxmox_florin_server-adr-0149
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0149-semaphore.md
+    depends_on:
+      - adr-0023-docker-runtime
+      - adr-0026-postgres-vm
+      - adr-0048-command-catalog
+      - adr-0077-compose-runtime-secrets-injection
+    conflicts_with: []
+    shared_surfaces:
+      - roles/semaphore_postgres
+      - roles/semaphore_runtime
+      - playbooks/semaphore.yml
+      - scripts/semaphore_bootstrap.py
+      - scripts/semaphore_tool.py
+      - inventory/host_vars/proxmox_florin.yml
+      - config/workflow-catalog.json
+      - config/command-catalog.json
+      - config/dependency-graph.json
+    ready_to_merge: false
+    live_applied: false
+
   - id: adr-0014-tailscale
     adr: "0014"
     title: Tailscale private access rollout

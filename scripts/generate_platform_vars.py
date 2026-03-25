@@ -33,6 +33,8 @@ PORT_KEYS = (
     "ntfy_port",
     "openbao_http_port",
     "openbao_proxy_port",
+    "semaphore_server_port",
+    "semaphore_host_proxy_port",
     "windmill_server_port",
     "windmill_host_proxy_port",
     "mattermost_server_port",
@@ -267,6 +269,11 @@ def build_service_urls(
         urls["controller"] = service_url("https", tailscale_ipv4, ports["step_ca_proxy_port"])
         port_map["internal"] = ports["step_ca_api_port"]
         port_map["controller"] = ports["step_ca_proxy_port"]
+    elif service_id == "semaphore":
+        urls["internal"] = service_url("http", private_ip, ports["semaphore_server_port"])
+        urls["controller"] = service_url("http", tailscale_ipv4, ports["semaphore_host_proxy_port"])
+        port_map["internal"] = ports["semaphore_server_port"]
+        port_map["controller"] = ports["semaphore_host_proxy_port"]
     elif service_id == "windmill":
         urls["internal"] = service_url("http", private_ip, ports["windmill_server_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["windmill_host_proxy_port"])
@@ -486,6 +493,7 @@ def build_platform_vars(
     vaultwarden_service = service_topology["vaultwarden"]
     postgres_service = service_topology["postgres"]
     step_ca_service = service_topology["step_ca"]
+    semaphore_service = service_topology["semaphore"]
     uptime_kuma_service = service_topology["uptime_kuma"]
     windmill_service = service_topology["windmill"]
     host_id = require_string(stack["desired_state"]["host_id"], "versions/stack.yaml.desired_state.host_id")
@@ -568,6 +576,7 @@ def build_platform_vars(
             resolved_ports["netbox_host_proxy_port"],
             resolved_ports["step_ca_proxy_port"],
             resolved_ports["openbao_proxy_port"],
+            resolved_ports["semaphore_host_proxy_port"],
             resolved_ports["headscale_http_port"],
             resolved_ports["windmill_host_proxy_port"],
             resolved_ports["open_webui_host_proxy_port"],
@@ -582,6 +591,10 @@ def build_platform_vars(
         "platform_postgres_host": postgres_service["public_hostname"],
         "openbao_postgres_host": postgres_service["public_hostname"],
         "openbao_controller_url": openbao_service["urls"]["controller"],
+        "semaphore_server_port": resolved_ports["semaphore_server_port"],
+        "semaphore_host_proxy_port": resolved_ports["semaphore_host_proxy_port"],
+        "semaphore_private_base_url": semaphore_service["urls"]["internal"],
+        "semaphore_controller_url": semaphore_service["urls"]["controller"],
         "netbox_host_proxy_port": resolved_ports["netbox_host_proxy_port"],
         "netbox_controller_url": netbox_service["urls"]["controller"],
         "open_webui_host_proxy_port": resolved_ports["open_webui_host_proxy_port"],
@@ -618,6 +631,7 @@ def build_platform_vars(
             resolved_ports["netbox_host_proxy_port"],
             resolved_ports["step_ca_proxy_port"],
             resolved_ports["openbao_proxy_port"],
+            resolved_ports["semaphore_host_proxy_port"],
             resolved_ports["headscale_http_port"],
             resolved_ports["windmill_host_proxy_port"],
             resolved_ports["open_webui_host_proxy_port"],
