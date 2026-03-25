@@ -43,7 +43,9 @@
   when: public_edge_certificate_after.stat.exists
   register: public_edge_verify_probe_headers
   changed_when: false
-  failed_when: "'X-Robots-Tag: {{ public_edge_robots_meta_content }}' not in public_edge_verify_probe_headers.stdout"
+  failed_when: >-
+    ('x-robots-tag: ' ~ public_edge_robots_meta_content) not in
+    (public_edge_verify_probe_headers.stdout | lower)
 
 - name: Verify the probe hostname robots.txt disallows crawling
   ansible.builtin.command:
@@ -70,8 +72,8 @@
   register: public_edge_verify_probe_html
   changed_when: false
   failed_when: >-
-    '<meta name="robots" content="{{ public_edge_robots_meta_content }}">' not in
-    public_edge_verify_probe_html.stdout
+    ('<meta name="robots" content="' ~ public_edge_robots_meta_content ~ '">') not in
+    (public_edge_verify_probe_html.stdout | lower)
 
 - name: Verify the apex hostname robots.txt is available over TLS
   ansible.builtin.command:
@@ -84,4 +86,6 @@
   when: public_edge_certificate_after.stat.exists
   register: public_edge_verify_apex_robots
   changed_when: false
-  failed_when: "'X-Robots-Tag: {{ public_edge_robots_meta_content }}' not in public_edge_verify_apex_robots.stdout"
+  failed_when: >-
+    ('x-robots-tag: ' ~ public_edge_robots_meta_content) not in
+    (public_edge_verify_apex_robots.stdout | lower)
