@@ -66,6 +66,22 @@ def write_yaml(path: Path, content: str) -> None:
     path.write_text(content)
 
 
+def test_gateway_runtime_compose_mounts_config_at_app_path() -> None:
+    template = (
+        REPO_ROOT
+        / "collections"
+        / "ansible_collections"
+        / "lv3"
+        / "platform"
+        / "roles"
+        / "api_gateway_runtime"
+        / "templates"
+        / "docker-compose.yml.j2"
+    ).read_text(encoding="utf-8")
+
+    assert "/app/config:ro" in template
+
+
 def prepare_graph_db(path: Path) -> str:
     connection = sqlite3.connect(path)
     connection.execute(

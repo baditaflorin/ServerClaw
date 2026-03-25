@@ -15,6 +15,7 @@ services:
       - keycloak
     volumes:
       - {{ api_gateway_config_dir }}:/config:ro
+      - {{ api_gateway_config_dir }}:/app/config:ro
       - {{ api_gateway_data_dir }}:/data:ro
     healthcheck:
       test:
