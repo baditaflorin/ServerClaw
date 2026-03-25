@@ -5,7 +5,7 @@
   "applied_on": "2026-03-25",
   "recorded_on": "2026-03-25",
   "recorded_by": "codex",
-  "source_commit": "fd1e89de6d737fc051f68902bd51e80b882cfbdc",
+  "source_commit": "3d325187068a4585e7d6dc7f4a575bce96670025",
   "repo_version_context": "0.158.0",
   "workflow_id": "converge-semaphore",
   "adr": "0149",
@@ -38,7 +38,7 @@
     {
       "check": "Repo-managed Semaphore converge",
       "result": "pass",
-      "observed": "`make converge-semaphore` completed successfully from the integrated mainline release with `docker-runtime-lv3 : ok=132 changed=11 failed=0`, `postgres-lv3 : ok=50 changed=0 failed=0`, and `proxmox_florin : ok=28 changed=1 failed=0`."
+      "observed": "`make converge-semaphore` completed successfully from the rebased integrated mainline release with `docker-runtime-lv3 : ok=133 changed=11 failed=0`, `postgres-lv3 : ok=50 changed=0 failed=0`, and `proxmox_florin : ok=29 changed=4 failed=0`."
     },
     {
       "check": "Private proxy health endpoint",
@@ -57,7 +57,7 @@
     "docs/workstreams/adr-0149-semaphore.md"
   ],
   "notes": [
-    "This receipt now records the integrated mainline live apply from repository release `0.158.0` after merging the ADR 0149 workstream and rerunning the converge path from the clean integration worktree.",
-    "The final mainline rerun included the clean-worktree credential recovery fix that restores the durable Semaphore admin password before bootstrap and persists it on the guest for future integration worktrees."
+    "This receipt now records the integrated mainline live apply from repository release `0.158.0` after merging the ADR 0149 workstream, rebasing onto the newer `origin/main`, and rerunning the converge path from the clean integration worktree.",
+    "The final rebased rerun included the clean-worktree credential recovery fix that restores the durable Semaphore admin password before bootstrap and persists it on the guest for future integration worktrees."
   ]
 }
