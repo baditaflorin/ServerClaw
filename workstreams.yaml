@@ -17,7 +17,7 @@ workstreams:
   - id: adr-0162-deadlock-detector
     adr: "0162"
     title: Distributed deadlock detection and resolution
-    status: in_progress
+    status: merged
     owner: codex
     branch: codex/adr-0162-deadlock-detector
     worktree_path: .worktrees/adr-0162-deadlock-detector
