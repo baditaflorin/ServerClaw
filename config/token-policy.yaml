@@ -1,0 +1,50 @@
+schema_version: 1.0.0
+token_classes:
+  - class: keycloak_client_secret
+    max_ttl_days: 90
+    warning_window_days: 14
+    enforcement_grace_days: 7
+    rotation_trigger: manual_or_scheduled
+    storage: openbao
+    revocation_workflow: rotate-keycloak-client-secret
+    on_exposure: immediate_revocation
+  - class: openbao_api_token
+    max_ttl_days: 1
+    warning_window_days: 0
+    enforcement_grace_days: 0
+    rotation_trigger: automatic_per_job
+    storage: in_memory_only
+    revocation_workflow: token-already-expired
+    on_exposure: token_already_expired
+  - class: windmill_api_token
+    max_ttl_days: 30
+    warning_window_days: 7
+    enforcement_grace_days: 7
+    rotation_trigger: scheduled_monthly
+    storage: openbao
+    revocation_workflow: rotate-windmill-token
+    on_exposure: immediate_revocation
+  - class: grafana_service_account_token
+    max_ttl_days: 90
+    warning_window_days: 14
+    enforcement_grace_days: 7
+    rotation_trigger: scheduled_quarterly
+    storage: openbao
+    revocation_workflow: rotate-grafana-service-token
+    on_exposure: immediate_revocation
+  - class: platform_cli_token
+    max_ttl_days: 7
+    warning_window_days: 1
+    enforcement_grace_days: 0
+    rotation_trigger: automatic_at_expiry
+    storage: local_keychain
+    revocation_workflow: rotate-platform-cli-token
+    on_exposure: immediate_revocation_plus_session_invalidation
+  - class: step_ca_bootstrap_token
+    max_ttl_days: 1
+    warning_window_days: 0
+    enforcement_grace_days: 0
+    rotation_trigger: automatic_on_use
+    storage: openbao
+    revocation_workflow: revoke-step-ca-bootstrap-token
+    on_exposure: immediate_revocation
