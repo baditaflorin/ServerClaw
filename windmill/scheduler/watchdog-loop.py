@@ -6,6 +6,8 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shlex
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any
@@ -73,8 +75,34 @@ def main(repo_path: str = "/srv/proxmox_florin_server") -> dict[str, Any]:
     if str(repo_root) not in sys.path:
         sys.path.insert(0, str(repo_root))
 
-    from platform.ledger import LedgerWriter
-    from platform.scheduler import HttpWindmillClient, SchedulerStateStore, Watchdog
+    try:
+        from platform.ledger import LedgerWriter
+        from platform.scheduler import HttpWindmillClient, SchedulerStateStore, Watchdog
+    except ModuleNotFoundError as exc:
+        if exc.name != "yaml":
+            raise
+        command = [
+            "uv",
+            "run",
+            "--with",
+            "pyyaml",
+            "python",
+            str(repo_root / "windmill" / "scheduler" / "watchdog-loop.py"),
+            "--repo-path",
+            str(repo_root),
+        ]
+        env = dict(os.environ)
+        env["PYTHONPATH"] = f"{repo_root}:{env['PYTHONPATH']}" if env.get("PYTHONPATH") else str(repo_root)
+        result = subprocess.run(command, cwd=repo_root, env=env, text=True, capture_output=True, check=False)
+        if result.returncode != 0:
+            return {
+                "status": "error",
+                "command": " ".join(shlex.quote(part) for part in command),
+                "returncode": result.returncode,
+                "stdout": result.stdout.strip(),
+                "stderr": result.stderr.strip(),
+            }
+        return json.loads(result.stdout) if result.stdout.strip() else {"status": "ok"}
 
     base_url = _resolve_windmill_url(repo_root)
     token = _resolve_windmill_token(repo_root)

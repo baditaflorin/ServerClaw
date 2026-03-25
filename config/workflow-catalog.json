@@ -3606,7 +3606,7 @@
       }
     },
     "scheduler-watchdog-loop": {
-      "description": "Run one ADR 0119 watchdog pass over active mutation jobs and cancel budget violations.",
+      "description": "Run one ADR 0172 watchdog pass over running mutation jobs, abort stale executions, and emit a heartbeat.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -3641,7 +3641,7 @@
         "windmill/scheduler/watchdog-loop.py"
       ],
       "outputs": [
-        "A JSON summary of active scheduler-tracked jobs, including any budget violations canceled during the pass."
+        "A JSON summary of running mutation jobs, including stale-job aborts, budget violations, warnings, and the latest watchdog heartbeat file."
       ],
       "verification_commands": [
         "python3 -m py_compile platform/scheduler/*.py windmill/scheduler/watchdog-loop.py",

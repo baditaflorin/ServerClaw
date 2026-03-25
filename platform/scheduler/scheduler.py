@@ -46,6 +46,9 @@ class WindmillClient(Protocol):
     def get_job(self, job_id: str) -> dict[str, Any]:
         ...
 
+    def list_jobs(self, *, running: bool | None = None) -> list[dict[str, Any]]:
+        ...
+
     def cancel_job(self, job_id: str, *, reason: str | None = None) -> dict[str, Any] | None:
         ...
 
@@ -243,6 +246,23 @@ class HttpWindmillClient:
         if not isinstance(response, dict):
             raise RuntimeError(f"unexpected Windmill job response: {response!r}")
         return response
+
+    def list_jobs(self, *, running: bool | None = None) -> list[dict[str, Any]]:
+        query: dict[str, str] = {}
+        if running is not None:
+            query["running"] = "true" if running else "false"
+        path = f"/api/w/{self._workspace}/jobs/list"
+        if query:
+            path = f"{path}?{urllib.parse.urlencode(query)}"
+        response = self._request(path, method="GET")
+        if isinstance(response, list):
+            return [item for item in response if isinstance(item, dict)]
+        if isinstance(response, dict):
+            for key in ("jobs", "items", "results", "data"):
+                value = response.get(key)
+                if isinstance(value, list):
+                    return [item for item in value if isinstance(item, dict)]
+        raise RuntimeError(f"unexpected Windmill jobs response: {response!r}")
 
     def cancel_job(self, job_id: str, *, reason: str | None = None) -> dict[str, Any] | None:
         encoded = urllib.parse.quote(job_id, safe="")

@@ -19,6 +19,7 @@
 - execution.speculative_probing
 - execution.speculative_committed
 - execution.speculative_rolled_back
+- execution.stale_job_detected
 
 # Service mutations
 - service.deployed

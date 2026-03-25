@@ -2747,6 +2747,27 @@ workstreams:
       - scripts/workflow_catalog.py
       - config/ledger-event-types.yaml
       - docs/runbooks/speculative-workflow-execution.md
+  - id: adr-0172-watchdog-escalation
+    adr: "0172"
+    title: Watchdog escalation and stale job self-healing
+    status: merged
+    owner: codex
+    branch: codex/adr-0172-watchdog
+    worktree_path: .worktrees/codex-adr-0172-watchdog
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0172-watchdog-escalation-and-stale-job-self-healing.md
+    depends_on:
+      - adr-0044-windmill
+      - adr-0115-mutation-ledger
+      - adr-0119-budgeted-workflow-scheduler
+    conflicts_with: []
+    shared_surfaces:
+      - platform/scheduler/watchdog.py
+      - platform/scheduler/scheduler.py
+      - windmill/scheduler/watchdog-loop.py
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+      - config/workflow-catalog.json
+      - config/ledger-event-types.yaml
+      - docs/runbooks/budgeted-workflow-scheduler.md
     ready_to_merge: false
     live_applied: false
 

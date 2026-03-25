@@ -26,3 +26,17 @@ def test_windmill_defaults_seed_health_refresh_script_and_schedule() -> None:
 
     assert "f/lv3/health/refresh_composite" in script_paths
     assert "f/lv3/health/refresh_composite_every_minute" in schedule_paths
+
+
+def test_windmill_defaults_seed_scheduler_watchdog_script_and_schedule() -> None:
+    defaults = yaml.safe_load(
+        (REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml").read_text()
+    )
+    script_paths = {entry["path"] for entry in defaults["windmill_seed_scripts"]}
+    schedule = next(
+        entry for entry in defaults["windmill_seed_schedules"] if entry["path"] == "f/lv3/scheduler_watchdog_loop_every_10s"
+    )
+
+    assert "f/lv3/scheduler_watchdog_loop" in script_paths
+    assert schedule["schedule"] == "*/10 * * * * *"
+    assert schedule["enabled"] is True
