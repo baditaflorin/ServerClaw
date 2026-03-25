@@ -28,12 +28,12 @@ from control_plane_lanes import load_lane_catalog
 from data_catalog import load_data_catalog, validate_data_catalog
 from dependency_graph import load_dependency_graph
 from data_catalog import load_data_catalog, validate_data_catalog
-from execution_lanes import load_execution_lane_catalog
 from live_apply_receipts import RECEIPTS_DIR, iter_receipt_paths, validate_receipts
 from platform.circuit import load_circuit_policies
 from generate_platform_vars import PLATFORM_VARS_PATH, PORT_KEYS, build_platform_vars
 from mutation_audit import load_mutation_audit_schema, validate_mutation_audit_schema
 from operator_manager import ROSTER_PATH, validate_operator_roster
+from platform.execution_lanes import load_execution_lane_catalog
 from promotion_pipeline import validate_promotion_receipts
 from public_surface_scan import load_public_surface_scan_policy
 from validate_ephemeral_vmid import validate_ephemeral_vmid_ranges
