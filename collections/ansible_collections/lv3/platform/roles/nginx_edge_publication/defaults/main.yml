@@ -30,6 +30,7 @@ public_edge_generated_build_root: "{{ playbook_dir }}/../build"
 public_edge_static_sites: "{{ public_edge_service_topology | service_topology_edge_static_sites }}"
 public_edge_security_headers_default:
   strict_transport_security: "max-age=63072000; includeSubDomains; preload"
+  cross_origin_resource_policy: same-origin
   x_content_type_options: nosniff
   x_frame_options: DENY
   referrer_policy: strict-origin-when-cross-origin

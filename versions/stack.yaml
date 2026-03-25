@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.135.0
+repo_version: 0.136.0
 platform_version: 0.130.1
 
 live_apply_evidence:
@@ -7,7 +7,7 @@ live_apply_evidence:
   latest_receipts:
     monitoring: 2026-03-24-adr-0140-grafana-monitoring-hardening-live-apply
     mutation_audit: 2026-03-23-adr-0066-mutation-audit-live-apply
-    public_edge_publication: 2026-03-24-adr-0140-grafana-edge-hardening-live-apply
+    public_edge_publication: 2026-03-25-adr-0136-http-security-headers-live-apply
     api_gateway: 2026-03-24-adr-0092-platform-api-gateway-live-apply
     docker_runtime: 2026-03-22-adr-0023-docker-runtime-live-apply
     postgres_vm: 2026-03-22-adr-0026-postgres-vm-live-apply
@@ -333,17 +333,18 @@ desired_state:
     edge_vm: 10.10.10.10
     tls_termination: nginx_edge
     published_hostnames:
-      - nginx.lv3.org
-      - grafana.lv3.org
-      - proxmox.lv3.org
-      - docker.lv3.org
+      - api.lv3.org
       - build.lv3.org
-      - uptime.lv3.org
+      - changelog.lv3.org
+      - docker.lv3.org
+      - docs.lv3.org
+      - grafana.lv3.org
+      - nginx.lv3.org
+      - ops.lv3.org
+      - proxmox.lv3.org
       - sso.lv3.org
-      - ops.lv3.org
-      - changelog.lv3.org
-      - ops.lv3.org
-      - changelog.lv3.org
+      - status.lv3.org
+      - uptime.lv3.org
 
 observed_state:
   checked_at: 2026-03-23
@@ -794,17 +795,28 @@ observed_state:
   public_publication:
     edge_configured: true
     edge_tls_certificate_present: true
+    api_domain_live: true
+    docs_domain_live: true
     grafana_domain_live: true
+    ops_domain_live: true
     sso_domain_live: true
+    status_domain_live: true
     uptime_domain_live: true
+    security_headers_audit_passed: true
+    security_headers_audited_at: 2026-03-25T06:15:03Z
     published_hostnames:
-      - nginx.lv3.org
-      - grafana.lv3.org
-      - proxmox.lv3.org
-      - docker.lv3.org
+      - api.lv3.org
       - build.lv3.org
-      - uptime.lv3.org
+      - changelog.lv3.org
+      - docker.lv3.org
+      - docs.lv3.org
+      - grafana.lv3.org
+      - nginx.lv3.org
+      - ops.lv3.org
+      - proxmox.lv3.org
       - sso.lv3.org
+      - status.lv3.org
+      - uptime.lv3.org
   postgres:
     vm: 10.10.10.50
     service_running: true
@@ -845,7 +857,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.135.0
+    current: 0.136.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.130.1

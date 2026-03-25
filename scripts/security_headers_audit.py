@@ -75,6 +75,7 @@ def expected_headers_for_host(role_defaults: dict, hostname: str) -> dict[str, s
 def header_validators(expected_headers: dict[str, str]) -> dict[str, Callable[[str], bool]]:
     return {
         "strict-transport-security": lambda value: value == expected_headers["strict_transport_security"],
+        "cross-origin-resource-policy": lambda value: value == expected_headers["cross_origin_resource_policy"],
         "x-content-type-options": lambda value: value == expected_headers["x_content_type_options"],
         "x-frame-options": lambda value: value == expected_headers["x_frame_options"],
         "referrer-policy": lambda value: value == expected_headers["referrer_policy"],

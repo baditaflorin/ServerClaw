@@ -54,6 +54,7 @@ def test_audit_host_reports_missing_and_mismatched_headers(monkeypatch) -> None:
     role_defaults = {
         "public_edge_security_headers_default": {
             "strict_transport_security": "max-age=63072000; includeSubDomains; preload",
+            "cross_origin_resource_policy": "same-origin",
             "x_content_type_options": "nosniff",
             "x_frame_options": "DENY",
             "referrer_policy": "strict-origin-when-cross-origin",
@@ -79,5 +80,6 @@ def test_audit_host_reports_missing_and_mismatched_headers(monkeypatch) -> None:
     result = audit.audit_host(role_defaults, "grafana.lv3.org", timeout=5.0)
 
     assert result.passed is False
+    assert "missing cross-origin-resource-policy" in result.details
     assert "unexpected x-frame-options: SAMEORIGIN" in result.details
     assert "missing content-security-policy" in result.details

@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0136](../adr/0136-http-security-headers-hardening.md)
 - Title: Harden browser-facing HTTP response headers on every public-edge hostname
-- Status: in_progress
+- Status: live_applied
 - Branch: `codex/adr-0136-http-security-headers`
 - Worktree: `.worktrees/adr-0136`
 - Owner: codex
@@ -36,7 +36,7 @@
 
 ## Expected Live Surfaces
 
-- every public-edge hostname serves HSTS, CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, and X-Robots-Tag
+- every public-edge hostname serves HSTS, CORP, CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, and X-Robots-Tag
 - `make security-headers-audit` passes against the live platform after apply
 
 ## Verification
@@ -54,5 +54,5 @@
 
 ## Notes For The Next Assistant
 
-- `docs.lv3.org`, `ops.lv3.org`, `grafana.lv3.org`, `uptime.lv3.org`, `status.lv3.org`, and `sso.lv3.org` all need host-specific CSP overrides based on their current live HTML payloads.
-- Keep the integration-surface edits for the final `main` step so this workstream can merge cleanly.
+- `docs.lv3.org`, `ops.lv3.org`, `grafana.lv3.org`, `uptime.lv3.org`, `status.lv3.org`, and `sso.lv3.org` now have host-specific CSP overrides derived from their current live HTML payloads.
+- The live rollout converged from `Check whether the public edge certificate exists` onward after the full `make live-apply-service service=public-edge env=production` path stalled in static-site copy steps inside the integration worktree.

@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-25-adr-0136-http-security-headers-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-25",
+  "recorded_on": "2026-03-25",
+  "recorded_by": "codex",
+  "source_commit": "1696f3735b141fcac24919dd2b83b8036ca9bd7c",
+  "repo_version_context": "0.136.0",
+  "workflow_id": "configure-edge-publication",
+  "adr": "0136",
+  "summary": "Applied hardened HTTP security headers on the shared nginx edge and verified the live header policy across every published hostname without changing the current platform version label.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "public_hostname",
+      "name": "api.lv3.org"
+    },
+    {
+      "kind": "public_hostname",
+      "name": "build.lv3.org"
+    },
+    {
+      "kind": "public_hostname",
+      "name": "changelog.lv3.org"
+    },
+    {
+      "kind": "public_hostname",
+      "name": "docker.lv3.org"
+    },
+    {
+      "kind": "public_hostname",
+      "name": "docs.lv3.org"
+    },
+    {
+      "kind": "public_hostname",
+      "name": "grafana.lv3.org"
+    },
+    {
+      "kind": "public_hostname",
+      "name": "nginx.lv3.org"
+    },
+    {
+      "kind": "public_hostname",
+      "name": "ops.lv3.org"
+    },
+    {
+      "kind": "public_hostname",
+      "name": "proxmox.lv3.org"
+    },
+    {
+      "kind": "public_hostname",
+      "name": "sso.lv3.org"
+    },
+    {
+      "kind": "public_hostname",
+      "name": "status.lv3.org"
+    },
+    {
+      "kind": "public_hostname",
+      "name": "uptime.lv3.org"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Merged edge playbook converged on nginx-lv3",
+      "result": "pass",
+      "observed": "The merged `playbooks/services/public-edge.yml` run completed successfully from the `Check whether the public edge certificate exists` task onward, reloaded nginx, and passed the built-in HTTP and HTTPS edge probes."
+    },
+    {
+      "check": "Repo-managed security headers audit",
+      "result": "pass",
+      "observed": "`uv run --with pyyaml python scripts/security_headers_audit.py` passed for api, build, changelog, docker, docs, grafana, nginx, ops, proxmox, sso, status, and uptime."
+    },
+    {
+      "check": "Representative HTTPS header probes",
+      "result": "pass",
+      "observed": "Direct `curl -sSI` probes for `docs.lv3.org` and `grafana.lv3.org` returned the expected HSTS, CORP, CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, and X-Robots-Tag headers."
+    },
+    {
+      "check": "Independent header scan",
+      "result": "pass",
+      "observed": "`nmap --script http-security-headers -p 443 docs.lv3.org grafana.lv3.org` reported the expected HSTS, X-Frame-Options, X-Content-Type-Options, and CSP values on both representative public hosts after rollout."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0136-http-security-headers-hardening.md",
+    "docs/workstreams/adr-0136-http-security-headers.md",
+    "docs/runbooks/http-security-headers.md",
+    "docs/release-notes/0.136.0.md",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "The full `make live-apply-service service=public-edge env=production` run from the integration worktree stalled while copying the already-generated docs and changelog site directories. The rollout then resumed from `Check whether the public edge certificate exists`, which converged the nginx configuration and verification path without changing the published static artifacts.",
+    "The edge now hides upstream security headers for proxied applications before adding the canonical repo-managed header policy."
+  ]
+}
