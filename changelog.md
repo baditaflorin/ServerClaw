@@ -12,8 +12,6 @@ Versioned release notes live under [docs/release-notes/README.md](/Users/live/Do
 
 ## Unreleased
 
-- implemented ADR 0169 with a shared structured JSON logger, end-to-end `trace_id` propagation through the API gateway, Windmill promotion path, and live-apply entrypoints, plus structured Ansible task logs and a contract validator CLI
-
 ## Latest Release
 
-- [0.146.0 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.146.0.md)
+- [0.146.1 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.146.1.md)
