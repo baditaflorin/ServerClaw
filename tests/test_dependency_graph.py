@@ -7,7 +7,7 @@ import dependency_graph
 
 def test_dependency_graph_validates_against_service_catalog() -> None:
     graph = dependency_graph.load_dependency_graph(validate_schema=True)
-    assert len(graph.nodes) == 27
+    assert len(graph.nodes) == 28
     assert graph.nodes["ops_portal"].tier == 4
 
 

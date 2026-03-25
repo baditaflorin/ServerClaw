@@ -74,43 +74,6 @@
     mode: "0644"
   notify: Restart Docker
 
-- name: Ensure Docker service is enabled and running
-  ansible.builtin.include_role:
-    name: lv3.platform.common
-    tasks_from: systemd_unit
-  vars:
-    common_systemd_unit_name: docker
-
-- name: Check whether Docker nat chain exists
-  ansible.builtin.command: iptables -t nat -S DOCKER
-  register: docker_runtime_nat_chain_check
-  changed_when: false
-  failed_when: docker_runtime_nat_chain_check.rc not in [0, 1]
-  when: docker_runtime_require_nat_chain | bool
-
-- name: Restart Docker when nat chain is missing
-  ansible.builtin.systemd:
-    name: docker
-    state: restarted
-  when:
-    - docker_runtime_require_nat_chain | bool
-    - docker_runtime_nat_chain_check.rc == 1
-
-- name: Recheck Docker nat chain after restart
-  ansible.builtin.command: iptables -t nat -S DOCKER
-  register: docker_runtime_nat_chain_recheck
-  changed_when: false
-  retries: 6
-  delay: 2
-  until: docker_runtime_nat_chain_recheck.rc == 0
-  when: docker_runtime_require_nat_chain | bool
-
-- name: Assert Docker nat chain is present
-  ansible.builtin.assert:
-    that:
-      - docker_runtime_nat_chain_recheck.rc == 0
-    fail_msg: "Docker is running but the nat DOCKER chain is missing; published ports will fail."
-  when: docker_runtime_require_nat_chain | bool
 - name: Check whether nftables config exists
   ansible.builtin.stat:
     path: "{{ docker_runtime_nftables_config_file }}"
