@@ -537,6 +537,19 @@ domains:
   agent:
     description: Agent coordination and state lifecycle events.
     topics:
+      - name: platform.agent.state_updated
+        description: One agent session published a live coordination-state update.
+        status: active
+        delivery: at_least_once
+        retention: 7d
+        producers:
+          - adr-0161-real-time-agent-coordination-map
+        payload:
+          required:
+            - session_id
+            - agent_id
+            - phase
+            - status
       - name: platform.agent.handoff
         description: One agent delegated work to another agent.
         status: reserved

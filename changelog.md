@@ -11,6 +11,7 @@ Detailed platform change history lives in the generated deployment history porta
 Versioned release notes live under [docs/release-notes/README.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/README.md).
 
 ## Unreleased
+
 ## Latest Release
 
-- [0.155.0 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.155.0.md)
+- [0.156.0 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.156.0.md)

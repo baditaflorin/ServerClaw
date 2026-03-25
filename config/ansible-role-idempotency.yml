@@ -103,6 +103,12 @@ roles:
   monitoring_vm:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  n8n_postgres:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  n8n_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   netbox_postgres:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
@@ -162,6 +168,9 @@ roles:
   proxmox_guests:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  proxmox_headscale:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   proxmox_kernel:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
@@ -217,6 +226,12 @@ roles:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   uptime_kuma_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  vaultwarden_postgres:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  vaultwarden_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   wait_for_healthy:

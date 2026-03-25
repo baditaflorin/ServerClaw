@@ -3084,7 +3084,7 @@ workstreams:
    - id: adr-0161-real-time-agent-coordination-map
     adr: "0161"
     title: Real-time agent coordination map
-    status: in_progress
+    status: merged
     owner: codex
     branch: codex/adr-0161-real-time-agent-coordination-map
     worktree_path: .worktrees/adr-0161-live-apply

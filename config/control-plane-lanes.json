@@ -467,6 +467,19 @@
           "notes": "Each committed mutation-ledger row fans out on the canonical platform.ledger.event_written subject for downstream mirrors and reactive consumers."
         },
         {
+          "id": "platform-agent-events",
+          "kind": "event_subject",
+          "endpoint": "platform.agent.*",
+          "auth": "Internal NATS publication from ADR 0161 through the private docker-runtime-lv3 event bus runtime.",
+          "owner_refs": [
+            "proxmox_florin"
+          ],
+          "workflow_refs": [
+            "converge-windmill"
+          ],
+          "notes": "Agent coordination publishers emit canonical platform.agent.* subjects so operators and future automation can observe live multi-agent session state without scraping worker-local state."
+        },
+        {
           "id": "platform-execution-events",
           "kind": "event_subject",
           "endpoint": "platform.execution.*",

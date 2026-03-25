@@ -247,6 +247,15 @@
       "approval_notes": "ADR 0115 ledger fan-out stays private-first because it exposes operator and automation mutations in near real time."
     },
     {
+      "id": "platform-agent-events",
+      "title": "Agent coordination event subjects",
+      "lane": "event",
+      "lane_surface_ref": "platform-agent-events",
+      "publication_tier": "internal-only",
+      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "approval_notes": "ADR 0161 coordination events stay private-first because they expose live agent activity, target selection, and blocked or escalated session state."
+    },
+    {
       "id": "platform-execution-events",
       "title": "Execution lifecycle event subjects",
       "lane": "event",
