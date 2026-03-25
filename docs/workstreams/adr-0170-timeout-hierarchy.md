@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0170](../adr/0170-platform-wide-timeout-hierarchy.md)
 - Title: Canonical timeout hierarchy, deadline propagation helpers, validation, and runtime integration
-- Status: in_progress
+- Status: merged
 - Branch: `codex/adr-0170-timeout-hierarchy`
 - Worktree: `../proxmox_florin_server-timeout-hierarchy`
 - Owner: codex

@@ -3110,7 +3110,7 @@ workstreams:
   - id: adr-0170-timeout-hierarchy
     adr: "0170"
     title: Platform-wide timeout hierarchy
-    status: in_progress
+    status: merged
     owner: codex
     branch: codex/adr-0170-timeout-hierarchy
     worktree_path: ../proxmox_florin_server-timeout-hierarchy
