@@ -4,6 +4,7 @@ import sqlite3
 import sys
 import time
 from pathlib import Path
+from unittest.mock import patch
 
 import httpx
 from cryptography.hazmat.primitives import hashes
@@ -15,7 +16,8 @@ SCRIPTS_DIR = REPO_ROOT / "scripts"
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
-from api_gateway.main import GatewayConfig, GatewayRuntime, create_app  # noqa: E402
+from api_gateway.main import GatewayConfig, GatewayRuntime, NatsEventEmitter, create_app  # noqa: E402
+from platform.degradation import DegradationStateStore  # noqa: E402
 
 
 def b64url_encode(data: bytes) -> str:
@@ -143,6 +145,46 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
         {
             "services": [
                 {
+                    "id": "api_gateway",
+                    "name": "Platform API Gateway",
+                    "description": "Unified platform gateway",
+                    "category": "automation",
+                    "lifecycle_status": "active",
+                    "vm": "docker-runtime-lv3",
+                    "exposure": "edge-published",
+                    "internal_url": "http://10.10.10.20:8083",
+                    "public_url": "https://api.lv3.org",
+                    "subdomain": "api.lv3.org",
+                    "health_probe_id": "api_gateway",
+                    "adr": "0092",
+                    "runbook": "docs/runbooks/configure-api-gateway.md",
+                    "degradation_modes": [
+                        {
+                            "dependency": "keycloak",
+                            "dependency_type": "soft",
+                            "degraded_behaviour": "Use cached JWKS for up to 300 seconds.",
+                            "degraded_for_seconds_max": 300,
+                            "recovery_signal": "successful JWKS refresh",
+                            "tested_by": "fault:keycloak-unavailable"
+                        },
+                        {
+                            "dependency": "nats",
+                            "dependency_type": "soft",
+                            "degraded_behaviour": "Buffer gateway events in a local outbox.",
+                            "degraded_for_seconds_max": -1,
+                            "recovery_signal": "successful outbox flush",
+                            "tested_by": "fault:nats-unavailable"
+                        }
+                    ],
+                    "environments": {
+                        "production": {
+                            "status": "active",
+                            "url": "https://api.lv3.org",
+                            "subdomain": "api.lv3.org"
+                        }
+                    }
+                },
+                {
                     "id": "postgres",
                     "name": "Postgres",
                     "description": "database",
@@ -235,6 +277,10 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
         "# Configure Windmill\n\nDeploy service runtime.\n",
     )
     write_yaml(
+        tmp_path / "docs" / "runbooks" / "configure-api-gateway.md",
+        "# Configure API Gateway\n\nDeploy service runtime.\n",
+    )
+    write_yaml(
         tmp_path / "docs" / "runbooks" / "postgres-failover.md",
         "# Postgres Failover\n\nHandle the failover path.\n",
     )
@@ -273,6 +319,8 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
         nats_url=None,
         deploy_webhook_url=None,
         secret_rotation_webhook_url=None,
+        degradation_state_path=tmp_path / "data" / "degradation-state.json",
+        nats_outbox_path=tmp_path / "data" / "nats-outbox.jsonl",
         openapi_include_upstreams=False,
         graph_dsn=graph_dsn,
         world_state_dsn=world_state_dsn,
@@ -311,11 +359,11 @@ def test_gateway_proxy_and_platform_endpoints(tmp_path: Path) -> None:
 
                     services = await client.get("/v1/platform/services", headers=headers)
                     assert services.status_code == 200
-                    assert services.json()["count"] == 2
+                    assert services.json()["count"] == 3
 
                     platform_health = await client.get("/v1/platform/health", headers=headers)
                     assert platform_health.status_code == 200
-                    assert platform_health.json()["service_count"] == 2
+                    assert platform_health.json()["service_count"] == 3
                     assert platform_health.json()["source"] == "health_composite"
 
                     postgres_health = await client.get("/v1/platform/health/postgres", headers=headers)
@@ -368,6 +416,117 @@ def test_gateway_proxy_and_platform_endpoints(tmp_path: Path) -> None:
     import asyncio
 
     asyncio.run(run())
+
+
+def test_gateway_enters_and_surfaces_keycloak_degraded_mode(tmp_path: Path) -> None:
+    jwks_online = {"value": True}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.host == "upstream.test":
+            return httpx.Response(200, json={"status": "ok"})
+        if jwks_online["value"]:
+            return httpx.Response(200, json=json.loads((tmp_path / "jwks.json").read_text()))
+        raise httpx.ConnectError("keycloak unavailable", request=request)
+
+    transport = httpx.MockTransport(handler)
+    config, token = make_repo(tmp_path, "http://upstream.test")
+    app = create_app(config)
+
+    async def run() -> None:
+        async with httpx.AsyncClient(transport=transport) as runtime_client:
+            runtime = GatewayRuntime(config)
+            await runtime.http_client.aclose()
+            runtime.http_client = runtime_client
+            runtime.verifier._client = runtime_client
+            app.state.runtime = runtime
+            try:
+                transport_app = httpx.ASGITransport(app=app)
+                async with httpx.AsyncClient(transport=transport_app, base_url="http://gateway.test") as client:
+                    headers = {"Authorization": f"Bearer {token}"}
+                    ok = await client.get("/v1/platform/services", headers=headers)
+                    assert ok.status_code == 200
+
+                    runtime.verifier._jwks_cache_expiry = time.time() + 10
+                    jwks_online["value"] = False
+
+                    degraded = await client.get("/v1/platform/services", headers=headers)
+                    assert degraded.status_code == 200
+
+                    active = await client.get("/v1/platform/degradations", headers=headers)
+                    assert active.status_code == 200
+                    assert active.json()["degradation_count"] == 1
+                    assert active.json()["services"]["api_gateway"][0]["dependency"] == "keycloak"
+
+                    runtime.verifier._jwks_cache_expiry = time.time() - 1
+                    failed = await client.get("/v1/platform/services", headers=headers)
+                    assert failed.status_code == 503
+                    assert failed.headers["Retry-After"] == "30"
+                    assert failed.json()["detail"]["error_code"] == "GATE_CIRCUIT_OPEN"
+            finally:
+                await runtime.close()
+
+    import asyncio
+
+    asyncio.run(run())
+
+
+def test_nats_emitter_buffers_and_flushes_outbox(tmp_path: Path) -> None:
+    emitter = NatsEventEmitter(
+        "nats://127.0.0.1:4222",
+        outbox_path=tmp_path / "nats-outbox.jsonl",
+        degradation_store=DegradationStateStore(tmp_path / "degradation-state.json"),
+        degradation_mode={
+            "dependency": "nats",
+            "dependency_type": "soft",
+            "degraded_behaviour": "Buffer events in a local outbox.",
+            "degraded_for_seconds_max": -1,
+            "recovery_signal": "successful outbox flush",
+            "tested_by": "fault:nats-unavailable",
+        },
+    )
+    publish_calls = {"count": 0}
+
+    def fake_publish(host: str, port: int, subject: str, payload: bytes) -> None:
+        publish_calls["count"] += 1
+        if publish_calls["count"] == 1:
+            raise OSError("nats unavailable")
+
+        with patch.object(emitter, "_publish", side_effect=fake_publish):
+            import asyncio
+
+        asyncio.run(
+            emitter.emit(
+                "platform.api.request",
+                {
+                    "request_id": "one",
+                    "method": "GET",
+                    "path": "/v1/platform/services",
+                    "status_code": 200,
+                    "latency_ms": 12.3,
+                    "caller_identity": "ops",
+                    "caller_roles": ["platform-operator"],
+                },
+            )
+        )
+        assert emitter._outbox_path.exists()
+        assert emitter._degradation_store.active_for_service("api_gateway")
+
+        asyncio.run(
+            emitter.emit(
+                "platform.api.request",
+                {
+                    "request_id": "two",
+                    "method": "GET",
+                    "path": "/v1/platform/services",
+                    "status_code": 200,
+                    "latency_ms": 10.1,
+                    "caller_identity": "ops",
+                    "caller_roles": ["platform-operator"],
+                },
+            )
+        )
+        assert not emitter._outbox_path.exists()
+        assert not emitter._degradation_store.active_for_service("api_gateway")
 
 
 def test_gateway_requires_bearer_token(tmp_path: Path) -> None:

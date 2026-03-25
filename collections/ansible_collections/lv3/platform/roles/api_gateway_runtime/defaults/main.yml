@@ -50,6 +50,7 @@ api_gateway_verify_client_secret_local_file: >-
     | default(api_gateway_repo_root ~ '/.local/keycloak/lv3-agent-hub-client-secret.txt')
   }}
 api_gateway_nats_url: ""
+api_gateway_keycloak_retry_after_seconds: 30
 api_gateway_deploy_webhook_url: ""
 api_gateway_secret_rotation_webhook_url: ""
 api_gateway_include_upstream_openapi: false

@@ -42,6 +42,7 @@ ALLOWED_EXPOSURES = {
     "informational-only",
     "private-only",
 }
+ALLOWED_DEPENDENCY_TYPES = {"hard", "soft", "optional"}
 
 
 def require_environment_bindings(
@@ -125,6 +126,47 @@ def require_string_list(value: Any, path: str) -> list[str]:
     if len(result) != len(set(result)):
         raise ValueError(f"{path} must not contain duplicates")
     return result
+
+
+def require_degradation_modes(value: Any, path: str) -> list[dict[str, Any]]:
+    modes = require_list(value, path)
+    normalized: list[dict[str, Any]] = []
+    seen_dependencies: set[str] = set()
+    for index, mode in enumerate(modes):
+        mode = require_mapping(mode, f"{path}[{index}]")
+        dependency = require_str(mode.get("dependency"), f"{path}[{index}].dependency")
+        if dependency in seen_dependencies:
+            raise ValueError(f"{path} must not declare duplicate dependency '{dependency}'")
+        seen_dependencies.add(dependency)
+        dependency_type = require_str(mode.get("dependency_type"), f"{path}[{index}].dependency_type")
+        if dependency_type not in ALLOWED_DEPENDENCY_TYPES:
+            raise ValueError(
+                f"{path}[{index}].dependency_type must be one of {sorted(ALLOWED_DEPENDENCY_TYPES)}"
+            )
+        degraded_behaviour = require_str(
+            mode.get("degraded_behaviour"),
+            f"{path}[{index}].degraded_behaviour",
+        )
+        degraded_for_seconds_max = require_int(
+            mode.get("degraded_for_seconds_max"),
+            f"{path}[{index}].degraded_for_seconds_max",
+            minimum=-1,
+        )
+        recovery_signal = require_str(mode.get("recovery_signal"), f"{path}[{index}].recovery_signal")
+        tested_by = require_str(mode.get("tested_by"), f"{path}[{index}].tested_by")
+        if not tested_by.startswith("fault:"):
+            raise ValueError(f"{path}[{index}].tested_by must start with 'fault:'")
+        normalized.append(
+            {
+                "dependency": dependency,
+                "dependency_type": dependency_type,
+                "degraded_behaviour": degraded_behaviour,
+                "degraded_for_seconds_max": degraded_for_seconds_max,
+                "recovery_signal": recovery_signal,
+                "tested_by": tested_by,
+            }
+        )
+    return normalized
 
 
 def load_service_catalog() -> dict[str, Any]:
@@ -310,6 +352,12 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
         if "tags" in service:
             require_string_list(service.get("tags"), f"services[{index}].tags")
 
+        if "degradation_modes" in service:
+            require_degradation_modes(
+                service.get("degradation_modes"),
+                f"services[{index}].degradation_modes",
+            )
+
         if lifecycle_status == "active":
             active_service_ids.add(service_id)
             if vm != "proxmox_florin" and vm not in observed_guests:
@@ -389,6 +437,18 @@ def show_service(catalog: dict[str, Any], service_id: str) -> int:
             print(f"Dashboard: {service['dashboard_url']}")
         if "adr" in service:
             print(f"ADR: {service['adr']}")
+        if service.get("degradation_modes"):
+            print("Degradation modes:")
+            for mode in service["degradation_modes"]:
+                duration = mode["degraded_for_seconds_max"]
+                duration_text = "indefinite" if duration == -1 else f"{duration}s"
+                print(
+                    "  - "
+                    f"{mode['dependency']} [{mode['dependency_type']}] "
+                    f"max={duration_text} tested_by={mode['tested_by']}"
+                )
+                print(f"    behaviour: {mode['degraded_behaviour']}")
+                print(f"    recovery: {mode['recovery_signal']}")
         environments = service.get("environments", {})
         if environments:
             print("Environments:")
