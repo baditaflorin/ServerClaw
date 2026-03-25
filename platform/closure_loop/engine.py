@@ -575,7 +575,9 @@ class ClosureLoop:
             SimpleNamespace(
                 workflow_id=proposal["workflow_id"],
                 arguments=payload if isinstance(payload, dict) else {},
+                target_service_id=run["service_id"],
                 target_vm=run["service_id"],
+                idempotency_scope=run["trigger_ref"],
             ),
             requested_by=actor_id,
         )

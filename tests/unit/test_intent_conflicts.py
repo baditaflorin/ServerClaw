@@ -256,7 +256,7 @@ def test_scheduler_returns_duplicate_recent_result(tmp_path: Path) -> None:
     )
 
     assert first.status == "completed"
-    assert second.status == "duplicate"
+    assert second.status == "idempotent_hit"
     assert windmill.submit_calls == ["converge-netbox"]
     assert second.output == {"job_id": "job-converge-netbox"}
 

@@ -17,6 +17,7 @@ from platform.agent_policy import AgentPolicyEngine, DailyExecutionCounter, Poli
 from platform.circuit import CircuitRegistry, should_count_urllib_exception
 from platform.conflict import IntentConflictRegistry
 from platform.goal_compiler.schema import RiskClass
+from platform.idempotency import IdempotencyStore, compute_idempotency_key
 from platform.ledger import LedgerReader, LedgerWriter
 from platform.retry import policy_for_surface, with_retry
 
@@ -332,6 +333,7 @@ class BudgetedWorkflowScheduler:
         conflict_registry: IntentConflictRegistry | None = None,
         speculative_state_store: SpeculativeStateStore | None = None,
         lane_budget_store: FileLaneReservationStore | None = None,
+        idempotency_store: IdempotencyStore | None = None,
         poll_interval_seconds: float = 2.0,
         sleep_fn: Any = time.sleep,
     ) -> None:
@@ -357,6 +359,11 @@ class BudgetedWorkflowScheduler:
         self._lane_budget_store = lane_budget_store or FileLaneReservationStore(
             self._repo_root / ".local" / "scheduler" / "lane-reservations.json"
         )
+        self._idempotency_store = idempotency_store or IdempotencyStore(repo_root=self._repo_root)
+        self._lane_budget_store = lane_budget_store or FileLaneReservationStore(
+            self._repo_root / ".local" / "scheduler" / "lane-reservations.json"
+        )
+        self._idempotency_store = idempotency_store or IdempotencyStore(repo_root=self._repo_root)
         self._poll_interval_seconds = poll_interval_seconds
         self._sleep = sleep_fn
         if lock_manager is not None:
@@ -548,6 +555,32 @@ class BudgetedWorkflowScheduler:
             metadata={"requested_by": requested_by, **metadata},
         )
 
+    def _write_idempotent_hit_event(
+        self,
+        *,
+        policy: WorkflowPolicy,
+        actor_intent_id: str,
+        requested_by: str,
+        record: Any,
+    ) -> None:
+        if self._ledger_writer is None:
+            return
+        self._ledger_writer.write(
+            event_type="execution.idempotent_hit",
+            actor="scheduler:budgeted-workflow-scheduler",
+            actor_intent_id=actor_intent_id,
+            target_kind="workflow",
+            target_id=policy.workflow_id,
+            receipt=record.result,
+            metadata={
+                "requested_by": requested_by,
+                "idempotency_key": record.idempotency_key,
+                "original_actor_intent_id": record.actor_intent_id,
+                "original_job_id": record.windmill_job_id,
+                "completed_at": record.completed_at,
+            },
+        )
+
     @staticmethod
     def _risk_class_for_submission(intent: Any, policy: WorkflowPolicy) -> RiskClass:
         for attr in ("final_risk_class", "risk_class"):
@@ -728,6 +761,30 @@ class BudgetedWorkflowScheduler:
                 return status, str(compensating_job_id), status_payload.get("result")
             self._sleep(self._poll_interval_seconds)
 
+    @staticmethod
+    def _idempotency_scope(intent: Any, arguments: dict[str, Any]) -> str | None:
+        for attr in ("idempotency_scope", "trigger_ref", "nats_message_id"):
+            value = getattr(intent, attr, None)
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+        for key in ("idempotency_scope", "trigger_ref", "nats_message_id"):
+            value = arguments.get(key)
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+        return None
+
+    @staticmethod
+    def _idempotency_target(intent: Any, arguments: dict[str, Any], policy: WorkflowPolicy) -> str:
+        for attr in ("target_service_id", "target_vm"):
+            value = getattr(intent, attr, None)
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+        for key in ("service_id", "service", "target_service", "target", "target_vm"):
+            value = arguments.get(key)
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+        return policy.workflow_id
+
     def submit(
         self,
         intent: Any,
@@ -738,7 +795,8 @@ class BudgetedWorkflowScheduler:
         policy = load_workflow_policy(intent.workflow_id, repo_root=self._repo_root)
         requested_by = normalize_actor_id(requested_by)
         actor_intent_id = self._resolve_actor_intent_id(intent)
-        parent_actor_intent_id = self._parent_actor_intent_id(getattr(intent, "arguments", {}) or {})
+        arguments = getattr(intent, "arguments", {}) or {}
+        parent_actor_intent_id = self._parent_actor_intent_id(arguments)
         host_touch_estimate = estimate_touched_hosts(intent, policy)
         risk_class = self._risk_class_for_submission(intent, policy)
         current_daily_executions = self._daily_execution_counter.get(requested_by) if autonomous else None
@@ -824,6 +882,56 @@ class BudgetedWorkflowScheduler:
                 )
 
         speculative_requested = self._speculative_requested(intent, policy)
+        idempotency_key = compute_idempotency_key(
+            policy.workflow_id,
+            self._idempotency_target(intent, arguments, policy),
+            arguments,
+            requested_by,
+            exact_scope=self._idempotency_scope(intent, arguments),
+        )
+        idempotency_claim = self._idempotency_store.claim(
+            idempotency_key=idempotency_key,
+            workflow_id=policy.workflow_id,
+            actor_id=requested_by,
+            actor_intent_id=actor_intent_id,
+            target_service_id=self._idempotency_target(intent, arguments, policy),
+            metadata={"requested_by": requested_by},
+        )
+        if idempotency_claim.action == "completed":
+            self._write_idempotent_hit_event(
+                policy=policy,
+                actor_intent_id=actor_intent_id,
+                requested_by=requested_by,
+                record=idempotency_claim.record,
+            )
+            return SchedulerResult(
+                status="idempotent_hit",
+                workflow_id=policy.workflow_id,
+                job_id=idempotency_claim.record.windmill_job_id,
+                actor_intent_id=actor_intent_id,
+                output=idempotency_claim.record.result,
+                budget=policy.budget.as_dict(),
+                metadata={
+                    "idempotency_key": idempotency_key,
+                    "original_actor_intent_id": idempotency_claim.record.actor_intent_id,
+                    "original_job_id": idempotency_claim.record.windmill_job_id,
+                    "completed_at": idempotency_claim.record.completed_at,
+                },
+            )
+        if idempotency_claim.action == "in_flight":
+            return SchedulerResult(
+                status="in_flight",
+                workflow_id=policy.workflow_id,
+                job_id=idempotency_claim.record.windmill_job_id,
+                actor_intent_id=actor_intent_id,
+                budget=policy.budget.as_dict(),
+                metadata={
+                    "idempotency_key": idempotency_key,
+                    "original_actor_intent_id": idempotency_claim.record.actor_intent_id,
+                    "original_job_id": idempotency_claim.record.windmill_job_id,
+                    "submitted_at": idempotency_claim.record.submitted_at,
+                },
+            )
         lock_token = None
         lane_decision = None
         lane_reservation_ttl = None
@@ -836,6 +944,7 @@ class BudgetedWorkflowScheduler:
                     max_instances=policy.budget.max_concurrent_instances,
                 )
                 if lock_token is None:
+                    self._idempotency_store.delete(idempotency_key)
                     return SchedulerResult(
                         status="concurrency_limit",
                         workflow_id=policy.workflow_id,
@@ -890,6 +999,7 @@ class BudgetedWorkflowScheduler:
                 allow_conflicts=speculative_requested,
             )
             if conflict_result.status == "conflict":
+                self._idempotency_store.delete(idempotency_key)
                 self._write_conflict_rejected_event(
                     policy=policy,
                     actor_intent_id=actor_intent_id,
@@ -905,6 +1015,7 @@ class BudgetedWorkflowScheduler:
                     metadata=conflict_result.as_dict(),
                 )
             if conflict_result.status == "duplicate":
+                self._idempotency_store.delete(idempotency_key)
                 self._write_deduplicated_event(
                     policy=policy,
                     actor_intent_id=actor_intent_id,
@@ -942,10 +1053,12 @@ class BudgetedWorkflowScheduler:
                 )
             submission = self._windmill_client.submit_workflow(
                 policy.workflow_id,
-                getattr(intent, "arguments", {}) or {},
+                arguments,
                 timeout_seconds=policy.budget.max_duration_seconds if policy.execution_class == "mutation" else None,
             )
             job_id = submission.get("job_id")
+            if job_id:
+                self._idempotency_store.attach_job_id(idempotency_key, str(job_id))
             self._write_started_event(
                 policy=policy,
                 requested_by=requested_by,
@@ -959,6 +1072,11 @@ class BudgetedWorkflowScheduler:
 
             if not job_id:
                 status = "completed" if submission.get("success", True) else "failed"
+                self._idempotency_store.complete(
+                    idempotency_key,
+                    status=status,
+                    result=submission.get("result"),
+                )
                 if status != "completed" or not speculative_requested:
                     self._write_execution_terminal_event(
                         event_type="execution.completed" if status == "completed" else "execution.failed",
@@ -1103,6 +1221,12 @@ class BudgetedWorkflowScheduler:
                 violation = self._watchdog.evaluate(active_job, status)
                 if violation is not None and not violation.advisory_only:
                     payload = self._watchdog.handle_violation(active_job, status, violation)
+                    self._idempotency_store.complete(
+                        idempotency_key,
+                        status="budget_exceeded",
+                        result=status.get("result"),
+                        job_id=str(job_id),
+                    )
                     if registered_claim:
                         self._conflict_registry.complete_intent(actor_intent_id, status="budget_exceeded")
                         claim_closed = True
@@ -1210,6 +1334,12 @@ class BudgetedWorkflowScheduler:
                                 output=status.get("result"),
                             )
                             claim_closed = True
+                    self._idempotency_store.complete(
+                        idempotency_key,
+                        status=final_status,
+                        result=status.get("result"),
+                        job_id=str(job_id),
+                    )
                     return SchedulerResult(
                         status=final_status,
                         workflow_id=policy.workflow_id,

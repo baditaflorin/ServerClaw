@@ -42,6 +42,7 @@ except ImportError:  # pragma: no cover - packaged entrypoint path
     from scripts.search_fabric import SearchClient
 
 from platform.health import HealthCompositeClient, ServiceHealthNotFoundError
+from platform.idempotency import IdempotencyStore
 from platform.scheduler import build_scheduler
 from scripts.risk_scorer import ExecutionIntent, assemble_context, compile_workflow_intent, score_intent
 CLI_VERSION = "0.1.0"
@@ -969,6 +970,88 @@ def enforce_risk_gate(intent: ExecutionIntent, *, approve_risk: bool, risk_overr
     return 0
 
 
+def load_ledger_events_for_intent(
+    actor_intent_id: str,
+    *,
+    repo_root: Path | None = None,
+    dsn: str | None = None,
+) -> list[dict[str, Any]]:
+    resolved_repo_root = repo_root or REPO_ROOT
+    resolved_dsn = (dsn if dsn is not None else os.environ.get("LV3_LEDGER_DSN", "")).strip()
+    if resolved_dsn:
+        return LEDGER_MODULE.LedgerReader(dsn=resolved_dsn).events_by_intent(actor_intent_id, limit=50)
+    ledger_path = resolved_repo_root / ".local" / "state" / "ledger" / "ledger.events.jsonl"
+    if not ledger_path.exists():
+        return []
+    events: list[dict[str, Any]] = []
+    for line in ledger_path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        payload = json.loads(line)
+        if payload.get("actor_intent_id") == actor_intent_id:
+            events.append(payload)
+    return events
+
+
+def show_intent_status(intent_id: str) -> int:
+    events = load_ledger_events_for_intent(intent_id)
+    record = IdempotencyStore(repo_root=REPO_ROOT).record_for_intent(intent_id)
+    if not events and record is None:
+        print(f"Intent {intent_id} was not found.", file=sys.stderr)
+        return 1
+
+    latest_event = events[-1] if events else None
+    status = "unknown"
+    result: Any = None
+    metadata: dict[str, Any] = {}
+    target_id = record.workflow_id if record is not None else "unknown"
+    if latest_event is not None:
+        target_id = str(latest_event.get("target_id") or target_id)
+        metadata = dict(latest_event.get("metadata") or {})
+        if latest_event.get("event_type") == "execution.idempotent_hit":
+            status = "idempotent_hit"
+            result = latest_event.get("receipt")
+        elif latest_event.get("event_type") == "execution.completed":
+            status = "completed"
+        elif latest_event.get("event_type") == "execution.failed":
+            status = "failed"
+        elif latest_event.get("event_type") == "execution.aborted":
+            status = "aborted"
+        elif latest_event.get("event_type") == "execution.started":
+            status = "in_flight"
+        elif latest_event.get("event_type") == "intent.deduplicated":
+            status = "duplicate"
+            result = latest_event.get("receipt")
+    if record is not None and record.status == "in_flight":
+        status = "in_flight"
+    elif record is not None and status == "unknown":
+        status = record.status
+        result = record.result
+
+    print(f"Intent {intent_id}: {target_id}")
+    print(f"Status: {status}")
+    if status == "idempotent_hit":
+        original_job_id = metadata.get("original_job_id") or (record.windmill_job_id if record is not None else None)
+        completed_at = metadata.get("completed_at") or (record.completed_at if record is not None else None)
+        original_intent_id = metadata.get("original_actor_intent_id")
+        summary = original_job_id or original_intent_id or "unknown"
+        if completed_at:
+            print(f"Original execution: {summary} (completed {completed_at})")
+        else:
+            print(f"Original execution: {summary}")
+        if result is not None:
+            print(f"Result: {json.dumps(result, sort_keys=True)}")
+        print("No action taken. The original result is being returned.")
+        return 0
+    if record is not None and record.windmill_job_id:
+        print(f"Windmill job: {record.windmill_job_id}")
+    if result is None and record is not None:
+        result = record.result
+    if result is not None:
+        print(f"Result: {json.dumps(result, sort_keys=True)}")
+    return 0
+
+
 def run_windmill_request(
     workflow_name: str,
     payload: dict[str, Any],
@@ -1016,6 +1099,7 @@ def run_windmill_request(
     scheduler_intent = intent or SimpleNamespace(
         workflow_id=workflow_name,
         arguments=payload,
+        target_service_id=payload.get("service") or payload.get("service_id"),
         target_vm=payload.get("target_vm") or payload.get("target"),
     )
     try:
@@ -1053,6 +1137,15 @@ def run_windmill_request(
         if isinstance(reasons, list) and reasons:
             print(f"Budget reasons: {', '.join(str(item) for item in reasons)}", file=sys.stderr)
         return 1
+    if result.status == "in_flight":
+        job = result.job_id
+        if job is None and isinstance(result.metadata, dict):
+            job = result.metadata.get("original_job_id")
+        message = f"Workflow {workflow_name} is already running for the same idempotency key."
+        if job:
+            message += f" Existing job: {job}."
+        print(message, file=sys.stderr)
+        return 0
     warnings = result.metadata.get("conflict_warnings", []) if isinstance(result.metadata, dict) else []
     for warning in warnings:
         message = warning.get("message") if isinstance(warning, dict) else None
@@ -2347,6 +2440,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     intent_batch.add_argument("--max-parallelism", type=int, default=5)
     intent_batch.add_argument("--json", action="store_true")
+    intent_status = intent_subparsers.add_parser("status", help="Show execution and idempotency state for one intent.")
+    intent_status.add_argument("intent_id")
 
     health = subparsers.add_parser("health", help="Show the composite health index.")
     health.add_argument("service", nargs="?")
@@ -2660,6 +2755,8 @@ def main(argv: list[str] | None = None) -> int:
                 max_parallelism=args.max_parallelism,
                 as_json=args.json,
             )
+        if args.intent_action == "status":
+            return show_intent_status(args.intent_id)
     if args.command == "runbook":
         if args.runbook_action == "execute":
             return runbook_execute_command(args.runbook, args.args, dry_run=args.dry_run, explain=args.explain)

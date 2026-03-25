@@ -1,15 +1,14 @@
-# Release 0.152.0
+# Release 0.153.0
 
 - Date: 2026-03-25
 
 ## Summary
-- Implement ADR 0144 by moving the management mesh control plane to repo-managed Headscale, publishing `headscale.lv3.org`, and updating canonical host access to `100.64.0.1`.
-- Implement ADR 0162 with a file-backed lock registry, coordination map, intent queue, and Windmill deadlock detector runtime; live apply remains pending while the Proxmox host is unreachable.
-- Implement ADR 0164 by adding shared circuit breaker policies and fail-fast dependency guards for Keycloak, Windmill, Ollama, gateway upstream calls, and NATS publishing.
-- Correct `versions/stack.yaml` so repository validation no longer references a missing ADR 0144 Headscale live-apply receipt.
+- Implemented ADR 0165 with deterministic workflow idempotency keys, shared idempotency-record storage, scheduler-side cached-result replay, and closure-loop trigger scoping to prevent duplicate workflow execution.
+- Added `platform.idempotency`, the new `execution.idempotent_hit` ledger event type, and the operator-facing `lv3 intent status <intent_id>` status surface.
+- Added the canonical Postgres schema migration at `migrations/0016_idempotency_store.sql`, a dedicated runbook, and focused regressions across the scheduler, CLI, conflict, and closure-loop paths.
 
 ## Platform Impact
-- no live platform version bump; this release adds ADR 0144 headscale control-plane work, ADR 0162 deadlock detection, ADR 0164 circuit breaker protections, and repository metadata corrections only
+- repository version advances to `0.153.0`; platform version remains `0.130.4` because the ADR 0165 live apply from `main` was blocked by an SSH timeout to the documented operator path during this turn
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

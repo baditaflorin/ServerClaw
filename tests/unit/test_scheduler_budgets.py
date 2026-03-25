@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import threading
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from types import SimpleNamespace
@@ -199,6 +200,29 @@ class SequencedWindmillClient:
 
     def cancel_job(self, job_id: str, *, reason: str | None = None) -> dict[str, Any]:
         return {"job_id": job_id, "canceled": True}
+
+
+class BlockingWindmillClient(FakeWindmillClient):
+    def __init__(self) -> None:
+        super().__init__()
+        self.submitted = threading.Event()
+        self.release = threading.Event()
+
+    def submit_workflow(
+        self,
+        workflow_id: str,
+        arguments: dict[str, Any],
+        *,
+        timeout_seconds: int | None = None,
+    ) -> dict[str, Any]:
+        payload = super().submit_workflow(workflow_id, arguments, timeout_seconds=timeout_seconds)
+        self.submitted.set()
+        return payload
+
+    def get_job(self, job_id: str) -> dict[str, Any]:
+        self.submitted.set()
+        self.release.wait(timeout=1)
+        return {"completed": True, "success": True, "result": {"job_id": job_id, "status": "ok"}}
 
 
 def test_budget_loader_merges_defaults_and_explicit_overrides(tmp_path: Path) -> None:
@@ -705,6 +729,112 @@ def test_load_workflow_policy_rejects_invalid_speculative_config(tmp_path: Path)
         assert "compensating_workflow_id" in str(exc)
     else:  # pragma: no cover - defensive guard for failing assertion
         raise AssertionError("expected invalid speculative config to raise ValueError")
+
+
+def test_scheduler_returns_cached_result_for_completed_idempotent_submission(tmp_path: Path) -> None:
+    write_scheduler_repo(
+        tmp_path,
+        workflows={
+            "converge-netbox": {
+                "description": "Deploy NetBox",
+                "live_impact": "guest_live",
+                "execution_class": "mutation",
+            }
+        },
+    )
+    ledger = RecordingLedgerWriter()
+    windmill = FakeWindmillClient(statuses=[{"completed": True, "success": True, "result": {"status": "ok"}}])
+    scheduler = BudgetedWorkflowScheduler(
+        windmill_client=windmill,
+        repo_root=tmp_path,
+        lock_manager=FakeLockManager(),
+        ledger_writer=ledger,
+        sleep_fn=lambda _seconds: None,
+    )
+
+    first = scheduler.submit(SimpleNamespace(workflow_id="converge-netbox", arguments={"service": "netbox"}))
+    second = scheduler.submit(SimpleNamespace(workflow_id="converge-netbox", arguments={"service": "netbox"}))
+
+    assert first.status == "completed"
+    assert second.status == "idempotent_hit"
+    assert second.output == {"status": "ok"}
+    assert len(windmill.submit_calls) == 1
+    assert [event["event_type"] for event in ledger.events] == [
+        "intent.claim_registered",
+        "execution.started",
+        "execution.completed",
+        "execution.idempotent_hit",
+    ]
+
+
+def test_scheduler_returns_in_flight_for_duplicate_submission(tmp_path: Path) -> None:
+    write_scheduler_repo(
+        tmp_path,
+        workflows={
+            "converge-netbox": {
+                "description": "Deploy NetBox",
+                "live_impact": "guest_live",
+                "execution_class": "mutation",
+            }
+        },
+    )
+    windmill = BlockingWindmillClient()
+    scheduler = BudgetedWorkflowScheduler(
+        windmill_client=windmill,
+        repo_root=tmp_path,
+        lock_manager=FakeLockManager(),
+        sleep_fn=lambda _seconds: None,
+    )
+    result_holder: dict[str, Any] = {}
+
+    def run_first() -> None:
+        result_holder["first"] = scheduler.submit(
+            SimpleNamespace(workflow_id="converge-netbox", arguments={"service": "netbox"})
+        )
+
+    thread = threading.Thread(target=run_first)
+    thread.start()
+    assert windmill.submitted.wait(timeout=1)
+
+    second = scheduler.submit(SimpleNamespace(workflow_id="converge-netbox", arguments={"service": "netbox"}))
+    windmill.release.set()
+    thread.join(timeout=1)
+
+    assert second.status == "in_flight"
+    assert len(windmill.submit_calls) == 1
+    assert result_holder["first"].status == "completed"
+
+
+def test_scheduler_allows_retry_after_failed_idempotent_submission(tmp_path: Path) -> None:
+    write_scheduler_repo(
+        tmp_path,
+        workflows={
+            "converge-netbox": {
+                "description": "Deploy NetBox",
+                "live_impact": "guest_live",
+                "execution_class": "mutation",
+            }
+        },
+    )
+    windmill = FakeWindmillClient(
+        statuses=[
+            {"completed": True, "success": False, "result": {"error": "boom"}},
+            {"completed": True, "success": True, "result": {"status": "ok"}},
+        ]
+    )
+    scheduler = BudgetedWorkflowScheduler(
+        windmill_client=windmill,
+        repo_root=tmp_path,
+        lock_manager=FakeLockManager(),
+        sleep_fn=lambda _seconds: None,
+    )
+
+    first = scheduler.submit(SimpleNamespace(workflow_id="converge-netbox", arguments={"service": "netbox"}))
+    second = scheduler.submit(SimpleNamespace(workflow_id="converge-netbox", arguments={"service": "netbox"}))
+
+    assert first.status == "failed"
+    assert second.status == "completed"
+    assert len(windmill.submit_calls) == 2
 
 
 def test_watchdog_cancels_stale_jobs_and_emits_heartbeat(tmp_path: Path) -> None:

@@ -19,6 +19,7 @@ from .lanes import (
     load_execution_lanes,
     resolve_execution_lane,
 )
+from platform.idempotency import IdempotencyStore
 from .rollback_guard import RollbackDepthResult, RollbackGuard
 from .scheduler import (
     BudgetedWorkflowScheduler,
@@ -43,6 +44,7 @@ __all__ = [
     "LaneBudget",
     "LaneReservationDecision",
     "LaneReservationRecord",
+    "IdempotencyStore",
     "PostgresAdvisoryLockManager",
     "ResourceReservation",
     "ResourceUsage",

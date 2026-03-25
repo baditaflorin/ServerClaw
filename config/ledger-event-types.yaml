@@ -11,6 +11,7 @@
 - execution.started
 - execution.rejected
 - execution.escalated
+- execution.idempotent_hit
 - execution.completed
 - execution.failed
 - execution.aborted

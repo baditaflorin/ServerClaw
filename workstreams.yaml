@@ -2843,6 +2843,8 @@ workstreams:
       - scripts/live_apply_receipts.py
       - scripts/promotion_pipeline.py
       - docs/runbooks/
+    ready_to_merge: false
+    live_applied: false
 
   - id: adr-0157-per-vm-concurrency-budget
     adr: "0157"
@@ -2891,7 +2893,6 @@ workstreams:
       - scripts/workflow_catalog.py
       - config/ledger-event-types.yaml
       - docs/runbooks/speculative-workflow-execution.md
-
   - id: adr-0164-circuit-breaker-pattern
     adr: "0164"
     title: Circuit breaker pattern for external service calls
@@ -2916,6 +2917,37 @@ workstreams:
       - scripts/runbook_executor.py
       - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime
       - docs/runbooks/circuit-breaker-operations.md
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0165-workflow-idempotency
+    adr: "0165"
+    title: Workflow idempotency keys and double-execution prevention
+    status: merged
+    owner: codex
+    branch: codex/live-apply-0165
+    worktree_path: .worktrees/live-apply-0165
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0165-workflow-idempotency.md
+    depends_on:
+      - adr-0044-windmill
+      - adr-0058-nats-event-bus
+      - adr-0112-goal-compiler
+      - adr-0115-mutation-ledger
+      - adr-0119-budgeted-workflow-scheduler
+      - adr-0126-observation-to-action-closure-loop
+      - adr-0127-intent-conflict-resolution
+    conflicts_with:
+      - adr-0119-budgeted-workflow-scheduler
+      - adr-0126-observation-to-action-closure-loop
+      - adr-0127-intent-conflict-resolution
+    shared_surfaces:
+      - platform/idempotency
+      - platform/scheduler
+      - platform/closure_loop
+      - scripts/lv3_cli.py
+      - migrations/0016_idempotency_store.sql
+      - docs/runbooks/workflow-idempotency.md
+      - config/ledger-event-types.yaml
     ready_to_merge: false
     live_applied: false
 
@@ -2990,5 +3022,29 @@ workstreams:
       - Makefile
       - inventory/group_vars/all.yml
       - docs/runbooks/
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0172-watchdog-escalation
+    adr: "0172"
+    title: Watchdog escalation and stale job self-healing
+    status: merged
+    owner: codex
+    branch: codex/adr-0172-watchdog
+    worktree_path: .worktrees/codex-adr-0172-watchdog
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0172-watchdog-escalation-and-stale-job-self-healing.md
+    depends_on:
+      - adr-0044-windmill
+      - adr-0115-mutation-ledger
+      - adr-0119-budgeted-workflow-scheduler
+    conflicts_with: []
+    shared_surfaces:
+      - platform/scheduler/watchdog.py
+      - platform/scheduler/scheduler.py
+      - windmill/scheduler/watchdog-loop.py
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+      - config/workflow-catalog.json
+      - config/ledger-event-types.yaml
+      - docs/runbooks/budgeted-workflow-scheduler.md
     ready_to_merge: false
     live_applied: false
