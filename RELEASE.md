@@ -1,14 +1,14 @@
-# Release 0.121.0
+# Release 0.122.0
 
-- Date: 2026-03-24
+- Date: 2026-03-25
 
 ## Summary
-- implemented ADR 0132 in repository automation with a self-describing platform manifest generator, committed `build/platform-manifest.json` output, and the matching JSON schema
-- added `lv3 manifest show` and `lv3 manifest refresh`, plus validation-gate enforcement that fails when the committed manifest drifts from canonical repo inputs
-- documented the operator workflow in `docs/runbooks/platform-manifest.md` and recorded the merged workstream in `docs/workstreams/adr-0132-self-describing-platform-manifest.md`
+- implemented ADR 0143 with a private Gitea service on `docker-runtime-lv3`, Keycloak OIDC login, and a managed PostgreSQL backend
+- added the self-hosted Gitea Actions runner on `docker-build-lv3` plus the repo-managed `.gitea/workflows/validate.yml` workflow
+- verified live repository creation, push-triggered webhook delivery, and successful workflow execution against the self-hosted Gitea control plane
 
 ## Platform Impact
-- no live platform version bump; this release updates repository automation, release metadata, and operator tooling only
+- pending mainline live apply for ADR 0143 private Gitea rollout
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

@@ -1954,7 +1954,7 @@ workstreams:
   - id: adr-0143-gitea-ci
     adr: "0143"
     title: Private Gitea with self-hosted CI
-    status: in_progress
+    status: merged
     owner: codex
     branch: codex/adr-0143-gitea-ci
     worktree_path: .worktrees/adr-0143-gitea-ci
