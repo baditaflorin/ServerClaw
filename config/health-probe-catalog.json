@@ -183,6 +183,46 @@
         }
       }
     },
+    "langfuse": {
+      "service_name": "langfuse",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "langfuse_runtime",
+      "verify_file": "roles/langfuse_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The Langfuse public health endpoint responds on the local runtime listener.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:3002/api/public/health",
+        "method": "GET",
+        "expected_status": [200]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The Langfuse sign-in page renders locally after the web and worker services finish startup.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:3002/auth/sign-in",
+        "method": "GET",
+        "expected_status": [200]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Langfuse Public Health",
+          "type": "http",
+          "url": "https://langfuse.lv3.org/api/public/health",
+          "description": "Public Langfuse health endpoint published through the shared NGINX edge VM.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": ["200-299"]
+        }
+      }
+    },
     "api_gateway": {
       "service_name": "api-gateway",
       "owning_vm": "docker-runtime-lv3",

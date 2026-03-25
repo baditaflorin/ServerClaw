@@ -114,6 +114,134 @@
         "converge-n8n"
       ]
     },
+    "langfuse_runtime": {
+      "kind": "runtime",
+      "service_id": "langfuse",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "langfuse-web",
+      "registry_ref": "docker.io/langfuse/langfuse",
+      "tag": "3",
+      "digest": "sha256:0c1d6df13e1f02f3e83a90e59c7a1d11b1ecff1d599fc9fc0689c4fc03c3ddd3",
+      "ref": "docker.io/langfuse/langfuse:3@sha256:0c1d6df13e1f02f3e83a90e59c7a1d11b1ecff1d599fc9fc0689c4fc03c3ddd3",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-25",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-25-langfuse-runtime.json",
+      "exception": {
+        "reason": "The pinned upstream Langfuse web image still reports critical Trivy findings in the bundled migrate binary; keep it digest-pinned and re-evaluate on the next image review.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-25",
+        "review_by": "2026-04-08"
+      },
+      "consumers": [
+        "roles/langfuse_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-langfuse"
+      ]
+    },
+    "langfuse_worker_runtime": {
+      "kind": "runtime",
+      "service_id": "langfuse",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "langfuse-worker",
+      "registry_ref": "docker.io/langfuse/langfuse-worker",
+      "tag": "3",
+      "digest": "sha256:edd5fa53a76b323465de328cc333a9046703ae72dfce6d8a29e99e28ea5660d3",
+      "ref": "docker.io/langfuse/langfuse-worker:3@sha256:edd5fa53a76b323465de328cc333a9046703ae72dfce6d8a29e99e28ea5660d3",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-25",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-25-langfuse-worker-runtime.json",
+      "consumers": [
+        "roles/langfuse_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-langfuse"
+      ]
+    },
+    "langfuse_clickhouse_runtime": {
+      "kind": "runtime",
+      "service_id": "langfuse",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "langfuse-clickhouse",
+      "registry_ref": "docker.io/clickhouse/clickhouse-server",
+      "tag": "25.8",
+      "digest": "sha256:6c7ac0ba8cc97f7f7895addc7312b3c7e4860877b81bf83d5a11231ebf2af8de",
+      "ref": "docker.io/clickhouse/clickhouse-server:25.8@sha256:6c7ac0ba8cc97f7f7895addc7312b3c7e4860877b81bf83d5a11231ebf2af8de",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-25",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-25-langfuse-clickhouse-runtime.json",
+      "consumers": [
+        "roles/langfuse_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-langfuse"
+      ]
+    },
+    "langfuse_minio_runtime": {
+      "kind": "runtime",
+      "service_id": "langfuse",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "langfuse-minio",
+      "registry_ref": "docker.io/minio/minio",
+      "tag": "RELEASE.2025-07-23T15-54-02Z",
+      "digest": "sha256:f6efb212cad3b62f78ca02339f16d8bc28d5bb2fbe792dfc21225c6037d2af8b",
+      "ref": "docker.io/minio/minio:RELEASE.2025-07-23T15-54-02Z@sha256:f6efb212cad3b62f78ca02339f16d8bc28d5bb2fbe792dfc21225c6037d2af8b",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-25",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-25-langfuse-minio-runtime.json",
+      "exception": {
+        "reason": "The pinned upstream MinIO image still reports critical Trivy findings in bundled Go binaries; keep it digest-pinned and review on the next image rotation window.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-25",
+        "review_by": "2026-04-08"
+      },
+      "consumers": [
+        "roles/langfuse_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-langfuse"
+      ]
+    },
+    "langfuse_redis_runtime": {
+      "kind": "runtime",
+      "service_id": "langfuse",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "langfuse-redis",
+      "registry_ref": "docker.io/library/redis",
+      "tag": "7",
+      "digest": "sha256:118753efcf3860079715d063438d08e9c63b81ce93f777a949bbd17de501a920",
+      "ref": "docker.io/library/redis:7@sha256:118753efcf3860079715d063438d08e9c63b81ce93f777a949bbd17de501a920",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-25",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-25-langfuse-redis-runtime.json",
+      "exception": {
+        "reason": "The pinned upstream Redis image still reports critical Trivy findings in bundled OS and Go binary components; keep it digest-pinned and re-evaluate on the next image review.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-25",
+        "review_by": "2026-04-08"
+      },
+      "consumers": [
+        "roles/langfuse_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-langfuse"
+      ]
+    },
     "open_webui_runtime": {
       "kind": "runtime",
       "service_id": "open_webui",

@@ -1,0 +1,31 @@
+---
+- name: Verify the Langfuse public health endpoint
+  ansible.builtin.uri:
+    url: "{{ langfuse_internal_base_url }}/api/public/health"
+    method: GET
+    status_code: 200
+  register: langfuse_verify_health
+  retries: 30
+  delay: 5
+  until: langfuse_verify_health.status == 200
+  changed_when: false
+
+- name: Verify the Langfuse bootstrap project API is reachable
+  ansible.builtin.uri:
+    url: "{{ langfuse_internal_base_url }}/api/public/projects"
+    method: GET
+    headers:
+      Authorization: "Basic {{ (langfuse_project_public_key ~ ':' ~ langfuse_project_secret_key) | b64encode }}"
+    return_content: true
+    status_code: 200
+  register: langfuse_verify_project
+  changed_when: false
+  no_log: true
+
+- name: Assert the Langfuse bootstrap project matches the repo-managed seed
+  ansible.builtin.assert:
+    that:
+      - (langfuse_verify_project.json.data | selectattr('id', 'equalto', langfuse_init_project_id) | list | length) == 1
+      - (langfuse_verify_project.json.data | selectattr('id', 'equalto', langfuse_init_project_id) | map(attribute='name') | first) == langfuse_init_project_name
+    fail_msg: "Langfuse started, but the repo-managed bootstrap project could not be verified."
+  no_log: true

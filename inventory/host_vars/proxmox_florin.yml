@@ -38,6 +38,7 @@ platform_port_assignments:
   mattermost_host_proxy_port: 8066
   netbox_server_port: 8082
   netbox_host_proxy_port: 8004
+  langfuse_port: 3002
   ollama_api_port: 11434
   n8n_port: 5678
   open_webui_port: 8088

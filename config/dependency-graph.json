@@ -84,6 +84,15 @@
       "adr": "0056"
     },
     {
+      "id": "langfuse",
+      "service": "langfuse",
+      "name": "Langfuse",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "observability",
+      "adr": "0146"
+    },
+    {
       "id": "mail_platform",
       "service": "mail_platform",
       "name": "Mail Platform",
@@ -354,6 +363,30 @@
       "to": "nginx_edge",
       "type": "soft",
       "description": "Public reachability for sso.lv3.org depends on the shared edge publication path."
+    },
+    {
+      "from": "langfuse",
+      "to": "postgres",
+      "type": "hard",
+      "description": "Langfuse stores application metadata, users, projects, and bootstrap state in Postgres."
+    },
+    {
+      "from": "langfuse",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Keycloak provides the preferred OIDC browser sign-in path, but a repo-managed bootstrap user remains the break-glass fallback."
+    },
+    {
+      "from": "langfuse",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Langfuse starts from OpenBao-rendered runtime secrets mirrored into its compose environment."
+    },
+    {
+      "from": "langfuse",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public access to langfuse.lv3.org depends on the shared NGINX edge publication path."
     },
     {
       "from": "mail_platform",

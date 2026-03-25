@@ -2823,6 +2823,34 @@ workstreams:
     ready_to_merge: false
     live_applied: true
 
+  - id: adr-0146-ai-observability
+    adr: "0146"
+    title: Langfuse for agent observability
+    status: in_progress
+    owner: codex
+    branch: codex/adr-0146-ai-observability
+    worktree_path: .worktrees/adr-0146-ai-observability
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0146-ai-observability.md
+    depends_on:
+      - adr-0043-openbao
+      - adr-0056-keycloak-sso
+      - adr-0075-service-capability-catalog
+      - adr-0077-compose-secrets-injection
+    conflicts_with: []
+    shared_surfaces:
+      - playbooks/langfuse.yml
+      - collections/ansible_collections/lv3/platform/roles/langfuse_runtime/
+      - collections/ansible_collections/lv3/platform/roles/langfuse_postgres/
+      - config/service-capability-catalog.json
+      - config/health-probe-catalog.json
+      - config/secret-catalog.json
+      - config/image-catalog.json
+      - inventory/host_vars/proxmox_florin.yml
+      - scripts/langfuse_trace_smoke.py
+      - platform/llm/observability.py
+    ready_to_merge: false
+    live_applied: false
+
   - id: adr-0147-vaultwarden
     adr: "0147"
     title: Vaultwarden for operator credential management

@@ -223,6 +223,49 @@
       }
     },
     {
+      "id": "langfuse",
+      "name": "Langfuse",
+      "description": "Self-hosted LLM trace, generation, and evaluation observability surface for repo-managed agents.",
+      "category": "observability",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:3002",
+      "public_url": "https://langfuse.lv3.org",
+      "subdomain": "langfuse.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Langfuse Public Health",
+      "health_probe_id": "langfuse",
+      "image_catalog_ids": [
+        "langfuse_runtime",
+        "langfuse_worker_runtime",
+        "langfuse_clickhouse_runtime",
+        "langfuse_minio_runtime",
+        "langfuse_redis_runtime"
+      ],
+      "secret_catalog_ids": [
+        "langfuse_database_password",
+        "langfuse_bootstrap_user_password",
+        "langfuse_project_secret_key",
+        "keycloak_langfuse_client_secret"
+      ],
+      "adr": "0146",
+      "runbook": "docs/runbooks/configure-langfuse.md",
+      "tags": [
+        "llm",
+        "traces",
+        "evaluations",
+        "observability"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://langfuse.lv3.org",
+          "subdomain": "langfuse.lv3.org"
+        }
+      }
+    },
+    {
       "id": "mail_platform",
       "name": "Mail Platform",
       "description": "Managed SMTP, IMAP, and delivery automation surface for platform notifications.",

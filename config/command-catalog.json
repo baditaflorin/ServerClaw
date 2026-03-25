@@ -1250,6 +1250,61 @@
         ]
       }
     },
+    "converge-langfuse": {
+      "description": "Converge the Langfuse observability runtime, publish it at langfuse.lv3.org, and verify one repo-managed trace ingestion path.",
+      "workflow_id": "converge-langfuse",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        },
+        {
+          "name": "hetzner_dns_api_token",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "DNS token used to publish langfuse.lv3.org and expand the shared edge certificate."
+        },
+        {
+          "name": "langfuse_project_secret_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-local Langfuse project secret key used for synthetic trace verification."
+        },
+        {
+          "name": "langfuse_bootstrap_user_password",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-local bootstrap Langfuse password used for UI verification during rollout."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-langfuse passes",
+        "make validate passes before the apply",
+        "The published observability blast radius, bootstrap project ids, and retained break-glass login path are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the source commit, public health verification, bootstrap project verification, and one successful synthetic trace URL from the live smoke script."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if PostgreSQL, Keycloak, the Langfuse runtime, or shared-edge publication fails.",
+          "Stop if the bootstrap project API keys or browser sign-in verification do not match the repo-managed seed."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good Langfuse and edge configuration from version control before retrying.",
+          "Do not compensate for a failed rollout by manually creating projects, users, or API keys in the Langfuse UI."
+        ]
+      }
+    },
     "converge-api-gateway": {
       "description": "Converge the unified platform API gateway on docker-runtime-lv3 and publish it at api.lv3.org.",
       "workflow_id": "converge-api-gateway",

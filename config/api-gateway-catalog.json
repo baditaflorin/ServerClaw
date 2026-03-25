@@ -25,6 +25,17 @@
       "healthcheck_path": "/realms/lv3/.well-known/openid-configuration"
     },
     {
+      "id": "langfuse",
+      "name": "Langfuse",
+      "upstream": "http://10.10.10.20:3002",
+      "gateway_prefix": "/v1/langfuse",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/api/public/health"
+    },
+    {
       "id": "mail_platform",
       "name": "Mail Platform",
       "upstream": "http://10.10.10.20:8081",
