@@ -33,6 +33,7 @@ class SubdomainExposureAuditTests(unittest.TestCase):
             "subdomains": [
                 {
                     "fqdn": "ops.lv3.org",
+                    "status": "active",
                     "auth_requirement": "edge_oidc",
                     "edge_auth": "none",
                 }
@@ -43,6 +44,22 @@ class SubdomainExposureAuditTests(unittest.TestCase):
 
         self.assertEqual(findings[0]["severity"], "CRITICAL")
         self.assertIn("edge_oidc", findings[0]["detail"])
+
+    def test_repo_findings_ignore_planned_edge_oidc_routes(self) -> None:
+        registry = {
+            "subdomains": [
+                {
+                    "fqdn": "ops.staging.lv3.org",
+                    "status": "planned",
+                    "auth_requirement": "edge_oidc",
+                    "edge_auth": "none",
+                }
+            ]
+        }
+
+        findings = audit.collect_repo_findings(registry)
+
+        self.assertEqual(findings, [])
 
     def test_resolution_findings_flag_planned_but_live(self) -> None:
         registry = {

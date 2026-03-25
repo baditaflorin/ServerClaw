@@ -227,6 +227,8 @@ def check_registry_current(registry: dict[str, Any]) -> None:
 def collect_repo_findings(registry: dict[str, Any]) -> list[dict[str, Any]]:
     findings: list[dict[str, Any]] = []
     for entry in registry["subdomains"]:
+        if entry.get("status") != "active":
+            continue
         if entry["auth_requirement"] == "edge_oidc" and entry["edge_auth"] != "oauth2_proxy":
             findings.append(
                 {
