@@ -2,9 +2,9 @@
 
 - ADR: [ADR 0154](../adr/0154-vm-scoped-parallel-execution-lanes.md)
 - Title: per-VM execution lane catalog, queueing scheduler path, and Windmill lane dispatcher
-- Status: merged
-- Branch: `codex/integration-0154-main-v3`
-- Worktree: `.worktrees/integration-0154-main-v2`
+- Status: live_applied
+- Branch: `codex/live-apply-0154-main-v3`
+- Worktree: `.worktrees/live-apply-0154-main-v3`
 - Owner: codex
 - Depends On: `adr-0044-windmill`, `adr-0075-service-capability-catalog`, `adr-0112-goal-compiler`, `adr-0119-budgeted-workflow-scheduler`, `adr-0127-intent-conflict-resolution`
 - Conflicts With: none
@@ -69,5 +69,6 @@
 ## Outcome
 
 - repository implementation completed in `0.155.0`
-- first platform version: not yet
-- live apply from this session remains blocked because the production control paths attempted for Windmill were unreachable (`100.64.0.1`, `100.118.189.95`, and `65.108.75.123`)
+- first platform version: `0.130.5`
+- production Windmill now exposes `f/lv3/lane_scheduler` and `f/lv3/scheduler_watchdog`, with `f/lv3/lane_scheduler_every_2s` and `f/lv3/scheduler_watchdog_every_30s` enabled through the private control path at `http://100.64.0.1:8005`
+- this session had to repair pre-existing OpenBao loopback drift on `docker-runtime-lv3`, align the runtime to the winning `windmill_admin` PostgreSQL password on `postgres-lv3`, grant `CREATEROLE` so Windmill could manage `custom_instance_user`, and force the schedule `enabled` flags to the repo-declared state before the ADR 0154 surfaces could be verified live

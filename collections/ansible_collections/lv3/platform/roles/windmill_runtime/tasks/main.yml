@@ -792,6 +792,21 @@
   changed_when: false
   no_log: true
 
+- name: Converge repo-managed Windmill schedule enabled flags
+  ansible.builtin.shell: |
+    set -euo pipefail
+    . "{{ windmill_env_file }}"
+    psql "${DATABASE_URL}" -v ON_ERROR_STOP=1 -Atqc \
+      "UPDATE schedule SET enabled = {{ item.enabled | default(false) | ternary('true', 'false') }} WHERE path = '{{ item.path }}' AND enabled IS DISTINCT FROM {{ item.enabled | default(false) | ternary('true', 'false') }};"
+  args:
+    executable: /bin/bash
+  loop: "{{ windmill_seed_schedules }}"
+  loop_control:
+    label: "{{ item.path }}"
+  register: windmill_seed_schedule_enabled_sync
+  changed_when: "'UPDATE 1' in (windmill_seed_schedule_enabled_sync.stdout | default(''))"
+  no_log: true
+
 - name: Run the Windmill seeded healthcheck script
   ansible.builtin.uri:
     url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id | urlencode }}/jobs/run_wait_result/p/{{ windmill_seed_scripts[0].path | urlencode }}"
