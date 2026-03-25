@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.142.0",
-  "platform_version": "0.130.2",
-  "generated_at": "2026-03-25T08:13:39Z",
-  "next_refresh_at": "2026-03-25T09:13:39Z",
+  "repo_version": "0.143.1",
+  "platform_version": "0.130.3",
+  "generated_at": "2026-03-25T09:59:29Z",
+  "next_refresh_at": "2026-03-25T10:59:29Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -14,7 +14,7 @@
     "provider": "hetzner-dedicated"
   },
   "health": {
-    "summary": "healthy",
+    "summary": "degraded",
     "mode": "repo_evidence",
     "services": {
       "alertmanager": {
@@ -26,7 +26,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.40:9093",
-        "last_live_apply": "2026-03-24T00:00:00Z"
+        "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "api_gateway": {
         "service_name": "Platform API Gateway",
@@ -50,6 +50,17 @@
         "primary_url": "https://10.10.10.60:8007",
         "last_live_apply": "2026-03-22T00:00:00Z"
       },
+      "changelog_portal": {
+        "service_name": "Deployment History Portal",
+        "status": "degraded",
+        "score": 0.75,
+        "safe_to_act": false,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: health probe, SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://changelog.lv3.org",
+        "last_live_apply": "2026-03-25T00:00:00Z"
+      },
       "docker_build": {
         "service_name": "Docker Build VM",
         "status": "healthy",
@@ -70,6 +81,17 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://docker.lv3.org",
+        "last_live_apply": "2026-03-25T00:00:00Z"
+      },
+      "docs_portal": {
+        "service_name": "Developer Portal",
+        "status": "degraded",
+        "score": 0.75,
+        "safe_to_act": false,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: health probe, SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://docs.lv3.org",
         "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "grafana": {
@@ -196,6 +218,17 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.118.189.95:8200",
+        "last_live_apply": "2026-03-25T00:00:00Z"
+      },
+      "ops_portal": {
+        "service_name": "Platform Operations Portal",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://ops.lv3.org",
         "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "platform_context_api": {
@@ -2901,10 +2934,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.141.0",
+    "last_version": "0.143.0",
     "deployed_at": "2026-03-25",
-    "summary": "Implemented ADR 0145 with a repo-managed Ollama runtime on `docker-runtime-lv3`, a pinned `ollama/ollama:0.18.2` image, a declarative startup model catalog, and health/dependency/catalog wiring for the new private inference service. Added `platform/llm/client.py` plus bounded goal-compiler fallback routing so unmatched instructions can use local inference without breaking deterministic rule matches, and recorded those calls under the new `llm.inference` ledger event type.",
-    "release_notes_url": "docs/release-notes/0.142.0.md"
+    "summary": "finalize ADR 0096 live apply on `monitoring-lv3` by re-converging the blackbox exporter, generated Prometheus SLO rules and probe targets, Alertmanager runtime validation, and the `LV3 SLO Overview` Grafana dashboard checks fix fresh-worktree live-apply prerequisites by teaching Alertmanager to derive fallback Mattermost webhook URLs from the current controller manifest and by aligning ops-portal and service-catalog validation with the already-active portal surfaces",
+    "release_notes_url": "docs/release-notes/0.143.1.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
