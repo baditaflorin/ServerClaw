@@ -218,6 +218,8 @@ all:
                     "operator-offboard": {"description": "Operator offboarding", "live_impact": "guest_live"},
                     "converge-netbox": {"description": "NetBox converge", "live_impact": "guest_live"},
                     "disaster-recovery-runbook": {"description": "DR runbook"},
+                    "check-cert-expiry": {"description": "Check certificate expiry"},
+                    "renew-service-cert": {"description": "Renew service certificate"},
                     "validate": {"description": "Validate repository", "live_impact": "repo_only"},
                 }
             },
@@ -285,6 +287,27 @@ backups:
     (tmp_path / "tests" / "fixtures" / "docker-host-fixture.yml").write_text("{}\n")
     (tmp_path / "receipts" / "live-applies" / "2026-03-23-grafana.json").write_text(
         json.dumps({"summary": "grafana deploy", "workflow_id": "converge-grafana"}) + "\n"
+    )
+    (tmp_path / "docs" / "runbooks" / "renew-certificate.yaml").write_text(
+        """
+id: renew-certificate
+title: Renew a service certificate
+automation:
+  eligible: true
+steps:
+  - id: check-expiry
+    workflow_id: check-cert-expiry
+    params:
+      service: "{{ params.service }}"
+    success_condition: "result.days_remaining <= 14"
+  - id: renew
+    workflow_id: renew-service-cert
+    params:
+      service: "{{ params.service }}"
+      previous_days: "{{ steps.check-expiry.result.days_remaining }}"
+    success_condition: "result.new_expiry_days >= 90"
+""".strip()
+        + "\n"
     )
     monkeypatch.setattr(lv3_cli, "REPO_ROOT", tmp_path)
     return tmp_path
@@ -509,6 +532,22 @@ def test_intent_check_reports_conflict(
     assert exit_code == 1
     assert "Conflict check: CONFLICT" in captured.out
     assert "intent-existing" in captured.out
+
+def test_runbook_execute_dry_run_renders_steps(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    exit_code = lv3_cli.main(["runbook", "execute", "renew-certificate", "--args", "service=grafana", "--dry-run"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "Runbook: renew-certificate" in captured.out
+    assert "check-expiry -> check-cert-expiry" in captured.out
+    assert '"service": "grafana"' in captured.out
+
+
+def test_runbook_completion_suggests_runbooks(minimal_repo: Path) -> None:
+    candidates = lv3_cli.completion_candidates(["lv3", "runbook", "execute", "renew"], "renew")
+    assert candidates == ["renew-certificate"]
 
 
 def test_vm_list_uses_inventory(

@@ -1,0 +1,21 @@
+id: renew-certificate
+title: Renew a service certificate
+automation:
+  eligible: true
+steps:
+  - id: check-expiry
+    type: diagnostic
+    workflow_id: check-cert-expiry
+    params:
+      service: "{{ params.service }}"
+    success_condition: "result.days_remaining <= 14"
+    on_failure: escalate
+
+  - id: renew-cert
+    type: mutation
+    workflow_id: renew-service-cert
+    params:
+      service: "{{ params.service }}"
+      previous_days: "{{ steps.check-expiry.result.days_remaining }}"
+    success_condition: "result.new_expiry_days >= 90"
+    on_failure: escalate

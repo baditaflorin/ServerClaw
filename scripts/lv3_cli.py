@@ -34,6 +34,7 @@ if str(REPO_ROOT) not in sys.path:
 from dependency_graph import dependency_summary, load_dependency_graph
 from platform.conflict import IntentConflictRegistry
 from repo_package_loader import load_repo_package
+import runbook_executor
 
 try:
     from search_fabric import SearchClient
@@ -702,6 +703,61 @@ def parse_kv_pairs(pairs: list[str]) -> dict[str, Any]:
         key, value = pair.split("=", 1)
         payload[key] = value
     return payload
+
+
+def runbook_execute_command(runbook_id: str, pairs: list[str], *, dry_run: bool, explain: bool) -> int:
+    executor = runbook_executor.RunbookExecutor(
+        repo_root=REPO_ROOT,
+        workflow_runner=runbook_executor.WindmillWorkflowRunner(
+            base_url=windmill_url(load_service_map()),
+            token=load_secret_file("windmill_superadmin_secret"),
+        ),
+    )
+    params = parse_kv_pairs(pairs)
+    if dry_run or explain:
+        preview = executor.preview(runbook_id, params)
+        print(f"Runbook: {preview['runbook']['id']}  {preview['runbook']['title']}")
+        for step in preview["steps"]:
+            print(
+                f"  - {step['id']} -> {step['workflow_id']} "
+                f"(on_failure={step['on_failure']}, wait={step['wait_seconds']}s)"
+            )
+            print(f"    params={json.dumps(step['params'], sort_keys=True)}")
+        return 0
+
+    record = executor.execute(runbook_id, params, actor_id="operator:lv3-cli")
+    print(runbook_executor.render_status(record))
+    return 0 if record["status"] == "completed" else 1
+
+
+def runbook_status_command(run_id: str) -> int:
+    store = runbook_executor.RunbookRunStore(REPO_ROOT / ".local" / "runbooks" / "runs")
+    print(runbook_executor.render_status(store.load(run_id)))
+    return 0
+
+
+def runbook_approve_command(run_id: str, *, dry_run: bool, explain: bool) -> int:
+    if dry_run or explain:
+        store = runbook_executor.RunbookRunStore(REPO_ROOT / ".local" / "runbooks" / "runs")
+        record = store.load(run_id)
+        print(
+            f"Run ID: {record['run_id']}\n"
+            f"Action: approve\n"
+            f"Runbook: {record['runbook_id']}\n"
+            f"Current step: {record.get('current_step') or '-'}"
+        )
+        return 0
+
+    executor = runbook_executor.RunbookExecutor(
+        repo_root=REPO_ROOT,
+        workflow_runner=runbook_executor.WindmillWorkflowRunner(
+            base_url=windmill_url(load_service_map()),
+            token=load_secret_file("windmill_superadmin_secret"),
+        ),
+    )
+    record = executor.resume(run_id, actor_id="operator:lv3-cli")
+    print(runbook_executor.render_status(record))
+    return 0 if record["status"] == "completed" else 1
 
 
 def build_execution_intent(workflow_name: str, args: list[str]) -> ExecutionIntent:
@@ -1777,6 +1833,7 @@ def completion_candidates(words: list[str], current: str) -> list[str]:
         "capacity",
         "promote",
         "run",
+        "runbook",
         "logs",
         "ssh",
         "open",
@@ -1797,6 +1854,14 @@ def completion_candidates(words: list[str], current: str) -> list[str]:
         return [workflow_id for workflow_id in sorted(load_workflow_catalog()) if workflow_id.startswith(current)]
     if words[1] == "auth" and len(words) == 3:
         return [action for action in ["login", "status", "logout"] if action.startswith(current)]
+    if words[1] == "runbook" and len(words) == 3:
+        return [action for action in ["execute", "status", "approve"] if action.startswith(current)]
+    if words[1] == "runbook" and len(words) in {3, 4} and words[2] == "execute":
+        registry = runbook_executor.RunbookRegistry(REPO_ROOT)
+        candidates = []
+        for path in registry._iter_candidates():
+            candidates.append(path.stem)
+        return [candidate for candidate in sorted(dict.fromkeys(candidates)) if candidate.startswith(current)]
     if words[1] == "ssh":
         return [vm_name for vm_name, _address, _service in resolve_vm_inventory() if vm_name.startswith(current)]
     if words[1] == "vm" and len(words) == 3:
@@ -2054,6 +2119,20 @@ def build_parser() -> argparse.ArgumentParser:
     health.add_argument("service", nargs="?")
     health.add_argument("--verbose", action="store_true")
     health.add_argument("--json", action="store_true")
+
+    runbook = subparsers.add_parser("runbook", help="Execute structured automation-compatible runbooks.")
+    runbook_subparsers = runbook.add_subparsers(dest="runbook_action", required=True)
+    runbook_execute = runbook_subparsers.add_parser("execute", help="Execute one runbook definition.")
+    runbook_execute.add_argument("runbook")
+    runbook_execute.add_argument("--args", nargs="*", default=[])
+    runbook_execute.add_argument("--dry-run", action="store_true")
+    runbook_execute.add_argument("--explain", action="store_true")
+    runbook_status = runbook_subparsers.add_parser("status", help="Show one persisted runbook execution.")
+    runbook_status.add_argument("run_id")
+    runbook_approve = runbook_subparsers.add_parser("approve", help="Resume one escalated runbook execution.")
+    runbook_approve.add_argument("run_id")
+    runbook_approve.add_argument("--dry-run", action="store_true")
+    runbook_approve.add_argument("--explain", action="store_true")
 
     logs = subparsers.add_parser("logs", help="Query service logs from Loki.")
     logs.add_argument("service")
@@ -2326,6 +2405,13 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "intent":
         if args.intent_action == "check":
             return check_intent_conflicts(" ".join(args.instruction), args.args)
+    if args.command == "runbook":
+        if args.runbook_action == "execute":
+            return runbook_execute_command(args.runbook, args.args, dry_run=args.dry_run, explain=args.explain)
+        if args.runbook_action == "status":
+            return runbook_status_command(args.run_id)
+        if args.runbook_action == "approve":
+            return runbook_approve_command(args.run_id, dry_run=args.dry_run, explain=args.explain)
     if args.command == "logs":
         return logs_command(args.service, tail=args.tail, since=args.since, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
     if args.command == "ssh":
