@@ -95,6 +95,15 @@ The repository implementation was validated on 2026-03-25 with:
 
 Live verification from `main` is recorded when the first mainline apply succeeds.
 
+## Live Apply Note
+
+The first live apply attempt from `main` on 2026-03-25 did not complete.
+
+- Hetzner DNS write calls for the new `n8n.lv3.org` record returned the provider brownout response during the documented `11:00` to `13:00` UTC weekday shutdown window.
+- During the same window, the Proxmox host was unreachable from the controller on both `100.118.189.95:22` and `65.108.75.123:22`, and `https://proxmox.lv3.org:8006/api2/json` timed out.
+
+`Implemented In Platform Version` remains `not yet` until a successful rerun from `main` completes after those external blockers clear.
+
 ## Related ADRs
 
 - ADR 0025: Compose-managed runtime stacks

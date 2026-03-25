@@ -264,8 +264,8 @@ workstreams:
       - config/service-capability-catalog.json
       - config/workflow-catalog.json
       - config/subdomain-catalog.json
-    ready_to_merge: true
-    live_applied: true
+    ready_to_merge: false
+    live_applied: false
 
   - id: adr-0040-runtime-container-telemetry
     adr: "0040"
