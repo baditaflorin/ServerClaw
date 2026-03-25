@@ -508,6 +508,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Token Lifecycle Management](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/token-lifecycle-management.md)
 - [Validate Repository Automation Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/validate-repository-automation.md)
 - [Validation Gate Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/validation-gate.md)
+- [VM-Scoped Execution Lanes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/vm-scoped-execution-lanes.md)
 - [Windmill Operator Access Admin](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/windmill-operator-access-admin.md)
 - [Workflow Catalog And Execution Contracts](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/workflow-catalog-and-execution-contracts.md)
 - [Workflow Idempotency](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/workflow-idempotency.md)
@@ -801,6 +802,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0145: Ollama for Local LLM Inference API](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0145-ollama.md)
 - [Workstream ADR 0147: Vaultwarden for Operator Credential Management](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0147-vaultwarden.md)
 - [Workstream ADR 0151: n8n for Webhook and API Integration Automation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0151-n8n.md)
+- [Workstream ADR 0154: VM-Scoped Parallel Execution Lanes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0154-vm-scoped-execution-lanes.md)
 - [Workstream ADR 0156: Agent Session Workspace Isolation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0156-agent-session-workspace-isolation.md)
 - [ADR 0157 Workstream](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0157-per-vm-concurrency-budget.md)
 - [Workstream ADR 0158: Conflict-Free Configuration Merge Protocol](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0158-config-merge-protocol.md)
@@ -988,6 +990,7 @@ This repository is intentionally opinionated:
 | `0145` | Ollama for local LLM inference | `live_applied` | [adr-0145-ollama.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0145-ollama.md) |
 | `0147` | Vaultwarden for operator credential management | `merged` | [adr-0147-vaultwarden.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0147-vaultwarden.md) |
 | `0151` | n8n for webhook and API integration automation | `merged` | [adr-0151-n8n.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0151-n8n.md) |
+| `0154` | VM-scoped parallel execution lanes | `merged` | [adr-0154-vm-scoped-execution-lanes.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0154-vm-scoped-execution-lanes.md) |
 | `0156` | Agent session workspace isolation | `merged` | [adr-0156-agent-session-workspace-isolation.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0156-agent-session-workspace-isolation.md) |
 | `0157` | Per-VM concurrency budget and resource reservation | `merged` | [adr-0157-per-vm-concurrency-budget.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0157-per-vm-concurrency-budget.md) |
 | `0158` | Conflict-free configuration merge protocol | `merged` | [adr-0158-config-merge-protocol.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0158-config-merge-protocol.md) |

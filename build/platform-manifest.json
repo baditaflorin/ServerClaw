@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.156.0",
   "platform_version": "0.130.4",
-  "generated_at": "2026-03-25T13:23:24Z",
-  "next_refresh_at": "2026-03-25T14:23:24Z",
+  "generated_at": "2026-03-25T13:30:56Z",
+  "next_refresh_at": "2026-03-25T14:30:56Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -2747,7 +2747,7 @@
         "id": "configure-windmill",
         "title": "Configure Windmill",
         "agent_trust_required": "T3",
-        "steps": 13,
+        "steps": 14,
         "path": "docs/runbooks/configure-windmill.md",
         "workflow_ids": [
           "converge-windmill"
@@ -3111,7 +3111,7 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.154.0",
+    "last_version": "0.155.0",
     "deployed_at": "2026-03-25",
     "summary": "implement ADR 0161 with a shared `platform.agent.coordination` runtime, closure-loop and observation-loop publishers, the authenticated `/v1/platform/agents` gateway route, and live coordination rendering in both ops-portal surfaces add the operator runbook and snapshot helper for committed coordination receipts under `receipts/agent-coordination/`",
     "release_notes_url": "docs/release-notes/0.156.0.md"
@@ -3184,13 +3184,6 @@
       "status": "Proposed",
       "implementation_status": "Not Implemented",
       "path": "docs/adr/0118-replayable-failure-case-library.md"
-    },
-    {
-      "adr": "0154",
-      "title": "VM-Scoped Parallel Execution Lanes",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0154-vm-scoped-parallel-execution-lanes.md"
     },
     {
       "adr": "0166",
