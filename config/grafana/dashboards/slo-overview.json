@@ -1909,7 +1909,7 @@
     {
       "id": 46,
       "type": "text",
-      "title": "platform-context-api-availability",
+      "title": "vaultwarden-availability",
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -1917,7 +1917,7 @@
         "y": 63
       },
       "options": {
-        "content": "### platform-context-api-availability\n\nThe platform context API remains reachable for agent-assisted operator workflows.\n\nService: `platform_context_api`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=platform-context-api-availability)",
+        "content": "### vaultwarden-availability\n\nVaultwarden remains reachable on the private Tailscale operator path.\n\nService: `vaultwarden`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=vaultwarden-availability)",
         "mode": "markdown"
       }
     },
@@ -1960,7 +1960,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:platform_context_api_availability:success_ratio_30d",
+          "expr": "slo:vaultwarden_availability:success_ratio_30d",
           "legendFormat": "30d Compliance"
         }
       ]
@@ -2024,7 +2024,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:platform_context_api_availability:budget_remaining",
+          "expr": "slo:vaultwarden_availability:budget_remaining",
           "legendFormat": "Budget Remaining"
         }
       ]
@@ -2068,7 +2068,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:platform_context_api_availability:burn_rate_1h",
+          "expr": "slo:vaultwarden_availability:burn_rate_1h",
           "legendFormat": "Burn Rate (1h)"
         }
       ]
@@ -2086,6 +2086,217 @@
         "w": 6,
         "x": 18,
         "y": 66
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "d"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "slo:vaultwarden_availability:time_to_budget_exhaustion_days",
+          "legendFormat": "Budget Exhaustion (days)"
+        }
+      ]
+    },
+    {
+      "id": 51,
+      "type": "text",
+      "title": "platform-context-api-availability",
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 70
+      },
+      "options": {
+        "content": "### platform-context-api-availability\n\nThe platform context API remains reachable for agent-assisted operator workflows.\n\nService: `platform_context_api`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=platform-context-api-availability)",
+        "mode": "markdown"
+      }
+    },
+    {
+      "id": 52,
+      "type": "stat",
+      "title": "30d Compliance",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "lv3-prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 73
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "slo:platform_context_api_availability:success_ratio_30d",
+          "legendFormat": "30d Compliance"
+        }
+      ]
+    },
+    {
+      "id": 53,
+      "type": "stat",
+      "title": "Budget Remaining",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "lv3-prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 73
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.1
+              },
+              {
+                "color": "green",
+                "value": 0.5
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "slo:platform_context_api_availability:budget_remaining",
+          "legendFormat": "Budget Remaining"
+        }
+      ]
+    },
+    {
+      "id": 54,
+      "type": "stat",
+      "title": "Burn Rate (1h)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "lv3-prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 73
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "slo:platform_context_api_availability:burn_rate_1h",
+          "legendFormat": "Burn Rate (1h)"
+        }
+      ]
+    },
+    {
+      "id": 55,
+      "type": "stat",
+      "title": "Budget Exhaustion (days)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "lv3-prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 73
       },
       "fieldConfig": {
         "defaults": {
@@ -2132,7 +2343,7 @@
         "name": "slo",
         "label": "SLO",
         "type": "custom",
-        "query": "status-page-availability,grafana-availability,keycloak-availability,keycloak-latency,uptime-kuma-availability,nginx-edge-availability,open-webui-availability,windmill-availability,netbox-availability,platform-context-api-availability",
+        "query": "status-page-availability,grafana-availability,keycloak-availability,keycloak-latency,uptime-kuma-availability,nginx-edge-availability,open-webui-availability,windmill-availability,netbox-availability,vaultwarden-availability,platform-context-api-availability",
         "current": {
           "selected": false,
           "text": "all",

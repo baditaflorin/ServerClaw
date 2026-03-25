@@ -941,6 +941,41 @@
           "accepted_statuscodes": ["200-299"]
         }
       }
+    },
+    "vaultwarden": {
+      "service_name": "vaultwarden",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "vaultwarden_runtime",
+      "verify_file": "roles/vaultwarden_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "tcp",
+        "description": "Vaultwarden accepts TLS connections on the private runtime listener.",
+        "timeout_seconds": 180,
+        "retries": 1,
+        "delay_seconds": 0,
+        "host": "127.0.0.1",
+        "port": 8222
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "Vaultwarden returns success from the managed liveness endpoint over HTTPS.",
+        "timeout_seconds": 60,
+        "retries": 12,
+        "delay_seconds": 5,
+        "url": "https://127.0.0.1:8222/alive",
+        "method": "GET",
+        "expected_status": [
+          200
+        ],
+        "validate_tls": false
+      },
+      "tls_certificate_ids": [
+        "vaultwarden-private"
+      ],
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "Vaultwarden is private-only and uses an internal CA trust chain, so repo-managed role verification is the current health contract."
+      }
     }
   }
 }

@@ -262,6 +262,23 @@
       }
     },
     {
+      "fqdn": "vault.lv3.org",
+      "service_id": "vaultwarden",
+      "environment": "production",
+      "status": "active",
+      "exposure": "private-only",
+      "auth_requirement": "private_network",
+      "target": "100.118.189.95",
+      "target_port": 443,
+      "owner_adr": "0147",
+      "tls": {
+        "provider": "step-ca",
+        "cert_path": "/opt/vaultwarden/tls",
+        "auto_renew": true
+      },
+      "notes": "Tailnet-only HTTPS publication through the Proxmox host using an LV3 internal CA certificate."
+    },
+    {
       "fqdn": "uptime.lv3.org",
       "service_id": "uptime_kuma",
       "environment": "production",

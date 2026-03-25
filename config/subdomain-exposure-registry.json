@@ -522,13 +522,38 @@
         "auto_renew": true
       },
       "live_tracking_expected": false
+    },
+    {
+      "fqdn": "vault.lv3.org",
+      "service_id": "vaultwarden",
+      "environment": "production",
+      "status": "active",
+      "exposure": "private-only",
+      "auth_requirement": "private_network",
+      "target": "100.118.189.95",
+      "target_port": 443,
+      "owner_adr": "0147",
+      "dns_record_type": "A",
+      "route_mode": "dns-only",
+      "route_source": "dns-only",
+      "route_kind": null,
+      "edge_auth": "none",
+      "unauthenticated_paths": [],
+      "repo_route_service_id": null,
+      "repo_route_metadata": {},
+      "tls": {
+        "provider": "step-ca",
+        "cert_path": "/opt/vaultwarden/tls",
+        "auto_renew": true
+      },
+      "live_tracking_expected": false
     }
   ],
   "summary": {
-    "catalog_total": 18,
-    "active_total": 14,
+    "catalog_total": 19,
+    "active_total": 15,
     "active_public_dns_total": 13,
-    "active_private_total": 1,
+    "active_private_total": 2,
     "planned_total": 4,
     "edge_total": 12,
     "edge_oidc_total": 4
