@@ -2732,7 +2732,7 @@ workstreams:
   - id: adr-0167-graceful-degradation-mode-declarations
     adr: "0167"
     title: Graceful degradation mode declarations
-    status: ready_for_merge
+    status: merged
     owner: codex
     branch: codex/adr-0167-graceful-degradation-mode-declarations
     worktree_path: .worktrees/adr-0167-graceful-degradation
@@ -2754,5 +2754,5 @@ workstreams:
       - tests/test_api_gateway.py
       - tests/test_health_composite.py
       - tests/test_validate_service_catalog.py
-    ready_to_merge: true
+    ready_to_merge: false
     live_applied: false

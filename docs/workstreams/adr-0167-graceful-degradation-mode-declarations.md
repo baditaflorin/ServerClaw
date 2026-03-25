@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0167](../adr/0167-graceful-degradation-mode-declarations.md)
 - Title: declared fallback behaviour for dependency failures, live degraded-state tracking, and API gateway enforcement
-- Status: ready_for_merge
+- Status: merged
 - Branch: `codex/adr-0167-graceful-degradation-mode-declarations`
 - Worktree: `.worktrees/adr-0167-graceful-degradation`
 - Owner: codex
@@ -67,5 +67,6 @@
 
 ## Outcome
 
-- branch-local implementation is complete and verified
-- integration-only release, ADR status, and live-state updates should be applied on `main`
+- repository implementation is complete on `main` in repo release `0.145.0`
+- the mainline now carries the declaration schema, gateway degraded-mode runtime, health surfacing, and operator runbooks
+- live platform state should move to `live_applied` only after the updated API gateway runtime is converged from `main`
