@@ -28,6 +28,7 @@ ALLOWED_EXECUTION_CLASSES = {"mutation", "diagnostic"}
 ALLOWED_ESCALATION_ACTIONS = {"notify_and_abort", "abort_silently", "escalate_to_operator"}
 ALLOWED_RESOURCE_CLAIM_ACCESS = {"read", "write", "exclusive"}
 WORKFLOW_SECRET_FIELDS = ("required_secret_ids", "generated_secret_ids", "blocked_secret_ids")
+EXECUTION_LANES_PATH = REPO_ROOT / "config" / "execution-lanes.yaml"
 
 
 def load_json(path: Path) -> dict:
@@ -44,6 +45,24 @@ def load_workflow_catalog() -> dict:
 
 def load_workflow_defaults() -> dict:
     return load_yaml(REPO_ROOT / "config" / "workflow-defaults.yaml")
+
+
+def load_execution_lane_ids() -> set[str]:
+    if not EXECUTION_LANES_PATH.exists():
+        return set()
+    payload = load_yaml(EXECUTION_LANES_PATH)
+    lanes = payload.get("lanes", [])
+    if not isinstance(lanes, list):
+        raise ValueError("config/execution-lanes.yaml must define a lanes list")
+    lane_ids: set[str] = set()
+    for index, lane in enumerate(lanes):
+        if not isinstance(lane, dict):
+            raise ValueError(f"config/execution-lanes.yaml lane[{index}] must be a mapping")
+        lane_id = lane.get("lane_id")
+        if not isinstance(lane_id, str) or not lane_id.strip():
+            raise ValueError(f"config/execution-lanes.yaml lane[{index}].lane_id must be a non-empty string")
+        lane_ids.add(lane_id.strip())
+    return lane_ids
 
 
 def validate_budget_payload(payload: dict, workflow_id: str) -> None:
@@ -76,6 +95,24 @@ def validate_budget_payload(payload: dict, workflow_id: str) -> None:
         )
 
 
+def validate_resource_reservation_payload(payload: dict, workflow_id: str) -> None:
+    if not isinstance(payload, dict):
+        raise ValueError(f"workflow '{workflow_id}' resource_reservation must be a mapping")
+    required_int_fields = ("cpu_milli", "memory_mb", "disk_iops", "estimated_duration_seconds")
+    for field in required_int_fields:
+        value = payload.get(field)
+        if isinstance(value, bool) or not isinstance(value, int):
+            raise ValueError(
+                f"workflow '{workflow_id}' resource_reservation field '{field}' must be an integer"
+            )
+        if value < 0:
+            raise ValueError(f"workflow '{workflow_id}' resource_reservation field '{field}' must be >= 0")
+    if payload["estimated_duration_seconds"] < 1:
+        raise ValueError(
+            f"workflow '{workflow_id}' resource_reservation field 'estimated_duration_seconds' must be >= 1"
+        )
+
+
 def validate_resource_claims(payload: object, workflow_id: str) -> None:
     if payload is None:
         return
@@ -104,10 +141,16 @@ def validate_workflow_catalog(catalog: dict, secret_manifest: dict) -> None:
     workflows = catalog.get("workflows")
     secrets = secret_manifest["secrets"]
     make_targets = parse_make_targets()
-    defaults_payload = load_workflow_defaults().get("default_budget")
+    defaults = load_workflow_defaults()
+    defaults_payload = defaults.get("default_budget")
     if not isinstance(defaults_payload, dict):
         raise ValueError("config/workflow-defaults.yaml must define default_budget")
     validate_budget_payload(defaults_payload, "default_budget")
+    default_reservation_payload = defaults.get("default_resource_reservation")
+    if not isinstance(default_reservation_payload, dict):
+        raise ValueError("config/workflow-defaults.yaml must define default_resource_reservation")
+    validate_resource_reservation_payload(default_reservation_payload, "default_resource_reservation")
+    execution_lane_ids = load_execution_lane_ids()
 
     if not isinstance(workflows, dict):
         raise ValueError("workflow catalog must define an object-valued 'workflows' key")
@@ -127,6 +170,12 @@ def validate_workflow_catalog(catalog: dict, secret_manifest: dict) -> None:
             raise ValueError(
                 f"workflow '{workflow_id}' has invalid execution_class '{execution_class}'"
             )
+        target_lane = workflow.get("target_lane")
+        if target_lane is not None:
+            if not isinstance(target_lane, str) or not target_lane.strip():
+                raise ValueError(f"workflow '{workflow_id}' target_lane must be a non-empty string")
+            if target_lane not in execution_lane_ids:
+                raise ValueError(f"workflow '{workflow_id}' references unknown target_lane '{target_lane}'")
         dedup_window = workflow.get("dedup_window_seconds")
         if dedup_window is not None and (isinstance(dedup_window, bool) or not isinstance(dedup_window, int) or dedup_window < 0):
             raise ValueError(f"workflow '{workflow_id}' dedup_window_seconds must be an integer >= 0")
@@ -154,6 +203,15 @@ def validate_workflow_catalog(catalog: dict, secret_manifest: dict) -> None:
             raise ValueError(f"workflow '{workflow_id}' budget must be a mapping")
         budget.update(workflow_budget)
         validate_budget_payload(budget, workflow_id)
+        reservation = dict(default_reservation_payload)
+        workflow_reservation = workflow.get("resource_reservation", {})
+        if workflow_reservation is None:
+            workflow_reservation = {}
+        if not isinstance(workflow_reservation, dict):
+            raise ValueError(f"workflow '{workflow_id}' resource_reservation must be a mapping")
+        reservation.update(workflow_reservation)
+        if execution_class == "mutation":
+            validate_resource_reservation_payload(reservation, workflow_id)
 
         preferred_entrypoint = workflow.get("preferred_entrypoint")
         if not isinstance(preferred_entrypoint, dict):
@@ -326,6 +384,8 @@ def show_workflow(catalog: dict, workflow_id: str) -> int:
     print(f"Dedup window: {workflow.get('dedup_window_seconds', 'default')}")
     print(f"Entrypoint: {workflow['preferred_entrypoint']['command']}")
     print(f"Runbook: {workflow['owner_runbook']}")
+    if workflow.get("target_lane"):
+        print(f"Target lane: {workflow['target_lane']}")
     print("Budget:")
     defaults = load_workflow_defaults().get("default_budget", {})
     budget = dict(defaults if isinstance(defaults, dict) else {})
@@ -334,6 +394,14 @@ def show_workflow(catalog: dict, workflow_id: str) -> int:
         budget.update(workflow_budget)
     for key, value in budget.items():
         print(f"  - {key}: {value}")
+    if workflow.get("execution_class", "mutation") == "mutation":
+        print("Resource reservation:")
+        reservation = dict(load_workflow_defaults().get("default_resource_reservation", {}))
+        workflow_reservation = workflow.get("resource_reservation", {})
+        if isinstance(workflow_reservation, dict):
+            reservation.update(workflow_reservation)
+        for key, value in reservation.items():
+            print(f"  - {key}: {value}")
     print("Validation targets:")
     for target in workflow["validation_targets"]:
         print(f"  - make {target}")

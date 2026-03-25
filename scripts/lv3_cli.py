@@ -1042,12 +1042,32 @@ def run_windmill_request(
             + (f" ({result.reason})" if result.reason else ""),
             file=sys.stderr,
         )
+        lane_budget = result.metadata.get("lane") if isinstance(result.metadata, dict) else None
+        reasons = result.metadata.get("reasons") if isinstance(result.metadata, dict) else None
+        if isinstance(lane_budget, dict):
+            print(
+                f"Lane: {lane_budget.get('lane_id')} "
+                f"(policy={lane_budget.get('admission_policy')}, host={lane_budget.get('hostname')})",
+                file=sys.stderr,
+            )
+        if isinstance(reasons, list) and reasons:
+            print(f"Budget reasons: {', '.join(str(item) for item in reasons)}", file=sys.stderr)
         return 1
     warnings = result.metadata.get("conflict_warnings", []) if isinstance(result.metadata, dict) else []
     for warning in warnings:
         message = warning.get("message") if isinstance(warning, dict) else None
         if message:
             print(f"Conflict warning: {message}", file=sys.stderr)
+    lane_budget = result.metadata.get("lane_budget") if isinstance(result.metadata, dict) else None
+    if isinstance(lane_budget, dict) and lane_budget.get("soft_exceeded") is True:
+        lane = lane_budget.get("lane", {})
+        reasons = lane_budget.get("reasons", [])
+        print(
+            "Lane budget warning: "
+            f"{lane.get('lane_id')} exceeded {', '.join(str(item) for item in reasons) or 'lane budget'} "
+            "but policy is soft.",
+            file=sys.stderr,
+        )
     if result.output is not None:
         if isinstance(result.output, str):
             print(result.output)

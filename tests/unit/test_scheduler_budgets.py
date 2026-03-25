@@ -10,6 +10,7 @@ from platform.conflict import IntentConflictRegistry
 from platform.scheduler import (
     ActiveJobRecord,
     BudgetedWorkflowScheduler,
+    FileLaneReservationStore,
     SchedulerStateStore,
     Watchdog,
     load_workflow_policy,
@@ -21,6 +22,7 @@ def write_scheduler_repo(
     *,
     workflows: dict[str, Any],
     default_budget: dict[str, Any] | None = None,
+    default_resource_reservation: dict[str, Any] | None = None,
     agent_policies: str | None = None,
 ) -> None:
     (repo_root / "config").mkdir(parents=True, exist_ok=True)
@@ -34,6 +36,11 @@ def write_scheduler_repo(
             f"  max_restarts: {(default_budget or {}).get('max_restarts', 1)}\n"
             f"  max_rollback_depth: {(default_budget or {}).get('max_rollback_depth', 1)}\n"
             f"  escalation_action: {(default_budget or {}).get('escalation_action', 'notify_and_abort')}\n"
+            "default_resource_reservation:\n"
+            f"  cpu_milli: {(default_resource_reservation or {}).get('cpu_milli', 500)}\n"
+            f"  memory_mb: {(default_resource_reservation or {}).get('memory_mb', 256)}\n"
+            f"  disk_iops: {(default_resource_reservation or {}).get('disk_iops', 30)}\n"
+            f"  estimated_duration_seconds: {(default_resource_reservation or {}).get('estimated_duration_seconds', 180)}\n"
         ),
         encoding="utf-8",
     )
@@ -68,6 +75,10 @@ def write_scheduler_repo(
         (agent_policies if agent_policies is not None else default_policies) + "\n",
         encoding="utf-8",
     )
+
+
+def write_execution_lanes(repo_root: Path, content: str) -> None:
+    (repo_root / "config" / "execution-lanes.yaml").write_text(content.strip() + "\n", encoding="utf-8")
 
 
 class RecordingLedgerWriter:
@@ -198,6 +209,13 @@ def test_budget_loader_merges_defaults_and_explicit_overrides(tmp_path: Path) ->
                 "description": "Deploy NetBox",
                 "live_impact": "guest_live",
                 "execution_class": "mutation",
+                "target_lane": "lane:docker-runtime",
+                "resource_reservation": {
+                    "cpu_milli": 1500,
+                    "memory_mb": 768,
+                    "disk_iops": 90,
+                    "estimated_duration_seconds": 300,
+                },
                 "budget": {
                     "max_duration_seconds": 900,
                     "max_concurrent_instances": 1,
@@ -217,6 +235,9 @@ def test_budget_loader_merges_defaults_and_explicit_overrides(tmp_path: Path) ->
     assert policy.budget.max_duration_seconds == 900
     assert policy.budget.max_concurrent_instances == 1
     assert policy.budget.max_steps == 250
+    assert policy.target_lane == "lane:docker-runtime"
+    assert policy.resource_reservation is not None
+    assert policy.resource_reservation.cpu_milli == 1500
 
 
 def test_scheduler_rejects_when_concurrency_slots_are_busy(tmp_path: Path) -> None:
@@ -242,6 +263,115 @@ def test_scheduler_rejects_when_concurrency_slots_are_busy(tmp_path: Path) -> No
 
     assert result.status == "concurrency_limit"
     assert windmill.submit_calls == []
+
+
+def test_scheduler_rejects_when_lane_budget_hard_limit_is_exceeded(tmp_path: Path) -> None:
+    write_scheduler_repo(
+        tmp_path,
+        workflows={
+            "converge-netbox": {
+                "description": "Deploy NetBox",
+                "live_impact": "guest_live",
+                "execution_class": "mutation",
+                "target_lane": "lane:test",
+                "resource_reservation": {
+                    "cpu_milli": 1200,
+                    "memory_mb": 256,
+                    "disk_iops": 40,
+                    "estimated_duration_seconds": 60,
+                },
+            }
+        },
+    )
+    write_execution_lanes(
+        tmp_path,
+        """
+schema_version: 1.0.0
+lanes:
+  - lane_id: lane:test
+    vm_id: 120
+    hostname: docker-runtime-lv3
+    services: []
+    max_concurrent_ops: 1
+    serialisation: strict
+    admission_policy: hard
+    vm_budget:
+      total_cpu_milli: 1000
+      total_memory_mb: 512
+      total_disk_iops: 100
+""",
+    )
+    windmill = FakeWindmillClient()
+    scheduler = BudgetedWorkflowScheduler(
+        windmill_client=windmill,
+        repo_root=tmp_path,
+        lock_manager=FakeLockManager(),
+        sleep_fn=lambda _seconds: None,
+    )
+
+    result = scheduler.submit(
+        SimpleNamespace(workflow_id="converge-netbox", arguments={"service": "netbox"}, target_vm="docker-runtime-lv3")
+    )
+
+    assert result.status == "budget_exceeded"
+    assert result.reason == "lane_budget_exceeded"
+    assert result.metadata["reasons"] == ["cpu_milli"]
+    assert windmill.submit_calls == []
+
+
+def test_scheduler_allows_soft_lane_budget_exceedance_and_releases_reservation(tmp_path: Path) -> None:
+    write_scheduler_repo(
+        tmp_path,
+        workflows={
+            "converge-netbox": {
+                "description": "Deploy NetBox",
+                "live_impact": "guest_live",
+                "execution_class": "mutation",
+                "target_lane": "lane:test",
+                "resource_reservation": {
+                    "cpu_milli": 1200,
+                    "memory_mb": 256,
+                    "disk_iops": 40,
+                    "estimated_duration_seconds": 60,
+                },
+            }
+        },
+    )
+    write_execution_lanes(
+        tmp_path,
+        """
+schema_version: 1.0.0
+lanes:
+  - lane_id: lane:test
+    vm_id: 120
+    hostname: docker-runtime-lv3
+    services: []
+    max_concurrent_ops: 2
+    serialisation: resource_lock
+    admission_policy: soft
+    vm_budget:
+      total_cpu_milli: 1000
+      total_memory_mb: 512
+      total_disk_iops: 100
+""",
+    )
+    reservation_store = FileLaneReservationStore(tmp_path / ".local" / "scheduler" / "lane-reservations.json")
+    scheduler = BudgetedWorkflowScheduler(
+        windmill_client=FakeWindmillClient(statuses=[{"completed": True, "success": True, "result": {"ok": True}}]),
+        repo_root=tmp_path,
+        lock_manager=FakeLockManager(),
+        lane_budget_store=reservation_store,
+        sleep_fn=lambda _seconds: None,
+    )
+
+    result = scheduler.submit(
+        SimpleNamespace(workflow_id="converge-netbox", arguments={"service": "netbox"}, target_vm="docker-runtime-lv3")
+    )
+
+    assert result.status == "completed"
+    assert result.metadata["lane_budget"]["soft_exceeded"] is True
+    assert result.metadata["lane_budget"]["reasons"] == ["cpu_milli"]
+    assert reservation_store.snapshot() == {}
 
 
 def test_scheduler_blocks_rollback_chain_beyond_budget(tmp_path: Path) -> None:

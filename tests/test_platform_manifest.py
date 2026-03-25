@@ -40,15 +40,23 @@ def configure_paths(module, repo_root: Path) -> None:
     module.DEFAULT_OUTPUT_PATH = repo_root / "build" / "platform-manifest.json"
     module.DEFAULT_INCIDENT_DIR = repo_root / ".local" / "triage" / "reports"
     module.load_workflow_catalog_data = lambda: json.loads((repo_root / "config" / "workflow-catalog.json").read_text())
-    module.load_workflow_defaults_data = lambda: {"default_budget": {
-        "max_duration_seconds": 300,
-        "max_steps": 50,
-        "max_concurrent_instances": 1,
-        "max_touched_hosts": 1,
-        "max_restarts": 0,
-        "max_rollback_depth": 1,
-        "escalation_action": "notify_and_abort",
-    }}
+    module.load_workflow_defaults_data = lambda: {
+        "default_budget": {
+            "max_duration_seconds": 300,
+            "max_steps": 50,
+            "max_concurrent_instances": 1,
+            "max_touched_hosts": 1,
+            "max_restarts": 0,
+            "max_rollback_depth": 1,
+            "escalation_action": "notify_and_abort",
+        },
+        "default_resource_reservation": {
+            "cpu_milli": 500,
+            "memory_mb": 256,
+            "disk_iops": 30,
+            "estimated_duration_seconds": 180,
+        },
+    }
     module.list_active_windows_best_effort = lambda **_kwargs: {}
     module.build_slo_status_entries = lambda **_kwargs: []
     module.collect_live_apply_entries = lambda service_catalog: [
@@ -166,6 +174,11 @@ default_budget:
   max_restarts: 0
   max_rollback_depth: 1
   escalation_action: notify_and_abort
+default_resource_reservation:
+  cpu_milli: 500
+  memory_mb: 256
+  disk_iops: 30
+  estimated_duration_seconds: 180
 """.strip()
         + "\n",
     )

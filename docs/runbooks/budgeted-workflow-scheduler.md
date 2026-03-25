@@ -11,11 +11,14 @@ ADR 0172 extends that watchdog so it can also:
 - emit a repeated-action finding after three identical self-healing actions in ten minutes
 - write `.local/scheduler/watchdog-heartbeat.json` on every tick
 
+ADR 0157 adds per-lane resource reservations. Mutation workflows now declare CPU, memory, disk-I/O, and duration estimates; the scheduler admits or rejects execution against the VM budget defined in `config/execution-lanes.yaml`.
+
 ## Canonical Sources
 
 - scheduler package: [platform/scheduler](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/scheduler)
 - workflow defaults: [config/workflow-defaults.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-defaults.yaml)
 - workflow catalog budgets: [config/workflow-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/workflow-catalog.json)
+- execution lanes: [config/execution-lanes.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/execution-lanes.yaml)
 - watchdog entry point: [windmill/scheduler/watchdog-loop.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/windmill/scheduler/watchdog-loop.py)
 - Windmill seed defaults: [collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml)
 
@@ -46,10 +49,18 @@ Inspect one workflow budget:
 python3 scripts/workflow_catalog.py --workflow converge-netbox
 ```
 
+Inspect one execution lane budget:
+
+```bash
+make execution-lane-info LANE=lane:docker-runtime
+```
+
 ## Budget Model
 
 - `config/workflow-defaults.yaml` defines the baseline budget applied when a workflow does not override a field.
-- `config/workflow-catalog.json` can override any budget field per workflow and declares `execution_class`.
+- `config/workflow-defaults.yaml` also defines the default mutation `resource_reservation`.
+- `config/workflow-catalog.json` can override any budget field per workflow, declares `execution_class`, and can set `target_lane` plus per-workflow `resource_reservation`.
+- `config/execution-lanes.yaml` defines the VM-level concurrency budgets and whether over-budget submissions are `hard` rejected or `soft` admitted with warnings.
 - Only `execution_class: mutation` workflows are subject to scheduler budget enforcement.
 - Host-touch limits are advisory in this first implementation unless the workflow supplies an explicit host list in its input arguments.
 
@@ -57,6 +68,7 @@ python3 scripts/workflow_catalog.py --workflow converge-netbox
 
 - Active jobs are tracked in `.local/scheduler/active-jobs.json`.
 - The watchdog also queries Windmill for running jobs so the scheduled loop can operate without sharing the controller-local state file.
+- Active lane reservations are tracked in `.local/scheduler/lane-reservations.json`.
 - Concurrency uses Postgres advisory transaction locks when `LV3_LEDGER_DSN` is present.
 - Without a ledger DSN, the scheduler falls back to repo-local file locks under `.local/scheduler/locks/`.
 - The watchdog heartbeat is written to `.local/scheduler/watchdog-heartbeat.json`.
@@ -67,6 +79,11 @@ python3 scripts/workflow_catalog.py --workflow converge-netbox
 `lv3 run ...` returns `concurrency_limit`:
 - another instance of the same mutation workflow is already active
 - confirm with `.local/scheduler/active-jobs.json`
+
+`lv3 run ...` returns `budget_exceeded` with `lane_budget_exceeded`:
+- inspect `config/execution-lanes.yaml` and `config/workflow-catalog.json`
+- check `.local/scheduler/lane-reservations.json` for active reservations and their TTLs
+- if the lane uses `admission_policy: soft`, expect execution to continue with a warning in the scheduler result metadata instead of a hard rejection
 
 `lv3 run ...` returns `rollback_depth_exceeded`:
 - the supplied `parent_actor_intent_id` chain already exceeds the budgeted rollback depth

@@ -489,6 +489,13 @@
         "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'pveversion'"
       ],
       "execution_class": "mutation",
+      "target_lane": "lane:proxmox-host",
+      "resource_reservation": {
+        "cpu_milli": 2800,
+        "memory_mb": 1536,
+        "disk_iops": 200,
+        "estimated_duration_seconds": 1200
+      },
       "budget": {
         "max_duration_seconds": 2400,
         "max_steps": 320,
@@ -532,6 +539,13 @@
         "make syntax-check"
       ],
       "execution_class": "mutation",
+      "target_lane": "lane:proxmox-host",
+      "resource_reservation": {
+        "cpu_milli": 1800,
+        "memory_mb": 768,
+        "disk_iops": 160,
+        "estimated_duration_seconds": 600
+      },
       "resource_claims": [
         {
           "resource": "host:proxmox_florin",
@@ -1040,6 +1054,13 @@
         "curl -I https://grafana.lv3.org"
       ],
       "execution_class": "mutation",
+      "target_lane": "lane:monitoring",
+      "resource_reservation": {
+        "cpu_milli": 1800,
+        "memory_mb": 1536,
+        "disk_iops": 140,
+        "estimated_duration_seconds": 900
+      },
       "budget": {
         "max_duration_seconds": 1500,
         "max_steps": 300,
@@ -1391,6 +1412,13 @@
         "curl -s -H \"Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)\" http://100.64.0.1:8005/api/users/global/whoami"
       ],
       "execution_class": "mutation",
+      "target_lane": "lane:docker-runtime",
+      "resource_reservation": {
+        "cpu_milli": 2000,
+        "memory_mb": 1024,
+        "disk_iops": 120,
+        "estimated_duration_seconds": 900
+      },
       "budget": {
         "max_duration_seconds": 1500,
         "max_steps": 300,
@@ -2329,6 +2357,13 @@
         "world_state"
       ],
       "execution_class": "mutation",
+      "target_lane": "lane:docker-runtime",
+      "resource_reservation": {
+        "cpu_milli": 1600,
+        "memory_mb": 768,
+        "disk_iops": 100,
+        "estimated_duration_seconds": 720
+      },
       "resource_claims": [
         {
           "resource": "service:netbox",

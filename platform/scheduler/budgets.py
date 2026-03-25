@@ -7,6 +7,8 @@ from typing import Any
 
 import yaml
 
+from .lanes import ResourceReservation
+
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 WORKFLOW_CATALOG_PATH = REPO_ROOT / "config" / "workflow-catalog.json"
@@ -78,6 +80,8 @@ class WorkflowPolicy:
     execution_class: str
     live_impact: str
     budget: WorkflowBudget
+    target_lane: str | None
+    resource_reservation: ResourceReservation | None
     workflow: dict[str, Any]
     speculative: SpeculativeWorkflowPolicy = field(default_factory=SpeculativeWorkflowPolicy)
 
@@ -218,6 +222,19 @@ def _validate_speculative_payload(
     )
 
 
+def _validate_resource_reservation_payload(payload: dict[str, Any], *, path: str) -> dict[str, Any]:
+    return {
+        "cpu_milli": _require_int(payload.get("cpu_milli"), f"{path}.cpu_milli", minimum=0),
+        "memory_mb": _require_int(payload.get("memory_mb"), f"{path}.memory_mb", minimum=0),
+        "disk_iops": _require_int(payload.get("disk_iops"), f"{path}.disk_iops", minimum=0),
+        "estimated_duration_seconds": _require_int(
+            payload.get("estimated_duration_seconds"),
+            f"{path}.estimated_duration_seconds",
+            minimum=1,
+        ),
+    }
+
+
 def infer_execution_class(workflow_id: str, workflow: dict[str, Any]) -> str:
     value = workflow.get("execution_class")
     if isinstance(value, str) and value in ALLOWED_EXECUTION_CLASSES:
@@ -246,6 +263,23 @@ def load_default_budget(
     return WorkflowBudget(**normalized)
 
 
+def load_default_resource_reservation(
+    *,
+    repo_root: Path | None = None,
+    defaults_path: Path | None = None,
+) -> ResourceReservation:
+    path = defaults_path or (repo_root or REPO_ROOT) / "config" / "workflow-defaults.yaml"
+    payload = _load_yaml(path)
+    default_reservation = payload.get("default_resource_reservation")
+    if not isinstance(default_reservation, dict):
+        raise ValueError(f"{path} must define a default_resource_reservation mapping")
+    normalized = _validate_resource_reservation_payload(
+        default_reservation,
+        path=f"{path}.default_resource_reservation",
+    )
+    return ResourceReservation(**normalized)
+
+
 def load_workflow_policy(
     workflow_id: str,
     *,
@@ -272,12 +306,32 @@ def load_workflow_policy(
         raise ValueError(
             f"workflow '{workflow_id}' execution_class must be one of {sorted(ALLOWED_EXECUTION_CLASSES)}"
         )
+    resource_reservation: ResourceReservation | None = None
+    if execution_class == "mutation":
+        reservation_defaults = load_default_resource_reservation(repo_root=root, defaults_path=defaults_path).as_dict()
+        reservation_override = workflow.get("resource_reservation", {})
+        if reservation_override is None:
+            reservation_override = {}
+        if not isinstance(reservation_override, dict):
+            raise ValueError(f"workflow '{workflow_id}' resource_reservation must be a mapping")
+        reservation_payload = {**reservation_defaults, **reservation_override}
+        resource_reservation = ResourceReservation(
+            **_validate_resource_reservation_payload(
+                reservation_payload,
+                path=f"workflow.{workflow_id}.resource_reservation",
+            )
+        )
+    target_lane = workflow.get("target_lane")
+    if target_lane is not None and (not isinstance(target_lane, str) or not target_lane.strip()):
+        raise ValueError(f"workflow '{workflow_id}' target_lane must be a non-empty string")
     speculative = _validate_speculative_payload(workflow_id, workflow, workflows)
     return WorkflowPolicy(
         workflow_id=workflow_id,
         execution_class=execution_class,
         live_impact=str(workflow.get("live_impact", "guest_live")),
         budget=WorkflowBudget(**normalized),
+        target_lane=target_lane.strip() if isinstance(target_lane, str) else None,
+        resource_reservation=resource_reservation,
         workflow=workflow,
         speculative=speculative,
     )
