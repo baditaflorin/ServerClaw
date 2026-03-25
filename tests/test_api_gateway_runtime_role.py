@@ -64,10 +64,15 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
 
     assert "scripts/maintenance_window_tool.py" in defaults
     assert "scripts/slo_tracking.py" in defaults
-    assert "Sync the shared scripts tree required by packaged platform modules" in tasks
-    assert 'src: "{{ api_gateway_repo_root }}/scripts/"' in tasks
-    assert "Sync the shared repo config tree required by packaged platform modules" in tasks
-    assert 'src: "{{ api_gateway_repo_root }}/config/"' in tasks
+    assert "api_gateway_tree_sync_specs" in defaults
+    assert 'remote_archive: "{{ api_gateway_site_dir }}/scripts-sync.tar.gz"' in defaults
+    assert 'remote_archive: "{{ api_gateway_site_dir }}/config-sync.tar.gz"' in defaults
+    assert "preserve_destination_root: true" in defaults
+    assert "api_gateway_runtime_config_probe_path: /app/config/ledger-event-types.yaml" in defaults
+    assert "Sync the staged repo trees required by the API gateway runtime" in tasks
+    assert "ansible.builtin.include_tasks: sync_tree.yml" in tasks
+    assert "ansible.builtin.meta: reset_connection" in tasks
+    assert "Check whether the API gateway container sees the runtime config bundle" in tasks
     assert "COPY maintenance_window_tool.py ./maintenance_window_tool.py" in tasks
     assert "COPY slo_tracking.py ./slo_tracking.py" in tasks
     assert "COPY scripts ./scripts" in tasks

@@ -72,7 +72,7 @@
   until: common_openbao_compose_env_seal_status.status == 200
   changed_when: false
 
-- name: Unseal the local OpenBao instance when runtime secret injection finds it sealed
+- name: Unseal the local OpenBao API when runtime secret injection finds it sealed
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/unseal"
     method: POST
@@ -88,7 +88,24 @@
   when: common_openbao_compose_env_seal_status.json.sealed | bool
   no_log: true
 
-- name: Wait for the local OpenBao API to become ready for runtime secret injection
+- name: Confirm the local OpenBao API is unsealed
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/seal-status"
+    method: GET
+    return_content: true
+    status_code: 200
+  register: common_openbao_compose_env_unsealed_status
+  changed_when: false
+
+- name: Assert the local OpenBao API is unsealed before runtime secret injection
+  ansible.builtin.assert:
+    that:
+      - not (common_openbao_compose_env_unsealed_status.json.sealed | bool)
+    fail_msg: >-
+      OpenBao remained sealed on the runtime host while preparing secret injection
+      for {{ common_openbao_compose_env_service_name }}.
+
+- name: Wait for the local OpenBao API to become active
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/health"
     method: GET

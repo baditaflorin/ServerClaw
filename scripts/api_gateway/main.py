@@ -66,10 +66,17 @@ from api_gateway_catalog import load_api_gateway_catalog
 GRAPH_RUNTIME_IMPORT_ERROR: str | None = None
 
 try:
-    from platform.circuit import CircuitOpenError, CircuitRegistry, should_count_httpx_exception, should_count_socket_exception
+    from platform.circuit import (
+        CircuitOpenError,
+        CircuitRegistry,
+        MemoryCircuitStateBackend,
+        should_count_httpx_exception,
+        should_count_socket_exception,
+    )
 except Exception as exc:  # noqa: BLE001
     CircuitOpenError = RuntimeError  # type: ignore[assignment]
     CircuitRegistry = Any  # type: ignore[assignment]
+    MemoryCircuitStateBackend = Any  # type: ignore[assignment]
 
     def should_count_httpx_exception(exc: BaseException) -> bool:
         return isinstance(exc, Exception)
@@ -394,7 +401,7 @@ class GatewayRuntime:
         self.circuit_registry = CircuitRegistry(
             config.repo_root,
             policies_path=config.circuit_policy_path,
-            nats_url=config.nats_url,
+            backend=MemoryCircuitStateBackend(),
         )
         self.verifier = KeycloakJWTVerifier(
             jwks_url=config.jwks_url,

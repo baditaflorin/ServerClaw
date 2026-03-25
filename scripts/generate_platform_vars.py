@@ -497,6 +497,12 @@ def build_platform_vars(
     uptime_kuma_service = service_topology["uptime_kuma"]
     windmill_service = service_topology["windmill"]
     host_id = require_string(stack["desired_state"]["host_id"], "versions/stack.yaml.desired_state.host_id")
+    postgres_ha = require_mapping(host_vars.get("postgres_ha"), "host_vars.postgres_ha")
+    postgres_primary_inventory_host = require_string(postgres_ha.get("initial_primary"), "host_vars.postgres_ha.initial_primary")
+    postgres_primary_ip = require_string(
+        guest_by_name.get(postgres_primary_inventory_host, {}).get("ipv4"),
+        f"host_vars.proxmox_guests[{postgres_primary_inventory_host}].ipv4",
+    )
 
     platform_vars = {
         "platform_generation": {
@@ -589,7 +595,7 @@ def build_platform_vars(
         "uptime_kuma_service_topology": copy.deepcopy(uptime_kuma_service),
         "hetzner_dns_records": dns_records["public"],
         "platform_postgres_host": postgres_service["public_hostname"],
-        "openbao_postgres_host": postgres_service["public_hostname"],
+        "openbao_postgres_host": postgres_primary_ip,
         "openbao_controller_url": openbao_service["urls"]["controller"],
         "semaphore_server_port": resolved_ports["semaphore_server_port"],
         "semaphore_host_proxy_port": resolved_ports["semaphore_host_proxy_port"],

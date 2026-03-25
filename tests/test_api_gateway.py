@@ -1,3 +1,4 @@
+import asyncio
 import base64
 import json
 import sqlite3
@@ -8,6 +9,7 @@ from pathlib import Path
 import httpx
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
+from platform.circuit import MemoryCircuitStateBackend
 from platform.retry import RetryPolicy
 
 
@@ -81,6 +83,16 @@ def test_gateway_runtime_compose_mounts_config_at_app_path() -> None:
     ).read_text(encoding="utf-8")
 
     assert "/app/config:ro" in template
+
+
+def test_gateway_runtime_uses_memory_circuit_backend(tmp_path: Path) -> None:
+    config, _ = make_repo(tmp_path, "http://127.0.0.1:8000")
+    runtime = GatewayRuntime(config)
+
+    try:
+        assert isinstance(runtime.circuit_registry.backend, MemoryCircuitStateBackend)
+    finally:
+        asyncio.run(runtime.close())
 
 
 def prepare_graph_db(path: Path) -> str:

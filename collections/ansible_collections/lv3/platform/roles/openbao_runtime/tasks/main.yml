@@ -896,6 +896,10 @@
   ansible.builtin.set_fact:
     openbao_rotatable_secret_catalog: "{{ lookup('ansible.builtin.file', openbao_secret_catalog_file) | from_json }}"
     openbao_controller_secret_manifest: "{{ lookup('ansible.builtin.file', openbao_controller_secret_manifest_file) | from_json }}"
+  no_log: true
+
+- name: Derive OpenBao secret rotation facts from the loaded catalog
+  ansible.builtin.set_fact:
     openbao_rotation_metadata: >-
       {{
         openbao_rotatable_secret_catalog.rotation_metadata

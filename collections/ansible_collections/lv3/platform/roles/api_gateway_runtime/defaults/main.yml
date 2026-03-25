@@ -11,6 +11,28 @@ api_gateway_image_name: lv3-platform-api-gateway
 api_gateway_container_name: api-gateway
 api_gateway_internal_port: 8080
 api_gateway_local_artifact_dir: "{{ api_gateway_repo_root }}/.local/api-gateway"
+api_gateway_tree_sync_specs:
+  - name: platform package for gateway graph support
+    archive_root: "{{ api_gateway_repo_root }}"
+    source: platform
+    dest_parent: "{{ api_gateway_service_dir }}"
+    remote_archive: "{{ api_gateway_site_dir }}/platform-sync.tar.gz"
+  - name: shared search fabric package for gateway search routes
+    archive_root: "{{ api_gateway_repo_root }}/scripts"
+    source: search_fabric
+    dest_parent: "{{ api_gateway_service_dir }}"
+    remote_archive: "{{ api_gateway_site_dir }}/search-fabric-sync.tar.gz"
+  - name: shared scripts tree required by packaged platform modules
+    archive_root: "{{ api_gateway_repo_root }}"
+    source: scripts
+    dest_parent: "{{ api_gateway_service_dir }}"
+    remote_archive: "{{ api_gateway_site_dir }}/scripts-sync.tar.gz"
+  - name: shared repo config tree required by packaged platform modules
+    archive_root: "{{ api_gateway_repo_root }}"
+    source: config
+    dest_parent: "{{ api_gateway_site_dir }}"
+    remote_archive: "{{ api_gateway_site_dir }}/config-sync.tar.gz"
+    preserve_destination_root: true
 api_gateway_gateway_catalog_src: "{{ api_gateway_repo_root }}/config/api-gateway-catalog.json"
 api_gateway_service_catalog_src: "{{ api_gateway_repo_root }}/config/service-capability-catalog.json"
 api_gateway_workflow_catalog_src: "{{ api_gateway_repo_root }}/config/workflow-catalog.json"
@@ -62,6 +84,7 @@ api_gateway_keycloak_issuer_url: https://sso.lv3.org/realms/lv3
 api_gateway_keycloak_token_url: https://sso.lv3.org/realms/lv3/protocol/openid-connect/token
 api_gateway_keycloak_verify_base_url: http://127.0.0.1:18080
 api_gateway_keycloak_docker_network: keycloak_default
+api_gateway_runtime_config_probe_path: /app/config/ledger-event-types.yaml
 api_gateway_verify_client_id: lv3-agent-hub
 api_gateway_verify_client_secret_local_file: >-
   {{
