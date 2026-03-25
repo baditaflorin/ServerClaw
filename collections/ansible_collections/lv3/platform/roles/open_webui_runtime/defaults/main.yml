@@ -35,6 +35,12 @@ open_webui_oidc_scopes: openid email profile
 open_webui_enable_openai_api: false
 open_webui_enable_ollama_api: false
 open_webui_ollama_base_url: http://host.docker.internal:11434
+open_webui_enable_web_search: true
+open_webui_web_search_engine: searxng
+open_webui_searxng_query_url: "http://host.docker.internal:{{ platform_service_topology | platform_service_port('searxng', 'internal') }}/search?q=<query>&format=json"
+open_webui_web_search_result_count: 3
+open_webui_web_search_concurrent_requests: 1
+open_webui_bypass_web_search_web_loader: true
 open_webui_default_models: ""
 open_webui_default_pinned_models: ""
 open_webui_audit_log_level: METADATA

@@ -138,6 +138,8 @@ platform_ports:
   gitea_host_proxy_port: 3009
   netbox_server_port: 8082
   netbox_host_proxy_port: 8004
+  searxng_port: 8881
+  searxng_host_proxy_port: 80
   langfuse_port: 3002
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
@@ -182,6 +184,8 @@ platform_port_assignments:
   gitea_host_proxy_port: 3009
   netbox_server_port: 8082
   netbox_host_proxy_port: 8004
+  searxng_port: 8881
+  searxng_host_proxy_port: 80
   langfuse_port: 3002
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
@@ -1029,6 +1033,33 @@ platform_service_topology:
     urls:
       internal: http://10.10.10.20:8082
       controller: http://100.64.0.1:8004
+  searxng:
+    service_name: searxng
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: search.lv3.org
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: tailnet
+      name: search
+      type: A
+      target: 100.64.0.1
+      ttl: 60
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:80
+    service_id: searxng
+    ports:
+      internal: 8881
+      controller: 80
+    urls:
+      public: http://search.lv3.org
+      internal: http://10.10.10.20:8881
+      controller: http://100.64.0.1:80
   langfuse:
     service_name: langfuse
     owning_vm: docker-runtime-lv3
@@ -1499,6 +1530,10 @@ platform_dns_records:
       type: A
       value: 100.64.0.1
       ttl: 60
+    - name: search
+      type: A
+      value: 100.64.0.1
+      ttl: 60
     - name: vault
       type: A
       value: 100.64.0.1
@@ -1919,6 +1954,33 @@ public_edge_service_topology:
     urls:
       internal: http://10.10.10.20:8082
       controller: http://100.64.0.1:8004
+  searxng:
+    service_name: searxng
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: search.lv3.org
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: tailnet
+      name: search
+      type: A
+      target: 100.64.0.1
+      ttl: 60
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:80
+    service_id: searxng
+    ports:
+      internal: 8881
+      controller: 80
+    urls:
+      public: http://search.lv3.org
+      internal: http://10.10.10.20:8881
+      controller: http://100.64.0.1:80
   langfuse:
     service_name: langfuse
     owning_vm: docker-runtime-lv3
@@ -2387,6 +2449,8 @@ openbao_http_port: 8201
 openbao_proxy_port: 8200
 windmill_server_port: 8000
 netbox_server_port: 8082
+searxng_port: 8881
+searxng_host_proxy_port: 80
 langfuse_port: 3002
 dozzle_http_port: 8089
 dozzle_agent_port: 7007

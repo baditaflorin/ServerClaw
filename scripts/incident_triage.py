@@ -19,6 +19,7 @@ from typing import Any
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path, write_json
 from maintenance_window_tool import list_active_windows_best_effort
 from mutation_audit import build_event, emit_event_best_effort, resolve_local_sink_path
+from platform.web import WebSearchClient
 
 
 RULES_PATH = repo_path("config", "triage-rules.yaml")
@@ -726,6 +727,36 @@ def execute_auto_check(
     return {"status": "skipped", "reason": f"no local executor for '{check_type}'"}
 
 
+def derive_web_search_query(context: dict[str, Any]) -> str | None:
+    explicit = context["alert_payload"].get("error_message")
+    if isinstance(explicit, str) and explicit.strip():
+        snippet = " ".join(explicit.split())[:180]
+        return f'site:github.com OR site:stackoverflow.com "{snippet}"'
+
+    for entry in context["logs"]:
+        if not log_line_is_error(entry):
+            continue
+        line = " ".join(str(entry.get("line", "")).split())
+        if not line:
+            continue
+        return f'site:github.com OR site:stackoverflow.com "{line[:180]}"'
+
+    if context["alert_name"] != "unknown_alert":
+        return f'{context["service_id"]} {context["alert_name"]}'
+    return None
+
+
+def search_web_references(query: str, *, max_results: int = 3) -> list[dict[str, str]]:
+    try:
+        results = WebSearchClient().search(query, max_results=max_results)
+    except Exception:
+        return []
+    return [
+        {"title": result.title, "url": result.url, "content": result.content}
+        for result in results
+    ]
+
+
 def build_context(alert_payload: dict[str, Any], *, loki_query_url: str | None = None) -> dict[str, Any]:
     services = load_service_catalog()
     service_id = infer_service_id(alert_payload, services)
@@ -795,6 +826,15 @@ def build_report(
         },
         "auto_check_result": auto_check,
     }
+
+    if hypotheses and hypotheses[0].get("id") == "unclassified-incident":
+        web_search_query = derive_web_search_query(context)
+        if web_search_query:
+            web_search_references = search_web_references(web_search_query)
+            if web_search_references:
+                report["web_search_query"] = web_search_query
+                report["web_search_references"] = web_search_references
+
     return report
 
 

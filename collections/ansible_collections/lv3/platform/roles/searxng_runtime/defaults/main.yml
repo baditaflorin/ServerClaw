@@ -1,0 +1,23 @@
+---
+searxng_runtime_site_dir: /opt/searxng
+searxng_runtime_config_dir: /etc/searxng
+searxng_runtime_secret_dir: /etc/lv3/searxng
+searxng_runtime_cache_dir: /data/searxng/cache
+searxng_runtime_valkey_data_dir: /data/searxng/valkey
+searxng_runtime_compose_file: "{{ searxng_runtime_site_dir }}/docker-compose.yml"
+searxng_runtime_settings_file: "{{ searxng_runtime_config_dir }}/settings.yml"
+searxng_runtime_container_name: searxng
+searxng_runtime_valkey_container_name: searxng-valkey
+searxng_runtime_image: "{{ container_image_catalog.images.searxng_runtime.ref }}"
+searxng_runtime_valkey_image: "{{ container_image_catalog.images.searxng_valkey_runtime.ref }}"
+searxng_runtime_port: "{{ platform_service_topology | platform_service_port('searxng', 'internal') }}"
+searxng_runtime_host_proxy_port: "{{ platform_service_topology | platform_service_port('searxng', 'controller') }}"
+searxng_runtime_internal_base_url: "{{ platform_service_topology | platform_service_url('searxng', 'internal') }}"
+searxng_runtime_controller_url: "{{ platform_service_topology | platform_service_url('searxng', 'controller') }}"
+searxng_runtime_public_base_url: "{{ platform_service_topology.searxng.urls.public | default(searxng_runtime_controller_url) }}"
+searxng_runtime_enable_limiter: false
+searxng_runtime_secret_key_remote_file: "{{ searxng_runtime_secret_dir }}/secret-key.txt"
+searxng_runtime_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/searxng
+searxng_runtime_secret_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/searxng/secret-key.txt
+searxng_runtime_instance_name: LV3 Search
+searxng_runtime_default_query: proxmox ve

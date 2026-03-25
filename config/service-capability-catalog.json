@@ -636,6 +636,43 @@
       }
     },
     {
+      "id": "searxng",
+      "name": "SearXNG",
+      "description": "Private metasearch runtime for operator and agent web lookups with a tailnet-only hostname.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8881",
+      "public_url": "http://search.lv3.org",
+      "subdomain": "search.lv3.org",
+      "exposure": "private-only",
+      "health_probe_id": "searxng",
+      "image_catalog_ids": [
+        "searxng_runtime",
+        "searxng_valkey_runtime"
+      ],
+      "secret_catalog_ids": [
+        "searxng_secret_key"
+      ],
+      "adr": "0148",
+      "runbook": "docs/runbooks/configure-searxng.md",
+      "tags": [
+        "search",
+        "web",
+        "agents",
+        "privacy"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "http://search.lv3.org",
+          "subdomain": "search.lv3.org",
+          "notes": "Tailnet-only hostname published on the Proxmox host Tailscale IP."
+        }
+      }
+    },
+    {
       "id": "openbao",
       "name": "OpenBao",
       "description": "Private secrets authority for controller automation and runtime credentials.",

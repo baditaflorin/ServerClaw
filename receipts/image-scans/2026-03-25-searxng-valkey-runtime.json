@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "searxng_valkey_runtime",
+  "image_ref": "docker.io/valkey/valkey:8-alpine@sha256:cb3339abbd6e18942cd8ac3349f0c371a82ba5b6204b242563ba299e7956cbd0",
+  "scanner": "trivy",
+  "scanner_image": "local/homebrew/trivy:0.69.3",
+  "scanned_on": "2026-03-25",
+  "summary": {
+    "critical": 0,
+    "high": 1
+  },
+  "targets_with_findings": [
+    "docker.io/valkey/valkey:8-alpine@sha256:cb3339abbd6e18942cd8ac3349f0c371a82ba5b6204b242563ba299e7956cbd0 (alpine 3.23.3)"
+  ],
+  "raw_report": "receipts/image-scans/2026-03-25-searxng-valkey-runtime.trivy.json"
+}

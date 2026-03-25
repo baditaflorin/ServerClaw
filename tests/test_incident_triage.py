@@ -204,3 +204,27 @@ def test_emit_triage_report_writes_report_and_audit(monkeypatch, tmp_path: Path)
     assert written.exists()
     assert captured["event"]["action"] == "triage.report_created"
     assert result["mattermost_posted"] is False
+
+
+def test_build_report_adds_web_search_references_for_unclassified_incident(monkeypatch, tmp_path: Path) -> None:
+    configure_repo(monkeypatch, tmp_path)
+    captured: dict[str, str] = {}
+
+    def fake_search(query: str, *, max_results: int = 3):
+        captured["query"] = query
+        return [{"title": "Known bug", "url": "https://example.com/issue", "content": "match"}]
+
+    monkeypatch.setattr(incident_triage, "search_web_references", fake_search)
+
+    report = incident_triage.build_report(
+        {
+            "service_id": "netbox",
+            "alert_name": "netbox_unknown_failure",
+            "status": "resolved",
+            "logs": [{"line": "fatal redirect_uri mismatch during startup", "labels": {"level": "error"}}],
+        }
+    )
+
+    assert report["hypotheses"][0]["id"] == "unclassified-incident"
+    assert report["web_search_references"][0]["url"] == "https://example.com/issue"
+    assert "redirect_uri mismatch" in captured["query"]

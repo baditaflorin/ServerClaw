@@ -43,9 +43,8 @@ PORT_KEYS = (
     "gitea_host_proxy_port",
     "netbox_server_port",
     "netbox_host_proxy_port",
-    "langfuse_port",
-    "dozzle_http_port",
-    "dozzle_agent_port",
+    "searxng_port",
+    "searxng_host_proxy_port",
     "langfuse_port",
     "dozzle_http_port",
     "dozzle_agent_port",
@@ -306,12 +305,17 @@ def build_service_urls(
         urls["controller"] = service_url("http", tailscale_ipv4, ports["netbox_host_proxy_port"])
         port_map["internal"] = ports["netbox_server_port"]
         port_map["controller"] = ports["netbox_host_proxy_port"]
-    elif service_id == "langfuse":
-        urls["internal"] = service_url("http", private_ip, ports["langfuse_port"])
-        port_map["internal"] = ports["langfuse_port"]
-    elif service_id == "dozzle":
-        urls["internal"] = service_url("http", private_ip, ports["dozzle_http_port"])
-        port_map["internal"] = ports["dozzle_http_port"]
+    elif service_id == "searxng":
+        public_hostname = service.get("public_hostname")
+        urls["internal"] = service_url("http", private_ip, ports["searxng_port"])
+        if public_hostname:
+            if ports["searxng_host_proxy_port"] == 80:
+                urls["public"] = f"http://{public_hostname}"
+            else:
+                urls["public"] = service_url("http", public_hostname, ports["searxng_host_proxy_port"])
+        urls["controller"] = service_url("http", tailscale_ipv4, ports["searxng_host_proxy_port"])
+        port_map["internal"] = ports["searxng_port"]
+        port_map["controller"] = ports["searxng_host_proxy_port"]
     elif service_id == "langfuse":
         urls["internal"] = service_url("http", private_ip, ports["langfuse_port"])
         port_map["internal"] = ports["langfuse_port"]

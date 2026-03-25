@@ -320,6 +320,50 @@
         "converge-homepage"
       ]
     },
+    "searxng_runtime": {
+      "kind": "runtime",
+      "service_id": "searxng",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "searxng",
+      "registry_ref": "docker.io/searxng/searxng",
+      "tag": "2026.3.24-02ba38786",
+      "digest": "sha256:c4850cf4ad1954a4d93e0ad5aa8ce2c5b6ba067c889355ce970d820ac6080722",
+      "ref": "docker.io/searxng/searxng:2026.3.24-02ba38786@sha256:c4850cf4ad1954a4d93e0ad5aa8ce2c5b6ba067c889355ce970d820ac6080722",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-25",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-25-searxng-runtime.json",
+      "consumers": [
+        "roles/searxng_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-searxng"
+      ]
+    },
+    "searxng_valkey_runtime": {
+      "kind": "runtime",
+      "service_id": "searxng",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "searxng-valkey",
+      "registry_ref": "docker.io/valkey/valkey",
+      "tag": "8-alpine",
+      "digest": "sha256:cb3339abbd6e18942cd8ac3349f0c371a82ba5b6204b242563ba299e7956cbd0",
+      "ref": "docker.io/valkey/valkey:8-alpine@sha256:cb3339abbd6e18942cd8ac3349f0c371a82ba5b6204b242563ba299e7956cbd0",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-25",
+      "scan_status": "pass_no_critical",
+      "scan_receipt": "receipts/image-scans/2026-03-25-searxng-valkey-runtime.json",
+      "consumers": [
+        "roles/searxng_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-searxng"
+      ]
+    },
     "ollama_runtime": {
       "kind": "runtime",
       "service_id": "ollama",

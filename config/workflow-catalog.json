@@ -2657,6 +2657,60 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-searxng": {
+      "description": "Deploy the private SearXNG runtime on docker-runtime-lv3, publish its tailnet-only hostname through the Proxmox host proxy, and re-render Open WebUI to use the local search endpoint.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-searxng",
+        "command": "make converge-searxng"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "searxng_secret_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-searxng"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-searxng.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/searxng.yml",
+        "roles/searxng_runtime",
+        "roles/open_webui_runtime",
+        "roles/proxmox_tailscale_proxy/tasks/main.yml",
+        "roles/proxmox_security/tasks/main.yml",
+        "roles/hetzner_dns_record",
+        "inventory/group_vars/all.yml",
+        "inventory/host_vars/proxmox_florin.yml"
+      ],
+      "outputs": [
+        "A private SearXNG runtime on docker-runtime-lv3, a tailnet-only hostname at search.lv3.org, and an Open WebUI runtime configured to use the local SearXNG search API."
+      ],
+      "verification_commands": [
+        "make syntax-check-searxng",
+        "curl -s http://100.118.189.95/search?q=proxmox%20ve\\&format=json",
+        "curl -s http://search.lv3.org/search?q=proxmox%20ve\\&format=json"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 320,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-ollama": {
       "description": "Deploy the private Ollama runtime on docker-runtime-lv3, sync the repo-managed startup model catalog, and verify local inference health.",
       "lifecycle_status": "active",

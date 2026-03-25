@@ -1,0 +1,180 @@
+---
+- name: Validate SearXNG runtime inputs
+  ansible.builtin.assert:
+    that:
+      - searxng_runtime_site_dir | length > 0
+      - searxng_runtime_config_dir | length > 0
+      - searxng_runtime_secret_dir | length > 0
+      - searxng_runtime_cache_dir | length > 0
+      - searxng_runtime_valkey_data_dir | length > 0
+      - searxng_runtime_compose_file | length > 0
+      - searxng_runtime_settings_file | length > 0
+      - searxng_runtime_container_name | length > 0
+      - searxng_runtime_valkey_container_name | length > 0
+      - searxng_runtime_image | length > 0
+      - searxng_runtime_valkey_image | length > 0
+      - searxng_runtime_port | int > 0
+      - searxng_runtime_internal_base_url | length > 0
+      - searxng_runtime_controller_url | length > 0
+      - searxng_runtime_public_base_url | length > 0
+      - searxng_runtime_default_query | length > 0
+    fail_msg: >-
+      searxng_runtime requires compose paths, stable URLs, container images, and
+      the default verification query.
+
+- name: Ensure the SearXNG runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - openssl
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the SearXNG directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ searxng_runtime_site_dir }}"
+      mode: "0755"
+    - path: "{{ searxng_runtime_config_dir }}"
+      mode: "0755"
+    - path: "{{ searxng_runtime_secret_dir }}"
+      mode: "0700"
+    - path: "{{ searxng_runtime_cache_dir }}"
+      mode: "0755"
+    - path: "{{ searxng_runtime_valkey_data_dir }}"
+      mode: "0755"
+
+- name: Generate the SearXNG secret key
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ searxng_runtime_secret_key_remote_file }}" ]; then
+      umask 077
+      openssl rand -hex 32 > "{{ searxng_runtime_secret_key_remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: searxng_runtime_secret_key_generation
+  changed_when: "'changed' in searxng_runtime_secret_key_generation.stdout"
+  no_log: true
+
+- name: Read the SearXNG secret key
+  ansible.builtin.slurp:
+    src: "{{ searxng_runtime_secret_key_remote_file }}"
+  register: searxng_runtime_secret_key_raw
+  no_log: true
+
+- name: Set the SearXNG secret key fact
+  ansible.builtin.set_fact:
+    searxng_runtime_secret_key: "{{ searxng_runtime_secret_key_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Ensure the local SearXNG artifact directory exists
+  ansible.builtin.file:
+    path: "{{ searxng_runtime_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Mirror the SearXNG secret key to the control machine
+  ansible.builtin.copy:
+    dest: "{{ searxng_runtime_secret_key_local_file }}"
+    content: "{{ searxng_runtime_secret_key }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Render the SearXNG settings
+  ansible.builtin.template:
+    src: settings.yml.j2
+    dest: "{{ searxng_runtime_settings_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  no_log: true
+
+- name: Render the SearXNG compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ searxng_runtime_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the SearXNG images
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ searxng_runtime_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ searxng_runtime_site_dir }}"
+  register: searxng_runtime_pull
+  changed_when: >-
+    'Pulling' in searxng_runtime_pull.stdout
+    or 'Downloaded newer image' in searxng_runtime_pull.stdout
+    or 'Pull complete' in searxng_runtime_pull.stdout
+
+- name: Start the SearXNG runtime
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ searxng_runtime_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ searxng_runtime_site_dir }}"
+  register: searxng_runtime_up
+  changed_when: >-
+    'Creating' in searxng_runtime_up.stdout
+    or 'Recreating' in searxng_runtime_up.stdout
+    or 'Starting' in searxng_runtime_up.stdout
+
+- name: Wait for SearXNG to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ searxng_runtime_port }}"
+    delay: 0
+    timeout: 180
+
+- name: Wait for the SearXNG root page
+  ansible.builtin.uri:
+    url: "{{ searxng_runtime_internal_base_url }}"
+    method: GET
+    status_code: 200
+  register: searxng_runtime_http_ready
+  retries: 24
+  delay: 5
+  until: searxng_runtime_http_ready.status == 200
+  changed_when: false
+
+- name: Verify the SearXNG JSON search endpoint returns results
+  ansible.builtin.uri:
+    url: "{{ searxng_runtime_internal_base_url }}/search?q={{ searxng_runtime_default_query | urlencode }}&format=json"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: searxng_runtime_query
+  retries: 6
+  delay: 5
+  until: searxng_runtime_query.status == 200
+  changed_when: false
+
+- name: Assert SearXNG returned a structured JSON payload
+  ansible.builtin.assert:
+    that:
+      - searxng_runtime_query.json.results is defined
+      - searxng_runtime_query.json.results is sequence
+    fail_msg: "SearXNG responded, but the JSON search API did not return a results list."

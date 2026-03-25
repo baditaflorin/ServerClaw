@@ -192,6 +192,15 @@
       "adr": "0145"
     },
     {
+      "id": "searxng",
+      "service": "searxng",
+      "name": "SearXNG",
+      "vm": "docker-runtime-lv3",
+      "tier": 1,
+      "category": "automation",
+      "adr": "0148"
+    },
+    {
       "id": "openbao",
       "service": "openbao",
       "name": "OpenBao",
@@ -528,6 +537,12 @@
       "to": "ollama",
       "type": "hard",
       "description": "Open WebUI routes the repo-managed local model connector to the private Ollama runtime on docker-runtime-lv3."
+    },
+    {
+      "from": "open_webui",
+      "to": "searxng",
+      "type": "soft",
+      "description": "Open WebUI delegates optional web-search requests to the private SearXNG runtime when the feature is enabled."
     },
     {
       "from": "open_webui",

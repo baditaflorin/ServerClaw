@@ -1029,6 +1029,36 @@
         }
       }
     },
+    "searxng": {
+      "service_name": "searxng",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "searxng_runtime",
+      "verify_file": "roles/searxng_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The SearXNG root page responds on the local listener.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8881/",
+        "method": "GET",
+        "expected_status": [200]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The SearXNG JSON search endpoint returns a structured payload for the default verification query.",
+        "timeout_seconds": 120,
+        "retries": 6,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8881/search?q=proxmox%20ve&format=json",
+        "method": "GET",
+        "expected_status": [200]
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "The SearXNG interface is intentionally tailnet-only and verified by its runtime role plus direct operator checks."
+      }
+    },
     "ollama": {
       "service_name": "ollama",
       "owning_vm": "docker-runtime-lv3",

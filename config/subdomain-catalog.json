@@ -120,6 +120,22 @@
       "notes": "Tailnet-only TCP proxy through the Proxmox host."
     },
     {
+      "fqdn": "search.lv3.org",
+      "service_id": "searxng",
+      "environment": "production",
+      "status": "active",
+      "exposure": "private-only",
+      "auth_requirement": "private_network",
+      "target": "100.64.0.1",
+      "target_port": 80,
+      "owner_adr": "0148",
+      "tls": {
+        "provider": "none",
+        "auto_renew": false
+      },
+      "notes": "Tailnet-only HTTP publication through the Proxmox host Tailscale proxy to docker-runtime-lv3."
+    },
+    {
       "fqdn": "changelog.lv3.org",
       "service_id": "changelog_portal",
       "environment": "production",

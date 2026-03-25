@@ -160,6 +160,9 @@ windmill_env_file: /run/lv3-secrets/windmill/runtime.env
 ollama_version: 0.18.2
 ollama_image: "{{ container_image_catalog.images.ollama_runtime.ref }}"
 ollama_default_model: llama3.2:3b
+searxng_version: 2026.3.24-02ba38786
+searxng_image: "{{ container_image_catalog.images.searxng_runtime.ref }}"
+searxng_controller_url: http://search.lv3.org
 open_webui_version: 0.8.9
 open_webui_image: "{{ container_image_catalog.images.open_webui_runtime.ref }}"
 open_webui_admin_email: ops@lv3.org
@@ -167,6 +170,8 @@ open_webui_admin_name: Florin Badita
 open_webui_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ open_webui_host_proxy_port }}"
 open_webui_enable_ollama_api: true
 open_webui_ollama_base_url: "http://host.docker.internal:11434"
+open_webui_enable_web_search: true
+open_webui_searxng_query_url: "http://host.docker.internal:8881/search?q=<query>&format=json"
 open_webui_default_models: "{{ ollama_default_model }}"
 open_webui_default_pinned_models: "{{ ollama_default_model }}"
 platform_context_host_proxy_port: 8010

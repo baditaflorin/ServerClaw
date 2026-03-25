@@ -15,11 +15,13 @@
       - open_webui_internal_base_url | length > 0
       - open_webui_webui_url | length > 0
       - (not open_webui_enable_ollama_api | bool) or (open_webui_ollama_base_url | length > 0)
+      - (not open_webui_enable_web_search | bool) or (open_webui_web_search_engine | length > 0)
+      - (not open_webui_enable_web_search | bool) or (open_webui_web_search_engine != 'searxng') or (open_webui_searxng_query_url | length > 0)
       - (not open_webui_enable_oidc | bool) or (open_webui_oidc_client_id | length > 0)
       - (not open_webui_enable_oidc | bool) or (open_webui_oidc_provider_url | length > 0)
     fail_msg: >-
       open_webui_runtime requires compose paths, image, admin bootstrap, base URLs,
-      and OIDC settings when SSO is enabled.
+      web-search settings when enabled, and OIDC settings when SSO is enabled.
 
 - name: Check whether a controller-local provider environment file exists
   ansible.builtin.stat:

@@ -1,0 +1,44 @@
+---
+- name: Converge the Tailscale operator proxy for SearXNG
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: lv3.platform.proxmox_tailscale_proxy
+    - role: lv3.platform.proxmox_security
+
+- name: Converge SearXNG and refresh Open WebUI search settings on the Docker runtime VM
+  hosts: docker-runtime-lv3
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Ensure target guest is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.searxng_runtime
+    - role: lv3.platform.open_webui_runtime
+
+- name: Converge the SearXNG tailnet DNS record
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    searxng_dns: "{{ hostvars['proxmox_florin'].platform_service_topology.searxng.dns }}"
+
+  roles:
+    - role: lv3.platform.hetzner_dns_record
+      vars:
+        hetzner_dns_record_zone_name: "{{ hetzner_dns_zone_name }}"
+        hetzner_dns_record_name: "{{ searxng_dns.name }}"
+        hetzner_dns_record_type: "{{ searxng_dns.type }}"
+        hetzner_dns_record_value: "{{ searxng_dns.target }}"
+        hetzner_dns_record_ttl: "{{ searxng_dns.ttl }}"
