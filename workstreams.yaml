@@ -2958,7 +2958,7 @@ workstreams:
   - id: adr-0157-per-vm-concurrency-budget
     adr: "0157"
     title: Per-VM concurrency budget and resource reservation
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/live-apply-0157
     worktree_path: .worktrees/live-apply-0157
@@ -2977,6 +2977,8 @@ workstreams:
       - docs/runbooks/per-vm-concurrency-budgets.md
       - playbooks/windmill.yml
       - roles/windmill_runtime
+    ready_to_merge: false
+    live_applied: true
 
   - id: adr-0158-config-merge-protocol
     adr: "0158"
