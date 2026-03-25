@@ -1,0 +1,9 @@
+---
+- name: Idempotency test for preflight
+  hosts: idempotency
+  gather_facts: true
+  vars:
+    preflight_skip_distribution_check: true
+    preflight_check_repo_env_files: false
+  roles:
+    - lv3.platform.preflight

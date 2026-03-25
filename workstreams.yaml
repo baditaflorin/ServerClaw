@@ -2749,3 +2749,25 @@ workstreams:
       - docs/runbooks/speculative-workflow-execution.md
     ready_to_merge: false
     live_applied: false
+
+  - id: adr-0168-idempotency-ci
+    adr: "0168"
+    title: Ansible role idempotency CI enforcement
+    status: merged
+    owner: codex
+    branch: codex/adr-0168-idempotency-ci
+    worktree_path: .worktrees/adr-0168-idempotency-ci
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0168-idempotency-ci.md
+    depends_on:
+      - adr-0083-docker-check-runner
+      - adr-0087-validation-gate
+    conflicts_with: []
+    shared_surfaces:
+      - config/ansible-role-idempotency.yml
+      - scripts/ansible_role_idempotency.py
+      - scripts/validate_repo.sh
+      - tests/idempotency/
+      - docs/runbooks/ansible-role-idempotency-ci.md
+      - docs/adr/0168-ansible-role-idempotency-ci-enforcement.md
+    ready_to_merge: false
+    live_applied: false

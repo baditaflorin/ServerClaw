@@ -19,3 +19,10 @@ def test_validate_repo_runs_tofu_validation_when_present() -> None:
 
     assert "scripts/tofu_exec.sh" in script
     assert "validate_tofu" in script
+
+
+def test_validate_repo_supports_ansible_idempotency_stage() -> None:
+    script = VALIDATE_REPO_SCRIPT.read_text()
+
+    assert "ansible-idempotency" in script
+    assert "scripts/ansible_role_idempotency.py" in script
