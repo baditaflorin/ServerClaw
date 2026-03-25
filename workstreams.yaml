@@ -14,6 +14,32 @@ release_policy:
   breaking_change_criteria: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/version-semantics.json
 
 workstreams:
+  - id: adr-0163-retry-taxonomy
+    adr: "0163"
+    title: Platform-wide retry taxonomy and exponential backoff
+    status: in_progress
+    owner: codex
+    branch: codex/adr-0163-retry-taxonomy
+    worktree_path: .worktrees/adr-0163
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0163-retry-taxonomy.md
+    depends_on:
+      - adr-0044-windmill
+      - adr-0058-nats-event-bus
+      - adr-0092-platform-api-gateway
+      - adr-0119-budgeted-workflow-scheduler
+    conflicts_with: []
+    shared_surfaces:
+      - platform/retry/
+      - config/retry-policies.yaml
+      - scripts/api_gateway/main.py
+      - platform/scheduler/scheduler.py
+      - scripts/netbox_inventory_sync.py
+      - scripts/drift_lib.py
+      - scripts/check_ad_hoc_retry.py
+      - docs/runbooks/retry-taxonomy.md
+    ready_to_merge: false
+    live_applied: false
+
   - id: adr-0138-published-artifact-secret-scanning
     adr: "0138"
     title: Published artifact secret scanning

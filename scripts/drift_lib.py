@@ -17,12 +17,14 @@ from typing import Any
 
 from controller_automation_toolkit import load_json, load_yaml, repo_path
 from platform.events import build_envelope
+from platform.retry import async_with_retry, policy_for_surface
 
 
 HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 GROUP_VARS_PATH = repo_path("inventory", "group_vars", "all.yml")
 SECRET_MANIFEST_PATH = repo_path("config", "controller-local-secrets.json")
 WORKSTREAMS_PATH = repo_path("workstreams.yaml")
+NATS_PUBLISH_POLICY = policy_for_surface("nats_publish")
 
 
 @dataclass(frozen=True)
@@ -308,7 +310,11 @@ async def connect_nats(nats_url: str, credentials: dict[str, str] | None = None)
     }
     if credentials:
         kwargs.update(credentials)
-    await nc.connect(**kwargs)
+    await async_with_retry(
+        lambda: nc.connect(**kwargs),
+        policy=NATS_PUBLISH_POLICY,
+        error_context=f"nats connect {nats_url}",
+    )
     return nc
 
 
@@ -338,8 +344,19 @@ async def publish_nats_events_async(
                 context_id=str(record.get("context_id") or "").strip() or None,
                 ts=record.get("ts") or record.get("generated_at") or record.get("occurred_at") or record.get("collected_at"),
             )
-            await nc.publish(subject, json.dumps(envelope, separators=(",", ":")).encode())
-        await nc.flush(timeout=5)
+            await async_with_retry(
+                lambda subject=subject, envelope=envelope: nc.publish(
+                    subject,
+                    json.dumps(envelope, separators=(",", ":")).encode(),
+                ),
+                policy=NATS_PUBLISH_POLICY,
+                error_context=f"nats publish {subject}",
+            )
+        await async_with_retry(
+            lambda: nc.flush(timeout=5),
+            policy=NATS_PUBLISH_POLICY,
+            error_context="nats flush",
+        )
     finally:
         await nc.drain()
 

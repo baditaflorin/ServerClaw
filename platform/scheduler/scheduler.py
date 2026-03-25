@@ -17,6 +17,7 @@ from platform.agent_policy import AgentPolicyEngine, DailyExecutionCounter, Poli
 from platform.conflict import IntentConflictRegistry
 from platform.goal_compiler.schema import RiskClass
 from platform.ledger import LedgerReader, LedgerWriter
+from platform.retry import policy_for_surface, with_retry
 
 from .budgets import HostTouchEstimate, WorkflowPolicy, estimate_touched_hosts, load_workflow_policy
 from .rollback_guard import RollbackGuard
@@ -167,6 +168,7 @@ class HttpWindmillClient:
         self._token = token
         self._workspace = workspace
         self._request_timeout_seconds = request_timeout_seconds
+        self._internal_api_retry_policy = policy_for_surface("internal_api")
 
     def _request(
         self,
@@ -175,6 +177,7 @@ class HttpWindmillClient:
         method: str,
         payload: Any | None = None,
         timeout: float | None = None,
+        retry: bool = True,
     ) -> Any:
         data = None
         headers = {"Authorization": f"Bearer {self._token}"}
@@ -187,10 +190,20 @@ class HttpWindmillClient:
             headers=headers,
             method=method,
         )
-        with urllib.request.urlopen(
+        open_request = lambda: urllib.request.urlopen(
             request,
             timeout=timeout or self._request_timeout_seconds,
-        ) as response:
+        )
+        response_cm = (
+            with_retry(
+                open_request,
+                policy=self._internal_api_retry_policy,
+                error_context=f"windmill {method} {path}",
+            )
+            if retry
+            else open_request()
+        )
+        with response_cm as response:
             body = response.read().decode("utf-8")
         if not body.strip():
             return None
@@ -213,6 +226,7 @@ class HttpWindmillClient:
                 f"/api/w/{self._workspace}/jobs/run/p/{encoded_path}",
                 method="POST",
                 payload=arguments,
+                retry=False,
             )
             if isinstance(response, str):
                 return {"job_id": response, "running": True}
@@ -230,6 +244,7 @@ class HttpWindmillClient:
             method="POST",
             payload=arguments,
             timeout=timeout_seconds or self._request_timeout_seconds,
+            retry=False,
         )
         return {
             "completed": True,
