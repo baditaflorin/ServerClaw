@@ -11,8 +11,9 @@ from slo_tracking import build_slo_status_entries, load_slo_catalog  # noqa: E40
 
 def test_slo_catalog_loads_expected_entries() -> None:
     catalog = load_slo_catalog()
-    assert len(catalog["slos"]) >= 8
+    assert len(catalog["slos"]) >= 9
     assert any(entry["indicator"] == "latency" for entry in catalog["slos"])
+    assert any(entry["service_id"] == "homepage" for entry in catalog["slos"])
 
 
 def test_generated_slo_assets_are_current() -> None:

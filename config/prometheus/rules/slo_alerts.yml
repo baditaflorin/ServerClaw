@@ -159,6 +159,46 @@ groups:
           description: The private Gitea runtime remains reachable for repository
             hosting, webhooks, and self-hosted CI orchestration.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_homepage_availability
+        expr: (slo:homepage_availability:error_rate_5m > (14 * 0.005000)) and (slo:homepage_availability:error_rate_1h
+          > (14 * 0.005000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: homepage
+          slo_id: homepage-availability
+          indicator: availability
+        annotations:
+          summary: homepage-availability is burning its error budget at 14x
+          description: The unified operator dashboard remains reachable through the
+            authenticated LV3 edge.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_homepage_availability
+        expr: slo:homepage_availability:error_rate_1h > (3 * 0.005000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: homepage
+          slo_id: homepage-availability
+          indicator: availability
+        annotations:
+          summary: homepage-availability is burning its error budget at 3x
+          description: The unified operator dashboard remains reachable through the
+            authenticated LV3 edge.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_homepage_availability
+        expr: slo:homepage_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: homepage
+          slo_id: homepage-availability
+          indicator: availability
+        annotations:
+          summary: homepage-availability has less than 10% error budget remaining
+          description: The unified operator dashboard remains reachable through the
+            authenticated LV3 edge.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_keycloak_availability
         expr: (slo:keycloak_availability:error_rate_5m > (14 * 0.003000)) and (slo:keycloak_availability:error_rate_1h
           > (14 * 0.003000))

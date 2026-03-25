@@ -120,6 +120,7 @@ public_edge_authenticated_sites:
       - /webhook-test/
       - /webhook-waiting/
   logs.lv3.org:
+  home.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
   ops.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180

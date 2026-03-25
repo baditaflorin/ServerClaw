@@ -154,6 +154,20 @@
       "notes": "Workflow logs can contain operator context and transient execution metadata but do not need indefinite retention."
     },
     {
+      "id": "homepage-config",
+      "service": "homepage",
+      "name": "Homepage generated dashboard config",
+      "class": "internal",
+      "retention_days": 30,
+      "backup_included": true,
+      "access_role": "platform-read",
+      "pii_risk": "low",
+      "locations": [
+        "/opt/homepage/config"
+      ],
+      "notes": "Homepage stores only repo-generated dashboard configuration and lightweight runtime state for the unified service dashboard."
+    },
+    {
       "id": "mattermost-messages",
       "service": "mattermost",
       "name": "Mattermost messages and attachments",

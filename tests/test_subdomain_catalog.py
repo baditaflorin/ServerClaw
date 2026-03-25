@@ -37,6 +37,10 @@ class SubdomainCatalogTests(unittest.TestCase):
             "edge_oidc",
         )
         self.assertEqual(
+            subdomain_catalog.get_subdomain_entry(self.catalog, "home.lv3.org")["auth_requirement"],
+            "edge_oidc",
+        )
+        self.assertEqual(
             subdomain_catalog.get_subdomain_entry(self.catalog, "database.lv3.org")["auth_requirement"],
             "private_network",
         )

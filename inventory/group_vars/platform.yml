@@ -148,6 +148,7 @@ platform_ports:
   api_gateway_internal_port: 8083
   platform_context_internal_port: 8010
   platform_context_host_proxy_port: 8010
+  homepage_port: 3090
   ops_portal_port: 8092
   ntopng_http_port: 3000
   ntopng_proxy_port: 3001
@@ -191,6 +192,7 @@ platform_port_assignments:
   api_gateway_internal_port: 8083
   platform_context_internal_port: 8010
   platform_context_host_proxy_port: 8010
+  homepage_port: 3090
   ops_portal_port: 8092
   ntopng_http_port: 3000
   ntopng_proxy_port: 3001
@@ -1238,6 +1240,33 @@ platform_service_topology:
     urls:
       public: https://ops.lv3.org
       internal: http://10.10.10.20:8092
+  homepage:
+    service_name: homepage
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: home.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: home
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:3090
+    service_id: homepage
+    ports:
+      internal: 3090
+    urls:
+      public: https://home.lv3.org
+      internal: http://10.10.10.20:3090
   openbao:
     service_name: openbao
     owning_vm: docker-runtime-lv3
@@ -1430,6 +1459,10 @@ platform_dns_records:
       value: 65.108.75.123
       ttl: 60
     - name: ops
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: home
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -2097,6 +2130,33 @@ public_edge_service_topology:
     urls:
       public: https://ops.lv3.org
       internal: http://10.10.10.20:8092
+  homepage:
+    service_name: homepage
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: home.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: home
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:3090
+    service_id: homepage
+    ports:
+      internal: 3090
+    urls:
+      public: https://home.lv3.org
+      internal: http://10.10.10.20:3090
   openbao:
     service_name: openbao
     owning_vm: docker-runtime-lv3
@@ -2333,6 +2393,7 @@ dozzle_agent_port: 7007
 ollama_api_port: 11434
 n8n_port: 5678
 open_webui_port: 8088
+homepage_port: 3090
 ops_portal_port: 8092
 ntopng_http_port: 3000
 portainer_https_port: 9443

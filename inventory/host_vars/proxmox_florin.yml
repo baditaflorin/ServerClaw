@@ -50,6 +50,7 @@ platform_port_assignments:
   api_gateway_internal_port: 8083
   platform_context_internal_port: 8010
   platform_context_host_proxy_port: 8010
+  homepage_port: 3090
   ops_portal_port: 8092
   ntopng_http_port: 3000
   ntopng_proxy_port: 3001
@@ -351,6 +352,11 @@ network_policy:
             - 9000
             - 9443
           description: Host-side private service proxies
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
+            - 3090
+          description: Reverse proxy access to the Homepage dashboard
         - source: all_guests
           protocol: tcp
           ports:
@@ -1099,6 +1105,27 @@ lv3_service_topology:
       tls: true
       kind: proxy
       upstream: "http://10.10.10.20:{{ platform_port_assignments.ops_portal_port }}"
+  homepage:
+    service_name: homepage
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: home.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: home
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: "http://10.10.10.20:{{ platform_port_assignments.homepage_port }}"
   openbao:
     service_name: openbao
     owning_vm: docker-runtime-lv3

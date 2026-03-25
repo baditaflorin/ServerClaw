@@ -2493,6 +2493,56 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-homepage": {
+      "description": "Deploy the Homepage unified service dashboard on docker-runtime-lv3 and publish it at home.lv3.org through the shared authenticated edge.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-homepage",
+        "command": "make converge-homepage"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": []
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-homepage"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-homepage.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/homepage.yml",
+        "roles/homepage_runtime",
+        "scripts/generate_homepage_config.py",
+        "config/service-capability-catalog.json",
+        "config/subdomain-catalog.json",
+        "inventory/host_vars/proxmox_florin.yml"
+      ],
+      "outputs": [
+        "A repo-generated Homepage dashboard published at home.lv3.org through the shared authenticated LV3 edge."
+      ],
+      "verification_commands": [
+        "make syntax-check-homepage",
+        "make uptime-kuma-manage ACTION=ensure-monitors",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'curl -fsS http://10.10.10.20:3090/'",
+        "curl -Ik https://home.lv3.org"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1500,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-langfuse": {
       "description": "Converge Langfuse on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at langfuse.lv3.org, and verify repo-managed trace ingestion.",
       "lifecycle_status": "active",

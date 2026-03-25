@@ -1,0 +1,26 @@
+---
+- name: Verify the Homepage HTTP surface
+  ansible.builtin.uri:
+    url: "{{ homepage_internal_url }}"
+    method: GET
+    status_code: 200
+  register: homepage_verify_http
+  retries: 24
+  delay: 5
+  until: homepage_verify_http.status == 200
+  changed_when: false
+
+- name: Verify Homepage renders the LV3 dashboard title
+  ansible.builtin.uri:
+    url: "{{ homepage_internal_url }}"
+    method: GET
+    return_content: true
+    status_code: 200
+  register: homepage_verify_content
+  changed_when: false
+
+- name: Assert Homepage rendered the expected dashboard title
+  ansible.builtin.assert:
+    that:
+      - "'LV3 Unified Dashboard' in homepage_verify_content.content"
+    fail_msg: "Homepage started, but the repo-managed dashboard title was not rendered."

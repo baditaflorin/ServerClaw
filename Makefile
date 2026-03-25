@@ -457,6 +457,9 @@ syntax-check-dozzle:
 syntax-check-open-webui:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/open-webui.yml --syntax-check
 
+syntax-check-homepage:
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/homepage.yml --syntax-check
+
 syntax-check-portainer:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/portainer.yml --syntax-check
 
@@ -674,6 +677,10 @@ converge-dozzle:
 converge-open-webui:
 	$(MAKE) preflight WORKFLOW=converge-open-webui
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/open-webui.yml --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+
+converge-homepage:
+	$(MAKE) preflight WORKFLOW=converge-homepage
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/homepage.yml --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 
 converge-rag-context:
 	$(MAKE) preflight WORKFLOW=converge-rag-context

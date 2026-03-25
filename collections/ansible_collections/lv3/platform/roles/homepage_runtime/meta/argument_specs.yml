@@ -1,0 +1,66 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the Homepage runtime and generated dashboard config.
+    options:
+      homepage_site_dir:
+        type: path
+        required: true
+        description:
+          - Base directory for the Homepage runtime stack.
+      homepage_config_dir:
+        type: path
+        required: true
+        description:
+          - Directory where generated Homepage config files are stored on the guest.
+      homepage_compose_file:
+        type: path
+        required: true
+        description:
+          - Compose file path for the managed Homepage stack.
+      homepage_container_name:
+        type: str
+        required: true
+        description:
+          - Expected container name used for verification.
+      homepage_image:
+        type: str
+        required: true
+        description:
+          - Digest-pinned Homepage container image reference.
+      homepage_bind_host:
+        type: str
+        required: true
+        description:
+          - Guest-side listener address used for the published Homepage port binding.
+      homepage_port:
+        type: int
+        required: true
+        description:
+          - Guest-local HTTP port exposed by Homepage.
+      homepage_internal_url:
+        type: str
+        required: true
+        description:
+          - Guest-local URL used for verification.
+      homepage_public_url:
+        type: str
+        required: true
+        description:
+          - Public URL published through the shared edge.
+      homepage_public_host:
+        type: str
+        required: true
+        description:
+          - Public hostname published through the shared edge.
+      homepage_allowed_hosts:
+        type: list
+        required: true
+        elements: str
+        description:
+          - Hostnames and local listener addresses accepted by Homepage.
+      homepage_config_generator_local_script:
+        type: path
+        required: true
+        description:
+          - Controller-local script used to render Homepage config files from repo metadata.

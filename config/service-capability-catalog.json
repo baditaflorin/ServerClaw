@@ -241,6 +241,39 @@
       }
     },
     {
+      "id": "homepage",
+      "name": "Homepage",
+      "description": "Unified operator-facing dashboard for the current LV3 service inventory, quick links, and live service reachability.",
+      "category": "access",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:3090",
+      "public_url": "https://home.lv3.org",
+      "subdomain": "home.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Homepage Public",
+      "health_probe_id": "homepage",
+      "image_catalog_ids": [
+        "homepage_runtime"
+      ],
+      "adr": "0152",
+      "runbook": "docs/runbooks/configure-homepage.md",
+      "tags": [
+        "dashboard",
+        "homepage",
+        "operator"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://home.lv3.org",
+          "subdomain": "home.lv3.org",
+          "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
+        }
+      }
+    },
+    {
       "id": "keycloak",
       "name": "Keycloak",
       "description": "Shared SSO and OIDC broker for operator-facing and approved agent-facing applications.",

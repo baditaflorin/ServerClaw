@@ -1,0 +1,35 @@
+---
+- name: Converge Homepage on the Docker runtime VM
+  hosts: docker-runtime-lv3
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - access
+    - service-homepage
+
+  pre_tasks:
+    - name: Ensure target guest is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.homepage_runtime
+
+- name: Publish Homepage on the shared NGINX edge
+  hosts: nginx-lv3
+  become: true
+  gather_facts: true
+  tags:
+    - tier-1
+    - access
+    - service-homepage
+    - publication-homepage
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.nginx_edge_publication

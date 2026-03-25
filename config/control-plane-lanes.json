@@ -57,6 +57,7 @@
             "harden-guest-access",
             "converge-monitoring",
             "converge-docker-runtime",
+            "converge-homepage",
             "converge-postgres-vm",
             "converge-mail-platform",
             "converge-rag-context",

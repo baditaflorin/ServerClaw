@@ -292,6 +292,34 @@
         "converge-open-webui"
       ]
     },
+    "homepage_runtime": {
+      "kind": "runtime",
+      "service_id": "homepage",
+      "runtime_host": "docker-runtime-lv3",
+      "container_name": "homepage",
+      "registry_ref": "ghcr.io/gethomepage/homepage",
+      "tag": "v1.8.0",
+      "digest": "sha256:a543b3b044b2fa349dfe319c9e9b256c4eb5b4f6923361045aa468be4d2ba990",
+      "ref": "ghcr.io/gethomepage/homepage:v1.8.0@sha256:a543b3b044b2fa349dfe319c9e9b256c4eb5b4f6923361045aa468be4d2ba990",
+      "platform": "linux/amd64",
+      "pinned_on": "2026-03-25",
+      "scan_status": "exception_open",
+      "scan_receipt": "receipts/image-scans/2026-03-25-homepage-runtime.json",
+      "exception": {
+        "reason": "The current official Homepage image still reports critical and high Trivy findings at the approved digest; keep it digest-pinned and re-evaluate on the next image review.",
+        "owner": "Platform operations",
+        "approved_on": "2026-03-25",
+        "review_by": "2026-04-08"
+      },
+      "consumers": [
+        "roles/homepage_runtime/templates/docker-compose.yml.j2",
+        "scripts/upgrade_container_image.py",
+        "docs/runbooks/container-image-policy.md"
+      ],
+      "apply_targets": [
+        "converge-homepage"
+      ]
+    },
     "ollama_runtime": {
       "kind": "runtime",
       "service_id": "ollama",

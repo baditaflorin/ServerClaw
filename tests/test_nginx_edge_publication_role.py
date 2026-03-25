@@ -68,7 +68,7 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertNotIn("ops.lv3.org", extra_hostnames)
         self.assertEqual(
             sorted(protected_sites),
-            ["changelog.lv3.org", "docs.lv3.org", "logs.lv3.org", "n8n.lv3.org", "ops.lv3.org"],
+            ["changelog.lv3.org", "docs.lv3.org", "home.lv3.org", "logs.lv3.org", "n8n.lv3.org", "ops.lv3.org"],
         )
         self.assertEqual(protected_sites["n8n.lv3.org"]["unauthenticated_paths"], ["/healthz"])
         self.assertEqual(
@@ -79,6 +79,7 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertNotIn("unauthenticated_paths", protected_sites["docs.lv3.org"])
         self.assertNotIn("unauthenticated_paths", protected_sites["changelog.lv3.org"])
         self.assertNotIn("unauthenticated_paths", protected_sites["logs.lv3.org"])
+        self.assertNotIn("unauthenticated_paths", protected_sites["home.lv3.org"])
 
     def test_tasks_include_dns_hetzner_plugin_and_credentials_flow(self) -> None:
         task_names = {task["name"] for task in self.tasks}

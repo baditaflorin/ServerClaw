@@ -56,6 +56,7 @@ PORT_KEYS = (
     "api_gateway_internal_port",
     "platform_context_internal_port",
     "platform_context_host_proxy_port",
+    "homepage_port",
     "ops_portal_port",
     "ntopng_http_port",
     "ntopng_proxy_port",
@@ -354,6 +355,9 @@ def build_service_urls(
     elif service_id == "ops_portal":
         urls["internal"] = service_url("http", private_ip, ports["ops_portal_port"])
         port_map["internal"] = ports["ops_portal_port"]
+    elif service_id == "homepage":
+        urls["internal"] = service_url("http", private_ip, ports["homepage_port"])
+        port_map["internal"] = ports["homepage_port"]
     elif service_id == "status_page":
         urls["internal"] = service_url("http", private_ip, 3001)
         port_map["internal"] = 3001

@@ -102,6 +102,15 @@
       "adr": "0056"
     },
     {
+      "id": "homepage",
+      "service": "homepage",
+      "name": "Homepage",
+      "vm": "docker-runtime-lv3",
+      "tier": 3,
+      "category": "access",
+      "adr": "0152"
+    },
+    {
       "id": "langfuse",
       "service": "langfuse",
       "name": "Langfuse",
@@ -417,6 +426,18 @@
       "to": "nginx_edge",
       "type": "soft",
       "description": "Public reachability for sso.lv3.org depends on the shared edge publication path."
+    },
+    {
+      "from": "homepage",
+      "to": "keycloak",
+      "type": "hard",
+      "description": "Public operator access to Homepage is intentionally gated through the shared Keycloak-backed oauth2-proxy flow on the NGINX edge."
+    },
+    {
+      "from": "homepage",
+      "to": "nginx_edge",
+      "type": "hard",
+      "description": "The unified dashboard is published at home.lv3.org through the shared NGINX edge and is not exposed directly on the public internet."
     },
     {
       "from": "langfuse",

@@ -45,3 +45,23 @@ def test_build_service_urls_supports_private_gitea_proxy_and_root_url() -> None:
         "internal": "http://10.10.10.20:3003",
         "controller": "http://100.64.0.1:3009",
     }
+
+
+def test_build_service_urls_resolves_homepage_internal_url() -> None:
+    ports = {"homepage_port": 3090}
+    service = {"owning_vm": "docker-runtime-lv3"}
+    host_vars = {"management_tailscale_ipv4": "100.118.189.95"}
+    guest_ipv4_by_name = {"docker-runtime-lv3": "10.10.10.20"}
+    stack = {"desired_state": {"host_id": "proxmox_florin"}}
+
+    port_map, urls = generate_platform_vars.build_service_urls(
+        "homepage",
+        service,
+        host_vars,
+        guest_ipv4_by_name,
+        ports,
+        stack,
+    )
+
+    assert port_map == {"internal": 3090}
+    assert urls == {"internal": "http://10.10.10.20:3090"}
