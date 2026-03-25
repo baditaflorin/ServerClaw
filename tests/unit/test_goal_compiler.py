@@ -23,7 +23,7 @@ def write(path: Path, content: str) -> None:
 
 
 @pytest.fixture()
-def compiler_repo(tmp_path: Path) -> Path:
+def compiler_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     write(
         tmp_path / "config" / "service-capability-catalog.json",
         json.dumps(
@@ -166,6 +166,9 @@ all:
         )
         + "\n",
     )
+    maintenance_state = tmp_path / ".local" / "state" / "maintenance" / "windows.json"
+    write(maintenance_state, "{}\n")
+    monkeypatch.setenv("LV3_MAINTENANCE_WINDOWS_FILE", str(maintenance_state))
     return tmp_path
 
 
@@ -259,6 +262,16 @@ def test_compile_force_unsafe_health_allows_instruction(compiler_repo: Path) -> 
 
     assert result.dispatch_workflow_id == "converge-netbox"
     assert result.intent.requires_approval is True
+
+
+def test_compile_batch_preserves_instruction_order(compiler_repo: Path) -> None:
+    compiler = GoalCompiler(compiler_repo)
+
+    batch = compiler.compile_batch(["deploy netbox", "deploy grafana"], actor_id="operator:lv3-cli")
+
+    assert batch.actor_id == "operator:lv3-cli"
+    assert batch.instructions == ("deploy netbox", "deploy grafana")
+    assert [item.dispatch_workflow_id for item in batch.results] == ["converge-netbox", "converge-grafana"]
 
 def test_compile_uses_llm_fallback_for_unmatched_instruction(compiler_repo: Path) -> None:
     class FakeLLMClient:

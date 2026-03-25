@@ -1,6 +1,7 @@
 # Intent lifecycle
 - intent.compiled
 - intent.approved
+- intent.batch_plan
 - intent.claim_registered
 - intent.deduplicated
 - intent.rejected
