@@ -99,7 +99,7 @@ The repository now also ships ADR 0137 crawl policy automation: the shared publi
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.143.2` |
+| Repository version | `0.146.0` |
 | Platform version | `0.130.3` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -354,6 +354,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Agent State Store](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/agent-state-store.md)
 - [Agent Tool Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/agent-tool-registry.md)
 - [Ansible Collection Development](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/ansible-collection-development.md)
+- [Ansible Role Idempotency CI](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/ansible-role-idempotency-ci.md)
 - [Backup Restore Verification](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/backup-restore-verification.md)
 - [Break-Glass Recovery](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/break-glass-recovery.md)
 - [Break-Glass References](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/break-glass.md)
@@ -430,6 +431,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Operator Onboarding](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/operator-onboarding.md)
 - [Ops Portal Down](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/ops-portal-down.md)
 - [Packer VM Templates](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/packer-vm-templates.md)
+- [Parallel Intent Batch Validation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/parallel-intent-batch-validation.md)
 - [Agentic Control-Plane Roadmap](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/plan-agentic-control-plane.md)
 - [Plan: Human Navigation, Deployment Lifecycle, And Platform Hardening (ADRs 0072–0081)](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/plan-human-navigation-and-deployment-lifecycle.md)
 - [Roadmap Runbook: IaC Potency, Build Server Offload, and User Ergonomics](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/plan-iac-potency-and-build-server.md)
@@ -466,6 +468,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Service Uptime Contracts](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/service-uptime-contracts.md)
 - [Runbook: SLO Fast Burn](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/slo-fast-burn.md)
 - [SLO Tracking](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/slo-tracking.md)
+- [Speculative Workflow Execution](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/speculative-workflow-execution.md)
 - [Staging And Production Topology](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/staging-and-production-topology.md)
 - [Subdomain Exposure Audit](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/subdomain-exposure-audit.md)
 - [Subdomain Governance](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/subdomain-governance.md)
@@ -623,7 +626,17 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0141: API Token Lifecycle and Exposure Response](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0141-api-token-lifecycle-and-exposure-response.md)
 - [ADR 0142: Public Surface Automated Security Scan](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0142-public-surface-automated-security-scan.md)
 - [ADR 0145: Ollama for Local LLM Inference API](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0145-ollama-for-local-llm-inference.md)
+- [ADR 0153: Distributed Resource Lock Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0153-distributed-resource-lock-registry.md)
+- [ADR 0154: VM-Scoped Parallel Execution Lanes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0154-vm-scoped-parallel-execution-lanes.md)
+- [ADR 0155: Intent Queue with Release-Triggered Scheduling](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0155-intent-queue-with-release-triggered-scheduling.md)
 - [ADR 0156: Agent Session Workspace Isolation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0156-agent-session-workspace-isolation.md)
+- [ADR 0157: Per-VM Concurrency Budget and Resource Reservation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0157-per-vm-concurrency-budget-and-resource-reservation.md)
+- [ADR 0158: Conflict-Free Configuration Merge Protocol](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0158-conflict-free-configuration-merge-protocol.md)
+- [ADR 0159: Speculative Parallel Execution with Compensating Transactions](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0159-speculative-parallel-execution-with-compensating-transactions.md)
+- [ADR 0160: Parallel Dry-Run Fan-Out for Intent Batch Validation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0160-parallel-dry-run-fan-out-for-intent-batch-validation.md)
+- [ADR 0161: Real-Time Agent Coordination Map](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0161-real-time-agent-coordination-map.md)
+- [ADR 0162: Distributed Deadlock Detection and Resolution](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0162-distributed-deadlock-detection-and-resolution.md)
+- [ADR 0168: Ansible Role Idempotency CI Enforcement](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0168-ansible-role-idempotency-ci-enforcement.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -743,6 +756,9 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0142: Public Surface Automated Security Scan](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0142-public-surface-security-scan.md)
 - [Workstream ADR 0145: Ollama for Local LLM Inference API](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0145-ollama.md)
 - [Workstream ADR 0156: Agent Session Workspace Isolation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0156-agent-session-workspace-isolation.md)
+- [Workstream ADR 0159: Speculative Parallel Execution with Compensating Transactions](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0159-speculative-parallel-execution.md)
+- [Workstream ADR 0160: Parallel Dry-Run Fan-Out](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0160-parallel-dry-run-fan-out.md)
+- [Workstream ADR 0168: Ansible Role Idempotency CI Enforcement](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0168-idempotency-ci.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
@@ -760,7 +776,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.143.2` |
+| Repository version | `0.146.0` |
 | Platform version | `0.130.3` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -916,6 +932,9 @@ This repository is intentionally opinionated:
 | `0142` | Public surface automated security scan | `merged` | [adr-0142-public-surface-security-scan.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0142-public-surface-security-scan.md) |
 | `0145` | Ollama for local LLM inference | `live_applied` | [adr-0145-ollama.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0145-ollama.md) |
 | `0156` | Agent session workspace isolation | `merged` | [adr-0156-agent-session-workspace-isolation.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0156-agent-session-workspace-isolation.md) |
+| `0159` | Speculative parallel execution with compensating transactions | `merged` | [adr-0159-speculative-parallel-execution.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0159-speculative-parallel-execution.md) |
+| `0160` | Parallel dry-run fan-out for intent batch validation | `merged` | [adr-0160-parallel-dry-run-fan-out.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0160-parallel-dry-run-fan-out.md) |
+| `0168` | Ansible role idempotency CI enforcement | `merged` | [adr-0168-idempotency-ci.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0168-idempotency-ci.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

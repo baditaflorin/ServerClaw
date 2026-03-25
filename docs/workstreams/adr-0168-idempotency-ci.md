@@ -3,7 +3,7 @@
 - ADR: [ADR 0168](../adr/0168-ansible-role-idempotency-ci-enforcement.md)
 - Title: Repo-managed idempotency coverage policy and CI gate for Ansible roles
 - Status: merged
-- Implemented In Repo Version: 0.144.0
+- Implemented In Repo Version: 0.146.0
 - Implemented In Platform Version: n/a
 - Implemented On: 2026-03-25
 - Branch: `codex/adr-0168-idempotency-ci`
