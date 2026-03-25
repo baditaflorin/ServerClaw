@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
@@ -90,7 +91,17 @@ class WatchdogViolation:
 
 class SchedulerStateStore:
     def __init__(self, path: Path | None = None) -> None:
-        self._path = path or (REPO_ROOT / ".local" / "scheduler" / "active-jobs.json")
+        self._path = path or self._default_path()
+
+    @staticmethod
+    def _default_path() -> Path:
+        override = os.environ.get("LV3_SCHEDULER_STATE_PATH", "").strip()
+        if override:
+            return Path(override).expanduser()
+        session_root = os.environ.get("LV3_SESSION_LOCAL_ROOT", "").strip()
+        if session_root:
+            return Path(session_root).expanduser() / "scheduler" / "active-jobs.json"
+        return REPO_ROOT / ".local" / "scheduler" / "active-jobs.json"
 
     def list_active_jobs(self) -> list[ActiveJobRecord]:
         payload = self._read()

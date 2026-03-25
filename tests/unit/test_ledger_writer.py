@@ -215,6 +215,33 @@ def test_writer_inserts_event_and_publishes_asynchronously() -> None:
     assert record["metadata"] == {"change": "deploy"}
 
 
+def test_writer_adds_session_workspace_metadata_from_environment(monkeypatch: pytest.MonkeyPatch) -> None:
+    connection = FakeConnection()
+    monkeypatch.setenv("LV3_SESSION_ID", "test-session")
+    monkeypatch.setenv("LV3_SESSION_SLUG", "test-session")
+    monkeypatch.setenv("LV3_SESSION_LOCAL_ROOT", "/tmp/lv3/test-session")
+    monkeypatch.setenv("LV3_SESSION_NATS_PREFIX", "platform.ws.test-session")
+    monkeypatch.setenv("LV3_SESSION_STATE_NAMESPACE", "ws:test-session")
+
+    writer = LedgerWriter(connection=connection, nats_publisher=None)
+    record = writer.write(
+        event_type="service.deployed",
+        actor="operator:florin",
+        target_kind="service",
+        target_id="netbox",
+        metadata={"change": "deploy"},
+    )
+
+    assert record["metadata"]["change"] == "deploy"
+    assert record["metadata"]["session_workspace"] == {
+        "session_id": "test-session",
+        "session_slug": "test-session",
+        "local_state_root": "/tmp/lv3/test-session",
+        "nats_prefix": "platform.ws.test-session",
+        "state_namespace": "ws:test-session",
+    }
+
+
 def test_writer_rejects_duplicate_event_id() -> None:
     connection = FakeConnection()
     writer = LedgerWriter(connection=connection, nats_publisher=None)

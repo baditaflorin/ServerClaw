@@ -268,6 +268,14 @@ def test_watchdog_cancels_duration_budget_violations(tmp_path: Path) -> None:
     assert store.list_active_jobs() == []
 
 
+def test_scheduler_state_store_uses_session_local_root(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("LV3_SESSION_LOCAL_ROOT", str(tmp_path / ".local" / "session-workspaces" / "test-session"))
+
+    store = SchedulerStateStore()
+
+    assert str(store._path).endswith(".local/session-workspaces/test-session/scheduler/active-jobs.json")
+
+
 def test_scheduler_submits_waits_and_records_completion(tmp_path: Path) -> None:
     write_scheduler_repo(
         tmp_path,

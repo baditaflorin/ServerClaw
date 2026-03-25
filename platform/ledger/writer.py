@@ -49,6 +49,23 @@ def _publish_async(
     thread.start()
 
 
+def _session_workspace_metadata() -> dict[str, Any] | None:
+    session_id = os.environ.get("LV3_SESSION_ID", "").strip()
+    session_slug = os.environ.get("LV3_SESSION_SLUG", "").strip()
+    local_root = os.environ.get("LV3_SESSION_LOCAL_ROOT", "").strip()
+    nats_prefix = os.environ.get("LV3_SESSION_NATS_PREFIX", "").strip()
+    state_namespace = os.environ.get("LV3_SESSION_STATE_NAMESPACE", "").strip()
+    if not any((session_id, session_slug, local_root, nats_prefix, state_namespace)):
+        return None
+    return {
+        "session_id": session_id or None,
+        "session_slug": session_slug or None,
+        "local_state_root": local_root or None,
+        "nats_prefix": nats_prefix or None,
+        "state_namespace": state_namespace or None,
+    }
+
+
 def derive_target_kind(*, surface: str | None = None, action: str | None = None, target: str) -> str:
     lowered_target = target.lower()
     lowered_action = (action or "").lower()
@@ -163,6 +180,10 @@ class LedgerWriter:
 
         resolved_event_id = event_id or str(uuid.uuid4())
         resolved_metadata = dict(metadata or {})
+        if "session_workspace" not in resolved_metadata:
+            session_workspace = _session_workspace_metadata()
+            if session_workspace is not None:
+                resolved_metadata["session_workspace"] = session_workspace
         resolved_occurred_at = normalize_timestamp(occurred_at)
         resolved_dsn = (self._dsn or os.environ.get("LV3_LEDGER_DSN", "")).strip()
         if self._connection is None and not resolved_dsn and self._file_path is not None:

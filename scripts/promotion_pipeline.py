@@ -26,6 +26,7 @@ from controller_automation_toolkit import (
 from live_apply_receipts import (
     RECEIPTS_DIR,
     load_receipt,
+    receipt_id_with_session,
     receipt_relative_path,
     resolve_receipt_path,
     validate_receipt,
@@ -579,7 +580,9 @@ def promote_service(
         raise ValueError(f"production live apply failed:\n{prod_apply['stderr'] or prod_apply['stdout']}")
 
     service = load_service_index()[service_id]
-    prod_receipt_id = f"{today_utc()}-{service_id}-production-promotion-{promotion_id.rsplit('-', 1)[-1]}"
+    prod_receipt_id = receipt_id_with_session(
+        f"{today_utc()}-{service_id}-production-promotion-{promotion_id.rsplit('-', 1)[-1]}"
+    )
     prod_receipt = build_live_apply_receipt(
         receipt_id=prod_receipt_id,
         workflow_id="deploy-and-promote",
