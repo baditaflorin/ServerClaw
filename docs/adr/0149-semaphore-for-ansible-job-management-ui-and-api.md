@@ -3,7 +3,7 @@
 - Status: Accepted
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.158.0
-- Implemented In Platform Version: not yet
+- Implemented In Platform Version: 0.130.7
 - Implemented On: 2026-03-25
 - Date: 2026-03-25
 
@@ -55,6 +55,6 @@ Initial implementation scope:
 - The live implementation will use [roles/semaphore_postgres](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/semaphore_postgres) and [roles/semaphore_runtime](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/semaphore_runtime).
 - Project, inventory, template, and API-token bootstrap are handled through [platform/ansible/semaphore.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/ansible/semaphore.py) and [scripts/semaphore_bootstrap.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/semaphore_bootstrap.py).
 - The initial seeded verification path is the repo-managed [playbooks/semaphore-self.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/semaphore-self.yml) template, which proves UI/API task execution without silently expanding infrastructure credential scope.
-- Repo implementation is complete on the ADR workstream branch after rebasing onto current `main`, hardening the bootstrap and runtime idempotency paths, and passing the Semaphore-specific validation stack.
-- The first live apply on `codex/adr-0149-semaphore` completed on 2026-03-25: `make converge-semaphore` succeeded, the private Tailscale proxy answered on `http://100.64.0.1:8020/api/ping`, and the seeded `Semaphore Self-Test` template completed successfully through the Semaphore task runner.
-- `Implemented In Platform Version` remains `not yet` until the integrated mainline converge is rerun and verified from `main` under the repository release policy.
+- Repo implementation landed in repository release `0.158.0` after rebasing onto current `main`, hardening the bootstrap and runtime idempotency paths, and passing the Semaphore-specific validation stack.
+- The integrated mainline live apply for repository release `0.158.0` completed on 2026-03-25: `make converge-semaphore` succeeded from the clean integration worktree, the private Tailscale proxy answered on `http://100.64.0.1:8020/api/ping`, and the seeded `Semaphore Self-Test` template completed successfully through the Semaphore task runner.
+- The mainline live apply advances platform version `0.130.7` and includes the durable clean-worktree credential recovery path for future Semaphore bootstrap reruns.

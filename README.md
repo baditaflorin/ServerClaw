@@ -106,7 +106,7 @@ The repository now also ships ADR 0137 crawl policy automation: the shared publi
 | Field | Value |
 | --- | --- |
 | Repository version | `0.158.0` |
-| Platform version | `0.130.6` |
+| Platform version | `0.130.7` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -175,6 +175,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `remote_build_gateway` | `2026-03-23-adr-0082-remote-build-gateway-live-apply` |
 | `runtime_container_telemetry` | `2026-03-22-adr-0040-runtime-container-telemetry-live-apply` |
 | `secret_rotation` | `2026-03-23-adr-0065-secret-rotation-live-apply` |
+| `semaphore` | `2026-03-25-adr-0149-semaphore-live-apply` |
 | `short_lived_credentials_and_mtls` | `2026-03-22-adr-0047-short-lived-credentials-live-apply` |
 | `step_ca` | `2026-03-22-adr-0042-step-ca-live-apply` |
 | `tempo_tracing` | `2026-03-22-adr-0053-tempo-traces-live-apply` |
@@ -844,7 +845,7 @@ Current values on `main`:
 | Field | Value |
 | --- | --- |
 | Repository version | `0.158.0` |
-| Platform version | `0.130.6` |
+| Platform version | `0.130.7` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -999,7 +1000,7 @@ This repository is intentionally opinionated:
 | `0142` | Public surface automated security scan | `merged` | [adr-0142-public-surface-security-scan.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0142-public-surface-security-scan.md) |
 | `0145` | Ollama for local LLM inference | `live_applied` | [adr-0145-ollama.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0145-ollama.md) |
 | `0147` | Vaultwarden for operator credential management | `merged` | [adr-0147-vaultwarden.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0147-vaultwarden.md) |
-| `0149` | Semaphore for Ansible job management UI and API | `live_applied` | [adr-0149-semaphore.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0149-semaphore.md) |
+| `0149` | Semaphore for Ansible job management UI and API | `merged` | [adr-0149-semaphore.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0149-semaphore.md) |
 | `0151` | n8n for webhook and API integration automation | `merged` | [adr-0151-n8n.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0151-n8n.md) |
 | `0153` | Distributed resource lock registry | `merged` | [adr-0153-distributed-resource-lock-registry.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0153-distributed-resource-lock-registry.md) |
 | `0154` | VM-scoped parallel execution lanes | `live_applied` | [adr-0154-vm-scoped-execution-lanes.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0154-vm-scoped-execution-lanes.md) |

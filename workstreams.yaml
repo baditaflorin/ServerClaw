@@ -106,7 +106,7 @@ workstreams:
   - id: adr-0149-semaphore
     adr: "0149"
     title: Semaphore for Ansible job management UI and API
-    status: live_applied
+    status: merged
     owner: codex
     branch: codex/adr-0149-semaphore
     worktree_path: ../proxmox_florin_server-adr-0149

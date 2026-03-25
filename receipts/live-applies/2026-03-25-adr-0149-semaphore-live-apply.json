@@ -5,11 +5,11 @@
   "applied_on": "2026-03-25",
   "recorded_on": "2026-03-25",
   "recorded_by": "codex",
-  "source_commit": "2a1b61f1712ce18ecdf82d0cba2d888f1c7a449f",
-  "repo_version_context": "0.157.4",
+  "source_commit": "fd1e89de6d737fc051f68902bd51e80b882cfbdc",
+  "repo_version_context": "0.158.0",
   "workflow_id": "converge-semaphore",
   "adr": "0149",
-  "summary": "Applied the private Semaphore runtime live on docker-runtime-lv3 with the PostgreSQL backend on postgres-lv3, exposed the UI and API through the Proxmox-host Tailscale proxy, and verified the seeded Semaphore self-test through the live task runner.",
+  "summary": "Applied the integrated mainline Semaphore runtime live on docker-runtime-lv3 with the PostgreSQL backend on postgres-lv3, exposed the UI and API through the Proxmox-host Tailscale proxy, and verified the seeded Semaphore self-test through the live task runner.",
   "targets": [
     {
       "kind": "host",
@@ -38,7 +38,7 @@
     {
       "check": "Repo-managed Semaphore converge",
       "result": "pass",
-      "observed": "`make converge-semaphore` completed successfully with `docker-runtime-lv3 : ok=127 changed=8 failed=0`, `postgres-lv3 : ok=50 changed=0 failed=0`, and `proxmox_florin : ok=28 changed=1 failed=0`."
+      "observed": "`make converge-semaphore` completed successfully from the integrated mainline release with `docker-runtime-lv3 : ok=132 changed=11 failed=0`, `postgres-lv3 : ok=50 changed=0 failed=0`, and `proxmox_florin : ok=28 changed=1 failed=0`."
     },
     {
       "check": "Private proxy health endpoint",
@@ -57,7 +57,7 @@
     "docs/workstreams/adr-0149-semaphore.md"
   ],
   "notes": [
-    "This receipt records the first successful live apply from `codex/adr-0149-semaphore` after rebasing onto current `origin/main` and fixing runtime checkout writability, forced compose recreation, and Semaphore API status-code handling.",
-    "The integrated mainline repo and platform versions remain pending until the workstream is merged, a numbered release is cut, and the same converge path is applied from `main` under the repository release policy."
+    "This receipt now records the integrated mainline live apply from repository release `0.158.0` after merging the ADR 0149 workstream and rerunning the converge path from the clean integration worktree.",
+    "The final mainline rerun included the clean-worktree credential recovery fix that restores the durable Semaphore admin password before bootstrap and persists it on the guest for future integration worktrees."
   ]
 }

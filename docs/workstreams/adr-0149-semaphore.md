@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0149](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0149-semaphore-for-ansible-job-management-ui-and-api.md)
 - Title: Private Semaphore runtime for bounded Ansible job execution
-- Status: live_applied
+- Status: merged
 - Branch: `codex/adr-0149-semaphore`
 - Worktree: `../proxmox_florin_server-adr-0149`
 - Owner: codex
@@ -63,12 +63,13 @@
 
 ## Outcome
 
-- `make converge-semaphore` completed successfully on 2026-03-25 after rebasing the workstream onto current `origin/main`.
+- the ADR is merged to `main` in repository release `0.158.0`
+- the integrated mainline live apply advanced platform version to `0.130.7` on 2026-03-25
 - `curl -fsS http://100.64.0.1:8020/api/ping` returned the Semaphore API health payload through the private Proxmox-host Tailscale proxy.
-- `python3 scripts/semaphore_tool.py --auth-file .local/semaphore/admin-auth.json run-template --template 'Semaphore Self-Test' --wait --timeout 300` completed with `status: success`, proving the seeded project, repository checkout, Galaxy install path, and task runner all work live.
+- `python3 scripts/semaphore_tool.py --auth-file .local/semaphore/admin-auth.json run-template --template 'Semaphore Self-Test' --wait --timeout 300` completed with `status: success`, proving the seeded project, repository checkout, Galaxy install path, and task runner all work live from the integrated mainline release.
 
 ## Notes For The Next Assistant
 
 - The live fixes that made the final apply succeed are in the worktree changes to `roles/semaphore_runtime`, `platform/ansible/semaphore.py`, `scripts/semaphore_bootstrap.py`, `scripts/semaphore_tool.py`, and the generated service catalogs.
-- The remaining integration step is mainline release work: merge, bump `VERSION`, update `changelog.md`, update `versions/stack.yaml`, and record the integrated live-apply metadata from `main`.
+- The mainline integration is complete; future work should treat Semaphore expansion as a new workstream instead of reopening ADR 0149 for release plumbing.
 - If a later workstream wants Semaphore to run broader platform converges, design that around an explicit internal inventory, dedicated SSH credential scope, and documented `.local` secret mirroring rather than silently reusing controller assumptions.
