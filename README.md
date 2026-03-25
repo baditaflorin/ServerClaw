@@ -60,6 +60,8 @@ The private OpenBao secret authority is now live on `docker-runtime-lv3`, with a
 
 Windmill is now live on `docker-runtime-lv3` and reachable privately at `http://100.118.189.95:8005`, with the repo-managed `lv3` workspace and seeded healthcheck script verified end to end.
 
+Private Gitea is now live on `docker-runtime-lv3` at `http://100.118.189.95:3009`, with Keycloak OIDC login, the bootstrapped `ops/proxmox_florin_server` repository path, and an online self-hosted Actions runner on `docker-build-lv3`.
+
 NetBox is now live on `docker-runtime-lv3` and reachable privately at `http://100.118.189.95:8004`, with repo-managed synchronization of the Hetzner site, the Proxmox host, all managed VMs, canonical prefixes and IPs, and the governed service catalog.
 
 The control-plane governance layer is now live on `main`: command, API, message, and event lanes are verified against the active host and mail surfaces, the current human/service/agent/break-glass principals have been re-reviewed against the identity taxonomy, and recurring live mutation is expected to use the named command catalog plus approval gates.
@@ -83,9 +85,9 @@ The repository now also ships ADR 0096 SLO tracking: a canonical SLO catalog, ge
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.121.0` |
-| Platform version | `0.105.0` |
-| Observed check date | `2026-03-23` |
+| Repository version | `0.122.0` |
+| Platform version | `0.106.0` |
+| Observed check date | `2026-03-25` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
 | Observed kernel | `6.17.13-2-pve` |
@@ -110,6 +112,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `build.lv3.org` | `docker-build` | `informational-only` | `docker-build-lv3` |
 | `database.lv3.org` | `postgres` | `private-only` | `postgres-lv3` |
 | `docker.lv3.org` | `docker-runtime` | `informational-only` | `docker-runtime-lv3` |
+| `git.lv3.org` | `gitea` | `private-only` | `docker-runtime-lv3` |
 | `grafana.lv3.org` | `grafana` | `edge-published` | `monitoring-lv3` |
 | `mail.lv3.org` | `mail-platform` | `informational-only` | `docker-runtime-lv3` |
 | `nginx.lv3.org` | `nginx-edge` | `edge-static` | `nginx-lv3` |
@@ -128,6 +131,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `control_plane_lanes` | `2026-03-22-adr-0045-control-plane-communication-lanes-live-apply` |
 | `control_plane_recovery` | `2026-03-22-adr-0051-control-plane-recovery-live-apply` |
 | `docker_runtime` | `2026-03-22-adr-0023-docker-runtime-live-apply` |
+| `gitea` | `2026-03-25-adr-0143-gitea-live-apply` |
 | `guest_network_policy` | `2026-03-22-adr-0067-guest-network-policy-live-apply` |
 | `identity_taxonomy` | `2026-03-22-adr-0046-identity-classes-live-apply` |
 | `keycloak` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
@@ -339,6 +343,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure Docker Build VM](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-docker-build-vm.md)
 - [Configure Docker Runtime Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-docker-runtime.md)
 - [Configure Edge Publication](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-edge-publication.md)
+- [Configure Gitea](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-gitea.md)
 - [Configure Guest Network Policy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-guest-network-policy.md)
 - [Configure Keycloak](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-keycloak.md)
 - [Configure Mail Platform](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-mail-platform.md)
@@ -703,6 +708,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0135: Developer Portal Sensitivity Classification](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0135-developer-portal-sensitivity-classification.md)
 - [Workstream ADR 0138: Published Artifact Secret Scanning](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0138-published-artifact-secret-scanning.md)
 - [Workstream ADR 0140: Grafana Public Access Hardening](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0140-grafana-public-access-hardening.md)
+- [Workstream ADR 0143: Gitea for Self-Hosted Git and Webhook-Driven Automation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0143-gitea-ci.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
@@ -720,8 +726,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.121.0` |
-| Platform version | `0.105.0` |
+| Repository version | `0.122.0` |
+| Platform version | `0.106.0` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -842,6 +848,7 @@ This repository is intentionally opinionated:
 | `0111` | End-to-end integration test suite | `merged` | [adr-0111-integration-test-suite.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0111-integration-test-suite.md) |
 | `0114` | Rule-based incident triage engine | `merged` | [adr-0114-incident-triage-engine.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0114-incident-triage-engine.md) |
 | `0132` | Self-describing platform manifest | `merged` | [adr-0132-self-describing-platform-manifest.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0132-self-describing-platform-manifest.md) |
+| `0143` | Private Gitea with self-hosted CI | `live_applied` | [adr-0143-gitea-ci.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0143-gitea-ci.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

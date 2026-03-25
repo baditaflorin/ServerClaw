@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0143](../adr/0143-gitea-for-self-hosted-git-and-ci.md)
 - Title: Private Gitea on docker-runtime-lv3 with Keycloak OIDC, a docker-build-lv3 Actions runner, and repo-managed webhook validation
-- Status: merged
+- Status: live_applied
 - Branch: `codex/adr-0143-gitea-ci`
 - Worktree: `.worktrees/adr-0143-gitea-ci`
 - Owner: codex
@@ -56,3 +56,10 @@
 - `curl -sf http://100.118.189.95:3009/api/swagger >/dev/null`
 - `docker ps --format '{{.Names}}'` on `docker-build-lv3` includes `lv3-gitea-runner`
 - a smoke repository push creates a workflow run and a webhook delivery record in Gitea
+
+Live verification on 2026-03-25:
+
+- released `main` commit `61837be` reapplied `playbooks/gitea.yml` successfully across `proxmox_florin`, `postgres-lv3`, `docker-runtime-lv3`, and `docker-build-lv3`
+- `GET /api/v1/admin/actions/runners` reported `docker-build-lv3` online
+- smoke repo `ops/adr-0143-final-smoke-20260325111646` produced workflow run `2` with `conclusion=success`
+- webhook bin `http://ptsv3.com/adr014320260325111646` recorded a `POST` with `X-Gitea-Event: push` and a body containing `refs/heads/main`

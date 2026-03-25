@@ -1,10 +1,10 @@
 # ADR 0143: Gitea for Self-Hosted Git and Webhook-Driven Automation
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.122.0
+- Implemented In Platform Version: 0.106.0
+- Implemented On: 2026-03-25
 - Date: 2026-03-24
 
 ## Context

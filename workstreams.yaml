@@ -1954,7 +1954,7 @@ workstreams:
   - id: adr-0143-gitea-ci
     adr: "0143"
     title: Private Gitea with self-hosted CI
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0143-gitea-ci
     worktree_path: .worktrees/adr-0143-gitea-ci
@@ -1972,4 +1972,4 @@ workstreams:
       - config/service-capability-catalog.json
       - versions/stack.yaml
     ready_to_merge: false
-    live_applied: false
+    live_applied: true

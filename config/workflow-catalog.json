@@ -1651,6 +1651,61 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-gitea": {
+      "description": "Converge private Gitea on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and register the self-hosted Actions runner on docker-build-lv3.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-gitea",
+        "command": "make converge-gitea"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "gitea_database_password",
+          "gitea_admin_password",
+          "gitea_webhook_secret",
+          "gitea_runner_registration_token"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-gitea"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-gitea.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/gitea.yml",
+        "collections/ansible_collections/lv3/platform/roles/gitea_postgres",
+        "collections/ansible_collections/lv3/platform/roles/gitea_runtime",
+        "collections/ansible_collections/lv3/platform/roles/gitea_runner",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/service-capability-catalog.json",
+        "config/health-probe-catalog.json"
+      ],
+      "outputs": [
+        "A private Gitea runtime on docker-runtime-lv3 with Keycloak OIDC login, a PostgreSQL backend on postgres-lv3, the bootstrapped ops/proxmox_florin_server repository path, and a dedicated self-hosted Actions runner on docker-build-lv3."
+      ],
+      "verification_commands": [
+        "make syntax-check-gitea",
+        "curl -sf http://100.118.189.95:3009/api/v1/version",
+        "curl -sf http://100.118.189.95:3009/api/swagger >/dev/null"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1500,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 4,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-api-gateway": {
       "description": "Converge the unified platform API gateway on docker-runtime-lv3 and publish it at api.lv3.org through the shared NGINX edge.",
       "lifecycle_status": "active",

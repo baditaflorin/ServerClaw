@@ -1175,6 +1175,40 @@
         ]
       }
     },
+    "converge-gitea": {
+      "description": "Converge private Gitea with Keycloak OIDC, PostgreSQL, the repo bootstrap path, and the docker-build-lv3 self-hosted Actions runner.",
+      "workflow_id": "converge-gitea",
+      "scope": "host_and_guest",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-gitea passes",
+        "make validate passes before the apply",
+        "The Keycloak OIDC dependency, bootstrap repository state, and docker-build-lv3 runner impact are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the source commit, private API verification, runner-online verification, and one smoke repository workflow plus webhook delivery result."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if PostgreSQL, Gitea bootstrap, OIDC auth-source setup, or runner registration fails.",
+          "Stop if the converge would leave git.lv3.org reachable without the expected repo bootstrap or webhook contract."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good Gitea, runner, and supporting secret state from version control before retrying.",
+          "Do not hand-edit Gitea auth sources, repositories, or hook state outside the repo-managed bootstrap path."
+        ]
+      }
+    },
     "converge-api-gateway": {
       "description": "Converge the unified platform API gateway on docker-runtime-lv3 and publish it at api.lv3.org.",
       "workflow_id": "converge-api-gateway",

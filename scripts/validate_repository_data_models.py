@@ -1161,17 +1161,26 @@ def validate_maintenance_window_schema() -> None:
 def validate_capacity_model() -> None:
     payload = require_mapping(load_json(CAPACITY_MODEL_PATH), str(CAPACITY_MODEL_PATH))
     require_semver(payload.get("schema_version"), "config/capacity-model.json.schema_version")
-    pool = require_mapping(payload.get("ephemeral_pool"), "config/capacity-model.json.ephemeral_pool")
-    vmid_range = require_int_list(pool.get("vmid_range"), "config/capacity-model.json.ephemeral_pool.vmid_range")
-    if len(vmid_range) != 2:
-        raise ValueError("config/capacity-model.json.ephemeral_pool.vmid_range must contain exactly two integers")
-    if vmid_range[0] > vmid_range[1]:
-        raise ValueError("config/capacity-model.json.ephemeral_pool.vmid_range must be ascending")
-    require_int(pool.get("max_concurrent_vms"), "config/capacity-model.json.ephemeral_pool.max_concurrent_vms", 1)
-    require_int(pool.get("reserved_ram_gb"), "config/capacity-model.json.ephemeral_pool.reserved_ram_gb", 1)
-    require_int(pool.get("reserved_vcpu"), "config/capacity-model.json.ephemeral_pool.reserved_vcpu", 1)
-    require_int(pool.get("reserved_disk_gb"), "config/capacity-model.json.ephemeral_pool.reserved_disk_gb", 1)
-    require_str(pool.get("notes"), "config/capacity-model.json.ephemeral_pool.notes")
+    reservations = require_list(payload.get("reservations"), "config/capacity-model.json.reservations")
+    ephemeral_reservations = [
+        require_mapping(item, f"config/capacity-model.json.reservations[{index}]")
+        for index, item in enumerate(reservations)
+        if isinstance(item, dict) and item.get("kind") == "ephemeral_pool"
+    ]
+    if len(ephemeral_reservations) != 1:
+        raise ValueError("config/capacity-model.json must define exactly one reservations entry with kind=ephemeral_pool")
+    pool = ephemeral_reservations[0]
+    vmid_range = require_mapping(pool.get("vmid_range"), "config/capacity-model.json.reservations.ephemeral_pool.vmid_range")
+    start = require_int(vmid_range.get("start"), "config/capacity-model.json.reservations.ephemeral_pool.vmid_range.start", 1)
+    end = require_int(vmid_range.get("end"), "config/capacity-model.json.reservations.ephemeral_pool.vmid_range.end", 1)
+    if start > end:
+        raise ValueError("config/capacity-model.json.reservations.ephemeral_pool.vmid_range must be ascending")
+    require_int(pool.get("max_concurrent_vms"), "config/capacity-model.json.reservations.ephemeral_pool.max_concurrent_vms", 1)
+    reserved = require_mapping(pool.get("reserved"), "config/capacity-model.json.reservations.ephemeral_pool.reserved")
+    require_int(reserved.get("ram_gb"), "config/capacity-model.json.reservations.ephemeral_pool.reserved.ram_gb", 1)
+    require_int(reserved.get("vcpu"), "config/capacity-model.json.reservations.ephemeral_pool.reserved.vcpu", 1)
+    require_int(reserved.get("disk_gb"), "config/capacity-model.json.reservations.ephemeral_pool.reserved.disk_gb", 1)
+    require_str(pool.get("notes"), "config/capacity-model.json.reservations.ephemeral_pool.notes")
     violations = validate_ephemeral_vmid_ranges()
     if violations:
         raise ValueError("; ".join(violations))

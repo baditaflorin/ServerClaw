@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-25-adr-0143-gitea-live-apply",
+  "applied_on": "2026-03-25",
+  "recorded_on": "2026-03-25",
+  "recorded_by": "codex",
+  "source_commit": "61837befc0b3bb42dc040e80ffbddc9a63fc3ad8",
+  "repo_version_context": "0.122.0",
+  "workflow_id": "converge-gitea",
+  "adr": "0143",
+  "summary": "Applied the released mainline Gitea automation, verified the private Gitea service and Keycloak OIDC bootstrap on docker-runtime-lv3, confirmed the docker-build-lv3 Actions runner stayed online, and proved both workflow execution and webhook delivery from a smoke repository push.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-build-lv3",
+      "vmid": 130,
+      "address": "10.10.10.30"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 150,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.118.189.95"
+    },
+    {
+      "kind": "private_hostname",
+      "name": "git.lv3.org"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Released mainline converge",
+      "result": "pass",
+      "observed": "From released main commit 61837be, `ansible-playbook -i inventory/hosts.yml playbooks/gitea.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump` completed successfully across proxmox_florin, postgres-lv3, docker-runtime-lv3, and docker-build-lv3."
+    },
+    {
+      "check": "Private Gitea API health",
+      "result": "pass",
+      "observed": "`curl -sf http://100.118.189.95:3009/api/v1/version` returned Gitea `1.25.5`, and the repo-managed swagger endpoint remained reachable at `http://100.118.189.95:3009/api/swagger`."
+    },
+    {
+      "check": "Self-hosted Actions runner registration",
+      "result": "pass",
+      "observed": "`GET /api/v1/admin/actions/runners` with the mirrored admin token returned runner `docker-build-lv3` with `status: online`."
+    },
+    {
+      "check": "Smoke repository workflow execution",
+      "result": "pass",
+      "observed": "Smoke repository `ops/adr-0143-final-smoke-20260325111646` created through the live Gitea API produced workflow run `2` with `status: completed` and `conclusion: success` after a push to `main`."
+    },
+    {
+      "check": "Webhook delivery from smoke push",
+      "result": "pass",
+      "observed": "PTSV3 bin `http://ptsv3.com/adr014320260325111646` recorded a `POST` from Gitea with header `X-Gitea-Event: push` and a payload body containing `refs/heads/main`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0143-gitea-for-self-hosted-git-and-ci.md",
+    "docs/workstreams/adr-0143-gitea-ci.md",
+    "docs/runbooks/configure-gitea.md",
+    "playbooks/gitea.yml",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "The live rollout exposed and fixed two Docker baseline issues before the final green mainline apply: nftables reloads were wiping Docker-managed iptables chains on both docker-runtime-lv3 and docker-build-lv3, and the build VM needed to use the Docker Compose plugin path supplied by the shared Docker runtime rather than Debian's conflicting docker-compose package.",
+    "The Gitea bootstrap path also required two runtime fixes before the first successful converge: Keycloak OIDC bootstrap must use an internally reachable discovery URL while preserving the public issuer metadata, and auth-source lookup had to use `gitea admin auth list` instead of direct SQL against `login_source`.",
+    "Smoke-test repositories used for repository creation, workflow, and webhook verification were created and removed during validation; the canonical bootstrap path remains `ops/proxmox_florin_server`."
+  ]
+}

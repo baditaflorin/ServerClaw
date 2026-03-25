@@ -86,6 +86,36 @@
         }
       }
     },
+    "alertmanager": {
+      "service_name": "alertmanager",
+      "owning_vm": "monitoring-lv3",
+      "role": "alertmanager_runtime",
+      "verify_file": "roles/alertmanager_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "Alertmanager responds on the local health endpoint.",
+        "timeout_seconds": 60,
+        "retries": 12,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:9093/-/healthy",
+        "method": "GET",
+        "expected_status": [200]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "Alertmanager reports ready after the routed notification configuration is loaded.",
+        "timeout_seconds": 60,
+        "retries": 12,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:9093/-/ready",
+        "method": "GET",
+        "expected_status": [200]
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "Alertmanager remains private-only behind the monitoring VM and is validated through the role verify contract."
+      }
+    },
     "gitea": {
       "service_name": "gitea",
       "owning_vm": "docker-runtime-lv3",
