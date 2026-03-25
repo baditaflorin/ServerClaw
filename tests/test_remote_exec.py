@@ -24,7 +24,7 @@ printf '%s\n' "$*" >> "${REMOTE_EXEC_SSH_LOG:?}"
 if [[ "${REMOTE_EXEC_SSH_FAIL:-0}" == "1" ]]; then
   exit 255
 fi
-if [[ "${REMOTE_EXEC_REMOTE_FAIL:-0}" == "1" && "$*" != *" true" && "$*" != *"mkdir -p"* ]]; then
+if [[ "${REMOTE_EXEC_REMOTE_FAIL:-0}" == "1" && "$*" != *" true" && "$*" != *"mkdir -p"* && "$*" != *".git-remote"* ]]; then
   exit 1
 fi
 if [[ "$*" == *"docker run"* ]]; then
@@ -311,6 +311,22 @@ def test_remote_exec_mounts_packer_cache_for_infra_runners(tmp_path: Path) -> No
 
     assert completed.returncode == 0, completed.stderr
     assert "/opt/builds/.packer.d:/root/.packer.d" in completed.stderr
+
+
+def test_remote_exec_materializes_worktree_git_metadata_for_remote_workspace(tmp_path: Path) -> None:
+    completed = run_remote_exec(tmp_path, "remote-lint")
+
+    assert completed.returncode == 0, completed.stderr
+    ssh_log = completed.ssh_log.read_text()  # type: ignore[attr-defined]
+    rsync_log = completed.rsync_log.read_text()  # type: ignore[attr-defined]
+    assert ".git-remote/worktree" in ssh_log
+    assert ".git-remote/common" in ssh_log
+    assert ".git-remote/worktree/gitdir" in ssh_log
+    assert "scripts/cases" in ssh_log
+    assert ".git-remote/worktree/" in rsync_log
+    assert ".git-remote/common/" in rsync_log
+    assert "./HEAD" in rsync_log
+    assert "./config" in rsync_log
 
 
 def test_remote_exec_syncs_remote_gate_status_back_to_local_checkout(tmp_path: Path) -> None:
