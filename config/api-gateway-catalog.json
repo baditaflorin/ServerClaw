@@ -10,7 +10,7 @@
       "auth": "keycloak_jwt",
       "required_role": "platform-operator",
       "strip_prefix": true,
-      "timeout_seconds": 15,
+      "timeout_seconds": 30,
       "healthcheck_path": "/api/health"
     },
     {
@@ -21,7 +21,7 @@
       "auth": "keycloak_jwt",
       "required_role": "platform-operator",
       "strip_prefix": true,
-      "timeout_seconds": 15,
+      "timeout_seconds": 30,
       "healthcheck_path": "/realms/lv3/.well-known/openid-configuration"
     },
     {
@@ -32,7 +32,7 @@
       "auth": "keycloak_jwt",
       "required_role": "platform-operator",
       "strip_prefix": true,
-      "timeout_seconds": 15,
+      "timeout_seconds": 30,
       "healthcheck_path": "/health"
     },
     {
@@ -43,7 +43,7 @@
       "auth": "keycloak_jwt",
       "required_role": "platform-operator",
       "strip_prefix": true,
-      "timeout_seconds": 15,
+      "timeout_seconds": 30,
       "healthcheck_path": "/api/v4/system/ping"
     },
     {
@@ -76,7 +76,7 @@
       "auth": "keycloak_jwt",
       "required_role": "platform-operator",
       "strip_prefix": true,
-      "timeout_seconds": 15,
+      "timeout_seconds": 30,
       "healthcheck_path": "/v1/sys/health"
     },
     {
@@ -87,7 +87,7 @@
       "auth": "keycloak_jwt",
       "required_role": "platform-operator",
       "strip_prefix": true,
-      "timeout_seconds": 20,
+      "timeout_seconds": 30,
       "healthcheck_path": "/health"
     },
     {
@@ -110,7 +110,7 @@
       "auth": "keycloak_jwt",
       "required_role": "platform-operator",
       "strip_prefix": true,
-      "timeout_seconds": 15,
+      "timeout_seconds": 30,
       "healthcheck_path": "/api/status"
     },
     {
@@ -132,7 +132,7 @@
       "auth": "keycloak_jwt",
       "required_role": "platform-read",
       "strip_prefix": true,
-      "timeout_seconds": 15,
+      "timeout_seconds": 30,
       "healthcheck_path": "/api/health"
     },
     {

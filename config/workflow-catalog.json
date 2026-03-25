@@ -3883,6 +3883,7 @@
         "Makefile",
         "config/workflow-defaults.yaml",
         "config/workflow-catalog.json",
+        "config/windmill/scripts/scheduler-watchdog-loop.py",
         "docs/runbooks/budgeted-workflow-scheduler.md",
         "platform/scheduler",
         "windmill/scheduler/watchdog-loop.py"
@@ -3892,7 +3893,8 @@
       ],
       "verification_commands": [
         "python3 -m py_compile platform/scheduler/*.py windmill/scheduler/watchdog-loop.py",
-        "python3 windmill/scheduler/watchdog-loop.py --repo-path ."
+        "uv run --with pyyaml python windmill/scheduler/watchdog-loop.py --repo-path .",
+        "uv run --with pyyaml python config/windmill/scripts/scheduler-watchdog-loop.py"
       ]
     },
     "platform-observation-loop": {

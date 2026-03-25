@@ -80,4 +80,5 @@ Run these checks after converge:
 - No repo-managed Windmill job in this rollout stores long-lived third-party secrets inside Windmill. Secret-bearing workflows should wait for ADR 0043 or use another approved authority.
 - The seeded `f/lv3/rotate_credentials` script summarizes the canonical secret-rotation catalog and is the first Windmill surface for ADR 0065.
 - The seeded `f/lv3/config_merge/merge_config_changes` worker is the ADR 0158 merge writer for `config_change_staging`.
+- ADR 0172 owns the live scheduler watchdog seed and schedule. ADR 0170 aligns the timeout hierarchy used around that path.
 - Backup coverage comes from the existing VM backup policy: `postgres-lv3` protects the Windmill database and `docker-runtime-lv3` protects the runtime filesystem and logs.

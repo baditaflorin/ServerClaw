@@ -21,6 +21,7 @@ from platform.goal_compiler.schema import RiskClass
 from platform.idempotency import IdempotencyStore, compute_idempotency_key
 from platform.ledger import LedgerReader, LedgerWriter
 from platform.retry import policy_for_surface, with_retry
+from platform.timeouts import default_timeout, resolve_timeout_seconds
 
 from platform.execution_lanes import LaneLease, LaneRegistry, resolve_lanes
 
@@ -168,15 +169,15 @@ class HttpWindmillClient:
         base_url: str,
         token: str,
         workspace: str = "lv3",
-        request_timeout_seconds: float = 30.0,
+        request_timeout_seconds: float = default_timeout("http_request"),
         circuit_breaker: Any | None = None,
         circuit_registry: CircuitRegistry | None = None,
     ) -> None:
         self._base_url = base_url.rstrip("/")
         self._token = token
         self._workspace = workspace
-        self._request_timeout_seconds = request_timeout_seconds
         self._internal_api_retry_policy = policy_for_surface("internal_api")
+        self._request_timeout_seconds = resolve_timeout_seconds("http_request", request_timeout_seconds)
         self._circuit_breaker = circuit_breaker
         if self._circuit_breaker is None:
             registry = circuit_registry or CircuitRegistry(REPO_ROOT)
@@ -209,7 +210,7 @@ class HttpWindmillClient:
         def execute() -> str:
             open_request = lambda: urllib.request.urlopen(
                 request,
-                timeout=timeout or self._request_timeout_seconds,
+                timeout=resolve_timeout_seconds("http_request", timeout or self._request_timeout_seconds),
             )
             response_cm = (
                 with_retry(
@@ -265,7 +266,7 @@ class HttpWindmillClient:
             f"/api/w/{self._workspace}/jobs/run_wait_result/p/{encoded_path}",
             method="POST",
             payload=arguments,
-            timeout=timeout_seconds or self._request_timeout_seconds,
+            timeout=resolve_timeout_seconds("http_request", timeout_seconds or self._request_timeout_seconds),
             retry=False,
         )
         return {

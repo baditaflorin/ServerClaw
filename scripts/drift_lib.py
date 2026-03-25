@@ -13,17 +13,33 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
+import sys
 from typing import Any
 
 from controller_automation_toolkit import load_json, load_yaml, repo_path
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
+    del sys.modules["platform"]
+
 from platform.events import build_envelope
 from platform.retry import async_with_retry, policy_for_surface
+from platform.timeouts import default_timeout, resolve_timeout_seconds
 
 
 HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 GROUP_VARS_PATH = repo_path("inventory", "group_vars", "all.yml")
 SECRET_MANIFEST_PATH = repo_path("config", "controller-local-secrets.json")
 WORKSTREAMS_PATH = repo_path("workstreams.yaml")
+NATS_PUBLISH_POLICY = policy_for_surface("nats_publish")
+SSH_CONNECT_TIMEOUT_SECONDS = int(default_timeout("ssh_connection"))
+LOCAL_TUNNEL_STATUS_TIMEOUT_SECONDS = resolve_timeout_seconds("liveness_probe", 1)
+LOCAL_TUNNEL_CONNECT_TIMEOUT_SECONDS = resolve_timeout_seconds("liveness_probe", 1)
+TUNNEL_SHUTDOWN_TIMEOUT_SECONDS = resolve_timeout_seconds("liveness_probe", 3)
+NATS_CONNECT_TIMEOUT_SECONDS = resolve_timeout_seconds("liveness_probe", 5)
 NATS_PUBLISH_POLICY = policy_for_surface("nats_publish")
 
 
@@ -113,7 +129,7 @@ def build_host_ssh_command(context: dict[str, Any], remote_command: str) -> list
         "-o",
         "BatchMode=yes",
         "-o",
-        "ConnectTimeout=10",
+        f"ConnectTimeout={SSH_CONNECT_TIMEOUT_SECONDS}",
         "-o",
         "LogLevel=ERROR",
         "-o",
@@ -132,7 +148,8 @@ def build_guest_ssh_command(context: dict[str, Any], target: str, remote_command
     guest_ip = context["guests"][target]
     host_login = f"{context['host_user']}@{context['host_addr']}"
     proxy_command = (
-        f"ssh -i {shlex.quote(key_path)} -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=10 "
+        f"ssh -i {shlex.quote(key_path)} -o IdentitiesOnly=yes -o BatchMode=yes "
+        f"-o ConnectTimeout={SSH_CONNECT_TIMEOUT_SECONDS} "
         f"-o LogLevel=ERROR {shlex.quote(host_login)} -W %h:%p"
     )
     return [
@@ -142,7 +159,7 @@ def build_guest_ssh_command(context: dict[str, Any], target: str, remote_command
         "-o",
         "BatchMode=yes",
         "-o",
-        "ConnectTimeout=10",
+        f"ConnectTimeout={SSH_CONNECT_TIMEOUT_SECONDS}",
         "-o",
         "LogLevel=ERROR",
         "-o",
@@ -169,7 +186,8 @@ def build_guest_ssh_tunnel_command(
     guest_ip = context["guests"][target]
     host_login = f"{context['host_user']}@{context['host_addr']}"
     proxy_command = (
-        f"ssh -i {shlex.quote(key_path)} -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=10 "
+        f"ssh -i {shlex.quote(key_path)} -o IdentitiesOnly=yes -o BatchMode=yes "
+        f"-o ConnectTimeout={SSH_CONNECT_TIMEOUT_SECONDS} "
         f"-o LogLevel=ERROR {shlex.quote(host_login)} -W %h:%p"
     )
     return [
@@ -179,7 +197,7 @@ def build_guest_ssh_tunnel_command(
         "-o",
         "BatchMode=yes",
         "-o",
-        "ConnectTimeout=10",
+        f"ConnectTimeout={SSH_CONNECT_TIMEOUT_SECONDS}",
         "-o",
         "LogLevel=ERROR",
         "-o",
@@ -264,10 +282,10 @@ def wait_for_tunnel(process: subprocess.Popen[str], port: int) -> None:
     deadline = time.time() + 10
     while time.time() < deadline:
         if process.poll() is not None:
-            stdout, stderr = process.communicate(timeout=1)
+            stdout, stderr = process.communicate(timeout=LOCAL_TUNNEL_STATUS_TIMEOUT_SECONDS)
             raise RuntimeError(f"SSH tunnel failed: {(stderr or stdout).strip()}")
         try:
-            with socket.create_connection(("127.0.0.1", port), timeout=0.2):
+            with socket.create_connection(("127.0.0.1", port), timeout=LOCAL_TUNNEL_CONNECT_TIMEOUT_SECONDS):
                 return
         except OSError:
             time.sleep(0.1)
@@ -291,10 +309,10 @@ def nats_tunnel(context: dict[str, Any]) -> int:
         if process.poll() is None:
             process.terminate()
             try:
-                process.wait(timeout=3)
+                process.wait(timeout=TUNNEL_SHUTDOWN_TIMEOUT_SECONDS)
             except subprocess.TimeoutExpired:
                 process.kill()
-                process.wait(timeout=3)
+                process.wait(timeout=TUNNEL_SHUTDOWN_TIMEOUT_SECONDS)
 
 
 async def connect_nats(nats_url: str, credentials: dict[str, str] | None = None) -> Any:
@@ -303,7 +321,7 @@ async def connect_nats(nats_url: str, credentials: dict[str, str] | None = None)
     nc = NATS()
     kwargs: dict[str, Any] = {
         "servers": [nats_url],
-        "connect_timeout": 5,
+        "connect_timeout": NATS_CONNECT_TIMEOUT_SECONDS,
         "allow_reconnect": False,
         "max_reconnect_attempts": 0,
         "reconnect_time_wait": 0,
@@ -352,11 +370,11 @@ async def publish_nats_events_async(
                 policy=NATS_PUBLISH_POLICY,
                 error_context=f"nats publish {subject}",
             )
-        await async_with_retry(
-            lambda: nc.flush(timeout=5),
-            policy=NATS_PUBLISH_POLICY,
-            error_context="nats flush",
-        )
+            await async_with_retry(
+                lambda: nc.flush(timeout=NATS_CONNECT_TIMEOUT_SECONDS),
+                policy=NATS_PUBLISH_POLICY,
+                error_context="nats flush",
+            )
     finally:
         await nc.drain()
 

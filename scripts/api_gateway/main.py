@@ -83,6 +83,7 @@ from platform.events import build_envelope
 from platform.health import HealthCompositeClient, ServiceHealthNotFoundError
 from platform.logging import clear_context, generate_trace_id, get_logger, set_context
 from platform.retry import async_with_retry, policy_for_surface
+from platform.timeouts import TimeoutContext, resolve_timeout_seconds
 from platform.world_state.client import SurfaceNotFoundError, WorldStateClient, WorldStateUnavailable
 from platform.world_state.materializer import SQLITE_CURRENT_VIEW_NAME, SQLITE_SNAPSHOTS_TABLE_NAME
 from platform.world_state.workers import collect_service_health
@@ -227,7 +228,10 @@ class KeycloakJWTVerifier:
 
             async def fetch_jwks() -> dict[str, Any]:
                 response = await async_with_retry(
-                    lambda: self._client.get(self._jwks_url, timeout=10),
+                    lambda: self._client.get(
+                        self._jwks_url,
+                        timeout=resolve_timeout_seconds("http_request"),
+                    ),
                     policy=self._retry_policy,
                     error_context="keycloak jwks fetch",
                 )
@@ -261,7 +265,6 @@ class KeycloakJWTVerifier:
                         "message": f"Keycloak JWKS fetch failed: {exc}",
                     },
                 ) from exc
-
             self._jwks_cache_expiry = now + 300
             return self._jwks_cache
 
@@ -359,7 +362,10 @@ class NatsEventEmitter:
 
     @staticmethod
     def _publish(host: str, port: int, subject: str, payload: bytes) -> None:
-        with socket.create_connection((host, port), timeout=3) as sock:
+        with socket.create_connection(
+            (host, port),
+            timeout=resolve_timeout_seconds("liveness_probe", 3),
+        ) as sock:
             sock.sendall(b'CONNECT {"verbose":false}\r\n')
             sock.sendall(f"PUB {subject} {len(payload)}\r\n".encode() + payload + b"\r\n")
 
@@ -431,6 +437,9 @@ class GatewayRuntime:
             service_id,
             exception_classifier=should_count_httpx_exception,
         )
+    @staticmethod
+    def api_call_context(requested_seconds: int | float | None = None) -> TimeoutContext:
+        return TimeoutContext.for_layer("api_call_chain", requested_seconds)
 
     async def close(self) -> None:
         await self.http_client.aclose()
@@ -491,7 +500,15 @@ class GatewayRuntime:
         try:
             async def fetch() -> httpx.Response:
                 response = await async_with_retry(
-                    lambda: self.http_client.get(url, timeout=service.timeout_seconds, headers=headers),
+                    lambda: self.http_client.get(
+                        url,
+                        timeout=self.api_call_context(service.timeout_seconds).timeout_for(
+                            "http_request",
+                            service.timeout_seconds,
+                            reserve_seconds=1.0,
+                        ),
+                        headers=headers,
+                    ),
                     policy=self.internal_api_retry_policy,
                     error_context=f"gateway health probe {service.id}",
                 )
@@ -1061,10 +1078,11 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
                 "trace_id": request.state.trace_id,
                 "parameters": body.parameters,
             }
+            timeout_ctx = runtime.api_call_context()
             webhook_response = await runtime.http_client.post(
                 runtime.config.deploy_webhook_url,
                 json=webhook_payload,
-                timeout=15,
+                timeout=timeout_ctx.timeout_for("http_request", reserve_seconds=1.0),
             )
             response_payload["queued"] = 200 <= webhook_response.status_code < 300
             response_payload["mode"] = "executed"
@@ -1104,10 +1122,11 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
                 "trace_id": request.state.trace_id,
                 "parameters": body.parameters,
             }
+            timeout_ctx = runtime.api_call_context()
             webhook_response = await runtime.http_client.post(
                 runtime.config.secret_rotation_webhook_url,
                 json=webhook_payload,
-                timeout=15,
+                timeout=timeout_ctx.timeout_for("http_request", reserve_seconds=1.0),
             )
             response_payload["queued"] = 200 <= webhook_response.status_code < 300
             response_payload["mode"] = "executed"
@@ -1141,7 +1160,15 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
                 try:
                     async def fetch() -> httpx.Response:
                         response = await async_with_retry(
-                            lambda: runtime.http_client.get(url, timeout=service.timeout_seconds, headers=headers),
+                            lambda: runtime.http_client.get(
+                                url,
+                                timeout=runtime.api_call_context(service.timeout_seconds).timeout_for(
+                                    "http_request",
+                                    service.timeout_seconds,
+                                    reserve_seconds=1.0,
+                                ),
+                                headers=headers,
+                            ),
                             policy=runtime.internal_api_retry_policy,
                             error_context=f"gateway openapi fetch {service.id}",
                         )
@@ -1217,7 +1244,11 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
                 params=request.query_params,
                 content=body,
                 headers=headers,
-                timeout=service.timeout_seconds,
+                timeout=runtime.api_call_context(service.timeout_seconds).timeout_for(
+                    "http_request",
+                    service.timeout_seconds,
+                    reserve_seconds=1.0,
+                ),
             )
 
         async def execute_request() -> httpx.Response:

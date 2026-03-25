@@ -21,6 +21,7 @@ ADR 0157 adds per-lane resource reservations. Mutation workflows now declare CPU
 - execution lanes: [config/execution-lanes.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/execution-lanes.yaml)
 - watchdog entry point: [windmill/scheduler/watchdog-loop.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/windmill/scheduler/watchdog-loop.py)
 - Windmill seed defaults: [collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml)
+- timeout hierarchy: [config/timeout-hierarchy.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/timeout-hierarchy.yaml)
 
 ## Operator Paths
 
@@ -33,7 +34,7 @@ lv3 run converge-netbox
 Run one watchdog pass locally:
 
 ```bash
-make scheduler-watchdog-loop
+uv run --with pyyaml python windmill/scheduler/watchdog-loop.py --repo-path .
 ```
 
 Expected live Windmill script and schedule:
@@ -61,6 +62,7 @@ make execution-lane-info LANE=lane:docker-runtime
 - `config/workflow-defaults.yaml` also defines the default mutation `resource_reservation`.
 - `config/workflow-catalog.json` can override any budget field per workflow, declares `execution_class`, and can set `target_lane` plus per-workflow `resource_reservation`.
 - `config/execution-lanes.yaml` defines the VM-level concurrency budgets and whether over-budget submissions are `hard` rejected or `soft` admitted with warnings.
+- `config/timeout-hierarchy.yaml` defines the outer timeout ceilings and defaults used by the scheduler, gateway, world-state workers, and the live watchdog seed path.
 - Only `execution_class: mutation` workflows are subject to scheduler budget enforcement.
 - Host-touch limits are advisory in this first implementation unless the workflow supplies an explicit host list in its input arguments.
 
@@ -89,7 +91,7 @@ make execution-lane-info LANE=lane:docker-runtime
 - the supplied `parent_actor_intent_id` chain already exceeds the budgeted rollback depth
 - inspect `ledger.events` for the prior scheduler lifecycle records
 
-`make scheduler-watchdog-loop` returns `blocked`:
+`uv run --with pyyaml python windmill/scheduler/watchdog-loop.py --repo-path .` returns `blocked`:
 - verify the repo checkout path exists on the worker
 - export `LV3_WINDMILL_BASE_URL` and `LV3_WINDMILL_TOKEN`, or keep the Windmill service catalog entry and controller-local secret current
 

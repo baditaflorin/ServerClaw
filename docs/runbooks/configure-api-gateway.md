@@ -10,11 +10,13 @@ Converge the repo-managed unified platform API gateway on `docker-runtime-lv3` a
 - Service wrapper: `playbooks/services/api-gateway.yml`
 - Health probe id: `api_gateway`
 - Catalog: `config/api-gateway-catalog.json`
+- Timeout hierarchy: `config/timeout-hierarchy.yaml`
 
 ## Local Validation
 
 ```bash
 python3 scripts/api_gateway_catalog.py --validate
+uv run --with pyyaml python scripts/validate_timeout_hierarchy.py
 uv run --with pytest --with fastapi==0.116.1 --with httpx==0.28.1 --with uvicorn==0.35.0 --with pyyaml==6.0.2 --with cryptography==45.0.6 pytest tests/test_api_gateway.py tests/test_api_gateway_catalog.py
 ```
 
@@ -37,6 +39,7 @@ From `docker-runtime-lv3`:
 ```bash
 curl -sf http://127.0.0.1:8083/healthz
 curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8083/v1/health
+test -f /opt/api-gateway/config/timeout-hierarchy.yaml
 ```
 
 Expected:

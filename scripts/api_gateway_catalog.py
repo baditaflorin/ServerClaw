@@ -11,6 +11,15 @@ from urllib.parse import urlparse
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path
 
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
+    del sys.modules["platform"]
+
+from platform.timeouts import timeout_limit
+
+
 API_GATEWAY_CATALOG_PATH = repo_path("config", "api-gateway-catalog.json")
 SERVICE_CATALOG_PATH = repo_path("config", "service-capability-catalog.json")
 SUPPORTED_SCHEMA_VERSION = "1.0.0"
@@ -140,6 +149,11 @@ def validate_api_gateway_catalog(
                 f"{path}.forward_authorization",
             ),
         }
+        if normalized_service["timeout_seconds"] > timeout_limit("http_request"):
+            raise ValueError(
+                f"{path}.timeout_seconds must be <= {timeout_limit('http_request')} "
+                f"to stay within the http_request layer budget"
+            )
 
         healthcheck_path = service.get("healthcheck_path")
         if healthcheck_path is not None:

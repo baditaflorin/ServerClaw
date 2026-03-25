@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from platform.events import build_envelope
+from platform.timeouts import TimeoutContext, default_timeout, resolve_timeout_seconds
 
 from ._db import ConnectionFactory, isoformat, parse_timestamp, utc_now
 from .materializer import SURFACE_DEFINITIONS, EventPublisher, materialize_surface
@@ -46,9 +47,12 @@ def fixture_payload(surface: str) -> Any | None:
     return load_json(Path(fixture_path).expanduser())
 
 
-def http_get_json(url: str, *, headers: dict[str, str] | None = None, timeout: int = 15) -> Any:
+def http_get_json(url: str, *, headers: dict[str, str] | None = None, timeout: int | float | None = None) -> Any:
     request = urllib.request.Request(url, headers=headers or {})
-    with urllib.request.urlopen(request, timeout=timeout) as response:
+    with urllib.request.urlopen(
+        request,
+        timeout=resolve_timeout_seconds("http_request", timeout),
+    ) as response:
         return json.loads(response.read().decode())
 
 
@@ -68,8 +72,20 @@ def read_repo_yaml(repo_root: Path, relative_path: str) -> Any:
     return yaml.safe_load((repo_root / relative_path).read_text())
 
 
-def command_output(command: list[str], *, cwd: Path, timeout: int = 120) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(command, cwd=cwd, text=True, capture_output=True, timeout=timeout, check=False)
+def command_output(
+    command: list[str],
+    *,
+    cwd: Path,
+    timeout: int | float | None = None,
+) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        command,
+        cwd=cwd,
+        text=True,
+        capture_output=True,
+        timeout=resolve_timeout_seconds("subprocess", timeout),
+        check=False,
+    )
 
 
 def normalize_proxmox_vm(record: dict[str, Any]) -> dict[str, Any]:
@@ -105,7 +121,7 @@ def collect_proxmox_vms(repo_root: Path) -> list[dict[str, Any]]:
         result = command_output(
             ["pvesh", "get", "/cluster/resources", "--type", "vm", "--output-format", "json"],
             cwd=repo_root,
-            timeout=30,
+            timeout=resolve_timeout_seconds("script_execution"),
         )
         if result.returncode == 0 and result.stdout.strip():
             return [normalize_proxmox_vm(item) for item in json.loads(result.stdout)]
@@ -151,7 +167,10 @@ def probe_service(url: str) -> tuple[str, int | None, str | None]:
         return "unknown", None, None
     request = urllib.request.Request(url, headers={"User-Agent": "lv3-world-state/1.0"})
     try:
-        with urllib.request.urlopen(request, timeout=10) as response:
+        with urllib.request.urlopen(
+            request,
+            timeout=resolve_timeout_seconds("health_probe"),
+        ) as response:
             status_code = getattr(response, "status", None)
             status = "ok" if status_code and status_code < 400 else "degraded"
             return status, status_code, None
@@ -164,7 +183,7 @@ def probe_service(url: str) -> tuple[str, int | None, str | None]:
 def probe_http_contract(probe: dict[str, Any]) -> tuple[str, int | None, str | None]:
     url = str(probe.get("url", ""))
     method = str(probe.get("method", "GET")).upper()
-    timeout = int(probe.get("timeout_seconds", 10))
+    timeout = int(probe.get("timeout_seconds", default_timeout("health_probe")))
     headers = probe.get("headers") if isinstance(probe.get("headers"), dict) else {}
     expected = probe.get("expected_status") if isinstance(probe.get("expected_status"), list) else [200]
     request = urllib.request.Request(url, headers=headers, method=method)
@@ -172,7 +191,11 @@ def probe_http_contract(probe: dict[str, Any]) -> tuple[str, int | None, str | N
     if url.startswith("https://") and probe.get("validate_tls") is False:
         context = ssl._create_unverified_context()  # noqa: SLF001
     try:
-        with urllib.request.urlopen(request, timeout=timeout, context=context) as response:
+        with urllib.request.urlopen(
+            request,
+            timeout=resolve_timeout_seconds("health_probe", timeout),
+            context=context,
+        ) as response:
             status_code = getattr(response, "status", None)
         status = "ok" if status_code in expected else "degraded"
         detail = f"HTTP {status_code}" if status_code is not None else "HTTP response"
@@ -187,9 +210,12 @@ def probe_http_contract(probe: dict[str, Any]) -> tuple[str, int | None, str | N
 def probe_tcp_contract(probe: dict[str, Any]) -> tuple[str, int | None, str | None]:
     host = str(probe.get("host", ""))
     port = int(probe.get("port", 0))
-    timeout = int(probe.get("timeout_seconds", 10))
+    timeout = int(probe.get("timeout_seconds", default_timeout("liveness_probe")))
     try:
-        with socket.create_connection((host, port), timeout=timeout):
+        with socket.create_connection(
+            (host, port),
+            timeout=resolve_timeout_seconds("liveness_probe", timeout),
+        ):
             return "ok", None, f"TCP {host}:{port}"
     except OSError as exc:
         return "down", None, str(exc)
@@ -291,7 +317,7 @@ def collect_container_inventory(repo_root: Path) -> list[dict[str, Any]]:
     result = command_output(
         ["docker", "ps", "--all", "--format", "{{json .}}"],
         cwd=repo_root,
-        timeout=30,
+        timeout=resolve_timeout_seconds("script_execution"),
     )
     if result.returncode != 0:
         return []
@@ -316,8 +342,13 @@ def paginated_netbox_list(base_url: str, token: str, path: str) -> list[dict[str
     url = urllib.parse.urljoin(base_url.rstrip("/") + "/", path.lstrip("/"))
     headers = {"Authorization": f"Token {token}", "Accept": "application/json"}
     results: list[dict[str, Any]] = []
+    timeout_ctx = TimeoutContext.for_layer("api_call_chain")
     while url:
-        payload = http_get_json(url, headers=headers)
+        payload = http_get_json(
+            url,
+            headers=headers,
+            timeout=timeout_ctx.timeout_for("http_request", reserve_seconds=1.0),
+        )
         if isinstance(payload, dict) and "results" in payload:
             results.extend(payload["results"])
             url = payload.get("next")
@@ -389,7 +420,10 @@ def collect_dns_records(repo_root: Path) -> list[dict[str, Any]]:
 
 def certificate_expiry(hostname: str, port: int = 443) -> dict[str, Any]:
     context = ssl.create_default_context()
-    with socket.create_connection((hostname, port), timeout=10) as sock:
+    with socket.create_connection(
+        (hostname, port),
+        timeout=resolve_timeout_seconds("health_probe"),
+    ) as sock:
         with context.wrap_socket(sock, server_hostname=hostname) as secure_sock:
             certificate = secure_sock.getpeercert()
     return {
@@ -434,7 +468,11 @@ def collect_opentofu_drift(repo_root: Path) -> dict[str, Any]:
     if fixture is not None:
         return fixture
 
-    result = command_output(["make", "tofu-drift", "ENV=production"], cwd=repo_root, timeout=180)
+    result = command_output(
+        ["make", "tofu-drift", "ENV=production"],
+        cwd=repo_root,
+        timeout=resolve_timeout_seconds("script_execution", 180),
+    )
     return summarize_drift(result.stdout, result.stderr, result.returncode)
 
 

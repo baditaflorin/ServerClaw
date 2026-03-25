@@ -30,7 +30,7 @@ from .scheduler import (
     build_scheduler,
 )
 from .speculative import ConflictProbeResult, SpeculativeExecutionRecord, SpeculativeStateStore
-from .watchdog import ActiveJobRecord, SchedulerStateStore, Watchdog, WatchdogViolation
+from .watchdog import ActiveJobRecord, SchedulerStateStore, WATCHDOG_POLL_INTERVAL_SECONDS, Watchdog, WatchdogViolation
 
 __all__ = [
     "ActiveJobRecord",
@@ -55,6 +55,8 @@ __all__ = [
     "SpeculativeExecutionRecord",
     "SpeculativeStateStore",
     "SpeculativeWorkflowPolicy",
+    "ConflictProbeResult",
+    "WATCHDOG_POLL_INTERVAL_SECONDS",
     "Watchdog",
     "WatchdogViolation",
     "WorkflowBudget",

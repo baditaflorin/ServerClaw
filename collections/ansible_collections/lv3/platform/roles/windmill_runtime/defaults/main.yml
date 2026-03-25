@@ -42,6 +42,7 @@ windmill_worker_checkout_sync_paths:
   - migrations
   - platform
   - scripts
+  - windmill
 windmill_seed_app_repo_root_local_dir: "{{ playbook_dir }}/../config/windmill/apps"
 windmill_seed_app_sync_dir: "{{ windmill_site_dir }}/seed-apps"
 windmill_mutation_audit_dir: "{{ platform_log_dir }}"
@@ -52,6 +53,11 @@ windmill_seed_scripts:
     language: python3
     summary: LV3 Windmill healthcheck
     description: Repo-managed verification script for Windmill runtime and worker execution.
+  - path: f/lv3/scheduler_watchdog_loop
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/scheduler-watchdog-loop.py"
+    language: python3
+    summary: ADR 0170 scheduler watchdog loop
+    description: Repo-managed helper that runs the budget watchdog against active mutation jobs every 10 seconds.
   - path: f/lv3/platform_observation_loop
     local_file: "{{ playbook_dir }}/../config/windmill/scripts/platform-observation-loop.py"
     language: python3

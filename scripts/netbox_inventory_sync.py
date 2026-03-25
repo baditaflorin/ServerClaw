@@ -16,6 +16,15 @@ from controller_automation_toolkit import emit_cli_error, load_json, load_yaml
 from platform.retry import MaxRetriesExceeded, policy_for_surface, with_retry
 
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
+    del sys.modules["platform"]
+
+from platform.timeouts import TimeoutContext, default_timeout
+
+
 HOSTNAME_PORT_PATTERN = re.compile(r":(\d+)(?:/|$)")
 TEMPLATE_PATTERN = re.compile(r"{{\s*([^{}]+?)\s*}}")
 HOSTVARS_REF_PATTERN = re.compile(r"^hostvars\['proxmox_florin'\]\.([a-zA-Z0-9_]+)$")
@@ -95,6 +104,8 @@ class NetBoxClient:
         self.created = 0
         self.updated = 0
         self.retry_policy = policy_for_surface("internal_api")
+        self.request_timeout_seconds = int(default_timeout("http_request"))
+        self.total_timeout_seconds = int(default_timeout("script_execution"))
 
     def request(
         self,
@@ -119,9 +130,17 @@ class NetBoxClient:
             headers["Content-Type"] = "application/json"
 
         request = urllib.request.Request(url, data=data, headers=headers, method=method)
+        timeout_ctx = TimeoutContext.for_layer("script_execution", self.total_timeout_seconds)
         try:
             with with_retry(
-                lambda: urllib.request.urlopen(request),
+                lambda: urllib.request.urlopen(
+                    request,
+                    timeout=timeout_ctx.timeout_for(
+                        "http_request",
+                        self.request_timeout_seconds,
+                        reserve_seconds=1.0,
+                    ),
+                ),
                 policy=self.retry_policy,
                 error_context=f"netbox {method} {path}",
             ) as response:
