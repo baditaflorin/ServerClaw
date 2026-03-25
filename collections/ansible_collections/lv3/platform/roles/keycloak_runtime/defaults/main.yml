@@ -53,6 +53,8 @@ keycloak_grafana_client_id: grafana-oauth
 keycloak_grafana_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/grafana-client-secret.txt
 keycloak_ops_portal_client_id: ops-portal-oauth
 keycloak_ops_portal_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/ops-portal-client-secret.txt
+keycloak_gitea_client_id: gitea-oauth
+keycloak_gitea_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/gitea-client-secret.txt
 keycloak_agent_client_id: lv3-agent-hub
 keycloak_agent_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/lv3-agent-hub-client-secret.txt
 keycloak_api_gateway_client_id: api-gateway
@@ -96,4 +98,5 @@ keycloak_service_account_realm_role_mappings:
 keycloak_public_base_url: "https://{{ keycloak_service_topology.public_hostname }}"
 keycloak_local_admin_url: "http://127.0.0.1:{{ keycloak_local_http_port }}"
 keycloak_grafana_root_url: "https://{{ hostvars['proxmox_florin'].lv3_service_topology.grafana.public_hostname }}"
+keycloak_gitea_root_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('gitea', 'public') }}"
 keycloak_ops_portal_root_url: https://ops.lv3.org

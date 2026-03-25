@@ -1947,5 +1947,29 @@ workstreams:
       - config/check-runner-manifest.json
       - config/validation-gate.json
       - docs/runbooks/platform-manifest.md
+
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0143-gitea-ci
+    adr: "0143"
+    title: Private Gitea with self-hosted CI
+    status: in_progress
+    owner: codex
+    branch: codex/adr-0143-gitea-ci
+    worktree_path: .worktrees/adr-0143-gitea-ci
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0143-gitea-ci.md
+    depends_on:
+      - adr-0044-windmill
+      - adr-0056-keycloak
+      - adr-0082-remote-build-gateway
+      - adr-0087-validation-gate
+    conflicts_with: []
+    shared_surfaces:
+      - inventory/host_vars/proxmox_florin.yml
+      - playbooks/gitea.yml
+      - collections/ansible_collections/lv3/platform/roles/gitea_runtime
+      - config/service-capability-catalog.json
+      - versions/stack.yaml
     ready_to_merge: false
     live_applied: false

@@ -1,0 +1,121 @@
+#!/bin/bash
+set -euo pipefail
+
+changed=false
+container="{{ gitea_container_name }}"
+admin_user="{{ gitea_admin_username }}"
+admin_email="{{ gitea_admin_email }}"
+repo_org="{{ gitea_repo_org }}"
+repo_name="{{ gitea_repo_name }}"
+api_url="{{ gitea_private_base_url }}"
+oidc_discovery="{{ gitea_oidc_discovery_url }}"
+oidc_internal_discovery="{{ gitea_oidc_internal_discovery_url }}"
+oidc_client_id="{{ gitea_oidc_client_id }}"
+required_claim_name="{{ gitea_oidc_required_claim_name }}"
+required_claim_value="{{ gitea_oidc_required_claim_value }}"
+db_uri="postgresql://{{ gitea_database_user }}:${GITEA_DATABASE_PASSWORD}@{{ gitea_database_host }}:{{ gitea_database_port }}/{{ gitea_database_name }}"
+admin_password="${GITEA_ADMIN_PASSWORD}"
+oidc_client_secret="${GITEA_KEYCLOAK_CLIENT_SECRET}"
+token_file="{{ gitea_admin_token_remote_file }}"
+runner_token_file="{{ gitea_runner_registration_token_remote_file }}"
+hook_template="{{ gitea_prereceive_hook_template }}"
+
+exec_gitea() {
+  docker exec "${container}" gitea "$@"
+}
+
+create_admin_output="$(docker exec "${container}" gitea admin user create \
+  --admin \
+  --username "${admin_user}" \
+  --password "${admin_password}" \
+  --email "${admin_email}" \
+  --must-change-password=false 2>&1 || true)"
+if ! grep -qi "already exists" <<<"${create_admin_output}"; then
+  if [[ -n "${create_admin_output}" ]]; then
+    changed=true
+  fi
+fi
+
+auth_source_id="$(
+  docker exec "${container}" gitea admin auth list \
+    | awk -F '\t' '$2 == "Keycloak" { print $1; exit }'
+)"
+
+provider_name="openidConnect"
+if [[ -n "${auth_source_id}" ]]; then
+  docker exec "${container}" gitea admin auth update-oauth \
+    --id "${auth_source_id}" \
+    --name Keycloak \
+    --provider "${provider_name}" \
+    --key "${oidc_client_id}" \
+    --secret "${oidc_client_secret}" \
+    --auto-discover-url "${oidc_internal_discovery}" \
+    --scopes "openid profile email groups" \
+    --group-claim-name "groups" \
+    --required-claim-name "${required_claim_name}" \
+    --required-claim-value "${required_claim_value}" >/dev/null
+else
+  docker exec "${container}" gitea admin auth add-oauth \
+    --name Keycloak \
+    --provider "${provider_name}" \
+    --key "${oidc_client_id}" \
+    --secret "${oidc_client_secret}" \
+    --auto-discover-url "${oidc_internal_discovery}" \
+    --scopes "openid profile email groups" \
+    --group-claim-name "groups" \
+    --required-claim-name "${required_claim_name}" \
+    --required-claim-value "${required_claim_value}" >/dev/null
+  changed=true
+fi
+
+if [[ ! -s "${token_file}" ]]; then
+  umask 077
+  docker exec "${container}" gitea admin user generate-access-token \
+    --username "${admin_user}" \
+    --token-name "repo-managed-admin-$(date +%s)" \
+    --scopes all \
+    --raw > "${token_file}"
+  changed=true
+fi
+
+if [[ ! -s "${runner_token_file}" ]]; then
+  umask 077
+  docker exec "${container}" gitea actions generate-runner-token > "${runner_token_file}"
+  changed=true
+fi
+
+token="$(tr -d '\r\n' < "${token_file}")"
+
+org_status="$(curl -sS -o /tmp/gitea-org.json -w '%{http_code}' \
+  -H "Authorization: token ${token}" \
+  "${api_url}/api/v1/orgs/${repo_org}")"
+if [[ "${org_status}" == "404" ]]; then
+  curl -sS \
+    -H "Authorization: token ${token}" \
+    -H 'Content-Type: application/json' \
+    -d "{\"username\":\"${repo_org}\",\"full_name\":\"${repo_org}\",\"visibility\":\"limited\"}" \
+    "${api_url}/api/v1/orgs" >/dev/null
+  changed=true
+fi
+rm -f /tmp/gitea-org.json
+
+repo_status="$(curl -sS -o /tmp/gitea-repo.json -w '%{http_code}' \
+  -H "Authorization: token ${token}" \
+  "${api_url}/api/v1/repos/${repo_org}/${repo_name}")"
+if [[ "${repo_status}" == "404" ]]; then
+  curl -sS \
+    -H "Authorization: token ${token}" \
+    -H 'Content-Type: application/json' \
+    -d "{\"name\":\"${repo_name}\",\"private\":true,\"default_branch\":\"main\",\"auto_init\":false}" \
+    "${api_url}/api/v1/orgs/${repo_org}/repos" >/dev/null
+  changed=true
+fi
+rm -f /tmp/gitea-repo.json
+
+repo_hook_dir="{{ gitea_data_dir }}/git/repositories/${repo_org}/${repo_name}.git/custom_hooks"
+mkdir -p "${repo_hook_dir}"
+install -m 0750 "${hook_template}" "${repo_hook_dir}/pre-receive"
+
+if [[ "${changed}" == "true" ]]; then
+  echo "GITEA_BOOTSTRAP_CHANGED=true"
+fi

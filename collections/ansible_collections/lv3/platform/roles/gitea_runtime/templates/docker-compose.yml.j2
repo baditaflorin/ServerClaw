@@ -1,0 +1,45 @@
+---
+services:
+  gitea-openbao-agent:
+    image: {{ gitea_openbao_agent_image }}
+    container_name: {{ gitea_openbao_agent_container_name }}
+    user: "0:0"
+    environment:
+      BAO_SKIP_DROP_ROOT: "true"
+    command:
+      - agent
+      - -config=/openbao-agent/agent.hcl
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -s {{ gitea_env_file }}
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    volumes:
+      - {{ gitea_openbao_agent_dir }}:/openbao-agent:ro
+      - {{ gitea_env_file | dirname }}:{{ gitea_env_file | dirname }}
+
+  gitea:
+    image: {{ gitea_image }}
+    container_name: {{ gitea_container_name }}
+    restart: unless-stopped
+    depends_on:
+      gitea-openbao-agent:
+        condition: service_healthy
+    env_file:
+      - {{ gitea_env_file }}
+    ports:
+      - "{{ ansible_host }}:{{ gitea_http_port }}:3000"
+    volumes:
+      - {{ gitea_data_dir }}:/var/lib/gitea
+    networks:
+      - default
+
+networks:
+  default:
+    name: {{ gitea_network_name }}
+    ipam:
+      config:
+        - subnet: {{ gitea_network_subnet }}

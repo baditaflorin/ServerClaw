@@ -37,6 +37,8 @@ PORT_KEYS = (
     "windmill_host_proxy_port",
     "mattermost_server_port",
     "mattermost_host_proxy_port",
+    "gitea_http_port",
+    "gitea_host_proxy_port",
     "netbox_server_port",
     "netbox_host_proxy_port",
     "open_webui_port",
@@ -220,7 +222,10 @@ def build_service_urls(
 
     public_hostname = service.get("public_hostname")
     if public_hostname:
-        urls["public"] = f"https://{public_hostname}"
+        if service_id == "gitea":
+            urls["public"] = service_url("http", public_hostname, ports["gitea_host_proxy_port"])
+        else:
+            urls["public"] = f"https://{public_hostname}"
 
     if service_id == "alertmanager":
         urls["internal"] = service_url("http", private_ip, ports["alertmanager_port"])
@@ -262,6 +267,11 @@ def build_service_urls(
         urls["controller"] = service_url("http", tailscale_ipv4, ports["mattermost_host_proxy_port"])
         port_map["internal"] = ports["mattermost_server_port"]
         port_map["controller"] = ports["mattermost_host_proxy_port"]
+    elif service_id == "gitea":
+        urls["internal"] = service_url("http", private_ip, ports["gitea_http_port"])
+        urls["controller"] = service_url("http", tailscale_ipv4, ports["gitea_host_proxy_port"])
+        port_map["internal"] = ports["gitea_http_port"]
+        port_map["controller"] = ports["gitea_host_proxy_port"]
     elif service_id == "netbox":
         urls["internal"] = service_url("http", private_ip, ports["netbox_server_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["netbox_host_proxy_port"])
@@ -444,6 +454,7 @@ def build_platform_vars(
     monitoring_service = service_topology["grafana"]
     mail_service = service_topology["mail_platform"]
     mattermost_service = service_topology["mattermost"]
+    gitea_service = service_topology["gitea"]
     netbox_service = service_topology["netbox"]
     open_webui_service = service_topology["open_webui"]
     api_gateway_service = service_topology["api_gateway"]
@@ -531,6 +542,7 @@ def build_platform_vars(
         "platform_dns_records": dns_records,
         "platform_management_allowed_tcp_ports": [
             resolved_ports["ntopng_proxy_port"],
+            resolved_ports["gitea_host_proxy_port"],
             resolved_ports["netbox_host_proxy_port"],
             resolved_ports["step_ca_proxy_port"],
             resolved_ports["openbao_proxy_port"],
@@ -559,6 +571,11 @@ def build_platform_vars(
         "mattermost_host_proxy_port": resolved_ports["mattermost_host_proxy_port"],
         "mattermost_private_base_url": mattermost_service["urls"]["internal"],
         "mattermost_controller_url": mattermost_service["urls"]["controller"],
+        "gitea_http_port": resolved_ports["gitea_http_port"],
+        "gitea_host_proxy_port": resolved_ports["gitea_host_proxy_port"],
+        "gitea_root_url": gitea_service["urls"].get("public", gitea_service["urls"]["controller"]),
+        "gitea_private_base_url": gitea_service["urls"]["internal"],
+        "gitea_controller_url": gitea_service["urls"]["controller"],
         "platform_context_internal_port": resolved_ports["platform_context_internal_port"],
         "platform_context_host_proxy_port": resolved_ports["platform_context_host_proxy_port"],
         "platform_context_private_url": platform_context_service["urls"]["internal"],
@@ -574,6 +591,7 @@ def build_platform_vars(
         "monitoring_loki_push_api_url": monitoring_service["urls"]["loki_push"],
         "proxmox_management_allowed_tcp_ports": [
             resolved_ports["ntopng_proxy_port"],
+            resolved_ports["gitea_host_proxy_port"],
             resolved_ports["netbox_host_proxy_port"],
             resolved_ports["step_ca_proxy_port"],
             resolved_ports["openbao_proxy_port"],

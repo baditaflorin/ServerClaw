@@ -1,0 +1,95 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the private Gitea runtime, bootstrap admin access, and prepare CI artifacts.
+    options:
+      gitea_site_dir:
+        type: path
+        required: true
+      gitea_data_dir:
+        type: path
+        required: true
+      gitea_secret_dir:
+        type: path
+        required: true
+      gitea_compose_file:
+        type: path
+        required: true
+      gitea_env_file:
+        type: path
+        required: true
+      gitea_bootstrap_script:
+        type: path
+        required: true
+      gitea_image:
+        type: str
+        required: true
+      gitea_http_port:
+        type: int
+        required: true
+      gitea_public_hostname:
+        type: str
+        required: true
+      gitea_private_base_url:
+        type: str
+        required: true
+      gitea_controller_url:
+        type: str
+        required: true
+      gitea_database_name:
+        type: str
+        required: true
+      gitea_database_user:
+        type: str
+        required: true
+      gitea_database_host:
+        type: str
+        required: true
+      gitea_database_password_local_file:
+        type: path
+        required: true
+      gitea_oidc_client_id:
+        type: str
+        required: true
+      gitea_oidc_client_secret_local_file:
+        type: path
+        required: true
+      gitea_oidc_discovery_url:
+        type: str
+        required: true
+      gitea_oidc_internal_discovery_url:
+        type: str
+        required: true
+      gitea_admin_username:
+        type: str
+        required: true
+      gitea_admin_email:
+        type: str
+        required: true
+      gitea_admin_password_remote_file:
+        type: path
+        required: true
+      gitea_admin_password_local_file:
+        type: path
+        required: true
+      gitea_admin_token_remote_file:
+        type: path
+        required: true
+      gitea_admin_token_local_file:
+        type: path
+        required: true
+      gitea_runner_registration_token_remote_file:
+        type: path
+        required: true
+      gitea_runner_registration_token_local_file:
+        type: path
+        required: true
+      gitea_webhook_secret_remote_file:
+        type: path
+        required: true
+      gitea_webhook_secret_local_file:
+        type: path
+        required: true
+      gitea_local_artifact_dir:
+        type: path
+        required: true
