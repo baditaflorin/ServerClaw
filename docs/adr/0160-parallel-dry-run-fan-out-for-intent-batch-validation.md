@@ -2,7 +2,7 @@
 
 - Status: Implemented
 - Implementation Status: Implemented
-- Implemented In Repo Version: 0.144.0
+- Implemented In Repo Version: 0.145.0
 - Implemented In Platform Version: not yet
 - Implemented On: 2026-03-25
 - Date: 2026-03-24
@@ -35,7 +35,7 @@ We implement a controller-local **parallel dry-run fan-out** for multi-intent ba
 
 ## Implementation Notes
 
-Repository implementation landed in `0.144.0` with the following surfaces:
+Repository implementation landed in `0.145.0` with the following surfaces:
 
 - `GoalCompiler.compile_batch()` in [platform/goal_compiler/compiler.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/goal_compiler/compiler.py)
 - `IntentBatchPlanner` and the batch plan dataclasses in [platform/goal_compiler/batch.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/goal_compiler/batch.py)

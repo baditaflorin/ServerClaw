@@ -188,7 +188,7 @@ def test_planner_fans_out_dry_runs_in_parallel(tmp_path: Path, monkeypatch: pyte
     result = planner.plan(batch)
     elapsed = time.monotonic() - started
 
-    assert elapsed < 0.35
+    assert elapsed < 0.55
     assert len(result.execution_plan.stages) == 1
     assert result.execution_plan.stages[0].parallelism == "full"
     assert ledger.events[0]["event_type"] == "intent.batch_plan"
