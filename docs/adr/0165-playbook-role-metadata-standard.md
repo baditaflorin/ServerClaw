@@ -1,7 +1,8 @@
 # ADR 0165: Playbook and Role Metadata Standard for Agent Discovery
 
-- Status: Proposed
-- Implementation Status: Proposed
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented Version: 0.173.0
 - Date: 2026-03-26
 
 ## Context

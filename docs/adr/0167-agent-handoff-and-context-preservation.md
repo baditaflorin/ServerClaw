@@ -1,7 +1,8 @@
 # ADR 0167: Agent Handoff and Context Preservation Protocol
 
-- Status: Proposed
-- Implementation Status: Proposed
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented Version: 0.173.0
 - Date: 2026-03-26
 
 ## Context

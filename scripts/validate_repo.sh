@@ -17,7 +17,7 @@ export ANSIBLE_COLLECTIONS_PATH="$REPO_ROOT/collections:$ANSIBLE_COLLECTIONS_DIR
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|ansible-idempotency|shell|json|compose-runtime-envs|retry-guard|data-models|generated-docs|generated-portals|health-probes|alert-rules|tofu]...
+  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|ansible-idempotency|shell|json|compose-runtime-envs|retry-guard|data-models|generated-docs|generated-portals|health-probes|alert-rules|tofu|agent-standards]...
 
 Examples:
   scripts/validate_repo.sh
@@ -284,6 +284,133 @@ validate_tofu() {
   fi
 }
 
+# ---------------------------------------------------------------------------
+# ADR 0168: Agent standards validation
+# ---------------------------------------------------------------------------
+
+validate_agent_standards() {
+  echo "Agent standards validation (ADR 0163-0168)"
+  local rc=0
+
+  _validate_playbook_metadata
+  local meta_rc=$?
+  [[ $meta_rc -ne 0 ]] && rc=$meta_rc
+
+  _validate_workstream_entry
+  local ws_rc=$?
+  [[ $ws_rc -ne 0 ]] && rc=$ws_rc
+
+  _validate_adr_index_current
+  local idx_rc=$?
+  [[ $idx_rc -ne 0 ]] && rc=$idx_rc
+
+  # Warnings only — do not fail
+  _validate_config_registry_updated || true
+  _validate_structure_index_updated || true
+
+  return $rc
+}
+
+_validate_playbook_metadata() {
+  local missing_metadata=()
+  local playbook
+
+  while IFS= read -r playbook; do
+    [[ -z "$playbook" ]] && continue
+    [[ ! -f "$REPO_ROOT/$playbook" ]] && continue
+    # Check for metadata header: any line starting with "# Purpose:"
+    if ! grep -q "^# Purpose:" "$REPO_ROOT/$playbook" 2>/dev/null; then
+      missing_metadata+=("$playbook")
+    fi
+  done < <(
+    git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
+    grep -E '^(playbooks|collections/.*roles)/.*\.ya?ml$' || true
+  )
+
+  if [[ ${#missing_metadata[@]} -gt 0 ]]; then
+    echo "ERROR: Playbooks/roles missing metadata headers (ADR 0165):" >&2
+    printf '  - %s\n' "${missing_metadata[@]}" >&2
+    echo "  Copy header from: playbooks/.metadata-template.yml" >&2
+    echo "  Reference: docs/adr/0165-playbook-role-metadata-standard.md" >&2
+    return 1
+  fi
+  return 0
+}
+
+_validate_workstream_entry() {
+  local current_branch
+  current_branch=$(git -C "$REPO_ROOT" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "main")
+
+  # Skip on main, detached HEAD, or CI environments
+  [[ "$current_branch" == "main" ]] && return 0
+  [[ "$current_branch" == "HEAD" ]] && return 0
+  [[ "${CI:-}" == "true" ]] && return 0
+
+  local workstreams_file="$REPO_ROOT/workstreams.yaml"
+  [[ ! -f "$workstreams_file" ]] && return 0
+
+  local entry_count
+  entry_count=$(grep -c "branch:.*\"$current_branch\"" "$workstreams_file" 2>/dev/null || echo "0")
+
+  if [[ "$entry_count" -eq 0 ]]; then
+    echo "WARNING: Branch '$current_branch' not found in workstreams.yaml (ADR 0167)" >&2
+    echo "  Add an entry: docs/adr/0167-agent-handoff-and-context-preservation.md" >&2
+    # Warning only — do not block push
+  fi
+  return 0
+}
+
+_validate_adr_index_current() {
+  local adr_changes index_updated
+
+  adr_changes=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
+    grep -c '^docs/adr/0[0-9]' || echo "0")
+  index_updated=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
+    grep -c '^docs/adr/\.index\.yaml' || echo "0")
+
+  if [[ "$adr_changes" -gt 0 ]] && [[ "$index_updated" -eq 0 ]]; then
+    # Check if index exists at all
+    if [[ ! -f "$REPO_ROOT/docs/adr/.index.yaml" ]]; then
+      echo "ERROR: docs/adr/.index.yaml missing (ADR 0164). Generate with:" >&2
+      echo "  uv run --with pyyaml python3 scripts/generate_adr_index.py --write" >&2
+      return 1
+    fi
+    echo "WARNING: ADR files changed but docs/adr/.index.yaml not updated (ADR 0164)" >&2
+    echo "  Run: uv run --with pyyaml python3 scripts/generate_adr_index.py --write" >&2
+    echo "  Then: git add docs/adr/.index.yaml" >&2
+    # Warning only — do not block push for this
+  fi
+  return 0
+}
+
+_validate_config_registry_updated() {
+  local new_config_files registry_updated
+
+  new_config_files=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
+    grep -cE '^(config/|inventory/|versions)' || echo "0")
+  registry_updated=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
+    grep -c '^\.config-locations\.yaml' || echo "0")
+
+  if [[ "$new_config_files" -gt 3 ]] && [[ "$registry_updated" -eq 0 ]]; then
+    echo "WARNING: Config files changed but .config-locations.yaml not updated (ADR 0166)" >&2
+  fi
+  return 0
+}
+
+_validate_structure_index_updated() {
+  local new_dirs structure_updated
+
+  new_dirs=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
+    grep -oE '^[^/]+/' | sort -u | wc -l | tr -d ' ' || echo "0")
+  structure_updated=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
+    grep -c '^\.repo-structure\.yaml' || echo "0")
+
+  if [[ "$new_dirs" -gt 2 ]] && [[ "$structure_updated" -eq 0 ]]; then
+    echo "WARNING: New top-level directories detected but .repo-structure.yaml not updated (ADR 0163)" >&2
+  fi
+  return 0
+}
+
 if [[ $# -eq 0 ]]; then
   set -- all
 fi
@@ -307,6 +434,7 @@ for stage in "$@"; do
       validate_data_models
       validate_generated_docs
       validate_generated_portals
+      validate_agent_standards
       ;;
     generated-vars)
       validate_generated_vars
@@ -349,6 +477,9 @@ for stage in "$@"; do
       ;;
     tofu)
       validate_tofu
+      ;;
+    agent-standards)
+      validate_agent_standards
       ;;
     generated-docs)
       validate_generated_docs

@@ -1,0 +1,76 @@
+{
+  "date": "2026-03-26T14:00:00Z",
+  "agent": "Claude (claude-sonnet-4-6)",
+  "release_version": "0.173.0",
+  "title": "ADR 0163-0168: Agent Discovery Infrastructure — Full Live Implementation",
+  "adrs_implemented": [
+    {
+      "adr": "0163",
+      "title": "Repository Structure Index for Agent Discovery",
+      "deliverable": ".repo-structure.yaml"
+    },
+    {
+      "adr": "0164",
+      "title": "ADR Metadata Index and Fast Discovery Protocol",
+      "deliverables": [
+        "docs/adr/.index.yaml",
+        "scripts/generate_adr_index.py"
+      ]
+    },
+    {
+      "adr": "0165",
+      "title": "Playbook and Role Metadata Standard for Agent Discovery",
+      "deliverable": "playbooks/.metadata-template.yml"
+    },
+    {
+      "adr": "0166",
+      "title": "Canonical Configuration Locations Registry",
+      "deliverable": ".config-locations.yaml"
+    },
+    {
+      "adr": "0167",
+      "title": "Agent Handoff and Context Preservation Protocol",
+      "deliverable": "AGENTS.md (updated with handoff protocol)"
+    },
+    {
+      "adr": "0168",
+      "title": "Automated Enforcement of Agent Discovery and Handoff Standards",
+      "deliverable": "scripts/validate_repo.sh (agent-standards stage added)"
+    }
+  ],
+  "files_created": [
+    ".repo-structure.yaml",
+    ".config-locations.yaml",
+    "docs/adr/.index.yaml",
+    "scripts/generate_adr_index.py",
+    "playbooks/.metadata-template.yml",
+    "docs/release-notes/0.173.0.md",
+    "receipts/live-applies/2026-03-26-adr-0163-0168-agent-discovery-live-apply.json"
+  ],
+  "files_modified": [
+    "AGENTS.md",
+    "scripts/validate_repo.sh",
+    "VERSION",
+    "changelog.md",
+    "docs/adr/0163-repository-structure-index.md",
+    "docs/adr/0164-adr-metadata-index.md",
+    "docs/adr/0165-playbook-role-metadata-standard.md",
+    "docs/adr/0166-canonical-configuration-locations.md",
+    "docs/adr/0167-agent-handoff-and-context-preservation.md",
+    "docs/adr/0168-automated-enforcement-of-agent-standards.md"
+  ],
+  "verification": {
+    "adr_index_generated": true,
+    "adr_count": 178,
+    "adr_statuses_updated": "Proposed → Accepted / Implemented",
+    "version_bump": "0.172.1 → 0.173.0",
+    "validate_agent_standards": "added to validate_repo.sh",
+    "pre_push_gate_integration": "agent-standards added to 'all' stage"
+  },
+  "notes": "All 6 ADRs fully implemented and live-applied. No playbook execution required — purely repository metadata and tooling changes.",
+  "next_steps": [
+    "New agents should read .repo-structure.yaml, .config-locations.yaml, docs/adr/.index.yaml as part of onboarding",
+    "When adding new ADRs, regenerate index: uv run --with pyyaml python3 scripts/generate_adr_index.py --write",
+    "New playbooks must include # Purpose: header per ADR 0165"
+  ]
+}

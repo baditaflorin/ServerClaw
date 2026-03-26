@@ -1,0 +1,45 @@
+---
+# =============================================================================
+# ADR 0165: Playbook Metadata Template
+# =============================================================================
+# Copy this header block to the top of every new playbook.
+# Replace <PLACEHOLDER> values and remove comments before committing.
+# Required fields: Purpose, Use case, Outputs, Idempotency, Dependencies
+# =============================================================================
+
+# Playbook: <filename>.yml
+# Purpose: <One sentence — what does this playbook do?>
+# Use case: <When and why to run this — e.g. "Run on new VM after bootstrap">
+#
+# Inputs (required):
+#   - <variable_name> (<type>, required): <description>
+#
+# Inputs (optional):
+#   - <variable_name> (<type>, optional, default=<value>): <description>
+#
+# Outputs:
+#   - <What is created/changed/configured on success>
+#
+# Idempotency: <Fully idempotent | Partially idempotent | Not idempotent>
+#              <Explanation if not fully idempotent>
+#
+# Dependencies:
+#   - ADR <XXXX>: <Why this ADR is relevant>
+#   - Requires: <What must exist/run before this playbook>
+#   - Role: <role_name> — <what the role does here>
+#
+# Related ADRs: <0001, 0002, ...>
+# Related Runbooks: docs/runbooks/<runbook-filename>.md
+#
+# Author: LV3 Platform
+# Last Updated: <YYYY-MM-DD>
+# =============================================================================
+
+# --- DELETE EVERYTHING ABOVE THIS LINE BEFORE COMMITTING --- #
+
+- name: <Descriptive play name>
+  hosts: <target_group>
+  become: yes
+
+  roles:
+    - role: <role_name>

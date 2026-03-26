@@ -97,6 +97,79 @@ Do not claim the platform is ready for routine production use until:
 3. The Proxmox security baseline and access model are documented and applied.
 4. Routine automation defaults to named non-root identities instead of `root`.
 
+## Agent Onboarding (ADR 0163–0168)
+
+New agent? Read these files in order — all five take under 2 minutes:
+
+1. **README.md** — current platform status and deployment state
+2. **AGENTS.md** — this file; rules and conventions
+3. **.repo-structure.yaml** — full directory map; find any path instantly
+4. **.config-locations.yaml** — where every configuration file lives
+5. **docs/adr/.index.yaml** — searchable index of all 170+ decisions by keyword
+6. **workstreams.yaml** — parallel work in flight; check before starting
+
+> Token tip: These six reads replace hours of tree exploration.
+
+## Handoff Protocol (ADR 0167)
+
+Follow this before ending any session:
+
+**Starting work:**
+- Create a git worktree: `git worktree add .worktrees/<name> main && git checkout -b <branch>`
+- Add an entry to `workstreams.yaml` with `status: in-progress`
+- Create `docs/workstreams/adr-XXXX-<name>.md` for major decisions
+
+**During work:**
+- Commit frequently with clear messages:
+  ```
+  [area] Short description
+
+  Purpose: Why this change matters
+  Scope: What files changed
+  Status: Current state
+  Next: What follows
+  See also: ADR XXXX
+  ```
+- New playbooks/roles MUST include metadata header per ADR 0165
+
+**Ending a session:**
+- [ ] All work committed, branch pushed to origin
+- [ ] `workstreams.yaml` updated with current status
+- [ ] README.md updated if deployed state changed
+- [ ] Blockers documented in workstreams.yaml if any
+- [ ] Receipts created in `receipts/live-applies/` for any live changes
+- [ ] If merging to main: bump `VERSION`, update `changelog.md`
+
+**Quick situation table:**
+
+| Situation | Action |
+|---|---|
+| Starting new work | Create branch + worktree, add to workstreams.yaml |
+| Making a change | Commit with Purpose/Scope/Status/Next |
+| Infrastructure change | Create receipt in receipts/live-applies/ |
+| Major decision | Create ADR in docs/workstreams/ |
+| Merging to main | Bump VERSION, update changelog, clear commit |
+| Work blocked | Mark status: blocked, document blocker, push branch |
+
+## Playbook / Role Metadata Standard (ADR 0165)
+
+Every new playbook and role must include a metadata comment block at the top.
+Copy from `playbooks/.metadata-template.yml`. Required fields:
+- `Purpose` — one sentence
+- `Use case` — when to run it
+- `Inputs` — required and optional variables
+- `Outputs` — what changes on success
+- `Idempotency` — safe to re-run? Y/N with explanation
+- `Dependencies` — ADRs, roles, prerequisites
+
+## Automated Validation (ADR 0168)
+
+The pre-push gate (`scripts/validate_repo.sh agent-standards`) enforces:
+- New playbooks must have `# Purpose:` header
+- Branch must appear in `workstreams.yaml`
+- `docs/adr/.index.yaml` must be current when ADR files change
+  - Regenerate: `uv run --with pyyaml python3 scripts/generate_adr_index.py --write`
+
 ## Lessons Learned
 
 - Proxmox guest network identity must be deterministic. Reapplying `qm set --net0 virtio,bridge=...` without an explicit MAC can assign a new MAC address, while Debian 13 cloud-init or systemd-networkd may still match the previous MAC in generated network config. The result is a guest that boots with no usable network even though the intended static config exists.

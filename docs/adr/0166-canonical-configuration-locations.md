@@ -1,7 +1,8 @@
 # ADR 0166: Canonical Configuration Locations Registry
 
-- Status: Proposed
-- Implementation Status: Proposed
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented Version: 0.173.0
 - Date: 2026-03-26
 
 ## Context
