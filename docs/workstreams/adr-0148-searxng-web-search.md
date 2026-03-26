@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0148](../adr/0148-searxng-for-agent-web-search.md)
 - Title: Private SearXNG runtime for agent and operator web search on docker-runtime-lv3
-- Status: in_progress
+- Status: live_applied
 - Implemented In Repo Version: not yet
 - Implemented In Platform Version: not yet
 - Implemented On: 2026-03-25
@@ -83,7 +83,11 @@
   container recreate on 2026-03-26 because the first live rollout had already
   written the config files without restarting the container. Keep that history
   in mind if you debug another stale-runtime mismatch.
-- the only remaining incomplete live surface is DNS publication. `search.lv3.org`
-  still has no answer because `HETZNER_DNS_API_TOKEN` is not present in the
-  controller shell, so the localhost Hetzner DNS role was intentionally not
-  rerun.
+- the final DNS publication completed on 2026-03-26 after the controller shell
+  was rerun with `HETZNER_DNS_API_TOKEN`. Verified from the controller:
+  `dig +short @1.1.1.1 search.lv3.org` returned `100.64.0.1`, and
+  `http://search.lv3.org/search?q=proxmox%20ve&format=json` returned `200`
+  with results.
+- the first DNS publication attempt failed at `12:53 UTC` on 2026-03-26
+  because Hetzner's legacy DNS write API was in a scheduled brownout window and
+  returned `503`. The successful localhost-only retry started at `13:01 UTC`.

@@ -1,7 +1,7 @@
 # ADR 0148: SearXNG for Agent Web Search
 
 - Status: Accepted
-- Implementation Status: Implemented on workstream branch
+- Implementation Status: Live applied on workstream branch
 - Implemented In Repo Version: not yet
 - Implemented In Platform Version: not yet
 - Implemented On: 2026-03-25
@@ -147,12 +147,15 @@ Web search results in a triage report are links only; the content is not summari
 - The runtime role now recreates the SearXNG container when managed config
   files change so mounted config updates are applied live, not just written to
   disk.
-- The live platform rollout is partially complete as of 2026-03-26: the guest
-  runtime serves `http://10.10.10.20:8881/search?...&format=json`, the Proxmox
-  host Tailscale proxy serves the same API at `http://100.64.0.1/search?...`,
-  and Open WebUI was re-rendered successfully. The remaining incomplete surface
-  is the `search.lv3.org` tailnet DNS record because the controller shell still
-  lacks `HETZNER_DNS_API_TOKEN`.
+- The live platform rollout completed on 2026-03-26 from the workstream branch:
+  the guest runtime serves `http://10.10.10.20:8881/search?...&format=json`,
+  the Proxmox host Tailscale proxy serves the same API at
+  `http://100.64.0.1/search?...`, `search.lv3.org` resolves to `100.64.0.1`,
+  and the hostname-backed JSON endpoint returns results.
+- The final DNS publication had to be retried after `13:00 UTC` on
+  2026-03-26 because Hetzner's legacy `dns.hetzner.com` write API was in a
+  scheduled brownout window and returned `503` for record creation at
+  `12:53 UTC`.
 
 ### Rate limiting and caching
 

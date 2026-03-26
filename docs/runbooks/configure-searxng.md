@@ -67,6 +67,7 @@ curl -fsS "http://100.64.0.1/search?q=proxmox%20ve&format=json"
 Verify the tailnet hostname:
 
 ```bash
+dig +short @1.1.1.1 search.lv3.org
 curl -fsS "http://search.lv3.org/search?q=proxmox%20ve&format=json"
 ```
 
@@ -92,5 +93,10 @@ ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory
   container, the running process can keep the old bot-detection behavior in
   memory. In that case, run `docker compose --file /opt/searxng/docker-compose.yml up -d --force-recreate --remove-orphans`
   on `docker-runtime-lv3` once, then retry the JSON verification endpoint.
+- Hetzner's legacy `dns.hetzner.com` write API is currently in brownout during
+  the DNS migration period. If the full converge fails only on the localhost
+  DNS record step with `503`, rerun the DNS publication after the brownout
+  window using:
+  `HETZNER_DNS_API_TOKEN=... ANSIBLE_CONFIG=ansible.cfg ANSIBLE_COLLECTIONS_PATH=collections uvx --from ansible-core ansible-playbook -i inventory/hosts.yml -i localhost, playbooks/searxng.yml --limit localhost`
 - Keep `.local/searxng/` controller-only. The mirrored secret key is stable on
   purpose so browser cookies and settings survive re-converges.
