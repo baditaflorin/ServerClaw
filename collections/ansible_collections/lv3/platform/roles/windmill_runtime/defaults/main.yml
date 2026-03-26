@@ -12,10 +12,19 @@ windmill_openbao_agent_container_name: windmill-openbao-agent
 windmill_openbao_secret_path: services/windmill/runtime-env
 windmill_openbao_policy_name: lv3-service-windmill-runtime
 windmill_openbao_approle_name: windmill-runtime
+windmill_runtime_packages:
+  - openssl
+  - tar
 windmill_server_port: "{{ platform_service_topology | platform_service_port('windmill', 'internal') }}"
 windmill_host_proxy_port: "{{ platform_service_topology | platform_service_port('windmill', 'controller') }}"
 windmill_image: "{{ container_image_catalog.images.windmill_runtime.ref }}"
 windmill_extra_image: "{{ container_image_catalog.images.windmill_extra_runtime.ref }}"
+windmill_uv_version: "0.9.21"
+windmill_uv_download_url: >-
+  https://github.com/astral-sh/uv/releases/download/{{ windmill_uv_version }}/uv-x86_64-unknown-linux-gnu.tar.gz
+windmill_uv_install_dir: /usr/local/bin
+windmill_uv_binary_path: "{{ windmill_uv_install_dir }}/uv"
+windmill_uvx_binary_path: "{{ windmill_uv_install_dir }}/uvx"
 windmill_worker_count: 2
 windmill_native_worker_count: 4
 windmill_database_name: windmill

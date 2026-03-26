@@ -38,11 +38,41 @@
 
 - name: Ensure the Windmill runtime packages are present
   ansible.builtin.apt:
-    name:
-      - openssl
+    name: "{{ windmill_runtime_packages }}"
     state: present
     update_cache: true
     force_apt_get: true
+
+- name: Download the pinned uv archive for Windmill worker scripts
+  ansible.builtin.get_url:
+    url: "{{ windmill_uv_download_url }}"
+    dest: /tmp/windmill-uv.tar.gz
+    mode: "0644"
+
+- name: Install the pinned uv binaries for Windmill worker scripts
+  ansible.builtin.unarchive:
+    src: /tmp/windmill-uv.tar.gz
+    dest: "{{ windmill_uv_install_dir }}"
+    remote_src: true
+    extra_opts:
+      - --strip-components=1
+    include:
+      - uv-x86_64-unknown-linux-gnu/uv
+      - uv-x86_64-unknown-linux-gnu/uvx
+
+- name: Ensure the pinned uv binaries are executable
+  ansible.builtin.file:
+    path: "{{ item }}"
+    mode: "0755"
+    state: file
+  loop:
+    - "{{ windmill_uv_binary_path }}"
+    - "{{ windmill_uvx_binary_path }}"
+
+- name: Remove the staged uv archive after installation
+  ansible.builtin.file:
+    path: /tmp/windmill-uv.tar.gz
+    state: absent
 
 - name: Ensure the Windmill directories exist
   ansible.builtin.include_role:

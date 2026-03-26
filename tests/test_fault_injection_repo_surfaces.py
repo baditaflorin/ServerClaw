@@ -31,6 +31,16 @@ def test_fault_injection_windmill_surfaces_are_seeded() -> None:
     assert "f/lv3/fault-injection-first-sunday" in schedule_paths
 
 
+def test_fault_injection_windmill_runtime_manages_uv() -> None:
+    defaults = yaml.safe_load(
+        (REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml").read_text()
+    )
+
+    assert defaults["windmill_uv_download_url"].endswith("/uv-x86_64-unknown-linux-gnu.tar.gz")
+    assert defaults["windmill_uv_binary_path"].endswith("/uv")
+    assert defaults["windmill_uvx_binary_path"].endswith("/uvx")
+
+
 def test_workstream_registry_tracks_adr_0171() -> None:
     registry = (REPO_ROOT / "workstreams.yaml").read_text()
 
