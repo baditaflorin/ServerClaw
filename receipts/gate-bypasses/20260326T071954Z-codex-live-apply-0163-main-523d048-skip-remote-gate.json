@@ -1,0 +1,8 @@
+{
+  "created_at": "2026-03-26T07:19:54.161799+00:00",
+  "bypass": "skip_remote_gate",
+  "reason": "Local Docker fallback gate could not start because the controller Docker daemon was unavailable; focused tests and repository model validation passed in the dedicated live-apply worktree.",
+  "source": "pre-push-gate",
+  "branch": "codex/live-apply-0163-main",
+  "commit": "523d0486e826df7f4991250806fa7b1e2e5f6346"
+}
