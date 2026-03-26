@@ -39,6 +39,7 @@ MAINTENANCE_BUCKET = "maintenance-windows"
 MAINTENANCE_BUCKET_MAX_AGE_SECONDS = 2 * 60 * 60
 MAINTENANCE_KEY_PREFIX = "maintenance/"
 MAINTENANCE_STATE_FILE_ENV = "LV3_MAINTENANCE_WINDOWS_FILE"
+MAINTENANCE_NATS_URL_ENV = "LV3_MAINTENANCE_WINDOWS_NATS_URL"
 MAINTENANCE_ALERTMANAGER_SILENCES_ENV = "LV3_ENABLE_ALERTMANAGER_SILENCES"
 
 DEFAULT_OPENED_BY_CLASS = "operator"
@@ -112,7 +113,7 @@ def load_controller_context() -> dict[str, Any]:
     }
 
 
-def resolve_nats_credentials(context: dict[str, Any]) -> dict[str, str]:
+def resolve_nats_credentials(context: dict[str, Any] | None = None) -> dict[str, str]:
     env_user = os.environ.get("LV3_NATS_USERNAME", "").strip()
     env_password = os.environ.get("LV3_NATS_PASSWORD", "").strip()
     env_password_file = os.environ.get("LV3_NATS_PASSWORD_FILE", "").strip()
@@ -121,7 +122,9 @@ def resolve_nats_credentials(context: dict[str, Any]) -> dict[str, str]:
     if env_user and env_password:
         return {"user": env_user, "password": env_password}
 
-    secret_entry = context["secret_manifest"]["secrets"].get("nats_jetstream_admin_password")
+    context = context or {}
+    secret_manifest = context.get("secret_manifest", {})
+    secret_entry = secret_manifest.get("secrets", {}).get("nats_jetstream_admin_password")
     if isinstance(secret_entry, dict) and secret_entry.get("kind") == "file":
         password_path = Path(secret_entry["path"]).expanduser()
         if password_path.exists():
@@ -130,6 +133,13 @@ def resolve_nats_credentials(context: dict[str, Any]) -> dict[str, str]:
                 "password": password_path.read_text().strip(),
             }
     return {}
+
+
+def direct_nats_url() -> str:
+    return (
+        os.environ.get(MAINTENANCE_NATS_URL_ENV, "").strip()
+        or os.environ.get("LV3_NATS_URL", "").strip()
+    )
 
 
 def build_guest_ssh_command(context: dict[str, Any], target: str, *extra_args: str) -> list[str]:
@@ -210,6 +220,20 @@ def nats_tunnel(context: dict[str, Any]) -> int:
             except subprocess.TimeoutExpired:
                 process.kill()
                 process.wait(timeout=3)
+
+
+@contextmanager
+def maintenance_nats_connection(context: dict[str, Any] | None = None):
+    credentials = resolve_nats_credentials(context)
+    direct_url = direct_nats_url()
+    if direct_url:
+        yield direct_url, credentials
+        return
+
+    resolved_context = context or load_controller_context()
+    credentials = resolve_nats_credentials(resolved_context)
+    with nats_tunnel(resolved_context) as local_port:
+        yield f"nats://127.0.0.1:{local_port}", credentials
 
 
 @contextmanager
@@ -718,10 +742,8 @@ def delete_alertmanager_silence(silence_id: str, context: dict[str, Any] | None 
 def list_active_windows(context: dict[str, Any] | None = None) -> dict[str, dict[str, Any]]:
     if state_file_path() is not None:
         return load_local_state()
-    context = context or load_controller_context()
-    credentials = resolve_nats_credentials(context)
-    with nats_tunnel(context) as local_port:
-        return asyncio.run(list_windows_async(f"nats://127.0.0.1:{local_port}", credentials))
+    with maintenance_nats_connection(context) as (nats_url, credentials):
+        return asyncio.run(list_windows_async(nats_url, credentials))
 
 
 def list_active_windows_best_effort(
@@ -766,10 +788,8 @@ def open_window(
         save_local_state(state)
         result = {"status": "opened", "action": "created", "bucket": MAINTENANCE_BUCKET, "key": maintenance_key(service_id), "window": window}
     else:
-        context = context or load_controller_context()
-        credentials = resolve_nats_credentials(context)
-        with nats_tunnel(context) as local_port:
-            result = asyncio.run(open_window_async(f"nats://127.0.0.1:{local_port}", window, credentials))
+        with maintenance_nats_connection(context) as (nats_url, credentials):
+            result = asyncio.run(open_window_async(nats_url, window, credentials))
 
     result["uptime_kuma_status_page"] = sync_status_page_maintenance(window, remove=False)
     emit_mutation_audit_event("maintenance.open", service_id, opened_by_class, opened_by_id)
@@ -801,12 +821,10 @@ def close_window(
             "force": force,
         }
     else:
-        context = context or load_controller_context()
-        credentials = resolve_nats_credentials(context)
-        with nats_tunnel(context) as local_port:
+        with maintenance_nats_connection(context) as (nats_url, credentials):
             result = asyncio.run(
                 close_window_async(
-                    f"nats://127.0.0.1:{local_port}",
+                    nats_url,
                     service_id=service_id,
                     force=force,
                     closed_by_class=closed_by_class,
@@ -838,10 +856,8 @@ def ensure_bucket(context: dict[str, Any] | None = None) -> dict[str, Any]:
         if not state_file_path().exists():
             save_local_state({})
         return {"status": "ready", "bucket": MAINTENANCE_BUCKET}
-    context = context or load_controller_context()
-    credentials = resolve_nats_credentials(context)
-    with nats_tunnel(context) as local_port:
-        return asyncio.run(ensure_bucket_async(f"nats://127.0.0.1:{local_port}", credentials))
+    with maintenance_nats_connection(context) as (nats_url, credentials):
+        return asyncio.run(ensure_bucket_async(nats_url, credentials))
 
 
 def is_problem_detail(check: str, detail: dict[str, Any]) -> bool:

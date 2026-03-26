@@ -309,6 +309,76 @@ def test_collect_service_health_uses_http_contract_expected_status(tmp_path: Pat
         server.server_close()
 
 
+def test_collect_service_health_marks_reset_probe_as_down_instead_of_crashing(tmp_path: Path) -> None:
+    class ResetConnectionHandler(BaseHTTPRequestHandler):
+        def do_GET(self) -> None:  # noqa: N802
+            self.connection.shutdown(2)
+            self.connection.close()
+
+        def log_message(self, format: str, *args: object) -> None:  # noqa: A003
+            return
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), ResetConnectionHandler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    port = server.server_address[1]
+
+    try:
+        write(
+            tmp_path / "config" / "service-capability-catalog.json",
+            json.dumps(
+                {
+                    "services": [
+                        {
+                            "id": "windmill",
+                            "name": "Windmill",
+                            "lifecycle_status": "active",
+                            "internal_url": f"http://127.0.0.1:{port}/api/version",
+                            "health_probe_id": "windmill",
+                            "vm": "docker-runtime-lv3",
+                            "vmid": 120,
+                            "environments": {"production": {"status": "active", "url": f"http://127.0.0.1:{port}/api/version"}},
+                        }
+                    ]
+                },
+                indent=2,
+            )
+            + "\n",
+        )
+        write(
+            tmp_path / "config" / "health-probe-catalog.json",
+            json.dumps(
+                {
+                    "schema_version": "1.0.0",
+                    "services": {
+                        "windmill": {
+                            "readiness": {
+                                "kind": "http",
+                                "url": f"http://127.0.0.1:{port}/api/version",
+                                "method": "GET",
+                                "expected_status": [200],
+                                "timeout_seconds": 5,
+                            }
+                        }
+                    },
+                },
+                indent=2,
+            )
+            + "\n",
+        )
+
+        payload = collect_service_health(tmp_path)
+
+        assert payload["summary"]["statuses"]["down"] == 1
+        assert payload["services"][0]["service_id"] == "windmill"
+        assert payload["services"][0]["probe_source"] == "readiness"
+        assert payload["services"][0]["probe_kind"] == "http"
+        assert payload["services"][0]["error"]
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
 def test_worker_script_wrapper_delegates_to_run_worker(monkeypatch: pytest.MonkeyPatch) -> None:
     module = load_module(
         "refresh_dns_records",

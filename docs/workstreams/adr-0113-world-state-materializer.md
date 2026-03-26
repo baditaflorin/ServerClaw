@@ -71,15 +71,20 @@
 
 - 2026-03-26 live replay from latest `origin/main` plus this worktree synced the runtime checkout on `docker-runtime-lv3`, fixed the first-refresh materializer path, and granted `windmill_user` access to `world_state`.
 - Verified live worker refreshes on `docker-runtime-lv3` for `proxmox_vms`, `container_inventory`, `netbox_topology`, `dns_records`, `tls_cert_expiry`, `opentofu_drift`, and `openbao_secret_expiry`.
-- Verified Postgres live state on `postgres-lv3`: `world_state.current_view` is populated and queryable, with seven fresh rows and `pg_matviews.ispopulated = true`.
-- Focused repository validation passed with `uv run --with pytest --with pyyaml pytest tests/test_world_state_workers.py tests/test_world_state_repo_surfaces.py tests/unit/test_world_state_materializer.py -q` and `python3 -m compileall config/windmill/scripts/world-state platform/world_state`.
+- Verified Postgres live state on `postgres-lv3`: `world_state.current_view` is populated and queryable, and direct worker runs succeeded for `maintenance_windows` and `service_health` once the repaired runtime env and worker checkout were present.
+- Resolved the repo-side merge blockers in this branch:
+  - `service_health` isolates per-probe transport failures instead of aborting the whole surface
+  - `maintenance_windows` can use a worker-local direct NATS URL instead of requiring the controller SSH tunnel path
+  - the Windmill runtime secret payload and `runtime.env.ctmpl` now carry the combined world-state, NATS, ledger, graph, Proxmox, and test-runner variables
+  - the Windmill role no longer overwrites the OpenBao-managed `runtime.env` after calling `openbao_compose_env`
+- Focused repository validation passed with `uv run --with pytest --with pyyaml pytest tests/test_world_state_workers.py tests/test_world_state_repo_surfaces.py tests/test_maintenance_window_tool.py tests/test_compose_runtime_secret_injection.py tests/unit/test_world_state_materializer.py -q`, `python3 -m compileall config/windmill/scripts/world-state platform/world_state scripts/maintenance_window_tool.py`, and `make syntax-check-windmill`.
+- The live platform was concurrently reverted by an older Windmill automation path after the repaired runtime was demonstrated: `/opt/windmill/openbao/runtime.env.ctmpl`, `/run/lv3-secrets/windmill/runtime.env`, and `/srv/proxmox_florin_server/platform/world_state/workers.py` all snapped back to the pre-fix variant before the final steady-state replay finished.
 
-## Remaining Merge-To-Main Follow-Up
+## Remaining Post-Merge Live Follow-Up
 
-- Merge the `windmill_postgres` world-state grant tasks so future replays do not require the manual `GRANT ... ON SCHEMA world_state` recovery.
-- Merge the wrapper import-order fix and the first-refresh fallback so future Windmill worker syncs can run without manual file sync on `docker-runtime-lv3`.
-- Reconcile the shared Windmill runtime template with the concurrent test-runner workstream so `WORLD_STATE_DSN`, NATS, ledger, Proxmox, and test-runner variables coexist in one managed `runtime.env.ctmpl`.
-- Finish live verification for `service_health` and `maintenance_windows`; the former was still long-running during this replay, and the latter still depends on a controller-coupled SSH tunnel path in `scripts/maintenance_window_tool.py`.
+- Reapply Windmill from merged `main` after the competing old runtime-env/template automation path is disabled or updated to the new superset contract.
+- Rerun the steady-state live replay for `service_health` and `maintenance_windows` after the old overwrite path stops rewriting `/opt/windmill/openbao/runtime.env.ctmpl`, `/run/lv3-secrets/windmill/runtime.env`, and `/srv/proxmox_florin_server/platform/world_state/workers.py`.
+- Once that stable replay holds, update `versions/stack.yaml`, `VERSION`, `README.md`, and the release notes from `main` as the final integration step.
 
 ## Merge Criteria
 

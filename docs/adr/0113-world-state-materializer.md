@@ -1,10 +1,10 @@
 # ADR 0113: World-State Materializer
 
 - Status: Accepted
-- Implementation Status: Partial
+- Implementation Status: Repo implementation complete; durable live state still blocked by concurrent runtime overwrite
 - Implemented In Repo Version: 0.113.0
-- Implemented In Platform Version: not yet
-- Implemented On: 2026-03-24
+- Implemented In Platform Version: pending stable replay from main
+- Implemented On: 2026-03-26
 - Date: 2026-03-24
 
 ## Context
@@ -120,9 +120,11 @@ The client is available to Windmill workflows, the platform CLI, and the agent o
 
 - Repository implementation landed in `0.113.0` with the shared [platform/world_state/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/world_state) package, the Postgres schema migration at [migrations/0010_world_state_schema.sql](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/migrations/0010_world_state_schema.sql), the seeded Windmill workers under [config/windmill/scripts/world-state/](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/world-state), and schedule registration through [collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml).
 - The 2026-03-26 `ws-0113-live-apply` replay verified the first-live materializer path after adding a non-concurrent populate fallback for `world_state.current_view`, fixing the worker wrappers so the `uv` fallback runs before optional imports, and granting `windmill_user` access to the `world_state` schema.
-- The live replay populated and verified `proxmox_vms`, `container_inventory`, `netbox_topology`, `dns_records`, `tls_cert_expiry`, `opentofu_drift`, and `openbao_secret_expiry` on `postgres-lv3`, and confirmed the materialized view is populated and queryable.
-- `service_health` was still slow-running during the replay, and `maintenance_windows` remains blocked by the controller-coupled SSH tunnel path in [scripts/maintenance_window_tool.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/maintenance_window_tool.py) plus a concurrent Windmill runtime template collision on `docker-runtime-lv3`.
-- Because those two surfaces were not fully live-verified and the shared Windmill runtime template still needs a merge-time superset update, `platform_version` must not advance yet.
+- The merge-blocker follow-up in this branch added per-service probe fault isolation for `service_health`, worker-runtime direct NATS support for `maintenance_windows`, and the Windmill runtime superset env contract for world-state, NATS, ledger, Proxmox, graph, and concurrent test-runner values.
+- During the 2026-03-26 replay, the repaired OpenBao payload and `runtime.env.ctmpl` transiently rendered a full `/run/lv3-secrets/windmill/runtime.env`, and the recreated `windmill_worker` container showed the expected `WORLD_STATE_DSN`, `LV3_NATS_URL`, `LV3_LEDGER_*`, `LV3_GRAPH_DSN`, and `LV3_TEST_RUNNER_*` variables.
+- The same replay also verified direct live worker refreshes for `maintenance_windows` and `service_health` when run against that repaired runtime contract, and `world_state.current_view` held all nine surfaces.
+- A concurrent older Windmill automation path then rewrote `/opt/windmill/openbao/runtime.env.ctmpl`, `/run/lv3-secrets/windmill/runtime.env`, and `/srv/proxmox_florin_server/platform/world_state/workers.py` back to the pre-fix state before the final steady-state wrapper replay completed.
+- Because the repaired live state was not durable on `docker-runtime-lv3`, `platform_version` must not advance yet; merge this branch to `main`, reapply from `main`, and rerun the live replay after the competing overwrite path is stopped.
 
 ## Consequences
 

@@ -87,6 +87,23 @@
       - path: "{{ windmill_worker_repo_checkout_host_path }}"
         mode: "0755"
 
+- name: Ensure the integration test runner password exists on the control machine
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ windmill_integration_test_runner_password_local_file }}" ]; then
+      umask 077
+      mkdir -p "$(dirname "{{ windmill_integration_test_runner_password_local_file }}")"
+      openssl rand -base64 24 | tr -d '\n' > "{{ windmill_integration_test_runner_password_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: windmill_integration_test_runner_password_generation
+  changed_when: "'changed' in windmill_integration_test_runner_password_generation.stdout"
+  no_log: true
+
 - name: Create a local staging archive path for the Windmill worker checkout
   ansible.builtin.tempfile:
     state: file
@@ -186,6 +203,7 @@
         {
           'DATABASE_URL': windmill_database_dsn,
           'SUPERADMIN_SECRET': windmill_superadmin_secret,
+          'LV3_GRAPH_DSN': windmill_platform_dsn,
           'WORLD_STATE_DSN': windmill_world_state_dsn,
           'LV3_NATS_URL': windmill_nats_url,
           'TF_VAR_proxmox_endpoint': windmill_proxmox_api_token_payload.api_url,
@@ -211,6 +229,17 @@
             if (windmill_ledger_nats_url | default('') | trim | length > 0)
             else {}
           )
+        | combine(
+            {'LV3_TEST_RUNNER_USERNAME': windmill_integration_test_runner_username}
+            if (windmill_integration_test_runner_username | default('') | trim | length > 0)
+            else {}
+          )
+        | combine(
+            {'LV3_TEST_RUNNER_PASSWORD': lookup('ansible.builtin.file', windmill_integration_test_runner_password_local_file) | trim}
+            if (lookup('ansible.builtin.file', windmill_integration_test_runner_password_local_file, errors='ignore') | default('', true) | trim | length > 0)
+            else {}
+          )
+        | combine({'LV3_INTEGRATION_ENVIRONMENT': 'production'})
       }}
   no_log: true
 
@@ -265,20 +294,6 @@
     common_openbao_compose_env_legacy_env_files:
       - "{{ windmill_legacy_env_file }}"
   no_log: true
-
-- name: Render the Windmill environment file
-  vars:
-    mutation_audit_action: render.windmill_env
-    mutation_audit_target: windmill-runtime
-  ansible.builtin.template:
-    src: windmill.env.j2
-    dest: "{{ windmill_env_file }}"
-    owner: root
-    group: root
-    mode: "0600"
-  no_log: true
-  tags:
-    - mutation
 
 - name: Render the Windmill compose file
   vars:

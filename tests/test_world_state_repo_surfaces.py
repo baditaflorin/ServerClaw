@@ -59,6 +59,7 @@ def test_windmill_runtime_templates_export_world_state_and_nats_env() -> None:
     ).read_text()
 
     for token in (
+        "LV3_GRAPH_DSN",
         "WORLD_STATE_DSN",
         "LV3_NATS_URL",
         "LV3_NATS_USERNAME",
@@ -67,9 +68,26 @@ def test_windmill_runtime_templates_export_world_state_and_nats_env() -> None:
         "LV3_LEDGER_NATS_URL",
         "TF_VAR_proxmox_endpoint",
         "TF_VAR_proxmox_api_token",
+        "LV3_TEST_RUNNER_USERNAME",
+        "LV3_TEST_RUNNER_PASSWORD",
+        "LV3_INTEGRATION_ENVIRONMENT",
         "LV3_WINDMILL_BASE_URL",
     ):
         assert token in env_template
+        assert token in env_ctmpl
+
+    for token in (
+        'index .Data.data "LV3_GRAPH_DSN"',
+        'index .Data.data "WORLD_STATE_DSN"',
+        'index .Data.data "LV3_NATS_URL"',
+        'index .Data.data "LV3_NATS_USERNAME"',
+        'index .Data.data "LV3_NATS_PASSWORD"',
+        'index .Data.data "LV3_LEDGER_DSN"',
+        'index .Data.data "LV3_LEDGER_NATS_URL"',
+        'index .Data.data "LV3_TEST_RUNNER_USERNAME"',
+        'index .Data.data "LV3_TEST_RUNNER_PASSWORD"',
+        'index .Data.data "LV3_INTEGRATION_ENVIRONMENT"',
+    ):
         assert token in env_ctmpl
 
 
