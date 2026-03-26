@@ -33,9 +33,11 @@ class FakeResponse:
 
 def test_netbox_client_retries_transient_url_errors(monkeypatch) -> None:
     attempts = {"count": 0}
+    observed_timeouts: list[float | None] = []
 
-    def flaky_urlopen(_request):
+    def flaky_urlopen(_request, timeout: float | None = None):
         attempts["count"] += 1
+        observed_timeouts.append(timeout)
         if attempts["count"] < 3:
             raise urllib.error.URLError(socket.timeout("timed out"))
         return FakeResponse({"status": "ok"})
@@ -54,3 +56,4 @@ def test_netbox_client_retries_transient_url_errors(monkeypatch) -> None:
 
     assert client.request("GET", "/api/status/") == {"status": "ok"}
     assert attempts["count"] == 3
+    assert all(timeout is not None for timeout in observed_timeouts)
