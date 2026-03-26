@@ -10,11 +10,13 @@ Converge the repo-managed unified platform API gateway on `docker-runtime-lv3` a
 - Service wrapper: `playbooks/services/api-gateway.yml`
 - Health probe id: `api_gateway`
 - Catalog: `config/api-gateway-catalog.json`
+- Timeout hierarchy: `config/timeout-hierarchy.yaml`
 
 ## Local Validation
 
 ```bash
 python3 scripts/api_gateway_catalog.py --validate
+uv run --with pyyaml python scripts/validate_timeout_hierarchy.py
 uv run --with pytest --with fastapi==0.116.1 --with httpx==0.28.1 --with uvicorn==0.35.0 --with pyyaml==6.0.2 --with cryptography==45.0.6 pytest tests/test_api_gateway.py tests/test_api_gateway_catalog.py
 ```
 
@@ -37,6 +39,7 @@ From `docker-runtime-lv3`:
 ```bash
 curl -sf http://127.0.0.1:8083/healthz
 curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8083/v1/health
+test -f /opt/api-gateway/config/timeout-hierarchy.yaml
 ```
 
 Expected:
@@ -50,21 +53,14 @@ From an operator workstation with a valid Keycloak token:
 curl https://api.lv3.org/healthz
 curl -H "Authorization: Bearer $LV3_TOKEN" https://api.lv3.org/v1/health
 curl -H "Authorization: Bearer $LV3_TOKEN" https://api.lv3.org/v1/platform/services
-curl -H "Authorization: Bearer $LV3_TOKEN" https://api.lv3.org/v1/platform/degradations
-```
-
-From `docker-runtime-lv3`, confirm the writable data volume now holds the gateway degradation state and any temporary NATS outbox:
-
-```bash
-sudo ls -l /opt/api-gateway/data
-sudo test -f /opt/api-gateway/data/degradation-state.json && sudo cat /opt/api-gateway/data/degradation-state.json || true
-sudo test -f /opt/api-gateway/data/nats-outbox.jsonl && sudo cat /opt/api-gateway/data/nats-outbox.jsonl || true
 ```
 
 ## Notes
 
 - The gateway validates Keycloak JWTs directly against the realm JWKS.
-- When Keycloak is unavailable but the JWKS cache is still valid, the gateway now stays in a declared degraded mode instead of failing authentication immediately.
-- When NATS publication fails, the gateway now buffers request events in `/opt/api-gateway/data/nats-outbox.jsonl` and flushes them on recovery.
+- When Keycloak is unavailable but the JWKS cache is still valid, the gateway stays in a declared degraded mode instead of failing authentication immediately.
+- When NATS publication fails, the gateway buffers request events in `/opt/api-gateway/data/nats-outbox.jsonl` and flushes them on recovery.
+- Safe read paths now use the ADR 0163 retry taxonomy with the shared `/config/retry-policies.yaml` bundle.
+- Non-idempotent webhook and proxied write paths remain single-shot until ADR 0165 idempotency keys are in place.
 - Native `/v1/platform/*` endpoints read repo-synced catalogs copied into the runtime bundle.
 - The public edge certificate for `api.lv3.org` is part of the shared `lv3-edge` certificate on `nginx-lv3`.

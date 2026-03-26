@@ -1,10 +1,10 @@
 # ADR 0157: Per-VM Concurrency Budget and Resource Reservation
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.151.0
+- Implemented In Platform Version: 0.130.7
+- Implemented On: 2026-03-25
 - Date: 2026-03-24
 
 ## Context

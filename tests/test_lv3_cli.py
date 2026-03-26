@@ -604,7 +604,6 @@ def test_intent_check_reports_conflict(
     assert "Conflict check: CONFLICT" in captured.out
     assert "intent-existing" in captured.out
 
-
 def test_intent_batch_renders_plan_and_writes_ledger(
     capsys: pytest.CaptureFixture[str], minimal_repo: Path
 ) -> None:
@@ -627,6 +626,39 @@ def test_intent_batch_renders_plan_and_writes_ledger(
     ledger_path = minimal_repo / ".local" / "state" / "ledger" / "ledger.events.jsonl"
     event_types = [json.loads(line)["event_type"] for line in ledger_path.read_text().splitlines()]
     assert event_types == ["intent.batch_plan"]
+
+def test_intent_status_reports_idempotent_hit(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    ledger_path = minimal_repo / ".local" / "state" / "ledger" / "ledger.events.jsonl"
+    ledger_path.parent.mkdir(parents=True, exist_ok=True)
+    ledger_path.write_text(
+        json.dumps(
+            {
+                "event_type": "execution.idempotent_hit",
+                "actor": "scheduler:budgeted-workflow-scheduler",
+                "actor_intent_id": "intent-2",
+                "target_kind": "workflow",
+                "target_id": "converge-netbox",
+                "receipt": {"status": "ok"},
+                "metadata": {
+                    "original_actor_intent_id": "intent-1",
+                    "original_job_id": "job-1",
+                    "completed_at": "2026-03-25T10:00:00Z",
+                },
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    exit_code = lv3_cli.main(["intent", "status", "intent-2"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "Status: idempotent_hit" in captured.out
+    assert "Original execution: job-1" in captured.out
+    assert "No action taken." in captured.out
 
 def test_runbook_execute_dry_run_renders_steps(
     capsys: pytest.CaptureFixture[str], minimal_repo: Path

@@ -6,16 +6,36 @@ Detailed per-change deployment history is generated separately in the deployment
 
 ## Releases
 
-- [0.146.1](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.146.1.md)
+- [0.159.0](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.159.0.md)
+- [0.158.0](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.158.0.md)
+- [0.157.4](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.157.4.md)
+- [0.157.2](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.157.2.md)
+- [0.157.1](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.157.1.md)
+- [0.157.0](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.157.0.md)
+- [0.156.0](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.156.0.md)
+- [0.155.0](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.155.0.md)
+- [0.154.0](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.154.0.md)
 
+- [0.153.0](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.153.0.md)
+
+- [0.152.0](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.152.0.md)
+
+- [0.151.0](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.151.0.md)
+
+- [0.149.0](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.149.0.md)
+
+- [0.148.0](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.148.0.md)
+
+- [0.147.0](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.147.0.md)
+
+- [0.146.2](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.146.2.md)
+
+- [0.146.1](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.146.1.md)
 - [0.146.0](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.146.0.md)
 
 - [0.145.0](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.145.0.md)
 
 - [0.144.0](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.144.0.md)
-
-- [0.143.2](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.143.2.md)
-
 - [0.143.1](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.143.1.md)
 
 - [0.143.0](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.143.0.md)

@@ -42,6 +42,7 @@ except ImportError:  # pragma: no cover - packaged entrypoint path
     from scripts.search_fabric import SearchClient
 
 from platform.health import HealthCompositeClient, ServiceHealthNotFoundError
+from platform.idempotency import IdempotencyStore
 from platform.scheduler import build_scheduler
 from scripts.risk_scorer import ExecutionIntent, assemble_context, compile_workflow_intent, score_intent
 CLI_VERSION = "0.1.0"
@@ -788,6 +789,7 @@ def build_execution_intent(workflow_name: str, args: list[str]) -> ExecutionInte
         scoring_context=context.as_dict(),
         risk_score=risk,
         semantic_diff=compiled.get("semantic_diff"),
+        required_lanes=compiled.get("required_lanes"),
         resource_claims=compiled.get("resource_claims"),
         conflict_warnings=compiled.get("conflict_warnings"),
     )
@@ -969,6 +971,88 @@ def enforce_risk_gate(intent: ExecutionIntent, *, approve_risk: bool, risk_overr
     return 0
 
 
+def load_ledger_events_for_intent(
+    actor_intent_id: str,
+    *,
+    repo_root: Path | None = None,
+    dsn: str | None = None,
+) -> list[dict[str, Any]]:
+    resolved_repo_root = repo_root or REPO_ROOT
+    resolved_dsn = (dsn if dsn is not None else os.environ.get("LV3_LEDGER_DSN", "")).strip()
+    if resolved_dsn:
+        return LEDGER_MODULE.LedgerReader(dsn=resolved_dsn).events_by_intent(actor_intent_id, limit=50)
+    ledger_path = resolved_repo_root / ".local" / "state" / "ledger" / "ledger.events.jsonl"
+    if not ledger_path.exists():
+        return []
+    events: list[dict[str, Any]] = []
+    for line in ledger_path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        payload = json.loads(line)
+        if payload.get("actor_intent_id") == actor_intent_id:
+            events.append(payload)
+    return events
+
+
+def show_intent_status(intent_id: str) -> int:
+    events = load_ledger_events_for_intent(intent_id)
+    record = IdempotencyStore(repo_root=REPO_ROOT).record_for_intent(intent_id)
+    if not events and record is None:
+        print(f"Intent {intent_id} was not found.", file=sys.stderr)
+        return 1
+
+    latest_event = events[-1] if events else None
+    status = "unknown"
+    result: Any = None
+    metadata: dict[str, Any] = {}
+    target_id = record.workflow_id if record is not None else "unknown"
+    if latest_event is not None:
+        target_id = str(latest_event.get("target_id") or target_id)
+        metadata = dict(latest_event.get("metadata") or {})
+        if latest_event.get("event_type") == "execution.idempotent_hit":
+            status = "idempotent_hit"
+            result = latest_event.get("receipt")
+        elif latest_event.get("event_type") == "execution.completed":
+            status = "completed"
+        elif latest_event.get("event_type") == "execution.failed":
+            status = "failed"
+        elif latest_event.get("event_type") == "execution.aborted":
+            status = "aborted"
+        elif latest_event.get("event_type") == "execution.started":
+            status = "in_flight"
+        elif latest_event.get("event_type") == "intent.deduplicated":
+            status = "duplicate"
+            result = latest_event.get("receipt")
+    if record is not None and record.status == "in_flight":
+        status = "in_flight"
+    elif record is not None and status == "unknown":
+        status = record.status
+        result = record.result
+
+    print(f"Intent {intent_id}: {target_id}")
+    print(f"Status: {status}")
+    if status == "idempotent_hit":
+        original_job_id = metadata.get("original_job_id") or (record.windmill_job_id if record is not None else None)
+        completed_at = metadata.get("completed_at") or (record.completed_at if record is not None else None)
+        original_intent_id = metadata.get("original_actor_intent_id")
+        summary = original_job_id or original_intent_id or "unknown"
+        if completed_at:
+            print(f"Original execution: {summary} (completed {completed_at})")
+        else:
+            print(f"Original execution: {summary}")
+        if result is not None:
+            print(f"Result: {json.dumps(result, sort_keys=True)}")
+        print("No action taken. The original result is being returned.")
+        return 0
+    if record is not None and record.windmill_job_id:
+        print(f"Windmill job: {record.windmill_job_id}")
+    if result is None and record is not None:
+        result = record.result
+    if result is not None:
+        print(f"Result: {json.dumps(result, sort_keys=True)}")
+    return 0
+
+
 def run_windmill_request(
     workflow_name: str,
     payload: dict[str, Any],
@@ -979,6 +1063,10 @@ def run_windmill_request(
     intent: Any | None = None,
     actor_id: str = DEFAULT_RUN_ACTOR_ID,
     autonomous: bool = False,
+    queue_if_conflicted: bool = False,
+    queue_priority: int | None = None,
+    queue_expires_in_seconds: int | None = None,
+    queue_notify_channel: str | None = None,
 ) -> int:
     service_map = load_service_map()
     base_url = windmill_url(service_map)
@@ -1013,11 +1101,28 @@ def run_windmill_request(
         workspace="lv3",
         repo_root=REPO_ROOT,
     )
-    scheduler_intent = intent or SimpleNamespace(
-        workflow_id=workflow_name,
-        arguments=payload,
-        target_vm=payload.get("target_vm") or payload.get("target"),
-    )
+    if intent is None:
+        scheduler_intent = SimpleNamespace(
+            workflow_id=workflow_name,
+            arguments=payload,
+            target_service_id=payload.get("service") or payload.get("service_id"),
+            target_vm=payload.get("target_vm") or payload.get("target"),
+            required_lanes=[],
+            queue_if_conflicted=queue_if_conflicted,
+            queue_priority=queue_priority,
+            queue_expires_in_seconds=queue_expires_in_seconds,
+            queue_notify_channel=queue_notify_channel,
+        )
+    elif queue_if_conflicted or queue_priority is not None or queue_expires_in_seconds is not None or queue_notify_channel:
+        scheduler_intent = SimpleNamespace(
+            **getattr(intent, "__dict__", {}),
+            queue_if_conflicted=queue_if_conflicted,
+            queue_priority=queue_priority,
+            queue_expires_in_seconds=queue_expires_in_seconds,
+            queue_notify_channel=queue_notify_channel,
+        )
+    else:
+        scheduler_intent = intent
     try:
         result = scheduler.submit(
             scheduler_intent,
@@ -1035,6 +1140,7 @@ def run_windmill_request(
         "capability_escalated",
         "concurrency_limit",
         "conflict_rejected",
+        "lane_busy",
         "rollback_depth_exceeded",
     }:
         print(
@@ -1042,12 +1148,62 @@ def run_windmill_request(
             + (f" ({result.reason})" if result.reason else ""),
             file=sys.stderr,
         )
+        lane_budget = result.metadata.get("lane") if isinstance(result.metadata, dict) else None
+        reasons = result.metadata.get("reasons") if isinstance(result.metadata, dict) else None
+        if isinstance(lane_budget, dict):
+            print(
+                f"Lane: {lane_budget.get('lane_id')} "
+                f"(policy={lane_budget.get('admission_policy')}, host={lane_budget.get('hostname')})",
+                file=sys.stderr,
+            )
+        if isinstance(reasons, list) and reasons:
+            print(f"Budget reasons: {', '.join(str(item) for item in reasons)}", file=sys.stderr)
         return 1
+    if result.status == "in_flight":
+        job = result.job_id
+        if job is None and isinstance(result.metadata, dict):
+            job = result.metadata.get("original_job_id")
+        message = f"Workflow {workflow_name} is already running for the same idempotency key."
+        if job:
+            message += f" Existing job: {job}."
+        print(message, file=sys.stderr)
+        return 0
+    if result.status == "queued":
+        queued_payload = {
+            "status": "queued",
+            "workflow_id": workflow_name,
+            "queue_id": result.metadata.get("queue_id"),
+        }
+        for key in (
+            "primary_lane_id",
+            "required_lanes",
+            "queue_position",
+            "queue_depth",
+            "priority",
+            "queued_at",
+            "expires_at",
+        ):
+            if key in result.metadata:
+                queued_payload[key] = result.metadata.get(key)
+        print(
+            json.dumps(queued_payload, indent=2, sort_keys=True)
+        )
+        return 0
     warnings = result.metadata.get("conflict_warnings", []) if isinstance(result.metadata, dict) else []
     for warning in warnings:
         message = warning.get("message") if isinstance(warning, dict) else None
         if message:
             print(f"Conflict warning: {message}", file=sys.stderr)
+    lane_budget = result.metadata.get("lane_budget") if isinstance(result.metadata, dict) else None
+    if isinstance(lane_budget, dict) and lane_budget.get("soft_exceeded") is True:
+        lane = lane_budget.get("lane", {})
+        reasons = lane_budget.get("reasons", [])
+        print(
+            "Lane budget warning: "
+            f"{lane.get('lane_id')} exceeded {', '.join(str(item) for item in reasons) or 'lane budget'} "
+            "but policy is soft.",
+            file=sys.stderr,
+        )
     if result.output is not None:
         if isinstance(result.output, str):
             print(result.output)
@@ -1073,6 +1229,10 @@ def run_windmill_workflow(
     risk_override: bool = False,
     actor_id: str = DEFAULT_RUN_ACTOR_ID,
     autonomous: bool = False,
+    queue_if_conflicted: bool = False,
+    queue_priority: int | None = None,
+    queue_expires_in_seconds: int | None = None,
+    queue_notify_channel: str | None = None,
 ) -> int:
     intent = build_execution_intent(workflow_name, args)
     maybe_write_compiled_intent_event(intent)
@@ -1090,6 +1250,10 @@ def run_windmill_workflow(
         intent=intent,
         actor_id=actor_id,
         autonomous=autonomous,
+        queue_if_conflicted=queue_if_conflicted,
+        queue_priority=queue_priority,
+        queue_expires_in_seconds=queue_expires_in_seconds,
+        queue_notify_channel=queue_notify_channel,
     )
 
 
@@ -1109,6 +1273,10 @@ def run_compiled_instruction(
     force_unsafe_health: bool = False,
     actor_id: str = DEFAULT_RUN_ACTOR_ID,
     autonomous: bool = False,
+    queue_if_conflicted: bool = False,
+    queue_priority: int | None = None,
+    queue_expires_in_seconds: int | None = None,
+    queue_notify_channel: str | None = None,
 ) -> int:
     compiler = GoalCompiler(REPO_ROOT)
     ledger = LedgerWriter(
@@ -1168,6 +1336,10 @@ def run_compiled_instruction(
                 no_color=no_color,
                 actor_id=actor_id,
                 autonomous=autonomous,
+                queue_if_conflicted=queue_if_conflicted,
+                queue_priority=queue_priority,
+                queue_expires_in_seconds=queue_expires_in_seconds,
+                queue_notify_channel=queue_notify_channel,
             )
         return 0
 
@@ -1204,6 +1376,7 @@ def run_compiled_instruction(
         execution_mode=result.intent.execution_mode,
         target_service_id=result.intent.target.services[0] if result.intent.target.services else None,
         target_vm=result.intent.scope.allowed_hosts[0] if result.intent.scope.allowed_hosts else None,
+        required_lanes=result.intent.required_lanes,
         resource_claims=result.intent.resource_claims,
         conflict_warnings=result.intent.conflict_warnings,
     )
@@ -1224,9 +1397,18 @@ def run_compiled_instruction(
             conflict_warnings=result.intent.conflict_warnings,
             risk_class=result.intent.risk_class,
             required_read_surfaces=result.intent.required_read_surfaces,
+            required_lanes=result.intent.required_lanes,
+            queue_if_conflicted=queue_if_conflicted,
+            queue_priority=queue_priority,
+            queue_expires_in_seconds=queue_expires_in_seconds,
+            queue_notify_channel=queue_notify_channel,
         ),
         actor_id=actor_id,
         autonomous=autonomous,
+        queue_if_conflicted=queue_if_conflicted,
+        queue_priority=queue_priority,
+        queue_expires_in_seconds=queue_expires_in_seconds,
+        queue_notify_channel=queue_notify_channel,
     )
 
 
@@ -1253,6 +1435,7 @@ def check_intent_conflicts(instruction: str, args: list[str]) -> int:
         arguments=result.dispatch_payload,
         target_service_id=result.intent.target.services[0] if result.intent.target.services else None,
         target_vm=result.intent.scope.allowed_hosts[0] if result.intent.scope.allowed_hosts else None,
+        required_lanes=result.intent.required_lanes,
         resource_claims=result.intent.resource_claims,
         conflict_warnings=result.intent.conflict_warnings,
     )
@@ -2305,6 +2488,10 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--actor-id", default=DEFAULT_RUN_ACTOR_ID)
     run.add_argument("--autonomous", action="store_true", help="Apply autonomous agent policy bounds.")
     run.add_argument("--allow-speculative", action="store_true", help="Opt into speculative execution when eligible.")
+    run.add_argument("--queue-if-conflicted", action="store_true", help="Queue instead of failing when blocked by conflicts or workflow concurrency.")
+    run.add_argument("--queue-priority", type=int, help="Explicit ADR 0155 queue priority (lower is higher priority).")
+    run.add_argument("--queue-expires-in", dest="queue_expires_in_seconds", type=int, help="ADR 0155 queue TTL in seconds.")
+    run.add_argument("--queue-notify-channel", help="Notification channel recorded on the queued intent.")
     run.add_argument("--dry-run", action="store_true")
     run.add_argument("--explain", action="store_true")
 
@@ -2327,6 +2514,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     intent_batch.add_argument("--max-parallelism", type=int, default=5)
     intent_batch.add_argument("--json", action="store_true")
+    intent_status = intent_subparsers.add_parser("status", help="Show execution and idempotency state for one intent.")
+    intent_status.add_argument("intent_id")
 
     health = subparsers.add_parser("health", help="Show the composite health index.")
     health.add_argument("service", nargs="?")
@@ -2616,6 +2805,10 @@ def main(argv: list[str] | None = None) -> int:
                 risk_override=args.risk_override,
                 actor_id=args.actor_id,
                 autonomous=args.autonomous,
+                queue_if_conflicted=args.queue_if_conflicted,
+                queue_priority=args.queue_priority,
+                queue_expires_in_seconds=args.queue_expires_in_seconds,
+                queue_notify_channel=args.queue_notify_channel,
             )
         return run_compiled_instruction(
             instruction,
@@ -2627,6 +2820,10 @@ def main(argv: list[str] | None = None) -> int:
             force_unsafe_health=args.force_unsafe_health,
             actor_id=args.actor_id,
             autonomous=args.autonomous,
+            queue_if_conflicted=args.queue_if_conflicted,
+            queue_priority=args.queue_priority,
+            queue_expires_in_seconds=args.queue_expires_in_seconds,
+            queue_notify_channel=args.queue_notify_channel,
         )
     if args.command == "intent":
         if args.intent_action == "check":
@@ -2640,6 +2837,8 @@ def main(argv: list[str] | None = None) -> int:
                 max_parallelism=args.max_parallelism,
                 as_json=args.json,
             )
+        if args.intent_action == "status":
+            return show_intent_status(args.intent_id)
     if args.command == "runbook":
         if args.runbook_action == "execute":
             return runbook_execute_command(args.runbook, args.args, dry_run=args.dry_run, explain=args.explain)

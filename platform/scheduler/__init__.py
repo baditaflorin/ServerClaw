@@ -5,8 +5,21 @@ from .budgets import (
     WorkflowPolicy,
     estimate_touched_hosts,
     load_default_budget,
+    load_default_resource_reservation,
     load_workflow_policy,
 )
+from .lanes import (
+    ExecutionLane,
+    FileLaneReservationStore,
+    LaneBudget,
+    LaneReservationDecision,
+    LaneReservationRecord,
+    ResourceReservation,
+    ResourceUsage,
+    load_execution_lanes,
+    resolve_execution_lane,
+)
+from platform.idempotency import IdempotencyStore
 from .rollback_guard import RollbackDepthResult, RollbackGuard
 from .scheduler import (
     BudgetedWorkflowScheduler,
@@ -17,15 +30,24 @@ from .scheduler import (
     build_scheduler,
 )
 from .speculative import ConflictProbeResult, SpeculativeExecutionRecord, SpeculativeStateStore
-from .watchdog import ActiveJobRecord, SchedulerStateStore, Watchdog, WatchdogViolation
+from .watchdog import ActiveJobRecord, SchedulerStateStore, WATCHDOG_POLL_INTERVAL_SECONDS, Watchdog, WatchdogViolation
 
 __all__ = [
     "ActiveJobRecord",
     "BudgetedWorkflowScheduler",
+    "ConflictProbeResult",
+    "ExecutionLane",
     "FileConcurrencyLockManager",
+    "FileLaneReservationStore",
     "HostTouchEstimate",
     "HttpWindmillClient",
+    "LaneBudget",
+    "LaneReservationDecision",
+    "LaneReservationRecord",
+    "IdempotencyStore",
     "PostgresAdvisoryLockManager",
+    "ResourceReservation",
+    "ResourceUsage",
     "RollbackDepthResult",
     "RollbackGuard",
     "SchedulerResult",
@@ -34,6 +56,7 @@ __all__ = [
     "SpeculativeStateStore",
     "SpeculativeWorkflowPolicy",
     "ConflictProbeResult",
+    "WATCHDOG_POLL_INTERVAL_SECONDS",
     "Watchdog",
     "WatchdogViolation",
     "WorkflowBudget",
@@ -41,5 +64,8 @@ __all__ = [
     "build_scheduler",
     "estimate_touched_hosts",
     "load_default_budget",
+    "load_default_resource_reservation",
+    "load_execution_lanes",
     "load_workflow_policy",
+    "resolve_execution_lane",
 ]

@@ -1,10 +1,10 @@
 # ADR 0153: Distributed Resource Lock Registry
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.150.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-25
 - Date: 2026-03-24
 
 ## Context
@@ -24,6 +24,8 @@ What is needed is a **resource lock registry**: a low-latency, real-time, resour
 ## Decision
 
 We will implement a **distributed resource lock registry** backed by NATS JetStream Key-Value (KV) store, providing hierarchical, TTL-bounded, typed resource locks for all platform agents.
+
+The first repository implementation lands in [`platform/locking/registry.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/locking/registry.py) as a worker-shared file-backed registry under the git common dir or `.local/state/`. It preserves the ADR contract that matters to callers now: typed locks, hierarchy checks, TTL expiry, and holder metadata that the deadlock detector can read. Optional NATS subject emission remains compatible with a later JetStream KV backend behind the same interface.
 
 ### Resource type hierarchy
 

@@ -40,6 +40,18 @@
     </div>
   </section>
 
+  <section id="agents" class="portal-section">
+    <div class="section-head">
+      <div>
+        <p class="section-kicker">Agent Coordination</p>
+        <h2>Live multi-agent session map</h2>
+      </div>
+    </div>
+    <div id="agent-panel" hx-get="/partials/agents" hx-trigger="load, every 15s" hx-swap="innerHTML">
+      {% include "partials/agents.html" %}
+    </div>
+  </section>
+
   <section id="drift" class="portal-section">
     <div class="section-head">
       <div>

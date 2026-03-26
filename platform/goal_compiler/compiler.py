@@ -18,6 +18,7 @@ if str(SCRIPTS_DIR) not in sys.path:
 from maintenance_window_tool import list_active_windows_best_effort
 from platform.agent_policy import AgentPolicyEngine, PolicyOutcome
 from platform.conflict import infer_resource_claims
+from platform.execution_lanes import resolve_lanes
 from platform.health import HealthCompositeClient, ServiceHealthNotFoundError
 
 from .rules import AliasConfig, GoalRule, GroupAlias, load_alias_config, load_goal_rules, match_rule
@@ -208,6 +209,7 @@ class GoalCompiler:
             requires_approval=requires_approval,
             compiled_by=COMPILER_VERSION,
             required_read_surfaces=list(COMPILER_REQUIRED_READ_SURFACES),
+            required_lanes=[],
             resource_claims=[],
             risk_score=RiskScore(
                 source="rule_table",
@@ -215,6 +217,22 @@ class GoalCompiler:
                 reasons=[f"matched rule {rule.rule_id}"],
             ),
         )
+        lane_resolution = resolve_lanes(
+            {
+                "workflow_id": workflow_id,
+                "target_service_id": target.services[0] if target.services else None,
+                "target_vm": scope.allowed_hosts[0] if scope.allowed_hosts else None,
+                "target": {
+                    "services": list(target.services),
+                },
+                "scope": {
+                    "allowed_hosts": list(scope.allowed_hosts),
+                },
+                "arguments": workflow_payload,
+            },
+            repo_root=self.repo_root,
+        )
+        intent = replace(intent, required_lanes=list(lane_resolution.required_lanes))
         intent = self._with_resource_claims(intent, workflow_id=workflow_id, dispatch_payload=workflow_payload)
         intent, workflow_payload = self._maybe_enable_speculative(
             intent,

@@ -1,0 +1,65 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the private Vaultwarden runtime and bootstrap state.
+    options:
+      vaultwarden_image:
+        type: str
+        required: true
+      vaultwarden_container_name:
+        type: str
+        required: true
+      vaultwarden_site_dir:
+        type: path
+        required: true
+      vaultwarden_data_dir:
+        type: path
+        required: true
+      vaultwarden_tls_dir:
+        type: path
+        required: true
+      vaultwarden_compose_file:
+        type: path
+        required: true
+      vaultwarden_https_port:
+        type: int
+        required: true
+      vaultwarden_internal_base_url:
+        type: str
+        required: true
+      vaultwarden_controller_url:
+        type: str
+        required: true
+      vaultwarden_public_base_url:
+        type: str
+        required: true
+      vaultwarden_database_name:
+        type: str
+        required: true
+      vaultwarden_database_user:
+        type: str
+        required: true
+      vaultwarden_database_host:
+        type: str
+        required: true
+      vaultwarden_database_port:
+        type: int
+        required: true
+      vaultwarden_local_artifact_dir:
+        type: path
+        required: true
+      vaultwarden_database_password_local_file:
+        type: path
+        required: true
+      vaultwarden_admin_token_local_file:
+        type: path
+        required: true
+      vaultwarden_admin_token_hash_local_file:
+        type: path
+        required: true
+      vaultwarden_bootstrap_state_local_file:
+        type: path
+        required: true
+      vaultwarden_bootstrap_operator_email:
+        type: str
+        required: true

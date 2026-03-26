@@ -1,7 +1,7 @@
 host_public_hostname: Debian-trixie-latest-amd64-base
 management_interface: enp7s0
 management_ipv4: 65.108.75.123
-management_tailscale_ipv4: 100.118.189.95
+management_tailscale_ipv4: 100.64.0.1
 management_ipv4_cidr: 26
 management_gateway4: 65.108.75.65
 management_ipv6: 2a01:4f9:6b:4b47::2
@@ -30,6 +30,8 @@ platform_port_assignments:
   ntfy_port: 2586
   openbao_http_port: 8201
   openbao_proxy_port: 8200
+  semaphore_server_port: 3004
+  semaphore_host_proxy_port: 8020
   windmill_server_port: 8000
   windmill_host_proxy_port: 8005
   mattermost_server_port: 8065
@@ -37,6 +39,7 @@ platform_port_assignments:
   netbox_server_port: 8082
   netbox_host_proxy_port: 8004
   ollama_api_port: 11434
+  n8n_port: 5678
   open_webui_port: 8088
   open_webui_host_proxy_port: 8008
   api_gateway_internal_port: 8083
@@ -49,7 +52,11 @@ platform_port_assignments:
   portainer_host_proxy_port: 9444
   step_ca_api_port: 9000
   step_ca_proxy_port: 9443
+  headscale_http_port: 8080
+  vaultwarden_https_port: 8222
 proxmox_tailscale_hostname: proxmox-florin-subnet-router
+proxmox_tailscale_login_server: https://headscale.lv3.org
+proxmox_tailscale_tags: []
 proxmox_tailscale_advertise_routes:
   - "{{ proxmox_internal_network }}"
 proxmox_tailscale_operator_target_guest: 10.10.10.30
@@ -111,6 +118,11 @@ proxmox_tailscale_tcp_proxies:
     listen_port: "{{ platform_port_assignments.openbao_proxy_port }}"
     upstream_host: 10.10.10.20
     upstream_port: "{{ platform_port_assignments.openbao_proxy_port }}"
+  - name: semaphore
+    listen_address: "{{ management_tailscale_ipv4 }}"
+    listen_port: "{{ platform_port_assignments.semaphore_host_proxy_port }}"
+    upstream_host: 10.10.10.20
+    upstream_port: "{{ platform_port_assignments.semaphore_server_port }}"
   - name: open-webui
     listen_address: "{{ management_tailscale_ipv4 }}"
     listen_port: "{{ platform_port_assignments.open_webui_host_proxy_port }}"
@@ -126,6 +138,11 @@ proxmox_tailscale_tcp_proxies:
     listen_port: "{{ platform_port_assignments.portainer_host_proxy_port }}"
     upstream_host: 10.10.10.20
     upstream_port: 9443
+  - name: vaultwarden
+    listen_address: "{{ management_tailscale_ipv4 }}"
+    listen_port: 443
+    upstream_host: 10.10.10.20
+    upstream_port: "{{ platform_port_assignments.vaultwarden_https_port }}"
 
 proxmox_guests:
   - vmid: 110
@@ -313,14 +330,31 @@ network_policy:
         - source: host
           protocol: tcp
           ports:
+            - 3004
             - 8000
             - 8010
             - 8082
             - 8088
             - 8200
+            - 8222
             - 9000
             - 9443
           description: Host-side private service proxies
+        - source: all_guests
+          protocol: tcp
+          ports:
+            - 5678
+          description: Private guest-to-guest access to the n8n automation runtime
+        - source: 172.16.0.0/12
+          protocol: tcp
+          ports:
+            - 5678
+          description: Local Docker workloads that call the private n8n automation runtime
+        - source: 192.168.0.0/16
+          protocol: tcp
+          ports:
+            - 5678
+          description: Local Docker workloads that call the private n8n automation runtime
         - source: all_guests
           protocol: tcp
           ports:
@@ -336,6 +370,11 @@ network_policy:
           ports:
             - 11434
           description: Local Docker workloads that use the private Ollama inference API
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
+            - 5678
+          description: Reverse proxy access to the n8n editor, health checks, and public webhook ingress
         - source: nginx-lv3
           protocol: tcp
           ports:
@@ -620,6 +659,27 @@ lv3_service_topology:
       blocked_exact_paths:
         - path: /api/health
           status: 404
+  headscale:
+    service_name: headscale
+    owning_vm: proxmox_florin
+    private_ip: "{{ hostvars['proxmox_florin'].proxmox_internal_ipv4 }}"
+    public_hostname: headscale.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: headscale
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: "http://{{ hostvars['proxmox_florin'].proxmox_internal_ipv4 }}:{{ hostvars['proxmox_florin'].platform_port_assignments.headscale_http_port }}"
   alertmanager:
     service_name: alertmanager
     owning_vm: monitoring-lv3
@@ -772,6 +832,17 @@ lv3_service_topology:
     access:
       kind: tailscale-tcp-proxy
       url: "{{ step_ca_controller_url }}"
+  semaphore:
+    service_name: semaphore
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    access:
+      kind: tailscale-tcp-proxy
+      url: "{{ semaphore_controller_url }}"
   windmill:
     service_name: windmill
     owning_vm: docker-runtime-lv3
@@ -824,6 +895,27 @@ lv3_service_topology:
     observability:
       guest_dashboard: false
       service_telemetry: false
+  n8n:
+    service_name: n8n
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: n8n.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: n8n
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.n8n_port }}"
   api_gateway:
     service_name: api-gateway
     owning_vm: docker-runtime-lv3
@@ -939,6 +1031,24 @@ lv3_service_topology:
     access:
       kind: tailscale-tcp-proxy
       url: "{{ portainer_controller_url }}"
+  vaultwarden:
+    service_name: vaultwarden
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: vault.lv3.org
+    exposure_model: private-only
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: tailnet
+      name: vault
+      type: A
+      target: "{{ management_tailscale_ipv4 }}"
+      ttl: 60
+    access:
+      kind: tailscale-tcp-proxy
   postgres:
     service_name: postgres
     owning_vm: postgres-lv3

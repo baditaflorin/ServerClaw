@@ -561,6 +561,99 @@
   changed_when: false
   no_log: true
 
+- name: Create a temporary path for the ADR 0158 config-merge migration
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become_user: postgres
+  ansible.builtin.tempfile:
+    state: file
+    suffix: .sql
+  register: windmill_config_merge_migration_tmp
+
+- name: Copy the ADR 0158 config-merge migration to the database host
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become_user: postgres
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../migrations/0016_config_merge_schema.sql"
+    dest: "{{ windmill_config_merge_migration_tmp.path }}"
+    mode: "0600"
+
+- name: Apply the ADR 0158 config-merge migration in the Windmill database
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -f
+      - "{{ windmill_config_merge_migration_tmp.path }}"
+  changed_when: false
+
+- name: Remove the temporary ADR 0158 config-merge migration file
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become_user: postgres
+  ansible.builtin.file:
+    path: "{{ windmill_config_merge_migration_tmp.path }}"
+    state: absent
+
+- name: Create a temporary path for the ADR 0165 idempotency migration
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become_user: postgres
+  ansible.builtin.tempfile:
+    state: file
+    suffix: .sql
+  register: windmill_idempotency_migration_tmp
+
+- name: Copy the ADR 0165 idempotency migration to the database host
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become_user: postgres
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../migrations/0016_idempotency_store.sql"
+    dest: "{{ windmill_idempotency_migration_tmp.path }}"
+    mode: "0600"
+
+- name: Apply the ADR 0165 idempotency migration in the Windmill database
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -f
+      - "{{ windmill_idempotency_migration_tmp.path }}"
+  changed_when: false
+
+- name: Remove the temporary ADR 0165 idempotency migration file
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become_user: postgres
+  ansible.builtin.file:
+    path: "{{ windmill_idempotency_migration_tmp.path }}"
+    state: absent
+
+- name: Assert the ADR 0165 idempotency schema exists in the Windmill database
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -Atqc
+      - "SELECT to_regclass('platform.idempotency_records')"
+  register: windmill_idempotency_schema_check
+  changed_when: false
+
+- name: Fail when the ADR 0165 idempotency schema is missing
+  ansible.builtin.assert:
+    that:
+      - windmill_idempotency_schema_check.stdout | trim == 'platform.idempotency_records'
+    fail_msg: "ADR 0165 live schema apply did not create platform.idempotency_records in the Windmill database."
+
 - name: Delete existing repo-managed Windmill scripts before reseeding
   ansible.builtin.uri:
     url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id | urlencode }}/scripts/delete/p/{{ item.path | urlencode }}"
@@ -568,12 +661,16 @@
     headers:
       Authorization: "Bearer {{ windmill_superadmin_secret }}"
     return_content: true
-    status_code:
-      - 200
-      - 404
   loop: "{{ windmill_seed_scripts }}"
   loop_control:
     label: "{{ item.path }}"
+  register: windmill_seed_script_delete
+  failed_when: >-
+    windmill_seed_script_delete.status not in [200, 404]
+    and not (
+      windmill_seed_script_delete.status == 400
+      and 'no rows returned' in (windmill_seed_script_delete.content | default('') | lower)
+    )
   changed_when: false
   no_log: true
 
@@ -692,7 +789,11 @@
   loop_control:
     label: "{{ item.path }}"
   register: windmill_seed_schedule_exists
+  retries: 6
+  delay: 5
+  until: windmill_seed_schedule_exists.status | default(0) == 200
   changed_when: false
+  failed_when: windmill_seed_schedule_exists.status | default(0) != 200
   no_log: true
 
 - name: Create repo-managed Windmill schedules
@@ -753,6 +854,21 @@
     label: "{{ item.item.path }}"
   when: item.content | default('false') | trim | bool
   changed_when: false
+  no_log: true
+
+- name: Converge repo-managed Windmill schedule enabled flags
+  ansible.builtin.shell: |
+    set -euo pipefail
+    . "{{ windmill_env_file }}"
+    psql "${DATABASE_URL}" -v ON_ERROR_STOP=1 -Atqc \
+      "UPDATE schedule SET enabled = {{ item.enabled | default(false) | ternary('true', 'false') }} WHERE path = '{{ item.path }}' AND enabled IS DISTINCT FROM {{ item.enabled | default(false) | ternary('true', 'false') }};"
+  args:
+    executable: /bin/bash
+  loop: "{{ windmill_seed_schedules }}"
+  loop_control:
+    label: "{{ item.path }}"
+  register: windmill_seed_schedule_enabled_sync
+  changed_when: "'UPDATE 1' in (windmill_seed_schedule_enabled_sync.stdout | default(''))"
   no_log: true
 
 - name: Run the Windmill seeded healthcheck script

@@ -1,0 +1,12 @@
+{
+  "summary": {
+    "count": 0,
+    "active": 0,
+    "blocked": 0,
+    "escalated": 0,
+    "completing": 0,
+    "generated_at": "2026-03-25T13:07:29Z"
+  },
+  "entries": [],
+  "receipt_id": "2026-03-25-adr-0161-agent-coordination-snapshot"
+}

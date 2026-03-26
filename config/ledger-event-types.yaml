@@ -4,21 +4,26 @@
 - intent.batch_plan
 - intent.claim_registered
 - intent.deduplicated
+- intent.queued
 - intent.rejected
+- intent.dispatched
 - intent.expired
 
 # Execution lifecycle
 - execution.started
 - execution.rejected
 - execution.escalated
+- execution.idempotent_hit
 - execution.completed
 - execution.failed
 - execution.aborted
+- execution.deadlock_aborted
 - execution.budget_exceeded
 - execution.speculative_started
 - execution.speculative_probing
 - execution.speculative_committed
 - execution.speculative_rolled_back
+- execution.stale_job_detected
 
 # Service mutations
 - service.deployed

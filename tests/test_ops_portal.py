@@ -73,6 +73,7 @@ class OpsPortalRenderTests(unittest.TestCase):
             self.assertIn("Failure blast radius", index_html)
             self.assertIn("ops.lv3.org", dns_html)
             self.assertIn("get-platform-status", agents_html)
+            self.assertIn("Agent Coordination Map", agents_html)
             self.assertEqual(snapshot_file.read_text(), index_html)
         finally:
             ops_portal.active_ephemeral_receipts = original_receipts

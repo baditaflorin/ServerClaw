@@ -1,26 +1,28 @@
 #!/usr/bin/env python3
 
 import json
-import logging
 import math
 import os
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 from dependency_graph import compute_impact, graph_to_dict, load_dependency_graph
-from fastapi import Depends, FastAPI, Header, HTTPException, Query
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, PointStruct, VectorParams
 
+from platform.logging import clear_context, generate_trace_id, get_logger, set_context
 from platform_context_corpus import build_chunks
 from slo_tracking import build_slo_status_entries, default_grafana_url, default_prometheus_url
 
 
 DEFAULT_COLLECTION = "platform_context"
 DEFAULT_DIMENSION = 384
-LOGGER = logging.getLogger(__name__)
+HTTP_LOGGER = get_logger("platform_context_api", "http", name="lv3.platform_context.http")
+SERVICE_LOGGER = get_logger("platform_context_api", "service", name="lv3.platform_context.service")
 
 
 class QueryRequest(BaseModel):
@@ -101,10 +103,16 @@ class PlatformContextService:
             try:
                 return SentenceTransformersEmbedder(self.config.embedding_model)
             except Exception as exc:
-                LOGGER.warning(
-                    "Falling back to token-hash embeddings because %s could not be initialized: %s",
-                    self.config.embedding_model,
-                    exc,
+                SERVICE_LOGGER.warning(
+                    "Falling back to token-hash embeddings",
+                    extra={
+                        "trace_id": "startup",
+                        "workflow_id": "converge-rag-context",
+                        "target": "service:platform_context_api",
+                        "error_code": "EMBEDDING_BACKEND_FALLBACK",
+                        "embedding_model": self.config.embedding_model,
+                        "error_detail": str(exc),
+                    },
                 )
                 return TokenHashEmbedder(self.config.embedding_dimension)
         raise ValueError(f"unsupported embedding backend: {self.config.embedding_backend}")
@@ -139,10 +147,20 @@ class PlatformContextService:
             for index, chunk in enumerate(chunks)
         ]
         self.client.upsert(collection_name=self.config.collection_name, points=points)
-        return {
+        result = {
             "collection_name": self.config.collection_name,
             "indexed_chunks": len(chunks),
         }
+        SERVICE_LOGGER.info(
+            "Indexed context chunks",
+            extra={
+                "workflow_id": "platform-context-rebuild",
+                "target": "collection:" + self.config.collection_name,
+                "duration_ms": None,
+                "indexed_chunks": len(chunks),
+            },
+        )
+        return result
 
     def rebuild_from_local_corpus(self) -> dict[str, Any]:
         chunks = build_chunks(self.config.corpus_root)
@@ -167,7 +185,7 @@ class PlatformContextService:
                 limit=top_k,
                 with_payload=True,
             )
-        return {
+        payload = {
             "question": question,
             "matches": [
                 {
@@ -182,6 +200,15 @@ class PlatformContextService:
                 for match in matches
             ],
         }
+        SERVICE_LOGGER.info(
+            "Answered platform-context query",
+            extra={
+                "target": "collection:" + self.config.collection_name,
+                "query_top_k": top_k,
+                "match_count": len(payload["matches"]),
+            },
+        )
+        return payload
 
     def recent_receipts(self, limit: int) -> dict[str, Any]:
         receipts_dir = self.config.corpus_root / "receipts" / "live-applies"
@@ -201,12 +228,15 @@ class PlatformContextService:
 
     def platform_summary(self) -> dict[str, Any]:
         version = (self.config.corpus_root / "VERSION").read_text().strip()
-        stack = json.loads(json.dumps(load_yaml(self.config.corpus_root / "versions" / "stack.yaml")))
+        stack = load_yaml(self.config.corpus_root / "versions" / "stack.yaml")
         observed = stack.get("observed_state", {})
+        checked_at = observed.get("checked_at")
+        if hasattr(checked_at, "isoformat"):
+            checked_at = checked_at.isoformat()
         return {
             "repo_version": version,
             "platform_version": stack.get("platform_version"),
-            "checked_at": observed.get("checked_at"),
+            "checked_at": checked_at,
             "proxmox_version": observed.get("proxmox", {}).get("version"),
             "open_webui_url": observed.get("open_webui", {}).get("host_tailscale_proxy_url"),
             "windmill_url": observed.get("windmill", {}).get("host_tailscale_proxy_url"),
@@ -302,6 +332,42 @@ def require_auth(authorization: str | None = Header(default=None)) -> None:
     current_service = get_service()
     if authorization != f"Bearer {current_service.config.api_token}":
         raise HTTPException(status_code=401, detail="Unauthorized")
+    set_context(actor_id="platform-context-client")
+
+
+@app.middleware("http")
+async def add_request_context(request: Request, call_next):
+    request.state.trace_id = request.headers.get("X-Trace-Id") or generate_trace_id()
+    set_context(trace_id=request.state.trace_id)
+    started_at = time.perf_counter()
+    try:
+        response = await call_next(request)
+    except Exception:
+        HTTP_LOGGER.exception(
+            "Unhandled platform-context request failure",
+            extra={
+                "path": request.url.path,
+                "method": request.method,
+                "status_code": 500,
+                "duration_ms": round((time.perf_counter() - started_at) * 1000, 3),
+                "target": request.url.path,
+            },
+        )
+        clear_context()
+        raise
+    response.headers["X-Trace-Id"] = request.state.trace_id
+    HTTP_LOGGER.info(
+        "Request completed",
+        extra={
+            "path": request.url.path,
+            "method": request.method,
+            "status_code": response.status_code,
+            "duration_ms": round((time.perf_counter() - started_at) * 1000, 3),
+            "target": request.url.path,
+        },
+    )
+    clear_context()
+    return response
 
 
 @app.get("/healthz")

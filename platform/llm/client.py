@@ -12,6 +12,8 @@ from typing import Any, Callable
 
 import yaml
 
+from platform.circuit import CircuitOpenError, CircuitRegistry
+
 
 RequestJson = Callable[[str, str, dict[str, Any] | None, dict[str, str] | None, float], dict[str, Any]]
 
@@ -52,6 +54,7 @@ class PlatformLLMClient:
         actor: str = "service:platform-llm-client",
         request_json: RequestJson | None = None,
         monotonic: Callable[[], float] = time.monotonic,
+        circuit_registry: CircuitRegistry | None = None,
     ) -> None:
         self.repo_root = Path(repo_root)
         default_catalog = self.repo_root / "config" / "ollama-models.yaml"
@@ -66,6 +69,17 @@ class PlatformLLMClient:
         self._monotonic = monotonic
         self.model_catalog = self._load_model_catalog()
         self.ledger_writer = ledger_writer or self._build_default_ledger_writer()
+        self._circuit_registry = circuit_registry or CircuitRegistry(self.repo_root)
+        self._ollama_circuit = (
+            self._circuit_registry.sync_breaker("ollama")
+            if self._circuit_registry.has_policy("ollama")
+            else None
+        )
+        self._fallback_circuit = (
+            self._circuit_registry.sync_breaker("anthropic_api")
+            if self._circuit_registry.has_policy("anthropic_api")
+            else None
+        )
 
     def complete(
         self,
@@ -99,13 +113,19 @@ class PlatformLLMClient:
         return result.text.strip()
 
     def available_models(self) -> set[str]:
-        payload = self._request_json(
-            "GET",
-            f"{self.ollama_base_url}/api/tags",
-            None,
-            None,
-            self.timeout_seconds,
-        )
+        def fetch_tags() -> dict[str, Any]:
+            return self._request_json(
+                "GET",
+                f"{self.ollama_base_url}/api/tags",
+                None,
+                None,
+                self.timeout_seconds,
+            )
+
+        if self._ollama_circuit is not None:
+            payload = self._ollama_circuit.call(fetch_tags)
+        else:
+            payload = fetch_tags()
         models = payload.get("models", [])
         if not isinstance(models, list):
             return set()
@@ -159,6 +179,10 @@ class PlatformLLMClient:
     def _safe_available_models(self) -> set[str]:
         try:
             return self.available_models()
+        except CircuitOpenError as exc:
+            if self.fallback_base_url and self.fallback_model:
+                return set()
+            raise LLMUnavailableError(f"Ollama circuit is open for {exc.retry_after}s") from exc
         except Exception as exc:  # noqa: BLE001
             if self.fallback_base_url and self.fallback_model:
                 return set()
@@ -172,21 +196,27 @@ class PlatformLLMClient:
         max_tokens: int,
         temperature: float,
     ) -> CompletionResult:
-        payload = self._request_json(
-            "POST",
-            f"{self.ollama_base_url}/api/generate",
-            {
-                "model": model_name,
-                "prompt": prompt,
-                "stream": False,
-                "options": {
-                    "num_predict": max_tokens,
-                    "temperature": temperature,
+        def generate() -> dict[str, Any]:
+            return self._request_json(
+                "POST",
+                f"{self.ollama_base_url}/api/generate",
+                {
+                    "model": model_name,
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {
+                        "num_predict": max_tokens,
+                        "temperature": temperature,
+                    },
                 },
-            },
-            None,
-            self.timeout_seconds,
-        )
+                None,
+                self.timeout_seconds,
+            )
+
+        if self._ollama_circuit is not None:
+            payload = self._ollama_circuit.call(generate)
+        else:
+            payload = generate()
         return CompletionResult(
             text=str(payload.get("response", "")).strip(),
             prompt_tokens=int(payload.get("prompt_eval_count", 0) or 0),
@@ -204,18 +234,25 @@ class PlatformLLMClient:
         headers = {"Content-Type": "application/json"}
         if self.fallback_api_key:
             headers["Authorization"] = f"Bearer {self.fallback_api_key}"
-        payload = self._request_json(
-            "POST",
-            f"{self.fallback_base_url}/chat/completions",
-            {
-                "model": model_name,
-                "messages": [{"role": "user", "content": prompt}],
-                "max_tokens": max_tokens,
-                "temperature": temperature,
-            },
-            headers,
-            self.timeout_seconds,
-        )
+
+        def complete() -> dict[str, Any]:
+            return self._request_json(
+                "POST",
+                f"{self.fallback_base_url}/chat/completions",
+                {
+                    "model": model_name,
+                    "messages": [{"role": "user", "content": prompt}],
+                    "max_tokens": max_tokens,
+                    "temperature": temperature,
+                },
+                headers,
+                self.timeout_seconds,
+            )
+
+        if self._fallback_circuit is not None:
+            payload = self._fallback_circuit.call(complete)
+        else:
+            payload = complete()
         choices = payload.get("choices", [])
         message = choices[0].get("message", {}) if isinstance(choices, list) and choices else {}
         usage = payload.get("usage", {}) if isinstance(payload.get("usage"), dict) else {}

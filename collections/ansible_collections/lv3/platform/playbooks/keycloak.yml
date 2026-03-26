@@ -14,7 +14,7 @@
       run_once: true
 
 - name: Prepare PostgreSQL for Keycloak
-  hosts: "{{ 'postgres_guests:&staging' if (env | default('production')) == 'staging' else 'postgres_guests:&production' }}"
+  hosts: postgres_guests
   become: true
   gather_facts: true
 
@@ -26,7 +26,10 @@
         fail_msg: "This playbook only supports Debian guests."
 
   roles:
-    - role: lv3.platform.postgres_ha
+    - role: lv3.platform.postgres_vm
+      vars:
+        postgres_vm_client_allowed_sources_extra:
+          - "{{ (hostvars['proxmox_florin'].proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}/32"
     - role: lv3.platform.keycloak_postgres
 
 - name: Converge Keycloak on the Docker runtime VM

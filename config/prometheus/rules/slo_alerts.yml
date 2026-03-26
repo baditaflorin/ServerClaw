@@ -344,6 +344,46 @@ groups:
           description: NetBox remains reachable for inventory, IPAM, and topology
             workflows.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_vaultwarden_availability
+        expr: (slo:vaultwarden_availability:error_rate_5m > (14 * 0.005000)) and (slo:vaultwarden_availability:error_rate_1h
+          > (14 * 0.005000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: vaultwarden
+          slo_id: vaultwarden-availability
+          indicator: availability
+        annotations:
+          summary: vaultwarden-availability is burning its error budget at 14x
+          description: Vaultwarden remains reachable on the private Tailscale operator
+            path.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_vaultwarden_availability
+        expr: slo:vaultwarden_availability:error_rate_1h > (3 * 0.005000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: vaultwarden
+          slo_id: vaultwarden-availability
+          indicator: availability
+        annotations:
+          summary: vaultwarden-availability is burning its error budget at 3x
+          description: Vaultwarden remains reachable on the private Tailscale operator
+            path.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_vaultwarden_availability
+        expr: slo:vaultwarden_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: vaultwarden
+          slo_id: vaultwarden-availability
+          indicator: availability
+        annotations:
+          summary: vaultwarden-availability has less than 10% error budget remaining
+          description: Vaultwarden remains reachable on the private Tailscale operator
+            path.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_platform_context_api_availability
         expr: (slo:platform_context_api_availability:error_rate_5m > (14 * 0.010000))
           and (slo:platform_context_api_availability:error_rate_1h > (14 * 0.010000))
@@ -386,4 +426,44 @@ groups:
             remaining
           description: The platform context API remains reachable for agent-assisted
             operator workflows.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_semaphore_availability
+        expr: (slo:semaphore_availability:error_rate_5m > (14 * 0.005000)) and (slo:semaphore_availability:error_rate_1h
+          > (14 * 0.005000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: semaphore
+          slo_id: semaphore-availability
+          indicator: availability
+        annotations:
+          summary: semaphore-availability is burning its error budget at 14x
+          description: Semaphore stays reachable for private Ansible job launches
+            and API-based task inspection.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_semaphore_availability
+        expr: slo:semaphore_availability:error_rate_1h > (3 * 0.005000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: semaphore
+          slo_id: semaphore-availability
+          indicator: availability
+        annotations:
+          summary: semaphore-availability is burning its error budget at 3x
+          description: Semaphore stays reachable for private Ansible job launches
+            and API-based task inspection.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_semaphore_availability
+        expr: slo:semaphore_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: semaphore
+          slo_id: semaphore-availability
+          indicator: availability
+        annotations:
+          summary: semaphore-availability has less than 10% error budget remaining
+          description: Semaphore stays reachable for private Ansible job launches
+            and API-based task inspection.
           runbook: docs/runbooks/slo-tracking.md

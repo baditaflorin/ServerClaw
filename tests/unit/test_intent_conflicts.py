@@ -13,6 +13,31 @@ from platform.scheduler import BudgetedWorkflowScheduler
 
 def write_conflict_repo(repo_root: Path) -> None:
     (repo_root / "config").mkdir(parents=True, exist_ok=True)
+    (repo_root / "config" / "agent-policies.yaml").write_text(
+        """
+- agent_id: operator:lv3-cli
+  description: operator
+  identity_class: operator-agent
+  trust_tier: T3
+  read_surfaces:
+    - search
+    - world_state
+  autonomous_actions:
+    max_risk_class: MEDIUM
+    allowed_workflow_tags:
+      - converge
+      - mutation
+      - diagnostic
+    disallowed_workflow_ids: []
+    max_daily_autonomous_executions: 50
+  escalation:
+    on_risk_above: MEDIUM
+    escalation_target: operator
+    escalation_event: platform.intent.rejected
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
     (repo_root / "config" / "workflow-defaults.yaml").write_text(
         (
             "default_budget:\n"
@@ -23,6 +48,11 @@ def write_conflict_repo(repo_root: Path) -> None:
             "  max_restarts: 1\n"
             "  max_rollback_depth: 1\n"
             "  escalation_action: notify_and_abort\n"
+            "default_resource_reservation:\n"
+            "  cpu_milli: 500\n"
+            "  memory_mb: 256\n"
+            "  disk_iops: 30\n"
+            "  estimated_duration_seconds: 180\n"
         ),
         encoding="utf-8",
     )
@@ -55,6 +85,33 @@ def write_conflict_repo(repo_root: Path) -> None:
             },
             indent=2,
         )
+        + "\n",
+        encoding="utf-8",
+    )
+    (repo_root / "config" / "agent-policies.yaml").write_text(
+        """
+- agent_id: operator:lv3-cli
+  description: operator
+  identity_class: operator-agent
+  trust_tier: T3
+  read_surfaces:
+    - search
+    - world_state
+  autonomous_actions:
+    max_risk_class: MEDIUM
+    allowed_workflow_tags:
+      - converge
+      - diagnostic
+      - mutation
+      - validation
+    disallowed_workflow_ids:
+      - destroy-vm
+    max_daily_autonomous_executions: 50
+  escalation:
+    on_risk_above: MEDIUM
+    escalation_target: operator
+    escalation_event: platform.intent.rejected
+""".strip()
         + "\n",
         encoding="utf-8",
     )
@@ -224,7 +281,7 @@ def test_scheduler_returns_duplicate_recent_result(tmp_path: Path) -> None:
     )
 
     assert first.status == "completed"
-    assert second.status == "duplicate"
+    assert second.status == "idempotent_hit"
     assert windmill.submit_calls == ["converge-netbox"]
     assert second.output == {"job_id": "job-converge-netbox"}
 

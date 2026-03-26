@@ -19,6 +19,7 @@ def test_topic_index_contains_active_canonical_subjects() -> None:
     topics = load_topic_index()
     assert topics["platform.findings.observation"]["status"] == "active"
     assert topics["platform.maintenance.opened"]["status"] == "active"
+    assert topics["platform.config.merged"]["status"] == "active"
     assert topics["platform.intent.compiled"]["status"] == "reserved"
 
 
@@ -61,3 +62,21 @@ def test_validate_nats_topics_covers_active_topic_routing() -> None:
     result = validate_nats_topics.validate_topic_usage()
     assert result["unknown_topics"] == []
     assert result["uncovered_topics"] == []
+
+
+def test_build_envelope_supports_config_merge_topics() -> None:
+    envelope = build_envelope(
+        "platform.config.merge_conflict",
+        {
+            "change_id": "c-123",
+            "file_path": "config/service-capability-catalog.json",
+            "key_value": "grafana",
+            "operation": "append",
+            "status": "conflict",
+            "reason": "duplicate_key",
+        },
+        actor_id="agent/config-merge-job",
+    )
+
+    assert envelope["topic"] == "platform.config.merge_conflict"
+    assert envelope["payload"]["reason"] == "duplicate_key"

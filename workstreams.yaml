@@ -14,6 +14,55 @@ release_policy:
   breaking_change_criteria: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/version-semantics.json
 
 workstreams:
+  - id: adr-0163-retry-taxonomy
+    adr: "0163"
+    title: Platform-wide retry taxonomy and exponential backoff
+    status: merged
+    owner: codex
+    branch: codex/adr-0163-retry-taxonomy
+    worktree_path: .worktrees/adr-0163
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0163-retry-taxonomy.md
+    depends_on:
+      - adr-0044-windmill
+      - adr-0058-nats-event-bus
+      - adr-0092-platform-api-gateway
+      - adr-0119-budgeted-workflow-scheduler
+    conflicts_with: []
+    shared_surfaces:
+      - platform/retry/
+      - config/retry-policies.yaml
+      - scripts/api_gateway/main.py
+      - platform/scheduler/scheduler.py
+      - scripts/netbox_inventory_sync.py
+      - scripts/drift_lib.py
+      - scripts/check_ad_hoc_retry.py
+      - docs/runbooks/retry-taxonomy.md
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0162-deadlock-detector
+    adr: "0162"
+    title: Distributed deadlock detection and resolution
+    status: live_applied
+    owner: codex
+    branch: codex/adr-0162-deadlock-detector
+    worktree_path: .worktrees/adr-0162-deadlock-detector
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0162-deadlock-detector.md
+    depends_on:
+      - adr-0115-mutation-ledger
+      - adr-0119-budgeted-scheduler
+      - adr-0124-event-taxonomy
+    conflicts_with: []
+    shared_surfaces:
+      - platform/locking/
+      - platform/coordination/
+      - platform/intent_queue/
+      - config/windmill/scripts/
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/
+      - config/event-taxonomy.yaml
+    ready_to_merge: true
+    live_applied: true
+
   - id: adr-0138-published-artifact-secret-scanning
     adr: "0138"
     title: Published artifact secret scanning
@@ -54,6 +103,33 @@ workstreams:
     ready_to_merge: false
     live_applied: true
 
+  - id: adr-0149-semaphore
+    adr: "0149"
+    title: Semaphore for Ansible job management UI and API
+    status: merged
+    owner: codex
+    branch: codex/adr-0149-semaphore
+    worktree_path: ../proxmox_florin_server-adr-0149
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0149-semaphore.md
+    depends_on:
+      - adr-0023-docker-runtime
+      - adr-0026-postgres-vm
+      - adr-0048-command-catalog
+      - adr-0077-compose-runtime-secrets-injection
+    conflicts_with: []
+    shared_surfaces:
+      - roles/semaphore_postgres
+      - roles/semaphore_runtime
+      - playbooks/semaphore.yml
+      - scripts/semaphore_bootstrap.py
+      - scripts/semaphore_tool.py
+      - inventory/host_vars/proxmox_florin.yml
+      - config/workflow-catalog.json
+      - config/command-catalog.json
+      - config/dependency-graph.json
+    ready_to_merge: false
+    live_applied: true
+
   - id: adr-0014-tailscale
     adr: "0014"
     title: Tailscale private access rollout
@@ -69,6 +145,28 @@ workstreams:
       - guest_access
       - private_network
     ready_to_merge: false
+    live_applied: true
+
+  - id: adr-0144-headscale
+    adr: "0144"
+    title: Headscale mesh control plane
+    status: implemented
+    owner: codex
+    branch: codex/adr-0144-headscale
+    worktree_path: ../proxmox_florin_server-headscale
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0144-headscale.md
+    depends_on:
+      - adr-0014-tailscale
+    conflicts_with: []
+    shared_surfaces:
+      - proxmox_host_access
+      - guest_access
+      - private_network
+      - inventory/hosts.yml
+      - inventory/host_vars/proxmox_florin.yml
+      - config/service-capability-catalog.json
+      - config/control-plane-lanes.json
+    ready_to_merge: true
     live_applied: true
 
   - id: adr-0020-backups
@@ -219,6 +317,31 @@ workstreams:
       - roles/monitoring_vm
     ready_to_merge: false
     live_applied: true
+
+  - id: adr-0151-n8n
+    adr: "0151"
+    title: n8n for webhook and API integration automation
+    status: merged
+    owner: codex
+    branch: codex/adr-0151-n8n
+    worktree_path: .worktrees/adr-0151
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0151-n8n.md
+    depends_on:
+      - adr-0025-docker-compose-stacks
+      - adr-0026-postgres-vm
+      - adr-0043-openbao
+      - adr-0056-keycloak-sso
+    conflicts_with: []
+    shared_surfaces:
+      - roles/n8n_postgres
+      - roles/n8n_runtime
+      - roles/nginx_edge_publication
+      - inventory/host_vars/proxmox_florin.yml
+      - config/service-capability-catalog.json
+      - config/workflow-catalog.json
+      - config/subdomain-catalog.json
+    ready_to_merge: false
+    live_applied: false
 
   - id: adr-0040-runtime-container-telemetry
     adr: "0040"
@@ -2700,6 +2823,111 @@ workstreams:
     ready_to_merge: false
     live_applied: true
 
+  - id: adr-0147-vaultwarden
+    adr: "0147"
+    title: Vaultwarden for operator credential management
+    status: merged
+    owner: codex
+    branch: codex/adr-0147-vaultwarden
+    worktree_path: .worktrees/adr-0147
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0147-vaultwarden.md
+    depends_on:
+      - adr-0026-postgres-vm
+      - adr-0042-step-ca
+      - adr-0067-guest-network-policy
+    conflicts_with: []
+    shared_surfaces:
+      - roles/vaultwarden_runtime
+      - roles/vaultwarden_postgres
+      - playbooks/vaultwarden.yml
+      - inventory/host_vars/proxmox_florin.yml
+      - config/service-capability-catalog.json
+      - config/workflow-catalog.json
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0153-distributed-resource-lock-registry
+    adr: "0153"
+    title: Distributed resource lock registry
+    status: merged
+    owner: codex
+    branch: codex/adr-0153-distributed-resource-lock-registry
+    worktree_path: .worktrees/adr-0153
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0153-distributed-resource-lock-registry.md
+    depends_on:
+      - adr-0112-goal-compiler
+      - adr-0115-mutation-ledger
+      - adr-0119-budgeted-workflow-scheduler
+      - adr-0127-intent-conflict-resolution
+    conflicts_with:
+      - adr-0154-vm-scoped-execution-lanes
+      - adr-0155-intent-queue-with-release-triggered-scheduling
+    shared_surfaces:
+      - platform/locking/
+      - platform/scheduler/
+      - platform/goal_compiler/
+      - scripts/resource_lock_tool.py
+      - Makefile
+      - docs/runbooks/resource-lock-registry.md
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0154-vm-scoped-execution-lanes
+    adr: "0154"
+    title: VM-scoped parallel execution lanes
+    status: live_applied
+    owner: codex
+    branch: codex/live-apply-0154-main-v3
+    worktree_path: .worktrees/live-apply-0154-main-v3
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0154-vm-scoped-execution-lanes.md
+    depends_on:
+      - adr-0044-windmill
+      - adr-0075-service-capability-catalog
+      - adr-0112-goal-compiler
+      - adr-0119-budgeted-workflow-scheduler
+      - adr-0127-intent-conflict-resolution
+    conflicts_with: []
+    shared_surfaces:
+      - config/execution-lanes.yaml
+      - platform/execution_lanes/
+      - platform/scheduler/
+      - platform/goal_compiler/
+      - scripts/risk_scorer/
+      - scripts/lv3_cli.py
+      - config/windmill/scripts/
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/
+      - collections/ansible_collections/lv3/platform/roles/windmill_postgres/
+      - docs/runbooks/vm-scoped-execution-lanes.md
+    ready_to_merge: false
+    live_applied: true
+
+  - id: adr-0155-intent-queue-with-release-triggered-scheduling
+    adr: "0155"
+    title: Intent queue with release-triggered scheduling
+    status: live_applied
+    owner: codex
+    branch: codex/adr-0155-main-live
+    worktree_path: /private/tmp/proxmox_florin_server-main-0155-v2
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0155-intent-queue-with-release-triggered-scheduling.md
+    depends_on:
+      - adr-0044-windmill
+      - adr-0119-budgeted-workflow-scheduler
+      - adr-0127-intent-conflict-resolution
+      - adr-0154-vm-scoped-execution-lanes
+      - adr-0162-deadlock-detector
+    conflicts_with: []
+    shared_surfaces:
+      - platform/intent_queue/
+      - platform/scheduler/
+      - scripts/lv3_cli.py
+      - scripts/intent_queue_dispatcher.py
+      - config/windmill/scripts/
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/
+      - config/ledger-event-types.yaml
+      - docs/runbooks/intent-queue.md
+    ready_to_merge: false
+    live_applied: true
+
   - id: adr-0156-agent-session-workspace-isolation
     adr: "0156"
     title: Agent session workspace isolation
@@ -2727,6 +2955,63 @@ workstreams:
     ready_to_merge: false
     live_applied: false
 
+  - id: adr-0157-per-vm-concurrency-budget
+    adr: "0157"
+    title: Per-VM concurrency budget and resource reservation
+    status: live_applied
+    owner: codex
+    branch: codex/live-apply-0157
+    worktree_path: .worktrees/live-apply-0157
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0157-per-vm-concurrency-budget.md
+    depends_on:
+      - adr-0119-budgeted-workflow-scheduler
+    conflicts_with:
+      - adr-0153-distributed-resource-lock-registry
+      - adr-0154-vm-scoped-execution-lanes
+    shared_surfaces:
+      - config/execution-lanes.yaml
+      - config/workflow-catalog.json
+      - config/workflow-defaults.yaml
+      - platform/scheduler
+      - docs/runbooks/budgeted-workflow-scheduler.md
+      - docs/runbooks/per-vm-concurrency-budgets.md
+      - playbooks/windmill.yml
+      - roles/windmill_runtime
+    ready_to_merge: false
+    live_applied: true
+
+  - id: adr-0158-config-merge-protocol
+    adr: "0158"
+    title: Conflict-free configuration merge protocol
+    status: merged
+    owner: codex
+    branch: codex/adr-0158-config-merge-protocol
+    worktree_path: .worktrees/adr-0158-config-merge
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0158-config-merge-protocol.md
+    depends_on:
+      - adr-0044-windmill
+      - adr-0075-service-capability-catalog
+      - adr-0076-subdomain-governance
+      - adr-0087-validation-gate
+      - adr-0115-mutation-ledger
+      - adr-0124-platform-event-taxonomy
+    conflicts_with: []
+    shared_surfaces:
+      - platform/config_merge/
+      - scripts/config_merge_protocol.py
+      - config/merge-eligible-files.yaml
+      - config/workflow-catalog.json
+      - config/command-catalog.json
+      - config/event-taxonomy.yaml
+      - config/control-plane-lanes.json
+      - config/api-publication.json
+      - config/windmill/scripts/merge-config-changes.py
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/
+      - migrations/0016_config_merge_schema.sql
+      - docs/runbooks/config-merge-protocol.md
+    ready_to_merge: false
+    live_applied: false
+
   - id: adr-0159-speculative-parallel-execution
     adr: "0159"
     title: Speculative parallel execution with compensating transactions
@@ -2749,7 +3034,63 @@ workstreams:
       - scripts/workflow_catalog.py
       - config/ledger-event-types.yaml
       - docs/runbooks/speculative-workflow-execution.md
+  - id: adr-0164-circuit-breaker-pattern
+    adr: "0164"
+    title: Circuit breaker pattern for external service calls
+    status: live_applied
+    owner: codex
+    branch: codex/live-apply-0164
+    worktree_path: .worktrees/live-apply-0164
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0164-circuit-breaker-pattern.md
+    depends_on:
+      - adr-0058-nats-event-bus
+      - adr-0092-platform-api-gateway
+      - adr-0119-budgeted-workflow-scheduler
+      - adr-0129-runbook-automation-executor
+      - adr-0145-ollama
+    conflicts_with: []
+    shared_surfaces:
+      - config/circuit-policies.yaml
+      - platform/circuit
+      - scripts/api_gateway/main.py
+      - platform/llm/client.py
+      - platform/scheduler/scheduler.py
+      - scripts/runbook_executor.py
+      - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime
+      - docs/runbooks/circuit-breaker-operations.md
     ready_to_merge: false
+    live_applied: true
+
+  - id: adr-0165-workflow-idempotency
+    adr: "0165"
+    title: Workflow idempotency keys and double-execution prevention
+    status: live_applied
+    owner: codex
+    branch: codex/live-apply-0165
+    worktree_path: .worktrees/live-apply-0165
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0165-workflow-idempotency.md
+    depends_on:
+      - adr-0044-windmill
+      - adr-0058-nats-event-bus
+      - adr-0112-goal-compiler
+      - adr-0115-mutation-ledger
+      - adr-0119-budgeted-workflow-scheduler
+      - adr-0126-observation-to-action-closure-loop
+      - adr-0127-intent-conflict-resolution
+    conflicts_with:
+      - adr-0119-budgeted-workflow-scheduler
+      - adr-0126-observation-to-action-closure-loop
+      - adr-0127-intent-conflict-resolution
+    shared_surfaces:
+      - platform/idempotency
+      - platform/scheduler
+      - platform/closure_loop
+      - scripts/lv3_cli.py
+      - migrations/0016_idempotency_store.sql
+      - docs/runbooks/workflow-idempotency.md
+      - config/ledger-event-types.yaml
+    ready_to_merge: false
+    live_applied: true
 
   - id: adr-0167-graceful-degradation-mode-declarations
     adr: "0167"
@@ -2776,5 +3117,158 @@ workstreams:
       - tests/test_api_gateway.py
       - tests/test_health_composite.py
       - tests/test_validate_service_catalog.py
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0172-watchdog-escalation
+    adr: "0172"
+    title: Watchdog escalation and stale job self-healing
+    status: merged
+    owner: codex
+    branch: codex/adr-0172-watchdog
+    worktree_path: .worktrees/codex-adr-0172-watchdog
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0172-watchdog-escalation-and-stale-job-self-healing.md
+    depends_on:
+      - adr-0044-windmill
+      - adr-0115-mutation-ledger
+      - adr-0119-budgeted-workflow-scheduler
+    conflicts_with: []
+    shared_surfaces:
+      - platform/scheduler/watchdog.py
+      - platform/scheduler/scheduler.py
+      - windmill/scheduler/watchdog-loop.py
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+      - config/workflow-catalog.json
+      - config/ledger-event-types.yaml
+      - docs/runbooks/budgeted-workflow-scheduler.md
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0168-idempotency-ci
+    adr: "0168"
+    title: Ansible role idempotency CI enforcement
+    status: merged
+    owner: codex
+    branch: codex/adr-0168-idempotency-ci
+    worktree_path: .worktrees/adr-0168-idempotency-ci
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0168-idempotency-ci.md
+    depends_on:
+      - adr-0083-docker-check-runner
+      - adr-0087-validation-gate
+    conflicts_with: []
+    shared_surfaces:
+      - config/ansible-role-idempotency.yml
+      - scripts/ansible_role_idempotency.py
+      - scripts/validate_repo.sh
+      - tests/idempotency/
+      - docs/runbooks/ansible-role-idempotency-ci.md
+      - docs/adr/0168-ansible-role-idempotency-ci-enforcement.md
+    ready_to_merge: false
+    live_applied: false
+
+  - id: adr-0169-structured-log-contract
+    adr: "0169"
+    title: Structured log field contract
+    status: merged
+    owner: codex
+    branch: codex/live-apply-0169
+    worktree_path: .worktrees/adr-0169
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0169-structured-log-field-contract.md
+    depends_on:
+      - adr-0052-loki-logs
+      - adr-0075-service-capability-catalog
+      - adr-0092-platform-api-gateway
+      - adr-0123-service-uptime-contracts
+      - adr-0166-canonical-error-response-format
+    conflicts_with: []
+    shared_surfaces:
+      - platform/
+      - scripts/api_gateway/
+      - scripts/platform_context_service.py
+      - scripts/promotion_pipeline.py
+      - config/windmill/scripts/
+      - collections/ansible_collections/lv3/platform/plugins/callback/
+      - Makefile
+      - inventory/group_vars/all.yml
+      - docs/runbooks/
+
+  - id: adr-0161-real-time-agent-coordination-map
+    adr: "0161"
+    title: Real-time agent coordination map
+    status: merged
+    owner: codex
+    branch: codex/adr-0161-real-time-agent-coordination-map
+    worktree_path: .worktrees/adr-0161-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0161-real-time-agent-coordination-map.md
+    depends_on:
+      - adr-0058-nats
+      - adr-0092-platform-api-gateway
+      - adr-0093-interactive-ops-portal
+      - adr-0126-observation-loop
+      - adr-0130-agent-state-persistence
+      - adr-0131-multi-agent-handoffs
+    conflicts_with: []
+    shared_surfaces:
+      - platform/agent
+      - platform/closure_loop
+      - scripts/api_gateway/main.py
+      - scripts/ops_portal
+      - scripts/generate_ops_portal.py
+      - config/windmill/scripts/platform-observation-loop.py
+      - receipts/agent-coordination
+      - docs/runbooks/agent-coordination-map.md
+
+  - id: adr-0170-timeout-hierarchy
+    adr: "0170"
+    title: Platform-wide timeout hierarchy
+    status: live_applied
+    owner: codex
+    branch: codex/adr-0170-timeout-hierarchy
+    worktree_path: ../proxmox_florin_server-timeout-hierarchy
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0170-timeout-hierarchy.md
+    depends_on:
+      - adr-0092-platform-api-gateway
+      - adr-0113-world-state-materializer
+      - adr-0119-budgeted-workflow-scheduler
+    conflicts_with:
+      - adr-0092-platform-api-gateway
+      - adr-0113-world-state-materializer
+      - adr-0119-budgeted-workflow-scheduler
+    shared_surfaces:
+      - config/timeout-hierarchy.yaml
+      - platform/timeouts/
+      - scripts/api_gateway/main.py
+      - platform/scheduler/
+      - platform/world_state/workers.py
+      - scripts/drift_lib.py
+      - scripts/netbox_inventory_sync.py
+      - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/
+      - config/workflow-catalog.json
+      - docs/runbooks/platform-timeout-hierarchy.md
+    ready_to_merge: false
+    live_applied: true
+
+  - id: adr-0172-watchdog-escalation
+    adr: "0172"
+    title: Watchdog escalation and stale job self-healing
+    status: merged
+    owner: codex
+    branch: codex/adr-0172-watchdog
+    worktree_path: .worktrees/codex-adr-0172-watchdog
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0172-watchdog-escalation-and-stale-job-self-healing.md
+    depends_on:
+      - adr-0044-windmill
+      - adr-0115-mutation-ledger
+      - adr-0119-budgeted-workflow-scheduler
+    conflicts_with: []
+    shared_surfaces:
+      - platform/scheduler/watchdog.py
+      - platform/scheduler/scheduler.py
+      - windmill/scheduler/watchdog-loop.py
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+      - config/workflow-catalog.json
+      - config/ledger-event-types.yaml
+      - docs/runbooks/budgeted-workflow-scheduler.md
     ready_to_merge: false
     live_applied: false

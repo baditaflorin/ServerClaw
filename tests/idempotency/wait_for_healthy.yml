@@ -1,0 +1,11 @@
+---
+- name: Idempotency test for wait_for_healthy
+  hosts: idempotency
+  gather_facts: false
+  vars:
+    health_url: "{{ lookup('ansible.builtin.env', 'IDEMPOTENCY_FIXTURE_URL') }}/health"
+    health_timeout_seconds: 1
+    health_retry_delay: 0
+    health_validate_certs: false
+  roles:
+    - lv3.platform.wait_for_healthy

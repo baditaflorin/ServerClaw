@@ -29,9 +29,10 @@
 - name: Generate the Windmill database password
   ansible.builtin.shell: |
     set -euo pipefail
-    if [ ! -s "{{ windmill_database_password_local_file }}" ]; then
+    if [ ! -s "{{ windmill_database_password_local_file }}" ] \
+      || ! grep -Eq '^[A-Za-z0-9_-]+$' "{{ windmill_database_password_local_file }}"; then
       umask 077
-      openssl rand -base64 24 | tr -d '\n' > "{{ windmill_database_password_local_file }}"
+      python3 -c "import secrets, string; alphabet = string.ascii_letters + string.digits + '-_'; print(''.join(secrets.choice(alphabet) for _ in range(32)), end='')" > "{{ windmill_database_password_local_file }}"
       echo changed
     fi
   args:
@@ -133,7 +134,7 @@
       - ON_ERROR_STOP=1
       - -c
       - >-
-        CREATE ROLE {{ windmill_database_user }} LOGIN BYPASSRLS
+        CREATE ROLE {{ windmill_database_user }} LOGIN BYPASSRLS CREATEROLE
         PASSWORD '{{ windmill_database_password }}' IN ROLE {{ windmill_database_support_role }}
   changed_when: true
   no_log: true
@@ -141,7 +142,7 @@
     - windmill_postgres_writable_check.stdout | trim == "1"
     - windmill_postgres_admin_role_check.stdout != "1"
 
-- name: Ensure the Windmill admin role password matches the managed secret
+- name: Ensure the Windmill admin role attributes and password match the managed secret
   become: true
   become_user: postgres
   ansible.builtin.command:
@@ -150,7 +151,10 @@
       - -v
       - ON_ERROR_STOP=1
       - -c
-      - "ALTER ROLE {{ windmill_database_user }} PASSWORD '{{ windmill_database_password }}'"
+      - >-
+        ALTER ROLE {{ windmill_database_user }}
+        LOGIN BYPASSRLS CREATEROLE
+        PASSWORD '{{ windmill_database_password }}'
   changed_when: false
   no_log: true
   when: windmill_postgres_writable_check.stdout | trim == "1"

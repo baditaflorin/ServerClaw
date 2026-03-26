@@ -1,0 +1,8 @@
+{
+  "created_at": "2026-03-25T14:19:05.829496+00:00",
+  "bypass": "skip_remote_gate",
+  "reason": "remote pre-push gate fell back locally and timed out on linux/amd64 Docker checks on the arm64 controller after ADR 0153 targeted tests and dependency-diagram regeneration passed",
+  "source": "manual",
+  "branch": "codex/reintegrate-0153-main",
+  "commit": "2e2cd4ea88336fe957523af3d5c56df473593a77"
+}

@@ -13,7 +13,7 @@
     - role: lv3.platform.proxmox_security
 
 - name: Converge PostgreSQL access for Windmill
-  hosts: "{{ 'postgres_guests:&staging' if (env | default('production')) == 'staging' else 'postgres_guests:&production' }}"
+  hosts: "{{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}"
   become: true
   gather_facts: true
   tags:
@@ -32,8 +32,14 @@
 
   roles:
     - role: lv3.platform.linux_guest_firewall
-    - role: lv3.platform.postgres_ha
+    - role: lv3.platform.postgres_vm
     - role: lv3.platform.windmill_postgres
+
+  post_tasks:
+    - name: Restart PostgreSQL before Windmill runtime verification
+      ansible.builtin.service:
+        name: "{{ postgres_vm_postgresql_service_name }}"
+        state: restarted
 
 - name: Converge Windmill on the Docker runtime VM
   hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"

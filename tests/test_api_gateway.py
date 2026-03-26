@@ -1,3 +1,4 @@
+import asyncio
 import base64
 import json
 import sqlite3
@@ -9,6 +10,9 @@ from unittest.mock import patch
 import httpx
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
+from platform.circuit import MemoryCircuitStateBackend
+from platform.degradation import DegradationStateStore
+from platform.retry import RetryPolicy
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -16,8 +20,21 @@ SCRIPTS_DIR = REPO_ROOT / "scripts"
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
-from api_gateway.main import GatewayConfig, GatewayRuntime, NatsEventEmitter, create_app, discover_repo_root  # noqa: E402
-from platform.degradation import DegradationStateStore  # noqa: E402
+import api_gateway.main as gateway_main  # noqa: E402
+from api_gateway.main import GatewayConfig, GatewayRuntime, NatsEventEmitter, create_app  # noqa: E402
+
+
+def test_resolve_repo_root_supports_packaged_layout(tmp_path: Path) -> None:
+    app_root = tmp_path / "app"
+    platform_dir = app_root / "platform"
+    platform_dir.mkdir(parents=True)
+    (platform_dir / "__init__.py").write_text("", encoding="utf-8")
+
+    script_path = app_root / "api_gateway" / "main.py"
+    script_path.parent.mkdir(parents=True)
+    script_path.write_text("# containerized gateway entrypoint\n", encoding="utf-8")
+
+    assert gateway_main._resolve_repo_root(script_path) == app_root
 
 
 def b64url_encode(data: bytes) -> str:
@@ -53,26 +70,30 @@ def write_yaml(path: Path, content: str) -> None:
     path.write_text(content)
 
 
-def test_discover_repo_root_accepts_source_tree_layout(tmp_path: Path) -> None:
-    repo_root = tmp_path / "repo"
-    (repo_root / "platform").mkdir(parents=True)
-    (repo_root / "platform" / "__init__.py").write_text("")
-    (repo_root / "scripts" / "api_gateway").mkdir(parents=True)
-    module_file = repo_root / "scripts" / "api_gateway" / "main.py"
-    module_file.write_text("")
+def test_gateway_runtime_compose_mounts_config_at_app_path() -> None:
+    template = (
+        REPO_ROOT
+        / "collections"
+        / "ansible_collections"
+        / "lv3"
+        / "platform"
+        / "roles"
+        / "api_gateway_runtime"
+        / "templates"
+        / "docker-compose.yml.j2"
+    ).read_text(encoding="utf-8")
 
-    assert discover_repo_root(module_file) == repo_root
+    assert "/app/config:ro" in template
 
 
-def test_discover_repo_root_accepts_packaged_layout(tmp_path: Path) -> None:
-    package_root = tmp_path / "app"
-    (package_root / "platform").mkdir(parents=True)
-    (package_root / "platform" / "__init__.py").write_text("")
-    (package_root / "api_gateway").mkdir(parents=True)
-    module_file = package_root / "api_gateway" / "main.py"
-    module_file.write_text("")
+def test_gateway_runtime_uses_memory_circuit_backend(tmp_path: Path) -> None:
+    config, _ = make_repo(tmp_path, "http://127.0.0.1:8000")
+    runtime = GatewayRuntime(config)
 
-    assert discover_repo_root(module_file) == package_root
+    try:
+        assert isinstance(runtime.circuit_registry.backend, MemoryCircuitStateBackend)
+    finally:
+        asyncio.run(runtime.close())
 
 
 def prepare_graph_db(path: Path) -> str:
@@ -187,7 +208,7 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
                             "degraded_behaviour": "Use cached JWKS for up to 300 seconds.",
                             "degraded_for_seconds_max": 300,
                             "recovery_signal": "successful JWKS refresh",
-                            "tested_by": "fault:keycloak-unavailable"
+                            "tested_by": "fault:keycloak-unavailable",
                         },
                         {
                             "dependency": "nats",
@@ -195,16 +216,16 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
                             "degraded_behaviour": "Buffer gateway events in a local outbox.",
                             "degraded_for_seconds_max": -1,
                             "recovery_signal": "successful outbox flush",
-                            "tested_by": "fault:nats-unavailable"
-                        }
+                            "tested_by": "fault:nats-unavailable",
+                        },
                     ],
                     "environments": {
                         "production": {
                             "status": "active",
                             "url": "https://api.lv3.org",
-                            "subdomain": "api.lv3.org"
+                            "subdomain": "api.lv3.org",
                         }
-                    }
+                    },
                 },
                 {
                     "id": "postgres",
@@ -287,6 +308,32 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
         },
     )
     write_yaml(
+        tmp_path / "config" / "circuit-policies.yaml",
+        """
+schema_version: 1.0.0
+circuits:
+  - name: keycloak
+    service: Keycloak OIDC / JWKS
+    failure_threshold: 5
+    recovery_window_s: 30
+    success_threshold: 2
+    timeout_s: 10
+  - name: windmill
+    service: Windmill workflow engine
+    failure_threshold: 5
+    recovery_window_s: 60
+    success_threshold: 2
+    timeout_s: 15
+  - name: nats
+    service: NATS event bus
+    failure_threshold: 10
+    recovery_window_s: 10
+    success_threshold: 3
+    timeout_s: 2
+""".strip()
+        + "\n",
+    )
+    write_yaml(
         tmp_path / "inventory" / "group_vars" / "platform.yml",
         "platform_service_topology:\n  windmill:\n    urls:\n      internal: http://10.10.10.20:8000\n",
     )
@@ -339,13 +386,17 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
         issuer="https://sso.example.test/realms/lv3",
         expected_audience=None,
         nats_url=None,
+        nats_username=None,
+        nats_password=None,
         deploy_webhook_url=None,
         secret_rotation_webhook_url=None,
+        circuit_policy_path=tmp_path / "config" / "circuit-policies.yaml",
         degradation_state_path=tmp_path / "data" / "degradation-state.json",
         nats_outbox_path=tmp_path / "data" / "nats-outbox.jsonl",
         openapi_include_upstreams=False,
         graph_dsn=graph_dsn,
         world_state_dsn=world_state_dsn,
+        keycloak_retry_after_seconds=30,
     )
     token = sign_token(private_key, roles=["platform-operator"], issuer=config.issuer or "")
     return config, token
@@ -355,7 +406,14 @@ def test_gateway_proxy_and_platform_endpoints(tmp_path: Path) -> None:
     def upstream(request: httpx.Request) -> httpx.Response:
         if request.url.path == "/health":
             return httpx.Response(200, json={"status": "ok"})
-        return httpx.Response(200, json={"path": request.url.path, "method": request.method})
+        return httpx.Response(
+            200,
+            json={
+                "path": request.url.path,
+                "method": request.method,
+                "trace_id": request.headers.get("X-Trace-Id"),
+            },
+        )
 
     def jwks(request: httpx.Request) -> httpx.Response:
         return httpx.Response(200, json=json.loads((tmp_path / "jwks.json").read_text()))
@@ -374,14 +432,17 @@ def test_gateway_proxy_and_platform_endpoints(tmp_path: Path) -> None:
             try:
                 transport_app = httpx.ASGITransport(app=app)
                 async with httpx.AsyncClient(transport=transport_app, base_url="http://gateway.test") as client:
-                    headers = {"Authorization": f"Bearer {token}"}
+                    headers = {"Authorization": f"Bearer {token}", "X-Trace-Id": "trace-test-123"}
                     health = await client.get("/v1/health", headers=headers)
                     assert health.status_code == 200
                     assert health.json()["status"] == "healthy"
+                    assert health.headers["X-Trace-Id"] == "trace-test-123"
 
                     services = await client.get("/v1/platform/services", headers=headers)
                     assert services.status_code == 200
                     assert services.json()["count"] == 3
+                    api_gateway_service = next(item for item in services.json()["services"] if item["id"] == "api_gateway")
+                    assert api_gateway_service["active_degradations"] == []
 
                     platform_health = await client.get("/v1/platform/health", headers=headers)
                     assert platform_health.status_code == 200
@@ -400,6 +461,10 @@ def test_gateway_proxy_and_platform_endpoints(tmp_path: Path) -> None:
                     topology = await client.get("/v1/platform/topology", headers=headers)
                     assert topology.status_code == 200
                     assert "windmill" in topology.json()["service_topology"]
+
+                    agents = await client.get("/v1/platform/agents", headers=headers)
+                    assert agents.status_code == 200
+                    assert agents.json()["summary"]["count"] == 0
 
                     graph_nodes = await client.get("/v1/graph/nodes", headers=headers)
                     assert graph_nodes.status_code == 200
@@ -432,6 +497,7 @@ def test_gateway_proxy_and_platform_endpoints(tmp_path: Path) -> None:
                     proxied = await client.get("/v1/windmill/api/version", headers=headers)
                     assert proxied.status_code == 200
                     assert proxied.json()["path"] == "/api/version"
+                    assert proxied.json()["trace_id"] == "trace-test-123"
             finally:
                 await runtime.close()
 
@@ -473,11 +539,20 @@ def test_gateway_enters_and_surfaces_keycloak_degraded_mode(tmp_path: Path) -> N
 
                     degraded = await client.get("/v1/platform/services", headers=headers)
                     assert degraded.status_code == 200
+                    api_gateway_service = next(
+                        item for item in degraded.json()["services"] if item["id"] == "api_gateway"
+                    )
+                    assert api_gateway_service["active_degradations"][0]["dependency"] == "keycloak"
 
                     active = await client.get("/v1/platform/degradations", headers=headers)
                     assert active.status_code == 200
                     assert active.json()["degradation_count"] == 1
                     assert active.json()["services"]["api_gateway"][0]["dependency"] == "keycloak"
+
+                    platform_health = await client.get("/v1/platform/health", headers=headers)
+                    assert platform_health.status_code == 200
+                    assert platform_health.json()["status"] == "degraded"
+                    assert platform_health.json()["degraded_service_count"] == 1
 
                     runtime.verifier._jwks_cache_expiry = time.time() - 1
                     failed = await client.get("/v1/platform/services", headers=headers)
@@ -486,8 +561,6 @@ def test_gateway_enters_and_surfaces_keycloak_degraded_mode(tmp_path: Path) -> N
                     assert failed.json()["detail"]["error_code"] == "GATE_CIRCUIT_OPEN"
             finally:
                 await runtime.close()
-
-    import asyncio
 
     asyncio.run(run())
 
@@ -513,9 +586,7 @@ def test_nats_emitter_buffers_and_flushes_outbox(tmp_path: Path) -> None:
         if publish_calls["count"] == 1:
             raise OSError("nats unavailable")
 
-        with patch.object(emitter, "_publish", side_effect=fake_publish):
-            import asyncio
-
+    with patch.object(emitter, "_publish", side_effect=fake_publish):
         asyncio.run(
             emitter.emit(
                 "platform.api.request",
@@ -551,6 +622,52 @@ def test_nats_emitter_buffers_and_flushes_outbox(tmp_path: Path) -> None:
         assert not emitter._degradation_store.active_for_service("api_gateway")
 
 
+def test_gateway_deploy_forwards_trace_id_to_webhook(tmp_path: Path) -> None:
+    received_payloads: list[dict[str, object]] = []
+
+    def upstream(request: httpx.Request) -> httpx.Response:
+        if request.url.host == "jwks.test":
+            return httpx.Response(200, json=json.loads((tmp_path / "jwks.json").read_text()))
+        if request.url.host == "deploy-hook.test":
+            received_payloads.append(json.loads(request.content.decode()))
+            return httpx.Response(202, json={"queued": True})
+        return httpx.Response(200, json={"status": "ok"})
+
+    transport = httpx.MockTransport(upstream)
+    config, token = make_repo(tmp_path, "http://upstream.test")
+    config = GatewayConfig(
+        **{
+            **config.__dict__,
+            "deploy_webhook_url": "http://deploy-hook.test/deploy",
+        }
+    )
+    app = create_app(config)
+
+    async def run() -> None:
+        async with httpx.AsyncClient(transport=transport) as runtime_client:
+            runtime = GatewayRuntime(config)
+            await runtime.http_client.aclose()
+            runtime.http_client = runtime_client
+            runtime.verifier._client = runtime_client
+            app.state.runtime = runtime
+            try:
+                transport_app = httpx.ASGITransport(app=app)
+                async with httpx.AsyncClient(transport=transport_app, base_url="http://gateway.test") as client:
+                    response = await client.post(
+                        "/v1/platform/deploy",
+                        headers={"Authorization": f"Bearer {token}", "X-Trace-Id": "trace-webhook-123"},
+                        json={"service_id": "windmill", "environment": "production", "execute": True},
+                    )
+                    assert response.status_code == 202
+                    assert received_payloads[0]["trace_id"] == "trace-webhook-123"
+            finally:
+                await runtime.close()
+
+    import asyncio
+
+    asyncio.run(run())
+
+
 def test_gateway_requires_bearer_token(tmp_path: Path) -> None:
     config, _token = make_repo(tmp_path, "http://upstream.test")
     app = create_app(config)
@@ -565,6 +682,146 @@ def test_gateway_requires_bearer_token(tmp_path: Path) -> None:
                 assert response.status_code == 401
         finally:
             await runtime.close()
+
+    import asyncio
+
+    asyncio.run(run())
+
+
+def test_gateway_retries_safe_proxy_reads(tmp_path: Path) -> None:
+    upstream_calls = {"count": 0}
+
+    def upstream(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/health":
+            return httpx.Response(200, json={"status": "ok"})
+        if request.url.path == "/api/version":
+            upstream_calls["count"] += 1
+            if upstream_calls["count"] < 3:
+                raise httpx.ConnectTimeout("timed out", request=request)
+            return httpx.Response(200, json={"path": request.url.path, "method": request.method})
+        return httpx.Response(200, json={"path": request.url.path, "method": request.method})
+
+    def jwks(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json=json.loads((tmp_path / "jwks.json").read_text()))
+
+    transport = httpx.MockTransport(lambda request: upstream(request) if request.url.host == "upstream.test" else jwks(request))
+    config, token = make_repo(tmp_path, "http://upstream.test")
+    app = create_app(config)
+
+    async def run() -> None:
+        async with httpx.AsyncClient(transport=transport) as runtime_client:
+            runtime = GatewayRuntime(config)
+            await runtime.http_client.aclose()
+            runtime.http_client = runtime_client
+            runtime.verifier._client = runtime_client
+            runtime.verifier._retry_policy = RetryPolicy(
+                max_attempts=4,
+                base_delay_s=0.0,
+                max_delay_s=0.0,
+                multiplier=2.0,
+                jitter=False,
+                transient_max=2,
+            )
+            runtime.internal_api_retry_policy = RetryPolicy(
+                max_attempts=4,
+                base_delay_s=0.0,
+                max_delay_s=0.0,
+                multiplier=2.0,
+                jitter=False,
+                transient_max=2,
+            )
+            app.state.runtime = runtime
+            try:
+                transport_app = httpx.ASGITransport(app=app)
+                async with httpx.AsyncClient(transport=transport_app, base_url="http://gateway.test") as client:
+                    response = await client.get(
+                        "/v1/windmill/api/version",
+                        headers={"Authorization": f"Bearer {token}"},
+                    )
+                    assert response.status_code == 200
+                    assert response.json()["path"] == "/api/version"
+            finally:
+                await runtime.close()
+
+    import asyncio
+
+    asyncio.run(run())
+    assert upstream_calls["count"] == 3
+
+
+def test_resolve_repo_root_supports_repo_layout(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    script_path = repo_root / "scripts" / "api_gateway" / "main.py"
+    script_path.parent.mkdir(parents=True, exist_ok=True)
+    script_path.write_text("# test\n", encoding="utf-8")
+    (repo_root / "platform").mkdir(parents=True, exist_ok=True)
+    (repo_root / "platform" / "__init__.py").write_text("", encoding="utf-8")
+
+    assert gateway_main._resolve_repo_root(script_path) == repo_root
+
+
+def test_gateway_runtime_root_exposes_scripts_tree(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    scripts_root = repo_root / "scripts"
+    script_path = scripts_root / "api_gateway" / "main.py"
+    script_path.parent.mkdir(parents=True, exist_ok=True)
+    script_path.write_text("# test\n", encoding="utf-8")
+    (repo_root / "platform").mkdir(parents=True, exist_ok=True)
+    (repo_root / "platform" / "__init__.py").write_text("", encoding="utf-8")
+
+    resolved_root = gateway_main._resolve_repo_root(script_path)
+
+    assert resolved_root / "scripts" == scripts_root
+
+
+def test_gateway_returns_retry_after_when_keycloak_circuit_is_open(tmp_path: Path) -> None:
+    jwks_calls = {"count": 0}
+
+    def upstream(_request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"status": "ok"})
+
+    def jwks(_request: httpx.Request) -> httpx.Response:
+        jwks_calls["count"] += 1
+        return httpx.Response(503, json={"error": "keycloak restarting"})
+
+    transport = httpx.MockTransport(lambda request: upstream(request) if request.url.host == "upstream.test" else jwks(request))
+    config, token = make_repo(tmp_path, "http://upstream.test")
+    write_yaml(
+        tmp_path / "config" / "circuit-policies.yaml",
+        """
+schema_version: 1.0.0
+circuits:
+  - name: keycloak
+    service: Keycloak OIDC / JWKS
+    failure_threshold: 1
+    recovery_window_s: 60
+    success_threshold: 1
+    timeout_s: 10
+""".strip()
+        + "\n",
+    )
+    app = create_app(config)
+
+    async def run() -> None:
+        async with httpx.AsyncClient(transport=transport) as runtime_client:
+            runtime = GatewayRuntime(config)
+            await runtime.http_client.aclose()
+            runtime.http_client = runtime_client
+            runtime.verifier._client = runtime_client
+            app.state.runtime = runtime
+            try:
+                transport_app = httpx.ASGITransport(app=app)
+                async with httpx.AsyncClient(transport=transport_app, base_url="http://gateway.test") as client:
+                    headers = {"Authorization": f"Bearer {token}"}
+                    first = await client.get("/v1/health", headers=headers)
+                    second = await client.get("/v1/health", headers=headers)
+
+                    assert first.status_code == 503
+                    assert second.status_code == 503
+                    assert int(second.headers["Retry-After"]) in {59, 60}
+                    assert jwks_calls["count"] == 1
+            finally:
+                await runtime.close()
 
     import asyncio
 

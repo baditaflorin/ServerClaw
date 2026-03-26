@@ -23,13 +23,17 @@
         "delay_seconds": 0,
         "url": "https://127.0.0.1/",
         "method": "GET",
-        "expected_status": [200],
+        "expected_status": [
+          200
+        ],
         "headers": {
           "Host": "nginx.lv3.org"
         },
         "validate_tls": false
       },
-      "tls_certificate_ids": ["nginx-edge-public"],
+      "tls_certificate_ids": [
+        "nginx-edge-public"
+      ],
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
@@ -41,7 +45,9 @@
           "retryInterval": 60,
           "maxretries": 0,
           "maxredirects": 10,
-          "accepted_statuscodes": ["200-399"]
+          "accepted_statuscodes": [
+            "200-399"
+          ]
         }
       }
     },
@@ -58,7 +64,9 @@
         "delay_seconds": 3,
         "url": "http://127.0.0.1:3000/api/health",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "readiness": {
         "kind": "http",
@@ -68,9 +76,13 @@
         "delay_seconds": 0,
         "url": "http://127.0.0.1:3000/api/health",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
-      "tls_certificate_ids": ["grafana-edge"],
+      "tls_certificate_ids": [
+        "grafana-edge"
+      ],
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
@@ -82,7 +94,9 @@
           "retryInterval": 60,
           "maxretries": 0,
           "maxredirects": 10,
-          "accepted_statuscodes": ["200-399"]
+          "accepted_statuscodes": [
+            "200-399"
+          ]
         }
       }
     },
@@ -99,7 +113,9 @@
         "delay_seconds": 3,
         "url": "http://127.0.0.1:9093/-/healthy",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "readiness": {
         "kind": "http",
@@ -109,7 +125,9 @@
         "delay_seconds": 3,
         "url": "http://127.0.0.1:9093/-/ready",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "uptime_kuma": {
         "enabled": false,
@@ -129,7 +147,9 @@
         "delay_seconds": 5,
         "url": "http://127.0.0.1:19000/health/live",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "readiness": {
         "kind": "http",
@@ -139,9 +159,13 @@
         "delay_seconds": 5,
         "url": "http://127.0.0.1:18080/realms/lv3/.well-known/openid-configuration",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
-      "tls_certificate_ids": ["keycloak-edge"],
+      "tls_certificate_ids": [
+        "keycloak-edge"
+      ],
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
@@ -153,7 +177,9 @@
           "retryInterval": 60,
           "maxretries": 0,
           "maxredirects": 5,
-          "accepted_statuscodes": ["200-299"]
+          "accepted_statuscodes": [
+            "200-299"
+          ]
         }
       }
     },
@@ -170,7 +196,9 @@
         "delay_seconds": 5,
         "url": "http://127.0.0.1:8083/healthz",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "readiness": {
         "kind": "http",
@@ -180,7 +208,9 @@
         "delay_seconds": 0,
         "url": "http://127.0.0.1:8083/v1/health",
         "method": "GET",
-        "expected_status": [401]
+        "expected_status": [
+          401
+        ]
       },
       "uptime_kuma": {
         "enabled": true,
@@ -193,7 +223,9 @@
           "retryInterval": 60,
           "maxretries": 0,
           "maxredirects": 5,
-          "accepted_statuscodes": ["200-299"]
+          "accepted_statuscodes": [
+            "200-299"
+          ]
         }
       }
     },
@@ -210,7 +242,9 @@
         "delay_seconds": 5,
         "url": "http://10.10.10.20:8092/health",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "readiness": {
         "kind": "http",
@@ -220,7 +254,9 @@
         "delay_seconds": 5,
         "url": "http://10.10.10.20:8092/",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "uptime_kuma": {
         "enabled": true,
@@ -233,7 +269,9 @@
           "retryInterval": 60,
           "maxretries": 0,
           "maxredirects": 5,
-          "accepted_statuscodes": ["200-299"]
+          "accepted_statuscodes": [
+            "200-299"
+          ]
         }
       }
     },
@@ -259,10 +297,15 @@
         "delay_seconds": 0,
         "url": "https://10.10.10.1:8006/api2/json/version",
         "method": "GET",
-        "expected_status": [200],
+        "expected_status": [
+          200
+        ],
         "validate_tls": false
       },
-      "tls_certificate_ids": ["proxmox-ui", "proxmox-edge-page"],
+      "tls_certificate_ids": [
+        "proxmox-ui",
+        "proxmox-edge-page"
+      ],
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
@@ -274,7 +317,60 @@
           "interval": 60,
           "retryInterval": 60,
           "maxretries": 0,
-          "accepted_statuscodes": ["200-299"]
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
+    "headscale": {
+      "service_name": "headscale",
+      "owning_vm": "proxmox_florin",
+      "role": "proxmox_headscale",
+      "verify_file": "roles/proxmox_headscale/tasks/main.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The Headscale local health endpoint responds on the Proxmox host.",
+        "timeout_seconds": 60,
+        "retries": 20,
+        "delay_seconds": 3,
+        "url": "http://127.0.0.1:8080/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "command",
+        "description": "The Headscale CLI can query the managed user catalog through the local config file.",
+        "timeout_seconds": 30,
+        "retries": 1,
+        "delay_seconds": 0,
+        "argv": [
+          "headscale",
+          "--config",
+          "/etc/headscale/config.yaml",
+          "users",
+          "list",
+          "--output",
+          "json"
+        ],
+        "success_rc": 0
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Headscale Public Health",
+          "type": "http",
+          "url": "https://headscale.lv3.org/health",
+          "description": "Public Headscale health endpoint published through the shared NGINX edge.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
         }
       }
     },
@@ -298,10 +394,17 @@
         "timeout_seconds": 30,
         "retries": 1,
         "delay_seconds": 0,
-        "argv": ["docker", "info", "--format", "{{.ServerVersion}}"],
+        "argv": [
+          "docker",
+          "info",
+          "--format",
+          "{{.ServerVersion}}"
+        ],
         "success_rc": 0
       },
-      "tls_certificate_ids": ["docker-runtime-edge"],
+      "tls_certificate_ids": [
+        "docker-runtime-edge"
+      ],
       "uptime_kuma": {
         "enabled": false,
         "reason": "Docker daemon health is enforced by the role verify task and does not expose a dedicated external HTTP surface."
@@ -330,7 +433,9 @@
         "host": "10.10.10.30",
         "port": 22
       },
-      "tls_certificate_ids": ["build-edge"],
+      "tls_certificate_ids": [
+        "build-edge"
+      ],
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
@@ -342,7 +447,9 @@
           "interval": 60,
           "retryInterval": 60,
           "maxretries": 0,
-          "accepted_statuscodes": ["200-299"]
+          "accepted_statuscodes": [
+            "200-299"
+          ]
         }
       }
     },
@@ -357,7 +464,16 @@
         "timeout_seconds": 30,
         "retries": 1,
         "delay_seconds": 0,
-        "argv": ["docker", "ps", "--filter", "name=uptime-kuma", "--filter", "status=running", "--format", "{{.Names}}"],
+        "argv": [
+          "docker",
+          "ps",
+          "--filter",
+          "name=uptime-kuma",
+          "--filter",
+          "status=running",
+          "--format",
+          "{{.Names}}"
+        ],
         "success_rc": 0
       },
       "readiness": {
@@ -368,9 +484,13 @@
         "delay_seconds": 0,
         "url": "http://127.0.0.1:3001",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
-      "tls_certificate_ids": ["uptime-kuma-edge"],
+      "tls_certificate_ids": [
+        "uptime-kuma-edge"
+      ],
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
@@ -382,7 +502,9 @@
           "retryInterval": 60,
           "maxretries": 0,
           "maxredirects": 10,
-          "accepted_statuscodes": ["200-399"]
+          "accepted_statuscodes": [
+            "200-399"
+          ]
         }
       }
     },
@@ -399,7 +521,9 @@
         "delay_seconds": 0,
         "url": "http://127.0.0.1:3001/status/lv3-platform",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "readiness": {
         "kind": "http",
@@ -409,7 +533,9 @@
         "delay_seconds": 0,
         "url": "https://127.0.0.1/",
         "method": "GET",
-        "expected_status": [200],
+        "expected_status": [
+          200
+        ],
         "headers": {
           "Host": "status.lv3.org"
         },
@@ -433,7 +559,9 @@
         "delay_seconds": 0,
         "url": "http://127.0.0.1:8081/healthz",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "readiness": {
         "kind": "command",
@@ -448,7 +576,9 @@
         ],
         "success_rc": 0
       },
-      "tls_certificate_ids": ["mail-platform-edge"],
+      "tls_certificate_ids": [
+        "mail-platform-edge"
+      ],
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
@@ -460,7 +590,9 @@
           "retryInterval": 60,
           "maxretries": 0,
           "maxredirects": 10,
-          "accepted_statuscodes": ["200-299"]
+          "accepted_statuscodes": [
+            "200-299"
+          ]
         }
       }
     },
@@ -484,10 +616,19 @@
         "timeout_seconds": 120,
         "retries": 1,
         "delay_seconds": 0,
-        "argv": ["step", "ca", "certificate", "step-ca-service-test.lv3.internal", "/opt/step-ca/service-test.crt", "/opt/step-ca/service-test.key"],
+        "argv": [
+          "step",
+          "ca",
+          "certificate",
+          "step-ca-service-test.lv3.internal",
+          "/opt/step-ca/service-test.crt",
+          "/opt/step-ca/service-test.key"
+        ],
         "success_rc": 0
       },
-      "tls_certificate_ids": ["step-ca-proxy"],
+      "tls_certificate_ids": [
+        "step-ca-proxy"
+      ],
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
@@ -499,7 +640,9 @@
           "retryInterval": 60,
           "maxretries": 0,
           "maxredirects": 10,
-          "accepted_statuscodes": ["200-299"],
+          "accepted_statuscodes": [
+            "200-299"
+          ],
           "ignoreTls": true
         }
       }
@@ -517,7 +660,9 @@
         "delay_seconds": 5,
         "url": "http://127.0.0.1:8000/api/version",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "readiness": {
         "kind": "http",
@@ -527,7 +672,9 @@
         "delay_seconds": 0,
         "url": "http://127.0.0.1:8000/api/version",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "uptime_kuma": {
         "enabled": true,
@@ -540,7 +687,9 @@
           "retryInterval": 60,
           "maxretries": 0,
           "maxredirects": 10,
-          "accepted_statuscodes": ["200-299"]
+          "accepted_statuscodes": [
+            "200-299"
+          ]
         }
       }
     },
@@ -557,7 +706,9 @@
         "delay_seconds": 5,
         "url": "http://127.0.0.1:8065/api/v4/system/ping",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "readiness": {
         "kind": "command",
@@ -565,7 +716,11 @@
         "timeout_seconds": 30,
         "retries": 1,
         "delay_seconds": 0,
-        "argv": ["test", "-s", "/etc/lv3/mattermost/incoming-webhooks.json"],
+        "argv": [
+          "test",
+          "-s",
+          "/etc/lv3/mattermost/incoming-webhooks.json"
+        ],
         "success_rc": 0
       },
       "uptime_kuma": {
@@ -579,7 +734,9 @@
           "retryInterval": 60,
           "maxretries": 0,
           "maxredirects": 10,
-          "accepted_statuscodes": ["200-299"]
+          "accepted_statuscodes": [
+            "200-299"
+          ]
         }
       }
     },
@@ -596,7 +753,9 @@
         "delay_seconds": 3,
         "url": "http://127.0.0.1:2586/v1/health",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "readiness": {
         "kind": "http",
@@ -606,7 +765,9 @@
         "delay_seconds": 3,
         "url": "http://127.0.0.1:2586/v1/health",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "uptime_kuma": {
         "enabled": false,
@@ -626,7 +787,9 @@
         "delay_seconds": 10,
         "url": "http://127.0.0.1:8082/login/",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "readiness": {
         "kind": "http",
@@ -636,7 +799,9 @@
         "delay_seconds": 5,
         "url": "http://127.0.0.1:8082/api/users/users/?limit=1",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "uptime_kuma": {
         "enabled": true,
@@ -649,7 +814,9 @@
           "retryInterval": 60,
           "maxretries": 0,
           "maxredirects": 10,
-          "accepted_statuscodes": ["200-299"]
+          "accepted_statuscodes": [
+            "200-299"
+          ]
         }
       }
     },
@@ -666,7 +833,9 @@
         "delay_seconds": 5,
         "url": "http://127.0.0.1:8088",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "readiness": {
         "kind": "http",
@@ -676,7 +845,9 @@
         "delay_seconds": 0,
         "url": "http://127.0.0.1:8088/api/v1/auths/signin",
         "method": "POST",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "uptime_kuma": {
         "enabled": true,
@@ -689,7 +860,9 @@
           "retryInterval": 60,
           "maxretries": 0,
           "maxredirects": 10,
-          "accepted_statuscodes": ["200-299"]
+          "accepted_statuscodes": [
+            "200-299"
+          ]
         }
       }
     },
@@ -706,7 +879,9 @@
         "delay_seconds": 5,
         "url": "http://127.0.0.1:11434/api/version",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "readiness": {
         "kind": "command",
@@ -714,12 +889,65 @@
         "timeout_seconds": 60,
         "retries": 1,
         "delay_seconds": 0,
-        "argv": ["docker", "exec", "ollama", "ollama", "show", "llama3.2:3b"],
+        "argv": [
+          "docker",
+          "exec",
+          "ollama",
+          "ollama",
+          "show",
+          "llama3.2:3b"
+        ],
         "success_rc": 0
       },
       "uptime_kuma": {
         "enabled": false,
         "reason": "The Ollama inference API remains private to the docker-runtime VM and internal guest network."
+      }
+    },
+    "n8n": {
+      "service_name": "n8n",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "n8n_runtime",
+      "verify_file": "roles/n8n_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The n8n health endpoint responds on the local listener.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:5678/healthz",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The n8n readiness endpoint reports a ready runtime after startup and database bootstrap.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:5678/healthz/readiness",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "n8n Public Health",
+          "type": "http",
+          "url": "https://n8n.lv3.org/healthz",
+          "description": "n8n edge-published health endpoint behind the shared NGINX edge VM.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
       }
     },
     "platform_context_api": {
@@ -735,7 +963,9 @@
         "delay_seconds": 5,
         "url": "http://127.0.0.1:8010/healthz",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "readiness": {
         "kind": "http",
@@ -745,7 +975,9 @@
         "delay_seconds": 5,
         "url": "http://127.0.0.1:8010/openapi.json",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "uptime_kuma": {
         "enabled": true,
@@ -758,7 +990,9 @@
           "retryInterval": 60,
           "maxretries": 0,
           "maxredirects": 10,
-          "accepted_statuscodes": ["200-299"]
+          "accepted_statuscodes": [
+            "200-299"
+          ]
         }
       }
     },
@@ -775,7 +1009,9 @@
         "delay_seconds": 0,
         "url": "http://127.0.0.1:8201/v1/sys/seal-status",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "readiness": {
         "kind": "http",
@@ -785,9 +1021,13 @@
         "delay_seconds": 2,
         "url": "http://127.0.0.1:8201/v1/sys/health",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
-      "tls_certificate_ids": ["openbao-proxy"],
+      "tls_certificate_ids": [
+        "openbao-proxy"
+      ],
       "uptime_kuma": {
         "enabled": false,
         "reason": "The operator-facing TLS surface requires client-certificate authentication, so Uptime Kuma only tracks this contract indirectly through role verification."
@@ -806,7 +1046,10 @@
         "delay_seconds": 3,
         "url": "http://127.0.0.1:3000/",
         "method": "GET",
-        "expected_status": [200, 302]
+        "expected_status": [
+          200,
+          302
+        ]
       },
       "readiness": {
         "kind": "http",
@@ -816,7 +1059,9 @@
         "delay_seconds": 3,
         "url": "http://127.0.0.1:3000/lua/rest/v2/get/ntopng/interfaces.lua",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "uptime_kuma": {
         "enabled": false,
@@ -845,10 +1090,14 @@
         "delay_seconds": 0,
         "url": "https://127.0.0.1:9443/api/status",
         "method": "GET",
-        "expected_status": [200],
+        "expected_status": [
+          200
+        ],
         "validate_tls": false
       },
-      "tls_certificate_ids": ["portainer-proxy"],
+      "tls_certificate_ids": [
+        "portainer-proxy"
+      ],
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
@@ -860,7 +1109,9 @@
           "retryInterval": 60,
           "maxretries": 0,
           "maxredirects": 10,
-          "accepted_statuscodes": ["200-299"],
+          "accepted_statuscodes": [
+            "200-299"
+          ],
           "ignoreTls": true
         }
       }
@@ -885,7 +1136,11 @@
         "timeout_seconds": 60,
         "retries": 1,
         "delay_seconds": 0,
-        "argv": ["psql", "-Atqc", "SELECT 1"],
+        "argv": [
+          "psql",
+          "-Atqc",
+          "SELECT 1"
+        ],
         "success_rc": 0
       },
       "uptime_kuma": {
@@ -899,7 +1154,9 @@
           "interval": 60,
           "retryInterval": 60,
           "maxretries": 0,
-          "accepted_statuscodes": ["200-299"]
+          "accepted_statuscodes": [
+            "200-299"
+          ]
         }
       }
     },
@@ -923,10 +1180,18 @@
         "timeout_seconds": 60,
         "retries": 1,
         "delay_seconds": 0,
-        "argv": ["proxmox-backup-manager", "datastore", "list", "--output-format", "json"],
+        "argv": [
+          "proxmox-backup-manager",
+          "datastore",
+          "list",
+          "--output-format",
+          "json"
+        ],
         "success_rc": 0
       },
-      "tls_certificate_ids": ["backup-pbs-ui"],
+      "tls_certificate_ids": [
+        "backup-pbs-ui"
+      ],
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
@@ -938,7 +1203,90 @@
           "interval": 60,
           "retryInterval": 60,
           "maxretries": 0,
-          "accepted_statuscodes": ["200-299"]
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
+    "vaultwarden": {
+      "service_name": "vaultwarden",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "vaultwarden_runtime",
+      "verify_file": "roles/vaultwarden_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "tcp",
+        "description": "Vaultwarden accepts TLS connections on the private runtime listener.",
+        "timeout_seconds": 180,
+        "retries": 1,
+        "delay_seconds": 0,
+        "host": "127.0.0.1",
+        "port": 8222
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "Vaultwarden returns success from the managed liveness endpoint over HTTPS.",
+        "timeout_seconds": 60,
+        "retries": 12,
+        "delay_seconds": 5,
+        "url": "https://127.0.0.1:8222/alive",
+        "method": "GET",
+        "expected_status": [
+          200
+        ],
+        "validate_tls": false
+      },
+      "tls_certificate_ids": [
+        "vaultwarden-private"
+      ],
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "Vaultwarden is private-only and uses an internal CA trust chain, so repo-managed role verification is the current health contract."
+      }
+    },
+    "semaphore": {
+      "service_name": "semaphore",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "semaphore_runtime",
+      "verify_file": "roles/semaphore_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "Semaphore returns the unauthenticated ping response on the local runtime listener.",
+        "timeout_seconds": 60,
+        "retries": 18,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:3004/api/ping",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "Semaphore keeps the local ping endpoint reachable after project bootstrap.",
+        "timeout_seconds": 60,
+        "retries": 1,
+        "delay_seconds": 0,
+        "url": "http://127.0.0.1:3004/api/ping",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Semaphore Private",
+          "type": "http",
+          "url": "http://10.10.10.20:3004/api/ping",
+          "description": "Private Semaphore ping endpoint on docker-runtime-lv3.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
         }
       }
     }

@@ -1,3 +1,4 @@
+from .coordination import AgentCoordinationSession, AgentCoordinationStore, AgentSessionEntry
 from .state import (
     AgentStateClient,
     AgentStateConflictError,
@@ -8,6 +9,9 @@ from .state import (
 )
 
 __all__ = [
+    "AgentCoordinationSession",
+    "AgentCoordinationStore",
+    "AgentSessionEntry",
     "AgentStateClient",
     "AgentStateConflictError",
     "AgentStateError",

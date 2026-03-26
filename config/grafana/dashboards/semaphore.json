@@ -1,0 +1,35 @@
+{
+  "title": "Semaphore Overview",
+  "uid": "semaphore-overview",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "timezone": "browser",
+  "tags": ["semaphore", "automation"],
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Semaphore Availability",
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 0},
+      "targets": [
+        {
+          "expr": "probe_success{monitor=\"Semaphore Private\"}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Semaphore Probe Duration",
+      "gridPos": {"h": 8, "w": 16, "x": 8, "y": 0},
+      "targets": [
+        {
+          "expr": "probe_duration_seconds{monitor=\"Semaphore Private\"}",
+          "refId": "B"
+        }
+      ]
+    }
+  ]
+}

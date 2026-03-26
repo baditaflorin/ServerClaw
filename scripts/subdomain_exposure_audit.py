@@ -73,6 +73,9 @@ def _route_entry(
         "service_id": service_id,
         "edge_auth": "oauth2_proxy" if protected else "none",
         "unauthenticated_paths": list(authenticated_sites.get(hostname, {}).get("unauthenticated_paths", [])),
+        "unauthenticated_prefix_paths": list(
+            authenticated_sites.get(hostname, {}).get("unauthenticated_prefix_paths", [])
+        ),
         "metadata": {
             key: value
             for key, value in site.items()
@@ -189,6 +192,7 @@ def build_registry(
                 "route_kind": route["route_kind"] if route else None,
                 "edge_auth": route["edge_auth"] if route else "none",
                 "unauthenticated_paths": route["unauthenticated_paths"] if route else [],
+                "unauthenticated_prefix_paths": route["unauthenticated_prefix_paths"] if route else [],
                 "repo_route_service_id": route["service_id"] if route else None,
                 "repo_route_metadata": route["metadata"] if route else {},
                 "tls": deepcopy(entry["tls"]),

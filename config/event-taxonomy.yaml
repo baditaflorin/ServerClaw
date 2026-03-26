@@ -40,6 +40,61 @@ domains:
             - details
             - ts
             - run_id
+      - name: platform.findings.watchdog_repeated_action
+        description: The scheduler watchdog repeated the same self-healing action often enough to indicate a systemic fault.
+        status: active
+        delivery: at_least_once
+        retention: 14d
+        producers:
+          - adr-0172-watchdog-escalation-and-stale-job-self-healing
+        payload:
+          required:
+            - action_type
+            - count_in_window
+            - window_seconds
+            - threshold
+            - severity
+            - last_payload
+
+  watchdog:
+    description: Scheduler watchdog heartbeat and stale-job self-healing events.
+    topics:
+      - name: platform.watchdog.heartbeat
+        description: One scheduler watchdog heartbeat emitted after a monitoring tick completes.
+        status: active
+        delivery: at_least_once
+        retention: 14d
+        producers:
+          - adr-0172-watchdog-escalation-and-stale-job-self-healing
+        payload:
+          required:
+            - checked_at
+            - active_jobs
+            - completed_jobs
+            - violation_count
+            - warning_count
+            - poll_interval_seconds
+      - name: platform.watchdog.stale_job_aborted
+        description: The scheduler watchdog aborted one running mutation workflow after it went stale.
+        status: active
+        delivery: at_least_once
+        retention: 30d
+        producers:
+          - adr-0172-watchdog-escalation-and-stale-job-self-healing
+        payload:
+          required:
+            - job_id
+            - workflow_id
+            - actor_intent_id
+            - parent_actor_intent_id
+            - reason
+            - observed
+            - limit
+            - message
+            - escalation_action
+            - requested_by
+            - windmill_status
+            - recent_action_count
 
   drift:
     description: Drift detection and reconciliation findings.
@@ -82,7 +137,7 @@ domains:
             - severity
 
   security:
-    description: Security posture summaries and critical findings.
+    description: Security posture summaries plus high and critical findings.
     topics:
       - name: platform.security.report
         description: One generated security posture report summary.
@@ -97,6 +152,19 @@ domains:
             - environment
             - generated_at
             - summary
+      - name: platform.security.high-finding
+        description: One high-severity security finding emitted from the public-surface or posture scan workflows.
+        status: active
+        delivery: at_least_once
+        retention: 90d
+        producers:
+          - adr-0102-security-posture-reporting
+          - adr-0142-public-surface-automated-security-scan
+        payload:
+          required:
+            - event
+            - kind
+            - generated_at
       - name: platform.security.critical-finding
         description: One critical security finding emitted from the posture report.
         status: active
@@ -109,7 +177,6 @@ domains:
             - event
             - kind
             - generated_at
-
   maintenance:
     description: Planned maintenance-window state transitions.
     topics:
@@ -188,6 +255,39 @@ domains:
             - summary
             - overall
             - results
+
+  config:
+    description: Conflict-free config-merge events for merge-eligible registry files.
+    topics:
+      - name: platform.config.merged
+        description: One staged config change was merged into a merge-eligible registry file.
+        status: active
+        delivery: at_least_once
+        retention: 14d
+        producers:
+          - adr-0158-config-merge-protocol
+        payload:
+          required:
+            - change_id
+            - file_path
+            - key_value
+            - operation
+            - status
+      - name: platform.config.merge_conflict
+        description: One staged config change could not be merged and now requires operator review.
+        status: active
+        delivery: at_least_once
+        retention: 30d
+        producers:
+          - adr-0158-config-merge-protocol
+        payload:
+          required:
+            - change_id
+            - file_path
+            - key_value
+            - operation
+            - status
+            - reason
 
   world_state:
     description: World-state refresh lifecycle events.
@@ -311,6 +411,39 @@ domains:
           required:
             - intent_id
             - budget_name
+      - name: platform.execution.deadlock_detected
+        description: A distributed deadlock cycle was detected across the lock registry, intent queue, or coordination map.
+        status: active
+        delivery: at_least_once
+        retention: 30d
+        producers:
+          - adr-0162-deadlock-detector
+        payload:
+          required:
+            - cycle_nodes
+      - name: platform.execution.deadlock_aborted
+        description: The detector aborted and requeued one participant to break a deadlock cycle.
+        status: active
+        delivery: at_least_once
+        retention: 30d
+        producers:
+          - adr-0162-deadlock-detector
+        payload:
+          required:
+            - intent_id
+            - victim_context_id
+            - cycle_nodes
+      - name: platform.execution.livelock_detected
+        description: A queued intent exceeded the livelock threshold without making progress.
+        status: active
+        delivery: at_least_once
+        retention: 30d
+        producers:
+          - adr-0162-deadlock-detector
+        payload:
+          required:
+            - intent_id
+            - attempts
 
   health:
     description: Health-state transition events.
@@ -404,6 +537,19 @@ domains:
   agent:
     description: Agent coordination and state lifecycle events.
     topics:
+      - name: platform.agent.state_updated
+        description: One agent session published a live coordination-state update.
+        status: active
+        delivery: at_least_once
+        retention: 7d
+        producers:
+          - adr-0161-real-time-agent-coordination-map
+        payload:
+          required:
+            - session_id
+            - agent_id
+            - phase
+            - status
       - name: platform.agent.handoff
         description: One agent delegated work to another agent.
         status: reserved

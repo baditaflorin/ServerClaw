@@ -19,7 +19,7 @@
         {
           "id": "proxmox-host-ops-ssh",
           "kind": "ssh_endpoint",
-          "endpoint": "ops@100.118.189.95",
+          "endpoint": "ops@100.64.0.1",
           "auth": "Named SSH key for ops plus sudo on the Proxmox host.",
           "owner_refs": [
             "proxmox_florin"
@@ -29,6 +29,7 @@
             "configure-network",
             "configure-ingress",
             "configure-tailscale",
+            "converge-headscale",
             "provision-guests",
             "harden-access",
             "harden-security",
@@ -41,7 +42,7 @@
         {
           "id": "guest-ops-ssh-via-proxmox-jump",
           "kind": "ssh_endpoint",
-          "endpoint": "ops@10.10.10.0/24 via ProxyJump through ops@100.118.189.95",
+          "endpoint": "ops@10.10.10.0/24 via ProxyJump through ops@100.64.0.1",
           "auth": "Named SSH key for ops on guests, reached through the approved Proxmox jump path.",
           "owner_refs": [
             "nginx-lv3",
@@ -60,6 +61,7 @@
             "converge-mail-platform",
             "converge-rag-context",
             "converge-portainer",
+            "converge-vaultwarden",
             "deploy-uptime-kuma",
             "configure-backup-vm",
             "database-dns"
@@ -97,7 +99,7 @@
         {
           "id": "proxmox-management-api",
           "kind": "management_api",
-          "endpoint": "https://100.118.189.95:8006/api2/json",
+          "endpoint": "https://100.64.0.1:8006/api2/json",
           "auth": "lv3-automation@pve token with privilege separation for automation; ops@pam for routine operator administration.",
           "service_refs": [
             "proxmox_ui"
@@ -110,7 +112,7 @@
         {
           "id": "step-ca-api",
           "kind": "service_api",
-          "endpoint": "https://100.118.189.95:9443",
+          "endpoint": "https://100.64.0.1:9443",
           "auth": "step-ca JWK provisioners with controller-local password material and mirrored root trust bootstrap artifacts under .local/step-ca.",
           "service_refs": [
             "step_ca"
@@ -123,7 +125,7 @@
         {
           "id": "openbao-api",
           "kind": "service_api",
-          "endpoint": "https://100.118.189.95:8200",
+          "endpoint": "https://100.64.0.1:8200",
           "auth": "OpenBao userpass or AppRole credentials plus required step-ca-issued client certificates for the external mTLS listener.",
           "service_refs": [
             "openbao"
@@ -136,7 +138,7 @@
         {
           "id": "windmill-api",
           "kind": "service_api",
-          "endpoint": "http://100.118.189.95:8005/api",
+          "endpoint": "http://100.64.0.1:8005/api",
           "auth": "Windmill scoped bearer tokens and the controller-local superadmin bootstrap secret for initial verification only.",
           "service_refs": [
             "windmill"
@@ -149,7 +151,7 @@
         {
           "id": "netbox-api",
           "kind": "service_api",
-          "endpoint": "http://100.118.189.95:8004/api/",
+          "endpoint": "http://100.64.0.1:8004/api/",
           "auth": "Bootstrap NetBox API token mirrored under .local/netbox/api-token.txt until brokered identity is introduced.",
           "service_refs": [
             "netbox"
@@ -162,7 +164,7 @@
         {
           "id": "portainer-api",
           "kind": "service_api",
-          "endpoint": "https://100.118.189.95:9444",
+          "endpoint": "https://100.64.0.1:9444",
           "auth": "Controller-local Portainer bootstrap auth under .local/portainer; governed machine actions flow through scripts/portainer_tool.py rather than broad Docker shell access.",
           "service_refs": [
             "portainer"
@@ -172,6 +174,19 @@
             "portainer-manage"
           ],
           "notes": "This is the private Docker runtime operations console and API published only through the Proxmox host Tailscale proxy."
+        },
+        {
+          "id": "vaultwarden-api",
+          "kind": "service_api",
+          "endpoint": "https://vault.lv3.org",
+          "auth": "Named Vaultwarden operator accounts for routine use; the controller-local admin token is reserved for bounded bootstrap and recovery-safe automation.",
+          "service_refs": [
+            "vaultwarden"
+          ],
+          "workflow_refs": [
+            "converge-vaultwarden"
+          ],
+          "notes": "This is the private shared credential-vault API and web surface exposed only through the Proxmox host Tailscale path with an internal CA certificate."
         },
         {
           "id": "mail-gateway-api",
@@ -189,7 +204,7 @@
         {
           "id": "mattermost-operator-api",
           "kind": "service_api",
-          "endpoint": "http://100.118.189.95:8066/api/v4",
+          "endpoint": "http://100.64.0.1:8066/api/v4",
           "auth": "Private Mattermost admin login today; future operator SSO integration will follow ADR 0056.",
           "service_refs": [
             "mattermost"
@@ -200,9 +215,22 @@
           "notes": "This is the private ChatOps and operator-agent collaboration API surface exposed through the Proxmox host Tailscale proxy."
         },
         {
+          "id": "headscale-control-plane",
+          "kind": "service_api",
+          "endpoint": "https://headscale.lv3.org",
+          "auth": "Headscale node registration keys for mesh clients and controller-local API keys for administrative automation.",
+          "service_refs": [
+            "headscale"
+          ],
+          "workflow_refs": [
+            "converge-headscale"
+          ],
+          "notes": "This is the repo-managed mesh control plane. Node-to-node traffic remains WireGuard peer-to-peer or DERP-relayed after registration."
+        },
+        {
           "id": "open-webui-operator-workbench",
           "kind": "service_api",
-          "endpoint": "http://100.118.189.95:8008",
+          "endpoint": "http://100.64.0.1:8008",
           "auth": "Repo-managed bootstrap admin password today; future OIDC through Keycloak once ADR 0056 is live.",
           "service_refs": [
             "open_webui"
@@ -228,7 +256,7 @@
         {
           "id": "platform-context-api",
           "kind": "service_api",
-          "endpoint": "http://100.118.189.95:8010",
+          "endpoint": "http://100.64.0.1:8010",
           "auth": "Controller-local bearer token mirrored under .local/platform-context/api-token.txt and used by the governed retrieval and query tooling.",
           "service_refs": [
             "platform_context_api"
@@ -327,15 +355,29 @@
         {
           "id": "platform-finding-subjects",
           "kind": "event_subject",
-          "endpoint": "platform.findings.observation",
+          "endpoint": "platform.findings.*",
           "auth": "Internal NATS publication from ADR 0071 through the private docker-runtime-lv3 event bus runtime.",
           "owner_refs": [
             "proxmox_florin"
           ],
           "workflow_refs": [
-            "check-platform-drift"
+            "check-platform-drift",
+            "scheduler-watchdog-loop"
           ],
-          "notes": "The observation loop now emits each structured finding on the canonical platform.findings.observation subject so consumers subscribe to one stable contract instead of per-check topic names."
+          "notes": "The canonical findings route now covers observation-loop findings and watchdog escalation findings so consumers subscribe to one stable findings namespace instead of per-producer topics."
+        },
+        {
+          "id": "platform-watchdog-subjects",
+          "kind": "event_subject",
+          "endpoint": "platform.watchdog.*",
+          "auth": "Internal NATS publication from ADR 0172 through the private docker-runtime-lv3 event bus runtime.",
+          "owner_refs": [
+            "proxmox_florin"
+          ],
+          "workflow_refs": [
+            "scheduler-watchdog-loop"
+          ],
+          "notes": "The watchdog publishes its liveness heartbeat and stale-job abort events on the canonical platform.watchdog.* namespace."
         },
         {
           "id": "platform-api-request-events",
@@ -423,6 +465,45 @@
           ],
           "workflow_refs": [],
           "notes": "Each committed mutation-ledger row fans out on the canonical platform.ledger.event_written subject for downstream mirrors and reactive consumers."
+        },
+        {
+          "id": "platform-agent-events",
+          "kind": "event_subject",
+          "endpoint": "platform.agent.*",
+          "auth": "Internal NATS publication from ADR 0161 through the private docker-runtime-lv3 event bus runtime.",
+          "owner_refs": [
+            "proxmox_florin"
+          ],
+          "workflow_refs": [
+            "converge-windmill"
+          ],
+          "notes": "Agent coordination publishers emit canonical platform.agent.* subjects so operators and future automation can observe live multi-agent session state without scraping worker-local state."
+        },
+        {
+          "id": "platform-execution-events",
+          "kind": "event_subject",
+          "endpoint": "platform.execution.*",
+          "auth": "Internal NATS publication from ADR 0119 and ADR 0162 through the private docker-runtime-lv3 event bus runtime.",
+          "owner_refs": [
+            "proxmox_florin"
+          ],
+          "workflow_refs": [
+            "converge-windmill"
+          ],
+          "notes": "Execution lifecycle publishers emit canonical execution subjects, including deadlock detection and livelock findings, so operators and future schedulers can react without polling worker state files."
+        },
+        {
+          "id": "platform-config-merge-events",
+          "kind": "event_subject",
+          "endpoint": "platform.config.*",
+          "auth": "Internal NATS publication from ADR 0158 through the private docker-runtime-lv3 Windmill worker runtime.",
+          "owner_refs": [
+            "proxmox_florin"
+          ],
+          "workflow_refs": [
+            "merge-config-changes"
+          ],
+          "notes": "Each merge-eligible config change publishes merged or conflict events so downstream consumers can react without polling config_change_staging directly."
         }
       ]
     }

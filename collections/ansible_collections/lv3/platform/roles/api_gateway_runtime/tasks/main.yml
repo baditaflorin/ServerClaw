@@ -13,6 +13,7 @@
       - api_gateway_internal_port | int > 0
       - api_gateway_sources | length > 0
       - api_gateway_config_sources | length > 0
+      - api_gateway_tree_sync_specs | length > 0
       - api_gateway_keycloak_jwks_url | length > 0
       - api_gateway_keycloak_issuer_url | length > 0
     fail_msg: "api_gateway_runtime requires runtime paths, build sources, and Keycloak endpoint settings."
@@ -87,23 +88,12 @@
   loop_control:
     label: "{{ item.dest }}"
 
-- name: Sync the platform package for gateway graph support
-  ansible.builtin.copy:
-    src: "{{ api_gateway_repo_root }}/platform/"
-    dest: "{{ api_gateway_service_dir }}/platform/"
-    owner: root
-    group: root
-    mode: "0644"
-    directory_mode: "0755"
-
-- name: Sync the shared search fabric package for gateway search routes
-  ansible.builtin.copy:
-    src: "{{ api_gateway_repo_root }}/scripts/search_fabric/"
-    dest: "{{ api_gateway_service_dir }}/search_fabric/"
-    owner: root
-    group: root
-    mode: "0644"
-    directory_mode: "0755"
+- name: Sync the staged repo trees required by the API gateway runtime
+  ansible.builtin.include_tasks: sync_tree.yml
+  loop: "{{ api_gateway_tree_sync_specs }}"
+  loop_control:
+    loop_var: api_gateway_tree_sync_spec
+    label: "{{ api_gateway_tree_sync_spec.name }}"
 
 - name: Sync the API gateway runtime config bundle
   ansible.builtin.copy:
@@ -154,8 +144,11 @@
       RUN pip install --no-cache-dir -r requirements.txt
       COPY controller_automation_toolkit.py ./controller_automation_toolkit.py
       COPY api_gateway_catalog.py ./api_gateway_catalog.py
+      COPY maintenance_window_tool.py ./maintenance_window_tool.py
+      COPY slo_tracking.py ./slo_tracking.py
       COPY api_gateway ./api_gateway
       COPY platform ./platform
+      COPY scripts ./scripts
       COPY search_fabric ./search_fabric
       EXPOSE 8080
       CMD ["uvicorn", "api_gateway.main:app", "--host", "0.0.0.0", "--port", "8080"]
@@ -218,7 +211,20 @@
   changed_when: false
   failed_when: false
 
-- name: Force recreate the API gateway when the published host port is missing
+- name: Check whether the API gateway container sees the runtime config bundle
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ api_gateway_container_name }}"
+      - test
+      - -f
+      - "{{ api_gateway_runtime_config_probe_path }}"
+  register: api_gateway_runtime_config_probe
+  changed_when: false
+  failed_when: false
+
+- name: Force recreate the API gateway when the published host port is missing or the config bind is stale
   ansible.builtin.command:
     argv:
       - docker
@@ -234,7 +240,11 @@
     chdir: "{{ api_gateway_site_dir }}"
   register: api_gateway_force_recreate
   changed_when: true
-  when: api_gateway_published_port.stdout | trim == ""
+  when:
+    - api_gateway_published_port.stdout | trim == "" or api_gateway_runtime_config_probe.rc != 0
+
+- name: Verify the API gateway runtime
+  ansible.builtin.meta: reset_connection
 
 - name: Verify the API gateway runtime
   ansible.builtin.import_tasks: verify.yml

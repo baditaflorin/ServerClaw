@@ -1,0 +1,60 @@
+---
+- name: Verify Vaultwarden responds on the local liveness endpoint
+  ansible.builtin.uri:
+    url: "{{ vaultwarden_local_health_url }}/alive"
+    method: GET
+    status_code: 200
+    validate_certs: false
+  register: vaultwarden_verify_alive
+  retries: 24
+  delay: 5
+  until: vaultwarden_verify_alive.status == 200
+  changed_when: false
+
+- name: Verify Vaultwarden is reachable through the controller URL
+  ansible.builtin.uri:
+    url: "{{ vaultwarden_controller_url }}/alive"
+    method: GET
+    status_code: 200
+    validate_certs: false
+  register: vaultwarden_verify_controller_alive
+  delegate_to: localhost
+  become: false
+  retries: 12
+  delay: 5
+  until: vaultwarden_verify_controller_alive.status == 200
+  changed_when: false
+
+- name: Verify the Vaultwarden container is running
+  ansible.builtin.command:
+    argv:
+      - docker
+      - ps
+      - --filter
+      - "name={{ vaultwarden_container_name }}"
+      - --filter
+      - status=running
+      - --format
+      - "{{ '{{' }}.Names{{ '}}' }}"
+  register: vaultwarden_verify_running
+  changed_when: false
+
+- name: Assert the Vaultwarden container is running
+  ansible.builtin.assert:
+    that:
+      - vaultwarden_verify_running.stdout_lines | select('equalto', vaultwarden_container_name) | list | length == 1
+    fail_msg: "Vaultwarden container is not running."
+
+- name: Assert the Vaultwarden bootstrap state file exists locally
+  ansible.builtin.stat:
+    path: "{{ vaultwarden_bootstrap_state_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: vaultwarden_bootstrap_state_local
+
+- name: Assert the Vaultwarden bootstrap state file is present
+  ansible.builtin.assert:
+    that:
+      - vaultwarden_bootstrap_state_local.stat.exists
+      - vaultwarden_bootstrap_state_local.stat.size | int > 0
+    fail_msg: "Vaultwarden bootstrap state was not mirrored to the control machine."

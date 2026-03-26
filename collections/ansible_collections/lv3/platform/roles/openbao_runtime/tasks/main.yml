@@ -423,6 +423,10 @@
       key: "{{ item }}"
     status_code: 200
   loop: "{{ openbao_init_payload.keys_base64[:openbao_init_key_threshold] }}"
+  register: openbao_unseal_result
+  retries: 6
+  delay: 2
+  until: openbao_unseal_result.status == 200
   when: openbao_seal_status.json.sealed | bool
   no_log: true
 
@@ -892,6 +896,10 @@
   ansible.builtin.set_fact:
     openbao_rotatable_secret_catalog: "{{ lookup('ansible.builtin.file', openbao_secret_catalog_file) | from_json }}"
     openbao_controller_secret_manifest: "{{ lookup('ansible.builtin.file', openbao_controller_secret_manifest_file) | from_json }}"
+  no_log: true
+
+- name: Derive OpenBao secret rotation facts from the loaded catalog
+  ansible.builtin.set_fact:
     openbao_rotation_metadata: >-
       {{
         openbao_rotatable_secret_catalog.rotation_metadata

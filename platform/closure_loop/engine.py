@@ -10,8 +10,10 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any, Callable
 
+from platform.agent import AgentCoordinationStore
 from platform.ledger import LedgerWriter
 from platform.ledger._common import REPO_ROOT, load_module_from_repo
+from platform.world_state._db import parse_timestamp
 from platform.world_state.client import WorldStateClient, WorldStateError
 
 from .store import LoopStateStore
@@ -109,6 +111,7 @@ class ClosureLoop:
         ledger_writer: LedgerWriter | None = None,
         event_publisher: Callable[[str, dict[str, Any]], None] | None = _default_event_publisher,
         world_state_client: WorldStateClient | None = None,
+        coordination_store: AgentCoordinationStore | None = None,
         clock: Callable[[], datetime] = utcnow,
     ) -> None:
         self._repo_root = Path(repo_root) if repo_root is not None else REPO_ROOT
@@ -123,6 +126,7 @@ class ClosureLoop:
         )
         self._event_publisher = event_publisher
         self._world_state_client = world_state_client or WorldStateClient(self._repo_root)
+        self._coordination_store = coordination_store or AgentCoordinationStore(self._repo_root)
         self._clock = clock
 
     def start(
@@ -165,6 +169,7 @@ class ClosureLoop:
             "resolved_at": None,
         }
         self._state_store.upsert(run)
+        self._publish_coordination_state(run, actor_id=resolved_actor)
         return self._advance(run["run_id"], actor_id=resolved_actor)
 
     def status(self, run_id: str) -> dict[str, Any]:
@@ -575,7 +580,9 @@ class ClosureLoop:
             SimpleNamespace(
                 workflow_id=proposal["workflow_id"],
                 arguments=payload if isinstance(payload, dict) else {},
+                target_service_id=run["service_id"],
                 target_vm=run["service_id"],
+                idempotency_scope=run["trigger_ref"],
             ),
             requested_by=actor_id,
         )
@@ -741,3 +748,112 @@ class ClosureLoop:
                     "ts": transition["at"],
                 },
             )
+        if transition["to_state"] in TERMINAL_LOOP_STATES:
+            self._clear_coordination_state(run, actor_id=transition["actor"])
+        else:
+            self._publish_coordination_state(run, actor_id=transition["actor"])
+
+    def _coordination_phase(self, state: str) -> str:
+        mapping = {
+            OBSERVED: "bootstrapping",
+            TRIAGED: "planning",
+            PROPOSING: "planning",
+            EXECUTING: "executing",
+            VERIFYING: "verifying",
+            RESOLVED: "completing",
+            CASE_PROMOTED: "completing",
+            ESCALATED_FOR_APPROVAL: "escalated",
+            BLOCKED: "blocked",
+            CLOSED_NO_ACTION: "completing",
+        }
+        return mapping.get(state, "idle")
+
+    def _coordination_status(self, state: str) -> str:
+        if state == BLOCKED:
+            return "blocked"
+        if state == ESCALATED_FOR_APPROVAL:
+            return "escalated"
+        if state in TERMINAL_LOOP_STATES or state == CLOSED_NO_ACTION:
+            return "completing"
+        return "active"
+
+    def _coordination_progress(self, state: str) -> tuple[int | None, int | None, float]:
+        ordering = {
+            OBSERVED: 0.1,
+            TRIAGED: 0.25,
+            PROPOSING: 0.4,
+            EXECUTING: 0.7,
+            VERIFYING: 0.9,
+            ESCALATED_FOR_APPROVAL: 0.6,
+            BLOCKED: 0.6,
+            RESOLVED: 1.0,
+            CASE_PROMOTED: 1.0,
+            CLOSED_NO_ACTION: 1.0,
+        }
+        return None, None, ordering.get(state, 0.0)
+
+    def _coordination_held_locks(self, run: dict[str, Any]) -> list[str]:
+        proposal = run.get("proposed_intent")
+        if not isinstance(proposal, dict):
+            return []
+        compiled = proposal.get("compiled_intent")
+        if not isinstance(compiled, dict):
+            return []
+        claims = compiled.get("resource_claims")
+        if not isinstance(claims, list):
+            return []
+        locks: list[str] = []
+        for claim in claims:
+            if not isinstance(claim, dict):
+                continue
+            resource = claim.get("resource")
+            if isinstance(resource, str) and resource.strip():
+                locks.append(resource.strip())
+        return locks
+
+    def _publish_coordination_state(self, run: dict[str, Any], *, actor_id: str) -> None:
+        if not actor_id or not actor_id.startswith("agent/"):
+            return
+        state = str(run.get("current_state", OBSERVED))
+        phase = self._coordination_phase(state)
+        step_index, step_count, progress_pct = self._coordination_progress(state)
+        proposal = run.get("proposed_intent") if isinstance(run.get("proposed_intent"), dict) else {}
+        execution = run.get("execution_result") if isinstance(run.get("execution_result"), dict) else {}
+        self._coordination_store.publish(
+            self._coordination_store.build_entry(
+                agent_id=actor_id,
+                context_id=str(run.get("context_id") or run["run_id"]),
+                session_label=f"closure-loop {run['run_id'][:8]}",
+                current_phase=phase,
+                current_target=f"service:{run['service_id']}",
+                current_workflow_id=_optional_str(proposal.get("workflow_id")),
+                current_intent_id=_optional_str(execution.get("actor_intent_id")),
+                held_locks=self._coordination_held_locks(run),
+                held_lanes=[],
+                reserved_budget={},
+                step_index=step_index,
+                step_count=step_count,
+                progress_pct=progress_pct,
+                status=self._coordination_status(state),
+                blocked_reason=_optional_str(run.get("escalation_reason")),
+                error_count=0,
+                started_at=parse_timestamp(run.get("created_at") or isoformat(self._clock())),
+                estimated_completion=(
+                    parse_timestamp(run["resolved_at"])
+                    if isinstance(run.get("resolved_at"), str) and run["resolved_at"]
+                    else None
+                ),
+            )
+        )
+
+    def _clear_coordination_state(self, run: dict[str, Any], *, actor_id: str) -> None:
+        if not actor_id or not actor_id.startswith("agent/"):
+            return
+        self._coordination_store.delete(actor_id, str(run.get("context_id") or run["run_id"]))
+
+
+def _optional_str(value: Any) -> str | None:
+    if not isinstance(value, str):
+        return None
+    candidate = value.strip()
+    return candidate or None

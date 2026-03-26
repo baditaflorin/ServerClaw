@@ -39,8 +39,10 @@ windmill_worker_repo_checkout_host_path: /srv/proxmox_florin_server
 windmill_worker_repo_checkout_container_path: /srv/proxmox_florin_server
 windmill_worker_checkout_sync_paths:
   - config
+  - migrations
   - platform
   - scripts
+  - windmill
 windmill_seed_app_repo_root_local_dir: "{{ playbook_dir }}/../config/windmill/apps"
 windmill_seed_app_sync_dir: "{{ windmill_site_dir }}/seed-apps"
 windmill_mutation_audit_dir: "{{ platform_log_dir }}"
@@ -51,16 +53,41 @@ windmill_seed_scripts:
     language: python3
     summary: LV3 Windmill healthcheck
     description: Repo-managed verification script for Windmill runtime and worker execution.
+  - path: f/lv3/scheduler_watchdog_loop
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/scheduler-watchdog-loop.py"
+    language: python3
+    summary: ADR 0170 scheduler watchdog loop
+    description: Repo-managed helper that runs the budget watchdog against active mutation jobs every 10 seconds.
   - path: f/lv3/platform_observation_loop
     local_file: "{{ playbook_dir }}/../config/windmill/scripts/platform-observation-loop.py"
     language: python3
     summary: LV3 observation loop summary helper
     description: Repo-managed Windmill helper for ADR 0071 observation-loop summaries and later scheduler activation.
+  - path: f/lv3/scheduler_watchdog_loop
+    local_file: "{{ playbook_dir }}/../windmill/scheduler/watchdog-loop.py"
+    language: python3
+    summary: ADR 0172 scheduler watchdog loop
+    description: Repo-managed Windmill helper that scans running jobs every 10 seconds, aborts stale mutation workflows, and emits watchdog heartbeats.
+  - path: f/lv3/lane_scheduler
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/lane-scheduler.py"
+    language: python3
+    summary: ADR 0154 execution lane scheduler
+    description: Repo-managed worker that dequeues VM-scoped execution intents when a lane has free capacity and submits them to Windmill.
+  - path: f/lv3/scheduler_watchdog
+    local_file: "{{ playbook_dir }}/../windmill/scheduler/watchdog-loop.py"
+    language: python3
+    summary: ADR 0119 scheduler watchdog
+    description: Repo-managed worker that releases active scheduler state for completed or budget-violating Windmill jobs.
   - path: f/lv3/platform_findings_daily_digest
     local_file: "{{ playbook_dir }}/../config/windmill/scripts/platform-findings-daily-digest.py"
     language: python3
     summary: LV3 findings daily digest helper
     description: Repo-managed Windmill helper that formats ADR 0071 findings into Markdown for operator review.
+  - path: f/lv3/config_merge/merge_config_changes
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/merge-config-changes.py"
+    language: python3
+    summary: Merge staged config registry changes
+    description: Repo-managed ADR 0158 helper that merges pending change rows from config_change_staging into the merge-eligible registry files.
   - path: f/lv3/rebuild_rag_index
     local_file: "{{ playbook_dir }}/../config/windmill/scripts/rebuild-rag-index.py"
     language: python3
@@ -196,7 +223,53 @@ windmill_seed_scripts:
     language: python3
     summary: Refresh the platform health composite index
     description: Repo-managed ADR 0128 worker that aggregates service health, SLO, drift, incident, maintenance, and mutation signals into the canonical composite index.
+  - path: f/lv3/detect_deadlocks
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/detect-deadlocks.py"
+    language: python3
+    summary: ADR 0162 distributed deadlock detector
+    description: Repo-managed ADR 0162 worker that scans the lock registry, intent queue, and coordination map for deadlock cycles and requeues the lowest-priority participant.
+  - path: f/lv3/intent_queue_dispatcher
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/intent-queue-dispatcher.py"
+    language: python3
+    summary: ADR 0155 queued intent dispatcher
+    description: Repo-managed ADR 0155 worker that replays queued intents once their blocking workflow or resource claims are released.
 windmill_seed_schedules:
+  - path: f/lv3/scheduler_watchdog_loop_every_10s
+    schedule: "*/10 * * * * *"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/scheduler_watchdog_loop
+    args: {}
+    enabled: true
+    summary: ADR 0172 scheduler watchdog loop
+    description: Repo-managed 10-second watchdog schedule that aborts stale scheduler-managed jobs and emits a heartbeat for operator verification.
+    no_flow_overlap: true
+  - path: f/lv3/lane_scheduler_every_2s
+    schedule: "*/2 * * * * *"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/lane_scheduler
+    args: {}
+    enabled: true
+    summary: ADR 0154 execution lane scheduler
+    description: Repo-managed two-second dispatch loop that drains queued VM-scoped intents when their primary lane frees capacity.
+    no_flow_overlap: true
+  - path: f/lv3/intent_queue_dispatcher_every_minute
+    schedule: "0 * * * * *"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/intent_queue_dispatcher
+    args: {}
+    enabled: true
+    summary: ADR 0155 queued intent dispatcher safety schedule
+    description: Repo-managed minute safety schedule that drains queued conflict-blocked intents if release-triggered dispatch was missed.
+    no_flow_overlap: true
+  - path: f/lv3/scheduler_watchdog_every_30s
+    schedule: "*/30 * * * * *"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/scheduler_watchdog
+    args: {}
+    enabled: true
+    summary: ADR 0119 scheduler watchdog
+    description: Repo-managed 30-second watchdog schedule that releases queued scheduler state for completed or budget-violating jobs.
+    no_flow_overlap: true
   - path: f/lv3/platform_observation_loop_every_4h
     schedule: "0 0 */4 * * *"
     timezone: Europe/Bucharest
@@ -215,6 +288,15 @@ windmill_seed_schedules:
     summary: Disabled ADR 0071 daily digest schedule placeholder
     description: Repo-managed Windmill schedule definition reserved for automatic findings digests after the observation loop is promoted into Windmill.
     no_flow_overlap: true
+  - path: f/lv3/config_merge/merge_config_changes_every_minute
+    schedule: "0 * * * * *"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/config_merge/merge_config_changes
+    args: {}
+    enabled: true
+    summary: ADR 0158 config-merge worker
+    description: Repo-managed minute merge for pending config_change_staging rows against the merge-eligible registry catalog.
+    no_flow_overlap: true
   - path: f/lv3/warm_build_cache_nightly
     schedule: "0 0 3 * * *"
     timezone: Europe/Bucharest
@@ -232,6 +314,15 @@ windmill_seed_schedules:
     enabled: false
     summary: Disabled ADR 0089 weekly cache maintenance placeholder
     description: Repo-managed weekly cache maintenance definition that purges the shared pip cache and checks apt-cacher-ng after the cache host is applied live from main.
+    no_flow_overlap: true
+  - path: f/lv3/detect_deadlocks_every_30s
+    schedule: "*/30 * * * * *"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/detect_deadlocks
+    args: {}
+    enabled: true
+    summary: ADR 0162 deadlock detector
+    description: Repo-managed 30-second deadlock detector schedule for the worker-shared lock, queue, and coordination state.
     no_flow_overlap: true
   - path: f/lv3/world_state/refresh_proxmox_vms_every_minute
     schedule: "0 * * * * *"

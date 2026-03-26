@@ -486,9 +486,16 @@
       ],
       "verification_commands": [
         "make syntax-check",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'pveversion'"
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'pveversion'"
       ],
       "execution_class": "mutation",
+      "target_lane": "lane:proxmox-host",
+      "resource_reservation": {
+        "cpu_milli": 2800,
+        "memory_mb": 1536,
+        "disk_iops": 200,
+        "estimated_duration_seconds": 1200
+      },
       "budget": {
         "max_duration_seconds": 2400,
         "max_steps": 320,
@@ -532,6 +539,13 @@
         "make syntax-check"
       ],
       "execution_class": "mutation",
+      "target_lane": "lane:proxmox-host",
+      "resource_reservation": {
+        "cpu_milli": 1800,
+        "memory_mb": 768,
+        "disk_iops": 160,
+        "estimated_duration_seconds": 600
+      },
       "resource_claims": [
         {
           "resource": "host:proxmox_florin",
@@ -584,9 +598,9 @@
       ],
       "verification_commands": [
         "make syntax-check-guest-network-policy",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo pve-firewall compile >/dev/null && sudo ls /etc/pve/firewall/*.fw'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'nc -z -w 2 10.10.10.50 5432'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.50 'nc -z -w 2 10.10.10.20 8083'"
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo pve-firewall compile >/dev/null && sudo ls /etc/pve/firewall/*.fw'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'nc -z -w 2 10.10.10.50 5432'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.50 'nc -z -w 2 10.10.10.20 8083'"
       ],
       "required_read_surfaces": [
         "world_state"
@@ -729,6 +743,54 @@
         "max_steps": 250,
         "max_concurrent_instances": 1,
         "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "converge-headscale": {
+      "description": "Deploy the repo-managed Headscale control plane on the Proxmox host, publish it through the shared NGINX edge, and reconcile the public DNS record for headscale.lv3.org.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-headscale",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-headscale"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-headscale"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-headscale.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/headscale.yml",
+        "playbooks/services/headscale.yml",
+        "roles/proxmox_headscale/tasks/main.yml",
+        "roles/nginx_edge_publication/tasks/main.yml",
+        "config/headscale-acl.hujson",
+        "inventory/host_vars/proxmox_florin.yml"
+      ],
+      "outputs": [
+        "Headscale control plane on proxmox_florin, public DNS publication for headscale.lv3.org, shared-edge proxy routing, and repo-managed ACL policy for the management mesh."
+      ],
+      "verification_commands": [
+        "make syntax-check-headscale",
+        "curl -I https://headscale.lv3.org/health"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1500,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
         "max_restarts": 0,
         "max_rollback_depth": 1,
         "escalation_action": "notify_and_abort"
@@ -992,6 +1054,13 @@
         "curl -I https://grafana.lv3.org"
       ],
       "execution_class": "mutation",
+      "target_lane": "lane:monitoring",
+      "resource_reservation": {
+        "cpu_milli": 1800,
+        "memory_mb": 1536,
+        "disk_iops": 140,
+        "estimated_duration_seconds": 900
+      },
       "budget": {
         "max_duration_seconds": 1500,
         "max_steps": 300,
@@ -1036,8 +1105,8 @@
       ],
       "verification_commands": [
         "make syntax-check-ntopng",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'sudo systemctl is-active redis-server ntopng'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'PASS=$(sudo cat /etc/lv3/ntopng/admin-password); curl -fsS -u admin:${PASS} http://100.118.189.95:3001/lua/rest/v2/get/ntopng/interfaces.lua'"
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo systemctl is-active redis-server ntopng'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'PASS=$(sudo cat /etc/lv3/ntopng/admin-password); curl -fsS -u admin:${PASS} http://100.64.0.1:3001/lua/rest/v2/get/ntopng/interfaces.lua'"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -1170,7 +1239,7 @@
       ],
       "verification_commands": [
         "make syntax-check-mail-platform",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose --file /opt/mail-platform/docker-compose.yml ps'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/mail-platform/docker-compose.yml ps'",
         "curl -s -H \"X-API-Key: $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/gateway-api-key.txt)\" http://10.10.10.20:8081/v1/profiles",
         "ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/mail-platform-notification-profiles-verify.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --limit docker-runtime-lv3",
         "curl -I https://grafana.lv3.org"
@@ -1231,8 +1300,8 @@
       ],
       "verification_commands": [
         "make syntax-check-openbao",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'ssh -o StrictHostKeyChecking=no ops@10.10.10.20 docker compose --file /opt/openbao/docker-compose.yml ps'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'ssh -o StrictHostKeyChecking=no ops@10.10.10.20 curl -fsS http://127.0.0.1:8200/v1/sys/health'"
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'ssh -o StrictHostKeyChecking=no ops@10.10.10.20 docker compose --file /opt/openbao/docker-compose.yml ps'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'ssh -o StrictHostKeyChecking=no ops@10.10.10.20 curl -fsS http://127.0.0.1:8200/v1/sys/health'"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -1287,8 +1356,8 @@
       ],
       "verification_commands": [
         "make syntax-check-step-ca",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose --file /opt/step-ca/docker-compose.yml ps'",
-        "curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt https://100.118.189.95:9443/health"
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker compose --file /opt/step-ca/docker-compose.yml ps'",
+        "curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt https://100.64.0.1:9443/health"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -1327,6 +1396,8 @@
       "owner_runbook": "docs/runbooks/configure-windmill.md",
       "implementation_refs": [
         "Makefile",
+        "migrations/0016_config_merge_schema.sql",
+        "config/windmill/scripts/merge-config-changes.py",
         "playbooks/windmill.yml",
         "config/windmill/scripts/lv3-healthcheck.py",
         "config/windmill/scripts/lv3-mutation-audit.py",
@@ -1335,19 +1406,80 @@
         "roles/proxmox_tailscale_proxy/tasks/main.yml"
       ],
       "outputs": [
-        "Windmill runtime deployed on docker-runtime-lv3 with a PostgreSQL backend on postgres-lv3 and an operator-only Tailscale proxy on the Proxmox host."
+        "Windmill runtime deployed on docker-runtime-lv3 with a PostgreSQL backend on postgres-lv3, an operator-only Tailscale proxy on the Proxmox host, and the repo-managed config-merge worker plus schedule seeded into the workspace."
       ],
       "verification_commands": [
         "make syntax-check-windmill",
-        "curl -s http://100.118.189.95:8005/api/version",
-        "curl -s -H \"Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)\" http://100.118.189.95:8005/api/users/global/whoami"
+        "curl -s http://100.64.0.1:8005/api/version",
+        "curl -s -H \"Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)\" http://100.64.0.1:8005/api/users/global/whoami"
       ],
       "execution_class": "mutation",
+      "target_lane": "lane:docker-runtime",
+      "resource_reservation": {
+        "cpu_milli": 2000,
+        "memory_mb": 1024,
+        "disk_iops": 120,
+        "estimated_duration_seconds": 900
+      },
       "budget": {
         "max_duration_seconds": 1500,
         "max_steps": 300,
         "max_concurrent_instances": 1,
         "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "merge-config-changes": {
+      "description": "Merge pending ADR 0158 staged config changes into the merge-eligible registry files and emit conflict or merged events for downstream consumers.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "merge-config-changes",
+        "command": "make merge-config-changes"
+      },
+      "preflight": {
+        "required": false
+      },
+      "validation_targets": [
+        "validate-data-models"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/config-merge-protocol.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/merge-eligible-files.yaml",
+        "config/event-taxonomy.yaml",
+        "config/windmill/scripts/merge-config-changes.py",
+        "docs/runbooks/config-merge-protocol.md",
+        "migrations/0016_config_merge_schema.sql",
+        "platform/config_merge",
+        "scripts/config_merge_protocol.py",
+        "tests/test_config_merge_protocol.py",
+        "tests/test_config_merge_repo_surfaces.py",
+        "tests/test_config_merge_windmill.py"
+      ],
+      "outputs": [
+        "Merged config-registry files in the worker checkout plus merged or conflict status transitions in config_change_staging."
+      ],
+      "verification_commands": [
+        "uv run --with pyyaml python scripts/config_merge_protocol.py validate",
+        "uv run --with pytest --with pyyaml pytest -q tests/test_config_merge_protocol.py tests/test_config_merge_repo_surfaces.py tests/test_config_merge_windmill.py tests/unit/test_event_taxonomy.py"
+      ],
+      "required_read_surfaces": [
+        "ledger"
+      ],
+      "tags": [
+        "mutation",
+        "config_merge"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 300,
+        "max_steps": 100,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
         "max_restarts": 0,
         "max_rollback_depth": 1,
         "escalation_action": "notify_and_abort"
@@ -1996,7 +2128,7 @@
       "verification_commands": [
         "scripts/validate_repo.sh compose-runtime-envs health-probes",
         "uv run --with pytest pytest -q tests/test_compose_runtime_secret_injection.py",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'sudo ls /run/lv3-secrets'"
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'sudo ls /run/lv3-secrets'"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -2053,8 +2185,8 @@
       ],
       "verification_commands": [
         "make syntax-check-control-plane-recovery",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 -W %h:%p\" ops@10.10.10.20 'sudo systemctl status lv3-control-plane-backup.timer --no-pager'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 -W %h:%p\" ops@10.10.10.60 'sudo systemctl status lv3-control-plane-restore-drill.timer --no-pager'"
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 -W %h:%p\" ops@10.10.10.20 'sudo systemctl status lv3-control-plane-backup.timer --no-pager'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 -W %h:%p\" ops@10.10.10.60 'sudo systemctl status lv3-control-plane-restore-drill.timer --no-pager'"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -2175,6 +2307,60 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-n8n": {
+      "description": "Converge n8n on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and publish it at n8n.lv3.org with a protected editor path and public webhook ingress.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-n8n",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-n8n"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "n8n_database_password",
+          "n8n_owner_password",
+          "n8n_encryption_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-n8n"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-n8n.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/n8n.yml",
+        "roles/n8n_postgres/tasks/main.yml",
+        "roles/n8n_runtime/tasks/main.yml",
+        "roles/nginx_edge_publication/templates/lv3-edge.conf.j2",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/uptime-kuma/monitors.json"
+      ],
+      "outputs": [
+        "A repo-managed n8n runtime on docker-runtime-lv3 with PostgreSQL persistence and public webhook ingress while the editor remains behind the shared edge auth flow."
+      ],
+      "verification_commands": [
+        "make syntax-check-n8n",
+        "curl -fsS https://n8n.lv3.org/healthz",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'curl -fsS http://127.0.0.1:5678/healthz/readiness'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-netbox": {
       "description": "Converge private NetBox on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish the host-side Tailscale proxy, and synchronize canonical repo inventory into the API.",
       "lifecycle_status": "active",
@@ -2217,9 +2403,9 @@
       ],
       "verification_commands": [
         "make syntax-check-netbox",
-        "curl -s -o /dev/null -w '%{http_code}\\n' http://100.118.189.95:8004/login/",
-        "curl -s -H \"Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/netbox/api-token.txt)\" http://100.118.189.95:8004/api/virtualization/virtual-machines/?limit=20",
-        "uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/netbox_inventory_sync.py --api-url http://100.118.189.95:8004 --api-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/netbox/api-token.txt --host-vars /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml --stack /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml --lane-catalog /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/control-plane-lanes.json"
+        "curl -s -o /dev/null -w '%{http_code}\\n' http://100.64.0.1:8004/login/",
+        "curl -s -H \"Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/netbox/api-token.txt)\" http://100.64.0.1:8004/api/virtualization/virtual-machines/?limit=20",
+        "uvx --from pyyaml python /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/netbox_inventory_sync.py --api-url http://100.64.0.1:8004 --api-token-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/netbox/api-token.txt --host-vars /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/host_vars/proxmox_florin.yml --stack /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/versions/stack.yaml --lane-catalog /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/control-plane-lanes.json"
       ],
       "required_read_surfaces": [
         "netbox",
@@ -2227,6 +2413,13 @@
         "world_state"
       ],
       "execution_class": "mutation",
+      "target_lane": "lane:docker-runtime",
+      "resource_reservation": {
+        "cpu_milli": 1600,
+        "memory_mb": 768,
+        "disk_iops": 100,
+        "estimated_duration_seconds": 720
+      },
       "resource_claims": [
         {
           "resource": "service:netbox",
@@ -2289,8 +2482,8 @@
       ],
       "verification_commands": [
         "make syntax-check-open-webui",
-        "curl -s http://100.118.189.95:8008/",
-        "curl -s -X POST -H \"Content-Type: application/json\" -d '{\"email\":\"ops@lv3.org\",\"password\":\"'\"$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/admin-password.txt)\"'\"}' http://100.118.189.95:8008/api/v1/auths/signin"
+        "curl -s http://100.64.0.1:8008/",
+        "curl -s -X POST -H \"Content-Type: application/json\" -d '{\"email\":\"ops@lv3.org\",\"password\":\"'\"$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/open-webui/admin-password.txt)\"'\"}' http://100.64.0.1:8008/api/v1/auths/signin"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -2338,8 +2531,8 @@
       ],
       "verification_commands": [
         "make syntax-check-ollama",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'curl -fsS http://127.0.0.1:11434/api/version'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/ollama_probe.py --base-url http://127.0.0.1:11434 --runs 3 --json'"
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:11434/api/version'",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/ollama_probe.py --base-url http://127.0.0.1:11434 --runs 3 --json'"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -2387,7 +2580,7 @@
       ],
       "verification_commands": [
         "make syntax-check-ntfy",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'curl -fsS http://127.0.0.1:2586/v1/health'"
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:2586/v1/health'"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -2441,9 +2634,9 @@
       ],
       "verification_commands": [
         "make syntax-check-rag-context",
-        "curl -s http://100.118.189.95:8010/healthz",
+        "curl -s http://100.64.0.1:8010/healthz",
         "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/build_rag_index.py --dry-run",
-        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/query_platform_context.py --api-url http://100.118.189.95:8010 --question 'how does step-ca issue SSH certificates'"
+        "python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/query_platform_context.py --api-url http://100.64.0.1:8010 --question 'how does step-ca issue SSH certificates'"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -2494,8 +2687,62 @@
       ],
       "verification_commands": [
         "make syntax-check-portainer",
-        "curl -sk https://100.118.189.95:9444/api/system/status",
+        "curl -sk https://100.64.0.1:9444/api/system/status",
         "make portainer-manage ACTION=list-containers PORTAINER_ARGS='--all'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1500,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "converge-vaultwarden": {
+      "description": "Converge private Vaultwarden on docker-runtime-lv3, provision its PostgreSQL backend, publish the Tailscale-only HTTPS hostname, and persist the controller-local bootstrap admin artifacts.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-vaultwarden",
+        "command": "make converge-vaultwarden"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "vaultwarden_database_password",
+          "vaultwarden_admin_token",
+          "vaultwarden_admin_token_hash"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-vaultwarden"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-vaultwarden.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/vaultwarden.yml",
+        "roles/vaultwarden_postgres",
+        "roles/vaultwarden_runtime",
+        "roles/proxmox_tailscale_proxy",
+        "roles/proxmox_security",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/service-capability-catalog.json"
+      ],
+      "outputs": [
+        "A private Vaultwarden runtime on docker-runtime-lv3 with a PostgreSQL backend, step-ca issued TLS, a Tailscale-only hostname at vault.lv3.org, and controller-local bootstrap admin artifacts under .local/vaultwarden."
+      ],
+      "verification_commands": [
+        "make syntax-check-vaultwarden",
+        "curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt https://vault.lv3.org/alive",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose --file /opt/vaultwarden/docker-compose.yml ps'"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -2549,8 +2796,8 @@
       ],
       "verification_commands": [
         "make syntax-check-mattermost",
-        "curl -s http://100.118.189.95:8066/api/v4/system/ping",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker exec lv3-mattermost /mattermost/bin/mmctl --local team search lv3 --json'",
+        "curl -s http://100.64.0.1:8066/api/v4/system/ping",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'docker exec lv3-mattermost /mattermost/bin/mmctl --local team search lv3 --json'",
         "python -m json.tool /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mattermost/incoming-webhooks.json"
       ],
       "execution_class": "mutation",
@@ -3606,7 +3853,7 @@
       }
     },
     "scheduler-watchdog-loop": {
-      "description": "Run one ADR 0119 watchdog pass over active mutation jobs and cancel budget violations.",
+      "description": "Run one ADR 0172 watchdog pass over running mutation jobs, abort stale executions, and emit a heartbeat.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -3636,16 +3883,18 @@
         "Makefile",
         "config/workflow-defaults.yaml",
         "config/workflow-catalog.json",
+        "config/windmill/scripts/scheduler-watchdog-loop.py",
         "docs/runbooks/budgeted-workflow-scheduler.md",
         "platform/scheduler",
         "windmill/scheduler/watchdog-loop.py"
       ],
       "outputs": [
-        "A JSON summary of active scheduler-tracked jobs, including any budget violations canceled during the pass."
+        "A JSON summary of running mutation jobs, including stale-job aborts, budget violations, warnings, and the latest watchdog heartbeat file."
       ],
       "verification_commands": [
         "python3 -m py_compile platform/scheduler/*.py windmill/scheduler/watchdog-loop.py",
-        "python3 windmill/scheduler/watchdog-loop.py --repo-path ."
+        "uv run --with pyyaml python windmill/scheduler/watchdog-loop.py --repo-path .",
+        "uv run --with pyyaml python config/windmill/scripts/scheduler-watchdog-loop.py"
       ]
     },
     "platform-observation-loop": {
@@ -3698,6 +3947,106 @@
         "python3 -m py_compile platform/closure_loop/*.py config/windmill/scripts/platform-observation-loop.py",
         "python3 config/windmill/scripts/platform-observation-loop.py --repo-path ."
       ]
+    },
+    "converge-semaphore": {
+      "description": "Converge the private Semaphore runtime on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish the Tailscale proxy on the Proxmox host, and seed the self-test project plus controller-local auth artifacts.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-semaphore",
+        "command": "make converge-semaphore"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": [
+          "semaphore_database_password",
+          "semaphore_admin_password",
+          "semaphore_api_token",
+          "semaphore_admin_auth"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-semaphore"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-semaphore.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/semaphore.yml",
+        "playbooks/semaphore-self.yml",
+        "inventory/semaphore-localhost.yml",
+        "roles/semaphore_postgres",
+        "roles/semaphore_runtime",
+        "platform/ansible/semaphore.py",
+        "scripts/semaphore_bootstrap.py",
+        "scripts/semaphore_tool.py",
+        "inventory/host_vars/proxmox_florin.yml"
+      ],
+      "outputs": [
+        "Private Semaphore runtime on docker-runtime-lv3 with a PostgreSQL backend on postgres-lv3, a Tailscale-published controller URL on the Proxmox host, controller-local auth artifacts under .local/semaphore, and a seeded self-test project."
+      ],
+      "verification_commands": [
+        "make syntax-check-semaphore",
+        "curl -fsS http://100.118.189.95:8020/api/ping",
+        "make semaphore-manage ACTION=list-projects",
+        "make semaphore-manage ACTION=run-template SEMAPHORE_ARGS='--template \"Semaphore Self-Test\" --wait'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1500,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "semaphore-manage": {
+      "description": "Run governed Semaphore API actions such as listing projects, listing templates, launching the seeded self-test job, or reading one task output.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "semaphore-manage",
+        "command": "make semaphore-manage ACTION=list-projects"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "semaphore_admin_auth"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "external_live",
+      "owner_runbook": "docs/runbooks/configure-semaphore.md",
+      "implementation_refs": [
+        "Makefile",
+        "scripts/semaphore_tool.py",
+        "platform/ansible/semaphore.py"
+      ],
+      "outputs": [
+        "Governed Semaphore project inspection, seeded template execution, and task-output retrieval through the repo-managed wrapper instead of ad hoc API calls."
+      ],
+      "verification_commands": [
+        "make semaphore-manage ACTION=list-projects",
+        "make semaphore-manage ACTION=run-template SEMAPHORE_ARGS='--template \"Semaphore Self-Test\" --wait'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     }
   }
 }

@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.146.1
-platform_version: 0.130.3
+repo_version: 0.159.0
+platform_version: 0.130.8
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -8,7 +8,7 @@ live_apply_evidence:
     monitoring: 2026-03-25-adr-0096-slo-tracking-live-apply
     mutation_audit: 2026-03-23-adr-0066-mutation-audit-live-apply
     public_edge_publication: 2026-03-25-adr-0136-http-security-headers-live-apply
-    api_gateway: 2026-03-24-adr-0092-platform-api-gateway-live-apply
+    api_gateway: 2026-03-25-adr-0170-timeout-hierarchy-live-apply
     docker_runtime: 2026-03-22-adr-0023-docker-runtime-live-apply
     postgres_vm: 2026-03-22-adr-0026-postgres-vm-live-apply
     uptime_kuma: 2026-03-22-adr-0027-uptime-kuma-live-apply
@@ -18,8 +18,8 @@ live_apply_evidence:
     runtime_container_telemetry: 2026-03-22-adr-0040-runtime-container-telemetry-live-apply
     mail_platform: 2026-03-24-keycloak-password-reset-mail-live-apply
     step_ca: 2026-03-22-adr-0042-step-ca-live-apply
-    openbao: 2026-03-22-adr-0043-openbao-live-apply
-    windmill: 2026-03-24-adr-0122-windmill-operator-access-admin-hotfix-live-apply
+    openbao: 2026-03-25-adr-0170-timeout-hierarchy-live-apply
+    windmill: 2026-03-25-adr-0170-timeout-hierarchy-live-apply
     mattermost: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
     portainer: 2026-03-22-adr-0055-portainer-live-apply
     short_lived_credentials_and_mtls: 2026-03-22-adr-0047-short-lived-credentials-live-apply
@@ -36,6 +36,7 @@ live_apply_evidence:
     remote_build_gateway: 2026-03-23-adr-0082-remote-build-gateway-live-apply
     tempo_tracing: 2026-03-22-adr-0053-tempo-traces-live-apply
     secret_rotation: 2026-03-23-adr-0065-secret-rotation-live-apply
+    semaphore: 2026-03-25-adr-0149-semaphore-live-apply
     ops_portal: 2026-03-24-adr-0133-portal-authentication-by-default-live-apply
     ollama: 2026-03-25-adr-0145-ollama-live-apply
 
@@ -91,7 +92,7 @@ desired_state:
   operator_access:
     bootstrap_method: ssh_via_public_ipv4_or_proxmox_jump
     steady_state_host_method: ssh_to_proxmox_over_tailscale
-    steady_state_host_target: 100.118.189.95
+    steady_state_host_target: 100.64.0.1
     private_guest_access_method: tailscale_subnet_route_when_needed
     private_build_vm: 10.10.10.30
   automation_access:
@@ -450,12 +451,12 @@ observed_state:
       - 100.64.0.0/10
       - 10.10.10.0/24
     tailscale_installed: true
-    tailscale_state: AuthenticatedRouteApprovalPending
-    tailscale_tail_ipv4: 100.118.189.95
+    tailscale_state: AuthenticatedHeadscaleRouteApproved
+    tailscale_tail_ipv4: 100.64.0.1
     tailscale_host_admin_path_working: true
     tailscale_advertised_routes:
       - 10.10.10.0/24
-    tailscale_private_subnet_route_distributed: false
+    tailscale_private_subnet_route_distributed: true
     inter_guest_connectivity_working: true
   notifications:
     sendmail_endpoint: lv3-ops-email
@@ -593,8 +594,20 @@ observed_state:
     latest_windmill_verification_correlation_id: windmill:emit.mutation_audit_event:20260323T084527Z
     openbao_native_audit_file: /opt/openbao/logs/audit.log
     openbao_native_audit_scrape_verified: true
+  headscale:
+    host: proxmox_florin
+    public_url: https://headscale.lv3.org
+    internal_url: http://10.10.10.1:8080
+    service_running: true
+    public_health_verified: true
+    api_key_bootstrapped: true
+    ops_user_present: true
+    proxmox_host_node: proxmox-florin-subnet-router
+    operator_workstation_node: florins-macbook-pro
+    subnet_route: 10.10.10.0/24
+    subnet_route_approved: true
   ntopng:
-    host_tailscale_proxy_url: http://100.118.189.95:3001
+    host_tailscale_proxy_url: http://100.64.0.1:3001
     local_http_url: http://127.0.0.1:3000
     version: 6.7.260322
     service_running: true
@@ -636,7 +649,7 @@ observed_state:
       max: 4396.5
   portainer:
     runtime_vm: 10.10.10.20
-    host_tailscale_proxy_url: https://100.118.189.95:9444
+    host_tailscale_proxy_url: https://100.64.0.1:9444
     endpoint_name: local
     container_running: true
     local_admin_bootstrapped: true
@@ -646,7 +659,7 @@ observed_state:
   step_ca:
     runtime_vm: 10.10.10.20
     api_port: 9000
-    host_tailscale_proxy_url: https://100.118.189.95:9443
+    host_tailscale_proxy_url: https://100.64.0.1:9443
     container_running: true
     healthcheck_verified: true
     x509_issuance_verified: true
@@ -669,7 +682,7 @@ observed_state:
     runtime_vm: 10.10.10.20
     postgres_backend_vm: 10.10.10.50
     raft_storage: true
-    host_tailscale_proxy_url: https://100.118.189.95:8200
+    host_tailscale_proxy_url: https://100.64.0.1:8200
     loopback_http_api: http://127.0.0.1:8201
     tls_listener_present: true
     external_mtls_api_verified: true
@@ -711,7 +724,7 @@ observed_state:
       - approved-agent-clients
   open_webui:
     runtime_vm: 10.10.10.20
-    host_tailscale_proxy_url: http://100.118.189.95:8008
+    host_tailscale_proxy_url: http://100.64.0.1:8008
     container_running: true
     healthcheck_verified: true
     bootstrap_admin_email: ops@lv3.org
@@ -728,7 +741,7 @@ observed_state:
     ollama_connector_verified: true
   platform_context_api:
     runtime_vm: 10.10.10.20
-    host_tailscale_proxy_url: http://100.118.189.95:8010
+    host_tailscale_proxy_url: http://100.64.0.1:8010
     private_http_url: http://10.10.10.20:8010
     container_running: true
     qdrant_container_running: true
@@ -741,7 +754,7 @@ observed_state:
   mattermost:
     runtime_vm: 10.10.10.20
     postgres_backend_vm: 10.10.10.50
-    host_tailscale_proxy_url: http://100.118.189.95:8066
+    host_tailscale_proxy_url: http://100.64.0.1:8066
     private_internal_url: http://10.10.10.20:8065
     container_running: true
     team_name: lv3
@@ -759,7 +772,7 @@ observed_state:
   netbox:
     runtime_vm: 10.10.10.20
     postgres_backend_vm: 10.10.10.50
-    host_tailscale_proxy_url: http://100.118.189.95:8004
+    host_tailscale_proxy_url: http://100.64.0.1:8004
     local_http_url: http://10.10.10.20:8082
     container_running: true
     api_token_verified: true
@@ -839,7 +852,7 @@ observed_state:
     vm: 10.10.10.50
     service_running: true
     guest_firewall_enabled: true
-    tailscale_proxy_host: 100.118.189.95:5432
+    tailscale_proxy_host: 100.64.0.1:5432
     dns_name: database.lv3.org
     dns_resolves_to_tailscale_ip: false
     public_ipv4_reachable: false
@@ -875,8 +888,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.146.1
+    current: 0.159.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.3
+    current: 0.130.8
     meaning: intended platform release for the actual server configuration

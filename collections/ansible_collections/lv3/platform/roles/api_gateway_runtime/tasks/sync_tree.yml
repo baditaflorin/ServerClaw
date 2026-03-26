@@ -1,0 +1,73 @@
+---
+- name: Stage and expand the {{ api_gateway_tree_sync_spec.name }}
+  block:
+    - name: Create a local staging archive path for the {{ api_gateway_tree_sync_spec.name }}
+      ansible.builtin.tempfile:
+        state: file
+        suffix: .tar.gz
+      delegate_to: localhost
+      become: false
+      register: api_gateway_tree_archive_local
+
+    - name: Build the local staging archive for the {{ api_gateway_tree_sync_spec.name }}
+      vars:
+        mutation_audit_action: >-
+          sync.api_gateway_tree.{{ api_gateway_tree_sync_spec.source | replace('-', '_') | replace('/', '_') }}
+        mutation_audit_target: >-
+          {{ api_gateway_tree_sync_spec.dest_parent }}/{{ api_gateway_tree_sync_spec.source | basename }}
+      ansible.builtin.shell: |
+        set -euo pipefail
+        tar -C "{{ api_gateway_tree_sync_spec.archive_root }}" -czf "{{ api_gateway_tree_archive_local.path }}" "{{ api_gateway_tree_sync_spec.source }}"
+      args:
+        executable: /bin/bash
+      delegate_to: localhost
+      become: false
+      changed_when: false
+      tags:
+        - mutation
+
+    - name: Remove the previously staged {{ api_gateway_tree_sync_spec.name }} from the guest
+      ansible.builtin.file:
+        path: "{{ api_gateway_tree_sync_spec.dest_parent }}/{{ api_gateway_tree_sync_spec.source | basename }}"
+        state: absent
+      when: not (api_gateway_tree_sync_spec.preserve_destination_root | default(false))
+
+    - name: Clear the previously staged contents for the {{ api_gateway_tree_sync_spec.name }} on the guest
+      ansible.builtin.shell: |
+        set -euo pipefail
+        destination="{{ api_gateway_tree_sync_spec.dest_parent }}/{{ api_gateway_tree_sync_spec.source | basename }}"
+        if [ -d "$destination" ]; then
+          find "$destination" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+        fi
+      args:
+        executable: /bin/bash
+      when: api_gateway_tree_sync_spec.preserve_destination_root | default(false)
+
+    - name: Copy the staged {{ api_gateway_tree_sync_spec.name }} archive to the guest
+      ansible.builtin.copy:
+        src: "{{ api_gateway_tree_archive_local.path }}"
+        dest: "{{ api_gateway_tree_sync_spec.remote_archive }}"
+        owner: root
+        group: root
+        mode: "0600"
+
+    - name: Expand the staged {{ api_gateway_tree_sync_spec.name }} on the guest
+      ansible.builtin.unarchive:
+        src: "{{ api_gateway_tree_sync_spec.remote_archive }}"
+        dest: "{{ api_gateway_tree_sync_spec.dest_parent }}"
+        remote_src: true
+        owner: root
+        group: root
+  always:
+    - name: Remove the staged {{ api_gateway_tree_sync_spec.name }} archive from the guest
+      ansible.builtin.file:
+        path: "{{ api_gateway_tree_sync_spec.remote_archive }}"
+        state: absent
+
+    - name: Remove the local staging archive for the {{ api_gateway_tree_sync_spec.name }}
+      ansible.builtin.file:
+        path: "{{ api_gateway_tree_archive_local.path }}"
+        state: absent
+      delegate_to: localhost
+      become: false
+      when: api_gateway_tree_archive_local is defined

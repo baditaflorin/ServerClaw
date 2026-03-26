@@ -1,10 +1,10 @@
 # ADR 0162: Distributed Deadlock Detection and Resolution
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.150.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-25
 - Date: 2026-03-24
 
 ## Context
@@ -36,6 +36,8 @@ A dedicated deadlock detector with active resolution provides:
 ## Decision
 
 We will implement a **distributed deadlock detector** as a periodic Windmill workflow that scans the lock registry and intent queue for cycle formation, and a **resolution protocol** that aborts the lowest-priority participant in the cycle.
+
+The first repository implementation lands in [`platform/locking/deadlock_detector.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/locking/deadlock_detector.py) plus the Windmill wrapper [`config/windmill/scripts/detect-deadlocks.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/windmill/scripts/detect-deadlocks.py). It operates over the worker-shared lock registry, intent queue, and coordination map files seeded in the repo checkout and is scheduled every 30 seconds through the existing Windmill runtime role.
 
 ### Wait-for graph construction
 

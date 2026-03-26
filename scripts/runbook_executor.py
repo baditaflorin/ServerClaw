@@ -20,6 +20,7 @@ from typing import Any, Protocol
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, write_json
 from mutation_audit import build_event, emit_event_best_effort
+from platform.circuit import CircuitRegistry, should_count_urllib_exception
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -312,10 +313,26 @@ class RunbookRunStore:
 
 
 class WindmillWorkflowRunner:
-    def __init__(self, *, base_url: str, token: str, workspace: str = "lv3") -> None:
+    def __init__(
+        self,
+        *,
+        base_url: str,
+        token: str,
+        workspace: str = "lv3",
+        circuit_breaker: Any | None = None,
+        circuit_registry: CircuitRegistry | None = None,
+    ) -> None:
         self.base_url = base_url.rstrip("/")
         self.token = token
         self.workspace = workspace
+        self.circuit_breaker = circuit_breaker
+        if self.circuit_breaker is None:
+            registry = circuit_registry or CircuitRegistry(REPO_ROOT)
+            if registry.has_policy("windmill"):
+                self.circuit_breaker = registry.sync_breaker(
+                    "windmill",
+                    exception_classifier=should_count_urllib_exception,
+                )
 
     def run_workflow(self, workflow_id: str, payload: dict[str, Any], *, timeout_seconds: int | None = None) -> Any:
         script_path = workflow_id if "/" in workflow_id else f"f/{self.workspace}/{workflow_id}"
@@ -330,8 +347,15 @@ class WindmillWorkflowRunner:
             },
             method="POST",
         )
-        with urllib.request.urlopen(request, timeout=timeout_seconds or 30) as response:
-            body = response.read().decode("utf-8")
+
+        def execute() -> str:
+            with urllib.request.urlopen(request, timeout=timeout_seconds or 30) as response:
+                return response.read().decode("utf-8")
+
+        if self.circuit_breaker is not None:
+            body = self.circuit_breaker.call(execute)
+        else:
+            body = execute()
         if not body.strip():
             return None
         try:

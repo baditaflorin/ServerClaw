@@ -71,6 +71,7 @@ class ExecutionIntent:
     scoring_context: dict[str, Any]
     risk_score: RiskScore
     semantic_diff: "SemanticDiff | None" = None
+    required_lanes: list[str] | None = None
     resource_claims: list[dict[str, Any]] | None = None
     conflict_warnings: list[dict[str, Any]] | None = None
 
@@ -94,6 +95,8 @@ class ExecutionIntent:
         }
         if self.semantic_diff is not None:
             payload["semantic_diff"] = self.semantic_diff.as_dict()
+        if self.required_lanes:
+            payload["required_lanes"] = self.required_lanes
         if self.resource_claims:
             payload["resource_claims"] = self.resource_claims
         if self.conflict_warnings:

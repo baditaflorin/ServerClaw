@@ -1,0 +1,62 @@
+---
+argument_specs:
+  main:
+    short_description: Converge Semaphore, bootstrap controller auth, and seed the self-test project state.
+    options:
+      semaphore_site_dir:
+        type: path
+        required: true
+      semaphore_data_dir:
+        type: path
+        required: true
+      semaphore_secret_dir:
+        type: path
+        required: true
+      semaphore_compose_file:
+        type: path
+        required: true
+      semaphore_env_file:
+        type: path
+        required: true
+      semaphore_server_port:
+        type: int
+        required: true
+      semaphore_host_proxy_port:
+        type: int
+        required: true
+      semaphore_image:
+        type: str
+        required: true
+      semaphore_container_name:
+        type: str
+        required: true
+      semaphore_controller_url:
+        type: str
+        required: true
+      semaphore_private_base_url:
+        type: str
+        required: true
+      semaphore_database_name:
+        type: str
+        required: true
+      semaphore_database_user:
+        type: str
+        required: true
+      semaphore_database_host:
+        type: str
+        required: true
+      semaphore_database_password_local_file:
+        type: path
+        required: true
+      semaphore_admin_password_local_file:
+        type: path
+        required: true
+      semaphore_api_token_local_file:
+        type: path
+        required: true
+      semaphore_admin_auth_local_file:
+        type: path
+        required: true
+      semaphore_bootstrap_spec_local_file:
+        type: path
+        required: true

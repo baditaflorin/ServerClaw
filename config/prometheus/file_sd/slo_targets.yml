@@ -62,9 +62,23 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
+    - https://vault.lv3.org/alive
+  labels:
+    service_id: vaultwarden
+    slo_id: vaultwarden-availability
+    indicator: availability
+    probe_module: http_2xx_insecure_tls
+- targets:
     - http://10.10.10.20:8010/healthz
   labels:
     service_id: platform_context_api
     slo_id: platform-context-api-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
+    - http://10.10.10.20:3004/api/ping
+  labels:
+    service_id: semaphore
+    slo_id: semaphore-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects

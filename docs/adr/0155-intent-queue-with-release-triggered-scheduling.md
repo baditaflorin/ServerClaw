@@ -1,10 +1,10 @@
 # ADR 0155: Intent Queue with Release-Triggered Scheduling
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.158.0
+- Implemented In Platform Version: 0.130.7
+- Implemented On: 2026-03-25
 - Date: 2026-03-24
 
 ## Context
@@ -24,6 +24,8 @@ The correct architecture is a **durable intent queue** with **release-triggered 
 ## Decision
 
 We will implement a **durable intent queue** with priority scheduling and release-triggered dispatch as a platform service.
+
+The first repository implementation lands in [`platform/intent_queue/scheduler_store.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/intent_queue/scheduler_store.py), [`platform/scheduler/scheduler.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/scheduler/scheduler.py), [`scripts/intent_queue_dispatcher.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/intent_queue_dispatcher.py), and the Windmill runtime defaults. It keeps the existing ADR 0162 queue state intact while adding a scheduler-owned queue for workflow-busy and conflict-rejected intents, release-triggered dispatcher spawning, a repo-managed Windmill safety schedule, and CLI/operator surfaces.
 
 ### Queue table schema
 

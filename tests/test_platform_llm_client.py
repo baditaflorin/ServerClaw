@@ -119,3 +119,78 @@ def test_client_falls_back_to_openai_compatible_endpoint_when_ollama_is_unavaila
     response = client.complete("normalize this", use_case="goal_compiler_normalisation", max_tokens=16)
 
     assert response == "deploy netbox"
+
+
+def test_client_fails_fast_after_ollama_circuit_opens(tmp_path: Path) -> None:
+    write(
+        tmp_path / "config" / "ollama-models.yaml",
+        yaml.safe_dump(
+            {
+                "schema_version": "1.0.0",
+                "models": [
+                    {
+                        "name": "llama3.2:3b",
+                        "provider": "ollama",
+                        "use_cases": ["goal_compiler_normalisation"],
+                        "max_context": 8192,
+                        "ram_requirement_gb": 4,
+                        "pull_on_startup": True,
+                    }
+                ],
+            }
+        ),
+    )
+    write(
+        tmp_path / "config" / "circuit-policies.yaml",
+        yaml.safe_dump(
+            {
+                "schema_version": "1.0.0",
+                "circuits": [
+                    {
+                        "name": "ollama",
+                        "service": "Ollama local inference",
+                        "failure_threshold": 1,
+                        "recovery_window_s": 300,
+                        "success_threshold": 1,
+                        "timeout_s": 30,
+                    },
+                    {
+                        "name": "anthropic_api",
+                        "service": "Anthropic-compatible LLM API",
+                        "failure_threshold": 1,
+                        "recovery_window_s": 300,
+                        "success_threshold": 1,
+                        "timeout_s": 30,
+                    },
+                ],
+            }
+        ),
+    )
+    calls: list[tuple[str, str]] = []
+
+    def fake_request(method: str, url: str, payload, headers, timeout):
+        calls.append((method, url))
+        if url.endswith("/api/tags"):
+            raise RuntimeError("ollama unavailable")
+        if url.endswith("/chat/completions"):
+            return {
+                "choices": [{"message": {"content": "fallback answer"}}],
+                "usage": {"prompt_tokens": 5, "completion_tokens": 2},
+            }
+        raise AssertionError(url)
+
+    client = PlatformLLMClient(
+        tmp_path,
+        request_json=fake_request,
+        fallback_base_url="https://llm.example.test/v1",
+        fallback_model="gpt-4o-mini",
+        fallback_api_key="test-token",
+    )
+
+    assert client.complete("normalize this", use_case="goal_compiler_normalisation", max_tokens=16) == "fallback answer"
+    assert client.complete("normalize this", use_case="goal_compiler_normalisation", max_tokens=16) == "fallback answer"
+    assert calls == [
+        ("GET", "http://127.0.0.1:11434/api/tags"),
+        ("POST", "https://llm.example.test/v1/chat/completions"),
+        ("POST", "https://llm.example.test/v1/chat/completions"),
+    ]

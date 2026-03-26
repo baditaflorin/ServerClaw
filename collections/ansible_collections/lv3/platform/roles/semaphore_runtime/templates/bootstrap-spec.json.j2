@@ -1,0 +1,19 @@
+{
+  "project": {
+    "name": {{ semaphore_project_name | to_json }},
+    "alert": false,
+    "max_parallel_tasks": 0,
+    "type": ""
+  },
+  "repository": {
+    "name": {{ semaphore_repository_name | to_json }},
+    "git_url": {{ semaphore_repo_checkout_container_path | to_json }},
+    "git_branch": "main"
+  },
+  "inventory": {
+    "name": {{ semaphore_inventory_name | to_json }},
+    "inventory": "inventory/semaphore-localhost.yml",
+    "type": "file"
+  },
+  "templates": {{ semaphore_bootstrap_templates | to_nice_json }}
+}

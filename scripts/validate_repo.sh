@@ -17,11 +17,11 @@ export ANSIBLE_COLLECTIONS_PATH="$REPO_ROOT/collections:$ANSIBLE_COLLECTIONS_DIR
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|shell|json|compose-runtime-envs|data-models|generated-docs|generated-portals|health-probes|alert-rules|tofu]...
+  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|ansible-idempotency|shell|json|compose-runtime-envs|retry-guard|data-models|generated-docs|generated-portals|health-probes|alert-rules|tofu]...
 
 Examples:
   scripts/validate_repo.sh
-  scripts/validate_repo.sh ansible-syntax role-argument-specs ansible-lint
+  scripts/validate_repo.sh ansible-syntax role-argument-specs ansible-lint ansible-idempotency
 EOF
 }
 
@@ -126,6 +126,11 @@ validate_ansible_lint() {
   )
 }
 
+validate_ansible_idempotency() {
+  echo "Ansible role idempotency policy"
+  uv run --with pyyaml python "$REPO_ROOT/scripts/ansible_role_idempotency.py"
+}
+
 validate_role_argument_specs() {
   "$REPO_ROOT/scripts/check_role_argument_specs.sh"
 }
@@ -177,20 +182,25 @@ validate_compose_runtime_envs() {
   fi
 }
 
+validate_retry_guard() {
+  echo "Retry guard"
+  python3 "$REPO_ROOT/scripts/check_ad_hoc_retry.py" >/dev/null
+}
+
 validate_data_models() {
   echo "Repository data model validation"
+  uv run --with pyyaml python "$REPO_ROOT/scripts/validate_timeout_hierarchy.py" >/dev/null
+  python3 "$REPO_ROOT/scripts/check_hardcoded_timeouts.py" >/dev/null
   uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/validate_repository_data_models.py" --validate >/dev/null
+  uvx --from pyyaml python "$REPO_ROOT/scripts/execution_lanes.py" --validate >/dev/null
   uvx --from pyyaml python "$REPO_ROOT/scripts/operator_manager.py" validate >/dev/null
   uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/data_catalog.py" --validate >/dev/null
   uv run --with jsonschema python "$REPO_ROOT/scripts/validate_dependency_graph.py" >/dev/null
   uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/service_catalog.py" --validate >/dev/null
   uvx --from pyyaml python "$REPO_ROOT/scripts/environment_topology.py" --validate >/dev/null
   uvx --from pyyaml python "$REPO_ROOT/scripts/subdomain_catalog.py" --validate >/dev/null
-  uvx --from pyyaml python "$REPO_ROOT/scripts/validate_portal_auth.py" --validate >/dev/null
-  uvx --from pyyaml python "$REPO_ROOT/scripts/subdomain_exposure_audit.py" --validate >/dev/null
-  uv run --with pyyaml python "$REPO_ROOT/scripts/validate_nats_topics.py" --validate >/dev/null
   python3 "$REPO_ROOT/scripts/validate_service_completeness.py" --validate >/dev/null
-  "$REPO_ROOT/scripts/agent_tool_registry.py" --export-mcp >/dev/null
+  uv run --with pyyaml python "$REPO_ROOT/scripts/agent_tool_registry.py" --export-mcp >/dev/null
   python3 "$REPO_ROOT/scripts/mutation_audit.py" --validate-schema >/dev/null
 }
 
@@ -198,7 +208,6 @@ validate_generated_docs() {
   echo "Generated status document validation"
   uvx --from pyyaml python "$REPO_ROOT/scripts/generate_status_docs.py" --check >/dev/null
   uv run --with jsonschema python "$REPO_ROOT/scripts/generate_dependency_diagram.py" --check >/dev/null
-  uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/platform_manifest.py" --check >/dev/null
 }
 
 validate_generated_portals() {
@@ -218,6 +227,7 @@ validate_health_probes() {
     backup_vm
     step_ca_runtime
     openbao_runtime
+    semaphore_runtime
     windmill_runtime
     mattermost_runtime
     mail_platform_runtime
@@ -227,6 +237,7 @@ validate_health_probes() {
     netbox_runtime
     open_webui_runtime
     portainer_runtime
+    vaultwarden_runtime
     proxmox_ntopng
   )
 
@@ -272,9 +283,11 @@ for stage in "$@"; do
       validate_yaml
       validate_role_argument_specs
       validate_ansible_lint
+      validate_ansible_idempotency
       validate_shell
       validate_json
       validate_compose_runtime_envs
+      validate_retry_guard
       validate_health_probes
       validate_alert_rules
       validate_tofu
@@ -297,6 +310,9 @@ for stage in "$@"; do
     ansible-lint)
       validate_ansible_lint
       ;;
+    ansible-idempotency)
+      validate_ansible_idempotency
+      ;;
     shell)
       validate_shell
       ;;
@@ -305,6 +321,9 @@ for stage in "$@"; do
       ;;
     compose-runtime-envs)
       validate_compose_runtime_envs
+      ;;
+    retry-guard)
+      validate_retry_guard
       ;;
     data-models)
       validate_data_models

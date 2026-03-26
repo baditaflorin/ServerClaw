@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import threading
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from types import SimpleNamespace
@@ -10,6 +11,7 @@ from platform.conflict import IntentConflictRegistry
 from platform.scheduler import (
     ActiveJobRecord,
     BudgetedWorkflowScheduler,
+    FileLaneReservationStore,
     SchedulerStateStore,
     Watchdog,
     load_workflow_policy,
@@ -21,6 +23,7 @@ def write_scheduler_repo(
     *,
     workflows: dict[str, Any],
     default_budget: dict[str, Any] | None = None,
+    default_resource_reservation: dict[str, Any] | None = None,
     agent_policies: str | None = None,
 ) -> None:
     (repo_root / "config").mkdir(parents=True, exist_ok=True)
@@ -34,6 +37,11 @@ def write_scheduler_repo(
             f"  max_restarts: {(default_budget or {}).get('max_restarts', 1)}\n"
             f"  max_rollback_depth: {(default_budget or {}).get('max_rollback_depth', 1)}\n"
             f"  escalation_action: {(default_budget or {}).get('escalation_action', 'notify_and_abort')}\n"
+            "default_resource_reservation:\n"
+            f"  cpu_milli: {(default_resource_reservation or {}).get('cpu_milli', 500)}\n"
+            f"  memory_mb: {(default_resource_reservation or {}).get('memory_mb', 256)}\n"
+            f"  disk_iops: {(default_resource_reservation or {}).get('disk_iops', 30)}\n"
+            f"  estimated_duration_seconds: {(default_resource_reservation or {}).get('estimated_duration_seconds', 180)}\n"
         ),
         encoding="utf-8",
     )
@@ -68,6 +76,10 @@ def write_scheduler_repo(
         (agent_policies if agent_policies is not None else default_policies) + "\n",
         encoding="utf-8",
     )
+
+
+def write_execution_lanes(repo_root: Path, content: str) -> None:
+    (repo_root / "config" / "execution-lanes.yaml").write_text(content.strip() + "\n", encoding="utf-8")
 
 
 class RecordingLedgerWriter:
@@ -112,8 +124,16 @@ class FakeLockManager:
 
 
 class FakeWindmillClient:
-    def __init__(self, *, statuses: list[dict[str, Any]] | None = None) -> None:
+    def __init__(
+        self,
+        *,
+        statuses: list[dict[str, Any]] | None = None,
+        statuses_by_job: dict[str, list[dict[str, Any]] | dict[str, Any]] | None = None,
+        remote_jobs: list[dict[str, Any]] | None = None,
+    ) -> None:
         self.statuses = statuses or []
+        self.statuses_by_job = statuses_by_job or {}
+        self.remote_jobs = remote_jobs or []
         self.submit_calls: list[tuple[str, dict[str, Any], int | None]] = []
         self.cancel_calls: list[tuple[str, str | None]] = []
 
@@ -128,11 +148,27 @@ class FakeWindmillClient:
         return {"job_id": "job-1", "running": True}
 
     def get_job(self, job_id: str) -> dict[str, Any]:
+        if job_id in self.statuses_by_job:
+            payload = self.statuses_by_job[job_id]
+            if isinstance(payload, list):
+                if len(payload) > 1:
+                    return payload.pop(0)
+                return payload[0]
+            return payload
         if len(self.statuses) > 1:
             return self.statuses.pop(0)
         if self.statuses:
             return self.statuses[0]
         return {"completed": True, "success": True, "result": {"job_id": job_id}}
+
+    def list_jobs(self, *, running: bool | None = None) -> list[dict[str, Any]]:
+        if running is None:
+            return list(self.remote_jobs)
+        return [
+            job
+            for job in self.remote_jobs
+            if job.get("running") is running or "running" not in job
+        ]
 
     def cancel_job(self, job_id: str, *, reason: str | None = None) -> dict[str, Any]:
         self.cancel_calls.append((job_id, reason))
@@ -166,6 +202,29 @@ class SequencedWindmillClient:
         return {"job_id": job_id, "canceled": True}
 
 
+class BlockingWindmillClient(FakeWindmillClient):
+    def __init__(self) -> None:
+        super().__init__()
+        self.submitted = threading.Event()
+        self.release = threading.Event()
+
+    def submit_workflow(
+        self,
+        workflow_id: str,
+        arguments: dict[str, Any],
+        *,
+        timeout_seconds: int | None = None,
+    ) -> dict[str, Any]:
+        payload = super().submit_workflow(workflow_id, arguments, timeout_seconds=timeout_seconds)
+        self.submitted.set()
+        return payload
+
+    def get_job(self, job_id: str) -> dict[str, Any]:
+        self.submitted.set()
+        self.release.wait(timeout=1)
+        return {"completed": True, "success": True, "result": {"job_id": job_id, "status": "ok"}}
+
+
 def test_budget_loader_merges_defaults_and_explicit_overrides(tmp_path: Path) -> None:
     write_scheduler_repo(
         tmp_path,
@@ -174,6 +233,13 @@ def test_budget_loader_merges_defaults_and_explicit_overrides(tmp_path: Path) ->
                 "description": "Deploy NetBox",
                 "live_impact": "guest_live",
                 "execution_class": "mutation",
+                "target_lane": "lane:docker-runtime",
+                "resource_reservation": {
+                    "cpu_milli": 1500,
+                    "memory_mb": 768,
+                    "disk_iops": 90,
+                    "estimated_duration_seconds": 300,
+                },
                 "budget": {
                     "max_duration_seconds": 900,
                     "max_concurrent_instances": 1,
@@ -193,6 +259,9 @@ def test_budget_loader_merges_defaults_and_explicit_overrides(tmp_path: Path) ->
     assert policy.budget.max_duration_seconds == 900
     assert policy.budget.max_concurrent_instances == 1
     assert policy.budget.max_steps == 250
+    assert policy.target_lane == "lane:docker-runtime"
+    assert policy.resource_reservation is not None
+    assert policy.resource_reservation.cpu_milli == 1500
 
 
 def test_scheduler_rejects_when_concurrency_slots_are_busy(tmp_path: Path) -> None:
@@ -218,6 +287,171 @@ def test_scheduler_rejects_when_concurrency_slots_are_busy(tmp_path: Path) -> No
 
     assert result.status == "concurrency_limit"
     assert windmill.submit_calls == []
+
+
+def test_scheduler_rejects_when_lane_budget_hard_limit_is_exceeded(tmp_path: Path) -> None:
+    write_scheduler_repo(
+        tmp_path,
+        workflows={
+            "converge-netbox": {
+                "description": "Deploy NetBox",
+                "live_impact": "guest_live",
+                "execution_class": "mutation",
+                "target_lane": "lane:test",
+                "resource_reservation": {
+                    "cpu_milli": 1200,
+                    "memory_mb": 256,
+                    "disk_iops": 40,
+                    "estimated_duration_seconds": 60,
+                },
+            }
+        },
+    )
+    write_execution_lanes(
+        tmp_path,
+        """
+schema_version: 1.0.0
+lanes:
+  - lane_id: lane:test
+    vm_id: 120
+    hostname: docker-runtime-lv3
+    services: []
+    max_concurrent_ops: 1
+    serialisation: strict
+    admission_policy: hard
+    vm_budget:
+      total_cpu_milli: 1000
+      total_memory_mb: 512
+      total_disk_iops: 100
+""",
+    )
+    windmill = FakeWindmillClient()
+    scheduler = BudgetedWorkflowScheduler(
+        windmill_client=windmill,
+        repo_root=tmp_path,
+        lock_manager=FakeLockManager(),
+        sleep_fn=lambda _seconds: None,
+    )
+
+    result = scheduler.submit(
+        SimpleNamespace(workflow_id="converge-netbox", arguments={"service": "netbox"}, target_vm="docker-runtime-lv3")
+    )
+
+    assert result.status == "budget_exceeded"
+    assert result.reason == "lane_budget_exceeded"
+    assert result.metadata["reasons"] == ["cpu_milli"]
+    assert windmill.submit_calls == []
+
+
+def test_scheduler_allows_soft_lane_budget_exceedance_and_releases_reservation(tmp_path: Path) -> None:
+    write_scheduler_repo(
+        tmp_path,
+        workflows={
+            "converge-netbox": {
+                "description": "Deploy NetBox",
+                "live_impact": "guest_live",
+                "execution_class": "mutation",
+                "target_lane": "lane:test",
+                "resource_reservation": {
+                    "cpu_milli": 1200,
+                    "memory_mb": 256,
+                    "disk_iops": 40,
+                    "estimated_duration_seconds": 60,
+                },
+            }
+        },
+    )
+    write_execution_lanes(
+        tmp_path,
+        """
+schema_version: 1.0.0
+lanes:
+  - lane_id: lane:test
+    vm_id: 120
+    hostname: docker-runtime-lv3
+    services: []
+    max_concurrent_ops: 2
+    serialisation: resource_lock
+    admission_policy: soft
+    vm_budget:
+      total_cpu_milli: 1000
+      total_memory_mb: 512
+      total_disk_iops: 100
+""",
+    )
+    reservation_store = FileLaneReservationStore(tmp_path / ".local" / "scheduler" / "lane-reservations.json")
+    scheduler = BudgetedWorkflowScheduler(
+        windmill_client=FakeWindmillClient(statuses=[{"completed": True, "success": True, "result": {"ok": True}}]),
+        repo_root=tmp_path,
+        lock_manager=FakeLockManager(),
+        lane_budget_store=reservation_store,
+        sleep_fn=lambda _seconds: None,
+    )
+
+    result = scheduler.submit(
+        SimpleNamespace(workflow_id="converge-netbox", arguments={"service": "netbox"}, target_vm="docker-runtime-lv3")
+    )
+
+    assert result.status == "completed"
+    assert result.metadata["lane_budget"]["soft_exceeded"] is True
+    assert result.metadata["lane_budget"]["reasons"] == ["cpu_milli"]
+    assert reservation_store.snapshot() == {}
+
+
+def test_watchdog_releases_lane_budget_for_async_submission(tmp_path: Path) -> None:
+    write_scheduler_repo(
+        tmp_path,
+        workflows={
+            "converge-netbox": {
+                "description": "Deploy NetBox",
+                "live_impact": "guest_live",
+                "execution_class": "mutation",
+            }
+        },
+    )
+    write_execution_lanes(
+        tmp_path,
+        """
+schema_version: 1.0.0
+lanes:
+  - lane_id: lane:test
+    vm_id: 120
+    hostname: docker-runtime-lv3
+    services: []
+    max_concurrent_ops: 2
+    serialisation: resource_lock
+    admission_policy: soft
+    vm_budget:
+      total_cpu_milli: 1000
+      total_memory_mb: 512
+      total_disk_iops: 100
+""",
+    )
+    reservation_store = FileLaneReservationStore(tmp_path / ".local" / "scheduler" / "lane-reservations.json")
+    state_store = SchedulerStateStore(tmp_path / ".local" / "scheduler" / "active-jobs.json")
+    windmill = FakeWindmillClient(statuses=[{"completed": True, "success": True, "result": {"ok": True}}])
+    scheduler = BudgetedWorkflowScheduler(
+        windmill_client=windmill,
+        repo_root=tmp_path,
+        lock_manager=FakeLockManager(),
+        lane_budget_store=reservation_store,
+        state_store=state_store,
+        sleep_fn=lambda _seconds: None,
+    )
+
+    result = scheduler.submit(
+        SimpleNamespace(workflow_id="converge-netbox", arguments={}, target_vm="docker-runtime-lv3"),
+        wait_for_completion=False,
+    )
+
+    assert result.status == "submitted"
+    assert reservation_store.snapshot()
+
+    summary = scheduler._watchdog.monitor_once(now=datetime.now(UTC))
+
+    assert summary["completed_jobs"] == 1
+    assert reservation_store.snapshot() == {}
+    assert state_store.list_active_jobs() == []
 
 
 def test_scheduler_blocks_rollback_chain_beyond_budget(tmp_path: Path) -> None:
@@ -551,6 +785,279 @@ def test_load_workflow_policy_rejects_invalid_speculative_config(tmp_path: Path)
         assert "compensating_workflow_id" in str(exc)
     else:  # pragma: no cover - defensive guard for failing assertion
         raise AssertionError("expected invalid speculative config to raise ValueError")
+
+
+def test_scheduler_returns_cached_result_for_completed_idempotent_submission(tmp_path: Path) -> None:
+    write_scheduler_repo(
+        tmp_path,
+        workflows={
+            "converge-netbox": {
+                "description": "Deploy NetBox",
+                "live_impact": "guest_live",
+                "execution_class": "mutation",
+            }
+        },
+    )
+    ledger = RecordingLedgerWriter()
+    windmill = FakeWindmillClient(statuses=[{"completed": True, "success": True, "result": {"status": "ok"}}])
+    scheduler = BudgetedWorkflowScheduler(
+        windmill_client=windmill,
+        repo_root=tmp_path,
+        lock_manager=FakeLockManager(),
+        ledger_writer=ledger,
+        sleep_fn=lambda _seconds: None,
+    )
+
+    first = scheduler.submit(SimpleNamespace(workflow_id="converge-netbox", arguments={"service": "netbox"}))
+    second = scheduler.submit(SimpleNamespace(workflow_id="converge-netbox", arguments={"service": "netbox"}))
+
+    assert first.status == "completed"
+    assert second.status == "idempotent_hit"
+    assert second.output == {"status": "ok"}
+    assert len(windmill.submit_calls) == 1
+    assert [event["event_type"] for event in ledger.events] == [
+        "intent.claim_registered",
+        "execution.started",
+        "execution.completed",
+        "execution.idempotent_hit",
+    ]
+
+
+def test_scheduler_returns_in_flight_for_duplicate_submission(tmp_path: Path) -> None:
+    write_scheduler_repo(
+        tmp_path,
+        workflows={
+            "converge-netbox": {
+                "description": "Deploy NetBox",
+                "live_impact": "guest_live",
+                "execution_class": "mutation",
+            }
+        },
+    )
+    windmill = BlockingWindmillClient()
+    scheduler = BudgetedWorkflowScheduler(
+        windmill_client=windmill,
+        repo_root=tmp_path,
+        lock_manager=FakeLockManager(),
+        sleep_fn=lambda _seconds: None,
+    )
+    result_holder: dict[str, Any] = {}
+
+    def run_first() -> None:
+        result_holder["first"] = scheduler.submit(
+            SimpleNamespace(workflow_id="converge-netbox", arguments={"service": "netbox"})
+        )
+
+    thread = threading.Thread(target=run_first)
+    thread.start()
+    assert windmill.submitted.wait(timeout=1)
+
+    second = scheduler.submit(SimpleNamespace(workflow_id="converge-netbox", arguments={"service": "netbox"}))
+    windmill.release.set()
+    thread.join(timeout=1)
+
+    assert second.status == "in_flight"
+    assert len(windmill.submit_calls) == 1
+    assert result_holder["first"].status == "completed"
+
+
+def test_scheduler_allows_retry_after_failed_idempotent_submission(tmp_path: Path) -> None:
+    write_scheduler_repo(
+        tmp_path,
+        workflows={
+            "converge-netbox": {
+                "description": "Deploy NetBox",
+                "live_impact": "guest_live",
+                "execution_class": "mutation",
+            }
+        },
+    )
+    windmill = FakeWindmillClient(
+        statuses=[
+            {"completed": True, "success": False, "result": {"error": "boom"}},
+            {"completed": True, "success": True, "result": {"status": "ok"}},
+        ]
+    )
+    scheduler = BudgetedWorkflowScheduler(
+        windmill_client=windmill,
+        repo_root=tmp_path,
+        lock_manager=FakeLockManager(),
+        sleep_fn=lambda _seconds: None,
+    )
+
+    first = scheduler.submit(SimpleNamespace(workflow_id="converge-netbox", arguments={"service": "netbox"}))
+    second = scheduler.submit(SimpleNamespace(workflow_id="converge-netbox", arguments={"service": "netbox"}))
+
+    assert first.status == "failed"
+    assert second.status == "completed"
+    assert len(windmill.submit_calls) == 2
+
+
+def test_watchdog_cancels_stale_jobs_and_emits_heartbeat(tmp_path: Path) -> None:
+    store = SchedulerStateStore(tmp_path / ".local" / "scheduler" / "active-jobs.json")
+    write_scheduler_repo(
+        tmp_path,
+        workflows={
+            "converge-netbox": {
+                "description": "Deploy NetBox",
+                "live_impact": "guest_live",
+                "execution_class": "mutation",
+            }
+        },
+    )
+    policy = load_workflow_policy("converge-netbox", repo_root=tmp_path)
+    started_at = (datetime.now(UTC) - timedelta(minutes=5)).isoformat()
+    updated_at = (datetime.now(UTC) - timedelta(minutes=3)).isoformat()
+    store.upsert(
+        ActiveJobRecord(
+            job_id="job-stale",
+            workflow_id="converge-netbox",
+            actor_intent_id="intent-stale",
+            requested_by="operator:test",
+            execution_class="mutation",
+            started_at=started_at,
+            budget=policy.budget,
+        )
+    )
+    windmill = FakeWindmillClient(
+        statuses=[
+            {
+                "running": True,
+                "started_at": started_at,
+                "updated_at": updated_at,
+            }
+        ]
+    )
+    ledger = RecordingLedgerWriter()
+    subjects: list[tuple[str, dict[str, Any]]] = []
+    watchdog = Watchdog(
+        windmill_client=windmill,
+        state_store=store,
+        ledger_writer=ledger,
+        escalation_handler=lambda subject, payload: subjects.append((subject, payload)),
+        repo_root=tmp_path,
+    )
+
+    summary = watchdog.monitor_once(now=datetime.now(UTC))
+
+    assert [event["event_type"] for event in ledger.events] == [
+        "execution.stale_job_detected",
+        "execution.aborted",
+    ]
+    assert windmill.cancel_calls == [
+        ("job-stale", "workflow converge-netbox appears stale (180.0s since the last observed activity)")
+    ]
+    assert summary["heartbeat_file"].endswith("watchdog-heartbeat.json")
+    heartbeat = json.loads((tmp_path / ".local" / "scheduler" / "watchdog-heartbeat.json").read_text(encoding="utf-8"))
+    assert heartbeat["poll_interval_seconds"] == 10
+    assert [subject for subject, _payload in subjects] == [
+        "platform.watchdog.stale_job_aborted",
+        "platform.watchdog.heartbeat",
+    ]
+
+
+def test_watchdog_discovers_running_jobs_from_windmill_listing(tmp_path: Path) -> None:
+    write_scheduler_repo(
+        tmp_path,
+        workflows={
+            "converge-netbox": {
+                "description": "Deploy NetBox",
+                "live_impact": "guest_live",
+                "execution_class": "mutation",
+            }
+        },
+    )
+    started_at = datetime.now(UTC).isoformat()
+    windmill = FakeWindmillClient(
+        statuses_by_job={
+            "job-remote": {
+                "running": True,
+                "started_at": started_at,
+                "updated_at": started_at,
+                "completed_steps": 1,
+            }
+        },
+        remote_jobs=[
+            {
+                "id": "job-remote",
+                "running": True,
+                "script_path": "f/lv3/converge_netbox",
+                "started_at": started_at,
+                "args": {"actor_intent_id": "intent-remote"},
+                "created_by": "operator:remote",
+            }
+        ],
+    )
+    watchdog = Watchdog(
+        windmill_client=windmill,
+        state_store=SchedulerStateStore(tmp_path / ".local" / "scheduler" / "active-jobs.json"),
+        repo_root=tmp_path,
+        escalation_handler=lambda *_args: None,
+    )
+
+    jobs = watchdog.list_monitored_jobs()
+    assert len(jobs) == 1
+    assert jobs[0].job_id == "job-remote"
+    assert jobs[0].workflow_id == "converge-netbox"
+    assert jobs[0].requested_by == "operator:remote"
+
+
+def test_watchdog_escalates_repeated_self_healing_actions(tmp_path: Path) -> None:
+    store = SchedulerStateStore(tmp_path / ".local" / "scheduler" / "active-jobs.json")
+    write_scheduler_repo(
+        tmp_path,
+        workflows={
+            "converge-netbox": {
+                "description": "Deploy NetBox",
+                "live_impact": "guest_live",
+                "execution_class": "mutation",
+            }
+        },
+    )
+    policy = load_workflow_policy("converge-netbox", repo_root=tmp_path)
+    now = datetime.now(UTC)
+    for index in range(3):
+        store.upsert(
+            ActiveJobRecord(
+                job_id=f"job-{index}",
+                workflow_id="converge-netbox",
+                actor_intent_id=f"intent-{index}",
+                requested_by="operator:test",
+                execution_class="mutation",
+                started_at=(now - timedelta(minutes=5)).isoformat(),
+                budget=policy.budget,
+            )
+        )
+    windmill = FakeWindmillClient(
+        statuses_by_job={
+            "job-0": {
+                "running": True,
+                "started_at": (now - timedelta(minutes=5)).isoformat(),
+                "updated_at": (now - timedelta(minutes=3)).isoformat(),
+            },
+            "job-1": {
+                "running": True,
+                "started_at": (now - timedelta(minutes=5)).isoformat(),
+                "updated_at": (now - timedelta(minutes=3)).isoformat(),
+            },
+            "job-2": {
+                "running": True,
+                "started_at": (now - timedelta(minutes=5)).isoformat(),
+                "updated_at": (now - timedelta(minutes=3)).isoformat(),
+            },
+        }
+    )
+    subjects: list[tuple[str, dict[str, Any]]] = []
+    watchdog = Watchdog(
+        windmill_client=windmill,
+        state_store=store,
+        escalation_handler=lambda subject, payload: subjects.append((subject, payload)),
+        repo_root=tmp_path,
+    )
+
+    watchdog.monitor_once(now=now)
+
+    assert "platform.findings.watchdog_repeated_action" in [subject for subject, _payload in subjects]
 
 
 def test_scheduler_rejects_when_autonomous_daily_cap_is_reached(tmp_path: Path) -> None:
