@@ -107,7 +107,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.163.0` |
+| Repository version | `0.164.0` |
 | Platform version | `0.130.14` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -448,6 +448,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Environment Promotion Pipeline](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/environment-promotion-pipeline.md)
 - [Ephemeral Fixtures](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/ephemeral-fixtures.md)
 - [Generate Status Documents](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/generate-status-documents.md)
+- [Graceful Degradation Modes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/graceful-degradation-modes.md)
 - [Harden Access Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/harden-access.md)
 - [Health Composite Index](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/health-composite-index.md)
 - [Health Probe Contracts Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/health-probe-contracts.md)
@@ -838,6 +839,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0164: Circuit Breaker Pattern for External Service Calls](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0164-circuit-breaker-pattern.md)
 - [Workstream ADR 0165: Workflow Idempotency Keys and Double-Execution Prevention](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0165-workflow-idempotency.md)
 - [Workstream ADR 0166: Canonical Error Response Format And Error Code Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0166-canonical-error-response-format.md)
+- [Workstream ADR 0167: Graceful Degradation Mode Declarations](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0167-graceful-degradation-mode-declarations.md)
 - [Workstream ADR 0168: Ansible Role Idempotency CI Enforcement](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0168-idempotency-ci.md)
 - [Workstream ADR 0169: Structured Log Field Contract](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0169-structured-log-field-contract.md)
 - [Workstream ADR 0170: Platform-Wide Timeout Hierarchy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0170-timeout-hierarchy.md)
@@ -859,7 +861,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.163.0` |
+| Repository version | `0.164.0` |
 | Platform version | `0.130.14` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1032,6 +1034,7 @@ This repository is intentionally opinionated:
 | `0164` | Circuit breaker pattern for external service calls | `live_applied` | [adr-0164-circuit-breaker-pattern.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0164-circuit-breaker-pattern.md) |
 | `0165` | Workflow idempotency keys and double-execution prevention | `live_applied` | [adr-0165-workflow-idempotency.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0165-workflow-idempotency.md) |
 | `0166` | Canonical error response format and error code registry | `live_applied` | [adr-0166-canonical-error-response-format.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0166-canonical-error-response-format.md) |
+| `0167` | Graceful degradation mode declarations | `merged` | [adr-0167-graceful-degradation-mode-declarations.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0167-graceful-degradation-mode-declarations.md) |
 | `0168` | Ansible role idempotency CI enforcement | `merged` | [adr-0168-idempotency-ci.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0168-idempotency-ci.md) |
 | `0169` | Structured log field contract | `live_applied` | [adr-0169-structured-log-field-contract.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0169-structured-log-field-contract.md) |
 | `0170` | Platform-wide timeout hierarchy | `live_applied` | [adr-0170-timeout-hierarchy.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0170-timeout-hierarchy.md) |
