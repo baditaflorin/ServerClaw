@@ -1,10 +1,10 @@
 # ADR 0166: Canonical Error Response Format and Error Code Registry
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Partial
+- Implemented In Repo Version: 0.162.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-26
 - Date: 2026-03-24
 
 ## Context
@@ -30,6 +30,17 @@ The correct fix is a **canonical error response format** with a machine-parseabl
 ## Decision
 
 We will define a **canonical error envelope** and an **error code registry** as the single source of truth for all platform errors. Every platform surface that currently returns an error in a non-canonical format will be migrated.
+
+### First implementation phase
+
+The first implemented phase scopes this ADR to the repo-managed HTTP APIs that already sit on the critical operator and agent path:
+
+- `scripts/api_gateway/main.py`
+- `scripts/platform_context_service.py`
+- repository validation for `config/error-codes.yaml`
+- operator documentation for the shared registry
+
+Goal compiler, workflow scheduler, runbook executor, and other non-HTTP surfaces remain in scope for later phases of this ADR, which is why the implementation state is currently `Partial`.
 
 ### Canonical error envelope
 
@@ -220,6 +231,15 @@ except PlatformError as e:
             # Workflow-level failure; triage engine should investigate
             triage.submit_signal(service_id=intent.target, error_code=e.error_code)
 ```
+
+## Implementation Notes
+
+- `config/error-codes.yaml` now provides the first repo-managed registry for authentication, validation, routing, dependency, and unexpected-failure codes.
+- `scripts/canonical_errors.py` provides the shared loader and canonical envelope helpers used by the gateway and platform-context API.
+- `scripts/api_gateway/main.py` and `scripts/platform_context_service.py` now return canonical envelopes for authentication failures, request-validation failures, and common not-found or dependency-failure paths.
+- `scripts/validate_repository_data_models.py` now validates the error-code registry as part of the repository data-model gate.
+- `docs/runbooks/platform-api-error-codes.md` documents the current envelope and registry ownership.
+- The first live-apply attempt on 2026-03-26 was blocked by repeated controller-to-host SSH timeouts to `65.108.75.123:22`, so platform metadata remains `not yet` until the rollout succeeds from `main`.
 
 ## Consequences
 

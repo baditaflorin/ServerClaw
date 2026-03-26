@@ -40,6 +40,13 @@ cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
 make converge-rag-context
 ```
 
+Or use the service wrapper when running a production live apply:
+
+```bash
+cd /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server
+make live-apply-service service=rag-context env=production
+```
+
 Rebuild the index from the current repo checkout:
 
 ```bash
@@ -66,7 +73,8 @@ python3 scripts/build_rag_index.py --dry-run
 1. `curl -s http://100.118.189.95:8010/healthz`
 2. `python3 scripts/build_rag_index.py --dry-run`
 3. `python3 scripts/query_platform_context.py --api-url http://100.118.189.95:8010 --question "how does step-ca issue SSH certificates"`
-4. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose --file /opt/platform-context/docker-compose.yml ps && sudo ls -l /opt/platform-context/openbao /run/lv3-secrets/platform-context && sudo test ! -e /opt/platform-context/platform-context.env'`
+4. `curl -s http://100.118.189.95:8010/v1/platform-summary | jq '.error.code'` returns `AUTH_TOKEN_MISSING`
+5. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker compose --file /opt/platform-context/docker-compose.yml ps && sudo ls -l /opt/platform-context/openbao /run/lv3-secrets/platform-context && sudo test ! -e /opt/platform-context/platform-context.env'`
 
 ## Open WebUI Integration
 
@@ -89,5 +97,6 @@ This follows the Open WebUI global OpenAPI tool-server model rather than exposin
 ## Operating Notes
 
 - The API token is required for all query and admin endpoints.
+- Protected endpoints now return the canonical error envelope backed by `config/error-codes.yaml`.
 - The current runtime uses a local `sentence-transformers/all-MiniLM-L6-v2` embedding model. Tests may switch to the deterministic `token-hash` backend, but the live runtime should stay on the local model unless a follow-up ADR changes that.
 - Windmill seeds `f/lv3/rebuild_rag_index` so the deployed control plane can trigger a local-corpus rebuild without re-reading the full repository through chat context.

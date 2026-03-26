@@ -36,6 +36,7 @@ api_gateway_tree_sync_specs:
     preserve_destination_root: true
 api_gateway_gateway_catalog_src: "{{ api_gateway_repo_root }}/config/api-gateway-catalog.json"
 api_gateway_service_catalog_src: "{{ api_gateway_repo_root }}/config/service-capability-catalog.json"
+api_gateway_error_registry_src: "{{ api_gateway_repo_root }}/config/error-codes.yaml"
 api_gateway_workflow_catalog_src: "{{ api_gateway_repo_root }}/config/workflow-catalog.json"
 api_gateway_retry_policy_src: "{{ api_gateway_repo_root }}/config/retry-policies.yaml"
 api_gateway_circuit_policies_src: "{{ api_gateway_repo_root }}/config/circuit-policies.yaml"
@@ -65,6 +66,8 @@ api_gateway_config_sources:
     dest: api-gateway-catalog.json
   - src: "{{ api_gateway_service_catalog_src }}"
     dest: service-capability-catalog.json
+  - src: "{{ api_gateway_error_registry_src }}"
+    dest: error-codes.yaml
   - src: "{{ api_gateway_workflow_catalog_src }}"
     dest: workflow-catalog.json
   - src: "{{ api_gateway_retry_policy_src }}"

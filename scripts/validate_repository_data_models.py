@@ -21,6 +21,7 @@ from command_catalog import load_command_catalog, validate_command_catalog
 from api_gateway_catalog import load_api_gateway_catalog, validate_api_gateway_catalog
 from api_publication import load_api_publication_catalog, validate_api_publication_catalog
 from capacity_report import load_capacity_model
+from canonical_errors import ErrorRegistry
 from container_image_policy import load_image_catalog, validate_image_catalog as validate_container_image_catalog
 from changelog_redaction import load_redaction_policy, validate_redaction_policy
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
@@ -66,6 +67,7 @@ SECRET_CATALOG_PATH = repo_path("config", "secret-catalog.json")
 TOKEN_POLICY_PATH = repo_path("config", "token-policy.yaml")
 TOKEN_INVENTORY_PATH = repo_path("config", "token-inventory.yaml")
 IMAGE_CATALOG_PATH = repo_path("config", "image-catalog.json")
+ERROR_REGISTRY_PATH = repo_path("config", "error-codes.yaml")
 PLATFORM_FINDING_SCHEMA_PATH = repo_path("docs", "schema", "platform-finding.json")
 MAINTENANCE_WINDOW_SCHEMA_PATH = repo_path("docs", "schema", "maintenance-window.json")
 VM_TEMPLATE_MANIFEST_PATH = repo_path("config", "vm-template-manifest.json")
@@ -1294,6 +1296,26 @@ def validate_capacity_model_schema() -> None:
             raise ValueError(f"docs/schema/capacity-model.schema.json.properties must include '{field}'")
 
 
+def validate_error_registry() -> None:
+    payload = require_mapping(load_yaml(ERROR_REGISTRY_PATH), str(ERROR_REGISTRY_PATH))
+    require_semver(payload.get("schema_version"), "config/error-codes.yaml.schema_version")
+    registry = ErrorRegistry.load(ERROR_REGISTRY_PATH)
+    openapi_fragment = registry.openapi_fragment()
+    if not openapi_fragment:
+        raise ValueError("config/error-codes.yaml must define at least one error code")
+    for code, definition in openapi_fragment.items():
+        http_status = definition["http_status"]
+        if http_status < 100 or http_status > 599:
+            raise ValueError(f"config/error-codes.yaml.error_codes.{code}.http_status must be between 100 and 599")
+        require_str(definition["severity"], f"config/error-codes.yaml.error_codes.{code}.severity")
+        require_str(definition["category"], f"config/error-codes.yaml.error_codes.{code}.category")
+        require_enum(
+            definition["retry_advice"],
+            f"config/error-codes.yaml.error_codes.{code}.retry_advice",
+            {"none", "immediate", "backoff", "manual"},
+        )
+
+
 def validate_version_semantics() -> None:
     payload = load_json(VERSION_SEMANTICS_PATH)
     require_semver(payload.get("schema_version"), "config/version-semantics.json.schema_version")
@@ -2190,6 +2212,7 @@ def validate_repository_data_models() -> int:
     command_catalog = load_command_catalog()
     validate_command_catalog(command_catalog, workflow_catalog, secret_manifest)
     validate_container_image_catalog(load_image_catalog())
+    validate_error_registry()
     api_gateway_catalog, _ = load_api_gateway_catalog()
     validate_api_gateway_catalog(api_gateway_catalog)
     lane_catalog, _ = load_lane_catalog()

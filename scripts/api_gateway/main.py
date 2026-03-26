@@ -29,6 +29,7 @@ import httpx
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
@@ -63,6 +64,7 @@ def _load_repo_platform_package() -> None:
 _load_repo_platform_package()
 
 from api_gateway_catalog import load_api_gateway_catalog
+from canonical_errors import ErrorRegistry
 GRAPH_RUNTIME_IMPORT_ERROR: str | None = None
 
 try:
@@ -193,6 +195,7 @@ class GatewayConfig:
     repo_root: Path
     catalog_path: Path
     service_catalog_path: Path
+    error_registry_path: Path
     health_probe_catalog_path: Path
     workflow_catalog_path: Path
     platform_vars_path: Path
@@ -420,6 +423,7 @@ class NatsEventEmitter:
 class GatewayRuntime:
     def __init__(self, config: GatewayConfig) -> None:
         self.config = config
+        self.error_registry = ErrorRegistry.load(config.error_registry_path)
         self.catalog_payload, normalized_catalog = load_api_gateway_catalog(
             config.catalog_path,
             service_catalog_path=config.service_catalog_path,
@@ -671,6 +675,9 @@ def build_config() -> GatewayConfig:
         service_catalog_path=Path(
             os.environ.get("LV3_GATEWAY_SERVICE_CATALOG_PATH", repo_root / "config" / "service-capability-catalog.json")
         ),
+        error_registry_path=Path(
+            os.environ.get("LV3_GATEWAY_ERROR_REGISTRY_PATH", repo_root / "config" / "error-codes.yaml")
+        ),
         health_probe_catalog_path=Path(
             os.environ.get("LV3_GATEWAY_HEALTH_PROBE_CATALOG_PATH", repo_root / "config" / "health-probe-catalog.json")
         ),
@@ -778,6 +785,134 @@ async def emit_request_event(
         return
 
 
+def request_trace_id(request: Request) -> str:
+    return getattr(request.state, "trace_id", "") or getattr(request.state, "request_id", "") or generate_trace_id()
+
+
+def validation_error_context(exc: RequestValidationError) -> dict[str, Any]:
+    errors = exc.errors()
+    if not errors:
+        return {}
+    first = errors[0]
+    return {
+        "field_path": ".".join(str(item) for item in first.get("loc", [])) or "request",
+        "error_type": str(first.get("type") or "validation_error"),
+        "validation_message": str(first.get("msg") or "request validation failed"),
+    }
+
+
+def canonical_error_from_http_exception(request: Request, exc: HTTPException) -> tuple[str, str | None, dict[str, Any], int | None]:
+    detail = exc.detail if isinstance(exc.detail, str) else str(exc.detail)
+    detail_lower = detail.lower()
+    context: dict[str, Any] = {}
+    retry_after: int | None = None
+    if exc.headers and exc.headers.get("Retry-After"):
+        try:
+            retry_after = int(exc.headers["Retry-After"])
+        except ValueError:
+            retry_after = None
+
+    if exc.status_code == 401:
+        if "missing bearer token" in detail_lower:
+            return (
+                "AUTH_TOKEN_MISSING",
+                "Bearer token is required for this endpoint.",
+                {"header": "Authorization"},
+                retry_after,
+            )
+        if "expired bearer token" in detail_lower:
+            return (
+                "AUTH_TOKEN_EXPIRED",
+                "Bearer token has expired.",
+                {"reason": "expired"},
+                retry_after,
+            )
+        return (
+            "AUTH_TOKEN_INVALID",
+            "Bearer token could not be validated.",
+            {"reason": "token_validation"},
+            retry_after,
+        )
+
+    if exc.status_code == 403:
+        required_role = ""
+        if "missing required role '" in detail:
+            required_role = detail.split("missing required role '", 1)[1].split("'", 1)[0]
+        identity = getattr(request.state, "identity", None) or {}
+        service_id = request.path_params.get("service_id") or request.path_params.get("service_path")
+        return (
+            "AUTH_INSUFFICIENT_ROLE",
+            "Caller identity is authenticated but lacks the required role.",
+            {
+                "required_role": required_role,
+                "subject": identity.get("subject", "anonymous"),
+                "service_id": str(service_id or ""),
+            },
+            retry_after,
+        )
+
+    if exc.status_code == 404:
+        path = request.url.path
+        if "unknown workflow" in detail_lower:
+            return (
+                "INPUT_UNKNOWN_WORKFLOW",
+                f"Unknown workflow: {request.path_params.get('workflow_id', '')}",
+                {"workflow_id": str(request.path_params.get("workflow_id", ""))},
+                retry_after,
+            )
+        if "unknown command" in detail_lower:
+            return (
+                "INPUT_UNKNOWN_COMMAND",
+                f"Unknown command: {request.path_params.get('command_id', '')}",
+                {"command_id": str(request.path_params.get("command_id", ""))},
+                retry_after,
+            )
+        if "unknown gateway route" in detail_lower:
+            return (
+                "INPUT_UNKNOWN_GATEWAY_ROUTE",
+                "Requested gateway route is not registered.",
+                {"path": path},
+                retry_after,
+            )
+        service_id = request.path_params.get("service_id")
+        if service_id:
+            return (
+                "INPUT_UNKNOWN_SERVICE",
+                detail,
+                {"service_id": str(service_id)},
+                retry_after,
+            )
+        return (
+            "INPUT_UNKNOWN_GATEWAY_ROUTE",
+            "Requested gateway route is not registered.",
+            {"path": path},
+            retry_after,
+        )
+
+    if exc.status_code == 503:
+        return (
+            "INFRA_RUNTIME_UNAVAILABLE",
+            detail or "Required runtime dependency is unavailable.",
+            {"dependency": "platform-runtime", "detail": detail},
+            retry_after,
+        )
+
+    if exc.status_code >= 500:
+        return (
+            "INTERNAL_UNEXPECTED_ERROR",
+            detail or "Unexpected internal platform error.",
+            {"detail": detail or "internal_error"},
+            retry_after,
+        )
+
+    return (
+        "INTERNAL_UNEXPECTED_ERROR",
+        detail or "Unexpected internal platform error.",
+        {"detail": detail or "internal_error"},
+        retry_after,
+    )
+
+
 def require_graph_runtime(runtime: GatewayRuntime) -> DependencyGraphClient:
     if runtime.graph_client is None:
         detail = "dependency graph runtime is not configured"
@@ -820,6 +955,7 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
         request.state.trace_id = request.headers.get("X-Trace-Id") or generate_trace_id()
         set_context(trace_id=request.state.trace_id, request_id=request.state.request_id)
         started_at = time.perf_counter()
+        request.state.request_started_at = started_at
         try:
             response = await call_next(request)
         except Exception:
@@ -852,6 +988,44 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
         )
         clear_context()
         return response
+
+    @app.exception_handler(HTTPException)
+    async def handle_http_exception(request: Request, exc: HTTPException) -> JSONResponse:
+        runtime: GatewayRuntime = request.app.state.runtime
+        code, message, context, retry_after = canonical_error_from_http_exception(request, exc)
+        error = runtime.error_registry.create(
+            code,
+            trace_id=request_trace_id(request),
+            message=message,
+            context=context,
+            retry_after_s=retry_after,
+        )
+        response = JSONResponse(status_code=error.http_status, content=error.to_response())
+        if error.retry_after_s is not None:
+            response.headers["Retry-After"] = str(error.retry_after_s)
+        return response
+
+    @app.exception_handler(RequestValidationError)
+    async def handle_request_validation_error(request: Request, exc: RequestValidationError) -> JSONResponse:
+        runtime: GatewayRuntime = request.app.state.runtime
+        error = runtime.error_registry.create(
+            "INPUT_SCHEMA_INVALID",
+            trace_id=request_trace_id(request),
+            message="Request payload or parameters failed validation.",
+            context=validation_error_context(exc),
+        )
+        return JSONResponse(status_code=error.http_status, content=error.to_response())
+
+    @app.exception_handler(Exception)
+    async def handle_unexpected_error(request: Request, exc: Exception) -> JSONResponse:
+        runtime: GatewayRuntime = request.app.state.runtime
+        error = runtime.error_registry.create(
+            "INTERNAL_UNEXPECTED_ERROR",
+            trace_id=request_trace_id(request),
+            message="Unexpected internal platform error.",
+            context={"detail": type(exc).__name__},
+        )
+        return JSONResponse(status_code=error.http_status, content=error.to_response())
 
     @app.get("/healthz")
     async def healthz() -> dict[str, str]:
@@ -1198,6 +1372,7 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
         runtime: GatewayRuntime = request.app.state.runtime
         schema = app.openapi()
         schema["x-lv3-gateway-catalog"] = runtime.catalog_payload
+        schema["x-lv3-error-codes"] = runtime.error_registry.openapi_fragment()
 
         if runtime.config.openapi_include_upstreams:
             upstream_schemas: dict[str, Any] = {}
@@ -1325,16 +1500,16 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
                 status_code=503,
                 started_at=started_at,
             )
-            return JSONResponse(
-                status_code=503,
-                headers={"Retry-After": str(exc.retry_after)},
-                content={
-                    "code": "GATE_CIRCUIT_OPEN",
-                    "circuit": service.id,
-                    "message": f"{service.name} is temporarily unavailable.",
-                    "retry_after": exc.retry_after,
-                },
+            error = runtime.error_registry.create(
+                "INFRA_RUNTIME_UNAVAILABLE",
+                trace_id=request_trace_id(request),
+                message=f"{service.name} is temporarily unavailable.",
+                context={"dependency": service.id, "detail": "circuit_open"},
+                retry_after_s=exc.retry_after,
             )
+            response = JSONResponse(status_code=error.http_status, content=error.to_response())
+            response.headers["Retry-After"] = str(exc.retry_after)
+            return response
         except httpx.HTTPError as exc:
             await emit_request_event(
                 request,
@@ -1342,14 +1517,13 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
                 status_code=502,
                 started_at=started_at,
             )
-            return JSONResponse(
-                status_code=502,
-                content={
-                    "code": "GATE_DEPENDENCY_UNAVAILABLE",
-                    "service": service.id,
-                    "message": str(exc),
-                },
+            error = runtime.error_registry.create(
+                "INFRA_DEPENDENCY_DOWN",
+                trace_id=request_trace_id(request),
+                message=f"Upstream request to {service.id} failed.",
+                context={"dependency": service.id, "detail": str(exc)},
             )
+            return JSONResponse(status_code=error.http_status, content=error.to_response())
 
         await emit_request_event(
             request,

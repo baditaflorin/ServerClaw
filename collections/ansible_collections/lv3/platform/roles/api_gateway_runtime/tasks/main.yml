@@ -143,6 +143,7 @@
       COPY requirements.txt ./requirements.txt
       RUN pip install --no-cache-dir -r requirements.txt
       COPY controller_automation_toolkit.py ./controller_automation_toolkit.py
+      COPY canonical_errors.py ./canonical_errors.py
       COPY api_gateway_catalog.py ./api_gateway_catalog.py
       COPY maintenance_window_tool.py ./maintenance_window_tool.py
       COPY slo_tracking.py ./slo_tracking.py
@@ -182,24 +183,62 @@
   changed_when: "'Downloaded newer image' in api_gateway_pull.stdout or 'Status: Downloaded newer image' in api_gateway_pull.stdout"
 
 - name: Build and start the API gateway stack
-  ansible.builtin.command:
-    argv:
-      - docker
-      - compose
-      - --file
-      - "{{ api_gateway_compose_file }}"
-      - up
-      - -d
-      - --build
-      - --remove-orphans
-  args:
-    chdir: "{{ api_gateway_site_dir }}"
-  register: api_gateway_up
-  changed_when: >-
-    'Creating' in api_gateway_up.stdout
-    or 'Recreating' in api_gateway_up.stdout
-    or 'Starting' in api_gateway_up.stdout
-    or 'Building' in api_gateway_up.stdout
+  block:
+    - name: Build and start the API gateway stack
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ api_gateway_compose_file }}"
+          - up
+          - -d
+          - --build
+          - --remove-orphans
+      args:
+        chdir: "{{ api_gateway_site_dir }}"
+      register: api_gateway_up
+      changed_when: >-
+        'Creating' in api_gateway_up.stdout
+        or 'Recreating' in api_gateway_up.stdout
+        or 'Starting' in api_gateway_up.stdout
+        or 'Building' in api_gateway_up.stdout
+  rescue:
+    - name: Flag Docker nat-chain failure during API gateway start
+      ansible.builtin.set_fact:
+        api_gateway_docker_nat_missing: >-
+          {{
+            'No chain/target/match by that name' in (ansible_failed_result.stderr | default(''))
+            or 'Unable to enable DNAT rule' in (ansible_failed_result.stderr | default(''))
+          }}
+
+    - name: Surface unexpected API gateway startup failures
+      ansible.builtin.fail:
+        msg: "{{ ansible_failed_result.stderr | default(ansible_failed_result.msg | default('api gateway compose up failed')) }}"
+      when: not api_gateway_docker_nat_missing
+
+    - name: Restart Docker to restore the nat chain before retrying the API gateway start
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+      when: api_gateway_docker_nat_missing
+
+    - name: Retry the API gateway stack start after Docker nat-chain recovery
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ api_gateway_compose_file }}"
+          - up
+          - -d
+          - --build
+          - --remove-orphans
+      args:
+        chdir: "{{ api_gateway_site_dir }}"
+      register: api_gateway_up
+      changed_when: true
+      when: api_gateway_docker_nat_missing
 
 - name: Check whether the API gateway published host port is present
   ansible.builtin.command:

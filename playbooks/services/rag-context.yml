@@ -1,0 +1,2 @@
+---
+- import_playbook: ../rag-context.yml
