@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.165.0",
-  "platform_version": "0.130.15",
-  "generated_at": "2026-03-26T10:41:00Z",
-  "next_refresh_at": "2026-03-26T11:41:00Z",
+  "repo_version": "0.166.0",
+  "platform_version": "0.130.16",
+  "generated_at": "2026-03-26T10:46:34Z",
+  "next_refresh_at": "2026-03-26T11:46:34Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -1494,6 +1494,31 @@
         "runbook": "docs/runbooks/ephemeral-fixtures.md"
       },
       {
+        "id": "fault-injection",
+        "description": "Run the ADR 0171 controlled fault-injection subset on docker-runtime-lv3, record a JSON report, and optionally publish failure notifications.",
+        "tags": [
+          "diagnostic",
+          "fault-injection",
+          "guest-live",
+          "validated"
+        ],
+        "risk_class": "MEDIUM",
+        "automation_eligible": true,
+        "agent_trust_required": "T2",
+        "execution_class": "diagnostic",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 120,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/fault-injection.md"
+      },
+      {
         "id": "fixture-expiry-reaper",
         "description": "Destroy any ADR 0088 ephemeral fixture whose lifetime window has expired and record one reaper-run receipt for the scan.",
         "tags": [
@@ -2977,6 +3002,16 @@
         ]
       },
       {
+        "id": "fault-injection",
+        "title": "Fault Injection",
+        "agent_trust_required": "T2",
+        "steps": 6,
+        "path": "docs/runbooks/fault-injection.md",
+        "workflow_ids": [
+          "fault-injection"
+        ]
+      },
+      {
         "id": "generate-status-documents",
         "title": "Generate Status Documents",
         "agent_trust_required": "T2",
@@ -3282,10 +3317,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.164.0",
+    "last_version": "0.165.0",
     "deployed_at": "2026-03-26",
-    "summary": "deploy private Gitea on `docker-runtime-lv3` with Keycloak OIDC, repo bootstrap automation, and a dedicated `docker-build-lv3` Actions runner verify the live `git.lv3.org` control-plane path with mirrored admin artifacts, an online self-hosted runner, and a push-triggered workflow smoke test",
-    "release_notes_url": "docs/release-notes/0.165.0.md"
+    "summary": "implement ADR 0171 with a repo-managed fault injector, scenario catalog, Windmill workflow, and operator CLI path for controlled resilience drills on `docker-runtime-lv3` harden the first live subset so Keycloak uses a reversible stop/start outage while OpenBao uses pause/unpause and keeps its seal state intact during validation",
+    "release_notes_url": "docs/release-notes/0.166.0.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -3355,13 +3390,6 @@
       "status": "Proposed",
       "implementation_status": "Not Implemented",
       "path": "docs/adr/0118-replayable-failure-case-library.md"
-    },
-    {
-      "adr": "0171",
-      "title": "Controlled Fault Injection for Resilience Validation",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0171-controlled-fault-injection-for-resilience-validation.md"
     }
   ]
 }
