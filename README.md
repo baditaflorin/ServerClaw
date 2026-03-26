@@ -105,8 +105,8 @@ The repository now also ships ADR 0137 crawl policy automation: the shared publi
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.159.2` |
-| Platform version | `0.130.10` |
+| Repository version | `0.160.0` |
+| Platform version | `0.130.11` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -154,6 +154,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `command_catalog` | `2026-03-22-adr-0048-command-catalog-live-apply` |
 | `control_plane_lanes` | `2026-03-22-adr-0045-control-plane-communication-lanes-live-apply` |
 | `control_plane_recovery` | `2026-03-22-adr-0051-control-plane-recovery-live-apply` |
+| `deadlock_detector` | `2026-03-26-adr-0162-deadlock-detector-live-apply` |
 | `docker_runtime` | `2026-03-22-adr-0023-docker-runtime-live-apply` |
 | `guest_network_policy` | `2026-03-22-adr-0067-guest-network-policy-live-apply` |
 | `identity_taxonomy` | `2026-03-22-adr-0046-identity-classes-live-apply` |
@@ -181,7 +182,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `step_ca` | `2026-03-22-adr-0042-step-ca-live-apply` |
 | `tempo_tracing` | `2026-03-22-adr-0053-tempo-traces-live-apply` |
 | `uptime_kuma` | `2026-03-22-adr-0027-uptime-kuma-live-apply` |
-| `windmill` | `2026-03-25-adr-0170-timeout-hierarchy-live-apply` |
+| `windmill` | `2026-03-26-adr-0162-deadlock-detector-live-apply` |
 <!-- END GENERATED: platform-status -->
 
 The current access posture is:
@@ -845,8 +846,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.159.2` |
-| Platform version | `0.130.10` |
+| Repository version | `0.160.0` |
+| Platform version | `0.130.11` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
