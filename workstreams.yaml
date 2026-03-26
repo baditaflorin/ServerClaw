@@ -2662,7 +2662,7 @@ workstreams:
   - id: adr-0137-robots-crawl-policy
     adr: "0137"
     title: Robots.txt and crawl policy
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0137-public-surface
     worktree_path: .worktrees/adr-0137
@@ -2680,7 +2680,7 @@ workstreams:
       - scripts/portal_utils.py
       - docs/runbooks/configure-edge-publication.md
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0139-subdomain-exposure-audit
     adr: "0139"

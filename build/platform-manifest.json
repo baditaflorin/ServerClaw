@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.170.0",
-  "platform_version": "0.130.19",
-  "generated_at": "2026-03-26T11:45:22Z",
-  "next_refresh_at": "2026-03-26T12:45:22Z",
+  "repo_version": "0.172.1",
+  "platform_version": "0.130.20",
+  "generated_at": "2026-03-26T12:17:56Z",
+  "next_refresh_at": "2026-03-26T13:17:56Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3413,10 +3413,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.169.0",
+    "last_version": "0.172.0",
     "deployed_at": "2026-03-26",
-    "summary": "harden the Windmill observation-loop and service-health wrappers so live workers recover from stdlib `platform` import collisions and missing `pyyaml` dependencies replace the fragile Windmill API delete/create reseed path with a repo-managed script-sync helper and complete the ADR 0126 production activation on top of current main",
-    "release_notes_url": "docs/release-notes/0.170.0.md"
+    "summary": "record ADR 0137 as already live on production, align the README and workstream status surfaces with the verified public-edge crawl policy, and preserve the existing platform version because no new live rollout was required",
+    "release_notes_url": "docs/release-notes/0.172.1.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

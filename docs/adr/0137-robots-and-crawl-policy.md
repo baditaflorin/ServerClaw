@@ -3,7 +3,7 @@
 - Status: Accepted
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.134.0
-- Implemented In Platform Version: not yet
+- Implemented In Platform Version: 0.130.1
 - Implemented On: 2026-03-25
 - Date: 2026-03-25
 
@@ -58,7 +58,19 @@ The repository implementation is carried by:
 ### Negative / Trade-offs
 
 - `robots.txt`, `X-Robots-Tag`, and robots meta tags are advisory; they do not block hostile scanners
-- the live platform remains unchanged until the public-edge and DNS automation is applied from `main`
+- later public-edge changes must preserve the shared crawl-policy contract because the live rollout now depends on the edge remaining the canonical enforcement point
+
+## Live Implementation
+
+ADR 0137 became true on the live platform in platform version `0.130.1`.
+
+The first verified live evidence is the shared public-edge rollout recorded in `receipts/live-applies/2026-03-25-adr-0136-http-security-headers-live-apply.json`, which reconverged the edge from current `main` after ADR 0137 had already merged and verified the representative live header policy on published hosts.
+
+Current live verification also confirms the full ADR 0137 contract:
+
+- `https://lv3.org/robots.txt` returns the shared disallow-all body
+- `https://nginx.lv3.org/` returns `X-Robots-Tag: noindex, nofollow`
+- the live `https://nginx.lv3.org/` landing page includes `<meta name="robots" content="noindex, nofollow">`
 
 ## Boundaries
 

@@ -2,7 +2,11 @@
 
 - ADR: [ADR 0137](../adr/0137-robots-and-crawl-policy.md)
 - Title: shared robots.txt, global noindex headers, and apex crawl-policy coverage
-- Status: merged
+- Status: live_applied
+- Implemented In Repo Version: 0.134.0
+- Live Applied In Platform Version: 0.130.1
+- Implemented On: 2026-03-25
+- Live Applied On: 2026-03-25
 - Branch: `codex/adr-0137-public-surface`
 - Worktree: `.worktrees/adr-0137`
 - Owner: codex
@@ -22,7 +26,6 @@
 
 - scanner-resistant hardening beyond advisory crawl controls
 - login-page version suppression or other fingerprint-reduction work outside crawl policy
-- live apply from this workstream
 
 ## Expected Repo Surfaces
 
@@ -65,8 +68,9 @@
 - Added apex certificate and DNS coverage for `lv3.org`
 - Added HTML robots meta tags to repository-generated edge surfaces
 - Added focused tests and runbook verification for the crawl-policy contract
+- The shared public-edge rollout recorded in `receipts/live-applies/2026-03-25-adr-0136-http-security-headers-live-apply.json` carried the merged ADR 0137 edge state live in platform version `0.130.1`
+- Current live checks confirm `https://lv3.org/robots.txt`, `X-Robots-Tag: noindex, nofollow`, and the robots meta tag are all present on production
 
 ## Notes For The Next Assistant
 
-- The repository implementation is merged, but the platform version should not advance until the public-edge and DNS automation is applied live from `main`.
 - `roles/` and `collections/ansible_collections/.../roles/` must stay in sync for this surface because tests still read the legacy top-level role path.
