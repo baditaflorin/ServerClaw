@@ -308,7 +308,11 @@ def build_service_urls(
         urls["internal"] = service_url("http", private_ip, ports["api_gateway_internal_port"])
         port_map["internal"] = ports["api_gateway_internal_port"]
     elif service_id == "headscale":
-        urls["internal"] = service_url("http", private_ip, ports["headscale_http_port"])
+        urls["internal"] = service_url(
+            "http",
+            require_string(host_vars.get("proxmox_internal_ipv4"), "host_vars.proxmox_internal_ipv4"),
+            ports["headscale_http_port"],
+        )
         port_map["internal"] = ports["headscale_http_port"]
     elif service_id == "openbao":
         urls["internal"] = service_url("https", private_ip, ports["openbao_proxy_port"])
