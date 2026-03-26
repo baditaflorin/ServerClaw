@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.122.0",
   "platform_version": "0.106.0",
-  "generated_at": "2026-03-26T09:21:47Z",
-  "next_refresh_at": "2026-03-26T10:21:47Z",
+  "generated_at": "2026-03-26T09:30:09Z",
+  "next_refresh_at": "2026-03-26T10:30:09Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -95,6 +95,17 @@
         "primary_url": "https://grafana.lv3.org",
         "last_live_apply": "2026-03-23T00:00:00Z",
         "slo_status": "unknown"
+      },
+      "headscale": {
+        "service_name": "Headscale",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://headscale.lv3.org",
+        "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "keycloak": {
         "service_name": "Keycloak",
