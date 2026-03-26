@@ -134,6 +134,58 @@
   delegate_to: localhost
   become: false
 
+- name: Load the controller-local secret manifest for worker-executed jobs
+  ansible.builtin.set_fact:
+    windmill_worker_secret_manifest: >-
+      {{
+        lookup('ansible.builtin.file', windmill_worker_secret_manifest_path)
+        | from_json
+      }}
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Ensure the mirrored worker secret directories exist
+  ansible.builtin.file:
+    path: >-
+      {{
+        windmill_worker_repo_checkout_host_path
+        ~ '/.local/'
+        ~ (
+          windmill_worker_secret_manifest.secrets[item].path
+          | regex_replace('^.*?/.local/', '')
+          | dirname
+        )
+      }}
+    state: directory
+    mode: "0700"
+  loop: "{{ windmill_worker_secret_mirror_ids }}"
+  when:
+    - windmill_worker_secret_manifest.secrets[item] is mapping
+    - windmill_worker_secret_manifest.secrets[item].kind == 'file'
+    - "'/.local/' in windmill_worker_secret_manifest.secrets[item].path"
+  no_log: true
+
+- name: Mirror the worker-executed controller-local secrets into the repo checkout
+  ansible.builtin.copy:
+    src: "{{ windmill_worker_secret_manifest.secrets[item].path }}"
+    dest: >-
+      {{
+        windmill_worker_repo_checkout_host_path
+        ~ '/.local/'
+        ~ (
+          windmill_worker_secret_manifest.secrets[item].path
+          | regex_replace('^.*?/.local/', '')
+        )
+      }}
+    mode: "0600"
+  loop: "{{ windmill_worker_secret_mirror_ids }}"
+  when:
+    - windmill_worker_secret_manifest.secrets[item] is mapping
+    - windmill_worker_secret_manifest.secrets[item].kind == 'file'
+    - "'/.local/' in windmill_worker_secret_manifest.secrets[item].path"
+  no_log: true
+
 - name: Ensure the platform mutation-audit directory exists
   ansible.builtin.file:
     path: "{{ windmill_mutation_audit_dir }}"

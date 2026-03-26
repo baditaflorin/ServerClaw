@@ -26,6 +26,12 @@ Or call the Python entrypoint directly:
 python3 scripts/security_posture_report.py --env production --print-report-json
 ```
 
+If the Lynis collection step already completed and you only need to retry aggregation or downstream publication, reuse the fetched `*.dat` files in `.local/security-posture/lynis/`:
+
+```bash
+uv run --with ansible-core --with pyyaml --with nats-py python scripts/security_posture_report.py --env production --skip-lynis --print-report-json
+```
+
 The workflow:
 
 1. runs `playbooks/tasks/security-scan.yml` against the repo-managed Lynis targets
@@ -50,6 +56,30 @@ When the relevant environment variables or controller-local secret files are pre
 - posts a summary to Mattermost
 - posts critical findings to GlitchTip
 - writes `platform_security_posture_*` metrics to InfluxDB
+
+## Windmill Worker Checkout
+
+The Windmill-side wrapper expects the worker checkout at `/srv/proxmox_florin_server` to include the same repo surfaces the controller-side report needs:
+
+- `ansible.cfg`
+- `collections/`
+- `config/`
+- `inventory/`
+- `playbooks/`
+- `scripts/`
+
+The `windmill_runtime` role now mirrors the required controller-local `bootstrap_ssh_private_key` and `nats_jetstream_admin_password` files into the worker checkout under `.local/` so `config/windmill/scripts/security-posture-scan.py` can execute the same report path honestly from the worker mount.
+
+The inventory guest-jump path now honors `LV3_BOOTSTRAP_SSH_PRIVATE_KEY`, so worker-side Ansible runs can override the controller-only absolute key path with the mirrored worker checkout key.
+Worker-side runs also honor `LV3_PROXMOX_HOST_ADDR`; the Windmill path prefers the Proxmox internal bridge address so guest SSH jumps stay on the private network instead of hairpinning through the management Tailscale address.
+
+After updating the worker checkout from the latest `main`, verify the wrapper from the runtime VM with:
+
+```bash
+docker exec windmill_worker bash -lc 'cd /srv/proxmox_florin_server && python3 config/windmill/scripts/security-posture-scan.py --repo-path /srv/proxmox_florin_server'
+```
+
+Treat the run as successful only when the wrapper returns `status: ok` and includes a `REPORT_JSON=` payload from `scripts/security_posture_report.py`.
 
 ## Suppressions
 

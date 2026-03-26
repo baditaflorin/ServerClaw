@@ -486,7 +486,7 @@ drift-report:
 
 security-posture-report:
 	@test -n "$(ENV)" || (echo "set ENV=<production|staging>"; exit 1)
-	uv run --with pyyaml --with nats-py python $(REPO_ROOT)/scripts/security_posture_report.py --env "$(ENV)"
+	uv run --with ansible-core --with pyyaml --with nats-py python $(REPO_ROOT)/scripts/security_posture_report.py --env "$(ENV)"
 
 public-surface-security-scan:
 	@test -n "$(ENV)" || (echo "set ENV=<production|staging>"; exit 1)

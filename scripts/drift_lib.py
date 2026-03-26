@@ -82,11 +82,39 @@ def parse_datetime(value: str) -> datetime:
     return parsed
 
 
+def resolve_repo_local_path(path_value: str | Path, *, repo_root: Path = REPO_ROOT) -> Path:
+    path = Path(path_value).expanduser()
+    if path.exists():
+        return path
+    marker = ".local"
+    if marker not in path.parts:
+        return path
+    marker_index = path.parts.index(marker)
+    candidate = repo_root.joinpath(*path.parts[marker_index:])
+    return candidate if candidate.exists() else path
+
+
 def load_controller_context() -> dict[str, Any]:
     host_vars = load_yaml(HOST_VARS_PATH)
     group_vars = load_yaml(GROUP_VARS_PATH)
     secret_manifest = load_json(SECRET_MANIFEST_PATH)
-    bootstrap_key = Path(secret_manifest["secrets"]["bootstrap_ssh_private_key"]["path"]).expanduser()
+    bootstrap_key = resolve_repo_local_path(secret_manifest["secrets"]["bootstrap_ssh_private_key"]["path"])
+    repo_local_secret_root = REPO_ROOT / ".local"
+    prefer_internal_host = False
+    try:
+        bootstrap_key.relative_to(repo_local_secret_root)
+        prefer_internal_host = True
+    except ValueError:
+        prefer_internal_host = False
+    host_addr = (
+        os.environ.get("LV3_PROXMOX_HOST_ADDR", "").strip()
+        or (
+            host_vars.get("proxmox_internal_ipv4")
+            if prefer_internal_host
+            else host_vars["management_tailscale_ipv4"]
+        )
+        or host_vars["management_tailscale_ipv4"]
+    )
     guests = {guest["name"]: guest["ipv4"] for guest in host_vars["proxmox_guests"]}
     return {
         "host_vars": host_vars,
@@ -94,7 +122,7 @@ def load_controller_context() -> dict[str, Any]:
         "secret_manifest": secret_manifest,
         "bootstrap_key": bootstrap_key,
         "host_user": group_vars["proxmox_host_admin_user"],
-        "host_addr": host_vars["management_tailscale_ipv4"],
+        "host_addr": host_addr,
         "guests": guests,
     }
 
@@ -150,7 +178,8 @@ def build_guest_ssh_command(context: dict[str, Any], target: str, remote_command
     proxy_command = (
         f"ssh -i {shlex.quote(key_path)} -o IdentitiesOnly=yes -o BatchMode=yes "
         f"-o ConnectTimeout={SSH_CONNECT_TIMEOUT_SECONDS} "
-        f"-o LogLevel=ERROR {shlex.quote(host_login)} -W %h:%p"
+        f"-o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "
+        f"{shlex.quote(host_login)} -W %h:%p"
     )
     return [
         "ssh",
@@ -188,7 +217,8 @@ def build_guest_ssh_tunnel_command(
     proxy_command = (
         f"ssh -i {shlex.quote(key_path)} -o IdentitiesOnly=yes -o BatchMode=yes "
         f"-o ConnectTimeout={SSH_CONNECT_TIMEOUT_SECONDS} "
-        f"-o LogLevel=ERROR {shlex.quote(host_login)} -W %h:%p"
+        f"-o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "
+        f"{shlex.quote(host_login)} -W %h:%p"
     )
     return [
         "ssh",
@@ -265,7 +295,7 @@ def resolve_nats_credentials(context: dict[str, Any]) -> dict[str, str]:
 
     secret_entry = context["secret_manifest"]["secrets"].get("nats_jetstream_admin_password")
     if isinstance(secret_entry, dict) and secret_entry.get("kind") == "file":
-        password_path = Path(secret_entry["path"]).expanduser()
+        password_path = resolve_repo_local_path(secret_entry["path"])
         if password_path.exists():
             return {"user": "jetstream-admin", "password": password_path.read_text().strip()}
     return {}

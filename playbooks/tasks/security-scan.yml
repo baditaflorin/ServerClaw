@@ -21,6 +21,21 @@
         update_cache: true
         force_apt_get: true
 
+    - name: Remove a stale Lynis pid file before starting a new audit
+      ansible.builtin.shell: |
+        if [ ! -f /var/run/lynis.pid ]; then
+          exit 0
+        fi
+        if pgrep -x lynis >/dev/null 2>&1; then
+          exit 0
+        fi
+        rm -f /var/run/lynis.pid
+        echo removed
+      args:
+        executable: /bin/bash
+      register: security_scan_lynis_pid_cleanup
+      changed_when: "'removed' in security_scan_lynis_pid_cleanup.stdout"
+
     - name: Run the Lynis system audit
       ansible.builtin.command:
         argv:

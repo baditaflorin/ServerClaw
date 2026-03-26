@@ -65,10 +65,20 @@ windmill_base_url: "{{ platform_service_topology | platform_service_url('windmil
 windmill_worker_checkout_repo_root_local_dir: "{{ playbook_dir }}/.."
 windmill_worker_repo_checkout_host_path: /srv/proxmox_florin_server
 windmill_worker_repo_checkout_container_path: /srv/proxmox_florin_server
+windmill_worker_secret_manifest_path: "{{ playbook_execution_controller_secret_manifest_path }}"
+windmill_worker_secret_mirror_ids:
+  - bootstrap_ssh_private_key
+  - nats_jetstream_admin_password
 windmill_worker_checkout_sync_paths:
+  - ansible.cfg
+  - callback_plugins
+  - collections
   - config
   - docs
+  - filter_plugins
+  - inventory
   - migrations
+  - playbooks
   - platform
   - receipts
   - scripts

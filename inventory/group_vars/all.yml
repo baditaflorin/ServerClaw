@@ -57,10 +57,14 @@ ansible_remote_tmp: /tmp
 proxmox_guest_nameserver: 1.1.1.1
 proxmox_guest_searchdomain: lv3.org
 proxmox_guest_ssh_connection_mode: tailscale_direct
+proxmox_guest_ssh_jump_host: >-
+  {{ lookup('env', 'LV3_PROXMOX_HOST_ADDR') | default(hostvars['proxmox_florin'].ansible_host, true) }}
+proxmox_guest_ssh_bootstrap_key_path: >-
+  {{ lookup('env', 'LV3_BOOTSTRAP_SSH_PRIVATE_KEY') | default('/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519', true) }}
 proxmox_guest_ssh_proxy_command: >-
-  -o ProxyCommand="ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes {{ proxmox_host_admin_user }}@{{ hostvars['proxmox_florin'].ansible_host }} -W %h:%p"
+  -o ProxyCommand="ssh -i {{ proxmox_guest_ssh_bootstrap_key_path }} -o IdentitiesOnly=yes {{ proxmox_host_admin_user }}@{{ proxmox_guest_ssh_jump_host }} -W %h:%p"
 proxmox_guest_ssh_public_proxy_command: >-
-  -o ProxyCommand="ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes {{ proxmox_host_admin_user }}@{{ hostvars['proxmox_florin'].management_ipv4 }} -W %h:%p"
+  -o ProxyCommand="ssh -i {{ proxmox_guest_ssh_bootstrap_key_path }} -o IdentitiesOnly=yes {{ proxmox_host_admin_user }}@{{ hostvars['proxmox_florin'].management_ipv4 }} -W %h:%p"
 proxmox_guest_ssh_common_args:
   tailscale_direct: "-o IdentitiesOnly=yes"
   proxmox_host_jump: "-o IdentitiesOnly=yes {{ proxmox_guest_ssh_proxy_command }}"

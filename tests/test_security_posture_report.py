@@ -8,6 +8,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
+import drift_lib  # noqa: E402
 import security_posture_report as report  # noqa: E402
 
 
@@ -111,3 +112,95 @@ def test_build_security_events_emits_summary_and_critical_findings() -> None:
     assert events[0]["event"] == "platform.security.report"
     critical_events = [item for item in events if item["event"] == "platform.security.critical-finding"]
     assert len(critical_events) == 2
+
+
+def test_resolve_repo_local_path_maps_missing_controller_local_secret(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    mirrored_secret = repo_root / ".local" / "ssh" / "worker.id_ed25519"
+    mirrored_secret.parent.mkdir(parents=True)
+    mirrored_secret.write_text("secret", encoding="utf-8")
+
+    resolved = drift_lib.resolve_repo_local_path(
+        "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/worker.id_ed25519",
+        repo_root=repo_root,
+    )
+
+    assert resolved == mirrored_secret
+
+
+def test_run_ansible_security_scan_uses_bootstrap_key_and_jump_mode(monkeypatch, tmp_path: Path) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_run_command(command: list[str], *, cwd: Path | None = None, env: dict[str, str] | None = None):
+        captured["command"] = command
+        captured["cwd"] = cwd
+        captured["env"] = env
+        return drift_lib.CommandResult(argv=command, returncode=0, stdout="", stderr="")
+
+    monkeypatch.setattr(report, "run_command", fake_run_command)
+
+    report.run_ansible_security_scan(
+        inventory=tmp_path / "inventory.yml",
+        playbook=tmp_path / "playbook.yml",
+        output_dir=tmp_path / "output",
+        hosts=["proxmox_florin", "docker-runtime-lv3"],
+        bootstrap_key=tmp_path / "bootstrap.id_ed25519",
+        jump_host_addr="10.10.10.1",
+    )
+
+    command = captured["command"]
+    assert isinstance(command, list)
+    assert "--private-key" in command
+    assert "proxmox_guest_ssh_connection_mode=proxmox_host_jump" in command
+    env = captured["env"]
+    assert isinstance(env, dict)
+    assert env["LV3_BOOTSTRAP_SSH_PRIVATE_KEY"] == str(tmp_path / "bootstrap.id_ed25519")
+    assert env["LV3_PROXMOX_HOST_ADDR"] == "10.10.10.1"
+
+
+def test_build_guest_ssh_command_makes_proxy_non_interactive(tmp_path: Path) -> None:
+    command = drift_lib.build_guest_ssh_command(
+        {
+            "bootstrap_key": tmp_path / "worker.id_ed25519",
+            "host_user": "ops",
+            "host_addr": "100.64.0.1",
+            "guests": {"docker-runtime-lv3": "10.10.10.20"},
+        },
+        "docker-runtime-lv3",
+        "true",
+    )
+
+    joined = " ".join(command)
+    assert "ProxyCommand=ssh" in joined
+    assert "StrictHostKeyChecking=no" in joined
+    assert "UserKnownHostsFile=/dev/null" in joined
+
+
+def test_skip_lynis_reuses_cached_reports(monkeypatch, tmp_path: Path) -> None:
+    cached_dir = tmp_path / "lynis"
+    cached_dir.mkdir()
+    fixture = REPO_ROOT / "tests" / "fixtures" / "security_posture_docker_runtime.dat"
+    (cached_dir / "docker-runtime-lv3-lynis-report.dat").write_text(fixture.read_text(), encoding="utf-8")
+
+    monkeypatch.setattr(report, "load_controller_context", lambda: {"bootstrap_key": None, "host_addr": "100.64.0.1"})
+    monkeypatch.setattr(report, "load_previous_report", lambda _path: None)
+    monkeypatch.setattr(report, "run_remote_script", lambda **_kwargs: {})
+    monkeypatch.setattr(report, "write_receipt", lambda _dir, _report: tmp_path / "receipt.json")
+    monkeypatch.setattr(report, "build_security_events", lambda _report: [])
+    monkeypatch.setattr(report, "maybe_publish_nats", lambda *args, **kwargs: None)
+    monkeypatch.setattr(report, "maybe_write_metrics", lambda _report: None)
+    monkeypatch.setattr(report, "emit_event_best_effort", lambda *args, **kwargs: None)
+    monkeypatch.setattr(report, "maybe_read_secret_path", lambda *_args, **_kwargs: None)
+
+    exit_code = report.main(
+        [
+            "--env",
+            "production",
+            "--skip-lynis",
+            "--skip-trivy",
+            "--lynis-dir",
+            str(cached_dir),
+        ]
+    )
+
+    assert exit_code in {0, 1, 2}

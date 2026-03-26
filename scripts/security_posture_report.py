@@ -66,9 +66,12 @@ def run_ansible_security_scan(
     playbook: Path,
     output_dir: Path,
     hosts: list[str],
+    bootstrap_key: Path | None = None,
+    jump_host_addr: str | None = None,
 ) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     limit = ",".join(hosts)
+    env = os.environ.copy()
     command = [
         "ansible-playbook",
         "-i",
@@ -78,8 +81,15 @@ def run_ansible_security_scan(
         limit,
         "-e",
         f"security_scan_output_dir={output_dir}",
+        "-e",
+        "proxmox_guest_ssh_connection_mode=proxmox_host_jump",
     ]
-    result = run_command(command, cwd=REPO_ROOT)
+    if bootstrap_key is not None:
+        command.extend(["--private-key", str(bootstrap_key)])
+        env["LV3_BOOTSTRAP_SSH_PRIVATE_KEY"] = str(bootstrap_key)
+    if jump_host_addr:
+        env["LV3_PROXMOX_HOST_ADDR"] = jump_host_addr
+    result = run_command(command, cwd=REPO_ROOT, env=env if bootstrap_key is not None else None)
     if result.returncode != 0:
         raise RuntimeError(result.stderr or result.stdout or "security scan playbook failed")
 
@@ -401,11 +411,23 @@ def main(argv: list[str] | None = None) -> int:
                 playbook=args.playbook,
                 output_dir=args.lynis_dir,
                 hosts=DEFAULT_LYNIS_HOSTS[args.env],
+                bootstrap_key=context["bootstrap_key"],
+                jump_host_addr=context["host_addr"],
             )
             host_reports = parse_path(
                 args.lynis_dir,
                 suppressions=suppressions,
                 include_suppressed=False,
+            )
+        elif any(args.lynis_dir.glob("*-lynis-report.dat")):
+            host_reports = parse_path(
+                args.lynis_dir,
+                suppressions=suppressions,
+                include_suppressed=False,
+            )
+        else:
+            raise RuntimeError(
+                f"skip-lynis requested but no cached Lynis reports were found in {args.lynis_dir}"
             )
 
         trivy_payloads: dict[str, list[dict[str, Any]]] = {}

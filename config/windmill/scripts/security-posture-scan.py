@@ -1,5 +1,6 @@
 import argparse
 import json
+import shlex
 import subprocess
 from pathlib import Path
 
@@ -13,9 +14,30 @@ def main(repo_path: str = "/srv/proxmox_florin_server"):
             "reason": "security posture report script is missing from the worker checkout",
             "expected_repo_path": str(repo_root),
         }
+    required_paths = [
+        repo_root / "inventory" / "host_vars" / "proxmox_florin.yml",
+        repo_root / "inventory" / "group_vars" / "all.yml",
+        repo_root / "playbooks" / "tasks" / "security-scan.yml",
+    ]
+    missing_paths = [str(path) for path in required_paths if not path.exists()]
+    if missing_paths:
+        return {
+            "status": "blocked",
+            "reason": "security posture worker checkout is missing required repo paths",
+            "missing_paths": missing_paths,
+            "expected_repo_path": str(repo_root),
+        }
 
     command = [
-        "python3",
+        "uv",
+        "run",
+        "--with",
+        "ansible-core",
+        "--with",
+        "nats-py",
+        "--with",
+        "pyyaml",
+        "python",
         str(report_script),
         "--env",
         "production",
@@ -25,11 +47,15 @@ def main(repo_path: str = "/srv/proxmox_florin_server"):
         "--print-report-json",
     ]
     result = subprocess.run(command, cwd=repo_root, text=True, capture_output=True, check=False)
+    stdout = result.stdout.strip()
+    stderr = result.stderr.strip()
+    has_report_json = "REPORT_JSON=" in stdout
     return {
-        "status": "ok" if result.returncode in {0, 2} else "error",
+        "status": "ok" if result.returncode in {0, 1, 2} and has_report_json else "error",
+        "command": " ".join(shlex.quote(part) for part in command),
         "returncode": result.returncode,
-        "stdout": result.stdout.strip(),
-        "stderr": result.stderr.strip(),
+        "stdout": stdout,
+        "stderr": stderr,
     }
 
 
