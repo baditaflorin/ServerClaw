@@ -388,12 +388,13 @@ remote_remove_paths() {
 }
 
 prune_remote_workspace_stale_paths() {
-  local stale_paths=("$WORKSPACE_ROOT/.git-remote")
+  local stale_paths=()
 
   if [[ ! -e "$REPO_ROOT/scripts/cases" ]]; then
     stale_paths+=("$WORKSPACE_ROOT/scripts/cases")
   fi
 
+  [[ "${#stale_paths[@]}" -gt 0 ]] || return 0
   remote_remove_paths "$(printf '%q ' "${stale_paths[@]}")"
 }
 
@@ -413,7 +414,6 @@ sync_worktree_git_metadata() {
   )
   local common_paths=(
     config
-    objects
     packed-refs
     refs
     info
@@ -425,17 +425,20 @@ sync_worktree_git_metadata() {
   worktree_git_dir="$(git -C "$REPO_ROOT" rev-parse --path-format=absolute --git-dir)"
   common_git_dir="$(git -C "$REPO_ROOT" rev-parse --path-format=absolute --git-common-dir)"
 
-  remote_remove_paths "$(quote_shell "$remote_git_root")"
   "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" \
     "mkdir -p $(quote_shell "$remote_git_root/worktree") $(quote_shell "$remote_git_root/common")" \
     >/dev/null
 
   for worktree_path in "${worktree_paths[@]}"; do
-    [[ -e "$worktree_git_dir/$worktree_path" ]] || continue
+    if [[ ! -e "$worktree_git_dir/$worktree_path" ]]; then
+      remote_remove_paths "$(quote_shell "$remote_git_root/worktree/$worktree_path")"
+      continue
+    fi
     (
       cd "$worktree_git_dir"
       "$RSYNC_BIN" \
         --archive \
+        --delete \
         --relative \
         -e "$ssh_wrapper" \
         "./$worktree_path" \
@@ -443,12 +446,19 @@ sync_worktree_git_metadata() {
     ) || return $?
   done
 
+  # Remote validation uses tracked-file and ref metadata; mirroring the entire
+  # object database from a shared local worktree is too expensive because this
+  # repo currently carries a large loose-object set.
   for common_path in "${common_paths[@]}"; do
-    [[ -e "$common_git_dir/$common_path" ]] || continue
+    if [[ ! -e "$common_git_dir/$common_path" ]]; then
+      remote_remove_paths "$(quote_shell "$remote_git_root/common/$common_path")"
+      continue
+    fi
     (
       cd "$common_git_dir"
       "$RSYNC_BIN" \
         --archive \
+        --delete \
         --relative \
         -e "$ssh_wrapper" \
         "./$common_path" \

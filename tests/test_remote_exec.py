@@ -373,11 +373,13 @@ def test_remote_exec_materializes_worktree_git_metadata_for_remote_workspace(tmp
     assert ".git-remote/worktree/gitdir" in ssh_log
     assert "scripts/cases" in ssh_log
     assert REMOTE_WORKSPACE_ROOT in ssh_log
+    assert f"rm -rf {REMOTE_WORKSPACE_ROOT}/.git-remote ||" not in ssh_log
     assert ".git-remote/worktree/" in rsync_log
     assert ".git-remote/common/" in rsync_log
+    assert "--delete" in rsync_log
     assert "./HEAD" in rsync_log
     assert "./config" in rsync_log
-    assert "./objects" in rsync_log
+    assert "./objects" not in rsync_log
 
 
 def test_remote_exec_syncs_remote_gate_status_back_to_local_checkout(tmp_path: Path) -> None:
