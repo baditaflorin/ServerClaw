@@ -63,6 +63,7 @@
 - Homepage config generation and runtime verification succeeded on `docker-runtime-lv3`, including the generated `/api/services`, `/api/bookmarks`, and `/api/widgets` endpoints.
 - Public rollout is still incomplete: on 2026-03-25 `home.lv3.org` did not resolve from `1.1.1.1`, and forcing `Host: home.lv3.org` to `65.108.75.123` returned the generic `LV3 Edge` default page instead of Homepage.
 - The live apply is blocked by management-plane reachability from the controller: `65.108.75.123:22` times out, `100.118.189.95:22` refuses connections, and the remote build gateway through `docker-build-lv3` is unreachable.
+- On 2026-03-26 the current controller public IP was `90.95.35.115`; the repo-managed Proxmox management allowlist was updated to include `90.95.35.115/32`, but the host was still unreachable from that controller so the change could not yet be applied live.
 
 ## Notes For The Next Assistant
 
