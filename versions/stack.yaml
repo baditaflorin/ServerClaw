@@ -24,7 +24,8 @@ live_apply_evidence:
     step_ca: 2026-03-22-adr-0042-step-ca-live-apply
     openbao: 2026-03-26-adr-0171-fault-injection-live-apply
     vaultwarden: 2026-03-26-adr-0153-live-apply
-    windmill: 2026-03-26-adr-0171-fault-injection-live-apply
+    windmill: 2026-03-26-adr-0126-observation-to-action-closure-loop-live-apply
+    observation_to_action_closure_loop: 2026-03-26-adr-0126-observation-to-action-closure-loop-live-apply
     deadlock_detector: 2026-03-26-adr-0162-deadlock-detector-live-apply
     mattermost: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
     portainer: 2026-03-22-adr-0055-portainer-live-apply
@@ -899,5 +900,5 @@ release_tracks:
     current: 0.169.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.18
+    current: 0.130.19
     meaning: intended platform release for the actual server configuration

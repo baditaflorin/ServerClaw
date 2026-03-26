@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0126](../adr/0126-observation-to-action-closure-loop.md)
 - Title: Durable loop that carries one finding through triage, proposal, execution, verification, and operator escalation
-- Status: merged
+- Status: live_applied
 - Branch: `codex/adr-0126-logic-loop-clean`
 - Worktree: `../proxmox_florin_server-adr-0126-logic-loop-clean`
 - Owner: codex
@@ -45,6 +45,9 @@
 - run `pytest tests/unit/test_closure_loop.py tests/test_closure_loop_windmill.py tests/test_lv3_cli.py -q`
 - run `python3 config/windmill/scripts/platform-observation-loop.py --repo-path .`
 - run `python3 scripts/lv3_cli.py loop start --trigger manual --service netbox`
+- run the repo-managed `scripts/sync_windmill_seed_scripts.py` helper against the production Windmill API from the rebased current-main checkout
+- run `POST /api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fplatform_observation_loop` with a critical service-health finding and confirm the live Windmill wrapper returns structured loop output
+- run a live `observation_finding` closure-loop start on `docker-runtime-lv3` with `goal_achieved: true` and confirm the state machine stops at `RESOLVED`
 
 ## Merge Criteria
 
@@ -58,6 +61,8 @@
 - repository implementation is complete on `main` in repo release `0.131.0`
 - the closure loop now terminates explicitly when triage or verification proves the service goal is already satisfied
 - observation findings can now create durable runs through Windmill and be inspected or approved through `lv3 loop`
+- production activation is recorded in `receipts/live-applies/2026-03-26-adr-0126-observation-to-action-closure-loop-live-apply.json`
+- the Windmill script seed path now uses a dedicated repo-managed helper because the raw API delete/create sequence was not reliable enough during live reseeds
 
 ## Notes For The Next Assistant
 

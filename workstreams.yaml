@@ -2393,7 +2393,7 @@ workstreams:
   - id: adr-0126-observation-to-action-closure-loop
     adr: "0126"
     title: Observation-to-action closure loop
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0126-logic-loop-clean
     worktree_path: ../proxmox_florin_server-adr-0126-logic-loop-clean
@@ -2419,8 +2419,8 @@ workstreams:
       - config/workflow-catalog.json
       - scripts/lv3_cli.py
       - docs/runbooks/observation-to-action-closure-loop.md
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
 
   - id: adr-0127-intent-conflict-resolution
     adr: "0127"

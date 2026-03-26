@@ -3,8 +3,8 @@
 - Status: Implemented
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.131.0
-- Implemented In Platform Version: not yet
-- Implemented On: 2026-03-25
+- Implemented In Platform Version: 0.130.19
+- Implemented On: 2026-03-26
 - Date: 2026-03-24
 
 ## Context
@@ -66,6 +66,16 @@ The loop now terminates explicitly on goal achievement:
 - failed verification re-triages at most 3 times per service, capped at 5 by catalog override, then blocks for operator input
 
 This closes the failure mode where an observation-driven sequence could continue cycling after the desired service state had already been restored.
+
+### Live activation
+
+The first production activation used the current-main Windmill runtime with three hardening changes that were required to make the closure loop reliable inside live workers:
+
+- the Windmill wrappers now discard the stdlib-loaded `platform` module before importing repo packages so `platform.agent` and `platform.closure_loop` resolve correctly inside worker sandboxes
+- the observation-loop and service-health wrappers now re-exec through `uv` with `pyyaml` and `nats-py` when those packages are missing from the base worker image, writing fallback results through an explicit JSON output file
+- Windmill script reseeding now uses a dedicated repo-managed sync helper instead of a fragile delete/create loop against the API
+
+Production verification on 2026-03-26 confirmed both live execution of the observation wrapper through Windmill and immediate termination to `RESOLVED` for an `observation_finding` run whose goal had already been achieved.
 
 ### Recording
 
