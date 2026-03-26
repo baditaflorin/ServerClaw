@@ -2877,7 +2877,7 @@ workstreams:
   - id: adr-0147-vaultwarden
     adr: "0147"
     title: Vaultwarden for operator credential management
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0147-vaultwarden
     worktree_path: .worktrees/adr-0147
@@ -2895,7 +2895,7 @@ workstreams:
       - config/service-capability-catalog.json
       - config/workflow-catalog.json
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0153-distributed-resource-lock-registry
     adr: "0153"

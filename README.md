@@ -1044,7 +1044,7 @@ This repository is intentionally opinionated:
 | `0142` | Public surface automated security scan | `merged` | [adr-0142-public-surface-security-scan.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0142-public-surface-security-scan.md) |
 | `0145` | Ollama for local LLM inference | `live_applied` | [adr-0145-ollama.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0145-ollama.md) |
 | `0146` | Langfuse for agent observability | `live_applied` | [adr-0146-ai-observability.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0146-ai-observability.md) |
-| `0147` | Vaultwarden for operator credential management | `merged` | [adr-0147-vaultwarden.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0147-vaultwarden.md) |
+| `0147` | Vaultwarden for operator credential management | `live_applied` | [adr-0147-vaultwarden.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0147-vaultwarden.md) |
 | `0149` | Semaphore for Ansible job management UI and API | `merged` | [adr-0149-semaphore.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0149-semaphore.md) |
 | `0150` | Dozzle for real-time container log access | `live_applied` | [adr-0150-dozzle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0150-dozzle.md) |
 | `0151` | n8n for webhook and API integration automation | `merged` | [adr-0151-n8n.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0151-n8n.md) |
