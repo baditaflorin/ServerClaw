@@ -3,8 +3,8 @@
 - ADR: [ADR 0150](../adr/0150-dozzle-for-real-time-container-log-access.md)
 - Title: Real-time container log access through a repo-managed Dozzle hub and per-host agents
 - Status: live_applied
-- Implemented In Repo Version: 0.167.0
-- Implemented In Platform Version: 0.130.17
+- Implemented In Repo Version: 0.168.0
+- Implemented In Platform Version: 0.130.18
 - Implemented On: 2026-03-26
 - Branch: `codex/live-apply-0150`
 - Worktree: `.worktrees/live-apply-0150`
