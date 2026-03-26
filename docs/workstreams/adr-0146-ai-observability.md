@@ -55,9 +55,11 @@
 
 ## Current Blockers
 
-- As of 2026-03-25, Langfuse is healthy on `docker-runtime-lv3` and the bootstrap project API is reachable on the internal service endpoint, but the shared `nginx-lv3` publication has not been completed.
-- `https://langfuse.lv3.org` still serves the generic edge page and its current certificate does not yet include `langfuse.lv3.org` as a SAN.
-- Completing edge publication was blocked by intermittent controller SSH timeouts to `proxmox_florin` and `nginx-lv3`, plus an unrelated transient `apt.grafana.com` package-index mismatch that affected shared package-install tasks.
+- As of 2026-03-26, Langfuse remains healthy on `docker-runtime-lv3` and the bootstrap project API remains reachable on the internal service endpoint, but the shared `nginx-lv3` publication is still incomplete.
+- `https://langfuse.lv3.org` no longer serves the generic edge page. It now redirects to `https://nginx.lv3.org/`, which confirms partial edge publication, but the host is still using the `nginx.lv3.org` certificate and does not include `langfuse.lv3.org` as a SAN.
+- Controller SSH still times out to `proxmox_florin` on `65.108.75.123:22`, `100.64.0.1:22`, and the previously observed `100.118.189.95:22`. `https://proxmox.lv3.org:8006` also times out from the controller.
+- Controller-local Tailscale is currently logged out because `https://headscale.lv3.org` presents the wrong certificate. The observed SAN set includes `nginx.lv3.org` and omits `headscale.lv3.org`, so the private management path cannot currently be re-established from this controller.
+- The controller's observed public IPv4 during the latest retry was `90.95.35.115`. If public-IP-based SSH filtering is in use on the Proxmox host firewall, that source may need to be temporarily allowed before publication can continue.
 
 ## Merge Criteria
 
