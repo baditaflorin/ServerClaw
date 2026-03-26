@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.172.1",
-  "platform_version": "0.130.20",
-  "generated_at": "2026-03-26T12:17:56Z",
-  "next_refresh_at": "2026-03-26T13:17:56Z",
+  "repo_version": "0.175.0",
+  "platform_version": "0.130.21",
+  "generated_at": "2026-03-26T16:30:19Z",
+  "next_refresh_at": "2026-03-26T17:30:19Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -344,6 +344,17 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://proxmox.lv3.org",
+        "last_live_apply": "2026-03-26T00:00:00Z"
+      },
+      "searxng": {
+        "service_name": "SearXNG",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "http://search.lv3.org",
         "last_live_apply": "2026-03-26T00:00:00Z"
       },
       "semaphore": {
@@ -1336,6 +1347,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/rag-platform-context.md"
+      },
+      {
+        "id": "converge-searxng",
+        "description": "Deploy the private SearXNG runtime on docker-runtime-lv3, publish its tailnet-only hostname through the Proxmox host proxy, and re-render Open WebUI to use the local search endpoint.",
+        "tags": [
+          "converge-searxng",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 320,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-searxng.md"
       },
       {
         "id": "converge-semaphore",
@@ -2995,6 +3032,16 @@
         ]
       },
       {
+        "id": "configure-searxng",
+        "title": "Configure SearXNG",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-searxng.md",
+        "workflow_ids": [
+          "converge-searxng"
+        ]
+      },
+      {
         "id": "configure-semaphore",
         "title": "Configure Semaphore",
         "agent_trust_required": "T3",
@@ -3413,10 +3460,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.172.0",
+    "last_version": "0.174.0",
     "deployed_at": "2026-03-26",
-    "summary": "record ADR 0137 as already live on production, align the README and workstream status surfaces with the verified public-edge crawl policy, and preserve the existing platform version because no new live rollout was required",
-    "release_notes_url": "docs/release-notes/0.172.1.md"
+    "summary": "merge ADR 0148 onto `main` with the repo-managed SearXNG runtime, the private `search.lv3.org` tailnet hostname, Open WebUI web-search wiring, and the bounded repo-side web-search client used by incident triage carry forward the 2026-03-26 live apply evidence showing the internal endpoint, host Tailscale proxy, and hostname-backed JSON search path all working after the limiter and forced-recreate runtime fix",
+    "release_notes_url": "docs/release-notes/0.175.0.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
