@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.166.0",
-  "platform_version": "0.130.16",
-  "generated_at": "2026-03-26T10:52:32Z",
-  "next_refresh_at": "2026-03-26T11:52:32Z",
+  "repo_version": "0.168.0",
+  "platform_version": "0.130.18",
+  "generated_at": "2026-03-26T11:01:38Z",
+  "next_refresh_at": "2026-03-26T12:01:38Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -26,7 +26,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.40:9093",
-        "last_live_apply": "2026-03-25T00:00:00Z"
+        "last_live_apply": "2026-03-26T00:00:00Z"
       },
       "api_gateway": {
         "service_name": "Platform API Gateway",
@@ -93,6 +93,18 @@
         "lifecycle_status": "active",
         "primary_url": "https://docs.lv3.org",
         "last_live_apply": "2026-03-26T00:00:00Z"
+      },
+      "dozzle": {
+        "service_name": "Dozzle",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://logs.lv3.org",
+        "last_live_apply": "2026-03-26T00:00:00Z",
+        "slo_status": "unknown"
       },
       "gitea": {
         "service_name": "Gitea",
@@ -792,6 +804,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-docker-runtime.md"
+      },
+      {
+        "id": "converge-dozzle",
+        "description": "Deploy the Dozzle hub on docker-runtime-lv3, join remote log agents from docker-build-lv3 and monitoring-lv3, and publish logs.lv3.org through the shared authenticated edge.",
+        "tags": [
+          "converge-dozzle",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1500,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-dozzle.md"
       },
       {
         "id": "converge-gitea",
@@ -2708,6 +2746,16 @@
         ]
       },
       {
+        "id": "configure-dozzle",
+        "title": "Configure Dozzle",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-dozzle.md",
+        "workflow_ids": [
+          "converge-dozzle"
+        ]
+      },
+      {
         "id": "configure-edge-publication",
         "title": "Configure Edge Publication",
         "agent_trust_required": "T3",
@@ -3317,10 +3365,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.165.0",
+    "last_version": "0.167.0",
     "deployed_at": "2026-03-26",
-    "summary": "implement ADR 0171 with a repo-managed fault injector, scenario catalog, Windmill workflow, and operator CLI path for controlled resilience drills on `docker-runtime-lv3` harden the first live subset so Keycloak uses a reversible stop/start outage while OpenBao uses pause/unpause and keeps its seal state intact during validation",
-    "release_notes_url": "docs/release-notes/0.166.0.md"
+    "summary": "deploy the repo-managed Dozzle hub on `docker-runtime-lv3`, join the `docker-build-lv3` and `monitoring-lv3` agents, and publish `logs.lv3.org` behind the shared Keycloak-authenticated edge harden the live apply path so Dozzle convergence also updates the Proxmox guest firewall, verifies the hub through its HTTP healthcheck, and keeps post-verify probes scoped to the owning VM",
+    "release_notes_url": "docs/release-notes/0.168.0.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
