@@ -5,7 +5,7 @@
   "applied_on": "2026-03-26",
   "recorded_on": "2026-03-26",
   "recorded_by": "codex",
-  "source_commit": "working-tree on top of 000590fa1045562f13c61aa81c7e92a1e96a83b9",
+  "source_commit": "d16e94ab56c926e59ed9b941718684c3a2a31067",
   "repo_version_context": "0.174.0",
   "workflow_id": "converge-windmill",
   "adr": "0113",
