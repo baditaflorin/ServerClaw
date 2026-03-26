@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0166](../adr/0166-canonical-error-response-format-and-error-code-registry.md)
 - Title: Shared canonical HTTP error envelopes and a repo-managed platform error-code registry
-- Status: merged
+- Status: live_applied
 - Branch: `codex/live-apply-0166`
 - Worktree: `.worktrees/live-apply-0166`
 - Owner: codex
@@ -62,9 +62,10 @@
 
 - Repo implementation completed for release `0.162.0` on `2026-03-26`.
 - Unit and integration-focused repository tests passed for the canonical error helpers, API gateway, and platform-context service.
-- The first live-apply attempt on `2026-03-26` was blocked by controller-to-host SSH timeouts; public verification still showed `https://api.lv3.org/v1/health` returning the legacy `{"detail":"missing bearer token"}` payload, so the workstream is merged but not yet live applied.
+- The 2026-03-26 live replay from `main` now applies ADR 0166 on both production HTTP surfaces: `https://api.lv3.org/v1/health` returns the canonical `AUTH_TOKEN_MISSING` envelope publicly, and `http://100.64.0.1:8010/v1/platform-summary` returns the same canonical envelope on the private platform-context path.
+- The final platform-context recovery required a direct guest-side rebuild because the Tailscale-routed Ansible converge stalled mid corpus sync before `config/error-codes.yaml` reached `/opt/platform-context/corpus/config/`; after copying the missing registry file and rebuilding the container, authenticated rebuild and query verification succeeded with `2550` indexed chunks.
 
 ## Notes For The Next Assistant
 
-- Re-run the gateway and platform-context converges from `main` once controller access to `65.108.75.123:22` is stable again.
-- After live apply succeeds, add an ADR 0166 receipt, update `versions/stack.yaml` platform evidence, and flip this workstream to `live_applied`.
+- If the public host SSH path to `65.108.75.123:22` remains unstable, prefer the steady-state Tailscale host path (`ops@100.64.0.1`) plus the governed Proxmox guest jump when replaying `docker-runtime-lv3` services.
+- The live-apply receipt records the manual recovery used to finish this rollout; future replays should come back to the full repo-managed `rag-context` converge once the intermittent guest copy stall is understood.

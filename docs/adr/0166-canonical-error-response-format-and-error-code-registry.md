@@ -3,7 +3,7 @@
 - Status: Accepted
 - Implementation Status: Partial
 - Implemented In Repo Version: 0.162.0
-- Implemented In Platform Version: not yet
+- Implemented In Platform Version: 0.130.13
 - Implemented On: 2026-03-26
 - Date: 2026-03-24
 
@@ -239,7 +239,8 @@ except PlatformError as e:
 - `scripts/api_gateway/main.py` and `scripts/platform_context_service.py` now return canonical envelopes for authentication failures, request-validation failures, and common not-found or dependency-failure paths.
 - `scripts/validate_repository_data_models.py` now validates the error-code registry as part of the repository data-model gate.
 - `docs/runbooks/platform-api-error-codes.md` documents the current envelope and registry ownership.
-- The first live-apply attempt on 2026-03-26 was blocked by repeated controller-to-host SSH timeouts to `65.108.75.123:22`, so platform metadata remains `not yet` until the rollout succeeds from `main`.
+- The 2026-03-26 live rollout from `main` now applies the canonical envelope on both `https://api.lv3.org/v1/health` and the private platform-context endpoint at `http://100.64.0.1:8010/v1/platform-summary`, with the first applied platform version recorded as `0.130.13`.
+- Public SSH reachability to `65.108.75.123:22` remained intermittent during the rollout, so the successful converge used the steady-state Tailscale host path and a manual recovery to finish the `platform-context` container rebuild after the corpus sync stalled before `config/error-codes.yaml` reached the guest.
 
 ## Consequences
 

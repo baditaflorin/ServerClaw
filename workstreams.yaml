@@ -3119,7 +3119,7 @@ workstreams:
   - id: adr-0166-canonical-error-response-format
     adr: "0166"
     title: Canonical error response format and error code registry
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/live-apply-0166
     worktree_path: .worktrees/live-apply-0166
@@ -3139,7 +3139,7 @@ workstreams:
       - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/
       - collections/ansible_collections/lv3/platform/roles/rag_context_runtime/
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0168-idempotency-ci
     adr: "0168"
