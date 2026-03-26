@@ -6,7 +6,7 @@ Generated from `config/dependency-graph.json`.
 
 | Tier | Services |
 | --- | --- |
-| `1` | Alertmanager, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Headscale, Mail Platform, NGINX Edge, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Uptime Kuma, ntfy, ntopng, step-ca |
+| `1` | Alertmanager, Docker Build VM, Docker Runtime VM, Grafana, Headscale, Mail Platform, NGINX Edge, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Uptime Kuma, ntfy, ntopng, step-ca |
 | `2` | Changelog Portal, Developer Portal, Gitea, Keycloak, Langfuse, Mattermost, NetBox, Open WebUI, Public Status Page, Semaphore, Vaultwarden, Windmill, n8n |
 | `3` | Platform API Gateway |
 | `4` | Ops Portal |
@@ -18,7 +18,6 @@ graph TD
     alertmanager["Alertmanager\nTier 1"]
     docker_build["Docker Build VM\nTier 1"]
     docker_runtime["Docker Runtime VM\nTier 1"]
-    dozzle["Dozzle\nTier 1"]
     grafana["Grafana\nTier 1"]
     headscale["Headscale\nTier 1"]
     mail_platform["Mail Platform\nTier 1"]
@@ -55,8 +54,6 @@ graph TD
     api_gateway -->|soft| nginx_edge
     changelog_portal -->|hard| nginx_edge
     docs_portal -->|hard| nginx_edge
-    dozzle -->|soft| keycloak
-    dozzle -->|soft| nginx_edge
     gitea -->|soft| docker_build
     gitea -->|soft| keycloak
     gitea -->|startup_only| openbao

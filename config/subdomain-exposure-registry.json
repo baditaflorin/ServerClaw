@@ -180,6 +180,31 @@
       "live_tracking_expected": true
     },
     {
+      "fqdn": "git.lv3.org",
+      "service_id": "gitea",
+      "environment": "production",
+      "status": "active",
+      "exposure": "private-only",
+      "auth_requirement": "private_network",
+      "target": "100.64.0.1",
+      "target_port": 3009,
+      "owner_adr": "0143",
+      "dns_record_type": "A",
+      "route_mode": "dns-only",
+      "route_source": "dns-only",
+      "route_kind": null,
+      "edge_auth": "none",
+      "unauthenticated_paths": [],
+      "unauthenticated_prefix_paths": [],
+      "repo_route_service_id": null,
+      "repo_route_metadata": {},
+      "tls": {
+        "provider": "none",
+        "auto_renew": false
+      },
+      "live_tracking_expected": false
+    },
+    {
       "fqdn": "grafana.lv3.org",
       "service_id": "grafana",
       "environment": "production",
@@ -277,28 +302,28 @@
       "live_tracking_expected": true
     },
     {
-      "fqdn": "logs.lv3.org",
-      "service_id": "dozzle",
+      "fqdn": "langfuse.lv3.org",
+      "service_id": "langfuse",
       "environment": "production",
       "status": "active",
       "exposure": "edge-published",
-      "auth_requirement": "edge_oidc",
+      "auth_requirement": "upstream_auth",
       "target": "65.108.75.123",
       "target_port": 443,
-      "owner_adr": "0150",
+      "owner_adr": "0146",
       "dns_record_type": "A",
       "route_mode": "edge",
       "route_source": "service_topology",
       "route_kind": "proxy",
-      "edge_auth": "oauth2_proxy",
+      "edge_auth": "none",
       "unauthenticated_paths": [],
       "unauthenticated_prefix_paths": [],
-      "repo_route_service_id": "dozzle",
+      "repo_route_service_id": "langfuse",
       "repo_route_metadata": {
         "enabled": true,
         "tls": true,
-        "server_sent_events": true,
-        "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.dozzle_http_port }}"
+        "noindex": true,
+        "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.langfuse_port }}"
       },
       "tls": {
         "provider": "letsencrypt",
@@ -666,12 +691,12 @@
     }
   ],
   "summary": {
-    "catalog_total": 22,
-    "active_total": 18,
+    "catalog_total": 23,
+    "active_total": 19,
     "active_public_dns_total": 16,
-    "active_private_total": 2,
+    "active_private_total": 3,
     "planned_total": 4,
     "edge_total": 15,
-    "edge_oidc_total": 6
+    "edge_oidc_total": 5
   }
 }

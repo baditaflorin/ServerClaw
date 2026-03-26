@@ -7,6 +7,7 @@ groups:
         labels:
           severity: critical
         annotations:
+          runbook_url: docs/runbooks/configure-gitea.md
           summary: Private Gitea is unavailable
           description: The private Gitea health endpoint on docker-runtime-lv3 has been failing blackbox checks for at least 10 minutes.
           runbook_url: https://docs.lv3.org/runbooks/configure-gitea/
