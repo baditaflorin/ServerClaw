@@ -138,6 +138,7 @@ platform_ports:
   portainer_host_proxy_port: 9444
   step_ca_api_port: 9000
   step_ca_proxy_port: 9443
+  headscale_http_port: 8080
 platform_port_assignments:
   alertmanager_port: 9093
   monitoring_grafana_port: 3000
@@ -172,6 +173,7 @@ platform_port_assignments:
   portainer_host_proxy_port: 9444
   step_ca_api_port: 9000
   step_ca_proxy_port: 9443
+  headscale_http_port: 8080
 platform_guest_catalog:
   list:
     - vmid: 110
@@ -685,6 +687,33 @@ platform_service_topology:
       internal: 9093
     urls:
       internal: http://10.10.10.40:9093
+  headscale:
+    service_name: headscale
+    owning_vm: proxmox_florin
+    private_ip: '{{ hostvars[''proxmox_florin''].proxmox_internal_ipv4 }}'
+    public_hostname: headscale.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: headscale
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.1:8080
+    service_id: headscale
+    ports:
+      internal: 8080
+    urls:
+      public: https://headscale.lv3.org
+      internal: http://10.10.10.1:8080
   proxmox_ui:
     service_name: proxmox-ui
     owning_vm: proxmox_florin
@@ -1349,6 +1378,33 @@ public_edge_service_topology:
       internal: 9093
     urls:
       internal: http://10.10.10.40:9093
+  headscale:
+    service_name: headscale
+    owning_vm: proxmox_florin
+    private_ip: '{{ hostvars[''proxmox_florin''].proxmox_internal_ipv4 }}'
+    public_hostname: headscale.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: headscale
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.1:8080
+    service_id: headscale
+    ports:
+      internal: 8080
+    urls:
+      public: https://headscale.lv3.org
+      internal: http://10.10.10.1:8080
   proxmox_ui:
     service_name: proxmox-ui
     owning_vm: proxmox_florin
@@ -1873,6 +1929,9 @@ open_webui_controller_url: http://100.118.189.95:8008
 api_gateway_internal_port: 8083
 api_gateway_public_url: https://api.lv3.org
 api_gateway_internal_url: http://10.10.10.20:8083
+headscale_http_port: 8080
+headscale_public_url: https://headscale.lv3.org
+headscale_internal_url: http://10.10.10.1:8080
 ntopng_proxy_port: 3001
 ntopng_operator_url: http://100.118.189.95:3001
 mattermost_server_port: 8065
