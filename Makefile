@@ -149,7 +149,7 @@ search-index-rebuild:
 	python3 $(REPO_ROOT)/scripts/published_artifact_secret_scan.py --repo-root $(REPO_ROOT) --path build/search-index
 
 fault-injection:
-	python3 $(REPO_ROOT)/scripts/lv3_cli.py run fault-injection --approve-risk $(if $(FAULT_INJECTION_ARGS),--args $(FAULT_INJECTION_ARGS),)
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/lv3_cli.py run fault-injection --approve-risk $(if $(FAULT_INJECTION_ARGS),--args $(FAULT_INJECTION_ARGS),)
 
 triage-alert:
 	python3 $(REPO_ROOT)/scripts/incident_triage.py $(TRIAGE_ARGS)

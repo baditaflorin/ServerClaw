@@ -14,20 +14,20 @@ The first implementation intentionally targets the local `docker-runtime-lv3` su
 - `fault:keycloak-unavailable`
 - `fault:openbao-unavailable`
 
-Both scenarios are bounded service-stop drills that restore the affected container automatically and wait for the configured health probes to recover before the run exits.
+The initial subset keeps the drills bounded and reversible: Keycloak uses a stop/start outage, while OpenBao uses pause/unpause so the singleton secret store does not come back sealed after the check.
 
 ## Manual Execution
 
 Trigger one scenario through the governed Windmill path:
 
 ```bash
-python3 scripts/lv3_cli.py run fault-injection --approve-risk --args scenario_names=fault:keycloak-unavailable
+make fault-injection FAULT_INJECTION_ARGS='scenario_names=fault:keycloak-unavailable'
 ```
 
 Trigger the current monthly subset:
 
 ```bash
-python3 scripts/lv3_cli.py run fault-injection --approve-risk --args scenario_names=fault:keycloak-unavailable,fault:openbao-unavailable
+make fault-injection FAULT_INJECTION_ARGS='scenario_names=fault:keycloak-unavailable,fault:openbao-unavailable'
 ```
 
 If you need to inspect the worker-side plan without applying a fault:

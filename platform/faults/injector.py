@@ -54,11 +54,13 @@ class ProbeSpec:
     name: str
     kind: str
     expect: str
+    execution_context: str = "worker"
     url: str | None = None
     method: str = "GET"
     expected_status: tuple[int, ...] = (200,)
     timeout_seconds: float = 5.0
     validate_tls: bool = True
+    headers: tuple[tuple[str, str], ...] = ()
     host: str | None = None
     port: int | None = None
     body_regex: str | None = None
@@ -184,6 +186,7 @@ class SuiteResult:
 class FaultToken:
     container_id: str
     target_description: str
+    restore_action: str
 
 
 class UnixSocketHTTPConnection(http.client.HTTPConnection):
@@ -202,10 +205,17 @@ class DockerSocketClient:
         self.socket_path = socket_path
         self.timeout = timeout
 
-    def _request(self, method: str, path: str) -> tuple[int, str]:
+    def _request(
+        self,
+        method: str,
+        path: str,
+        *,
+        body: str | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> tuple[int, str]:
         connection = UnixSocketHTTPConnection(self.socket_path, timeout=self.timeout)
         try:
-            connection.request(method, path)
+            connection.request(method, path, body=body, headers=headers or {})
             response = connection.getresponse()
             payload = response.read().decode("utf-8")
             return response.status, payload
@@ -258,7 +268,7 @@ class DockerSocketClient:
         )
         if status not in {204, 304}:
             raise RuntimeError(f"docker stop for '{description}' returned HTTP {status}: {payload.strip()}")
-        return FaultToken(container_id=container_id, target_description=description)
+        return FaultToken(container_id=container_id, target_description=description, restore_action="start")
 
     def start(self, token: FaultToken) -> None:
         status, payload = self._request("POST", f"/containers/{token.container_id}/start")
@@ -266,6 +276,56 @@ class DockerSocketClient:
             raise RuntimeError(
                 f"docker start for '{token.target_description}' returned HTTP {status}: {payload.strip()}"
             )
+
+    def pause(self, action: FaultAction) -> FaultToken:
+        container_id, description = self._resolve_container(action)
+        status, payload = self._request("POST", f"/containers/{container_id}/pause")
+        if status not in {204, 304}:
+            raise RuntimeError(f"docker pause for '{description}' returned HTTP {status}: {payload.strip()}")
+        return FaultToken(container_id=container_id, target_description=description, restore_action="unpause")
+
+    def unpause(self, token: FaultToken) -> None:
+        status, payload = self._request("POST", f"/containers/{token.container_id}/unpause")
+        if status not in {204, 304}:
+            raise RuntimeError(
+                f"docker unpause for '{token.target_description}' returned HTTP {status}: {payload.strip()}"
+            )
+
+    def exec(self, container_name: str, argv: list[str]) -> tuple[int, str]:
+        create_payload = json.dumps(
+            {
+                "AttachStdout": True,
+                "AttachStderr": True,
+                "Tty": True,
+                "Cmd": argv,
+            }
+        )
+        status, payload = self._request(
+            "POST",
+            f"/containers/{urllib.parse.quote(container_name, safe='')}/exec",
+            body=create_payload,
+            headers={"Content-Type": "application/json"},
+        )
+        if status != 201:
+            raise RuntimeError(f"docker exec create for '{container_name}' returned HTTP {status}: {payload.strip()}")
+        exec_id = str(json.loads(payload)["Id"])
+        status, output = self._request(
+            "POST",
+            f"/exec/{exec_id}/start",
+            body=json.dumps({"Detach": False, "Tty": True}),
+            headers={"Content-Type": "application/json"},
+        )
+        if status != 200:
+            raise RuntimeError(f"docker exec start for '{container_name}' returned HTTP {status}: {output.strip()}")
+        status, inspect_payload = self._request("GET", f"/exec/{exec_id}/json")
+        if status != 200:
+            raise RuntimeError(
+                f"docker exec inspect for '{container_name}' returned HTTP {status}: {inspect_payload.strip()}"
+            )
+        exit_code = json.loads(inspect_payload).get("ExitCode")
+        if not isinstance(exit_code, int):
+            raise RuntimeError(f"docker exec for '{container_name}' did not report a valid exit code")
+        return exit_code, output
 
 
 def _coerce_expected_status(value: Any) -> tuple[int, ...]:
@@ -303,6 +363,7 @@ def _resolve_health_probe(
             name=resolved_name,
             kind="http",
             expect=expect,
+            execution_context="worker",
             url=str(check_payload["url"]),
             method=str(check_payload.get("method", "GET")).upper(),
             expected_status=_coerce_expected_status(check_payload.get("expected_status")),
@@ -315,6 +376,7 @@ def _resolve_health_probe(
             name=resolved_name,
             kind="tcp",
             expect=expect,
+            execution_context="worker",
             host=str(check_payload["host"]),
             port=int(check_payload["port"]),
             timeout_seconds=float(check_payload.get("timeout_seconds", 5)),
@@ -325,6 +387,11 @@ def _resolve_health_probe(
 def _load_probe_spec(raw: dict[str, Any], probe_catalog: dict[str, Any]) -> ProbeSpec:
     kind = str(raw.get("kind", "")).strip()
     expect = str(raw.get("expect", "")).strip()
+    execution_context = str(raw.get("execution_context", "worker")).strip() or "worker"
+    header_payload = raw.get("headers") or {}
+    if header_payload and not isinstance(header_payload, dict):
+        raise ScenarioLoadError("probe.headers must be a mapping when provided")
+    headers = tuple((str(key), str(value)) for key, value in header_payload.items())
     if expect not in {"reachable", "unreachable"}:
         raise ScenarioLoadError("probe.expect must be 'reachable' or 'unreachable'")
     if kind == "health_probe":
@@ -332,13 +399,28 @@ def _load_probe_spec(raw: dict[str, Any], probe_catalog: dict[str, Any]) -> Prob
         check = str(raw.get("check", "")).strip()
         if not probe_id or not check:
             raise ScenarioLoadError("health_probe entries must define probe_id and check")
-        return _resolve_health_probe(
+        probe = _resolve_health_probe(
             probe_catalog=probe_catalog,
             probe_id=probe_id,
             check=check,
             name=raw.get("name"),
             expect=expect,
             body_regex=raw.get("body_regex"),
+        )
+        return ProbeSpec(
+            name=probe.name,
+            kind=probe.kind,
+            expect=probe.expect,
+            execution_context=execution_context,
+            url=probe.url,
+            method=probe.method,
+            expected_status=probe.expected_status,
+            timeout_seconds=probe.timeout_seconds,
+            validate_tls=bool(raw.get("validate_tls", probe.validate_tls)),
+            headers=headers or probe.headers,
+            host=probe.host,
+            port=probe.port,
+            body_regex=probe.body_regex,
         )
     if kind == "http":
         url = str(raw.get("url", "")).strip()
@@ -348,11 +430,13 @@ def _load_probe_spec(raw: dict[str, Any], probe_catalog: dict[str, Any]) -> Prob
             name=str(raw.get("name") or url),
             kind="http",
             expect=expect,
+            execution_context=execution_context,
             url=url,
             method=str(raw.get("method", "GET")).upper(),
             expected_status=_coerce_expected_status(raw.get("expected_status")),
             timeout_seconds=float(raw.get("timeout_seconds", 5)),
             validate_tls=bool(raw.get("validate_tls", True)),
+            headers=headers,
             body_regex=raw.get("body_regex"),
         )
     if kind == "tcp":
@@ -434,7 +518,7 @@ def load_scenario_catalog(path: Path = DEFAULT_SCENARIO_PATH) -> ScenarioCatalog
             raise ScenarioLoadError(f"scenario '{name}' must define description")
         if not scenario.expected_behaviour:
             raise ScenarioLoadError(f"scenario '{name}' must define expected_behaviour")
-        if scenario.fault.kind != "service_kill":
+        if scenario.fault.kind not in {"service_kill", "service_pause"}:
             raise ScenarioLoadError(f"scenario '{name}' uses unsupported fault kind '{scenario.fault.kind}'")
         if scenario.fault.duration_seconds < 1:
             raise ScenarioLoadError(f"scenario '{name}' fault.duration_seconds must be >= 1")
@@ -466,6 +550,7 @@ class FaultInjector:
         self.sleep = sleep
         self.urlopen = urlopen
         self.socket_connection = socket_connection
+        self.host_network_probe_container = "windmill-openbao-agent"
 
     def run_suite(self, scenarios: list[FaultScenario]) -> SuiteResult:
         started_at = _utc_now()
@@ -581,12 +666,20 @@ class FaultInjector:
             return
 
     def _apply_fault(self, action: FaultAction) -> FaultToken:
-        if action.kind != "service_kill":
-            raise RuntimeError(f"unsupported fault kind '{action.kind}'")
-        return self.docker_client.stop(action)
+        if action.kind == "service_kill":
+            return self.docker_client.stop(action)
+        if action.kind == "service_pause":
+            return self.docker_client.pause(action)
+        raise RuntimeError(f"unsupported fault kind '{action.kind}'")
 
     def _remove_fault(self, token: FaultToken) -> None:
-        self.docker_client.start(token)
+        if token.restore_action == "start":
+            self.docker_client.start(token)
+            return
+        if token.restore_action == "unpause":
+            self.docker_client.unpause(token)
+            return
+        raise RuntimeError(f"unsupported fault restore action '{token.restore_action}'")
 
     def _run_phase(self, probes: tuple[ProbeSpec, ...]) -> tuple[ProbeResult, ...]:
         return tuple(self._run_probe(probe) for probe in probes)
@@ -605,10 +698,52 @@ class FaultInjector:
 
     def _run_probe(self, probe: ProbeSpec) -> ProbeResult:
         if probe.kind == "http":
+            if probe.execution_context == "host_network_helper":
+                return self._run_host_network_http_probe(probe)
             return self._run_http_probe(probe)
         if probe.kind == "tcp":
             return self._run_tcp_probe(probe)
         raise RuntimeError(f"unsupported probe kind '{probe.kind}'")
+
+    def _run_host_network_http_probe(self, probe: ProbeSpec) -> ProbeResult:
+        assert probe.url is not None
+        argv = ["wget", "-qO-", "-T", str(int(max(probe.timeout_seconds, 1))), "-t", "1"]
+        if not probe.validate_tls:
+            argv.append("--no-check-certificate")
+        for key, value in probe.headers:
+            argv.append(f"--header={key}: {value}")
+        argv.append(probe.url)
+        started = time.monotonic()
+        try:
+            exit_code, output = self.docker_client.exec(self.host_network_probe_container, argv)
+        except Exception as exc:
+            duration = time.monotonic() - started
+            passed = probe.expect == "unreachable"
+            return ProbeResult(
+                name=probe.name,
+                kind=probe.kind,
+                expect=probe.expect,
+                passed=passed,
+                observed=type(exc).__name__,
+                status_code=None,
+                duration_seconds=duration,
+            )
+
+        duration = time.monotonic() - started
+        body_matches = True
+        if probe.body_regex:
+            body_matches = bool(re.search(probe.body_regex, output))
+        reachable = exit_code == 0 and body_matches
+        passed = reachable if probe.expect == "reachable" else not reachable
+        return ProbeResult(
+            name=probe.name,
+            kind=probe.kind,
+            expect=probe.expect,
+            passed=passed,
+            observed="reachable" if reachable else f"wget-exit-{exit_code}",
+            status_code=200 if reachable else None,
+            duration_seconds=duration,
+        )
 
     def _run_http_probe(self, probe: ProbeSpec) -> ProbeResult:
         assert probe.url is not None
