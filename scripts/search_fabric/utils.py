@@ -22,7 +22,10 @@ def utc_now_iso() -> str:
 def load_json(path: Path, default: Any) -> Any:
     if not path.exists():
         return default
-    return json.loads(path.read_text(encoding="utf-8"))
+    try:
+        return json.loads(read_text(path))
+    except json.JSONDecodeError:
+        return default
 
 
 def load_yaml(path: Path, default: Any) -> Any:
@@ -39,7 +42,10 @@ def load_yaml(path: Path, default: Any) -> Any:
 
 
 def read_text(path: Path) -> str:
-    return path.read_text(encoding="utf-8")
+    try:
+        return path.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        return path.read_text(encoding="utf-8", errors="replace")
 
 
 def normalize_text(value: str) -> str:

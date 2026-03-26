@@ -64,6 +64,10 @@ groups:
         tmp_path / "receipts" / "live-applies" / "2026-03-23-netbox.json",
         json.dumps({"summary": "netbox deploy", "workflow_id": "converge-netbox"}, indent=2) + "\n",
     )
+    (tmp_path / "receipts" / "live-applies" / "2026-03-24-binaryish.json").write_bytes(
+        b'{"summary":"caf\xe9 deploy","workflow_id":"converge-netbox"}\n'
+    )
+    (tmp_path / "config" / "binaryish.json").write_bytes(b'{"name":"caf\xe9","\xa3":"value"}\n')
     return tmp_path
 
 
@@ -98,10 +102,30 @@ def test_suggest_uses_trigram_fallback(tmp_path: Path) -> None:
 def test_filter_by_collection_metadata(tmp_path: Path) -> None:
     client = SearchClient(make_repo(tmp_path))
     payload = client.filter(collection="receipts", facets={"workflow_id": "converge-netbox"})
-    assert payload["count"] == 1
+    assert payload["count"] == 2
 
 
 def test_empty_corpus_returns_no_results(tmp_path: Path) -> None:
     client = SearchClient(tmp_path)
     payload = client.query("xyzzy")
     assert payload["results"] == []
+
+
+def test_indexer_tolerates_non_utf8_config_text(tmp_path: Path) -> None:
+    payload = SearchIndexer(make_repo(tmp_path)).index_all()
+    config_docs = [document for document in payload["documents"] if document.collection == "configs"]
+    assert any(document.title == "binaryish.json" for document in config_docs)
+
+
+def test_indexer_tolerates_non_utf8_receipt_json(tmp_path: Path) -> None:
+    payload = SearchIndexer(make_repo(tmp_path)).index_all()
+    receipt_docs = [document for document in payload["documents"] if document.collection == "receipts"]
+    assert any(document.doc_id == "receipt:receipts/live-applies/2026-03-24-binaryish.json" for document in receipt_docs)
+
+
+def test_indexer_skips_malformed_receipt_json(tmp_path: Path) -> None:
+    repo_root = make_repo(tmp_path)
+    (repo_root / "receipts" / "live-applies" / "2026-03-25-malformed.json").write_text("{not-json}\n", encoding="utf-8")
+    payload = SearchIndexer(repo_root).index_all()
+    receipt_docs = [document for document in payload["documents"] if document.collection == "receipts"]
+    assert not any(document.doc_id == "receipt:receipts/live-applies/2026-03-25-malformed.json" for document in receipt_docs)
