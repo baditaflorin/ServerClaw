@@ -80,7 +80,7 @@
     body:
       key: "{{ item }}"
     status_code: 200
-  loop: "{{ common_openbao_compose_env_init_payload.keys_base64[:(openbao_init_key_threshold | default(2) | int)] }}"
+  loop: "{{ common_openbao_compose_env_init_payload.keys_base64[: (openbao_init_key_threshold | default(2) | int)] }}"
   register: common_openbao_compose_env_unseal_result
   retries: 6
   delay: 2

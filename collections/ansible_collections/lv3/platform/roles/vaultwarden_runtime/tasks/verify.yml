@@ -11,12 +11,79 @@
   until: vaultwarden_verify_alive.status == 200
   changed_when: false
 
+- name: Check whether the Vaultwarden controller hostname resolves locally
+  ansible.builtin.command:
+    argv:
+      - python3
+      - -c
+      - |
+        import socket
+        import sys
+        socket.getaddrinfo(sys.argv[1], None)
+      - "{{ vaultwarden_controller_url | urlsplit('hostname') }}"
+  register: vaultwarden_controller_hostname_resolution
+  delegate_to: localhost
+  become: false
+  failed_when: false
+  changed_when: false
+
+- name: Select the Vaultwarden controller probe target
+  ansible.builtin.set_fact:
+    vaultwarden_controller_probe_url: >-
+      {{
+        (
+          vaultwarden_controller_url
+          if vaultwarden_controller_hostname_resolution.rc == 0
+          else (
+            (vaultwarden_controller_url | urlsplit('scheme'))
+            ~ '://'
+            ~ vaultwarden_service_topology.dns.target
+            ~ (
+              ':' ~ ((vaultwarden_controller_url | urlsplit('port')) | string)
+              if (vaultwarden_controller_url | urlsplit('port'))
+              else ''
+            )
+          )
+        )
+      }}
+    vaultwarden_controller_probe_headers: >-
+      {{
+        (
+          {}
+          if vaultwarden_controller_hostname_resolution.rc == 0
+          else {'Host': (vaultwarden_controller_url | urlsplit('hostname'))}
+        )
+      }}
+  changed_when: false
+
+- name: Discover the local Tailscale IPv4 address for fallback controller probes
+  ansible.builtin.shell: |
+    set -euo pipefail
+    ifconfig | awk '/inet 100\./ { print $2; exit }'
+  args:
+    executable: /bin/bash
+  register: vaultwarden_controller_probe_bind_address
+  delegate_to: localhost
+  become: false
+  when: vaultwarden_controller_hostname_resolution.rc != 0
+  changed_when: false
+
+- name: Assert the fallback controller probe has a local Tailscale IPv4 address
+  ansible.builtin.assert:
+    that:
+      - vaultwarden_controller_probe_bind_address.stdout | trim | length > 0
+    fail_msg: >-
+      Vaultwarden controller fallback verification requires a local Tailscale IPv4 address when
+      the controller hostname does not resolve on the control machine.
+  when: vaultwarden_controller_hostname_resolution.rc != 0
+
 - name: Verify Vaultwarden is reachable through the controller URL
   ansible.builtin.uri:
-    url: "{{ vaultwarden_controller_url }}/alive"
+    url: "{{ vaultwarden_controller_probe_url }}/alive"
     method: GET
     status_code: 200
     validate_certs: false
+    headers: "{{ vaultwarden_controller_probe_headers }}"
   register: vaultwarden_verify_controller_alive
   delegate_to: localhost
   become: false
@@ -24,6 +91,31 @@
   delay: 5
   until: vaultwarden_verify_controller_alive.status == 200
   changed_when: false
+  when: vaultwarden_controller_hostname_resolution.rc == 0
+
+- name: Verify Vaultwarden is reachable through the controller proxy fallback
+  ansible.builtin.shell: |
+    set -euo pipefail
+    curl \
+      --interface "{{ vaultwarden_controller_probe_bind_address.stdout | trim }}" \
+      --silent \
+      --show-error \
+      --output /dev/null \
+      --write-out '%{http_code}' \
+      --max-time 10 \
+      --insecure \
+      --header 'Host: {{ vaultwarden_controller_url | urlsplit('hostname') }}' \
+      "{{ vaultwarden_controller_probe_url }}/alive"
+  args:
+    executable: /bin/bash
+  register: vaultwarden_verify_controller_alive_fallback
+  delegate_to: localhost
+  become: false
+  retries: 12
+  delay: 5
+  until: (vaultwarden_verify_controller_alive_fallback.stdout | trim) == '200'
+  changed_when: false
+  when: vaultwarden_controller_hostname_resolution.rc != 0
 
 - name: Verify the Vaultwarden container is running
   ansible.builtin.command:

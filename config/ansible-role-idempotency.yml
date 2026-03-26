@@ -217,7 +217,7 @@ roles:
             status: 200
             json:
               data:
-              data:
+                data:
                   password: s3cr3t
   semaphore_postgres:
     policy: tracked

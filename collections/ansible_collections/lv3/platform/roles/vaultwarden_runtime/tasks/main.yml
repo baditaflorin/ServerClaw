@@ -112,16 +112,35 @@
   become: false
   register: vaultwarden_admin_token_hash_local
 
+- name: Record whether the Vaultwarden admin token hash must be generated
+  ansible.builtin.set_fact:
+    vaultwarden_admin_token_hash_missing: >-
+      {{
+        (not vaultwarden_admin_token_hash_local.stat.exists)
+        or (vaultwarden_admin_token_hash_local.stat.size | default(0) | int == 0)
+      }}
+
 - name: Generate the Vaultwarden admin token hash on the runtime host when missing
   ansible.builtin.shell: |
     set -euo pipefail
-    printf '%s\n%s\n' "{{ vaultwarden_admin_token }}" "{{ vaultwarden_admin_token }}" | \
-      docker run --rm -i "{{ vaultwarden_image }}" /vaultwarden hash | tail -n 1
+    script_output="$(
+      printf '%s\n%s\n' "{{ vaultwarden_admin_token }}" "{{ vaultwarden_admin_token }}" | \
+        script -qec 'docker run --rm -it "{{ vaultwarden_image }}" /vaultwarden hash' /dev/null
+    )"
+    printf '%s\n' "$script_output" | tr -d '\r' | sed -n "s/.*ADMIN_TOKEN='\\([^']*\\)'.*/\\1/p" | tail -n 1
   args:
     executable: /bin/bash
   register: vaultwarden_admin_token_hash_generation
   changed_when: true
-  when: not vaultwarden_admin_token_hash_local.stat.exists
+  when: vaultwarden_admin_token_hash_missing
+  no_log: true
+
+- name: Assert the generated Vaultwarden admin token hash is non-empty
+  ansible.builtin.assert:
+    that:
+      - vaultwarden_admin_token_hash_generation.stdout | trim | length > 0
+    fail_msg: Vaultwarden admin token hash generation returned an empty value.
+  when: vaultwarden_admin_token_hash_missing
   no_log: true
 
 - name: Persist the Vaultwarden admin token hash locally when newly generated
@@ -131,7 +150,7 @@
     mode: "0600"
   delegate_to: localhost
   become: false
-  when: not vaultwarden_admin_token_hash_local.stat.exists
+  when: vaultwarden_admin_token_hash_missing
   no_log: true
 
 - name: Read the Vaultwarden admin token hash from the control machine
@@ -322,6 +341,37 @@
   no_log: true
 
 - name: Persist Vaultwarden bootstrap state locally
+  ansible.builtin.set_fact:
+    vaultwarden_bootstrap_login_status: >-
+      {{
+        (
+          vaultwarden_bootstrap_admin.stdout
+          | regex_findall('LOGIN_HTTP_STATUS=([0-9]+)')
+          | first
+          | default('', true)
+        )
+      }}
+    vaultwarden_bootstrap_lookup_status: >-
+      {{
+        (
+          vaultwarden_bootstrap_admin.stdout
+          | regex_findall('LOOKUP_HTTP_STATUS=([0-9]+)')
+          | first
+          | default('', true)
+        )
+      }}
+    vaultwarden_bootstrap_invite_status: >-
+      {{
+        (
+          vaultwarden_bootstrap_admin.stdout
+          | regex_findall('INVITE_HTTP_STATUS=([^\\n]+)')
+          | first
+          | default('', true)
+        )
+      }}
+  no_log: true
+
+- name: Persist Vaultwarden bootstrap state locally
   ansible.builtin.copy:
     dest: "{{ vaultwarden_bootstrap_state_local_file }}"
     content: >-
@@ -332,9 +382,9 @@
           'bootstrap_operator_email': vaultwarden_bootstrap_operator_email,
           'admin_token_file': vaultwarden_admin_token_local_file,
           'admin_token_hash_file': vaultwarden_admin_token_hash_local_file,
-          'login_status': (vaultwarden_bootstrap_admin.stdout | regex_search('LOGIN_HTTP_STATUS=([0-9]+)', '\\1') | first | default('')),
-          'lookup_status': (vaultwarden_bootstrap_admin.stdout | regex_search('LOOKUP_HTTP_STATUS=([0-9]+)', '\\1') | first | default('')),
-          'invite_status': (vaultwarden_bootstrap_admin.stdout | regex_search('INVITE_HTTP_STATUS=([^\\n]+)', '\\1') | first | default(''))
+          'login_status': vaultwarden_bootstrap_login_status,
+          'lookup_status': vaultwarden_bootstrap_lookup_status,
+          'invite_status': vaultwarden_bootstrap_invite_status
         } | to_nice_json
       }}
       {{ '\n' }}

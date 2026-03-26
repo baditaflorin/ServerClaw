@@ -9,6 +9,7 @@ RSYNC_EXCLUDE_FILE="${REMOTE_EXEC_EXCLUDE_FILE:-$REPO_ROOT/.rsync-exclude}"
 SSH_BIN="${REMOTE_EXEC_SSH_BIN:-ssh}"
 RSYNC_BIN="${REMOTE_EXEC_RSYNC_BIN:-rsync}"
 PYTHON_BIN="${REMOTE_EXEC_PYTHON_BIN:-python3}"
+TAILSCALE_BIN="${REMOTE_EXEC_TAILSCALE_BIN:-/Applications/Tailscale.app/Contents/MacOS/Tailscale}"
 CONNECT_TIMEOUT="${REMOTE_EXEC_CONNECT_TIMEOUT:-5}"
 VERBOSE="${REMOTE_EXEC_VERBOSE:-0}"
 LOCAL_FALLBACK=false
@@ -334,6 +335,28 @@ remote_reachable() {
   "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" "true" >/dev/null 2>&1
 }
 
+mesh_proxy_configured() {
+  [[ "$SSH_OPTIONS_NL" =~ 100\.[0-9]+\.[0-9]+\.[0-9]+ ]]
+}
+
+local_mesh_diagnostic() {
+  local status_output=""
+
+  mesh_proxy_configured || return 0
+  [[ -x "$TAILSCALE_BIN" ]] || return 0
+
+  status_output="$("$TAILSCALE_BIN" status 2>&1 || true)"
+
+  if [[ "$status_output" == *"You are logged out"* || "$status_output" == *"unexpected state: NoState"* ]]; then
+    printf '%s' "; controller appears logged out of the Headscale/Tailscale mesh"
+    return 0
+  fi
+
+  if [[ "$status_output" == *"Unable to connect to the Tailscale coordination server"* || "$status_output" == *"fetch control key:"* ]]; then
+    printf '%s' "; controller cannot reach the Headscale/Tailscale coordination server"
+  fi
+}
+
 sync_remote_gate_status_back() {
   local remote_status=""
   local local_status=""
@@ -365,12 +388,13 @@ remote_remove_paths() {
 }
 
 prune_remote_workspace_stale_paths() {
-  local stale_paths=("$WORKSPACE_ROOT/.git-remote")
+  local stale_paths=()
 
   if [[ ! -e "$REPO_ROOT/scripts/cases" ]]; then
     stale_paths+=("$WORKSPACE_ROOT/scripts/cases")
   fi
 
+  [[ "${#stale_paths[@]}" -gt 0 ]] || return 0
   remote_remove_paths "$(printf '%q ' "${stale_paths[@]}")"
 }
 
@@ -401,17 +425,20 @@ sync_worktree_git_metadata() {
   worktree_git_dir="$(git -C "$REPO_ROOT" rev-parse --path-format=absolute --git-dir)"
   common_git_dir="$(git -C "$REPO_ROOT" rev-parse --path-format=absolute --git-common-dir)"
 
-  remote_remove_paths "$(quote_shell "$remote_git_root")"
   "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" \
     "mkdir -p $(quote_shell "$remote_git_root/worktree") $(quote_shell "$remote_git_root/common")" \
     >/dev/null
 
   for worktree_path in "${worktree_paths[@]}"; do
-    [[ -e "$worktree_git_dir/$worktree_path" ]] || continue
+    if [[ ! -e "$worktree_git_dir/$worktree_path" ]]; then
+      remote_remove_paths "$(quote_shell "$remote_git_root/worktree/$worktree_path")"
+      continue
+    fi
     (
       cd "$worktree_git_dir"
       "$RSYNC_BIN" \
         --archive \
+        --delete \
         --relative \
         -e "$ssh_wrapper" \
         "./$worktree_path" \
@@ -419,12 +446,19 @@ sync_worktree_git_metadata() {
     ) || return $?
   done
 
+  # Remote validation uses tracked-file and ref metadata; mirroring the entire
+  # object database from a shared local worktree is too expensive because this
+  # repo currently carries a large loose-object set.
   for common_path in "${common_paths[@]}"; do
-    [[ -e "$common_git_dir/$common_path" ]] || continue
+    if [[ ! -e "$common_git_dir/$common_path" ]]; then
+      remote_remove_paths "$(quote_shell "$remote_git_root/common/$common_path")"
+      continue
+    fi
     (
       cd "$common_git_dir"
       "$RSYNC_BIN" \
         --archive \
+        --delete \
         --relative \
         -e "$ssh_wrapper" \
         "./$common_path" \
@@ -433,7 +467,7 @@ sync_worktree_git_metadata() {
   done
 
   "${SSH_BASE_CMD[@]}" "$REMOTE_HOST" \
-    "printf '%s\n' '../common' > $(quote_shell "$remote_git_root/worktree/commondir") && printf '%s\n' '../../.git' > $(quote_shell "$remote_git_root/worktree/gitdir") && printf '%s\n' 'gitdir: .git-remote/worktree' > $(quote_shell "$WORKSPACE_ROOT/.git")" \
+    "printf '%s\n' '../common' > $(quote_shell "$remote_git_root/worktree/commondir") && printf '%s\n' $(quote_shell "$WORKSPACE_ROOT/.git") > $(quote_shell "$remote_git_root/worktree/gitdir") && printf '%s\n' 'gitdir: .git-remote/worktree' > $(quote_shell "$WORKSPACE_ROOT/.git")" \
     >/dev/null
 }
 
@@ -600,7 +634,7 @@ main() {
     return $?
   fi
 
-  fail "build server $REMOTE_HOST is unreachable; rerun with --local-fallback to execute locally"
+  fail "build server $REMOTE_HOST is unreachable$(local_mesh_diagnostic); rerun with --local-fallback to execute locally"
 }
 
 main "$@"

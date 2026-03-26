@@ -36,6 +36,18 @@ tracked_files() {
   git -C "$REPO_ROOT" ls-files -- "$@"
 }
 
+load_lines_into_array() {
+  local target_name="$1"
+  local line=""
+  local quoted=""
+
+  eval "$target_name=()"
+  while IFS= read -r line; do
+    printf -v quoted '%q' "$line"
+    eval "$target_name+=( $quoted )"
+  done
+}
+
 install_collections() {
   local requirements_file="$REPO_ROOT/collections/requirements.yml"
   local current_sha_file=""
@@ -67,7 +79,7 @@ validate_ansible_syntax() {
   local playbooks=()
 
   install_collections
-  mapfile -t playbooks < <(
+  load_lines_into_array playbooks < <(
     tracked_files 'playbooks/*.yml' 'playbooks/groups/*.yml' 'playbooks/services/*.yml' |
       awk -F/ '$1 == "playbooks" && $2 != "tasks" { print }'
   )
@@ -94,7 +106,7 @@ validate_yaml() {
   local yaml_files=()
 
   echo "YAML lint"
-  mapfile -t yaml_files < <(tracked_files '*.yml' '*.yaml')
+  load_lines_into_array yaml_files < <(tracked_files '*.yml' '*.yaml')
   if [[ ${#yaml_files[@]} -eq 0 ]]; then
     return 0
   fi
@@ -109,7 +121,7 @@ validate_ansible_lint() {
 
   echo "Ansible lint"
   install_collections
-  mapfile -t lint_targets < <(
+  load_lines_into_array lint_targets < <(
     tracked_files 'playbooks/*.yml' 'playbooks/groups/*.yml' 'playbooks/services/*.yml' |
       awk -F/ '
         $1 == "playbooks" && $2 != "tasks" && $NF ~ /\.yml$/ { print }
@@ -140,7 +152,7 @@ validate_shell() {
 
   echo "Shell lint"
   require_command shellcheck
-  mapfile -t shell_files < <(tracked_files 'scripts/*.sh')
+  load_lines_into_array shell_files < <(tracked_files 'scripts/*.sh')
   if [[ ${#shell_files[@]} -eq 0 ]]; then
     return 0
   fi
@@ -155,7 +167,7 @@ validate_json() {
   local json_files=()
 
   echo "JSON validation"
-  mapfile -t json_files < <(tracked_files '*.json')
+  load_lines_into_array json_files < <(tracked_files '*.json')
   for json_file in "${json_files[@]}"; do
     jq empty "$json_file"
   done
@@ -165,7 +177,7 @@ validate_compose_runtime_envs() {
   local env_files=()
 
   echo "Compose runtime env guard"
-  mapfile -t env_files < <(
+  load_lines_into_array env_files < <(
     find "$REPO_ROOT" \
       \( -path "$REPO_ROOT/.git" \
          -o -path "$REPO_ROOT/.ansible" \

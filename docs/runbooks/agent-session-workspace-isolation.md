@@ -81,7 +81,7 @@ If you must remove one manually:
 
 ```bash
 ssh -i .local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes \
-  -o ProxyCommand='ssh -i .local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes ops@100.118.189.95 -W %h:%p' \
+  -o ProxyCommand='ssh -i .local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes ops@100.64.0.1 -W %h:%p' \
   ops@10.10.10.30 \
   'rm -rf /home/ops/builds/proxmox_florin_server/.lv3-session-workspaces/<session_slug>'
 ```

@@ -563,6 +563,7 @@
 
 - name: Create a temporary path for the ADR 0158 config-merge migration
   delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
   become_user: postgres
   ansible.builtin.tempfile:
     state: file
@@ -571,6 +572,7 @@
 
 - name: Copy the ADR 0158 config-merge migration to the database host
   delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
   become_user: postgres
   ansible.builtin.copy:
     src: "{{ playbook_dir }}/../migrations/0016_config_merge_schema.sql"
@@ -579,6 +581,7 @@
 
 - name: Apply the ADR 0158 config-merge migration in the Windmill database
   delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
   become_user: postgres
   ansible.builtin.command:
     argv:
@@ -593,6 +596,7 @@
 
 - name: Remove the temporary ADR 0158 config-merge migration file
   delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
   become_user: postgres
   ansible.builtin.file:
     path: "{{ windmill_config_merge_migration_tmp.path }}"
@@ -600,6 +604,7 @@
 
 - name: Create a temporary path for the ADR 0165 idempotency migration
   delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
   become_user: postgres
   ansible.builtin.tempfile:
     state: file
@@ -608,6 +613,7 @@
 
 - name: Copy the ADR 0165 idempotency migration to the database host
   delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
   become_user: postgres
   ansible.builtin.copy:
     src: "{{ playbook_dir }}/../migrations/0016_idempotency_store.sql"
@@ -616,6 +622,7 @@
 
 - name: Apply the ADR 0165 idempotency migration in the Windmill database
   delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
   become_user: postgres
   ansible.builtin.command:
     argv:
@@ -630,6 +637,7 @@
 
 - name: Remove the temporary ADR 0165 idempotency migration file
   delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
   become_user: postgres
   ansible.builtin.file:
     path: "{{ windmill_idempotency_migration_tmp.path }}"
@@ -637,6 +645,7 @@
 
 - name: Assert the ADR 0165 idempotency schema exists in the Windmill database
   delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
   become_user: postgres
   ansible.builtin.command:
     argv:

@@ -118,6 +118,7 @@ except ImportError:  # pragma: no cover - packaged import path
 
 HTTP_LOGGER = get_logger("api_gateway", "http", name="lv3.api_gateway.http")
 RUNTIME_LOGGER = get_logger("api_gateway", "runtime", name="lv3.api_gateway.runtime")
+REQUEST_EVENT_TIMEOUT_SECONDS = 1.0
 
 
 def b64url_decode(value: str) -> bytes:
@@ -415,8 +416,8 @@ class NatsEventEmitter:
         circuit_breaker: Any | None = None,
     ) -> None:
         self._parsed = urlparse(nats_url) if nats_url else None
-        self._username = username
-        self._password = password
+        self._username = (username or "").strip() or None
+        self._password = (password or "").strip() or None
         self._retry_policy = policy_for_surface("nats_publish")
         self._outbox_path = outbox_path
         self._degradation_store = degradation_store
@@ -922,7 +923,10 @@ async def emit_request_event(
         "caller_roles": sorted(identity["roles"]) if identity else [],
     }
     try:
-        await runtime.event_emitter.emit("platform.api.request", payload)
+        await asyncio.wait_for(
+            runtime.event_emitter.emit("platform.api.request", payload),
+            timeout=REQUEST_EVENT_TIMEOUT_SECONDS,
+        )
     except Exception:  # noqa: BLE001
         return
 

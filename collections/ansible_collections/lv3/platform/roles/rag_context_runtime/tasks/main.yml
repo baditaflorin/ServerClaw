@@ -146,9 +146,11 @@
     content: |
       FROM python:3.12-slim
       WORKDIR /app
+      ENV PYTHONPATH=/app/scripts:/app
       COPY requirements.txt ./requirements.txt
       RUN pip install --no-cache-dir -r requirements.txt
       COPY platform ./platform
+      COPY scripts ./scripts
       COPY platform_context_corpus.py ./platform_context_corpus.py
       COPY platform_context_service.py ./platform_context_service.py
       EXPOSE 8010
@@ -156,6 +158,17 @@
     owner: root
     group: root
     mode: "0644"
+
+- name: Ensure platform context service source parent directories exist
+  ansible.builtin.file:
+    path: "{{ platform_context_service_dir }}/{{ item.dest | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ platform_context_service_sources }}"
+  loop_control:
+    label: "{{ item.dest }}"
 
 - name: Sync the platform context service sources
   ansible.builtin.copy:

@@ -2,9 +2,12 @@
 
 - ADR: [ADR 0169](../adr/0169-structured-log-field-contract.md)
 - Title: shared JSON logging, trace propagation, structured Ansible task logs, and validator coverage
-- Status: merged
-- Branch: `codex/live-apply-0169`
-- Worktree: `.worktrees/adr-0169`
+- Status: live_applied
+- Implemented In Repo Version: 0.146.1
+- Implemented In Platform Version: 0.130.8
+- Implemented On: 2026-03-26
+- Branch: `codex/live-apply-0169-main-v2`
+- Worktree: `.worktrees/live-apply-0169-main-v2`
 - Owner: codex
 - Depends On: `adr-0052-loki-logs`, `adr-0075-service-capability-catalog`, `adr-0092-platform-api-gateway`, `adr-0123-service-uptime-contracts`, `adr-0166-canonical-error-response-format`
 - Conflicts With: none
@@ -64,4 +67,6 @@
 ## Outcome
 
 - repository implementation shipped in `0.146.1`
-- live verification from `main` is still pending because controller-to-Proxmox SSH reachability to both `100.118.189.95` and `65.108.75.123` became unstable during the 2026-03-25 integration run
+- the production platform-context runtime is live from `main` and recorded in `receipts/live-applies/2026-03-26-adr-0169-structured-log-contract-live-apply.json`
+- focused role and service coverage passed with `11 passed in 0.89s`, and `./scripts/validate_repo.sh ansible-syntax` completed successfully
+- repeated ansible live-apply attempts from the build-server runner hit SSH banner-exchange timeouts on the `docker-runtime-lv3` jump path, so the final live apply replayed the tested repository artifacts manually over the same build-server-to-guest SSH path before guest-local and proxied endpoint verification

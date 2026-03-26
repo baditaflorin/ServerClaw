@@ -35,7 +35,7 @@ def make_repo(tmp_path: Path) -> Path:
     )
     write(
         tmp_path / "versions" / "stack.yaml",
-        "platform_version: 1.2.3\nobserved_state:\n  checked_at: 2026-03-22\n  proxmox:\n    version: 9.1.6\n  open_webui:\n    host_tailscale_proxy_url: http://100.118.189.95:8008\n  windmill:\n    host_tailscale_proxy_url: http://100.118.189.95:8005\n  netbox:\n    host_tailscale_proxy_url: http://100.118.189.95:8004\n",
+        "platform_version: 1.2.3\nobserved_state:\n  checked_at: 2026-03-22\n  proxmox:\n    version: 9.1.6\n  monitoring:\n    prometheus_internal_url: http://100.118.189.95:9090\n  open_webui:\n    host_tailscale_proxy_url: http://100.118.189.95:8008\n  windmill:\n    host_tailscale_proxy_url: http://100.118.189.95:8005\n  netbox:\n    host_tailscale_proxy_url: http://100.118.189.95:8004\n",
     )
     write(tmp_path / "VERSION", "1.2.3\n")
     write(tmp_path / "changelog.md", "# Changelog\n")
@@ -176,3 +176,16 @@ def test_platform_context_http_sets_trace_header(tmp_path: Path) -> None:
     import asyncio
 
     asyncio.run(run())
+
+
+def test_build_config_uses_corpus_root_for_default_observability_paths(tmp_path: Path, monkeypatch) -> None:
+    repo_root = make_repo(tmp_path)
+    monkeypatch.setenv("PLATFORM_CONTEXT_API_TOKEN", "test-token")
+    monkeypatch.setenv("PLATFORM_CONTEXT_CORPUS_ROOT", str(repo_root))
+    monkeypatch.delenv("PLATFORM_CONTEXT_PROMETHEUS_URL", raising=False)
+    monkeypatch.delenv("PLATFORM_CONTEXT_GRAFANA_URL", raising=False)
+
+    config = platform_context_service.build_config()
+
+    assert config.prometheus_url == "http://100.118.189.95:9090"
+    assert config.grafana_url == "https://grafana.lv3.org"

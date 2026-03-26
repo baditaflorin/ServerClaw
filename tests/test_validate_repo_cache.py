@@ -26,3 +26,10 @@ def test_validate_repo_supports_ansible_idempotency_stage() -> None:
 
     assert "ansible-idempotency" in script
     assert "scripts/ansible_role_idempotency.py" in script
+
+
+def test_validate_repo_avoids_bash4_only_mapfile() -> None:
+    script = VALIDATE_REPO_SCRIPT.read_text()
+
+    assert "load_lines_into_array()" in script
+    assert "mapfile" not in script

@@ -6,6 +6,7 @@ services:
     image: {{ ops_portal_service_image_name }}:latest
     container_name: {{ ops_portal_container_name }}
     restart: unless-stopped
+    network_mode: {{ ops_portal_network_mode }}
     command:
       - uvicorn
       - ops_portal.app:app
@@ -18,8 +19,6 @@ services:
       - "*"
     env_file:
       - {{ ops_portal_env_file }}
-    ports:
-      - "{{ ops_portal_bind_address }}:{{ ops_portal_internal_port }}:{{ ops_portal_container_port }}"
     volumes:
       - {{ ops_portal_data_dir }}:/srv/ops-portal/data:ro
     healthcheck:

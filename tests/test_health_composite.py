@@ -5,6 +5,7 @@ import sqlite3
 from datetime import UTC, datetime
 from pathlib import Path
 
+import platform.health.composite as composite_module
 from platform.health import HealthCompositeClient, compute_health_entries
 
 
@@ -84,7 +85,6 @@ def test_health_client_refresh_persists_sqlite_entries(tmp_path: Path) -> None:
     assert entry.composite_status == "degraded"
     assert entry.composite_score == 0.8
 
-
 def test_compute_health_entries_marks_active_degradation_as_degraded() -> None:
     entries = compute_health_entries(
         [{"id": "api_gateway", "lifecycle_status": "active"}],
@@ -108,3 +108,28 @@ def test_compute_health_entries_marks_active_degradation_as_degraded() -> None:
     assert entries[0].composite_status == "degraded"
     assert entries[0].safe_to_act is False
     assert any(signal.name == "degraded_mode" for signal in entries[0].signals)
+
+
+def test_load_maintenance_windows_skips_missing_script_dependencies(monkeypatch: object, tmp_path: Path) -> None:
+    class FakeWorldStateClient:
+        def get(self, *_args: object, **_kwargs: object) -> None:
+            return None
+
+    def fail_import(module_name: str) -> object:
+        raise ImportError(f"missing {module_name}")
+
+    monkeypatch.setattr(composite_module.importlib, "import_module", fail_import)
+
+    assert composite_module.load_maintenance_windows(tmp_path, world_state=FakeWorldStateClient()) == []
+
+
+def test_load_slo_entries_skips_missing_script_dependencies(monkeypatch: object, tmp_path: Path) -> None:
+    (tmp_path / "config").mkdir()
+    (tmp_path / "config" / "slo-catalog.json").write_text('{"schema_version":"1.0.0","slos":[]}', encoding="utf-8")
+
+    def fail_import(module_name: str) -> object:
+        raise ImportError(f"missing {module_name}")
+
+    monkeypatch.setattr(composite_module.importlib, "import_module", fail_import)
+
+    assert composite_module.load_slo_entries(tmp_path, allow_live_queries=False) == []

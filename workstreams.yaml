@@ -37,8 +37,8 @@ workstreams:
       - scripts/drift_lib.py
       - scripts/check_ad_hoc_retry.py
       - docs/runbooks/retry-taxonomy.md
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
 
   - id: adr-0162-deadlock-detector
     adr: "0162"
@@ -60,7 +60,7 @@ workstreams:
       - config/windmill/scripts/
       - collections/ansible_collections/lv3/platform/roles/windmill_runtime/
       - config/event-taxonomy.yaml
-    ready_to_merge: true
+    ready_to_merge: false
     live_applied: true
 
   - id: adr-0138-published-artifact-secret-scanning
@@ -2931,7 +2931,7 @@ workstreams:
   - id: adr-0156-agent-session-workspace-isolation
     adr: "0156"
     title: Agent session workspace isolation
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0156-agent-session-workspace-isolation
     worktree_path: .worktrees/adr-0156
@@ -2953,7 +2953,7 @@ workstreams:
       - scripts/promotion_pipeline.py
       - docs/runbooks/
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0157-per-vm-concurrency-budget
     adr: "0157"
@@ -3169,10 +3169,10 @@ workstreams:
   - id: adr-0169-structured-log-contract
     adr: "0169"
     title: Structured log field contract
-    status: merged
+    status: live_applied
     owner: codex
-    branch: codex/live-apply-0169
-    worktree_path: .worktrees/adr-0169
+    branch: codex/live-apply-0169-main-v2
+    worktree_path: .worktrees/live-apply-0169-main-v2
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0169-structured-log-field-contract.md
     depends_on:
       - adr-0052-loki-logs
@@ -3191,14 +3191,16 @@ workstreams:
       - Makefile
       - inventory/group_vars/all.yml
       - docs/runbooks/
+    ready_to_merge: false
+    live_applied: true
 
   - id: adr-0161-real-time-agent-coordination-map
     adr: "0161"
     title: Real-time agent coordination map
-    status: merged
+    status: live_applied
     owner: codex
-    branch: codex/adr-0161-real-time-agent-coordination-map
-    worktree_path: .worktrees/adr-0161-live-apply
+    branch: codex/adr-0161-main-integration
+    worktree_path: .worktrees/adr-0161-main
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0161-real-time-agent-coordination-map.md
     depends_on:
       - adr-0058-nats
@@ -3217,6 +3219,8 @@ workstreams:
       - config/windmill/scripts/platform-observation-loop.py
       - receipts/agent-coordination
       - docs/runbooks/agent-coordination-map.md
+    ready_to_merge: false
+    live_applied: true
 
   - id: adr-0170-timeout-hierarchy
     adr: "0170"

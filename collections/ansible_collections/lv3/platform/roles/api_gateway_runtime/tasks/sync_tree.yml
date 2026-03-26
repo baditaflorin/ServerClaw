@@ -26,24 +26,27 @@
       tags:
         - mutation
 
-    - name: Remove the previously staged {{ api_gateway_tree_sync_spec.name }} from the guest
+    - name: Remove the previously staged guest copy for {{ api_gateway_tree_sync_spec.name }}
       ansible.builtin.file:
         path: "{{ api_gateway_tree_sync_spec.dest_parent }}/{{ api_gateway_tree_sync_spec.source | basename }}"
         state: absent
       when: not (api_gateway_tree_sync_spec.preserve_destination_root | default(false))
 
-    - name: Clear the previously staged contents for the {{ api_gateway_tree_sync_spec.name }} on the guest
+    - name: Clear the previously staged guest contents for {{ api_gateway_tree_sync_spec.name }}
       ansible.builtin.shell: |
         set -euo pipefail
         destination="{{ api_gateway_tree_sync_spec.dest_parent }}/{{ api_gateway_tree_sync_spec.source | basename }}"
-        if [ -d "$destination" ]; then
+        if [ -d "$destination" ] && find "$destination" -mindepth 1 -maxdepth 1 -print -quit | grep -q .; then
           find "$destination" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+          echo changed
         fi
       args:
         executable: /bin/bash
+      register: api_gateway_tree_preserve_root_clear
+      changed_when: "'changed' in api_gateway_tree_preserve_root_clear.stdout"
       when: api_gateway_tree_sync_spec.preserve_destination_root | default(false)
 
-    - name: Copy the staged {{ api_gateway_tree_sync_spec.name }} archive to the guest
+    - name: Copy the staged archive to the guest for {{ api_gateway_tree_sync_spec.name }}
       ansible.builtin.copy:
         src: "{{ api_gateway_tree_archive_local.path }}"
         dest: "{{ api_gateway_tree_sync_spec.remote_archive }}"
@@ -51,7 +54,7 @@
         group: root
         mode: "0600"
 
-    - name: Expand the staged {{ api_gateway_tree_sync_spec.name }} on the guest
+    - name: Expand the staged archive on the guest for {{ api_gateway_tree_sync_spec.name }}
       ansible.builtin.unarchive:
         src: "{{ api_gateway_tree_sync_spec.remote_archive }}"
         dest: "{{ api_gateway_tree_sync_spec.dest_parent }}"
@@ -59,7 +62,7 @@
         owner: root
         group: root
   always:
-    - name: Remove the staged {{ api_gateway_tree_sync_spec.name }} archive from the guest
+    - name: Remove the staged archive from the guest for {{ api_gateway_tree_sync_spec.name }}
       ansible.builtin.file:
         path: "{{ api_gateway_tree_sync_spec.remote_archive }}"
         state: absent

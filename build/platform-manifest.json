@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.156.0",
-  "platform_version": "0.130.4",
-  "generated_at": "2026-03-25T13:30:56Z",
-  "next_refresh_at": "2026-03-25T14:30:56Z",
+  "repo_version": "0.159.2",
+  "platform_version": "0.130.10",
+  "generated_at": "2026-03-26T04:05:33Z",
+  "next_refresh_at": "2026-03-26T05:05:33Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -37,7 +37,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://api.lv3.org",
-        "last_live_apply": "2026-03-25T00:00:00Z"
+        "last_live_apply": "2026-03-26T00:00:00Z"
       },
       "backup_pbs": {
         "service_name": "Proxmox Backup Server",
@@ -59,7 +59,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: health probe, SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://changelog.lv3.org",
-        "last_live_apply": "2026-03-25T00:00:00Z"
+        "last_live_apply": "2026-03-26T00:00:00Z"
       },
       "docker_build": {
         "service_name": "Docker Build VM",
@@ -70,7 +70,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://build.lv3.org",
-        "last_live_apply": "2026-03-25T00:00:00Z"
+        "last_live_apply": "2026-03-26T00:00:00Z"
       },
       "docker_runtime": {
         "service_name": "Docker Runtime VM",
@@ -81,7 +81,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://docker.lv3.org",
-        "last_live_apply": "2026-03-25T00:00:00Z"
+        "last_live_apply": "2026-03-26T00:00:00Z"
       },
       "docs_portal": {
         "service_name": "Developer Portal",
@@ -92,7 +92,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: health probe, SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://docs.lv3.org",
-        "last_live_apply": "2026-03-25T00:00:00Z"
+        "last_live_apply": "2026-03-26T00:00:00Z"
       },
       "grafana": {
         "service_name": "Grafana",
@@ -115,7 +115,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://headscale.lv3.org",
-        "last_live_apply": "2026-03-25T00:00:00Z"
+        "last_live_apply": "2026-03-26T00:00:00Z"
       },
       "keycloak": {
         "service_name": "Keycloak",
@@ -126,7 +126,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://sso.lv3.org",
-        "last_live_apply": "2026-03-25T00:00:00Z",
+        "last_live_apply": "2026-03-26T00:00:00Z",
         "slo_status": "unknown"
       },
       "mail_platform": {
@@ -138,7 +138,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://mail.lv3.org",
-        "last_live_apply": "2026-03-25T00:00:00Z"
+        "last_live_apply": "2026-03-26T00:00:00Z"
       },
       "mattermost": {
         "service_name": "Mattermost",
@@ -149,7 +149,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:8066",
-        "last_live_apply": "2026-03-25T00:00:00Z"
+        "last_live_apply": "2026-03-26T00:00:00Z"
       },
       "n8n": {
         "service_name": "n8n",
@@ -160,7 +160,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://n8n.lv3.org",
-        "last_live_apply": "2026-03-25T00:00:00Z"
+        "last_live_apply": "2026-03-26T00:00:00Z"
       },
       "netbox": {
         "service_name": "NetBox",
@@ -171,7 +171,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:8004",
-        "last_live_apply": "2026-03-25T00:00:00Z",
+        "last_live_apply": "2026-03-26T00:00:00Z",
         "slo_status": "unknown"
       },
       "nginx_edge": {
@@ -195,7 +195,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.20:2586",
-        "last_live_apply": "2026-03-25T00:00:00Z"
+        "last_live_apply": "2026-03-26T00:00:00Z"
       },
       "ntopng": {
         "service_name": "ntopng",
@@ -206,7 +206,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:3001",
-        "last_live_apply": "2026-03-25T00:00:00Z"
+        "last_live_apply": "2026-03-26T00:00:00Z"
       },
       "ollama": {
         "service_name": "Ollama",
@@ -217,7 +217,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.20:11434",
-        "last_live_apply": "2026-03-25T00:00:00Z"
+        "last_live_apply": "2026-03-26T00:00:00Z"
       },
       "open_webui": {
         "service_name": "Open WebUI",
@@ -228,7 +228,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:8008",
-        "last_live_apply": "2026-03-25T00:00:00Z",
+        "last_live_apply": "2026-03-26T00:00:00Z",
         "slo_status": "unknown"
       },
       "openbao": {
@@ -240,7 +240,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:8200",
-        "last_live_apply": "2026-03-25T00:00:00Z"
+        "last_live_apply": "2026-03-26T00:00:00Z"
       },
       "ops_portal": {
         "service_name": "Platform Operations Portal",
@@ -251,7 +251,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://ops.lv3.org",
-        "last_live_apply": "2026-03-25T00:00:00Z"
+        "last_live_apply": "2026-03-26T00:00:00Z"
       },
       "platform_context_api": {
         "service_name": "Platform Context API",
@@ -262,7 +262,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:8010",
-        "last_live_apply": "2026-03-25T00:00:00Z",
+        "last_live_apply": "2026-03-26T00:00:00Z",
         "slo_status": "unknown"
       },
       "portainer": {
@@ -274,7 +274,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:9444",
-        "last_live_apply": "2026-03-25T00:00:00Z"
+        "last_live_apply": "2026-03-26T00:00:00Z"
       },
       "postgres": {
         "service_name": "PostgreSQL",
@@ -285,7 +285,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "postgres://database.lv3.org:5432",
-        "last_live_apply": "2026-03-25T00:00:00Z"
+        "last_live_apply": "2026-03-26T00:00:00Z"
       },
       "proxmox_ui": {
         "service_name": "Proxmox UI",
@@ -296,7 +296,19 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://proxmox.lv3.org",
-        "last_live_apply": "2026-03-25T00:00:00Z"
+        "last_live_apply": "2026-03-26T00:00:00Z"
+      },
+      "semaphore": {
+        "service_name": "Semaphore",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "http://100.118.189.95:8020",
+        "last_live_apply": "2026-03-26T00:00:00Z",
+        "slo_status": "unknown"
       },
       "status_page": {
         "service_name": "Public Status Page",
@@ -307,7 +319,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://status.lv3.org",
-        "last_live_apply": "2026-03-25T00:00:00Z",
+        "last_live_apply": "2026-03-26T00:00:00Z",
         "slo_status": "unknown"
       },
       "step_ca": {
@@ -319,7 +331,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:9443",
-        "last_live_apply": "2026-03-25T00:00:00Z"
+        "last_live_apply": "2026-03-26T00:00:00Z"
       },
       "uptime_kuma": {
         "service_name": "Uptime Kuma",
@@ -330,7 +342,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://uptime.lv3.org",
-        "last_live_apply": "2026-03-25T00:00:00Z",
+        "last_live_apply": "2026-03-26T00:00:00Z",
         "slo_status": "unknown"
       },
       "vaultwarden": {
@@ -342,7 +354,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://vault.lv3.org",
-        "last_live_apply": "2026-03-25T00:00:00Z",
+        "last_live_apply": "2026-03-26T00:00:00Z",
         "slo_status": "unknown"
       },
       "windmill": {
@@ -354,7 +366,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:8005",
-        "last_live_apply": "2026-03-25T00:00:00Z",
+        "last_live_apply": "2026-03-26T00:00:00Z",
         "slo_status": "unknown"
       }
     }
@@ -1172,6 +1184,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/rag-platform-context.md"
+      },
+      {
+        "id": "converge-semaphore",
+        "description": "Converge the private Semaphore runtime on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish the Tailscale proxy on the Proxmox host, and seed the self-test project plus controller-local auth artifacts.",
+        "tags": [
+          "converge-semaphore",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1500,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-semaphore.md"
       },
       {
         "id": "converge-step-ca",
@@ -2191,6 +2229,32 @@
         "runbook": "docs/runbooks/security-posture-reporting.md"
       },
       {
+        "id": "semaphore-manage",
+        "description": "Run governed Semaphore API actions such as listing projects, listing templates, launching the seeded self-test job, or reading one task output.",
+        "tags": [
+          "external-live",
+          "mutation",
+          "preflight",
+          "semaphore-manage",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "external_live",
+        "budget": {
+          "max_duration_seconds": 1200,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-semaphore.md"
+      },
+      {
         "id": "subdomain-exposure-audit",
         "description": "Run the ADR 0139 subdomain exposure registry audit, check live DNS and edge auth behavior, and store one receipt.",
         "tags": [
@@ -2714,6 +2778,17 @@
         ]
       },
       {
+        "id": "configure-semaphore",
+        "title": "Configure Semaphore",
+        "agent_trust_required": "T3",
+        "steps": 5,
+        "path": "docs/runbooks/configure-semaphore.md",
+        "workflow_ids": [
+          "converge-semaphore",
+          "semaphore-manage"
+        ]
+      },
+      {
         "id": "configure-step-ca",
         "title": "Configure step-ca",
         "agent_trust_required": "T3",
@@ -3111,10 +3186,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.155.0",
-    "deployed_at": "2026-03-25",
-    "summary": "implement ADR 0161 with a shared `platform.agent.coordination` runtime, closure-loop and observation-loop publishers, the authenticated `/v1/platform/agents` gateway route, and live coordination rendering in both ops-portal surfaces add the operator runbook and snapshot helper for committed coordination receipts under `receipts/agent-coordination/`",
-    "release_notes_url": "docs/release-notes/0.156.0.md"
+    "last_version": "0.159.1",
+    "deployed_at": "2026-03-26",
+    "summary": "fix the ADR 0161 live runtime path so the gateway can boot without optional maintenance-window or SLO helper modules present in the image align the ADR 0161 gateway and interactive ops portal runtimes with the live docker-runtime host-network topology, including localhost Keycloak and NATS wiring plus the controller-managed legacy platform token path",
+    "release_notes_url": "docs/release-notes/0.159.2.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -3198,13 +3273,6 @@
       "status": "Proposed",
       "implementation_status": "Not Implemented",
       "path": "docs/adr/0167-graceful-degradation-mode-declarations.md"
-    },
-    {
-      "adr": "0170",
-      "title": "Platform-Wide Timeout Hierarchy",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0170-platform-wide-timeout-hierarchy.md"
     },
     {
       "adr": "0171",

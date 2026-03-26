@@ -9,6 +9,7 @@ api_gateway_compose_file: "{{ api_gateway_site_dir }}/docker-compose.yml"
 api_gateway_env_file: "{{ api_gateway_site_dir }}/api-gateway.env"
 api_gateway_image_name: lv3-platform-api-gateway
 api_gateway_container_name: api-gateway
+api_gateway_network_mode: host
 api_gateway_internal_port: 8080
 api_gateway_local_artifact_dir: "{{ api_gateway_repo_root }}/.local/api-gateway"
 api_gateway_tree_sync_specs:
@@ -43,7 +44,7 @@ api_gateway_event_taxonomy_src: "{{ api_gateway_repo_root }}/config/event-taxono
 api_gateway_timeout_hierarchy_src: "{{ api_gateway_repo_root }}/config/timeout-hierarchy.yaml"
 api_gateway_platform_vars_src: "{{ api_gateway_repo_root }}/inventory/group_vars/platform.yml"
 api_gateway_drift_receipts_glob: "{{ api_gateway_repo_root }}/receipts/drift-reports/*.json"
-api_gateway_platform_context_token_local_file: "{{ api_gateway_repo_root }}/.local/platform-context/api-token.txt"
+api_gateway_platform_context_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt
 api_gateway_sources:
   - src: "{{ api_gateway_repo_root }}/scripts/controller_automation_toolkit.py"
     dest: controller_automation_toolkit.py
@@ -78,7 +79,7 @@ api_gateway_config_sources:
     dest: timeout-hierarchy.yaml
   - src: "{{ api_gateway_platform_vars_src }}"
     dest: platform.yml
-api_gateway_keycloak_internal_base_url: http://keycloak:8080
+api_gateway_keycloak_internal_base_url: http://127.0.0.1:18080
 api_gateway_keycloak_jwks_url: "{{ api_gateway_keycloak_internal_base_url }}/realms/lv3/protocol/openid-connect/certs"
 api_gateway_keycloak_issuer_url: https://sso.lv3.org/realms/lv3
 api_gateway_keycloak_token_url: https://sso.lv3.org/realms/lv3/protocol/openid-connect/token
@@ -91,11 +92,16 @@ api_gateway_verify_client_secret_local_file: >-
     keycloak_agent_client_secret_local_file
     | default(api_gateway_repo_root ~ '/.local/keycloak/lv3-agent-hub-client-secret.txt')
   }}
-api_gateway_nats_url: "nats://{{ api_gateway_service_topology.private_ip }}:4222"
+api_gateway_nats_url: nats://127.0.0.1:4222
 api_gateway_nats_username: jetstream-admin
 api_gateway_nats_password_local_file: "{{ api_gateway_repo_root }}/.local/nats/jetstream-admin-password.txt"
-api_gateway_nats_password: "{{ lookup('ansible.builtin.file', api_gateway_nats_password_local_file, errors='ignore') | trim }}"
 api_gateway_keycloak_retry_after_seconds: 30
+api_gateway_nats_password: >-
+  {{
+    lookup('ansible.builtin.file', api_gateway_nats_password_local_file, errors='ignore')
+    | default('', true)
+    | trim
+  }}
 api_gateway_deploy_webhook_url: ""
 api_gateway_secret_rotation_webhook_url: ""
 api_gateway_include_upstream_openapi: false
