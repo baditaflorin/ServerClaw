@@ -1,0 +1,8 @@
+{
+  "created_at": "2026-03-26T10:26:42.924797+00:00",
+  "bypass": "skip_remote_gate",
+  "reason": "ADR 0143 finalization after repeated remote pre-push gate hangs on docker-build host-key churn",
+  "source": "pre-push-hook",
+  "branch": "codex/integration-0143-main-refresh-v2",
+  "commit": "acca554b730039aa5b6d81506ce7a0ffc8441c40"
+}
