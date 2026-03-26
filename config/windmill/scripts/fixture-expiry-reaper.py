@@ -114,6 +114,7 @@ def main(repo_path: str | None = DEFAULT_REPO_PATH):
     fixture_manager.FIXTURE_DEFINITIONS_DIR = repo_root / "tests" / "fixtures"
     fixture_manager.FIXTURE_RECEIPTS_DIR = repo_root / "receipts" / "fixtures"
     fixture_manager.FIXTURE_LOCAL_ROOT = repo_root / ".local" / "fixtures"
+    fixture_manager.FIXTURE_REAPER_RUNS_DIR = fixture_manager.FIXTURE_LOCAL_ROOT / "reaper-runs"
     fixture_manager.FIXTURE_RUNTIME_DIR = fixture_manager.FIXTURE_LOCAL_ROOT / "runtime"
     fixture_manager.FIXTURE_ARCHIVE_DIR = fixture_manager.FIXTURE_LOCAL_ROOT / "archive"
     fixture_manager.FIXTURE_LOCKS_DIR = fixture_manager.FIXTURE_LOCAL_ROOT / "locks"

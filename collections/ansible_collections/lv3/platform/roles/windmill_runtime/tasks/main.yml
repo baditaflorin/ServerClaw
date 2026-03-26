@@ -135,6 +135,15 @@
     src: "{{ windmill_site_dir }}/worker-checkout.tar.gz"
     dest: "{{ windmill_worker_repo_checkout_host_path }}"
     remote_src: true
+    extra_opts:
+      - --no-same-owner
+
+- name: Ensure repo-backed Windmill runtime paths stay writable after checkout sync
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: directory_tree
+  vars:
+    common_directory_tree_paths: "{{ windmill_worker_runtime_writable_directories }}"
 
 - name: Remove the staged Windmill worker checkout archive from the guest
   ansible.builtin.file:

@@ -2,12 +2,12 @@
 
 - ADR: [ADR 0106](../adr/0106-ephemeral-environment-lifecycle-policy.md)
 - Title: Govern the 910-979 ephemeral VM pool with expiry tags, capacity reservation, cluster-aware reaping, and operator-visible status
-- Status: live_applied
+- Status: merged
 - Implemented In Repo Version: 0.97.0
 - Implemented In Platform Version: 0.130.20
 - Implemented On: 2026-03-26
-- Branch: `codex/ws-0106-live-apply`
-- Worktree: `.worktrees/ws-0106-live-apply`
+- Branch: `codex/ws-0106-main-merge`
+- Worktree: `.worktrees/ws-0106-main-merge`
 - Owner: codex
 - Depends On: `adr-0072-staging-production-topology`, `adr-0085-opentofu-vm-lifecycle`, `adr-0088-ephemeral-fixtures`, `adr-0093-interactive-ops-portal`, `adr-0105-capacity-model`
 - Conflicts With: none
@@ -45,25 +45,26 @@
 - Windmill workspace `lv3` contains the script `f/lv3/ephemeral_vm_reaper`
 - Windmill schedule `f/lv3/ephemeral_vm_reaper_every_30m` is present and enabled
 - the mounted worker checkout carries `/srv/proxmox_florin_server/.local/proxmox-api/lv3-automation-primary.json`
-- a manual `run_wait_result` execution writes a `receipts/fixtures/reaper-run-*.json` summary on `docker-runtime-lv3`
+- a manual `run_wait_result` execution writes a `.local/fixtures/reaper-runs/reaper-run-*.json` summary on `docker-runtime-lv3`
 
 ## Verification
 
-- `uv run --with pytest --with pyyaml python -m pytest tests/test_ephemeral_vm_reaper.py tests/test_fixture_expiry_reaper.py tests/test_ephemeral_lifecycle_repo_surfaces.py tests/test_deadlock_repo_surfaces.py -q`
+- `uv run --with pytest --with pyyaml python -m pytest tests/test_fixture_manager.py tests/test_ephemeral_vm_reaper.py tests/test_fixture_expiry_reaper.py tests/test_ephemeral_lifecycle_repo_surfaces.py tests/test_deadlock_repo_surfaces.py -q`
 - `make syntax-check-windmill`
 - `ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory/hosts.yml playbooks/windmill.yml --limit docker-runtime-lv3 --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
 - `curl -s -X POST -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" -H "Content-Type: application/json" -d '{}' http://100.64.0.1:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fephemeral_vm_reaper`
-- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'cat /srv/proxmox_florin_server/receipts/fixtures/reaper-run-20260326T143309Z.json'`
+- `ANSIBLE_HOST_KEY_CHECKING=False ansible -i inventory/hosts.yml docker-runtime-lv3 -m shell -a 'python3 - <<\"PY\"\nfrom pathlib import Path\nimport json\npayload = Path(\"/srv/proxmox_florin_server/.local/proxmox-api/lv3-automation-primary.json\")\nlatest = sorted(Path(\"/srv/proxmox_florin_server/.local/fixtures/reaper-runs\").glob(\"reaper-run-*.json\"))[-1]\nprint(json.dumps({\"payload_exists\": payload.exists(), \"latest_receipt\": latest.name, \"latest_receipt_body\": json.loads(latest.read_text())}, indent=2, sort_keys=True))\nPY' --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
 
 ## Live Apply Result
 
 - repo-side lifecycle enforcement is complete
 - repo-side validation covers the governed ephemeral range and capacity seed
 - static operator visibility for active repo-managed ephemeral VMs exists
-- the live Windmill schedule is enabled and a clean manual sweep returned `{"expired_vmids":[],"retagged_vmids":[],"skipped_vmids":[],"warned_vmids":[]}`
+- the live Windmill schedule is enabled and a clean manual sweep returned `{"expired_vmids":[],"retagged_vmids":[],"skipped_vmids":[],"warned_vmids":[]}` while writing `.local/fixtures/reaper-runs/reaper-run-20260326T170554Z.json`
 - the live worker now resolves Proxmox credentials through the mirrored repo-local token payload when the sandboxed job environment does not inherit the runtime env contract
 
 ## Merge Notes
 
-- Protected integration files remain deferred to merge-to-`main`: `README.md`, `VERSION`, release sections in `changelog.md`, and `versions/stack.yaml`
-- The 2026-03-26 converge reached worker-checkout sync, runtime secret refresh, Windmill startup, script sync, and schedule reconciliation. A no-log Windmill task failed once in the final schedule/healthcheck tail, but the equivalent schedule update loop and the seeded `f/lv3/windmill_healthcheck` plus `f/lv3/ephemeral_vm_reaper` API runs were replayed successfully from the same branch state.
+- The mainline integration is complete in repository release `0.175.1`, and the integrated live verification advanced the platform version to `0.130.22` on `2026-03-26`.
+- The integrated `playbooks/windmill.yml` replay reached worker-checkout sync, mirrored credential payload creation, Windmill startup, and script sync, but later failed in unrelated raw-app sync for `f/lv3/operator_access_admin` with Docker reporting `unexpected EOF`.
+- The final ADR 0106 reapply therefore used a targeted worker-checkout refresh plus a targeted `f/lv3/ephemeral_vm_reaper` sync, after which direct `f/lv3/windmill_healthcheck` plus `f/lv3/ephemeral_vm_reaper` API runs both succeeded from the same integrated branch state.

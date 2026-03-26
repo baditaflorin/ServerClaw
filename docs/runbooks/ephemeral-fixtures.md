@@ -47,7 +47,7 @@ lv3 fixture destroy --vmid 910 --dry-run
 ## Runtime State
 
 - Active receipts: `receipts/fixtures/*.json`
-- Reaper receipts: `receipts/fixtures/reaper-run-*.json`
+- Reaper receipts: `.local/fixtures/reaper-runs/reaper-run-*.json`
 - Ignored local state and history: `.local/fixtures/`
 
 The tracked repository keeps only [receipts/fixtures/.gitkeep](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/fixtures/.gitkeep) plus [receipts/fixtures/.gitignore](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/fixtures/.gitignore) so fixture runs do not dirty the git tree.
@@ -71,7 +71,7 @@ Run the reaper manually with:
 python3 config/windmill/scripts/ephemeral-vm-reaper.py
 ```
 
-It scans the governed `910-979` pool, destroys expired ephemeral VMs, adds a one-hour grace expiry tag to unowned VMs found in that range, and writes a `reaper-run-<timestamp>.json` summary receipt.
+It scans the governed `910-979` pool, destroys expired ephemeral VMs, adds a one-hour grace expiry tag to unowned VMs found in that range, and writes a `reaper-run-<timestamp>.json` summary receipt under `.local/fixtures/reaper-runs/`.
 
 The live Windmill worker path uses the mounted repo checkout at `/srv/proxmox_florin_server`. The reaper now prefers a repo-local Proxmox API token payload mirrored to `/srv/proxmox_florin_server/.local/proxmox-api/lv3-automation-primary.json` because the sandboxed Windmill job environment does not reliably inherit the runtime env contract during `run_wait_result` execution.
 
@@ -79,5 +79,5 @@ The live Windmill worker path uses the mounted repo checkout at `/srv/proxmox_fl
 
 - Repository automation shipped in repo version `0.97.0`; the first verified production live apply completed on `2026-03-26` in platform version `0.130.20`.
 - Windmill schedule `f/lv3/ephemeral_vm_reaper_every_30m` is now enabled on `docker-runtime-lv3`.
-- Manual API verification from the controller returned `{"expired_vmids":[],"retagged_vmids":[],"skipped_vmids":[],"warned_vmids":[]}` and wrote `/srv/proxmox_florin_server/receipts/fixtures/reaper-run-20260326T143309Z.json`.
-- The 2026-03-26 live path required committed runtime changes in the Windmill role plus two host-side operating details that are now documented here: mirroring the Proxmox token payload into the mounted worker checkout and keeping `receipts/fixtures/` writable for worker-generated reaper receipts.
+- Manual API verification from the controller returned `{"expired_vmids":[],"retagged_vmids":[],"skipped_vmids":[],"warned_vmids":[]}` and the latest integrated mainline verification wrote `/srv/proxmox_florin_server/.local/fixtures/reaper-runs/reaper-run-20260326T170554Z.json`.
+- The 2026-03-26 live path required committed runtime changes in the Windmill role plus two host-side operating details that are now documented here: mirroring the Proxmox token payload into the mounted worker checkout and keeping `/srv/proxmox_florin_server/.local/fixtures/reaper-runs/` writable for worker-generated reaper receipts.

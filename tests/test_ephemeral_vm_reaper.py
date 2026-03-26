@@ -135,6 +135,7 @@ def test_reaper_uses_fixture_manager_for_existing_repo(monkeypatch, tmp_path: Pa
         FIXTURE_DEFINITIONS_DIR = None
         FIXTURE_RECEIPTS_DIR = None
         FIXTURE_LOCAL_ROOT = None
+        FIXTURE_REAPER_RUNS_DIR = None
         FIXTURE_RUNTIME_DIR = None
         FIXTURE_ARCHIVE_DIR = None
         FIXTURE_LOCKS_DIR = None
@@ -170,3 +171,4 @@ def test_reaper_uses_fixture_manager_for_existing_repo(monkeypatch, tmp_path: Pa
         "https://proxmox.example.invalid:8006/api2/json",
         "lv3-automation@pve!primary=secret-token",
     )
+    assert FixtureManagerStub.FIXTURE_REAPER_RUNS_DIR == tmp_path / ".local" / "fixtures" / "reaper-runs"

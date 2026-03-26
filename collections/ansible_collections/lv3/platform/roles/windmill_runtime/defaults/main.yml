@@ -85,6 +85,21 @@ windmill_worker_checkout_sync_paths:
   - receipts
   - scripts
   - windmill
+windmill_worker_runtime_writable_directories:
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/receipts/fixtures"
+    mode: "1777"
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/.local"
+    mode: "0755"
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures"
+    mode: "1777"
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures/reaper-runs"
+    mode: "1777"
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures/runtime"
+    mode: "1777"
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures/archive"
+    mode: "1777"
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures/locks"
+    mode: "1777"
 windmill_seed_app_repo_root_local_dir: "{{ inventory_dir }}/../config/windmill/apps"
 windmill_seed_app_sync_dir: "{{ windmill_site_dir }}/seed-apps"
 windmill_mutation_audit_dir: "{{ platform_log_dir }}"

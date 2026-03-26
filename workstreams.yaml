@@ -1915,10 +1915,10 @@ workstreams:
   - id: adr-0106-ephemeral-lifecycle
     adr: "0106"
     title: Ephemeral environment lifecycle and teardown policy
-    status: live_applied
+    status: merged
     owner: codex
-    branch: codex/ws-0106-live-apply
-    worktree_path: .worktrees/ws-0106-live-apply
+    branch: codex/ws-0106-main-merge
+    worktree_path: .worktrees/ws-0106-main-merge
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0106-ephemeral-lifecycle.md
     depends_on:
       - adr-0072-staging-production-topology

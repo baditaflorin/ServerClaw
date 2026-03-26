@@ -96,6 +96,7 @@ def fixture_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     monkeypatch.setattr(fixture_manager, "FIXTURE_DEFINITIONS_DIR", repo_root / "tests" / "fixtures")
     monkeypatch.setattr(fixture_manager, "FIXTURE_RECEIPTS_DIR", repo_root / "receipts" / "fixtures")
     monkeypatch.setattr(fixture_manager, "FIXTURE_LOCAL_ROOT", repo_root / ".local" / "fixtures")
+    monkeypatch.setattr(fixture_manager, "FIXTURE_REAPER_RUNS_DIR", repo_root / ".local" / "fixtures" / "reaper-runs")
     monkeypatch.setattr(fixture_manager, "FIXTURE_RUNTIME_DIR", repo_root / ".local" / "fixtures" / "runtime")
     monkeypatch.setattr(fixture_manager, "FIXTURE_ARCHIVE_DIR", repo_root / ".local" / "fixtures" / "archive")
     monkeypatch.setattr(fixture_manager, "FIXTURE_LOCKS_DIR", repo_root / ".local" / "fixtures" / "locks")
@@ -235,6 +236,9 @@ def test_reap_expired_only_destroys_expired_receipts(fixture_repo: Path, monkeyp
 
     assert destroyed_ids == [expired["receipt_id"]]
     assert payload["skipped_vmids"] == [911]
+    reaper_runs = sorted((fixture_repo / ".local" / "fixtures" / "reaper-runs").glob("reaper-run-*.json"))
+    assert len(reaper_runs) == 1
+    assert json.loads(reaper_runs[0].read_text())["skipped_vmids"] == [911]
 
 
 def test_build_runtime_main_targets_fixture_module(fixture_repo: Path) -> None:

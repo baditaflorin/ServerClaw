@@ -3771,7 +3771,7 @@
       ],
       "outputs": [
         "Expired fixture receipts are removed from receipts/fixtures and archived under .local/fixtures/archive/.",
-        "A reaper-run receipt is written under receipts/fixtures/reaper-run-<timestamp>.json with the expired and skipped fixture ids."
+        "A reaper-run receipt is written under .local/fixtures/reaper-runs/reaper-run-<timestamp>.json with the expired and skipped fixture ids."
       ],
       "verification_commands": [
         "python3 scripts/fixture_manager.py list",

@@ -771,7 +771,7 @@ Create exactly these files:
 8. config/windmill/scripts/fixture-expiry-reaper.py
    - Reads all files in receipts/fixtures/
    - For each: parse created_at + lifetime_minutes; if expired, call fixture down
-   - Writes receipts/fixtures/reaper-run-<timestamp>.json with summary
+   - Writes .local/fixtures/reaper-runs/reaper-run-<timestamp>.json with summary
 
 9. molecule/drivers/proxmox-fixture/  (custom Molecule driver)
    - Create: (create.yml) calls scripts/fixture_manager.py up

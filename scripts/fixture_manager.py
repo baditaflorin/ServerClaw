@@ -31,6 +31,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 FIXTURE_DEFINITIONS_DIR = REPO_ROOT / "tests" / "fixtures"
 FIXTURE_RECEIPTS_DIR = REPO_ROOT / "receipts" / "fixtures"
 FIXTURE_LOCAL_ROOT = REPO_ROOT / ".local" / "fixtures"
+FIXTURE_REAPER_RUNS_DIR = FIXTURE_LOCAL_ROOT / "reaper-runs"
 FIXTURE_RUNTIME_DIR = FIXTURE_LOCAL_ROOT / "runtime"
 FIXTURE_ARCHIVE_DIR = FIXTURE_LOCAL_ROOT / "archive"
 FIXTURE_LOCKS_DIR = FIXTURE_LOCAL_ROOT / "locks"
@@ -1159,7 +1160,7 @@ def reap_expired() -> dict[str, Any]:
         "warned_vmids": warned_vmids,
         "retagged_vmids": retagged_vmids,
     }
-    write_json(FIXTURE_RECEIPTS_DIR / f"reaper-run-{compact_timestamp(utc_now())}.json", summary)
+    write_json(FIXTURE_REAPER_RUNS_DIR / f"reaper-run-{compact_timestamp(utc_now())}.json", summary)
     return summary
 
 
@@ -1244,6 +1245,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     FIXTURE_RECEIPTS_DIR.mkdir(parents=True, exist_ok=True)
     FIXTURE_LOCAL_ROOT.mkdir(parents=True, exist_ok=True)
+    FIXTURE_REAPER_RUNS_DIR.mkdir(parents=True, exist_ok=True)
     try:
         if args.action in {"create", "up"}:
             payload = fixture_up(
