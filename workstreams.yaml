@@ -17,7 +17,7 @@ workstreams:
   - id: adr-0163-retry-taxonomy
     adr: "0163"
     title: Platform-wide retry taxonomy and exponential backoff
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0163-retry-taxonomy
     worktree_path: .worktrees/adr-0163

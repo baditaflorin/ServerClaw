@@ -9,7 +9,7 @@ live_apply_evidence:
     mutation_audit: 2026-03-23-adr-0066-mutation-audit-live-apply
     public_edge_publication: 2026-03-25-adr-0136-http-security-headers-live-apply
     agent_coordination: 2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply
-    api_gateway: 2026-03-26-adr-0167-graceful-degradation-live-apply
+    api_gateway: 2026-03-26-adr-0163-retry-taxonomy-live-apply
     docker_runtime: 2026-03-22-adr-0023-docker-runtime-live-apply
     langfuse: 2026-03-26-adr-0146-langfuse-live-apply
     postgres_vm: 2026-03-22-adr-0026-postgres-vm-live-apply

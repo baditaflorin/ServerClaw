@@ -108,19 +108,6 @@
     - networking
     - service-headscale
 
-  vars:
-    public_edge_extra_sites:
-      - hostname: headscale.lv3.org
-        kind: proxy
-        upstream: "http://{{ hostvars['proxmox_florin'].proxmox_internal_ipv4 }}:{{ hostvars['proxmox_florin'].platform_port_assignments.headscale_http_port }}"
-      - hostname: changelog.lv3.org
-        kind: static_dir
-        source_dir: changelog-portal
-      - hostname: docs.lv3.org
-        kind: static_dir
-        source_dir: docs-portal
-        noindex: true
-
   pre_tasks:
     - name: Run shared preflight checks
       ansible.builtin.import_tasks: tasks/preflight.yml

@@ -707,13 +707,13 @@ platform_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://100.64.0.1:8080
+      upstream: http://10.10.10.1:8080
     service_id: headscale
     ports:
       internal: 8080
     urls:
       public: https://headscale.lv3.org
-      internal: http://100.64.0.1:8080
+      internal: http://10.10.10.1:8080
   alertmanager:
     service_name: alertmanager
     owning_vm: monitoring-lv3
@@ -1502,13 +1502,13 @@ public_edge_service_topology:
       enabled: true
       tls: true
       kind: proxy
-      upstream: http://100.64.0.1:8080
+      upstream: http://10.10.10.1:8080
     service_id: headscale
     ports:
       internal: 8080
     urls:
       public: https://headscale.lv3.org
-      internal: http://100.64.0.1:8080
+      internal: http://10.10.10.1:8080
   alertmanager:
     service_name: alertmanager
     owning_vm: monitoring-lv3
@@ -2138,7 +2138,7 @@ api_gateway_public_url: https://api.lv3.org
 api_gateway_internal_url: http://10.10.10.20:8083
 headscale_http_port: 8080
 headscale_public_url: https://headscale.lv3.org
-headscale_internal_url: http://100.64.0.1:8080
+headscale_internal_url: http://10.10.10.1:8080
 ntopng_proxy_port: 3001
 ntopng_operator_url: http://100.64.0.1:3001
 mattermost_server_port: 8065
