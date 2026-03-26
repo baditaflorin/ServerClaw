@@ -30,7 +30,7 @@
       - "{{ dozzle_runtime_hub_container_name }}"
       - /dozzle
       - agent-test
-      - "dozzle-agent:{{ dozzle_runtime_agent_port }}"
+      - "127.0.0.1:{{ dozzle_runtime_agent_port }}"
   register: dozzle_runtime_local_agent_test
   changed_when: false
   when: dozzle_runtime_is_hub
@@ -44,7 +44,7 @@
       - /dozzle
       - agent-test
       - "{{ item }}"
-  loop: "{{ dozzle_runtime_remote_agents | reject('equalto', 'dozzle-agent:' ~ (dozzle_runtime_agent_port | string)) | list }}"
+  loop: "{{ dozzle_runtime_remote_agents | reject('equalto', '127.0.0.1:' ~ (dozzle_runtime_agent_port | string)) | list }}"
   register: dozzle_runtime_remote_agent_tests
   changed_when: false
   when: dozzle_runtime_is_hub

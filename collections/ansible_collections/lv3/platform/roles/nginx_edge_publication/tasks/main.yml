@@ -16,7 +16,7 @@
   ansible.builtin.apt:
     name: >-
       {{
-        ['nginx', 'certbot']
+        ['nginx', 'certbot', 'rsync']
         + (
           ['python3-venv']
           if public_edge_acme_challenge_method == 'dns-hetzner'
@@ -92,11 +92,26 @@
     mode: "0644"
 
 - name: Publish generated static site directories
-  ansible.builtin.copy:
-    src: "{{ public_edge_generated_build_root }}/{{ item.source_dir }}/"
-    dest: "{{ public_edge_generated_static_root }}/{{ item.source_dir }}/"
-    mode: "0644"
-    directory_mode: "0755"
+  ansible.builtin.command:
+    argv:
+      - rsync
+      - --archive
+      - --delete
+      - --compress
+      - --out-format=<<CHANGED>>%i %n%L
+      - --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r
+      - >-
+        --rsh=ssh -i {{ playbook_execution_secret_manifest.secrets.bootstrap_ssh_private_key.path }}
+        -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null
+        {{ hostvars[inventory_hostname].ansible_ssh_common_args | default('') }}
+      - --rsync-path=sudo rsync
+      - "{{ public_edge_generated_build_root }}/{{ item.source_dir }}/"
+      - >-
+        {{ hostvars[inventory_hostname].ansible_user }}@{{ hostvars[inventory_hostname].ansible_host }}:{{ public_edge_generated_static_root }}/{{ item.source_dir }}/
+  delegate_to: localhost
+  become: false
+  register: public_edge_generated_site_sync
+  changed_when: "'<<CHANGED>>' in public_edge_generated_site_sync.stdout"
   loop: "{{ public_edge_extra_sites | selectattr('kind', 'equalto', 'static_dir') | list }}"
 
 - name: Check whether the public edge certificate exists

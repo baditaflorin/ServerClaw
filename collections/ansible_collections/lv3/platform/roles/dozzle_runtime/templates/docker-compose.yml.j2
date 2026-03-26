@@ -4,11 +4,12 @@ services:
     image: {{ dozzle_runtime_image }}
     container_name: {{ dozzle_runtime_hub_container_name }}
     restart: unless-stopped
+    network_mode: host
     depends_on:
       - dozzle-agent
     command:
       - "--addr"
-      - ":8080"
+      - ":{{ dozzle_runtime_hub_port }}"
 {% if dozzle_runtime_disable_analytics %}
       - "--no-analytics"
 {% endif %}
@@ -18,8 +19,6 @@ services:
       - "--remote-agent"
       - "{{ remote_agent }}"
 {% endfor %}
-    ports:
-      - "{{ dozzle_runtime_hub_port }}:8080"
     healthcheck:
       test:
         - CMD
@@ -35,6 +34,7 @@ services:
     image: {{ dozzle_runtime_image }}
     container_name: {{ dozzle_runtime_agent_container_name }}
     restart: unless-stopped
+    network_mode: host
     command:
 {% if dozzle_runtime_disable_analytics %}
       - "--no-analytics"
@@ -43,9 +43,7 @@ services:
       - "{{ dozzle_runtime_release_check_mode }}"
       - "agent"
       - "--agent-addr"
-      - ":7007"
-    ports:
-      - "{{ dozzle_runtime_agent_port }}:7007"
+      - ":{{ dozzle_runtime_agent_port }}"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     healthcheck:

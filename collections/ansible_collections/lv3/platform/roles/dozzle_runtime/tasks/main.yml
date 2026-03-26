@@ -23,7 +23,7 @@
 
 - name: Initialize the Dozzle remote agent list
   ansible.builtin.set_fact:
-    dozzle_runtime_remote_agents: "{{ ['dozzle-agent:' ~ (dozzle_runtime_agent_port | string)] if dozzle_runtime_is_hub else [] }}"
+    dozzle_runtime_remote_agents: "{{ ['127.0.0.1:' ~ (dozzle_runtime_agent_port | string)] if dozzle_runtime_is_hub else [] }}"
 
 - name: Add remote Dozzle agents for non-hub inventory hosts
   ansible.builtin.set_fact:

@@ -38,7 +38,7 @@ Verify the hub healthcheck on `docker-runtime-lv3`:
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
-  -J ops@100.118.189.95 \
+  -J ops@100.64.0.1 \
   ops@10.10.10.20 \
   'curl -fsS http://127.0.0.1:8089/healthcheck'
 ```
@@ -48,9 +48,9 @@ Verify the agents are reachable from the hub container:
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
-  -J ops@100.118.189.95 \
+  -J ops@100.64.0.1 \
   ops@10.10.10.20 \
-  'sudo docker exec dozzle /dozzle agent-test dozzle-agent:7007 && \
+  'sudo docker exec dozzle /dozzle agent-test 127.0.0.1:7007 && \
    sudo docker exec dozzle /dozzle agent-test 10.10.10.30:7007 && \
    sudo docker exec dozzle /dozzle agent-test 10.10.10.40:7007'
 ```
@@ -66,7 +66,7 @@ Verify the edge health endpoint responds locally on `nginx-lv3`:
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
   -o IdentitiesOnly=yes \
-  -J ops@100.118.189.95 \
+  -J ops@100.64.0.1 \
   ops@10.10.10.10 \
   'curl -Ik -H "Host: logs.lv3.org" https://127.0.0.1/'
 ```

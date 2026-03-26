@@ -54,6 +54,10 @@ def test_verify_tasks_cover_remote_agent_tests() -> None:
     assert "Verify the Dozzle hub healthcheck succeeds" in names
     assert "Verify the local Dozzle agent is reachable from the hub container" in names
     assert "Verify the remote Dozzle agents are reachable from the hub container" in names
+    local_agent_task = next(
+        task for task in verify if task["name"] == "Verify the local Dozzle agent is reachable from the hub container"
+    )
+    assert "127.0.0.1:{{ dozzle_runtime_agent_port }}" in local_agent_task["ansible.builtin.command"]["argv"]
 
 
 def test_compose_template_defines_hub_remote_agents_and_healthchecks() -> None:
@@ -63,6 +67,8 @@ def test_compose_template_defines_hub_remote_agents_and_healthchecks() -> None:
     assert "--remote-agent" in template
     assert 'container_name: {{ dozzle_runtime_hub_container_name }}' in template
     assert 'container_name: {{ dozzle_runtime_agent_container_name }}' in template
+    assert "network_mode: host" in template
     assert '/dozzle' in template
-    assert "{{ dozzle_runtime_hub_port }}:8080" in template
-    assert "{{ dozzle_runtime_agent_port }}:7007" in template
+    assert '":{{ dozzle_runtime_hub_port }}"' in template
+    assert '":{{ dozzle_runtime_agent_port }}"' in template
+    assert "ports:" not in template

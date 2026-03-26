@@ -54,6 +54,10 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertEqual(self.defaults["public_edge_apex_hostname"], "lv3.org")
         self.assertEqual(self.defaults["public_edge_additional_certificate_domains"], ["{{ public_edge_apex_hostname }}"])
         self.assertEqual(self.defaults["public_edge_robots_meta_content"], "noindex, nofollow")
+        self.assertEqual(
+            self.defaults["public_edge_generated_build_root"],
+            "{{ inventory_dir | dirname }}/build",
+        )
         self.assertIn("User-agent: *", self.defaults["public_edge_robots_txt_content"])
         self.assertIn("Disallow: /", self.defaults["public_edge_robots_txt_content"])
 
@@ -86,6 +90,20 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
             task_names,
         )
         self.assertIn("Render the crawl policy robots.txt", task_names)
+        publish_task = next(
+            task for task in self.tasks if task["name"] == "Publish generated static site directories"
+        )
+        self.assertIn("ansible.builtin.command", publish_task)
+        self.assertEqual(publish_task["delegate_to"], "localhost")
+        self.assertFalse(publish_task["become"])
+        publish_argv = publish_task["ansible.builtin.command"]["argv"]
+        self.assertIn("--rsync-path=sudo rsync", publish_argv)
+        self.assertIn("hostvars[inventory_hostname].ansible_ssh_common_args", publish_argv[6])
+        ensure_packages_task = next(
+            task for task in self.tasks if task["name"] == "Ensure public edge packages are present"
+        )
+        package_expr = ensure_packages_task["ansible.builtin.apt"]["name"]
+        self.assertIn("rsync", package_expr)
 
     def test_certificate_san_regex_preserves_domains_with_s_characters(self) -> None:
         derive_task = next(
