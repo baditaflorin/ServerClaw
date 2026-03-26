@@ -81,7 +81,7 @@ validate_ansible_syntax() {
   install_collections
   load_lines_into_array playbooks < <(
     tracked_files 'playbooks/*.yml' 'playbooks/groups/*.yml' 'playbooks/services/*.yml' |
-      awk -F/ '$1 == "playbooks" && $2 != "tasks" { print }'
+      awk -F/ '$1 == "playbooks" && $2 != "tasks" && $NF !~ /^\./ { print }'
   )
   if [[ ${#playbooks[@]} -eq 0 ]]; then
     return 0
@@ -124,7 +124,7 @@ validate_ansible_lint() {
   load_lines_into_array lint_targets < <(
     tracked_files 'playbooks/*.yml' 'playbooks/groups/*.yml' 'playbooks/services/*.yml' |
       awk -F/ '
-        $1 == "playbooks" && $2 != "tasks" && $NF ~ /\.yml$/ { print }
+        $1 == "playbooks" && $2 != "tasks" && $NF ~ /\.yml$/ && $NF !~ /^\./ { print }
       ' |
       awk '!seen[$0]++'
   )

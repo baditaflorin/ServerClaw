@@ -299,3 +299,103 @@
       - "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO {{ windmill_database_support_role }}"
   changed_when: false
   when: windmill_postgres_writable_check.stdout | trim == "1"
+
+- name: Check whether the world_state schema already exists
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -At
+      - -c
+      - "SELECT 1 FROM pg_namespace WHERE nspname = 'world_state'"
+  register: windmill_world_state_schema_check
+  changed_when: false
+  when: windmill_postgres_writable_check.stdout | trim == "1"
+
+- name: Ensure the Windmill support role can use the world_state schema
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "GRANT USAGE ON SCHEMA world_state TO {{ windmill_database_support_role }}"
+  changed_when: false
+  when:
+    - windmill_postgres_writable_check.stdout | trim == "1"
+    - windmill_world_state_schema_check.stdout | trim == "1"
+
+- name: Ensure the Windmill support role can access world_state tables
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "GRANT ALL ON ALL TABLES IN SCHEMA world_state TO {{ windmill_database_support_role }}"
+  changed_when: false
+  when:
+    - windmill_postgres_writable_check.stdout | trim == "1"
+    - windmill_world_state_schema_check.stdout | trim == "1"
+
+- name: Ensure the Windmill support role can access world_state sequences
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA world_state TO {{ windmill_database_support_role }}"
+  changed_when: false
+  when:
+    - windmill_postgres_writable_check.stdout | trim == "1"
+    - windmill_world_state_schema_check.stdout | trim == "1"
+
+- name: Ensure future world_state tables grant privileges to the support role
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "ALTER DEFAULT PRIVILEGES IN SCHEMA world_state GRANT ALL ON TABLES TO {{ windmill_database_support_role }}"
+  changed_when: false
+  when:
+    - windmill_postgres_writable_check.stdout | trim == "1"
+    - windmill_world_state_schema_check.stdout | trim == "1"
+
+- name: Ensure future world_state sequences grant privileges to the support role
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "ALTER DEFAULT PRIVILEGES IN SCHEMA world_state GRANT ALL ON SEQUENCES TO {{ windmill_database_support_role }}"
+  changed_when: false
+  when:
+    - windmill_postgres_writable_check.stdout | trim == "1"
+    - windmill_world_state_schema_check.stdout | trim == "1"

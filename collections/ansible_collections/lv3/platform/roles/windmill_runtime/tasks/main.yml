@@ -176,13 +176,42 @@
   ansible.builtin.set_fact:
     windmill_superadmin_secret: "{{ windmill_superadmin_secret_raw.content | b64decode | trim }}"
     windmill_database_password: "{{ lookup('ansible.builtin.file', windmill_database_password_local_file) | trim }}"
+    windmill_proxmox_api_token_payload: "{{ lookup('ansible.builtin.file', proxmox_api_token_local_file) | from_json }}"
   no_log: true
 
 - name: Build the Windmill runtime secret payload
   ansible.builtin.set_fact:
-    windmill_runtime_secret_payload:
-      DATABASE_URL: "{{ windmill_database_dsn }}"
-      SUPERADMIN_SECRET: "{{ windmill_superadmin_secret }}"
+    windmill_runtime_secret_payload: >-
+      {{
+        {
+          'DATABASE_URL': windmill_database_dsn,
+          'SUPERADMIN_SECRET': windmill_superadmin_secret,
+          'WORLD_STATE_DSN': windmill_world_state_dsn,
+          'LV3_NATS_URL': windmill_nats_url,
+          'TF_VAR_proxmox_endpoint': windmill_proxmox_api_token_payload.api_url,
+          'TF_VAR_proxmox_api_token': windmill_proxmox_api_token_payload.full_token_id ~ '=' ~ windmill_proxmox_api_token_payload.value,
+        }
+        | combine(
+            {'LV3_NATS_USERNAME': windmill_nats_username}
+            if (windmill_nats_username | default('') | trim | length > 0)
+            else {}
+          )
+        | combine(
+            {'LV3_NATS_PASSWORD': windmill_nats_password}
+            if (windmill_nats_password | default('') | trim | length > 0)
+            else {}
+          )
+        | combine(
+            {'LV3_LEDGER_DSN': windmill_ledger_dsn}
+            if (windmill_ledger_dsn | default('') | trim | length > 0)
+            else {}
+          )
+        | combine(
+            {'LV3_LEDGER_NATS_URL': windmill_ledger_nats_url}
+            if (windmill_ledger_nats_url | default('') | trim | length > 0)
+            else {}
+          )
+      }}
   no_log: true
 
 - name: Ensure the local Windmill artifact directory exists

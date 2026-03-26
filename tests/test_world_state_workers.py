@@ -314,6 +314,10 @@ def test_worker_script_wrapper_delegates_to_run_worker(monkeypatch: pytest.Monke
         "refresh_dns_records",
         "config/windmill/scripts/world-state/refresh-dns-records.py",
     )
+    workers_module = load_module(
+        "platform.world_state.workers",
+        "platform/world_state/workers.py",
+    )
     captured: dict[str, object] = {}
 
     def fake_run_worker(surface: str, **kwargs):
@@ -321,7 +325,8 @@ def test_worker_script_wrapper_delegates_to_run_worker(monkeypatch: pytest.Monke
         captured["kwargs"] = kwargs
         return {"status": "ok"}
 
-    monkeypatch.setattr(module, "run_worker", fake_run_worker)
+    monkeypatch.setattr(workers_module, "run_worker", fake_run_worker)
+    monkeypatch.setattr(module, "maybe_run_via_uv", lambda **_: None)
 
     result = module.main(repo_path="/tmp/repo", dsn="sqlite:////tmp/world-state.sqlite", publish_nats=False)
 
@@ -332,3 +337,20 @@ def test_worker_script_wrapper_delegates_to_run_worker(monkeypatch: pytest.Monke
         "dsn": "sqlite:////tmp/world-state.sqlite",
         "publish_nats": False,
     }
+
+
+def test_worker_script_wrapper_falls_back_to_uv_when_runtime_deps_are_missing(monkeypatch: pytest.MonkeyPatch) -> None:
+    module = load_module(
+        "refresh_proxmox_vms",
+        "config/windmill/scripts/world-state/refresh-proxmox-vms.py",
+    )
+
+    monkeypatch.setattr(
+        module,
+        "maybe_run_via_uv",
+        lambda **_: {"status": "ok", "command": "uv run"},
+    )
+
+    result = module.main(repo_path="/tmp/repo", dsn="postgres://example", publish_nats=True)
+
+    assert result == {"status": "ok", "command": "uv run"}

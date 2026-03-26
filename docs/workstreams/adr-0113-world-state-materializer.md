@@ -3,8 +3,8 @@
 - ADR: [ADR 0113](../adr/0113-world-state-materializer.md)
 - Title: Continuously refreshed canonical Postgres materialized view of platform state from Proxmox, NetBox, Docker, TLS, DNS, and OpenTofu — replaces ad hoc re-discovery in all agent workflows
 - Status: merged
-- Branch: `codex/adr-0113-world-state-materializer`
-- Worktree: `../proxmox_florin_server-world-state`
+- Branch: `codex/ws-0113-live-apply`
+- Worktree: `.worktrees/ws-0113-live-apply`
 - Owner: codex
 - Depends On: `adr-0054-netbox-topology`, `adr-0058-nats-event-bus`, `adr-0064-health-probe-contracts`, `adr-0080-maintenance-windows`, `adr-0085-opentofu-vm-lifecycle`, `adr-0091-drift-detection`, `adr-0098-postgres-ha`
 - Conflicts With: `adr-0117-dependency-graph-runtime` (both read NetBox; coordinate on refresh interval)
@@ -66,6 +66,20 @@
 - Run `python -c "from platform.world_state.client import WorldStateClient; print(WorldStateClient().get('service_health'))"` → returns health dict
 - Pause one refresh worker for 10 minutes and confirm `is_expired` flips to `true` for that surface
 - Confirm `WorldStateClient().get("service_health")` raises `StaleDataError` when the surface is expired and `allow_stale=False`
+
+## Live Apply Evidence
+
+- 2026-03-26 live replay from latest `origin/main` plus this worktree synced the runtime checkout on `docker-runtime-lv3`, fixed the first-refresh materializer path, and granted `windmill_user` access to `world_state`.
+- Verified live worker refreshes on `docker-runtime-lv3` for `proxmox_vms`, `container_inventory`, `netbox_topology`, `dns_records`, `tls_cert_expiry`, `opentofu_drift`, and `openbao_secret_expiry`.
+- Verified Postgres live state on `postgres-lv3`: `world_state.current_view` is populated and queryable, with seven fresh rows and `pg_matviews.ispopulated = true`.
+- Focused repository validation passed with `uv run --with pytest --with pyyaml pytest tests/test_world_state_workers.py tests/test_world_state_repo_surfaces.py tests/unit/test_world_state_materializer.py -q` and `python3 -m compileall config/windmill/scripts/world-state platform/world_state`.
+
+## Remaining Merge-To-Main Follow-Up
+
+- Merge the `windmill_postgres` world-state grant tasks so future replays do not require the manual `GRANT ... ON SCHEMA world_state` recovery.
+- Merge the wrapper import-order fix and the first-refresh fallback so future Windmill worker syncs can run without manual file sync on `docker-runtime-lv3`.
+- Reconcile the shared Windmill runtime template with the concurrent test-runner workstream so `WORLD_STATE_DSN`, NATS, ledger, Proxmox, and test-runner variables coexist in one managed `runtime.env.ctmpl`.
+- Finish live verification for `service_health` and `maintenance_windows`; the former was still long-running during this replay, and the latter still depends on a controller-coupled SSH tunnel path in `scripts/maintenance_window_tool.py`.
 
 ## Merge Criteria
 

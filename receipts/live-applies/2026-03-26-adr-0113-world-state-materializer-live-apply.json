@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-26-adr-0113-world-state-materializer-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-26",
+  "recorded_on": "2026-03-26",
+  "recorded_by": "codex",
+  "source_commit": "9457e4694f5a80b8876ff4e99e400b6960a07cb7 + ws-0113-live-apply working tree",
+  "repo_version_context": "0.174.0",
+  "workflow_id": "converge-windmill",
+  "adr": "0113",
+  "summary": "Partially completed the ADR 0113 live replay from the latest origin/main tree by repairing the first-refresh world-state materializer path, resyncing the Windmill runtime checkout, granting world_state privileges to the managed Windmill support role, and verifying seven of the nine world-state surfaces live on docker-runtime-lv3 and postgres-lv3.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 150,
+      "address": "10.10.10.50"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused repository validation",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with pyyaml pytest tests/test_world_state_workers.py tests/test_world_state_repo_surfaces.py tests/unit/test_world_state_materializer.py -q` passed with 12 tests, and `python3 -m compileall config/windmill/scripts/world-state platform/world_state` completed successfully."
+    },
+    {
+      "check": "Windmill runtime recovery and repo sync",
+      "result": "pass",
+      "observed": "After the shared `converge-windmill` replay was blocked by an unrelated OpenBao agent template collision, the runtime checkout and ADR 0113 worker files were synced manually onto `/srv/proxmox_florin_server`, and `windmill_server`, `windmill_worker`, `windmill_worker_native`, and `windmill_extra` were started cleanly on `docker-runtime-lv3`."
+    },
+    {
+      "check": "world_state schema access for Windmill",
+      "result": "pass",
+      "observed": "On `postgres-lv3`, `windmill_user` was granted `USAGE` on schema `world_state` plus table and sequence privileges there, which unblocked inserts from the worker DSN used by ADR 0113."
+    },
+    {
+      "check": "Materialized view populate path",
+      "result": "pass",
+      "observed": "The first live refresh populated `world_state.current_view`, and `SELECT ispopulated FROM pg_matviews WHERE schemaname='world_state' AND matviewname='current_view'` returned `t` afterward."
+    },
+    {
+      "check": "Verified live surfaces",
+      "result": "pass",
+      "observed": "Direct worker execution on `docker-runtime-lv3` succeeded for `proxmox_vms` (7 records), `container_inventory` (58), `netbox_topology` (0), `dns_records` (25), `tls_cert_expiry` (23), `opentofu_drift` (0), and `openbao_secret_expiry` (47)."
+    },
+    {
+      "check": "Postgres current view contents",
+      "result": "pass",
+      "observed": "`world_state.current_view` held seven fresh rows for `container_inventory`, `dns_records`, `netbox_topology`, `openbao_secret_expiry`, `opentofu_drift`, `proxmox_vms`, and `tls_cert_expiry` immediately after the replay."
+    },
+    {
+      "check": "service_health live refresh",
+      "result": "partial",
+      "observed": "A direct `refresh-service-health.py` run was still in progress / timing out during the replay window, so the surface was not fully verified in Postgres before this receipt was recorded."
+    },
+    {
+      "check": "maintenance_windows live refresh",
+      "result": "blocked",
+      "observed": "`refresh-maintenance-windows.py` still depends on the controller-coupled SSH tunnel path in `scripts/maintenance_window_tool.py`, so the worker runtime could not verify the surface without additional runtime-specific NATS path work."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0113-world-state-materializer.md",
+    "docs/workstreams/adr-0113-world-state-materializer.md",
+    "docs/runbooks/world-state-materializer.md",
+    "migrations/0010_world_state_schema.sql",
+    "platform/world_state/materializer.py",
+    "platform/world_state/windmill_entrypoint.py",
+    "collections/ansible_collections/lv3/platform/roles/windmill_postgres/tasks/main.yml",
+    "config/windmill/scripts/world-state/"
+  ],
+  "notes": [
+    "The shared `make converge-windmill` replay updated the Windmill runtime files but failed before full completion because another concurrent workstream had replaced the managed Windmill OpenBao template with a test-runner-specific variant. The manual live recovery in this receipt is limited to ADR 0113 runtime checkout sync, schema grants, and container startup needed to verify the world-state surfaces.",
+    "The broader `make validate` run again reached the repo-wide `ansible-lint` phase and was interrupted after the focused ADR 0113 checks had already passed; that broad validation path still contains unrelated repo debt outside this ADR.",
+    "Merge-to-main still needs the shared Windmill runtime template reconciliation plus final live verification for `service_health` and `maintenance_windows` before ADR 0113 can claim a fully live platform-version implementation."
+  ]
+}
