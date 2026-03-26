@@ -49,6 +49,10 @@ release_tracks:
 ## Latest Release
 
 - [0.1.0 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.1.0.md)
+
+## Previous Releases
+
+- [0.0.9 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.0.9.md)
 """,
     )
     write(
@@ -190,6 +194,8 @@ def test_release_cut_updates_core_release_files(release_repo: Path) -> None:
     changelog = (release_repo / "changelog.md").read_text()
     assert "0.1.1 release notes" in changelog
     assert "implemented ADR 0110" not in changelog
+    assert "## Previous Releases" in changelog
+    assert "0.0.9 release notes" in changelog
     assert (release_repo / "RELEASE.md").exists()
     assert (release_repo / "docs" / "release-notes" / "0.1.1.md").exists()
     assert "[0.1.1](" in (release_repo / "docs" / "release-notes" / "README.md").read_text()

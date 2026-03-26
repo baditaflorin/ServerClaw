@@ -117,7 +117,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.174.2` |
+| Repository version | `0.175.1` |
 | Platform version | `0.130.21` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -152,10 +152,10 @@ Template VM: `9000` `debian13-cloud-template`
 | `logs.lv3.org` | `dozzle` | `edge-published` | `docker-runtime-lv3` |
 | `mail.lv3.org` | `mail-platform` | `informational-only` | `docker-runtime-lv3` |
 | `n8n.lv3.org` | `n8n` | `edge-published` | `docker-runtime-lv3` |
-| `search.lv3.org` | `searxng` | `private-only` | `docker-runtime-lv3` |
 | `nginx.lv3.org` | `nginx-edge` | `edge-static` | `nginx-lv3` |
 | `ops.lv3.org` | `ops-portal` | `edge-published` | `docker-runtime-lv3` |
 | `proxmox.lv3.org` | `proxmox-ui` | `informational-only` | `proxmox_florin` |
+| `search.lv3.org` | `searxng` | `private-only` | `docker-runtime-lv3` |
 | `sso.lv3.org` | `keycloak` | `edge-published` | `docker-runtime-lv3` |
 | `status.lv3.org` | `status-page` | `edge-published` | `docker-runtime-lv3` |
 | `uptime.lv3.org` | `uptime-kuma` | `edge-published` | `docker-runtime-lv3` |
@@ -192,7 +192,6 @@ Template VM: `9000` `debian13-cloud-template`
 | `ntopng` | `2026-03-22-adr-0059-ntopng-live-apply` |
 | `observation_to_action_closure_loop` | `2026-03-26-adr-0126-observation-to-action-closure-loop-live-apply` |
 | `ollama` | `2026-03-25-adr-0145-ollama-live-apply` |
-| `searxng` | `2026-03-26-adr-0148-searxng-live-apply` |
 | `open_webui` | `2026-03-25-adr-0145-open-webui-ollama-connector-live-apply` |
 | `openbao` | `2026-03-26-adr-0171-fault-injection-live-apply` |
 | `ops_portal` | `2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply` |
@@ -203,6 +202,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `public_edge_publication` | `2026-03-26-adr-0134-changelog-redaction-live-apply` |
 | `remote_build_gateway` | `2026-03-26-adr-0156-agent-session-workspace-isolation-live-apply` |
 | `runtime_container_telemetry` | `2026-03-22-adr-0040-runtime-container-telemetry-live-apply` |
+| `searxng` | `2026-03-26-adr-0148-searxng-live-apply` |
 | `secret_rotation` | `2026-03-23-adr-0065-secret-rotation-live-apply` |
 | `security_posture_reporting` | `2026-03-26-adr-0102-security-posture-live-apply` |
 | `semaphore` | `2026-03-25-adr-0149-semaphore-live-apply` |
@@ -450,6 +450,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure PostgreSQL VM Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-postgres-vm.md)
 - [Configure Proxmox Network Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-proxmox-network.md)
 - [Configure Public Ingress Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-public-ingress.md)
+- [Configure SearXNG](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-searxng.md)
 - [Configure Semaphore](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-semaphore.md)
 - [Configure step-ca](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-step-ca.md)
 - [Configure Storage And Backups](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-storage-and-backups.md)
@@ -740,6 +741,16 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0170: Platform-Wide Timeout Hierarchy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0170-platform-wide-timeout-hierarchy.md)
 - [ADR 0171: Controlled Fault Injection for Resilience Validation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0171-controlled-fault-injection-for-resilience-validation.md)
 - [ADR 0172: Watchdog Escalation and Stale Job Self-Healing](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0172-watchdog-escalation-and-stale-job-self-healing.md)
+- [ADR 0173: Workstream Surface Ownership Manifest](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0173-workstream-surface-ownership-manifest.md)
+- [ADR 0174: Integration-Only Canonical Truth Assembly](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0174-integration-only-canonical-truth-assembly.md)
+- [ADR 0175: Cross-Workstream Interface Contracts](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0175-cross-workstream-interface-contracts.md)
+- [ADR 0176: Inventory Sharding and Host-Scoped Ansible Execution](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0176-inventory-sharding-and-host-scoped-ansible-execution.md)
+- [ADR 0177: Run Namespace Partitioning for Parallel Tooling](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0177-run-namespace-partitioning-for-parallel-tooling.md)
+- [ADR 0178: Dependency Wave Manifests for Parallel Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0178-dependency-wave-manifests-for-parallel-apply.md)
+- [ADR 0179: Service Redundancy Tier Matrix](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0179-service-redundancy-tier-matrix.md)
+- [ADR 0180: Standby Capacity Reservation and Placement Rules](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0180-standby-capacity-reservation-and-placement-rules.md)
+- [ADR 0181: Off-Host Witness and Control Metadata Replication](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0181-off-host-witness-and-control-metadata-replication.md)
+- [ADR 0182: Live Apply Merge Train and Rollback Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0182-live-apply-merge-train-and-rollback-bundle.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -904,7 +915,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.174.2` |
+| Repository version | `0.175.1` |
 | Platform version | `0.130.21` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |

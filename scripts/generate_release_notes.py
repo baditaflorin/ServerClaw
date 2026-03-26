@@ -19,7 +19,7 @@ UNRELEASED_PATTERN = re.compile(
     re.MULTILINE | re.DOTALL,
 )
 LATEST_RELEASE_PATTERN = re.compile(
-    r"(^## Latest Release\n)(.*)$",
+    r"(^## Latest Release\n)(.*?)(?=^\s*## |\Z)",
     re.MULTILINE | re.DOTALL,
 )
 RELEASES_HEADER = "## Releases\n"
