@@ -337,7 +337,7 @@
       "environment": "production",
       "status": "active",
       "exposure": "edge-published",
-      "auth_requirement": "upstream_auth",
+      "auth_requirement": "edge_oidc",
       "target": "65.108.75.123",
       "target_port": 443,
       "owner_adr": "0146",
@@ -345,7 +345,7 @@
       "route_mode": "edge",
       "route_source": "service_topology",
       "route_kind": "proxy",
-      "edge_auth": "none",
+      "edge_auth": "oauth2_proxy",
       "unauthenticated_paths": [],
       "unauthenticated_prefix_paths": [],
       "repo_route_service_id": "langfuse",
@@ -758,6 +758,6 @@
     "active_private_total": 3,
     "planned_total": 4,
     "edge_total": 17,
-    "edge_oidc_total": 7
+    "edge_oidc_total": 8
   }
 }

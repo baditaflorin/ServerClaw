@@ -68,8 +68,9 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertNotIn("ops.lv3.org", extra_hostnames)
         self.assertEqual(
             sorted(protected_sites),
-            ["changelog.lv3.org", "docs.lv3.org", "home.lv3.org", "logs.lv3.org", "n8n.lv3.org", "ops.lv3.org"],
+            ["changelog.lv3.org", "docs.lv3.org", "home.lv3.org", "langfuse.lv3.org", "logs.lv3.org", "n8n.lv3.org", "ops.lv3.org"],
         )
+        self.assertNotIn("unauthenticated_paths", protected_sites["langfuse.lv3.org"])
         self.assertEqual(protected_sites["n8n.lv3.org"]["unauthenticated_paths"], ["/healthz"])
         self.assertEqual(
             protected_sites["n8n.lv3.org"]["unauthenticated_prefix_paths"],

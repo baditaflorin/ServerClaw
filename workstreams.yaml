@@ -37,7 +37,7 @@ workstreams:
       - scripts/drift_lib.py
       - scripts/check_ad_hoc_retry.py
       - docs/runbooks/retry-taxonomy.md
-    ready_to_merge: true
+    ready_to_merge: false
     live_applied: true
 
   - id: adr-0162-deadlock-detector
@@ -166,7 +166,7 @@ workstreams:
       - inventory/host_vars/proxmox_florin.yml
       - config/service-capability-catalog.json
       - config/control-plane-lanes.json
-    ready_to_merge: true
+    ready_to_merge: false
     live_applied: true
 
   - id: adr-0020-backups
@@ -321,7 +321,7 @@ workstreams:
   - id: adr-0151-n8n
     adr: "0151"
     title: n8n for webhook and API integration automation
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0151-n8n
     worktree_path: .worktrees/adr-0151
@@ -341,7 +341,7 @@ workstreams:
       - config/workflow-catalog.json
       - config/subdomain-catalog.json
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0040-runtime-container-telemetry
     adr: "0040"

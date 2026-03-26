@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.172.1
+repo_version: 0.174.0
 platform_version: 0.130.20
 
 live_apply_evidence:
@@ -40,6 +40,7 @@ live_apply_evidence:
     platform_event_taxonomy: 2026-03-26-adr-0124-platform-event-taxonomy-live-apply
     netbox: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
     keycloak: 2026-03-26-adr-0171-fault-injection-live-apply
+    n8n: 2026-03-26-adr-0151-n8n-live-apply
     platform_context: 2026-03-26-adr-0166-canonical-error-response-live-apply
     ntopng: 2026-03-22-adr-0059-ntopng-live-apply
     open_webui: 2026-03-25-adr-0145-open-webui-ollama-connector-live-apply
@@ -898,7 +899,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.172.1
+    current: 0.174.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.130.20

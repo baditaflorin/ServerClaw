@@ -17,7 +17,7 @@ n8n_port: "{{ platform_service_topology | platform_service_port('n8n', 'internal
 n8n_internal_base_url: "{{ platform_service_topology | platform_service_url('n8n', 'internal') }}"
 n8n_public_base_url: "{{ platform_service_topology.n8n.urls.public }}"
 n8n_public_hostname: "{{ platform_service_topology.n8n.public_hostname }}"
-n8n_database_host: "{{ platform_postgres_host }}"
+n8n_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
 n8n_database_port: 5432
 n8n_database_name: n8n
 n8n_database_user: n8n

@@ -3,8 +3,8 @@
 - Status: Implemented
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.148.0
-- Implemented In Platform Version: not yet
-- Implemented On: 2026-03-25
+- Implemented In Platform Version: 0.130.20
+- Implemented On: 2026-03-26
 - Date: 2026-03-25
 
 ## Context
@@ -84,16 +84,16 @@ The n8n CLI import path can deactivate imported workflows, which makes automatic
 
 ## Repository Verification
 
-The repository implementation was validated on 2026-03-25 with:
+The repository implementation was validated on 2026-03-26 with:
 
 - `make syntax-check-n8n`
-- `uv run --with pytest --with pyyaml --with jsonschema python -m pytest tests/test_n8n_runtime_role.py tests/test_nginx_edge_publication_role.py tests/test_subdomain_catalog.py tests/test_subdomain_exposure_audit.py -q`
+- `uv run --with pytest --with pyyaml --with jsonschema python -m pytest tests/test_n8n_playbook.py tests/test_n8n_runtime_role.py tests/test_nginx_edge_publication_role.py tests/test_subdomain_catalog.py tests/test_subdomain_exposure_audit.py -q`
 - `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`
 - `python3 scripts/uptime_contract.py --check`
 - `uvx --from pyyaml python scripts/subdomain_exposure_audit.py --check-registry`
 - `scripts/validate_repo.sh yaml role-argument-specs shell json compose-runtime-envs health-probes`
 
-Live verification from `main` is recorded when the first mainline apply succeeds.
+Live verification from `main` completed successfully on 2026-03-26.
 
 ## Live Apply Note
 
@@ -102,7 +102,11 @@ The first live apply attempt from `main` on 2026-03-25 did not complete.
 - Hetzner DNS write calls for the new `n8n.lv3.org` record returned the provider brownout response during the documented `11:00` to `13:00` UTC weekday shutdown window.
 - During the same window, the Proxmox host was unreachable from the controller on both `100.118.189.95:22` and `65.108.75.123:22`, and `https://proxmox.lv3.org:8006/api2/json` timed out.
 
-`Implemented In Platform Version` remains `not yet` until a successful rerun from `main` completes after those external blockers clear.
+The successful rerun from current `main` completed on 2026-03-26 after narrowing the service playbook to the n8n-specific DNS record, pinning the runtime database host to the PostgreSQL primary guest address, recovering Docker bridge-chain startup failures on `docker-runtime-lv3`, and regenerating the repo-managed static portal artifacts expected by shared edge publication.
+
+- `docker-runtime-lv3` rendered `DB_POSTGRESDB_HOST=10.10.10.50` in `/run/lv3-secrets/n8n/runtime.env`.
+- Local `http://127.0.0.1:5678/healthz` and `http://127.0.0.1:5678/healthz/readiness` both returned `{"status":"ok"}`.
+- Public `https://n8n.lv3.org/healthz` returned `HTTP 200` through the shared NGINX edge.
 
 ## Related ADRs
 

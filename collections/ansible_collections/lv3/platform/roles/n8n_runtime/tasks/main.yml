@@ -206,23 +206,121 @@
     or 'Downloaded newer image' in n8n_pull.stdout
     or 'Pull complete' in n8n_pull.stdout
 
-- name: Start the n8n runtime
+- name: Check whether the Docker nat chain exists before n8n startup
   ansible.builtin.command:
     argv:
-      - docker
-      - compose
-      - --file
-      - "{{ n8n_compose_file }}"
-      - up
-      - -d
-      - --remove-orphans
-  args:
-    chdir: "{{ n8n_site_dir }}"
-  register: n8n_up
-  changed_when: >-
-    'Creating' in n8n_up.stdout
-    or 'Recreating' in n8n_up.stdout
-    or 'Starting' in n8n_up.stdout
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: n8n_docker_nat_chain_check
+  changed_when: false
+  failed_when: n8n_docker_nat_chain_check.rc not in [0, 1]
+
+- name: Check whether the Docker forward chain exists before n8n startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -S
+      - DOCKER-FORWARD
+  register: n8n_docker_forward_chain_check
+  changed_when: false
+  failed_when: n8n_docker_forward_chain_check.rc not in [0, 1]
+
+- name: Restart Docker when the nat or forward chain is missing before n8n startup
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+  when: n8n_docker_nat_chain_check.rc == 1 or n8n_docker_forward_chain_check.rc == 1
+
+- name: Recheck the Docker nat chain before n8n startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: n8n_docker_nat_chain_recheck
+  changed_when: false
+  retries: 6
+  delay: 2
+  until: n8n_docker_nat_chain_recheck.rc == 0
+
+- name: Recheck the Docker forward chain before n8n startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -S
+      - DOCKER-FORWARD
+  register: n8n_docker_forward_chain_recheck
+  changed_when: false
+  retries: 6
+  delay: 2
+  until: n8n_docker_forward_chain_recheck.rc == 0
+
+- name: Assert Docker bridge chains are present before n8n startup
+  ansible.builtin.assert:
+    that:
+      - n8n_docker_nat_chain_recheck.rc == 0
+      - n8n_docker_forward_chain_recheck.rc == 0
+    fail_msg: "Docker is running but the nat DOCKER or filter DOCKER-FORWARD chain is missing; n8n bridge networking will fail."
+
+- name: Start the n8n runtime and recover Docker bridge-chain failures
+  block:
+    - name: Start the n8n runtime
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ n8n_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ n8n_site_dir }}"
+      register: n8n_up
+      changed_when: >-
+        'Creating' in n8n_up.stdout
+        or 'Recreating' in n8n_up.stdout
+        or 'Starting' in n8n_up.stdout
+  rescue:
+    - name: Flag Docker bridge-chain failures during n8n startup
+      ansible.builtin.set_fact:
+        n8n_docker_bridge_chain_missing: >-
+          {{
+            'No chain/target/match by that name' in (ansible_failed_result.stderr | default(''))
+            or 'Unable to enable ACCEPT OUTGOING rule' in (ansible_failed_result.stderr | default(''))
+          }}
+
+    - name: Surface unexpected n8n startup failures
+      ansible.builtin.fail:
+        msg: "{{ ansible_failed_result.stderr | default(ansible_failed_result.msg | default('n8n compose up failed')) }}"
+      when: not n8n_docker_bridge_chain_missing
+
+    - name: Restart Docker to restore bridge chains before retrying n8n startup
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+      when: n8n_docker_bridge_chain_missing
+
+    - name: Retry n8n startup after Docker bridge-chain recovery
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ n8n_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ n8n_site_dir }}"
+      register: n8n_up
+      changed_when: true
+      when: n8n_docker_bridge_chain_missing
 
 - name: Wait for n8n to listen locally
   ansible.builtin.wait_for:

@@ -98,7 +98,7 @@ The repository now also ships ADR 0122 browser-first operator access management:
 The repository now also ships ADR 0130 agent state persistence: `platform.agent.AgentStateClient`, the `agent.state` schema migration, and `lv3 agent state show|delete|verify` provide a governed scratch-state path for resumable agent work and post-handoff integrity validation; the first live schema apply from `main` is still pending.
 The repository now also ships ADR 0131 multi-agent handoffs: `platform.handoff`, the `handoff.transfers` schema migration, mutation-ledger event types, and `lv3 handoff send|list|view|accept|refuse|complete` provide a durable transfer path between agents and operators, with concurrent burst coverage verified in-repo; the first live transport integration from `main` is still pending.
 The repository now also ships ADR 0161 real-time agent coordination: `platform.agent.coordination`, `/v1/platform/agents`, the interactive ops-portal coordination panel, and committed coordination snapshot receipts expose active observation-loop and closure-loop sessions from one shared read model; the first live apply from `main` completed on 2026-03-26 with the coordination surfaces verified on `docker-runtime-lv3`.
-The repository now also ships ADR 0151 n8n automation: a repo-managed `n8n` runtime on `docker-runtime-lv3`, a PostgreSQL-backed persistence path on `postgres-lv3`, and shared-edge publication for `https://n8n.lv3.org` with a protected editor plus public webhook prefixes. The first live apply from `main` was attempted on 2026-03-25 but remains blocked by the Hetzner DNS brownout window and concurrent Proxmox host reachability failures.
+The repository now also ships ADR 0151 n8n automation live on production: the repo-managed `n8n` runtime is active on `docker-runtime-lv3`, PostgreSQL-backed persistence is pinned to `postgres-lv3` at `10.10.10.50`, and `https://n8n.lv3.org` now serves the protected editor with public webhook prefixes through the shared NGINX edge after the first successful `main`-based live apply on 2026-03-26.
 The repository now also ships ADR 0165 workflow idempotency: `platform.idempotency`, scheduler-side cached result replay, closure-loop trigger scoping, `execution.idempotent_hit` ledger events, and `lv3 intent status <intent_id>` provide deterministic duplicate suppression for platform-managed workflows; the live Windmill converge from `main` on 2026-03-25 now applies and verifies the shared `platform.idempotency_records` schema on `postgres-lv3`.
 The repository now also ships ADR 0146 Langfuse observability live on production: `https://langfuse.lv3.org` is published through the shared NGINX edge, the seeded `lv3-agent-observability` project is reachable through the public API, and the 2026-03-26 smoke verification ingested a trace that resolved successfully in the Langfuse UI.
 The developer portal generator now stamps published docs pages with sensitivity metadata, keeps `RESTRICTED` ADRs and runbooks summary-only in portal output, and leaves `CONFIDENTIAL` documents source-only until a dedicated admin-view path exists.
@@ -115,7 +115,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.172.1` |
+| Repository version | `0.174.0` |
 | Platform version | `0.130.20` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -182,6 +182,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `mattermost` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
 | `monitoring` | `2026-03-25-adr-0096-slo-tracking-live-apply` |
 | `mutation_audit` | `2026-03-23-adr-0066-mutation-audit-live-apply` |
+| `n8n` | `2026-03-26-adr-0151-n8n-live-apply` |
 | `netbox` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
 | `notification_profiles` | `2026-03-22-adr-0050-notification-profiles-live-apply` |
 | `ntopng` | `2026-03-22-adr-0059-ntopng-live-apply` |
@@ -895,7 +896,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.172.1` |
+| Repository version | `0.174.0` |
 | Platform version | `0.130.20` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1054,7 +1055,7 @@ This repository is intentionally opinionated:
 | `0147` | Vaultwarden for operator credential management | `live_applied` | [adr-0147-vaultwarden.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0147-vaultwarden.md) |
 | `0149` | Semaphore for Ansible job management UI and API | `merged` | [adr-0149-semaphore.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0149-semaphore.md) |
 | `0150` | Dozzle for real-time container log access | `live_applied` | [adr-0150-dozzle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0150-dozzle.md) |
-| `0151` | n8n for webhook and API integration automation | `merged` | [adr-0151-n8n.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0151-n8n.md) |
+| `0151` | n8n for webhook and API integration automation | `live_applied` | [adr-0151-n8n.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0151-n8n.md) |
 | `0152` | Homepage for unified service dashboard | `live_applied` | [adr-0152-homepage.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0152-homepage.md) |
 | `0153` | Distributed resource lock registry | `merged` | [adr-0153-distributed-resource-lock-registry.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0153-distributed-resource-lock-registry.md) |
 | `0154` | VM-scoped parallel execution lanes | `live_applied` | [adr-0154-vm-scoped-execution-lanes.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0154-vm-scoped-execution-lanes.md) |

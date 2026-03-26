@@ -208,7 +208,7 @@
       "environment": "production",
       "status": "active",
       "exposure": "edge-published",
-      "auth_requirement": "upstream_auth",
+      "auth_requirement": "edge_oidc",
       "target": "65.108.75.123",
       "target_port": 443,
       "owner_adr": "0146",
@@ -249,8 +249,7 @@
         "provider": "none",
         "auto_renew": false
       },
-      "notes": "Tailnet-only TCP proxy for the private Gitea runtime on docker-runtime-lv3.",
-      "auth_requirement": "private_network"
+      "notes": "Tailnet-only TCP proxy for the private Gitea runtime on docker-runtime-lv3."
     },
     {
       "fqdn": "mail.lv3.org",

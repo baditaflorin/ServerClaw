@@ -18,6 +18,7 @@ def load_tasks(path: Path) -> list[dict]:
 def test_runtime_defaults_pin_public_hostname_and_local_artifacts() -> None:
     defaults = yaml.safe_load(ROLE_DEFAULTS.read_text())
     assert defaults["n8n_port"] == "{{ platform_service_topology | platform_service_port('n8n', 'internal') }}"
+    assert defaults["n8n_database_host"] == "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
     assert defaults["n8n_owner_password_local_file"].endswith("/.local/n8n/owner-password.txt")
     assert defaults["n8n_encryption_key_local_file"].endswith("/.local/n8n/encryption-key.txt")
     assert defaults["n8n_enable_public_api"] is True
@@ -60,3 +61,32 @@ def test_host_network_policy_allows_edge_and_private_n8n_access() -> None:
     guest_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "all_guests" and 5678 in rule["ports"])
     assert nginx_rule["description"].lower().startswith("reverse proxy access")
     assert guest_rule["description"].lower().startswith("private guest-to-guest")
+
+
+def test_runtime_recovers_missing_docker_bridge_chains_before_startup() -> None:
+    tasks = load_tasks(ROLE_TASKS)
+
+    nat_check = next(task for task in tasks if task.get("name") == "Check whether the Docker nat chain exists before n8n startup")
+    forward_check = next(task for task in tasks if task.get("name") == "Check whether the Docker forward chain exists before n8n startup")
+    restart = next(
+        task for task in tasks if task.get("name") == "Restart Docker when the nat or forward chain is missing before n8n startup"
+    )
+    assert_task = next(task for task in tasks if task.get("name") == "Assert Docker bridge chains are present before n8n startup")
+    startup = next(task for task in tasks if task.get("name") == "Start the n8n runtime and recover Docker bridge-chain failures")
+
+    assert nat_check["ansible.builtin.command"]["argv"] == ["iptables", "-t", "nat", "-S", "DOCKER"]
+    assert forward_check["ansible.builtin.command"]["argv"] == ["iptables", "-S", "DOCKER-FORWARD"]
+    assert restart["when"] == "n8n_docker_nat_chain_check.rc == 1 or n8n_docker_forward_chain_check.rc == 1"
+    assert assert_task["ansible.builtin.assert"]["that"] == [
+        "n8n_docker_nat_chain_recheck.rc == 0",
+        "n8n_docker_forward_chain_recheck.rc == 0",
+    ]
+
+    start_task = next(task for task in startup["block"] if task.get("name") == "Start the n8n runtime")
+    rescue_fact = next(task for task in startup["rescue"] if task.get("name") == "Flag Docker bridge-chain failures during n8n startup")
+    retry_task = next(task for task in startup["rescue"] if task.get("name") == "Retry n8n startup after Docker bridge-chain recovery")
+
+    assert start_task["ansible.builtin.command"]["argv"][-3:] == ["up", "-d", "--remove-orphans"]
+    assert "No chain/target/match by that name" in rescue_fact["ansible.builtin.set_fact"]["n8n_docker_bridge_chain_missing"]
+    assert "Unable to enable ACCEPT OUTGOING rule" in rescue_fact["ansible.builtin.set_fact"]["n8n_docker_bridge_chain_missing"]
+    assert retry_task["when"] == "n8n_docker_bridge_chain_missing"

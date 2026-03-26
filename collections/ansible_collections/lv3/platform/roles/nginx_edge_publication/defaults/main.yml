@@ -113,6 +113,8 @@ public_edge_authenticated_sites:
     auth_proxy_upstream: http://127.0.0.1:4180
   docs.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
+  langfuse.lv3.org:
+    auth_proxy_upstream: http://127.0.0.1:4180
   n8n.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
     unauthenticated_paths:
