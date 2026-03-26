@@ -651,7 +651,9 @@ def test_gateway_enters_and_surfaces_keycloak_degraded_mode(tmp_path: Path) -> N
                     failed = await client.get("/v1/platform/services", headers=headers)
                     assert failed.status_code == 503
                     assert failed.headers["Retry-After"] == "30"
-                    assert failed.json()["detail"]["error_code"] == "GATE_CIRCUIT_OPEN"
+                    assert failed.json()["error"]["code"] == "INFRA_RUNTIME_UNAVAILABLE"
+                    assert failed.json()["error"]["context"]["dependency"] == "keycloak"
+                    assert failed.json()["error"]["context"]["detail"]["error_code"] == "GATE_CIRCUIT_OPEN"
             finally:
                 await runtime.close()
 

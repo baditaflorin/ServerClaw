@@ -955,7 +955,8 @@ def validation_error_context(exc: RequestValidationError) -> dict[str, Any]:
 
 
 def canonical_error_from_http_exception(request: Request, exc: HTTPException) -> tuple[str, str | None, dict[str, Any], int | None]:
-    detail = exc.detail if isinstance(exc.detail, str) else str(exc.detail)
+    raw_detail = exc.detail
+    detail = raw_detail if isinstance(raw_detail, str) else str(raw_detail)
     detail_lower = detail.lower()
     context: dict[str, Any] = {}
     retry_after: int | None = None
@@ -1043,10 +1044,19 @@ def canonical_error_from_http_exception(request: Request, exc: HTTPException) ->
         )
 
     if exc.status_code == 503:
+        dependency = "platform-runtime"
+        context_detail: Any = detail
+        message = detail or "Required runtime dependency is unavailable."
+        if isinstance(raw_detail, dict):
+            dependency = str(raw_detail.get("dependency") or dependency)
+            context_detail = raw_detail
+            raw_message = raw_detail.get("message")
+            if isinstance(raw_message, str) and raw_message.strip():
+                message = raw_message
         return (
             "INFRA_RUNTIME_UNAVAILABLE",
-            detail or "Required runtime dependency is unavailable.",
-            {"dependency": "platform-runtime", "detail": detail},
+            message,
+            {"dependency": dependency, "detail": context_detail},
             retry_after,
         )
 
