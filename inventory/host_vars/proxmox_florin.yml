@@ -946,11 +946,6 @@ lv3_service_topology:
     owning_vm: docker-runtime-lv3
     private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
     public_hostname: langfuse.lv3.org
-  dozzle:
-    service_name: dozzle
-    owning_vm: docker-runtime-lv3
-    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
-    public_hostname: logs.lv3.org
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -959,7 +954,6 @@ lv3_service_topology:
       managed: true
       visibility: public
       name: langfuse
-      name: logs
       type: A
       target: "{{ management_ipv4 }}"
       ttl: 60

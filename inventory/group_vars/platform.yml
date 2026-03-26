@@ -1032,6 +1032,23 @@ platform_service_topology:
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
     public_hostname: langfuse.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: langfuse
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:3002
     service_id: langfuse
     ports:
       internal: 3002
@@ -1389,6 +1406,10 @@ platform_dns_records:
       value: 65.108.75.123
       ttl: 60
     - name: mail
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: langfuse
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -1870,6 +1891,23 @@ public_edge_service_topology:
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
     public_hostname: langfuse.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: langfuse
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:3002
     service_id: langfuse
     ports:
       internal: 3002
