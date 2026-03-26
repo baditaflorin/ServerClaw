@@ -170,6 +170,7 @@
       "environment": "production",
       "status": "active",
       "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
       "target": "65.108.75.123",
       "target_port": 443,
       "owner_adr": "0146",
