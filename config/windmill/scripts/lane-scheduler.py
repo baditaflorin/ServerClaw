@@ -4,11 +4,30 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import os
+import shlex
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any
+
+
+def _read_proc_env_var(*names: str, proc_environ_path: str = "/proc/1/environ") -> str:
+    proc_environ = Path(proc_environ_path)
+    if not proc_environ.exists():
+        return ""
+    try:
+        entries = proc_environ.read_bytes().split(b"\0")
+    except OSError:
+        return ""
+    for name in names:
+        prefix = f"{name}=".encode("utf-8")
+        for entry in entries:
+            if entry.startswith(prefix):
+                return entry.split(b"=", 1)[1].decode("utf-8", errors="ignore").strip()
+    return ""
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -20,6 +39,9 @@ def _resolve_windmill_url(repo_root: Path) -> str | None:
     override = os.environ.get("LV3_WINDMILL_BASE_URL", "").strip()
     if override:
         return override.rstrip("/")
+    proc_override = _read_proc_env_var("LV3_WINDMILL_BASE_URL", "BASE_URL")
+    if proc_override:
+        return proc_override.rstrip("/")
     catalog_path = repo_root / "config" / "service-capability-catalog.json"
     if not catalog_path.exists():
         return None
@@ -38,6 +60,12 @@ def _resolve_windmill_token(repo_root: Path) -> str | None:
     override = os.environ.get("LV3_WINDMILL_TOKEN", "").strip()
     if override:
         return override
+    proc_override = _read_proc_env_var("LV3_WINDMILL_TOKEN", "SUPERADMIN_SECRET")
+    if proc_override:
+        return proc_override
+    worker_secret = repo_root / ".local" / "windmill" / "superadmin-secret.txt"
+    if worker_secret.exists():
+        return worker_secret.read_text(encoding="utf-8").strip()
     manifest_path = repo_root / "config" / "controller-local-secrets.json"
     if not manifest_path.exists():
         return None
@@ -54,6 +82,33 @@ def _resolve_windmill_token(repo_root: Path) -> str | None:
     return path.read_text(encoding="utf-8").strip()
 
 
+def _run_with_uv(repo_root: Path, *, max_dispatches: int) -> dict[str, Any]:
+    command = [
+        "uv",
+        "run",
+        "--with",
+        "pyyaml",
+        "python",
+        str(repo_root / "config" / "windmill" / "scripts" / "lane-scheduler.py"),
+        "--repo-path",
+        str(repo_root),
+        "--max-dispatches",
+        str(max_dispatches),
+    ]
+    env = dict(os.environ)
+    env["PYTHONPATH"] = f"{repo_root}:{env['PYTHONPATH']}" if env.get("PYTHONPATH") else str(repo_root)
+    result = subprocess.run(command, cwd=repo_root, env=env, text=True, capture_output=True, check=False)
+    if result.returncode != 0:
+        return {
+            "status": "error",
+            "command": " ".join(shlex.quote(part) for part in command),
+            "returncode": result.returncode,
+            "stdout": result.stdout.strip(),
+            "stderr": result.stderr.strip(),
+        }
+    return json.loads(result.stdout) if result.stdout.strip() else {"status": "ok"}
+
+
 def main(repo_path: str = "/srv/proxmox_florin_server", *, max_dispatches: int = 10) -> dict[str, Any]:
     repo_root = Path(repo_path)
     if not repo_root.exists():
@@ -66,7 +121,15 @@ def main(repo_path: str = "/srv/proxmox_florin_server", *, max_dispatches: int =
     if str(repo_root) not in sys.path:
         sys.path.insert(0, str(repo_root))
 
-    from platform.scheduler import build_scheduler
+    if importlib.util.find_spec("yaml") is None:
+        return _run_with_uv(repo_root, max_dispatches=max_dispatches)
+
+    try:
+        from platform.scheduler import build_scheduler
+    except ModuleNotFoundError as exc:
+        if exc.name != "yaml":
+            raise
+        return _run_with_uv(repo_root, max_dispatches=max_dispatches)
 
     base_url = _resolve_windmill_url(repo_root)
     token = _resolve_windmill_token(repo_root)

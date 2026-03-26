@@ -362,6 +362,7 @@
         {
           'DATABASE_URL': windmill_database_dsn,
           'LV3_WINDMILL_BASE_URL': windmill_worker_api_base_url,
+          'LV3_WINDMILL_TOKEN': windmill_superadmin_secret,
           'SUPERADMIN_SECRET': windmill_superadmin_secret,
           'LV3_GRAPH_DSN': windmill_platform_dsn,
           'WORLD_STATE_DSN': windmill_world_state_dsn,
@@ -457,6 +458,24 @@
     mode: "0600"
   delegate_to: localhost
   become: false
+  no_log: true
+
+- name: Ensure the worker checkout secret directory exists
+  ansible.builtin.file:
+    path: "{{ windmill_worker_superadmin_secret_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+  no_log: true
+
+- name: Mirror the Windmill superadmin secret into the worker checkout
+  ansible.builtin.copy:
+    dest: "{{ windmill_worker_superadmin_secret_file }}"
+    content: "{{ windmill_superadmin_secret }}\n"
+    owner: root
+    group: root
+    mode: "0600"
   no_log: true
 
 - name: Prepare OpenBao agent runtime secret injection for Windmill
@@ -1332,16 +1351,19 @@
   no_log: true
 
 - name: Run the Windmill seeded healthcheck script
-  ansible.builtin.uri:
-    url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id | urlencode }}/jobs/run_wait_result/p/{{ windmill_seed_scripts[0].path | urlencode }}"
-    method: POST
-    headers:
-      Authorization: "Bearer {{ windmill_superadmin_secret }}"
-    body_format: json
-    body:
-      probe: live-verify
-    return_content: true
-    status_code: 200
+  ansible.builtin.shell: >
+    python3 {{ (playbook_dir | dirname ~ '/scripts/windmill_run_wait_result.py') | quote }}
+    --base-url {{ windmill_base_url | quote }}
+    --workspace {{ windmill_workspace_id | quote }}
+    --path {{ windmill_seed_scripts[0].path | quote }}
+    --payload-json '{"probe":"live-verify"}'
+    --timeout {{ windmill_seed_job_timeout_seconds }}
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  environment:
+    WINDMILL_TOKEN: "{{ windmill_superadmin_secret }}"
   register: windmill_healthcheck
   changed_when: false
   no_log: true
@@ -1349,9 +1371,9 @@
 - name: Assert the Windmill seeded healthcheck result
   ansible.builtin.assert:
     that:
-      - windmill_healthcheck.json.probe == "live-verify"
-      - windmill_healthcheck.json.job_id_present | bool
-      - windmill_healthcheck.json.workspace == windmill_workspace_id
+      - (windmill_healthcheck.stdout | from_json).probe == "live-verify"
+      - (windmill_healthcheck.stdout | from_json).job_id_present | bool
+      - (windmill_healthcheck.stdout | from_json).workspace == windmill_workspace_id
     fail_msg: "Windmill API responded, but the seeded healthcheck script did not return the expected result."
 
 - name: Verify Windmill health probes

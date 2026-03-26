@@ -9,6 +9,9 @@ from pathlib import Path
 from types import ModuleType
 
 
+DEFAULT_REPO_ROOT = Path("/srv/proxmox_florin_server")
+
+
 def _load_impl(repo_root: Path) -> ModuleType:
     impl_path = repo_root / "windmill" / "scheduler" / "watchdog-loop.py"
     spec = importlib.util.spec_from_file_location("lv3_scheduler_watchdog_loop", impl_path)
@@ -19,8 +22,12 @@ def _load_impl(repo_root: Path) -> ModuleType:
     return module
 
 
+def main(repo_path: str = str(DEFAULT_REPO_ROOT)) -> dict:
+    impl = _load_impl(Path(repo_path))
+    return impl.main(repo_path=repo_path)
+
+
 if __name__ == "__main__":
-    repo_root = Path(__file__).resolve().parents[3]
-    impl = _load_impl(repo_root)
+    impl = _load_impl(DEFAULT_REPO_ROOT)
     args = impl.build_parser().parse_args()
-    print(json.dumps(impl.main(repo_path=args.repo_path), indent=2, sort_keys=True))
+    print(json.dumps(main(repo_path=args.repo_path), indent=2, sort_keys=True))

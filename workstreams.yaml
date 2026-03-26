@@ -2594,10 +2594,10 @@ workstreams:
   - id: adr-0119-budgeted-workflow-scheduler
     adr: "0119"
     title: Budgeted workflow scheduler
-    status: merged
+    status: live_applied
     owner: codex
-    branch: codex/adr-0119-budgeted-scheduler
-    worktree_path: .worktrees/adr-0119
+    branch: codex/ws-0119-live-apply
+    worktree_path: .worktrees/ws-0119-live-apply
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0119-budgeted-workflow-scheduler.md
     depends_on:
       - adr-0044-windmill
@@ -2618,7 +2618,7 @@ workstreams:
       - windmill/scheduler/watchdog-loop.py
       - docs/runbooks/budgeted-workflow-scheduler.md
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0120-dry-run-diff-engine
     adr: "0120"

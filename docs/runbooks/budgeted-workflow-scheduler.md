@@ -37,6 +37,17 @@ Run one watchdog pass locally:
 uv run --with pyyaml python windmill/scheduler/watchdog-loop.py --repo-path .
 ```
 
+Run one controller-side Windmill script probe through the same `jobs/run_wait_result` contract used for live verification:
+
+```bash
+WINDMILL_TOKEN="$(cat .local/windmill/superadmin-secret.txt)" \
+python3 scripts/windmill_run_wait_result.py \
+  --base-url http://100.64.0.1:8005 \
+  --workspace lv3 \
+  --path f/lv3/windmill_healthcheck \
+  --payload-json '{"probe":"live-verify"}'
+```
+
 Expected live Windmill script and schedule:
 
 ```text
@@ -75,6 +86,13 @@ make execution-lane-info LANE=lane:docker-runtime
 - Without a ledger DSN, the scheduler falls back to repo-local file locks under `.local/scheduler/locks/`.
 - The watchdog heartbeat is written to `.local/scheduler/watchdog-heartbeat.json`.
 - Recent self-healing actions are tracked in `.local/scheduler/watchdog-actions.json`.
+- Windmill worker helpers first look for `LV3_WINDMILL_BASE_URL` and `LV3_WINDMILL_TOKEN` in the rendered runtime env, then fall back to `/proc/1/environ`, then to `/srv/proxmox_florin_server/.local/windmill/superadmin-secret.txt` on the mirrored worker checkout.
+
+## Live Verification
+
+- 2026-03-26 live verification confirmed `f/lv3/intent_queue_dispatcher`, `f/lv3/lane_scheduler`, `f/lv3/scheduler_watchdog`, and `f/lv3/scheduler_watchdog_loop` all returned `status: ok` through `jobs/run_wait_result`.
+- The enabled scheduler surfaces were rechecked after apply: `f/lv3/intent_queue_dispatcher_every_minute`, `f/lv3/lane_scheduler_every_2s`, `f/lv3/scheduler_watchdog_every_30s`, and `f/lv3/scheduler_watchdog_loop_every_10s`.
+- The worker runtime env on `docker-runtime-lv3` now includes `LV3_WINDMILL_BASE_URL` and `LV3_WINDMILL_TOKEN`, and the mirrored worker secret file exists at `/srv/proxmox_florin_server/.local/windmill/superadmin-secret.txt`.
 
 ## Troubleshooting
 
@@ -94,6 +112,11 @@ make execution-lane-info LANE=lane:docker-runtime
 `uv run --with pyyaml python windmill/scheduler/watchdog-loop.py --repo-path .` returns `blocked`:
 - verify the repo checkout path exists on the worker
 - export `LV3_WINDMILL_BASE_URL` and `LV3_WINDMILL_TOKEN`, or keep the Windmill service catalog entry and controller-local secret current
+
+The Windmill runtime apply passes manual `jobs/run_wait_result` probes but the role-level healthcheck still needs investigation:
+- run the controller-side helper above directly to confirm whether Windmill itself is healthy
+- compare the direct helper result against the Ansible task path in `collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml`
+- treat the current replay failure as an automation wrapper issue until the direct helper also fails
 
 The watchdog is running but stale jobs are not being aborted:
 - inspect `.local/scheduler/watchdog-heartbeat.json` on the execution surface

@@ -3,11 +3,30 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import os
+import shlex
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any
+
+
+def _read_proc_env_var(*names: str, proc_environ_path: str = "/proc/1/environ") -> str:
+    proc_environ = Path(proc_environ_path)
+    if not proc_environ.exists():
+        return ""
+    try:
+        entries = proc_environ.read_bytes().split(b"\0")
+    except OSError:
+        return ""
+    for name in names:
+        prefix = f"{name}=".encode("utf-8")
+        for entry in entries:
+            if entry.startswith(prefix):
+                return entry.split(b"=", 1)[1].decode("utf-8", errors="ignore").strip()
+    return ""
 
 
 def _resolve_windmill_url(repo_root: Path) -> str | None:
@@ -15,6 +34,9 @@ def _resolve_windmill_url(repo_root: Path) -> str | None:
         override = os.environ.get(env_name, "").strip()
         if override:
             return override.rstrip("/")
+    proc_override = _read_proc_env_var("LV3_WINDMILL_BASE_URL", "BASE_URL")
+    if proc_override:
+        return proc_override.rstrip("/")
     catalog_path = repo_root / "config" / "service-capability-catalog.json"
     if not catalog_path.exists():
         return None
@@ -34,6 +56,12 @@ def _resolve_windmill_token(repo_root: Path) -> str | None:
         override = os.environ.get(env_name, "").strip()
         if override:
             return override
+    proc_override = _read_proc_env_var("LV3_WINDMILL_TOKEN", "SUPERADMIN_SECRET")
+    if proc_override:
+        return proc_override
+    worker_secret = repo_root / ".local" / "windmill" / "superadmin-secret.txt"
+    if worker_secret.exists():
+        return worker_secret.read_text(encoding="utf-8").strip()
     manifest_path = repo_root / "config" / "controller-local-secrets.json"
     if not manifest_path.exists():
         return None
@@ -63,7 +91,69 @@ def main(
     if str(base) not in sys.path:
         sys.path.insert(0, str(base))
 
-    from platform.scheduler import build_scheduler
+    if importlib.util.find_spec("yaml") is None:
+        command = [
+            "uv",
+            "run",
+            "--with",
+            "pyyaml",
+            "python",
+            str(base / "scripts" / "intent_queue_dispatcher.py"),
+            "--repo-root",
+            str(base),
+            "--max-items",
+            str(max_items),
+        ]
+        for resource_hint in resource_hints or []:
+            command.extend(["--resource-hint", resource_hint])
+        for workflow_hint in workflow_hints or []:
+            command.extend(["--workflow-hint", workflow_hint])
+        env = dict(os.environ)
+        env["PYTHONPATH"] = f"{base}:{env['PYTHONPATH']}" if env.get("PYTHONPATH") else str(base)
+        result = subprocess.run(command, cwd=base, env=env, text=True, capture_output=True, check=False)
+        if result.returncode != 0:
+            return {
+                "status": "error",
+                "command": " ".join(shlex.quote(part) for part in command),
+                "returncode": result.returncode,
+                "stdout": result.stdout.strip(),
+                "stderr": result.stderr.strip(),
+            }
+        return json.loads(result.stdout) if result.stdout.strip() else {"status": "ok"}
+
+    try:
+        from platform.scheduler import build_scheduler
+    except ModuleNotFoundError as exc:
+        if exc.name != "yaml":
+            raise
+        command = [
+            "uv",
+            "run",
+            "--with",
+            "pyyaml",
+            "python",
+            str(base / "scripts" / "intent_queue_dispatcher.py"),
+            "--repo-root",
+            str(base),
+            "--max-items",
+            str(max_items),
+        ]
+        for resource_hint in resource_hints or []:
+            command.extend(["--resource-hint", resource_hint])
+        for workflow_hint in workflow_hints or []:
+            command.extend(["--workflow-hint", workflow_hint])
+        env = dict(os.environ)
+        env["PYTHONPATH"] = f"{base}:{env['PYTHONPATH']}" if env.get("PYTHONPATH") else str(base)
+        result = subprocess.run(command, cwd=base, env=env, text=True, capture_output=True, check=False)
+        if result.returncode != 0:
+            return {
+                "status": "error",
+                "command": " ".join(shlex.quote(part) for part in command),
+                "returncode": result.returncode,
+                "stdout": result.stdout.strip(),
+                "stderr": result.stderr.strip(),
+            }
+        return json.loads(result.stdout) if result.stdout.strip() else {"status": "ok"}
 
     base_url = _resolve_windmill_url(base)
     token = _resolve_windmill_token(base)

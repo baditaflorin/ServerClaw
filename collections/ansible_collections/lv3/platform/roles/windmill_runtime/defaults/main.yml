@@ -112,7 +112,9 @@ windmill_bootstrap_identity_username: superadmin_secret
 windmill_bootstrap_identity_login_type: password
 windmill_private_base_url: "{{ platform_service_topology | platform_service_url('windmill', 'internal') }}"
 windmill_base_url: "{{ platform_service_topology | platform_service_url('windmill', 'controller') }}"
-windmill_worker_api_base_url: "{{ windmill_private_base_url }}"
+windmill_runtime_api_base_url: "http://127.0.0.1:{{ windmill_server_port }}"
+windmill_worker_api_base_url: "http://windmill_server:8000"
+windmill_seed_job_timeout_seconds: 120
 windmill_worker_checkout_repo_root_local_dir: "{{ playbook_dir }}/.."
 windmill_worker_repo_checkout_host_path: /srv/proxmox_florin_server
 windmill_worker_repo_checkout_container_path: /srv/proxmox_florin_server
@@ -122,6 +124,8 @@ windmill_worker_secret_mirror_ids:
   - nats_jetstream_admin_password
 windmill_worker_proxmox_api_token_payload_dir: "{{ windmill_worker_repo_checkout_host_path }}/.local/proxmox-api"
 windmill_worker_proxmox_api_token_payload_file: "{{ windmill_worker_proxmox_api_token_payload_dir }}/lv3-automation-primary.json"
+windmill_worker_superadmin_secret_dir: "{{ windmill_worker_repo_checkout_host_path }}/.local/windmill"
+windmill_worker_superadmin_secret_file: "{{ windmill_worker_superadmin_secret_dir }}/superadmin-secret.txt"
 windmill_openbao_runtime_network: openbao_default
 windmill_worker_repo_mutable_directories:
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/state/operator-access"
@@ -141,6 +145,7 @@ windmill_worker_repo_secret_files:
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/openbao/init.json"
     src: "{{ windmill_controller_local_root }}/openbao/init.json"
     mode: "0600"
+windmill_worker_checkout_checksum_file: "{{ windmill_site_dir }}/worker-checkout.sha256"
 windmill_worker_checkout_sync_paths:
   - ansible.cfg
   - callback_plugins

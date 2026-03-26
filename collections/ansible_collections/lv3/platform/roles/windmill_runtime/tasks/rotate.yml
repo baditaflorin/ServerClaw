@@ -83,7 +83,7 @@
 
 - name: Wait for the Windmill API after secret rotation
   ansible.builtin.uri:
-    url: "{{ windmill_private_base_url }}/api/version"
+    url: "{{ windmill_runtime_api_base_url }}/api/version"
     method: GET
     status_code: 200
   register: windmill_rotation_health

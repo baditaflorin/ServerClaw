@@ -1,7 +1,7 @@
 ---
 - name: Verify the Windmill API version endpoint
   ansible.builtin.uri:
-    url: "{{ windmill_private_base_url }}/api/version"
+    url: "{{ windmill_runtime_api_base_url }}/api/version"
     method: GET
     status_code: 200
   register: windmill_verify_version
@@ -11,16 +11,19 @@
   changed_when: false
 
 - name: Run the Windmill seeded healthcheck script
-  ansible.builtin.uri:
-    url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id | urlencode }}/jobs/run_wait_result/p/{{ windmill_seed_scripts[0].path | urlencode }}"
-    method: POST
-    headers:
-      Authorization: "Bearer {{ windmill_superadmin_secret }}"
-    body_format: json
-    body:
-      probe: live-verify
-    return_content: true
-    status_code: 200
+  ansible.builtin.shell: >
+    python3 {{ (playbook_dir | dirname ~ '/scripts/windmill_run_wait_result.py') | quote }}
+    --base-url {{ windmill_base_url | quote }}
+    --workspace {{ windmill_workspace_id | quote }}
+    --path {{ windmill_seed_scripts[0].path | quote }}
+    --payload-json '{"probe":"live-verify"}'
+    --timeout {{ windmill_seed_job_timeout_seconds }}
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  environment:
+    WINDMILL_TOKEN: "{{ windmill_superadmin_secret }}"
   register: windmill_verify_healthcheck
   changed_when: false
   no_log: true
@@ -28,7 +31,7 @@
 - name: Assert the Windmill seeded healthcheck result
   ansible.builtin.assert:
     that:
-      - windmill_verify_healthcheck.json.probe == "live-verify"
-      - windmill_verify_healthcheck.json.job_id_present | bool
-      - windmill_verify_healthcheck.json.workspace == windmill_workspace_id
+      - (windmill_verify_healthcheck.stdout | from_json).probe == "live-verify"
+      - (windmill_verify_healthcheck.stdout | from_json).job_id_present | bool
+      - (windmill_verify_healthcheck.stdout | from_json).workspace == windmill_workspace_id
     fail_msg: "Windmill API responded, but the seeded healthcheck script did not return the expected result."

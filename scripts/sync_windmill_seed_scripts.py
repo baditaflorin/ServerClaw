@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import http.client
 import json
 import os
 import sys
@@ -43,6 +44,35 @@ class RetryableSyncError(SyncError):
     pass
 
 
+class SyncTransportError(RetryableSyncError):
+    pass
+
+
+def login_with_bootstrap_secret(base_url: str, secret: str) -> str:
+    request = urllib.request.Request(
+        f"{base_url.rstrip('/')}/api/auth/login",
+        data=json.dumps(
+            {
+                "email": "superadmin_secret@windmill.dev",
+                "password": secret,
+            }
+        ).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request) as response:
+            token = response.read().decode("utf-8").strip()
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode("utf-8")
+        raise SyncError(f"bootstrap login returned {exc.code}: {body[:500]}") from exc
+    except (urllib.error.URLError, http.client.HTTPException, OSError, TimeoutError) as exc:
+        raise SyncTransportError(f"bootstrap login transport error: {exc}") from exc
+    if not token:
+        raise SyncError("bootstrap login returned an empty session token")
+    return token
+
+
 def build_request(url: str, token: str, method: str, payload: dict | None = None) -> urllib.request.Request:
     body = None if payload is None else json.dumps(payload).encode("utf-8")
     headers = {"Authorization": f"Bearer {token}"}
@@ -70,8 +100,20 @@ def request_json_or_text(
     except urllib.error.HTTPError as exc:
         status = exc.code
         body = exc.read().decode("utf-8")
-    except (urllib.error.URLError, TimeoutError, OSError) as exc:
-        raise RetryableSyncError(f"{method} {path} transient transport failure: {exc}") from exc
+        if status == 401:
+            session_token = login_with_bootstrap_secret(base_url, token)
+            request = build_request(url, session_token, method, payload)
+            try:
+                with urllib.request.urlopen(request) as response:
+                    status = response.status
+                    body = response.read().decode("utf-8")
+            except urllib.error.HTTPError as retry_exc:
+                status = retry_exc.code
+                body = retry_exc.read().decode("utf-8")
+            except (urllib.error.URLError, http.client.HTTPException, OSError, TimeoutError) as retry_exc:
+                raise SyncTransportError(f"{method} {path} transport error: {retry_exc}") from retry_exc
+    except (urllib.error.URLError, http.client.HTTPException, OSError, TimeoutError) as exc:
+        raise SyncTransportError(f"{method} {path} transport error: {exc}") from exc
     if status not in expected_statuses:
         error_cls = RetryableSyncError if status >= 500 or status in (408, 429) else SyncError
         raise error_cls(f"{method} {path} returned {status}: {body[:500]}")

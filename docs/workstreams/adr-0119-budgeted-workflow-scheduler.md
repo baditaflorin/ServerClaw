@@ -2,9 +2,9 @@
 
 - ADR: [ADR 0119](../adr/0119-budgeted-workflow-scheduler.md)
 - Title: Orchestration layer between the goal compiler and Windmill — enforces hard per-workflow budgets (duration, steps, concurrency, host count, restart depth) and terminates or escalates on violation
-- Status: merged
-- Branch: `codex/adr-0119-budgeted-scheduler`
-- Worktree: `../proxmox_florin_server-budgeted-scheduler`
+- Status: live_applied
+- Branch: `codex/ws-0119-live-apply`
+- Worktree: `.worktrees/ws-0119-live-apply`
 - Owner: codex
 - Depends On: `adr-0044-windmill`, `adr-0048-command-catalog`, `adr-0058-nats-event-bus`, `adr-0071-agent-observation-loop`, `adr-0098-postgres-ha`, `adr-0112-goal-compiler`, `adr-0115-mutation-ledger`, `adr-0116-change-risk-scoring`
 - Conflicts With: `adr-0112-goal-compiler` (shared workflow submission path)
@@ -56,6 +56,27 @@
 - Attempt two simultaneous `converge-netbox` submissions; confirm the second returns `CONCURRENCY_LIMIT`
 - Confirm rollback depth guard blocks a rollback-of-rollback chain beyond depth 1
 
+## Live Apply Evidence
+
+- 2026-03-26 live apply updated the Docker runtime Windmill worker checkout, mirrored the worker-side superadmin secret, and re-synced the repo-managed Windmill scripts from this branch.
+- The live Windmill script bodies for `f/lv3/intent_queue_dispatcher`, `f/lv3/lane_scheduler`, `f/lv3/scheduler_watchdog`, and `f/lv3/scheduler_watchdog_loop` were rechecked through the API and matched the branch-local sources byte-for-byte after apply.
+- Manual end-to-end `jobs/run_wait_result` verification succeeded for `f/lv3/windmill_healthcheck`, `f/lv3/intent_queue_dispatcher`, `f/lv3/lane_scheduler`, `f/lv3/scheduler_watchdog`, and `f/lv3/scheduler_watchdog_loop`.
+- The repo-managed schedules `f/lv3/intent_queue_dispatcher_every_minute`, `f/lv3/lane_scheduler_every_2s`, `f/lv3/scheduler_watchdog_every_30s`, and `f/lv3/scheduler_watchdog_loop_every_10s` were verified as enabled after apply.
+- The live worker runtime env on `docker-runtime-lv3` now exposes `LV3_WINDMILL_BASE_URL` and `LV3_WINDMILL_TOKEN`, and `/srv/proxmox_florin_server/.local/windmill/superadmin-secret.txt` exists on the worker checkout.
+
+## Repo Validation
+
+- `uv run --with pytest python -m pytest -q tests/test_config_merge_windmill.py tests/test_windmill_operator_admin_app.py tests/test_config_merge_repo_surfaces.py` → passed (`30 passed`)
+- `python3 -m py_compile scripts/windmill_run_wait_result.py` → passed
+- `ansible-playbook -i inventory/hosts.yml playbooks/windmill.yml --syntax-check` → passed
+- `uvx --from ansible-lint ansible-lint collections/ansible_collections/lv3/platform/roles/windmill_runtime` → passed
+- `./scripts/validate_repo.sh` still fails on the pre-existing unrelated `complexity[tasks]` warning in `collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/main.yml`
+
+## Merge Notes
+
+- Leave `VERSION`, release sections in `changelog.md`, top-level integrated `README.md` status, and `versions/stack.yaml` to the main-branch integration step.
+- When merging to `main`, update the protected integration files for the live-applied state and carry forward the branch-local verification notes from this workstream.
+
 ## Merge Criteria
 
 - Unit tests pass
@@ -70,3 +91,4 @@
 - The watchdog workflow runs every 30 seconds; ensure it has `max_concurrent_instances: 1` in its own budget block to prevent watchdog overlap
 - The rollback chain walk using `actor_intent_id` requires that the goal compiler always sets `actor_intent_id` on rollback intents pointing to the original intent. Verify this is implemented before testing the rollback guard.
 - For the first release, `max_touched_hosts` enforcement is advisory only (logs a warning but does not block). Promote it to a hard block in a follow-up after verifying the Ansible inventory size reporting is reliable across all playbooks.
+- The live apply is complete on platform version `0.130.20`, but the protected integration files still need the main-branch update that this workstream branch intentionally skipped.

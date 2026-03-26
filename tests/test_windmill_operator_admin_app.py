@@ -56,6 +56,12 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         "scripts",
         "windmill",
     }.issubset(set(defaults["windmill_worker_checkout_sync_paths"]))
+    assert defaults["windmill_worker_checkout_checksum_file"] == "{{ windmill_site_dir }}/worker-checkout.sha256"
+    assert defaults["windmill_worker_superadmin_secret_dir"] == "{{ windmill_worker_repo_checkout_host_path }}/.local/windmill"
+    assert defaults["windmill_worker_superadmin_secret_file"] == "{{ windmill_worker_superadmin_secret_dir }}/superadmin-secret.txt"
+    assert defaults["windmill_runtime_api_base_url"] == "http://127.0.0.1:{{ windmill_server_port }}"
+    assert defaults["windmill_worker_api_base_url"] == "http://windmill_server:8000"
+    assert defaults["windmill_seed_job_timeout_seconds"] == 120
     assert defaults["windmill_worker_repo_mutable_directories"] == [
         {"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/state/operator-access", "mode": "0777"}
     ]
@@ -325,8 +331,16 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "windmill_worker_repo_mutable_files" in tasks
     assert "windmill_worker_repo_secret_directories" in tasks
     assert "windmill_worker_repo_secret_files" in tasks
+    assert "Ensure the worker checkout secret directory exists" in tasks
+    assert "Mirror the Windmill superadmin secret into the worker checkout" in tasks
+    assert "windmill_worker_superadmin_secret_dir" in tasks
+    assert "windmill_worker_superadmin_secret_file" in tasks
     assert "windmill_worker_checkout_repo_root_local_dir" in tasks
+    assert "windmill_worker_checkout_checksum_file" in tasks
     assert "windmill_worker_checkout_sync_paths" in tasks
+    assert "scripts/windmill_run_wait_result.py" in tasks
+    assert "--payload-json" in tasks
+    assert "--timeout {{ windmill_seed_job_timeout_seconds }}" in tasks
     assert defaults["windmill_worker_repo_checkout_host_path"] == "/srv/proxmox_florin_server"
     assert defaults["windmill_worker_repo_checkout_container_path"] == "/srv/proxmox_florin_server"
     assert "{{ windmill_worker_repo_checkout_host_path }}:{{ windmill_worker_repo_checkout_container_path }}" in compose_template
@@ -341,7 +355,9 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     ).read_text()
     assert "TF_VAR_proxmox_endpoint" in runtime_template
     assert "TF_VAR_proxmox_api_token" in runtime_template
+    assert "LV3_WINDMILL_TOKEN={{ windmill_superadmin_secret }}" in runtime_template
     assert "{% for item in windmill_operator_manager_env" in runtime_template
     assert "TF_VAR_proxmox_endpoint" in runtime_ctmpl_template
     assert "TF_VAR_proxmox_api_token" in runtime_ctmpl_template
+    assert 'LV3_WINDMILL_TOKEN=[[ with secret "kv/data/{{ windmill_openbao_secret_path }}" ]][[ .Data.data.LV3_WINDMILL_TOKEN ]][[ end ]]' in runtime_ctmpl_template
     assert "{% for item in windmill_operator_manager_env" in runtime_ctmpl_template
