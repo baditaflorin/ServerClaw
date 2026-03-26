@@ -139,6 +139,8 @@ platform_ports:
   netbox_server_port: 8082
   netbox_host_proxy_port: 8004
   langfuse_port: 3002
+  dozzle_http_port: 8089
+  dozzle_agent_port: 7007
   ollama_api_port: 11434
   n8n_port: 5678
   open_webui_port: 8088
@@ -180,6 +182,8 @@ platform_port_assignments:
   netbox_server_port: 8082
   netbox_host_proxy_port: 8004
   langfuse_port: 3002
+  dozzle_http_port: 8089
+  dozzle_agent_port: 7007
   ollama_api_port: 11434
   n8n_port: 5678
   open_webui_port: 8088
@@ -1028,6 +1032,17 @@ platform_service_topology:
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
     public_hostname: langfuse.lv3.org
+    service_id: langfuse
+    ports:
+      internal: 3002
+    urls:
+      public: https://langfuse.lv3.org
+      internal: http://10.10.10.20:3002
+  dozzle:
+    service_name: dozzle
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: logs.lv3.org
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -1035,22 +1050,22 @@ platform_service_topology:
     dns:
       managed: true
       visibility: public
-      name: langfuse
+      name: logs
       type: A
       target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
       tls: true
-      noindex: true
       kind: proxy
-      upstream: http://10.10.10.20:3002
-    service_id: langfuse
+      server_sent_events: true
+      upstream: http://10.10.10.20:8089
+    service_id: dozzle
     ports:
-      internal: 3002
+      internal: 8089
     urls:
-      public: https://langfuse.lv3.org
-      internal: http://10.10.10.20:3002
+      public: https://logs.lv3.org
+      internal: http://10.10.10.20:8089
   open_webui:
     service_name: open-webui
     owning_vm: docker-runtime-lv3
@@ -1377,7 +1392,7 @@ platform_dns_records:
       type: A
       value: 65.108.75.123
       ttl: 60
-    - name: langfuse
+    - name: logs
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -1855,6 +1870,17 @@ public_edge_service_topology:
     owning_vm: docker-runtime-lv3
     private_ip: 10.10.10.20
     public_hostname: langfuse.lv3.org
+    service_id: langfuse
+    ports:
+      internal: 3002
+    urls:
+      public: https://langfuse.lv3.org
+      internal: http://10.10.10.20:3002
+  dozzle:
+    service_name: dozzle
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: logs.lv3.org
     exposure_model: edge-published
     observability:
       guest_dashboard: false
@@ -1862,22 +1888,22 @@ public_edge_service_topology:
     dns:
       managed: true
       visibility: public
-      name: langfuse
+      name: logs
       type: A
       target: 65.108.75.123
       ttl: 60
     edge:
       enabled: true
       tls: true
-      noindex: true
       kind: proxy
-      upstream: http://10.10.10.20:3002
-    service_id: langfuse
+      server_sent_events: true
+      upstream: http://10.10.10.20:8089
+    service_id: dozzle
     ports:
-      internal: 3002
+      internal: 8089
     urls:
-      public: https://langfuse.lv3.org
-      internal: http://10.10.10.20:3002
+      public: https://logs.lv3.org
+      internal: http://10.10.10.20:8089
   open_webui:
     service_name: open-webui
     owning_vm: docker-runtime-lv3
@@ -2264,6 +2290,8 @@ openbao_proxy_port: 8200
 windmill_server_port: 8000
 netbox_server_port: 8082
 langfuse_port: 3002
+dozzle_http_port: 8089
+dozzle_agent_port: 7007
 ollama_api_port: 11434
 n8n_port: 5678
 open_webui_port: 8088
