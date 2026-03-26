@@ -6,7 +6,7 @@ Generated from `config/dependency-graph.json`.
 
 | Tier | Services |
 | --- | --- |
-| `1` | Alertmanager, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Headscale, Mail Platform, NGINX Edge, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Uptime Kuma, ntfy, ntopng, step-ca |
+| `1` | Alertmanager, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Headscale, Mail Platform, NGINX Edge, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
 | `2` | Changelog Portal, Developer Portal, Gitea, Keycloak, Langfuse, Mattermost, NetBox, Open WebUI, Public Status Page, Semaphore, Vaultwarden, Windmill, n8n |
 | `3` | Homepage, Platform API Gateway |
 | `4` | Ops Portal |
@@ -32,6 +32,7 @@ graph TD
     postgres["Postgres\nTier 1"]
     backup_pbs["Proxmox Backup Server\nTier 1"]
     proxmox_ui["Proxmox UI\nTier 1"]
+    searxng["SearXNG\nTier 1"]
     step_ca["step-ca\nTier 1"]
     uptime_kuma["Uptime Kuma\nTier 1"]
     changelog_portal["Changelog Portal\nTier 2"]
@@ -88,6 +89,7 @@ graph TD
     open_webui -->|soft| keycloak
     open_webui -->|hard| ollama
     open_webui -->|startup_only| openbao
+    open_webui -->|soft| searxng
     ops_portal -->|hard| api_gateway
     ops_portal -->|hard| keycloak
     ops_portal -->|hard| nginx_edge

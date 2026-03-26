@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.174.0
-platform_version: 0.130.20
+repo_version: 0.175.0
+platform_version: 0.130.21
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -48,6 +48,7 @@ live_apply_evidence:
     tempo_tracing: 2026-03-22-adr-0053-tempo-traces-live-apply
     secret_rotation: 2026-03-23-adr-0065-secret-rotation-live-apply
     semaphore: 2026-03-25-adr-0149-semaphore-live-apply
+    searxng: 2026-03-26-adr-0148-searxng-live-apply
     ops_portal: 2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply
     ollama: 2026-03-25-adr-0145-ollama-live-apply
 
@@ -743,13 +744,24 @@ observed_state:
     password_auth_enabled: true
     oidc_enabled: false
     approved_provider_env_present: false
-    web_search_permission: false
+    web_search_permission: true
+    web_search_provider: searxng
     image_generation_permission: false
     code_interpreter_permission: false
     direct_tool_servers_permission: false
     ollama_connector_enabled: true
     ollama_connector_url: http://host.docker.internal:11434
     ollama_connector_verified: true
+  searxng:
+    runtime_vm: 10.10.10.20
+    host_tailscale_proxy_url: http://100.64.0.1
+    tailnet_hostname: search.lv3.org
+    tailnet_dns_verified: true
+    private_http_url: http://10.10.10.20:8881
+    container_running: true
+    json_search_verified: true
+    limiter_config_managed: true
+    open_webui_integration_verified: true
   platform_context_api:
     runtime_vm: 10.10.10.20
     host_tailscale_proxy_url: http://100.64.0.1:8010
@@ -899,8 +911,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.174.0
+    current: 0.175.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.20
+    current: 0.130.21
     meaning: intended platform release for the actual server configuration

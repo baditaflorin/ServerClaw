@@ -2900,7 +2900,7 @@ workstreams:
   - id: adr-0148-searxng-web-search
     adr: "0148"
     title: SearXNG for agent web search
-    status: live_applied
+    status: merged
     owner: codex
     branch: codex/adr-0148-searxng-web-search
     worktree_path: .worktrees/adr-0148-searxng-web-search
@@ -2922,7 +2922,7 @@ workstreams:
       - config/subdomain-catalog.json
       - config/workflow-catalog.json
       - config/dependency-graph.json
-    ready_to_merge: true
+    ready_to_merge: false
     live_applied: true
 
   - id: adr-0153-distributed-resource-lock-registry

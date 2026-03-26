@@ -7,9 +7,9 @@
 
 schema_version: 1
 generated: '2026-03-26'
-total_adrs: 178
+total_adrs: 179
 implementation_status_summary:
-  Implemented: 174
+  Implemented: 175
   Partial: 3
   Deprecated: 1
 concerns:
@@ -82,6 +82,7 @@ concerns:
   - '0121'
   - '0134'
   - '0135'
+  - 0148
   host-os:
   - '0002'
   - '0004'
@@ -2470,6 +2471,20 @@ adr_index:
     use
   filename: 0147-vaultwarden-for-operator-credential-management.md
   implemented_version: 0.147.0
+- adr: 0148
+  title: SearXNG for Agent Web Search
+  status: Accepted
+  implementation_status: Implemented
+  date: '2026-03-24'
+  concern: documentation
+  keywords:
+  - searxng
+  - agent
+  - web
+  - search
+  summary: We will deploy SearXNG on docker-runtime-lv3 as a self-hosted search aggregation API for agent and operator use.
+  filename: 0148-searxng-for-agent-web-search.md
+  implemented_version: 0.175.0
 - adr: 0149
   title: Semaphore For Ansible Job Management UI And API
   status: Accepted

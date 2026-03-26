@@ -1,10 +1,10 @@
 # ADR 0148: SearXNG for Agent Web Search
 
 - Status: Accepted
-- Implementation Status: Live applied on workstream branch
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: 2026-03-25
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.175.0
+- Implemented In Platform Version: 0.130.21
+- Implemented On: 2026-03-26
 - Date: 2026-03-24
 
 ## Context

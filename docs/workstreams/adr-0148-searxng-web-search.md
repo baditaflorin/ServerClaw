@@ -2,10 +2,10 @@
 
 - ADR: [ADR 0148](../adr/0148-searxng-for-agent-web-search.md)
 - Title: Private SearXNG runtime for agent and operator web search on docker-runtime-lv3
-- Status: live_applied
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: 2026-03-25
+- Status: merged
+- Implemented In Repo Version: 0.175.0
+- Implemented In Platform Version: 0.130.21
+- Implemented On: 2026-03-26
 - Branch: `codex/adr-0148-searxng-web-search`
 - Worktree: `.worktrees/adr-0148-searxng-web-search`
 - Owner: codex
