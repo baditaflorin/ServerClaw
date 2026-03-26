@@ -846,9 +846,9 @@
       - --manifest
       - "{{ windmill_seed_script_manifest_local.path }}"
       - --max-attempts
-      - "8"
+      - "20"
       - --settle-interval
-      - "1.0"
+      - "2.0"
   delegate_to: localhost
   become: false
   environment:

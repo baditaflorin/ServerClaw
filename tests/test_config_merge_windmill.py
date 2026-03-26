@@ -121,3 +121,43 @@ def test_sync_helper_rejects_unexpected_delete_400(monkeypatch: pytest.MonkeyPat
             token="token",
             script_path="f/lv3/config_merge/merge_config_changes",
         )
+
+
+def test_sync_helper_retries_retryable_create_failures(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    module = load_module("sync_helper_retries", SYNC_HELPER_PATH)
+    script_path = tmp_path / "script.py"
+    script_path.write_text("print('ok')\n", encoding="utf-8")
+    calls = {"create": 0}
+
+    monkeypatch.setattr(module, "delete_script", lambda **kwargs: None)
+    monkeypatch.setattr(module, "wait_for_absent", lambda **kwargs: None)
+    monkeypatch.setattr(module, "wait_for_content", lambda **kwargs: None)
+
+    def fake_create_script(**kwargs):
+        calls["create"] += 1
+        if calls["create"] == 1:
+            raise module.RetryableSyncError("connection reset by peer")
+        return 201, "created"
+
+    monkeypatch.setattr(module, "create_script", fake_create_script)
+
+    result = module.sync_script(
+        base_url="http://windmill.internal",
+        workspace="lv3",
+        token="token",
+        spec={
+            "path": "f/lv3/config_merge/merge_config_changes",
+            "language": "python3",
+            "summary": "summary",
+            "description": "desc",
+            "local_file": str(script_path),
+        },
+        max_attempts=3,
+        settle_interval_s=0.0,
+    )
+
+    assert result == {
+        "path": "f/lv3/config_merge/merge_config_changes",
+        "attempts": 2,
+        "status": "synced",
+    }
