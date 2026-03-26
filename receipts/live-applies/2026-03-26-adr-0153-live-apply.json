@@ -5,7 +5,7 @@
   "applied_on": "2026-03-26",
   "recorded_on": "2026-03-26",
   "recorded_by": "codex",
-  "source_commit": "e2ee3cda63dc06c77943b4429c860c79765352c5",
+  "source_commit": "7747ec0a04e138cff2a4c3b8c6940f82686e8dcc",
   "repo_version_context": "0.161.0",
   "workflow_id": "converge-vaultwarden",
   "adr": "0153",
