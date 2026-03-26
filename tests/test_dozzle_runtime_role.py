@@ -54,6 +54,11 @@ def test_verify_tasks_cover_remote_agent_tests() -> None:
     assert "Verify the Dozzle hub healthcheck succeeds" in names
     assert "Verify the local Dozzle agent is reachable from the hub container" in names
     assert "Verify the remote Dozzle agents are reachable from the hub container" in names
+    hub_health_task = next(
+        task for task in verify if task["name"] == "Verify the Dozzle hub healthcheck succeeds"
+    )
+    assert "ansible.builtin.uri" in hub_health_task
+    assert hub_health_task["ansible.builtin.uri"]["url"] == "http://127.0.0.1:{{ dozzle_runtime_hub_port }}/healthcheck"
     local_agent_task = next(
         task for task in verify if task["name"] == "Verify the local Dozzle agent is reachable from the hub container"
     )

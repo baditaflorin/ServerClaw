@@ -29,12 +29,14 @@
   vars:
     playbook_execution_probe_stage: liveness
     playbook_execution_probe: "{{ playbook_execution_service_probe.liveness }}"
+  when: inventory_hostname == playbook_execution_service_probe.owning_vm
 
 - name: Run readiness verification
   ansible.builtin.include_tasks: verify-probe.yml
   vars:
     playbook_execution_probe_stage: readiness
     playbook_execution_probe: "{{ playbook_execution_service_probe.readiness }}"
+  when: inventory_hostname == playbook_execution_service_probe.owning_vm
 
 - name: Emit a best-effort playbook completion audit event
   ansible.builtin.command:

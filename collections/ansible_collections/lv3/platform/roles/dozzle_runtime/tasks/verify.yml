@@ -11,14 +11,18 @@
   changed_when: false
 
 - name: Verify the Dozzle hub healthcheck succeeds
-  ansible.builtin.command:
-    argv:
-      - docker
-      - exec
-      - "{{ dozzle_runtime_hub_container_name }}"
-      - /dozzle
-      - healthcheck
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ dozzle_runtime_hub_port }}/healthcheck"
+    method: GET
+    status_code:
+      - 200
+    validate_certs: false
+    return_content: false
+    timeout: 30
   register: dozzle_runtime_hub_healthcheck
+  retries: 12
+  delay: 2
+  until: dozzle_runtime_hub_healthcheck.status == 200
   changed_when: false
   when: dozzle_runtime_is_hub
 

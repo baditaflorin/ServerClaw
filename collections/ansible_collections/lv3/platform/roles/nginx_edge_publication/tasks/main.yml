@@ -103,7 +103,17 @@
       - >-
         --rsh=ssh -i {{ playbook_execution_secret_manifest.secrets.bootstrap_ssh_private_key.path }}
         -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null
-        {{ hostvars[inventory_hostname].ansible_ssh_common_args | default('') }}
+        {{
+          (
+            ansible_ssh_common_args
+            | default('', true)
+          )
+          or
+          (
+            proxmox_guest_ssh_common_args[proxmox_guest_ssh_connection_mode]
+            | default('', true)
+          )
+        }}
       - --rsync-path=sudo rsync
       - "{{ public_edge_generated_build_root }}/{{ item.source_dir }}/"
       - >-

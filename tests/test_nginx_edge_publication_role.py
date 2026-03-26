@@ -66,15 +66,14 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         protected_sites = self.defaults["public_edge_authenticated_sites"]
 
         self.assertNotIn("ops.lv3.org", extra_hostnames)
-        self.assertEqual(sorted(protected_sites), ["changelog.lv3.org", "docs.lv3.org", "n8n.lv3.org", "ops.lv3.org"])
+        self.assertEqual(
+            sorted(protected_sites),
+            ["changelog.lv3.org", "docs.lv3.org", "logs.lv3.org", "n8n.lv3.org", "ops.lv3.org"],
+        )
         self.assertEqual(protected_sites["n8n.lv3.org"]["unauthenticated_paths"], ["/healthz"])
         self.assertEqual(
             protected_sites["n8n.lv3.org"]["unauthenticated_prefix_paths"],
             ["/webhook/", "/webhook-test/", "/webhook-waiting/"],
-        )
-        self.assertEqual(
-            sorted(protected_sites),
-            ["changelog.lv3.org", "docs.lv3.org", "logs.lv3.org", "n8n.lv3.org", "ops.lv3.org"],
         )
         self.assertEqual(protected_sites["ops.lv3.org"]["unauthenticated_paths"], ["/health"])
         self.assertNotIn("unauthenticated_paths", protected_sites["docs.lv3.org"])
@@ -98,7 +97,8 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertFalse(publish_task["become"])
         publish_argv = publish_task["ansible.builtin.command"]["argv"]
         self.assertIn("--rsync-path=sudo rsync", publish_argv)
-        self.assertIn("hostvars[inventory_hostname].ansible_ssh_common_args", publish_argv[6])
+        self.assertIn("ansible_ssh_common_args", publish_argv[6])
+        self.assertIn("proxmox_guest_ssh_common_args[proxmox_guest_ssh_connection_mode]", publish_argv[6])
         ensure_packages_task = next(
             task for task in self.tasks if task["name"] == "Ensure public edge packages are present"
         )

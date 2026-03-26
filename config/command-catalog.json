@@ -246,6 +246,40 @@
         ]
       }
     },
+    "fault-injection": {
+      "description": "Run the ADR 0171 controlled fault-injection subset on docker-runtime-lv3 through the governed repo workflow.",
+      "workflow_id": "fault-injection",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "FAULT_INJECTION_ARGS",
+          "kind": "operator_parameter",
+          "required": false,
+          "source": "Makefile",
+          "description": "Optional scenario selectors or execution flags passed through the repo-managed make target."
+        }
+      ],
+      "expected_preconditions": [
+        "make validate passes before starting any controlled fault scenario",
+        "Operators review the requested ADR 0171 scenario set, blast radius, and change window before execution",
+        "The docker-runtime-lv3 host and required notification hooks are reachable if the selected scenario expects live verification or incident fan-out"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the selected scenario arguments, the generated JSON report path, and the recovery outcome for each executed fault."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if preflight validation fails, the injector cannot reach the intended target surface, or the first executed scenario does not recover within the documented boundary.",
+          "Stop if the selected scenarios exceed the approved blast radius or start affecting unrelated services."
+        ],
+        "rollback_guidance": [
+          "Use the documented ADR 0171 recovery path and repo-managed service converge workflows before attempting another fault run.",
+          "Do not continue by layering ad hoc host changes on top of a partially recovered scenario; restore the platform to a known-good repo state first."
+        ]
+      }
+    },
     "nightly-integration-tests": {
       "description": "Run the ADR 0111 nightly integration suite, including the NetBox rotation mutation check when the worker is provisioned for it.",
       "workflow_id": "nightly-integration-tests",
