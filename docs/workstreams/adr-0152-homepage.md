@@ -2,9 +2,12 @@
 
 - ADR: [ADR 0152](../adr/0152-homepage-for-unified-service-dashboard.md)
 - Title: Repo-generated Homepage dashboard on docker-runtime-lv3 with authenticated publication at `home.lv3.org`
-- Status: ready
-- Branch: `codex/adr-0152-homepage-main`
-- Worktree: `../proxmox_florin_server-homepage-integration`
+- Status: live_applied
+- Implemented In Repo Version: 0.169.0
+- Implemented In Platform Version: 0.130.19
+- Implemented On: 2026-03-26
+- Branch: `codex/integration-0152-homepage-v3`
+- Worktree: `../proxmox_florin_server-homepage-mainline-v2`
 - Owner: codex
 - Depends On: `adr-0075-service-capability-catalog`, `adr-0076-subdomain-governance`, `adr-0093-interactive-ops-portal`, `adr-0133-portal-authentication-by-default`
 - Conflicts With: none
@@ -59,15 +62,14 @@
 
 ## Outcome
 
-- Repository implementation landed on the workstream branch and the focused Homepage validation suite passed on 2026-03-25.
-- Homepage config generation and runtime verification succeeded on `docker-runtime-lv3`, including the generated `/api/services`, `/api/bookmarks`, and `/api/widgets` endpoints.
-- Public rollout is still incomplete: on 2026-03-25 `home.lv3.org` did not resolve from `1.1.1.1`, and forcing `Host: home.lv3.org` to `65.108.75.123` returned the generic `LV3 Edge` default page instead of Homepage.
-- The live apply is blocked by management-plane reachability from the controller: `65.108.75.123:22` times out, `100.118.189.95:22` refuses connections, and the remote build gateway through `docker-build-lv3` is unreachable.
-- On 2026-03-26 the current controller public IP was `90.95.35.115`; the repo-managed Proxmox management allowlist was updated to include `90.95.35.115/32`, but the host was still unreachable from that controller so the change could not yet be applied live.
+- the repo-managed Homepage runtime, generated config renderer, shared-edge publication, and catalog wiring are implemented and live on production
+- the production rollout is recorded in `receipts/live-applies/2026-03-26-adr-0152-homepage-live-apply.json`
+- `uv run --with pytest --with pyyaml --with jsonschema python -m pytest tests/test_homepage_config.py tests/test_homepage_runtime_role.py tests/test_nginx_edge_publication_role.py tests/test_generate_platform_vars.py tests/test_subdomain_catalog.py tests/test_validate_service_catalog.py tests/test_uptime_contract.py tests/test_slo_tracking.py -q` passed with `39 passed`
+- `make syntax-check-homepage`, `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, and `uv run --with pyyaml python scripts/validate_alert_rules.py` all passed
+- live verification confirmed the private Homepage runtime, the generated catalog endpoints, authoritative DNS for `home.lv3.org`, and the public shared-edge OIDC redirect path
 
 ## Notes For The Next Assistant
 
 - Keep Homepage config generation anchored to the canonical service and subdomain catalogs rather than ad hoc per-service files.
 - Edge auth for `home.lv3.org` is shared infrastructure. Do not add a separate Homepage auth stack unless the broader portal-auth model changes.
-- Resume from `../proxmox_florin_server-homepage-integration` on `codex/adr-0152-homepage-main`; local code changes for the runtime and edge roles are already present there.
-- After management access is restored, finish the second `nginx-lv3` play in `playbooks/homepage.yml`, provision `home.lv3.org` DNS if still missing, verify the public endpoint, then update release and ADR/platform metadata from the current `origin/main` base.
+- The `home.lv3.org` route now depends on the shared edge certificate SAN set. Future hostname changes should be applied through `nginx_edge_publication`, not with ad hoc certbot commands.

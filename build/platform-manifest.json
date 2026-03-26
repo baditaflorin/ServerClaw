@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.169.0",
-  "platform_version": "0.130.18",
-  "generated_at": "2026-03-26T11:15:00Z",
-  "next_refresh_at": "2026-03-26T12:15:00Z",
+  "repo_version": "0.170.0",
+  "platform_version": "0.130.19",
+  "generated_at": "2026-03-26T11:45:22Z",
+  "next_refresh_at": "2026-03-26T12:45:22Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3413,10 +3413,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.168.0",
+    "last_version": "0.169.0",
     "deployed_at": "2026-03-26",
-    "summary": "publish the repo-generated Homepage dashboard at `https://home.lv3.org` through the shared authenticated edge, with generated service and bookmark catalogs served from `docker-runtime-lv3` fix the Homepage converge workflow so `make converge-homepage` uses the working Proxmox jump path and skips unrelated generated static-dir sync during edge publication",
-    "release_notes_url": "docs/release-notes/0.169.0.md"
+    "summary": "harden the Windmill observation-loop and service-health wrappers so live workers recover from stdlib `platform` import collisions and missing `pyyaml` dependencies replace the fragile Windmill API delete/create reseed path with a repo-managed script-sync helper and complete the ADR 0126 production activation on top of current main",
+    "release_notes_url": "docs/release-notes/0.170.0.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

@@ -1,10 +1,10 @@
 # ADR 0152: Homepage for Unified Service Dashboard
 
 - Status: Accepted
-- Implementation Status: Partial
-- Implemented In Repo Version: 0.144.0
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implementation Status: Live applied
+- Implemented In Repo Version: 0.169.0
+- Implemented In Platform Version: 0.130.19
+- Implemented On: 2026-03-26
 - Date: 2026-03-24
 
 ## Context
@@ -80,18 +80,15 @@ Homepage does not own an application-level auth integration. It is protected at 
 
 ## Verification
 
-Repository implementation in `0.144.0` verified on 2026-03-25:
+Repository release `0.169.0` and live platform version `0.130.19` verified on 2026-03-26:
 
-- the focused Homepage pytest suite passed
+- `uv run --with pytest --with pyyaml --with jsonschema python -m pytest tests/test_homepage_config.py tests/test_homepage_runtime_role.py tests/test_nginx_edge_publication_role.py tests/test_generate_platform_vars.py tests/test_subdomain_catalog.py tests/test_validate_service_catalog.py tests/test_uptime_contract.py tests/test_slo_tracking.py -q` passed with `39 passed`
 - `make syntax-check-homepage` passed
-- repository data-model validation passed
-- Homepage served the repo-generated `/api/services`, `/api/bookmarks`, and `/api/widgets` endpoints on `docker-runtime-lv3`
-
-Live platform rollout is still incomplete as of 2026-03-25:
-
-- `home.lv3.org` was not publicly resolvable from `1.1.1.1`
-- forcing `Host: home.lv3.org` to `65.108.75.123` returned the generic `LV3 Edge` default page, not the Homepage route
-- the controller could not complete the `nginx-lv3` publication play because Proxmox public SSH, Tailscale SSH, and the build-gateway path were all unreachable
+- `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate` passed
+- `uv run --with pyyaml python scripts/validate_alert_rules.py` passed
+- `make converge-homepage` completed successfully from `main`
+- `curl -skI https://home.lv3.org` returned `HTTP/2 302` to `/oauth2/sign_in`
+- `dig +short home.lv3.org @1.1.1.1` returned `65.108.75.123`
 
 ## Related ADRs
 

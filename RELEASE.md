@@ -7,7 +7,7 @@
 - fix the Homepage converge workflow so `make converge-homepage` uses the working Proxmox jump path and skips unrelated generated static-dir sync during edge publication
 
 ## Platform Impact
-- repository version advances for the merged ADR 0152 Homepage; platform version follows after the verified mainline live apply and receipt update
+- repository version advances to `0.169.0`; platform version advances to `0.130.19` with the ADR 0152 Homepage live-apply receipt recorded from `main`.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

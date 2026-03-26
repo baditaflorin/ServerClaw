@@ -13,6 +13,7 @@ live_apply_evidence:
     docker_runtime: 2026-03-22-adr-0023-docker-runtime-live-apply
     dozzle: 2026-03-26-adr-0150-dozzle-live-apply
     gitea: 2026-03-26-adr-0143-gitea-live-apply
+    homepage: 2026-03-26-adr-0152-homepage-live-apply
     langfuse: 2026-03-26-adr-0146-langfuse-live-apply
     postgres_vm: 2026-03-22-adr-0026-postgres-vm-live-apply
     uptime_kuma: 2026-03-22-adr-0027-uptime-kuma-live-apply

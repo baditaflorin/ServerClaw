@@ -3066,11 +3066,11 @@ workstreams:
   - id: adr-0152-homepage-dashboard
     adr: "0152"
     title: Homepage for unified service dashboard
-    status: ready
+    status: live_applied
     owner: codex
-    branch: codex/adr-0152-homepage-main
-    worktree_path: ../proxmox_florin_server-homepage-integration
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-homepage-integration/docs/workstreams/adr-0152-homepage.md
+    branch: codex/integration-0152-homepage-v3
+    worktree_path: ../proxmox_florin_server-homepage-mainline-v2
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0152-homepage.md
     depends_on:
       - adr-0075-service-capability-catalog
       - adr-0076-subdomain-governance
@@ -3086,7 +3086,7 @@ workstreams:
       - inventory/host_vars/proxmox_florin.yml
       - config/workflow-catalog.json
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0159-speculative-parallel-execution
     adr: "0159"
