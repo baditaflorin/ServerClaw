@@ -1636,10 +1636,10 @@ workstreams:
   - id: adr-0121-search-indexing-fabric
     adr: "0121"
     title: Local search and indexing fabric
-    status: merged
+    status: live_applied
     owner: codex
-    branch: codex/adr-0121-local-search-indexing-fabric
-    worktree_path: .worktrees/adr-0121
+    branch: codex/ws-0121-live-apply
+    worktree_path: .worktrees/ws-0121-live-apply
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0121-search-indexing-fabric.md
     depends_on:
       - adr-0048-command-catalog
@@ -1664,7 +1664,7 @@ workstreams:
       - scripts/ops_portal/
       - docs/runbooks/search-indexing-fabric.md
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0096-slo-tracking
     adr: "0096"
