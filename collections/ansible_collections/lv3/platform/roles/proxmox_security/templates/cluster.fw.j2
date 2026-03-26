@@ -21,3 +21,6 @@ IN Ping(ACCEPT) -source +management
 IN ACCEPT -p tcp -dport {{ port }}
 {% endfor %}
 {% endif %}
+{% if proxmox_breakglass_ssh_port is defined %}
+IN ACCEPT -p tcp -dport {{ proxmox_breakglass_ssh_port }}
+{% endif %}

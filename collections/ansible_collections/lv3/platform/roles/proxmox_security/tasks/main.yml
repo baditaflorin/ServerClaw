@@ -79,6 +79,29 @@
   when: proxmox_cluster_firewall.changed or proxmox_host_firewall.changed
   changed_when: true
 
+- name: Render break-glass sshd port drop-in
+  ansible.builtin.copy:
+    dest: /etc/ssh/sshd_config.d/91-lv3-breakglass.conf
+    mode: "0644"
+    content: |
+      # Break-glass port: publicly reachable even when Tailscale is down.
+      # Key authentication is enforced by 90-lv3-hardening.conf; no password path exists.
+      Port 22
+      Port {{ proxmox_breakglass_ssh_port }}
+  when: proxmox_breakglass_ssh_port is defined
+  register: proxmox_breakglass_sshd_dropin
+
+- name: Validate full SSH daemon configuration after break-glass drop-in
+  ansible.builtin.command: /usr/sbin/sshd -t
+  changed_when: false
+  when: proxmox_breakglass_sshd_dropin.changed
+
+- name: Reload sshd to apply break-glass port
+  ansible.builtin.service:
+    name: ssh
+    state: reloaded
+  when: proxmox_breakglass_sshd_dropin.changed
+
 - name: Read current Proxmox users
   ansible.builtin.command: pvesh get /access/users --output-format json
   register: proxmox_users

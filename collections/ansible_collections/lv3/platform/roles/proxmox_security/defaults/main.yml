@@ -14,3 +14,4 @@ proxmox_acme_validation_delay: 30
 proxmox_security_manage_acme: true
 proxmox_tfa_description: Primary TOTP
 proxmox_management_allowed_tcp_ports: []
+proxmox_breakglass_ssh_port: 2222
