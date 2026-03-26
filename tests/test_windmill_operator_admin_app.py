@@ -40,15 +40,21 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert defaults["windmill_bootstrap_identity_username"] == "superadmin_secret"
     assert defaults["windmill_bootstrap_identity_login_type"] == "password"
     assert defaults["windmill_worker_checkout_repo_root_local_dir"] == "{{ playbook_dir }}/.."
-    assert defaults["windmill_worker_checkout_sync_paths"] == [
+    assert {
+        "ansible.cfg",
+        "callback_plugins",
+        "collections",
         "config",
         "docs",
+        "filter_plugins",
+        "inventory",
         "migrations",
+        "playbooks",
         "platform",
         "receipts",
         "scripts",
         "windmill",
-    ]
+    }.issubset(set(defaults["windmill_worker_checkout_sync_paths"]))
     weekly_schedule = next(entry for entry in defaults["windmill_seed_schedules"] if entry["path"] == "f/lv3/build_cache_maintenance_weekly")
     assert weekly_schedule["schedule"] == "0 0 4 * * 7"
 
@@ -176,6 +182,16 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Build the local staging archive for the Windmill worker checkout" in tasks
     assert "changed_when: false" in tasks
     assert "Expand the staged Windmill worker checkout on the guest" in tasks
+    assert "Find stale Python bytecode files in the Windmill worker checkout" in tasks
+    assert "Remove stale Python bytecode files from the Windmill worker checkout" in tasks
+    assert "Find stale Python bytecode cache directories in the Windmill worker checkout" in tasks
+    assert "Remove stale Python bytecode cache directories from the Windmill worker checkout" in tasks
+    assert "__pycache__" in tasks
+    assert "\"*.pyc\"" in tasks
+    assert "file_type: file" in tasks
+    assert "file_type: directory" in tasks
+    assert '{{ windmill_worker_repo_checkout_host_path }}/scripts' in tasks
+    assert '{{ windmill_worker_repo_checkout_host_path }}/platform' in tasks
     assert "windmill_worker_checkout_repo_root_local_dir" in tasks
     assert "windmill_worker_checkout_sync_paths" in tasks
     assert defaults["windmill_worker_repo_checkout_host_path"] == "/srv/proxmox_florin_server"

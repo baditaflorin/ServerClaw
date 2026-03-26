@@ -47,6 +47,7 @@ live_apply_evidence:
     open_webui: 2026-03-25-adr-0145-open-webui-ollama-connector-live-apply
     remote_build_gateway: 2026-03-26-adr-0156-agent-session-workspace-isolation-live-apply
     tempo_tracing: 2026-03-22-adr-0053-tempo-traces-live-apply
+    security_posture_reporting: 2026-03-26-adr-0102-security-posture-live-apply
     secret_rotation: 2026-03-23-adr-0065-secret-rotation-live-apply
     semaphore: 2026-03-25-adr-0149-semaphore-live-apply
     searxng: 2026-03-26-adr-0148-searxng-live-apply

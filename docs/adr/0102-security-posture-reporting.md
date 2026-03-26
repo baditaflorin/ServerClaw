@@ -3,7 +3,7 @@
 - Status: Accepted
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.109.0
-- Implemented In Platform Version: 0.174.0
+- Implemented In Platform Version: 0.130.21
 - Implemented On: 2026-03-26
 - Date: 2026-03-23
 
@@ -195,10 +195,11 @@ The managed Grafana platform overview dashboard also exposes security posture pa
 ## Implementation Notes
 
 - The first verified production security posture receipt was generated on 2026-03-26 and is recorded in [`receipts/security-reports/20260326T140237Z.json`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/security-reports/20260326T140237Z.json).
+- A full worker-executed replay from `windmill-windmill_worker-1` was later verified on 2026-03-26 and wrote [`receipts/security-reports/20260326T170143Z.json`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/security-reports/20260326T170143Z.json) from the mirrored checkout.
 - The branch-local live-apply evidence for that rollout is recorded in [`receipts/live-applies/2026-03-26-adr-0102-security-posture-live-apply.json`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/live-applies/2026-03-26-adr-0102-security-posture-live-apply.json).
 - The live apply also hardened the repo-managed retry path: `playbooks/tasks/security-scan.yml` now removes stale Lynis pid files before a rerun, and `scripts/security_posture_report.py` can reuse cached Lynis artifacts with `--skip-lynis` when a later aggregation or publication retry is needed.
-- Windmill worker portability was improved by mirroring the bootstrap SSH key into the worker checkout and preferring the Proxmox internal bridge address for guest SSH jumps from the runtime VM. During the 2026-03-26 live verification, targeted worker-side SSH to `nginx-lv3` succeeded with that internal jump path.
-- The same live verification surfaced a broader Windmill runtime outage on `docker-runtime-lv3`: `openbao-agent` entered a restart loop and the `windmill_server`, `windmill_worker`, and `windmill_worker_native` services remained in `Created` after a compose restart, so a fully successful worker-wrapper replay should be rerun once the Windmill stack is healthy again.
+- Windmill worker portability was improved by mirroring the bootstrap SSH key into the worker checkout, preferring the Proxmox internal bridge address for guest SSH jumps from the runtime VM, and purging stale Python bytecode from the mirrored worker checkout after sync so updated repo modules are actually loaded.
+- The 2026-03-26 worker replay completed end to end after that cleanup and wrote a fresh receipt from the worker checkout. Its wrapped `security_posture_report.py` process still returned `1` because the generated report summary status was `critical`, but the automation path itself completed successfully and emitted the expected `REPORT_JSON=` payload.
 
 ## Related ADRs
 

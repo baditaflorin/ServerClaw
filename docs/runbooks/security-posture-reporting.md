@@ -80,6 +80,7 @@ docker exec windmill_worker bash -lc 'cd /srv/proxmox_florin_server && python3 c
 ```
 
 Treat the run as successful only when the wrapper returns `status: ok` and includes a `REPORT_JSON=` payload from `scripts/security_posture_report.py`.
+The inner `security_posture_report.py` command may still report `returncode: 1` when the generated summary status is `critical`; that indicates actionable findings were present, not that the worker automation path failed.
 
 ## Suppressions
 

@@ -176,6 +176,22 @@ def test_build_guest_ssh_command_makes_proxy_non_interactive(tmp_path: Path) -> 
     assert "UserKnownHostsFile=/dev/null" in joined
 
 
+def test_inventory_guest_proxy_command_is_non_interactive() -> None:
+    group_vars = (REPO_ROOT / "inventory" / "group_vars" / "all.yml").read_text(encoding="utf-8")
+
+    assert "proxmox_guest_ssh_proxy_command" in group_vars
+    assert "-o BatchMode=yes" in group_vars
+    assert "-o LogLevel=ERROR" in group_vars
+    assert "-o StrictHostKeyChecking=no" in group_vars
+    assert "-o UserKnownHostsFile=/dev/null" in group_vars
+
+
+def test_inventory_proxmox_host_is_env_overridable() -> None:
+    inventory = (REPO_ROOT / "inventory" / "hosts.yml").read_text(encoding="utf-8")
+
+    assert "lookup('env', 'LV3_PROXMOX_HOST_ADDR')" in inventory
+
+
 def test_skip_lynis_reuses_cached_reports(monkeypatch, tmp_path: Path) -> None:
     cached_dir = tmp_path / "lynis"
     cached_dir.mkdir()

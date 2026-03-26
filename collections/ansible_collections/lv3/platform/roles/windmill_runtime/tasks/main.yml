@@ -127,6 +127,50 @@
     path: "{{ windmill_site_dir }}/worker-checkout.tar.gz"
     state: absent
 
+- name: Find stale Python bytecode files in the Windmill worker checkout
+  ansible.builtin.find:
+    paths:
+      - "{{ windmill_worker_repo_checkout_host_path }}/callback_plugins"
+      - "{{ windmill_worker_repo_checkout_host_path }}/collections"
+      - "{{ windmill_worker_repo_checkout_host_path }}/config"
+      - "{{ windmill_worker_repo_checkout_host_path }}/filter_plugins"
+      - "{{ windmill_worker_repo_checkout_host_path }}/platform"
+      - "{{ windmill_worker_repo_checkout_host_path }}/scripts"
+      - "{{ windmill_worker_repo_checkout_host_path }}/windmill"
+    patterns:
+      - "*.pyc"
+    recurse: true
+    file_type: file
+  register: windmill_worker_checkout_python_cache_files
+
+- name: Remove stale Python bytecode files from the Windmill worker checkout
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ windmill_worker_checkout_python_cache_files.files }}"
+
+- name: Find stale Python bytecode cache directories in the Windmill worker checkout
+  ansible.builtin.find:
+    paths:
+      - "{{ windmill_worker_repo_checkout_host_path }}/callback_plugins"
+      - "{{ windmill_worker_repo_checkout_host_path }}/collections"
+      - "{{ windmill_worker_repo_checkout_host_path }}/config"
+      - "{{ windmill_worker_repo_checkout_host_path }}/filter_plugins"
+      - "{{ windmill_worker_repo_checkout_host_path }}/platform"
+      - "{{ windmill_worker_repo_checkout_host_path }}/scripts"
+      - "{{ windmill_worker_repo_checkout_host_path }}/windmill"
+    patterns:
+      - __pycache__
+    recurse: true
+    file_type: directory
+  register: windmill_worker_checkout_python_cache_dirs
+
+- name: Remove stale Python bytecode cache directories from the Windmill worker checkout
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ windmill_worker_checkout_python_cache_dirs.files }}"
+
 - name: Remove the local staging archive for the Windmill worker checkout
   ansible.builtin.file:
     path: "{{ windmill_worker_checkout_archive_local.path }}"
