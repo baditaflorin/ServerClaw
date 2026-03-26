@@ -3332,7 +3332,7 @@ workstreams:
   - id: adr-0171-controlled-fault-injection
     adr: "0171"
     title: Controlled fault injection for resilience validation
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/adr-0171-fault-injection
     worktree_path: .worktrees/adr-0171-fault-injection
@@ -3352,7 +3352,7 @@ workstreams:
       - docs/runbooks/fault-injection.md
       - versions/stack.yaml
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0172-watchdog-escalation
     adr: "0172"

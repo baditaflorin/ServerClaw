@@ -1,10 +1,10 @@
 # ADR 0171: Controlled Fault Injection for Resilience Validation
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Implemented
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.166.0
+- Implemented In Platform Version: 0.130.16
+- Implemented On: 2026-03-26
 - Date: 2026-03-24
 
 ## Context
@@ -232,6 +232,12 @@ A failure in the fault injection suite creates a GlitchTip incident (ADR 0061) w
 
 - Fault injection targets platform-layer services (Docker containers, NATS, Postgres). It does not target the Proxmox host, physical hardware, or external services.
 - The `programmatic` fault type manipulates internal platform state (lock registry, Postgres tables). It is limited to controlled test scenarios and cannot be triggered remotely (requires `platform-admin` role).
+
+## Implementation Notes
+
+- The first shipped subset is intentionally narrow: `fault:keycloak-unavailable` and `fault:openbao-unavailable` run through the repo-managed Windmill wrapper and the `make fault-injection` operator entrypoint.
+- The OpenBao live scenario uses container pause/unpause rather than stop/start so the singleton secret authority does not come back sealed during routine validation.
+- The first production live apply completed on 2026-03-26 from `main`; both governed drills passed and the live evidence is recorded in [`receipts/live-applies/2026-03-26-adr-0171-fault-injection-live-apply.json`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/live-applies/2026-03-26-adr-0171-fault-injection-live-apply.json).
 
 ## Related ADRs
 
