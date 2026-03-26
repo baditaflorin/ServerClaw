@@ -11,7 +11,7 @@ This runbook covers the private Gitea deployment introduced by ADR 0143.
 - Runtime host: `docker-runtime-lv3`
 - Database host: `postgres-lv3`
 - Runner host: `docker-build-lv3`
-- Controller URL: `http://100.118.189.95:3009`
+- Controller URL: `http://100.64.0.1:3009`
 - Local bootstrap artifacts: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/`
 
 ## Converge
@@ -25,7 +25,7 @@ ansible-playbook -i inventory/hosts.yml playbooks/gitea.yml
 1. Confirm the controller login page responds:
 
 ```bash
-curl -sf http://100.118.189.95:3009/user/login >/dev/null
+curl -sf http://100.64.0.1:3009/user/login >/dev/null
 ```
 
 2. Confirm the mirrored admin token exists:
@@ -56,7 +56,7 @@ curl -sS \
   -H "Authorization: token ${GITEA_TOKEN}" \
   -H 'Content-Type: application/json' \
   -d '{"name":"ci-webhook-smoke","private":true,"auto_init":false}' \
-  http://100.118.189.95:3009/api/v1/orgs/ops/repos
+  http://100.64.0.1:3009/api/v1/orgs/ops/repos
 ```
 
 ## Managed Hook Path

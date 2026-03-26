@@ -3,8 +3,8 @@
 - ADR: [ADR 0143](../adr/0143-gitea-for-self-hosted-git-and-ci.md)
 - Title: Private Gitea on docker-runtime-lv3 with Keycloak OIDC, a docker-build-lv3 Actions runner, and repo-managed webhook validation
 - Status: in_progress
-- Branch: `codex/adr-0143-gitea-ci`
-- Worktree: `.worktrees/adr-0143-gitea-ci`
+- Branch: `codex/integration-0143-main-refresh-v2`
+- Worktree: `.worktrees/integration-0134-main/.worktrees/integration-0143-main-refresh-v2`
 - Owner: codex
 - Depends On: `adr-0044-windmill`, `adr-0056-keycloak`, `adr-0082-remote-build-gateway`, `adr-0087-validation-gate`
 - Conflicts With: none
@@ -45,7 +45,7 @@
 
 ## Expected Live Surfaces
 
-- `http://100.118.189.95:3009` serves the private Gitea instance for `git.lv3.org`
+- `http://100.64.0.1:3009` serves the private Gitea instance for `git.lv3.org`
 - the Keycloak login source exists in Gitea and admits the `lv3-platform-admins` group
 - `docker-build-lv3` appears as an online self-hosted Gitea Actions runner
 - a test repository under the `ops` org can receive a push and emit a webhook successfully
@@ -53,6 +53,6 @@
 ## Verification
 
 - `ansible-playbook -i inventory/hosts.yml playbooks/gitea.yml` exits 0
-- `curl -sf http://100.118.189.95:3009/api/swagger >/dev/null`
+- `curl -sf http://100.64.0.1:3009/api/swagger >/dev/null`
 - `docker ps --format '{{.Names}}'` on `docker-build-lv3` includes `lv3-gitea-runner`
 - a smoke repository push creates a workflow run and a webhook delivery record in Gitea

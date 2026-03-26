@@ -2696,8 +2696,8 @@
       ],
       "verification_commands": [
         "make syntax-check-gitea",
-        "curl -sf http://100.118.189.95:3009/api/v1/version",
-        "curl -sf http://100.118.189.95:3009/api/swagger >/dev/null"
+        "curl -sf http://100.64.0.1:3009/api/v1/version",
+        "curl -sf http://100.64.0.1:3009/api/swagger >/dev/null"
       ],
       "execution_class": "mutation",
       "budget": {

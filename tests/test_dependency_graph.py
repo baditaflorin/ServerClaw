@@ -7,7 +7,7 @@ import dependency_graph
 
 def test_dependency_graph_validates_against_service_catalog() -> None:
     graph = dependency_graph.load_dependency_graph(validate_schema=True)
-    assert len(graph.nodes) == 32
+    assert len(graph.nodes) == 33
     assert graph.nodes["ops_portal"].tier == 4
 
 
@@ -18,6 +18,7 @@ def test_compute_impact_for_postgres_includes_direct_and_transitive_failures() -
     assert set(impact.direct_hard) == {
         "gitea",
         "keycloak",
+        "langfuse",
         "mattermost",
         "n8n",
         "netbox",
