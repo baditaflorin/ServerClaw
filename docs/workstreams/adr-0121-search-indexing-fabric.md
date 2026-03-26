@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0121](../adr/0121-local-search-and-indexing-fabric.md)
 - Title: Postgres-native BM25 + trigram search over ADRs, runbooks, receipts, cases, alerts, configs, command catalog, and topology — no vector DB, no embeddings, no external service
-- Status: live_applied
+- Status: merged
 - Implemented In Repo Version: 0.119.0
 - Implemented In Platform Version: 0.130.20
 - Implemented On: 2026-03-26
@@ -89,4 +89,4 @@
   - `make live-apply-service service=api-gateway env=production` staged the corrected runtime content, but the role's final Keycloak bearer-token verification step failed and a later replay hit a transient SSH reconnect.
   - `make live-apply-service service=windmill env=production EXTRA_ARGS="--limit docker-runtime-lv3"` failed before the worker checkout stage on the unrelated `Ensure the pinned uv binaries are executable` privilege-escalation task.
 - To finish the live apply without losing the repo-managed fix set, the final recovery manually synchronized the corrected `scripts/search_fabric/` tree into `/opt/api-gateway/service` and `/srv/proxmox_florin_server`, rebuilt the API gateway container, and repaired ownership on `/srv/proxmox_florin_server/build`. This manual exception is recorded in the live-apply receipt and runbook.
-- Merge-to-main still needs the shared integration files that are protected on workstream branches: `README.md`, `VERSION`, `changelog.md`, and `versions/stack.yaml`.
+- The mainline integration completed in repository version `0.174.1`, which is the first `main` release that records the ADR 0121 production receipt and the runtime-hardening fixes together.

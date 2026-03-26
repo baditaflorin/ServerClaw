@@ -1636,7 +1636,7 @@ workstreams:
   - id: adr-0121-search-indexing-fabric
     adr: "0121"
     title: Local search and indexing fabric
-    status: live_applied
+    status: merged
     owner: codex
     branch: codex/ws-0121-live-apply
     worktree_path: .worktrees/ws-0121-live-apply
