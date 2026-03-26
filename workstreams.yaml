@@ -3141,10 +3141,10 @@ workstreams:
   - id: adr-0169-structured-log-contract
     adr: "0169"
     title: Structured log field contract
-    status: merged
+    status: live_applied
     owner: codex
-    branch: codex/live-apply-0169
-    worktree_path: .worktrees/adr-0169
+    branch: codex/live-apply-0169-main-v2
+    worktree_path: .worktrees/live-apply-0169-main-v2
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0169-structured-log-field-contract.md
     depends_on:
       - adr-0052-loki-logs
@@ -3163,6 +3163,8 @@ workstreams:
       - Makefile
       - inventory/group_vars/all.yml
       - docs/runbooks/
+    ready_to_merge: false
+    live_applied: true
 
   - id: adr-0161-real-time-agent-coordination-map
     adr: "0161"

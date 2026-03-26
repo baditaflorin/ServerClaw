@@ -3,8 +3,8 @@
 - Status: Implemented
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.146.1
-- Implemented In Platform Version: not yet
-- Implemented On: 2026-03-25
+- Implemented In Platform Version: 0.130.8
+- Implemented On: 2026-03-26
 - Date: 2026-03-24
 
 ## Context
@@ -87,6 +87,7 @@ Trade-offs:
 - live-apply and converge entrypoints inject `platform_trace_id` through [`Makefile`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/Makefile) and [`inventory/group_vars/all.yml`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/group_vars/all.yml)
 - Ansible emits structured task logs through [`collections/ansible_collections/lv3/platform/plugins/callback/structured_log.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/ansible_collections/lv3/platform/plugins/callback/structured_log.py)
 - the contract validator ships as [`scripts/log_validator.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/log_validator.py)
+- the production platform-context runtime was verified live from `main` in [`receipts/live-applies/2026-03-26-adr-0169-structured-log-contract-live-apply.json`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/live-applies/2026-03-26-adr-0169-structured-log-contract-live-apply.json)
 
 ## Related ADRs
 
