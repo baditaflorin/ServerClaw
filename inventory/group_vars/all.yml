@@ -71,6 +71,7 @@ proxmox_host_ssh_hardening_file: /etc/ssh/sshd_config.d/90-lv3-hardening.conf
 proxmox_management_allowed_sources:
   - 100.64.0.0/10
   - 10.10.10.0/24
+proxmox_breakglass_ssh_port: 2222
 proxmox_notification_email: baditaflorin@gmail.com
 proxmox_notification_author: Proxmox LV3
 proxmox_notification_endpoint_name: lv3-ops-email
