@@ -67,7 +67,7 @@
     },
     {
       "check": "maintenance_windows live refresh",
-      "result": "blocked",
+      "result": "partial",
       "observed": "`refresh-maintenance-windows.py` still depends on the controller-coupled SSH tunnel path in `scripts/maintenance_window_tool.py`, so the worker runtime could not verify the surface without additional runtime-specific NATS path work."
     }
   ],
