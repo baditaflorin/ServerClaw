@@ -1,10 +1,10 @@
 # ADR 0146: Langfuse For Agent Observability
 
 - Status: Accepted
-- Implementation Status: In Progress
-- Implemented In Repo Version: TBD
-- Implemented In Platform Version: TBD
-- Implemented On: TBD
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.163.0
+- Implemented In Platform Version: 0.130.14
+- Implemented On: 2026-03-26
 - Date: 2026-03-24
 
 ## Context

@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.162.0
-platform_version: 0.130.13
+repo_version: 0.163.0
+platform_version: 0.130.14
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -11,6 +11,7 @@ live_apply_evidence:
     agent_coordination: 2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply
     api_gateway: 2026-03-26-adr-0166-canonical-error-response-live-apply
     docker_runtime: 2026-03-22-adr-0023-docker-runtime-live-apply
+    langfuse: 2026-03-26-adr-0146-langfuse-live-apply
     postgres_vm: 2026-03-22-adr-0026-postgres-vm-live-apply
     uptime_kuma: 2026-03-22-adr-0027-uptime-kuma-live-apply
     build_telemetry: 2026-03-22-adr-0028-build-telemetry-live-apply
@@ -892,8 +893,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.162.0
+    current: 0.163.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.13
+    current: 0.130.14
     meaning: intended platform release for the actual server configuration

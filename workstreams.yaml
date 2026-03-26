@@ -2826,7 +2826,7 @@ workstreams:
   - id: adr-0146-ai-observability
     adr: "0146"
     title: Langfuse for agent observability
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/adr-0146-ai-observability
     worktree_path: .worktrees/adr-0146-ai-observability
@@ -2849,7 +2849,7 @@ workstreams:
       - scripts/langfuse_trace_smoke.py
       - platform/llm/observability.py
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0147-vaultwarden
     adr: "0147"
