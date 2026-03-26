@@ -2731,6 +2731,40 @@
           "Avoid minting ad hoc API tokens or editing project state in the UI without returning the final contract to git."
         ]
       }
+    },
+    "fault-injection": {
+      "description": "Run the ADR 0171 controlled fault-injection test suite on docker-runtime-lv3.",
+      "workflow_id": "fault-injection",
+      "scope": "guest_runtime",
+      "approval_policy": "standard_live_change",
+      "inputs": [
+        {
+          "name": "TARGET",
+          "kind": "operator_parameter",
+          "required": false,
+          "source": "Makefile",
+          "description": "Optional fault scenario target to run; defaults to the full suite."
+        }
+      ],
+      "expected_preconditions": [
+        "make validate passes before executing any fault scenarios",
+        "docker-runtime-lv3 is healthy and all monitored services are active",
+        "No concurrent Ansible playbook runs are targeting docker-runtime-lv3"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the fault scenario set executed, any services that experienced transient failures, and the recovery verification outcome."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if a service fails to recover within the defined timeout window.",
+          "Stop if the fault injection harness reports an unexpected unrecoverable failure."
+        ],
+        "rollback_guidance": [
+          "Re-run the relevant service playbook to restore the service to converged state.",
+          "Use make validate to confirm the repository remains consistent after any recovery action."
+        ]
+      }
     }
   }
 }
