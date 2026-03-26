@@ -692,74 +692,56 @@
       - windmill_idempotency_schema_check.stdout | trim == 'platform.idempotency_records'
     fail_msg: "ADR 0165 live schema apply did not create platform.idempotency_records in the Windmill database."
 
-- name: Delete existing repo-managed Windmill scripts before reseeding
-  ansible.builtin.uri:
-    url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id | urlencode }}/scripts/delete/p/{{ item.path | urlencode }}"
-    method: POST
-    headers:
-      Authorization: "Bearer {{ windmill_superadmin_secret }}"
-    return_content: true
-    status_code:
-      - 200
-      - 400
-      - 404
-  loop: "{{ windmill_seed_scripts }}"
-  loop_control:
-    label: "{{ item.path }}"
-  register: windmill_seed_script_delete
-  changed_when: false
-  no_log: true
+- name: Create a local manifest path for repo-managed Windmill scripts
+  ansible.builtin.tempfile:
+    state: file
+    suffix: .json
+  delegate_to: localhost
+  become: false
+  register: windmill_seed_script_manifest_local
 
-- name: Assert repo-managed Windmill script deletes only returned accepted statuses
-  ansible.builtin.assert:
-    that:
-      - item.status in [200, 404] or (item.status == 400 and 'no rows returned' in (item.content | default('') | lower))
-    fail_msg: >-
-      Windmill refused to delete {{ item.item.path }} during script reseed with status {{ item.status }}
-      and content {{ item.content | default('') | to_json }}.
-  loop: "{{ windmill_seed_script_delete.results }}"
-  loop_control:
-    label: "{{ item.item.path }}"
-  changed_when: false
-  no_log: true
+- name: Render the repo-managed Windmill script manifest locally
+  ansible.builtin.copy:
+    dest: "{{ windmill_seed_script_manifest_local.path }}"
+    content: "{{ windmill_seed_scripts | to_nice_json }}"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
 
 - name: Sync repo-managed Windmill scripts
   vars:
     mutation_audit_action: sync.windmill_scripts
     mutation_audit_target: windmill-workspace
     mutation_audit_emit_on_success: true
-  ansible.builtin.uri:
-    url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id | urlencode }}/scripts/create"
-    method: POST
-    headers:
-      Authorization: "Bearer {{ windmill_superadmin_secret }}"
-    body_format: json
-    body:
-      path: "{{ item.path }}"
-      language: "{{ item.language }}"
-      summary: "{{ item.summary }}"
-      description: "{{ item.description }}"
-      kind: script
-      deployment_message: Repo-managed Windmill seed sync
-      content: >-
-        {{
-          lookup('ansible.builtin.template', item.template_src)
-          if item.template_src is defined
-          else lookup('ansible.builtin.file', item.local_file)
-        }}
-    return_content: true
-    status_code:
-      - 201
-      - 400
-  loop: "{{ windmill_seed_scripts }}"
-  loop_control:
-    label: "{{ item.path }}"
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ inventory_dir }}/../scripts/sync_windmill_seed_scripts.py"
+      - --base-url
+      - "{{ windmill_private_base_url }}"
+      - --workspace
+      - "{{ windmill_workspace_id }}"
+      - --manifest
+      - "{{ windmill_seed_script_manifest_local.path }}"
+      - --max-attempts
+      - "8"
+      - --settle-interval
+      - "1.0"
+  delegate_to: localhost
+  become: false
+  environment:
+    WINDMILL_TOKEN: "{{ windmill_superadmin_secret }}"
   register: windmill_seed_script_sync
-  failed_when: false
   changed_when: false
-  no_log: true
   tags:
     - mutation
+
+- name: Remove the local repo-managed Windmill script manifest
+  ansible.builtin.file:
+    path: "{{ windmill_seed_script_manifest_local.path }}"
+    state: absent
+  delegate_to: localhost
+  become: false
 
 - name: Ensure the Windmill seed app sync directory exists
   ansible.builtin.file:

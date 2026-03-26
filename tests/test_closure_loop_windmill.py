@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import platform as stdlib_platform
+import sys
 from pathlib import Path
 
 
@@ -53,6 +55,19 @@ def build_report(payload):
     payload = module.main(
         findings=[{"severity": "critical", "check": "check-service-health", "service_id": "netbox"}],
         repo_path=str(repo_root),
+    )
+
+    assert payload["status"] == "ok"
+    assert payload["processed_count"] == 1
+    assert payload["processed_runs"][0]["service_id"] == "netbox"
+
+
+def test_wrapper_handles_stdlib_platform_collision(tmp_path: Path) -> None:
+    sys.modules["platform"] = stdlib_platform
+    module = load_module("platform_observation_loop_stdlib_platform", WRAPPER_PATH)
+    payload = module.main(
+        findings=[{"severity": "critical", "check": "check-service-health", "service_id": "netbox"}],
+        repo_path=str(REPO_ROOT),
     )
 
     assert payload["status"] == "ok"
