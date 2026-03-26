@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.160.0
-platform_version: 0.130.11
+repo_version: 0.161.0
+platform_version: 0.130.12
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -20,7 +20,8 @@ live_apply_evidence:
     mail_platform: 2026-03-24-keycloak-password-reset-mail-live-apply
     step_ca: 2026-03-22-adr-0042-step-ca-live-apply
     openbao: 2026-03-25-adr-0170-timeout-hierarchy-live-apply
-    windmill: 2026-03-26-adr-0162-deadlock-detector-live-apply
+    vaultwarden: 2026-03-26-adr-0153-live-apply
+    windmill: 2026-03-26-adr-0153-live-apply
     deadlock_detector: 2026-03-26-adr-0162-deadlock-detector-live-apply
     mattermost: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
     portainer: 2026-03-22-adr-0055-portainer-live-apply
@@ -890,8 +891,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.159.2
+    current: 0.161.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.10
+    current: 0.130.12
     meaning: intended platform release for the actual server configuration

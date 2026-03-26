@@ -4,8 +4,8 @@
 - Title: Worker-shared typed resource locks with TTL, hierarchy, deadlock-detector integration, and controller-local inspection tooling
 - Status: merged
 - Implemented In Repo Version: 0.150.0
-- Implemented In Platform Version: not yet
-- Implemented On: 2026-03-25
+- Implemented In Platform Version: 0.130.12
+- Implemented On: 2026-03-26
 - Branch: `codex/adr-0153-distributed-resource-lock-registry`
 - Worktree: `.worktrees/adr-0153`
 - Owner: codex
@@ -24,7 +24,7 @@
 
 - claiming the JetStream KV backend is already the default runtime for the first repository implementation
 - introducing lock-dashboard UI in this workstream
-- marking the platform implementation as live-applied while host access remains unavailable
+- rewinding the newer mainline scheduler architecture to the older ADR 0153 branch shape
 
 ## Expected Repo Surfaces
 
@@ -61,4 +61,13 @@
 - repository implementation first merged in repo release `0.150.0`
 - current `main` now carries the missing ADR 0153 runbook, workstream record, and current-main-compatible lock tool without reintroducing the earlier divergent scheduler branch
 - focused lock-registry and lock-tool tests cover duplicate refresh, heartbeat, release-all, CLI round-trip, and conflict handling
-- the first live apply remains blocked as of 2026-03-25 because SSH and API access to `proxmox_florin` were unavailable from the controller
+- release `0.161.0` completes the first current-mainline live replay for ADR 0153 on `2026-03-26` and advances platform version to `0.130.12`
+
+## Live Apply Notes
+
+- The first 2026-03-25 retry reached `proxmox_florin`, `postgres-lv3`, and `docker-runtime-lv3` but failed when the local OpenBao API on `docker-runtime-lv3` answered `503` with `sealed: true`.
+- The recovery work identified a repo-owned timer bug: the OpenBao and Vaultwarden certificate-renew helpers reissued 24-hour certificates every 15 minutes, repeatedly restarting OpenBao and resealing it. The managed renewal threshold is now 6 hours instead of 24 hours.
+- Recovery also required one manual Docker daemon restart on `docker-runtime-lv3` to restore the missing `nat` `DOCKER` chain and one manual OpenBao unseal using the existing controller-local recovery material after an interrupted replay left the runtime half-unsealed.
+- Because this integration ran from a separate worktree, the worktree-local Windmill database password had diverged from the canonical controller-local secret already mirrored in OpenBao. Syncing the worktree secret back to the canonical root checkout was required before the successful current-mainline replay.
+- Vaultwarden then exposed two current-mainline gaps during the same live replay: the admin-token hash generation path needed a TTY-aware `vaultwarden hash` invocation, and the controller-path verification could not rely on local DNS or default source-address selection on this workstation. The role now generates hashes through `script -qec`, persists non-empty hashes safely, and falls back to a Tailscale-bound controller probe when `vault.lv3.org` does not resolve locally.
+- The successful current-mainline replay completed on `2026-03-26` through the production OpenBao, Windmill, and Vaultwarden converges. Direct verification confirmed Vaultwarden returned `200` on the published controller path, `CE v1.662.0`, healthy Windmill workers, an unsealed OpenBao API on `http://127.0.0.1:8201/v1/sys/health`, and a runtime `DATABASE_URL` matching the canonical controller-local secret.

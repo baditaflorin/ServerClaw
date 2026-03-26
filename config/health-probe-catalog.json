@@ -607,7 +607,7 @@
         "timeout_seconds": 120,
         "retries": 1,
         "delay_seconds": 0,
-        "host": "127.0.0.1",
+        "host": "10.10.10.20",
         "port": 9000
       },
       "readiness": {
@@ -1229,7 +1229,7 @@
         "timeout_seconds": 60,
         "retries": 12,
         "delay_seconds": 5,
-        "url": "https://127.0.0.1:8222/alive",
+        "url": "https://10.10.10.20:8222/alive",
         "method": "GET",
         "expected_status": [
           200

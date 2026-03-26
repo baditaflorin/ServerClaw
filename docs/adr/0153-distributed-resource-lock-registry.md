@@ -3,8 +3,8 @@
 - Status: Accepted
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.150.0
-- Implemented In Platform Version: 0.130.11
-- Implemented On: 2026-03-25
+- Implemented In Platform Version: 0.130.12
+- Implemented On: 2026-03-26
 - Date: 2026-03-24
 
 ## Context
@@ -171,6 +171,12 @@ All lock acquisitions, upgrades, releases, and expirations are published to NATS
 
 - The NATS JetStream KV bucket is now on the critical path for every platform mutation. If the NATS broker is unavailable, no locks can be acquired and agents degrade to no-mutation mode (safe default).
 - Lock granularity is a design decision that requires ongoing calibration. Too coarse (service-level locks only) and parallelism is lost; too fine (file-level locks only) and agents forget to lock parents.
+
+## Implementation Status
+
+- Repository implementation first landed in release `0.150.0`.
+- The current-mainline live replay completed on `2026-03-26` after reconverging the OpenBao dependency path and rerunning the Windmill control-plane apply from a branch based on the then-current `origin/main`.
+- That replay advances platform version to `0.130.12` and confirms the current-main-compatible lock registry, runbook, and controller-local inspection tooling on the production control plane without regressing the later ADR 0161 and ADR 0162 runtime surfaces.
 
 ## Related ADRs
 

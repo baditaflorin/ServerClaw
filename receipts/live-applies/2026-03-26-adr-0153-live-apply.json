@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-26-adr-0153-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-26",
+  "recorded_on": "2026-03-26",
+  "recorded_by": "codex",
+  "source_commit": "e2ee3cda63dc06c77943b4429c860c79765352c5",
+  "repo_version_context": "0.161.0",
+  "workflow_id": "converge-vaultwarden",
+  "adr": "0153",
+  "summary": "Completed the current-mainline live replay for ADR 0153 by reconverging Vaultwarden after the same-day OpenBao and Windmill dependency replays, then verifying the private controller-only service path and its runtime dependencies against production state.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 150,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "vaultwarden",
+      "address": "100.64.0.1:443"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "windmill",
+      "address": "100.64.0.1:8005"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "openbao",
+      "address": "10.10.10.20:8201"
+    }
+  ],
+  "verification": [
+    {
+      "check": "OpenBao local health",
+      "result": "pass",
+      "observed": "A direct probe to `http://127.0.0.1:8201/v1/sys/health` on `docker-runtime-lv3` returned `200` after the final ADR 0153 replay sequence, confirming the local OpenBao API was unsealed and answering again."
+    },
+    {
+      "check": "Windmill live replay",
+      "result": "pass",
+      "observed": "The production replay finished on 2026-03-26 with `docker-runtime-lv3 : ok=151 changed=11 unreachable=0 failed=0`, `postgres-lv3 : ok=57 changed=1 unreachable=0 failed=0`, and `proxmox_florin : ok=35 changed=4 unreachable=0 failed=0` before the final Vaultwarden-only runtime replay."
+    },
+    {
+      "check": "Windmill API version",
+      "result": "pass",
+      "observed": "A direct probe to `http://127.0.0.1:8000/api/version` on `docker-runtime-lv3` returned `CE v1.662.0` after the current-mainline replay."
+    },
+    {
+      "check": "Windmill workers",
+      "result": "pass",
+      "observed": "`docker compose --file /opt/windmill/docker-compose.yml ps` showed `windmill_server`, `windmill_worker`, and `windmill_worker_native` all `Up` after the replay."
+    },
+    {
+      "check": "Vaultwarden controller path",
+      "result": "pass",
+      "observed": "A controller-side probe bound to the local Tailscale address and sent through the Proxmox host proxy returned `200` for `https://vault.lv3.org/alive`, confirming the private Vaultwarden entrypoint was reachable after the runtime replay."
+    },
+    {
+      "check": "Vaultwarden runtime state",
+      "result": "pass",
+      "observed": "`docker ps` on `docker-runtime-lv3` showed `vaultwarden` healthy with `10.10.10.20:8222->8222/tcp`, and the controller-local bootstrap receipt under `.local/vaultwarden/bootstrap.json` remained populated after the final replay."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0153-distributed-resource-lock-registry.md",
+    "docs/runbooks/resource-lock-registry.md",
+    "docs/workstreams/adr-0153-distributed-resource-lock-registry.md",
+    "scripts/resource_lock_tool.py",
+    "collections/ansible_collections/lv3/platform/roles/openbao_runtime/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/vaultwarden_runtime/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/vaultwarden_runtime/tasks/verify.yml",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "The pre-replay recovery path required a manual `systemctl restart docker` on `docker-runtime-lv3` to restore the missing `nat` `DOCKER` chain so newly published Windmill ports could start again.",
+    "OpenBao had to be manually unsealed once on `docker-runtime-lv3` using the existing controller-local recovery material after an interrupted replay left the local API half-unsealed.",
+    "The separate-worktree Windmill database password had drifted from the canonical root checkout `.local` secret already mirrored in OpenBao; syncing the worktree secret back to the canonical value was required before the successful current-mainline replay.",
+    "Vaultwarden required additional current-mainline hardening during the same live-apply sequence: the admin-token hash generation path now runs with a TTY-aware `vaultwarden hash` invocation, the PostgreSQL password is URL-encoded in the compose file, and the controller-path verification falls back to a Tailscale-bound probe when the private hostname does not resolve locally."
+  ]
+}

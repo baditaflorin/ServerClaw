@@ -44,7 +44,7 @@ openbao_tls_server_sans:
   - "{{ platform_service_topology | platform_service_host('openbao') }}"
   - "{{ platform_host.management.tailscale_ipv4 }}"
 openbao_tls_certificate_not_after: 24h
-openbao_tls_cert_renew_before_seconds: 86400
+openbao_tls_cert_renew_before_seconds: 21600
 openbao_tls_renewal_timer_name: lv3-openbao-cert-renew
 openbao_tls_renewal_script_path: "/usr/local/libexec/{{ openbao_tls_renewal_timer_name }}.sh"
 openbao_tls_renewal_service_path: "/etc/systemd/system/{{ openbao_tls_renewal_timer_name }}.service"

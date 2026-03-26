@@ -105,8 +105,8 @@ The repository now also ships ADR 0137 crawl policy automation: the shared publi
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.160.0` |
-| Platform version | `0.130.11` |
+| Repository version | `0.161.0` |
+| Platform version | `0.130.12` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -182,7 +182,8 @@ Template VM: `9000` `debian13-cloud-template`
 | `step_ca` | `2026-03-22-adr-0042-step-ca-live-apply` |
 | `tempo_tracing` | `2026-03-22-adr-0053-tempo-traces-live-apply` |
 | `uptime_kuma` | `2026-03-22-adr-0027-uptime-kuma-live-apply` |
-| `windmill` | `2026-03-26-adr-0162-deadlock-detector-live-apply` |
+| `vaultwarden` | `2026-03-26-adr-0153-live-apply` |
+| `windmill` | `2026-03-26-adr-0153-live-apply` |
 <!-- END GENERATED: platform-status -->
 
 The current access posture is:
@@ -846,8 +847,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.160.0` |
-| Platform version | `0.130.11` |
+| Repository version | `0.161.0` |
+| Platform version | `0.130.12` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |

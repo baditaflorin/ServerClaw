@@ -12,7 +12,9 @@ vaultwarden_controller_url: "{{ platform_service_topology | platform_service_url
 vaultwarden_public_base_url: "https://{{ vaultwarden_service_topology.public_hostname }}"
 vaultwarden_database_name: vaultwarden
 vaultwarden_database_user: vaultwarden_admin
-vaultwarden_database_host: "{{ (hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('postgres')).public_hostname }}"
+vaultwarden_database_inventory_host: >-
+  {{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}
+vaultwarden_database_host: "{{ hostvars[vaultwarden_database_inventory_host].ansible_host }}"
 vaultwarden_database_port: 5432
 vaultwarden_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/vaultwarden
 vaultwarden_database_password_local_file: "{{ vaultwarden_local_artifact_dir }}/database-password.txt"
@@ -27,7 +29,7 @@ vaultwarden_invitations_allowed: true
 vaultwarden_admin_enabled: true
 vaultwarden_sends_allowed: false
 vaultwarden_websocket_enabled: true
-vaultwarden_local_health_url: "https://127.0.0.1:{{ vaultwarden_https_port }}"
+vaultwarden_local_health_url: "{{ vaultwarden_internal_base_url }}"
 vaultwarden_tls_server_cert_host_file: "{{ vaultwarden_tls_dir }}/server.crt"
 vaultwarden_tls_server_key_host_file: "{{ vaultwarden_tls_dir }}/server.key"
 vaultwarden_tls_server_cert_file: /ssl/server.crt
@@ -40,7 +42,7 @@ vaultwarden_tls_server_sans:
   - 127.0.0.1
   - "{{ ansible_host }}"
 vaultwarden_tls_certificate_not_after: 24h
-vaultwarden_tls_cert_renew_before_seconds: 86400
+vaultwarden_tls_cert_renew_before_seconds: 21600
 vaultwarden_tls_renewal_timer_name: lv3-vaultwarden-cert-renew
 vaultwarden_tls_renewal_script_path: "/usr/local/libexec/{{ vaultwarden_tls_renewal_timer_name }}.sh"
 vaultwarden_tls_renewal_service_path: "/etc/systemd/system/{{ vaultwarden_tls_renewal_timer_name }}.service"
