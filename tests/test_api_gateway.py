@@ -581,7 +581,15 @@ def test_nats_emitter_buffers_and_flushes_outbox(tmp_path: Path) -> None:
     )
     publish_calls = {"count": 0}
 
-    def fake_publish(host: str, port: int, subject: str, payload: bytes) -> None:
+    def fake_publish(
+        host: str,
+        port: int,
+        subject: str,
+        payload: bytes,
+        *,
+        username: str | None = None,
+        password: str | None = None,
+    ) -> None:
         publish_calls["count"] += 1
         if publish_calls["count"] == 1:
             raise OSError("nats unavailable")
@@ -620,6 +628,33 @@ def test_nats_emitter_buffers_and_flushes_outbox(tmp_path: Path) -> None:
         )
         assert not emitter._outbox_path.exists()
         assert not emitter._degradation_store.active_for_service("api_gateway")
+
+
+def test_nats_emitter_sends_credentials_in_connect_frame() -> None:
+    sent_frames: list[bytes] = []
+
+    class FakeSocket:
+        def sendall(self, data: bytes) -> None:
+            sent_frames.append(data)
+
+        def __enter__(self) -> "FakeSocket":
+            return self
+
+        def __exit__(self, exc_type, exc, tb) -> None:
+            return None
+
+    with patch.object(gateway_main.socket, "create_connection", return_value=FakeSocket()):
+        gateway_main.NatsEventEmitter._publish(
+            "127.0.0.1",
+            4222,
+            "platform.api.request",
+            b'{"ok":true}',
+            username="jetstream-admin",
+            password="secret-value",
+        )
+
+    assert sent_frames[0] == b'CONNECT {"verbose":false,"user":"jetstream-admin","pass":"secret-value"}\r\n'
+    assert sent_frames[1] == b'PUB platform.api.request 11\r\n{"ok":true}\r\n'
 
 
 def test_gateway_deploy_forwards_trace_id_to_webhook(tmp_path: Path) -> None:

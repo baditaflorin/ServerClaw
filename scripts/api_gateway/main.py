@@ -407,12 +407,16 @@ class NatsEventEmitter:
         self,
         nats_url: str | None,
         *,
+        username: str | None = None,
+        password: str | None = None,
         outbox_path: Path,
         degradation_store: DegradationStateStore | None,
         degradation_mode: dict[str, Any] | None,
         circuit_breaker: Any | None = None,
     ) -> None:
         self._parsed = urlparse(nats_url) if nats_url else None
+        self._username = username
+        self._password = password
         self._retry_policy = policy_for_surface("nats_publish")
         self._outbox_path = outbox_path
         self._degradation_store = degradation_store
@@ -486,7 +490,15 @@ class NatsEventEmitter:
     async def _publish_live(self, host: str, port: int, subject: str, payload: bytes) -> None:
         async def publish() -> None:
             await async_with_retry(
-                lambda: asyncio.to_thread(self._publish, host, port, subject, payload),
+                lambda: asyncio.to_thread(
+                    self._publish,
+                    host,
+                    port,
+                    subject,
+                    payload,
+                    username=self._username,
+                    password=self._password,
+                ),
                 policy=self._retry_policy,
                 error_context=f"gateway nats publish {subject}",
             )
@@ -497,12 +509,26 @@ class NatsEventEmitter:
         await publish()
 
     @staticmethod
-    def _publish(host: str, port: int, subject: str, payload: bytes) -> None:
+    def _publish(
+        host: str,
+        port: int,
+        subject: str,
+        payload: bytes,
+        *,
+        username: str | None = None,
+        password: str | None = None,
+    ) -> None:
+        connect_payload: dict[str, Any] = {"verbose": False}
+        if username:
+            connect_payload["user"] = username
+        if password:
+            connect_payload["pass"] = password
         with socket.create_connection(
             (host, port),
             timeout=resolve_timeout_seconds("liveness_probe", 3),
         ) as sock:
-            sock.sendall(b'CONNECT {"verbose":false}\r\n')
+            connect_frame = json.dumps(connect_payload, separators=(",", ":")).encode()
+            sock.sendall(b"CONNECT " + connect_frame + b"\r\n")
             sock.sendall(f"PUB {subject} {len(payload)}\r\n".encode() + payload + b"\r\n")
 
 
@@ -542,6 +568,8 @@ class GatewayRuntime:
         )
         self.event_emitter = NatsEventEmitter(
             config.nats_url,
+            username=config.nats_username,
+            password=config.nats_password,
             outbox_path=config.nats_outbox_path,
             degradation_store=self.degradation_store,
             degradation_mode=self.degradation_mode("api_gateway", "nats"),
