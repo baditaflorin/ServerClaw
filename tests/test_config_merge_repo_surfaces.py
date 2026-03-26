@@ -41,7 +41,7 @@ def test_windmill_defaults_seed_config_merge_script_and_schedule() -> None:
     assert schedule_map["f/lv3/config_merge/merge_config_changes_every_minute"]["args"]["dsn"] == "{{ windmill_database_dsn }}"
 
 
-def test_windmill_script_delete_task_allows_missing_rows() -> None:
+def test_windmill_script_sync_uses_manifest_helper() -> None:
     tasks = (
         REPO_ROOT
         / "collections"
@@ -54,10 +54,10 @@ def test_windmill_script_delete_task_allows_missing_rows() -> None:
         / "main.yml"
     ).read_text(encoding="utf-8")
 
-    assert "Delete existing repo-managed Windmill scripts before reseeding" in tasks
-    assert "status_code:\n      - 200\n      - 400\n      - 404" in tasks
-    assert "Assert repo-managed Windmill script deletes only returned accepted statuses" in tasks
-    assert "'no rows returned' in (item.content | default('') | lower)" in tasks
+    assert "Create a local manifest path for repo-managed Windmill scripts" in tasks
+    assert "Render the repo-managed Windmill script manifest locally" in tasks
+    assert "{{ inventory_dir }}/../scripts/sync_windmill_seed_scripts.py" in tasks
+    assert "{{ windmill_seed_script_manifest_local.path }}" in tasks
 
 
 def test_windmill_defaults_use_git_common_dir_for_shared_local_artifacts() -> None:

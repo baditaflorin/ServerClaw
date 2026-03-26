@@ -10,6 +10,7 @@ import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 WRAPPER_PATH = REPO_ROOT / "config" / "windmill" / "scripts" / "merge-config-changes.py"
+SYNC_HELPER_PATH = REPO_ROOT / "scripts" / "sync_windmill_seed_scripts.py"
 
 
 def load_module(name: str, path: Path):
@@ -85,3 +86,38 @@ def test_wrapper_reads_dsn_from_proc_environ_fallback(tmp_path: Path) -> None:
         module.resolve_dsn(None, proc_environ_path=str(proc_environ))
         == "postgres://windmill_admin:secret@10.10.10.50:5432/windmill?sslmode=disable"
     )
+
+
+def test_sync_helper_tolerates_missing_row_delete_response(monkeypatch: pytest.MonkeyPatch) -> None:
+    module = load_module("sync_helper_missing_rows", SYNC_HELPER_PATH)
+
+    def fake_request_json_or_text(**kwargs):
+        assert kwargs["method"] == "POST"
+        return 400, "No rows returned"
+
+    monkeypatch.setattr(module, "request_json_or_text", fake_request_json_or_text)
+
+    module.delete_script(
+        base_url="http://windmill.internal",
+        workspace="lv3",
+        token="token",
+        script_path="f/lv3/config_merge/merge_config_changes",
+    )
+
+
+def test_sync_helper_rejects_unexpected_delete_400(monkeypatch: pytest.MonkeyPatch) -> None:
+    module = load_module("sync_helper_bad_delete", SYNC_HELPER_PATH)
+
+    def fake_request_json_or_text(**kwargs):
+        assert kwargs["method"] == "POST"
+        return 400, "constraint violation"
+
+    monkeypatch.setattr(module, "request_json_or_text", fake_request_json_or_text)
+
+    with pytest.raises(module.SyncError, match="returned 400"):
+        module.delete_script(
+            base_url="http://windmill.internal",
+            workspace="lv3",
+            token="token",
+            script_path="f/lv3/config_merge/merge_config_changes",
+        )
