@@ -43,9 +43,11 @@ The workflow manages these live surfaces:
 - seeded helper `f/lv3/mutation_audit_emit`
 - seeded helper `f/lv3/lane_scheduler`
 - seeded helper `f/lv3/scheduler_watchdog`
+- seeded helper `f/lv3/ephemeral_vm_reaper`
 - enabled schedule `f/lv3/scheduler_watchdog_loop_every_10s`
 - seeded helper `f/lv3/config_merge/merge_config_changes`
 - enabled schedule `f/lv3/config_merge/merge_config_changes_every_minute`
+- enabled schedule `f/lv3/ephemeral_vm_reaper_every_30m`
 - PostgreSQL table `config_change_staging` in the Windmill database
 - enabled schedule `f/lv3/lane_scheduler_every_2s`
 - enabled schedule `f/lv3/scheduler_watchdog_every_30s`
@@ -72,6 +74,9 @@ Run these checks after converge:
 9. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.50 "psql -d windmill -Atqc \"SELECT to_regclass('public.config_change_staging')\""`
 10. `curl -s -X POST -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" -H "Content-Type: application/json" -d '{}' http://100.64.0.1:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fconfig_merge%2Fmerge_config_changes`
 11. `curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" http://100.64.0.1:8005/api/w/lv3/schedules/list | jq '.[] | select(.path=="f/lv3/lane_scheduler_every_2s" or .path=="f/lv3/scheduler_watchdog_every_30s" or .path=="f/lv3/config_merge/merge_config_changes_every_minute") | {path, enabled, schedule}'`
+12. `curl -s -X POST -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" -H "Content-Type: application/json" -d '{}' http://100.64.0.1:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fephemeral_vm_reaper`
+13. `curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" http://100.64.0.1:8005/api/w/lv3/schedules/list | jq '.[] | select(.path=="f/lv3/ephemeral_vm_reaper_every_30m") | {path, enabled, schedule, script_path}'`
+14. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'ls -l /srv/proxmox_florin_server/.local/proxmox-api/lv3-automation-primary.json && cat /srv/proxmox_florin_server/receipts/fixtures/reaper-run-20260326T143309Z.json'`
 
 ## Notes
 
@@ -80,5 +85,6 @@ Run these checks after converge:
 - No repo-managed Windmill job in this rollout stores long-lived third-party secrets inside Windmill. Secret-bearing workflows should wait for ADR 0043 or use another approved authority.
 - The seeded `f/lv3/rotate_credentials` script summarizes the canonical secret-rotation catalog and is the first Windmill surface for ADR 0065.
 - The seeded `f/lv3/config_merge/merge_config_changes` worker is the ADR 0158 merge writer for `config_change_staging`.
+- The ADR 0106 reaper uses the mounted worker checkout as its durable credential bridge. Keep `/srv/proxmox_florin_server/.local/proxmox-api/lv3-automation-primary.json` present and `receipts/fixtures/` writable on `docker-runtime-lv3` so `run_wait_result` executions can both talk to Proxmox and persist summary receipts.
 - ADR 0172 owns the live scheduler watchdog seed and schedule. ADR 0170 aligns the timeout hierarchy used around that path.
 - Backup coverage comes from the existing VM backup policy: `postgres-lv3` protects the Windmill database and `docker-runtime-lv3` protects the runtime filesystem and logs.

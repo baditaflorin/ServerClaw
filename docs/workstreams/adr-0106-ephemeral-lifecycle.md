@@ -2,9 +2,12 @@
 
 - ADR: [ADR 0106](../adr/0106-ephemeral-environment-lifecycle-policy.md)
 - Title: Govern the 910-979 ephemeral VM pool with expiry tags, capacity reservation, cluster-aware reaping, and operator-visible status
-- Status: merged
-- Branch: `codex/adr-0106-ephemeral-lifecycle`
-- Worktree: `../proxmox_florin_server-ephemeral-lifecycle`
+- Status: live_applied
+- Implemented In Repo Version: 0.97.0
+- Implemented In Platform Version: 0.130.20
+- Implemented On: 2026-03-26
+- Branch: `codex/ws-0106-live-apply`
+- Worktree: `.worktrees/ws-0106-live-apply`
 - Owner: codex
 - Depends On: `adr-0072-staging-production-topology`, `adr-0085-opentofu-vm-lifecycle`, `adr-0088-ephemeral-fixtures`, `adr-0093-interactive-ops-portal`, `adr-0105-capacity-model`
 - Conflicts With: none
@@ -25,7 +28,6 @@
 
 - Windmill job-awareness before reaping a currently-used VM
 - per-operator quotas inside the shared pool
-- a live platform claim that the reaper schedule is already enabled from `main`
 
 ## Expected Repo Surfaces
 
@@ -38,21 +40,30 @@
 - [docs/runbooks/ephemeral-fixtures.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/ephemeral-fixtures.md)
 - [docs/runbooks/scaffold-new-service.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/scaffold-new-service.md)
 
-## Live Surfaces Still Pending
+## Expected Live Surfaces
 
-- the Windmill schedule for `ephemeral-vm-reaper` is not claimed as live from this repo-only merge
-- no platform version bump is claimed because the host-side schedule and end-to-end live sweep were not applied from `main` in this workstream
+- Windmill workspace `lv3` contains the script `f/lv3/ephemeral_vm_reaper`
+- Windmill schedule `f/lv3/ephemeral_vm_reaper_every_30m` is present and enabled
+- the mounted worker checkout carries `/srv/proxmox_florin_server/.local/proxmox-api/lv3-automation-primary.json`
+- a manual `run_wait_result` execution writes a `receipts/fixtures/reaper-run-*.json` summary on `docker-runtime-lv3`
 
-## Verification Run
+## Verification
 
-- `uvx --with pytest --with pyyaml --with jsonschema pytest tests/test_vmid_allocator.py tests/test_fixture_manager.py tests/test_fixture_expiry_reaper.py tests/test_ephemeral_vm_reaper.py tests/test_lv3_cli.py tests/test_ops_portal.py tests/test_validate_ephemeral_vmid.py`
-- `uvx --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`
-- `uvx --with pyyaml python scripts/validate_ephemeral_vmid.py --validate`
-- `uvx --with pyyaml --with jsonschema python scripts/generate_ops_portal.py --output-dir /tmp/ops-portal-0106 --health-snapshot tests/fixtures/ops_portal_health.json --probe-timeout 0 --write`
+- `uv run --with pytest --with pyyaml python -m pytest tests/test_ephemeral_vm_reaper.py tests/test_fixture_expiry_reaper.py tests/test_ephemeral_lifecycle_repo_surfaces.py tests/test_deadlock_repo_surfaces.py -q`
+- `make syntax-check-windmill`
+- `ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory/hosts.yml playbooks/windmill.yml --limit docker-runtime-lv3 --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump`
+- `curl -s -X POST -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" -H "Content-Type: application/json" -d '{}' http://100.64.0.1:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fephemeral_vm_reaper`
+- `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'cat /srv/proxmox_florin_server/receipts/fixtures/reaper-run-20260326T143309Z.json'`
 
-## Merge Criteria Result
+## Live Apply Result
 
 - repo-side lifecycle enforcement is complete
 - repo-side validation covers the governed ephemeral range and capacity seed
 - static operator visibility for active repo-managed ephemeral VMs exists
-- live enablement remains a follow-up from `main`
+- the live Windmill schedule is enabled and a clean manual sweep returned `{"expired_vmids":[],"retagged_vmids":[],"skipped_vmids":[],"warned_vmids":[]}`
+- the live worker now resolves Proxmox credentials through the mirrored repo-local token payload when the sandboxed job environment does not inherit the runtime env contract
+
+## Merge Notes
+
+- Protected integration files remain deferred to merge-to-`main`: `README.md`, `VERSION`, release sections in `changelog.md`, and `versions/stack.yaml`
+- The 2026-03-26 converge reached worker-checkout sync, runtime secret refresh, Windmill startup, script sync, and schedule reconciliation. A no-log Windmill task failed once in the final schedule/healthcheck tail, but the equivalent schedule update loop and the seeded `f/lv3/windmill_healthcheck` plus `f/lv3/ephemeral_vm_reaper` API runs were replayed successfully from the same branch state.

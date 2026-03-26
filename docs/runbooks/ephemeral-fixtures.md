@@ -73,7 +73,11 @@ python3 config/windmill/scripts/ephemeral-vm-reaper.py
 
 It scans the governed `910-979` pool, destroys expired ephemeral VMs, adds a one-hour grace expiry tag to unowned VMs found in that range, and writes a `reaper-run-<timestamp>.json` summary receipt.
 
+The live Windmill worker path uses the mounted repo checkout at `/srv/proxmox_florin_server`. The reaper now prefers a repo-local Proxmox API token payload mirrored to `/srv/proxmox_florin_server/.local/proxmox-api/lv3-automation-primary.json` because the sandboxed Windmill job environment does not reliably inherit the runtime env contract during `run_wait_result` execution.
+
 ## Live Rollout Notes
 
-- Repo automation is complete through `0.97.0`, but live use still depends on ADR 0072's staging bridge on `vmbr20`.
-- Do not enable the Windmill reaper schedule until `make fixture-up FIXTURE=docker-host` succeeds from `main` against the live host and the schedule is applied from a clean `main` checkout.
+- Repository automation shipped in repo version `0.97.0`; the first verified production live apply completed on `2026-03-26` in platform version `0.130.20`.
+- Windmill schedule `f/lv3/ephemeral_vm_reaper_every_30m` is now enabled on `docker-runtime-lv3`.
+- Manual API verification from the controller returned `{"expired_vmids":[],"retagged_vmids":[],"skipped_vmids":[],"warned_vmids":[]}` and wrote `/srv/proxmox_florin_server/receipts/fixtures/reaper-run-20260326T143309Z.json`.
+- The 2026-03-26 live path required committed runtime changes in the Windmill role plus two host-side operating details that are now documented here: mirroring the Proxmox token payload into the mounted worker checkout and keeping `receipts/fixtures/` writable for worker-generated reaper receipts.

@@ -1915,10 +1915,10 @@ workstreams:
   - id: adr-0106-ephemeral-lifecycle
     adr: "0106"
     title: Ephemeral environment lifecycle and teardown policy
-    status: merged
+    status: live_applied
     owner: codex
-    branch: codex/adr-0106-ephemeral-lifecycle
-    worktree_path: ../proxmox_florin_server-ephemeral-lifecycle
+    branch: codex/ws-0106-live-apply
+    worktree_path: .worktrees/ws-0106-live-apply
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0106-ephemeral-lifecycle.md
     depends_on:
       - adr-0072-staging-production-topology
@@ -1935,7 +1935,7 @@ workstreams:
       - config/workflow-catalog.json
       - config/capacity-model.json
     ready_to_merge: true
-    live_applied: false
+    live_applied: true
 
   - id: adr-0107-extension-model
     adr: "0107"
