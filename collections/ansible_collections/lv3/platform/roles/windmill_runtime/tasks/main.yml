@@ -181,8 +181,7 @@
 - name: Build the Windmill runtime secret payload
   ansible.builtin.set_fact:
     windmill_runtime_secret_payload:
-      DATABASE_URL: >-
-        postgres://{{ windmill_database_user }}:{{ windmill_database_password | urlencode | replace('/', '%2F') }}@{{ windmill_database_host }}:{{ windmill_database_port }}/{{ windmill_database_name }}?sslmode=disable
+      DATABASE_URL: "{{ windmill_database_dsn }}"
       SUPERADMIN_SECRET: "{{ windmill_superadmin_secret }}"
   no_log: true
 

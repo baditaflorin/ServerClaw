@@ -34,10 +34,11 @@ def test_windmill_defaults_seed_config_merge_script_and_schedule() -> None:
         ).read_text(encoding="utf-8")
     )
     script_paths = {entry["path"] for entry in defaults["windmill_seed_scripts"]}
-    schedule_paths = {entry["path"] for entry in defaults["windmill_seed_schedules"]}
+    schedule_map = {entry["path"]: entry for entry in defaults["windmill_seed_schedules"]}
 
     assert "f/lv3/config_merge/merge_config_changes" in script_paths
-    assert "f/lv3/config_merge/merge_config_changes_every_minute" in schedule_paths
+    assert "f/lv3/config_merge/merge_config_changes_every_minute" in schedule_map
+    assert schedule_map["f/lv3/config_merge/merge_config_changes_every_minute"]["args"]["dsn"] == "{{ windmill_database_dsn }}"
 
 
 def test_windmill_script_delete_task_allows_missing_rows() -> None:
@@ -57,6 +58,43 @@ def test_windmill_script_delete_task_allows_missing_rows() -> None:
     assert "status_code:\n      - 200\n      - 400\n      - 404" in tasks
     assert "Assert repo-managed Windmill script deletes only returned accepted statuses" in tasks
     assert "'no rows returned' in (item.content | default('') | lower)" in tasks
+
+
+def test_windmill_defaults_use_git_common_dir_for_shared_local_artifacts() -> None:
+    runtime_defaults = yaml.safe_load(
+        (
+            REPO_ROOT
+            / "collections"
+            / "ansible_collections"
+            / "lv3"
+            / "platform"
+            / "roles"
+            / "windmill_runtime"
+            / "defaults"
+            / "main.yml"
+        ).read_text(encoding="utf-8")
+    )
+    postgres_defaults = yaml.safe_load(
+        (
+            REPO_ROOT
+            / "collections"
+            / "ansible_collections"
+            / "lv3"
+            / "platform"
+            / "roles"
+            / "windmill_postgres"
+            / "defaults"
+            / "main.yml"
+        ).read_text(encoding="utf-8")
+    )
+
+    expected_lookup = "rev-parse --path-format=absolute --git-common-dir"
+    assert expected_lookup in runtime_defaults["windmill_local_artifact_dir"]
+    assert expected_lookup in postgres_defaults["windmill_local_artifact_dir"]
+    assert "/.local/windmill" in runtime_defaults["windmill_local_artifact_dir"]
+    assert "/.local/windmill" in postgres_defaults["windmill_local_artifact_dir"]
+    assert runtime_defaults["windmill_database_password_local_file"] == "{{ windmill_local_artifact_dir }}/database-password.txt"
+    assert runtime_defaults["windmill_database_dsn"].startswith("postgres://{{ windmill_database_user }}:")
 
 
 def test_migration_and_workflow_contracts_exist() -> None:

@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import subprocess
 from pathlib import Path
+
+import pytest
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -23,25 +26,62 @@ def test_wrapper_blocks_when_repo_checkout_is_missing(tmp_path: Path) -> None:
     assert payload["status"] == "blocked"
 
 
-def test_wrapper_executes_repo_script_and_parses_json(tmp_path: Path) -> None:
+def test_wrapper_executes_repo_script_via_uv_and_parses_json(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     module = load_module("config_merge_ok", WRAPPER_PATH)
     repo_root = tmp_path
     (repo_root / "scripts").mkdir(parents=True)
-    (repo_root / "scripts" / "config_merge_protocol.py").write_text(
-        "\n".join(
-            [
-                "#!/usr/bin/env python3",
-                "import json",
-                "import sys",
-                "print(json.dumps({'status': 'ok', 'argv': sys.argv[1:]}))",
-            ]
+    (repo_root / "scripts" / "config_merge_protocol.py").write_text("# repo stub\n", encoding="utf-8")
+    captured: dict[str, object] = {}
+
+    def fake_run(command, cwd, text, capture_output, check):
+        captured["command"] = command
+        captured["cwd"] = cwd
+        assert text is True
+        assert capture_output is True
+        assert check is False
+        return subprocess.CompletedProcess(
+            command,
+            0,
+            stdout=json.dumps({"status": "ok", "argv": command[4:]}),
+            stderr="",
         )
-        + "\n",
-        encoding="utf-8",
-    )
+
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
 
     payload = module.main(repo_path=str(repo_root), dsn="sqlite:////tmp/config-merge.sqlite3", publish_nats=True)
 
     assert payload["status"] == "ok"
     assert payload["result"]["status"] == "ok"
+    assert captured["cwd"] == repo_root
+    assert captured["command"] == [
+        "uv",
+        "run",
+        "--with",
+        "pyyaml",
+        "--with",
+        "psycopg[binary]",
+        "python3",
+        str(repo_root / "scripts" / "config_merge_protocol.py"),
+        "--repo-root",
+        str(repo_root),
+        "merge",
+        "--dsn",
+        "sqlite:////tmp/config-merge.sqlite3",
+        "--actor",
+        "agent/config-merge-job",
+        "--publish-nats",
+    ]
     assert "--publish-nats" in payload["result"]["argv"]
+
+
+def test_wrapper_reads_dsn_from_proc_environ_fallback(tmp_path: Path) -> None:
+    module = load_module("config_merge_proc_env", WRAPPER_PATH)
+    proc_environ = tmp_path / "proc-1-environ"
+    proc_environ.write_bytes(
+        b"PATH=/usr/bin\0DATABASE_URL=postgres://windmill_admin:secret@10.10.10.50:5432/windmill?sslmode=disable\0"
+    )
+
+    assert (
+        module.resolve_dsn(None, proc_environ_path=str(proc_environ))
+        == "postgres://windmill_admin:secret@10.10.10.50:5432/windmill?sslmode=disable"
+    )

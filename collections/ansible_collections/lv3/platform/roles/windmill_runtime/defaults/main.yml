@@ -34,9 +34,28 @@ windmill_database_inventory_host: >-
 windmill_database_host: >-
   {{ hostvars[windmill_database_inventory_host].ansible_host }}
 windmill_database_port: 5432
-windmill_database_password_local_file: "{{ playbook_dir }}/../.local/windmill/database-password.txt"
+windmill_database_password_local_file: "{{ windmill_local_artifact_dir }}/database-password.txt"
+windmill_database_dsn: >-
+  postgres://{{ windmill_database_user }}:{{
+    (
+      windmill_database_password
+      | default(lookup('ansible.builtin.file', windmill_database_password_local_file) | trim, true)
+    )
+    | urlencode
+    | replace('/', '%2F')
+  }}@{{ windmill_database_host }}:{{ windmill_database_port }}/{{ windmill_database_name }}?sslmode=disable
 windmill_superadmin_secret_remote_file: "{{ windmill_secret_dir }}/superadmin-secret"
-windmill_local_artifact_dir: "{{ playbook_dir }}/../.local/windmill"
+windmill_local_artifact_dir: >-
+  {{
+    (
+      lookup(
+        'ansible.builtin.pipe',
+        'git -C ' ~ ((playbook_dir | dirname) | quote) ~ ' rev-parse --path-format=absolute --git-common-dir'
+      )
+      | dirname
+    )
+    ~ '/.local/windmill'
+  }}
 windmill_superadmin_secret_local_file: "{{ windmill_local_artifact_dir }}/superadmin-secret.txt"
 windmill_bootstrap_identity_email: superadmin_secret@windmill.dev
 windmill_bootstrap_identity_username: superadmin_secret
@@ -306,7 +325,8 @@ windmill_seed_schedules:
     schedule: "0 * * * * *"
     timezone: Europe/Bucharest
     script_path: f/lv3/config_merge/merge_config_changes
-    args: {}
+    args:
+      dsn: "{{ windmill_database_dsn }}"
     enabled: true
     summary: ADR 0158 config-merge worker
     description: Repo-managed minute merge for pending config_change_staging rows against the merge-eligible registry catalog.

@@ -4,5 +4,15 @@ windmill_database_user: windmill_admin
 windmill_database_support_role: windmill_user
 windmill_postgres_secret_dir: /etc/lv3/windmill
 windmill_postgres_password_file: "{{ windmill_postgres_secret_dir }}/database-password"
-windmill_local_artifact_dir: "{{ playbook_dir }}/../.local/windmill"
+windmill_local_artifact_dir: >-
+  {{
+    (
+      lookup(
+        'ansible.builtin.pipe',
+        'git -C ' ~ ((playbook_dir | dirname) | quote) ~ ' rev-parse --path-format=absolute --git-common-dir'
+      )
+      | dirname
+    )
+    ~ '/.local/windmill'
+  }}
 windmill_database_password_local_file: "{{ windmill_local_artifact_dir }}/database-password.txt"
