@@ -3167,10 +3167,10 @@ workstreams:
   - id: adr-0161-real-time-agent-coordination-map
     adr: "0161"
     title: Real-time agent coordination map
-    status: merged
+    status: live_applied
     owner: codex
-    branch: codex/adr-0161-real-time-agent-coordination-map
-    worktree_path: .worktrees/adr-0161-live-apply
+    branch: codex/adr-0161-main-integration
+    worktree_path: .worktrees/adr-0161-main
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0161-real-time-agent-coordination-map.md
     depends_on:
       - adr-0058-nats
@@ -3189,6 +3189,8 @@ workstreams:
       - config/windmill/scripts/platform-observation-loop.py
       - receipts/agent-coordination
       - docs/runbooks/agent-coordination-map.md
+    ready_to_merge: false
+    live_applied: true
 
   - id: adr-0170-timeout-hierarchy
     adr: "0170"

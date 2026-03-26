@@ -2,12 +2,12 @@
 
 - ADR: [ADR 0161](../adr/0161-real-time-agent-coordination-map.md)
 - Title: JetStream-backed live agent session map surfaced through the API gateway, ops portal, static portal, and agent publishers
-- Status: merged
+- Status: live_applied
 - Implemented In Repo Version: 0.156.0
-- Implemented In Platform Version: not yet
+- Implemented In Platform Version: 0.130.10
 - Implemented On: 2026-03-25
-- Branch: `codex/adr-0161-real-time-agent-coordination-map`
-- Worktree: `.worktrees/adr-0161-live-apply`
+- Branch: `codex/adr-0161-main-integration`
+- Worktree: `.worktrees/adr-0161-main`
 - Owner: codex
 - Depends On: `adr-0058-nats`, `adr-0092-platform-api-gateway`, `adr-0093-interactive-ops-portal`, `adr-0114-incident-triage`, `adr-0126-observation-loop`
 - Conflicts With: none
@@ -70,7 +70,8 @@
 ## Outcome
 
 - repository implementation is merged in repo release `0.156.0`
+- the first live apply completed on 2026-03-26 in platform version `0.130.10`
 - the coordination runtime, gateway route, interactive ops-portal panel, static snapshot panel, runbook, and snapshot helper are all committed on `main`
 - focused ADR 0161 test coverage passed on the integrated mainline for the coordination store, gateway route, interactive ops portal, static ops portal, closure-loop publishing, and observation-loop publishing
 - the first coordination snapshot receipt is committed as `receipts/agent-coordination/2026-03-25-adr-0161-agent-coordination-snapshot.json`
-- the first live apply remains blocked as of 2026-03-25 because SSH to `100.64.0.1`, `100.118.189.95`, and `65.108.75.123` was unavailable from the controller
+- the live rollout is recorded in [receipts/live-applies/2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/live-applies/2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply.json)

@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.159.1
-platform_version: 0.130.9
+repo_version: 0.159.2
+platform_version: 0.130.10
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -8,7 +8,8 @@ live_apply_evidence:
     monitoring: 2026-03-25-adr-0096-slo-tracking-live-apply
     mutation_audit: 2026-03-23-adr-0066-mutation-audit-live-apply
     public_edge_publication: 2026-03-25-adr-0136-http-security-headers-live-apply
-    api_gateway: 2026-03-25-adr-0170-timeout-hierarchy-live-apply
+    agent_coordination: 2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply
+    api_gateway: 2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply
     docker_runtime: 2026-03-22-adr-0023-docker-runtime-live-apply
     postgres_vm: 2026-03-22-adr-0026-postgres-vm-live-apply
     uptime_kuma: 2026-03-22-adr-0027-uptime-kuma-live-apply
@@ -37,7 +38,7 @@ live_apply_evidence:
     tempo_tracing: 2026-03-22-adr-0053-tempo-traces-live-apply
     secret_rotation: 2026-03-23-adr-0065-secret-rotation-live-apply
     semaphore: 2026-03-25-adr-0149-semaphore-live-apply
-    ops_portal: 2026-03-24-adr-0133-portal-authentication-by-default-live-apply
+    ops_portal: 2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply
     ollama: 2026-03-25-adr-0145-ollama-live-apply
 
 desired_state:
@@ -888,8 +889,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.159.0
+    current: 0.159.2
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.8
+    current: 0.130.10
     meaning: intended platform release for the actual server configuration

@@ -90,7 +90,7 @@ The repository now also ships ADR 0121 local search: a repo-managed search fabri
 The repository now also ships ADR 0122 browser-first operator access management: a repo-managed Windmill admin app at `f/lv3/operator_access_admin` backed by the governed ADR 0108 onboarding, off-boarding, reconciliation, and inventory workflows.
 The repository now also ships ADR 0130 agent state persistence: `platform.agent.AgentStateClient`, the `agent.state` schema migration, and `lv3 agent state show|delete|verify` provide a governed scratch-state path for resumable agent work and post-handoff integrity validation; the first live schema apply from `main` is still pending.
 The repository now also ships ADR 0131 multi-agent handoffs: `platform.handoff`, the `handoff.transfers` schema migration, mutation-ledger event types, and `lv3 handoff send|list|view|accept|refuse|complete` provide a durable transfer path between agents and operators, with concurrent burst coverage verified in-repo; the first live transport integration from `main` is still pending.
-The repository now also ships ADR 0161 real-time agent coordination: `platform.agent.coordination`, `/v1/platform/agents`, the interactive ops-portal coordination panel, and committed coordination snapshot receipts expose active observation-loop and closure-loop sessions from one shared read model; the first live apply from `main` is still blocked by current SSH reachability failures to the Proxmox host.
+The repository now also ships ADR 0161 real-time agent coordination: `platform.agent.coordination`, `/v1/platform/agents`, the interactive ops-portal coordination panel, and committed coordination snapshot receipts expose active observation-loop and closure-loop sessions from one shared read model; the first live apply from `main` completed on 2026-03-26 with the coordination surfaces verified on `docker-runtime-lv3`.
 The repository now also ships ADR 0151 n8n automation: a repo-managed `n8n` runtime on `docker-runtime-lv3`, a PostgreSQL-backed persistence path on `postgres-lv3`, and shared-edge publication for `https://n8n.lv3.org` with a protected editor plus public webhook prefixes. The first live apply from `main` was attempted on 2026-03-25 but remains blocked by the Hetzner DNS brownout window and concurrent Proxmox host reachability failures.
 The repository now also ships ADR 0165 workflow idempotency: `platform.idempotency`, scheduler-side cached result replay, closure-loop trigger scoping, `execution.idempotent_hit` ledger events, and `lv3 intent status <intent_id>` provide deterministic duplicate suppression for platform-managed workflows; the live Windmill converge from `main` on 2026-03-25 now applies and verifies the shared `platform.idempotency_records` schema on `postgres-lv3`.
 The developer portal generator now stamps published docs pages with sensitivity metadata, keeps `RESTRICTED` ADRs and runbooks summary-only in portal output, and leaves `CONFIDENTIAL` documents source-only until a dedicated admin-view path exists.
@@ -105,8 +105,8 @@ The repository now also ships ADR 0137 crawl policy automation: the shared publi
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.159.1` |
-| Platform version | `0.130.9` |
+| Repository version | `0.159.2` |
+| Platform version | `0.130.10` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -147,7 +147,8 @@ Template VM: `9000` `debian13-cloud-template`
 ### Latest Live-Apply Evidence
 | Capability | Receipt |
 | --- | --- |
-| `api_gateway` | `2026-03-25-adr-0170-timeout-hierarchy-live-apply` |
+| `agent_coordination` | `2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply` |
+| `api_gateway` | `2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply` |
 | `backup_vm` | `2026-03-22-adr-0029-backup-vm-live-apply` |
 | `build_telemetry` | `2026-03-22-adr-0028-build-telemetry-live-apply` |
 | `command_catalog` | `2026-03-22-adr-0048-command-catalog-live-apply` |
@@ -167,7 +168,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `ollama` | `2026-03-25-adr-0145-ollama-live-apply` |
 | `open_webui` | `2026-03-25-adr-0145-open-webui-ollama-connector-live-apply` |
 | `openbao` | `2026-03-25-adr-0170-timeout-hierarchy-live-apply` |
-| `ops_portal` | `2026-03-24-adr-0133-portal-authentication-by-default-live-apply` |
+| `ops_portal` | `2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply` |
 | `platform_context` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
 | `portainer` | `2026-03-22-adr-0055-portainer-live-apply` |
 | `postgres_vm` | `2026-03-22-adr-0026-postgres-vm-live-apply` |
@@ -844,8 +845,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.159.1` |
-| Platform version | `0.130.9` |
+| Repository version | `0.159.2` |
+| Platform version | `0.130.10` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1010,7 +1011,7 @@ This repository is intentionally opinionated:
 | `0158` | Conflict-free configuration merge protocol | `merged` | [adr-0158-config-merge-protocol.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0158-config-merge-protocol.md) |
 | `0159` | Speculative parallel execution with compensating transactions | `merged` | [adr-0159-speculative-parallel-execution.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0159-speculative-parallel-execution.md) |
 | `0160` | Parallel dry-run fan-out for intent batch validation | `merged` | [adr-0160-parallel-dry-run-fan-out.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0160-parallel-dry-run-fan-out.md) |
-| `0161` | Real-time agent coordination map | `merged` | [adr-0161-real-time-agent-coordination-map.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0161-real-time-agent-coordination-map.md) |
+| `0161` | Real-time agent coordination map | `live_applied` | [adr-0161-real-time-agent-coordination-map.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0161-real-time-agent-coordination-map.md) |
 | `0162` | Distributed deadlock detection and resolution | `live_applied` | [adr-0162-deadlock-detector.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0162-deadlock-detector.md) |
 | `0163` | Platform-wide retry taxonomy and exponential backoff | `merged` | [adr-0163-retry-taxonomy.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0163-retry-taxonomy.md) |
 | `0164` | Circuit breaker pattern for external service calls | `live_applied` | [adr-0164-circuit-breaker-pattern.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0164-circuit-breaker-pattern.md) |
