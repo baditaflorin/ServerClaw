@@ -110,8 +110,8 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.166.0` |
-| Platform version | `0.130.16` |
+| Repository version | `0.167.0` |
+| Platform version | `0.130.17` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -159,6 +159,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `backup_vm` | `2026-03-22-adr-0029-backup-vm-live-apply` |
 | `build_telemetry` | `2026-03-22-adr-0028-build-telemetry-live-apply` |
 | `command_catalog` | `2026-03-22-adr-0048-command-catalog-live-apply` |
+| `config_merge` | `2026-03-26-adr-0158-config-merge-live-apply` |
 | `control_plane_lanes` | `2026-03-22-adr-0045-control-plane-communication-lanes-live-apply` |
 | `control_plane_recovery` | `2026-03-22-adr-0051-control-plane-recovery-live-apply` |
 | `deadlock_detector` | `2026-03-26-adr-0162-deadlock-detector-live-apply` |
@@ -871,8 +872,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.166.0` |
-| Platform version | `0.130.16` |
+| Repository version | `0.167.0` |
+| Platform version | `0.130.17` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1035,7 +1036,7 @@ This repository is intentionally opinionated:
 | `0155` | Intent queue with release-triggered scheduling | `live_applied` | [adr-0155-intent-queue-with-release-triggered-scheduling.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0155-intent-queue-with-release-triggered-scheduling.md) |
 | `0156` | Agent session workspace isolation | `live_applied` | [adr-0156-agent-session-workspace-isolation.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0156-agent-session-workspace-isolation.md) |
 | `0157` | Per-VM concurrency budget and resource reservation | `live_applied` | [adr-0157-per-vm-concurrency-budget.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0157-per-vm-concurrency-budget.md) |
-| `0158` | Conflict-free configuration merge protocol | `merged` | [adr-0158-config-merge-protocol.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0158-config-merge-protocol.md) |
+| `0158` | Conflict-free configuration merge protocol | `live_applied` | [adr-0158-config-merge-protocol.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0158-config-merge-protocol.md) |
 | `0159` | Speculative parallel execution with compensating transactions | `merged` | [adr-0159-speculative-parallel-execution.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0159-speculative-parallel-execution.md) |
 | `0160` | Parallel dry-run fan-out for intent batch validation | `merged` | [adr-0160-parallel-dry-run-fan-out.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0160-parallel-dry-run-fan-out.md) |
 | `0161` | Real-time agent coordination map | `live_applied` | [adr-0161-real-time-agent-coordination-map.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0161-real-time-agent-coordination-map.md) |

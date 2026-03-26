@@ -2,11 +2,11 @@
 
 - ADR: [ADR 0158](../adr/0158-conflict-free-configuration-merge-protocol.md)
 - Title: queue append-heavy registry changes into `config_change_staging` and merge them through one governed Windmill writer
-- Status: merged
+- Status: live_applied
 - Implemented In Repo Version: 0.154.0
-- Live Applied In Platform Version: not yet
+- Live Applied In Platform Version: 0.130.17
 - Implemented On: 2026-03-25
-- Live Applied On: not yet
+- Live Applied On: 2026-03-26
 - Branch: `codex/adr-0158-config-merge-protocol`
 - Worktree: `.worktrees/adr-0158-config-merge`
 - Owner: codex
@@ -64,17 +64,17 @@
 - `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`
 - `make syntax-check-windmill`
 - `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.50 "psql -d windmill -Atqc \"SELECT to_regclass('public.config_change_staging')\""`
-- `curl -s -X POST -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" -H "Content-Type: application/json" -d '{}' http://100.64.0.1:8005/api/w/lv3/jobs/run_wait_result/p/f%2Flv3%2Fconfig_merge%2Fmerge_config_changes`
+- `curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" http://100.64.0.1:8005/api/w/lv3/schedules/get/f%2Flv3%2Fconfig_merge%2Fmerge_config_changes_every_minute`
 
 ## Merge Criteria
 
 - merge-eligible file definitions validate through the shared repo data-model gate
 - list-backed and mapping-backed registries both merge correctly from staged rows
 - the Windmill runtime converge applies the migration and seeds the config-merge worker
-- the live Windmill worker returns a successful run result from the production control plane
+- the live Windmill worker returns a successful run result from the production control plane when invoked with the managed database DSN, and the scheduled path keeps that DSN in the repo-managed Windmill schedule arguments
 
 ## Outcome
 
-- repository implementation is complete on `main` in repo release `0.154.0`
-- the repo now ships the merge-eligible catalog, staging-table migration, `platform.config_merge`, the operator CLI, the Windmill merge worker, canonical config-merge events, and focused repo plus Windmill tests
-- live apply is still pending because `make converge-windmill` failed immediately on `proxmox_florin` with `ssh: connect to host 100.64.0.1 port 22: Connection refused`, the public fallback `ops@65.108.75.123:22` timed out, and the private Proxmox API probe `https://100.64.0.1:8006` also failed during the same window
+- the repository implementation first landed on `main` in repo release `0.154.0`, and the integrated live apply from current `main` is recorded in release `0.167.0`
+- the 2026-03-26 live verification advanced platform version to `0.130.17` after `make converge-windmill` passed, `public.config_change_staging` remained present in the Windmill PostgreSQL database, the managed schedule kept the production DSN in `args.dsn`, and the live worker returned `status: ok` with `pending_count: 0` against the production control plane
+- ad hoc empty-body manual runs remain blocked outside the governed schedule context because Windmill does not reliably expose `DATABASE_URL` into the job sandbox; the live production path is the managed minute schedule that now carries the repo-managed DSN explicitly

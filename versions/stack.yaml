@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.166.0
-platform_version: 0.130.16
+repo_version: 0.167.0
+platform_version: 0.130.17
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -31,6 +31,7 @@ live_apply_evidence:
     control_plane_lanes: 2026-03-22-adr-0045-control-plane-communication-lanes-live-apply
     identity_taxonomy: 2026-03-22-adr-0046-identity-classes-live-apply
     command_catalog: 2026-03-22-adr-0048-command-catalog-live-apply
+    config_merge: 2026-03-26-adr-0158-config-merge-live-apply
     control_plane_recovery: 2026-03-22-adr-0051-control-plane-recovery-live-apply
     notification_profiles: 2026-03-22-adr-0050-notification-profiles-live-apply
     platform_event_taxonomy: 2026-03-26-adr-0124-platform-event-taxonomy-live-apply

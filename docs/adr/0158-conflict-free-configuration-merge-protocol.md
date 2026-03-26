@@ -3,8 +3,8 @@
 - Status: Implemented
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.154.0
-- Implemented In Platform Version: not yet
-- Implemented On: 2026-03-25
+- Implemented In Platform Version: 0.130.17
+- Implemented On: 2026-03-26
 - Date: 2026-03-24
 
 ## Context
@@ -56,6 +56,8 @@ Pending writes land in `config_change_staging` with:
 ### Live runtime
 
 The Windmill converge now applies `migrations/0016_config_merge_schema.sql`, seeds `f/lv3/config_merge/merge_config_changes`, and enables the minute schedule `f/lv3/config_merge/merge_config_changes_every_minute`.
+
+The live worker wrapper now runs the repo workflow through `uv` with explicit `pyyaml` and `psycopg[binary]` runtime dependencies, and the governed schedule carries the managed Windmill PostgreSQL DSN in `args.dsn` so scheduled production merges do not depend on job-sandbox environment inheritance.
 
 ## Implementation Notes
 

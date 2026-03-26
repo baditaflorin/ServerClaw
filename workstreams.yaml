@@ -3034,7 +3034,7 @@ workstreams:
   - id: adr-0158-config-merge-protocol
     adr: "0158"
     title: Conflict-free configuration merge protocol
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0158-config-merge-protocol
     worktree_path: .worktrees/adr-0158-config-merge
@@ -3061,7 +3061,7 @@ workstreams:
       - migrations/0016_config_merge_schema.sql
       - docs/runbooks/config-merge-protocol.md
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0159-speculative-parallel-execution
     adr: "0159"
