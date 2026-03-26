@@ -5,11 +5,11 @@
   "applied_on": "2026-03-26",
   "recorded_on": "2026-03-26",
   "recorded_by": "codex",
-  "source_commit": "48a8ad4900d2a9cb5cb957a334072b2a148b1df1",
-  "repo_version_context": "0.168.0",
+  "source_commit": "a755423ed994c813d45bb9738c283c7d118c1dc5",
+  "repo_version_context": "0.169.0",
   "workflow_id": "platform-observation-loop",
   "adr": "0126",
-  "summary": "Completed the ADR 0126 production activation from the rebased current-main `0.168.0` tree by reseeding the repo-managed Windmill scripts with the committed sync helper, verifying the live observation-loop wrapper, and proving that a production observation_finding run stops at RESOLVED when goal achievement is already true.",
+  "summary": "Completed the ADR 0126 production activation from the rebased current-main `0.169.0` tree by reseeding the repo-managed Windmill scripts with the committed sync helper, verifying the live observation-loop wrapper, and proving that a production observation_finding run stops at RESOLVED when goal achievement is already true.",
   "targets": [
     {
       "kind": "host",
@@ -32,7 +32,7 @@
     {
       "check": "Repo-managed Windmill script reseed from the rebased branch",
       "result": "pass",
-      "observed": "Running `scripts/sync_windmill_seed_scripts.py` against the production Windmill API from source commit `48a8ad4900d2a9cb5cb957a334072b2a148b1df1` synced 38 repo-managed scripts, including `f/lv3/platform_observation_loop` and `f/lv3/world_state/refresh_service_health`, with all items succeeding on the first attempt."
+      "observed": "Running `scripts/sync_windmill_seed_scripts.py` against the production Windmill API from source commit `a755423ed994c813d45bb9738c283c7d118c1dc5` synced 38 repo-managed scripts, including `f/lv3/platform_observation_loop` and `f/lv3/world_state/refresh_service_health`, with all items succeeding on the first attempt."
     },
     {
       "check": "Windmill runtime health after the closure-loop reseed",
