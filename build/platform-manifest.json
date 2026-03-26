@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.121.0",
-  "platform_version": "0.105.0",
-  "generated_at": "2026-03-25T05:56:05Z",
-  "next_refresh_at": "2026-03-25T06:56:05Z",
+  "repo_version": "0.122.0",
+  "platform_version": "0.106.0",
+  "generated_at": "2026-03-26T09:21:47Z",
+  "next_refresh_at": "2026-03-26T10:21:47Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -37,7 +37,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://api.lv3.org",
-        "last_live_apply": "2026-03-24T00:00:00Z"
+        "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "backup_pbs": {
         "service_name": "Proxmox Backup Server",
@@ -59,7 +59,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://build.lv3.org",
-        "last_live_apply": "2026-03-24T00:00:00Z"
+        "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "docker_runtime": {
         "service_name": "Docker Runtime VM",
@@ -70,7 +70,19 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://docker.lv3.org",
-        "last_live_apply": "2026-03-24T00:00:00Z"
+        "last_live_apply": "2026-03-25T00:00:00Z"
+      },
+      "gitea": {
+        "service_name": "Gitea",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "http://100.118.189.95:3009",
+        "last_live_apply": "2026-03-25T00:00:00Z",
+        "slo_status": "unknown"
       },
       "grafana": {
         "service_name": "Grafana",
@@ -93,7 +105,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://sso.lv3.org",
-        "last_live_apply": "2026-03-24T00:00:00Z",
+        "last_live_apply": "2026-03-25T00:00:00Z",
         "slo_status": "unknown"
       },
       "mail_platform": {
@@ -105,7 +117,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://mail.lv3.org",
-        "last_live_apply": "2026-03-24T00:00:00Z"
+        "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "mattermost": {
         "service_name": "Mattermost",
@@ -116,7 +128,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://100.118.189.95:8066",
-        "last_live_apply": "2026-03-24T00:00:00Z"
+        "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "netbox": {
         "service_name": "NetBox",
@@ -127,7 +139,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.118.189.95:8004",
-        "last_live_apply": "2026-03-24T00:00:00Z",
+        "last_live_apply": "2026-03-25T00:00:00Z",
         "slo_status": "unknown"
       },
       "nginx_edge": {
@@ -151,7 +163,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.20:2586",
-        "last_live_apply": "2026-03-24T00:00:00Z"
+        "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "ntopng": {
         "service_name": "ntopng",
@@ -162,7 +174,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://100.118.189.95:3001",
-        "last_live_apply": "2026-03-24T00:00:00Z"
+        "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "open_webui": {
         "service_name": "Open WebUI",
@@ -173,7 +185,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.118.189.95:8008",
-        "last_live_apply": "2026-03-24T00:00:00Z",
+        "last_live_apply": "2026-03-25T00:00:00Z",
         "slo_status": "unknown"
       },
       "openbao": {
@@ -185,7 +197,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.118.189.95:8200",
-        "last_live_apply": "2026-03-24T00:00:00Z"
+        "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "platform_context_api": {
         "service_name": "Platform Context API",
@@ -196,7 +208,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.118.189.95:8010",
-        "last_live_apply": "2026-03-24T00:00:00Z",
+        "last_live_apply": "2026-03-25T00:00:00Z",
         "slo_status": "unknown"
       },
       "portainer": {
@@ -208,7 +220,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.118.189.95:9444",
-        "last_live_apply": "2026-03-24T00:00:00Z"
+        "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "postgres": {
         "service_name": "PostgreSQL",
@@ -219,7 +231,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "postgres://database.lv3.org:5432",
-        "last_live_apply": "2026-03-24T00:00:00Z"
+        "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "proxmox_ui": {
         "service_name": "Proxmox UI",
@@ -230,7 +242,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://proxmox.lv3.org",
-        "last_live_apply": "2026-03-24T00:00:00Z"
+        "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "status_page": {
         "service_name": "Public Status Page",
@@ -241,7 +253,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://status.lv3.org",
-        "last_live_apply": "2026-03-24T00:00:00Z",
+        "last_live_apply": "2026-03-25T00:00:00Z",
         "slo_status": "unknown"
       },
       "step_ca": {
@@ -253,7 +265,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.118.189.95:9443",
-        "last_live_apply": "2026-03-24T00:00:00Z"
+        "last_live_apply": "2026-03-25T00:00:00Z"
       },
       "uptime_kuma": {
         "service_name": "Uptime Kuma",
@@ -264,7 +276,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://uptime.lv3.org",
-        "last_live_apply": "2026-03-24T00:00:00Z",
+        "last_live_apply": "2026-03-25T00:00:00Z",
         "slo_status": "unknown"
       },
       "windmill": {
@@ -276,7 +288,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.118.189.95:8005",
-        "last_live_apply": "2026-03-24T00:00:00Z",
+        "last_live_apply": "2026-03-25T00:00:00Z",
         "slo_status": "unknown"
       }
     }
@@ -653,6 +665,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-docker-runtime.md"
+      },
+      {
+        "id": "converge-gitea",
+        "description": "Converge private Gitea on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and register the self-hosted Actions runner on docker-build-lv3.",
+        "tags": [
+          "converge-gitea",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1500,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 4,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-gitea.md"
       },
       {
         "id": "converge-guest-network-policy",
@@ -2084,6 +2122,16 @@
         ]
       },
       {
+        "id": "configure-gitea",
+        "title": "Configure Gitea",
+        "agent_trust_required": "T3",
+        "steps": 4,
+        "path": "docs/runbooks/configure-gitea.md",
+        "workflow_ids": [
+          "converge-gitea"
+        ]
+      },
+      {
         "id": "configure-guest-network-policy",
         "title": "Configure Guest Network Policy",
         "agent_trust_required": "T3",
@@ -2538,10 +2586,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.120.2",
-    "deployed_at": "2026-03-25",
-    "summary": "implemented ADR 0132 in repository automation with a self-describing platform manifest generator, committed `build/platform-manifest.json` output, and the matching JSON schema added `lv3 manifest show` and `lv3 manifest refresh`, plus validation-gate enforcement that fails when the committed manifest drifts from canonical repo inputs",
-    "release_notes_url": "docs/release-notes/0.121.0.md"
+    "last_version": "0.121.0",
+    "deployed_at": "2026-03-26",
+    "summary": "implemented ADR 0143 with a private Gitea service on `docker-runtime-lv3`, Keycloak OIDC login, and a managed PostgreSQL backend added the self-hosted Gitea Actions runner on `docker-build-lv3` plus the repo-managed `.gitea/workflows/validate.yml` workflow",
+    "release_notes_url": "docs/release-notes/0.122.0.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -2709,13 +2757,6 @@
       "status": "Proposed",
       "implementation_status": "Not Implemented",
       "path": "docs/adr/0142-public-surface-automated-security-scan.md"
-    },
-    {
-      "adr": "0143",
-      "title": "Gitea for Self-Hosted Git and Webhook-Driven Automation",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0143-gitea-for-self-hosted-git-and-ci.md"
     },
     {
       "adr": "0144",
