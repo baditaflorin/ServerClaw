@@ -117,8 +117,8 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.175.1` |
-| Platform version | `0.130.21` |
+| Repository version | `0.175.2` |
+| Platform version | `0.130.22` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -915,8 +915,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.175.1` |
-| Platform version | `0.130.21` |
+| Repository version | `0.175.2` |
+| Platform version | `0.130.22` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
