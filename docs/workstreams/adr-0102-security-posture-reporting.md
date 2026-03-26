@@ -77,5 +77,9 @@
 ## Outcome
 
 - repository implementation is complete on `main` in repo release `0.109.0`
-- the repo now ships the scan playbook, Lynis parser, Trivy runtime scanner, security posture report generator, Windmill wrapper, receipt directory, portal summary, dashboard panels, and `platform.security.*` event-lane metadata
-- no live platform version change is claimed yet; scheduling the workflow, configuring webhook or metric credentials, and collecting the first production receipt still require apply from `main`
+- the branch now adds worker-portable SSH handling for the security scan workflow, a stale-Lynis-lock cleanup task, and a cached-Lynis retry path for report aggregation
+- the first verified production receipt is committed at `receipts/security-reports/20260326T140237Z.json` with summary totals `critical=126`, `high=1300`, and `lowest_hardening_index=62`
+- the branch-local live-apply record is committed at `receipts/live-applies/2026-03-26-adr-0102-security-posture-live-apply.json`
+- focused validation passed with `python3 -m py_compile scripts/parse_lynis_report.py scripts/security_posture_report.py config/windmill/scripts/security-posture-scan.py`, `uv run --with pytest --with pyyaml --with jsonschema pytest -q tests/test_parse_lynis_report.py tests/test_security_posture_report.py tests/test_ops_portal.py`, `uv run --with pytest --with pyyaml --with jsonschema pytest -q tests/test_security_posture_report.py tests/test_security_posture_windmill_wrapper.py`, `uv run --with pyyaml --with jsonschema python scripts/generate_ops_portal.py --check`, `make validate-generated-portals`, and `make syntax-check-windmill`
+- targeted live verification proved the worker-side internal jump path to `nginx-lv3`, but the broader Windmill stack on `docker-runtime-lv3` destabilized during replay: `openbao-agent` entered a restart loop and the `windmill_server`/worker services remained in `Created`, so the full worker-wrapper success check should be rerun after the Windmill runtime is repaired
+- merge-to-main should keep the protected integration files for the integration step, reuse the committed production receipt and live-apply receipt below, and only then decide whether to update shared status files such as `README.md` and `versions/stack.yaml`

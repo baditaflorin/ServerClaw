@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-26-adr-0102-security-posture-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-26",
+  "recorded_on": "2026-03-26",
+  "recorded_by": "codex",
+  "source_commit": "2e48fdc04c1a0864cc21f447c7d4413dfd40f978",
+  "repo_version_context": "0.174.0",
+  "workflow_id": "security-posture-scan",
+  "adr": "0102",
+  "summary": "Applied the ADR 0102 live portability and retry hardening from the latest branch snapshot, generated the first committed production security posture receipt, and verified the worker-side internal Proxmox jump path while documenting the contemporaneous Windmill runtime outage that blocked a clean full wrapper replay.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-build-lv3",
+      "vmid": 130,
+      "address": "10.10.10.30"
+    },
+    {
+      "kind": "guest",
+      "name": "monitoring-lv3",
+      "vmid": 140,
+      "address": "10.10.10.40"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 150,
+      "address": "10.10.10.50"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Controller Lynis collection",
+      "result": "pass",
+      "observed": "A controlled production replay of `ansible-playbook -i inventory/hosts.yml playbooks/tasks/security-scan.yml -l proxmox_florin,docker-runtime-lv3,postgres-lv3,nginx-lv3,monitoring-lv3 -e security_scan_output_dir=.local/security-posture/lynis -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --private-key ...` completed with all five targets at `ok=7 changed=1 unreachable=0 failed=0` after the stale-Lynis-lock cleanup task was added."
+    },
+    {
+      "check": "Production security posture receipt",
+      "result": "pass",
+      "observed": "`uv run --with ansible-core --with pyyaml --with nats-py python scripts/security_posture_report.py --env production --skip-lynis --print-report-json` wrote `receipts/security-reports/20260326T140237Z.json` with `host_count=5`, `image_count=36`, `lowest_hardening_index=62`, `total_critical_cves=126`, and `total_high_cves=1300`."
+    },
+    {
+      "check": "Direct Trivy runtime scan",
+      "result": "pass",
+      "observed": "A direct controller-routed execution of `scripts/trivy_scan_running_images.sh` on `docker-runtime-lv3` returned JSON vulnerability payloads for the currently running images after the `aquasec/trivy:0.63.0` runner image had been pulled and cached."
+    },
+    {
+      "check": "Focused repository validation",
+      "result": "pass",
+      "observed": "`python3 -m py_compile scripts/parse_lynis_report.py scripts/security_posture_report.py config/windmill/scripts/security-posture-scan.py`, `uv run --with pytest --with pyyaml --with jsonschema pytest -q tests/test_parse_lynis_report.py tests/test_security_posture_report.py tests/test_ops_portal.py`, `uv run --with pytest --with pyyaml --with jsonschema pytest -q tests/test_security_posture_report.py tests/test_security_posture_windmill_wrapper.py`, `uv run --with pyyaml --with jsonschema python scripts/generate_ops_portal.py --check`, `make validate-generated-portals`, and `make syntax-check-windmill` all passed on the branch."
+    },
+    {
+      "check": "Windmill worker replay",
+      "result": "partial",
+      "observed": "The worker-side internal jump-path fix was verified by a successful SSH probe from `windmill-windmill_worker-1` to `nginx-lv3` through `ops@10.10.10.1`, but a full wrapper replay could not be completed because the live Windmill stack on `docker-runtime-lv3` destabilized during verification: `openbao-agent` entered a restart loop and the `windmill_server`, `windmill_worker`, and `windmill_worker_native` services fell back to `Created`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0102-security-posture-reporting.md",
+    "docs/runbooks/security-posture-reporting.md",
+    "docs/workstreams/adr-0102-security-posture-reporting.md",
+    "inventory/group_vars/all.yml",
+    "playbooks/tasks/security-scan.yml",
+    "scripts/drift_lib.py",
+    "scripts/security_posture_report.py",
+    "config/windmill/scripts/security-posture-scan.py",
+    "receipts/security-reports/20260326T140237Z.json",
+    "receipts/live-applies/2026-03-26-adr-0102-security-posture-live-apply.json"
+  ],
+  "notes": [
+    "The initial full `make security-posture-report` retries surfaced live-state contention rather than a repository-only defect: stale Lynis pid files on the Proxmox host and transient SSH banner or forwarding failures when the same fan-out was repeated during debugging.",
+    "This branch therefore adds two retry-safety improvements that were exercised live: stale Lynis pid cleanup in `playbooks/tasks/security-scan.yml` and cached-Lynis aggregation support via `scripts/security_posture_report.py --skip-lynis`.",
+    "Merge-to-main should keep the protected integration files for the integration step, reuse the committed production receipt above, and rerun the Windmill worker wrapper after the live Windmill stack is healthy before updating shared status summaries."
+  ]
+}

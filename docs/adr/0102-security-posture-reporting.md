@@ -3,8 +3,8 @@
 - Status: Accepted
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.109.0
-- Implemented In Platform Version: not yet
-- Implemented On: 2026-03-24
+- Implemented In Platform Version: 0.174.0
+- Implemented On: 2026-03-26
 - Date: 2026-03-23
 
 ## Context
@@ -191,6 +191,14 @@ The managed Grafana platform overview dashboard also exposes security posture pa
 - **OpenSCAP / OSCAP-Ansible**: more rigorous CIS benchmark alignment; higher complexity to configure and maintain; Lynis achieves the same practical outcome with lower operational overhead
 - **Wazuh (SIEM + vulnerability management)**: full SIEM platform; appropriate for enterprise; overkill for a homelab; adds 4+ GB RAM for a service that duplicates what Lynis and Trivy provide separately
 - **Manual security reviews quarterly**: insufficient frequency; CVEs are published daily; a quarterly review would miss a critical CVE for up to 90 days
+
+## Implementation Notes
+
+- The first verified production security posture receipt was generated on 2026-03-26 and is recorded in [`receipts/security-reports/20260326T140237Z.json`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/security-reports/20260326T140237Z.json).
+- The branch-local live-apply evidence for that rollout is recorded in [`receipts/live-applies/2026-03-26-adr-0102-security-posture-live-apply.json`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/live-applies/2026-03-26-adr-0102-security-posture-live-apply.json).
+- The live apply also hardened the repo-managed retry path: `playbooks/tasks/security-scan.yml` now removes stale Lynis pid files before a rerun, and `scripts/security_posture_report.py` can reuse cached Lynis artifacts with `--skip-lynis` when a later aggregation or publication retry is needed.
+- Windmill worker portability was improved by mirroring the bootstrap SSH key into the worker checkout and preferring the Proxmox internal bridge address for guest SSH jumps from the runtime VM. During the 2026-03-26 live verification, targeted worker-side SSH to `nginx-lv3` succeeded with that internal jump path.
+- The same live verification surfaced a broader Windmill runtime outage on `docker-runtime-lv3`: `openbao-agent` entered a restart loop and the `windmill_server`, `windmill_worker`, and `windmill_worker_native` services remained in `Created` after a compose restart, so a fully successful worker-wrapper replay should be rerun once the Windmill stack is healthy again.
 
 ## Related ADRs
 

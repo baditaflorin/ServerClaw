@@ -559,8 +559,8 @@ workstreams:
       - NGINX edge
       - private API listeners
       - admin surfaces
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
 
   - id: adr-0050-notification-profiles
     adr: "0050"
