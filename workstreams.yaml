@@ -2338,7 +2338,7 @@ workstreams:
   - id: adr-0124-platform-event-taxonomy
     adr: "0124"
     title: Platform event taxonomy and canonical NATS topics
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0124-platform-event-taxonomy
     worktree_path: .worktrees/adr-0124
@@ -2362,7 +2362,7 @@ workstreams:
       - scripts/validate_nats_topics.py
       - docs/runbooks/platform-event-taxonomy.md
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0125-agent-capability-bounds
     adr: "0125"

@@ -2,9 +2,10 @@
 
 - ADR: [ADR 0124](../adr/0124-platform-event-taxonomy-and-canonical-nats-topics.md)
 - Title: Canonicalize the platform event plane around one NATS taxonomy and validated routing contract
-- Status: merged
+- Status: live_applied
 - Implemented In Repo Version: 0.128.0
-- Implemented On: 2026-03-24
+- Implemented In Platform Version: 0.130.13
+- Implemented On: 2026-03-26
 - Branch: `codex/adr-0124-platform-event-taxonomy`
 - Worktree: `.worktrees/adr-0124`
 - Owner: codex
@@ -60,3 +61,9 @@
 - the event lane catalog routes every active topic family declared by the taxonomy
 - the observation loop, maintenance-window tool, world-state materializer, API gateway, backup verification publisher, and ledger fan-out all publish canonical `platform.*` subjects
 - `make validate` fails when a code publisher or routed event surface drifts from the taxonomy
+
+## Live Apply Notes
+
+- 2026-03-26 live apply completed from rebased `origin/main` by reconciling the live `PLATFORM_EVENTS` JetStream stream with `make apply-nats-streams`.
+- The live runtime lacked the committed stream definition before the apply, and the first smoke publish exposed an additional auth gap.
+- Because the NATS server auth file is not yet repo-managed, the live apply required a manual server-side change on `docker-runtime-lv3`: add `platform.>` to the `jetstream-admin` publish allow-list in `/opt/nats-jetstream/config/nats-server.conf`, then restart `lv3-nats-jetstream`.

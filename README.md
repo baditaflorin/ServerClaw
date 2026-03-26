@@ -107,7 +107,7 @@ The repository now also ships the first ADR 0166 canonical error rollout: `confi
 | Field | Value |
 | --- | --- |
 | Repository version | `0.162.0` |
-| Platform version | `0.130.12` |
+| Platform version | `0.130.13` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -172,6 +172,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `openbao` | `2026-03-25-adr-0170-timeout-hierarchy-live-apply` |
 | `ops_portal` | `2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply` |
 | `platform_context` | `2026-03-26-adr-0169-structured-log-contract-live-apply` |
+| `platform_event_taxonomy` | `2026-03-26-adr-0124-platform-event-taxonomy-live-apply` |
 | `portainer` | `2026-03-22-adr-0055-portainer-live-apply` |
 | `postgres_vm` | `2026-03-22-adr-0026-postgres-vm-live-apply` |
 | `public_edge_publication` | `2026-03-25-adr-0136-http-security-headers-live-apply` |
@@ -851,7 +852,7 @@ Current values on `main`:
 | Field | Value |
 | --- | --- |
 | Repository version | `0.162.0` |
-| Platform version | `0.130.12` |
+| Platform version | `0.130.13` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -985,7 +986,7 @@ This repository is intentionally opinionated:
 | `0121` | Local search and indexing fabric | `merged` | [adr-0121-search-indexing-fabric.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0121-search-indexing-fabric.md) |
 | `0122` | Windmill operator access admin surface | `live_applied` | [adr-0122-operator-access-admin.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0122-operator-access-admin.md) |
 | `0123` | Service uptime contracts and monitor-backed health | `merged` | [adr-0123-service-uptime-contracts.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0123-service-uptime-contracts.md) |
-| `0124` | Platform event taxonomy and canonical NATS topics | `merged` | [adr-0124-platform-event-taxonomy.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0124-platform-event-taxonomy.md) |
+| `0124` | Platform event taxonomy and canonical NATS topics | `live_applied` | [adr-0124-platform-event-taxonomy.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0124-platform-event-taxonomy.md) |
 | `0125` | Agent capability bounds and autonomous action policy | `merged` | [adr-0125-agent-capability-bounds.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0125-agent-capability-bounds.md) |
 | `0126` | Observation-to-action closure loop | `merged` | [adr-0126-observation-to-action-closure-loop.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0126-observation-to-action-closure-loop.md) |
 | `0127` | Intent deduplication and conflict resolution | `merged` | [adr-0127-intent-conflict-resolution.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0127-intent-conflict-resolution.md) |

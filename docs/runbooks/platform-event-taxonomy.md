@@ -65,6 +65,12 @@ ADR 0124 is not fully live until the internal JetStream runtime exposes the comm
 4. Record a live-apply receipt under `receipts/live-applies/`.
 5. Update `versions/stack.yaml`, the ADR metadata, and the workstream metadata to the new platform version only after the live check passes.
 
+## Current Live Note
+
+The 2026-03-26 ADR 0124 live apply established the `PLATFORM_EVENTS` stream on the live NATS runtime and verified a canonical `platform.findings.observation` publish into that stream.
+
+That apply also exposed one runtime gap outside the repository-managed stream contract: the host-local NATS auth file at `/opt/nats-jetstream/config/nats-server.conf` still had `jetstream-admin` limited to `$JS.API.>` publishes only. Because that auth file is not yet repo-managed in this repository, the live apply required a manual server-side edit to add `platform.>` to the allow-list and a restart of the `lv3-nats-jetstream` container.
+
 ## Envelope Shape
 
 Each published event is wrapped as:
