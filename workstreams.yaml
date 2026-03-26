@@ -3123,7 +3123,7 @@ workstreams:
   - id: adr-0167-graceful-degradation-mode-declarations
     adr: "0167"
     title: Graceful degradation mode declarations
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0167-graceful-degradation-mode-declarations
     worktree_path: .worktrees/adr-0167-graceful-degradation
@@ -3146,7 +3146,7 @@ workstreams:
       - tests/test_health_composite.py
       - tests/test_validate_service_catalog.py
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0172-watchdog-escalation
     adr: "0172"

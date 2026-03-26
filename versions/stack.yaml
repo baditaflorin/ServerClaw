@@ -1,6 +1,6 @@
 schema_version: 1.0.0
 repo_version: 0.164.0
-platform_version: 0.130.14
+platform_version: 0.130.15
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -9,7 +9,7 @@ live_apply_evidence:
     mutation_audit: 2026-03-23-adr-0066-mutation-audit-live-apply
     public_edge_publication: 2026-03-25-adr-0136-http-security-headers-live-apply
     agent_coordination: 2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply
-    api_gateway: 2026-03-26-adr-0166-canonical-error-response-live-apply
+    api_gateway: 2026-03-26-adr-0167-graceful-degradation-live-apply
     docker_runtime: 2026-03-22-adr-0023-docker-runtime-live-apply
     langfuse: 2026-03-26-adr-0146-langfuse-live-apply
     postgres_vm: 2026-03-22-adr-0026-postgres-vm-live-apply
@@ -896,5 +896,5 @@ release_tracks:
     current: 0.164.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.14
+    current: 0.130.15
     meaning: intended platform release for the actual server configuration

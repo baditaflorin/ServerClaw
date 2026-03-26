@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0167](../adr/0167-graceful-degradation-mode-declarations.md)
 - Title: declared fallback behaviour for dependency failures, live degraded-state tracking, and API gateway enforcement
-- Status: merged
+- Status: live_applied
 - Branch: `codex/adr-0167-graceful-degradation-mode-declarations`
 - Worktree: `.worktrees/adr-0167-graceful-degradation`
 - Owner: codex
@@ -70,7 +70,7 @@
 - repository implementation is complete on `main` in repo release `0.146.1`
 - the mainline now carries the declaration schema, gateway degraded-mode runtime, health surfacing, and operator runbooks
 - patch release `0.146.1` fixes API gateway repo-root discovery for the packaged container layout so the bundled `platform/` package resolves correctly at runtime
-- live platform state should move to `live_applied` only after the updated API gateway runtime is converged from `main`
+- current-main release `0.164.0` completed the merged replay and recorded the first live platform state in platform version `0.130.15`
 
 ## Live Apply Attempt 2026-03-25
 
@@ -79,3 +79,11 @@
 - the first live attempt exposed a packaged-path regression in `scripts/api_gateway/main.py`; release `0.146.1` fixes that by discovering the repo root from either the source-tree or packaged layout
 - the second live attempt reached `docker compose up`, but Docker failed to publish `8083` because the guest lost the `DOCKER` nat chain during container recreate: `iptables: No chain/target/match by that name`
 - after that failure, new SSH sessions to the public Proxmox host at `65.108.75.123:22` began timing out from this controller environment, so the Docker restart/retry step could not be completed in the same turn
+
+## Live Apply 2026-03-26
+
+- replaying `playbooks/api-gateway.yml` from merged `main` succeeded on `docker-runtime-lv3` with `ok=125 changed=25 unreachable=0 failed=0 skipped=24`
+- the runtime verification steps passed during converge, including the authenticated platform service catalog probe and the anonymous aggregate-health canonical-error assertion
+- the public endpoint `https://api.lv3.org/v1/platform/degradations` returned `{"degradation_count":0,"services":{}}` after the replay
+- the authenticated public endpoint `https://api.lv3.org/v1/platform/services` reported `api_gateway.active_degradations: []`
+- guest state under `/opt/api-gateway/data/degradation-state.json` showed an empty `services` object and `/opt/api-gateway/data/nats-outbox.jsonl` was absent after recovery

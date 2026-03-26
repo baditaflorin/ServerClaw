@@ -8,7 +8,7 @@
 - ship the authenticated NATS `CONNECT` fix so the gateway clears its durable outbox and degraded state automatically once publication recovers
 
 ## Platform Impact
-- repository version advances to `0.164.0`; platform version remains `0.130.14` until ADR 0167 is replayed from `main` and its live-apply receipt is recorded.
+- repository version advances to `0.164.0`; platform version advances to `0.130.15` after the successful ADR 0167 replay from `main`.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)
