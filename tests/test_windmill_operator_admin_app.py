@@ -40,7 +40,7 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert defaults["windmill_bootstrap_identity_username"] == "superadmin_secret"
     assert defaults["windmill_bootstrap_identity_login_type"] == "password"
     assert defaults["windmill_worker_checkout_repo_root_local_dir"] == "{{ playbook_dir }}/.."
-    assert defaults["windmill_worker_checkout_sync_paths"] == ["config", "platform", "scripts"]
+    assert defaults["windmill_worker_checkout_sync_paths"] == ["config", "migrations", "platform", "scripts", "windmill"]
     weekly_schedule = next(entry for entry in defaults["windmill_seed_schedules"] if entry["path"] == "f/lv3/build_cache_maintenance_weekly")
     assert weekly_schedule["schedule"] == "0 0 4 * * 7"
 
