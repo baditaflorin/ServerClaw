@@ -106,6 +106,7 @@ windmill_ledger_nats_url: >-
 windmill_superadmin_secret_remote_file: "{{ windmill_secret_dir }}/superadmin-secret"
 windmill_local_artifact_dir: "{{ windmill_controller_repo_common_root ~ '/.local/windmill' }}"
 windmill_superadmin_secret_local_file: "{{ windmill_local_artifact_dir }}/superadmin-secret.txt"
+windmill_controller_local_root: "{{ windmill_local_artifact_dir | dirname }}"
 windmill_bootstrap_identity_email: superadmin_secret@windmill.dev
 windmill_bootstrap_identity_username: superadmin_secret
 windmill_bootstrap_identity_login_type: password
@@ -121,6 +122,35 @@ windmill_worker_secret_mirror_ids:
   - nats_jetstream_admin_password
 windmill_worker_proxmox_api_token_payload_dir: "{{ windmill_worker_repo_checkout_host_path }}/.local/proxmox-api"
 windmill_worker_proxmox_api_token_payload_file: "{{ windmill_worker_proxmox_api_token_payload_dir }}/lv3-automation-primary.json"
+windmill_openbao_runtime_network: openbao_default
+windmill_worker_repo_mutable_directories:
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/state/operator-access"
+    mode: "0777"
+windmill_worker_repo_mutable_files:
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/config/operators.yaml"
+    mode: "0666"
+windmill_worker_repo_secret_directories:
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/keycloak"
+    mode: "0700"
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/openbao"
+    mode: "0700"
+windmill_worker_repo_secret_files:
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/keycloak/bootstrap-admin-password.txt"
+    mode: "0600"
+    content: >-
+      {{
+        lookup('ansible.builtin.file', windmill_controller_local_root ~ '/keycloak/bootstrap-admin-password.txt', errors='ignore')
+        | default('', true)
+        | trim
+      }}
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/openbao/init.json"
+    mode: "0600"
+    content: >-
+      {{
+        lookup('ansible.builtin.file', windmill_controller_local_root ~ '/openbao/init.json', errors='ignore')
+        | default('', true)
+        | trim
+      }}
 windmill_worker_checkout_sync_paths:
   - ansible.cfg
   - callback_plugins
@@ -154,6 +184,27 @@ windmill_worker_runtime_writable_directories:
     mode: "1777"
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures/locks"
     mode: "1777"
+windmill_operator_manager_env:
+  LV3_OPERATOR_MANAGER_SURFACE: windmill
+  LV3_OPENBAO_URL: http://lv3-openbao:8201
+  KEYCLOAK_BOOTSTRAP_PASSWORD: >-
+    {{
+      lookup('ansible.builtin.file', windmill_controller_local_root ~ '/keycloak/bootstrap-admin-password.txt', errors='ignore')
+      | default('', true)
+      | trim
+    }}
+  OPENBAO_INIT_JSON: >-
+    {{
+      lookup('ansible.builtin.file', windmill_controller_local_root ~ '/openbao/init.json', errors='ignore')
+      | default('', true)
+      | trim
+    }}
+  TAILSCALE_API_KEY: "{{ lookup('ansible.builtin.env', 'TAILSCALE_API_KEY') | default('', true) }}"
+  TAILSCALE_TAILNET: "{{ lookup('ansible.builtin.env', 'TAILSCALE_TAILNET') | default('', true) }}"
+  LV3_TAILSCALE_INVITE_ENDPOINT: "{{ lookup('ansible.builtin.env', 'LV3_TAILSCALE_INVITE_ENDPOINT') | default('', true) }}"
+  LV3_STEP_CA_SSH_REGISTER_COMMAND: "{{ lookup('ansible.builtin.env', 'LV3_STEP_CA_SSH_REGISTER_COMMAND') | default('', true) }}"
+  LV3_STEP_CA_SSH_REVOKE_COMMAND: "{{ lookup('ansible.builtin.env', 'LV3_STEP_CA_SSH_REVOKE_COMMAND') | default('', true) }}"
+  LV3_MATTERMOST_WEBHOOK: "{{ lookup('ansible.builtin.env', 'LV3_MATTERMOST_WEBHOOK') | default('', true) }}"
 windmill_seed_app_repo_root_local_dir: "{{ inventory_dir }}/../config/windmill/apps"
 windmill_seed_app_sync_dir: "{{ windmill_site_dir }}/seed-apps"
 windmill_mutation_audit_dir: "{{ platform_log_dir }}"
@@ -467,6 +518,18 @@ windmill_seed_schedules:
     enabled: true
     summary: ADR 0171 first-Sunday guarded fault injection
     description: Repo-managed weekly trigger at 03:00 UTC that only executes the bounded ADR 0171 monthly subset on the first Sunday of the month.
+    no_flow_overlap: true
+  - path: f/lv3/quarterly_access_review_every_monday_0900
+    schedule: "0 0 9 * * 1"
+    timezone: Europe/Bucharest
+    script_path: f/lv3/quarterly_access_review
+    args:
+      schedule_guard: first_monday_of_quarter
+      warning_days: 45
+      inactive_days: 60
+    enabled: true
+    summary: ADR 0108 quarterly access review
+    description: Repo-managed Monday trigger that only delivers the ADR 0108 quarterly access review on the first Monday of January, April, July, and October.
     no_flow_overlap: true
   - path: f/lv3/world_state/refresh_proxmox_vms_every_minute
     schedule: "0 * * * * *"

@@ -45,9 +45,10 @@ The report flags operators with no recorded activity for 45 days and marks opera
 - `python3 scripts/operator_access_inventory.py --id <operator-id> --offline`
 - `make workflow-info WORKFLOW=operator-offboard`
 - `make workflow-info WORKFLOW=quarterly-access-review`
+- `curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" http://100.64.0.1:8005/api/w/lv3/schedules/list | jq '.[] | select(.path=="f/lv3/quarterly_access_review_every_monday_0900") | {path, enabled, schedule, timezone}'`
 
 ## Failure Handling
 
 - If Keycloak disable succeeds but OpenBao or Tailscale fails, rerun the same offboard command. The flow is idempotent.
-- If Tailscale credentials are unavailable, remove the device manually in the admin console and record the action in the same incident thread or receipt.
+- If Tailscale credentials are unavailable, the repo-managed flow now records a skipped device-removal step instead of aborting the entire offboard. Remove the device manually in the admin console and record the action in the same incident thread or receipt.
 - If emergency SSH revocation is required, configure `LV3_STEP_CA_SSH_REVOKE_COMMAND` to point at the approved revocation wrapper and rerun the offboard command.

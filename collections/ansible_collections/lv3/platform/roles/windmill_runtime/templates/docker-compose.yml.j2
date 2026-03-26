@@ -41,6 +41,10 @@ services:
     image: {{ windmill_image }}
     restart: unless-stopped
     privileged: true
+    user: "0:0"
+    networks:
+      - default
+      - openbao_runtime
     env_file:
       - {{ windmill_env_file }}
     environment:
@@ -64,6 +68,10 @@ services:
   windmill_worker_native:
     image: {{ windmill_image }}
     restart: unless-stopped
+    user: "0:0"
+    networks:
+      - default
+      - openbao_runtime
     env_file:
       - {{ windmill_env_file }}
     environment:
@@ -103,3 +111,8 @@ volumes:
   worker_dependency_cache: null
   worker_logs: null
   lsp_cache: null
+
+networks:
+  openbao_runtime:
+    external: true
+    name: {{ windmill_openbao_runtime_network }}

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import subprocess
 from pathlib import Path
 
 import yaml
@@ -55,8 +56,44 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         "scripts",
         "windmill",
     }.issubset(set(defaults["windmill_worker_checkout_sync_paths"]))
+    assert defaults["windmill_worker_repo_mutable_directories"] == [
+        {"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/state/operator-access", "mode": "0777"}
+    ]
+    assert defaults["windmill_worker_repo_mutable_files"] == [
+        {"path": "{{ windmill_worker_repo_checkout_host_path }}/config/operators.yaml", "mode": "0666"}
+    ]
+    assert defaults["windmill_worker_repo_secret_directories"] == [
+        {"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/keycloak", "mode": "0700"},
+        {"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/openbao", "mode": "0700"},
+    ]
+    assert defaults["windmill_worker_repo_secret_files"][0]["path"] == (
+        "{{ windmill_worker_repo_checkout_host_path }}/.local/keycloak/bootstrap-admin-password.txt"
+    )
+    assert defaults["windmill_worker_repo_secret_files"][1]["path"] == (
+        "{{ windmill_worker_repo_checkout_host_path }}/.local/openbao/init.json"
+    )
+    assert defaults["windmill_operator_manager_env"]["LV3_OPERATOR_MANAGER_SURFACE"] == "windmill"
+    assert defaults["windmill_openbao_runtime_network"] == "openbao_default"
+    assert defaults["windmill_operator_manager_env"]["LV3_OPENBAO_URL"] == "http://lv3-openbao:8201"
+    assert "KEYCLOAK_BOOTSTRAP_PASSWORD" in defaults["windmill_operator_manager_env"]
+    assert "OPENBAO_INIT_JSON" in defaults["windmill_operator_manager_env"]
+    assert {
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/receipts/fixtures", "mode": "1777"}.items()),
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local", "mode": "0755"}.items()),
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures", "mode": "1777"}.items()),
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures/reaper-runs", "mode": "1777"}.items()),
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures/runtime", "mode": "1777"}.items()),
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures/archive", "mode": "1777"}.items()),
+        frozenset({"path": "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures/locks", "mode": "1777"}.items()),
+    } == {frozenset(item.items()) for item in defaults["windmill_worker_runtime_writable_directories"]}
     weekly_schedule = next(entry for entry in defaults["windmill_seed_schedules"] if entry["path"] == "f/lv3/build_cache_maintenance_weekly")
     assert weekly_schedule["schedule"] == "0 0 4 * * 7"
+    quarterly_schedule = next(
+        entry for entry in defaults["windmill_seed_schedules"] if entry["path"] == "f/lv3/quarterly_access_review_every_monday_0900"
+    )
+    assert quarterly_schedule["schedule"] == "0 0 9 * * 1"
+    assert quarterly_schedule["timezone"] == "Europe/Bucharest"
+    assert quarterly_schedule["args"]["schedule_guard"] == "first_monday_of_quarter"
 
 
 def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> None:
@@ -80,6 +117,7 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
     for script_source in (roster_script, onboard_script, offboard_script, sync_script, inventory_script):
         assert "\"uv\"" in script_source
         assert "\"run\"" in script_source
+        assert "\"--no-project\"" in script_source
         assert "\"pyyaml\"" in script_source
         assert "\"PYTHONPATH\"" in script_source
     assert "backend.create_operator" in app_source
@@ -151,6 +189,87 @@ def test_operator_inventory_script_requires_operator_id() -> None:
     assert payload["reason"] == "operator_id is required"
 
 
+def test_quarterly_access_review_script_supports_guard() -> None:
+    module = load_module(REPO_ROOT / "config/windmill/scripts/quarterly-access-review.py", "quarterly_access_review")
+    module._is_first_monday_of_quarter = lambda now=None: False
+
+    payload = module.main(repo_path=str(REPO_ROOT), schedule_guard="first_monday_of_quarter")
+
+    assert payload["status"] == "skipped"
+    assert payload["schedule_guard"] == "first_monday_of_quarter"
+
+
+def test_operator_onboard_wrapper_passes_emit_json_before_subcommand(tmp_path: Path, monkeypatch) -> None:
+    repo_root = tmp_path / "repo"
+    workflow = repo_root / "scripts" / "operator_manager.py"
+    workflow.parent.mkdir(parents=True)
+    workflow.write_text("# stub\n", encoding="utf-8")
+    module = load_module(REPO_ROOT / "config/windmill/scripts/operator-onboard.py", "operator_onboard_wrapper")
+    captured = {}
+
+    def fake_run(command, cwd, env, text, capture_output, check):
+        captured["command"] = command
+        return subprocess.CompletedProcess(command, 0, stdout=json.dumps({"status": "ok"}), stderr="")
+
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
+
+    payload = module.main(name="Alice Example", email="alice@example.com", role="viewer", repo_path=str(repo_root))
+
+    assert payload["status"] == "ok"
+    assert captured["command"][:9] == [
+        "uv",
+        "run",
+        "--no-project",
+        "--with",
+        "pyyaml",
+        "python",
+        str(workflow),
+        "--emit-json",
+        "onboard",
+    ]
+
+
+def test_operator_onboard_wrapper_reads_runtime_env_fallback(tmp_path: Path, monkeypatch) -> None:
+    repo_root = tmp_path / "repo"
+    workflow = repo_root / "scripts" / "operator_manager.py"
+    workflow.parent.mkdir(parents=True)
+    workflow.write_text("# stub\n", encoding="utf-8")
+    runtime_env = tmp_path / "runtime.env"
+    runtime_env.write_text(
+        "LV3_OPENBAO_URL=http://127.0.0.1:8201\nKEYCLOAK_BOOTSTRAP_PASSWORD=test-bootstrap\nOPENBAO_INIT_JSON={'root_token':'test'}\nIGNORED=value\n",
+        encoding="utf-8",
+    )
+    module = load_module(REPO_ROOT / "config/windmill/scripts/operator-onboard.py", "operator_onboard_wrapper_runtime_env")
+    monkeypatch.setattr(module, "RUNTIME_ENV_FILE", runtime_env)
+    captured = {}
+
+    def fake_run(command, cwd, env, text, capture_output, check):
+        captured["env"] = env
+        return subprocess.CompletedProcess(command, 0, stdout=json.dumps({"status": "ok"}), stderr="")
+
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
+
+    payload = module.main(name="Alice Example", email="alice@example.com", role="viewer", repo_path=str(repo_root))
+
+    assert payload["status"] == "ok"
+    assert captured["env"]["LV3_OPENBAO_URL"] == "http://127.0.0.1:8201"
+    assert captured["env"]["KEYCLOAK_BOOTSTRAP_PASSWORD"] == "test-bootstrap"
+    assert captured["env"]["OPENBAO_INIT_JSON"] == "{'root_token':'test'}"
+    assert "IGNORED" not in captured["env"]
+
+
+def test_operator_onboard_wrapper_sets_openbao_url_without_runtime_env(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    workflow = repo_root / "scripts" / "operator_manager.py"
+    workflow.parent.mkdir(parents=True)
+    workflow.write_text("# stub\n", encoding="utf-8")
+    module = load_module(REPO_ROOT / "config/windmill/scripts/operator-onboard.py", "operator_onboard_wrapper_default_env")
+
+    env = module.build_subprocess_env(repo_root)
+
+    assert env["LV3_OPENBAO_URL"] == "http://lv3-openbao:8201"
+
+
 def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     tasks = (
         REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml"
@@ -171,12 +290,13 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "/api/users/set_login_type/" in tasks
     assert "Ensure the Windmill bootstrap admin password matches the managed secret" in tasks
     assert "/api/users/set_password_of/" in tasks
-    assert "Create repo-managed Windmill schedules" in tasks
-    assert "Converge repo-managed Windmill schedule enabled flags" in tasks
-    assert 'psql "${DATABASE_URL}"' in tasks
-    assert "become: true" in tasks
-    assert "status_code:\n      - 200\n      - 201\n      - 400" in tasks
-    assert "{{ inventory_dir }}/../scripts/sync_windmill_seed_scripts.py" in tasks
+    assert "Sync repo-managed Windmill scripts" in tasks
+    assert "scripts/sync_windmill_seed_scripts.py" in tasks
+    assert "WINDMILL_TOKEN" in tasks
+    assert "Sync repo-managed Windmill schedules" in tasks
+    assert "scripts/sync_windmill_seed_schedules.py" in tasks
+    assert '$1 == "DATABASE_URL"' in tasks
+    assert '. "{{ windmill_env_file }}"' not in tasks
     assert "Sync repo-managed Windmill raw apps" in tasks
     assert "wmill sync push" in tasks
     assert "--skip-scripts" in tasks
@@ -186,8 +306,6 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Build the local staging archive for the Windmill worker checkout" in tasks
     assert "changed_when: false" in tasks
     assert "Expand the staged Windmill worker checkout on the guest" in tasks
-    assert 'src: "{{ windmill_worker_checkout_archive_local.path }}"' in tasks
-    assert "Ensure repo-backed Windmill runtime paths stay writable after checkout sync" in tasks
     assert "Find stale Python bytecode files in the Windmill worker checkout" in tasks
     assert "Remove stale Python bytecode files from the Windmill worker checkout" in tasks
     assert "Find stale Python bytecode cache directories in the Windmill worker checkout" in tasks
@@ -198,9 +316,32 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "-exec rm -rf {} +" in tasks
     assert '{{ windmill_worker_repo_checkout_host_path }}/scripts' in tasks
     assert '{{ windmill_worker_repo_checkout_host_path }}/platform' in tasks
-    assert "worker-checkout.tar.gz" not in tasks
+    assert "Ensure repo-backed Windmill runtime paths stay writable after checkout sync" in tasks
+    assert "Ensure the Windmill worker checkout mutable directories exist with write access" in tasks
+    assert "Ensure the Windmill worker checkout mutable files remain writable for Windmill jobs" in tasks
+    assert "Ensure the Windmill worker checkout secret directories exist" in tasks
+    assert "Mirror the Windmill worker checkout bootstrap secret files" in tasks
+    assert "windmill_worker_repo_mutable_directories" in tasks
+    assert "windmill_worker_repo_mutable_files" in tasks
+    assert "windmill_worker_repo_secret_directories" in tasks
+    assert "windmill_worker_repo_secret_files" in tasks
     assert "windmill_worker_checkout_repo_root_local_dir" in tasks
     assert "windmill_worker_checkout_sync_paths" in tasks
     assert defaults["windmill_worker_repo_checkout_host_path"] == "/srv/proxmox_florin_server"
     assert defaults["windmill_worker_repo_checkout_container_path"] == "/srv/proxmox_florin_server"
     assert "{{ windmill_worker_repo_checkout_host_path }}:{{ windmill_worker_repo_checkout_container_path }}" in compose_template
+    assert "openbao_runtime" in compose_template
+    assert "name: {{ windmill_openbao_runtime_network }}" in compose_template
+    assert compose_template.count('user: "0:0"') >= 3
+    runtime_template = (
+        REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.j2"
+    ).read_text()
+    runtime_ctmpl_template = (
+        REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.ctmpl.j2"
+    ).read_text()
+    assert "TF_VAR_proxmox_endpoint" in runtime_template
+    assert "TF_VAR_proxmox_api_token" in runtime_template
+    assert "{% for item in windmill_operator_manager_env" in runtime_template
+    assert "TF_VAR_proxmox_endpoint" in runtime_ctmpl_template
+    assert "TF_VAR_proxmox_api_token" in runtime_ctmpl_template
+    assert "{% for item in windmill_operator_manager_env" in runtime_ctmpl_template

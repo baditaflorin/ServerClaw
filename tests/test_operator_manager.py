@@ -92,6 +92,11 @@ def test_repo_operator_roster_validates() -> None:
     assert normalized["operators"][0]["id"] == "florin-badita"
 
 
+def test_service_url_prefers_env_override(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("LV3_OPENBAO_URL", "http://127.0.0.1:8201/")
+    assert operator_manager.service_url("openbao") == "http://127.0.0.1:8201"
+
+
 def test_onboard_writes_roster_and_state(
     roster_paths: tuple[Path, Path], monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -333,3 +338,35 @@ def test_quarterly_review_flags_stale_operator(
 
     assert payload["flagged_count"] == 1
     assert payload["operators"][0]["flagged"] is True
+
+
+def test_live_backend_skips_tailscale_remove_when_not_configured(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    backend = operator_manager.LiveBackend(actor_class="operator", actor_id="tester")
+    monkeypatch.setattr(operator_manager, "load_tailscale_api_key", lambda: None)
+    monkeypatch.setattr(operator_manager, "load_tailscale_tailnet", lambda: None)
+
+    payload = backend._tailscale_remove(
+        {
+            "tailscale": {
+                "login_email": "alice@example.com",
+                "device_name": "alice-mbp",
+            }
+        }
+    )
+
+    assert payload["status"] == "skipped"
+    assert "TAILSCALE_API_KEY or TAILSCALE_TAILNET" in payload["reason"]
+
+
+def test_keycloak_bootstrap_password_prefers_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("KEYCLOAK_BOOTSTRAP_PASSWORD", "EnvBootstrap123")
+
+    assert operator_manager.load_keycloak_bootstrap_password() == "EnvBootstrap123"
+
+
+def test_openbao_root_token_reads_env_payload(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("OPENBAO_INIT_JSON", json.dumps({"root_token": "s.test-root-token"}))
+
+    assert operator_manager.load_openbao_root_token() == "s.test-root-token"

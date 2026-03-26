@@ -336,11 +336,11 @@ receipt-info:
 	$(REPO_ROOT)/scripts/live_apply_receipts.py --receipt $(RECEIPT)
 
 workflows:
-	$(REPO_ROOT)/scripts/workflow_catalog.py --list
+	uvx --from pyyaml python $(REPO_ROOT)/scripts/workflow_catalog.py --list
 
 workflow-info:
 	@test -n "$(WORKFLOW)" || (echo "set WORKFLOW=<workflow-id>"; exit 1)
-	$(REPO_ROOT)/scripts/workflow_catalog.py --workflow $(WORKFLOW)
+	uvx --from pyyaml python $(REPO_ROOT)/scripts/workflow_catalog.py --workflow $(WORKFLOW)
 
 commands:
 	$(REPO_ROOT)/scripts/command_catalog.py --list

@@ -19,6 +19,7 @@ This runbook documents the repo-managed onboarding path introduced by ADR 0108.
   - `LV3_STEP_CA_SSH_REGISTER_COMMAND`
   - `LV3_MATTERMOST_WEBHOOK`
 - `viewer` operators do not receive SSH access and therefore do not need an SSH public key; `admin` and `operator` still do.
+- `make converge-windmill` now mirrors the ADR 0108 operator-manager bootstrap secrets and optional environment values into the Windmill worker runtime so the browser-first path can use the same live credentials and optional hooks as the controller path without a worker-local `.local/` checkout.
 
 ## Roster-First Flow
 
@@ -93,6 +94,7 @@ make sync-operators
 - `python3 scripts/operator_access_inventory.py --id <operator-id>`
 - `make workflow-info WORKFLOW=operator-onboard`
 - `make workflow-info WORKFLOW=sync-operators`
+- `curl -s -H "Authorization: Bearer $(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/windmill/superadmin-secret.txt)" http://100.64.0.1:8005/api/w/lv3/schedules/list | jq '.[] | select(.path=="f/lv3/quarterly_access_review_every_monday_0900")'`
 
 ## Notes
 

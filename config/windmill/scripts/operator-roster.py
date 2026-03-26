@@ -25,7 +25,7 @@ def main(repo_path: str = "/srv/proxmox_florin_server"):
                 "reason": "repo checkout not mounted on the worker",
                 "expected_repo_path": str(repo_root),
             }
-        command = ["uv", "run", "--with", "pyyaml", "python", str(workflow), "validate"]
+        command = ["uv", "run", "--no-project", "--with", "pyyaml", "python", str(workflow), "validate"]
         env = dict(os.environ)
         env["PYTHONPATH"] = f"{repo_root}:{env['PYTHONPATH']}" if env.get("PYTHONPATH") else str(repo_root)
         result = subprocess.run(command, cwd=repo_root, env=env, text=True, capture_output=True, check=False)

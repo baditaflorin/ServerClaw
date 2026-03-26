@@ -162,6 +162,41 @@
   vars:
     common_directory_tree_paths: "{{ windmill_worker_runtime_writable_directories }}"
 
+- name: Ensure the Windmill worker checkout mutable directories exist with write access
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: "{{ item.mode }}"
+  loop: "{{ windmill_worker_repo_mutable_directories }}"
+
+- name: Ensure the Windmill worker checkout mutable files remain writable for Windmill jobs
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: file
+    mode: "{{ item.mode }}"
+  loop: "{{ windmill_worker_repo_mutable_files }}"
+
+- name: Ensure the Windmill worker checkout secret directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: "{{ item.mode }}"
+  loop: "{{ windmill_worker_repo_secret_directories }}"
+  no_log: true
+
+- name: Mirror the Windmill worker checkout bootstrap secret files
+  ansible.builtin.copy:
+    dest: "{{ item.path }}"
+    content: "{{ item.content }}\n"
+    mode: "{{ item.mode }}"
+  loop: "{{ windmill_worker_repo_secret_files }}"
+  no_log: true
+
+- name: Remove the staged Windmill worker checkout archive from the guest
+  ansible.builtin.file:
+    path: "{{ windmill_site_dir }}/worker-checkout.tar.gz"
+    state: absent
+
 - name: Find stale Python bytecode files in the Windmill worker checkout
   ansible.builtin.shell: |
     set -euo pipefail
@@ -365,6 +400,12 @@
             else {}
           )
         | combine({'LV3_INTEGRATION_ENVIRONMENT': 'production'})
+        | combine(
+            windmill_operator_manager_env
+            | dict2items
+            | rejectattr('value', 'equalto', '')
+            | items2dict
+          )
       }}
   no_log: true
 
@@ -493,9 +534,8 @@
   tags:
     - mutation
 
-- name: Check whether Docker nat chain exists before Windmill startup
-  ansible.builtin.command: iptables -t nat -S DOCKER
-  register: windmill_docker_nat_chain_check
+- name: Verify Docker responds before Windmill startup
+  ansible.builtin.command: docker info --format '{{ "{{ .ServerVersion }}" }}'
   changed_when: false
   failed_when: windmill_docker_nat_chain_check.rc not in [0, 1]
   when: windmill_server_requires_docker_nat | bool
@@ -1219,95 +1259,64 @@
   tags:
     - mutation
 
-- name: Check whether repo-managed Windmill schedules already exist
-  ansible.builtin.uri:
-    url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id | urlencode }}/schedules/exists/{{ item.path | urlencode }}"
-    method: GET
-    headers:
-      Authorization: "Bearer {{ windmill_superadmin_secret }}"
-    return_content: true
-    status_code: 200
-  loop: "{{ windmill_seed_schedules }}"
-  loop_control:
-    label: "{{ item.path }}"
-  register: windmill_seed_schedule_exists
-  retries: 6
-  delay: 5
-  until: windmill_seed_schedule_exists.status | default(0) == 200
-  changed_when: false
-  failed_when: windmill_seed_schedule_exists.status | default(0) != 200
-  no_log: true
+- name: Create a local manifest path for repo-managed Windmill schedules
+  ansible.builtin.tempfile:
+    state: file
+    suffix: .json
+  delegate_to: localhost
+  become: false
+  register: windmill_seed_schedule_manifest_local
 
-- name: Create repo-managed Windmill schedules
-  ansible.builtin.uri:
-    url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id | urlencode }}/schedules/create"
-    method: POST
-    headers:
-      Authorization: "Bearer {{ windmill_superadmin_secret }}"
-    body_format: json
-    body:
-      path: "{{ item.item.path }}"
-      schedule: "{{ item.item.schedule }}"
-      timezone: "{{ item.item.timezone }}"
-      script_path: "{{ item.item.script_path }}"
-      is_flow: false
-      args: "{{ item.item.args | default({}) }}"
-      enabled: "{{ item.item.enabled | default(false) }}"
-      summary: "{{ item.item.summary }}"
-      description: "{{ item.item.description }}"
-      no_flow_overlap: "{{ item.item.no_flow_overlap | default(true) }}"
-    return_content: true
-    status_code:
-      - 200
-      - 201
-      - 400
-  loop: "{{ windmill_seed_schedule_exists.results }}"
-  loop_control:
-    label: "{{ item.item.path }}"
-  when: not (item.content | default('false') | trim | bool)
-  failed_when: >-
-    windmill_seed_schedule_create.status not in [200, 201, 400]
-    or (
-      windmill_seed_schedule_create.status == 400
-      and 'already exists' not in (windmill_seed_schedule_create.content | default('') | lower)
-    )
-  changed_when: windmill_seed_schedule_create.status in [200, 201]
-  register: windmill_seed_schedule_create
-  no_log: true
+- name: Render the repo-managed Windmill schedule manifest locally
+  ansible.builtin.copy:
+    dest: "{{ windmill_seed_schedule_manifest_local.path }}"
+    content: "{{ windmill_seed_schedules | to_nice_json }}"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
 
-- name: Update existing repo-managed Windmill schedules
-  ansible.builtin.uri:
-    url: "{{ windmill_private_base_url }}/api/w/{{ windmill_workspace_id | urlencode }}/schedules/update/{{ item.item.path | urlencode }}"
-    method: POST
-    headers:
-      Authorization: "Bearer {{ windmill_superadmin_secret }}"
-    body_format: json
-    body:
-      schedule: "{{ item.item.schedule }}"
-      timezone: "{{ item.item.timezone }}"
-      args: "{{ item.item.args | default({}) }}"
-      summary: "{{ item.item.summary }}"
-      description: "{{ item.item.description }}"
-      no_flow_overlap: "{{ item.item.no_flow_overlap | default(true) }}"
-    return_content: true
-    status_code: 200
-  loop: "{{ windmill_seed_schedule_exists.results }}"
-  loop_control:
-    label: "{{ item.item.path }}"
-  register: windmill_seed_schedule_update
-  retries: 6
-  delay: 5
-  until: windmill_seed_schedule_update.status | default(0) == 200
-  when: item.content | default('false') | trim | bool
+- name: Sync repo-managed Windmill schedules
+  vars:
+    mutation_audit_action: sync.windmill_schedules
+    mutation_audit_target: windmill-workspace
+    mutation_audit_emit_on_success: true
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ inventory_dir }}/../scripts/sync_windmill_seed_schedules.py"
+      - --base-url
+      - "{{ windmill_private_base_url }}"
+      - --workspace
+      - "{{ windmill_workspace_id }}"
+      - --manifest
+      - "{{ windmill_seed_schedule_manifest_local.path }}"
+      - --max-attempts
+      - "8"
+      - --settle-interval
+      - "1.0"
+  delegate_to: localhost
+  become: false
+  environment:
+    WINDMILL_TOKEN: "{{ windmill_superadmin_secret }}"
+  register: windmill_seed_schedule_sync
   changed_when: false
-  no_log: true
+  tags:
+    - mutation
+
+- name: Remove the local repo-managed Windmill schedule manifest
+  ansible.builtin.file:
+    path: "{{ windmill_seed_schedule_manifest_local.path }}"
+    state: absent
+  delegate_to: localhost
+  become: false
 
 - name: Converge repo-managed Windmill schedule enabled flags
   become: true
   ansible.builtin.shell: |
     set -euo pipefail
-    . "{{ windmill_env_file }}"
-    psql "${DATABASE_URL}" -v ON_ERROR_STOP=1 -Atqc \
+    database_url="$(awk -F= '$1 == "DATABASE_URL" { sub(/^[^=]*=/, ""); print; exit }' "{{ windmill_env_file }}")"
+    test -n "${database_url}"
+    psql "${database_url}" -v ON_ERROR_STOP=1 -Atqc \
       "UPDATE schedule SET enabled = {{ item.enabled | default(false) | ternary('true', 'false') }} WHERE path = '{{ item.path }}' AND enabled IS DISTINCT FROM {{ item.enabled | default(false) | ternary('true', 'false') }};"
   args:
     executable: /bin/bash

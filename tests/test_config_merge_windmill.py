@@ -11,6 +11,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parents[1]
 WRAPPER_PATH = REPO_ROOT / "config" / "windmill" / "scripts" / "merge-config-changes.py"
 SYNC_HELPER_PATH = REPO_ROOT / "scripts" / "sync_windmill_seed_scripts.py"
+SCHEDULE_SYNC_HELPER_PATH = REPO_ROOT / "scripts" / "sync_windmill_seed_schedules.py"
 
 
 def load_module(name: str, path: Path):
@@ -162,41 +163,77 @@ def test_sync_helper_reports_missing_token(monkeypatch: pytest.MonkeyPatch, tmp_
     assert json.loads(captured.err)["reason"] == "WINDMILL_TOKEN is required"
 
 
-def test_sync_helper_retries_retryable_create_failures(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    module = load_module("sync_helper_retries", SYNC_HELPER_PATH)
-    script_path = tmp_path / "script.py"
-    script_path.write_text("print('ok')\n", encoding="utf-8")
-    calls = {"create": 0}
+def test_sync_helper_retries_connection_reset_during_create(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module = load_module("sync_helper_retry_reset", SYNC_HELPER_PATH)
+    local_file = tmp_path / "script.py"
+    local_file.write_text("print('ok')\n", encoding="utf-8")
+    spec = {
+        "path": "f/lv3/operator_onboard",
+        "local_file": str(local_file),
+        "language": "python3",
+        "summary": "ADR 0108 operator onboarding",
+        "description": "Repo-managed sync test",
+    }
+    attempts = {"count": 0}
 
     monkeypatch.setattr(module, "delete_script", lambda **kwargs: None)
     monkeypatch.setattr(module, "wait_for_absent", lambda **kwargs: None)
     monkeypatch.setattr(module, "wait_for_content", lambda **kwargs: None)
 
     def fake_create_script(**kwargs):
-        calls["create"] += 1
-        if calls["create"] == 1:
-            raise module.RetryableSyncError("connection reset by peer")
-        return 201, "created"
+        attempts["count"] += 1
+        if attempts["count"] == 1:
+            raise ConnectionResetError(54, "Connection reset by peer")
+        return 201, ""
 
     monkeypatch.setattr(module, "create_script", fake_create_script)
 
-    result = module.sync_script(
+    payload = module.sync_script(
         base_url="http://windmill.internal",
         workspace="lv3",
         token="token",
-        spec={
-            "path": "f/lv3/config_merge/merge_config_changes",
-            "language": "python3",
-            "summary": "summary",
-            "description": "desc",
-            "local_file": str(script_path),
-        },
+        spec=spec,
         max_attempts=3,
         settle_interval_s=0.0,
     )
 
-    assert result == {
-        "path": "f/lv3/config_merge/merge_config_changes",
-        "attempts": 2,
-        "status": "synced",
+    assert payload == {"path": "f/lv3/operator_onboard", "attempts": 2, "status": "synced"}
+
+
+def test_schedule_sync_helper_retries_connection_reset_during_update(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module = load_module("schedule_sync_helper_retry_reset", SCHEDULE_SYNC_HELPER_PATH)
+    spec = {
+        "path": "f/lv3/quarterly_access_review_every_monday_0900",
+        "schedule": "0 0 9 * * 1",
+        "timezone": "Europe/Bucharest",
+        "script_path": "f/lv3/quarterly_access_review",
+        "summary": "ADR 0108 quarterly access review",
+        "description": "Repo-managed schedule sync test",
+        "args": {"schedule_guard": "first_monday_of_quarter"},
     }
+    attempts = {"count": 0}
+
+    monkeypatch.setattr(module, "schedule_exists", lambda **kwargs: True)
+
+    def fake_update_schedule(**kwargs):
+        attempts["count"] += 1
+        if attempts["count"] == 1:
+            raise ConnectionResetError(54, "Connection reset by peer")
+
+    monkeypatch.setattr(module, "update_schedule", fake_update_schedule)
+
+    payload = module.sync_schedule(
+        base_url="http://windmill.internal",
+        workspace="lv3",
+        token="token",
+        spec=spec,
+        max_attempts=3,
+        settle_interval_s=0.0,
+    )
+
+    assert payload == {"path": "f/lv3/quarterly_access_review_every_monday_0900", "attempts": 2, "status": "updated"}

@@ -168,6 +168,10 @@ def load_service_catalog() -> dict[str, dict[str, Any]]:
 
 
 def service_url(service_id: str, *, prefer_public: bool = False) -> str:
+    env_name = f"LV3_{service_id.upper().replace('-', '_')}_URL"
+    override = os.environ.get(env_name, "").strip()
+    if override:
+        return override.rstrip("/")
     service = load_service_catalog().get(service_id)
     if service is None:
         raise OperatorManagerError(f"Service catalog entry '{service_id}' is missing.")
@@ -209,11 +213,31 @@ def load_mattermost_webhook() -> str | None:
     return None
 
 
+def load_keycloak_bootstrap_password() -> str | None:
+    value = os.environ.get("KEYCLOAK_BOOTSTRAP_PASSWORD", "").strip()
+    if value:
+        return value
+    return load_text_if_exists(KEYCLOAK_BOOTSTRAP_PASSWORD_PATH)
+
+
+def load_openbao_init_payload() -> dict[str, Any]:
+    value = os.environ.get("OPENBAO_INIT_JSON", "").strip()
+    if value:
+        try:
+            payload = json.loads(value)
+        except json.JSONDecodeError as exc:
+            raise OperatorManagerError("OPENBAO_INIT_JSON must contain valid JSON.") from exc
+        if not isinstance(payload, dict):
+            raise OperatorManagerError("OPENBAO_INIT_JSON must decode to an object.")
+        return payload
+    return load_json(OPENBAO_INIT_PATH)
+
+
 def load_openbao_root_token() -> str:
-    payload = load_json(OPENBAO_INIT_PATH)
+    payload = load_openbao_init_payload()
     root_token = payload.get("root_token")
     if not isinstance(root_token, str) or not root_token.strip():
-        raise OperatorManagerError(f"{OPENBAO_INIT_PATH} does not contain a root_token")
+        raise OperatorManagerError("OpenBao init payload does not contain a root_token")
     return root_token
 
 
@@ -613,10 +637,12 @@ class LiveBackend:
             "mattermost_webhook_configured": bool(load_mattermost_webhook()),
         }
         missing: list[str] = []
-        if not KEYCLOAK_BOOTSTRAP_PASSWORD_PATH.exists():
-            missing.append(str(KEYCLOAK_BOOTSTRAP_PASSWORD_PATH))
-        if not OPENBAO_INIT_PATH.exists():
-            missing.append(str(OPENBAO_INIT_PATH))
+        if not load_keycloak_bootstrap_password():
+            missing.append("KEYCLOAK_BOOTSTRAP_PASSWORD or " + str(KEYCLOAK_BOOTSTRAP_PASSWORD_PATH))
+        try:
+            load_openbao_init_payload()
+        except (OperatorManagerError, FileNotFoundError):
+            missing.append("OPENBAO_INIT_JSON or " + str(OPENBAO_INIT_PATH))
         if missing:
             raise OperatorManagerError("Missing required local artifacts: " + ", ".join(missing))
         return details
@@ -624,9 +650,12 @@ class LiveBackend:
     def _keycloak_admin_token(self) -> str:
         if self._keycloak_token is not None:
             return self._keycloak_token
-        password = load_text_if_exists(KEYCLOAK_BOOTSTRAP_PASSWORD_PATH)
+        password = load_keycloak_bootstrap_password()
         if not password:
-            raise OperatorManagerError(f"Keycloak bootstrap admin password file is missing: {KEYCLOAK_BOOTSTRAP_PASSWORD_PATH}")
+            raise OperatorManagerError(
+                "Keycloak bootstrap admin password is missing from KEYCLOAK_BOOTSTRAP_PASSWORD and "
+                f"{KEYCLOAK_BOOTSTRAP_PASSWORD_PATH}"
+            )
         payload = json_request(
             f"{service_url('keycloak', prefer_public=True)}/realms/master/protocol/openid-connect/token",
             method="POST",
@@ -982,6 +1011,12 @@ class LiveBackend:
         return [device for device in devices if isinstance(device, dict)]
 
     def _tailscale_remove(self, operator: dict[str, Any]) -> dict[str, Any]:
+        if not load_tailscale_api_key() or not load_tailscale_tailnet():
+            return {
+                "status": "skipped",
+                "reason": "TAILSCALE_API_KEY or TAILSCALE_TAILNET is not configured",
+                "login_email": operator["tailscale"]["login_email"],
+            }
         devices = self._tailscale_devices()
         device_name = operator["tailscale"].get("device_name")
         device_id = operator["tailscale"].get("device_id")
