@@ -36,12 +36,18 @@ platform_context_corpus_sources:
     dest: receipts/live-applies
   - src: "{{ platform_context_repo_root }}/versions/stack.yaml"
     dest: versions/stack.yaml
+  - src: "{{ platform_context_repo_root }}/config/dependency-graph.json"
+    dest: config/dependency-graph.json
   - src: "{{ platform_context_repo_root }}/config/workflow-catalog.json"
     dest: config/workflow-catalog.json
   - src: "{{ platform_context_repo_root }}/config/command-catalog.json"
     dest: config/command-catalog.json
   - src: "{{ platform_context_repo_root }}/config/agent-tool-registry.json"
     dest: config/agent-tool-registry.json
+  - src: "{{ platform_context_repo_root }}/config/service-capability-catalog.json"
+    dest: config/service-capability-catalog.json
+  - src: "{{ platform_context_repo_root }}/config/slo-catalog.json"
+    dest: config/slo-catalog.json
   - src: "{{ platform_context_repo_root }}/changelog.md"
     dest: changelog.md
   - src: "{{ platform_context_repo_root }}/VERSION"
@@ -51,6 +57,12 @@ platform_context_service_sources:
     dest: platform_context_corpus.py
   - src: "{{ platform_context_repo_root }}/scripts/platform_context_service.py"
     dest: platform_context_service.py
+  - src: "{{ platform_context_repo_root }}/scripts/dependency_graph.py"
+    dest: scripts/dependency_graph.py
+  - src: "{{ platform_context_repo_root }}/scripts/slo_tracking.py"
+    dest: scripts/slo_tracking.py
+  - src: "{{ platform_context_repo_root }}/scripts/controller_automation_toolkit.py"
+    dest: scripts/controller_automation_toolkit.py
   - src: "{{ platform_context_repo_root }}/requirements/platform-context-api.txt"
     dest: requirements.txt
 platform_context_local_rebuild_script: "{{ platform_context_repo_root }}/scripts/build_rag_index.py"

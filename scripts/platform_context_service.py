@@ -294,9 +294,10 @@ def load_yaml(path: Path) -> Any:
 
 
 def build_config() -> ServiceConfig:
+    corpus_root = Path(os.environ.get("PLATFORM_CONTEXT_CORPUS_ROOT", "/srv/platform-context/corpus"))
     return ServiceConfig(
         api_token=os.environ["PLATFORM_CONTEXT_API_TOKEN"],
-        corpus_root=Path(os.environ.get("PLATFORM_CONTEXT_CORPUS_ROOT", "/srv/platform-context/corpus")),
+        corpus_root=corpus_root,
         collection_name=os.environ.get("PLATFORM_CONTEXT_COLLECTION", DEFAULT_COLLECTION),
         qdrant_url=os.environ.get("PLATFORM_CONTEXT_QDRANT_URL"),
         qdrant_location=os.environ.get("PLATFORM_CONTEXT_QDRANT_LOCATION"),
@@ -308,8 +309,10 @@ def build_config() -> ServiceConfig:
         embedding_dimension=int(
             os.environ.get("PLATFORM_CONTEXT_EMBEDDING_DIMENSION", str(DEFAULT_DIMENSION))
         ),
-        prometheus_url=os.environ.get("PLATFORM_CONTEXT_PROMETHEUS_URL", default_prometheus_url()),
-        grafana_url=os.environ.get("PLATFORM_CONTEXT_GRAFANA_URL", default_grafana_url()),
+        prometheus_url=os.environ.get("PLATFORM_CONTEXT_PROMETHEUS_URL")
+        or default_prometheus_url(stack_path=corpus_root / "versions" / "stack.yaml"),
+        grafana_url=os.environ.get("PLATFORM_CONTEXT_GRAFANA_URL")
+        or default_grafana_url(service_catalog_path=corpus_root / "config" / "service-capability-catalog.json"),
     )
 
 
