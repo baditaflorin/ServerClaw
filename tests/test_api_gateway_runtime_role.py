@@ -46,6 +46,7 @@ ENV_TEMPLATE_PATH = (
     / "templates"
     / "api-gateway.env.j2"
 )
+REQUIREMENTS_PATH = REPO_ROOT / "requirements" / "api-gateway.txt"
 
 
 def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
@@ -65,7 +66,8 @@ def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
     assert "dest: event-taxonomy.yaml" in defaults
     assert "api_gateway_database_name: windmill" in defaults
     assert "api_gateway_database_user: windmill_admin" in defaults
-    assert "/.local/windmill/database-password.txt" in defaults
+    assert "rev-parse --path-format=absolute --git-common-dir" in defaults
+    assert 'api_gateway_database_password_local_file: "{{ api_gateway_shared_local_root }}/windmill/database-password.txt"' in defaults
     assert "api_gateway_graph_dsn" in defaults
     assert 'api_gateway_world_state_dsn: "{{ api_gateway_graph_dsn }}"' in defaults
 
@@ -83,9 +85,56 @@ def test_api_gateway_compose_mounts_config_into_app_root() -> None:
     assert "LV3_GATEWAY_WORLD_STATE_DSN={{ api_gateway_world_state_dsn }}" in env_template
 
 
+def test_windmill_runtime_templates_export_graph_world_state_and_ledger_dsns() -> None:
+    runtime_tasks = (
+        REPO_ROOT
+        / "collections"
+        / "ansible_collections"
+        / "lv3"
+        / "platform"
+        / "roles"
+        / "windmill_runtime"
+        / "tasks"
+        / "main.yml"
+    ).read_text(encoding="utf-8")
+    legacy_template = (
+        REPO_ROOT
+        / "collections"
+        / "ansible_collections"
+        / "lv3"
+        / "platform"
+        / "roles"
+        / "windmill_runtime"
+        / "templates"
+        / "windmill.env.j2"
+    ).read_text(encoding="utf-8")
+    runtime_template = (
+        REPO_ROOT
+        / "collections"
+        / "ansible_collections"
+        / "lv3"
+        / "platform"
+        / "roles"
+        / "windmill_runtime"
+        / "templates"
+        / "windmill.env.ctmpl.j2"
+    ).read_text(encoding="utf-8")
+
+    for text in (runtime_tasks, legacy_template, runtime_template):
+        assert "LV3_GRAPH_DSN" in text
+        assert "WORLD_STATE_DSN" in text
+        assert "LV3_LEDGER_DSN" in text
+    assert "Create a controller-local staging path for the Windmill OpenBao agent runtime env template" in runtime_tasks
+    assert "Render the Windmill OpenBao agent runtime env template to a controller-local file" in runtime_tasks
+    assert "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill.env.ctmpl.j2" in runtime_tasks
+    assert 'common_openbao_compose_env_agent_template_local_file: "{{ windmill_openbao_agent_template_local.path }}"' in runtime_tasks
+    assert "Remove the controller-local Windmill OpenBao agent runtime env template staging file" in runtime_tasks
+
+
 def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
     tasks = TASKS_PATH.read_text(encoding="utf-8")
+    requirements = REQUIREMENTS_PATH.read_text(encoding="utf-8")
 
     assert "scripts/maintenance_window_tool.py" in defaults
     assert "scripts/slo_tracking.py" in defaults
@@ -101,3 +150,4 @@ def test_api_gateway_role_packages_shared_platform_helpers() -> None:
     assert "COPY maintenance_window_tool.py ./maintenance_window_tool.py" in tasks
     assert "COPY slo_tracking.py ./slo_tracking.py" in tasks
     assert "COPY scripts ./scripts" in tasks
+    assert "psycopg[binary]==" in requirements

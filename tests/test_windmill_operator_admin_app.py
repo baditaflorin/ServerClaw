@@ -39,7 +39,7 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert defaults["windmill_bootstrap_identity_email"] == "superadmin_secret@windmill.dev"
     assert defaults["windmill_bootstrap_identity_username"] == "superadmin_secret"
     assert defaults["windmill_bootstrap_identity_login_type"] == "password"
-    assert defaults["windmill_worker_checkout_repo_root_local_dir"] == "{{ playbook_dir }}/.."
+    assert defaults["windmill_worker_checkout_repo_root_local_dir"] == "{{ inventory_dir }}/.."
     assert defaults["windmill_worker_checkout_sync_paths"] == ["config", "migrations", "platform", "scripts", "windmill"]
     weekly_schedule = next(entry for entry in defaults["windmill_seed_schedules"] if entry["path"] == "f/lv3/build_cache_maintenance_weekly")
     assert weekly_schedule["schedule"] == "0 0 4 * * 7"
@@ -157,9 +157,12 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "/api/users/set_login_type/" in tasks
     assert "Ensure the Windmill bootstrap admin password matches the managed secret" in tasks
     assert "/api/users/set_password_of/" in tasks
-    assert "/api/w/{{ windmill_workspace_id | urlencode }}/scripts/delete/p/" in tasks
     assert "Create repo-managed Windmill schedules" in tasks
+    assert "Converge repo-managed Windmill schedule enabled flags" in tasks
+    assert 'psql "${DATABASE_URL}"' in tasks
+    assert "become: true" in tasks
     assert "status_code:\n      - 200\n      - 201\n      - 400" in tasks
+    assert "{{ inventory_dir }}/../scripts/sync_windmill_seed_scripts.py" in tasks
     assert "Sync repo-managed Windmill raw apps" in tasks
     assert "wmill sync push" in tasks
     assert "--skip-branch-validation" in tasks
@@ -167,6 +170,8 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Build the local staging archive for the Windmill worker checkout" in tasks
     assert "changed_when: false" in tasks
     assert "Expand the staged Windmill worker checkout on the guest" in tasks
+    assert 'src: "{{ windmill_worker_checkout_archive_local.path }}"' in tasks
+    assert "worker-checkout.tar.gz" not in tasks
     assert "windmill_worker_checkout_repo_root_local_dir" in tasks
     assert "windmill_worker_checkout_sync_paths" in tasks
     assert defaults["windmill_worker_repo_checkout_host_path"] == "/srv/proxmox_florin_server"
