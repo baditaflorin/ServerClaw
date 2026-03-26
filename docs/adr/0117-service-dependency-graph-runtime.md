@@ -3,8 +3,8 @@
 - Status: Accepted
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.117.0
-- Implemented In Platform Version: not yet
-- Implemented On: 2026-03-24
+- Implemented In Platform Version: 0.130.20
+- Implemented On: 2026-03-26
 - Date: 2026-03-24
 
 ## Context
@@ -136,6 +136,27 @@ GET /v1/graph/path?from={a}&to={b}      # shortest path
 
 - The dependency graph covers runtime operational dependencies (who needs whom to function). It does not model build-time or code-level dependencies; those are out of scope.
 - The graph is a derived artifact, not the source of truth. NetBox is still the authority for network topology; the workflow catalog is still the authority for automation composition.
+
+## Repository Verification
+
+The ADR 0117 repository surfaces were revalidated on 2026-03-26 with:
+
+- `uv run --with pytest --with pyyaml python -m pytest -q tests/test_graph_repo_surfaces.py tests/test_graph_windmill.py tests/test_config_merge_windmill.py tests/test_api_gateway_runtime_role.py tests/test_openbao_compose_env_helper.py tests/test_windmill_operator_admin_app.py`
+- `make syntax-check-windmill`
+- `make syntax-check-api-gateway`
+- `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`
+
+The focused pytest run passed with `29 passed`, both syntax checks succeeded, and the repository data-model validator confirmed the live-apply receipt set and repository metadata remained consistent.
+
+## Live Apply Note
+
+ADR 0117 was replayed live from the separate `codex/ws-0117-live-apply` worktree branch on 2026-03-26 and verified end to end across Windmill, PostgreSQL, and the platform API gateway.
+
+- `make converge-windmill` completed successfully after repairing the Windmill graph-worker fallback runtime, exporting the graph DSNs into the managed runtime environment, granting `windmill_admin` graph-schema write access, and refreshing `world_state.current_view` after the ADR 0113 schema replay.
+- The live platform now reports `world_state.current_view` as populated, stores graph schedule arguments in Windmill's `schedule.args`, and serves authenticated traversal results from `https://api.lv3.org/v1/graph/*`.
+- Post-apply verification confirmed graph data in PostgreSQL, correct descendants and path results through the gateway, and successful repo-managed graph rebuild execution from the live checkout on `docker-runtime-lv3`.
+
+Protected integration files still intentionally wait for merge to `main`: `VERSION`, release sections in `changelog.md`, the top-level `README.md` integrated status summary, and `versions/stack.yaml`.
 
 ## Related ADRs
 

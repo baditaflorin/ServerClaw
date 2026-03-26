@@ -2125,10 +2125,10 @@ workstreams:
   - id: adr-0117-dependency-graph-runtime
     adr: "0117"
     title: Service dependency graph as first-class runtime
-    status: merged
+    status: live_applied
     owner: codex
-    branch: codex/adr-0117-dependency-graph
-    worktree_path: ../proxmox_florin_server-dependency-graph
+    branch: codex/ws-0117-live-apply
+    worktree_path: ../proxmox_florin_server_ws-0117-live-apply
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0117-dependency-graph-runtime.md
     depends_on:
       - adr-0048-command-catalog
@@ -2148,7 +2148,7 @@ workstreams:
       - scripts/risk_scorer/context.py
       - migrations/0012_graph_schema.sql
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0119-budgeted-workflow-scheduler
     adr: "0119"

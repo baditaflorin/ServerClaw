@@ -2,9 +2,9 @@
 
 - ADR: [ADR 0117](../adr/0117-service-dependency-graph-runtime.md)
 - Title: Persist a machine-usable DAG of service/host/network/cert dependencies in Postgres; expose traversal API for blast-radius, health propagation, and incident correlation used by triage and risk scoring
-- Status: merged
-- Branch: `codex/adr-0117-dependency-graph`
-- Worktree: `../proxmox_florin_server-dependency-graph`
+- Status: live_applied
+- Branch: `codex/ws-0117-live-apply`
+- Worktree: `../proxmox_florin_server_ws-0117-live-apply`
 - Owner: codex
 - Depends On: `adr-0048-command-catalog`, `adr-0054-netbox-topology`, `adr-0058-nats-event-bus`, `adr-0075-service-capability-catalog`, `adr-0092-platform-api-gateway`, `adr-0098-postgres-ha`, `adr-0113-world-state-materializer`
 - Conflicts With: `adr-0113-world-state-materializer` (both read from NetBox; coordinate on refresh timing to avoid stampede)
@@ -63,9 +63,24 @@
 - API gateway endpoints responding with correct data
 - Risk scorer (ADR 0116) `downstream_count` stub replaced with real `DependencyGraphClient().descendants()` call
 
+## Outcome
+
+- Repository implementation remains tracked from repo release `0.117.0`.
+- Live apply completed from the separate `codex/ws-0117-live-apply` branch on 2026-03-26 and is verified against platform version `0.130.20`.
+- The replay repaired the Windmill graph runtime's dependency bootstrap path, exported the graph DSNs into the managed runtime environment, restored graph-schema grants for `windmill_admin`, and refreshes the ADR 0113 `world_state.current_view` materialized view during converge so the graph import workflows can run against populated world-state data.
+
+## Live Apply Note
+
+- Focused repository validation passed with the ADR 0117 pytest suite (`29 passed`), `make syntax-check-windmill`, `make syntax-check-api-gateway`, and `scripts/validate_repository_data_models.py --validate`.
+- `make converge-windmill` was replayed successfully from this worktree branch after the fixes landed, with the final run completing on `docker-runtime-lv3`, `postgres-lv3`, and `proxmox_florin` without failed hosts.
+- Production verification confirmed `world_state.current_view` is populated, PostgreSQL holds the graph runtime rows, Windmill schedule arguments are stored in `schedule.args`, and authenticated gateway traversal returns the expected descendants and shortest path for the current service graph.
+- A repo-managed graph rebuild also completed successfully from the live guest checkout, proving the deployed worker wrapper can execute the managed scripts directly on `docker-runtime-lv3`.
+- Protected integration files still deferred to merge-to-main are `VERSION`, release sections in `changelog.md`, the top-level `README.md` integrated status summary, and `versions/stack.yaml`.
+
 ## Notes For The Next Assistant
 
 - Recursive CTEs for `descendants()` must have a cycle guard: include a `visited` set in the CTE to avoid infinite loops if a graph cycle is ever introduced by a bad import. Log a warning and return the partial result rather than crashing.
 - The `health_propagation()` method should only propagate `degraded` status, not `down`. A `down` service means the health probe is failing; a `derived_health_degraded` on a downstream service means "your upstream is sick, you might be at risk". Conflating these two statuses in triage signals would cause confusion.
 - The `import-from-catalog.py` workflow reads `config/workflow-catalog.json` which is on disk in the repo. In Windmill, this means the workflow must clone or read the repo via the git resource. Coordinate with the platform API gateway workstream to ensure the catalog is also accessible via `/v1/platform/catalog`.
 - Edge de-duplication: the import workflows run on a schedule and re-insert edges. Use `INSERT INTO graph.edges ... ON CONFLICT DO NOTHING` to avoid duplicate edges accumulating over time.
+- During ad hoc Windmill API execution, pass `dsn` and `world_state_dsn` explicitly to the graph scripts even though the scheduled jobs persist those values in `schedule.args`; the schedule list endpoint may render `args: null` even when the database state is correct.
