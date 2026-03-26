@@ -47,9 +47,21 @@ def test_migrated_role_tasks_no_longer_shell_out_with_env_file_flag() -> None:
 
 
 def test_runtime_secret_payloads_are_built_in_follow_up_tasks() -> None:
+    windmill_defaults = (REPO_ROOT / "roles" / "windmill_runtime" / "defaults" / "main.yml").read_text()
     windmill_tasks = (REPO_ROOT / "roles" / "windmill_runtime" / "tasks" / "main.yml").read_text()
+    windmill_env_template = (REPO_ROOT / "roles" / "windmill_runtime" / "templates" / "windmill-runtime.env.j2").read_text()
+    windmill_template = (REPO_ROOT / "roles" / "windmill_runtime" / "templates" / "windmill-runtime.env.ctmpl.j2").read_text()
     mattermost_tasks = (REPO_ROOT / "roles" / "mattermost_runtime" / "tasks" / "main.yml").read_text()
+    assert "windmill_ledger_postgres_user: patroni" in windmill_defaults
+    assert "windmill_ledger_dsn" in windmill_defaults
+    assert "windmill_ledger_nats_url" in windmill_defaults
     assert "- name: Build the Windmill runtime secret payload" in windmill_tasks
+    assert "'LV3_LEDGER_DSN': windmill_ledger_dsn" in windmill_tasks
+    assert "'LV3_LEDGER_NATS_URL': windmill_ledger_nats_url" in windmill_tasks
+    assert "LV3_LEDGER_DSN={{ windmill_ledger_dsn }}" in windmill_env_template
+    assert "LV3_LEDGER_NATS_URL={{ windmill_ledger_nats_url }}" in windmill_env_template
+    assert "LV3_LEDGER_DSN" in windmill_template
+    assert "LV3_LEDGER_NATS_URL" in windmill_template
     assert "- name: Build Mattermost runtime secret payload" in mattermost_tasks
 
 

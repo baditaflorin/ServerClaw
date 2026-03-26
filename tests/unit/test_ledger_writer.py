@@ -46,6 +46,11 @@ class FakeCursor:
             self._results = []
             self.description = []
             return
+        if normalized == "SELECT to_regclass('public.audit_log') IS NOT NULL":
+            self.description = [("exists",)]
+            self._results = [(self.connection.audit_log_exists,)]
+            self._index = 0
+            return
         if normalized.startswith("INSERT INTO ledger.events"):
             self._handle_insert(params or ())
             return
@@ -144,9 +149,10 @@ class FakeCursor:
 
 
 class FakeConnection:
-    def __init__(self, *, audit_rows: list[dict[str, Any]] | None = None) -> None:
+    def __init__(self, *, audit_rows: list[dict[str, Any]] | None = None, audit_log_exists: bool | None = None) -> None:
         self.rows: list[dict[str, Any]] = []
         self.audit_rows = audit_rows or []
+        self.audit_log_exists = (audit_rows is not None) if audit_log_exists is None else audit_log_exists
         self.event_ids: set[str] = set()
         self.next_id = 1
         self.commits = 0
@@ -394,6 +400,17 @@ def test_migration_helper_moves_legacy_rows_and_installs_view() -> None:
     assert any("CREATE OR REPLACE VIEW audit_log AS" in statement for statement in connection.view_statements)
     assert json.loads(connection.rows[0]["metadata"])["legacy_row_id"] == 1
     assert connection.rows[1]["event_type"] == "execution.failed"
+
+
+def test_migration_helper_installs_view_when_no_sql_audit_source_exists() -> None:
+    module = load_migration_script()
+    connection = FakeConnection()
+
+    result = module.migrate_audit_log(connection=connection, batch_size=1)
+
+    assert result == {"migrated_rows": 0, "batches": 0, "legacy_view_applied": True}
+    assert connection.rows == []
+    assert any("CREATE OR REPLACE VIEW audit_log AS" in statement for statement in connection.view_statements)
 
 
 def test_migration_sql_declares_append_only_trigger() -> None:

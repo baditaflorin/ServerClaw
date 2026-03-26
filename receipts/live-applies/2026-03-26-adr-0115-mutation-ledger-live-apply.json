@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-26-adr-0115-mutation-ledger-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-26",
+  "recorded_on": "2026-03-26",
+  "recorded_by": "codex",
+  "source_commit": "9457e4694f5a80b8876ff4e99e400b6960a07cb7",
+  "repo_version_context": "0.174.0",
+  "workflow_id": "adr-0115-mutation-ledger-live-apply",
+  "adr": "0115",
+  "summary": "Applied the ADR 0115 production ledger schema on the current mainline platform, installed the compatibility audit_log view with zero migrated SQL rows, verified a live guest-side mutation write into ledger.events plus append-only enforcement, and updated the Windmill runtime templates so a clean post-contention replay can project the ledger DSN into Windmill after the concurrent shared-surface converges stop overwriting docker-runtime-lv3.",
+  "targets": [
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 150,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "windmill",
+      "address": "100.64.0.1:8005"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "postgres",
+      "address": "10.10.10.50:5432"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "nats",
+      "address": "10.10.10.20:4222"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused repository validation",
+      "result": "pass",
+      "observed": "Focused ADR 0115 validation passed with `uv run --with pytest --with pyyaml python -m pytest tests/test_compose_runtime_secret_injection.py tests/unit/test_ledger_writer.py -q` returning `20 passed`, plus `make syntax-check-windmill` and `make preflight WORKFLOW=converge-windmill` completing successfully earlier in the apply."
+    },
+    {
+      "check": "Production schema and compatibility view",
+      "result": "pass",
+      "observed": "Applied `migrations/0011_ledger_schema.sql` to the shared `postgres` database on `postgres-lv3`, confirmed `ledger.events` and the `public.audit_log` view existed, and the migration helper reported `{\"batches\": 0, \"legacy_view_applied\": true, \"migrated_rows\": 0}` because no SQL `audit_log` source table existed on the live platform."
+    },
+    {
+      "check": "Append-only enforcement",
+      "result": "pass",
+      "observed": "After writing a live ledger row, `UPDATE ledger.events SET event_type='tampered' WHERE id = (SELECT max(id) FROM ledger.events)` failed with `ledger.events is append-only` from `ledger.prevent_event_mutation()`."
+    },
+    {
+      "check": "Live guest-side ledger emit",
+      "result": "pass",
+      "observed": "A guest-local `uv run --with psycopg2-binary python scripts/mutation_audit.py --emit ...` on `docker-runtime-lv3` wrote `execution.completed|operator:ops|host|proxmox_florin|ws0115-emit-20260326T133018Z` into `ledger.events`, and the compatibility `audit_log` view exposed `1|operator:ops|proxmox_florin|success|ws0115-emit-20260326T133018Z`."
+    },
+    {
+      "check": "Windmill runtime reconcile",
+      "result": "partial",
+      "observed": "The repo-side Windmill converge path was exercised repeatedly, but concurrent `playbooks/windmill.yml` runs from other worktrees kept rewriting the same `docker-runtime-lv3` env surfaces and temp artifacts. This branch identified and fixed the missing ledger projection in both `windmill.env.j2` and `windmill.env.ctmpl.j2`, updated the live OpenBao secret once, and temporarily observed the ledger vars inside `windmill-windmill_worker-1`, but later concurrent converges overwrote the on-disk runtime env again before a clean uncontested replay could finish."
+    },
+    {
+      "check": "Broad repository validation",
+      "result": "partial",
+      "observed": "`make validate` did not complete because the repo-wide validation currently syntax-checks `playbooks/.metadata-template.yml`, which still contains the placeholder role name `<role_name>` and fails before ADR 0115-specific checks can finish."
+    },
+    {
+      "check": "NATS publish path",
+      "result": "partial",
+      "observed": "The live NATS auth config on `docker-runtime-lv3` currently includes `platform.>` in the `jetstream-admin` publish allow-list, but the same principal still received a subscription permission violation on `platform.ledger.event_written`, so this branch could verify broker publish authorization and successful guest-side emits but not capture a same-principal subscription message."
+    }
+  ],
+  "evidence_refs": [
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill.env.ctmpl.j2",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill.env.j2",
+    "docs/adr/0115-event-sourced-mutation-ledger.md",
+    "docs/runbooks/mutation-ledger.md",
+    "docs/workstreams/adr-0115-mutation-ledger.md",
+    "tests/test_compose_runtime_secret_injection.py",
+    "tests/unit/test_ledger_writer.py",
+    "windmill/ledger/migrate-audit-log.py",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "The 2026-03-26 live platform still had the ADR 0066 JSONL/Loki sink but no SQL `audit_log` table, so the first SQL rollout intentionally installed an empty compatibility view with zero migrated rows.",
+    "Live PostgreSQL access for the ledger uses the existing `patroni` superuser secret and the shared `postgres` database on `postgres-lv3`; the current `postgres` role password does not match the controller-local superuser secret.",
+    "A manual server-side step became unavoidable on `docker-runtime-lv3` because concurrent Windmill converges from other worktrees kept overwriting the same env files: this branch updated the OpenBao `services/windmill/runtime-env` secret and temporarily edited `/run/lv3-secrets/windmill/runtime.env` plus recycled the Windmill compose services while capturing evidence.",
+    "Because those concurrent converges remained active at the end of the turn, the durable follow-up is a clean replay of `playbooks/windmill.yml` from merged `main` after shared-surface contention stops so the updated Windmill templates project `LV3_LEDGER_DSN` and `LV3_LEDGER_NATS_URL` without manual intervention."
+  ]
+}

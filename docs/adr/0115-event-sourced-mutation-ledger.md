@@ -3,8 +3,8 @@
 - Status: Accepted
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.110.0
-- Implemented In Platform Version: not yet
-- Implemented On: 2026-03-24
+- Implemented In Platform Version: 0.130.20
+- Implemented On: 2026-03-26
 - Date: 2026-03-24
 
 ## Context
@@ -176,6 +176,10 @@ The existing `audit_log` table from ADR 0066 is migrated to `ledger.events` via 
 - The repository now ships the Postgres schema migration at [migrations/0011_ledger_schema.sql](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-mutation-ledger/migrations/0011_ledger_schema.sql), the canonical registry at [config/ledger-event-types.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-mutation-ledger/config/ledger-event-types.yaml), and the runtime modules at [platform/ledger/writer.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-mutation-ledger/platform/ledger/writer.py), [platform/ledger/reader.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-mutation-ledger/platform/ledger/reader.py), and [platform/ledger/replay.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-mutation-ledger/platform/ledger/replay.py).
 - A one-time migration helper now lives at [windmill/ledger/migrate-audit-log.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-mutation-ledger/windmill/ledger/migrate-audit-log.py) and installs the backward-compatible `audit_log` view after moving legacy rows into `ledger.events`.
 - The existing controller-side emitter at [scripts/mutation_audit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-mutation-ledger/scripts/mutation_audit.py) now dual-writes legacy mutation events into the ledger when `LV3_LEDGER_DSN` is configured, preserving the JSONL/Loki sinks while the platform is migrated.
+- The 2026-03-26 production live apply ran the schema against the shared `postgres` database on `postgres-lv3`, found no legacy SQL `audit_log` table to migrate, and installed the compatibility `audit_log` view with zero migrated rows because the live ADR 0066 sink was still JSONL/Loki-only.
+- The same live apply verified a guest-side dual-write from `docker-runtime-lv3` into `ledger.events`, confirmed the `audit_log` compatibility view exposed that row, and confirmed the append-only trigger rejected an `UPDATE`.
+- The live NATS broker on `docker-runtime-lv3` currently grants `jetstream-admin` publish access to `platform.>` but still rejects same-principal subscriptions to `platform.ledger.event_written`, so the production verification path used successful live emits plus broker config inspection rather than a same-principal subscription capture.
+- A clean post-contention replay of [playbooks/windmill.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/windmill.yml) from `main` is still required to make the Windmill runtime env projection durable through automation: concurrent Windmill converges from other worktrees repeatedly rewrote `/run/lv3-secrets/windmill/runtime.env` during the branch-local apply window.
 
 ## Boundaries
 

@@ -3,8 +3,8 @@
 - ADR: [ADR 0115](../adr/0115-event-sourced-mutation-ledger.md)
 - Title: Promote the mutation audit log into a fully typed, append-only event stream with before/after state and replay capability — the canonical operational memory for the whole platform
 - Status: merged
-- Branch: `codex/adr-0115-mutation-ledger`
-- Worktree: `../proxmox_florin_server-mutation-ledger`
+- Branch: `codex/ws-0115-live-apply`
+- Worktree: `.worktrees/ws-0115-live-apply`
 - Owner: codex
 - Depends On: `adr-0058-nats-event-bus`, `adr-0066-mutation-audit-log`, `adr-0098-postgres-ha`
 - Conflicts With: `adr-0112-goal-compiler` (both add event types to ledger), `adr-0114-triage-engine` (writes triage reports to ledger)
@@ -73,4 +73,6 @@
 ## Outcome
 
 - merged in repo version `0.110.0`
-- live apply not yet performed from `main`
+- 2026-03-26 live apply verified the production Postgres ledger schema on platform version `0.130.20`, including the `audit_log` compatibility view, append-only trigger enforcement, and a live `execution.completed` row written from `docker-runtime-lv3`
+- the live migration helper observed no SQL `audit_log` source table, so the first production rollout migrated `0` legacy rows and installed the compatibility view over an empty initial stream
+- Windmill runtime automation was exercised repeatedly during the live apply, but concurrent `playbooks/windmill.yml` runs from other worktrees kept rewriting the same `docker-runtime-lv3` env surfaces; merge-to-main still needs one clean replay of `playbooks/windmill.yml` after shared-surface contention stops so `LV3_LEDGER_DSN` and `LV3_LEDGER_NATS_URL` stay durable in `/run/lv3-secrets/windmill/runtime.env`

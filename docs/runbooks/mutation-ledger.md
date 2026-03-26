@@ -86,6 +86,15 @@ Default behavior:
 - renames the old table to `audit_log_legacy`
 - creates `audit_log` as a compatibility view over `ledger.events`
 
+First production rollout note:
+
+- if `public.audit_log` does not exist yet, the helper now skips row migration and still installs the compatibility `audit_log` view
+- the 2026-03-26 production apply hit that path because ADR 0066 was still writing JSONL/Loki only, so the SQL migration moved `0` rows
+
+Current live credential note:
+
+- the current production controller-local superuser password is for the `patroni` role, so the live ledger DSN targets `postgresql://patroni@.../postgres`, not `postgresql://postgres@...`
+
 If you need a dry staging pass that leaves the old table name untouched:
 
 ```bash
@@ -133,3 +142,19 @@ Current projection support is intentionally narrow:
 - `vm:<id>`
 
 Other target kinds raise `NotImplementedError` until their projection logic is defined.
+
+## Windmill Runtime Projection
+
+When projecting the ledger DSN into the Windmill runtime, keep both templates in sync:
+
+- [roles/windmill_runtime/templates/windmill.env.j2](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0115-live-apply/roles/windmill_runtime/templates/windmill.env.j2)
+- [roles/windmill_runtime/templates/windmill.env.ctmpl.j2](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0115-live-apply/roles/windmill_runtime/templates/windmill.env.ctmpl.j2)
+
+If only the OpenBao-backed template is updated, the later static `windmill.env.j2` render will still overwrite `/run/lv3-secrets/windmill/runtime.env` without the ledger keys.
+
+During the 2026-03-26 production apply, concurrent Windmill converges from other worktrees repeatedly rewrote the same env surfaces. When this happens:
+
+- update the OpenBao secret `services/windmill/runtime-env`
+- update the rendered `/run/lv3-secrets/windmill/runtime.env` with the same ledger values if another converge already flattened the file
+- recycle the Windmill compose services
+- if the restart fails because the Docker `DOCKER` nat chain is missing, restart `docker` first and then rerun `docker compose --file /opt/windmill/docker-compose.yml up -d --remove-orphans`

@@ -79,6 +79,17 @@ def _row_to_dict(cursor: Any, row: Any) -> dict[str, Any]:
     return {column[0]: value for column, value in zip(cursor.description or [], row, strict=False)}
 
 
+def _audit_log_source_exists(connection: Any) -> bool:
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT to_regclass('public.audit_log') IS NOT NULL")
+        row = cursor.fetchone()
+    if isinstance(row, dict):
+        return bool(next(iter(row.values()), False))
+    if isinstance(row, tuple):
+        return bool(row[0]) if row else False
+    return bool(row)
+
+
 def migrate_audit_log(
     *,
     dsn: str | None = None,
@@ -99,16 +110,17 @@ def migrate_audit_log(
     migrated = 0
     batch_count = 0
     view_applied = False
-    with source_connection.cursor() as cursor:
-        cursor.execute("SELECT * FROM audit_log ORDER BY id ASC")
-        while True:
-            rows = cursor.fetchmany(batch_size)
-            if not rows:
-                break
-            batch_count += 1
-            for row in rows:
-                writer.write(**map_audit_row(_row_to_dict(cursor, row)))
-                migrated += 1
+    if _audit_log_source_exists(source_connection):
+        with source_connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM audit_log ORDER BY id ASC")
+            while True:
+                rows = cursor.fetchmany(batch_size)
+                if not rows:
+                    break
+                batch_count += 1
+                for row in rows:
+                    writer.write(**map_audit_row(_row_to_dict(cursor, row)))
+                    migrated += 1
 
     if replace_legacy_table:
         with source_connection.cursor() as cursor:
