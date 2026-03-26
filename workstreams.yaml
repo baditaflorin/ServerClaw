@@ -3120,6 +3120,34 @@ workstreams:
     ready_to_merge: false
     live_applied: true
 
+  - id: adr-0167-graceful-degradation-mode-declarations
+    adr: "0167"
+    title: Graceful degradation mode declarations
+    status: merged
+    owner: codex
+    branch: codex/adr-0167-graceful-degradation-mode-declarations
+    worktree_path: .worktrees/adr-0167-graceful-degradation
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0167-graceful-degradation-mode-declarations.md
+    depends_on:
+      - adr-0075-service-capability-catalog
+      - adr-0092-platform-api-gateway
+      - adr-0128-health-composite-index
+    conflicts_with: []
+    shared_surfaces:
+      - config/service-capability-catalog.json
+      - docs/schema/service-capability-catalog.schema.json
+      - scripts/service_catalog.py
+      - scripts/api_gateway/main.py
+      - platform/degradation/
+      - platform/health/composite.py
+      - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/
+      - docs/runbooks/
+      - tests/test_api_gateway.py
+      - tests/test_health_composite.py
+      - tests/test_validate_service_catalog.py
+    ready_to_merge: false
+    live_applied: false
+
   - id: adr-0172-watchdog-escalation
     adr: "0172"
     title: Watchdog escalation and stale job self-healing

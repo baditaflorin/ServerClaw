@@ -5,11 +5,13 @@ import sqlite3
 import sys
 import time
 from pathlib import Path
+from unittest.mock import patch
 
 import httpx
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from platform.circuit import MemoryCircuitStateBackend
+from platform.degradation import DegradationStateStore
 from platform.retry import RetryPolicy
 
 
@@ -19,11 +21,10 @@ if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
 import api_gateway.main as gateway_main  # noqa: E402
-from api_gateway.main import GatewayConfig, GatewayRuntime, create_app  # noqa: E402
-import api_gateway.main as gateway_main  # noqa: E402
+from api_gateway.main import GatewayConfig, GatewayRuntime, NatsEventEmitter, create_app  # noqa: E402
 
 
-def test_resolve_repo_root_supports_container_layout(tmp_path: Path) -> None:
+def test_resolve_repo_root_supports_packaged_layout(tmp_path: Path) -> None:
     app_root = tmp_path / "app"
     platform_dir = app_root / "platform"
     platform_dir.mkdir(parents=True)
@@ -186,6 +187,46 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
         tmp_path / "config" / "service-capability-catalog.json",
         {
             "services": [
+                {
+                    "id": "api_gateway",
+                    "name": "Platform API Gateway",
+                    "description": "Unified platform gateway",
+                    "category": "automation",
+                    "lifecycle_status": "active",
+                    "vm": "docker-runtime-lv3",
+                    "exposure": "edge-published",
+                    "internal_url": "http://10.10.10.20:8083",
+                    "public_url": "https://api.lv3.org",
+                    "subdomain": "api.lv3.org",
+                    "health_probe_id": "api_gateway",
+                    "adr": "0092",
+                    "runbook": "docs/runbooks/configure-api-gateway.md",
+                    "degradation_modes": [
+                        {
+                            "dependency": "keycloak",
+                            "dependency_type": "soft",
+                            "degraded_behaviour": "Use cached JWKS for up to 300 seconds.",
+                            "degraded_for_seconds_max": 300,
+                            "recovery_signal": "successful JWKS refresh",
+                            "tested_by": "fault:keycloak-unavailable",
+                        },
+                        {
+                            "dependency": "nats",
+                            "dependency_type": "soft",
+                            "degraded_behaviour": "Buffer gateway events in a local outbox.",
+                            "degraded_for_seconds_max": -1,
+                            "recovery_signal": "successful outbox flush",
+                            "tested_by": "fault:nats-unavailable",
+                        },
+                    ],
+                    "environments": {
+                        "production": {
+                            "status": "active",
+                            "url": "https://api.lv3.org",
+                            "subdomain": "api.lv3.org",
+                        }
+                    },
+                },
                 {
                     "id": "postgres",
                     "name": "Postgres",
@@ -397,6 +438,10 @@ circuits:
         "# Configure Windmill\n\nDeploy service runtime.\n",
     )
     write_yaml(
+        tmp_path / "docs" / "runbooks" / "configure-api-gateway.md",
+        "# Configure API Gateway\n\nDeploy service runtime.\n",
+    )
+    write_yaml(
         tmp_path / "docs" / "runbooks" / "postgres-failover.md",
         "# Postgres Failover\n\nHandle the failover path.\n",
     )
@@ -438,10 +483,13 @@ circuits:
         nats_password=None,
         deploy_webhook_url=None,
         secret_rotation_webhook_url=None,
-        openapi_include_upstreams=False,
         circuit_policy_path=tmp_path / "config" / "circuit-policies.yaml",
+        degradation_state_path=tmp_path / "data" / "degradation-state.json",
+        nats_outbox_path=tmp_path / "data" / "nats-outbox.jsonl",
+        openapi_include_upstreams=False,
         graph_dsn=graph_dsn,
         world_state_dsn=world_state_dsn,
+        keycloak_retry_after_seconds=30,
     )
     token = sign_token(private_key, roles=["platform-operator"], issuer=config.issuer or "")
     return config, token
@@ -485,11 +533,13 @@ def test_gateway_proxy_and_platform_endpoints(tmp_path: Path) -> None:
 
                     services = await client.get("/v1/platform/services", headers=headers)
                     assert services.status_code == 200
-                    assert services.json()["count"] == 2
+                    assert services.json()["count"] == 3
+                    api_gateway_service = next(item for item in services.json()["services"] if item["id"] == "api_gateway")
+                    assert api_gateway_service["active_degradations"] == []
 
                     platform_health = await client.get("/v1/platform/health", headers=headers)
                     assert platform_health.status_code == 200
-                    assert platform_health.json()["service_count"] == 2
+                    assert platform_health.json()["service_count"] == 3
                     assert platform_health.json()["source"] == "health_composite"
 
                     postgres_health = await client.get("/v1/platform/health/postgres", headers=headers)
@@ -547,6 +597,159 @@ def test_gateway_proxy_and_platform_endpoints(tmp_path: Path) -> None:
     import asyncio
 
     asyncio.run(run())
+
+
+def test_gateway_enters_and_surfaces_keycloak_degraded_mode(tmp_path: Path) -> None:
+    jwks_online = {"value": True}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.host == "upstream.test":
+            return httpx.Response(200, json={"status": "ok"})
+        if jwks_online["value"]:
+            return httpx.Response(200, json=json.loads((tmp_path / "jwks.json").read_text()))
+        raise httpx.ConnectError("keycloak unavailable", request=request)
+
+    transport = httpx.MockTransport(handler)
+    config, token = make_repo(tmp_path, "http://upstream.test")
+    app = create_app(config)
+
+    async def run() -> None:
+        async with httpx.AsyncClient(transport=transport) as runtime_client:
+            runtime = GatewayRuntime(config)
+            await runtime.http_client.aclose()
+            runtime.http_client = runtime_client
+            runtime.verifier._client = runtime_client
+            app.state.runtime = runtime
+            try:
+                transport_app = httpx.ASGITransport(app=app)
+                async with httpx.AsyncClient(transport=transport_app, base_url="http://gateway.test") as client:
+                    headers = {"Authorization": f"Bearer {token}"}
+                    ok = await client.get("/v1/platform/services", headers=headers)
+                    assert ok.status_code == 200
+
+                    runtime.verifier._jwks_cache_expiry = time.time() + 10
+                    jwks_online["value"] = False
+
+                    degraded = await client.get("/v1/platform/services", headers=headers)
+                    assert degraded.status_code == 200
+                    api_gateway_service = next(
+                        item for item in degraded.json()["services"] if item["id"] == "api_gateway"
+                    )
+                    assert api_gateway_service["active_degradations"][0]["dependency"] == "keycloak"
+
+                    active = await client.get("/v1/platform/degradations", headers=headers)
+                    assert active.status_code == 200
+                    assert active.json()["degradation_count"] == 1
+                    assert active.json()["services"]["api_gateway"][0]["dependency"] == "keycloak"
+
+                    platform_health = await client.get("/v1/platform/health", headers=headers)
+                    assert platform_health.status_code == 200
+                    assert platform_health.json()["status"] == "degraded"
+                    assert platform_health.json()["degraded_service_count"] == 1
+
+                    runtime.verifier._jwks_cache_expiry = time.time() - 1
+                    failed = await client.get("/v1/platform/services", headers=headers)
+                    assert failed.status_code == 503
+                    assert failed.headers["Retry-After"] == "30"
+                    assert failed.json()["error"]["code"] == "INFRA_RUNTIME_UNAVAILABLE"
+                    assert failed.json()["error"]["context"]["dependency"] == "keycloak"
+                    assert failed.json()["error"]["context"]["detail"]["error_code"] == "GATE_CIRCUIT_OPEN"
+            finally:
+                await runtime.close()
+
+    asyncio.run(run())
+
+
+def test_nats_emitter_buffers_and_flushes_outbox(tmp_path: Path) -> None:
+    emitter = NatsEventEmitter(
+        "nats://127.0.0.1:4222",
+        outbox_path=tmp_path / "nats-outbox.jsonl",
+        degradation_store=DegradationStateStore(tmp_path / "degradation-state.json"),
+        degradation_mode={
+            "dependency": "nats",
+            "dependency_type": "soft",
+            "degraded_behaviour": "Buffer events in a local outbox.",
+            "degraded_for_seconds_max": -1,
+            "recovery_signal": "successful outbox flush",
+            "tested_by": "fault:nats-unavailable",
+        },
+    )
+    publish_calls = {"count": 0}
+
+    def fake_publish(
+        host: str,
+        port: int,
+        subject: str,
+        payload: bytes,
+        *,
+        username: str | None = None,
+        password: str | None = None,
+    ) -> None:
+        publish_calls["count"] += 1
+        if publish_calls["count"] == 1:
+            raise OSError("nats unavailable")
+
+    with patch.object(emitter, "_publish", side_effect=fake_publish):
+        asyncio.run(
+            emitter.emit(
+                "platform.api.request",
+                {
+                    "request_id": "one",
+                    "method": "GET",
+                    "path": "/v1/platform/services",
+                    "status_code": 200,
+                    "latency_ms": 12.3,
+                    "caller_identity": "ops",
+                    "caller_roles": ["platform-operator"],
+                },
+            )
+        )
+        assert emitter._outbox_path.exists()
+        assert emitter._degradation_store.active_for_service("api_gateway")
+
+        asyncio.run(
+            emitter.emit(
+                "platform.api.request",
+                {
+                    "request_id": "two",
+                    "method": "GET",
+                    "path": "/v1/platform/services",
+                    "status_code": 200,
+                    "latency_ms": 10.1,
+                    "caller_identity": "ops",
+                    "caller_roles": ["platform-operator"],
+                },
+            )
+        )
+        assert not emitter._outbox_path.exists()
+        assert not emitter._degradation_store.active_for_service("api_gateway")
+
+
+def test_nats_emitter_sends_credentials_in_connect_frame() -> None:
+    sent_frames: list[bytes] = []
+
+    class FakeSocket:
+        def sendall(self, data: bytes) -> None:
+            sent_frames.append(data)
+
+        def __enter__(self) -> "FakeSocket":
+            return self
+
+        def __exit__(self, exc_type, exc, tb) -> None:
+            return None
+
+    with patch.object(gateway_main.socket, "create_connection", return_value=FakeSocket()):
+        gateway_main.NatsEventEmitter._publish(
+            "127.0.0.1",
+            4222,
+            "platform.api.request",
+            b'{"ok":true}',
+            username="jetstream-admin",
+            password="secret-value",
+        )
+
+    assert sent_frames[0] == b'CONNECT {"verbose":false,"user":"jetstream-admin","pass":"secret-value"}\r\n'
+    assert sent_frames[1] == b'PUB platform.api.request 11\r\n{"ok":true}\r\n'
 
 
 def test_gateway_deploy_forwards_trace_id_to_webhook(tmp_path: Path) -> None:
@@ -746,17 +949,6 @@ def test_gateway_retries_safe_proxy_reads(tmp_path: Path) -> None:
 
     asyncio.run(run())
     assert upstream_calls["count"] == 3
-
-
-def test_resolve_repo_root_supports_container_layout(tmp_path: Path) -> None:
-    app_root = tmp_path / "app"
-    script_path = app_root / "api_gateway" / "main.py"
-    script_path.parent.mkdir(parents=True, exist_ok=True)
-    script_path.write_text("# test\n", encoding="utf-8")
-    (app_root / "platform").mkdir(parents=True, exist_ok=True)
-    (app_root / "platform" / "__init__.py").write_text("", encoding="utf-8")
-
-    assert gateway_main._resolve_repo_root(script_path) == app_root
 
 
 def test_resolve_repo_root_supports_repo_layout(tmp_path: Path) -> None:

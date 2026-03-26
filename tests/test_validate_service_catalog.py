@@ -30,16 +30,24 @@ class ValidateServiceCatalogTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "unknown health probe 'missing_probe'"):
             service_catalog.validate_service_catalog(catalog)
 
+    def test_invalid_degradation_fixture_fails(self) -> None:
+        fixture_path = REPO_ROOT / "tests" / "fixtures" / "service-catalog-invalid-degradation-mode.json"
+        catalog = service_catalog.load_json(fixture_path)
+
+        with self.assertRaisesRegex(ValueError, "must not declare duplicate dependency 'postgres'"):
+            service_catalog.validate_service_catalog(catalog)
+
     def test_show_service_renders_expected_summary(self) -> None:
         catalog = service_catalog.load_service_catalog()
         buffer = io.StringIO()
         with redirect_stdout(buffer):
-            exit_code = service_catalog.show_service(catalog, "grafana")
+            exit_code = service_catalog.show_service(catalog, "api_gateway")
         output = buffer.getvalue()
 
         self.assertEqual(exit_code, 0)
-        self.assertIn("Service: grafana", output)
-        self.assertIn("Runbook: docs/runbooks/monitoring-stack.md", output)
+        self.assertIn("Service: api_gateway", output)
+        self.assertIn("Runbook: docs/runbooks/configure-api-gateway.md", output)
+        self.assertIn("Degradation modes:", output)
 
 
 if __name__ == "__main__":

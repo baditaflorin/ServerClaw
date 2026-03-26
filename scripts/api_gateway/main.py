@@ -16,10 +16,14 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urljoin, urlparse
 
+
 def _resolve_repo_root(script_path: Path | None = None) -> Path:
     resolved_path = (script_path or Path(__file__)).resolve()
     for candidate in resolved_path.parents:
-        if (candidate / "platform" / "__init__.py").exists():
+        platform_init = candidate / "platform" / "__init__.py"
+        packaged_gateway = candidate / "api_gateway" / "main.py"
+        source_gateway = candidate / "scripts" / "api_gateway" / "main.py"
+        if platform_init.exists() and (packaged_gateway.exists() or source_gateway.exists()):
             return candidate
     raise RuntimeError(f"unable to resolve repo root for {resolved_path}")
 
@@ -98,6 +102,7 @@ except Exception as exc:  # noqa: BLE001
 
     GRAPH_RUNTIME_IMPORT_ERROR = str(exc)
 from platform.agent import AgentCoordinationStore
+from platform.degradation import DegradationStateStore
 from platform.events import build_envelope
 from platform.health import HealthCompositeClient, ServiceHealthNotFoundError
 from platform.logging import clear_context, generate_trace_id, get_logger, set_context
@@ -210,9 +215,12 @@ class GatewayConfig:
     secret_rotation_webhook_url: str | None
     openapi_include_upstreams: bool
     circuit_policy_path: Path
+    degradation_state_path: Path
+    nats_outbox_path: Path
     graph_dsn: str | None = None
     world_state_dsn: str | None = None
     clock_skew_seconds: int = 30
+    keycloak_retry_after_seconds: int = 30
 
 
 class KeycloakJWTVerifier:
@@ -224,6 +232,9 @@ class KeycloakJWTVerifier:
         expected_audience: str | None,
         clock_skew_seconds: int,
         client: httpx.AsyncClient,
+        degradation_store: DegradationStateStore | None,
+        degradation_mode: dict[str, Any] | None,
+        retry_after_seconds: int,
         circuit_breaker: Any | None = None,
     ) -> None:
         self._jwks_url = jwks_url
@@ -231,63 +242,105 @@ class KeycloakJWTVerifier:
         self._expected_audience = expected_audience
         self._clock_skew_seconds = clock_skew_seconds
         self._client = client
+        self._degradation_store = degradation_store
+        self._degradation_mode = degradation_mode
+        self._retry_after_seconds = retry_after_seconds
         self._circuit_breaker = circuit_breaker
         self._jwks_cache: dict[str, Any] | None = None
         self._jwks_cache_expiry = 0.0
         self._lock = asyncio.Lock()
         self._retry_policy = policy_for_surface("internal_api")
+        self._refresh_window_seconds = 30
+
+    def _activate_degradation(self, error: str, *, stale_until: float | None = None) -> None:
+        if self._degradation_store is None:
+            return
+        metadata: dict[str, Any] = {}
+        if stale_until is not None:
+            metadata["cache_valid_until_epoch"] = int(stale_until)
+        self._degradation_store.activate(
+            "api_gateway",
+            self._degradation_mode,
+            source="keycloak_jwks",
+            last_error=error,
+            metadata=metadata,
+        )
+
+    def _clear_degradation(self) -> None:
+        if self._degradation_store is None:
+            return
+        dependency = str((self._degradation_mode or {}).get("dependency") or "keycloak")
+        self._degradation_store.clear("api_gateway", dependency)
+
+    def _dependency_unavailable(self, retry_after: int) -> HTTPException:
+        return HTTPException(
+            status_code=503,
+            detail={
+                "code": "GATE_CIRCUIT_OPEN",
+                "error_code": "GATE_CIRCUIT_OPEN",
+                "circuit": "keycloak",
+                "dependency": "keycloak",
+                "message": "Keycloak is unavailable and the JWKS cache has expired.",
+                "retry_after": retry_after,
+                "retry_after_s": retry_after,
+            },
+            headers={"Retry-After": str(retry_after)},
+        )
+
+    async def _fetch_jwks(self) -> dict[str, Any]:
+        async def fetch() -> dict[str, Any]:
+            response = await async_with_retry(
+                lambda: self._client.get(
+                    self._jwks_url,
+                    timeout=resolve_timeout_seconds("http_request"),
+                ),
+                policy=self._retry_policy,
+                error_context="keycloak jwks fetch",
+            )
+            response.raise_for_status()
+            return response.json()
+
+        if self._circuit_breaker is not None:
+            return await self._circuit_breaker.call(fetch)
+        return await fetch()
+
+    async def _refresh_jwks(self, *, allow_stale: bool) -> dict[str, Any]:
+        now = time.time()
+        try:
+            self._jwks_cache = await self._fetch_jwks()
+        except CircuitOpenError as exc:
+            cached_valid = self._jwks_cache is not None and now < self._jwks_cache_expiry
+            if allow_stale and cached_valid:
+                self._activate_degradation(str(exc), stale_until=self._jwks_cache_expiry)
+                return self._jwks_cache
+            self._activate_degradation(str(exc))
+            raise self._dependency_unavailable(exc.retry_after) from exc
+        except Exception as exc:  # noqa: BLE001
+            cached_valid = self._jwks_cache is not None and now < self._jwks_cache_expiry
+            if allow_stale and cached_valid:
+                self._activate_degradation(str(exc), stale_until=self._jwks_cache_expiry)
+                return self._jwks_cache
+            self._activate_degradation(str(exc))
+            raise self._dependency_unavailable(self._retry_after_seconds) from exc
+        self._jwks_cache_expiry = now + 300
+        self._clear_degradation()
+        return self._jwks_cache
 
     async def _load_jwks(self) -> dict[str, Any]:
         now = time.time()
         if self._jwks_cache is not None and now < self._jwks_cache_expiry:
+            if now >= self._jwks_cache_expiry - self._refresh_window_seconds:
+                async with self._lock:
+                    return await self._refresh_jwks(allow_stale=True)
             return self._jwks_cache
 
         async with self._lock:
             now = time.time()
             if self._jwks_cache is not None and now < self._jwks_cache_expiry:
+                if now >= self._jwks_cache_expiry - self._refresh_window_seconds:
+                    return await self._refresh_jwks(allow_stale=True)
                 return self._jwks_cache
-
-            async def fetch_jwks() -> dict[str, Any]:
-                response = await async_with_retry(
-                    lambda: self._client.get(
-                        self._jwks_url,
-                        timeout=resolve_timeout_seconds("http_request"),
-                    ),
-                    policy=self._retry_policy,
-                    error_context="keycloak jwks fetch",
-                )
-                response.raise_for_status()
-                return response.json()
-
-            try:
-                if self._circuit_breaker is not None:
-                    self._jwks_cache = await self._circuit_breaker.call(fetch_jwks)
-                else:
-                    self._jwks_cache = await fetch_jwks()
-            except CircuitOpenError as exc:
-                if self._jwks_cache is not None and now < self._jwks_cache_expiry:
-                    return self._jwks_cache
-                raise HTTPException(
-                    status_code=503,
-                    detail={
-                        "code": "GATE_CIRCUIT_OPEN",
-                        "circuit": "keycloak",
-                        "message": "Keycloak JWKS is temporarily unavailable.",
-                        "retry_after": exc.retry_after,
-                    },
-                    headers={"Retry-After": str(exc.retry_after)},
-                ) from exc
-            except Exception as exc:  # noqa: BLE001
-                raise HTTPException(
-                    status_code=503,
-                    detail={
-                        "code": "GATE_DEPENDENCY_UNAVAILABLE",
-                        "circuit": "keycloak",
-                        "message": f"Keycloak JWKS fetch failed: {exc}",
-                    },
-                ) from exc
-            self._jwks_cache_expiry = now + 300
-            return self._jwks_cache
+            return await self._refresh_jwks(allow_stale=False)
 
     async def verify(self, token: str) -> dict[str, Any]:
         try:
@@ -360,12 +413,18 @@ class NatsEventEmitter:
         *,
         username: str | None = None,
         password: str | None = None,
+        outbox_path: Path,
+        degradation_store: DegradationStateStore | None,
+        degradation_mode: dict[str, Any] | None,
         circuit_breaker: Any | None = None,
     ) -> None:
         self._parsed = urlparse(nats_url) if nats_url else None
         self._username = (username or "").strip() or None
         self._password = (password or "").strip() or None
         self._retry_policy = policy_for_surface("nats_publish")
+        self._outbox_path = outbox_path
+        self._degradation_store = degradation_store
+        self._degradation_mode = degradation_mode
         self._circuit_breaker = circuit_breaker
 
     async def emit(self, subject: str, payload: dict[str, Any]) -> None:
@@ -375,6 +434,64 @@ class NatsEventEmitter:
         port = self._parsed.port or 4222
         envelope = build_envelope(subject, payload, actor_id="service/api-gateway")
         encoded = json.dumps(envelope, separators=(",", ":")).encode()
+
+        try:
+            await self._flush_outbox(host, port)
+            await self._publish_live(host, port, subject, encoded)
+        except Exception as exc:  # noqa: BLE001
+            self._append_outbox(subject, encoded)
+            self._activate_degradation(str(exc))
+            return
+        self._clear_degradation()
+
+    def _activate_degradation(self, error: str) -> None:
+        if self._degradation_store is None:
+            return
+        self._degradation_store.activate(
+            "api_gateway",
+            self._degradation_mode,
+            source="nats_publish",
+            last_error=error,
+            metadata={"outbox_path": str(self._outbox_path)},
+        )
+
+    def _clear_degradation(self) -> None:
+        if self._degradation_store is None:
+            return
+        dependency = str((self._degradation_mode or {}).get("dependency") or "nats")
+        self._degradation_store.clear("api_gateway", dependency)
+
+    def _append_outbox(self, subject: str, payload: bytes) -> None:
+        self._outbox_path.parent.mkdir(parents=True, exist_ok=True)
+        entry = {"subject": subject, "payload": payload.decode("utf-8")}
+        with self._outbox_path.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(entry, separators=(",", ":")) + "\n")
+
+    async def _flush_outbox(self, host: str, port: int) -> None:
+        if not self._outbox_path.exists():
+            return
+        lines = self._outbox_path.read_text(encoding="utf-8").splitlines()
+        remaining: list[str] = []
+        for index, line in enumerate(lines):
+            if not line.strip():
+                continue
+            try:
+                entry = json.loads(line)
+                subject = str(entry["subject"])
+                payload = str(entry["payload"]).encode("utf-8")
+            except (KeyError, TypeError, ValueError):
+                continue
+            try:
+                await self._publish_live(host, port, subject, payload)
+            except Exception:  # noqa: BLE001
+                remaining = lines[index:]
+                break
+        if remaining:
+            self._outbox_path.write_text("\n".join(remaining) + "\n", encoding="utf-8")
+            raise ConnectionError("unable to flush buffered NATS events")
+        self._outbox_path.unlink(missing_ok=True)
+
+    async def _publish_live(self, host: str, port: int, subject: str, payload: bytes) -> None:
         async def publish() -> None:
             await async_with_retry(
                 lambda: asyncio.to_thread(
@@ -382,21 +499,18 @@ class NatsEventEmitter:
                     host,
                     port,
                     subject,
-                    encoded,
-                    self._username,
-                    self._password,
+                    payload,
+                    username=self._username,
+                    password=self._password,
                 ),
                 policy=self._retry_policy,
                 error_context=f"gateway nats publish {subject}",
             )
 
-        try:
-            if self._circuit_breaker is not None:
-                await self._circuit_breaker.call(publish)
-            else:
-                await publish()
-        except CircuitOpenError:
+        if self._circuit_breaker is not None:
+            await self._circuit_breaker.call(publish)
             return
+        await publish()
 
     @staticmethod
     def _publish(
@@ -404,19 +518,21 @@ class NatsEventEmitter:
         port: int,
         subject: str,
         payload: bytes,
-        username: str | None,
-        password: str | None,
+        *,
+        username: str | None = None,
+        password: str | None = None,
     ) -> None:
+        connect_payload: dict[str, Any] = {"verbose": False}
+        if username:
+            connect_payload["user"] = username
+        if password:
+            connect_payload["pass"] = password
         with socket.create_connection(
             (host, port),
             timeout=resolve_timeout_seconds("liveness_probe", 3),
         ) as sock:
-            connect_payload: dict[str, Any] = {"verbose": False}
-            if username is not None:
-                connect_payload["user"] = username
-            if password is not None:
-                connect_payload["pass"] = password
-            sock.sendall(f"CONNECT {json.dumps(connect_payload, separators=(',', ':'))}\r\n".encode())
+            connect_frame = json.dumps(connect_payload, separators=(",", ":")).encode()
+            sock.sendall(b"CONNECT " + connect_frame + b"\r\n")
             sock.sendall(f"PUB {subject} {len(payload)}\r\n".encode() + payload + b"\r\n")
 
 
@@ -428,10 +544,12 @@ class GatewayRuntime:
             config.catalog_path,
             service_catalog_path=config.service_catalog_path,
         )
+        self._service_catalog = json_file(config.service_catalog_path, {"services": []})
         self.services = [GatewayService(**service) for service in normalized_catalog]
         self.service_by_prefix = sorted(self.services, key=lambda service: len(service.gateway_prefix), reverse=True)
         self.http_client = httpx.AsyncClient(follow_redirects=False)
         self.search_client = SearchClient(config.repo_root)
+        self.degradation_store = DegradationStateStore(config.degradation_state_path)
         self.circuit_registry = CircuitRegistry(
             config.repo_root,
             policies_path=config.circuit_policy_path,
@@ -443,6 +561,9 @@ class GatewayRuntime:
             expected_audience=config.expected_audience,
             clock_skew_seconds=config.clock_skew_seconds,
             client=self.http_client,
+            degradation_store=self.degradation_store,
+            degradation_mode=self.degradation_mode("api_gateway", "keycloak"),
+            retry_after_seconds=config.keycloak_retry_after_seconds,
             circuit_breaker=self.circuit_registry.async_breaker(
                 "keycloak",
                 exception_classifier=should_count_httpx_exception,
@@ -454,6 +575,9 @@ class GatewayRuntime:
             config.nats_url,
             username=config.nats_username,
             password=config.nats_password,
+            outbox_path=config.nats_outbox_path,
+            degradation_store=self.degradation_store,
+            degradation_mode=self.degradation_mode("api_gateway", "nats"),
             circuit_breaker=self.circuit_registry.async_breaker(
                 "nats",
                 exception_classifier=should_count_socket_exception,
@@ -498,7 +622,20 @@ class GatewayRuntime:
         await self.http_client.aclose()
 
     def primary_service_catalog(self) -> dict[str, Any]:
-        return json_file(self.config.service_catalog_path, {"services": []})
+        return self._service_catalog
+
+    def degradation_mode(self, service_id: str, dependency: str) -> dict[str, Any] | None:
+        services = self._service_catalog.get("services", [])
+        for service in services:
+            if not isinstance(service, dict) or service.get("id") != service_id:
+                continue
+            for mode in service.get("degradation_modes", []):
+                if isinstance(mode, dict) and mode.get("dependency") == dependency:
+                    return mode
+        return None
+
+    def active_degradations(self) -> dict[str, list[dict[str, Any]]]:
+        return self.degradation_store.all_active()
 
     def workflow_catalog(self) -> dict[str, Any]:
         return json_file(self.config.workflow_catalog_path, {"workflows": {}})
@@ -611,6 +748,7 @@ class GatewayRuntime:
             entry.service_id: entry.as_dict()
             for entry in self.health_client.get_all(allow_stale=True)
         }
+        active_degradations = self.active_degradations()
 
         services: list[dict[str, Any]] = []
         for service in catalog.get("services", []):
@@ -639,6 +777,11 @@ class GatewayRuntime:
                     "uptime_monitor_name": service.get("uptime_monitor_name"),
                 }
             )
+            item["active_degradations"] = active_degradations.get(service_id, [])
+            if item["active_degradations"] and item.get("composite_status") == "healthy":
+                item["status"] = "degraded"
+                item["composite_status"] = "degraded"
+                item["safe_to_act"] = False
             services.append(item)
 
         statuses = {item["composite_status"] for item in services}
@@ -649,12 +792,15 @@ class GatewayRuntime:
             overall = "degraded"
         elif statuses and statuses <= {"unknown"}:
             overall = "unknown"
+        if any(item["active_degradations"] for item in services):
+            overall = "degraded"
 
         return {
             "status": overall,
             "service_count": len(services),
             "safe_service_count": sum(1 for item in services if item.get("safe_to_act") is True),
             "unsafe_service_count": sum(1 for item in services if item.get("safe_to_act") is False),
+            "degraded_service_count": sum(1 for item in services if item["active_degradations"]),
             "services": services,
             "source": "health_composite",
         }
@@ -701,6 +847,12 @@ def build_config() -> GatewayConfig:
         nats_password=os.environ.get("LV3_NATS_PASSWORD") or None,
         deploy_webhook_url=os.environ.get("LV3_GATEWAY_DEPLOY_WEBHOOK_URL") or None,
         secret_rotation_webhook_url=os.environ.get("LV3_GATEWAY_SECRET_ROTATION_WEBHOOK_URL") or None,
+        degradation_state_path=Path(
+            os.environ.get("LV3_GATEWAY_DEGRADATION_STATE_PATH", "/data/degradation-state.json")
+        ),
+        nats_outbox_path=Path(
+            os.environ.get("LV3_GATEWAY_NATS_OUTBOX_PATH", "/data/nats-outbox.jsonl")
+        ),
         graph_dsn=os.environ.get("LV3_GATEWAY_GRAPH_DSN")
         or os.environ.get("LV3_GRAPH_DSN")
         or os.environ.get("WORLD_STATE_DSN")
@@ -713,6 +865,7 @@ def build_config() -> GatewayConfig:
         or None,
         openapi_include_upstreams=os.environ.get("LV3_GATEWAY_INCLUDE_UPSTREAM_OPENAPI", "false").lower()
         in {"1", "true", "yes"},
+        keycloak_retry_after_seconds=int(os.environ.get("LV3_GATEWAY_KEYCLOAK_RETRY_AFTER_SECONDS", "30")),
     )
 
 
@@ -802,7 +955,8 @@ def validation_error_context(exc: RequestValidationError) -> dict[str, Any]:
 
 
 def canonical_error_from_http_exception(request: Request, exc: HTTPException) -> tuple[str, str | None, dict[str, Any], int | None]:
-    detail = exc.detail if isinstance(exc.detail, str) else str(exc.detail)
+    raw_detail = exc.detail
+    detail = raw_detail if isinstance(raw_detail, str) else str(raw_detail)
     detail_lower = detail.lower()
     context: dict[str, Any] = {}
     retry_after: int | None = None
@@ -890,10 +1044,19 @@ def canonical_error_from_http_exception(request: Request, exc: HTTPException) ->
         )
 
     if exc.status_code == 503:
+        dependency = "platform-runtime"
+        context_detail: Any = detail
+        message = detail or "Required runtime dependency is unavailable."
+        if isinstance(raw_detail, dict):
+            dependency = str(raw_detail.get("dependency") or dependency)
+            context_detail = raw_detail
+            raw_message = raw_detail.get("message")
+            if isinstance(raw_message, str) and raw_message.strip():
+                message = raw_message
         return (
             "INFRA_RUNTIME_UNAVAILABLE",
-            detail or "Required runtime dependency is unavailable.",
-            {"dependency": "platform-runtime", "detail": detail},
+            message,
+            {"dependency": dependency, "detail": context_detail},
             retry_after,
         )
 
@@ -1092,6 +1255,7 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
         runtime: GatewayRuntime = request.app.state.runtime
         catalog = runtime.primary_service_catalog()
         gateway_services = {service.id: service for service in runtime.services}
+        active_degradations = runtime.active_degradations()
         services = []
         for service in catalog.get("services", []):
             if not isinstance(service, dict):
@@ -1100,9 +1264,26 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
             gateway = gateway_services.get(item.get("id"))
             if gateway:
                 item["gateway_prefix"] = gateway.gateway_prefix
+            item["active_degradations"] = active_degradations.get(str(item.get("id")), [])
             services.append(item)
         await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
         return {"count": len(services), "services": services}
+
+    @app.get("/v1/platform/degradations")
+    async def platform_degradations(
+        request: Request,
+        identity: dict[str, Any] = Depends(require_identity),
+    ) -> dict[str, Any]:
+        started_at = time.perf_counter()
+        if not has_required_role(identity, "platform-read"):
+            raise HTTPException(status_code=403, detail="missing required role 'platform-read'")
+        runtime: GatewayRuntime = request.app.state.runtime
+        payload = await asyncio.to_thread(runtime.active_degradations)
+        await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
+        return {
+            "degradation_count": sum(len(entries) for entries in payload.values()),
+            "services": payload,
+        }
 
     @app.get("/v1/platform/drift")
     async def platform_drift(

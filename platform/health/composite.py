@@ -31,6 +31,7 @@ from platform.world_state.materializer import SQLITE_CURRENT_VIEW_NAME, SQLITE_S
 
 
 SCRIPTS_DIR = Path(__file__).resolve().parents[2] / "scripts"
+from platform.degradation import default_state_path
 
 
 DEFAULT_TTL_SECONDS = 120
@@ -276,6 +277,28 @@ def load_ledger_events(
     return _load_ledger_events_from_file(repo_root / ".local" / "state" / "ledger" / "ledger.events.jsonl")
 
 
+def load_degradation_state(repo_root: Path) -> dict[str, list[dict[str, Any]]]:
+    configured = os.environ.get("LV3_DEGRADATION_STATE_PATH", "").strip()
+    path = Path(configured) if configured else default_state_path(repo_root)
+    if not path.exists():
+        return {}
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    services = payload.get("services", []) if isinstance(payload, dict) else {}
+    if not isinstance(services, dict):
+        return {}
+    result: dict[str, list[dict[str, Any]]] = {}
+    for service_id, entries in services.items():
+        if not isinstance(service_id, str) or not isinstance(entries, dict):
+            continue
+        normalized = [entry for entry in entries.values() if isinstance(entry, dict)]
+        if normalized:
+            result[service_id] = normalized
+    return result
+
+
 def _score_probe_status(status: str) -> tuple[float, str]:
     normalized = status.strip().lower()
     if normalized in {"ok", "healthy"}:
@@ -492,6 +515,26 @@ def _pending_mutation_signal(service_id: str, ledger_events: list[dict[str, Any]
     )
 
 
+def _degraded_mode_signal(service_id: str, degradation_state: dict[str, list[dict[str, Any]]]) -> Signal:
+    active = degradation_state.get(service_id, [])
+    if not active:
+        return Signal(
+            name="degraded_mode",
+            value=[],
+            score=1.0,
+            weight=0.0,
+            reason="no active degraded modes",
+        )
+    dependencies = ", ".join(sorted(str(item.get("dependency", "")).strip() for item in active if item.get("dependency")))
+    return Signal(
+        name="degraded_mode",
+        value=active,
+        score=0.5,
+        weight=0.0,
+        reason=f"active degraded mode for {dependencies or 'unknown dependency'}",
+    )
+
+
 def _status_for_score(score: float) -> str:
     if score < 0.4:
         return "critical"
@@ -509,11 +552,13 @@ def compute_health_entries(
     triage_reports: list[dict[str, Any]],
     maintenance_windows: list[dict[str, Any]],
     ledger_events: list[dict[str, Any]],
+    degradation_state: dict[str, list[dict[str, Any]]] | None = None,
     computed_at: datetime | None = None,
     ttl_seconds: int = DEFAULT_TTL_SECONDS,
 ) -> list[ServiceHealthEntry]:
     observed_at = computed_at or utc_now()
     health_map = _service_health_map(service_health_snapshot)
+    active_degradations = degradation_state or {}
     entries: list[ServiceHealthEntry] = []
     for service in services:
         if str(service.get("lifecycle_status", "active")) != "active":
@@ -528,6 +573,7 @@ def compute_health_entries(
             _drift_signal(service_id, drift_report),
             _incident_signal(service_id, triage_reports),
             _pending_mutation_signal(service_id, ledger_events),
+            _degraded_mode_signal(service_id, active_degradations),
         ]
 
         maintenance_active = _maintenance_active(service_id, maintenance_windows)
@@ -550,6 +596,9 @@ def compute_health_entries(
             if any(signal.score == 0.0 for signal in signals) and status == "healthy":
                 status = "degraded"
             safe_to_act = score >= 0.7 and not any(signal.score == 0.0 for signal in signals)
+            if active_degradations.get(service_id):
+                status = "degraded"
+                safe_to_act = False
 
         entries.append(
             ServiceHealthEntry(
@@ -609,6 +658,7 @@ class HealthCompositeClient:
             triage_reports=load_triage_reports(repo_root),
             maintenance_windows=load_maintenance_windows(repo_root, world_state=world_state),
             ledger_events=load_ledger_events(repo_root, ledger_dsn=self._ledger_dsn),
+            degradation_state=load_degradation_state(repo_root),
             computed_at=computed_at,
         )
 

@@ -97,7 +97,8 @@ api_gateway_verify_client_secret_local_file: >-
   }}
 api_gateway_nats_url: nats://127.0.0.1:4222
 api_gateway_nats_username: jetstream-admin
-api_gateway_nats_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/nats/jetstream-admin-password.txt
+api_gateway_nats_password_local_file: "{{ api_gateway_repo_root }}/.local/nats/jetstream-admin-password.txt"
+api_gateway_keycloak_retry_after_seconds: 30
 api_gateway_nats_password: >-
   {{
     lookup('ansible.builtin.file', api_gateway_nats_password_local_file, errors='ignore')

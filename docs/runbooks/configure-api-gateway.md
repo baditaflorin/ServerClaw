@@ -58,6 +58,8 @@ curl -H "Authorization: Bearer $LV3_TOKEN" https://api.lv3.org/v1/platform/servi
 ## Notes
 
 - The gateway validates Keycloak JWTs directly against the realm JWKS.
+- When Keycloak is unavailable but the JWKS cache is still valid, the gateway stays in a declared degraded mode instead of failing authentication immediately.
+- When NATS publication fails, the gateway buffers request events in `/opt/api-gateway/data/nats-outbox.jsonl` and flushes them on recovery.
 - Safe read paths now use the ADR 0163 retry taxonomy with the shared `/config/retry-policies.yaml` bundle.
 - Non-idempotent webhook and proxied write paths remain single-shot until ADR 0165 idempotency keys are in place.
 - Native `/v1/platform/*` endpoints read repo-synced catalogs copied into the runtime bundle.

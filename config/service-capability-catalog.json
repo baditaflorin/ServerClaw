@@ -44,6 +44,24 @@
       "adr": "0092",
       "runbook": "docs/runbooks/configure-api-gateway.md",
       "dashboard_url": "https://grafana.lv3.org/d/lv3-platform-api-gateway/lv3-platform-api-gateway",
+      "degradation_modes": [
+        {
+          "dependency": "keycloak",
+          "dependency_type": "soft",
+          "degraded_behaviour": "Use cached JWKS for bearer-token validation until the cache expires. After cache expiry, return GATE_CIRCUIT_OPEN with Retry-After 30 for auth-gated requests.",
+          "degraded_for_seconds_max": 300,
+          "recovery_signal": "successful JWKS refresh from Keycloak",
+          "tested_by": "fault:keycloak-unavailable"
+        },
+        {
+          "dependency": "nats",
+          "dependency_type": "soft",
+          "degraded_behaviour": "Buffer platform.api.request events in the gateway-local outbox under /data/nats-outbox.jsonl and flush them when NATS publication succeeds again.",
+          "degraded_for_seconds_max": -1,
+          "recovery_signal": "successful outbox flush to NATS",
+          "tested_by": "fault:nats-unavailable"
+        }
+      ],
       "tags": [
         "api",
         "gateway",
@@ -569,6 +587,16 @@
       ],
       "adr": "0043",
       "runbook": "docs/runbooks/configure-openbao.md",
+      "degradation_modes": [
+        {
+          "dependency": "postgres",
+          "dependency_type": "hard",
+          "degraded_behaviour": "OpenBao cannot persist state without PostgreSQL. Secret reads and writes fail until the storage backend reconnects.",
+          "degraded_for_seconds_max": 0,
+          "recovery_signal": "OpenBao storage reconnect succeeds",
+          "tested_by": "fault:postgres-unavailable"
+        }
+      ],
       "tags": [
         "secrets",
         "vault",
@@ -975,6 +1003,16 @@
       ],
       "adr": "0044",
       "runbook": "docs/runbooks/configure-windmill.md",
+      "degradation_modes": [
+        {
+          "dependency": "postgres",
+          "dependency_type": "hard",
+          "degraded_behaviour": "Windmill cannot accept or persist workflow state without PostgreSQL. Requests fail until database connectivity returns.",
+          "degraded_for_seconds_max": 0,
+          "recovery_signal": "Windmill database connection succeeds again",
+          "tested_by": "fault:postgres-unavailable"
+        }
+      ],
       "tags": [
         "workflow",
         "automation",

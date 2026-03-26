@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.162.0",
-  "platform_version": "0.130.13",
-  "generated_at": "2026-03-26T09:08:42Z",
-  "next_refresh_at": "2026-03-26T10:08:42Z",
+  "repo_version": "0.164.0",
+  "platform_version": "0.130.14",
+  "generated_at": "2026-03-26T10:04:46Z",
+  "next_refresh_at": "2026-03-26T11:04:46Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -126,6 +126,18 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://sso.lv3.org",
+        "last_live_apply": "2026-03-26T00:00:00Z",
+        "slo_status": "unknown"
+      },
+      "langfuse": {
+        "service_name": "Langfuse",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://langfuse.lv3.org",
         "last_live_apply": "2026-03-26T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -846,6 +858,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-keycloak.md"
+      },
+      {
+        "id": "converge-langfuse",
+        "description": "Converge Langfuse on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at langfuse.lv3.org, and verify repo-managed trace ingestion.",
+        "tags": [
+          "converge-langfuse",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 350,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-langfuse.md"
       },
       {
         "id": "converge-mail-platform",
@@ -2647,6 +2685,16 @@
         ]
       },
       {
+        "id": "configure-langfuse",
+        "title": "Configure Langfuse",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-langfuse.md",
+        "workflow_ids": [
+          "converge-langfuse"
+        ]
+      },
+      {
         "id": "configure-mail-platform",
         "title": "Configure Mail Platform",
         "agent_trust_required": "T3",
@@ -3186,10 +3234,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.161.0",
+    "last_version": "0.163.0",
     "deployed_at": "2026-03-26",
-    "summary": "implement the first ADR 0166 rollout with a shared `config/error-codes.yaml` registry, reusable canonical error helpers, and canonical error envelopes for the API gateway and platform-context API harden the `api-gateway` and `platform-context` runtime packaging so fresh worktrees ship the shared registry and helper module into their live-apply bundles",
-    "release_notes_url": "docs/release-notes/0.162.0.md"
+    "summary": "complete the current-main ADR 0167 rollout so the API gateway publishes declared degradation state through `/v1/platform/degradations`, `/v1/platform/services`, and `/v1/platform/health` keep Keycloak dependency failures operator-visible after ADR 0166 by preserving the structured circuit-open context inside the canonical error envelope",
+    "release_notes_url": "docs/release-notes/0.164.0.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -3259,13 +3307,6 @@
       "status": "Proposed",
       "implementation_status": "Not Implemented",
       "path": "docs/adr/0118-replayable-failure-case-library.md"
-    },
-    {
-      "adr": "0167",
-      "title": "Graceful Degradation Mode Declarations",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0167-graceful-degradation-mode-declarations.md"
     },
     {
       "adr": "0171",

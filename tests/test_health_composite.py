@@ -85,6 +85,30 @@ def test_health_client_refresh_persists_sqlite_entries(tmp_path: Path) -> None:
     assert entry.composite_status == "degraded"
     assert entry.composite_score == 0.8
 
+def test_compute_health_entries_marks_active_degradation_as_degraded() -> None:
+    entries = compute_health_entries(
+        [{"id": "api_gateway", "lifecycle_status": "active"}],
+        service_health_snapshot={"services": [{"service_id": "api_gateway", "status": "healthy"}]},
+        slo_entries=[],
+        drift_report={},
+        triage_reports=[],
+        maintenance_windows=[],
+        ledger_events=[],
+        degradation_state={
+            "api_gateway": [
+                {
+                    "dependency": "keycloak",
+                    "degraded_behaviour": "Use cached JWKS while Keycloak is unavailable.",
+                }
+            ]
+        },
+        computed_at=datetime(2026, 3, 24, 10, 0, tzinfo=UTC),
+    )
+
+    assert entries[0].composite_status == "degraded"
+    assert entries[0].safe_to_act is False
+    assert any(signal.name == "degraded_mode" for signal in entries[0].signals)
+
 
 def test_load_maintenance_windows_skips_missing_script_dependencies(monkeypatch: object, tmp_path: Path) -> None:
     class FakeWorldStateClient:

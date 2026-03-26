@@ -115,6 +115,12 @@
             },
             "uniqueItems": true
           },
+          "degradation_modes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/degradationMode"
+            }
+          },
           "runbook": {
             "type": "string",
             "minLength": 1
@@ -170,6 +176,44 @@
         },
         "notes": {
           "type": "string"
+        }
+      }
+    },
+    "degradationMode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dependency",
+        "dependency_type",
+        "degraded_behaviour",
+        "degraded_for_seconds_max",
+        "recovery_signal",
+        "tested_by"
+      ],
+      "properties": {
+        "dependency": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_-]*$"
+        },
+        "dependency_type": {
+          "type": "string",
+          "enum": ["hard", "soft", "optional"]
+        },
+        "degraded_behaviour": {
+          "type": "string",
+          "minLength": 1
+        },
+        "degraded_for_seconds_max": {
+          "type": "integer",
+          "minimum": -1
+        },
+        "recovery_signal": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tested_by": {
+          "type": "string",
+          "pattern": "^fault:[a-z0-9][a-z0-9-]*$"
         }
       }
     }
