@@ -103,6 +103,7 @@ The repository now also ships ADR 0165 workflow idempotency: `platform.idempoten
 The repository now also ships ADR 0146 Langfuse observability live on production: `https://langfuse.lv3.org` is published through the shared NGINX edge, the seeded `lv3-agent-observability` project is reachable through the public API, and the 2026-03-26 smoke verification ingested a trace that resolved successfully in the Langfuse UI.
 The developer portal generator now stamps published docs pages with sensitivity metadata, keeps `RESTRICTED` ADRs and runbooks summary-only in portal output, and leaves `CONFIDENTIAL` documents source-only until a dedicated admin-view path exists.
 Portal access is now authentication-by-default on the live platform: `ops.lv3.org`, `docs.lv3.org`, and `changelog.lv3.org` are gated by the shared Keycloak edge auth flow, and Grafana no longer serves anonymous dashboards.
+ADR 0134 changelog redaction is now live on the shared authenticated edge: the published deployment-history view masks emails, private IPs, internal hostnames, and inline secret material before changelog data reaches `changelog.lv3.org`.
 The repository now also ships ADR 0142 public-surface security scanning: `make public-surface-security-scan ENV=production` writes structured receipts under `receipts/security-scan/`, uses `testssl.sh` and `nuclei` container runners for the live public HTTP or HTTPS surface, and can publish high or critical findings on `platform.security.*`; the live weekly schedule still requires apply from `main`.
 The repository now also ships ADR 0129 runbook automation: structured YAML, JSON, and Markdown-front-matter runbooks can execute through `lv3 runbook`, persist resumable run state under `.local/runbooks/runs/`, and reuse the current Windmill plus mutation-audit surfaces.
 The repository now also ships ADR 0137 crawl policy automation: the shared public edge serves a universal `robots.txt`, emits `X-Robots-Tag: noindex, nofollow` across published hostnames, adds robots meta tags to repository-generated HTML surfaces, and includes `lv3.org` in the shared edge certificate definition; live apply from `main` is still pending.
@@ -114,8 +115,8 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.170.0` |
-| Platform version | `0.130.19` |
+| Repository version | `0.172.0` |
+| Platform version | `0.130.20` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -193,7 +194,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `platform_event_taxonomy` | `2026-03-26-adr-0124-platform-event-taxonomy-live-apply` |
 | `portainer` | `2026-03-22-adr-0055-portainer-live-apply` |
 | `postgres_vm` | `2026-03-22-adr-0026-postgres-vm-live-apply` |
-| `public_edge_publication` | `2026-03-25-adr-0136-http-security-headers-live-apply` |
+| `public_edge_publication` | `2026-03-26-adr-0134-changelog-redaction-live-apply` |
 | `remote_build_gateway` | `2026-03-26-adr-0156-agent-session-workspace-isolation-live-apply` |
 | `runtime_container_telemetry` | `2026-03-22-adr-0040-runtime-container-telemetry-live-apply` |
 | `secret_rotation` | `2026-03-23-adr-0065-secret-rotation-live-apply` |
@@ -716,11 +717,17 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0162: Distributed Deadlock Detection and Resolution](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0162-distributed-deadlock-detection-and-resolution.md)
 - [ADR 0163: Platform-Wide Retry Taxonomy and Exponential Backoff](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0163-platform-wide-retry-taxonomy-and-exponential-backoff.md)
 - [ADR 0163: Proxmox Break-Glass SSH Port](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0163-proxmox-break-glass-ssh-port.md)
+- [ADR 0163: Repository Structure Index for Agent Discovery](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0163-repository-structure-index.md)
+- [ADR 0164: ADR Metadata Index and Fast Discovery Protocol](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0164-adr-metadata-index.md)
 - [ADR 0164: Circuit Breaker Pattern for External Service Calls](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0164-circuit-breaker-pattern-for-external-service-calls.md)
+- [ADR 0165: Playbook and Role Metadata Standard for Agent Discovery](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0165-playbook-role-metadata-standard.md)
 - [ADR 0165: Workflow Idempotency Keys and Double-Execution Prevention](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0165-workflow-idempotency-keys-and-double-execution-prevention.md)
+- [ADR 0166: Canonical Configuration Locations Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0166-canonical-configuration-locations.md)
 - [ADR 0166: Canonical Error Response Format and Error Code Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0166-canonical-error-response-format-and-error-code-registry.md)
+- [ADR 0167: Agent Handoff and Context Preservation Protocol](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0167-agent-handoff-and-context-preservation.md)
 - [ADR 0167: Graceful Degradation Mode Declarations](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0167-graceful-degradation-mode-declarations.md)
 - [ADR 0168: Ansible Role Idempotency CI Enforcement](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0168-ansible-role-idempotency-ci-enforcement.md)
+- [ADR 0168: Automated Enforcement of Agent Discovery and Handoff Standards](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0168-automated-enforcement-of-agent-standards.md)
 - [ADR 0169: Structured Log Field Contract](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0169-structured-log-field-contract.md)
 - [ADR 0170: Platform-Wide Timeout Hierarchy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0170-platform-wide-timeout-hierarchy.md)
 - [ADR 0171: Controlled Fault Injection for Resilience Validation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0171-controlled-fault-injection-for-resilience-validation.md)
@@ -888,8 +895,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.170.0` |
-| Platform version | `0.130.19` |
+| Repository version | `0.172.0` |
+| Platform version | `0.130.20` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1037,7 +1044,7 @@ This repository is intentionally opinionated:
 | `0135` | Developer portal sensitivity classification | `merged` | [adr-0135-developer-portal-sensitivity-classification.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0135-developer-portal-sensitivity-classification.md) |
 | `0136` | HTTP security headers hardening | `live_applied` | [adr-0136-http-security-headers.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0136-http-security-headers.md) |
 | `0137` | Robots.txt and crawl policy | `merged` | [adr-0137-robots-and-crawl-policy.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0137-robots-and-crawl-policy.md) |
-| `0138` | Published artifact secret scanning | `merged` | [adr-0138-published-artifact-secret-scanning.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0138-published-artifact-secret-scanning.md) |
+| `0138` | Published artifact secret scanning | `live_applied` | [adr-0138-published-artifact-secret-scanning.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0138-published-artifact-secret-scanning.md) |
 | `0139` | Subdomain exposure audit and registry | `merged` | [adr-0139-subdomain-exposure-audit.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0139-subdomain-exposure-audit.md) |
 | `0140` | Grafana public access hardening | `live_applied` | [adr-0140-grafana-public-access-hardening.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0140-grafana-public-access-hardening.md) |
 | `0141` | API token lifecycle and exposure response | `merged` | [adr-0141-api-token-lifecycle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0141-api-token-lifecycle.md) |

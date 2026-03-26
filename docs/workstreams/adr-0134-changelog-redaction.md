@@ -2,9 +2,9 @@
 
 - ADR: [ADR 0134](../adr/0134-changelog-portal-content-redaction.md)
 - Title: Config-backed read-path redaction for deployment history and changelog portal content
-- Status: merged
+- Status: live_applied
 - Implemented In Repo Version: 0.133.0
-- Implemented In Platform Version: not yet
+- Implemented In Platform Version: 0.130.20
 - Implemented On: 2026-03-25
 - Branch: `codex/adr-0134-changelog-redaction`
 - Worktree: `.worktrees/adr-0134`
@@ -41,3 +41,4 @@
 - secrets, private IPs, internal hostnames, actor emails, and raw error detail are filtered before display
 - repo validation now fails if `config/changelog-redaction.yaml` is malformed or unsupported
 - ADR 0134 is implemented in repository release `0.133.0`
+- ADR 0134 is live on platform version `0.130.20` via the shared authenticated changelog edge
