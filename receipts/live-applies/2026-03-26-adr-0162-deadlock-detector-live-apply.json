@@ -5,7 +5,7 @@
   "applied_on": "2026-03-26",
   "recorded_on": "2026-03-26",
   "recorded_by": "codex",
-  "source_commit": "57741daeecd9011bc134b79a3aabeb274071fc13",
+  "source_commit": "5f9ddf35af56d21f21b5e1b2e3c2f1a84415d2aa",
   "repo_version_context": "0.160.0",
   "workflow_id": "adr-0162-deadlock-detector-live-apply",
   "adr": "0162",
