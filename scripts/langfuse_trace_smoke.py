@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import sys
 import time
@@ -11,7 +12,16 @@ from pathlib import Path
 
 import requests
 
-from platform.llm.observability import dump_json, load_langfuse_config, trace_url
+
+def _load_observability_helpers(repo_root: Path):
+    module_path = repo_root / "platform" / "llm" / "observability.py"
+    spec = importlib.util.spec_from_file_location("lv3_langfuse_observability", module_path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f"Unable to load Langfuse observability helpers from {module_path}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module.dump_json, module.load_langfuse_config, module.trace_url
 
 
 def _build_session(base_url: str, email: str, password: str) -> requests.Session:
@@ -33,6 +43,12 @@ def _build_session(base_url: str, email: str, password: str) -> requests.Session
     )
     response.raise_for_status()
     payload = response.json()
+    if payload.get("ok") is True:
+        return session
+    if payload.get("url") and session.cookies:
+        return session
+    if payload.get("url") and "authjs.session-token" in response.headers.get("set-cookie", ""):
+        return session
     if payload.get("ok") is not True:
         raise RuntimeError(f"Langfuse credential sign-in failed: {payload!r}")
     return session
@@ -50,10 +66,11 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
+        dump_json, load_langfuse_config, trace_url = _load_observability_helpers(args.repo_root)
         config = load_langfuse_config(args.repo_root)
         base_url = (args.base_url or config.host).rstrip("/")
         project_id = args.project_id or config.project_id or "lv3-agent-observability"
-        trace_id = args.trace_id or f"codex-smoke-{uuid.uuid4()}"
+        trace_id = args.trace_id or uuid.uuid4().hex
 
         try:
             from langfuse import Langfuse

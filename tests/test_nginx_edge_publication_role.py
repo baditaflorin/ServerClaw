@@ -47,6 +47,10 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
             self.defaults["public_edge_dns_hetzner_virtualenv"],
             "/opt/certbot-dns-hetzner",
         )
+        self.assertEqual(
+            self.defaults["public_edge_certbot_plugin_path"],
+            "{{ public_edge_dns_hetzner_virtualenv }}/lib/python{{ ansible_python.version.major }}.{{ ansible_python.version.minor }}/site-packages",
+        )
         self.assertEqual(self.defaults["public_edge_apex_hostname"], "lv3.org")
         self.assertEqual(self.defaults["public_edge_additional_certificate_domains"], ["{{ public_edge_apex_hostname }}"])
         self.assertEqual(self.defaults["public_edge_robots_meta_content"], "noindex, nofollow")

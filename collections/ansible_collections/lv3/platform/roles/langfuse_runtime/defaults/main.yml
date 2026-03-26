@@ -24,6 +24,8 @@ langfuse_worker_container_name: langfuse-worker
 langfuse_clickhouse_container_name: langfuse-clickhouse
 langfuse_minio_container_name: langfuse-minio
 langfuse_redis_container_name: langfuse-redis
+langfuse_redis_uid: "999"
+langfuse_redis_gid: "999"
 langfuse_web_image: "{{ container_image_catalog.images.langfuse_runtime.ref }}"
 langfuse_worker_image: "{{ container_image_catalog.images.langfuse_worker_runtime.ref }}"
 langfuse_clickhouse_image: "{{ container_image_catalog.images.langfuse_clickhouse_runtime.ref }}"

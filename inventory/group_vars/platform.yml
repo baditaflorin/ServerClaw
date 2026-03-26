@@ -987,6 +987,34 @@ platform_service_topology:
     urls:
       internal: http://10.10.10.20:8082
       controller: http://100.64.0.1:8004
+  langfuse:
+    service_name: langfuse
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: langfuse.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: langfuse
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:3002
+    service_id: langfuse
+    ports:
+      internal: 3002
+    urls:
+      public: https://langfuse.lv3.org
+      internal: http://10.10.10.20:3002
   open_webui:
     service_name: open-webui
     owning_vm: docker-runtime-lv3
@@ -1310,6 +1338,10 @@ platform_dns_records:
       value: 65.108.75.123
       ttl: 60
     - name: mail
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: langfuse
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -1750,6 +1782,34 @@ public_edge_service_topology:
     urls:
       internal: http://10.10.10.20:8082
       controller: http://100.64.0.1:8004
+  langfuse:
+    service_name: langfuse
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: langfuse.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: langfuse
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:3002
+    service_id: langfuse
+    ports:
+      internal: 3002
+    urls:
+      public: https://langfuse.lv3.org
+      internal: http://10.10.10.20:3002
   open_webui:
     service_name: open-webui
     owning_vm: docker-runtime-lv3

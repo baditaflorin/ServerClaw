@@ -60,6 +60,7 @@ services:
     image: {{ langfuse_redis_image }}
     container_name: {{ langfuse_redis_container_name }}
     restart: unless-stopped
+    user: "{{ langfuse_redis_uid }}:{{ langfuse_redis_gid }}"
     command:
       - redis-server
       - --requirepass

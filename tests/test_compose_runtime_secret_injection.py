@@ -63,6 +63,19 @@ def test_migrated_compose_templates_include_openbao_agent_sidecars() -> None:
         assert "-config=/openbao-agent/agent.hcl" in template_text
 
 
+def test_langfuse_runtime_pins_redis_volume_permissions_to_redis_uid() -> None:
+    defaults_text = (REPO_ROOT / "roles" / "langfuse_runtime" / "defaults" / "main.yml").read_text()
+    tasks_text = (REPO_ROOT / "roles" / "langfuse_runtime" / "tasks" / "main.yml").read_text()
+    template_text = (REPO_ROOT / "roles" / "langfuse_runtime" / "templates" / "docker-compose.yml.j2").read_text()
+
+    assert 'langfuse_redis_uid: "999"' in defaults_text
+    assert 'langfuse_redis_gid: "999"' in defaults_text
+    assert 'path: "{{ langfuse_redis_data_dir }}"' in tasks_text
+    assert 'owner: "{{ langfuse_redis_uid }}"' in tasks_text
+    assert 'group: "{{ langfuse_redis_gid }}"' in tasks_text
+    assert 'user: "{{ langfuse_redis_uid }}:{{ langfuse_redis_gid }}"' in template_text
+
+
 def test_control_plane_recovery_no_longer_requires_windmill_env_file() -> None:
     defaults_text = (REPO_ROOT / "roles" / "control_plane_recovery_store" / "defaults" / "main.yml").read_text()
     assert "opt/windmill/windmill.env" not in defaults_text

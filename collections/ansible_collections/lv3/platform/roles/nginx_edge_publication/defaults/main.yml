@@ -15,6 +15,8 @@ public_edge_dns_hetzner_plugin_version: 3.0.0
 public_edge_dns_hetzner_credentials_file: /etc/letsencrypt/hetzner.ini
 public_edge_dns_hetzner_propagation_seconds: 30
 public_edge_dns_hetzner_virtualenv: /opt/certbot-dns-hetzner
+public_edge_certbot_plugin_path: >-
+  {{ public_edge_dns_hetzner_virtualenv }}/lib/python{{ ansible_python.version.major }}.{{ ansible_python.version.minor }}/site-packages
 public_edge_apex_hostname: lv3.org
 public_edge_probe_hostname: "{{ public_edge_service_topology.nginx_edge.public_hostname }}"
 public_edge_additional_certificate_domains:

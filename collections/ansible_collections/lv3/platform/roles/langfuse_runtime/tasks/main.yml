@@ -82,7 +82,9 @@
     - path: "{{ langfuse_minio_data_dir }}/{{ langfuse_bucket_name }}"
       mode: "0755"
     - path: "{{ langfuse_redis_data_dir }}"
-      mode: "0755"
+      owner: "{{ langfuse_redis_uid }}"
+      group: "{{ langfuse_redis_gid }}"
+      mode: "0750"
     - path: "{{ langfuse_secret_dir }}"
       mode: "0700"
 
