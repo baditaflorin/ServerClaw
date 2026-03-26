@@ -540,7 +540,7 @@
         "review_by": "2026-04-05"
       },
       "consumers": [
-        "roles/windmill_runtime/templates/windmill.env.j2",
+        "roles/windmill_runtime/templates/windmill-runtime.env.j2",
         "scripts/upgrade_container_image.py",
         "docs/runbooks/container-image-policy.md"
       ],
@@ -568,7 +568,7 @@
         "review_by": "2026-04-05"
       },
       "consumers": [
-        "roles/windmill_runtime/templates/windmill.env.j2",
+        "roles/windmill_runtime/templates/windmill-runtime.env.j2",
         "scripts/upgrade_container_image.py",
         "docs/runbooks/container-image-policy.md"
       ],
