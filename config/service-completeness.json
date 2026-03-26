@@ -93,6 +93,14 @@
       "requires_compose_secrets": false,
       "suppression_preset": "legacy-service"
     },
+    "headscale": {
+      "service_type": "vm-service",
+      "requires_subdomain": true,
+      "requires_oidc": false,
+      "requires_secrets": false,
+      "requires_compose_secrets": false,
+      "suppression_preset": "legacy-service"
+    },
     "keycloak": {
       "service_type": "compose",
       "requires_subdomain": true,
@@ -133,19 +141,19 @@
       "requires_compose_secrets": false,
       "suppression_preset": "legacy-service"
     },
-    "ntopng": {
-      "service_type": "vm-service",
-      "requires_subdomain": false,
-      "requires_oidc": false,
-      "requires_secrets": false,
-      "requires_compose_secrets": false,
-      "suppression_preset": "legacy-service"
-    },
     "ntfy": {
       "service_type": "compose",
       "requires_subdomain": false,
       "requires_oidc": false,
       "requires_secrets": true,
+      "requires_compose_secrets": false,
+      "suppression_preset": "legacy-service"
+    },
+    "ntopng": {
+      "service_type": "vm-service",
+      "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_secrets": false,
       "requires_compose_secrets": false,
       "suppression_preset": "legacy-service"
     },
@@ -205,17 +213,17 @@
       "requires_compose_secrets": false,
       "suppression_preset": "legacy-service"
     },
-    "step_ca": {
+    "status_page": {
       "service_type": "compose",
-      "requires_subdomain": false,
+      "requires_subdomain": true,
       "requires_oidc": false,
       "requires_secrets": false,
       "requires_compose_secrets": true,
       "suppression_preset": "legacy-service"
     },
-    "status_page": {
+    "step_ca": {
       "service_type": "compose",
-      "requires_subdomain": true,
+      "requires_subdomain": false,
       "requires_oidc": false,
       "requires_secrets": false,
       "requires_compose_secrets": true,

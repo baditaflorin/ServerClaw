@@ -52,7 +52,7 @@
       ],
       "environments": {
         "production": {
-        "status": "active",
+          "status": "active",
           "url": "https://api.lv3.org",
           "subdomain": "api.lv3.org",
           "notes": "Repository automation is ready; live publication still requires apply from main."
@@ -219,6 +219,32 @@
           "url": "https://grafana.staging.lv3.org",
           "subdomain": "grafana.staging.lv3.org",
           "notes": "Planned shared-edge staging hostname; live publication remains pending."
+        }
+      }
+    },
+    {
+      "id": "headscale",
+      "name": "Headscale",
+      "description": "Self-hosted Tailscale coordination server providing private VPN overlay for operator and agent access.",
+      "category": "infrastructure",
+      "lifecycle_status": "active",
+      "vm": "proxmox_florin",
+      "internal_url": "http://10.10.10.1:8080",
+      "public_url": "https://headscale.lv3.org",
+      "exposure": "edge-published",
+      "health_probe_id": "headscale",
+      "adr": "0014",
+      "runbook": "docs/runbooks/configure-tailscale-access.md",
+      "tags": [
+        "vpn",
+        "tailscale",
+        "networking",
+        "access"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://headscale.lv3.org"
         }
       }
     },

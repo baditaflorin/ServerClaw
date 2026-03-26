@@ -84,6 +84,15 @@
       "adr": "0011"
     },
     {
+      "id": "headscale",
+      "service": "headscale",
+      "name": "Headscale",
+      "vm": "proxmox_florin",
+      "tier": 1,
+      "category": "infrastructure",
+      "adr": "0014"
+    },
+    {
       "id": "keycloak",
       "service": "keycloak",
       "name": "Keycloak",
