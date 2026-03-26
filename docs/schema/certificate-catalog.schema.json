@@ -86,10 +86,6 @@
           },
           "policy": {
             "type": "object",
-            "required": [
-              "warn_days",
-              "critical_days"
-            ],
             "properties": {
               "warn_days": {
                 "type": "integer",
@@ -98,8 +94,30 @@
               "critical_days": {
                 "type": "integer",
                 "minimum": 1
+              },
+              "warn_hours": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "critical_hours": {
+                "type": "integer",
+                "minimum": 1
               }
             },
+            "anyOf": [
+              {
+                "required": [
+                  "warn_days",
+                  "critical_days"
+                ]
+              },
+              {
+                "required": [
+                  "warn_hours",
+                  "critical_hours"
+                ]
+              }
+            ],
             "additionalProperties": false
           },
           "renewal": {

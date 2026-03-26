@@ -204,8 +204,8 @@
         "server_name": "100.64.0.1"
       },
       "policy": {
-        "warn_days": 21,
-        "critical_days": 14
+        "warn_hours": 6,
+        "critical_hours": 2
       },
       "renewal": {
         "agent": "systemd-step-issue",
@@ -260,13 +260,13 @@
       "summary": "Vaultwarden HTTPS endpoint exposed through the Proxmox host Tailscale proxy.",
       "expected_issuer": "step-ca",
       "endpoint": {
-        "host": "vault.lv3.org",
+        "host": "100.64.0.1",
         "port": 443,
         "server_name": "vault.lv3.org"
       },
       "policy": {
-        "warn_days": 21,
-        "critical_days": 14
+        "warn_hours": 6,
+        "critical_hours": 2
       },
       "renewal": {
         "agent": "systemd-step-issue",

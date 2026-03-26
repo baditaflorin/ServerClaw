@@ -945,10 +945,22 @@ def validate_certificate_catalog(host_vars_context: dict[str, Any]) -> None:
         require_str(endpoint.get("server_name"), f"{path}.endpoint.server_name")
 
         policy = require_mapping(item.get("policy"), f"{path}.policy")
-        warn_days = require_int(policy.get("warn_days"), f"{path}.policy.warn_days", 1)
-        critical_days = require_int(policy.get("critical_days"), f"{path}.policy.critical_days", 1)
-        if warn_days <= critical_days:
-            raise ValueError(f"{path}.policy.warn_days must be greater than {path}.policy.critical_days")
+        has_day_window = "warn_days" in policy or "critical_days" in policy
+        has_hour_window = "warn_hours" in policy or "critical_hours" in policy
+        if has_day_window and has_hour_window:
+            raise ValueError(f"{path}.policy must use either day or hour thresholds, not both")
+        if not has_day_window and not has_hour_window:
+            raise ValueError(f"{path}.policy must define either warn_days/critical_days or warn_hours/critical_hours")
+        if has_day_window:
+            warn_days = require_int(policy.get("warn_days"), f"{path}.policy.warn_days", 1)
+            critical_days = require_int(policy.get("critical_days"), f"{path}.policy.critical_days", 1)
+            if warn_days <= critical_days:
+                raise ValueError(f"{path}.policy.warn_days must be greater than {path}.policy.critical_days")
+        if has_hour_window:
+            warn_hours = require_int(policy.get("warn_hours"), f"{path}.policy.warn_hours", 1)
+            critical_hours = require_int(policy.get("critical_hours"), f"{path}.policy.critical_hours", 1)
+            if warn_hours <= critical_hours:
+                raise ValueError(f"{path}.policy.warn_hours must be greater than {path}.policy.critical_hours")
 
         renewal = require_mapping(item.get("renewal"), f"{path}.renewal")
         require_str(renewal.get("agent"), f"{path}.renewal.agent")

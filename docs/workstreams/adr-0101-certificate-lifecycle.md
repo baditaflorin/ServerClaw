@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0101](../adr/0101-automated-certificate-lifecycle-management.md)
 - Title: certificate inventory, TLS probes, and repo-managed renewal for current HTTPS endpoints
-- Status: merged
+- Status: live_applied
 - Branch: `codex/adr-0101-certificate-lifecycle`
 - Worktree: `../proxmox_florin_server-certificate-lifecycle`
 - Owner: codex
@@ -70,11 +70,15 @@
 - Added `scripts/generate_cert_renewal_config.py` so renewal ownership is machine-readable instead of implied
 - Added reusable `cert_renewal_timer` and `cert_renewer_sidecar` roles
 - Patched `openbao_runtime` to install the first repository-managed TLS renewal timer
+- Patched `vaultwarden_runtime` so current `main` also installs a repository-managed TLS renewal timer for the private Vaultwarden listener
 - Extended `config/health-probe-catalog.json` with `tls_certificate_ids`
 - Added the emergency manual-rotation runbook and the repo-managed alert rules file
+- The first successful live apply from current `origin/main` completed on `2026-03-26` from repo release `0.174.0`, verified on platform version `0.130.20`
+- The live-apply follow-up fixed two contract gaps on top of the merged implementation: `scripts/tls_cert_probe.py` now resolves the shared `.local/step-ca` trust root from git worktrees, and the catalog now models the 24-hour OpenBao and Vaultwarden certificates with hour-based warning windows instead of permanent false-critical day thresholds
 
 ## Notes For The Next Assistant
 
 - The broad `./scripts/validate_repo.sh all` gate is slower than the focused checks because `ansible-lint` walks the whole playbook tree.
-- Current `main` only has one renewal path the repository truly owns: OpenBao. The other HTTPS surfaces are now inventoried and probed instead of being over-automated incorrectly.
+- Current `main` now has two renewal paths the repository truly owns: OpenBao and Vaultwarden. The other HTTPS surfaces are now inventoried and probed instead of being over-automated incorrectly.
 - The committed alert rules are a repo contract for ADR 0097; they are not yet a statement that Alertmanager is already live on this branch.
+- The live-apply receipt for the latest `origin/main` replay is tracked separately in `docs/workstreams/ws-0101-live-apply.md` and `receipts/live-applies/2026-03-26-adr-0101-certificate-lifecycle-live-apply.json`.

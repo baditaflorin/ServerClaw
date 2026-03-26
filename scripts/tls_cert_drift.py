@@ -19,6 +19,8 @@ def collect_drift(*, timeout_seconds: float = 5.0) -> list[dict[str, Any]]:
         detail = result.get("error", "")
         if result["status"] == "issuer_mismatch":
             detail = f"issuer '{result['issuer']}' does not match expected provider {result['expected_issuer']}"
+        elif result.get("policy_unit") == "hours" and "hours_remaining" in result:
+            detail = f"certificate expires in {result['hours_remaining']} hours"
         elif "days_remaining" in result:
             detail = f"certificate expires in {result['days_remaining']} days"
         record = {

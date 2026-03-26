@@ -2144,7 +2144,7 @@ workstreams:
   - id: adr-0101-certificate-lifecycle
     adr: "0101"
     title: Automated certificate lifecycle management
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0101-certificate-lifecycle
     worktree_path: ../proxmox_florin_server-certificate-lifecycle
@@ -2163,7 +2163,29 @@ workstreams:
       - TLS-owning service roles
       - systemd unit files on VMs
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
+
+  - id: ws-0101-live-apply
+    adr: "0101"
+    title: ADR 0101 live apply from latest origin/main
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0101-live-apply
+    worktree_path: .worktrees/ws-0101-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0101-live-apply.md
+    depends_on:
+      - adr-0101-certificate-lifecycle
+    conflicts_with: []
+    shared_surfaces:
+      - playbooks/openbao.yml
+      - roles/openbao_runtime
+      - roles/vaultwarden_runtime
+      - roles/cert_renewal_timer
+      - config/certificate-catalog.json
+      - docs/runbooks/configure-openbao.md
+      - receipts/live-applies/
+    ready_to_merge: false
+    live_applied: true
 
   - id: adr-0102-security-posture-reporting
     adr: "0102"

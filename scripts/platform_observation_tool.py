@@ -748,7 +748,7 @@ def check_certificate_expiry(context: dict[str, Any], run_id: str) -> dict[str, 
             "certificate_id": result["certificate_id"],
             "status": result["status"],
         }
-        for field in ("subject", "issuer", "not_after", "days_remaining", "expected_issuer", "error"):
+        for field in ("subject", "issuer", "not_after", "days_remaining", "hours_remaining", "policy_unit", "expected_issuer", "error"):
             if field in result:
                 detail[field] = result[field]
         details.append(detail)

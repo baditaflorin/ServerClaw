@@ -14,6 +14,7 @@ from controller_automation_toolkit import load_json, repo_path
 
 
 CERTIFICATE_CATALOG_PATH = repo_path("config", "certificate-catalog.json")
+STEP_CA_LOCAL_ROOT_CERTIFICATE_PATH = repo_path(".local", "step-ca", "certs", "root_ca.crt")
 ISSUER_HINTS = {
     "letsencrypt": ("Let's Encrypt", "R11", "E1"),
     "step-ca": ("step", "Smallstep", "LV3 Internal CA"),
@@ -33,9 +34,12 @@ def probe_tls_certificate(
     port: int,
     *,
     server_name: str | None = None,
+    ca_bundle_path: Path | None = None,
     timeout_seconds: float = 5.0,
 ) -> dict[str, Any]:
-    context = ssl.create_default_context()
+    context = ssl.create_default_context(
+        cafile=str(ca_bundle_path) if ca_bundle_path is not None else None
+    )
     with socket.create_connection((host, port), timeout=timeout_seconds) as sock:
         with context.wrap_socket(sock, server_hostname=server_name or host) as tls_sock:
             certificate = tls_sock.getpeercert()
@@ -46,6 +50,48 @@ def probe_tls_certificate(
         "subject": format_certificate_name(certificate.get("subject", ())),
         "issuer": format_certificate_name(certificate.get("issuer", ())),
         "not_after": datetime.fromtimestamp(ssl.cert_time_to_seconds(not_after_raw), tz=UTC),
+    }
+
+
+def resolve_shared_repo_path(*parts: str) -> Path | None:
+    git_metadata = repo_path(".git")
+    if not git_metadata.is_file():
+        return None
+    gitdir_line = git_metadata.read_text().strip()
+    if not gitdir_line.startswith("gitdir: "):
+        return None
+    gitdir = Path(gitdir_line.removeprefix("gitdir: ").strip()).resolve()
+    return gitdir.parent.parent.parent.joinpath(*parts)
+
+
+def resolve_step_ca_local_root_certificate_path() -> Path | None:
+    for candidate in (
+        STEP_CA_LOCAL_ROOT_CERTIFICATE_PATH,
+        resolve_shared_repo_path(".local", "step-ca", "certs", "root_ca.crt"),
+    ):
+        if candidate is not None and candidate.exists():
+            return candidate
+    return None
+
+
+def resolve_ca_bundle_path(certificate: dict[str, Any]) -> Path | None:
+    if certificate.get("expected_issuer") == "step-ca":
+        return resolve_step_ca_local_root_certificate_path()
+    return None
+
+
+def resolve_policy_window(certificate: dict[str, Any]) -> dict[str, int | str]:
+    policy = certificate["policy"]
+    if "warn_hours" in policy or "critical_hours" in policy:
+        return {
+            "unit": "hours",
+            "warn": int(policy["warn_hours"]),
+            "critical": int(policy["critical_hours"]),
+        }
+    return {
+        "unit": "days",
+        "warn": int(policy["warn_days"]),
+        "critical": int(policy["critical_days"]),
     }
 
 
@@ -77,7 +123,7 @@ def evaluate_certificate(
 ) -> dict[str, Any]:
     now = now or datetime.now(tz=UTC)
     endpoint = certificate["endpoint"]
-    policy = certificate["policy"]
+    policy = resolve_policy_window(certificate)
     result = {
         "certificate_id": certificate["id"],
         "service_id": certificate["service_id"],
@@ -88,6 +134,7 @@ def evaluate_certificate(
             endpoint["host"],
             int(endpoint["port"]),
             server_name=endpoint.get("server_name"),
+            ca_bundle_path=resolve_ca_bundle_path(certificate),
             timeout_seconds=timeout_seconds,
         )
     except (OSError, RuntimeError, ValueError, ssl.SSLError) as exc:
@@ -96,13 +143,17 @@ def evaluate_certificate(
         result["error"] = str(exc)
         return result
 
-    days_remaining = int((observed["not_after"] - now).total_seconds() // 86400)
+    seconds_remaining = (observed["not_after"] - now).total_seconds()
+    days_remaining = int(seconds_remaining // 86400)
+    hours_remaining = int(seconds_remaining // 3600)
     result.update(
         {
             "subject": observed["subject"],
             "issuer": observed["issuer"],
             "not_after": observed["not_after"].isoformat().replace("+00:00", "Z"),
             "days_remaining": days_remaining,
+            "hours_remaining": hours_remaining,
+            "policy_unit": policy["unit"],
         }
     )
 
@@ -112,11 +163,13 @@ def evaluate_certificate(
         result["expected_issuer"] = certificate["expected_issuer"]
         return result
 
-    if days_remaining < int(policy["critical_days"]):
+    remaining = hours_remaining if policy["unit"] == "hours" else days_remaining
+
+    if remaining < int(policy["critical"]):
         result["status"] = "expiring_critical"
         result["severity"] = "critical"
         return result
-    if days_remaining < int(policy["warn_days"]):
+    if remaining < int(policy["warn"]):
         result["status"] = "expiring_warning"
         result["severity"] = "warning"
         return result

@@ -109,3 +109,22 @@ curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local
 - The external OpenBao API on `https://100.118.189.95:8200` is private-only, published through the Proxmox host Tailscale path, and requires a valid client certificate signed by `step-ca`.
 - The current implementation seeds existing mail, monitoring, Proxmox API, Windmill, and mail-profile artifacts into OpenBao so later consumers can fetch them without reintroducing git-managed secrets.
 - Dedicated rotatable secret paths and their metadata now align with `config/secret-catalog.json`, so future scheduled evaluators can inspect bounded credential age directly in OpenBao.
+
+## Recovery Notes From The 2026-03-26 Live Apply
+
+If `make converge-openbao` reloads the guest firewall and Docker loses the OpenBao publish rule, the broken state presents as `docker compose up` failing to bind `:8200` with an iptables DNAT error and `docker inspect lv3-openbao` showing an empty `NetworkSettings.Networks` object.
+
+Recover the guest runtime in this order:
+
+1. Restart Docker on `docker-runtime-lv3`.
+2. Remove the broken `lv3-openbao` container.
+3. Remove the detached `openbao_default` network.
+4. Recreate the stack with `docker compose --file /opt/openbao/docker-compose.yml up -d`.
+
+After the guest is healthy again, restart the host-side socket activation pair if the proxy socket reports that the service is already active:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo systemctl stop lv3-tailscale-proxy-openbao.service && sudo systemctl start lv3-tailscale-proxy-openbao.socket'
+```
+
+The current host Tailscale IP is `100.64.0.1`. The OpenBao proxy certificate already covers that IP, but the `step-ca` proxy certificate still carries the legacy `100.118.189.95` SAN today, so controller-local CA health checks may still need `curl --resolve 100.118.189.95:9443:100.64.0.1 ...` until the proxy certificate is reissued.

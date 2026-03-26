@@ -3,8 +3,8 @@
 - Status: Accepted
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.98.0
-- Implemented In Platform Version: not yet
-- Implemented On: 2026-03-23
+- Implemented In Platform Version: 0.130.20
+- Implemented On: 2026-03-26
 - Date: 2026-03-23
 
 ## Context
@@ -32,11 +32,12 @@ The current platform topology does **not** terminate TLS inside every Compose st
 - repo-managed renewal paths, where the repository renders both the certificate material and the renewal mechanism
 - externally managed renewal paths, where the repository inventories the certificate and probes it but does not replace the issuer's own renewal flow
 
-The first repository-managed renewal path on current `main` is OpenBao:
+The current repository-managed renewal paths on `main` are OpenBao and Vaultwarden:
 
-- the role now renders a dedicated systemd timer and service via `lv3.platform.cert_renewal_timer`
-- the timer reissues the short-lived OpenBao server certificate from step-ca before expiry using the existing `services` provisioner credentials
-- the timer only restarts the OpenBao container when the certificate actually changed
+- `openbao_runtime` now renders a dedicated systemd timer and service via `lv3.platform.cert_renewal_timer`
+- `vaultwarden_runtime` now renders the same timer pattern for the private Vaultwarden HTTPS listener
+- both timers reissue short-lived server certificates from step-ca before expiry using the existing `services` provisioner credentials
+- both timers only restart their container when the certificate actually changed
 
 For external paths that already renew outside this role:
 
@@ -140,8 +141,10 @@ systemctl reload openbao
 
 - `config/certificate-catalog.json` is implemented and validated as a canonical data model.
 - `scripts/tls_cert_probe.py` is implemented and now backs both drift detection and the observation-loop certificate check.
+- `scripts/tls_cert_probe.py` now resolves the shared repository `.local/step-ca` trust root when run from a git worktree, so branch-local live-apply worktrees can validate `step-ca`-issued endpoints without copying controller-local trust state.
+- The certificate catalog now supports hour-based warning windows for short-lived certificates, and current `main` uses that path for the 24-hour OpenBao and Vaultwarden certificates so healthy renewal no longer reads as a permanent critical alert.
 - `config/health-probe-catalog.json` now links HTTPS-owning services to the certificate catalog through `tls_certificate_ids`.
-- `lv3.platform.cert_renewal_timer` is implemented and is used by `openbao_runtime` to keep the OpenBao proxy certificate fresh.
+- `lv3.platform.cert_renewal_timer` is implemented and is used by both `openbao_runtime` and `vaultwarden_runtime` to keep their private proxy certificates fresh.
 - `lv3.platform.cert_renewer_sidecar` is implemented as the future reusable path for TLS-owning Compose stacks, but current `main` intentionally does not force it into HTTP-only stacks.
 - `config/alertmanager/rules/platform.yml` now carries the repo-managed certificate expiry alert rule group for the later ADR 0097 runtime.
 

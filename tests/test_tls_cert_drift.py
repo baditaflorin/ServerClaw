@@ -56,3 +56,28 @@ def test_collect_drift_warns_on_issuer_mismatch(monkeypatch) -> None:
     assert len(records) == 1
     assert records[0]["severity"] == "warn"
     assert records[0]["expected_provider"] == "letsencrypt"
+
+
+def test_collect_drift_uses_hour_based_detail_for_short_lived_certificates(monkeypatch) -> None:
+    monkeypatch.setattr(
+        drift,
+        "collect_certificate_results",
+        lambda timeout_seconds=5.0, now=None: [
+            {
+                "certificate_id": "openbao-proxy",
+                "service_id": "openbao",
+                "severity": "warning",
+                "status": "expiring_warning",
+                "hours_remaining": 4,
+                "policy_unit": "hours",
+                "issuer": "commonName=LV3 Internal CA",
+                "not_after": "2026-03-23T04:30:00Z",
+            }
+        ],
+    )
+
+    records = drift.collect_drift()
+
+    assert len(records) == 1
+    assert records[0]["severity"] == "warn"
+    assert records[0]["detail"] == "certificate expires in 4 hours"

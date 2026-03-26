@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-26-adr-0101-certificate-lifecycle-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-26",
+  "recorded_on": "2026-03-26",
+  "recorded_by": "codex",
+  "source_commit": "9457e4694f5a80b8876ff4e99e400b6960a07cb7",
+  "repo_version_context": "0.174.0",
+  "workflow_id": "converge-openbao",
+  "adr": "0101",
+  "summary": "Replayed ADR 0101 from the latest `origin/main` in an isolated worktree, recovered the OpenBao runtime after a live Docker network regression during converge, verified the OpenBao and Vaultwarden renewal timers, and recorded the remaining platform drift still surfaced by the shared certificate probe contract.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1"
+    },
+    {
+      "kind": "host",
+      "name": "proxmox_florin_public",
+      "address": "65.108.75.123:2222"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "openbao_proxy",
+      "address": "https://100.64.0.1:8200"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "step_ca_proxy",
+      "address": "https://100.64.0.1:9443"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "vaultwarden_private",
+      "address": "https://vault.lv3.org"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused repo validation suite",
+      "result": "pass",
+      "observed": "`tests/test_tls_cert_probe.py`, `tests/test_generate_cert_renewal_config.py`, `tests/test_tls_cert_drift.py`, `tests/test_platform_observation_tool.py`, and `tests/test_compose_runtime_secret_injection.py` all passed after adding worktree-aware trust-root resolution plus hour-based probe windows for short-lived certificates."
+    },
+    {
+      "check": "Repository data-model and playbook syntax validation",
+      "result": "pass",
+      "observed": "`uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, `python3 scripts/generate_cert_renewal_config.py --pretty`, and `make syntax-check-openbao` all completed successfully from the isolated live-apply worktree."
+    },
+    {
+      "check": "OpenBao live replay and recovery",
+      "result": "pass",
+      "observed": "The first `make converge-openbao` replay from current `origin/main` exposed stale production inventory for `postgres-replica-lv3` and an OpenBao Docker publish failure after firewall reload (`lv3-openbao` detached from `openbao_default`). Recovery succeeded by restarting Docker on `docker-runtime-lv3`, removing the broken `lv3-openbao` container, removing `openbao_default`, recreating the stack, and restarting the host-side `lv3-tailscale-proxy-openbao` socket pair."
+    },
+    {
+      "check": "Renewal timers active on docker-runtime-lv3",
+      "result": "pass",
+      "observed": "`lv3-openbao-cert-renew.timer` and `lv3-vaultwarden-cert-renew.timer` both report `Loaded: loaded` and `Active: active (waiting)` on `docker-runtime-lv3`."
+    },
+    {
+      "check": "Host Tailscale proxy sockets active",
+      "result": "pass",
+      "observed": "`lv3-tailscale-proxy-openbao.socket` and `lv3-tailscale-proxy-step-ca.socket` are active on `proxmox_florin`, and their paired proxy services are running against `10.10.10.20:8200` and `10.10.10.20:9000`."
+    },
+    {
+      "check": "OpenBao certificate probe and mTLS listener behavior",
+      "result": "pass",
+      "observed": "`python3 scripts/tls_cert_probe.py --certificate-id openbao-proxy --fail-on never` reported `status: ok`, issuer `LV3 Internal CA Intermediate CA`, and `hours_remaining: 11`; `curl -vk https://100.64.0.1:8200/v1/sys/health` confirmed the host proxy presents the 24-hour `CN=100.64.0.1` certificate and requests a client certificate on connect."
+    },
+    {
+      "check": "Vaultwarden private HTTPS path",
+      "result": "pass",
+      "observed": "`curl -vk --resolve vault.lv3.org:443:100.64.0.1 https://vault.lv3.org/` returned HTTP `200` with a 24-hour `CN=vault.lv3.org` certificate from the LV3 internal CA, confirming the service is healthy through the host Tailscale proxy."
+    },
+    {
+      "check": "step-ca proxy health and remaining live drift",
+      "result": "partial",
+      "observed": "`curl --resolve 100.118.189.95:9443:100.64.0.1 --cacert ... https://100.118.189.95:9443/health` returned `{\"status\":\"ok\"}`, but `python3 scripts/tls_cert_probe.py --certificate-id step-ca-proxy --fail-on never` still reports `certificate is not valid for '100.64.0.1'` because the live proxy certificate SAN has not yet been rotated from legacy `100.118.189.95`."
+    }
+  ],
+  "evidence_refs": [
+    "config/certificate-catalog.json",
+    "docs/adr/0101-automated-certificate-lifecycle-management.md",
+    "docs/workstreams/adr-0101-certificate-lifecycle.md",
+    "docs/workstreams/ws-0101-live-apply.md",
+    "docs/runbooks/configure-openbao.md",
+    "receipts/live-applies/2026-03-26-adr-0101-certificate-lifecycle-live-apply.json"
+  ],
+  "notes": [
+    "The branch intentionally does not modify protected integration files: `VERSION`, release sections in `changelog.md`, the top-level `README.md` integrated status summary, or `versions/stack.yaml`.",
+    "The shared certificate probe contract now uses the host Tailscale IP for `vaultwarden-private` while keeping `vault.lv3.org` as SNI, which removes a controller-local private-DNS dependency from the validation path.",
+    "The remaining platform issues visible after this replay are unrelated to the ADR 0101 repo implementation itself: stale production inventory for `postgres-replica-lv3` and the legacy SAN on the `step-ca` proxy certificate."
+  ]
+}
