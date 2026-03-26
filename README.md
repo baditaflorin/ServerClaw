@@ -98,6 +98,7 @@ Portal access is now authentication-by-default on the live platform: `ops.lv3.or
 The repository now also ships ADR 0142 public-surface security scanning: `make public-surface-security-scan ENV=production` writes structured receipts under `receipts/security-scan/`, uses `testssl.sh` and `nuclei` container runners for the live public HTTP or HTTPS surface, and can publish high or critical findings on `platform.security.*`; the live weekly schedule still requires apply from `main`.
 The repository now also ships ADR 0129 runbook automation: structured YAML, JSON, and Markdown-front-matter runbooks can execute through `lv3 runbook`, persist resumable run state under `.local/runbooks/runs/`, and reuse the current Windmill plus mutation-audit surfaces.
 The repository now also ships ADR 0137 crawl policy automation: the shared public edge serves a universal `robots.txt`, emits `X-Robots-Tag: noindex, nofollow` across published hostnames, adds robots meta tags to repository-generated HTML surfaces, and includes `lv3.org` in the shared edge certificate definition; live apply from `main` is still pending.
+The repository now also ships the first ADR 0166 canonical error rollout: `config/error-codes.yaml` and `scripts/canonical_errors.py` now normalize repo-managed gateway and platform-context failures behind one trace-id-backed error envelope, while the first live apply from `main` remains blocked by controller-to-host SSH timeouts observed on 2026-03-26.
 
 <!-- BEGIN GENERATED: platform-status -->
 > Generated from canonical repository state by [`scripts/generate_status_docs.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_status_docs.py). Do not edit this block by hand.
@@ -105,7 +106,7 @@ The repository now also ships ADR 0137 crawl policy automation: the shared publi
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.161.0` |
+| Repository version | `0.162.0` |
 | Platform version | `0.130.12` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -472,6 +473,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Roadmap Runbook: IaC Potency, Build Server Offload, and User Ergonomics](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/plan-iac-potency-and-build-server.md)
 - [Platform Hardening And Agentic Extensibility Roadmap](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/plan-platform-hardening-and-agentic-extensibility.md)
 - [Visual And Agent Operations Roadmap](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/plan-visual-agent-operations.md)
+- [Platform API Error Codes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/platform-api-error-codes.md)
 - [Platform CLI](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/platform-cli.md)
 - [Platform Event Taxonomy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/platform-event-taxonomy.md)
 - [Platform Facts Library](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/platform-facts-library.md)
@@ -826,6 +828,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0163: Platform-Wide Retry Taxonomy And Exponential Backoff](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0163-retry-taxonomy.md)
 - [Workstream ADR 0164: Circuit Breaker Pattern for External Service Calls](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0164-circuit-breaker-pattern.md)
 - [Workstream ADR 0165: Workflow Idempotency Keys and Double-Execution Prevention](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0165-workflow-idempotency.md)
+- [Workstream ADR 0166: Canonical Error Response Format And Error Code Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0166-canonical-error-response-format.md)
 - [Workstream ADR 0168: Ansible Role Idempotency CI Enforcement](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0168-idempotency-ci.md)
 - [Workstream ADR 0169: Structured Log Field Contract](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0169-structured-log-field-contract.md)
 - [Workstream ADR 0170: Platform-Wide Timeout Hierarchy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0170-timeout-hierarchy.md)
@@ -847,7 +850,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.161.0` |
+| Repository version | `0.162.0` |
 | Platform version | `0.130.12` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1018,6 +1021,7 @@ This repository is intentionally opinionated:
 | `0163` | Platform-wide retry taxonomy and exponential backoff | `merged` | [adr-0163-retry-taxonomy.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0163-retry-taxonomy.md) |
 | `0164` | Circuit breaker pattern for external service calls | `live_applied` | [adr-0164-circuit-breaker-pattern.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0164-circuit-breaker-pattern.md) |
 | `0165` | Workflow idempotency keys and double-execution prevention | `live_applied` | [adr-0165-workflow-idempotency.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0165-workflow-idempotency.md) |
+| `0166` | Canonical error response format and error code registry | `merged` | [adr-0166-canonical-error-response-format.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0166-canonical-error-response-format.md) |
 | `0168` | Ansible role idempotency CI enforcement | `merged` | [adr-0168-idempotency-ci.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0168-idempotency-ci.md) |
 | `0169` | Structured log field contract | `live_applied` | [adr-0169-structured-log-field-contract.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0169-structured-log-field-contract.md) |
 | `0170` | Platform-wide timeout hierarchy | `live_applied` | [adr-0170-timeout-hierarchy.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0170-timeout-hierarchy.md) |

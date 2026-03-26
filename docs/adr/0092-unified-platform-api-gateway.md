@@ -159,7 +159,7 @@ A dedicated **Platform API** Grafana dashboard tracks:
 - Live rollout completed on 2026-03-24 in platform version `0.114.2` with receipt [receipts/live-applies/2026-03-24-adr-0092-platform-api-gateway-live-apply.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/live-applies/2026-03-24-adr-0092-platform-api-gateway-live-apply.json).
 - The live runtime now validates JWTs against Keycloak over the shared Docker network, publishes the gateway on host port `8083`, and verifies an authenticated `/v1/platform/services` request during the Ansible converge.
 - Live verification on 2026-03-24 confirmed `https://api.lv3.org/healthz` returned `200 {"status":"ok"}` and `https://api.lv3.org/v1/platform/services` returned `200` with a valid realm-issued bearer token.
-- Repo version `0.144.0` extends the gateway with ADR 0166 canonical error envelopes, shared registry-backed error codes, and trace-id-aware failure responses.
+- Repo version `0.162.0` extends the gateway with ADR 0166 canonical error envelopes, shared registry-backed error codes, and trace-id-aware failure responses.
 
 ## Alternatives Considered
 

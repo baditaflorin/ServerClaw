@@ -60,7 +60,7 @@
 
 ## Outcome
 
-- Repo implementation completed for release `0.144.0` on `2026-03-26`.
+- Repo implementation completed for release `0.162.0` on `2026-03-26`.
 - Unit and integration-focused repository tests passed for the canonical error helpers, API gateway, and platform-context service.
 - The first live-apply attempt on `2026-03-26` was blocked by controller-to-host SSH timeouts; public verification still showed `https://api.lv3.org/v1/health` returning the legacy `{"detail":"missing bearer token"}` payload, so the workstream is merged but not yet live applied.
 
