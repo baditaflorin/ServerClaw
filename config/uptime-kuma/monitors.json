@@ -34,7 +34,9 @@
     "retryInterval": 60,
     "maxretries": 0,
     "maxredirects": 10,
-    "accepted_statuscodes": ["200-299"]
+    "accepted_statuscodes": [
+      "200-299"
+    ]
   },
   {
     "name": "Keycloak OIDC Discovery",
@@ -244,6 +246,19 @@
     "maxretries": 0,
     "accepted_statuscodes": [
       "200-299"
+    ]
+  },
+  {
+    "name": "Headscale Public",
+    "type": "http",
+    "url": "https://headscale.lv3.org",
+    "description": "Headscale coordination server through the NGINX edge VM.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-399"
     ]
   }
 ]

@@ -625,6 +625,27 @@ lv3_service_topology:
     observability:
       guest_dashboard: false
       service_telemetry: false
+  headscale:
+    service_name: headscale
+    owning_vm: proxmox_florin
+    private_ip: "{{ proxmox_internal_ipv4 }}"
+    public_hostname: headscale.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: headscale
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: "http://{{ proxmox_internal_ipv4 }}:8080"
   proxmox_ui:
     service_name: proxmox-ui
     owning_vm: proxmox_florin

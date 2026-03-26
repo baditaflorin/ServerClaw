@@ -76,6 +76,7 @@
     executable: /bin/bash
   delegate_to: localhost
   become: false
+  changed_when: true
   tags:
     - mutation
 

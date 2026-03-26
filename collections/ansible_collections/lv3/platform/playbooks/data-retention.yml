@@ -1,6 +1,6 @@
 ---
 - name: Converge scheduled data retention on the Docker runtime VM
-  hosts: "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
   become: true
   gather_facts: true
 
