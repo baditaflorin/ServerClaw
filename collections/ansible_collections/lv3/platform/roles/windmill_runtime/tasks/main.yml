@@ -700,16 +700,27 @@
     headers:
       Authorization: "Bearer {{ windmill_superadmin_secret }}"
     return_content: true
+    status_code:
+      - 200
+      - 400
+      - 404
   loop: "{{ windmill_seed_scripts }}"
   loop_control:
     label: "{{ item.path }}"
   register: windmill_seed_script_delete
-  failed_when: >-
-    windmill_seed_script_delete.status not in [200, 404]
-    and not (
-      windmill_seed_script_delete.status == 400
-      and 'no rows returned' in (windmill_seed_script_delete.content | default('') | lower)
-    )
+  changed_when: false
+  no_log: true
+
+- name: Assert repo-managed Windmill script deletes only returned accepted statuses
+  ansible.builtin.assert:
+    that:
+      - item.status in [200, 404] or (item.status == 400 and 'no rows returned' in (item.content | default('') | lower))
+    fail_msg: >-
+      Windmill refused to delete {{ item.item.path }} during script reseed with status {{ item.status }}
+      and content {{ item.content | default('') | to_json }}.
+  loop: "{{ windmill_seed_script_delete.results }}"
+  loop_control:
+    label: "{{ item.item.path }}"
   changed_when: false
   no_log: true
 

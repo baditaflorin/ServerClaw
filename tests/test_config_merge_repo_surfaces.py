@@ -40,6 +40,25 @@ def test_windmill_defaults_seed_config_merge_script_and_schedule() -> None:
     assert "f/lv3/config_merge/merge_config_changes_every_minute" in schedule_paths
 
 
+def test_windmill_script_delete_task_allows_missing_rows() -> None:
+    tasks = (
+        REPO_ROOT
+        / "collections"
+        / "ansible_collections"
+        / "lv3"
+        / "platform"
+        / "roles"
+        / "windmill_runtime"
+        / "tasks"
+        / "main.yml"
+    ).read_text(encoding="utf-8")
+
+    assert "Delete existing repo-managed Windmill scripts before reseeding" in tasks
+    assert "status_code:\n      - 200\n      - 400\n      - 404" in tasks
+    assert "Assert repo-managed Windmill script deletes only returned accepted statuses" in tasks
+    assert "'no rows returned' in (item.content | default('') | lower)" in tasks
+
+
 def test_migration_and_workflow_contracts_exist() -> None:
     migration = (REPO_ROOT / "migrations" / "0016_config_merge_schema.sql").read_text(encoding="utf-8")
     workflows = json.loads((REPO_ROOT / "config" / "workflow-catalog.json").read_text(encoding="utf-8"))["workflows"]
