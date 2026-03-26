@@ -62,13 +62,15 @@ windmill_bootstrap_identity_username: superadmin_secret
 windmill_bootstrap_identity_login_type: password
 windmill_private_base_url: "{{ platform_service_topology | platform_service_url('windmill', 'internal') }}"
 windmill_base_url: "{{ platform_service_topology | platform_service_url('windmill', 'controller') }}"
-windmill_worker_checkout_repo_root_local_dir: "{{ inventory_dir }}/.."
+windmill_worker_checkout_repo_root_local_dir: "{{ playbook_dir }}/.."
 windmill_worker_repo_checkout_host_path: /srv/proxmox_florin_server
 windmill_worker_repo_checkout_container_path: /srv/proxmox_florin_server
 windmill_worker_checkout_sync_paths:
   - config
+  - docs
   - migrations
   - platform
+  - receipts
   - scripts
   - windmill
 windmill_seed_app_repo_root_local_dir: "{{ inventory_dir }}/../config/windmill/apps"

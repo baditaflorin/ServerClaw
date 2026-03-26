@@ -148,7 +148,9 @@
       COPY maintenance_window_tool.py ./maintenance_window_tool.py
       COPY slo_tracking.py ./slo_tracking.py
       COPY api_gateway ./api_gateway
+      COPY docs ./docs
       COPY platform ./platform
+      COPY receipts ./receipts
       COPY scripts ./scripts
       COPY search_fabric ./search_fabric
       EXPOSE 8080

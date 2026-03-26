@@ -4,9 +4,10 @@
 - Title: Postgres-native BM25 + trigram search over ADRs, runbooks, receipts, cases, alerts, configs, command catalog, and topology — no vector DB, no embeddings, no external service
 - Status: merged
 - Implemented In Repo Version: 0.119.0
-- Implemented On: 2026-03-24
-- Branch: `codex/adr-0121-local-search-indexing-fabric`
-- Worktree: `.worktrees/adr-0121`
+- Implemented In Platform Version: 0.130.20
+- Implemented On: 2026-03-26
+- Branch: `codex/ws-0121-live-apply`
+- Worktree: `.worktrees/ws-0121-live-apply`
 - Owner: codex
 - Depends On: `adr-0048-command-catalog`, `adr-0052-loki-logs`, `adr-0061-glitchtip`, `adr-0090-platform-cli`, `adr-0092-platform-api-gateway`, `adr-0093-interactive-ops-portal`, `adr-0095-unified-platform-search`, `adr-0098-postgres-ha`, `adr-0113-world-state-materializer`, `adr-0115-mutation-ledger`, `adr-0118-failure-case-library`
 - Conflicts With: none
@@ -84,3 +85,8 @@
 - The `body` column should store at most 2000 characters per document (truncate with a `...` suffix for longer documents). Storing full ADR bodies in the trigram index will cause the GIN index to grow very large; summaries are sufficient for BM25 ranking.
 - The synonym expansion should be applied to the query string before calling `plainto_tsquery()`. Implement it as a simple string replacement from the synonyms YAML rather than using Postgres `thesaurus` dictionaries (simpler to maintain and debug).
 - The git push webhook trigger for the indexer rebuild requires a webhook secret configured in the repo server. Use `config/controller-local-secrets.json` to store the webhook secret; document the registration step in the indexer runbook.
+- The 2026-03-26 live apply verified the public API search path and the worker-side rebuild helper, but the repository converges were noisy for reasons outside ADR 0121:
+  - `make live-apply-service service=api-gateway env=production` staged the corrected runtime content, but the role's final Keycloak bearer-token verification step failed and a later replay hit a transient SSH reconnect.
+  - `make live-apply-service service=windmill env=production EXTRA_ARGS="--limit docker-runtime-lv3"` failed before the worker checkout stage on the unrelated `Ensure the pinned uv binaries are executable` privilege-escalation task.
+- To finish the live apply without losing the repo-managed fix set, the final recovery manually synchronized the corrected `scripts/search_fabric/` tree into `/opt/api-gateway/service` and `/srv/proxmox_florin_server`, rebuilt the API gateway container, and repaired ownership on `/srv/proxmox_florin_server/build`. This manual exception is recorded in the live-apply receipt and runbook.
+- The mainline integration completed in repository version `0.174.1`, which is the first `main` release that records the ADR 0121 production receipt and the runtime-hardening fixes together.

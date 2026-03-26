@@ -34,6 +34,16 @@ api_gateway_tree_sync_specs:
     dest_parent: "{{ api_gateway_site_dir }}"
     remote_archive: "{{ api_gateway_site_dir }}/config-sync.tar.gz"
     preserve_destination_root: true
+  - name: repo documentation tree required by the local search fabric
+    archive_root: "{{ api_gateway_repo_root }}"
+    source: docs
+    dest_parent: "{{ api_gateway_service_dir }}"
+    remote_archive: "{{ api_gateway_site_dir }}/docs-sync.tar.gz"
+  - name: repo receipts tree required by the local search fabric
+    archive_root: "{{ api_gateway_repo_root }}"
+    source: receipts
+    dest_parent: "{{ api_gateway_service_dir }}"
+    remote_archive: "{{ api_gateway_site_dir }}/receipts-sync.tar.gz"
 api_gateway_gateway_catalog_src: "{{ api_gateway_repo_root }}/config/api-gateway-catalog.json"
 api_gateway_service_catalog_src: "{{ api_gateway_repo_root }}/config/service-capability-catalog.json"
 api_gateway_error_registry_src: "{{ api_gateway_repo_root }}/config/error-codes.yaml"

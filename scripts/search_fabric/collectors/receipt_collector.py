@@ -14,7 +14,7 @@ def collect(repo_root: Path) -> list[SearchDocument]:
         return documents
     for path in sorted(receipts_root.rglob("*.json")):
         payload = load_json(path, {})
-        if not isinstance(payload, dict):
+        if not isinstance(payload, dict) or not payload:
             continue
         relative_path = relative_url(repo_root, path)
         title = str(payload.get("summary") or payload.get("receipt_id") or path.stem)

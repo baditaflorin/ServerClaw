@@ -36,6 +36,7 @@ live_apply_evidence:
     command_catalog: 2026-03-22-adr-0048-command-catalog-live-apply
     config_merge: 2026-03-26-adr-0158-config-merge-live-apply
     control_plane_recovery: 2026-03-22-adr-0051-control-plane-recovery-live-apply
+    local_search_and_indexing_fabric: 2026-03-26-adr-0121-search-indexing-fabric-live-apply
     notification_profiles: 2026-03-22-adr-0050-notification-profiles-live-apply
     platform_event_taxonomy: 2026-03-26-adr-0124-platform-event-taxonomy-live-apply
     netbox: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
