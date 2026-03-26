@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0156](../adr/0156-agent-session-workspace-isolation.md)
 - Title: per-session controller state, remote build workspace isolation, and session-aware receipt metadata
-- Status: merged
+- Status: live_applied
 - Branch: `codex/adr-0156-agent-session-workspace-isolation`
 - Worktree: `.worktrees/adr-0156`
 - Owner: codex
@@ -64,6 +64,7 @@
 
 ## Outcome
 
-- repository implementation is complete on `main` in repo release `0.143.2`
-- live verification from `main` is still pending because the current `docker-build-lv3` SSH route remained unreachable during both 2026-03-25 retries: `LV3_SESSION_ID=adr-0156-live make check-build-server` still reports the build server unreachable, the current `config/build-server.json` jump host `ops@100.64.0.1` refuses port `22`, and the fallback public Proxmox host probe to `ops@65.108.75.123` still times out before the banner exchange to `ops@10.10.10.30`
-- the repo currently advertises two different jump hosts for the same build-server path: `config/build-server.json` points at `ops@100.64.0.1`, while `inventory/build_server.yml` and older runbook snippets still reference `ops@100.118.189.95`
+- the repository implementation first landed on `main` in repo release `0.143.2`, and the integrated live apply from current `main` is recorded in release `0.159.1`
+- the 2026-03-26 live verification advanced platform version to `0.130.9` after `LV3_SESSION_ID=adr-0156-live make check-build-server` passed, the remote session workspace reported a valid git checkout path, and `LV3_SESSION_ID=adr-0156-live make remote-lint` completed successfully
+- the live-apply branch also repaired stale build-server jump-host references, stopped forcing a full remote `.git-remote` wipe between session syncs, and cleared current ansible/yaml lint debt that was blocking the ADR 0156 gate on `main`
+- the production ansible runner image on `docker-build-lv3` still carries an `ansible-lint` import mismatch, so the verified `remote-lint` run exercised the remote session workspace path and then completed through the command's built-in local fallback

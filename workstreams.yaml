@@ -2931,7 +2931,7 @@ workstreams:
   - id: adr-0156-agent-session-workspace-isolation
     adr: "0156"
     title: Agent session workspace isolation
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0156-agent-session-workspace-isolation
     worktree_path: .worktrees/adr-0156
@@ -2953,7 +2953,7 @@ workstreams:
       - scripts/promotion_pipeline.py
       - docs/runbooks/
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0157-per-vm-concurrency-budget
     adr: "0157"
