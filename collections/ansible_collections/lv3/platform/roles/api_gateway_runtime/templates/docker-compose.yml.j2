@@ -6,13 +6,16 @@ services:
     image: {{ api_gateway_image_name }}:latest
     container_name: {{ api_gateway_container_name }}
     restart: unless-stopped
+    network_mode: {{ api_gateway_network_mode }}
     env_file:
       - {{ api_gateway_env_file }}
-    ports:
-      - "{{ api_gateway_internal_port }}:8080"
-    networks:
-      - default
-      - keycloak
+    command:
+      - uvicorn
+      - api_gateway.main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "{{ api_gateway_internal_port }}"
     volumes:
       - {{ api_gateway_config_dir }}:/config:ro
       - {{ api_gateway_config_dir }}:/app/config:ro
@@ -20,12 +23,7 @@ services:
     healthcheck:
       test:
         - CMD-SHELL
-        - python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/healthz', timeout=5)"
+        - python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:{{ api_gateway_internal_port }}/healthz', timeout=5)"
       interval: 30s
       timeout: 5s
       retries: 3
-
-networks:
-  keycloak:
-    external: true
-    name: {{ api_gateway_keycloak_docker_network }}

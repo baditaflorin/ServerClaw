@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib
 import json
 import os
 import sys
@@ -30,11 +31,6 @@ from platform.world_state.materializer import SQLITE_CURRENT_VIEW_NAME, SQLITE_S
 
 
 SCRIPTS_DIR = Path(__file__).resolve().parents[2] / "scripts"
-if str(SCRIPTS_DIR) not in sys.path:
-    sys.path.insert(0, str(SCRIPTS_DIR))
-
-from maintenance_window_tool import list_active_windows_best_effort
-from slo_tracking import build_slo_status_entries
 
 
 DEFAULT_TTL_SECONDS = 120
@@ -54,6 +50,13 @@ SQLITE_HEALTH_TABLE_NAME = "health_composite"
 
 def repo_root_default() -> Path:
     return Path(__file__).resolve().parents[2]
+
+
+def _load_script_symbol(module_name: str, symbol_name: str) -> Any:
+    if str(SCRIPTS_DIR) not in sys.path:
+        sys.path.insert(0, str(SCRIPTS_DIR))
+    module = importlib.import_module(module_name)
+    return getattr(module, symbol_name)
 
 
 @dataclass(frozen=True)
@@ -197,6 +200,13 @@ def load_maintenance_windows(
         active_windows = payload.get("active_windows")
         if isinstance(active_windows, list):
             return [item for item in active_windows if isinstance(item, dict)]
+    try:
+        list_active_windows_best_effort = _load_script_symbol(
+            "maintenance_window_tool",
+            "list_active_windows_best_effort",
+        )
+    except ImportError:
+        return []
     windows = list_active_windows_best_effort()
     return [window for window in windows.values() if isinstance(window, dict)]
 
@@ -216,6 +226,10 @@ def load_slo_entries(
 ) -> list[dict[str, Any]]:
     catalog_path = repo_root / "config" / "slo-catalog.json"
     if not catalog_path.exists():
+        return []
+    try:
+        build_slo_status_entries = _load_script_symbol("slo_tracking", "build_slo_status_entries")
+    except ImportError:
         return []
     prometheus_url = None if allow_live_queries else ""
     return build_slo_status_entries(

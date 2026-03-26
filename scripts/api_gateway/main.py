@@ -113,6 +113,7 @@ except ImportError:  # pragma: no cover - packaged import path
 
 HTTP_LOGGER = get_logger("api_gateway", "http", name="lv3.api_gateway.http")
 RUNTIME_LOGGER = get_logger("api_gateway", "runtime", name="lv3.api_gateway.runtime")
+REQUEST_EVENT_TIMEOUT_SECONDS = 1.0
 
 
 def b64url_decode(value: str) -> bytes:
@@ -350,8 +351,17 @@ class KeycloakJWTVerifier:
 
 
 class NatsEventEmitter:
-    def __init__(self, nats_url: str | None, *, circuit_breaker: Any | None = None) -> None:
+    def __init__(
+        self,
+        nats_url: str | None,
+        *,
+        username: str | None = None,
+        password: str | None = None,
+        circuit_breaker: Any | None = None,
+    ) -> None:
         self._parsed = urlparse(nats_url) if nats_url else None
+        self._username = (username or "").strip() or None
+        self._password = (password or "").strip() or None
         self._retry_policy = policy_for_surface("nats_publish")
         self._circuit_breaker = circuit_breaker
 
@@ -364,7 +374,15 @@ class NatsEventEmitter:
         encoded = json.dumps(envelope, separators=(",", ":")).encode()
         async def publish() -> None:
             await async_with_retry(
-                lambda: asyncio.to_thread(self._publish, host, port, subject, encoded),
+                lambda: asyncio.to_thread(
+                    self._publish,
+                    host,
+                    port,
+                    subject,
+                    encoded,
+                    self._username,
+                    self._password,
+                ),
                 policy=self._retry_policy,
                 error_context=f"gateway nats publish {subject}",
             )
@@ -378,12 +396,24 @@ class NatsEventEmitter:
             return
 
     @staticmethod
-    def _publish(host: str, port: int, subject: str, payload: bytes) -> None:
+    def _publish(
+        host: str,
+        port: int,
+        subject: str,
+        payload: bytes,
+        username: str | None,
+        password: str | None,
+    ) -> None:
         with socket.create_connection(
             (host, port),
             timeout=resolve_timeout_seconds("liveness_probe", 3),
         ) as sock:
-            sock.sendall(b'CONNECT {"verbose":false}\r\n')
+            connect_payload: dict[str, Any] = {"verbose": False}
+            if username is not None:
+                connect_payload["user"] = username
+            if password is not None:
+                connect_payload["pass"] = password
+            sock.sendall(f"CONNECT {json.dumps(connect_payload, separators=(',', ':'))}\r\n".encode())
             sock.sendall(f"PUB {subject} {len(payload)}\r\n".encode() + payload + b"\r\n")
 
 
@@ -418,6 +448,8 @@ class GatewayRuntime:
         )
         self.event_emitter = NatsEventEmitter(
             config.nats_url,
+            username=config.nats_username,
+            password=config.nats_password,
             circuit_breaker=self.circuit_registry.async_breaker(
                 "nats",
                 exception_classifier=should_count_socket_exception,
@@ -738,7 +770,10 @@ async def emit_request_event(
         "caller_roles": sorted(identity["roles"]) if identity else [],
     }
     try:
-        await runtime.event_emitter.emit("platform.api.request", payload)
+        await asyncio.wait_for(
+            runtime.event_emitter.emit("platform.api.request", payload),
+            timeout=REQUEST_EVENT_TIMEOUT_SECONDS,
+        )
     except Exception:  # noqa: BLE001
         return
 

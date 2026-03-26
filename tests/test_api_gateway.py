@@ -522,6 +522,44 @@ def test_gateway_requires_bearer_token(tmp_path: Path) -> None:
     asyncio.run(run())
 
 
+def test_gateway_request_events_do_not_block_platform_reads(tmp_path: Path) -> None:
+    def upstream(request: httpx.Request) -> httpx.Response:
+        if request.url.host == "jwks.test":
+            return httpx.Response(200, json=json.loads((tmp_path / "jwks.json").read_text()))
+        return httpx.Response(200, json={"status": "ok"})
+
+    transport = httpx.MockTransport(upstream)
+    config, token = make_repo(tmp_path, "http://upstream.test")
+    app = create_app(config)
+
+    async def run() -> None:
+        class SlowEmitter:
+            async def emit(self, _subject: str, _payload: dict[str, object]) -> None:
+                await gateway_main.asyncio.sleep(5)
+
+        async with httpx.AsyncClient(transport=transport) as runtime_client:
+            runtime = GatewayRuntime(config)
+            await runtime.http_client.aclose()
+            runtime.http_client = runtime_client
+            runtime.verifier._client = runtime_client
+            runtime.event_emitter = SlowEmitter()
+            app.state.runtime = runtime
+            try:
+                transport_app = httpx.ASGITransport(app=app)
+                async with httpx.AsyncClient(transport=transport_app, base_url="http://gateway.test") as client:
+                    started = time.perf_counter()
+                    response = await client.get("/v1/platform/services", headers={"Authorization": f"Bearer {token}"})
+                    elapsed = time.perf_counter() - started
+                    assert response.status_code == 200
+                    assert elapsed < 2
+            finally:
+                await runtime.close()
+
+    import asyncio
+
+    asyncio.run(run())
+
+
 def test_gateway_retries_safe_proxy_reads(tmp_path: Path) -> None:
     upstream_calls = {"count": 0}
 

@@ -41,10 +41,13 @@ def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
     defaults = DEFAULTS_PATH.read_text(encoding="utf-8")
 
     assert "api_gateway_keycloak_internal_base_url" in defaults
-    assert "http://keycloak:8080" in defaults
+    assert "http://127.0.0.1:18080" in defaults
     assert "api_gateway_keycloak_verify_base_url: http://127.0.0.1:18080" in defaults
+    assert "api_gateway_network_mode: host" in defaults
     assert "api_gateway_keycloak_docker_network: keycloak_default" in defaults
     assert "/realms/lv3/protocol/openid-connect/certs" in defaults
+    assert "api_gateway_nats_url: nats://127.0.0.1:4222" in defaults
+    assert "/.local/nats/jetstream-admin-password.txt" in defaults
     assert "api_gateway_ledger_event_types_src" in defaults
     assert "dest: ledger-event-types.yaml" in defaults
     assert "api_gateway_event_taxonomy_src" in defaults
@@ -54,6 +57,9 @@ def test_api_gateway_role_uses_internal_keycloak_jwks_url() -> None:
 def test_api_gateway_compose_mounts_config_into_app_root() -> None:
     compose_template = COMPOSE_TEMPLATE_PATH.read_text(encoding="utf-8")
 
+    assert "network_mode: {{ api_gateway_network_mode }}" in compose_template
+    assert '- "{{ api_gateway_internal_port }}"' in compose_template
+    assert "http://127.0.0.1:{{ api_gateway_internal_port }}/healthz" in compose_template
     assert "{{ api_gateway_config_dir }}:/config:ro" in compose_template
     assert "{{ api_gateway_config_dir }}:/app/config:ro" in compose_template
 

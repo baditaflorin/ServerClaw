@@ -170,6 +170,7 @@
       - "{{ api_gateway_keycloak_docker_network }}"
   register: api_gateway_keycloak_network
   changed_when: false
+  when: api_gateway_network_mode != 'host'
 
 - name: Pull the API gateway base image
   ansible.builtin.command:
@@ -210,6 +211,7 @@
   register: api_gateway_published_port
   changed_when: false
   failed_when: false
+  when: api_gateway_network_mode != 'host'
 
 - name: Check whether the API gateway container sees the runtime config bundle
   ansible.builtin.command:
@@ -241,7 +243,12 @@
   register: api_gateway_force_recreate
   changed_when: true
   when:
-    - api_gateway_published_port.stdout | trim == "" or api_gateway_runtime_config_probe.rc != 0
+    - >-
+      (
+        api_gateway_network_mode != 'host'
+        and api_gateway_published_port.stdout | trim == ""
+      )
+      or api_gateway_runtime_config_probe.rc != 0
 
 - name: Verify the API gateway runtime
   ansible.builtin.meta: reset_connection
