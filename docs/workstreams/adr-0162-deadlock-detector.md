@@ -2,10 +2,10 @@
 
 - ADR: [ADR 0162](../adr/0162-distributed-deadlock-detection-and-resolution.md)
 - Title: Worker-shared lock registry, coordination map, intent queue, and 30-second Windmill deadlock detector with automatic loser requeue
-- Status: merged
+- Status: live_applied
 - Implemented In Repo Version: 0.150.0
-- Implemented In Platform Version: not yet
-- Implemented On: 2026-03-25
+- Implemented In Platform Version: 0.130.11
+- Implemented On: 2026-03-26
 - Branch: `codex/adr-0162-deadlock-detector`
 - Worktree: `.worktrees/adr-0162-deadlock-detector`
 - Owner: codex
@@ -70,4 +70,6 @@
 
 - the first repository implementation is intentionally file-backed so it works in local tests and on the mounted Windmill worker checkout without a separate JetStream client dependency
 - if a later workstream introduces a JetStream KV backend, keep the current Python interfaces stable so the detector and wrapper do not need to change
-- the March 25, 2026 live-apply attempt reached the Windmill guest converge and then the Proxmox host at `65.108.75.123` stopped responding on ICMP, SSH, and `8006`; no platform-version claim or live-apply receipt was recorded
+- the 2026-03-26 completion path used a temporary jump-based inventory through `ops@100.64.0.1` because the controller could not reach `10.10.10.20` and `10.10.10.50` directly
+- live recovery required realigning the `windmill_admin` PostgreSQL role password on `postgres-lv3` before Windmill could finish the ADR 0162 runtime verification path
+- `config/windmill/scripts/detect-deadlocks.py` now resolves imports from the mounted checkout default `/srv/proxmox_florin_server`, which is required for Windmill `run_wait_result` execution

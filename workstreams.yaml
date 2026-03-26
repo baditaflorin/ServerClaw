@@ -60,7 +60,7 @@ workstreams:
       - config/windmill/scripts/
       - collections/ansible_collections/lv3/platform/roles/windmill_runtime/
       - config/event-taxonomy.yaml
-    ready_to_merge: true
+    ready_to_merge: false
     live_applied: true
 
   - id: adr-0138-published-artifact-secret-scanning
