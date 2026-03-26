@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.164.0",
+  "repo_version": "0.165.0",
   "platform_version": "0.130.15",
-  "generated_at": "2026-03-26T10:20:56Z",
-  "next_refresh_at": "2026-03-26T11:20:56Z",
+  "generated_at": "2026-03-26T10:19:15Z",
+  "next_refresh_at": "2026-03-26T11:19:15Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -93,6 +93,18 @@
         "lifecycle_status": "active",
         "primary_url": "https://docs.lv3.org",
         "last_live_apply": "2026-03-26T00:00:00Z"
+      },
+      "gitea": {
+        "service_name": "Gitea",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "http://100.64.0.1:3009",
+        "last_live_apply": "2026-03-26T00:00:00Z",
+        "slo_status": "unknown"
       },
       "grafana": {
         "service_name": "Grafana",
@@ -780,6 +792,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-docker-runtime.md"
+      },
+      {
+        "id": "converge-gitea",
+        "description": "Converge private Gitea on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and register the self-hosted Actions runner on docker-build-lv3.",
+        "tags": [
+          "converge-gitea",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1500,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 4,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-gitea.md"
       },
       {
         "id": "converge-guest-network-policy",
@@ -2655,6 +2693,16 @@
         ]
       },
       {
+        "id": "configure-gitea",
+        "title": "Configure Gitea",
+        "agent_trust_required": "T3",
+        "steps": 4,
+        "path": "docs/runbooks/configure-gitea.md",
+        "workflow_ids": [
+          "converge-gitea"
+        ]
+      },
+      {
         "id": "configure-guest-network-policy",
         "title": "Configure Guest Network Policy",
         "agent_trust_required": "T3",
@@ -3234,10 +3282,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.163.0",
+    "last_version": "0.164.0",
     "deployed_at": "2026-03-26",
-    "summary": "complete the current-main ADR 0167 rollout so the API gateway publishes declared degradation state through `/v1/platform/degradations`, `/v1/platform/services`, and `/v1/platform/health` keep Keycloak dependency failures operator-visible after ADR 0166 by preserving the structured circuit-open context inside the canonical error envelope",
-    "release_notes_url": "docs/release-notes/0.164.0.md"
+    "summary": "deploy private Gitea on `docker-runtime-lv3` with Keycloak OIDC, repo bootstrap automation, and a dedicated `docker-build-lv3` Actions runner verify the live `git.lv3.org` control-plane path with mirrored admin artifacts, an online self-hosted runner, and a push-triggered workflow smoke test",
+    "release_notes_url": "docs/release-notes/0.165.0.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

@@ -173,7 +173,7 @@
       "lifecycle_status": "active",
       "vm": "docker-runtime-lv3",
       "vmid": 120,
-      "internal_url": "http://100.118.189.95:3009",
+      "internal_url": "http://100.64.0.1:3009",
       "subdomain": "git.lv3.org",
       "exposure": "private-only",
       "uptime_monitor_name": "Gitea Private",
@@ -195,7 +195,7 @@
       "environments": {
         "production": {
           "status": "active",
-          "url": "http://100.118.189.95:3009",
+          "url": "http://100.64.0.1:3009",
           "subdomain": "git.lv3.org"
         }
       }

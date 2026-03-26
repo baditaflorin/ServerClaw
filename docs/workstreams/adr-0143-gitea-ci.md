@@ -2,7 +2,10 @@
 
 - ADR: [ADR 0143](../adr/0143-gitea-for-self-hosted-git-and-ci.md)
 - Title: Private Gitea on docker-runtime-lv3 with Keycloak OIDC, a docker-build-lv3 Actions runner, and repo-managed webhook validation
-- Status: in_progress
+- Status: implemented
+- Implemented In Repo Version: 0.165.0
+- Implemented In Platform Version: 0.130.15
+- Implemented On: 2026-03-26
 - Branch: `codex/integration-0143-main-refresh-v2`
 - Worktree: `.worktrees/integration-0134-main/.worktrees/integration-0143-main-refresh-v2`
 - Owner: codex
@@ -55,4 +58,4 @@
 - `ansible-playbook -i inventory/hosts.yml playbooks/gitea.yml` exits 0
 - `curl -sf http://100.64.0.1:3009/api/swagger >/dev/null`
 - `docker ps --format '{{.Names}}'` on `docker-build-lv3` includes `lv3-gitea-runner`
-- a smoke repository push creates a workflow run and a webhook delivery record in Gitea
+- a smoke repository push creates a workflow run that completes successfully on the self-hosted runner

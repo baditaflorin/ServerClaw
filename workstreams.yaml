@@ -2826,7 +2826,7 @@ workstreams:
   - id: adr-0143-gitea-ci
     adr: "0143"
     title: Private Gitea with self-hosted CI
-    status: in_progress
+    status: implemented
     owner: codex
     branch: codex/integration-0143-main-refresh-v2
     worktree_path: .worktrees/integration-0134-main/.worktrees/integration-0143-main-refresh-v2
@@ -2844,7 +2844,7 @@ workstreams:
       - config/service-capability-catalog.json
       - versions/stack.yaml
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0146-ai-observability
     adr: "0146"

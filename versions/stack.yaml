@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.164.0
+repo_version: 0.165.0
 platform_version: 0.130.15
 
 live_apply_evidence:
@@ -11,6 +11,7 @@ live_apply_evidence:
     agent_coordination: 2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply
     api_gateway: 2026-03-26-adr-0163-retry-taxonomy-live-apply
     docker_runtime: 2026-03-22-adr-0023-docker-runtime-live-apply
+    gitea: 2026-03-26-adr-0143-gitea-live-apply
     langfuse: 2026-03-26-adr-0146-langfuse-live-apply
     postgres_vm: 2026-03-22-adr-0026-postgres-vm-live-apply
     uptime_kuma: 2026-03-22-adr-0027-uptime-kuma-live-apply
@@ -893,7 +894,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.164.0
+    current: 0.165.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.130.15
