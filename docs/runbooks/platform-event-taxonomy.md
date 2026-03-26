@@ -34,6 +34,18 @@ Run the full repo gate:
 make validate
 ```
 
+Check the live JetStream stream state against the committed stream registry:
+
+```bash
+make check-nats-streams
+```
+
+Apply the committed stream registry to the live NATS runtime through the controller tunnel:
+
+```bash
+make apply-nats-streams
+```
+
 ## Adding A New Topic
 
 1. Add the topic to `config/event-taxonomy.yaml`.
@@ -42,6 +54,16 @@ make validate
 4. Update the publisher to emit the canonical subject and shared envelope.
 5. Add or update tests for the producer and, if needed, the validator.
 6. Run `uv run --with pyyaml python scripts/validate_nats_topics.py --validate`.
+
+## Live Apply
+
+ADR 0124 is not fully live until the internal JetStream runtime exposes the committed `PLATFORM_EVENTS` stream.
+
+1. Run `make check-nats-streams` from a rebased `main` worktree.
+2. If the stream is missing or drifted, run `make apply-nats-streams`.
+3. Re-run `make check-nats-streams` and confirm the script exits cleanly.
+4. Record a live-apply receipt under `receipts/live-applies/`.
+5. Update `versions/stack.yaml`, the ADR metadata, and the workstream metadata to the new platform version only after the live check passes.
 
 ## Envelope Shape
 
