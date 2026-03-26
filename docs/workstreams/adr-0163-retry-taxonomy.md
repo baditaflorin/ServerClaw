@@ -64,6 +64,6 @@
 
 - repository implementation is complete on `main` in repo release `0.149.0`
 - the repo now ships the shared retry taxonomy, per-surface retry config, API-gateway retry adoption, Windmill transport read retries, NetBox retry migration, shared NATS publication retries, and the ad hoc retry guard
-- the 2026-03-26 production replay from the current `main` lineage reconverged `docker-runtime-lv3`, and the gateway now serves the ADR 0163 runtime bundle live in platform version `0.130.15`
+- the 2026-03-26 production replay from current `main` release `0.164.0` reconverged `docker-runtime-lv3`, and the gateway now serves the ADR 0163 runtime bundle live in platform version `0.130.15`
 - `https://api.lv3.org/healthz` returns `200`, both public and guest-local `/v1/health` reject anonymous callers with the canonical `AUTH_TOKEN_MISSING` envelope, and the running gateway exports `LV3_RETRY_POLICY_CONFIG=/config/retry-policies.yaml` with the shared bundle mounted inside the container
 - production verification did not inject upstream or NATS faults on purpose; live evidence is the successful replay plus confirmation that the deployed runtime is loading the shared retry-policy bundle that gates the ADR 0163 behavior
