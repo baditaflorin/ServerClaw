@@ -1,14 +1,13 @@
-# Release 0.166.0
+# Release 0.167.0
 
 - Date: 2026-03-26
 
 ## Summary
-- implement ADR 0171 with a repo-managed fault injector, scenario catalog, Windmill workflow, and operator CLI path for controlled resilience drills on `docker-runtime-lv3`
-- harden the first live subset so Keycloak uses a reversible stop/start outage while OpenBao uses pause/unpause and keeps its seal state intact during validation
-- record the first production live drill from `main`, including the guarded Windmill schedule, the seeded `f/lv3/fault-injection` script path, and the governed Keycloak plus OpenBao verification runs
+- deploy the repo-managed Dozzle hub on `docker-runtime-lv3`, join the `docker-build-lv3` and `monitoring-lv3` agents, and publish `logs.lv3.org` behind the shared Keycloak-authenticated edge
+- harden the live apply path so Dozzle convergence also updates the Proxmox guest firewall, verifies the hub through its HTTP healthcheck, and keeps post-verify probes scoped to the owning VM
 
 ## Platform Impact
-- repository version advances to `0.166.0`; platform version advances to `0.130.16` with the first ADR 0171 live-apply receipt recorded from `main`.
+- repository version advances to 0.167.0; platform version advances to 0.130.17 with the first ADR 0150 live-apply receipt recorded for the Dozzle rollout on production.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

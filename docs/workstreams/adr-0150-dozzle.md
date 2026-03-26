@@ -2,7 +2,10 @@
 
 - ADR: [ADR 0150](../adr/0150-dozzle-for-real-time-container-log-access.md)
 - Title: Real-time container log access through a repo-managed Dozzle hub and per-host agents
-- Status: blocked
+- Status: live_applied
+- Implemented In Repo Version: 0.167.0
+- Implemented In Platform Version: 0.130.17
+- Implemented On: 2026-03-26
 - Branch: `codex/live-apply-0150`
 - Worktree: `.worktrees/live-apply-0150`
 - Owner: codex
@@ -61,13 +64,8 @@
 
 ## Outcome
 
-- the repo-managed Dozzle hub, agent, edge, catalog, alerting, and runbook implementation is complete in this worktree
-- `uv run --with pytest python -m pytest tests/test_dozzle_runtime_role.py tests/test_nginx_edge_publication_role.py tests/test_validate_portal_auth.py tests/test_subdomain_exposure_audit.py -q` passed with `25 passed`
-- `make syntax-check-dozzle`, `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, `uvx --from ansible-lint ansible-lint playbooks/dozzle.yml collections/ansible_collections/lv3/platform/playbooks/dozzle.yml roles/dozzle_runtime collections/ansible_collections/lv3/platform/roles/dozzle_runtime`, `./scripts/validate_repo.sh health-probes`, and `./scripts/validate_repo.sh alert-rules` all passed
-- live apply is blocked from this session because SSH to `100.118.189.95` and `65.108.75.123` failed and `make check-build-server` reported `build server ops@10.10.10.30 is unreachable`
-
-## Notes For The Next Assistant
-
-- Keep the edge streaming toggle in `nginx_edge_publication` when changing `logs.lv3.org`; Dozzle log streaming is sensitive to proxy buffering.
-- Do not enable Dozzle actions or shell access without a separate ADR and a review of the Docker socket exposure boundary.
-- Resume with a reachable operator path, then run the live hub, agent, and edge verification steps from `docs/runbooks/configure-dozzle.md` before changing ADR 0150 to `Implemented` or `Live Applied`.
+- the repo-managed Dozzle hub, agents, edge publication, catalog wiring, alerting, and runbook are implemented and live on production
+- the production rollout is recorded in `receipts/live-applies/2026-03-26-adr-0150-dozzle-live-apply.json`
+- `uv run --with pytest python -m pytest tests/test_dozzle_runtime_role.py tests/test_nginx_edge_publication_role.py tests/test_post_verify_tasks.py tests/test_dozzle_playbook.py -q` passed with `18 passed`
+- `make syntax-check-dozzle`, `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, `./scripts/validate_repo.sh health-probes`, and `./scripts/validate_repo.sh alert-rules` all passed
+- live verification confirmed the private hub healthcheck, remote agent reachability for `docker-build-lv3` and `monitoring-lv3`, and the public `logs.lv3.org` OIDC redirect path

@@ -3380,7 +3380,7 @@ workstreams:
   - id: adr-0150-dozzle
     adr: "0150"
     title: Dozzle for real-time container log access
-    status: blocked
+    status: live_applied
     owner: codex
     branch: codex/live-apply-0150
     worktree_path: .worktrees/live-apply-0150
@@ -3398,5 +3398,5 @@ workstreams:
       - config/subdomain-catalog.json
       - config/api-gateway-catalog.json
       - config/dependency-graph.json
-    ready_to_merge: true
-    live_applied: false
+    ready_to_merge: false
+    live_applied: true

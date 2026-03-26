@@ -66,6 +66,8 @@ Windmill is now live on `docker-runtime-lv3` and reachable privately at `http://
 
 Gitea is now live on `docker-runtime-lv3` at `http://100.64.0.1:3009`, with Keycloak-backed operator login, the repo-managed `ops/proxmox_florin_server` bootstrap path, mirrored controller-local admin and runner artifacts, and a verified self-hosted Actions runner on `docker-build-lv3`.
 
+Dozzle is now live on `docker-runtime-lv3` and published at `https://logs.lv3.org`, with repo-managed agents on `docker-build-lv3` and `monitoring-lv3`, shared-edge Keycloak auth, and verified remote agent reachability over the guest network.
+
 NetBox is now live on `docker-runtime-lv3` and reachable privately at `http://100.64.0.1:8004`, with repo-managed synchronization of the Hetzner site, the Proxmox host, all managed VMs, canonical prefixes and IPs, and the governed service catalog.
 
 The control-plane governance layer is now live on `main`: command, API, message, and event lanes are verified against the active host and mail surfaces, the current human/service/agent/break-glass principals have been re-reviewed against the identity taxonomy, and recurring live mutation is expected to use the named command catalog plus approval gates.
@@ -141,6 +143,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `grafana.lv3.org` | `grafana` | `edge-published` | `monitoring-lv3` |
 | `headscale.lv3.org` | `headscale` | `edge-published` | `proxmox_florin` |
 | `langfuse.lv3.org` | `langfuse` | `edge-published` | `docker-runtime-lv3` |
+| `logs.lv3.org` | `dozzle` | `edge-published` | `docker-runtime-lv3` |
 | `mail.lv3.org` | `mail-platform` | `informational-only` | `docker-runtime-lv3` |
 | `n8n.lv3.org` | `n8n` | `edge-published` | `docker-runtime-lv3` |
 | `nginx.lv3.org` | `nginx-edge` | `edge-static` | `nginx-lv3` |
@@ -164,6 +167,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `control_plane_recovery` | `2026-03-22-adr-0051-control-plane-recovery-live-apply` |
 | `deadlock_detector` | `2026-03-26-adr-0162-deadlock-detector-live-apply` |
 | `docker_runtime` | `2026-03-22-adr-0023-docker-runtime-live-apply` |
+| `dozzle` | `2026-03-26-adr-0150-dozzle-live-apply` |
 | `gitea` | `2026-03-26-adr-0143-gitea-live-apply` |
 | `guest_network_policy` | `2026-03-22-adr-0067-guest-network-policy-live-apply` |
 | `identity_taxonomy` | `2026-03-22-adr-0046-identity-classes-live-apply` |
@@ -412,6 +416,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Configure Control-Plane Recovery](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-control-plane-recovery.md)
 - [Configure Docker Build VM](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-docker-build-vm.md)
 - [Configure Docker Runtime Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-docker-runtime.md)
+- [Configure Dozzle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-dozzle.md)
 - [Configure Edge Publication](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-edge-publication.md)
 - [Configure Gitea](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-gitea.md)
 - [Configure Guest Network Policy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/configure-guest-network-policy.md)
@@ -690,6 +695,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0146: Langfuse For Agent Observability](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0146-langfuse-for-agent-observability.md)
 - [ADR 0147: Vaultwarden for Operator Credential Management](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0147-vaultwarden-for-operator-credential-management.md)
 - [ADR 0149: Semaphore For Ansible Job Management UI And API](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0149-semaphore-for-ansible-job-management-ui-and-api.md)
+- [ADR 0150: Dozzle for Real-Time Container Log Access](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0150-dozzle-for-real-time-container-log-access.md)
 - [ADR 0151: n8n for Webhook and API Integration Automation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0151-n8n-for-webhook-and-api-integration-automation.md)
 - [ADR 0153: Distributed Resource Lock Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0153-distributed-resource-lock-registry.md)
 - [ADR 0154: VM-Scoped Parallel Execution Lanes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0154-vm-scoped-parallel-execution-lanes.md)
@@ -834,6 +840,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0146: Langfuse For Agent Observability](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0146-ai-observability.md)
 - [Workstream ADR 0147: Vaultwarden for Operator Credential Management](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0147-vaultwarden.md)
 - [Workstream ADR 0149: Semaphore For Ansible Job Management UI And API](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0149-semaphore.md)
+- [Workstream ADR 0150: Dozzle for Real-Time Container Log Access](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0150-dozzle.md)
 - [Workstream ADR 0151: n8n for Webhook and API Integration Automation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0151-n8n.md)
 - [Workstream ADR 0153: Distributed Resource Lock Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0153-distributed-resource-lock-registry.md)
 - [Workstream ADR 0154: VM-Scoped Parallel Execution Lanes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0154-vm-scoped-execution-lanes.md)
@@ -1030,6 +1037,7 @@ This repository is intentionally opinionated:
 | `0146` | Langfuse for agent observability | `live_applied` | [adr-0146-ai-observability.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0146-ai-observability.md) |
 | `0147` | Vaultwarden for operator credential management | `merged` | [adr-0147-vaultwarden.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0147-vaultwarden.md) |
 | `0149` | Semaphore for Ansible job management UI and API | `merged` | [adr-0149-semaphore.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0149-semaphore.md) |
+| `0150` | Dozzle for real-time container log access | `live_applied` | [adr-0150-dozzle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0150-dozzle.md) |
 | `0151` | n8n for webhook and API integration automation | `merged` | [adr-0151-n8n.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0151-n8n.md) |
 | `0153` | Distributed resource lock registry | `merged` | [adr-0153-distributed-resource-lock-registry.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0153-distributed-resource-lock-registry.md) |
 | `0154` | VM-scoped parallel execution lanes | `live_applied` | [adr-0154-vm-scoped-execution-lanes.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0154-vm-scoped-execution-lanes.md) |

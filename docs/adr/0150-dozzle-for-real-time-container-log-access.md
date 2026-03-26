@@ -1,10 +1,10 @@
 # ADR 0150: Dozzle for Real-Time Container Log Access
 
 - Status: Accepted
-- Implementation Status: Implemented on workstream branch
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: 2026-03-25
+- Implementation Status: Live applied
+- Implemented In Repo Version: 0.167.0
+- Implemented In Platform Version: 0.130.17
+- Implemented On: 2026-03-26
 - Date: 2026-03-24
 
 ## Context
@@ -84,22 +84,22 @@ ad hoc host access.
 
 ## Verification
 
-The workstream implementation on 2026-03-25 verified:
+The production rollout on 2026-03-26 verified:
 
-- `uv run --with pytest python -m pytest tests/test_dozzle_runtime_role.py tests/test_nginx_edge_publication_role.py tests/test_validate_portal_auth.py tests/test_subdomain_exposure_audit.py -q`
-  passed with `25 passed`
-- `make syntax-check-dozzle` passed
-- `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`
+- `uv run --with pytest python -m pytest tests/test_dozzle_runtime_role.py tests/test_nginx_edge_publication_role.py tests/test_post_verify_tasks.py tests/test_dozzle_playbook.py -q`
+  passed with `18 passed`
+- `make syntax-check-dozzle`, `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, `./scripts/validate_repo.sh health-probes`, and `./scripts/validate_repo.sh alert-rules`
   passed
-- `uvx --from ansible-lint ansible-lint playbooks/dozzle.yml collections/ansible_collections/lv3/platform/playbooks/dozzle.yml roles/dozzle_runtime collections/ansible_collections/lv3/platform/roles/dozzle_runtime`
-  passed
-- `./scripts/validate_repo.sh health-probes` and `./scripts/validate_repo.sh alert-rules`
-  passed
-
-Live apply remains pending because this session could not reach the managed
-environment: direct SSH to `100.118.189.95` and `65.108.75.123` failed, and
-`make check-build-server` reported `build server ops@10.10.10.30 is
-unreachable`.
+- the repo-managed Dozzle playbook converged successfully across `proxmox_florin`,
+  `nginx-lv3`, `docker-runtime-lv3`, `docker-build-lv3`, and `monitoring-lv3`
+  with no failed tasks during the final live apply
+- controller-routed private verification over the Proxmox jump path reached
+  `docker-runtime-lv3`, the hub healthcheck at `http://127.0.0.1:8089/healthcheck`
+  exited successfully, and `sudo docker exec dozzle /dozzle agent-test
+  10.10.10.30:7007` plus `10.10.10.40:7007` both connected successfully
+- `curl -Ik --resolve logs.lv3.org:443:65.108.75.123 https://logs.lv3.org/`
+  returned `HTTP/2 302` to `/oauth2/sign_in` with the expected shared edge
+  security headers
 
 ## Related ADRs
 
