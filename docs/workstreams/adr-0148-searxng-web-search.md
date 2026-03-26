@@ -73,5 +73,17 @@
 
 - keep the operator surface tailnet-only; do not route SearXNG through the public edge in this workstream
 - the live host's current Tailscale IPv4 is `100.64.0.1`; the older `100.118.189.95` value was stale repo state discovered during this workstream
-- the repo-side implementation is validated, but the live rollout is blocked: after host security re-applied on 2026-03-25, new SSH to `65.108.75.123` timed out and new SSH or `8006` access to `100.64.0.1` returned `Connection refused`
-- if management access is restored, rerun the SearXNG playbook from this branch or from merged `main`, then verify the host proxy first at `http://100.64.0.1/search?q=proxmox%20ve&format=json`
+- management access was restored on 2026-03-26. Verified from the controller:
+  `100.64.0.1:22`, `100.64.0.1:2222`, and `100.64.0.1:8006` are open again.
+- the guest runtime and host proxy are now live. Verified from the controller:
+  `http://10.10.10.20:8881/search?q=proxmox%20ve&format=json` returned `200`
+  with results, and `http://100.64.0.1/search?q=proxmox%20ve&format=json`
+  returned `200` with results on 2026-03-26.
+- SearXNG needed an additional managed `limiter.toml` plus a one-time forced
+  container recreate on 2026-03-26 because the first live rollout had already
+  written the config files without restarting the container. Keep that history
+  in mind if you debug another stale-runtime mismatch.
+- the only remaining incomplete live surface is DNS publication. `search.lv3.org`
+  still has no answer because `HETZNER_DNS_API_TOKEN` is not present in the
+  controller shell, so the localhost Hetzner DNS role was intentionally not
+  rerun.

@@ -85,8 +85,12 @@ ansible -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory
   address before re-running the host proxy or security roles.
 - Open WebUI is configured to use SearXNG search results directly and to skip
   automatic web-page loading for those search hits.
-- The runtime ships with `limiter: false` by default. The initial live rollout
-  produced `429 Too Many Requests` on the bounded JSON verification request when
-  the limiter was enabled.
+- The runtime now manages both `/etc/searxng/settings.yml` and
+  `/etc/searxng/limiter.toml`. The limiter config passlists the private Docker,
+  Proxmox internal, and Tailscale ranges used by Open WebUI and operators.
+- If a previous converge wrote SearXNG config files without recreating the
+  container, the running process can keep the old bot-detection behavior in
+  memory. In that case, run `docker compose --file /opt/searxng/docker-compose.yml up -d --force-recreate --remove-orphans`
+  on `docker-runtime-lv3` once, then retry the JSON verification endpoint.
 - Keep `.local/searxng/` controller-only. The mirrored secret key is stable on
   purpose so browser cookies and settings survive re-converges.

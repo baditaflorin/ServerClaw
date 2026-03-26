@@ -6,6 +6,7 @@ searxng_runtime_cache_dir: /data/searxng/cache
 searxng_runtime_valkey_data_dir: /data/searxng/valkey
 searxng_runtime_compose_file: "{{ searxng_runtime_site_dir }}/docker-compose.yml"
 searxng_runtime_settings_file: "{{ searxng_runtime_config_dir }}/settings.yml"
+searxng_runtime_limiter_file: "{{ searxng_runtime_config_dir }}/limiter.toml"
 searxng_runtime_container_name: searxng
 searxng_runtime_valkey_container_name: searxng-valkey
 searxng_runtime_image: "{{ container_image_catalog.images.searxng_runtime.ref }}"
@@ -21,3 +22,15 @@ searxng_runtime_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmo
 searxng_runtime_secret_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/searxng/secret-key.txt
 searxng_runtime_instance_name: LV3 Search
 searxng_runtime_default_query: proxmox ve
+searxng_runtime_trusted_proxies:
+  - 127.0.0.0/8
+  - ::1
+  - "{{ platform_host.network.internal_network }}"
+  - 172.16.0.0/12
+  - 192.168.0.0/16
+  - 100.64.0.0/10
+searxng_runtime_pass_ip_ranges:
+  - "{{ platform_host.network.internal_network }}"
+  - 172.16.0.0/12
+  - 192.168.0.0/16
+  - 100.64.0.0/10

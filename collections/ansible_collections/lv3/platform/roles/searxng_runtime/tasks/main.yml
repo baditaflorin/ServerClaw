@@ -9,6 +9,7 @@
       - searxng_runtime_valkey_data_dir | length > 0
       - searxng_runtime_compose_file | length > 0
       - searxng_runtime_settings_file | length > 0
+      - searxng_runtime_limiter_file | length > 0
       - searxng_runtime_container_name | length > 0
       - searxng_runtime_valkey_container_name | length > 0
       - searxng_runtime_image | length > 0
@@ -18,6 +19,8 @@
       - searxng_runtime_controller_url | length > 0
       - searxng_runtime_public_base_url | length > 0
       - searxng_runtime_default_query | length > 0
+      - searxng_runtime_trusted_proxies | length > 0
+      - searxng_runtime_pass_ip_ranges | length > 0
     fail_msg: >-
       searxng_runtime requires compose paths, stable URLs, container images, and
       the default verification query.
@@ -98,7 +101,17 @@
     owner: root
     group: root
     mode: "0644"
+  register: searxng_runtime_settings_template
   no_log: true
+
+- name: Render the SearXNG limiter configuration
+  ansible.builtin.template:
+    src: limiter.toml.j2
+    dest: "{{ searxng_runtime_limiter_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: searxng_runtime_limiter_template
 
 - name: Render the SearXNG compose file
   ansible.builtin.template:
@@ -107,6 +120,7 @@
     owner: root
     group: root
     mode: "0644"
+  register: searxng_runtime_compose_template
 
 - name: Pull the SearXNG images
   ansible.builtin.command:
@@ -124,7 +138,30 @@
     or 'Downloaded newer image' in searxng_runtime_pull.stdout
     or 'Pull complete' in searxng_runtime_pull.stdout
 
-- name: Start the SearXNG runtime
+- name: Recreate the SearXNG runtime when config changes
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ searxng_runtime_compose_file }}"
+      - up
+      - -d
+      - --force-recreate
+      - --remove-orphans
+  args:
+    chdir: "{{ searxng_runtime_site_dir }}"
+  register: searxng_runtime_up_recreate
+  changed_when: >-
+    'Creating' in searxng_runtime_up_recreate.stdout
+    or 'Recreating' in searxng_runtime_up_recreate.stdout
+    or 'Starting' in searxng_runtime_up_recreate.stdout
+  when: >-
+    searxng_runtime_settings_template.changed
+    or searxng_runtime_limiter_template.changed
+    or searxng_runtime_compose_template.changed
+
+- name: Ensure the SearXNG runtime is running
   ansible.builtin.command:
     argv:
       - docker
@@ -141,6 +178,12 @@
     'Creating' in searxng_runtime_up.stdout
     or 'Recreating' in searxng_runtime_up.stdout
     or 'Starting' in searxng_runtime_up.stdout
+  when: >-
+    not (
+      searxng_runtime_settings_template.changed
+      or searxng_runtime_limiter_template.changed
+      or searxng_runtime_compose_template.changed
+    )
 
 - name: Wait for SearXNG to listen locally
   ansible.builtin.wait_for:

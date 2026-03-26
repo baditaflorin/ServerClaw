@@ -139,14 +139,20 @@ Web search results in a triage report are links only; the content is not summari
 - The repo-side client defaults to the tailnet hostname
   `http://search.lv3.org/search?q=<query>&format=json` and adds the `results`
   parameter itself when the caller does not supply one.
-- The SearXNG runtime now defaults `limiter` to `false`. This is an observed
-  implementation adjustment from the 2026-03-25 live attempt: the upstream
-  limiter returned `429 Too Many Requests` for the verification query even on
-  the first bounded API call.
-- The live platform rollout is not complete yet. Host proxy rendering and the
-  guest runtime converge both progressed, but the 2026-03-25 apply lost the
-  controller's working SSH and Proxmox API path after the host security layer
-  re-applied. This is an observation from the rollout attempt, not an inference.
+- The SearXNG runtime now manages both `settings.yml` and `limiter.toml`. The
+  private platform ranges (`10.10.10.0/24`, `172.16.0.0/12`, `192.168.0.0/16`,
+  `100.64.0.0/10`) are passlisted so the JSON API works for tailnet and
+  Docker-local callers without tripping SearXNG's upstream bot-detection
+  defaults.
+- The runtime role now recreates the SearXNG container when managed config
+  files change so mounted config updates are applied live, not just written to
+  disk.
+- The live platform rollout is partially complete as of 2026-03-26: the guest
+  runtime serves `http://10.10.10.20:8881/search?...&format=json`, the Proxmox
+  host Tailscale proxy serves the same API at `http://100.64.0.1/search?...`,
+  and Open WebUI was re-rendered successfully. The remaining incomplete surface
+  is the `search.lv3.org` tailnet DNS record because the controller shell still
+  lacks `HETZNER_DNS_API_TOKEN`.
 
 ### Rate limiting and caching
 
