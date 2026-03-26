@@ -4,7 +4,10 @@
     {
       "prefix": "ops",
       "owner_adr": "0074",
-      "allowed_fqdns": ["ops.lv3.org", "ops.staging.lv3.org"],
+      "allowed_fqdns": [
+        "ops.lv3.org",
+        "ops.staging.lv3.org"
+      ],
       "notes": "Reserved for the generated operations portal and its staged hostname."
     },
     {
@@ -36,7 +39,9 @@
     {
       "prefix": "api",
       "owner_adr": "0049",
-      "allowed_fqdns": ["api.lv3.org"],
+      "allowed_fqdns": [
+        "api.lv3.org"
+      ],
       "notes": "Reserved for a future governed API gateway surface."
     },
     {
@@ -52,7 +57,9 @@
     {
       "prefix": "mail",
       "owner_adr": "0041",
-      "allowed_fqdns": ["mail.lv3.org"],
+      "allowed_fqdns": [
+        "mail.lv3.org"
+      ],
       "notes": "Reserved for the primary platform mail surface."
     }
   ],
@@ -179,6 +186,22 @@
         "auto_renew": false
       },
       "notes": "Tailnet-only TCP proxy for the private Gitea runtime on docker-runtime-lv3."
+    },
+    {
+      "fqdn": "headscale.lv3.org",
+      "service_id": "headscale",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0014",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Headscale coordination server proxied through the shared NGINX edge to the Proxmox host bridge."
     },
     {
       "fqdn": "mail.lv3.org",
