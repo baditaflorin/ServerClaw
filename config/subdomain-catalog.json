@@ -241,6 +241,7 @@
       "environment": "production",
       "status": "active",
       "exposure": "private-only",
+      "auth_requirement": "private_network",
       "target": "100.64.0.1",
       "target_port": 3009,
       "owner_adr": "0143",

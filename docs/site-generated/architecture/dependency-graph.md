@@ -8,7 +8,7 @@ Generated from `config/dependency-graph.json`.
 | --- | --- |
 | `1` | Alertmanager, Docker Build VM, Docker Runtime VM, Grafana, Headscale, Mail Platform, NGINX Edge, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Uptime Kuma, ntfy, ntopng, step-ca |
 | `2` | Changelog Portal, Developer Portal, Gitea, Keycloak, Langfuse, Mattermost, NetBox, Open WebUI, Public Status Page, Semaphore, Vaultwarden, Windmill, n8n |
-| `3` | Platform API Gateway |
+| `3` | Homepage, Platform API Gateway |
 | `4` | Ops Portal |
 
 ## Mermaid Diagram
@@ -46,6 +46,7 @@ graph TD
     semaphore["Semaphore\nTier 2"]
     vaultwarden["Vaultwarden\nTier 2"]
     windmill["Windmill\nTier 2"]
+    homepage["Homepage\nTier 3"]
     api_gateway["Platform API Gateway\nTier 3"]
     ops_portal["Ops Portal\nTier 4"]
     alertmanager -->|soft| mattermost
@@ -61,6 +62,8 @@ graph TD
     grafana -->|soft| keycloak
     grafana -->|soft| nginx_edge
     headscale -->|soft| nginx_edge
+    homepage -->|hard| keycloak
+    homepage -->|hard| nginx_edge
     keycloak -->|soft| nginx_edge
     keycloak -->|startup_only| openbao
     keycloak -->|hard| postgres

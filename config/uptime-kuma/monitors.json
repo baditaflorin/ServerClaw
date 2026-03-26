@@ -34,7 +34,9 @@
     "retryInterval": 60,
     "maxretries": 0,
     "maxredirects": 10,
-    "accepted_statuscodes": ["200-299"]
+    "accepted_statuscodes": [
+      "200-299"
+    ]
   },
   {
     "name": "Keycloak OIDC Discovery",

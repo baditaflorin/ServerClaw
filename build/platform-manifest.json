@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.168.0",
+  "repo_version": "0.169.0",
   "platform_version": "0.130.18",
-  "generated_at": "2026-03-26T11:01:38Z",
-  "next_refresh_at": "2026-03-26T12:01:38Z",
+  "generated_at": "2026-03-26T11:15:00Z",
+  "next_refresh_at": "2026-03-26T12:15:00Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -140,6 +140,18 @@
         "lifecycle_status": "active",
         "primary_url": "https://headscale.lv3.org",
         "last_live_apply": "2026-03-26T00:00:00Z"
+      },
+      "homepage": {
+        "service_name": "Homepage",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://home.lv3.org",
+        "last_live_apply": "2026-03-26T00:00:00Z",
+        "slo_status": "unknown"
       },
       "keycloak": {
         "service_name": "Keycloak",
@@ -908,6 +920,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-headscale.md"
+      },
+      {
+        "id": "converge-homepage",
+        "description": "Deploy the Homepage unified service dashboard on docker-runtime-lv3 and publish it at home.lv3.org through the shared authenticated edge.",
+        "tags": [
+          "converge-homepage",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1500,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-homepage.md"
       },
       {
         "id": "converge-keycloak",
@@ -2796,6 +2834,16 @@
         ]
       },
       {
+        "id": "configure-homepage",
+        "title": "Configure Homepage",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-homepage.md",
+        "workflow_ids": [
+          "converge-homepage"
+        ]
+      },
+      {
         "id": "configure-keycloak",
         "title": "Configure Keycloak",
         "agent_trust_required": "T3",
@@ -3365,10 +3413,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.167.0",
+    "last_version": "0.168.0",
     "deployed_at": "2026-03-26",
-    "summary": "deploy the repo-managed Dozzle hub on `docker-runtime-lv3`, join the `docker-build-lv3` and `monitoring-lv3` agents, and publish `logs.lv3.org` behind the shared Keycloak-authenticated edge harden the live apply path so Dozzle convergence also updates the Proxmox guest firewall, verifies the hub through its HTTP healthcheck, and keeps post-verify probes scoped to the owning VM",
-    "release_notes_url": "docs/release-notes/0.168.0.md"
+    "summary": "publish the repo-generated Homepage dashboard at `https://home.lv3.org` through the shared authenticated edge, with generated service and bookmark catalogs served from `docker-runtime-lv3` fix the Homepage converge workflow so `make converge-homepage` uses the working Proxmox jump path and skips unrelated generated static-dir sync during edge publication",
+    "release_notes_url": "docs/release-notes/0.169.0.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
