@@ -101,7 +101,21 @@
       - --out-format=<<CHANGED>>%i %n%L
       - --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r
       - >-
-        --rsh=ssh -i {{ playbook_execution_secret_manifest.secrets.bootstrap_ssh_private_key.path }}
+        --rsh=ssh -i {{
+          ansible_private_key_file
+          | default(
+            (
+              playbook_execution_secret_manifest.secrets.bootstrap_ssh_private_key.path
+              if (
+                playbook_execution_secret_manifest is defined
+                and playbook_execution_secret_manifest.secrets is defined
+                and playbook_execution_secret_manifest.secrets.bootstrap_ssh_private_key is defined
+              )
+              else ''
+            ),
+            true
+          )
+        }}
         -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null
         {{
           (
