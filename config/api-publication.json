@@ -121,6 +121,16 @@
       "approval_notes": "Mattermost stays private-first and operator-only; future SSO may change authentication, not exposure."
     },
     {
+      "id": "langfuse-observability-api",
+      "title": "Langfuse observability API",
+      "lane": "api",
+      "lane_surface_ref": "langfuse-observability-api",
+      "publication_tier": "public-edge",
+      "public_hostnames": ["langfuse.lv3.org"],
+      "reachability": "Reachable on https://langfuse.lv3.org/api/public through the shared NGINX edge, authenticated with project-scoped API keys for ingestion and Keycloak-backed browser login for operators.",
+      "approval_notes": "ADR 0146 approves this public-edge observability surface so agent traces can be emitted without relying on private network paths."
+    },
+    {
       "id": "open-webui-operator-workbench",
       "title": "Open WebUI operator workbench",
       "lane": "api",

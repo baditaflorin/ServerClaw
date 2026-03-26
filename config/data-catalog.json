@@ -63,6 +63,36 @@
       "notes": "Trace payloads support short-lived troubleshooting and should remain bounded to protect monitoring disk capacity."
     },
     {
+      "id": "langfuse-trace-store",
+      "service": "langfuse",
+      "name": "Langfuse trace and observation store",
+      "class": "confidential",
+      "retention_days": 90,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "Langfuse PostgreSQL database",
+        "/opt/langfuse/data/clickhouse"
+      ],
+      "notes": "Langfuse captures prompt, trace, and generation payloads that may contain operator-entered context and model outputs."
+    },
+    {
+      "id": "langfuse-object-storage",
+      "service": "langfuse",
+      "name": "Langfuse event and media object storage",
+      "class": "confidential",
+      "retention_days": 90,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "high",
+      "locations": [
+        "/opt/langfuse/data/minio/langfuse/events",
+        "/opt/langfuse/data/minio/langfuse/media"
+      ],
+      "notes": "Blob-backed event uploads and media attachments may contain raw prompts, responses, and attached evidence artifacts."
+    },
+    {
       "id": "grafana-annotations",
       "service": "grafana",
       "name": "Grafana annotations",

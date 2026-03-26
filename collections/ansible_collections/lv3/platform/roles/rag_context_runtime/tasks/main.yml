@@ -149,6 +149,7 @@
       ENV PYTHONPATH=/app/scripts:/app
       COPY requirements.txt ./requirements.txt
       RUN pip install --no-cache-dir -r requirements.txt
+      COPY canonical_errors.py ./canonical_errors.py
       COPY platform ./platform
       COPY scripts ./scripts
       COPY platform_context_corpus.py ./platform_context_corpus.py

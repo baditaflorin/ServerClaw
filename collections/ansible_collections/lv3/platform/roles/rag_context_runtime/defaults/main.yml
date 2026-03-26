@@ -44,6 +44,8 @@ platform_context_corpus_sources:
     dest: config/command-catalog.json
   - src: "{{ platform_context_repo_root }}/config/agent-tool-registry.json"
     dest: config/agent-tool-registry.json
+  - src: "{{ platform_context_repo_root }}/config/error-codes.yaml"
+    dest: config/error-codes.yaml
   - src: "{{ platform_context_repo_root }}/config/service-capability-catalog.json"
     dest: config/service-capability-catalog.json
   - src: "{{ platform_context_repo_root }}/config/slo-catalog.json"
@@ -53,6 +55,8 @@ platform_context_corpus_sources:
   - src: "{{ platform_context_repo_root }}/VERSION"
     dest: VERSION
 platform_context_service_sources:
+  - src: "{{ platform_context_repo_root }}/scripts/canonical_errors.py"
+    dest: canonical_errors.py
   - src: "{{ platform_context_repo_root }}/scripts/platform_context_corpus.py"
     dest: platform_context_corpus.py
   - src: "{{ platform_context_repo_root }}/scripts/platform_context_service.py"

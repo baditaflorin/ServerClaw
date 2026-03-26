@@ -19,6 +19,8 @@ def test_defaults_define_private_mail_submission_for_realm_mail() -> None:
     assert defaults["keycloak_mail_platform_submission_port"] == (
         "{{ hostvars['proxmox_florin'].platform_port_assignments.mail_platform_internal_submission_port | default(1587) }}"
     )
+    assert defaults["keycloak_langfuse_client_id"] == "langfuse"
+    assert defaults["keycloak_langfuse_client_secret_local_file"].endswith("/.local/keycloak/langfuse-client-secret.txt")
     assert smtp_server["port"] == "{{ keycloak_mail_platform_submission_port }}"
     assert smtp_server["user"] == "{{ keycloak_mail_platform_submission_username }}"
     assert smtp_server["starttls"] is False
@@ -66,3 +68,17 @@ def test_role_restores_docker_nat_chain_before_startup() -> None:
     assert nat_restore["ansible.builtin.service"]["name"] == "docker"
     assert readiness_probe["ansible.builtin.uri"]["url"] == "http://127.0.0.1:{{ keycloak_local_management_port }}/health/ready"
     assert "--force-recreate" in force_recreate["ansible.builtin.command"]["argv"]
+
+
+def test_role_manages_langfuse_client_secret() -> None:
+    tasks = load_tasks()
+    realm_block = next(task for task in tasks if task.get("name") == "Converge Keycloak realm objects")
+    langfuse_client_task = next(task for task in realm_block["block"] if task.get("name") == "Ensure the Langfuse OAuth client exists")
+    read_secret_task = next(task for task in realm_block["block"] if task.get("name") == "Read the Langfuse client secret")
+    mirror_secret_task = next(task for task in tasks if task.get("name") == "Mirror the Langfuse client secret to the control machine")
+    assert langfuse_client_task["community.general.keycloak_client"]["client_id"] == "{{ keycloak_langfuse_client_id }}"
+    assert langfuse_client_task["community.general.keycloak_client"]["redirect_uris"] == [
+        "{{ keycloak_langfuse_root_url }}/api/auth/callback/keycloak"
+    ]
+    assert read_secret_task["community.general.keycloak_clientsecret_info"]["client_id"] == "{{ keycloak_langfuse_client_id }}"
+    assert mirror_secret_task["ansible.builtin.copy"]["dest"] == "{{ keycloak_langfuse_client_secret_local_file }}"

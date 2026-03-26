@@ -17,6 +17,22 @@
   until: platform_context_health.status == 200
   changed_when: false
 
+- name: Verify the platform context API rejects anonymous protected requests with the canonical envelope
+  ansible.builtin.uri:
+    url: "{{ platform_context_private_url }}/v1/platform-summary"
+    method: GET
+    status_code: 401
+    return_content: true
+  register: platform_context_auth_check
+  changed_when: false
+
+- name: Assert the platform context auth rejection uses the canonical error envelope
+  ansible.builtin.assert:
+    that:
+      - platform_context_auth_check.json.error.code == "AUTH_TOKEN_MISSING"
+      - (platform_context_auth_check.json.error.trace_id | default('')) | length > 0
+    fail_msg: "Platform context auth rejection did not return the canonical error envelope."
+
 - name: Rebuild the platform context index from the remote mirrored corpus
   ansible.builtin.uri:
     url: "{{ platform_context_private_url }}/v1/admin/rebuild-local"

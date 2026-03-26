@@ -15,8 +15,16 @@
     url: "http://127.0.0.1:{{ api_gateway_internal_port }}/v1/health"
     method: GET
     status_code: 401
+    return_content: true
   register: api_gateway_auth_check
   changed_when: false
+
+- name: Assert the anonymous health rejection uses the canonical error envelope
+  ansible.builtin.assert:
+    that:
+      - api_gateway_auth_check.json.error.code == "AUTH_TOKEN_MISSING"
+      - (api_gateway_auth_check.json.error.trace_id | default('')) | length > 0
+    fail_msg: "API gateway anonymous auth rejection did not return the canonical error envelope."
 
 - name: Check whether the controller-local API gateway verification client secret exists
   ansible.builtin.stat:

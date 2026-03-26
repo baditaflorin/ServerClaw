@@ -156,6 +156,46 @@ groups:
           summary: keycloak-latency has less than 10% error budget remaining
           description: Keycloak discovery responds in under 500ms for 95% of probes.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_langfuse_availability
+        expr: (slo:langfuse_availability:error_rate_5m > (14 * 0.005000)) and (slo:langfuse_availability:error_rate_1h
+          > (14 * 0.005000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: langfuse
+          slo_id: langfuse-availability
+          indicator: availability
+        annotations:
+          summary: langfuse-availability is burning its error budget at 14x
+          description: Langfuse remains reachable through the public LV3 edge for
+            trace ingestion and operator access.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_langfuse_availability
+        expr: slo:langfuse_availability:error_rate_1h > (3 * 0.005000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: langfuse
+          slo_id: langfuse-availability
+          indicator: availability
+        annotations:
+          summary: langfuse-availability is burning its error budget at 3x
+          description: Langfuse remains reachable through the public LV3 edge for
+            trace ingestion and operator access.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_langfuse_availability
+        expr: slo:langfuse_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: langfuse
+          slo_id: langfuse-availability
+          indicator: availability
+        annotations:
+          summary: langfuse-availability has less than 10% error budget remaining
+          description: Langfuse remains reachable through the public LV3 edge for
+            trace ingestion and operator access.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_uptime_kuma_availability
         expr: (slo:uptime_kuma_availability:error_rate_5m > (14 * 0.001000)) and (slo:uptime_kuma_availability:error_rate_1h
           > (14 * 0.001000))

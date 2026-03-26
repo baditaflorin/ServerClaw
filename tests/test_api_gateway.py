@@ -288,6 +288,98 @@ def make_repo(tmp_path: Path, upstream_base: str) -> tuple[GatewayConfig, str]:
             }
         },
     )
+    write_yaml(
+        tmp_path / "config" / "error-codes.yaml",
+        """schema_version: 1.0.0
+error_codes:
+  AUTH_TOKEN_MISSING:
+    http_status: 401
+    severity: warn
+    category: authentication
+    retry_advice: none
+    description: Bearer token is required for this endpoint.
+    context_fields: [header]
+  AUTH_TOKEN_INVALID:
+    http_status: 401
+    severity: warn
+    category: authentication
+    retry_advice: none
+    description: Bearer token could not be validated.
+    context_fields: [reason]
+  AUTH_TOKEN_EXPIRED:
+    http_status: 401
+    severity: info
+    category: authentication
+    retry_advice: none
+    description: Bearer token has expired.
+    context_fields: [reason]
+  AUTH_INSUFFICIENT_ROLE:
+    http_status: 403
+    severity: warn
+    category: authentication
+    retry_advice: none
+    description: Caller identity is authenticated but lacks the required role.
+    context_fields: [required_role, subject, service_id]
+  INPUT_SCHEMA_INVALID:
+    http_status: 422
+    severity: warn
+    category: input
+    retry_advice: none
+    description: Request payload or parameters failed validation.
+    context_fields: [field_path, error_type, validation_message]
+  INPUT_UNKNOWN_SERVICE:
+    http_status: 404
+    severity: info
+    category: input
+    retry_advice: none
+    description: Requested platform service is not defined.
+    context_fields: [service_id]
+  INPUT_UNKNOWN_WORKFLOW:
+    http_status: 404
+    severity: info
+    category: input
+    retry_advice: none
+    description: Requested workflow is not defined.
+    context_fields: [workflow_id]
+  INPUT_UNKNOWN_COMMAND:
+    http_status: 404
+    severity: info
+    category: input
+    retry_advice: none
+    description: Requested command is not defined.
+    context_fields: [command_id]
+  INPUT_UNKNOWN_GATEWAY_ROUTE:
+    http_status: 404
+    severity: info
+    category: input
+    retry_advice: none
+    description: Requested gateway route is not registered.
+    context_fields: [path]
+  INFRA_RUNTIME_UNAVAILABLE:
+    http_status: 503
+    severity: error
+    category: infrastructure
+    retry_advice: backoff
+    retry_after_s: 30
+    description: Required runtime dependency is unavailable or not configured.
+    context_fields: [dependency, detail]
+  INFRA_DEPENDENCY_DOWN:
+    http_status: 503
+    severity: error
+    category: infrastructure
+    retry_advice: backoff
+    retry_after_s: 30
+    description: Upstream dependency request failed.
+    context_fields: [dependency, detail]
+  INTERNAL_UNEXPECTED_ERROR:
+    http_status: 500
+    severity: error
+    category: internal
+    retry_advice: manual
+    description: Unexpected internal error.
+    context_fields: [detail]
+""",
+    )
     write_json(
         tmp_path / "config" / "api-gateway-catalog.json",
         {
@@ -378,6 +470,7 @@ circuits:
         repo_root=tmp_path,
         catalog_path=tmp_path / "config" / "api-gateway-catalog.json",
         service_catalog_path=tmp_path / "config" / "service-capability-catalog.json",
+        error_registry_path=tmp_path / "config" / "error-codes.yaml",
         health_probe_catalog_path=tmp_path / "config" / "health-probe-catalog.json",
         workflow_catalog_path=tmp_path / "config" / "workflow-catalog.json",
         platform_vars_path=tmp_path / "inventory" / "group_vars" / "platform.yml",
@@ -715,10 +808,44 @@ def test_gateway_requires_bearer_token(tmp_path: Path) -> None:
             async with httpx.AsyncClient(transport=transport_app, base_url="http://gateway.test") as client:
                 response = await client.get("/v1/health")
                 assert response.status_code == 401
+                payload = response.json()["error"]
+                assert payload["code"] == "AUTH_TOKEN_MISSING"
+                assert payload["context"]["header"] == "Authorization"
         finally:
             await runtime.close()
 
     import asyncio
+
+    asyncio.run(run())
+
+
+def test_gateway_validation_errors_use_canonical_envelope(tmp_path: Path) -> None:
+    def jwks(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json=json.loads((tmp_path / "jwks.json").read_text()))
+
+    transport = httpx.MockTransport(jwks)
+    config, token = make_repo(tmp_path, "http://upstream.test")
+    app = create_app(config)
+
+    async def run() -> None:
+        runtime: GatewayRuntime | None = None
+        try:
+            async with httpx.AsyncClient(transport=transport) as runtime_client:
+                runtime = GatewayRuntime(config)
+                await runtime.http_client.aclose()
+                runtime.http_client = runtime_client
+                runtime.verifier._client = runtime_client
+                app.state.runtime = runtime
+                transport_app = httpx.ASGITransport(app=app)
+                async with httpx.AsyncClient(transport=transport_app, base_url="http://gateway.test") as client:
+                    response = await client.get("/v1/search?q=a", headers={"Authorization": f"Bearer {token}"})
+                    assert response.status_code == 422
+                    payload = response.json()["error"]
+                    assert payload["code"] == "INPUT_SCHEMA_INVALID"
+                    assert payload["context"]["field_path"].startswith("query.q")
+        finally:
+            if runtime is not None:
+                await runtime.close()
 
     asyncio.run(run())
 

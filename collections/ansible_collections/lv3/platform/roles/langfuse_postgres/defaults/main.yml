@@ -1,0 +1,7 @@
+---
+langfuse_database_name: langfuse
+langfuse_database_user: langfuse
+langfuse_postgres_secret_dir: /etc/lv3/langfuse
+langfuse_postgres_password_file: "{{ langfuse_postgres_secret_dir }}/database-password"
+langfuse_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/langfuse
+langfuse_database_password_local_file: "{{ langfuse_local_artifact_dir }}/database-password.txt"

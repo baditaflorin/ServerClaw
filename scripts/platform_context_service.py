@@ -8,8 +8,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from canonical_errors import ErrorRegistry, PlatformHTTPError
 from dependency_graph import compute_impact, graph_to_dict, load_dependency_graph
-from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
+from fastapi import Depends, FastAPI, Header, Query, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, PointStruct, VectorParams
@@ -74,6 +77,7 @@ class SentenceTransformersEmbedder:
 class ServiceConfig:
     api_token: str
     corpus_root: Path
+    error_registry_path: Path
     collection_name: str
     qdrant_url: str | None
     qdrant_location: str | None
@@ -87,6 +91,7 @@ class ServiceConfig:
 class PlatformContextService:
     def __init__(self, config: ServiceConfig) -> None:
         self.config = config
+        self.error_registry = ErrorRegistry.load(config.error_registry_path)
         self.client = self._build_client()
         self.embedder = self._build_embedder()
         self.ensure_collection()
@@ -298,6 +303,9 @@ def build_config() -> ServiceConfig:
     return ServiceConfig(
         api_token=os.environ["PLATFORM_CONTEXT_API_TOKEN"],
         corpus_root=corpus_root,
+        error_registry_path=Path(
+            os.environ.get("PLATFORM_CONTEXT_ERROR_REGISTRY_PATH", corpus_root / "config" / "error-codes.yaml")
+        ),
         collection_name=os.environ.get("PLATFORM_CONTEXT_COLLECTION", DEFAULT_COLLECTION),
         qdrant_url=os.environ.get("PLATFORM_CONTEXT_QDRANT_URL"),
         qdrant_location=os.environ.get("PLATFORM_CONTEXT_QDRANT_LOCATION"),
@@ -331,10 +339,48 @@ def get_service() -> PlatformContextService:
     return service
 
 
-def require_auth(authorization: str | None = Header(default=None)) -> None:
+def request_trace_id(request: Request) -> str:
+    return getattr(request.state, "trace_id", "") or generate_trace_id()
+
+
+def raise_platform_error(
+    request: Request,
+    code: str,
+    *,
+    message: str | None = None,
+    context: dict[str, Any] | None = None,
+) -> None:
+    error = get_service().error_registry.create(
+        code,
+        trace_id=request_trace_id(request),
+        message=message,
+        context=context,
+    )
+    raise PlatformHTTPError(error)
+
+
+def validation_error_context(exc: RequestValidationError) -> dict[str, Any]:
+    errors = exc.errors()
+    if not errors:
+        return {}
+    first = errors[0]
+    return {
+        "field_path": ".".join(str(item) for item in first.get("loc", [])) or "request",
+        "error_type": str(first.get("type") or "validation_error"),
+        "validation_message": str(first.get("msg") or "request validation failed"),
+    }
+
+
+def require_auth(request: Request, authorization: str | None = Header(default=None)) -> None:
     current_service = get_service()
     if authorization != f"Bearer {current_service.config.api_token}":
-        raise HTTPException(status_code=401, detail="Unauthorized")
+        code = "AUTH_TOKEN_MISSING" if authorization is None else "AUTH_TOKEN_INVALID"
+        message = (
+            "Bearer token is required for this endpoint."
+            if authorization is None
+            else "Bearer token is invalid."
+        )
+        raise_platform_error(request, code, message=message, context={"header": "Authorization"})
     set_context(actor_id="platform-context-client")
 
 
@@ -373,6 +419,36 @@ async def add_request_context(request: Request, call_next):
     return response
 
 
+@app.exception_handler(PlatformHTTPError)
+async def handle_platform_http_error(request: Request, exc: PlatformHTTPError) -> JSONResponse:
+    response = JSONResponse(status_code=exc.error.http_status, content=exc.error.to_response())
+    if exc.error.retry_after_s is not None:
+        response.headers["Retry-After"] = str(exc.error.retry_after_s)
+    return response
+
+
+@app.exception_handler(RequestValidationError)
+async def handle_request_validation_error(request: Request, exc: RequestValidationError) -> JSONResponse:
+    error = get_service().error_registry.create(
+        "INPUT_SCHEMA_INVALID",
+        trace_id=request_trace_id(request),
+        message="Request payload or parameters failed validation.",
+        context=validation_error_context(exc),
+    )
+    return JSONResponse(status_code=error.http_status, content=error.to_response())
+
+
+@app.exception_handler(Exception)
+async def handle_unexpected_error(request: Request, exc: Exception) -> JSONResponse:
+    error = get_service().error_registry.create(
+        "INTERNAL_UNEXPECTED_ERROR",
+        trace_id=request_trace_id(request),
+        message="Unexpected internal platform-context error.",
+        context={"detail": type(exc).__name__},
+    )
+    return JSONResponse(status_code=error.http_status, content=error.to_response())
+
+
 @app.get("/healthz")
 def healthz() -> dict[str, Any]:
     current_service = get_service()
@@ -390,11 +466,16 @@ def platform_dependency_graph() -> dict[str, Any]:
 
 
 @app.get("/v1/platform/dependency-graph/{service_id}/impact", dependencies=[Depends(require_auth)])
-def platform_dependency_impact(service_id: str) -> dict[str, Any]:
+def platform_dependency_impact(service_id: str, request: Request) -> dict[str, Any]:
     try:
         return get_service().dependency_impact(service_id)
     except ValueError as exc:
-        raise HTTPException(status_code=404, detail=str(exc)) from exc
+        raise_platform_error(
+            request,
+            "INPUT_UNKNOWN_SERVICE",
+            message=str(exc),
+            context={"service_id": service_id},
+        )
 
 
 @app.get("/v1/receipts/recent", dependencies=[Depends(require_auth)])
@@ -403,19 +484,29 @@ def recent_receipts(limit: int = Query(default=5, ge=1, le=20)) -> dict[str, Any
 
 
 @app.get("/v1/workflows/{workflow_id}", dependencies=[Depends(require_auth)])
-def workflow_contract(workflow_id: str) -> dict[str, Any]:
+def workflow_contract(workflow_id: str, request: Request) -> dict[str, Any]:
     try:
         return get_service().workflow_contract(workflow_id)
     except KeyError as exc:
-        raise HTTPException(status_code=404, detail=f"Unknown workflow: {workflow_id}") from exc
+        raise_platform_error(
+            request,
+            "INPUT_UNKNOWN_WORKFLOW",
+            message=f"Unknown workflow: {workflow_id}",
+            context={"workflow_id": workflow_id},
+        )
 
 
 @app.get("/v1/commands/{command_id}", dependencies=[Depends(require_auth)])
-def command_contract(command_id: str) -> dict[str, Any]:
+def command_contract(command_id: str, request: Request) -> dict[str, Any]:
     try:
         return get_service().command_contract(command_id)
     except KeyError as exc:
-        raise HTTPException(status_code=404, detail=f"Unknown command: {command_id}") from exc
+        raise_platform_error(
+            request,
+            "INPUT_UNKNOWN_COMMAND",
+            message=f"Unknown command: {command_id}",
+            context={"command_id": command_id},
+        )
 
 
 @app.get("/v1/platform/slos", dependencies=[Depends(require_auth)])

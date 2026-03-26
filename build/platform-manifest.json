@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.159.2",
-  "platform_version": "0.130.10",
-  "generated_at": "2026-03-26T04:05:33Z",
-  "next_refresh_at": "2026-03-26T05:05:33Z",
+  "repo_version": "0.162.0",
+  "platform_version": "0.130.13",
+  "generated_at": "2026-03-26T09:08:42Z",
+  "next_refresh_at": "2026-03-26T10:08:42Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -103,7 +103,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://grafana.lv3.org",
-        "last_live_apply": "2026-03-25T00:00:00Z",
+        "last_live_apply": "2026-03-26T00:00:00Z",
         "slo_status": "unknown"
       },
       "headscale": {
@@ -183,7 +183,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://nginx.lv3.org",
-        "last_live_apply": "2026-03-25T00:00:00Z",
+        "last_live_apply": "2026-03-26T00:00:00Z",
         "slo_status": "unknown"
       },
       "ntfy": {
@@ -3049,7 +3049,7 @@
         "id": "rag-platform-context",
         "title": "RAG Platform Context",
         "agent_trust_required": "T3",
-        "steps": 8,
+        "steps": 9,
         "path": "docs/runbooks/rag-platform-context.md",
         "workflow_ids": [
           "converge-rag-context"
@@ -3186,10 +3186,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.159.1",
+    "last_version": "0.161.0",
     "deployed_at": "2026-03-26",
-    "summary": "fix the ADR 0161 live runtime path so the gateway can boot without optional maintenance-window or SLO helper modules present in the image align the ADR 0161 gateway and interactive ops portal runtimes with the live docker-runtime host-network topology, including localhost Keycloak and NATS wiring plus the controller-managed legacy platform token path",
-    "release_notes_url": "docs/release-notes/0.159.2.md"
+    "summary": "implement the first ADR 0166 rollout with a shared `config/error-codes.yaml` registry, reusable canonical error helpers, and canonical error envelopes for the API gateway and platform-context API harden the `api-gateway` and `platform-context` runtime packaging so fresh worktrees ship the shared registry and helper module into their live-apply bundles",
+    "release_notes_url": "docs/release-notes/0.162.0.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -3259,13 +3259,6 @@
       "status": "Proposed",
       "implementation_status": "Not Implemented",
       "path": "docs/adr/0118-replayable-failure-case-library.md"
-    },
-    {
-      "adr": "0166",
-      "title": "Canonical Error Response Format and Error Code Registry",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0166-canonical-error-response-format-and-error-code-registry.md"
     },
     {
       "adr": "0167",

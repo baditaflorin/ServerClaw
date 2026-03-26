@@ -2444,6 +2444,68 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-langfuse": {
+      "description": "Converge Langfuse on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at langfuse.lv3.org, and verify repo-managed trace ingestion.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-langfuse",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-langfuse"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "langfuse_database_password",
+          "langfuse_nextauth_secret",
+          "langfuse_salt",
+          "langfuse_encryption_key",
+          "langfuse_clickhouse_password",
+          "langfuse_redis_password",
+          "langfuse_minio_root_password",
+          "langfuse_bootstrap_user_password",
+          "langfuse_project_secret_key",
+          "keycloak_langfuse_client_secret"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-langfuse"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-langfuse.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/langfuse.yml",
+        "roles/langfuse_postgres",
+        "roles/langfuse_runtime",
+        "roles/keycloak_runtime/tasks/main.yml",
+        "inventory/host_vars/proxmox_florin.yml",
+        "scripts/langfuse_trace_smoke.py",
+        "platform/llm/observability.py"
+      ],
+      "outputs": [
+        "A repo-managed Langfuse runtime on docker-runtime-lv3 with PostgreSQL on postgres-lv3, Keycloak-backed browser sign-in, mirrored bootstrap API credentials, and a live trace smoke-verification path."
+      ],
+      "verification_commands": [
+        "make syntax-check-langfuse",
+        "curl -s https://langfuse.lv3.org/api/public/health",
+        "uv run --with langfuse --with requests python scripts/langfuse_trace_smoke.py --base-url https://langfuse.lv3.org --project-id lv3-agent-observability --bootstrap-email baditaflorin@gmail.com --bootstrap-password-file .local/langfuse/bootstrap-user-password.txt"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 350,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-open-webui": {
       "description": "Deploy private Open WebUI on docker-runtime-lv3 with repo-managed bootstrap auth and an operator-only Tailscale proxy on the Proxmox host.",
       "lifecycle_status": "active",

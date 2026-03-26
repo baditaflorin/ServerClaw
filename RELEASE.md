@@ -1,16 +1,14 @@
-# Release 0.159.1
+# Release 0.163.0
 
 - Date: 2026-03-26
 
 ## Summary
-- complete the first live apply for ADR 0156 on current `main` by verifying the session-scoped build-server workspace route end to end
-- repair the live build-server gate path by aligning the Headscale jump-host references, preserving remote `.git-remote` caches between session syncs, and keeping remote checkout metadata valid
-- clear current YAML and ansible-lint failures on `main` that blocked the ADR 0156 gate, including the idempotency fixture shape and ansible task metadata debt
-- record ADR 0156 as live on repository version `0.159.1` and platform version `0.130.9`
+- implement ADR 0146 with a repo-managed Langfuse deployment on `docker-runtime-lv3`, Keycloak-backed operator access, the seeded `lv3-agent-observability` project, and public publication at `https://langfuse.lv3.org`
+- add the shared Langfuse observability helper plus the smoke verifier so approved agent runtimes can emit traces and operators can verify API and UI ingestion end to end
+- harden the Langfuse live-apply path by fixing topology generation, edge certificate recovery defaults, URL-safe runtime credentials, smoke-verification imports, and Redis persistence ownership
 
 ## Platform Impact
-- repository version advances to `0.159.1`
-- platform version advances to `0.130.9` because the 2026-03-26 mainline live apply verified the session-scoped build-server workspace path with `LV3_SESSION_ID=adr-0156-live`, including the remote workspace checkout probe and a successful `remote-lint` completion through the command's built-in local fallback when the published ansible runner image exposed an `ansible-lint` import mismatch
+- repository version advances to `0.163.0`; ADR 0146 adds the Langfuse observability surface and its verified production live apply is recorded separately as platform version `0.130.14`.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

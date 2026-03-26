@@ -25,6 +25,61 @@ def make_repo(tmp_path: Path) -> Path:
         '{"services":[{"id":"grafana","name":"Grafana","description":"Monitoring UI","category":"observability","lifecycle_status":"active","vm":"monitoring-lv3","exposure":"public","public_url":"https://grafana.lv3.org","environments":{"production":{"status":"active","url":"https://grafana.lv3.org"}}},{"id":"step_ca","name":"step-ca","description":"Certificate authority","category":"security","lifecycle_status":"active","vm":"docker-runtime-lv3","exposure":"private-only","internal_url":"https://10.10.10.20:9443","environments":{"production":{"status":"active","url":"https://10.10.10.20:9443"}}}]}',
     )
     write(
+        tmp_path / "config" / "error-codes.yaml",
+        """schema_version: 1.0.0
+error_codes:
+  AUTH_TOKEN_MISSING:
+    http_status: 401
+    severity: warn
+    category: authentication
+    retry_advice: none
+    description: Bearer token is required for this endpoint.
+    context_fields: [header]
+  AUTH_TOKEN_INVALID:
+    http_status: 401
+    severity: warn
+    category: authentication
+    retry_advice: none
+    description: Bearer token is invalid.
+    context_fields: [header]
+  INPUT_SCHEMA_INVALID:
+    http_status: 422
+    severity: warn
+    category: input
+    retry_advice: none
+    description: Request payload or parameters failed validation.
+    context_fields: [field_path, error_type, validation_message]
+  INPUT_UNKNOWN_WORKFLOW:
+    http_status: 404
+    severity: info
+    category: input
+    retry_advice: none
+    description: Requested workflow is not defined.
+    context_fields: [workflow_id]
+  INPUT_UNKNOWN_COMMAND:
+    http_status: 404
+    severity: info
+    category: input
+    retry_advice: none
+    description: Requested command is not defined.
+    context_fields: [command_id]
+  INPUT_UNKNOWN_SERVICE:
+    http_status: 404
+    severity: info
+    category: input
+    retry_advice: none
+    description: Requested platform service is not defined.
+    context_fields: [service_id]
+  INTERNAL_UNEXPECTED_ERROR:
+    http_status: 500
+    severity: error
+    category: internal
+    retry_advice: manual
+    description: Unexpected internal error.
+    context_fields: [detail]
+""",
+    )
+    write(
         tmp_path / "config" / "slo-catalog.json",
         '{"schema_version":"1.0.0","review_note":"review later","slos":[{"id":"grafana-availability","service_id":"grafana","indicator":"availability","objective_percent":99.5,"window_days":30,"target_url":"https://grafana.lv3.org","probe_module":"http_2xx_follow_redirects","description":"Grafana stays up."}]}',
     )
@@ -48,6 +103,7 @@ def test_query_returns_cited_step_ca_chunk(tmp_path: Path) -> None:
         ServiceConfig(
             api_token="test-token",
             corpus_root=repo_root,
+            error_registry_path=repo_root / "config" / "error-codes.yaml",
             collection_name="test",
             qdrant_url=None,
             qdrant_location=":memory:",
@@ -82,6 +138,7 @@ def test_sentence_transformers_backend_falls_back_to_token_hash(tmp_path: Path, 
         ServiceConfig(
             api_token="test-token",
             corpus_root=repo_root,
+            error_registry_path=repo_root / "config" / "error-codes.yaml",
             collection_name="test",
             qdrant_url=None,
             qdrant_location=":memory:",
@@ -102,6 +159,7 @@ def test_platform_slos_return_catalog_entries(tmp_path: Path) -> None:
         ServiceConfig(
             api_token="test-token",
             corpus_root=repo_root,
+            error_registry_path=repo_root / "config" / "error-codes.yaml",
             collection_name="test",
             qdrant_url=None,
             qdrant_location=":memory:",
@@ -125,6 +183,7 @@ def test_dependency_graph_methods_return_expected_payload(tmp_path: Path) -> Non
         ServiceConfig(
             api_token="test-token",
             corpus_root=repo_root,
+            error_registry_path=repo_root / "config" / "error-codes.yaml",
             collection_name="test",
             qdrant_url=None,
             qdrant_location=":memory:",
@@ -148,6 +207,7 @@ def test_platform_context_http_sets_trace_header(tmp_path: Path) -> None:
         ServiceConfig(
             api_token="test-token",
             corpus_root=repo_root,
+            error_registry_path=repo_root / "config" / "error-codes.yaml",
             collection_name="test",
             qdrant_url=None,
             qdrant_location=":memory:",
@@ -187,5 +247,47 @@ def test_build_config_uses_corpus_root_for_default_observability_paths(tmp_path:
 
     config = platform_context_service.build_config()
 
+    assert config.error_registry_path == repo_root / "config" / "error-codes.yaml"
     assert config.prometheus_url == "http://100.118.189.95:9090"
     assert config.grafana_url == "https://grafana.lv3.org"
+
+
+def test_platform_context_app_returns_canonical_errors(tmp_path: Path) -> None:
+    from fastapi.testclient import TestClient
+
+    repo_root = make_repo(tmp_path)
+    platform_context_service.service = PlatformContextService(
+        ServiceConfig(
+            api_token="test-token",
+            corpus_root=repo_root,
+            error_registry_path=repo_root / "config" / "error-codes.yaml",
+            collection_name="test",
+            qdrant_url=None,
+            qdrant_location=":memory:",
+            embedding_backend="token-hash",
+            embedding_model="unused",
+            embedding_dimension=384,
+        )
+    )
+    client = TestClient(platform_context_service.app)
+    try:
+        unauthorized = client.get("/v1/platform-summary")
+        assert unauthorized.status_code == 401
+        assert unauthorized.json()["error"]["code"] == "AUTH_TOKEN_MISSING"
+
+        missing_workflow = client.get(
+            "/v1/workflows/missing",
+            headers={"Authorization": "Bearer test-token"},
+        )
+        assert missing_workflow.status_code == 404
+        assert missing_workflow.json()["error"]["code"] == "INPUT_UNKNOWN_WORKFLOW"
+
+        invalid_query = client.post(
+            "/v1/context/query",
+            headers={"Authorization": "Bearer test-token"},
+            json={"question": "hi", "top_k": 3},
+        )
+        assert invalid_query.status_code == 422
+        assert invalid_query.json()["error"]["code"] == "INPUT_SCHEMA_INVALID"
+    finally:
+        platform_context_service.service = None

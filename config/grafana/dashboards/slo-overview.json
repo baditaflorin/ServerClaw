@@ -854,7 +854,7 @@
     {
       "id": 21,
       "type": "text",
-      "title": "uptime-kuma-availability",
+      "title": "langfuse-availability",
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -862,7 +862,7 @@
         "y": 28
       },
       "options": {
-        "content": "### uptime-kuma-availability\n\nUptime Kuma remains reachable through the public status surface.\n\nService: `uptime_kuma`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=uptime-kuma-availability)",
+        "content": "### langfuse-availability\n\nLangfuse remains reachable through the public LV3 edge for trace ingestion and operator access.\n\nService: `langfuse`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=langfuse-availability)",
         "mode": "markdown"
       }
     },
@@ -905,7 +905,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:uptime_kuma_availability:success_ratio_30d",
+          "expr": "slo:langfuse_availability:success_ratio_30d",
           "legendFormat": "30d Compliance"
         }
       ]
@@ -969,7 +969,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:uptime_kuma_availability:budget_remaining",
+          "expr": "slo:langfuse_availability:budget_remaining",
           "legendFormat": "Budget Remaining"
         }
       ]
@@ -1013,7 +1013,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:uptime_kuma_availability:burn_rate_1h",
+          "expr": "slo:langfuse_availability:burn_rate_1h",
           "legendFormat": "Burn Rate (1h)"
         }
       ]
@@ -1057,7 +1057,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:uptime_kuma_availability:time_to_budget_exhaustion_days",
+          "expr": "slo:langfuse_availability:time_to_budget_exhaustion_days",
           "legendFormat": "Budget Exhaustion (days)"
         }
       ]
@@ -1065,7 +1065,7 @@
     {
       "id": 26,
       "type": "text",
-      "title": "nginx-edge-availability",
+      "title": "uptime-kuma-availability",
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -1073,7 +1073,7 @@
         "y": 35
       },
       "options": {
-        "content": "### nginx-edge-availability\n\nThe edge reverse proxy remains reachable for published services.\n\nService: `nginx_edge`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=nginx-edge-availability)",
+        "content": "### uptime-kuma-availability\n\nUptime Kuma remains reachable through the public status surface.\n\nService: `uptime_kuma`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=uptime-kuma-availability)",
         "mode": "markdown"
       }
     },
@@ -1116,7 +1116,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:nginx_edge_availability:success_ratio_30d",
+          "expr": "slo:uptime_kuma_availability:success_ratio_30d",
           "legendFormat": "30d Compliance"
         }
       ]
@@ -1180,7 +1180,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:nginx_edge_availability:budget_remaining",
+          "expr": "slo:uptime_kuma_availability:budget_remaining",
           "legendFormat": "Budget Remaining"
         }
       ]
@@ -1224,7 +1224,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:nginx_edge_availability:burn_rate_1h",
+          "expr": "slo:uptime_kuma_availability:burn_rate_1h",
           "legendFormat": "Burn Rate (1h)"
         }
       ]
@@ -1268,7 +1268,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:nginx_edge_availability:time_to_budget_exhaustion_days",
+          "expr": "slo:uptime_kuma_availability:time_to_budget_exhaustion_days",
           "legendFormat": "Budget Exhaustion (days)"
         }
       ]
@@ -1276,7 +1276,7 @@
     {
       "id": 31,
       "type": "text",
-      "title": "open-webui-availability",
+      "title": "nginx-edge-availability",
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -1284,7 +1284,7 @@
         "y": 42
       },
       "options": {
-        "content": "### open-webui-availability\n\nOpen WebUI remains reachable on the private runtime network.\n\nService: `open_webui`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=open-webui-availability)",
+        "content": "### nginx-edge-availability\n\nThe edge reverse proxy remains reachable for published services.\n\nService: `nginx_edge`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=nginx-edge-availability)",
         "mode": "markdown"
       }
     },
@@ -1327,7 +1327,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:open_webui_availability:success_ratio_30d",
+          "expr": "slo:nginx_edge_availability:success_ratio_30d",
           "legendFormat": "30d Compliance"
         }
       ]
@@ -1391,7 +1391,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:open_webui_availability:budget_remaining",
+          "expr": "slo:nginx_edge_availability:budget_remaining",
           "legendFormat": "Budget Remaining"
         }
       ]
@@ -1435,7 +1435,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:open_webui_availability:burn_rate_1h",
+          "expr": "slo:nginx_edge_availability:burn_rate_1h",
           "legendFormat": "Burn Rate (1h)"
         }
       ]
@@ -1479,7 +1479,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:open_webui_availability:time_to_budget_exhaustion_days",
+          "expr": "slo:nginx_edge_availability:time_to_budget_exhaustion_days",
           "legendFormat": "Budget Exhaustion (days)"
         }
       ]
@@ -1487,7 +1487,7 @@
     {
       "id": 36,
       "type": "text",
-      "title": "windmill-availability",
+      "title": "open-webui-availability",
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -1495,7 +1495,7 @@
         "y": 49
       },
       "options": {
-        "content": "### windmill-availability\n\nWindmill API stays reachable for scheduled automation.\n\nService: `windmill`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=windmill-availability)",
+        "content": "### open-webui-availability\n\nOpen WebUI remains reachable on the private runtime network.\n\nService: `open_webui`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=open-webui-availability)",
         "mode": "markdown"
       }
     },
@@ -1538,7 +1538,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:windmill_availability:success_ratio_30d",
+          "expr": "slo:open_webui_availability:success_ratio_30d",
           "legendFormat": "30d Compliance"
         }
       ]
@@ -1602,7 +1602,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:windmill_availability:budget_remaining",
+          "expr": "slo:open_webui_availability:budget_remaining",
           "legendFormat": "Budget Remaining"
         }
       ]
@@ -1646,7 +1646,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:windmill_availability:burn_rate_1h",
+          "expr": "slo:open_webui_availability:burn_rate_1h",
           "legendFormat": "Burn Rate (1h)"
         }
       ]
@@ -1690,7 +1690,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:windmill_availability:time_to_budget_exhaustion_days",
+          "expr": "slo:open_webui_availability:time_to_budget_exhaustion_days",
           "legendFormat": "Budget Exhaustion (days)"
         }
       ]
@@ -1698,7 +1698,7 @@
     {
       "id": 41,
       "type": "text",
-      "title": "netbox-availability",
+      "title": "windmill-availability",
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -1706,7 +1706,7 @@
         "y": 56
       },
       "options": {
-        "content": "### netbox-availability\n\nNetBox remains reachable for inventory, IPAM, and topology workflows.\n\nService: `netbox`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=netbox-availability)",
+        "content": "### windmill-availability\n\nWindmill API stays reachable for scheduled automation.\n\nService: `windmill`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=windmill-availability)",
         "mode": "markdown"
       }
     },
@@ -1749,7 +1749,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:netbox_availability:success_ratio_30d",
+          "expr": "slo:windmill_availability:success_ratio_30d",
           "legendFormat": "30d Compliance"
         }
       ]
@@ -1813,7 +1813,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:netbox_availability:budget_remaining",
+          "expr": "slo:windmill_availability:budget_remaining",
           "legendFormat": "Budget Remaining"
         }
       ]
@@ -1857,7 +1857,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:netbox_availability:burn_rate_1h",
+          "expr": "slo:windmill_availability:burn_rate_1h",
           "legendFormat": "Burn Rate (1h)"
         }
       ]
@@ -1901,7 +1901,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:netbox_availability:time_to_budget_exhaustion_days",
+          "expr": "slo:windmill_availability:time_to_budget_exhaustion_days",
           "legendFormat": "Budget Exhaustion (days)"
         }
       ]
@@ -1909,7 +1909,7 @@
     {
       "id": 46,
       "type": "text",
-      "title": "vaultwarden-availability",
+      "title": "netbox-availability",
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -1917,7 +1917,7 @@
         "y": 63
       },
       "options": {
-        "content": "### vaultwarden-availability\n\nVaultwarden remains reachable on the private Tailscale operator path.\n\nService: `vaultwarden`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=vaultwarden-availability)",
+        "content": "### netbox-availability\n\nNetBox remains reachable for inventory, IPAM, and topology workflows.\n\nService: `netbox`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=netbox-availability)",
         "mode": "markdown"
       }
     },
@@ -1960,7 +1960,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:vaultwarden_availability:success_ratio_30d",
+          "expr": "slo:netbox_availability:success_ratio_30d",
           "legendFormat": "30d Compliance"
         }
       ]
@@ -2024,7 +2024,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:vaultwarden_availability:budget_remaining",
+          "expr": "slo:netbox_availability:budget_remaining",
           "legendFormat": "Budget Remaining"
         }
       ]
@@ -2068,7 +2068,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:vaultwarden_availability:burn_rate_1h",
+          "expr": "slo:netbox_availability:burn_rate_1h",
           "legendFormat": "Burn Rate (1h)"
         }
       ]
@@ -2112,7 +2112,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:vaultwarden_availability:time_to_budget_exhaustion_days",
+          "expr": "slo:netbox_availability:time_to_budget_exhaustion_days",
           "legendFormat": "Budget Exhaustion (days)"
         }
       ]
@@ -2120,7 +2120,7 @@
     {
       "id": 51,
       "type": "text",
-      "title": "platform-context-api-availability",
+      "title": "vaultwarden-availability",
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -2128,7 +2128,7 @@
         "y": 70
       },
       "options": {
-        "content": "### platform-context-api-availability\n\nThe platform context API remains reachable for agent-assisted operator workflows.\n\nService: `platform_context_api`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=platform-context-api-availability)",
+        "content": "### vaultwarden-availability\n\nVaultwarden remains reachable on the private Tailscale operator path.\n\nService: `vaultwarden`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=vaultwarden-availability)",
         "mode": "markdown"
       }
     },
@@ -2171,7 +2171,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:platform_context_api_availability:success_ratio_30d",
+          "expr": "slo:vaultwarden_availability:success_ratio_30d",
           "legendFormat": "30d Compliance"
         }
       ]
@@ -2235,7 +2235,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:platform_context_api_availability:budget_remaining",
+          "expr": "slo:vaultwarden_availability:budget_remaining",
           "legendFormat": "Budget Remaining"
         }
       ]
@@ -2279,7 +2279,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:platform_context_api_availability:burn_rate_1h",
+          "expr": "slo:vaultwarden_availability:burn_rate_1h",
           "legendFormat": "Burn Rate (1h)"
         }
       ]
@@ -2323,7 +2323,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:platform_context_api_availability:time_to_budget_exhaustion_days",
+          "expr": "slo:vaultwarden_availability:time_to_budget_exhaustion_days",
           "legendFormat": "Budget Exhaustion (days)"
         }
       ]
@@ -2331,7 +2331,7 @@
     {
       "id": 56,
       "type": "text",
-      "title": "semaphore-availability",
+      "title": "platform-context-api-availability",
       "gridPos": {
         "h": 3,
         "w": 24,
@@ -2339,7 +2339,7 @@
         "y": 77
       },
       "options": {
-        "content": "### semaphore-availability\n\nSemaphore stays reachable for private Ansible job launches and API-based task inspection.\n\nService: `semaphore`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=semaphore-availability)",
+        "content": "### platform-context-api-availability\n\nThe platform context API remains reachable for agent-assisted operator workflows.\n\nService: `platform_context_api`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=platform-context-api-availability)",
         "mode": "markdown"
       }
     },
@@ -2382,7 +2382,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:semaphore_availability:success_ratio_30d",
+          "expr": "slo:platform_context_api_availability:success_ratio_30d",
           "legendFormat": "30d Compliance"
         }
       ]
@@ -2446,7 +2446,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:semaphore_availability:budget_remaining",
+          "expr": "slo:platform_context_api_availability:budget_remaining",
           "legendFormat": "Budget Remaining"
         }
       ]
@@ -2490,7 +2490,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "slo:semaphore_availability:burn_rate_1h",
+          "expr": "slo:platform_context_api_availability:burn_rate_1h",
           "legendFormat": "Burn Rate (1h)"
         }
       ]
@@ -2508,6 +2508,217 @@
         "w": 6,
         "x": 18,
         "y": 80
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "d"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "slo:platform_context_api_availability:time_to_budget_exhaustion_days",
+          "legendFormat": "Budget Exhaustion (days)"
+        }
+      ]
+    },
+    {
+      "id": 61,
+      "type": "text",
+      "title": "semaphore-availability",
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 84
+      },
+      "options": {
+        "content": "### semaphore-availability\n\nSemaphore stays reachable for private Ansible job launches and API-based task inspection.\n\nService: `semaphore`\n\n[Open Grafana](https://grafana.lv3.org/d/lv3-slo-overview/lv3-slo-overview?var-slo=semaphore-availability)",
+        "mode": "markdown"
+      }
+    },
+    {
+      "id": 62,
+      "type": "stat",
+      "title": "30d Compliance",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "lv3-prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 87
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "slo:semaphore_availability:success_ratio_30d",
+          "legendFormat": "30d Compliance"
+        }
+      ]
+    },
+    {
+      "id": 63,
+      "type": "stat",
+      "title": "Budget Remaining",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "lv3-prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 87
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.1
+              },
+              {
+                "color": "green",
+                "value": 0.5
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "slo:semaphore_availability:budget_remaining",
+          "legendFormat": "Budget Remaining"
+        }
+      ]
+    },
+    {
+      "id": 64,
+      "type": "stat",
+      "title": "Burn Rate (1h)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "lv3-prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 87
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "slo:semaphore_availability:burn_rate_1h",
+          "legendFormat": "Burn Rate (1h)"
+        }
+      ]
+    },
+    {
+      "id": 65,
+      "type": "stat",
+      "title": "Budget Exhaustion (days)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "lv3-prometheus"
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 87
       },
       "fieldConfig": {
         "defaults": {
@@ -2554,7 +2765,7 @@
         "name": "slo",
         "label": "SLO",
         "type": "custom",
-        "query": "status-page-availability,grafana-availability,keycloak-availability,keycloak-latency,uptime-kuma-availability,nginx-edge-availability,open-webui-availability,windmill-availability,netbox-availability,vaultwarden-availability,platform-context-api-availability,semaphore-availability",
+        "query": "status-page-availability,grafana-availability,keycloak-availability,keycloak-latency,langfuse-availability,uptime-kuma-availability,nginx-edge-availability,open-webui-availability,windmill-availability,netbox-availability,vaultwarden-availability,platform-context-api-availability,semaphore-availability",
         "current": {
           "selected": false,
           "text": "all",

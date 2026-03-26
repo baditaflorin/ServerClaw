@@ -228,6 +228,19 @@
           "notes": "This is the repo-managed mesh control plane. Node-to-node traffic remains WireGuard peer-to-peer or DERP-relayed after registration."
         },
         {
+          "id": "langfuse-observability-api",
+          "kind": "service_api",
+          "endpoint": "https://langfuse.lv3.org/api/public",
+          "auth": "Project-scoped Langfuse public and secret API keys mirrored under .local/langfuse plus Keycloak-backed browser sign-in for interactive operator use.",
+          "service_refs": [
+            "langfuse"
+          ],
+          "workflow_refs": [
+            "converge-langfuse"
+          ],
+          "notes": "This is the sanctioned agent-observability API surface for trace ingestion and read-back verification."
+        },
+        {
           "id": "open-webui-operator-workbench",
           "kind": "service_api",
           "endpoint": "http://100.64.0.1:8008",

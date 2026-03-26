@@ -7,7 +7,7 @@ Generated from `config/dependency-graph.json`.
 | Tier | Services |
 | --- | --- |
 | `1` | Alertmanager, Docker Build VM, Docker Runtime VM, Grafana, Headscale, Mail Platform, NGINX Edge, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, Uptime Kuma, ntfy, ntopng, step-ca |
-| `2` | Changelog Portal, Developer Portal, Keycloak, Mattermost, NetBox, Open WebUI, Public Status Page, Semaphore, Vaultwarden, Windmill, n8n |
+| `2` | Changelog Portal, Developer Portal, Keycloak, Langfuse, Mattermost, NetBox, Open WebUI, Public Status Page, Semaphore, Vaultwarden, Windmill, n8n |
 | `3` | Platform API Gateway |
 | `4` | Ops Portal |
 
@@ -36,6 +36,7 @@ graph TD
     changelog_portal["Changelog Portal\nTier 2"]
     docs_portal["Developer Portal\nTier 2"]
     keycloak["Keycloak\nTier 2"]
+    langfuse["Langfuse\nTier 2"]
     mattermost["Mattermost\nTier 2"]
     n8n["n8n\nTier 2"]
     netbox["NetBox\nTier 2"]
@@ -59,6 +60,10 @@ graph TD
     keycloak -->|startup_only| openbao
     keycloak -->|hard| postgres
     keycloak -->|startup_only| step_ca
+    langfuse -->|soft| keycloak
+    langfuse -->|soft| nginx_edge
+    langfuse -->|startup_only| openbao
+    langfuse -->|hard| postgres
     mail_platform -->|soft| nginx_edge
     mail_platform -->|startup_only| openbao
     mattermost -->|startup_only| openbao

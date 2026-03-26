@@ -131,6 +131,7 @@ platform_ports:
   mattermost_host_proxy_port: 8066
   netbox_server_port: 8082
   netbox_host_proxy_port: 8004
+  langfuse_port: 3002
   ollama_api_port: 11434
   n8n_port: 5678
   open_webui_port: 8088
@@ -169,6 +170,7 @@ platform_port_assignments:
   mattermost_host_proxy_port: 8066
   netbox_server_port: 8082
   netbox_host_proxy_port: 8004
+  langfuse_port: 3002
   ollama_api_port: 11434
   n8n_port: 5678
   open_webui_port: 8088
@@ -985,6 +987,34 @@ platform_service_topology:
     urls:
       internal: http://10.10.10.20:8082
       controller: http://100.64.0.1:8004
+  langfuse:
+    service_name: langfuse
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: langfuse.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: langfuse
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:3002
+    service_id: langfuse
+    ports:
+      internal: 3002
+    urls:
+      public: https://langfuse.lv3.org
+      internal: http://10.10.10.20:3002
   open_webui:
     service_name: open-webui
     owning_vm: docker-runtime-lv3
@@ -1308,6 +1338,10 @@ platform_dns_records:
       value: 65.108.75.123
       ttl: 60
     - name: mail
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: langfuse
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -1748,6 +1782,34 @@ public_edge_service_topology:
     urls:
       internal: http://10.10.10.20:8082
       controller: http://100.64.0.1:8004
+  langfuse:
+    service_name: langfuse
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: langfuse.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: langfuse
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:3002
+    service_id: langfuse
+    ports:
+      internal: 3002
+    urls:
+      public: https://langfuse.lv3.org
+      internal: http://10.10.10.20:3002
   open_webui:
     service_name: open-webui
     owning_vm: docker-runtime-lv3
@@ -2127,6 +2189,7 @@ openbao_http_port: 8201
 openbao_proxy_port: 8200
 windmill_server_port: 8000
 netbox_server_port: 8082
+langfuse_port: 3002
 ollama_api_port: 11434
 n8n_port: 5678
 open_webui_port: 8088

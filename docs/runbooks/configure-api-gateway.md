@@ -45,7 +45,7 @@ test -f /opt/api-gateway/config/timeout-hierarchy.yaml
 Expected:
 
 - `/healthz` returns `200`
-- `/v1/health` returns `401` without a bearer token
+- `/v1/health` returns `401` with `error.code=AUTH_TOKEN_MISSING` without a bearer token
 
 From an operator workstation with a valid Keycloak token:
 
@@ -63,4 +63,5 @@ curl -H "Authorization: Bearer $LV3_TOKEN" https://api.lv3.org/v1/platform/servi
 - Safe read paths now use the ADR 0163 retry taxonomy with the shared `/config/retry-policies.yaml` bundle.
 - Non-idempotent webhook and proxied write paths remain single-shot until ADR 0165 idempotency keys are in place.
 - Native `/v1/platform/*` endpoints read repo-synced catalogs copied into the runtime bundle.
+- Error responses for repo-managed gateway endpoints use the canonical registry in `config/error-codes.yaml`.
 - The public edge certificate for `api.lv3.org` is part of the shared `lv3-edge` certificate on `nginx-lv3`.

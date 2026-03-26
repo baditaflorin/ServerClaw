@@ -93,6 +93,14 @@
       "requires_compose_secrets": true,
       "suppression_preset": "legacy-service"
     },
+    "langfuse": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": true,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "suppression_preset": "legacy-service"
+    },
     "mail_platform": {
       "service_type": "compose",
       "requires_subdomain": true,

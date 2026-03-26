@@ -1,6 +1,6 @@
 # ADR 0070: Retrieval-Augmented Context For Platform Queries
 
-- Status: Accepted
+- Status: Implemented
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.71.0
 - Implemented In Platform Version: 0.35.0
@@ -69,4 +69,5 @@ Access:
 - [scripts/platform_context_corpus.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/platform_context_corpus.py) defines corpus discovery and chunking, keeping ADRs and runbooks aligned to Markdown `##` boundaries before paragraph splitting.
 - [scripts/build_rag_index.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/build_rag_index.py) now provides the canonical dry-run and upload path for corpus builds, and [scripts/query_platform_context.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/query_platform_context.py) provides a direct private query client.
 - [scripts/platform_context_service.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/platform_context_service.py) serves the private OpenAPI tool surface for `query-platform-context`, workflow or command contract lookups, recent receipt reporting, and platform summary reads.
+- Repo version `0.162.0` extends the service with ADR 0166 canonical error envelopes and the shared error-code registry.
 - Operator usage and Open WebUI global-tool integration are documented in [docs/runbooks/rag-platform-context.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/rag-platform-context.md).

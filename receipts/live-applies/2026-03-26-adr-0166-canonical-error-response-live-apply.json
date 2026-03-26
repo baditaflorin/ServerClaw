@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-26-adr-0166-canonical-error-response-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-26",
+  "recorded_on": "2026-03-26",
+  "recorded_by": "codex",
+  "source_commit": "bfe876bdf623375be333b3f72edd0cc8dbbcc10b",
+  "repo_version_context": "0.162.0",
+  "workflow_id": "converge-rag-context",
+  "adr": "0166",
+  "summary": "Completed the first current-mainline live rollout for ADR 0166 by reconverging the API gateway and platform-context surfaces from the rebased `0.162.0` tree, then verifying the canonical `AUTH_TOKEN_MISSING` envelope on both the public and private runtime endpoints.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "api_gateway",
+      "address": "https://api.lv3.org/v1/health"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "platform_context",
+      "address": "http://100.64.0.1:8010"
+    }
+  ],
+  "verification": [
+    {
+      "check": "API gateway converge",
+      "result": "pass",
+      "observed": "The 2026-03-26 `make live-apply-service service=api-gateway env=production` replay finished with `docker-runtime-lv3 : ok=125 changed=27 unreachable=0 failed=0`, and the runtime verify step asserted the anonymous aggregate-health rejection used the canonical error envelope."
+    },
+    {
+      "check": "Public gateway canonical auth rejection",
+      "result": "pass",
+      "observed": "`curl https://api.lv3.org/v1/health` returned HTTP `401` with `{\"error\":{\"code\":\"AUTH_TOKEN_MISSING\"...}}` and a gateway `trace_id` after the replay."
+    },
+    {
+      "check": "Private platform-context canonical auth rejection",
+      "result": "pass",
+      "observed": "`curl http://100.64.0.1:8010/v1/platform-summary` returned HTTP `401` with the canonical `AUTH_TOKEN_MISSING` envelope after the rebuilt platform-context container loaded the shared error registry."
+    },
+    {
+      "check": "Platform-context corpus rebuild",
+      "result": "pass",
+      "observed": "`POST http://100.64.0.1:8010/v1/admin/rebuild-local` with the mirrored platform-context bearer token returned `{\"collection_name\":\"platform_context\",\"indexed_chunks\":2550,\"source\":\"/opt/platform-context/corpus\"}`."
+    },
+    {
+      "check": "Platform-context query response",
+      "result": "pass",
+      "observed": "`POST http://100.64.0.1:8010/v1/context/query` with the mirrored bearer token returned HTTP `200` and cited `matches` entries sourced from the mirrored corpus."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0166-canonical-error-response-format-and-error-code-registry.md",
+    "docs/workstreams/adr-0166-canonical-error-response-format.md",
+    "docs/runbooks/platform-api-error-codes.md",
+    "config/error-codes.yaml",
+    "scripts/canonical_errors.py",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "Public SSH reachability to `65.108.75.123:22` remained intermittent during the live replay, so the successful path used direct Tailscale host access to `ops@100.64.0.1` and the governed Proxmox guest jump for `docker-runtime-lv3`.",
+    "The repo-managed `rag-context` converge stalled during the mirrored corpus copy before `/opt/platform-context/corpus/config/error-codes.yaml` reached the guest. The rollout was completed by rebuilding `platform-context-api` directly with `docker compose up -d --build --remove-orphans`, copying the missing registry file into the mirrored corpus, and restarting the container before the final verification probes."
+  ]
+}

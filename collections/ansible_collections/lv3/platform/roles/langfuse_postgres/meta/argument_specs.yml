@@ -1,0 +1,20 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the PostgreSQL backend for Langfuse.
+    options:
+      langfuse_database_name:
+        type: str
+        required: true
+      langfuse_database_user:
+        type: str
+        required: true
+      langfuse_postgres_secret_dir:
+        type: path
+        required: true
+      langfuse_postgres_password_file:
+        type: path
+        required: true
+      langfuse_database_password_local_file:
+        type: path
+        required: true

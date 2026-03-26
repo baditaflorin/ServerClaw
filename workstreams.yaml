@@ -2338,7 +2338,7 @@ workstreams:
   - id: adr-0124-platform-event-taxonomy
     adr: "0124"
     title: Platform event taxonomy and canonical NATS topics
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0124-platform-event-taxonomy
     worktree_path: .worktrees/adr-0124
@@ -2362,7 +2362,7 @@ workstreams:
       - scripts/validate_nats_topics.py
       - docs/runbooks/platform-event-taxonomy.md
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0125-agent-capability-bounds
     adr: "0125"
@@ -2823,6 +2823,34 @@ workstreams:
     ready_to_merge: false
     live_applied: true
 
+  - id: adr-0146-ai-observability
+    adr: "0146"
+    title: Langfuse for agent observability
+    status: live_applied
+    owner: codex
+    branch: codex/adr-0146-ai-observability
+    worktree_path: .worktrees/adr-0146-ai-observability
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0146-ai-observability.md
+    depends_on:
+      - adr-0043-openbao
+      - adr-0056-keycloak-sso
+      - adr-0075-service-capability-catalog
+      - adr-0077-compose-secrets-injection
+    conflicts_with: []
+    shared_surfaces:
+      - playbooks/langfuse.yml
+      - collections/ansible_collections/lv3/platform/roles/langfuse_runtime/
+      - collections/ansible_collections/lv3/platform/roles/langfuse_postgres/
+      - config/service-capability-catalog.json
+      - config/health-probe-catalog.json
+      - config/secret-catalog.json
+      - config/image-catalog.json
+      - inventory/host_vars/proxmox_florin.yml
+      - scripts/langfuse_trace_smoke.py
+      - platform/llm/observability.py
+    ready_to_merge: false
+    live_applied: true
+
   - id: adr-0147-vaultwarden
     adr: "0147"
     title: Vaultwarden for operator credential management
@@ -3143,6 +3171,31 @@ workstreams:
       - docs/runbooks/budgeted-workflow-scheduler.md
     ready_to_merge: false
     live_applied: false
+
+  - id: adr-0166-canonical-error-response-format
+    adr: "0166"
+    title: Canonical error response format and error code registry
+    status: live_applied
+    owner: codex
+    branch: codex/live-apply-0166
+    worktree_path: .worktrees/live-apply-0166
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0166-canonical-error-response-format.md
+    depends_on:
+      - adr-0031-validation-pipeline
+      - adr-0070-rag-platform-context
+      - adr-0092-platform-api-gateway
+    conflicts_with: []
+    shared_surfaces:
+      - config/error-codes.yaml
+      - scripts/canonical_errors.py
+      - scripts/api_gateway/main.py
+      - scripts/platform_context_service.py
+      - scripts/validate_repository_data_models.py
+      - docs/runbooks/platform-api-error-codes.md
+      - collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/
+      - collections/ansible_collections/lv3/platform/roles/rag_context_runtime/
+    ready_to_merge: false
+    live_applied: true
 
   - id: adr-0168-idempotency-ci
     adr: "0168"

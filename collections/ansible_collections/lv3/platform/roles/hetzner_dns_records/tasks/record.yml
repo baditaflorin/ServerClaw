@@ -56,7 +56,7 @@
       name: "{{ hetzner_dns_record.name }}"
       type: "{{ hetzner_dns_record.type }}"
       value: "{{ hetzner_dns_record.value }}"
-      ttl: "{{ hetzner_dns_record.ttl | default(60) }}"
+      ttl: "{{ hetzner_dns_record.ttl | default(60) | int }}"
     status_code:
       - 200
       - 201
@@ -75,7 +75,7 @@
       name: "{{ hetzner_dns_record.name }}"
       type: "{{ hetzner_dns_record.type }}"
       value: "{{ hetzner_dns_record.value }}"
-      ttl: "{{ hetzner_dns_record.ttl | default(60) }}"
+      ttl: "{{ hetzner_dns_record.ttl | default(60) | int }}"
     status_code:
       - 200
       - 201
