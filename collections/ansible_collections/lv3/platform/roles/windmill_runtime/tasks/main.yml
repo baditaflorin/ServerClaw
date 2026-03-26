@@ -590,6 +590,128 @@
   changed_when: false
   no_log: true
 
+- name: Create a temporary path for the ADR 0113 world-state migration
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.tempfile:
+    state: file
+    suffix: .sql
+  register: windmill_world_state_migration_tmp
+
+- name: Copy the ADR 0113 world-state migration to the database host
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../migrations/0010_world_state_schema.sql"
+    dest: "{{ windmill_world_state_migration_tmp.path }}"
+    mode: "0600"
+
+- name: Apply the ADR 0113 world-state migration in the Windmill database
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -f
+      - "{{ windmill_world_state_migration_tmp.path }}"
+  changed_when: false
+
+- name: Remove the temporary ADR 0113 world-state migration file
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.file:
+    path: "{{ windmill_world_state_migration_tmp.path }}"
+    state: absent
+
+- name: Assert the ADR 0113 world-state schema exists in the Windmill database
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -Atqc
+      - "SELECT to_regclass('world_state.current_view')"
+  register: windmill_world_state_schema_check
+  changed_when: false
+
+- name: Fail when the ADR 0113 world-state schema is missing
+  ansible.builtin.assert:
+    that:
+      - windmill_world_state_schema_check.stdout | trim == 'world_state.current_view'
+    fail_msg: "ADR 0113 live schema apply did not create world_state.current_view in the Windmill database."
+
+- name: Create a temporary path for the ADR 0117 graph migration
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.tempfile:
+    state: file
+    suffix: .sql
+  register: windmill_graph_migration_tmp
+
+- name: Copy the ADR 0117 graph migration to the database host
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../migrations/0012_graph_schema.sql"
+    dest: "{{ windmill_graph_migration_tmp.path }}"
+    mode: "0600"
+
+- name: Apply the ADR 0117 graph migration in the Windmill database
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -f
+      - "{{ windmill_graph_migration_tmp.path }}"
+  changed_when: false
+
+- name: Remove the temporary ADR 0117 graph migration file
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.file:
+    path: "{{ windmill_graph_migration_tmp.path }}"
+    state: absent
+
+- name: Assert the ADR 0117 graph schema exists in the Windmill database
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -Atqc
+      - "SELECT to_regclass('graph.nodes')"
+  register: windmill_graph_schema_check
+  changed_when: false
+
+- name: Fail when the ADR 0117 graph schema is missing
+  ansible.builtin.assert:
+    that:
+      - windmill_graph_schema_check.stdout | trim == 'graph.nodes'
+    fail_msg: "ADR 0117 live schema apply did not create graph.nodes in the Windmill database."
+
 - name: Create a temporary path for the ADR 0158 config-merge migration
   delegate_to: "{{ windmill_database_inventory_host }}"
   become: true

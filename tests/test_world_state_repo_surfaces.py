@@ -13,7 +13,8 @@ def test_windmill_defaults_seed_world_state_scripts_and_schedules() -> None:
         (REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml").read_text()
     )
     script_paths = {entry["path"] for entry in defaults["windmill_seed_scripts"]}
-    schedule_paths = {entry["path"] for entry in defaults["windmill_seed_schedules"]}
+    schedules = {entry["path"]: entry for entry in defaults["windmill_seed_schedules"]}
+    schedule_paths = set(schedules)
 
     expected_scripts = {
         "f/lv3/world_state/refresh_proxmox_vms",
@@ -40,6 +41,9 @@ def test_windmill_defaults_seed_world_state_scripts_and_schedules() -> None:
 
     assert expected_scripts.issubset(script_paths)
     assert expected_schedules.issubset(schedule_paths)
+    for schedule_path in expected_schedules:
+        assert schedules[schedule_path]["enabled"] is True
+        assert schedules[schedule_path]["args"] == {"dsn": "{{ windmill_platform_dsn }}"}
 
 
 def test_world_state_migration_declares_unique_current_view_index() -> None:

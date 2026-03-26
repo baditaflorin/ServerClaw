@@ -89,6 +89,24 @@ api_gateway_keycloak_token_url: https://sso.lv3.org/realms/lv3/protocol/openid-c
 api_gateway_keycloak_verify_base_url: http://127.0.0.1:18080
 api_gateway_keycloak_docker_network: keycloak_default
 api_gateway_runtime_config_probe_path: /app/config/ledger-event-types.yaml
+api_gateway_database_name: windmill
+api_gateway_database_user: windmill_admin
+api_gateway_database_inventory_host: >-
+  {{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}
+api_gateway_database_host: "{{ hostvars[api_gateway_database_inventory_host].ansible_host }}"
+api_gateway_database_port: 5432
+api_gateway_database_password_local_file: "{{ api_gateway_repo_root }}/.local/windmill/database-password.txt"
+api_gateway_graph_dsn: >-
+  postgres://{{ api_gateway_database_user }}:{{
+    (
+      lookup('ansible.builtin.file', api_gateway_database_password_local_file, errors='ignore')
+      | default('', true)
+      | trim
+    )
+    | urlencode
+    | replace('/', '%2F')
+  }}@{{ api_gateway_database_host }}:{{ api_gateway_database_port }}/{{ api_gateway_database_name }}?sslmode=disable
+api_gateway_world_state_dsn: "{{ api_gateway_graph_dsn }}"
 api_gateway_verify_client_id: lv3-agent-hub
 api_gateway_verify_client_secret_local_file: >-
   {{

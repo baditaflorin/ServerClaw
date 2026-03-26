@@ -13,7 +13,8 @@ def test_windmill_defaults_seed_graph_scripts_and_schedules() -> None:
         (REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml").read_text()
     )
     script_paths = {entry["path"] for entry in defaults["windmill_seed_scripts"]}
-    schedule_paths = {entry["path"] for entry in defaults["windmill_seed_schedules"]}
+    schedules = {entry["path"]: entry for entry in defaults["windmill_seed_schedules"]}
+    schedule_paths = set(schedules)
 
     assert {
         "f/lv3/graph/import_from_catalog",
@@ -24,6 +25,16 @@ def test_windmill_defaults_seed_graph_scripts_and_schedules() -> None:
         "f/lv3/graph/import_from_catalog_every_5m",
         "f/lv3/graph/import_from_netbox_every_5m",
     }.issubset(schedule_paths)
+    assert schedules["f/lv3/graph/import_from_catalog_every_5m"]["enabled"] is True
+    assert schedules["f/lv3/graph/import_from_catalog_every_5m"]["args"] == {
+        "dsn": "{{ windmill_platform_dsn }}",
+        "world_state_dsn": "{{ windmill_platform_dsn }}",
+    }
+    assert schedules["f/lv3/graph/import_from_netbox_every_5m"]["enabled"] is True
+    assert schedules["f/lv3/graph/import_from_netbox_every_5m"]["args"] == {
+        "dsn": "{{ windmill_platform_dsn }}",
+        "world_state_dsn": "{{ windmill_platform_dsn }}",
+    }
 
 
 def test_graph_migration_declares_schema_and_unique_edges() -> None:
