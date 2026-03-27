@@ -225,6 +225,11 @@ platform_guest_catalog:
         - ingress
         - nginx
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: edge-publication
+        co_location_exceptions: []
       packages:
         - nginx
     - vmid: 120
@@ -243,6 +248,11 @@ platform_guest_catalog:
         - docker
         - runtime
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: runtime-shared
+        co_location_exceptions: []
       packages:
         - docker.io
     - vmid: 130
@@ -260,6 +270,11 @@ platform_guest_catalog:
         - docker
         - build
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: build-jobs
+        co_location_exceptions: []
       packages:
         - docker.io
         - git
@@ -281,6 +296,11 @@ platform_guest_catalog:
         - monitoring
         - grafana
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: observability-core
+        co_location_exceptions: []
       packages:
         - prometheus-node-exporter
     - vmid: 150
@@ -298,6 +318,11 @@ platform_guest_catalog:
         - postgres
         - database
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: postgres-ha
+        co_location_exceptions: []
       packages:
         - acl
         - nftables
@@ -319,6 +344,15 @@ platform_guest_catalog:
         - database
         - ha
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: standby
+        anti_affinity_group: postgres-ha
+        co_location_exceptions:
+          - scope: failure_domain
+            rationale: The platform still has only one active failure domain, so the
+              PostgreSQL standby carries an explicit temporary same-domain waiver
+              until auxiliary capacity is live.
       packages:
         - acl
         - nftables
@@ -343,6 +377,14 @@ platform_guest_catalog:
         - backup
         - pbs
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: recovery
+        anti_affinity_group: control-plane-recovery
+        co_location_exceptions:
+          - scope: failure_domain
+            rationale: Backup and restore automation still share the dedicated host
+              while the auxiliary cloud recovery domain remains planned but not active.
       packages:
         - acl
         - xfsprogs
@@ -364,6 +406,11 @@ platform_guest_catalog:
         - ingress
         - nginx
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: edge-publication
+        co_location_exceptions: []
       packages:
         - nginx
     docker-runtime-lv3:
@@ -383,6 +430,11 @@ platform_guest_catalog:
         - docker
         - runtime
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: runtime-shared
+        co_location_exceptions: []
       packages:
         - docker.io
     docker-build-lv3:
@@ -401,6 +453,11 @@ platform_guest_catalog:
         - docker
         - build
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: build-jobs
+        co_location_exceptions: []
       packages:
         - docker.io
         - git
@@ -423,6 +480,11 @@ platform_guest_catalog:
         - monitoring
         - grafana
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: observability-core
+        co_location_exceptions: []
       packages:
         - prometheus-node-exporter
     postgres-lv3:
@@ -441,6 +503,11 @@ platform_guest_catalog:
         - postgres
         - database
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: postgres-ha
+        co_location_exceptions: []
       packages:
         - acl
         - nftables
@@ -463,6 +530,15 @@ platform_guest_catalog:
         - database
         - ha
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: standby
+        anti_affinity_group: postgres-ha
+        co_location_exceptions:
+          - scope: failure_domain
+            rationale: The platform still has only one active failure domain, so the
+              PostgreSQL standby carries an explicit temporary same-domain waiver
+              until auxiliary capacity is live.
       packages:
         - acl
         - nftables
@@ -488,6 +564,14 @@ platform_guest_catalog:
         - backup
         - pbs
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: recovery
+        anti_affinity_group: control-plane-recovery
+        co_location_exceptions:
+          - scope: failure_domain
+            rationale: Backup and restore automation still share the dedicated host
+              while the auxiliary cloud recovery domain remains planned but not active.
       packages:
         - acl
         - xfsprogs
@@ -509,6 +593,11 @@ platform_guest_catalog:
         - ingress
         - nginx
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: edge-publication
+        co_location_exceptions: []
       packages:
         - nginx
     docker-runtime:
@@ -528,6 +617,11 @@ platform_guest_catalog:
         - docker
         - runtime
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: runtime-shared
+        co_location_exceptions: []
       packages:
         - docker.io
     docker-build:
@@ -546,6 +640,11 @@ platform_guest_catalog:
         - docker
         - build
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: build-jobs
+        co_location_exceptions: []
       packages:
         - docker.io
         - git
@@ -568,6 +667,11 @@ platform_guest_catalog:
         - monitoring
         - grafana
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: observability-core
+        co_location_exceptions: []
       packages:
         - prometheus-node-exporter
     postgres:
@@ -586,6 +690,11 @@ platform_guest_catalog:
         - postgres
         - database
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: postgres-ha
+        co_location_exceptions: []
       packages:
         - acl
         - nftables
@@ -608,6 +717,15 @@ platform_guest_catalog:
         - database
         - ha
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: standby
+        anti_affinity_group: postgres-ha
+        co_location_exceptions:
+          - scope: failure_domain
+            rationale: The platform still has only one active failure domain, so the
+              PostgreSQL standby carries an explicit temporary same-domain waiver
+              until auxiliary capacity is live.
       packages:
         - acl
         - nftables
@@ -633,6 +751,14 @@ platform_guest_catalog:
         - backup
         - pbs
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: recovery
+        anti_affinity_group: control-plane-recovery
+        co_location_exceptions:
+          - scope: failure_domain
+            rationale: Backup and restore automation still share the dedicated host
+              while the auxiliary cloud recovery domain remains planned but not active.
       packages:
         - acl
         - xfsprogs

@@ -96,6 +96,17 @@ proxmox_public_ingress_tcp_forwards:
   - listen_port: 993
     target_host: 10.10.10.20
     target_port: 993
+platform_failure_domains:
+  - id: host:proxmox_florin
+    kind: host
+    status: active
+    live_label: fd-host-proxmox-florin
+    summary: The current Hetzner dedicated Proxmox host that carries every live primary guest.
+  - id: cloud:hetzner-fsn1
+    kind: cloud
+    status: planned
+    live_label: fd-cloud-hetzner-fsn1
+    summary: Planned auxiliary Hetzner Cloud failure domain for recovery, preview, and burst workloads.
 proxmox_tailscale_tcp_proxies:
   - name: ntopng
     listen_address: "{{ management_tailscale_ipv4 }}"
@@ -180,6 +191,11 @@ proxmox_guests:
       - ingress
       - nginx
       - lv3
+    placement:
+      failure_domain: host:proxmox_florin
+      placement_class: primary
+      anti_affinity_group: edge-publication
+      co_location_exceptions: []
     packages:
       - nginx
   - vmid: 120
@@ -198,6 +214,11 @@ proxmox_guests:
       - docker
       - runtime
       - lv3
+    placement:
+      failure_domain: host:proxmox_florin
+      placement_class: primary
+      anti_affinity_group: runtime-shared
+      co_location_exceptions: []
     packages:
       - docker.io
   - vmid: 130
@@ -215,6 +236,11 @@ proxmox_guests:
       - docker
       - build
       - lv3
+    placement:
+      failure_domain: host:proxmox_florin
+      placement_class: primary
+      anti_affinity_group: build-jobs
+      co_location_exceptions: []
     packages:
       - docker.io
       - git
@@ -236,6 +262,11 @@ proxmox_guests:
       - monitoring
       - grafana
       - lv3
+    placement:
+      failure_domain: host:proxmox_florin
+      placement_class: primary
+      anti_affinity_group: observability-core
+      co_location_exceptions: []
     packages:
       - prometheus-node-exporter
   - vmid: 150
@@ -253,6 +284,11 @@ proxmox_guests:
       - postgres
       - database
       - lv3
+    placement:
+      failure_domain: host:proxmox_florin
+      placement_class: primary
+      anti_affinity_group: postgres-ha
+      co_location_exceptions: []
     packages:
       - acl
       - nftables
@@ -274,6 +310,13 @@ proxmox_guests:
       - database
       - ha
       - lv3
+    placement:
+      failure_domain: host:proxmox_florin
+      placement_class: standby
+      anti_affinity_group: postgres-ha
+      co_location_exceptions:
+        - scope: failure_domain
+          rationale: The platform still has only one active failure domain, so the PostgreSQL standby carries an explicit temporary same-domain waiver until auxiliary capacity is live.
     packages:
       - acl
       - nftables
@@ -298,6 +341,13 @@ proxmox_guests:
       - backup
       - pbs
       - lv3
+    placement:
+      failure_domain: host:proxmox_florin
+      placement_class: recovery
+      anti_affinity_group: control-plane-recovery
+      co_location_exceptions:
+        - scope: failure_domain
+          rationale: Backup and restore automation still share the dedicated host while the auxiliary cloud recovery domain remains planned but not active.
     packages:
       - acl
       - xfsprogs

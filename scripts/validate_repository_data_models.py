@@ -29,6 +29,7 @@ from control_plane_lanes import load_lane_catalog
 from data_catalog import load_data_catalog, validate_data_catalog
 from dependency_graph import load_dependency_graph
 from data_catalog import load_data_catalog, validate_data_catalog
+from failure_domain_policy import validate_failure_domain_policy
 from live_apply_receipts import RECEIPTS_DIR, iter_receipt_paths, validate_receipts
 from platform.circuit import load_circuit_policies
 from platform.interface_contracts import validate_contracts
@@ -2398,6 +2399,7 @@ def validate_repository_data_models() -> int:
     validate_certificate_catalog(host_vars_context)
     validate_health_probe_catalog(host_vars_context)
     validate_data_catalog(load_data_catalog())
+    validate_failure_domain_policy()
     validate_slo_catalog_assets()
     validate_secret_catalog(secret_manifest)
     token_classes = validate_token_policy()
