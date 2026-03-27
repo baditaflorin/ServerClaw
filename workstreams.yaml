@@ -91,6 +91,29 @@ workstreams:
     ready_to_merge: false
     live_applied: false
 
+  - id: adr-0176-inventory-sharding
+    adr: "0176"
+    title: Inventory sharding and host-scoped Ansible execution
+    status: implemented
+    owner: codex
+    branch: codex/adr-0176-inventory-sharding
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/worktree-adr-0176-inventory-sharding
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0176-inventory-sharding.md
+    depends_on:
+      - adr-0048-command-catalog
+      - adr-0154-vm-scoped-parallel-execution-lanes
+      - adr-0157-per-vm-concurrency-budget
+    conflicts_with: []
+    shared_surfaces:
+      - config/ansible-execution-scopes.yaml
+      - platform/ansible/execution_scopes.py
+      - scripts/ansible_scope_runner.py
+      - Makefile
+      - scripts/validate_repo.sh
+      - docs/runbooks/ansible-inventory-sharding.md
+    ready_to_merge: true
+    live_applied: false
+
   - id: adr-0163-retry-taxonomy
     adr: "0163"
     title: Platform-wide retry taxonomy and exponential backoff

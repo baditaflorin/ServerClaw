@@ -6,18 +6,16 @@ Detailed per-change deployment history is generated separately in the deployment
 
 ## Releases
 
+- [0.177.0](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.0.md)
 - [0.176.7](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.176.7.md)
-
 - [0.176.6](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.176.6.md)
-
+- [0.176.5](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.176.5.md)
 - [0.176.4](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.176.4.md)
 
 - [0.176.3](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.176.3.md)
 
 - [0.176.2](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.176.2.md)
-
 - [0.176.1](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.176.1.md)
-
 - [0.176.0](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.176.0.md)
 
 - [0.175.2](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.175.2.md)
