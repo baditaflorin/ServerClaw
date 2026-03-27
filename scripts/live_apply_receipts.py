@@ -41,8 +41,14 @@ def git_metadata_available() -> bool:
     )
 
 
+def git_commit_lookup_available() -> bool:
+    if not git_metadata_available():
+        return False
+    return command_succeeds(["git", "cat-file", "-e", "HEAD^{commit}"])
+
+
 def validate_source_commit(commit: str, path: Path) -> None:
-    if git_metadata_available():
+    if git_commit_lookup_available():
         if not git_commit_exists(commit):
             raise ValueError(f"{path.name}: source_commit '{commit}' is not a valid git commit")
         return
