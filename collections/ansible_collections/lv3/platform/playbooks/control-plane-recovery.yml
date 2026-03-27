@@ -47,7 +47,7 @@
     - role: lv3.platform.control_plane_recovery_store
 
 - name: Converge scheduled control-plane exports on docker-runtime-lv3
-  hosts: "docker-runtime-{{ env | default('production') == 'production' | ternary('', 'staging-') }}lv3"
+  hosts: "{{ 'docker-runtime-lv3' if (env | default('production')) == 'production' else 'docker-runtime-staging-lv3' }}"
   become: true
   gather_facts: true
 
