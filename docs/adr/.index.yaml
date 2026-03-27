@@ -9,7 +9,7 @@ schema_version: 1
 generated: '2026-03-28'
 total_adrs: 202
 implementation_status_summary:
-  Implemented: 184
+  Implemented: 185
   Partial: 3
   Not Implemented: 13
   Deprecated: 1
@@ -3258,7 +3258,7 @@ adr_index:
     summary: We will require scheduled failover or recovery rehearsals for services that claim redundancy tiers above rebuild-only
       re
     filename: 0188-failover-rehearsal-gate-for-redundancy-tiers.md
-    implemented_version: 0.177.14
+    implemented_version: 0.177.15
   - adr: 0189
     title: Network Impairment Test Matrix for Staging and Previews
     status: Proposed

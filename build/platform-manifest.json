@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.14",
+  "repo_version": "0.177.15",
   "platform_version": "0.130.31",
-  "generated_at": "2026-03-27T22:50:46Z",
-  "next_refresh_at": "2026-03-27T23:50:46Z",
+  "generated_at": "2026-03-27T22:59:45Z",
+  "next_refresh_at": "2026-03-27T23:59:45Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3496,10 +3496,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.13",
+    "last_version": "0.177.14",
     "deployed_at": "2026-03-27",
-    "summary": "completed ADR 0198 by switching platform-context retrieval to local Ollama semantic embeddings, expanding the indexed corpus, and grounding the operator CLI plus LLM client with cited vector matches",
-    "release_notes_url": "docs/release-notes/0.177.14.md"
+    "summary": "implemented ADR 0188 failover rehearsal gating so redundancy reporting now distinguishes declared tiers from currently proven tiers and the unproven PostgreSQL warm-standby path is surfaced as implemented `R0`",
+    "release_notes_url": "docs/release-notes/0.177.15.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
