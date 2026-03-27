@@ -4108,10 +4108,10 @@ workstreams:
   - id: adr-0183-multi-environment-live-lanes
     adr: "0183"
     title: Multi-environment live lanes
-    status: active
+    status: merged
     owner: codex
-    branch: codex/adr-0183-multi-environment-lanes
-    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/worktree-adr-0183-multi-environment-lanes
+    branch: codex/adr-0183-main-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/worktree-adr-0183-main-live-apply
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0183-multi-environment-live-lanes.md
     depends_on:
       - adr-0072-staging-production-topology
@@ -4151,13 +4151,17 @@ workstreams:
             - scripts/integration_suite.py
             - scripts/live_apply_receipts.py
             - scripts/deployment_history.py
-            - scripts/lv3_cli.py
             - scripts/drift_detector.py
             - scripts/security_posture_report.py
             - scripts/tofu_remote_command.py
             - scripts/generate_changelog_portal.py
             - config/windmill/scripts/nightly-integration-tests.py
           mode: exclusive
+        - id: platform_cli_environment_selection
+          paths:
+            - scripts/lv3_cli.py
+          mode: shared_contract
+          contract: platform-cli-environment-selection-v1
         - id: staging_bridge_repo_surface
           paths:
             - inventory/host_vars/proxmox_florin.yml
@@ -4173,3 +4177,8 @@ workstreams:
           mode: exclusive
     ready_to_merge: false
     live_applied: false
+    canonical_truth:
+      changelog_entry: implemented ADR 0183 catalog-driven environment lanes and the repo-managed staging bridge activation path so staging can be brought up safely from main without ad hoc Proxmox network edits
+      release_bump: patch
+      included_in_repo_version: 0.177.9
+      latest_receipts: {}

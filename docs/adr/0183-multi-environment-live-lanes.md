@@ -1,10 +1,10 @@
 # ADR 0183: Multi-Environment Live Lanes
 
-- Status: Accepted
-- Implementation Status: In Progress
-- Implemented In Repo Version: not yet
+- Status: Implemented
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.9
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-27
 - Date: 2026-03-27
 
 ## Context

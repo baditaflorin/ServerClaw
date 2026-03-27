@@ -119,7 +119,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.8` |
+| Repository version | `0.177.9` |
 | Platform version | `0.130.29` |
 | Observed check date | `2026-03-27` |
 | Observed OS | `Debian 13` |
@@ -562,6 +562,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [SLO Tracking](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/slo-tracking.md)
 - [Speculative Workflow Execution](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/speculative-workflow-execution.md)
 - [Staging And Production Topology](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/staging-and-production-topology.md)
+- [Staging Environment](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/staging-environment.md)
 - [Structured Log Contract](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/structured-log-contract.md)
 - [Subdomain Exposure Audit](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/subdomain-exposure-audit.md)
 - [Subdomain Governance](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/subdomain-governance.md)
@@ -769,6 +770,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0182: Live Apply Merge Train and Rollback Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0182-live-apply-merge-train-and-rollback-bundle.md)
 - [ADR 0183: Auxiliary Cloud Failure Domain for Witness, Recovery, and Burst Capacity](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0183-auxiliary-cloud-failure-domain-for-witness-recovery-and-burst-capacity.md)
 - [ADR 0183: Keycloak Uses Shared-Mail-Network Internal Submission](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0183-keycloak-mail-network-internal-submission.md)
+- [ADR 0183: Multi-Environment Live Lanes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0183-multi-environment-live-lanes.md)
 - [ADR 0184: Failure-Domain Labels and Anti-Affinity Policy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0184-failure-domain-labels-and-anti-affinity-policy.md)
 - [ADR 0185: Branch-Scoped Ephemeral Preview Environments](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0185-branch-scoped-ephemeral-preview-environments.md)
 - [ADR 0186: Prewarmed Fixture Pools and Lease-Based Ephemeral Capacity](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0186-prewarmed-fixture-pools-and-lease-based-ephemeral-capacity.md)
@@ -935,6 +937,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0180: Standby Capacity Reservation and Placement Rules](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0180-standby-capacity-reservation-and-placement-rules.md)
 - [Workstream ADR 0181: Off-Host Witness And Control Metadata Replication](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0181-off-host-witness-replication.md)
 - [Workstream ADR 0182: Live Apply Merge Train and Rollback Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0182-live-apply-merge-train-and-rollback-bundle.md)
+- [Workstream ADR 0183: Multi-Environment Live Lanes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0183-multi-environment-live-lanes.md)
 - [Workstream ws-0101-live-apply: ADR 0101 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0101-live-apply.md)
 - [Workstream ws-0105-live-apply: Live Apply ADR 0105 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0105-live-apply.md)
 - [Workstream WS-0108: Operator Onboarding and Off-boarding Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0108-live-apply.md)
@@ -955,7 +958,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.8` |
+| Repository version | `0.177.9` |
 | Platform version | `0.130.29` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1148,6 +1151,7 @@ This repository is intentionally opinionated:
 | `0179` | Service redundancy tier matrix | `merged` | [adr-0179-service-redundancy-tier-matrix.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0179-service-redundancy-tier-matrix.md) |
 | `0181` | Off-host witness and control metadata replication | `live_applied` | [adr-0181-off-host-witness-replication.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0181-off-host-witness-replication.md) |
 | `0182` | Live apply merge train and rollback bundle | `merged` | [adr-0182-live-apply-merge-train-and-rollback-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0182-live-apply-merge-train-and-rollback-bundle.md) |
+| `0183` | Multi-environment live lanes | `merged` | [adr-0183-multi-environment-live-lanes.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0183-multi-environment-live-lanes.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

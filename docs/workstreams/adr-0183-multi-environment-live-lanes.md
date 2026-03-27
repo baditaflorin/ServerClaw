@@ -2,9 +2,13 @@
 
 - ADR: [ADR 0183](../adr/0183-multi-environment-live-lanes.md)
 - Title: Make environment lanes catalog-driven, add a controlled staging activation path, and leave room for future development lanes without hardcoded rewrites
-- Status: active
-- Branch: `codex/adr-0183-multi-environment-lanes`
-- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/worktree-adr-0183-multi-environment-lanes`
+- Status: merged
+- Implemented In Repo Version: 0.177.9
+- Live Applied In Platform Version: not yet
+- Implemented On: 2026-03-27
+- Live Applied On: not yet
+- Branch: `codex/adr-0183-main-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/worktree-adr-0183-main-live-apply`
 - Owner: codex
 - Depends On: `adr-0072-staging-production-topology`, `adr-0073-promotion-pipeline`, `adr-0079-playbook-decomposition`, `adr-0182-live-apply-merge-train`
 - Conflicts With: none
