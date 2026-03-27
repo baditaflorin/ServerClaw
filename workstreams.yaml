@@ -4194,7 +4194,7 @@ workstreams:
   - id: ws-0191-live-apply
     adr: "0191"
     title: Immutable guest replacement for stateful and edge services
-    status: implemented
+    status: live_applied
     owner: codex
     branch: codex/ws-0191-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0191-live-apply
@@ -4207,6 +4207,7 @@ workstreams:
       - config/immutable-guest-replacement-catalog.json
       - docs/schema/immutable-guest-replacement-catalog.schema.json
       - scripts/immutable_guest_replacement.py
+      - scripts/sync_windmill_seed_schedules.py
       - scripts/validate_repository_data_models.py
       - Makefile
       - docs/runbooks/immutable-guest-replacement.md
@@ -4239,6 +4240,11 @@ workstreams:
             - .config-locations.yaml
           mode: shared_contract
           contract: repo-validation-pipeline-v1
+        - id: retry-guard-helper
+          paths:
+            - scripts/sync_windmill_seed_schedules.py
+          mode: shared_contract
+          contract: retry-guard-v1
         - id: live-apply-service-contract
           paths:
             - Makefile
@@ -4252,4 +4258,4 @@ workstreams:
           mode: shared_contract
           contract: live-apply-receipts-v1
     ready_to_merge: false
-    live_applied: false
+    live_applied: true

@@ -2,13 +2,13 @@
 
 - ADR: [ADR 0191](../adr/0191-immutable-guest-replacement-for-stateful-and-edge-services.md)
 - Title: guest-level immutable replacement policy, production live-apply guard, and branch-local live verification
-- Status: implemented
+- Status: live_applied
 - Branch: `codex/ws-0191-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0191-live-apply`
 - Owner: codex
 - Depends On: `adr-0179-service-redundancy-tier-matrix`, `adr-0182-live-apply-merge-train`
 - Conflicts With: none
-- Shared Surfaces: `config/immutable-guest-replacement-catalog.json`, `docs/schema/immutable-guest-replacement-catalog.schema.json`, `scripts/immutable_guest_replacement.py`, `scripts/validate_repository_data_models.py`, `Makefile`, `docs/runbooks/immutable-guest-replacement.md`, `receipts/live-applies/`
+- Shared Surfaces: `config/immutable-guest-replacement-catalog.json`, `docs/schema/immutable-guest-replacement-catalog.schema.json`, `scripts/immutable_guest_replacement.py`, `scripts/validate_repository_data_models.py`, `scripts/sync_windmill_seed_schedules.py`, `Makefile`, `docs/runbooks/immutable-guest-replacement.md`, `receipts/live-applies/`
 
 ## Scope
 
@@ -52,9 +52,13 @@
 - `uv run --with pyyaml --with jsonschema python scripts/immutable_guest_replacement.py --validate`
 - `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`
 - `python3 -m py_compile scripts/immutable_guest_replacement.py scripts/validate_repository_data_models.py`
+- `python3 -m py_compile scripts/sync_windmill_seed_schedules.py`
 - `make immutable-guest-replacement-plan service=grafana`
 - `uv run --with pyyaml --with jsonschema python scripts/immutable_guest_replacement.py --check-live-apply --service grafana`
+- `./scripts/validate_repo.sh retry-guard`
+- `./scripts/validate_repo.sh agent-standards`
 - `make live-apply-service service=grafana env=production ALLOW_IN_PLACE_MUTATION=true EXTRA_ARGS='-e bypass_promotion=true'`
+- `make validate`
 
 ## Merge Criteria
 
@@ -64,8 +68,17 @@
 
 ## Outcome
 
-- pending live apply
+- implementation commits `27804621ae4fef5e7b061e40d284eca1bece88c5` and `b323baa14615cb9bf50af3dad590edb4f5c919fb` added the catalog, schema, guard script, Makefile integration, validation wiring, runbooks, and fresh generated README doc index updates needed for the branch-local live apply path
+- `make immutable-guest-replacement-plan service=grafana` resolved the governed production service path as `grafana -> monitoring-lv3`
+- `uv run --with pyyaml --with jsonschema python scripts/immutable_guest_replacement.py --check-live-apply --service grafana` failed closed with exit code `2` until the documented override was supplied
+- `scripts/sync_windmill_seed_schedules.py` was migrated from a raw `time.sleep` retry loop to `platform.retry.with_retry` so the broad validation path could move past the unrelated retry-guard failure
+- the bounded production replay `make live-apply-service service=grafana env=production ALLOW_IN_PLACE_MUTATION=true EXTRA_ARGS='-e bypass_promotion=true'` completed cleanly with `monitoring-lv3 : ok=176 changed=0 unreachable=0 failed=0 skipped=34`
+- `curl -Ik --resolve grafana.lv3.org:443:65.108.75.123 https://grafana.lv3.org/d/lv3-platform-overview/lv3-platform-overview` returned `HTTP/2 302` to `/login`, and the local monitoring guest health endpoints for Grafana, Prometheus, Alertmanager, Blackbox Exporter, and Tempo all remained healthy
+- the branch records receipt `2026-03-27-adr-0191-immutable-guest-replacement-live-apply` and verifies the production platform change on canonical platform version `0.130.31` from repo version context `0.177.12`
+- the broad repo gate now reaches repository data model validation, where `make validate` currently stops on the unrelated preexisting `ansible-scope-runner` error `playbook 'playbooks/proxmox-staging-bridge.yml' does not define imports or a leaf catalog entry`
 
 ## Remaining For Merge To `main`
 
-- protected integration files still need the normal mainline release step after this workstream is reviewed and merged
+- protected integration files remain intentionally untouched on this workstream branch and still require the normal integration step on `main`: `VERSION`, release sections in `changelog.md`, canonical observed state in `versions/stack.yaml`, and the top-level README integrated status summary
+- merge to `main` still needs the official repo/platform version advancement and any final canonical-truth release note mapping after this branch is reviewed
+- a separate follow-up workstream still needs to clear the unrelated broad-gate blocker in `playbooks/proxmox-staging-bridge.yml` so `make validate` can complete end to end from this repo tip
