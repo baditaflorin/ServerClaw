@@ -12,6 +12,8 @@ def test_windmill_defaults_seed_world_state_scripts_and_schedules() -> None:
     defaults = yaml.safe_load(
         (REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml").read_text()
     )
+    for package in ("make", "python3-psycopg"):
+        assert package in defaults["windmill_runtime_packages"]
     script_paths = {entry["path"] for entry in defaults["windmill_seed_scripts"]}
     schedules = {entry["path"]: entry for entry in defaults["windmill_seed_schedules"]}
     schedule_paths = set(schedules)

@@ -163,48 +163,57 @@
     common_directory_tree_paths: "{{ windmill_worker_runtime_writable_directories }}"
 
 - name: Find stale Python bytecode files in the Windmill worker checkout
-  ansible.builtin.find:
-    paths:
-      - "{{ windmill_worker_repo_checkout_host_path }}/callback_plugins"
-      - "{{ windmill_worker_repo_checkout_host_path }}/collections"
-      - "{{ windmill_worker_repo_checkout_host_path }}/config"
-      - "{{ windmill_worker_repo_checkout_host_path }}/filter_plugins"
-      - "{{ windmill_worker_repo_checkout_host_path }}/platform"
-      - "{{ windmill_worker_repo_checkout_host_path }}/scripts"
-      - "{{ windmill_worker_repo_checkout_host_path }}/windmill"
-    patterns:
-      - "*.pyc"
-    recurse: true
-    file_type: file
+  ansible.builtin.shell: |
+    set -euo pipefail
+    find \
+      "{{ windmill_worker_repo_checkout_host_path }}/callback_plugins" \
+      "{{ windmill_worker_repo_checkout_host_path }}/collections" \
+      "{{ windmill_worker_repo_checkout_host_path }}/config" \
+      "{{ windmill_worker_repo_checkout_host_path }}/filter_plugins" \
+      "{{ windmill_worker_repo_checkout_host_path }}/platform" \
+      "{{ windmill_worker_repo_checkout_host_path }}/scripts" \
+      "{{ windmill_worker_repo_checkout_host_path }}/windmill" \
+      -type f \
+      -name '*.pyc' \
+      -print \
+      -delete
+  args:
+    executable: /bin/bash
   register: windmill_worker_checkout_python_cache_files
+  changed_when: windmill_worker_checkout_python_cache_files.stdout | trim | length > 0
 
 - name: Remove stale Python bytecode files from the Windmill worker checkout
-  ansible.builtin.file:
-    path: "{{ item.path }}"
-    state: absent
-  loop: "{{ windmill_worker_checkout_python_cache_files.files }}"
+  ansible.builtin.debug:
+    msg: "Removed stale Python bytecode files from the Windmill worker checkout"
+  when: windmill_worker_checkout_python_cache_files.stdout | trim | length > 0
+  changed_when: false
 
 - name: Find stale Python bytecode cache directories in the Windmill worker checkout
-  ansible.builtin.find:
-    paths:
-      - "{{ windmill_worker_repo_checkout_host_path }}/callback_plugins"
-      - "{{ windmill_worker_repo_checkout_host_path }}/collections"
-      - "{{ windmill_worker_repo_checkout_host_path }}/config"
-      - "{{ windmill_worker_repo_checkout_host_path }}/filter_plugins"
-      - "{{ windmill_worker_repo_checkout_host_path }}/platform"
-      - "{{ windmill_worker_repo_checkout_host_path }}/scripts"
-      - "{{ windmill_worker_repo_checkout_host_path }}/windmill"
-    patterns:
-      - __pycache__
-    recurse: true
-    file_type: directory
+  ansible.builtin.shell: |
+    set -euo pipefail
+    find \
+      "{{ windmill_worker_repo_checkout_host_path }}/callback_plugins" \
+      "{{ windmill_worker_repo_checkout_host_path }}/collections" \
+      "{{ windmill_worker_repo_checkout_host_path }}/config" \
+      "{{ windmill_worker_repo_checkout_host_path }}/filter_plugins" \
+      "{{ windmill_worker_repo_checkout_host_path }}/platform" \
+      "{{ windmill_worker_repo_checkout_host_path }}/scripts" \
+      "{{ windmill_worker_repo_checkout_host_path }}/windmill" \
+      -depth \
+      -type d \
+      -name '__pycache__' \
+      -print \
+      -exec rm -rf {} +
+  args:
+    executable: /bin/bash
   register: windmill_worker_checkout_python_cache_dirs
+  changed_when: windmill_worker_checkout_python_cache_dirs.stdout | trim | length > 0
 
 - name: Remove stale Python bytecode cache directories from the Windmill worker checkout
-  ansible.builtin.file:
-    path: "{{ item.path }}"
-    state: absent
-  loop: "{{ windmill_worker_checkout_python_cache_dirs.files }}"
+  ansible.builtin.debug:
+    msg: "Removed stale Python bytecode cache directories from the Windmill worker checkout"
+  when: windmill_worker_checkout_python_cache_dirs.stdout | trim | length > 0
+  changed_when: false
 
 - name: Remove the local staging archive for the Windmill worker checkout
   ansible.builtin.file:
@@ -489,12 +498,15 @@
   register: windmill_docker_nat_chain_check
   changed_when: false
   failed_when: windmill_docker_nat_chain_check.rc not in [0, 1]
+  when: windmill_server_requires_docker_nat | bool
 
 - name: Restart Docker when the nat chain is missing before Windmill startup
   ansible.builtin.systemd:
     name: docker
     state: restarted
-  when: windmill_docker_nat_chain_check.rc == 1
+  when:
+    - windmill_server_requires_docker_nat | bool
+    - windmill_docker_nat_chain_check.rc == 1
 
 - name: Recheck Docker nat chain before Windmill startup
   ansible.builtin.command: iptables -t nat -S DOCKER
@@ -504,12 +516,14 @@
   retries: 5
   delay: 2
   until: windmill_docker_nat_chain_recheck.rc == 0
+  when: windmill_server_requires_docker_nat | bool
 
 - name: Assert Docker nat chain is present before Windmill startup
   ansible.builtin.assert:
     that:
       - windmill_docker_nat_chain_recheck.rc == 0
     fail_msg: "Docker is running but the nat DOCKER chain is missing; Windmill published ports will fail."
+  when: windmill_server_requires_docker_nat | bool
 
 - name: Start Windmill and wait for the API socket
   block:

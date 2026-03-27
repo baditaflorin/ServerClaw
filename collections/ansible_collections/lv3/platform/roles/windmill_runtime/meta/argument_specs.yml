@@ -38,6 +38,16 @@ argument_specs:
         required: true
         description:
           - Local TCP port exposed by the Windmill API.
+      windmill_server_network_mode:
+        type: str
+        required: false
+        description:
+          - Docker networking mode used by the Windmill server container.
+      windmill_server_requires_docker_nat:
+        type: bool
+        required: false
+        description:
+          - Whether the Windmill server startup depends on Docker-managed nat port publishing.
       windmill_base_url:
         type: str
         required: true

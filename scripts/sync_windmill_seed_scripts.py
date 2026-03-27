@@ -11,6 +11,12 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
+    del sys.modules["platform"]
+
 from platform.retry import PlatformRetryError, RetryClass, RetryPolicy, with_retry
 
 

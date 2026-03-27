@@ -21,16 +21,29 @@ def test_windmill_defaults_seed_ephemeral_vm_reaper_script_and_schedule() -> Non
     assert schedule_map["f/lv3/ephemeral_vm_reaper_every_30m"]["script_path"] == "f/lv3/ephemeral_vm_reaper"
 
 
-def test_windmill_runtime_retries_nat_chain_recheck_before_startup() -> None:
+def test_windmill_runtime_only_rechecks_nat_chain_when_port_publishing_is_enabled() -> None:
+    defaults = yaml.safe_load(
+        (REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml").read_text()
+    )
     tasks = (
         REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml"
     ).read_text(encoding="utf-8")
+    compose_template = (
+        REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/docker-compose.yml.j2"
+    ).read_text(encoding="utf-8")
 
+    assert defaults["windmill_server_network_mode"] == "host"
+    assert defaults["windmill_server_requires_docker_nat"] == "{{ windmill_server_network_mode != 'host' }}"
+    assert defaults["windmill_worker_api_base_url"] == "{{ windmill_private_base_url }}"
+    assert "network_mode: {{ windmill_server_network_mode }}" in compose_template
+    assert 'ports:' not in compose_template
+    assert "WINDMILL_BASE_URL: {{ windmill_private_base_url }}" in compose_template
     assert "Recheck Docker nat chain before Windmill startup" in tasks
     assert "failed_when: windmill_docker_nat_chain_recheck.rc not in [0, 1]" in tasks
     assert "retries: 5" in tasks
     assert "delay: 2" in tasks
     assert "until: windmill_docker_nat_chain_recheck.rc == 0" in tasks
+    assert "when: windmill_server_requires_docker_nat | bool" in tasks
 
 
 def test_windmill_runtime_exports_proxmox_api_credentials_for_ephemeral_reaper() -> None:

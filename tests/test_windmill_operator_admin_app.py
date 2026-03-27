@@ -193,9 +193,9 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Find stale Python bytecode cache directories in the Windmill worker checkout" in tasks
     assert "Remove stale Python bytecode cache directories from the Windmill worker checkout" in tasks
     assert "__pycache__" in tasks
-    assert "\"*.pyc\"" in tasks
-    assert "file_type: file" in tasks
-    assert "file_type: directory" in tasks
+    assert "*.pyc" in tasks
+    assert "-delete" in tasks
+    assert "-exec rm -rf {} +" in tasks
     assert '{{ windmill_worker_repo_checkout_host_path }}/scripts' in tasks
     assert '{{ windmill_worker_repo_checkout_host_path }}/platform' in tasks
     assert "worker-checkout.tar.gz" not in tasks

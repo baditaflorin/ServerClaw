@@ -123,6 +123,18 @@ def test_sync_helper_rejects_unexpected_delete_400(monkeypatch: pytest.MonkeyPat
         )
 
 
+def test_sync_helper_bootstraps_repo_platform_package(monkeypatch: pytest.MonkeyPatch) -> None:
+    import platform as stdlib_platform
+    import sys
+
+    monkeypatch.setitem(sys.modules, "platform", stdlib_platform)
+
+    module = load_module("sync_helper_repo_platform", SYNC_HELPER_PATH)
+
+    assert hasattr(module, "with_retry")
+    assert module.REPO_ROOT == REPO_ROOT
+
+
 def test_sync_helper_reports_missing_token(monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     module = load_module("sync_helper_missing_token", SYNC_HELPER_PATH)
     manifest = tmp_path / "manifest.json"
