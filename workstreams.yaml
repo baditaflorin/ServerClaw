@@ -14,6 +14,71 @@ release_policy:
   breaking_change_criteria: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/version-semantics.json
 
 workstreams:
+  - id: ws-0192-live-apply
+    adr: "0192"
+    title: Live apply ADR 0192 capacity classes for standby, recovery, and preview workloads
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0192-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0192-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0192-live-apply.md
+    depends_on:
+      - adr-0105-capacity-model
+      - adr-0180-standby-capacity
+      - adr-0183-auxiliary-cloud-failure-domain
+      - adr-0186-prewarmed-fixture-pools
+    conflicts_with: []
+    shared_surfaces:
+      - config/capacity-model.json
+      - build/platform-manifest.json
+      - docs/schema/capacity-model.schema.json
+      - scripts/capacity_report.py
+      - scripts/fixture_manager.py
+      - scripts/restore_verification.py
+      - scripts/validate_ephemeral_vmid.py
+      - docs/runbooks/capacity-classes.md
+      - receipts/live-applies/
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0192_local_surface
+          paths:
+            - docs/adr/0192-separate-capacity-classes-for-standby-recovery-and-preview-workloads.md
+            - docs/workstreams/ws-0192-live-apply.md
+            - build/platform-manifest.json
+            - scripts/fixture_manager.py
+            - scripts/restore_verification.py
+            - scripts/validate_ephemeral_vmid.py
+            - tests/test_fixture_manager.py
+            - tests/test_restore_verification.py
+            - docs/runbooks/capacity-classes.md
+            - receipts/live-applies/
+          mode: exclusive
+        - id: capacity_model_contract
+          paths:
+            - config/capacity-model.json
+          mode: shared_contract
+          contract: capacity-model-v1
+        - id: capacity_model_schema_contract
+          paths:
+            - docs/schema/capacity-model.schema.json
+            - scripts/capacity_report.py
+            - tests/test_capacity_report.py
+          mode: shared_contract
+          contract: capacity-model-schema-v1
+    ready_to_merge: false
+    live_applied: true
+    canonical_truth:
+      changelog_entry: completed ADR 0192 by separating `ha_reserved`, `recovery_reserved`, and `preview_burst` capacity classes in mainline automation and recording the verified live apply evidence for preview and restore admission checks
+      release_bump: patch
+      included_in_repo_version: 0.177.15
+      latest_receipts:
+        capacity_classes: 2026-03-27-adr-0192-capacity-classes-live-apply
+
   - id: adr-0180-standby-capacity
     adr: "0180"
     title: Standby capacity reservation and placement rules

@@ -173,6 +173,37 @@ def test_render_fixture_table_handles_empty_rows() -> None:
     assert fixture_manager.render_fixture_table([]) == "No active fixtures"
 
 
+def test_load_ephemeral_pool_accepts_reservation_backed_preview_burst(
+    fixture_repo: Path,
+) -> None:
+    (fixture_repo / "config" / "capacity-model.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "1.0.0",
+                "reservations": [
+                    {
+                        "id": "ephemeral-pool",
+                        "kind": "ephemeral_pool",
+                        "status": "reserved",
+                        "capacity_class": "preview_burst",
+                        "vmid_range": {"start": 910, "end": 979},
+                        "max_concurrent_vms": 5,
+                        "reserved": {"ram_gb": 20, "vcpu": 8, "disk_gb": 100},
+                        "notes": "fixture test pool",
+                    }
+                ],
+            }
+        )
+        + "\n"
+    )
+
+    pool = fixture_manager.load_ephemeral_pool()
+
+    assert pool["capacity_class"] == "preview_burst"
+    assert pool["vmid_range"] == [910, 979]
+    assert pool["reserved_ram_gb"] == 20
+
+
 def test_reap_expired_only_destroys_expired_receipts(fixture_repo: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     expired = {
         "receipt_id": "docker-host-20260323T080000Z",
