@@ -1,0 +1,49 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy scheduled receipt and mutation-audit retention on runtime hosts.
+    options:
+      data_retention_repo_root:
+        type: str
+        required: false
+        default: "{{ lookup('ansible.builtin.env', 'PWD') }}"
+      data_retention_runtime_root:
+        type: str
+        required: false
+        default: /opt/lv3/data-retention
+      data_retention_bin_dir:
+        type: str
+        required: false
+        default: "{{ data_retention_runtime_root }}/bin"
+      data_retention_config_dir:
+        type: str
+        required: false
+        default: /etc/lv3/data-retention
+      data_retention_receipts_root:
+        type: str
+        required: false
+        default: /var/lib/lv3/receipts
+      data_retention_purge_script_path:
+        type: str
+        required: false
+        default: "{{ data_retention_bin_dir }}/purge-old-receipts.py"
+      data_retention_catalog_path:
+        type: str
+        required: false
+        default: "{{ data_retention_config_dir }}/data-catalog.json"
+      data_retention_service_name:
+        type: str
+        required: false
+        default: lv3-data-retention.service
+      data_retention_timer_name:
+        type: str
+        required: false
+        default: lv3-data-retention.timer
+      data_retention_on_calendar:
+        type: str
+        required: false
+        default: weekly
+      data_retention_audit_log_path:
+        type: str
+        required: false
+        default: "{{ mutation_audit_log_file }}"

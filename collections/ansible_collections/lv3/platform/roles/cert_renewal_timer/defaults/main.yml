@@ -1,0 +1,12 @@
+---
+cert_renewal_timer_name: ""
+cert_renewal_timer_description: Managed certificate renewal timer
+cert_renewal_timer_user: root
+cert_renewal_timer_group: root
+cert_renewal_timer_on_calendar: "*:0/15"
+cert_renewal_timer_randomized_delay_seconds: 60
+cert_renewal_timer_script_path: ""
+cert_renewal_timer_service_path: ""
+cert_renewal_timer_timer_path: ""
+cert_renewal_timer_issue_command: ""
+cert_renewal_timer_reload_command: ""

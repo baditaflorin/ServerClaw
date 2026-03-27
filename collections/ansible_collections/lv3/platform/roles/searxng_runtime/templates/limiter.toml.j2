@@ -1,0 +1,19 @@
+[botdetection]
+trusted_proxies = [
+{% for proxy in searxng_runtime_trusted_proxies %}
+  '{{ proxy }}',
+{% endfor %}
+]
+
+[botdetection.ip_limit]
+filter_link_local = false
+link_token = false
+
+[botdetection.ip_lists]
+block_ip = []
+pass_ip = [
+{% for network in searxng_runtime_pass_ip_ranges %}
+  '{{ network }}',
+{% endfor %}
+]
+pass_searxng_org = true

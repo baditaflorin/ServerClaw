@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
+staging_root="{{ control_plane_recovery_runtime_state_dir }}/staging"
+run_dir="${staging_root}/${timestamp}"
+target_host="{{ control_plane_recovery_runtime_backup_target_host }}"
+target_user="{{ control_plane_recovery_runtime_backup_target_user }}"
+target_dir="{{ control_plane_recovery_runtime_backup_target_dir }}"
+ssh_key="{{ control_plane_recovery_runtime_config_dir }}/docker-runtime-backup.id_ed25519"
+openbao_token_file="{{ control_plane_recovery_runtime_openbao_backup_token_remote_file }}"
+
+mkdir -p "${run_dir}"
+trap 'rm -rf "${run_dir}"' EXIT
+
+tar --zstd -cpf "${run_dir}/step-ca.tar.zst" -C / opt/step-ca
+tar --zstd -cpf "${run_dir}/openbao-config.tar.zst" -C / opt/openbao/config opt/openbao/tls opt/openbao/policies opt/openbao/docker-compose.yml
+
+curl -fsS \
+  -H "X-Vault-Token: $(jq -r '.token' "${openbao_token_file}")" \
+  "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/storage/raft/snapshot" \
+  > "${run_dir}/openbao-raft.snap"
+
+pg_dump \
+  --format=custom \
+  --file "${run_dir}/windmill-db.dump" \
+  "{{ control_plane_recovery_windmill_backup_database_dsn }}"
+tar --zstd -cpf "${run_dir}/windmill-files.tar.zst" -C / opt/windmill etc/lv3/windmill
+tar --zstd -cpf "${run_dir}/mail-platform.tar.zst" -C / opt/mail-platform etc/lv3/mail-platform
+
+step_ca_sha="$(sha256sum "${run_dir}/step-ca.tar.zst" | awk '{print $1}')"
+openbao_config_sha="$(sha256sum "${run_dir}/openbao-config.tar.zst" | awk '{print $1}')"
+openbao_snapshot_sha="$(sha256sum "${run_dir}/openbao-raft.snap" | awk '{print $1}')"
+windmill_db_sha="$(sha256sum "${run_dir}/windmill-db.dump" | awk '{print $1}')"
+windmill_files_sha="$(sha256sum "${run_dir}/windmill-files.tar.zst" | awk '{print $1}')"
+mail_sha="$(sha256sum "${run_dir}/mail-platform.tar.zst" | awk '{print $1}')"
+
+jq -n \
+  --arg generated_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+  --arg host "{{ inventory_hostname }}" \
+  --arg timestamp "${timestamp}" \
+  --arg step_ca_sha "${step_ca_sha}" \
+  --arg openbao_config_sha "${openbao_config_sha}" \
+  --arg openbao_snapshot_sha "${openbao_snapshot_sha}" \
+  --arg windmill_db_sha "${windmill_db_sha}" \
+  --arg windmill_files_sha "${windmill_files_sha}" \
+  --arg mail_sha "${mail_sha}" \
+  '{
+    generated_at: $generated_at,
+    source_host: $host,
+    timestamp: $timestamp,
+    artifacts: {
+      step_ca: { file: "step-ca.tar.zst", sha256: $step_ca_sha },
+      openbao_config: { file: "openbao-config.tar.zst", sha256: $openbao_config_sha },
+      openbao_snapshot: { file: "openbao-raft.snap", sha256: $openbao_snapshot_sha },
+      windmill_db: { file: "windmill-db.dump", sha256: $windmill_db_sha },
+      windmill_files: { file: "windmill-files.tar.zst", sha256: $windmill_files_sha },
+      mail_platform: { file: "mail-platform.tar.zst", sha256: $mail_sha }
+    }
+  }' > "${run_dir}/control-plane-backup-manifest.json"
+
+ssh -i "${ssh_key}" -o BatchMode=yes "${target_user}@${target_host}" "mkdir -p '${target_dir}/${timestamp}'"
+rsync -az --delete -e "ssh -i ${ssh_key} -o BatchMode=yes" "${run_dir}/" "${target_user}@${target_host}:${target_dir}/${timestamp}/"
+ssh -i "${ssh_key}" -o BatchMode=yes "${target_user}@${target_host}" "ln -sfn '${target_dir}/${timestamp}' '${target_dir}/latest'"
+ssh -i "${ssh_key}" -o BatchMode=yes "${target_user}@${target_host}" "cd '${target_dir}' && ls -1dt [0-9]* 2>/dev/null | tail -n +$(({{ control_plane_recovery_backup_retention_count }} + 1)) | xargs -r rm -rf --"
+
+echo "control-plane-backup: ${timestamp}"

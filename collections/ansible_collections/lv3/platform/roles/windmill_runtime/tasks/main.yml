@@ -1,0 +1,1526 @@
+---
+# Purpose: Converge the Windmill runtime, worker checkout, and OpenBao-composed runtime environment.
+# Inputs: Windmill runtime defaults, controller-local secrets, and platform service topology facts.
+# Outputs: Configured Windmill runtime files, mirrored worker checkout content, and seeded workflow assets.
+# Idempotency: Partially idempotent; reruns converge the same runtime while mirroring live secrets and schedules.
+# Dependencies: ADR 0077, ADR 0106, ADR 0113, ADR 0165; requires openbao_runtime and windmill_postgres outputs.
+# Related Runbooks: docs/runbooks/configure-windmill.md, docs/runbooks/world-state-materializer.md
+
+- name: Validate Windmill runtime inputs
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: assert_vars
+  vars:
+    common_assert_vars_required:
+      - windmill_workspace_id
+      - windmill_workspace_name
+      - windmill_site_dir
+      - windmill_secret_dir
+      - windmill_compose_file
+      - windmill_env_file
+      - windmill_server_port
+      - windmill_base_url
+      - windmill_database_name
+      - windmill_database_user
+      - windmill_database_host
+      - windmill_database_password_local_file
+      - windmill_seed_scripts
+    common_assert_vars_expressions:
+      - windmill_server_port | int > 0
+    common_assert_vars_fail_msg: "windmill_runtime requires workspace, database, compose, and seed script inputs."
+
+- name: Ensure the Windmill database password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ windmill_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: windmill_database_password_local
+
+- name: Fail if the Windmill database password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ windmill_database_password_local_file }} is missing on the control machine.
+      Run the Windmill PostgreSQL converge first so the runtime can connect to postgres-lv3.
+  when: not windmill_database_password_local.stat.exists
+
+- name: Ensure the Proxmox API token payload exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ proxmox_api_token_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: windmill_proxmox_api_token_local
+
+- name: Fail if the Proxmox API token payload is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ proxmox_api_token_local_file }} is missing on the control machine.
+      Converge proxmox_api_access before enabling the ADR 0106 Windmill reaper schedule.
+  when: not windmill_proxmox_api_token_local.stat.exists
+
+- name: Ensure the Windmill runtime packages are present
+  ansible.builtin.apt:
+    name: "{{ windmill_runtime_packages }}"
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Download the pinned uv archive for Windmill worker scripts
+  ansible.builtin.get_url:
+    url: "{{ windmill_uv_download_url }}"
+    dest: /tmp/windmill-uv.tar.gz
+    mode: "0644"
+
+- name: Install the pinned uv binaries for Windmill worker scripts
+  ansible.builtin.unarchive:
+    src: /tmp/windmill-uv.tar.gz
+    dest: "{{ windmill_uv_install_dir }}"
+    remote_src: true
+    extra_opts:
+      - --strip-components=1
+    include:
+      - uv-x86_64-unknown-linux-gnu/uv
+      - uv-x86_64-unknown-linux-gnu/uvx
+
+- name: Ensure the pinned uv binaries are executable
+  ansible.builtin.file:
+    path: "{{ item }}"
+    mode: "0755"
+    state: file
+  loop:
+    - "{{ windmill_uv_binary_path }}"
+    - "{{ windmill_uvx_binary_path }}"
+
+- name: Remove the staged uv archive after installation
+  ansible.builtin.file:
+    path: /tmp/windmill-uv.tar.gz
+    state: absent
+
+- name: Ensure the Windmill directories exist
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: directory_tree
+  vars:
+    common_directory_tree_paths:
+      - path: "{{ windmill_site_dir }}"
+        mode: "0755"
+      - path: "{{ windmill_secret_dir }}"
+        mode: "0700"
+      - path: "{{ windmill_worker_repo_checkout_host_path }}"
+        mode: "0755"
+
+- name: Ensure the integration test runner password exists on the control machine
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ windmill_integration_test_runner_password_local_file }}" ]; then
+      umask 077
+      mkdir -p "$(dirname "{{ windmill_integration_test_runner_password_local_file }}")"
+      openssl rand -base64 24 | tr -d '\n' > "{{ windmill_integration_test_runner_password_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: windmill_integration_test_runner_password_generation
+  changed_when: "'changed' in windmill_integration_test_runner_password_generation.stdout"
+  no_log: true
+
+- name: Create a local staging archive path for the Windmill worker checkout
+  ansible.builtin.tempfile:
+    state: file
+    suffix: .tar.gz
+  delegate_to: localhost
+  become: false
+  register: windmill_worker_checkout_archive_local
+
+- name: Build the local staging archive for the Windmill worker checkout
+  vars:
+    mutation_audit_action: sync.windmill_worker_checkout
+    mutation_audit_target: "{{ windmill_worker_repo_checkout_host_path }}"
+  ansible.builtin.shell: |
+    set -euo pipefail
+    tar -C "{{ windmill_worker_checkout_repo_root_local_dir }}" -czf "{{ windmill_worker_checkout_archive_local.path }}" {{ windmill_worker_checkout_sync_paths | map('quote') | join(' ') }}
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  changed_when: false
+  tags:
+    - mutation
+
+- name: Copy the staged Windmill worker checkout archive to the guest
+  ansible.builtin.copy:
+    src: "{{ windmill_worker_checkout_archive_local.path }}"
+    dest: "{{ windmill_site_dir }}/worker-checkout.tar.gz"
+    mode: "0600"
+  register: windmill_worker_checkout_archive_remote
+
+- name: Check whether the Windmill worker checkout checksum marker exists
+  ansible.builtin.stat:
+    path: "{{ windmill_worker_checkout_checksum_file }}"
+  register: windmill_worker_checkout_checksum_marker
+
+- name: Read the Windmill worker checkout checksum marker
+  ansible.builtin.slurp:
+    src: "{{ windmill_worker_checkout_checksum_file }}"
+  register: windmill_worker_checkout_checksum_marker_raw
+  when: windmill_worker_checkout_checksum_marker.stat.exists
+
+- name: Decide whether the Windmill worker checkout needs to be refreshed
+  ansible.builtin.set_fact:
+    windmill_worker_checkout_needs_refresh: >-
+      {{
+        (not windmill_worker_checkout_checksum_marker.stat.exists)
+        or (
+          (windmill_worker_checkout_checksum_marker_raw.content | default('') | b64decode | trim)
+          != (windmill_worker_checkout_archive_remote.checksum | default(''))
+        )
+      }}
+
+- name: Expand the staged Windmill worker checkout on the guest when the archive changed
+  ansible.builtin.shell: |
+    set -euo pipefail
+    tar -xzf "{{ windmill_site_dir }}/worker-checkout.tar.gz" \
+      --overwrite \
+      -C "{{ windmill_worker_repo_checkout_host_path }}"
+  args:
+    executable: /bin/bash
+  changed_when: windmill_worker_checkout_needs_refresh | bool
+  when: windmill_worker_checkout_needs_refresh | bool
+
+- name: Record the deployed Windmill worker checkout archive checksum
+  ansible.builtin.copy:
+    dest: "{{ windmill_worker_checkout_checksum_file }}"
+    content: "{{ windmill_worker_checkout_archive_remote.checksum | default('') }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+  when: windmill_worker_checkout_needs_refresh | bool
+
+- name: Ensure repo-backed Windmill runtime paths stay writable after checkout sync
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: directory_tree
+  vars:
+    common_directory_tree_paths: "{{ windmill_worker_runtime_writable_directories }}"
+
+- name: Ensure the Windmill worker checkout mutable directories exist with write access
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: "{{ item.mode }}"
+  loop: "{{ windmill_worker_repo_mutable_directories }}"
+
+- name: Ensure the Windmill worker checkout mutable files remain writable for Windmill jobs
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: file
+    mode: "{{ item.mode }}"
+  loop: "{{ windmill_worker_repo_mutable_files }}"
+
+- name: Ensure the Windmill worker checkout secret directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: "{{ item.mode }}"
+  loop: "{{ windmill_worker_repo_secret_directories }}"
+  no_log: true
+
+- name: Mirror the Windmill worker checkout bootstrap secret files
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.path }}"
+    mode: "{{ item.mode }}"
+  loop: "{{ windmill_worker_repo_secret_files }}"
+  no_log: true
+
+- name: Remove the staged Windmill worker checkout archive from the guest
+  ansible.builtin.file:
+    path: "{{ windmill_site_dir }}/worker-checkout.tar.gz"
+    state: absent
+
+- name: Find stale Python bytecode files in the Windmill worker checkout
+  ansible.builtin.shell: |
+    set -euo pipefail
+    find \
+      "{{ windmill_worker_repo_checkout_host_path }}/callback_plugins" \
+      "{{ windmill_worker_repo_checkout_host_path }}/collections" \
+      "{{ windmill_worker_repo_checkout_host_path }}/config" \
+      "{{ windmill_worker_repo_checkout_host_path }}/filter_plugins" \
+      "{{ windmill_worker_repo_checkout_host_path }}/platform" \
+      "{{ windmill_worker_repo_checkout_host_path }}/scripts" \
+      "{{ windmill_worker_repo_checkout_host_path }}/windmill" \
+      -type f \
+      -name '*.pyc' \
+      -print \
+      -delete
+  args:
+    executable: /bin/bash
+  register: windmill_worker_checkout_python_cache_files
+  changed_when: windmill_worker_checkout_python_cache_files.stdout | trim | length > 0
+
+- name: Remove stale Python bytecode files from the Windmill worker checkout
+  ansible.builtin.debug:
+    msg: "Removed stale Python bytecode files from the Windmill worker checkout"
+  when: windmill_worker_checkout_python_cache_files.stdout | trim | length > 0
+  changed_when: false
+
+- name: Find stale Python bytecode cache directories in the Windmill worker checkout
+  ansible.builtin.shell: |
+    set -euo pipefail
+    find \
+      "{{ windmill_worker_repo_checkout_host_path }}/callback_plugins" \
+      "{{ windmill_worker_repo_checkout_host_path }}/collections" \
+      "{{ windmill_worker_repo_checkout_host_path }}/config" \
+      "{{ windmill_worker_repo_checkout_host_path }}/filter_plugins" \
+      "{{ windmill_worker_repo_checkout_host_path }}/platform" \
+      "{{ windmill_worker_repo_checkout_host_path }}/scripts" \
+      "{{ windmill_worker_repo_checkout_host_path }}/windmill" \
+      -depth \
+      -type d \
+      -name '__pycache__' \
+      -print \
+      -exec rm -rf {} +
+  args:
+    executable: /bin/bash
+  register: windmill_worker_checkout_python_cache_dirs
+  changed_when: windmill_worker_checkout_python_cache_dirs.stdout | trim | length > 0
+
+- name: Remove stale Python bytecode cache directories from the Windmill worker checkout
+  ansible.builtin.debug:
+    msg: "Removed stale Python bytecode cache directories from the Windmill worker checkout"
+  when: windmill_worker_checkout_python_cache_dirs.stdout | trim | length > 0
+  changed_when: false
+
+- name: Remove the local staging archive for the Windmill worker checkout
+  ansible.builtin.file:
+    path: "{{ windmill_worker_checkout_archive_local.path }}"
+    state: absent
+  delegate_to: localhost
+  become: false
+
+- name: Load the controller-local secret manifest for worker-executed jobs
+  ansible.builtin.set_fact:
+    windmill_worker_secret_manifest: >-
+      {{
+        lookup('ansible.builtin.file', windmill_worker_secret_manifest_path)
+        | from_json
+      }}
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Ensure the mirrored worker secret directories exist
+  ansible.builtin.file:
+    path: >-
+      {{
+        windmill_worker_repo_checkout_host_path
+        ~ '/.local/'
+        ~ (
+          windmill_worker_secret_manifest.secrets[item].path
+          | regex_replace('^.*?/.local/', '')
+          | dirname
+        )
+      }}
+    state: directory
+    mode: "0700"
+  loop: "{{ windmill_worker_secret_mirror_ids }}"
+  when:
+    - windmill_worker_secret_manifest.secrets[item] is mapping
+    - windmill_worker_secret_manifest.secrets[item].kind == 'file'
+    - "'/.local/' in windmill_worker_secret_manifest.secrets[item].path"
+  no_log: true
+
+- name: Mirror the worker-executed controller-local secrets into the repo checkout
+  ansible.builtin.copy:
+    src: "{{ windmill_worker_secret_manifest.secrets[item].path }}"
+    dest: >-
+      {{
+        windmill_worker_repo_checkout_host_path
+        ~ '/.local/'
+        ~ (
+          windmill_worker_secret_manifest.secrets[item].path
+          | regex_replace('^.*?/.local/', '')
+        )
+      }}
+    mode: "0600"
+  loop: "{{ windmill_worker_secret_mirror_ids }}"
+  when:
+    - windmill_worker_secret_manifest.secrets[item] is mapping
+    - windmill_worker_secret_manifest.secrets[item].kind == 'file'
+    - "'/.local/' in windmill_worker_secret_manifest.secrets[item].path"
+  no_log: true
+
+- name: Ensure the platform mutation-audit directory exists
+  ansible.builtin.file:
+    path: "{{ windmill_mutation_audit_dir }}"
+    state: directory
+    owner: root
+    group: adm
+    mode: "0755"
+
+- name: Ensure the platform mutation-audit file exists
+  ansible.builtin.file:
+    path: "{{ windmill_mutation_audit_file }}"
+    state: touch
+    owner: root
+    group: adm
+    mode: "0640"
+    access_time: preserve
+    modification_time: preserve
+
+- name: Generate the Windmill superadmin secret
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ windmill_superadmin_secret_remote_file }}" ]; then
+      umask 077
+      openssl rand -hex 32 > "{{ windmill_superadmin_secret_remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: windmill_superadmin_secret_generation
+  changed_when: "'changed' in windmill_superadmin_secret_generation.stdout"
+  no_log: true
+
+- name: Read the Windmill superadmin secret
+  ansible.builtin.slurp:
+    src: "{{ windmill_superadmin_secret_remote_file }}"
+  register: windmill_superadmin_secret_raw
+  no_log: true
+
+- name: Record the Windmill superadmin secret
+  ansible.builtin.set_fact:
+    windmill_superadmin_secret: "{{ windmill_superadmin_secret_raw.content | b64decode | trim }}"
+    windmill_database_password: "{{ lookup('ansible.builtin.file', windmill_database_password_local_file) | trim }}"
+    windmill_proxmox_api_token_payload: "{{ lookup('ansible.builtin.file', proxmox_api_token_local_file) | from_json }}"
+    windmill_proxmox_api_token_payload_raw: "{{ lookup('ansible.builtin.file', proxmox_api_token_local_file) | trim }}"
+  no_log: true
+
+- name: Build the Windmill runtime secret payload
+  ansible.builtin.set_fact:
+    windmill_runtime_secret_payload: >-
+      {{
+        {
+          'DATABASE_URL': windmill_database_dsn,
+          'LV3_WINDMILL_BASE_URL': windmill_worker_api_base_url,
+          'LV3_WINDMILL_TOKEN': windmill_superadmin_secret,
+          'SUPERADMIN_SECRET': windmill_superadmin_secret,
+          'LV3_GRAPH_DSN': windmill_platform_dsn,
+          'WORLD_STATE_DSN': windmill_world_state_dsn,
+          'LV3_NATS_URL': windmill_nats_url,
+          'TF_VAR_proxmox_endpoint': windmill_proxmox_api_token_payload.api_url,
+          'TF_VAR_proxmox_api_token': windmill_proxmox_api_token_payload.full_token_id ~ '=' ~ windmill_proxmox_api_token_payload.value,
+        }
+        | combine(
+            {'LV3_NATS_USERNAME': windmill_nats_username}
+            if (windmill_nats_username | default('') | trim | length > 0)
+            else {}
+          )
+        | combine(
+            {'LV3_NATS_PASSWORD': windmill_nats_password}
+            if (windmill_nats_password | default('') | trim | length > 0)
+            else {}
+          )
+        | combine(
+            {'LV3_LEDGER_DSN': windmill_ledger_dsn}
+            if (windmill_ledger_dsn | default('') | trim | length > 0)
+            else {}
+          )
+        | combine(
+            {'LV3_LEDGER_NATS_URL': windmill_ledger_nats_url}
+            if (windmill_ledger_nats_url | default('') | trim | length > 0)
+            else {}
+          )
+        | combine(
+            {'LV3_TEST_RUNNER_USERNAME': windmill_integration_test_runner_username}
+            if (windmill_integration_test_runner_username | default('') | trim | length > 0)
+            else {}
+          )
+        | combine(
+            {'LV3_TEST_RUNNER_PASSWORD': lookup('ansible.builtin.file', windmill_integration_test_runner_password_local_file) | trim}
+            if (lookup('ansible.builtin.file', windmill_integration_test_runner_password_local_file, errors='ignore') | default('', true) | trim | length > 0)
+            else {}
+          )
+        | combine({'LV3_INTEGRATION_ENVIRONMENT': 'production'})
+        | combine(
+            windmill_operator_manager_env
+            | dict2items
+            | rejectattr('value', 'equalto', '')
+            | items2dict
+          )
+      }}
+  no_log: true
+
+- name: Ensure the repo-local Proxmox API token directory exists for Windmill jobs
+  ansible.builtin.file:
+    path: "{{ windmill_worker_proxmox_api_token_payload_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Mirror the Proxmox API token payload into the Windmill worker checkout
+  ansible.builtin.copy:
+    dest: "{{ windmill_worker_proxmox_api_token_payload_file }}"
+    content: "{{ windmill_proxmox_api_token_payload_raw }}\n"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Ensure the local Windmill artifact directory exists
+  ansible.builtin.file:
+    path: "{{ windmill_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Mirror the Windmill superadmin secret to the control machine
+  ansible.builtin.copy:
+    dest: "{{ windmill_superadmin_secret_local_file }}"
+    content: "{{ windmill_superadmin_secret }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Create a controller-local staging path for the Windmill OpenBao agent runtime env template
+  ansible.builtin.tempfile:
+    state: file
+    suffix: .ctmpl
+  delegate_to: localhost
+  become: false
+  register: windmill_openbao_agent_template_local
+
+- name: Render the Windmill OpenBao agent runtime env template to a controller-local file
+  ansible.builtin.template:
+    src: "{{ playbook_dir }}/../collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.ctmpl.j2"
+    dest: "{{ windmill_openbao_agent_template_local.path }}"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Ensure the worker checkout secret directory exists
+  ansible.builtin.file:
+    path: "{{ windmill_worker_superadmin_secret_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+  no_log: true
+
+- name: Mirror the Windmill superadmin secret into the worker checkout
+  ansible.builtin.copy:
+    dest: "{{ windmill_worker_superadmin_secret_file }}"
+    content: "{{ windmill_superadmin_secret }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Prepare OpenBao agent runtime secret injection for Windmill
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: windmill
+    common_openbao_compose_env_agent_dir: "{{ windmill_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ windmill_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ windmill_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ windmill_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ windmill_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ windmill_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ windmill_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ windmill_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ windmill_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ windmill_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ windmill_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_local_file: "{{ windmill_openbao_agent_template_local.path }}"
+    common_openbao_compose_env_role_id_file: "{{ windmill_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ windmill_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ windmill_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ windmill_legacy_env_file }}"
+  no_log: true
+
+- name: Remove the controller-local Windmill OpenBao agent runtime env template staging file
+  ansible.builtin.file:
+    path: "{{ windmill_openbao_agent_template_local.path }}"
+    state: absent
+  delegate_to: localhost
+  become: false
+- name: Render the Windmill compose file
+  vars:
+    mutation_audit_action: render.windmill_compose
+    mutation_audit_target: windmill-runtime
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ windmill_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  tags:
+    - mutation
+
+- name: Pull the Windmill images
+  vars:
+    mutation_audit_action: pull.windmill_images
+    mutation_audit_target: windmill-runtime
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ windmill_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ windmill_site_dir }}"
+  register: windmill_pull
+  changed_when: >-
+    'Pulling' in windmill_pull.stdout
+    or 'Downloaded newer image' in windmill_pull.stdout
+    or 'Pull complete' in windmill_pull.stdout
+  tags:
+    - mutation
+
+- name: Check whether Docker nat chain exists before Windmill startup
+  ansible.builtin.command: iptables -t nat -S DOCKER
+  register: windmill_docker_nat_chain_check
+  changed_when: false
+  failed_when: windmill_docker_nat_chain_check.rc not in [0, 1]
+  when: windmill_server_requires_docker_nat | bool
+
+- name: Verify Docker responds before Windmill startup
+  ansible.builtin.command: docker info --format '{{ "{{ .ServerVersion }}" }}'
+  changed_when: false
+
+- name: Restart Docker when the nat chain is missing before Windmill startup
+  ansible.builtin.systemd:
+    name: docker
+    state: restarted
+  when:
+    - windmill_server_requires_docker_nat | bool
+    - windmill_docker_nat_chain_check.rc == 1
+
+- name: Recheck Docker nat chain before Windmill startup
+  ansible.builtin.command: iptables -t nat -S DOCKER
+  register: windmill_docker_nat_chain_recheck
+  changed_when: false
+  failed_when: windmill_docker_nat_chain_recheck.rc not in [0, 1]
+  retries: 5
+  delay: 2
+  until: windmill_docker_nat_chain_recheck.rc == 0
+  when: windmill_server_requires_docker_nat | bool
+
+- name: Assert Docker nat chain is present before Windmill startup
+  ansible.builtin.assert:
+    that:
+      - windmill_docker_nat_chain_recheck.rc == 0
+    fail_msg: "Docker is running but the nat DOCKER chain is missing; Windmill published ports will fail."
+  when: windmill_server_requires_docker_nat | bool
+
+- name: Remove stale Windmill compose replacement containers before startup
+  ansible.builtin.shell: |
+    set -euo pipefail
+    stale_ids="$(docker ps -aq \
+      --filter label=com.docker.compose.project=windmill \
+      --filter label=com.docker.compose.replace)"
+    if [ -z "$stale_ids" ]; then
+      exit 0
+    fi
+    docker rm -f $stale_ids
+  args:
+    executable: /bin/bash
+  register: windmill_stale_replace_cleanup
+  changed_when: windmill_stale_replace_cleanup.stdout | trim != ""
+- name: Start Windmill and wait for the API socket
+  block:
+    - name: Start the Windmill stack
+      vars:
+        mutation_audit_action: start.windmill_stack
+        mutation_audit_target: windmill-runtime
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ windmill_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ windmill_site_dir }}"
+      register: windmill_up
+      changed_when: >-
+        'Creating' in windmill_up.stdout
+        or 'Recreating' in windmill_up.stdout
+        or 'Starting' in windmill_up.stdout
+      tags:
+        - mutation
+
+    - name: Wait for Windmill to listen locally
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: "{{ windmill_server_port }}"
+        delay: 0
+        timeout: 180
+  rescue:
+    - name: Detect stale Windmill compose-network startup failures
+      ansible.builtin.set_fact:
+        windmill_missing_network_failure: >-
+          {{
+            'network ' in (windmill_up.stderr | default(''))
+            and ' does not exist' in (windmill_up.stderr | default(''))
+          }}
+
+    - name: Reset the stale Windmill compose network before retrying startup
+      ansible.builtin.shell: |
+        set -euo pipefail
+        docker compose --file "{{ windmill_compose_file }}" down --remove-orphans >/dev/null 2>&1 || true
+        docker network rm windmill_default >/dev/null 2>&1 || true
+        echo changed
+      args:
+        chdir: "{{ windmill_site_dir }}"
+        executable: /bin/bash
+      register: windmill_network_reset
+      changed_when: "'changed' in windmill_network_reset.stdout"
+      when: windmill_missing_network_failure | bool
+
+    - name: Recreate the full Windmill stack after stale-network cleanup
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ windmill_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ windmill_site_dir }}"
+      register: windmill_network_retry_up
+      changed_when: >-
+        'Creating' in windmill_network_retry_up.stdout
+        or 'Recreating' in windmill_network_retry_up.stdout
+        or 'Starting' in windmill_network_retry_up.stdout
+      when: windmill_missing_network_failure | bool
+
+    - name: Wait for Windmill to listen locally after stale-network cleanup
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: "{{ windmill_server_port }}"
+        delay: 0
+        timeout: 180
+      when: windmill_missing_network_failure | bool
+
+    - name: Recreate the Windmill server container after startup timeout
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ windmill_compose_file }}"
+          - rm
+          - -fsv
+          - windmill_server
+      args:
+        chdir: "{{ windmill_site_dir }}"
+      register: windmill_server_recreate_rm
+      changed_when: >-
+        'Removed' in windmill_server_recreate_rm.stdout
+        or 'Stopping' in windmill_server_recreate_rm.stdout
+      when: not (windmill_missing_network_failure | bool)
+
+    - name: Start a fresh Windmill server container
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ windmill_compose_file }}"
+          - up
+          - -d
+          - windmill_server
+      args:
+        chdir: "{{ windmill_site_dir }}"
+      register: windmill_server_recreate_up
+      changed_when: >-
+        'Creating' in windmill_server_recreate_up.stdout
+        or 'Recreating' in windmill_server_recreate_up.stdout
+        or 'Starting' in windmill_server_recreate_up.stdout
+      when: not (windmill_missing_network_failure | bool)
+
+    - name: Wait for Windmill to listen locally after server recreation
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: "{{ windmill_server_port }}"
+        delay: 0
+        timeout: 180
+      when: not (windmill_missing_network_failure | bool)
+
+- name: Wait for the Windmill API version endpoint
+  ansible.builtin.uri:
+    url: "{{ windmill_private_base_url }}/api/version"
+    method: GET
+    status_code: 200
+  register: windmill_version
+  retries: 18
+  delay: 5
+  until: windmill_version.status == 200
+  changed_when: false
+
+- name: Check whether the rendered Windmill runtime env exposes worker scheduler variables
+  ansible.builtin.shell: |
+    set -euo pipefail
+    test -s "{{ windmill_env_file }}"
+    grep '^LV3_WINDMILL_BASE_URL=' "{{ windmill_env_file }}"
+    grep '^LV3_WINDMILL_TOKEN=' "{{ windmill_env_file }}"
+  args:
+    executable: /bin/bash
+  register: windmill_runtime_env_contract
+  changed_when: false
+  failed_when: false
+
+- name: Recreate the OpenBao agent and Windmill worker services when the runtime env contract is stale
+  vars:
+    mutation_audit_action: restart.windmill_runtime_contract
+    mutation_audit_target: windmill-runtime
+  args:
+    chdir: "{{ windmill_site_dir }}"
+    executable: /bin/bash
+  ansible.builtin.shell: |
+    set -euo pipefail
+    stale_ids="$(docker ps -aq \
+      --filter label=com.docker.compose.project=windmill \
+      --filter label=com.docker.compose.replace)"
+    if [ -n "$stale_ids" ]; then
+      docker rm -f $stale_ids
+    fi
+    docker compose --file "{{ windmill_compose_file }}" up -d --force-recreate \
+      openbao-agent windmill_server windmill_worker windmill_worker_native
+  register: windmill_runtime_env_recreate
+  changed_when: >-
+    'Creating' in windmill_runtime_env_recreate.stdout
+    or 'Recreating' in windmill_runtime_env_recreate.stdout
+    or 'Starting' in windmill_runtime_env_recreate.stdout
+  when: windmill_runtime_env_contract.rc != 0
+  tags:
+    - mutation
+
+- name: Wait for the rendered Windmill runtime env to expose worker scheduler variables
+  ansible.builtin.shell: |
+    set -euo pipefail
+    test -s "{{ windmill_env_file }}"
+    grep '^LV3_WINDMILL_BASE_URL=' "{{ windmill_env_file }}"
+    grep '^LV3_WINDMILL_TOKEN=' "{{ windmill_env_file }}"
+  args:
+    executable: /bin/bash
+  register: windmill_runtime_env_contract_verify
+  retries: 18
+  delay: 5
+  until: windmill_runtime_env_contract_verify.rc == 0
+  changed_when: false
+
+- name: Recheck the Windmill API version endpoint after runtime env contract reconciliation
+  ansible.builtin.uri:
+    url: "{{ windmill_runtime_api_base_url }}/api/version"
+    method: GET
+    status_code: 200
+  register: windmill_version_post_contract
+  retries: 18
+  delay: 5
+  until: windmill_version_post_contract.status == 200
+  changed_when: false
+
+- name: Authenticate the Windmill bootstrap admin session
+  ansible.builtin.uri:
+    url: "{{ windmill_runtime_api_base_url }}/api/auth/login"
+    method: POST
+    body_format: json
+    body:
+      email: "{{ windmill_bootstrap_identity_email }}"
+      password: "{{ windmill_superadmin_secret }}"
+    return_content: true
+    status_code: 200
+  register: windmill_bootstrap_session_login
+  retries: 6
+  delay: 5
+  until: windmill_bootstrap_session_login.status | default(0) == 200
+  changed_when: false
+  no_log: true
+
+- name: Record the Windmill bootstrap admin session token
+  ansible.builtin.set_fact:
+    windmill_bootstrap_session_token: "{{ windmill_bootstrap_session_login.content | trim }}"
+  no_log: true
+- name: Check whether the Windmill workspace already exists
+  ansible.builtin.uri:
+    url: "{{ windmill_private_base_url }}/api/workspaces/exists"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ windmill_bootstrap_session_token }}"
+    body_format: json
+    body:
+      id: "{{ windmill_workspace_id }}"
+    return_content: true
+    status_code: 200
+  register: windmill_workspace_exists
+  changed_when: false
+  no_log: true
+
+- name: Create the Windmill workspace
+  vars:
+    mutation_audit_action: create.windmill_workspace
+    mutation_audit_target: windmill-workspace
+    mutation_audit_emit_on_success: true
+  ansible.builtin.uri:
+    url: "{{ windmill_private_base_url }}/api/workspaces/create"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ windmill_bootstrap_session_token }}"
+    body_format: json
+    body:
+      id: "{{ windmill_workspace_id }}"
+      name: "{{ windmill_workspace_name }}"
+    return_content: true
+    status_code:
+      - 201
+      - 400
+  register: windmill_workspace_create
+  failed_when: >-
+    windmill_workspace_create.status not in [201, 400]
+    or (
+      windmill_workspace_create.status == 400
+      and 'already exists' not in (windmill_workspace_create.content | default('') | lower)
+    )
+  when: not (windmill_workspace_exists.json | default(false) | bool)
+  no_log: true
+  tags:
+    - mutation
+
+- name: Ensure the Windmill bootstrap workspace identity is consistent
+  become: true
+  become_user: postgres
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        INSERT INTO password
+          (email, password_hash, login_type, super_admin, verified, name, company, first_time_user, username, devops, role_source)
+        VALUES
+          ('{{ windmill_bootstrap_identity_email }}', NULL, '{{ windmill_bootstrap_identity_login_type }}', TRUE, TRUE, NULL, NULL, FALSE, '{{ windmill_bootstrap_identity_username }}', FALSE, 'manual')
+        ON CONFLICT (email) DO UPDATE
+        SET login_type = EXCLUDED.login_type,
+            super_admin = TRUE,
+            verified = TRUE,
+            username = COALESCE(password.username, EXCLUDED.username),
+            devops = FALSE,
+            role_source = 'manual'
+  changed_when: false
+  no_log: true
+
+- name: Ensure the Windmill bootstrap workspace user is consistent
+  become: true
+  become_user: postgres
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        INSERT INTO usr
+          (workspace_id, email, username, is_admin, operator, disabled, role, added_via)
+        VALUES
+          ('{{ windmill_workspace_id }}', '{{ windmill_bootstrap_identity_email }}', '{{ windmill_bootstrap_identity_username }}', TRUE, FALSE, FALSE, 'admin', '{"kind":"bootstrap"}'::jsonb)
+        ON CONFLICT (workspace_id, username) DO UPDATE
+        SET email = EXCLUDED.email,
+            is_admin = TRUE,
+            operator = FALSE,
+            disabled = FALSE,
+            role = 'admin',
+            added_via = COALESCE(usr.added_via, EXCLUDED.added_via)
+  changed_when: false
+  no_log: true
+
+- name: Ensure the Windmill bootstrap user remains in the default workspace group
+  become: true
+  become_user: postgres
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        INSERT INTO usr_to_group (workspace_id, usr, group_)
+        VALUES ('{{ windmill_workspace_id }}', '{{ windmill_bootstrap_identity_username }}', 'all')
+        ON CONFLICT DO NOTHING
+  changed_when: false
+  no_log: true
+
+- name: Ensure the Windmill bootstrap admin login type matches the managed contract
+  ansible.builtin.uri:
+    url: "{{ windmill_private_base_url }}/api/users/set_login_type/{{ windmill_bootstrap_identity_email | urlencode }}"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ windmill_bootstrap_session_token }}"
+    body_format: json
+    body:
+      login_type: "{{ windmill_bootstrap_identity_login_type }}"
+    return_content: true
+    status_code: 200
+  changed_when: false
+  no_log: true
+
+- name: Ensure the Windmill bootstrap admin password matches the managed secret
+  ansible.builtin.uri:
+    url: "{{ windmill_private_base_url }}/api/users/set_password_of/{{ windmill_bootstrap_identity_email | urlencode }}"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ windmill_bootstrap_session_token }}"
+    body_format: json
+    body:
+      password: "{{ windmill_superadmin_secret }}"
+    return_content: true
+    status_code: 200
+  changed_when: false
+  no_log: true
+
+- name: Create a temporary path for the ADR 0113 world-state migration
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.tempfile:
+    state: file
+    suffix: .sql
+  register: windmill_world_state_migration_tmp
+
+- name: Copy the ADR 0113 world-state migration to the database host
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../migrations/0010_world_state_schema.sql"
+    dest: "{{ windmill_world_state_migration_tmp.path }}"
+    mode: "0600"
+
+- name: Apply the ADR 0113 world-state migration in the Windmill database
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -f
+      - "{{ windmill_world_state_migration_tmp.path }}"
+  changed_when: false
+
+- name: Remove the temporary ADR 0113 world-state migration file
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.file:
+    path: "{{ windmill_world_state_migration_tmp.path }}"
+    state: absent
+
+- name: Assert the ADR 0113 world-state schema exists in the Windmill database
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -Atqc
+      - "SELECT to_regclass('world_state.current_view')"
+  register: windmill_world_state_schema_check
+  changed_when: false
+
+- name: Fail when the ADR 0113 world-state schema is missing
+  ansible.builtin.assert:
+    that:
+      - windmill_world_state_schema_check.stdout | trim == 'world_state.current_view'
+    fail_msg: "ADR 0113 live schema apply did not create world_state.current_view in the Windmill database."
+
+- name: Refresh the ADR 0113 world-state materialized view in the Windmill database
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "REFRESH MATERIALIZED VIEW world_state.current_view"
+  changed_when: false
+
+- name: Check whether the ADR 0113 world-state materialized view is populated
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -Atqc
+      - "SELECT ispopulated::text FROM pg_matviews WHERE schemaname = 'world_state' AND matviewname = 'current_view'"
+  register: windmill_world_state_current_view_populated
+  changed_when: false
+
+- name: Fail when the ADR 0113 world-state materialized view is not populated
+  ansible.builtin.assert:
+    that:
+      - windmill_world_state_current_view_populated.stdout | trim == 'true'
+    fail_msg: "ADR 0113 live schema apply left world_state.current_view unpopulated in the Windmill database."
+
+- name: Create a temporary path for the ADR 0117 graph migration
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.tempfile:
+    state: file
+    suffix: .sql
+  register: windmill_graph_migration_tmp
+
+- name: Copy the ADR 0117 graph migration to the database host
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../migrations/0012_graph_schema.sql"
+    dest: "{{ windmill_graph_migration_tmp.path }}"
+    mode: "0600"
+
+- name: Apply the ADR 0117 graph migration in the Windmill database
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -f
+      - "{{ windmill_graph_migration_tmp.path }}"
+  changed_when: false
+
+- name: Remove the temporary ADR 0117 graph migration file
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.file:
+    path: "{{ windmill_graph_migration_tmp.path }}"
+    state: absent
+
+- name: Assert the ADR 0117 graph schema exists in the Windmill database
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -Atqc
+      - "SELECT to_regclass('graph.nodes')"
+  register: windmill_graph_schema_check
+  changed_when: false
+
+- name: Fail when the ADR 0117 graph schema is missing
+  ansible.builtin.assert:
+    that:
+      - windmill_graph_schema_check.stdout | trim == 'graph.nodes'
+    fail_msg: "ADR 0117 live schema apply did not create graph.nodes in the Windmill database."
+
+- name: Ensure the ADR 0117 graph schema is owned by the Windmill database role
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        ALTER SCHEMA graph OWNER TO {{ windmill_database_user }};
+        ALTER TABLE graph.nodes OWNER TO {{ windmill_database_user }};
+        ALTER TABLE graph.edges OWNER TO {{ windmill_database_user }};
+        ALTER SEQUENCE graph.edges_id_seq OWNER TO {{ windmill_database_user }};
+  changed_when: false
+
+- name: Ensure the ADR 0117 graph schema grants runtime access to the Windmill database role
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        GRANT USAGE ON SCHEMA graph TO {{ windmill_database_user }};
+        GRANT ALL ON ALL TABLES IN SCHEMA graph TO {{ windmill_database_user }};
+        GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA graph TO {{ windmill_database_user }};
+  changed_when: false
+
+- name: Create a temporary path for the ADR 0158 config-merge migration
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.tempfile:
+    state: file
+    suffix: .sql
+  register: windmill_config_merge_migration_tmp
+
+- name: Copy the ADR 0158 config-merge migration to the database host
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../migrations/0016_config_merge_schema.sql"
+    dest: "{{ windmill_config_merge_migration_tmp.path }}"
+    mode: "0600"
+
+- name: Apply the ADR 0158 config-merge migration in the Windmill database
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -f
+      - "{{ windmill_config_merge_migration_tmp.path }}"
+  changed_when: false
+
+- name: Remove the temporary ADR 0158 config-merge migration file
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.file:
+    path: "{{ windmill_config_merge_migration_tmp.path }}"
+    state: absent
+
+- name: Create a temporary path for the ADR 0165 idempotency migration
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.tempfile:
+    state: file
+    suffix: .sql
+  register: windmill_idempotency_migration_tmp
+
+- name: Copy the ADR 0165 idempotency migration to the database host
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../migrations/0016_idempotency_store.sql"
+    dest: "{{ windmill_idempotency_migration_tmp.path }}"
+    mode: "0600"
+
+- name: Apply the ADR 0165 idempotency migration in the Windmill database
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -f
+      - "{{ windmill_idempotency_migration_tmp.path }}"
+  changed_when: false
+
+- name: Remove the temporary ADR 0165 idempotency migration file
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.file:
+    path: "{{ windmill_idempotency_migration_tmp.path }}"
+    state: absent
+
+- name: Assert the ADR 0165 idempotency schema exists in the Windmill database
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -Atqc
+      - "SELECT to_regclass('platform.idempotency_records')"
+  register: windmill_idempotency_schema_check
+  changed_when: false
+
+- name: Fail when the ADR 0165 idempotency schema is missing
+  ansible.builtin.assert:
+    that:
+      - windmill_idempotency_schema_check.stdout | trim == 'platform.idempotency_records'
+    fail_msg: "ADR 0165 live schema apply did not create platform.idempotency_records in the Windmill database."
+
+- name: Create a local manifest path for repo-managed Windmill scripts
+  ansible.builtin.tempfile:
+    state: file
+    suffix: .json
+  delegate_to: localhost
+  become: false
+  register: windmill_seed_script_manifest_local
+
+- name: Render the repo-managed Windmill script manifest locally
+  ansible.builtin.copy:
+    dest: "{{ windmill_seed_script_manifest_local.path }}"
+    content: "{{ windmill_seed_scripts | to_nice_json }}"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+
+- name: Sync repo-managed Windmill scripts
+  vars:
+    mutation_audit_action: sync.windmill_scripts
+    mutation_audit_target: windmill-workspace
+    mutation_audit_emit_on_success: true
+  ansible.builtin.command:
+    argv:
+      - uv
+      - run
+      - --no-project
+      - --with
+      - pyyaml
+      - python3
+      - "{{ inventory_dir }}/../scripts/sync_windmill_seed_scripts.py"
+      - --base-url
+      - "{{ windmill_private_base_url }}"
+      - --workspace
+      - "{{ windmill_workspace_id }}"
+      - --manifest
+      - "{{ windmill_seed_script_manifest_local.path }}"
+      - --max-attempts
+      - "20"
+      - --settle-interval
+      - "2.0"
+  delegate_to: localhost
+  become: false
+  environment:
+    WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"
+  register: windmill_seed_script_sync
+  changed_when: false
+  tags:
+    - mutation
+
+- name: Remove the local repo-managed Windmill script manifest
+  ansible.builtin.file:
+    path: "{{ windmill_seed_script_manifest_local.path }}"
+    state: absent
+  delegate_to: localhost
+  become: false
+
+- name: Ensure the Windmill seed app sync directory exists
+  ansible.builtin.file:
+    path: "{{ windmill_seed_app_sync_dir }}"
+    state: directory
+    mode: "0755"
+  when: (windmill_seed_raw_apps | default([])) | length > 0
+
+- name: Copy the repo-managed Windmill app sync root
+  ansible.builtin.copy:
+    src: "{{ windmill_seed_app_repo_root_local_dir }}/"
+    dest: "{{ windmill_seed_app_sync_dir }}/"
+    mode: preserve
+  when: (windmill_seed_raw_apps | default([])) | length > 0
+
+- name: Sync repo-managed Windmill raw apps
+  vars:
+    mutation_audit_action: sync.windmill_raw_apps
+    mutation_audit_target: "{{ item.path }}"
+    mutation_audit_emit_on_success: true
+  ansible.builtin.command:
+    argv:
+      - docker
+      - run
+      - --rm
+      - --network
+      - host
+      - -e
+      - WM_WORKSPACE
+      - -e
+      - WM_TOKEN
+      - -e
+      - BASE_INTERNAL_URL
+      - -v
+      - "{{ windmill_seed_app_sync_dir }}:/workspace"
+      - "{{ windmill_image }}"
+      - sh
+      - -lc
+      - >-
+        cd /workspace
+        && wmill sync push
+        --yes
+        --skip-variables
+        --skip-secrets
+        --skip-resources
+        --skip-resource-types
+        --skip-scripts
+        --skip-flows
+        --skip-folders
+        --skip-workspace-dependencies
+        --skip-branch-validation
+        --includes "{{ item.sync_pattern }}"
+        --message "Repo-managed Windmill raw app sync"
+  loop: "{{ windmill_seed_raw_apps | default([]) }}"
+  loop_control:
+    label: "{{ item.path }}"
+  register: windmill_seed_raw_app_sync
+  environment:
+    WM_WORKSPACE: "{{ windmill_workspace_id }}"
+    WM_TOKEN: "{{ windmill_bootstrap_session_token }}"
+    BASE_INTERNAL_URL: "{{ windmill_runtime_api_base_url }}"
+  changed_when: false
+  when: (windmill_seed_raw_apps | default([])) | length > 0
+  tags:
+    - mutation
+
+- name: Create a local manifest path for repo-managed Windmill schedules
+  ansible.builtin.tempfile:
+    state: file
+    suffix: .json
+  delegate_to: localhost
+  become: false
+  register: windmill_seed_schedule_manifest_local
+
+- name: Render the repo-managed Windmill schedule manifest locally
+  ansible.builtin.copy:
+    dest: "{{ windmill_seed_schedule_manifest_local.path }}"
+    content: "{{ windmill_seed_schedules | to_nice_json }}"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+
+- name: Sync repo-managed Windmill schedules
+  vars:
+    mutation_audit_action: sync.windmill_schedules
+    mutation_audit_target: windmill-workspace
+    mutation_audit_emit_on_success: true
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ inventory_dir }}/../scripts/sync_windmill_seed_schedules.py"
+      - --base-url
+      - "{{ windmill_private_base_url }}"
+      - --workspace
+      - "{{ windmill_workspace_id }}"
+      - --manifest
+      - "{{ windmill_seed_schedule_manifest_local.path }}"
+      - --max-attempts
+      - "8"
+      - --settle-interval
+      - "1.0"
+  delegate_to: localhost
+  become: false
+  environment:
+    WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"
+  register: windmill_seed_schedule_sync
+  changed_when: false
+  tags:
+    - mutation
+
+- name: Remove the local repo-managed Windmill schedule manifest
+  ansible.builtin.file:
+    path: "{{ windmill_seed_schedule_manifest_local.path }}"
+    state: absent
+  delegate_to: localhost
+  become: false
+
+- name: Converge repo-managed Windmill schedule enabled flags
+  become: true
+  ansible.builtin.shell: |
+    set -euo pipefail
+    database_url="$(awk -F= '$1 == "DATABASE_URL" { sub(/^[^=]*=/, ""); print; exit }' "{{ windmill_env_file }}")"
+    test -n "${database_url}"
+    psql "${database_url}" -v ON_ERROR_STOP=1 -Atqc \
+      "UPDATE schedule SET enabled = {{ item.enabled | default(false) | ternary('true', 'false') }} WHERE path = '{{ item.path }}' AND enabled IS DISTINCT FROM {{ item.enabled | default(false) | ternary('true', 'false') }};"
+  args:
+    executable: /bin/bash
+  loop: "{{ windmill_seed_schedules }}"
+  loop_control:
+    label: "{{ item.path }}"
+  register: windmill_seed_schedule_enabled_sync
+  changed_when: "'UPDATE 1' in (windmill_seed_schedule_enabled_sync.stdout | default(''))"
+  no_log: true
+
+- name: Run the Windmill seeded healthcheck script
+  ansible.builtin.shell: >
+    python3 {{ (playbook_dir | dirname ~ '/scripts/windmill_run_wait_result.py') | quote }}
+    --base-url {{ windmill_base_url | quote }}
+    --workspace {{ windmill_workspace_id | quote }}
+    --path {{ windmill_seed_scripts[0].path | quote }}
+    --payload-json '{"probe":"live-verify"}'
+    --timeout {{ windmill_seed_job_timeout_seconds }}
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  environment:
+    WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"
+  register: windmill_healthcheck
+  changed_when: false
+  no_log: true
+
+- name: Assert the Windmill seeded healthcheck result
+  ansible.builtin.assert:
+    that:
+      - (windmill_healthcheck.stdout | from_json).probe == "live-verify"
+      - (windmill_healthcheck.stdout | from_json).job_id_present | bool
+      - (windmill_healthcheck.stdout | from_json).workspace == windmill_workspace_id
+    fail_msg: "Windmill API responded, but the seeded healthcheck script did not return the expected result."
+
+- name: Verify Windmill health probes
+  ansible.builtin.import_tasks: verify.yml

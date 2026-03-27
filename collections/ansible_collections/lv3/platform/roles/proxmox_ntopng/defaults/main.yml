@@ -1,0 +1,20 @@
+---
+ntopng_repo_package_url: https://packages.ntop.org/apt/trixie/all/apt-ntop.deb
+ntopng_repo_package_file: /tmp/apt-ntop.deb
+ntopng_packages:
+  - redis-server
+  - ntopng
+ntopng_state_dir: /etc/lv3/ntopng
+ntopng_admin_password_file: /etc/lv3/ntopng/admin-password
+ntopng_local_networks_file: /etc/lv3/ntopng/local-networks.txt
+ntopng_config_file: /etc/ntopng/ntopng.conf.d/90-lv3.conf
+ntopng_http_port: "{{ platform_service_topology | platform_service_port('ntopng', 'internal') }}"
+ntopng_https_port: 0
+ntopng_interfaces:
+  - vmbr10
+  - vmbr0
+ntopng_local_networks:
+  - 10.10.10.0/24=vmbr10
+  - 100.64.0.0/10=tailscale
+ntopng_probe_target: 10.10.10.10
+ntopng_operator_url: "{{ platform_service_topology | platform_service_url('ntopng', 'internal') }}"

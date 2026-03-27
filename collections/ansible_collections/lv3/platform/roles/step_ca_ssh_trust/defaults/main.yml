@@ -1,0 +1,20 @@
+---
+step_ca_cli_version: 0.30.1
+step_ca_cli_download_url: >-
+  https://github.com/smallstep/cli/releases/download/v{{ step_ca_cli_version }}/step_linux_{{ step_ca_cli_version }}_amd64.tar.gz
+step_ca_internal_url: "{{ platform_service_topology | platform_service_url('step_ca', 'internal') }}"
+step_ca_local_root_certificate_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt
+step_ca_local_ssh_user_ca_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/ssh_user_ca.pub
+step_ca_local_hosts_password_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/secrets/provisioners/hosts-password.txt
+step_ca_remote_dir: /etc/lv3/step-ca
+step_ca_root_remote_file: /etc/lv3/step-ca/root_ca.crt
+step_ca_ssh_trusted_user_ca_file: /etc/ssh/lv3-user-ca.pub
+step_ca_ssh_hosts_password_remote_file: /etc/lv3/step-ca/hosts-password.txt
+step_ca_ssh_trust_dropin_file: /etc/ssh/sshd_config.d/95-lv3-step-ca.conf
+step_ca_ssh_host_private_key: /etc/ssh/ssh_host_ed25519_key
+step_ca_ssh_host_public_key: /etc/ssh/ssh_host_ed25519_key.pub
+step_ca_ssh_host_certificate_file: /etc/ssh/ssh_host_ed25519_key-cert.pub
+step_ca_ssh_host_key_id: "{{ inventory_hostname }}"
+step_ca_ssh_hosts_provisioner_name: hosts
+step_ca_ssh_host_renew_before: 24h
+step_ca_ssh_host_principals_extra: []

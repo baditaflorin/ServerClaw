@@ -1,0 +1,47 @@
+{
+  "schema_version": "1.0.0",
+  "environments": [
+    {
+      "id": "production",
+      "name": "Production",
+      "status": "active",
+      "purpose": "Live operator and platform environment on the current LV3 single-node estate.",
+      "base_domain": "lv3.org",
+      "hostname_pattern": "<service>.lv3.org",
+      "edge_service_id": "nginx_edge",
+      "edge_vm": "nginx-lv3",
+      "ingress_ipv4": "65.108.75.123",
+      "topology_model": "single-node-shared-edge",
+      "isolation_model": "Production uses the authoritative bare lv3.org hostnames and repo-managed runtime state.",
+      "operator_access": "Private-only services stay on the Tailscale-backed operator path through the Proxmox host.",
+      "private_network": {
+        "bridge": "vmbr10",
+        "gateway_ipv4": "10.10.10.1",
+        "cidr": 24,
+        "network": "10.10.10.0/24"
+      },
+      "notes": "This is the only environment currently applied live."
+    },
+    {
+      "id": "staging",
+      "name": "Staging",
+      "status": "active",
+      "purpose": "Pre-production validation lane for staged edge-published and operator-facing services.",
+      "base_domain": "staging.lv3.org",
+      "hostname_pattern": "<service>.staging.lv3.org",
+      "edge_service_id": "nginx_edge",
+      "edge_vm": "nginx-lv3",
+      "ingress_ipv4": "65.108.75.123",
+      "topology_model": "single-node-shared-edge",
+      "isolation_model": "Staging reuses the shared host and edge VM but must use separate DNS names, secrets, and mutable service state.",
+      "operator_access": "Until a dedicated staging access path exists, operator-only staged services follow the same private path as production.",
+      "private_network": {
+        "bridge": "vmbr20",
+        "gateway_ipv4": "10.20.10.1",
+        "cidr": 24,
+        "network": "10.20.10.0/24"
+      },
+      "notes": "Live from 2026-03-27 with docker-runtime-staging-lv3 and monitoring-staging-lv3 on vmbr20; staged guest network policy and service bindings remain follow-up work."
+    }
+  ]
+}

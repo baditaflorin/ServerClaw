@@ -1,0 +1,13 @@
+groups:
+  - name: lv3-dozzle
+    rules:
+      - alert: DozzleDown
+        expr: probe_success{service="dozzle",probe_kind="readiness"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          service: dozzle
+        annotations:
+          summary: Dozzle is unreachable on the private runtime port.
+          description: The Dozzle readiness probe on docker-runtime-lv3 has been failing for at least two minutes.
+          runbook_url: https://docs.lv3.org/runbooks/configure-dozzle/

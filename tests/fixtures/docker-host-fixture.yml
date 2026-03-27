@@ -1,0 +1,25 @@
+{
+  "fixture_id": "docker-host",
+  "template": "lv3-docker-host",
+  "vmid_range": [910, 979],
+  "network": {
+    "bridge": "vmbr20",
+    "ip_cidr": "10.20.10.100/24",
+    "gateway": "10.20.10.1"
+  },
+  "resources": {
+    "cores": 2,
+    "memory_mb": 4096,
+    "disk_gb": 32
+  },
+  "lifetime_minutes": 120,
+  "extend_minutes": 0,
+  "tags": ["ephemeral", "fixture", "docker"],
+  "roles_under_test": ["lv3.platform.docker_runtime"],
+  "verify": [
+    {
+      "command": "docker info >/dev/null",
+      "timeout_seconds": 60
+    }
+  ]
+}

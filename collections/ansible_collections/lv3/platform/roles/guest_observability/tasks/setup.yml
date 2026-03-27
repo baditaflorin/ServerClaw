@@ -1,0 +1,95 @@
+---
+- name: Validate guest observability inputs
+  ansible.builtin.assert:
+    that:
+      - guest_observability_prereq_packages | length > 0
+      - guest_observability_packages | length > 0
+      - guest_observability_keyring_dir | length > 0
+      - guest_observability_influx_repo_key_url | length > 0
+      - guest_observability_influx_repo_key_temp_file | length > 0
+      - guest_observability_influx_repo_keyring | length > 0
+      - guest_observability_influx_repo_file | length > 0
+      - guest_observability_state_dir | length > 0
+      - guest_observability_writer_token_local_file | length > 0
+      - guest_observability_writer_token_file | length > 0
+      - guest_observability_influx_url | length > 0
+      - guest_observability_hostname | length > 0
+      - guest_observability_role | length > 0
+      - guest_observability_service | length > 0
+      - guest_observability_managed_directories | length > 0
+    fail_msg: "guest_observability requires Telegraf, InfluxDB repository, service identity, and token inputs."
+
+- name: Ensure guest observability prerequisite packages are present
+  ansible.builtin.apt:
+    name: "{{ guest_observability_prereq_packages }}"
+    state: present
+
+- name: Ensure guest observability APT keyring directory exists
+  ansible.builtin.file:
+    path: "{{ guest_observability_keyring_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Install InfluxData repository key for guest observability
+  ansible.builtin.get_url:
+    url: "{{ guest_observability_influx_repo_key_url }}"
+    dest: "{{ guest_observability_influx_repo_key_temp_file }}"
+    mode: "0644"
+
+- name: Convert InfluxData repository key into a gpg keyring for guest observability
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --dearmor
+      - --yes
+      - --output
+      - "{{ guest_observability_influx_repo_keyring }}"
+      - "{{ guest_observability_influx_repo_key_temp_file }}"
+    creates: "{{ guest_observability_influx_repo_keyring }}"
+
+- name: Install InfluxData repository definition for guest observability
+  ansible.builtin.copy:
+    dest: "{{ guest_observability_influx_repo_file }}"
+    mode: "0644"
+    content: |
+      deb [signed-by={{ guest_observability_influx_repo_keyring }}] https://repos.influxdata.com/debian stable main
+
+- name: Install guest observability packages
+  ansible.builtin.apt:
+    name: "{{ guest_observability_packages }}"
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure guest observability directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  loop: "{{ guest_observability_managed_directories }}"
+
+- name: Ensure local guest writer token exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ guest_observability_writer_token_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: guest_observability_local_token
+
+- name: Fail if the guest writer token is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ guest_observability_writer_token_local_file }} is missing on the control machine.
+      Converge the monitoring VM first so the guest-writer token exists before enabling guest observability.
+  when: not guest_observability_local_token.stat.exists
+
+- name: Persist guest writer token on the guest
+  ansible.builtin.copy:
+    dest: "{{ guest_observability_writer_token_file }}"
+    content: "{{ lookup('file', guest_observability_writer_token_local_file) | trim }}\n"
+    owner: root
+    group: telegraf
+    mode: "0640"
+  no_log: true
+  notify: Restart Telegraf

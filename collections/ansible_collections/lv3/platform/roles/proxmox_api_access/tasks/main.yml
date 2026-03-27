@@ -1,0 +1,337 @@
+---
+- name: Validate Proxmox API access inputs
+  ansible.builtin.assert:
+    that:
+      - proxmox_api_hostname | length > 0
+      - proxmox_api_automation_user | length > 0
+      - proxmox_api_automation_comment | length > 0
+      - proxmox_api_token_id | length > 0
+      - proxmox_api_token_comment | length > 0
+      - proxmox_api_token_role | length > 0
+      - proxmox_api_token_acl_path | length > 0
+      - proxmox_api_token_local_dir | length > 0
+      - proxmox_api_token_local_file | length > 0
+      - not (proxmox_api_token_role_manage | bool) or (proxmox_api_token_role_privileges | length > 0)
+    fail_msg: "proxmox_api_access requires API identity, token ACL, and local secret path inputs."
+
+- name: Ensure local Proxmox API secret directory exists
+  ansible.builtin.file:
+    path: "{{ proxmox_api_token_local_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Check whether local Proxmox API token secret file exists
+  ansible.builtin.stat:
+    path: "{{ proxmox_api_token_local_file }}"
+  register: proxmox_api_token_local_file_stat
+  delegate_to: localhost
+  become: false
+
+- name: Read current Proxmox users
+  ansible.builtin.command: pvesh get /access/users --output-format json
+  register: proxmox_api_current_users
+  changed_when: false
+
+- name: Read current Proxmox roles
+  ansible.builtin.command: pveum role list --output-format json
+  register: proxmox_api_current_roles
+  changed_when: false
+
+- name: Ensure managed Proxmox API role exists
+  ansible.builtin.command:
+    argv:
+      - pveum
+      - role
+      - add
+      - "{{ proxmox_api_token_role }}"
+      - --privs
+      - "{{ proxmox_api_token_role_privileges | join(' ') }}"
+  when:
+    - proxmox_api_token_role_manage | bool
+    - >
+      (
+        proxmox_api_current_roles.stdout | from_json
+        | selectattr('roleid', 'equalto', proxmox_api_token_role)
+        | list
+        | length
+      ) == 0
+  changed_when: true
+
+- name: Fail if the desired managed Proxmox API role collides with a built-in role
+  ansible.builtin.fail:
+    msg: >-
+      proxmox_api_token_role {{ proxmox_api_token_role }} is a built-in Proxmox role with privileges that do not
+      match proxmox_api_token_role_privileges. Choose a custom role name or disable managed role convergence.
+  when:
+    - proxmox_api_token_role_manage | bool
+    - >
+      (
+        proxmox_api_current_roles.stdout | from_json
+        | selectattr('roleid', 'equalto', proxmox_api_token_role)
+        | list
+        | length
+      ) > 0
+    - >
+      (
+        (
+          proxmox_api_current_roles.stdout | from_json
+          | selectattr('roleid', 'equalto', proxmox_api_token_role)
+          | list
+          | first
+        ).special | int
+      ) == 1
+    - >
+      (
+        (
+          (
+            proxmox_api_current_roles.stdout | from_json
+            | selectattr('roleid', 'equalto', proxmox_api_token_role)
+            | list
+            | first
+          ).privs | default('')
+        ).split(',')
+        | map('trim')
+        | reject('equalto', '')
+        | sort
+        | list
+      ) != (proxmox_api_token_role_privileges | sort | list)
+
+- name: Ensure managed Proxmox API role privileges are current
+  ansible.builtin.command:
+    argv:
+      - pveum
+      - role
+      - modify
+      - "{{ proxmox_api_token_role }}"
+      - --privs
+      - "{{ proxmox_api_token_role_privileges | join(' ') }}"
+  when:
+    - proxmox_api_token_role_manage | bool
+    - >
+      (
+        proxmox_api_current_roles.stdout | from_json
+        | selectattr('roleid', 'equalto', proxmox_api_token_role)
+        | list
+        | length
+      ) > 0
+    - >
+      (
+        (
+          proxmox_api_current_roles.stdout | from_json
+          | selectattr('roleid', 'equalto', proxmox_api_token_role)
+          | list
+          | first
+        ).special | int
+      ) == 0
+    - >
+      (
+        (
+          (
+            proxmox_api_current_roles.stdout | from_json
+            | selectattr('roleid', 'equalto', proxmox_api_token_role)
+            | list
+            | first
+          ).privs | default('')
+        ).split(',')
+        | map('trim')
+        | reject('equalto', '')
+        | sort
+        | list
+      ) != (proxmox_api_token_role_privileges | sort | list)
+  changed_when: true
+
+- name: Ensure Proxmox API automation user exists
+  ansible.builtin.command:
+    argv:
+      - pveum
+      - user
+      - add
+      - "{{ proxmox_api_automation_user }}"
+      - --comment
+      - "{{ proxmox_api_automation_comment }}"
+      - --enable
+      - "1"
+  register: proxmox_api_user_add
+  failed_when: proxmox_api_user_add.rc != 0 and ('already exists' not in (proxmox_api_user_add.stderr | default('')))
+  changed_when: proxmox_api_user_add.rc == 0
+
+- name: Ensure Proxmox API automation user comment is current
+  ansible.builtin.command:
+    argv:
+      - pveum
+      - user
+      - modify
+      - "{{ proxmox_api_automation_user }}"
+      - --comment
+      - "{{ proxmox_api_automation_comment }}"
+      - --enable
+      - "1"
+  when: >
+    (
+      proxmox_api_current_users.stdout | from_json | selectattr('userid', 'equalto', proxmox_api_automation_user) | list | length
+    ) > 0 and (
+      (
+        proxmox_api_current_users.stdout | from_json | selectattr('userid', 'equalto', proxmox_api_automation_user) | list | first
+      ).comment | default('')
+    ) != proxmox_api_automation_comment
+  changed_when: true
+
+- name: Read current Proxmox ACLs
+  ansible.builtin.command: pveum acl list --output-format json
+  register: proxmox_api_current_acls
+  changed_when: false
+
+- name: Ensure Proxmox API automation user has the expected role
+  ansible.builtin.command:
+    argv:
+      - pveum
+      - acl
+      - modify
+      - "{{ proxmox_api_token_acl_path }}"
+      - --users
+      - "{{ proxmox_api_automation_user }}"
+      - --roles
+      - "{{ proxmox_api_token_role }}"
+  when: >
+    (
+      proxmox_api_current_acls.stdout | from_json
+      | selectattr('path', 'equalto', proxmox_api_token_acl_path)
+      | selectattr('type', 'equalto', 'user')
+      | selectattr('ugid', 'equalto', proxmox_api_automation_user)
+      | selectattr('roleid', 'equalto', proxmox_api_token_role)
+      | list
+      | length
+    ) == 0
+  changed_when: true
+
+- name: Read current Proxmox API tokens for automation user
+  ansible.builtin.command:
+    argv:
+      - pveum
+      - user
+      - token
+      - list
+      - "{{ proxmox_api_automation_user }}"
+      - --output-format
+      - json
+  register: proxmox_api_current_tokens
+  changed_when: false
+
+- name: Create durable privilege-separated Proxmox API token
+  ansible.builtin.command:
+    argv:
+      - pveum
+      - user
+      - token
+      - add
+      - "{{ proxmox_api_automation_user }}"
+      - "{{ proxmox_api_token_id }}"
+      - --comment
+      - "{{ proxmox_api_token_comment }}"
+      - --privsep
+      - "{{ (proxmox_api_token_privsep | bool) | ternary('1', '0') }}"
+      - --output-format
+      - json
+  register: proxmox_api_token_create
+  when: >
+    (
+      proxmox_api_current_tokens.stdout | from_json
+      | selectattr('tokenid', 'equalto', proxmox_api_token_id)
+      | list
+      | length
+    ) == 0
+  changed_when: true
+  no_log: true
+
+- name: Ensure privilege-separated token has the expected ACL
+  ansible.builtin.command:
+    argv:
+      - pveum
+      - acl
+      - modify
+      - "{{ proxmox_api_token_acl_path }}"
+      - --tokens
+      - "{{ proxmox_api_automation_user }}!{{ proxmox_api_token_id }}"
+      - --roles
+      - "{{ proxmox_api_token_role }}"
+  when:
+    - proxmox_api_token_privsep | bool
+    - >
+      (
+        proxmox_api_current_acls.stdout | from_json
+        | selectattr('path', 'equalto', proxmox_api_token_acl_path)
+        | selectattr('type', 'equalto', 'token')
+        | selectattr('ugid', 'equalto', proxmox_api_automation_user ~ '!' ~ proxmox_api_token_id)
+        | selectattr('roleid', 'equalto', proxmox_api_token_role)
+        | list
+        | length
+      ) == 0
+  changed_when: true
+
+- name: Fail if Proxmox API token exists remotely but the local secret is missing
+  ansible.builtin.fail:
+    msg: >-
+      The Proxmox API token {{ proxmox_api_automation_user }}!{{ proxmox_api_token_id }} already exists,
+      but {{ proxmox_api_token_local_file }} is missing locally. Proxmox only returns the token secret once.
+      Revoke and recreate the token or restore the local secret file before rerunning automation.
+  when:
+    - not proxmox_api_token_create.changed
+    - not proxmox_api_token_local_file_stat.stat.exists
+
+- name: Parse newly created Proxmox API token payload
+  ansible.builtin.set_fact:
+    proxmox_api_created_token_payload: "{{ proxmox_api_token_create.stdout | from_json }}"
+  when: proxmox_api_token_create.changed
+  no_log: true
+
+- name: Persist Proxmox API token secret locally
+  ansible.builtin.copy:
+    dest: "{{ proxmox_api_token_local_file }}"
+    mode: "0600"
+    content: |
+      {
+        "created_at": "{{ ansible_date_time.iso8601 }}",
+        "api_url": "https://{{ proxmox_api_hostname }}:8006/api2/json",
+        "user": "{{ proxmox_api_automation_user }}",
+        "token_id": "{{ proxmox_api_token_id }}",
+        "full_token_id": "{{ proxmox_api_automation_user }}!{{ proxmox_api_token_id }}",
+        "role": "{{ proxmox_api_token_role }}",
+        "acl_path": "{{ proxmox_api_token_acl_path }}",
+        "privilege_separation": {{ (proxmox_api_token_privsep | bool) | ternary('true', 'false') }},
+        "value": "{{ proxmox_api_created_token_payload.value }}",
+        "authorization_header": "PVEAPIToken={{ proxmox_api_automation_user }}!{{ proxmox_api_token_id }}={{ proxmox_api_created_token_payload.value }}"
+      }
+  when: proxmox_api_token_create.changed
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Load effective Proxmox API token payload from local file
+  ansible.builtin.set_fact:
+    proxmox_api_effective_token_payload: "{{ lookup('ansible.builtin.file', proxmox_api_token_local_file) | from_json }}"
+  no_log: true
+
+- name: Verify Proxmox API token against the version endpoint
+  ansible.builtin.uri:
+    url: "https://{{ proxmox_api_hostname }}:8006/api2/json/version"
+    method: GET
+    headers:
+      Authorization: "{{ proxmox_api_effective_token_payload.authorization_header }}"
+    validate_certs: true
+    return_content: true
+  register: proxmox_api_version_check
+  delegate_to: localhost
+  become: false
+  changed_when: false
+  no_log: true
+
+- name: Assert Proxmox API token verification succeeded
+  ansible.builtin.assert:
+    that:
+      - proxmox_api_version_check.status == 200
+      - (proxmox_api_version_check.json.data.version | default('')) | length > 0
+    fail_msg: >-
+      The durable Proxmox API automation token did not authenticate successfully
+      against https://{{ proxmox_api_hostname }}:8006/api2/json/version.

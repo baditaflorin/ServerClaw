@@ -1,0 +1,33 @@
+---
+- name: Destroy one Proxmox fixture for Molecule
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Read the driver environment file when present
+      ansible.builtin.slurp:
+        src: "{{ lookup('ansible.builtin.env', 'MOLECULE_EPHEMERAL_DIRECTORY') }}/molecule.env"
+      register: molecule_env_file
+      failed_when: false
+
+    - name: Parse the fixture receipt from the environment file
+      ansible.builtin.set_fact:
+        molecule_fixture_receipt: >-
+          {{
+            (molecule_env_file.content | default('') | b64decode).splitlines()
+            | select('match', '^MOLECULE_FIXTURE_RECEIPT=')
+            | map('regex_replace', '^MOLECULE_FIXTURE_RECEIPT=', '')
+            | list
+            | first
+            | default('')
+          }}
+
+    - name: Destroy the fixture receipt when one exists
+      ansible.builtin.command:
+        argv:
+          - python3
+          - "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}/scripts/fixture_manager.py"
+          - down
+          - --receipt-id
+          - "{{ molecule_fixture_receipt }}"
+      when: molecule_fixture_receipt | length > 0
+      changed_when: true

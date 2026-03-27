@@ -1,0 +1,45 @@
+---
+- name: Validate Proxmox platform inputs
+  ansible.builtin.assert:
+    that:
+      - host_public_hostname | length > 0
+      - proxmox_core_packages | length > 0
+      - proxmox_cleanup_packages | length > 0
+    fail_msg: "proxmox_platform requires hostname plus package-list inputs."
+
+- name: Preseed postfix mailname
+  ansible.builtin.debconf:
+    name: postfix
+    question: postfix/mailname
+    value: "{{ host_public_hostname }}"
+    vtype: string
+
+- name: Preseed postfix main mailer type
+  ansible.builtin.debconf:
+    name: postfix
+    question: postfix/main_mailer_type
+    value: Local only
+    vtype: string
+
+- name: Install Proxmox VE platform packages
+  ansible.builtin.apt:
+    name: "{{ proxmox_core_packages }}"
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Remove Debian kernel meta package and os-prober
+  ansible.builtin.apt:
+    name: "{{ proxmox_cleanup_packages }}"
+    state: absent
+    purge: true
+    autoremove: false
+
+- name: Gather Proxmox version
+  ansible.builtin.command: pveversion --verbose
+  register: pveversion_output
+  changed_when: false
+
+- name: Show Proxmox version summary
+  ansible.builtin.debug:
+    var: pveversion_output.stdout_lines

@@ -1,0 +1,23 @@
+---
+- name: Verify the repo-managed Semaphore job runner path
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    semaphore_self_probe_url: "{{ lookup('ansible.builtin.env', 'SEMAPHORE_SELF_PROBE_URL') | default('http://127.0.0.1:3004/api/ping', true) }}"
+
+  tasks:
+    - name: Read the local Semaphore ping endpoint
+      ansible.builtin.uri:
+        url: "{{ semaphore_self_probe_url }}"
+        method: GET
+        return_content: true
+        status_code: 200
+      register: semaphore_self_ping
+
+    - name: Assert that the Semaphore ping endpoint returns pong
+      ansible.builtin.assert:
+        that:
+          - semaphore_self_ping.content | trim == "pong"
+        fail_msg: "Semaphore self-test playbook could not verify the local ping endpoint."

@@ -1,0 +1,27 @@
+---
+argument_specs:
+  main:
+    short_description: Fetch an OpenBao secret and expose it as a runtime fact.
+    options:
+      secret_path:
+        type: str
+        required: true
+      secret_fact_name:
+        type: str
+        required: true
+      secret_fact_field:
+        type: str
+        required: false
+        default: ""
+      secret_fact_openbao_url:
+        type: str
+        required: false
+        default: http://127.0.0.1:8200
+      secret_fact_validate_certs:
+        type: bool
+        required: false
+        default: false
+      secret_fact_token:
+        type: str
+        required: false
+        default: ""

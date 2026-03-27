@@ -1,0 +1,329 @@
+[
+  {
+    "name": "NGINX Edge Public",
+    "type": "http",
+    "url": "https://nginx.lv3.org",
+    "description": "Public landing page served by the NGINX edge VM.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-399"
+    ]
+  },
+  {
+    "name": "Grafana Public",
+    "type": "http",
+    "url": "https://grafana.lv3.org",
+    "description": "Grafana publication through the NGINX edge VM.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-399"
+    ]
+  },
+  {
+    "name": "Gitea Private",
+    "type": "http",
+    "url": "http://10.10.10.20:3003/api/healthz",
+    "description": "Private Gitea health endpoint on docker-runtime-lv3.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
+    "name": "Keycloak OIDC Discovery",
+    "type": "http",
+    "url": "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration",
+    "description": "Shared SSO discovery endpoint published through the NGINX edge VM.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 5,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
+    "name": "Homepage Public",
+    "type": "http",
+    "url": "https://home.lv3.org",
+    "description": "Unified service dashboard published through the authenticated shared NGINX edge.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 5,
+    "accepted_statuscodes": [
+      "200-399"
+    ]
+  },
+  {
+    "name": "Langfuse Public Health",
+    "type": "http",
+    "url": "https://langfuse.lv3.org/api/public/health",
+    "description": "Public Langfuse health endpoint published through the shared NGINX edge VM.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 5,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
+    "name": "Platform API Gateway Public",
+    "type": "http",
+    "url": "https://api.lv3.org/healthz",
+    "description": "Public edge entrypoint for the unified LV3 API gateway.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 5,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
+    "name": "Ops Portal Public",
+    "type": "http",
+    "url": "https://ops.lv3.org/health",
+    "description": "Interactive ops portal health endpoint published through the NGINX edge VM.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 5,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
+    "name": "Proxmox UI Port",
+    "type": "port",
+    "hostname": "10.10.10.1",
+    "port": 8006,
+    "description": "Internal Proxmox UI listener on the host bridge address.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
+    "name": "Headscale Public Health",
+    "type": "http",
+    "url": "https://headscale.lv3.org/health",
+    "description": "Public Headscale health endpoint published through the shared NGINX edge.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 5,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
+    "name": "Docker Build SSH",
+    "type": "port",
+    "hostname": "10.10.10.30",
+    "port": 22,
+    "description": "SSH reachability for the Docker build VM.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
+    "name": "Dozzle Private",
+    "type": "http",
+    "url": "http://10.10.10.20:8089/healthcheck",
+    "description": "Private Dozzle healthcheck on docker-runtime-lv3.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
+    "name": "Uptime Kuma Public",
+    "type": "http",
+    "url": "https://uptime.lv3.org",
+    "description": "Public Uptime Kuma entrypoint through the NGINX edge.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-399"
+    ]
+  },
+  {
+    "name": "Mail Platform Gateway Private",
+    "type": "http",
+    "url": "http://10.10.10.20:8081/healthz",
+    "description": "Private mail gateway health endpoint on docker-runtime-lv3.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
+    "name": "Step CA Private",
+    "type": "http",
+    "url": "https://10.10.10.20:9000/health",
+    "description": "Private step-ca health endpoint on docker-runtime-lv3.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-299"
+    ],
+    "ignoreTls": true
+  },
+  {
+    "name": "Windmill Private",
+    "type": "http",
+    "url": "http://10.10.10.20:8000/api/version",
+    "description": "Private Windmill API version endpoint on docker-runtime-lv3.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
+    "name": "Mattermost Private",
+    "type": "http",
+    "url": "http://10.10.10.20:8065/api/v4/system/ping",
+    "description": "Private Mattermost system ping endpoint on docker-runtime-lv3.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
+    "name": "NetBox Private",
+    "type": "http",
+    "url": "http://10.10.10.20:8082/login/",
+    "description": "Private NetBox login surface on docker-runtime-lv3.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
+    "name": "Open WebUI Private",
+    "type": "http",
+    "url": "http://10.10.10.20:8088",
+    "description": "Private Open WebUI surface on docker-runtime-lv3.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
+    "name": "n8n Public Health",
+    "type": "http",
+    "url": "https://n8n.lv3.org/healthz",
+    "description": "n8n edge-published health endpoint behind the shared NGINX edge VM.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 5,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
+    "name": "Platform Context Private",
+    "type": "http",
+    "url": "http://10.10.10.20:8010/healthz",
+    "description": "Private platform-context health endpoint on docker-runtime-lv3.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
+    "name": "Portainer Private",
+    "type": "http",
+    "url": "https://10.10.10.20:9443/api/status",
+    "description": "Private Portainer status endpoint on docker-runtime-lv3.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-299"
+    ],
+    "ignoreTls": true
+  },
+  {
+    "name": "PostgreSQL VIP Port",
+    "type": "port",
+    "hostname": "10.10.10.55",
+    "port": 5432,
+    "description": "Private PostgreSQL VIP listener managed by Patroni and keepalived.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
+    "name": "Backup PBS Port",
+    "type": "port",
+    "hostname": "10.10.10.60",
+    "port": 8007,
+    "description": "Private PBS listener on backup-lv3.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
+    "name": "Semaphore Private",
+    "type": "http",
+    "url": "http://10.10.10.20:3004/api/ping",
+    "description": "Private Semaphore ping endpoint on docker-runtime-lv3.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  }
+]

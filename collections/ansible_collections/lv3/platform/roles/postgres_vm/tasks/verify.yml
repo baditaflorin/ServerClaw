@@ -1,0 +1,19 @@
+---
+- name: Verify PostgreSQL is listening on the managed TCP port
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ postgres_vm_port }}"
+    delay: 0
+    timeout: 60
+
+- name: Verify PostgreSQL accepts a local SQL readiness probe
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - SELECT 1
+  register: postgres_vm_sql_probe
+  changed_when: false
+  failed_when: postgres_vm_sql_probe.stdout | trim != "1"

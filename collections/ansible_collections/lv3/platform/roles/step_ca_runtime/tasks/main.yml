@@ -1,0 +1,526 @@
+---
+- name: Validate step-ca runtime inputs
+  ansible.builtin.assert:
+    that:
+      - step_ca_name | length > 0
+      - step_ca_version | length > 0
+      - step_ca_cli_version | length > 0
+      - step_ca_image | length > 0
+      - step_ca_site_dir | length > 0
+      - step_ca_home | length > 0
+      - step_ca_compose_file | length > 0
+      - step_ca_internal_url | length > 0
+      - step_ca_controller_url | length > 0
+      - step_ca_provisioners | length == 3
+      - step_ca_server_names | length >= 4
+      - step_ca_local_artifact_dir | length > 0
+    fail_msg: "step_ca_runtime requires image versions, CA paths, URLs, provisioners, and controller artifact paths."
+
+- name: Ensure step-ca prerequisite packages are present
+  ansible.builtin.apt:
+    name: "{{ step_ca_runtime_packages }}"
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure step-ca directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ step_ca_site_dir }}"
+      owner: root
+      group: root
+      mode: "0755"
+    - path: "{{ step_ca_home }}"
+      owner: "{{ step_ca_container_uid }}"
+      group: "{{ step_ca_container_gid }}"
+      mode: "0755"
+    - path: "{{ step_ca_home }}/db"
+      owner: "{{ step_ca_container_uid }}"
+      group: "{{ step_ca_container_gid }}"
+      mode: "0755"
+    - path: "{{ step_ca_password_dir }}"
+      owner: "{{ step_ca_container_uid }}"
+      group: "{{ step_ca_container_gid }}"
+      mode: "0700"
+
+- name: Generate step-ca local password material when missing
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ item }}" ]; then
+      umask 077
+      openssl rand -base64 33 > "{{ item }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  loop:
+    - "{{ step_ca_ca_password_file }}"
+    - "{{ step_ca_humans_password_file }}"
+    - "{{ step_ca_agents_password_file }}"
+    - "{{ step_ca_services_password_file }}"
+    - "{{ step_ca_hosts_password_file }}"
+  register: step_ca_password_generation
+  changed_when: "'changed' in step_ca_password_generation.stdout"
+  no_log: true
+
+- name: Check installed step CLI version
+  ansible.builtin.command: step version
+  register: step_ca_cli_version_check
+  changed_when: false
+  failed_when: false
+
+- name: Install pinned step CLI binary on docker-runtime-lv3
+  ansible.builtin.shell: |
+    set -euo pipefail
+    workdir="$(mktemp -d)"
+    trap 'rm -rf "$workdir"' EXIT
+    cd "$workdir"
+    curl -fsSLo step.tar.gz "{{ step_ca_cli_download_url }}"
+    tar -xf step.tar.gz
+    install -m 0755 "step_{{ step_ca_cli_version }}/bin/step" /usr/local/bin/step
+  args:
+    executable: /bin/bash
+  when: step_ca_cli_version_check.rc != 0 or (step_ca_cli_version not in step_ca_cli_version_check.stdout)
+  changed_when: true
+
+- name: Check whether step-ca PKI is already initialized
+  ansible.builtin.stat:
+    path: "{{ step_ca_home }}/config/ca.json"
+  register: step_ca_config_stat
+
+- name: Initialize the private step-ca PKI
+  ansible.builtin.shell: |
+    set -euo pipefail
+    export STEPPATH="{{ step_ca_home }}"
+    step ca init \
+      --deployment-type standalone \
+      --name "{{ step_ca_name }}" \
+      --address ":{{ step_ca_api_port }}" \
+      --provisioner "{{ step_ca_initial_provisioner }}" \
+      --password-file "{{ step_ca_ca_password_file }}" \
+      --provisioner-password-file "{{ step_ca_humans_password_file }}" \
+      --with-ca-url "{{ step_ca_internal_url }}" \
+      --ssh \
+    {% for san in step_ca_server_names %}
+      --dns "{{ san }}" \
+    {% endfor %}
+      >/dev/null
+  args:
+    executable: /bin/bash
+  when: not step_ca_config_stat.stat.exists
+  changed_when: true
+
+- name: Check current provisioner list from the local CA config
+  ansible.builtin.command:
+    argv:
+      - jq
+      - -r
+      - ".authority.provisioners[].name"
+      - "{{ step_ca_home }}/config/ca.json"
+  register: step_ca_provisioner_list
+  changed_when: false
+
+- name: Add missing step-ca provisioners
+  ansible.builtin.command:
+    argv:
+      - step
+      - ca
+      - provisioner
+      - add
+      - "{{ item.name }}"
+      - --type
+      - JWK
+      - --create
+      - --password-file
+      - "{{ item.password_file }}"
+      - --ca-url
+      - "{{ step_ca_internal_url }}"
+      - --root
+      - "{{ step_ca_home }}/certs/root_ca.crt"
+      - --ca-config
+      - "{{ step_ca_home }}/config/ca.json"
+  loop: "{{ step_ca_provisioners }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: item.name not in step_ca_provisioner_list.stdout
+  changed_when: true
+
+- name: Ensure step-ca server names match the current controller topology
+  ansible.builtin.shell: |
+    set -euo pipefail
+    python3 - <<'PY'
+    import json
+    from pathlib import Path
+
+    path = Path("{{ step_ca_home }}/config/ca.json")
+    payload = json.loads(path.read_text())
+    desired = {{ step_ca_server_names | to_json }}
+    current = payload.get("dnsNames", [])
+
+    if current == desired:
+        raise SystemExit(0)
+
+    payload["dnsNames"] = desired
+    path.write_text(json.dumps(payload, indent=2) + "\n")
+    print("changed")
+    PY
+  args:
+    executable: /bin/bash
+  register: step_ca_server_names_sync
+  changed_when: "'changed' in step_ca_server_names_sync.stdout"
+
+- name: Ensure the step-ca home and secrets are readable by the container user
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    recurse: true
+    owner: "{{ step_ca_container_uid }}"
+    group: "{{ step_ca_container_gid }}"
+  loop:
+    - "{{ step_ca_home }}"
+    - "{{ step_ca_password_dir }}"
+
+- name: Render the step-ca Compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ step_ca_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the step-ca container image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ step_ca_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ step_ca_site_dir }}"
+  register: step_ca_pull
+  changed_when: >-
+    'Downloaded newer image' in step_ca_pull.stdout
+    or 'Pull complete' in step_ca_pull.stdout
+    or 'Pulling' in step_ca_pull.stdout
+
+- name: Reset SSH connection before Docker chain checks for step-ca startup
+  ansible.builtin.meta: reset_connection
+
+- name: Check whether Docker nat chain exists before step-ca startup
+  ansible.builtin.command: iptables -t nat -S DOCKER
+  register: step_ca_docker_nat_chain_check
+  changed_when: false
+  failed_when: step_ca_docker_nat_chain_check.rc not in [0, 1]
+
+- name: Check whether Docker forward chain exists before step-ca startup
+  ansible.builtin.command: iptables -t filter -S DOCKER-FORWARD
+  register: step_ca_docker_forward_chain_check
+  changed_when: false
+  failed_when: step_ca_docker_forward_chain_check.rc not in [0, 1]
+
+- name: Restart Docker when required chains are missing before step-ca startup
+  ansible.builtin.systemd:
+    name: docker
+    state: restarted
+  when: step_ca_docker_nat_chain_check.rc == 1 or step_ca_docker_forward_chain_check.rc == 1
+
+- name: Recheck Docker nat chain before step-ca startup
+  ansible.builtin.command: iptables -t nat -S DOCKER
+  register: step_ca_docker_nat_chain_recheck
+  changed_when: false
+
+- name: Recheck Docker forward chain before step-ca startup
+  ansible.builtin.command: iptables -t filter -S DOCKER-FORWARD
+  register: step_ca_docker_forward_chain_recheck
+  changed_when: false
+
+- name: Assert Docker nat chain is present before step-ca startup
+  ansible.builtin.assert:
+    that:
+      - step_ca_docker_nat_chain_recheck.rc == 0
+    fail_msg: "Docker is running but the nat DOCKER chain is missing; step-ca published ports will fail."
+
+- name: Assert Docker forward chain is present before step-ca startup
+  ansible.builtin.assert:
+    that:
+      - step_ca_docker_forward_chain_recheck.rc == 0
+    fail_msg: "Docker is running but the filter DOCKER-FORWARD chain is missing; step-ca bridge networking will fail."
+
+- name: Check whether the step-ca container already exists
+  ansible.builtin.command:
+    argv:
+      - docker
+      - container
+      - inspect
+      - step-ca
+  register: step_ca_container_inspect
+  changed_when: false
+  failed_when: false
+
+- name: Check whether the existing step-ca container publishes the expected port
+  ansible.builtin.command:
+    argv:
+      - docker
+      - port
+      - step-ca
+      - "{{ step_ca_api_port }}/tcp"
+  register: step_ca_container_port_check
+  changed_when: false
+  failed_when: false
+  when: step_ca_container_inspect.rc == 0
+
+- name: Remove the stale step-ca container when its published port binding is missing
+  ansible.builtin.command:
+    argv:
+      - docker
+      - rm
+      - -f
+      - step-ca
+  when:
+    - step_ca_container_inspect.rc == 0
+    - step_ca_container_port_check.rc != 0
+  changed_when: true
+
+- name: Start the step-ca stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ step_ca_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ step_ca_site_dir }}"
+  register: step_ca_up
+  changed_when: >-
+    'Creating' in step_ca_up.stdout
+    or 'Recreating' in step_ca_up.stdout
+    or 'Starting' in step_ca_up.stdout
+
+- name: Restart step-ca after controller SAN changes
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ step_ca_compose_file }}"
+      - restart
+      - step-ca
+  args:
+    chdir: "{{ step_ca_site_dir }}"
+  when: step_ca_server_names_sync.changed
+  changed_when: true
+
+- name: Wait for the private step-ca API to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ step_ca_api_port }}"
+    delay: 0
+    timeout: 120
+
+- name: Verify the step-ca health endpoint locally
+  ansible.builtin.uri:
+    url: "https://127.0.0.1:{{ step_ca_api_port }}{{ step_ca_healthcheck_path }}"
+    method: GET
+    ca_path: "{{ step_ca_home }}/certs/root_ca.crt"
+    status_code: 200
+  register: step_ca_healthcheck
+  changed_when: false
+
+- name: Verify X.509 issuance with the services provisioner
+  ansible.builtin.command:
+    argv:
+      - step
+      - ca
+      - certificate
+      - "{{ step_ca_service_test_name }}"
+      - "{{ step_ca_site_dir }}/service-test.crt"
+      - "{{ step_ca_site_dir }}/service-test.key"
+      - --force
+      - --ca-url
+      - "{{ step_ca_internal_url }}"
+      - --root
+      - "{{ step_ca_home }}/certs/root_ca.crt"
+      - --provisioner
+      - services
+      - --provisioner-password-file
+      - "{{ step_ca_services_password_file }}"
+      - --password-file
+      - "{{ step_ca_services_password_file }}"
+      - --san
+      - "{{ step_ca_service_test_name }}"
+      - --not-after
+      - 1h
+  register: step_ca_service_test_issue
+  retries: 5
+  delay: 2
+  until: step_ca_service_test_issue.rc == 0
+  changed_when: false
+  no_log: true
+
+- name: Verify the issued X.509 test certificate chains to the root
+  ansible.builtin.command:
+    argv:
+      - openssl
+      - verify
+      - -CAfile
+      - "{{ step_ca_home }}/certs/root_ca.crt"
+      - -untrusted
+      - "{{ step_ca_home }}/certs/intermediate_ca.crt"
+      - "{{ step_ca_site_dir }}/service-test.crt"
+  register: step_ca_service_test_verify
+  changed_when: false
+
+- name: Read the root certificate fingerprint
+  ansible.builtin.command:
+    argv:
+      - step
+      - certificate
+      - fingerprint
+      - "{{ step_ca_home }}/certs/root_ca.crt"
+  register: step_ca_root_fingerprint_cmd
+  changed_when: false
+
+- name: Record the step-ca root fingerprint for later plays
+  ansible.builtin.set_fact:
+    step_ca_root_fingerprint: "{{ step_ca_root_fingerprint_cmd.stdout | trim }}"
+
+- name: Read step-ca public trust material
+  ansible.builtin.slurp:
+    src: "{{ item }}"
+  loop:
+    - "{{ step_ca_remote_root_certificate_file }}"
+    - "{{ step_ca_remote_ssh_user_ca_file }}"
+    - "{{ step_ca_remote_ssh_host_ca_file }}"
+  register: step_ca_public_material
+
+- name: Read step-ca local password material
+  ansible.builtin.slurp:
+    src: "{{ item }}"
+  loop:
+    - "{{ step_ca_ca_password_file }}"
+    - "{{ step_ca_humans_password_file }}"
+    - "{{ step_ca_agents_password_file }}"
+    - "{{ step_ca_services_password_file }}"
+    - "{{ step_ca_hosts_password_file }}"
+  register: step_ca_secret_material
+  no_log: true
+
+- name: Ensure controller-local step-ca artifact directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0700"
+  loop:
+    - "{{ step_ca_local_artifact_dir }}"
+    - "{{ step_ca_local_certs_dir }}"
+    - "{{ step_ca_local_ssh_dir }}"
+    - "{{ step_ca_local_secrets_dir }}"
+    - "{{ step_ca_local_provisioner_secrets_dir }}"
+  delegate_to: localhost
+  become: false
+
+- name: Mirror the step-ca root certificate to the controller
+  ansible.builtin.copy:
+    dest: "{{ step_ca_local_root_certificate_file }}"
+    content: "{{ step_ca_public_material.results[0].content | b64decode }}"
+    mode: "0644"
+  delegate_to: localhost
+  become: false
+
+- name: Mirror the step-ca SSH user CA public key to the controller
+  ansible.builtin.copy:
+    dest: "{{ step_ca_local_ssh_user_ca_file }}"
+    content: "{{ step_ca_public_material.results[1].content | b64decode }}"
+    mode: "0644"
+  delegate_to: localhost
+  become: false
+
+- name: Mirror the step-ca SSH host CA public key to the controller
+  ansible.builtin.copy:
+    dest: "{{ step_ca_local_ssh_host_ca_file }}"
+    content: "{{ step_ca_public_material.results[2].content | b64decode }}"
+    mode: "0644"
+  delegate_to: localhost
+  become: false
+
+- name: Mirror the step-ca CA password to the controller
+  ansible.builtin.copy:
+    dest: "{{ step_ca_local_ca_password_file }}"
+    content: "{{ step_ca_secret_material.results[0].content | b64decode }}"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Mirror the humans provisioner password to the controller
+  ansible.builtin.copy:
+    dest: "{{ step_ca_local_humans_password_file }}"
+    content: "{{ step_ca_secret_material.results[1].content | b64decode }}"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Mirror the agents provisioner password to the controller
+  ansible.builtin.copy:
+    dest: "{{ step_ca_local_agents_password_file }}"
+    content: "{{ step_ca_secret_material.results[2].content | b64decode }}"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Mirror the services provisioner password to the controller
+  ansible.builtin.copy:
+    dest: "{{ step_ca_local_services_password_file }}"
+    content: "{{ step_ca_secret_material.results[3].content | b64decode }}"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Mirror the hosts provisioner password to the controller
+  ansible.builtin.copy:
+    dest: "{{ step_ca_local_hosts_password_file }}"
+    content: "{{ step_ca_secret_material.results[4].content | b64decode }}"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Write the controller-local SSH known_hosts CA file
+  ansible.builtin.copy:
+    dest: "{{ step_ca_local_known_hosts_file }}"
+    content: "@cert-authority * {{ step_ca_public_material.results[2].content | b64decode | trim }}\n"
+    mode: "0644"
+  delegate_to: localhost
+  become: false
+
+- name: Render the controller-local step-ca bootstrap manifest
+  ansible.builtin.template:
+    src: bootstrap.json.j2
+    dest: "{{ step_ca_local_bootstrap_file }}"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+
+- name: Reset SSH connection before final step-ca runtime verification
+  ansible.builtin.meta: reset_connection
+
+- name: Wait for SSH to recover before final step-ca runtime verification
+  ansible.builtin.wait_for_connection:
+    delay: 0
+    sleep: 2
+    timeout: 120
+
+- name: Verify step-ca health probes
+  ansible.builtin.import_tasks: verify.yml

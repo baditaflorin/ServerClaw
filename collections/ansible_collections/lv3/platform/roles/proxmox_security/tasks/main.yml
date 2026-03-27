@@ -1,0 +1,403 @@
+---
+- name: Validate Proxmox security inputs
+  ansible.builtin.assert:
+    that:
+      - proxmox_management_allowed_sources | length > 0
+      - proxmox_notification_email | length > 0
+      - proxmox_notification_endpoint_name | length > 0
+      - proxmox_notification_matcher_name | length > 0
+      - proxmox_acme_contact_email | length > 0
+      - proxmox_acme_directory | length > 0
+      - proxmox_acme_plugin_id | length > 0
+      - proxmox_acme_domain | length > 0
+      - proxmox_tfa_description | length > 0
+    fail_msg: "proxmox_security requires firewall policy, notification, ACME, and TFA inputs."
+
+- name: Ensure security support packages are present
+  ansible.builtin.apt:
+    name:
+      - pve-firewall
+      - python3
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure Proxmox firewall configuration directory exists
+  ansible.builtin.file:
+    path: /etc/pve/firewall
+    state: directory
+    mode: "0755"
+
+- name: Render cluster-wide Proxmox firewall policy to staging file
+  ansible.builtin.template:
+    src: cluster.fw.j2
+    dest: /root/.lv3-cluster.fw
+    mode: "0644"
+
+- name: Install cluster-wide Proxmox firewall policy
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if ! cmp -s /root/.lv3-cluster.fw /etc/pve/firewall/cluster.fw 2>/dev/null; then
+      cp /root/.lv3-cluster.fw /etc/pve/firewall/cluster.fw
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: proxmox_cluster_firewall
+  changed_when: "'changed' in proxmox_cluster_firewall.stdout"
+
+- name: Render host-specific Proxmox firewall policy to staging file
+  ansible.builtin.template:
+    src: host.fw.j2
+    dest: /root/.lv3-host.fw
+    mode: "0644"
+
+- name: Install host-specific Proxmox firewall policy
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if ! cmp -s /root/.lv3-host.fw /etc/pve/nodes/{{ ansible_hostname }}/host.fw 2>/dev/null; then
+      cp /root/.lv3-host.fw /etc/pve/nodes/{{ ansible_hostname }}/host.fw
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: proxmox_host_firewall
+  changed_when: "'changed' in proxmox_host_firewall.stdout"
+
+- name: Enable and start Proxmox firewall service
+  ansible.builtin.systemd:
+    name: pve-firewall
+    enabled: true
+    state: started
+
+- name: Compile Proxmox firewall configuration
+  ansible.builtin.command: pve-firewall compile
+  changed_when: false
+
+- name: Restart Proxmox firewall if rules changed
+  ansible.builtin.command: pve-firewall restart
+  when: proxmox_cluster_firewall.changed or proxmox_host_firewall.changed
+  changed_when: true
+
+- name: Render break-glass sshd port drop-in
+  ansible.builtin.copy:
+    dest: /etc/ssh/sshd_config.d/91-lv3-breakglass.conf
+    mode: "0644"
+    content: |
+      # Break-glass port: publicly reachable even when Tailscale is down.
+      # Key authentication is enforced by 90-lv3-hardening.conf; no password path exists.
+      Port 22
+      Port {{ proxmox_breakglass_ssh_port }}
+  when: proxmox_breakglass_ssh_port is defined
+  register: proxmox_breakglass_sshd_dropin
+
+- name: Validate full SSH daemon configuration after break-glass drop-in
+  ansible.builtin.command: /usr/sbin/sshd -t
+  changed_when: false
+  when: proxmox_breakglass_sshd_dropin.changed
+
+- name: Reload sshd to apply break-glass port
+  ansible.builtin.service:
+    name: ssh
+    state: reloaded
+  when: proxmox_breakglass_sshd_dropin.changed
+
+- name: Read current Proxmox users
+  ansible.builtin.command: pvesh get /access/users --output-format json
+  register: proxmox_users
+  changed_when: false
+
+- name: Ensure Proxmox users have notification email addresses
+  ansible.builtin.command:
+    argv:
+      - pveum
+      - user
+      - modify
+      - "{{ item }}"
+      - --email
+      - "{{ proxmox_notification_email }}"
+  loop:
+    - root@pam
+    - "{{ proxmox_host_admin_user }}@pam"
+  when: >
+    (
+      proxmox_users.stdout | from_json | selectattr('userid', 'equalto', item) | list | first
+    ).email | default('') != proxmox_notification_email
+  changed_when: true
+
+- name: Read current sendmail notification endpoints
+  ansible.builtin.command: pvesh get /cluster/notifications/endpoints/sendmail --output-format json
+  register: proxmox_sendmail_endpoints
+  changed_when: false
+
+- name: Create sendmail notification endpoint
+  ansible.builtin.command:
+    argv:
+      - pvesh
+      - create
+      - /cluster/notifications/endpoints/sendmail
+      - --name
+      - "{{ proxmox_notification_endpoint_name }}"
+      - --mailto
+      - "{{ proxmox_notification_email }}"
+      - --comment
+      - "{{ proxmox_notification_endpoint_comment }}"
+      - --author
+      - "{{ proxmox_notification_author }}"
+  when: "(proxmox_sendmail_endpoints.stdout | from_json | map(attribute='name') | list) is not contains(proxmox_notification_endpoint_name)"
+  changed_when: true
+
+- name: Update sendmail notification endpoint
+  ansible.builtin.command:
+    argv:
+      - pvesh
+      - set
+      - "/cluster/notifications/endpoints/sendmail/{{ proxmox_notification_endpoint_name }}"
+      - --mailto
+      - "{{ proxmox_notification_email }}"
+      - --comment
+      - "{{ proxmox_notification_endpoint_comment }}"
+      - --author
+      - "{{ proxmox_notification_author }}"
+  when: >
+    (
+      proxmox_sendmail_endpoints.stdout | from_json | selectattr('name', 'equalto', proxmox_notification_endpoint_name) | list | length
+    ) > 0 and (
+      (
+        proxmox_sendmail_endpoints.stdout | from_json | selectattr('name', 'equalto', proxmox_notification_endpoint_name) | list | first
+      ).mailto | default([])
+    ) != [proxmox_notification_email] or
+    (
+      (
+        proxmox_sendmail_endpoints.stdout | from_json | selectattr('name', 'equalto', proxmox_notification_endpoint_name) | list | first
+      ).comment | default('')
+    ) != proxmox_notification_endpoint_comment or
+    (
+      (
+        proxmox_sendmail_endpoints.stdout | from_json | selectattr('name', 'equalto', proxmox_notification_endpoint_name) | list | first
+      ).author | default('')
+    ) != proxmox_notification_author
+  changed_when: true
+
+- name: Read current notification matchers
+  ansible.builtin.command: pvesh get /cluster/notifications/matchers --output-format json
+  register: proxmox_notification_matchers
+  changed_when: false
+
+- name: Create catch-all notification matcher
+  ansible.builtin.command:
+    argv:
+      - pvesh
+      - create
+      - /cluster/notifications/matchers
+      - --name
+      - "{{ proxmox_notification_matcher_name }}"
+      - --target
+      - "{{ proxmox_notification_endpoint_name }}"
+      - --comment
+      - "{{ proxmox_notification_matcher_comment }}"
+  when: "(proxmox_notification_matchers.stdout | from_json | map(attribute='name') | list) is not contains(proxmox_notification_matcher_name)"
+  changed_when: true
+
+- name: Update catch-all notification matcher
+  ansible.builtin.command:
+    argv:
+      - pvesh
+      - set
+      - "/cluster/notifications/matchers/{{ proxmox_notification_matcher_name }}"
+      - --target
+      - "{{ proxmox_notification_endpoint_name }}"
+      - --comment
+      - "{{ proxmox_notification_matcher_comment }}"
+  when: >
+    (
+      proxmox_notification_matchers.stdout | from_json | selectattr('name', 'equalto', proxmox_notification_matcher_name) | list | length
+    ) > 0 and (
+      (
+        proxmox_notification_matchers.stdout | from_json | selectattr('name', 'equalto', proxmox_notification_matcher_name) | list | first
+      ).target | default([])
+    ) != [proxmox_notification_endpoint_name] or
+    (
+      (
+        proxmox_notification_matchers.stdout | from_json | selectattr('name', 'equalto', proxmox_notification_matcher_name) | list | first
+      ).comment | default('')
+    ) != proxmox_notification_matcher_comment
+  changed_when: true
+
+- name: Send a direct mail delivery probe through local sendmail
+  ansible.builtin.shell: |
+    set -euo pipefail
+    cat <<'EOF' | /usr/sbin/sendmail -t
+    To: {{ proxmox_notification_email }}
+    Subject: [lv3] Proxmox notification probe
+
+    This is a direct local sendmail probe from {{ inventory_hostname }}.
+    EOF
+  args:
+    executable: /bin/bash
+  changed_when: true
+
+- name: Check notification mail queue state
+  ansible.builtin.command: postqueue -p
+  register: proxmox_postqueue
+  changed_when: false
+
+- name: Check existing ACME accounts
+  ansible.builtin.command: pvenode acme account list
+  register: proxmox_acme_accounts
+  changed_when: false
+  when: proxmox_security_manage_acme | bool
+
+- name: Register default ACME account
+  ansible.builtin.shell: |
+    set -euo pipefail
+    printf 'y\n' | pvenode acme account register default "{{ proxmox_acme_contact_email }}" --directory "{{ proxmox_acme_directory }}"
+  args:
+    executable: /bin/bash
+  when:
+    - proxmox_security_manage_acme | bool
+    - proxmox_acme_account_name not in proxmox_acme_accounts.stdout
+  changed_when: true
+
+- name: Check existing ACME plugins
+  ansible.builtin.command: pvenode acme plugin list
+  register: proxmox_acme_plugins
+  changed_when: false
+  when: proxmox_security_manage_acme | bool
+
+- name: Create temporary ACME DNS plugin credential file
+  ansible.builtin.copy:
+    dest: /root/.lv3-acme-hetzner.env
+    mode: "0600"
+    content: "HETZNER_Token={{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}\n"
+  when: proxmox_security_manage_acme | bool
+  no_log: true
+
+- name: Create Hetzner ACME DNS plugin
+  ansible.builtin.command:
+    argv:
+      - pvenode
+      - acme
+      - plugin
+      - add
+      - dns
+      - "{{ proxmox_acme_plugin_id }}"
+      - --api
+      - hetzner
+      - --data
+      - /root/.lv3-acme-hetzner.env
+      - --validation-delay
+      - "{{ proxmox_acme_validation_delay | string }}"
+  when:
+    - proxmox_security_manage_acme | bool
+    - proxmox_acme_plugin_id not in proxmox_acme_plugins.stdout
+  changed_when: true
+  no_log: true
+
+- name: Update Hetzner ACME DNS plugin
+  ansible.builtin.command:
+    argv:
+      - pvenode
+      - acme
+      - plugin
+      - set
+      - "{{ proxmox_acme_plugin_id }}"
+      - --api
+      - hetzner
+      - --data
+      - /root/.lv3-acme-hetzner.env
+      - --validation-delay
+      - "{{ proxmox_acme_validation_delay | string }}"
+  when:
+    - proxmox_security_manage_acme | bool
+    - proxmox_acme_plugin_id in proxmox_acme_plugins.stdout
+  changed_when: true
+  no_log: true
+
+- name: Remove temporary ACME DNS plugin credential file
+  ansible.builtin.file:
+    path: /root/.lv3-acme-hetzner.env
+    state: absent
+  when: proxmox_security_manage_acme | bool
+
+- name: Read current node ACME configuration
+  ansible.builtin.command: "pvesh get /nodes/{{ ansible_hostname }}/config --output-format json"
+  register: proxmox_node_config
+  changed_when: false
+  when: proxmox_security_manage_acme | bool
+
+- name: Configure node ACME domain binding
+  ansible.builtin.command:
+    argv:
+      - pvenode
+      - config
+      - set
+      - --acmedomain0
+      - "{{ proxmox_acme_domain }},plugin={{ proxmox_acme_plugin_id }}"
+  when:
+    - proxmox_security_manage_acme | bool
+    - (proxmox_node_config.stdout | from_json).acmedomain0 | default('') != proxmox_acme_domain + ",plugin=" + proxmox_acme_plugin_id
+  changed_when: true
+
+- name: Read current certificate information
+  ansible.builtin.command: pvenode cert info --output-format json
+  register: proxmox_cert_info
+  changed_when: false
+  when: proxmox_security_manage_acme | bool
+
+- name: Order ACME certificate for Proxmox UI
+  ansible.builtin.command: pvenode acme cert order
+  when:
+    - proxmox_security_manage_acme | bool
+    - proxmox_acme_domain not in proxmox_cert_info.stdout
+  changed_when: true
+
+- name: Provision or refresh local TOTP state for Proxmox admin
+  ansible.builtin.command:
+    argv:
+      - python3
+      - /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/totp_provision.py
+      - --state-file
+      - /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/tfa/proxmox-ops-pam-totp.json
+      - --issuer
+      - Proxmox VE
+      - --account
+      - "{{ proxmox_host_admin_user }}@pam"
+  delegate_to: localhost
+  become: false
+  register: proxmox_totp_material
+  changed_when: false
+  no_log: true
+
+- name: Parse local TOTP material
+  ansible.builtin.set_fact:
+    proxmox_totp_material_parsed: "{{ proxmox_totp_material.stdout | from_json }}"
+  no_log: true
+
+- name: Read current TFA entries for Proxmox admin user
+  ansible.builtin.command: "pvesh get /access/tfa/{{ proxmox_host_admin_user }}@pam --output-format json"
+  register: proxmox_admin_tfa_entries
+  changed_when: false
+
+- name: Add TOTP entry for Proxmox admin user
+  ansible.builtin.command:
+    argv:
+      - pvesh
+      - create
+      - "/access/tfa/{{ proxmox_host_admin_user }}@pam"
+      - --type
+      - totp
+      - --description
+      - "{{ proxmox_tfa_description }}"
+      - --totp
+      - "{{ proxmox_totp_material_parsed.uri }}"
+      - --value
+      - "{{ proxmox_totp_material_parsed.code }}"
+  when: "(proxmox_admin_tfa_entries.stdout | from_json | selectattr('type', 'equalto', 'totp') | list | length) == 0"
+  changed_when: true
+  no_log: true
+
+- name: Confirm TFA entries for Proxmox admin user
+  ansible.builtin.command: "pvesh get /access/tfa/{{ proxmox_host_admin_user }}@pam --output-format json-pretty"
+  register: proxmox_admin_tfa_entries_final
+  changed_when: false

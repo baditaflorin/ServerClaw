@@ -1,0 +1,26 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the ntfy runtime used for ADR 0097 critical paging.
+    options:
+      ntfy_runtime_image:
+        type: str
+        required: true
+      ntfy_runtime_site_dir:
+        type: path
+        required: true
+      ntfy_runtime_data_dir:
+        type: path
+        required: true
+      ntfy_runtime_compose_file:
+        type: path
+        required: true
+      ntfy_runtime_config_template:
+        type: path
+        required: true
+      ntfy_runtime_password_local_file:
+        type: path
+        required: true
+      ntfy_runtime_port:
+        type: int
+        required: true

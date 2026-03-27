@@ -1,0 +1,81 @@
+---
+mattermost_team_name: lv3
+mattermost_team_display_name: LV3
+mattermost_site_dir: /opt/mattermost
+mattermost_secret_dir: /etc/lv3/mattermost
+mattermost_compose_file: "{{ mattermost_site_dir }}/docker-compose.yml"
+mattermost_env_file: "{{ compose_runtime_secret_root }}/mattermost/runtime.env"
+mattermost_legacy_env_file: "{{ mattermost_site_dir }}/mattermost.env"
+mattermost_openbao_agent_dir: "{{ mattermost_site_dir }}/openbao"
+mattermost_openbao_agent_image: "{{ openbao_agent_image }}"
+mattermost_openbao_agent_container_name: mattermost-openbao-agent
+mattermost_openbao_secret_path: services/mattermost/runtime-env
+mattermost_openbao_policy_name: lv3-service-mattermost-runtime
+mattermost_openbao_approle_name: mattermost-runtime
+mattermost_bootstrap_file: "{{ mattermost_site_dir }}/bootstrap-mattermost.py"
+mattermost_server_port: "{{ platform_service_topology | platform_service_port('mattermost', 'internal') }}"
+mattermost_host_proxy_port: "{{ platform_service_topology | platform_service_port('mattermost', 'controller') }}"
+mattermost_image: mattermost/mattermost-team-edition:release-10.11
+mattermost_database_name: mattermost
+mattermost_database_user: mattermost_admin
+mattermost_database_host: "{{ (hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('postgres')).public_hostname }}"
+mattermost_database_port: 5432
+mattermost_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mattermost/database-password.txt
+mattermost_admin_username: ops
+mattermost_admin_email: "{{ proxmox_notification_email }}"
+mattermost_admin_password_remote_file: "{{ mattermost_secret_dir }}/admin-password"
+mattermost_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mattermost/admin-password.txt
+mattermost_webhooks_remote_file: "{{ mattermost_secret_dir }}/incoming-webhooks.json"
+mattermost_webhooks_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mattermost/incoming-webhooks.json
+mattermost_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mattermost
+mattermost_container_name: lv3-mattermost
+mattermost_local_mode_socket: /var/tmp/mattermost_local.socket
+mattermost_private_base_url: "{{ platform_service_topology | platform_service_url('mattermost', 'internal') }}"
+mattermost_controller_url: "{{ platform_service_topology | platform_service_url('mattermost', 'controller') }}"
+mattermost_support_email: "{{ proxmox_notification_email }}"
+mattermost_message_retention_hours: 17520
+mattermost_file_retention_hours: 17520
+mattermost_retention_deletion_job_start_time: "03:00"
+mattermost_channels:
+  - id: platform-alerts-critical
+    name: platform-alerts-critical
+    display_name: Platform Alerts Critical
+    purpose: Immediate critical incident routing and paging context.
+    header: Repo-managed critical incident channel for LV3 paging and escalation context.
+    webhook_key: alerts_critical
+  - id: platform-alerts
+    name: platform-alerts
+    display_name: Platform Alerts
+    purpose: Alert acknowledgements and operational incident routing.
+    header: Repo-managed Grafana and platform alert intake for LV3 operators and agents.
+    webhook_key: alerts
+  - id: platform-ops
+    name: platform-ops
+    display_name: Platform Ops
+    purpose: Informational events, resolves, and non-urgent operational updates.
+    header: Repo-managed informational operations stream for low-urgency platform events.
+    webhook_key: ops
+  - id: workflow-events
+    name: workflow-events
+    display_name: Workflow Events
+    purpose: Windmill job notifications and automation outcomes.
+    header: Repo-managed workflow status, completions, retries, and handoff events.
+    webhook_key: workflows
+  - id: change-approvals
+    name: change-approvals
+    display_name: Change Approvals
+    purpose: Human approval requests and change acknowledgements.
+    header: Repo-managed approvals, review prompts, and documented change coordination.
+    webhook_key: approvals
+  - id: agent-handoffs
+    name: agent-handoffs
+    display_name: Agent Handoffs
+    purpose: Findings, escalation, and operator-agent coordination.
+    header: Repo-managed operator and agent handoff surface for governed ChatOps work.
+    webhook_key: handoffs
+  - id: mail-ops
+    name: mail-ops
+    display_name: Mail Ops
+    purpose: Mail delivery health, queue issues, and sender-profile incidents.
+    header: Repo-managed mail platform status and delivery alerts.
+    webhook_key: mail

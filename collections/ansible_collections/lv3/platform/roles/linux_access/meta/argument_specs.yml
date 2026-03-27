@@ -1,0 +1,5 @@
+---
+argument_specs:
+  main:
+    short_description: Linux access baseline role inputs.
+    options: {}

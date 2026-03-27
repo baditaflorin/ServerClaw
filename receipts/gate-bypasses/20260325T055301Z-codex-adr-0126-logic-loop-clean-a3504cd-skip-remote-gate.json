@@ -1,0 +1,8 @@
+{
+  "created_at": "2026-03-25T05:53:01.255523+00:00",
+  "bypass": "skip_remote_gate",
+  "reason": "remote pre-push gate hung after sync error: cannot delete non-empty directory scripts/cases; ADR-0126 validations passed locally on merged branch",
+  "source": "pre-push-hook",
+  "branch": "codex/adr-0126-logic-loop-clean",
+  "commit": "a3504cd58c689174be3d0624c2808c07ae3f9e7d"
+}

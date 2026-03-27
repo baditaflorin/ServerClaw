@@ -1,0 +1,9 @@
+---
+hetzner_dns_api_url: https://dns.hetzner.com/api/v1
+hetzner_dns_api_token_env_var: HETZNER_DNS_API_TOKEN
+hetzner_dns_record_zone_name: ""
+hetzner_dns_record_name: ""
+hetzner_dns_record_type: A
+hetzner_dns_record_value: ""
+hetzner_dns_record_ttl: 60
+hetzner_dns_record_value_match_regex: ""

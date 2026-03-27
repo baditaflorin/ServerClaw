@@ -1,0 +1,166 @@
+---
+- name: Validate Gitea PostgreSQL inputs
+  ansible.builtin.assert:
+    that:
+      - gitea_database_name | length > 0
+      - gitea_database_user | length > 0
+      - gitea_postgres_secret_dir | length > 0
+      - gitea_postgres_password_file | length > 0
+      - gitea_database_password_local_file | length > 0
+    fail_msg: "gitea_postgres requires database names and local or remote password paths."
+
+- name: Ensure the Gitea PostgreSQL secret directory exists
+  ansible.builtin.file:
+    path: "{{ gitea_postgres_secret_dir }}"
+    state: directory
+    owner: root
+    group: postgres
+    mode: "0750"
+
+- name: Ensure the local Gitea artifact directory exists
+  ansible.builtin.file:
+    path: "{{ gitea_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Generate the Gitea database password
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ gitea_database_password_local_file }}" ]; then
+      umask 077
+      openssl rand -base64 24 | tr -d '\n' > "{{ gitea_database_password_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: gitea_postgres_password_generation
+  changed_when: "'changed' in gitea_postgres_password_generation.stdout"
+  no_log: true
+
+- name: Read the Gitea database password
+  ansible.builtin.slurp:
+    src: "{{ gitea_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: gitea_postgres_password_raw
+  no_log: true
+
+- name: Record the Gitea database password
+  ansible.builtin.set_fact:
+    gitea_database_password: "{{ gitea_postgres_password_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Mirror the Gitea database password to the control machine
+  ansible.builtin.copy:
+    dest: "{{ gitea_database_password_local_file }}"
+    content: "{{ gitea_database_password }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Persist the Gitea database password on the current guest
+  ansible.builtin.copy:
+    dest: "{{ gitea_postgres_password_file }}"
+    content: "{{ gitea_database_password }}\n"
+    owner: root
+    group: postgres
+    mode: "0640"
+  no_log: true
+
+- name: Check whether the local PostgreSQL member is writable
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT CASE WHEN pg_is_in_recovery() THEN 0 ELSE 1 END"
+  register: gitea_postgres_writable_check
+  changed_when: false
+
+- name: Check whether the Gitea database role already exists
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT 1 FROM pg_roles WHERE rolname = '{{ gitea_database_user }}'"
+  register: gitea_postgres_role_check
+  changed_when: false
+  when: gitea_postgres_writable_check.stdout | trim == "1"
+
+- name: Create the Gitea database role
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "CREATE ROLE {{ gitea_database_user }} LOGIN PASSWORD '{{ gitea_database_password }}'"
+  changed_when: true
+  no_log: true
+  when:
+    - gitea_postgres_writable_check.stdout | trim == "1"
+    - gitea_postgres_role_check.stdout != "1"
+
+- name: Ensure the Gitea database role password matches the managed secret
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "ALTER ROLE {{ gitea_database_user }} PASSWORD '{{ gitea_database_password }}'"
+  changed_when: false
+  no_log: true
+  when: gitea_postgres_writable_check.stdout | trim == "1"
+
+- name: Check whether the Gitea PostgreSQL database already exists
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT 1 FROM pg_database WHERE datname = '{{ gitea_database_name }}'"
+  register: gitea_postgres_database_check
+  changed_when: false
+  when: gitea_postgres_writable_check.stdout | trim == "1"
+
+- name: Create the Gitea PostgreSQL database
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "CREATE DATABASE {{ gitea_database_name }} OWNER {{ gitea_database_user }}"
+  when:
+    - gitea_postgres_writable_check.stdout | trim == "1"
+    - gitea_postgres_database_check.stdout != "1"
+  changed_when: true
+
+- name: Ensure the Gitea database owner is correct
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "ALTER DATABASE {{ gitea_database_name }} OWNER TO {{ gitea_database_user }}"
+  changed_when: false
+  when: gitea_postgres_writable_check.stdout | trim == "1"

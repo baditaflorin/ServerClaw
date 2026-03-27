@@ -1,0 +1,136 @@
+---
+- name: Validate control-plane recovery store inputs
+  ansible.builtin.assert:
+    that:
+      - control_plane_recovery_store_root | length > 0
+      - control_plane_recovery_store_runtime_root | length > 0
+      - control_plane_recovery_store_controller_dir | length > 0
+      - control_plane_recovery_store_runtime_ssh_public_key_local_file | length > 0
+      - control_plane_recovery_store_restore_drill_script | length > 0
+      - control_plane_recovery_store_required_step_ca_paths | length > 0
+      - control_plane_recovery_store_required_openbao_paths | length > 0
+      - control_plane_recovery_store_required_windmill_paths | length > 0
+      - control_plane_recovery_store_required_mail_paths | length > 0
+      - control_plane_recovery_store_required_controller_bundle_paths | length > 0
+    fail_msg: "control_plane_recovery_store requires storage paths, an SSH public key, and restore-drill validation paths."
+
+- name: Ensure the controller-local runtime backup public key exists
+  ansible.builtin.stat:
+    path: "{{ control_plane_recovery_store_runtime_ssh_public_key_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: control_plane_recovery_store_public_key
+
+- name: Fail if the controller-local runtime backup public key is missing
+  ansible.builtin.fail:
+    msg: >-
+      {{ control_plane_recovery_store_runtime_ssh_public_key_local_file }} is missing on the control machine.
+      Run the control-plane recovery workflow from the repo so the managed SSH keypair exists first.
+  when: not control_plane_recovery_store_public_key.stat.exists
+
+- name: Install backup-store packages
+  ansible.builtin.apt:
+    name:
+      - jq
+      - openssh-server
+      - postgresql-client
+      - rsync
+      - zstd
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the control-plane recovery group exists
+  ansible.builtin.group:
+    name: "{{ control_plane_recovery_store_group }}"
+    state: present
+
+- name: Ensure the control-plane recovery user exists
+  ansible.builtin.user:
+    name: "{{ control_plane_recovery_store_user }}"
+    group: "{{ control_plane_recovery_store_group }}"
+    home: "{{ control_plane_recovery_store_root }}"
+    shell: /bin/bash
+    create_home: false
+    state: present
+
+- name: Ensure the control-plane recovery directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ control_plane_recovery_store_root }}"
+      owner: root
+      group: root
+      mode: "0755"
+    - path: "{{ control_plane_recovery_store_root }}/.ssh"
+      owner: "{{ control_plane_recovery_store_user }}"
+      group: "{{ control_plane_recovery_store_group }}"
+      mode: "0700"
+    - path: "{{ control_plane_recovery_store_runtime_root }}"
+      owner: "{{ control_plane_recovery_store_user }}"
+      group: "{{ control_plane_recovery_store_group }}"
+      mode: "0750"
+    - path: "{{ control_plane_recovery_store_controller_dir }}"
+      owner: "{{ control_plane_recovery_store_user }}"
+      group: "{{ control_plane_recovery_store_group }}"
+      mode: "0750"
+    - path: "{{ control_plane_recovery_store_drill_dir }}"
+      owner: "{{ control_plane_recovery_store_user }}"
+      group: "{{ control_plane_recovery_store_group }}"
+      mode: "0750"
+    - path: "{{ control_plane_recovery_store_tmp_dir }}"
+      owner: "{{ control_plane_recovery_store_user }}"
+      group: "{{ control_plane_recovery_store_group }}"
+      mode: "0700"
+    - path: /usr/local/libexec
+      owner: root
+      group: root
+      mode: "0755"
+
+- name: Read the managed runtime backup public key from the control machine
+  ansible.builtin.slurp:
+    src: "{{ control_plane_recovery_store_runtime_ssh_public_key_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: control_plane_recovery_store_public_key_raw
+
+- name: Install the managed runtime backup authorized key
+  ansible.posix.authorized_key:
+    user: "{{ control_plane_recovery_store_user }}"
+    state: present
+    key: "{{ control_plane_recovery_store_public_key_raw.content | b64decode | trim }}"
+
+- name: Render the restore-drill script
+  ansible.builtin.template:
+    src: lv3-control-plane-restore-drill.sh.j2
+    dest: "{{ control_plane_recovery_store_restore_drill_script }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Render the restore-drill systemd service
+  ansible.builtin.template:
+    src: lv3-control-plane-restore-drill.service.j2
+    dest: "/etc/systemd/system/{{ control_plane_recovery_store_restore_drill_service }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the restore-drill systemd timer
+  ansible.builtin.template:
+    src: lv3-control-plane-restore-drill.timer.j2
+    dest: "/etc/systemd/system/{{ control_plane_recovery_store_restore_drill_timer }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Enable and start the restore-drill timer
+  ansible.builtin.systemd:
+    name: "{{ control_plane_recovery_store_restore_drill_timer }}"
+    enabled: true
+    state: started
+    daemon_reload: true

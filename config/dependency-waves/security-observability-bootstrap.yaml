@@ -1,0 +1,19 @@
+plan_id: security-observability-bootstrap-01
+waves:
+  - wave_id: foundation
+    parallel:
+      - playbooks/guest-network-policy.yml
+
+  - wave_id: control-plane
+    depends_on:
+      - foundation
+    parallel:
+      - playbooks/step-ca.yml
+      - playbooks/openbao.yml
+
+  - wave_id: observability
+    depends_on:
+      - control-plane
+    parallel:
+      - playbooks/monitoring-stack.yml
+      - playbooks/uptime-kuma.yml

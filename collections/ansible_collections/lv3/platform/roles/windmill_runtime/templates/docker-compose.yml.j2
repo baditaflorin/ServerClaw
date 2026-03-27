@@ -1,0 +1,118 @@
+services:
+  openbao-agent:
+    image: {{ windmill_openbao_agent_image }}
+    container_name: {{ windmill_openbao_agent_container_name }}
+    user: "0:0"
+    environment:
+      BAO_SKIP_DROP_ROOT: "true"
+    command:
+      - agent
+      - -config=/openbao-agent/agent.hcl
+    network_mode: host
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -s {{ windmill_env_file }}
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    volumes:
+      - {{ windmill_openbao_agent_dir }}:/openbao-agent:ro
+      - {{ windmill_env_file | dirname }}:{{ windmill_env_file | dirname }}
+
+  windmill_server:
+    image: {{ windmill_image }}
+    restart: unless-stopped
+    network_mode: {{ windmill_server_network_mode }}
+    env_file:
+      - {{ windmill_env_file }}
+    environment:
+      MODE: server
+      SERVER_BIND_ADDR: 0.0.0.0
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+    volumes:
+      - {{ windmill_mutation_audit_dir }}:/var/log/platform
+      - worker_logs:/tmp/windmill/logs
+
+  windmill_worker:
+    image: {{ windmill_image }}
+    restart: unless-stopped
+    privileged: true
+    user: "0:0"
+    networks:
+      - default
+      - openbao_runtime
+    env_file:
+      - {{ windmill_env_file }}
+    environment:
+      MODE: worker
+      WORKER_GROUP: default
+      NUM_WORKERS: "{{ windmill_worker_count }}"
+      FAVOR_UNSHARE_PID: "true"
+      LV3_MUTATION_AUDIT_FILE: /var/log/platform/mutation-audit.jsonl
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+      windmill_server:
+        condition: service_started
+    volumes:
+      - {{ windmill_mutation_audit_dir }}:/var/log/platform
+      - /var/run/docker.sock:/var/run/docker.sock
+      - {{ windmill_worker_repo_checkout_host_path }}:{{ windmill_worker_repo_checkout_container_path }}
+      - worker_dependency_cache:/tmp/windmill/cache
+      - worker_logs:/tmp/windmill/logs
+
+  windmill_worker_native:
+    image: {{ windmill_image }}
+    restart: unless-stopped
+    user: "0:0"
+    networks:
+      - default
+      - openbao_runtime
+    env_file:
+      - {{ windmill_env_file }}
+    environment:
+      MODE: worker
+      WORKER_GROUP: native
+      NATIVE_MODE: "true"
+      NUM_WORKERS: "{{ windmill_native_worker_count }}"
+      SLEEP_QUEUE: "200"
+      LV3_MUTATION_AUDIT_FILE: /var/log/platform/mutation-audit.jsonl
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+      windmill_server:
+        condition: service_started
+    volumes:
+      - {{ windmill_mutation_audit_dir }}:/var/log/platform
+      - {{ windmill_worker_repo_checkout_host_path }}:{{ windmill_worker_repo_checkout_container_path }}
+      - worker_logs:/tmp/windmill/logs
+
+  windmill_extra:
+    image: {{ windmill_extra_image }}
+    restart: unless-stopped
+    environment:
+      ENABLE_LSP: "true"
+      ENABLE_MULTIPLAYER: "false"
+      ENABLE_DEBUGGER: "true"
+      DEBUGGER_PORT: "3003"
+      ENABLE_NSJAIL: "false"
+      REQUIRE_SIGNED_DEBUG_REQUESTS: "false"
+      WINDMILL_BASE_URL: {{ windmill_private_base_url }}
+    depends_on:
+      - windmill_server
+    volumes:
+      - lsp_cache:/pyls/.cache
+
+volumes:
+  worker_dependency_cache: null
+  worker_logs: null
+  lsp_cache: null
+
+networks:
+  openbao_runtime:
+    external: true
+    name: {{ windmill_openbao_runtime_network }}

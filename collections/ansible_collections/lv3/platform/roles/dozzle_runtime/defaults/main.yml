@@ -1,0 +1,16 @@
+---
+dozzle_runtime_site_dir: /opt/dozzle
+dozzle_runtime_compose_file: "{{ dozzle_runtime_site_dir }}/docker-compose.yml"
+dozzle_runtime_image: "{{ container_image_catalog.images.dozzle_runtime.ref }}"
+dozzle_runtime_hub_container_name: dozzle
+dozzle_runtime_agent_container_name: dozzle-agent
+dozzle_runtime_hub_port: "{{ platform_service_topology | platform_service_port('dozzle', 'internal') }}"
+dozzle_runtime_agent_port: 7007
+dozzle_runtime_hub_inventory_host: docker-runtime-lv3
+dozzle_runtime_agent_inventory_hosts:
+  - docker-runtime-lv3
+  - docker-build-lv3
+  - monitoring-lv3
+dozzle_runtime_is_hub: "{{ inventory_hostname == dozzle_runtime_hub_inventory_host }}"
+dozzle_runtime_release_check_mode: manual
+dozzle_runtime_disable_analytics: true

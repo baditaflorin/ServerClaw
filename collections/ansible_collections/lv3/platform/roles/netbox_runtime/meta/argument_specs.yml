@@ -1,0 +1,105 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the NetBox runtime stack and bootstrap state.
+    options:
+      netbox_image:
+        type: str
+        required: true
+        description:
+          - Container image reference used for the NetBox runtime.
+      netbox_site_dir:
+        type: path
+        required: true
+        description:
+          - Base directory for the NetBox stack.
+      netbox_secret_dir:
+        type: path
+        required: true
+        description:
+          - Directory that stores NetBox secrets on the guest.
+      netbox_compose_file:
+        type: path
+        required: true
+        description:
+          - Compose file path for the managed NetBox stack.
+      netbox_env_file:
+        type: path
+        required: true
+        description:
+          - Environment file rendered for NetBox.
+      netbox_server_port:
+        type: int
+        required: true
+        description:
+          - Guest-local TCP port exposed by NetBox.
+      netbox_host_proxy_port:
+        type: int
+        required: true
+        description:
+          - Host-side proxy port used for operator access.
+      netbox_controller_url:
+        type: str
+        required: true
+        description:
+          - Operator-facing URL used to reach NetBox from the controller.
+      netbox_database_name:
+        type: str
+        required: true
+        description:
+          - PostgreSQL database name used by NetBox.
+      netbox_database_user:
+        type: str
+        required: true
+        description:
+          - PostgreSQL login role used by NetBox.
+      netbox_database_host:
+        type: str
+        required: true
+        description:
+          - PostgreSQL host used by NetBox.
+      netbox_database_port:
+        type: int
+        required: false
+        description:
+          - PostgreSQL port used by NetBox.
+      netbox_database_password_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file that stores the NetBox database password.
+      netbox_local_artifact_dir:
+        type: path
+        required: false
+        description:
+          - Controller-local directory for NetBox bootstrap artifacts.
+      netbox_secret_key_file:
+        type: path
+        required: true
+        description:
+          - Guest-local file that stores the NetBox Django secret key.
+      netbox_changelog_retention_days:
+        type: int
+        required: false
+        description:
+          - Number of days NetBox keeps object-change records before housekeeping prunes them.
+      netbox_housekeeping_script:
+        type: path
+        required: false
+        description:
+          - Host-local housekeeping wrapper script rendered by the role.
+      netbox_housekeeping_service_name:
+        type: str
+        required: false
+        description:
+          - systemd service name that runs NetBox housekeeping.
+      netbox_housekeeping_timer_name:
+        type: str
+        required: false
+        description:
+          - systemd timer name that schedules NetBox housekeeping.
+      netbox_housekeeping_on_calendar:
+        type: str
+        required: false
+        description:
+          - systemd OnCalendar expression for NetBox housekeeping.

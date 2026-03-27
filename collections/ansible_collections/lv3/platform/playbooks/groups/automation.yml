@@ -1,0 +1,3 @@
+---
+- import_playbook: ../services/windmill.yml
+- import_playbook: ../services/n8n.yml

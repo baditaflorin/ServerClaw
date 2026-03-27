@@ -1,0 +1,13 @@
+default_budget:
+  max_duration_seconds: 600
+  max_steps: 200
+  max_concurrent_instances: 3
+  max_touched_hosts: 10
+  max_restarts: 1
+  max_rollback_depth: 1
+  escalation_action: notify_and_abort
+default_resource_reservation:
+  cpu_milli: 500
+  memory_mb: 256
+  disk_iops: 30
+  estimated_duration_seconds: 180

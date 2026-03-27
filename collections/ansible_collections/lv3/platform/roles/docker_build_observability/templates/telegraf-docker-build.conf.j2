@@ -1,0 +1,17 @@
+[agent]
+  hostname = "{{ guest_observability_hostname }}"
+  omit_hostname = false
+
+[global_tags]
+  role = "{{ guest_observability_role }}"
+  service = "{{ guest_observability_service }}"
+
+[[outputs.influxdb_v2]]
+  urls = ["{{ guest_observability_influx_url }}"]
+  token = "{{ lookup('file', guest_observability_writer_token_local_file) | trim }}"
+  organization = "{{ monitoring_influxdb_org }}"
+  bucket = "{{ monitoring_influxdb_bucket }}"
+
+[[inputs.socket_listener]]
+  service_address = "{{ docker_build_observability_socket_listener_address }}"
+  data_format = "influx"

@@ -1,0 +1,5 @@
+---
+- name: Restart Telegraf
+  ansible.builtin.systemd:
+    name: "{{ guest_observability_telegraf_service_name }}"
+    state: restarted

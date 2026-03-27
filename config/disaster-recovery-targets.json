@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0.0",
+  "platform_target": {
+    "rto_minutes": 240,
+    "rpo_hours": 24
+  },
+  "review_policy": {
+    "table_top_interval_days": 90,
+    "live_drill_interval_days": 365
+  },
+  "offsite_backup": {
+    "strategy": "proxmox-offsite-backup-of-backup-vm",
+    "target_vmids": [
+      160
+    ],
+    "storage_kind": "cifs",
+    "storage_id": "lv3-backup-offsite",
+    "schedule_utc": "04:00",
+    "retention": {
+      "keep_last": 3,
+      "keep_daily": 7,
+      "keep_weekly": 5,
+      "keep_monthly": 12
+    },
+    "notes": [
+      "The off-site copy protects the backup-lv3 PBS VM as a complete recovery unit, including the PBS datastore disk.",
+      "Hetzner Storage Box is mounted through Proxmox-managed CIFS storage on the hypervisor.",
+      "Native PBS remote sync is intentionally not used here because it requires another PBS endpoint."
+    ]
+  },
+  "scenarios": [
+    {
+      "id": "single_service_failure",
+      "name": "Single service failure",
+      "rto_minutes": 5,
+      "rpo_minutes": 0,
+      "notes": "Docker restart policy or targeted service converge resolves the failure."
+    },
+    {
+      "id": "vm_failure_postgres_ha",
+      "name": "Postgres VM failure with HA",
+      "rto_minutes": 1,
+      "rpo_minutes": 0,
+      "notes": "Planned ADR 0098 failover target; included as the zero-loss design goal."
+    },
+    {
+      "id": "vm_failure_stateless",
+      "name": "Stateless VM failure",
+      "rto_minutes": 30,
+      "rpo_minutes": 0,
+      "notes": "Applies to nginx-lv3 and monitoring-lv3 once restored or reprovisioned from IaC."
+    },
+    {
+      "id": "vm_failure_stateful_no_ha",
+      "name": "Stateful VM failure without HA",
+      "rto_minutes": 120,
+      "rpo_hours": 24,
+      "notes": "Applies to docker-runtime-lv3 and backup-lv3 restore from the most recent backup set."
+    },
+    {
+      "id": "full_host_recovery_offsite_backup_vm",
+      "name": "Full host recovery with off-site backup-lv3 copy",
+      "rto_minutes": 240,
+      "rpo_hours": 24,
+      "notes": "Restore backup-lv3 from external storage first, then restore the remaining VMs from PBS."
+    },
+    {
+      "id": "full_host_recovery_no_backup",
+      "name": "Full host recovery with no backup",
+      "rto_minutes": 480,
+      "rpo": "unbounded",
+      "notes": "IaC rebuild path only; stateful data is lost."
+    }
+  ],
+  "recovery_tiers": [
+    {
+      "id": "tier_0",
+      "name": "Host reprovision",
+      "deadline_minutes": 45,
+      "dependencies": []
+    },
+    {
+      "id": "tier_1",
+      "name": "Restore backup-lv3 from off-site storage",
+      "deadline_minutes": 90,
+      "dependencies": [
+        "tier_0"
+      ]
+    },
+    {
+      "id": "tier_2",
+      "name": "Restore stateful data services",
+      "deadline_minutes": 150,
+      "dependencies": [
+        "tier_1"
+      ]
+    },
+    {
+      "id": "tier_3",
+      "name": "Restore edge and observability guests",
+      "deadline_minutes": 195,
+      "dependencies": [
+        "tier_2"
+      ]
+    },
+    {
+      "id": "tier_4",
+      "name": "Restore build infrastructure",
+      "deadline_minutes": 225,
+      "dependencies": [
+        "tier_3"
+      ]
+    },
+    {
+      "id": "tier_5",
+      "name": "Platform verification sweep",
+      "deadline_minutes": 240,
+      "dependencies": [
+        "tier_4"
+      ]
+    }
+  ]
+}

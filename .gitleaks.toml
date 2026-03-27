@@ -1,0 +1,29 @@
+[allowlist]
+description = "Repo-managed placeholders and encrypted artifacts"
+regexes = [
+  '''\$ANSIBLE_VAULT;''',
+  '''example-token-here''',
+  '''\[REDACTED''',
+  '''YOUR_[A-Z0-9_]+_HERE''',
+]
+paths = [
+  '''tests/fixtures/.*''',
+  '''docs/adr/.*''',
+  '''docs/runbooks/.*''',
+  '''docs/workstreams/.*''',
+]
+
+[[rules]]
+id = "openbao-token"
+description = "OpenBao or Vault-style token"
+regex = '''hvs\.[A-Za-z0-9_-]{20,}'''
+
+[[rules]]
+id = "step-ca-provisioner-password"
+description = "step-ca provisioner password assignment"
+regex = '''provisioner[_\-]?password["'\s:=]+[A-Za-z0-9+/=_-]{20,}'''
+
+[[rules]]
+id = "keycloak-client-secret"
+description = "Keycloak client secret assignment"
+regex = '''client\.secret["'\s:=]+[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'''

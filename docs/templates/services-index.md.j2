@@ -1,0 +1,20 @@
+# Services Directory
+
+This directory is generated from `config/service-capability-catalog.json`.
+
+## Summary
+
+- Total services: **{{ totals.services }}**
+- Publicly published services: **{{ totals.public_services }}**
+- Private-only services: **{{ totals.private_services }}**
+
+{% for category in categories %}
+## {{ category.name }}
+
+| Service | Lifecycle | Exposure | Primary URL | ADR |
+| --- | --- | --- | --- | --- |
+{% for service in category.services -%}
+| [{{ service.name }}]({{ service.link }}) | {{ service.lifecycle_status }} | {{ service.exposure }} | {% if service.primary_url %}`{{ service.primary_url }}`{% else %}n/a{% endif %} | {% if service.adr_link %}[ADR {{ service.adr }}]({{ service.adr_link }}){% else %}n/a{% endif %} |
+{% endfor %}
+
+{% endfor %}

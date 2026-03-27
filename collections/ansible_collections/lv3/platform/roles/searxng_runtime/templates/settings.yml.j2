@@ -1,0 +1,19 @@
+use_default_settings: true
+
+general:
+  instance_name: "{{ searxng_runtime_instance_name }}"
+
+search:
+  safe_search: 0
+  formats:
+    - html
+    - json
+
+server:
+  secret_key: "{{ searxng_runtime_secret_key }}"
+  limiter: {{ searxng_runtime_enable_limiter | bool | lower }}
+  image_proxy: true
+  base_url: "{{ searxng_runtime_public_base_url }}/"
+
+valkey:
+  url: valkey://valkey:6379/0

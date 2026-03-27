@@ -1,0 +1,4 @@
+---
+proxmox_kernel_packages:
+  - proxmox-default-kernel
+  - ifupdown2

@@ -1,0 +1,133 @@
+---
+- name: Validate Proxmox metrics inputs
+  ansible.builtin.assert:
+    that:
+      - monitoring_proxmox_writer_token_local_file | length > 0
+      - proxmox_metrics_server_id | length > 0
+      - proxmox_metrics_token_hash_file | length > 0
+      - monitoring_influxdb_org | length > 0
+      - monitoring_influxdb_bucket | length > 0
+      - hostvars['monitoring-lv3'].ansible_host is defined
+    fail_msg: "proxmox_metrics requires the mirrored writer token plus monitoring-lv3 host metadata."
+
+- name: Ensure proxmox writer token exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ monitoring_proxmox_writer_token_local_file }}"
+  register: proxmox_metrics_local_token
+  delegate_to: localhost
+  become: false
+
+- name: Fail if proxmox writer token is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ monitoring_proxmox_writer_token_local_file }} is missing on the control
+      machine. Run the monitoring VM portion of the monitoring playbook first.
+  when: not proxmox_metrics_local_token.stat.exists
+
+- name: Read proxmox writer token from the control machine
+  ansible.builtin.set_fact:
+    proxmox_metrics_token: "{{ lookup('file', monitoring_proxmox_writer_token_local_file) | trim }}"
+    proxmox_metrics_token_sha256: "{{ (lookup('file', monitoring_proxmox_writer_token_local_file) | trim) | hash('sha256') }}"
+  no_log: true
+
+- name: Read current Proxmox metric server configuration
+  ansible.builtin.command: "pvesh get /cluster/metrics/server/{{ proxmox_metrics_server_id }} --output-format json"
+  register: proxmox_metrics_current_config_raw
+  failed_when: false
+  changed_when: false
+  no_log: true
+
+- name: Set current Proxmox metric server fact
+  ansible.builtin.set_fact:
+    proxmox_metrics_current_config: "{{ (proxmox_metrics_current_config_raw.stdout | from_json) if proxmox_metrics_current_config_raw.rc == 0 else {} }}"
+  no_log: true
+
+- name: Check current Proxmox metric token hash marker
+  ansible.builtin.stat:
+    path: "{{ proxmox_metrics_token_hash_file }}"
+  register: proxmox_metrics_token_hash_stat
+
+- name: Read current Proxmox metric token hash marker
+  ansible.builtin.slurp:
+    src: "{{ proxmox_metrics_token_hash_file }}"
+  register: proxmox_metrics_token_hash_raw
+  when: proxmox_metrics_token_hash_stat.stat.exists
+  no_log: true
+
+- name: Decide whether the Proxmox metric server needs an update
+  ansible.builtin.set_fact:
+    proxmox_metrics_needs_update: >-
+      {{
+        proxmox_metrics_current_config_raw.rc != 0
+        or (proxmox_metrics_current_config.server | default('')) != hostvars['monitoring-lv3'].ansible_host
+        or (proxmox_metrics_current_config.port | default(0) | int) != 8086
+        or (proxmox_metrics_current_config.type | default('')) != 'influxdb'
+        or (proxmox_metrics_current_config.influxdbproto | default('')) != 'http'
+        or (proxmox_metrics_current_config.bucket | default('')) != monitoring_influxdb_bucket
+        or (proxmox_metrics_current_config.organization | default('')) != monitoring_influxdb_org
+        or (
+          not proxmox_metrics_token_hash_stat.stat.exists
+          or (proxmox_metrics_token_hash_raw.content | b64decode | trim) != proxmox_metrics_token_sha256
+        )
+      }}
+  no_log: true
+
+- name: Create Proxmox metric server
+  ansible.builtin.command:
+    argv:
+      - pvesh
+      - create
+      - "/cluster/metrics/server/{{ proxmox_metrics_server_id }}"
+      - --type
+      - influxdb
+      - --server
+      - "{{ hostvars['monitoring-lv3'].ansible_host }}"
+      - --port
+      - "8086"
+      - --influxdbproto
+      - http
+      - --organization
+      - "{{ monitoring_influxdb_org }}"
+      - --bucket
+      - "{{ monitoring_influxdb_bucket }}"
+      - --token
+      - "{{ proxmox_metrics_token }}"
+  when:
+    - proxmox_metrics_needs_update
+    - proxmox_metrics_current_config_raw.rc != 0
+  changed_when: true
+  no_log: true
+
+- name: Update Proxmox metric server
+  ansible.builtin.command:
+    argv:
+      - pvesh
+      - set
+      - "/cluster/metrics/server/{{ proxmox_metrics_server_id }}"
+      - --server
+      - "{{ hostvars['monitoring-lv3'].ansible_host }}"
+      - --port
+      - "8086"
+      - --influxdbproto
+      - http
+      - --organization
+      - "{{ monitoring_influxdb_org }}"
+      - --bucket
+      - "{{ monitoring_influxdb_bucket }}"
+      - --token
+      - "{{ proxmox_metrics_token }}"
+  when:
+    - proxmox_metrics_needs_update
+    - proxmox_metrics_current_config_raw.rc == 0
+  changed_when: true
+  no_log: true
+
+- name: Persist Proxmox metric token hash marker
+  ansible.builtin.copy:
+    dest: "{{ proxmox_metrics_token_hash_file }}"
+    content: "{{ proxmox_metrics_token_sha256 }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+  when: proxmox_metrics_needs_update
+  no_log: true

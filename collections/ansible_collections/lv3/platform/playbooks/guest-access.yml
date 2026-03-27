@@ -1,0 +1,23 @@
+---
+- name: Enforce guest Linux access baseline
+  hosts: "{{ 'lv3_guests:&staging' if (env | default('production')) == 'staging' else 'lv3_guests:&production' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - tier-1
+    - access
+    - service-guest-access
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts: "{{ ansible_play_hosts_all }}"
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.linux_access
+      vars:
+        linux_access_admin_user: "{{ proxmox_guest_ci_user }}"

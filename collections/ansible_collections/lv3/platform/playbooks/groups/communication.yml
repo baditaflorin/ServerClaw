@@ -1,0 +1,2 @@
+---
+- import_playbook: ../services/mail-platform.yml

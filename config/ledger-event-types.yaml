@@ -1,0 +1,74 @@
+# Intent lifecycle
+- intent.compiled
+- intent.approved
+- intent.batch_plan
+- intent.claim_registered
+- intent.deduplicated
+- intent.queued
+- intent.rejected
+- intent.dispatched
+- intent.expired
+
+# Execution lifecycle
+- execution.started
+- execution.rejected
+- execution.escalated
+- execution.idempotent_hit
+- execution.completed
+- execution.failed
+- execution.aborted
+- execution.deadlock_aborted
+- execution.budget_exceeded
+- execution.speculative_started
+- execution.speculative_probing
+- execution.speculative_committed
+- execution.speculative_rolled_back
+- execution.stale_job_detected
+
+# Service mutations
+- service.deployed
+- service.rolled_back
+- service.restarted
+- service.config_changed
+
+# Secret management
+- secret.audited
+- secret.rotated
+- secret.revoked
+- secret.accessed
+- secret.expiry_extended
+
+# Infrastructure
+- host.provisioned
+- host.decommissioned
+- vm.created
+- vm.destroyed
+- vm.snapshot_taken
+
+# Certificate management
+- cert.issued
+- cert.renewed
+- cert.revoked
+
+# Observability
+- llm.inference
+- alert.fired
+- graph.health_propagated
+- loop.state_transition
+- triage.report_created
+- incident.opened
+- incident.escalated
+- incident.resolved
+
+# Agent handoffs
+- handoff.transfer_recorded
+- handoff.accepted
+- handoff.refused
+- handoff.timed_out
+- handoff.escalated_to_operator
+- handoff.closed_unaccepted
+- handoff.completed
+
+# Corrections and annotations
+- correction
+- operator.annotation

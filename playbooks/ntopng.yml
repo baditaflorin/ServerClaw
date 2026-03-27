@@ -1,0 +1,18 @@
+---
+- name: Converge ntopng private network visibility on the Proxmox host
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Ensure target host is Debian 13
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+          - ansible_distribution_major_version == "13"
+        fail_msg: "This playbook only supports Debian 13 targets."
+
+  roles:
+    - role: lv3.platform.proxmox_tailscale_proxy
+    - role: lv3.platform.proxmox_security
+    - role: lv3.platform.proxmox_ntopng

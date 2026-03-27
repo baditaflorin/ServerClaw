@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-22-adr-0048-command-catalog-live-apply",
+  "applied_on": "2026-03-22",
+  "recorded_on": "2026-03-22",
+  "recorded_by": "codex",
+  "source_commit": "175dea61cf85afc64982cf1202938a2f819870be",
+  "repo_version_context": "0.49.0",
+  "workflow_id": "validate",
+  "adr": "0048",
+  "summary": "Applied the command catalog and approval gates live by validating the catalog on main and confirming a representative host mutation contract and approval gate before recording them as the steady-state execution path.",
+  "targets": [
+    {
+      "kind": "controller",
+      "name": "proxmox_florin_server-main",
+      "address": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server"
+    },
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.118.189.95"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Command catalog validation",
+      "result": "pass",
+      "observed": "scripts/command_catalog.py --validate completed successfully against the command catalog on main."
+    },
+    {
+      "check": "Representative contract inspection",
+      "result": "pass",
+      "observed": "scripts/command_catalog.py --command configure-network confirmed the expected make entrypoint, sensitive_live_change approval policy, receipt requirement, and rollback guidance for the representative host mutation."
+    },
+    {
+      "check": "Representative approval gate",
+      "result": "pass",
+      "observed": "scripts/command_catalog.py --check-approval for configure-network returned OK for a human_operator requester and approver with validation, preflight, and receipt-planning inputs marked complete."
+    },
+    {
+      "check": "Standard repository cross-check",
+      "result": "pass",
+      "observed": "The command catalog remains part of the repository data-model validation gate alongside workflows, receipts, control-plane lanes, and canonical stack state."
+    }
+  ],
+  "evidence_refs": [
+    "config/command-catalog.json",
+    "docs/adr/0048-command-catalog-and-approval-gates.md",
+    "docs/runbooks/command-catalog-and-approval-gates.md",
+    "docs/workstreams/adr-0048-command-catalog.md",
+    "versions/stack.yaml"
+  ],
+  "notes": [
+    "This is a governance live apply: no new host mutation was required because the live platform already uses repo-managed workflows and receipts.",
+    "The representative approval check intentionally used configure-network because it exercises the higher-risk sensitive_live_change policy."
+  ]
+}

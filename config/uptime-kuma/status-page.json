@@ -1,0 +1,32 @@
+{
+  "slug": "lv3-platform",
+  "title": "lv3 Platform Status",
+  "description": "Current operational status of public lv3.org platform services.",
+  "theme": "dark",
+  "showTags": false,
+  "customCSS": "",
+  "footerText": "lv3.org - powered by Uptime Kuma",
+  "showPoweredBy": true,
+  "showOnlyLastHeartbeat": false,
+  "showCertificateExpiry": false,
+  "autoRefreshInterval": 300,
+  "domainNameList": [
+    "status.lv3.org"
+  ],
+  "groups": [
+    {
+      "name": "Platform Access",
+      "monitor_names": [
+        "Keycloak OIDC Discovery",
+        "Uptime Kuma Public"
+      ]
+    },
+    {
+      "name": "Observability",
+      "monitor_names": [
+        "Grafana Public",
+        "NGINX Edge Public"
+      ]
+    }
+  ]
+}

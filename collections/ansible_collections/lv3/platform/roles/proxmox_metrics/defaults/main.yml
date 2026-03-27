@@ -1,0 +1,3 @@
+---
+proxmox_metrics_server_id: influxdb-http
+proxmox_metrics_token_hash_file: /root/.lv3-proxmox-metrics-token.sha256

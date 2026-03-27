@@ -1,0 +1,771 @@
+{
+  "schema_version": "1.0.0",
+  "default_audit_log_path": ".local/tool-audit/agent-tool-calls.jsonl",
+  "tools": [
+    {
+      "name": "get-platform-status",
+      "title": "Get Platform Status",
+      "description": "Return the current repo-grounded platform status snapshot from versions/stack.yaml.",
+      "category": "observe",
+      "transport": "controller_local",
+      "endpoint": "repo://versions/stack.yaml",
+      "auth": "repo-read",
+      "approval_required": false,
+      "audit_on_call": true,
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {}
+      },
+      "output_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "repo_version",
+          "platform_version",
+          "observed_check_date",
+          "os",
+          "proxmox",
+          "guest_count",
+          "public_services",
+          "latest_receipt_ids"
+        ],
+        "properties": {
+          "repo_version": {
+            "type": "string"
+          },
+          "platform_version": {
+            "type": "string"
+          },
+          "observed_check_date": {
+            "type": "string"
+          },
+          "os": {
+            "type": "object"
+          },
+          "proxmox": {
+            "type": "object"
+          },
+          "guest_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "public_services": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "latest_receipt_ids": {
+            "type": "object"
+          }
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "get_platform_status"
+      },
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "runbook": "docs/runbooks/agent-tool-registry.md"
+    },
+    {
+      "name": "list-recent-receipts",
+      "title": "List Recent Receipts",
+      "description": "List the most recent structured live-apply receipts from the repository evidence set.",
+      "category": "observe",
+      "transport": "controller_local",
+      "endpoint": "repo://receipts/live-applies",
+      "auth": "repo-read",
+      "approval_required": false,
+      "audit_on_call": true,
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "count",
+          "receipts"
+        ],
+        "properties": {
+          "count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "receipts": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "list_recent_receipts"
+      },
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "runbook": "docs/runbooks/agent-tool-registry.md"
+    },
+    {
+      "name": "get-deployment-history",
+      "title": "Get Deployment History",
+      "description": "Return recent platform deployments filtered by service, environment, or date range.",
+      "category": "observe",
+      "transport": "controller_local",
+      "endpoint": "repo://receipts/live-applies",
+      "auth": "repo-read",
+      "approval_required": false,
+      "audit_on_call": true,
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "service_id": {
+            "type": "string"
+          },
+          "environment": {
+            "type": "string",
+            "enum": [
+              "production",
+              "staging"
+            ]
+          },
+          "days": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "service_id",
+          "environment",
+          "days",
+          "count",
+          "warnings",
+          "entries"
+        ],
+        "properties": {
+          "service_id": {
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          },
+          "days": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "id",
+                "change_type",
+                "timestamp",
+                "timestamp_precision",
+                "date_label",
+                "actor",
+                "actor_class",
+                "environment",
+                "outcome",
+                "service_ids",
+                "service_names",
+                "vm_names",
+                "targets",
+                "summary",
+                "link_path",
+                "source",
+                "metadata"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "change_type": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string"
+                },
+                "timestamp_precision": {
+                  "type": "string"
+                },
+                "date_label": {
+                  "type": "string"
+                },
+                "actor": {
+                  "type": "string"
+                },
+                "actor_class": {
+                  "type": "string"
+                },
+                "environment": {
+                  "type": "string"
+                },
+                "outcome": {
+                  "type": "string"
+                },
+                "service_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "service_names": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "vm_names": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "targets": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "summary": {
+                  "type": "string"
+                },
+                "link_path": {
+                  "type": "string"
+                },
+                "source": {
+                  "type": "string"
+                },
+                "workflow_id": {
+                  "type": "string"
+                },
+                "adr": {
+                  "type": "string"
+                },
+                "metadata": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "get_deployment_history"
+      },
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "runbook": "docs/runbooks/agent-tool-registry.md"
+    },
+    {
+      "name": "get-workflow-contract",
+      "title": "Get Workflow Contract",
+      "description": "Return one workflow execution contract from the canonical workflow catalog.",
+      "category": "observe",
+      "transport": "controller_local",
+      "endpoint": "repo://config/workflow-catalog.json",
+      "auth": "repo-read",
+      "approval_required": false,
+      "audit_on_call": true,
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "workflow_id"
+        ],
+        "properties": {
+          "workflow_id": {
+            "type": "string"
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object"
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "get_workflow_contract"
+      },
+      "catalog_refs": {
+        "workflow_id": "validate"
+      },
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "runbook": "docs/runbooks/agent-tool-registry.md"
+    },
+    {
+      "name": "get-command-contract",
+      "title": "Get Command Contract",
+      "description": "Return one mutating command contract from the canonical command catalog.",
+      "category": "observe",
+      "transport": "controller_local",
+      "endpoint": "repo://config/command-catalog.json",
+      "auth": "repo-read",
+      "approval_required": false,
+      "audit_on_call": true,
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "command_id"
+        ],
+        "properties": {
+          "command_id": {
+            "type": "string"
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object"
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "get_command_contract"
+      },
+      "catalog_refs": {
+        "command_id": "configure-network"
+      },
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "runbook": "docs/runbooks/agent-tool-registry.md"
+    },
+    {
+      "name": "get-api-publication-surface",
+      "title": "Get API Publication Surface",
+      "description": "Return one classified API or webhook surface from the private-first publication catalog.",
+      "category": "observe",
+      "transport": "controller_local",
+      "endpoint": "repo://config/api-publication.json",
+      "auth": "repo-read",
+      "approval_required": false,
+      "audit_on_call": true,
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "surface_id"
+        ],
+        "properties": {
+          "surface_id": {
+            "type": "string"
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object"
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "get_api_publication_surface"
+      },
+      "catalog_refs": {
+        "api_surface_id": "proxmox-management-api"
+      },
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "runbook": "docs/runbooks/agent-tool-registry.md"
+    },
+    {
+      "name": "query-platform-context",
+      "title": "Query Platform Context",
+      "description": "Query the private platform-context API for cited RAG matches grounded in ADRs, runbooks, receipts, and platform catalogs.",
+      "category": "observe",
+      "transport": "http",
+      "endpoint": "https://api.lv3.org/v1/platform-context/v1/context/query",
+      "auth": "platform-context-api-token",
+      "approval_required": false,
+      "audit_on_call": true,
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "question"
+        ],
+        "properties": {
+          "question": {
+            "type": "string"
+          },
+          "top_k": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "question",
+          "matches"
+        ],
+        "properties": {
+          "question": {
+            "type": "string"
+          },
+          "matches": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "query_platform_context"
+      },
+      "catalog_refs": {
+        "api_surface_id": "platform-context-api"
+      },
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "runbook": "docs/runbooks/rag-platform-context.md"
+    },
+    {
+      "name": "get-maintenance-windows",
+      "title": "Get Maintenance Windows",
+      "description": "Return the currently active ADR 0080 maintenance windows from the private NATS KV bucket through the governed controller query surface.",
+      "category": "observe",
+      "transport": "controller_local",
+      "endpoint": "repo://scripts/maintenance_window_tool.py list",
+      "auth": "bootstrap-ssh-jump to private NATS runtime",
+      "approval_required": false,
+      "audit_on_call": true,
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "service_id": {
+            "type": "string"
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "count",
+          "windows"
+        ],
+        "properties": {
+          "count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "windows": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "get_maintenance_windows"
+      },
+      "catalog_refs": {
+        "workflow_id": "open-maintenance-window"
+      },
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "runbook": "docs/runbooks/maintenance-windows.md"
+    },
+    {
+      "name": "export-mcp-tools",
+      "title": "Export MCP Tools",
+      "description": "Export the governed tool registry as MCP-compatible tool definitions.",
+      "category": "report",
+      "transport": "controller_local",
+      "endpoint": "repo://scripts/agent_tool_registry.py --export-mcp",
+      "auth": "repo-read",
+      "approval_required": false,
+      "audit_on_call": true,
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "output_path": {
+            "type": "string"
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "count",
+          "tools"
+        ],
+        "properties": {
+          "count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "tools": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "export_mcp_tools"
+      },
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "runbook": "docs/runbooks/agent-tool-registry.md"
+    },
+    {
+      "name": "run-governed-command",
+      "title": "Run Governed Command",
+      "description": "Evaluate approval requirements and optionally execute one named mutating command contract.",
+      "category": "execute",
+      "transport": "controller_local",
+      "endpoint": "repo://config/command-catalog.json",
+      "auth": "approval-gated command execution",
+      "approval_required": true,
+      "audit_on_call": true,
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "command_id",
+          "requester_class"
+        ],
+        "properties": {
+          "command_id": {
+            "type": "string"
+          },
+          "requester_class": {
+            "type": "string",
+            "enum": [
+              "human_operator",
+              "service_identity",
+              "agent",
+              "break_glass"
+            ]
+          },
+          "approver_classes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "preflight_passed": {
+            "type": "boolean"
+          },
+          "validation_passed": {
+            "type": "boolean"
+          },
+          "receipt_planned": {
+            "type": "boolean"
+          },
+          "self_approve": {
+            "type": "boolean"
+          },
+          "break_glass": {
+            "type": "boolean"
+          },
+          "dry_run": {
+            "type": "boolean"
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "approved",
+          "executed",
+          "command_id",
+          "workflow_id",
+          "reasons"
+        ],
+        "properties": {
+          "approved": {
+            "type": "boolean"
+          },
+          "executed": {
+            "type": "boolean"
+          },
+          "command_id": {
+            "type": "string"
+          },
+          "workflow_id": {
+            "type": "string"
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "entrypoint": {
+            "type": "string"
+          },
+          "returncode": {
+            "type": "integer"
+          }
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "run_governed_command"
+      },
+      "catalog_refs": {
+        "command_id": "configure-network"
+      },
+      "mcp_annotations": {
+        "destructiveHint": true,
+        "openWorldHint": true
+      },
+      "runbook": "docs/runbooks/agent-tool-registry.md"
+    },
+    {
+      "name": "check-command-approval",
+      "title": "Check Command Approval",
+      "description": "Evaluate the approval gate for one mutating command contract without executing it.",
+      "category": "approve",
+      "transport": "controller_local",
+      "endpoint": "repo://scripts/command_catalog.py --check-approval",
+      "auth": "catalog-read",
+      "approval_required": false,
+      "audit_on_call": true,
+      "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "command_id",
+          "requester_class"
+        ],
+        "properties": {
+          "command_id": {
+            "type": "string"
+          },
+          "requester_class": {
+            "type": "string",
+            "enum": [
+              "human_operator",
+              "service_identity",
+              "agent",
+              "break_glass"
+            ]
+          },
+          "approver_classes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "preflight_passed": {
+            "type": "boolean"
+          },
+          "validation_passed": {
+            "type": "boolean"
+          },
+          "receipt_planned": {
+            "type": "boolean"
+          },
+          "self_approve": {
+            "type": "boolean"
+          },
+          "break_glass": {
+            "type": "boolean"
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "approved",
+          "command_id",
+          "workflow_id",
+          "reasons"
+        ],
+        "properties": {
+          "approved": {
+            "type": "boolean"
+          },
+          "command_id": {
+            "type": "string"
+          },
+          "workflow_id": {
+            "type": "string"
+          },
+          "reasons": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "entrypoint": {
+            "type": "string"
+          }
+        }
+      },
+      "implementation": {
+        "kind": "handler",
+        "handler": "check_command_approval"
+      },
+      "catalog_refs": {
+        "command_id": "configure-network"
+      },
+      "mcp_annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true
+      },
+      "runbook": "docs/runbooks/agent-tool-registry.md"
+    }
+  ]
+}

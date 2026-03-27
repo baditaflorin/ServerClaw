@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+
+rule='-A PREROUTING -i fwbr+ -j CT --zone 1'
+
+if ! iptables-save -t raw | grep -F -- "$rule" >/dev/null 2>&1; then
+  iptables -t raw -I PREROUTING -i fwbr+ -j CT --zone 1
+fi

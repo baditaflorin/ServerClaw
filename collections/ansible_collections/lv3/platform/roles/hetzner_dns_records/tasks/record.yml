@@ -1,0 +1,90 @@
+---
+- name: Select existing Hetzner DNS records with the same name and type
+  ansible.builtin.set_fact:
+    hetzner_dns_same_name_type_records: >-
+      {{
+        hetzner_dns_records_lookup.json.records
+        | selectattr('name', 'equalto', hetzner_dns_record.name)
+        | selectattr('type', 'equalto', hetzner_dns_record.type)
+        | list
+      }}
+
+- name: Select exact Hetzner DNS record matches by value
+  ansible.builtin.set_fact:
+    hetzner_dns_exact_records: >-
+      {{
+        hetzner_dns_same_name_type_records
+        | selectattr('value', 'equalto', hetzner_dns_record.value)
+        | list
+      }}
+
+- name: Select managed Hetzner DNS records by value identity
+  ansible.builtin.set_fact:
+    hetzner_dns_matching_records: >-
+      {{
+        hetzner_dns_exact_records
+        if (hetzner_dns_exact_records | length > 0)
+        else (
+          (
+            hetzner_dns_same_name_type_records
+            | selectattr('value', 'search', hetzner_dns_record.value_match_regex)
+            | list
+          )
+          if (hetzner_dns_record.value_match_regex is defined)
+          else hetzner_dns_exact_records
+        )
+      }}
+
+- name: Assert the exact record match is unambiguous
+  ansible.builtin.assert:
+    that:
+      - hetzner_dns_matching_records | length <= 1
+    fail_msg: >-
+      Multiple Hetzner DNS records matched {{ hetzner_dns_record.name }} {{ hetzner_dns_record.type }}
+      for managed identity {{ hetzner_dns_record.value_match_regex | default(hetzner_dns_record.value) }}.
+      Clean up duplicates before rerunning automation.
+
+- name: Create the Hetzner DNS record when it does not exist
+  ansible.builtin.uri:
+    url: "{{ hetzner_dns_api_base_url }}/records"
+    method: POST
+    headers:
+      Auth-API-Token: "{{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}"
+    body_format: json
+    body:
+      zone_id: "{{ hetzner_dns_zone_id }}"
+      name: "{{ hetzner_dns_record.name }}"
+      type: "{{ hetzner_dns_record.type }}"
+      value: "{{ hetzner_dns_record.value }}"
+      ttl: "{{ hetzner_dns_record.ttl | default(60) | int }}"
+    status_code:
+      - 200
+      - 201
+  when: hetzner_dns_matching_records | length == 0
+  no_log: true
+
+- name: Update the Hetzner DNS record when drift is detected
+  ansible.builtin.uri:
+    url: "{{ hetzner_dns_api_base_url }}/records/{{ hetzner_dns_matching_records[0].id }}"
+    method: PUT
+    headers:
+      Auth-API-Token: "{{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}"
+    body_format: json
+    body:
+      zone_id: "{{ hetzner_dns_zone_id }}"
+      name: "{{ hetzner_dns_record.name }}"
+      type: "{{ hetzner_dns_record.type }}"
+      value: "{{ hetzner_dns_record.value }}"
+      ttl: "{{ hetzner_dns_record.ttl | default(60) | int }}"
+    status_code:
+      - 200
+      - 201
+  when:
+    - hetzner_dns_matching_records | length == 1
+    - hetzner_dns_matching_records[0].value != hetzner_dns_record.value
+      or (
+        hetzner_dns_matching_records[0].ttl
+        | default(hetzner_dns_record.ttl | default(60))
+        | int
+      ) != (hetzner_dns_record.ttl | default(60) | int)
+  no_log: true

@@ -1,0 +1,115 @@
+---
+- name: Validate Proxmox Tailscale inputs
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: assert_vars
+  vars:
+    common_assert_vars_required:
+      - tailscale_apt_key_url
+      - tailscale_apt_keyring_path
+      - tailscale_apt_repo_file
+      - tailscale_apt_repo_url
+      - proxmox_tailscale_hostname
+      - proxmox_tailscale_advertise_routes
+      - proxmox_tailscale_auth_key_env_var
+    common_assert_vars_fail_msg: "proxmox_tailscale requires repository settings plus hostname and advertised route inputs."
+
+- name: Ensure Tailscale repository prerequisites are present
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the Tailscale keyring directory exists
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: directory_tree
+  vars:
+    common_directory_tree_paths:
+      - "{{ tailscale_apt_keyring_path | dirname }}"
+
+- name: Install the Tailscale archive key
+  ansible.builtin.get_url:
+    url: "{{ tailscale_apt_key_url }}"
+    dest: "{{ tailscale_apt_keyring_path }}"
+    mode: "0644"
+
+- name: Install the Tailscale apt repository definition
+  ansible.builtin.get_url:
+    url: "{{ tailscale_apt_repo_url }}"
+    dest: "{{ tailscale_apt_repo_file }}"
+    mode: "0644"
+  register: proxmox_tailscale_repo
+
+- name: Ensure the Tailscale package is present
+  ansible.builtin.apt:
+    name: tailscale
+    state: present
+    update_cache: "{{ proxmox_tailscale_repo.changed }}"
+
+- name: Ensure the tailscaled service is enabled and started
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: systemd_unit
+  vars:
+    common_systemd_unit_name: tailscaled
+
+- name: Ensure IPv4 forwarding is enabled for subnet routing
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "1"
+    state: present
+    sysctl_set: true
+    reload: true
+  loop:
+    - name: net.ipv4.ip_forward
+    - name: net.ipv4.conf.all.forwarding
+    - name: net.ipv4.conf.default.forwarding
+
+- name: Ensure forwarding is enabled on Tailscale routing interfaces
+  ansible.posix.sysctl:
+    name: "net.ipv4.conf.{{ item }}.forwarding"
+    value: "1"
+    state: present
+    sysctl_set: true
+    reload: true
+  loop: "{{ proxmox_tailscale_forwarding_interfaces }}"
+
+- name: Install the LV3 Tailscale helper
+  ansible.builtin.template:
+    src: lv3-tailscale-up.sh.j2
+    dest: /usr/local/sbin/lv3-tailscale-up
+    mode: "0755"
+
+- name: Check whether the host already has a Tailscale IPv4 address
+  ansible.builtin.command: tailscale ip -4
+  register: proxmox_tailscale_ipv4
+  failed_when: false
+  changed_when: false
+
+- name: Attach the Proxmox host to the tailnet with the supplied auth key
+  ansible.builtin.command: /usr/local/sbin/lv3-tailscale-up
+  environment:
+    TAILSCALE_AUTH_KEY: "{{ lookup('ansible.builtin.env', proxmox_tailscale_auth_key_env_var) | trim }}"
+  when:
+    - proxmox_tailscale_ipv4.rc != 0
+    - (lookup('ansible.builtin.env', proxmox_tailscale_auth_key_env_var) | trim) | length > 0
+  changed_when: true
+  no_log: true
+
+- name: Refresh the subnet-router settings on an authenticated host
+  ansible.builtin.command: /usr/local/sbin/lv3-tailscale-up
+  when: proxmox_tailscale_ipv4.rc == 0
+  changed_when: false
+
+- name: Show the remaining manual authentication step when no auth key was supplied
+  ansible.builtin.debug:
+    msg: >-
+      Tailscale is installed but not yet authenticated. Run sudo /usr/local/sbin/lv3-tailscale-up on the Proxmox
+      host, approve the login in the Tailscale admin console, and then approve the advertised route
+      {{ proxmox_tailscale_advertise_routes | join(', ') }} if auto-approval is not already configured.
+  when:
+    - proxmox_tailscale_ipv4.rc != 0
+    - (lookup('ansible.builtin.env', proxmox_tailscale_auth_key_env_var) | trim) | length == 0

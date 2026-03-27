@@ -1,0 +1,5 @@
+---
+argument_specs:
+  main:
+    short_description: Docker build observability role inputs.
+    options: {}

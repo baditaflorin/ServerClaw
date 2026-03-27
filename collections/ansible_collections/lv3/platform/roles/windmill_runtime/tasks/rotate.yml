@@ -1,0 +1,93 @@
+---
+- name: Assert the Windmill runtime rotation request is valid
+  ansible.builtin.assert:
+    that:
+      - secret_rotation_secret_id in ['windmill_database_password', 'windmill_superadmin_secret']
+      - secret_rotation_new_value | length > 0
+    fail_msg: "windmill_runtime rotate.yml only supports windmill_database_password and windmill_superadmin_secret."
+
+- name: Update the Windmill database URL in the env file
+  ansible.builtin.lineinfile:
+    path: "{{ windmill_env_file }}"
+    regexp: '^DATABASE_URL='
+    line: >-
+      DATABASE_URL=postgres://{{ windmill_database_user }}:{{ secret_rotation_new_value | urlencode | replace('/', '%2F') }}@{{ windmill_database_host }}:{{ windmill_database_port }}/{{ windmill_database_name }}?sslmode=disable
+    owner: root
+    group: root
+    mode: "0600"
+  when: secret_rotation_secret_id == 'windmill_database_password'
+  no_log: true
+
+- name: Mirror the Windmill database password locally
+  ansible.builtin.copy:
+    dest: "{{ windmill_database_password_local_file }}"
+    content: "{{ secret_rotation_new_value }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  when: secret_rotation_secret_id == 'windmill_database_password'
+  no_log: true
+
+- name: Persist the Windmill superadmin secret on the runtime host
+  ansible.builtin.copy:
+    dest: "{{ windmill_superadmin_secret_remote_file }}"
+    content: "{{ secret_rotation_new_value }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+  when: secret_rotation_secret_id == 'windmill_superadmin_secret'
+  no_log: true
+
+- name: Update the Windmill superadmin secret in the env file
+  ansible.builtin.lineinfile:
+    path: "{{ windmill_env_file }}"
+    regexp: '^SUPERADMIN_SECRET='
+    line: "SUPERADMIN_SECRET={{ secret_rotation_new_value }}"
+    owner: root
+    group: root
+    mode: "0600"
+  when: secret_rotation_secret_id == 'windmill_superadmin_secret'
+  no_log: true
+
+- name: Mirror the Windmill superadmin secret locally
+  ansible.builtin.copy:
+    dest: "{{ windmill_superadmin_secret_local_file }}"
+    content: "{{ secret_rotation_new_value }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  when: secret_rotation_secret_id == 'windmill_superadmin_secret'
+  no_log: true
+
+- name: Restart the Windmill runtime with the rotated secret material
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ windmill_compose_file }}"
+      - up
+      - -d
+      - --force-recreate
+      - windmill_server
+      - windmill_worker
+      - windmill_worker_native
+      - windmill_extra
+  args:
+    chdir: "{{ windmill_site_dir }}"
+  register: windmill_rotation_up
+  changed_when: >-
+    'Recreating' in windmill_rotation_up.stdout
+    or 'Creating' in windmill_rotation_up.stdout
+    or 'Starting' in windmill_rotation_up.stdout
+
+- name: Wait for the Windmill API after secret rotation
+  ansible.builtin.uri:
+    url: "{{ windmill_runtime_api_base_url }}/api/version"
+    method: GET
+    status_code: 200
+  register: windmill_rotation_health
+  retries: 18
+  delay: 5
+  until: windmill_rotation_health.status == 200
+  changed_when: false

@@ -1,0 +1,109 @@
+---
+- name: Publish mail DNS records
+  hosts: proxmox_hosts
+  become: false
+  gather_facts: false
+  tags:
+    - tier-2
+    - communication
+    - service-mail-platform
+
+  tasks:
+    - name: Ensure Hetzner DNS records are present for the mail platform
+      ansible.builtin.include_role:
+        name: lv3.platform.hetzner_dns_records
+        apply:
+          delegate_to: localhost
+          become: false
+      vars:
+        hetzner_dns_records: "{{ hostvars[inventory_hostname].mail_platform_dns_records }}"
+      run_once: true
+
+- name: Converge public mail ingress forwarding on the Proxmox host
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  tags:
+    - tier-1
+    - communication
+    - service-mail-platform
+
+  roles:
+    - role: lv3.platform.proxmox_network
+
+- name: Converge the mail platform runtime on the Docker runtime VM
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - communication
+    - service-mail-platform
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.mail-platform
+        playbook_execution_audit_target: mail_platform
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.mail_platform_runtime
+
+  post_tasks:
+    - name: Run shared post-verify checks
+      ansible.builtin.import_tasks: tasks/post-verify.yml
+      vars:
+        service_health_probe_id: mail_platform
+        playbook_execution_post_verify_audit_action: playbook.verify.mail-platform
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: mail_platform
+
+- name: Converge mail platform observability on the Docker runtime VM
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - communication
+    - service-mail-platform
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.mail_platform_observability
+
+- name: Refresh the monitoring stack with the managed mail dashboard
+  hosts: "{{ 'monitoring-staging-lv3' if (env | default('production')) == 'staging' else 'monitoring-lv3' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - communication
+    - service-mail-platform
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.monitoring[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.monitoring_vm

@@ -1,0 +1,319 @@
+{
+  "$schema": "docs/schema/capacity-model.schema.json",
+  "schema_version": "1.0.0",
+  "host": {
+    "id": "proxmox_florin",
+    "name": "florin",
+    "metrics_host": "Debian-trixie-latest-amd64-base",
+    "physical": {
+      "ram_gb": 128,
+      "vcpu": 32,
+      "disk_gb": 3600
+    },
+    "target_utilisation": {
+      "ram_percent": 80,
+      "vcpu_percent": 75,
+      "disk_percent": 75
+    },
+    "reserved_for_platform": {
+      "ram_gb": 8,
+      "vcpu": 2,
+      "disk_gb": 250
+    },
+    "notes": "Physical capacity for the Hetzner single-node Proxmox host. Disk is the usable local NVMe pool budget rather than the nominal raw drive size."
+  },
+  "guests": [
+    {
+      "vmid": 110,
+      "name": "nginx-lv3",
+      "status": "active",
+      "environment": "production",
+      "metrics_host": "nginx-lv3",
+      "allocated": {
+        "ram_gb": 4,
+        "vcpu": 2,
+        "disk_gb": 32
+      },
+      "budget": {
+        "ram_gb": 6,
+        "vcpu": 4,
+        "disk_gb": 48
+      },
+      "disk_paths": [
+        "/"
+      ],
+      "notes": "Validated from live qm config on 2026-03-23."
+    },
+    {
+      "vmid": 120,
+      "name": "docker-runtime-lv3",
+      "status": "active",
+      "environment": "production",
+      "metrics_host": "docker-runtime-lv3",
+      "allocated": {
+        "ram_gb": 24,
+        "vcpu": 4,
+        "disk_gb": 96
+      },
+      "budget": {
+        "ram_gb": 32,
+        "vcpu": 8,
+        "disk_gb": 160
+      },
+      "disk_paths": [
+        "/"
+      ],
+      "notes": "Validated from live qm config on 2026-03-23."
+    },
+    {
+      "vmid": 130,
+      "name": "docker-build-lv3",
+      "status": "active",
+      "environment": "production",
+      "metrics_host": "docker-build-lv3",
+      "allocated": {
+        "ram_gb": 24,
+        "vcpu": 12,
+        "disk_gb": 160
+      },
+      "budget": {
+        "ram_gb": 32,
+        "vcpu": 16,
+        "disk_gb": 240
+      },
+      "disk_paths": [
+        "/"
+      ],
+      "notes": "Validated from live qm config on 2026-03-23."
+    },
+    {
+      "vmid": 140,
+      "name": "monitoring-lv3",
+      "status": "active",
+      "environment": "production",
+      "metrics_host": "monitoring-lv3",
+      "allocated": {
+        "ram_gb": 8,
+        "vcpu": 4,
+        "disk_gb": 64
+      },
+      "budget": {
+        "ram_gb": 12,
+        "vcpu": 8,
+        "disk_gb": 96
+      },
+      "disk_paths": [
+        "/"
+      ],
+      "notes": "Validated from live qm config on 2026-03-23."
+    },
+    {
+      "vmid": 150,
+      "name": "postgres-lv3",
+      "status": "active",
+      "environment": "production",
+      "metrics_host": "postgres-lv3",
+      "allocated": {
+        "ram_gb": 8,
+        "vcpu": 4,
+        "disk_gb": 96
+      },
+      "budget": {
+        "ram_gb": 12,
+        "vcpu": 6,
+        "disk_gb": 128
+      },
+      "disk_paths": [
+        "/"
+      ],
+      "notes": "Validated from live qm config on 2026-03-23."
+    },
+    {
+      "vmid": 160,
+      "name": "backup-lv3",
+      "status": "active",
+      "environment": "production",
+      "metrics_host": "backup-lv3",
+      "allocated": {
+        "ram_gb": 8,
+        "vcpu": 4,
+        "disk_gb": 672
+      },
+      "budget": {
+        "ram_gb": 12,
+        "vcpu": 6,
+        "disk_gb": 800
+      },
+      "disk_paths": [
+        "/",
+        "/mnt/datastore/proxmox"
+      ],
+      "notes": "Validated from live qm config on 2026-03-23. Disk includes the 32 GB root disk plus the 640 GB PBS datastore disk."
+    },
+    {
+      "vmid": 210,
+      "name": "nginx-staging-lv3",
+      "status": "planned",
+      "environment": "staging",
+      "metrics_host": "nginx-staging-lv3",
+      "allocated": {
+        "ram_gb": 2,
+        "vcpu": 1,
+        "disk_gb": 24
+      },
+      "budget": {
+        "ram_gb": 4,
+        "vcpu": 2,
+        "disk_gb": 32
+      },
+      "disk_paths": [
+        "/"
+      ],
+      "notes": "Declared staging edge guest in inventory; planned capacity placeholder pending live VM creation."
+    },
+    {
+      "vmid": 220,
+      "name": "docker-runtime-staging-lv3",
+      "status": "planned",
+      "environment": "staging",
+      "metrics_host": "docker-runtime-staging-lv3",
+      "allocated": {
+        "ram_gb": 8,
+        "vcpu": 2,
+        "disk_gb": 64
+      },
+      "budget": {
+        "ram_gb": 12,
+        "vcpu": 4,
+        "disk_gb": 96
+      },
+      "disk_paths": [
+        "/"
+      ],
+      "notes": "Planned from tofu/environments/staging/main.tf."
+    },
+    {
+      "vmid": 230,
+      "name": "docker-build-staging-lv3",
+      "status": "planned",
+      "environment": "staging",
+      "metrics_host": "docker-build-staging-lv3",
+      "allocated": {
+        "ram_gb": 8,
+        "vcpu": 4,
+        "disk_gb": 96
+      },
+      "budget": {
+        "ram_gb": 12,
+        "vcpu": 6,
+        "disk_gb": 128
+      },
+      "disk_paths": [
+        "/"
+      ],
+      "notes": "Declared staging build guest in inventory; planned capacity placeholder pending tofu module rollout."
+    },
+    {
+      "vmid": 240,
+      "name": "monitoring-staging-lv3",
+      "status": "planned",
+      "environment": "staging",
+      "metrics_host": "monitoring-staging-lv3",
+      "allocated": {
+        "ram_gb": 4,
+        "vcpu": 2,
+        "disk_gb": 48
+      },
+      "budget": {
+        "ram_gb": 8,
+        "vcpu": 4,
+        "disk_gb": 64
+      },
+      "disk_paths": [
+        "/"
+      ],
+      "notes": "Planned from tofu/environments/staging/main.tf."
+    },
+    {
+      "vmid": 250,
+      "name": "postgres-staging-lv3",
+      "status": "planned",
+      "environment": "staging",
+      "metrics_host": "postgres-staging-lv3",
+      "allocated": {
+        "ram_gb": 4,
+        "vcpu": 2,
+        "disk_gb": 64
+      },
+      "budget": {
+        "ram_gb": 8,
+        "vcpu": 4,
+        "disk_gb": 96
+      },
+      "disk_paths": [
+        "/"
+      ],
+      "notes": "Declared staging database guest in inventory; planned capacity placeholder pending staged database rollout."
+    },
+    {
+      "vmid": 260,
+      "name": "backup-staging-lv3",
+      "status": "planned",
+      "environment": "staging",
+      "metrics_host": "backup-staging-lv3",
+      "allocated": {
+        "ram_gb": 4,
+        "vcpu": 2,
+        "disk_gb": 64
+      },
+      "budget": {
+        "ram_gb": 8,
+        "vcpu": 4,
+        "disk_gb": 96
+      },
+      "disk_paths": [
+        "/"
+      ],
+      "notes": "Declared staging backup guest in inventory; planned capacity placeholder pending staged backup topology."
+    },
+    {
+      "vmid": 151,
+      "name": "postgres-replica-lv3",
+      "status": "planned",
+      "environment": "production",
+      "metrics_host": "postgres-replica-lv3",
+      "allocated": {
+        "ram_gb": 8,
+        "vcpu": 4,
+        "disk_gb": 96
+      },
+      "budget": {
+        "ram_gb": 12,
+        "vcpu": 6,
+        "disk_gb": 128
+      },
+      "disk_paths": [
+        "/"
+      ],
+      "notes": "Reserved planned capacity for ADR 0098."
+    }
+  ],
+  "reservations": [
+    {
+      "id": "ephemeral-pool",
+      "kind": "ephemeral_pool",
+      "status": "reserved",
+      "vmid_range": {
+        "start": 910,
+        "end": 979
+      },
+      "max_concurrent_vms": 5,
+      "reserved": {
+        "ram_gb": 20,
+        "vcpu": 8,
+        "disk_gb": 100
+      },
+      "notes": "Shared peak reservation for ADR 0106 ephemeral fixtures so transient test VMs cannot silently consume production headroom."
+    }
+  ]
+}

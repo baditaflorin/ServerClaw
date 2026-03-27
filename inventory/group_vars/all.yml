@@ -1,0 +1,380 @@
+repo_version: 0.106.1
+platform_version: 0.40.0
+container_image_catalog_path: "{{ inventory_dir | dirname }}/config/image-catalog.json"
+container_image_catalog: "{{ lookup('file', container_image_catalog_path) | from_json }}"
+
+proxmox_release_major: 9
+proxmox_suite: trixie
+proxmox_repo_channel: pve-no-subscription
+proxmox_key_url: https://enterprise.proxmox.com/debian/proxmox-archive-keyring-trixie.gpg
+proxmox_key_checksum: sha256:136673be77aba35dcce385b28737689ad64fd785a797e57897589aed08db6e45
+proxmox_keyring_path: /usr/share/keyrings/proxmox-archive-keyring.gpg
+proxmox_repo_file: /etc/apt/sources.list.d/proxmox.sources
+proxmox_repo_uri: http://download.proxmox.com/debian/pve
+
+proxmox_kernel_packages:
+  - proxmox-default-kernel
+  - ifupdown2
+
+proxmox_core_packages:
+  - proxmox-ve
+  - postfix
+  - open-iscsi
+  - chrony
+
+proxmox_cleanup_packages:
+  - linux-image-amd64
+  - os-prober
+
+debian_prereq_packages:
+  - wget
+  - gpg
+  - apt-transport-https
+
+bootstrap_authorized_key_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/keys/hetzner_llm_agents_ed25519.pub
+
+proxmox_vm_templates:
+  lv3-debian-base:
+    vmid: 9000
+    name: lv3-debian-base
+    source_template: debian13-cloud-template
+  lv3-docker-host:
+    vmid: 9001
+    name: lv3-docker-host
+    source_template: lv3-debian-base
+  lv3-postgres-host:
+    vmid: 9002
+    name: lv3-postgres-host
+    source_template: lv3-debian-base
+  lv3-ops-base:
+    vmid: 9003
+    name: lv3-ops-base
+    source_template: lv3-debian-base
+proxmox_storage_id: local
+proxmox_snippets_storage_id: local
+proxmox_guest_ci_user: ops
+ansible_remote_tmp: /tmp
+proxmox_guest_nameserver: 1.1.1.1
+proxmox_guest_searchdomain: lv3.org
+proxmox_guest_ssh_connection_mode: tailscale_direct
+proxmox_guest_ssh_jump_host: >-
+  {{ lookup('env', 'LV3_PROXMOX_HOST_ADDR') | default(hostvars['proxmox_florin'].ansible_host, true) }}
+proxmox_guest_ssh_bootstrap_key_path: >-
+  {{ lookup('env', 'LV3_BOOTSTRAP_SSH_PRIVATE_KEY') | default('/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519', true) }}
+proxmox_guest_ssh_proxy_command: >-
+  -o ProxyCommand="ssh -i {{ proxmox_guest_ssh_bootstrap_key_path }} -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout={{ playbook_execution_preflight_connection_timeout }} -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {{ proxmox_host_admin_user }}@{{ proxmox_guest_ssh_jump_host }} -W %h:%p"
+proxmox_guest_ssh_public_proxy_command: >-
+  -o ProxyCommand="ssh -i {{ proxmox_guest_ssh_bootstrap_key_path }} -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout={{ playbook_execution_preflight_connection_timeout }} -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null {{ proxmox_host_admin_user }}@{{ hostvars['proxmox_florin'].management_ipv4 }} -W %h:%p"
+proxmox_guest_ssh_common_args:
+  tailscale_direct: "-o IdentitiesOnly=yes"
+  proxmox_host_jump: "-o IdentitiesOnly=yes {{ proxmox_guest_ssh_proxy_command }}"
+  proxmox_host_public_jump: "-o IdentitiesOnly=yes {{ proxmox_guest_ssh_public_proxy_command }}"
+
+proxmox_host_admin_user: ops
+proxmox_host_admin_comment: LV3 Operations
+proxmox_host_admin_shell: /bin/bash
+proxmox_host_sudo_group: sudo
+proxmox_host_ssh_hardening_file: /etc/ssh/sshd_config.d/90-lv3-hardening.conf
+proxmox_management_allowed_sources:
+  - 100.64.0.0/10
+  - 10.10.10.0/24
+  - 90.95.35.115/32
+proxmox_breakglass_ssh_port: 2222
+proxmox_notification_email: baditaflorin@gmail.com
+proxmox_notification_author: Proxmox LV3
+proxmox_notification_endpoint_name: lv3-ops-email
+proxmox_notification_endpoint_comment: LV3 operations mailbox
+proxmox_notification_matcher_name: lv3-all-events
+proxmox_notification_matcher_comment: Send all Proxmox notifications to LV3 operations
+proxmox_acme_account_name: default
+proxmox_acme_contact_email: baditaflorin@gmail.com
+proxmox_acme_directory: https://acme-v02.api.letsencrypt.org/directory
+proxmox_acme_plugin_id: lv3-hetzner-dns
+proxmox_acme_domain: proxmox.lv3.org
+proxmox_acme_validation_delay: 30
+proxmox_tfa_description: Primary TOTP
+proxmox_api_hostname: proxmox.lv3.org
+proxmox_api_automation_user: lv3-automation@pve
+proxmox_api_automation_comment: LV3 durable automation identity
+proxmox_api_token_id: primary
+proxmox_api_token_comment: LV3 primary automation token
+proxmox_api_token_role: LV3Automation
+proxmox_api_token_role_manage: true
+proxmox_api_token_role_privileges:
+  - Datastore.Allocate
+  - Datastore.AllocateSpace
+  - Datastore.AllocateTemplate
+  - Datastore.Audit
+  - Group.Allocate
+  - Mapping.Audit
+  - Mapping.Use
+  - Pool.Allocate
+  - Pool.Audit
+  - Realm.AllocateUser
+  - SDN.Allocate
+  - SDN.Audit
+  - SDN.Use
+  - Sys.Audit
+  - Sys.Console
+  - Sys.Modify
+  - Sys.Syslog
+  - User.Modify
+  - VM.Allocate
+  - VM.Audit
+  - VM.Backup
+  - VM.Clone
+  - VM.Config.CDROM
+  - VM.Config.CPU
+  - VM.Config.Cloudinit
+  - VM.Config.Disk
+  - VM.Config.HWType
+  - VM.Config.Memory
+  - VM.Config.Network
+  - VM.Config.Options
+  - VM.Console
+  - VM.GuestAgent.Audit
+  - VM.GuestAgent.FileRead
+  - VM.GuestAgent.FileSystemMgmt
+  - VM.GuestAgent.FileWrite
+  - VM.GuestAgent.Unrestricted
+  - VM.Migrate
+  - VM.PowerMgmt
+  - VM.Replicate
+  - VM.Snapshot
+  - VM.Snapshot.Rollback
+proxmox_api_token_acl_path: /
+proxmox_api_token_privsep: true
+proxmox_api_token_local_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-api
+proxmox_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-api/lv3-automation-primary.json
+
+hetzner_dns_api_base_url: https://dns.hetzner.com/api/v1
+hetzner_dns_zone_name: lv3.org
+
+monitoring_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring
+monitoring_grafana_repo_key_url: https://apt.grafana.com/gpg-full.key
+monitoring_grafana_repo_keyring: /etc/apt/keyrings/grafana.asc
+monitoring_grafana_repo_file: /etc/apt/sources.list.d/grafana.list
+monitoring_proxmox_writer_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/proxmox-writer.token
+monitoring_guest_writer_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/monitoring/guest-writer.token
+keycloak_agent_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/lv3-agent-hub-client-secret.txt
+monitoring_influxdb_repo_key_url: https://repos.influxdata.com/influxdata-archive.key
+monitoring_influxdb_repo_keyring: /etc/apt/keyrings/influxdata-archive.gpg
+monitoring_influxdb_repo_file: /etc/apt/sources.list.d/influxdata.list
+monitoring_influxdb_url: http://127.0.0.1:8086
+monitoring_influxdb_org: lv3
+monitoring_influxdb_bucket: proxmox
+monitoring_loki_push_api_url: >-
+  http://{{ hostvars['monitoring-lv3'].ansible_host | default('10.10.10.40') }}:3100/loki/api/v1/push
+platform_log_dir: /var/log/platform
+mutation_audit_log_file: "{{ platform_log_dir }}/mutation-audit.jsonl"
+openbao_host_audit_log_file: /opt/openbao/logs/audit.log
+hetzner_dns_api_url: https://dns.hetzner.com/api/v1
+hetzner_dns_api_token_env_var: HETZNER_DNS_API_TOKEN
+
+mail_platform_domain: lv3.org
+mail_platform_mailbox_localpart: server
+mail_platform_mailbox_login: "{{ mail_platform_mailbox_localpart }}"
+mail_platform_mailbox_address: "{{ mail_platform_mailbox_localpart }}@{{ mail_platform_domain }}"
+mail_platform_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform
+mail_platform_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/stalwart-admin-password.txt
+mail_platform_mailbox_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/server-mailbox-password.txt
+mail_platform_metrics_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/metrics-password.txt
+mail_platform_gateway_api_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/gateway-api-key.txt
+mail_platform_brevo_api_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/brevo-api-key.txt
+mail_platform_brevo_sender_email: "{{ mail_platform_mailbox_address }}"
+mail_platform_brevo_sender_name: Florin Mail Bridge
+mail_platform_reply_to_email: "{{ mail_platform_mailbox_address }}"
+openbao_postgres_admin_role: openbao_rotator
+openbao_postgres_database: postgres
+openbao_tls_enabled: true
+openbao_database_mount_path: database
+openbao_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao
+openbao_init_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/init.json
+openbao_ops_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/ops-password.txt
+openbao_breakglass_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/breakglass-password.txt
+openbao_postgres_rotator_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/postgres-rotator-password.txt
+openbao_controller_approle_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/controller-automation-approle.json
+openbao_mail_platform_approle_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/mail-platform-approle.json
+openbao_agent_image: "{{ container_image_catalog.images.openbao_runtime.ref }}"
+compose_runtime_secret_root: /run/lv3-secrets
+openbao_site_dir: /opt/openbao
+openbao_config_dir: /opt/openbao/config
+openbao_policy_dir: /opt/openbao/policies
+openbao_tls_dir: /opt/openbao/tls
+windmill_site_dir: /opt/windmill
+windmill_secret_dir: /etc/lv3/windmill
+windmill_env_file: /run/lv3-secrets/windmill/runtime.env
+ollama_version: 0.18.2
+ollama_image: "{{ container_image_catalog.images.ollama_runtime.ref }}"
+ollama_default_model: llama3.2:3b
+searxng_version: 2026.3.24-02ba38786
+searxng_image: "{{ container_image_catalog.images.searxng_runtime.ref }}"
+searxng_controller_url: http://search.lv3.org
+open_webui_version: 0.8.9
+open_webui_image: "{{ container_image_catalog.images.open_webui_runtime.ref }}"
+open_webui_admin_email: ops@lv3.org
+open_webui_admin_name: Florin Badita
+open_webui_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ open_webui_host_proxy_port }}"
+open_webui_enable_ollama_api: true
+open_webui_ollama_base_url: "http://host.docker.internal:11434"
+open_webui_enable_web_search: true
+open_webui_searxng_query_url: "http://host.docker.internal:8881/search?q=<query>&format=json"
+open_webui_default_models: "{{ ollama_default_model }}"
+open_webui_default_pinned_models: "{{ ollama_default_model }}"
+platform_context_host_proxy_port: 8010
+platform_context_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ platform_context_host_proxy_port }}"
+platform_context_embedding_backend: token-hash
+ntopng_proxy_port: 3001
+ntopng_http_port: 3000
+ntopng_operator_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ ntopng_proxy_port }}"
+mattermost_host_proxy_port: 8066
+mattermost_controller_url: "http://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ mattermost_host_proxy_port }}"
+portainer_host_proxy_port: 9444
+portainer_controller_url: "https://{{ hostvars['proxmox_florin'].management_tailscale_ipv4 }}:{{ portainer_host_proxy_port }}"
+
+step_ca_version: 0.30.1
+step_ca_cli_version: 0.30.1
+step_ca_image: "{{ container_image_catalog.images.step_ca_runtime.ref }}"
+step_ca_site_dir: /opt/step-ca
+step_ca_home: "{{ step_ca_site_dir }}/home"
+step_ca_password_dir: "{{ step_ca_site_dir }}/secrets"
+step_ca_remote_root_certificate_file: "{{ step_ca_home }}/certs/root_ca.crt"
+step_ca_remote_ssh_user_ca_file: "{{ step_ca_home }}/certs/ssh_user_ca_key.pub"
+step_ca_remote_ssh_host_ca_file: "{{ step_ca_home }}/certs/ssh_host_ca_key.pub"
+step_ca_services_password_file: "{{ step_ca_password_dir }}/services-password.txt"
+step_ca_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca
+mail_platform_site_dir: /opt/mail-platform
+mail_platform_secret_dir: /etc/lv3/mail-platform
+
+control_plane_recovery_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-plane-recovery
+control_plane_recovery_local_ssh_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-plane-recovery/ssh
+control_plane_recovery_local_controller_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-plane-recovery/controller
+control_plane_recovery_runtime_ssh_private_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-plane-recovery/ssh/docker-runtime-backup.id_ed25519
+control_plane_recovery_runtime_ssh_public_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-plane-recovery/ssh/docker-runtime-backup.id_ed25519.pub
+control_plane_recovery_local_controller_bundle_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-plane-recovery/controller/controller-recovery-bundle.tar.zst
+control_plane_recovery_local_controller_manifest_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-plane-recovery/controller/control-plane-recovery-manifest.json
+control_plane_recovery_backup_store_root: /srv/control-plane-recovery
+control_plane_recovery_backup_store_user: lv3-control-plane-backup
+control_plane_recovery_backup_on_calendar: "*-*-* 01,07,13,19:15:00"
+control_plane_recovery_restore_drill_on_calendar: "*-*-* 05:45:00"
+control_metadata_witness_script: "{{ inventory_dir | dirname }}/scripts/control_metadata_witness.py"
+control_metadata_witness_archive_root: "{{ lookup('ansible.builtin.env', 'LV3_CONTROL_METADATA_WITNESS_ARCHIVE_ROOT') | default('', true) }}"
+control_metadata_witness_git_remote: "{{ lookup('ansible.builtin.env', 'LV3_CONTROL_METADATA_WITNESS_GIT_REMOTE') | default('origin', true) }}"
+control_metadata_witness_git_remote_ref: "{{ lookup('ansible.builtin.env', 'LV3_CONTROL_METADATA_WITNESS_GIT_REMOTE_REF') | default('', true) }}"
+control_metadata_witness_receipt_dir: "{{ inventory_dir | dirname }}/receipts/witness-replication"
+control_metadata_witness_enabled: "{{ (control_metadata_witness_archive_root | trim | length) > 0 }}"
+
+dr_offsite_backup_storage:
+  enabled: "{{ (lookup('ansible.builtin.env', 'PROXMOX_DR_OFFSITE_ENABLED') | default('false', true)) | bool }}"
+  id: lv3-backup-offsite
+  type: cifs
+  server: "{{ lookup('ansible.builtin.env', 'PROXMOX_DR_OFFSITE_SERVER') | default('', true) }}"
+  share: "{{ lookup('ansible.builtin.env', 'PROXMOX_DR_OFFSITE_SHARE') | default('', true) }}"
+  username: "{{ lookup('ansible.builtin.env', 'PROXMOX_DR_OFFSITE_USERNAME') | default('', true) }}"
+  password_env: PROXMOX_DR_OFFSITE_PASSWORD
+  path: /mnt/pve/lv3-backup-offsite
+  content:
+    - backup
+  nodes:
+    - "{{ host_public_hostname }}"
+  smbversion: "3.0"
+
+dr_offsite_backup_jobs:
+  - id: backup-lv3-offsite
+    enabled: "{{ dr_offsite_backup_storage.enabled }}"
+    storage: "{{ dr_offsite_backup_storage.id }}"
+    schedule: "04:00"
+    node: "{{ host_public_hostname }}"
+    mode: snapshot
+    compress: zstd
+    notification_mode: notification-system
+    repeat_missed: true
+    vmid_list:
+      - "{{ backup_vm_vmid }}"
+    prune_backups:
+      keep_last: 3
+      keep_daily: 7
+      keep_weekly: 5
+      keep_monthly: 12
+
+proxmox_management_allowed_tcp_ports:
+  - "{{ step_ca_proxy_port }}"
+  - "{{ openbao_proxy_port }}"
+  - "{{ windmill_host_proxy_port }}"
+
+playbook_execution_env: "{{ env | default('production') }}"
+playbook_execution_allowed_envs:
+  - production
+  - staging
+platform_trace_id: "{{ lookup('ansible.builtin.env', 'PLATFORM_TRACE_ID') | default('', true) }}"
+platform_intent_id: "{{ lookup('ansible.builtin.env', 'PLATFORM_INTENT_ID') | default('', true) }}"
+playbook_execution_preflight_connection_timeout: 30
+playbook_execution_check_connectivity: true
+playbook_execution_emit_audit: true
+playbook_execution_correlation_id: >-
+  {{
+    (platform_trace_id | trim)
+    if (platform_trace_id | trim | length > 0)
+    else 'playbook:' ~ playbook_execution_env ~ ':' ~ (lookup('ansible.builtin.env', 'USER') | default('unknown', true))
+  }}
+playbook_execution_controller_secret_manifest_path: "{{ inventory_dir | dirname }}/config/controller-local-secrets.json"
+playbook_execution_health_probe_catalog_path: "{{ inventory_dir | dirname }}/config/health-probe-catalog.json"
+playbook_execution_mutation_audit_script: "{{ inventory_dir | dirname }}/scripts/mutation_audit.py"
+playbook_execution_mattermost_webhook_url: "{{ lookup('ansible.builtin.env', 'LV3_MATTERMOST_WEBHOOK') | default('', true) }}"
+playbook_execution_nats_notify_command: "{{ lookup('ansible.builtin.env', 'LV3_NATS_NOTIFY_COMMAND') | default('', true) }}"
+playbook_execution_host_patterns:
+  proxmox_hosts:
+    production: "proxmox_hosts:&production"
+    staging: "proxmox_hosts:&staging"
+  lv3_guests:
+    production: "lv3_guests:&production"
+    staging: "lv3_guests:&staging"
+  postgres_guests:
+    production: "postgres_guests:&production"
+    staging: "postgres_guests:&staging"
+  backup_guests:
+    production: "backup_guests:&production"
+    staging: "backup_guests:&staging"
+  nginx_edge:
+    production: nginx-lv3
+    staging: nginx-staging-lv3
+  docker_runtime:
+    production: docker-runtime-lv3
+    staging: docker-runtime-staging-lv3
+  docker_build:
+    production: docker-build-lv3
+    staging: docker-build-staging-lv3
+  monitoring:
+    production: monitoring-lv3
+    staging: monitoring-staging-lv3
+  postgres:
+    production: postgres-lv3
+    staging: postgres-staging-lv3
+  backup:
+    production: backup-lv3
+    staging: backup-staging-lv3
+playbook_execution_required_hosts:
+  proxmox_hosts:
+    production: proxmox_florin
+    staging: proxmox_florin
+  lv3_guests:
+    production: "lv3_guests:&production"
+    staging: "lv3_guests:&staging"
+  nginx_edge:
+    production: nginx-lv3
+    staging: nginx-staging-lv3
+  docker_runtime:
+    production: docker-runtime-lv3
+    staging: docker-runtime-staging-lv3
+  docker_build:
+    production: docker-build-lv3
+    staging: docker-build-staging-lv3
+  monitoring:
+    production: monitoring-lv3
+    staging: monitoring-staging-lv3
+  postgres:
+    production: postgres-lv3
+    staging: postgres-staging-lv3
+  backup:
+    production: backup-lv3
+    staging: backup-staging-lv3

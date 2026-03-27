@@ -1,0 +1,108 @@
+---
+- name: Resolve Proxmox Tailscale proxy inputs
+  ansible.builtin.set_fact:
+    proxmox_tailscale_effective_tcp_proxies: >-
+      {{
+        platform_host.network.tailscale_tcp_proxies
+        if (
+          platform_host is defined and
+          platform_host.network is defined and
+          platform_host.network.tailscale_tcp_proxies is defined
+        )
+        else (proxmox_tailscale_tcp_proxies | default([]))
+      }}
+
+- name: Validate Proxmox Tailscale proxy inputs
+  ansible.builtin.assert:
+    that:
+      - proxmox_tailscale_effective_tcp_proxies is sequence
+    fail_msg: "proxmox_tailscale_proxy requires a list of TCP proxy definitions."
+
+- name: Ensure Proxmox Tailscale proxy systemd unit directory exists
+  ansible.builtin.file:
+    path: /etc/systemd/system
+    state: directory
+    mode: "0755"
+
+- name: Render Proxmox Tailscale proxy socket units
+  ansible.builtin.template:
+    src: lv3-tailscale-proxy.socket.j2
+    dest: "/etc/systemd/system/lv3-tailscale-proxy-{{ item.name }}.socket"
+    mode: "0644"
+  loop: "{{ proxmox_tailscale_effective_tcp_proxies }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: proxmox_tailscale_proxy_sockets
+  notify: Reload systemd
+
+- name: Render Proxmox Tailscale proxy service units
+  ansible.builtin.template:
+    src: lv3-tailscale-proxy.service.j2
+    dest: "/etc/systemd/system/lv3-tailscale-proxy-{{ item.name }}.service"
+    mode: "0644"
+  loop: "{{ proxmox_tailscale_effective_tcp_proxies }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: proxmox_tailscale_proxy_services
+  notify: Reload systemd
+
+- name: Flush Proxmox Tailscale proxy systemd handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Enable and start Proxmox Tailscale proxy sockets
+  ansible.builtin.systemd:
+    name: "lv3-tailscale-proxy-{{ item.name }}.socket"
+    enabled: true
+    state: started
+  loop: "{{ proxmox_tailscale_effective_tcp_proxies }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Read active Proxmox Tailscale proxy service command lines
+  ansible.builtin.shell: |
+    set -euo pipefail
+    pid="$(systemctl show -p MainPID --value lv3-tailscale-proxy-{{ item.name }}.service)"
+    if [ -z "$pid" ] || [ "$pid" = "0" ]; then
+      exit 0
+    fi
+    ps -p "$pid" -o command=
+  args:
+    executable: /bin/bash
+  loop: "{{ proxmox_tailscale_effective_tcp_proxies }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: proxmox_tailscale_proxy_cmdlines
+  changed_when: false
+
+- name: Restart active Proxmox Tailscale proxy services when their unit or upstream changes
+  ansible.builtin.systemd:
+    name: "lv3-tailscale-proxy-{{ item.name }}.service"
+    state: restarted
+  loop: "{{ proxmox_tailscale_effective_tcp_proxies }}"
+  loop_control:
+    label: "{{ item.name }}"
+  vars:
+    proxmox_tailscale_service_unit_changed: >-
+      {{
+        (
+          proxmox_tailscale_proxy_services.results
+          | selectattr('item.name', 'equalto', item.name)
+          | map(attribute='changed')
+          | first
+          | default(false)
+        ) | bool
+      }}
+    proxmox_tailscale_running_cmdline: >-
+      {{
+        proxmox_tailscale_proxy_cmdlines.results
+        | selectattr('item.name', 'equalto', item.name)
+        | map(attribute='stdout')
+        | first
+        | default('')
+      }}
+  when: >-
+    proxmox_tailscale_service_unit_changed
+    or (
+      proxmox_tailscale_running_cmdline | length > 0
+      and (item.upstream_host ~ ':' ~ (item.upstream_port | string)) not in proxmox_tailscale_running_cmdline
+    )

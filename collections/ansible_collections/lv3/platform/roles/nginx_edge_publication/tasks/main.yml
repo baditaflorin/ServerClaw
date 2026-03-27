@@ -1,0 +1,291 @@
+---
+- name: Validate public edge publication inputs
+  ansible.builtin.assert:
+    that:
+      - public_edge_certbot_email | length > 0
+      - public_edge_cert_name | length > 0
+      - public_edge_acme_challenge_method in ['webroot', 'dns-hetzner']
+      - public_edge_static_root | length > 0
+      - public_edge_acme_root | length > 0
+      - public_edge_certificate_domains | length > 0
+      - public_edge_sites | length > 0
+      - public_edge_authenticated_sites is mapping
+    fail_msg: "nginx_edge_publication requires certificate, site, and content-path inputs."
+
+- name: Ensure public edge packages are present
+  ansible.builtin.apt:
+    name: >-
+      {{
+        ['nginx', 'certbot', 'rsync']
+        + (
+          ['python3-venv']
+          if public_edge_acme_challenge_method == 'dns-hetzner'
+          else []
+        )
+      }}
+    state: present
+    update_cache: "{{ public_edge_update_apt_cache | bool }}"
+    force_apt_get: true
+
+- name: Ensure public edge directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ public_edge_static_root }}"
+    - "{{ public_edge_generated_static_root }}"
+    - "{{ public_edge_acme_root }}"
+    - /etc/nginx/sites-available
+    - /etc/nginx/sites-enabled
+    - /etc/letsencrypt/renewal-hooks/deploy
+    - "{{ public_edge_dns_hetzner_credentials_file | dirname }}"
+
+- name: Record the Certbot plugin path for local Python packages
+  ansible.builtin.set_fact:
+    public_edge_certbot_plugin_path: >-
+      {{ public_edge_dns_hetzner_virtualenv }}/lib/python{{ ansible_python.version.major }}.{{ ansible_python.version.minor }}/site-packages
+
+- name: Install the pinned Certbot Hetzner DNS plugin
+  ansible.builtin.pip:
+    name: "certbot-dns-hetzner=={{ public_edge_dns_hetzner_plugin_version }}"
+    virtualenv: "{{ public_edge_dns_hetzner_virtualenv }}"
+    virtualenv_command: /usr/bin/python3 -m venv
+  when: public_edge_acme_challenge_method == 'dns-hetzner'
+
+- name: Write the Hetzner DNS credential file when a controller token is present
+  ansible.builtin.copy:
+    dest: "{{ public_edge_dns_hetzner_credentials_file }}"
+    mode: "0600"
+    content: "dns_hetzner_api_token = {{ lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim }}\n"
+  when:
+    - public_edge_acme_challenge_method == 'dns-hetzner'
+    - (lookup('ansible.builtin.env', 'HETZNER_DNS_API_TOKEN') | trim | length) > 0
+  no_log: true
+
+- name: Check the Hetzner DNS credential file
+  ansible.builtin.stat:
+    path: "{{ public_edge_dns_hetzner_credentials_file }}"
+  register: public_edge_dns_hetzner_credentials_after
+  when: public_edge_acme_challenge_method == 'dns-hetzner'
+
+- name: Assert the Hetzner DNS credential file is available when DNS-01 is enabled
+  ansible.builtin.assert:
+    that:
+      - public_edge_dns_hetzner_credentials_after.stat.exists
+    fail_msg: >-
+      public_edge_acme_challenge_method=dns-hetzner requires either HETZNER_DNS_API_TOKEN on the controller
+      or an existing {{ public_edge_dns_hetzner_credentials_file }} on the edge host.
+  when: public_edge_acme_challenge_method == 'dns-hetzner'
+
+- name: Render static pages for published informational hostnames
+  ansible.builtin.template:
+    src: static-page.html.j2
+    dest: "{{ public_edge_static_root }}/{{ item.slug }}.html"
+    mode: "0644"
+  loop: "{{ public_edge_static_sites }}"
+
+- name: Render the crawl policy robots.txt
+  ansible.builtin.template:
+    src: robots.txt.j2
+    dest: "{{ public_edge_static_root }}/robots.txt"
+    mode: "0644"
+
+- name: Publish generated static site directories
+  ansible.builtin.command:
+    argv:
+      - rsync
+      - --archive
+      - --delete
+      - --compress
+      - --out-format=<<CHANGED>>%i %n%L
+      - --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r
+      - >-
+        --rsh=ssh -i {{
+          ansible_private_key_file
+          | default(
+            (
+              playbook_execution_secret_manifest.secrets.bootstrap_ssh_private_key.path
+              if (
+                playbook_execution_secret_manifest is defined
+                and playbook_execution_secret_manifest.secrets is defined
+                and playbook_execution_secret_manifest.secrets.bootstrap_ssh_private_key is defined
+              )
+              else ''
+            ),
+            true
+          )
+        }}
+        -o IdentitiesOnly=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null
+        {{
+          (
+            ansible_ssh_common_args
+            | default('', true)
+          )
+          or
+          (
+            proxmox_guest_ssh_common_args[proxmox_guest_ssh_connection_mode]
+            | default('', true)
+          )
+        }}
+      - --rsync-path=sudo rsync
+      - "{{ public_edge_generated_build_root }}/{{ item.source_dir }}/"
+      - >-
+        {{ hostvars[inventory_hostname].ansible_user }}@{{ hostvars[inventory_hostname].ansible_host }}:{{ public_edge_generated_static_root }}/{{ item.source_dir }}/
+  delegate_to: localhost
+  become: false
+  register: public_edge_generated_site_sync
+  changed_when: "'<<CHANGED>>' in public_edge_generated_site_sync.stdout"
+  loop: "{{ public_edge_extra_sites | selectattr('kind', 'equalto', 'static_dir') | list }}"
+  when: public_edge_sync_generated_static_dirs | bool
+
+- name: Check whether the public edge certificate exists
+  ansible.builtin.stat:
+    path: "/etc/letsencrypt/live/{{ public_edge_cert_name }}/fullchain.pem"
+  register: public_edge_certificate
+
+- name: Read current public edge certificate SANs
+  ansible.builtin.command:
+    argv:
+      - openssl
+      - x509
+      - -in
+      - "/etc/letsencrypt/live/{{ public_edge_cert_name }}/fullchain.pem"
+      - -noout
+      - -ext
+      - subjectAltName
+  when: public_edge_certificate.stat.exists
+  register: public_edge_certificate_sans
+  changed_when: false
+
+- name: Derive current and missing public edge certificate domains
+  ansible.builtin.set_fact:
+    public_edge_current_certificate_domains: >-
+      {{
+        (public_edge_certificate_sans.stdout | default(''))
+        | regex_findall('DNS:([^, ]+)')
+      }}
+    public_edge_missing_certificate_domains: >-
+      {{
+        public_edge_certificate_domains
+        | difference(
+            (public_edge_certificate_sans.stdout | default(''))
+            | regex_findall('DNS:([^, ]+)')
+          )
+      }}
+
+- name: Render NGINX public edge configuration
+  ansible.builtin.template:
+    src: lv3-edge.conf.j2
+    dest: /etc/nginx/sites-available/lv3-edge.conf
+    mode: "0644"
+  vars:
+    public_edge_tls_enabled: "{{ public_edge_certificate.stat.exists }}"
+
+- name: Enable the public edge site
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/lv3-edge.conf
+    dest: /etc/nginx/sites-enabled/lv3-edge.conf
+    state: link
+    force: true
+
+- name: Disable the default NGINX site
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+
+- name: Validate NGINX configuration before issuing certificates
+  ansible.builtin.command: nginx -t
+  changed_when: false
+
+- name: Reload NGINX before certificate issuance
+  ansible.builtin.systemd:
+    name: nginx
+    state: reloaded
+
+- name: Obtain the public edge Let's Encrypt certificate
+  ansible.builtin.command:
+    argv: >-
+      {{
+        ['certbot', 'certonly', '--non-interactive', '--agree-tos', '--email', public_edge_certbot_email, '--cert-name', public_edge_cert_name]
+        + (
+          ['--webroot', '-w', public_edge_acme_root]
+          if public_edge_acme_challenge_method == 'webroot'
+          else [
+            '--authenticator', 'dns-hetzner',
+            '--dns-hetzner-credentials', public_edge_dns_hetzner_credentials_file,
+            '--dns-hetzner-propagation-seconds', public_edge_dns_hetzner_propagation_seconds | string
+          ]
+        )
+        + ['-d', public_edge_certificate_domains | join(',')]
+      }}
+  environment: >-
+    {{
+      {'CERTBOT_PLUGIN_PATH': public_edge_certbot_plugin_path}
+      if public_edge_acme_challenge_method == 'dns-hetzner'
+      else {}
+    }}
+  when: not public_edge_certificate.stat.exists
+  changed_when: true
+
+- name: Expand the public edge Let's Encrypt certificate when domains were added
+  ansible.builtin.command:
+    argv: >-
+      {{
+        ['certbot', 'certonly', '--non-interactive', '--agree-tos', '--expand', '--email', public_edge_certbot_email, '--cert-name', public_edge_cert_name]
+        + (
+          ['--webroot', '-w', public_edge_acme_root]
+          if public_edge_acme_challenge_method == 'webroot'
+          else [
+            '--authenticator', 'dns-hetzner',
+            '--dns-hetzner-credentials', public_edge_dns_hetzner_credentials_file,
+            '--dns-hetzner-propagation-seconds', public_edge_dns_hetzner_propagation_seconds | string
+          ]
+        )
+        + ['-d', public_edge_certificate_domains | join(',')]
+      }}
+  environment: >-
+    {{
+      {'CERTBOT_PLUGIN_PATH': public_edge_certbot_plugin_path}
+      if public_edge_acme_challenge_method == 'dns-hetzner'
+      else {}
+    }}
+  when:
+    - public_edge_certificate.stat.exists
+    - public_edge_missing_certificate_domains | length > 0
+  changed_when: true
+
+- name: Install NGINX reload hook for certificate renewal
+  ansible.builtin.copy:
+    dest: /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh
+    mode: "0755"
+    content: |
+      #!/bin/sh
+      set -eu
+      systemctl reload nginx
+
+- name: Re-check whether the public edge certificate exists
+  ansible.builtin.stat:
+    path: "/etc/letsencrypt/live/{{ public_edge_cert_name }}/fullchain.pem"
+  register: public_edge_certificate_after
+
+- name: Render final NGINX public edge configuration
+  ansible.builtin.template:
+    src: lv3-edge.conf.j2
+    dest: /etc/nginx/sites-available/lv3-edge.conf
+    mode: "0644"
+  vars:
+    public_edge_tls_enabled: "{{ public_edge_certificate_after.stat.exists }}"
+
+- name: Validate final NGINX configuration
+  ansible.builtin.command: nginx -t
+  changed_when: false
+
+- name: Enable and reload NGINX
+  ansible.builtin.systemd:
+    name: nginx
+    enabled: true
+    state: reloaded
+
+- name: Verify NGINX edge health probes
+  ansible.builtin.import_tasks: verify.yml

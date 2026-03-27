@@ -1,0 +1,136 @@
+schema_version: 1.0.0
+lanes:
+  - lane_id: lane:proxmox-host
+    vm_id: null
+    hostname: proxmox_florin
+    services:
+      - proxmox_ui
+      - ntopng
+    max_concurrent_ops: 1
+    serialisation: strict
+    admission_policy: hard
+    vm_budget:
+      total_cpu_milli: 1000
+      total_memory_mb: 1024
+      total_disk_iops: 120
+
+  - lane_id: lane:nginx
+    vm_id: 110
+    hostname: nginx-lv3
+    services:
+      - nginx_edge
+      - changelog_portal
+      - docs_portal
+    max_concurrent_ops: 1
+    serialisation: strict
+    admission_policy: hard
+    vm_budget:
+      total_cpu_milli: 1000
+      total_memory_mb: 768
+      total_disk_iops: 100
+
+  - lane_id: lane:docker-runtime
+    vm_id: 120
+    hostname: docker-runtime-lv3
+    services:
+      - api_gateway
+      - docker_runtime
+      - keycloak
+      - mail_platform
+      - mattermost
+      - netbox
+      - ntfy
+      - ollama
+      - open_webui
+      - openbao
+      - ops_portal
+      - platform_context_api
+      - portainer
+      - step_ca
+      - status_page
+      - uptime_kuma
+      - windmill
+    max_concurrent_ops: 3
+    serialisation: resource_lock
+    admission_policy: soft
+    vm_budget:
+      total_cpu_milli: 4000
+      total_memory_mb: 4096
+      total_disk_iops: 240
+
+  - lane_id: lane:build
+    vm_id: 130
+    hostname: docker-build-lv3
+    services:
+      - docker_build
+    max_concurrent_ops: 2
+    serialisation: resource_lock
+    admission_policy: soft
+    vm_budget:
+      total_cpu_milli: 3000
+      total_memory_mb: 3072
+      total_disk_iops: 320
+
+  - lane_id: lane:monitoring
+    vm_id: 140
+    hostname: monitoring-lv3
+    services:
+      - alertmanager
+      - grafana
+    max_concurrent_ops: 2
+    serialisation: resource_lock
+    admission_policy: soft
+    vm_budget:
+      total_cpu_milli: 2000
+      total_memory_mb: 2048
+      total_disk_iops: 180
+
+  - lane_id: lane:postgres
+    vm_id: 150
+    hostname: postgres-lv3
+    services:
+      - postgres
+    max_concurrent_ops: 1
+    serialisation: strict
+    admission_policy: hard
+    vm_budget:
+      total_cpu_milli: 1500
+      total_memory_mb: 2048
+      total_disk_iops: 140
+
+  - lane_id: lane:postgres-replica
+    vm_id: 151
+    hostname: postgres-replica-lv3
+    services: []
+    max_concurrent_ops: 1
+    serialisation: strict
+    admission_policy: hard
+    vm_budget:
+      total_cpu_milli: 1000
+      total_memory_mb: 1024
+      total_disk_iops: 100
+
+  - lane_id: lane:backup
+    vm_id: 160
+    hostname: backup-lv3
+    services:
+      - backup_pbs
+    max_concurrent_ops: 1
+    serialisation: strict
+    admission_policy: hard
+    vm_budget:
+      total_cpu_milli: 1000
+      total_memory_mb: 1024
+      total_disk_iops: 140
+
+  - lane_id: lane:platform
+    vm_id: null
+    hostname: platform
+    services: []
+    max_concurrent_ops: 1
+    serialisation: strict
+    admission_policy: hard
+    vm_budget:
+      total_cpu_milli: 1200
+      total_memory_mb: 1024
+      total_disk_iops: 120

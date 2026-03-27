@@ -1,0 +1,348 @@
+---
+- name: Validate backup VM role inputs
+  ansible.builtin.assert:
+    that:
+      - backup_vm_ipv4 | length > 0
+      - backup_vm_repo_file | length > 0
+      - backup_vm_datastore_name | length > 0
+      - backup_vm_datastore_disk_device | length > 0
+      - backup_vm_datastore_mountpoint | length > 0
+      - backup_vm_api_user | length > 0
+      - backup_vm_api_token_id | length > 0
+      - backup_vm_api_token_local_dir | length > 0
+      - backup_vm_api_token_local_file | length > 0
+    fail_msg: "backup_vm requires PBS datastore, API user, and token path inputs."
+
+- name: Ensure local PBS secret directory exists
+  ansible.builtin.file:
+    path: "{{ backup_vm_api_token_local_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Check whether the local PBS token secret file exists
+  ansible.builtin.stat:
+    path: "{{ backup_vm_api_token_local_file }}"
+  register: backup_vm_api_token_local_file_stat
+  delegate_to: localhost
+  become: false
+
+- name: Generate or load the PBS automation user password locally
+  ansible.builtin.set_fact:
+    backup_vm_api_user_password: "{{ lookup('ansible.builtin.password', backup_vm_api_user_password_local_file, length=40) }}"
+  no_log: true
+
+- name: Disable the PBS enterprise apt repository on the backup guest
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/pbs-enterprise.sources
+    state: absent
+
+- name: Ensure backup VM repository prerequisites are present
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - gpg
+      - wget
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the Proxmox archive keyring directory exists
+  ansible.builtin.file:
+    path: "{{ proxmox_keyring_path | dirname }}"
+    state: directory
+    mode: "0755"
+
+- name: Install the Proxmox archive keyring for PBS packages
+  ansible.builtin.get_url:
+    url: "{{ proxmox_key_url }}"
+    dest: "{{ proxmox_keyring_path }}"
+    mode: "0644"
+    checksum: "{{ proxmox_key_checksum }}"
+
+- name: Install the PBS apt repository definition
+  ansible.builtin.template:
+    src: proxmox-backup.sources.j2
+    dest: "{{ backup_vm_repo_file }}"
+    mode: "0644"
+
+- name: Ensure Proxmox Backup Server packages are present
+  ansible.builtin.apt:
+    name:
+      - proxmox-backup-server
+      - xfsprogs
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Read configured PBS filesystem mounts
+  ansible.builtin.command: proxmox-backup-manager disk fs list --output-format json
+  register: backup_vm_disk_fs_list
+  changed_when: false
+
+- name: Check whether the PBS datastore mountpoint is already mounted
+  ansible.builtin.command: "findmnt -n {{ backup_vm_datastore_mountpoint }}"
+  register: backup_vm_datastore_mount
+  failed_when: false
+  changed_when: false
+
+- name: Create and mount the dedicated PBS datastore filesystem
+  ansible.builtin.command:
+    argv:
+      - proxmox-backup-manager
+      - disk
+      - fs
+      - create
+      - "{{ backup_vm_datastore_name }}"
+      - --disk
+      - "{{ backup_vm_datastore_disk_device | basename }}"
+      - --filesystem
+      - "{{ backup_vm_datastore_disk_filesystem }}"
+      - --add-datastore
+      - "0"
+  when: >
+    (
+      backup_vm_disk_fs_list.stdout | from_json
+      | selectattr('name', 'equalto', backup_vm_datastore_name)
+      | list
+      | length
+    ) == 0
+    and backup_vm_datastore_mount.rc != 0
+  changed_when: true
+
+- name: Read configured PBS datastores
+  ansible.builtin.command: proxmox-backup-manager datastore list --output-format json
+  register: backup_vm_datastore_list
+  changed_when: false
+
+- name: Create the PBS datastore
+  ansible.builtin.command:
+    argv:
+      - proxmox-backup-manager
+      - datastore
+      - create
+      - "{{ backup_vm_datastore_name }}"
+      - "{{ backup_vm_datastore_mountpoint }}"
+      - --gc-schedule
+      - "{{ backup_vm_datastore_gc_schedule }}"
+      - --verify-new
+      - "1"
+  when: >
+    (
+      backup_vm_datastore_list.stdout | from_json
+      | selectattr('name', 'equalto', backup_vm_datastore_name)
+      | list
+      | length
+    ) == 0
+  changed_when: true
+
+- name: Update the PBS datastore schedule and verification flags
+  ansible.builtin.command:
+    argv:
+      - proxmox-backup-manager
+      - datastore
+      - update
+      - "{{ backup_vm_datastore_name }}"
+      - --gc-schedule
+      - "{{ backup_vm_datastore_gc_schedule }}"
+      - --verify-new
+      - "1"
+  when: >
+    (
+      backup_vm_datastore_list.stdout | from_json
+      | selectattr('name', 'equalto', backup_vm_datastore_name)
+      | list
+      | length
+    ) > 0
+  changed_when: true
+
+- name: Ensure PBS proxy service is enabled and started
+  ansible.builtin.systemd:
+    name: proxmox-backup-proxy
+    enabled: true
+    state: started
+
+- name: Read the current PBS users
+  ansible.builtin.command: proxmox-backup-manager user list --output-format json
+  register: backup_vm_users
+  changed_when: false
+
+- name: Ensure the dedicated PBS automation user exists
+  ansible.builtin.command:
+    argv:
+      - proxmox-backup-manager
+      - user
+      - create
+      - "{{ backup_vm_api_user }}"
+      - --comment
+      - "{{ backup_vm_api_user_comment }}"
+      - --password
+      - "{{ backup_vm_api_user_password }}"
+  when: >
+    (
+      backup_vm_users.stdout | from_json
+      | selectattr('userid', 'equalto', backup_vm_api_user)
+      | list
+      | length
+    ) == 0
+  changed_when: true
+  no_log: true
+
+- name: Read the current PBS ACLs
+  ansible.builtin.command: proxmox-backup-manager acl list --output-format json
+  register: backup_vm_acls
+  changed_when: false
+
+- name: Ensure the automation user has datastore admin rights
+  ansible.builtin.command:
+    argv:
+      - proxmox-backup-manager
+      - acl
+      - update
+      - "/datastore/{{ backup_vm_datastore_name }}"
+      - DatastoreAdmin
+      - --auth-id
+      - "{{ backup_vm_api_user }}"
+  when: >
+    (
+      backup_vm_acls.stdout | from_json
+      | selectattr('path', 'equalto', '/datastore/' ~ backup_vm_datastore_name)
+      | selectattr('ugid', 'equalto', backup_vm_api_user)
+      | selectattr('roleid', 'equalto', 'DatastoreAdmin')
+      | list
+      | length
+    ) == 0
+  changed_when: true
+
+- name: Read the current PBS API tokens
+  ansible.builtin.command:
+    argv:
+      - proxmox-backup-manager
+      - user
+      - list-tokens
+      - "{{ backup_vm_api_user }}"
+      - --output-format
+      - json
+  register: backup_vm_tokens
+  changed_when: false
+
+- name: Revoke the PBS API token when the local secret file is missing
+  ansible.builtin.command:
+    argv:
+      - proxmox-backup-manager
+      - user
+      - delete-token
+      - "{{ backup_vm_api_user }}"
+      - "{{ backup_vm_api_token_id }}"
+  when:
+    - not backup_vm_api_token_local_file_stat.stat.exists
+    - >
+      (
+        backup_vm_tokens.stdout | from_json
+        | selectattr('token-name', 'equalto', backup_vm_api_token_id)
+        | list
+        | length
+      ) > 0
+  changed_when: true
+
+- name: Generate a PBS API token for the Proxmox host
+  ansible.builtin.shell: |
+    set -euo pipefail
+    proxmox-backup-manager user generate-token "{{ backup_vm_api_user }}" "{{ backup_vm_api_token_id }}" \
+      --comment "{{ backup_vm_api_token_comment }}" \
+      | perl -0ne 'print $1 if /"value"\s*:\s*"([^"]+)"/s'
+  args:
+    executable: /bin/bash
+  register: backup_vm_generated_token_value
+  when: >
+    (
+      backup_vm_tokens.stdout | from_json
+      | selectattr('token-name', 'equalto', backup_vm_api_token_id)
+      | list
+      | length
+    ) == 0 or not backup_vm_api_token_local_file_stat.stat.exists
+  changed_when: true
+  no_log: true
+
+- name: Ensure the PBS token has datastore backup rights
+  ansible.builtin.command:
+    argv:
+      - proxmox-backup-manager
+      - acl
+      - update
+      - "/datastore/{{ backup_vm_datastore_name }}"
+      - DatastoreBackup
+      - --auth-id
+      - "{{ backup_vm_api_user }}!{{ backup_vm_api_token_id }}"
+  when: >
+    (
+      backup_vm_acls.stdout | from_json
+      | selectattr('path', 'equalto', '/datastore/' ~ backup_vm_datastore_name)
+      | selectattr('ugid', 'equalto', backup_vm_api_user ~ '!' ~ backup_vm_api_token_id)
+      | selectattr('roleid', 'equalto', 'DatastoreBackup')
+      | list
+      | length
+    ) == 0
+  changed_when: true
+
+- name: Read the PBS TLS certificate fingerprint
+  ansible.builtin.shell: |
+    set -euo pipefail
+    proxmox-backup-manager cert info | awk -F': ' '/Fingerprint/ {print $2}'
+  args:
+    executable: /bin/bash
+  register: backup_vm_cert_fingerprint
+  changed_when: false
+
+- name: Load the existing local PBS token payload when present
+  ansible.builtin.set_fact:
+    backup_vm_existing_token_payload: "{{ lookup('ansible.builtin.file', backup_vm_api_token_local_file) | from_json }}"
+  when: backup_vm_api_token_local_file_stat.stat.exists
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Choose the newly generated PBS token value
+  ansible.builtin.set_fact:
+    backup_vm_effective_token_value: "{{ backup_vm_generated_token_value.stdout | trim }}"
+  when:
+    - backup_vm_generated_token_value is defined
+    - backup_vm_generated_token_value.changed
+  no_log: true
+
+- name: Choose the existing PBS token value
+  ansible.builtin.set_fact:
+    backup_vm_effective_token_value: "{{ backup_vm_existing_token_payload.value }}"
+  when:
+    - backup_vm_effective_token_value is not defined
+    - backup_vm_existing_token_payload is defined
+  no_log: true
+
+- name: Persist the PBS host token locally
+  ansible.builtin.copy:
+    dest: "{{ backup_vm_api_token_local_file }}"
+    mode: "0600"
+    content: |
+      {
+        "created_at": "{{ ansible_date_time.iso8601 }}",
+        "server": "{{ backup_vm_ipv4 }}",
+        "port": 8007,
+        "datastore": "{{ backup_vm_datastore_name }}",
+        "user": "{{ backup_vm_api_user }}",
+        "token_id": "{{ backup_vm_api_token_id }}",
+        "auth_id": "{{ backup_vm_api_user }}!{{ backup_vm_api_token_id }}",
+        "comment": "{{ backup_vm_api_token_comment }}",
+        "fingerprint": "{{ backup_vm_cert_fingerprint.stdout | trim }}",
+        "value": "{{ backup_vm_effective_token_value }}"
+      }
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Verify the PBS datastore is readable
+  ansible.builtin.command: proxmox-backup-manager datastore list --output-format json-pretty
+  changed_when: false
+
+- name: Verify PBS health probes
+  ansible.builtin.import_tasks: verify.yml

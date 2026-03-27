@@ -1,0 +1,298 @@
+---
+- name: Validate API gateway runtime inputs
+  ansible.builtin.assert:
+    that:
+      - api_gateway_site_dir | length > 0
+      - api_gateway_service_dir | length > 0
+      - api_gateway_config_dir | length > 0
+      - api_gateway_data_dir | length > 0
+      - api_gateway_compose_file | length > 0
+      - api_gateway_env_file | length > 0
+      - api_gateway_image_name | length > 0
+      - api_gateway_container_name | length > 0
+      - api_gateway_internal_port | int > 0
+      - api_gateway_sources | length > 0
+      - api_gateway_config_sources | length > 0
+      - api_gateway_tree_sync_specs | length > 0
+      - api_gateway_keycloak_jwks_url | length > 0
+      - api_gateway_keycloak_issuer_url | length > 0
+    fail_msg: "api_gateway_runtime requires runtime paths, build sources, and Keycloak endpoint settings."
+
+- name: Ensure API gateway prerequisite packages are present
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure API gateway directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ api_gateway_site_dir }}"
+      mode: "0755"
+    - path: "{{ api_gateway_service_dir }}"
+      mode: "0755"
+    - path: "{{ api_gateway_service_dir }}/api_gateway"
+      mode: "0755"
+    - path: "{{ api_gateway_config_dir }}"
+      mode: "0755"
+    - path: "{{ api_gateway_data_dir }}"
+      mode: "0755"
+    - path: "{{ api_gateway_data_dir }}/receipts/drift-reports"
+      mode: "0755"
+
+- name: Ensure the local API gateway artifact directory exists
+  ansible.builtin.file:
+    path: "{{ api_gateway_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Check whether the controller-local platform-context token exists for migration routing
+  ansible.builtin.stat:
+    path: "{{ api_gateway_platform_context_token_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: api_gateway_platform_context_token_stat
+
+- name: Read the controller-local platform-context token for migration routing
+  ansible.builtin.slurp:
+    src: "{{ api_gateway_platform_context_token_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: api_gateway_platform_context_token_raw
+  when: api_gateway_platform_context_token_stat.stat.exists
+  no_log: true
+
+- name: Record the optional migration token for platform-context gateway routing
+  ansible.builtin.set_fact:
+    api_gateway_platform_context_legacy_token: "{{ api_gateway_platform_context_token_raw.content | b64decode | trim }}"
+  when: api_gateway_platform_context_token_stat.stat.exists
+  no_log: true
+
+- name: Sync the API gateway application sources
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ api_gateway_service_dir }}/{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ api_gateway_sources }}"
+  loop_control:
+    label: "{{ item.dest }}"
+
+- name: Sync the staged repo trees required by the API gateway runtime
+  ansible.builtin.include_tasks: sync_tree.yml
+  loop: "{{ api_gateway_tree_sync_specs }}"
+  loop_control:
+    loop_var: api_gateway_tree_sync_spec
+    label: "{{ api_gateway_tree_sync_spec.name }}"
+
+- name: Sync the API gateway runtime config bundle
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ api_gateway_config_dir }}/{{ item.dest }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ api_gateway_config_sources }}"
+  loop_control:
+    label: "{{ item.dest }}"
+
+- name: Discover committed drift receipts to bundle with the gateway
+  ansible.builtin.set_fact:
+    api_gateway_drift_receipts: "{{ lookup('ansible.builtin.fileglob', api_gateway_drift_receipts_glob, wantlist=True) }}"
+  delegate_to: localhost
+  become: false
+
+- name: Sync committed drift receipts into the runtime bundle
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ api_gateway_data_dir }}/receipts/drift-reports/{{ item | basename }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ api_gateway_drift_receipts }}"
+  loop_control:
+    label: "{{ item | basename }}"
+
+- name: Render the API gateway environment file
+  ansible.builtin.template:
+    src: api-gateway.env.j2
+    dest: "{{ api_gateway_env_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the API gateway Dockerfile
+  ansible.builtin.copy:
+    dest: "{{ api_gateway_service_dir }}/Dockerfile"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      FROM python:3.12-slim
+      WORKDIR /app
+      COPY requirements.txt ./requirements.txt
+      RUN pip install --no-cache-dir -r requirements.txt
+      COPY controller_automation_toolkit.py ./controller_automation_toolkit.py
+      COPY canonical_errors.py ./canonical_errors.py
+      COPY api_gateway_catalog.py ./api_gateway_catalog.py
+      COPY maintenance_window_tool.py ./maintenance_window_tool.py
+      COPY slo_tracking.py ./slo_tracking.py
+      COPY api_gateway ./api_gateway
+      COPY docs ./docs
+      COPY platform ./platform
+      COPY receipts ./receipts
+      COPY scripts ./scripts
+      COPY search_fabric ./search_fabric
+      EXPOSE 8080
+      CMD ["uvicorn", "api_gateway.main:app", "--host", "0.0.0.0", "--port", "8080"]
+
+- name: Render the API gateway compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ api_gateway_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Assert the external Keycloak Docker network exists
+  ansible.builtin.command:
+    argv:
+      - docker
+      - network
+      - inspect
+      - "{{ api_gateway_keycloak_docker_network }}"
+  register: api_gateway_keycloak_network
+  changed_when: false
+  when: api_gateway_network_mode != 'host'
+
+- name: Pull the API gateway base image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - pull
+      - python:3.12-slim
+  register: api_gateway_pull
+  changed_when: "'Downloaded newer image' in api_gateway_pull.stdout or 'Status: Downloaded newer image' in api_gateway_pull.stdout"
+
+- name: Build and start the API gateway stack
+  block:
+    - name: Build and start the API gateway stack
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ api_gateway_compose_file }}"
+          - up
+          - -d
+          - --build
+          - --remove-orphans
+      args:
+        chdir: "{{ api_gateway_site_dir }}"
+      register: api_gateway_up
+      changed_when: >-
+        'Creating' in api_gateway_up.stdout
+        or 'Recreating' in api_gateway_up.stdout
+        or 'Starting' in api_gateway_up.stdout
+        or 'Building' in api_gateway_up.stdout
+  rescue:
+    - name: Flag Docker nat-chain failure during API gateway start
+      ansible.builtin.set_fact:
+        api_gateway_docker_nat_missing: >-
+          {{
+            'No chain/target/match by that name' in (ansible_failed_result.stderr | default(''))
+            or 'Unable to enable DNAT rule' in (ansible_failed_result.stderr | default(''))
+          }}
+
+    - name: Surface unexpected API gateway startup failures
+      ansible.builtin.fail:
+        msg: "{{ ansible_failed_result.stderr | default(ansible_failed_result.msg | default('api gateway compose up failed')) }}"
+      when: not api_gateway_docker_nat_missing
+
+    - name: Restart Docker to restore the nat chain before retrying the API gateway start
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+      when: api_gateway_docker_nat_missing
+
+    - name: Retry the API gateway stack start after Docker nat-chain recovery
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ api_gateway_compose_file }}"
+          - up
+          - -d
+          - --build
+          - --remove-orphans
+      args:
+        chdir: "{{ api_gateway_site_dir }}"
+      register: api_gateway_up
+      changed_when: true
+      when: api_gateway_docker_nat_missing
+
+- name: Check whether the API gateway published host port is present
+  ansible.builtin.command:
+    argv:
+      - docker
+      - port
+      - "{{ api_gateway_container_name }}"
+      - 8080/tcp
+  register: api_gateway_published_port
+  changed_when: false
+  failed_when: false
+  when: api_gateway_network_mode != 'host'
+
+- name: Check whether the API gateway container sees the runtime config bundle
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ api_gateway_container_name }}"
+      - test
+      - -f
+      - "{{ api_gateway_runtime_config_probe_path }}"
+  register: api_gateway_runtime_config_probe
+  changed_when: false
+  failed_when: false
+
+- name: Force recreate the API gateway when the published host port is missing or the config bind is stale
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ api_gateway_compose_file }}"
+      - up
+      - -d
+      - --build
+      - --force-recreate
+      - --remove-orphans
+  args:
+    chdir: "{{ api_gateway_site_dir }}"
+  register: api_gateway_force_recreate
+  changed_when: true
+  when:
+    - >-
+      (
+        api_gateway_network_mode != 'host'
+        and api_gateway_published_port.stdout | trim == ""
+      )
+      or api_gateway_runtime_config_probe.rc != 0
+
+- name: Verify the API gateway runtime
+  ansible.builtin.meta: reset_connection
+
+- name: Verify the API gateway runtime
+  ansible.builtin.import_tasks: verify.yml

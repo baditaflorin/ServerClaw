@@ -1,0 +1,39 @@
+---
+proxmox_backup_protected_vmids:
+  - 110
+  - 120
+  - 130
+  - 140
+  - 150
+
+proxmox_backup_storage:
+  enabled: "{{ proxmox_backup_storage_enabled_override | default(false) }}"
+  id: lv3-backup-pbs
+  type: pbs
+  server: "{{ backup_vm_ipv4 }}"
+  port: 8007
+  datastore: "{{ backup_vm_datastore_name }}"
+  api_token_local_file: "{{ backup_vm_api_token_local_file }}"
+  content:
+    - backup
+  nodes:
+    - "{{ host_public_hostname }}"
+
+proxmox_backup_jobs:
+  - id: backup-lv3-nightly
+    enabled: "{{ proxmox_backup_storage.enabled }}"
+    storage: "{{ proxmox_backup_storage.id }}"
+    schedule: "02:30"
+    node: "{{ host_public_hostname }}"
+    mode: snapshot
+    compress: zstd
+    notification_mode: notification-system
+    repeat_missed: true
+    vmid_list: "{{ proxmox_backup_protected_vmids }}"
+    prune_backups:
+      keep_last: 3
+      keep_daily: 7
+      keep_weekly: 5
+      keep_monthly: 12
+
+proxmox_backup_jobs_marker_id: "{{ proxmox_backup_storage.id }}"

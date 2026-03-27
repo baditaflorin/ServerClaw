@@ -1,0 +1,27 @@
+path "sys/health" {
+  capabilities = ["read"]
+}
+
+path "kv/data/services/mail-platform/*" {
+  capabilities = ["read"]
+}
+
+path "kv/metadata/services/mail-platform/*" {
+  capabilities = ["read", "list"]
+}
+
+path "transit/encrypt/mail-platform" {
+  capabilities = ["update"]
+}
+
+path "transit/decrypt/mail-platform" {
+  capabilities = ["update"]
+}
+
+path "transit/sign/mail-platform" {
+  capabilities = ["update"]
+}
+
+path "transit/verify/mail-platform" {
+  capabilities = ["update"]
+}

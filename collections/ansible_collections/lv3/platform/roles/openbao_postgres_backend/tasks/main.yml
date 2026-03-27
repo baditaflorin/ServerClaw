@@ -1,0 +1,109 @@
+---
+- name: Validate OpenBao PostgreSQL backend inputs
+  ansible.builtin.assert:
+    that:
+      - openbao_postgres_admin_role is match('^[a-z_][a-z0-9_]*$')
+      - openbao_postgres_admin_password_local_file | length > 0
+      - openbao_postgres_database | length > 0
+    fail_msg: "openbao_postgres_backend requires a safe admin role name, local password path, and target database."
+
+- name: Ensure the OpenBao local artifact directory exists on the control machine
+  ansible.builtin.file:
+    path: "{{ openbao_postgres_admin_password_local_file | dirname }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Ensure the OpenBao PostgreSQL rotator password exists locally
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ openbao_postgres_admin_password_local_file }}" ]; then
+      umask 077
+      openssl rand -base64 24 > "{{ openbao_postgres_admin_password_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: openbao_postgres_password_generation
+  changed_when: "'changed' in openbao_postgres_password_generation.stdout"
+  no_log: true
+
+- name: Read the OpenBao PostgreSQL rotator password from the control machine
+  ansible.builtin.slurp:
+    src: "{{ openbao_postgres_admin_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: openbao_postgres_password_raw
+  no_log: true
+
+- name: Record the OpenBao PostgreSQL rotator password fact
+  ansible.builtin.set_fact:
+    openbao_postgres_admin_password: "{{ openbao_postgres_password_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Check whether the local PostgreSQL member is writable
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT CASE WHEN pg_is_in_recovery() THEN 0 ELSE 1 END"
+  register: openbao_postgres_writable_check
+  changed_when: false
+
+- name: Ensure the OpenBao PostgreSQL rotator role exists with the managed password
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        DO $$
+        BEGIN
+          IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '{{ openbao_postgres_admin_role }}') THEN
+            CREATE ROLE {{ openbao_postgres_admin_role }} LOGIN CREATEROLE PASSWORD '{{ openbao_postgres_admin_password }}';
+          ELSE
+            ALTER ROLE {{ openbao_postgres_admin_role }} WITH LOGIN CREATEROLE PASSWORD '{{ openbao_postgres_admin_password }}';
+          END IF;
+        END
+        $$;
+  changed_when: false
+  no_log: true
+  when: openbao_postgres_writable_check.stdout | trim == "1"
+
+- name: Grant CONNECT on the target database to the OpenBao rotator role
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -d
+      - "{{ openbao_postgres_database }}"
+      - -c
+      - "GRANT CONNECT ON DATABASE {{ openbao_postgres_database }} TO {{ openbao_postgres_admin_role }}"
+  changed_when: false
+  when: openbao_postgres_writable_check.stdout | trim == "1"
+
+- name: Grant pg_read_all_data with admin option to the OpenBao rotator role
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -d
+      - "{{ openbao_postgres_database }}"
+      - -c
+      - "GRANT pg_read_all_data TO {{ openbao_postgres_admin_role }} WITH ADMIN OPTION"
+  changed_when: false
+  when: openbao_postgres_writable_check.stdout | trim == "1"

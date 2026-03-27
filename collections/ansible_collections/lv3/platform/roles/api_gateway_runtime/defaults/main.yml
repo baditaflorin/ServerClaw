@@ -1,0 +1,149 @@
+---
+api_gateway_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('api_gateway') }}"
+api_gateway_repo_root: "{{ inventory_dir | dirname }}"
+api_gateway_site_dir: /opt/api-gateway
+api_gateway_service_dir: "{{ api_gateway_site_dir }}/service"
+api_gateway_config_dir: "{{ api_gateway_site_dir }}/config"
+api_gateway_data_dir: "{{ api_gateway_site_dir }}/data"
+api_gateway_compose_file: "{{ api_gateway_site_dir }}/docker-compose.yml"
+api_gateway_env_file: "{{ api_gateway_site_dir }}/api-gateway.env"
+api_gateway_image_name: lv3-platform-api-gateway
+api_gateway_container_name: api-gateway
+api_gateway_network_mode: host
+api_gateway_internal_port: 8080
+api_gateway_local_artifact_dir: "{{ api_gateway_repo_root }}/.local/api-gateway"
+api_gateway_shared_local_root: >-
+  {{
+    (
+      lookup(
+        'ansible.builtin.pipe',
+        'git -C ' ~ (api_gateway_repo_root | quote) ~ ' rev-parse --path-format=absolute --git-common-dir'
+      )
+      | dirname
+    )
+    ~ '/.local'
+  }}
+api_gateway_tree_sync_specs:
+  - name: platform package for gateway graph support
+    archive_root: "{{ api_gateway_repo_root }}"
+    source: platform
+    dest_parent: "{{ api_gateway_service_dir }}"
+    remote_archive: "{{ api_gateway_site_dir }}/platform-sync.tar.gz"
+  - name: shared search fabric package for gateway search routes
+    archive_root: "{{ api_gateway_repo_root }}/scripts"
+    source: search_fabric
+    dest_parent: "{{ api_gateway_service_dir }}"
+    remote_archive: "{{ api_gateway_site_dir }}/search-fabric-sync.tar.gz"
+  - name: shared scripts tree required by packaged platform modules
+    archive_root: "{{ api_gateway_repo_root }}"
+    source: scripts
+    dest_parent: "{{ api_gateway_service_dir }}"
+    remote_archive: "{{ api_gateway_site_dir }}/scripts-sync.tar.gz"
+  - name: shared repo config tree required by packaged platform modules
+    archive_root: "{{ api_gateway_repo_root }}"
+    source: config
+    dest_parent: "{{ api_gateway_site_dir }}"
+    remote_archive: "{{ api_gateway_site_dir }}/config-sync.tar.gz"
+    preserve_destination_root: true
+  - name: repo documentation tree required by the local search fabric
+    archive_root: "{{ api_gateway_repo_root }}"
+    source: docs
+    dest_parent: "{{ api_gateway_service_dir }}"
+    remote_archive: "{{ api_gateway_site_dir }}/docs-sync.tar.gz"
+  - name: repo receipts tree required by the local search fabric
+    archive_root: "{{ api_gateway_repo_root }}"
+    source: receipts
+    dest_parent: "{{ api_gateway_service_dir }}"
+    remote_archive: "{{ api_gateway_site_dir }}/receipts-sync.tar.gz"
+api_gateway_gateway_catalog_src: "{{ api_gateway_repo_root }}/config/api-gateway-catalog.json"
+api_gateway_service_catalog_src: "{{ api_gateway_repo_root }}/config/service-capability-catalog.json"
+api_gateway_error_registry_src: "{{ api_gateway_repo_root }}/config/error-codes.yaml"
+api_gateway_workflow_catalog_src: "{{ api_gateway_repo_root }}/config/workflow-catalog.json"
+api_gateway_retry_policy_src: "{{ api_gateway_repo_root }}/config/retry-policies.yaml"
+api_gateway_circuit_policies_src: "{{ api_gateway_repo_root }}/config/circuit-policies.yaml"
+api_gateway_ledger_event_types_src: "{{ api_gateway_repo_root }}/config/ledger-event-types.yaml"
+api_gateway_event_taxonomy_src: "{{ api_gateway_repo_root }}/config/event-taxonomy.yaml"
+api_gateway_timeout_hierarchy_src: "{{ api_gateway_repo_root }}/config/timeout-hierarchy.yaml"
+api_gateway_platform_vars_src: "{{ api_gateway_repo_root }}/inventory/group_vars/platform.yml"
+api_gateway_drift_receipts_glob: "{{ api_gateway_repo_root }}/receipts/drift-reports/*.json"
+api_gateway_platform_context_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/platform-context/api-token.txt
+api_gateway_sources:
+  - src: "{{ api_gateway_repo_root }}/scripts/controller_automation_toolkit.py"
+    dest: controller_automation_toolkit.py
+  - src: "{{ api_gateway_repo_root }}/scripts/api_gateway_catalog.py"
+    dest: api_gateway_catalog.py
+  - src: "{{ api_gateway_repo_root }}/scripts/maintenance_window_tool.py"
+    dest: maintenance_window_tool.py
+  - src: "{{ api_gateway_repo_root }}/scripts/slo_tracking.py"
+    dest: slo_tracking.py
+  - src: "{{ api_gateway_repo_root }}/scripts/api_gateway/__init__.py"
+    dest: api_gateway/__init__.py
+  - src: "{{ api_gateway_repo_root }}/scripts/api_gateway/main.py"
+    dest: api_gateway/main.py
+  - src: "{{ api_gateway_repo_root }}/requirements/api-gateway.txt"
+    dest: requirements.txt
+api_gateway_config_sources:
+  - src: "{{ api_gateway_gateway_catalog_src }}"
+    dest: api-gateway-catalog.json
+  - src: "{{ api_gateway_service_catalog_src }}"
+    dest: service-capability-catalog.json
+  - src: "{{ api_gateway_error_registry_src }}"
+    dest: error-codes.yaml
+  - src: "{{ api_gateway_workflow_catalog_src }}"
+    dest: workflow-catalog.json
+  - src: "{{ api_gateway_retry_policy_src }}"
+    dest: retry-policies.yaml
+  - src: "{{ api_gateway_circuit_policies_src }}"
+    dest: circuit-policies.yaml
+  - src: "{{ api_gateway_ledger_event_types_src }}"
+    dest: ledger-event-types.yaml
+  - src: "{{ api_gateway_event_taxonomy_src }}"
+    dest: event-taxonomy.yaml
+  - src: "{{ api_gateway_timeout_hierarchy_src }}"
+    dest: timeout-hierarchy.yaml
+  - src: "{{ api_gateway_platform_vars_src }}"
+    dest: platform.yml
+api_gateway_keycloak_internal_base_url: http://127.0.0.1:18080
+api_gateway_keycloak_jwks_url: "{{ api_gateway_keycloak_internal_base_url }}/realms/lv3/protocol/openid-connect/certs"
+api_gateway_keycloak_issuer_url: https://sso.lv3.org/realms/lv3
+api_gateway_keycloak_token_url: https://sso.lv3.org/realms/lv3/protocol/openid-connect/token
+api_gateway_keycloak_verify_base_url: http://127.0.0.1:18080
+api_gateway_keycloak_docker_network: keycloak_default
+api_gateway_runtime_config_probe_path: /app/config/ledger-event-types.yaml
+api_gateway_database_name: windmill
+api_gateway_database_user: windmill_admin
+api_gateway_database_inventory_host: >-
+  {{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}
+api_gateway_database_host: "{{ hostvars[api_gateway_database_inventory_host].ansible_host }}"
+api_gateway_database_port: 5432
+api_gateway_database_password_local_file: "{{ api_gateway_shared_local_root }}/windmill/database-password.txt"
+api_gateway_graph_dsn: >-
+  postgres://{{ api_gateway_database_user }}:{{
+    (
+      lookup('ansible.builtin.file', api_gateway_database_password_local_file, errors='ignore')
+      | default('', true)
+      | trim
+    )
+    | urlencode
+    | replace('/', '%2F')
+  }}@{{ api_gateway_database_host }}:{{ api_gateway_database_port }}/{{ api_gateway_database_name }}?sslmode=disable
+api_gateway_world_state_dsn: "{{ api_gateway_graph_dsn }}"
+api_gateway_verify_client_id: lv3-agent-hub
+api_gateway_verify_client_secret_local_file: >-
+  {{
+    keycloak_agent_client_secret_local_file
+    | default(api_gateway_repo_root ~ '/.local/keycloak/lv3-agent-hub-client-secret.txt')
+  }}
+api_gateway_nats_url: nats://127.0.0.1:4222
+api_gateway_nats_username: jetstream-admin
+api_gateway_nats_password_local_file: "{{ api_gateway_repo_root }}/.local/nats/jetstream-admin-password.txt"
+api_gateway_keycloak_retry_after_seconds: 30
+api_gateway_nats_password: >-
+  {{
+    lookup('ansible.builtin.file', api_gateway_nats_password_local_file, errors='ignore')
+    | default('', true)
+    | trim
+  }}
+api_gateway_deploy_webhook_url: ""
+api_gateway_secret_rotation_webhook_url: ""
+api_gateway_include_upstream_openapi: false

@@ -1,0 +1,29 @@
+services:
+  api-gateway:
+    build:
+      context: {{ api_gateway_service_dir }}
+      network: host
+    image: {{ api_gateway_image_name }}:latest
+    container_name: {{ api_gateway_container_name }}
+    restart: unless-stopped
+    network_mode: {{ api_gateway_network_mode }}
+    env_file:
+      - {{ api_gateway_env_file }}
+    command:
+      - uvicorn
+      - api_gateway.main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "{{ api_gateway_internal_port }}"
+    volumes:
+      - {{ api_gateway_config_dir }}:/config:ro
+      - {{ api_gateway_config_dir }}:/app/config:ro
+      - {{ api_gateway_data_dir }}:/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:{{ api_gateway_internal_port }}/healthz', timeout=5)"
+      interval: 30s
+      timeout: 5s
+      retries: 3

@@ -1,0 +1,72 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the LV3 unified platform API gateway.
+    options:
+      api_gateway_site_dir:
+        type: path
+        required: true
+        description:
+          - Base directory for the gateway deployment.
+      api_gateway_service_dir:
+        type: path
+        required: true
+        description:
+          - Directory containing the gateway application source bundle.
+      api_gateway_config_dir:
+        type: path
+        required: true
+        description:
+          - Directory containing the repo-synced gateway catalogs and platform data.
+      api_gateway_data_dir:
+        type: path
+        required: true
+        description:
+          - Directory containing mutable gateway runtime data such as copied drift receipts.
+      api_gateway_compose_file:
+        type: path
+        required: true
+        description:
+          - Compose file rendered for the gateway stack.
+      api_gateway_env_file:
+        type: path
+        required: true
+        description:
+          - Environment file rendered for the gateway container.
+      api_gateway_image_name:
+        type: str
+        required: true
+        description:
+          - Local image name used when building the gateway container.
+      api_gateway_container_name:
+        type: str
+        required: true
+        description:
+          - Container name used for the running gateway.
+      api_gateway_internal_port:
+        type: int
+        required: true
+        description:
+          - Host port exposed by the gateway on docker-runtime-lv3.
+      api_gateway_sources:
+        type: list
+        elements: dict
+        required: true
+        description:
+          - Controller-local gateway application files copied into the build context.
+      api_gateway_config_sources:
+        type: list
+        elements: dict
+        required: true
+        description:
+          - Controller-local catalog files copied into the runtime config directory.
+      api_gateway_keycloak_jwks_url:
+        type: str
+        required: true
+        description:
+          - Keycloak JWKS endpoint used for bearer-token verification.
+      api_gateway_keycloak_issuer_url:
+        type: str
+        required: true
+        description:
+          - Expected Keycloak issuer for gateway JWT verification.

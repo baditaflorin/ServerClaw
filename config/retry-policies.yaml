@@ -1,0 +1,41 @@
+schema_version: 1.0.0
+policies:
+  - surface: external_api
+    max_attempts: 5
+    base_delay_s: 2.0
+    max_delay_s: 120.0
+    multiplier: 2.0
+    jitter: true
+    transient_max: 2
+
+  - surface: internal_api
+    max_attempts: 4
+    base_delay_s: 0.5
+    max_delay_s: 30.0
+    multiplier: 2.0
+    jitter: true
+    transient_max: 2
+
+  - surface: ansible_ssh
+    max_attempts: 3
+    base_delay_s: 5.0
+    max_delay_s: 30.0
+    multiplier: 2.0
+    jitter: false
+    transient_max: 2
+
+  - surface: nats_publish
+    max_attempts: 3
+    base_delay_s: 0.1
+    max_delay_s: 5.0
+    multiplier: 2.0
+    jitter: true
+    transient_max: 1
+
+  - surface: workflow_execution
+    max_attempts: 2
+    base_delay_s: 10.0
+    max_delay_s: 60.0
+    multiplier: 2.0
+    jitter: true
+    transient_max: 1

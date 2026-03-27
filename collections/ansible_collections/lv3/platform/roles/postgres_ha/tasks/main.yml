@@ -1,0 +1,358 @@
+---
+- name: Record shared Postgres HA facts
+  ansible.builtin.set_fact:
+    postgres_ha_cluster: "{{ hostvars['proxmox_florin'].postgres_ha }}"
+    postgres_ha_is_initial_primary: "{{ inventory_hostname == hostvars['proxmox_florin'].postgres_ha.initial_primary }}"
+    postgres_ha_keepalived_priority: "{{ hostvars['proxmox_florin'].postgres_ha.keepalived.priorities[inventory_hostname] }}"
+    postgres_ha_peer_hosts: >-
+      {{
+        ansible_play_hosts_all
+        | difference([inventory_hostname])
+        | map('extract', hostvars, 'ansible_host')
+        | list
+      }}
+
+- name: Validate Postgres HA inputs
+  ansible.builtin.assert:
+    that:
+      - postgres_ha_packages | length > 0
+      - postgres_ha_cluster.scope | length > 0
+      - postgres_ha_cluster.database_hostname | length > 0
+      - postgres_ha_cluster.vip_ipv4 | length > 0
+      - postgres_ha_cluster.patroni_rest_port | int > 0
+      - postgres_ha_cluster.postgres_port | int > 0
+      - postgres_ha_cluster.users.superuser | length > 0
+      - postgres_ha_cluster.users.replicator | length > 0
+      - postgres_ha_cluster.dcs.members | length >= 3
+      - ansible_play_hosts_all | length == 2
+    fail_msg: "postgres_ha requires the shared cluster topology and exactly two postgres inventory members."
+
+- name: Install PostgreSQL HA packages
+  ansible.builtin.apt:
+    name: "{{ postgres_ha_packages }}"
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure Postgres HA directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ postgres_ha_state_dir }}"
+      owner: root
+      group: root
+      mode: "0750"
+    - path: "{{ postgres_ha_patroni_config_dir }}"
+      owner: root
+      group: root
+      mode: "0755"
+    - path: "{{ postgres_ha_local_artifact_dir }}"
+      owner: root
+      group: root
+      mode: "0700"
+  when: item.path != postgres_ha_local_artifact_dir
+
+- name: Ensure the local Postgres HA artifact directory exists
+  ansible.builtin.file:
+    path: "{{ postgres_ha_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Generate the Patroni superuser password locally
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ postgres_ha_superuser_password_local_file }}" ]; then
+      umask 077
+      openssl rand -base64 24 | tr -d '\n' > "{{ postgres_ha_superuser_password_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: postgres_ha_superuser_password_generation
+  changed_when: "'changed' in postgres_ha_superuser_password_generation.stdout"
+  no_log: true
+
+- name: Generate the replication password locally
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ postgres_ha_replicator_password_local_file }}" ]; then
+      umask 077
+      openssl rand -base64 24 | tr -d '\n' > "{{ postgres_ha_replicator_password_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: postgres_ha_replicator_password_generation
+  changed_when: "'changed' in postgres_ha_replicator_password_generation.stdout"
+  no_log: true
+
+- name: Read the Patroni superuser password from localhost
+  ansible.builtin.slurp:
+    src: "{{ postgres_ha_superuser_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: postgres_ha_superuser_password_raw
+  no_log: true
+
+- name: Read the replication password from localhost
+  ansible.builtin.slurp:
+    src: "{{ postgres_ha_replicator_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: postgres_ha_replicator_password_raw
+  no_log: true
+
+- name: Record Postgres HA secret facts
+  ansible.builtin.set_fact:
+    postgres_ha_superuser_password: "{{ postgres_ha_superuser_password_raw.content | b64decode | trim }}"
+    postgres_ha_replicator_password: "{{ postgres_ha_replicator_password_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Persist Postgres HA shared secrets on the guest
+  ansible.builtin.copy:
+    dest: "{{ item.dest }}"
+    content: "{{ item.value }}\n"
+    owner: root
+    group: postgres
+    mode: "0640"
+  loop:
+    - dest: "{{ postgres_ha_superuser_password_file }}"
+      value: "{{ postgres_ha_superuser_password }}"
+    - dest: "{{ postgres_ha_replicator_password_file }}"
+      value: "{{ postgres_ha_replicator_password }}"
+  no_log: true
+
+- name: Discover PostgreSQL cluster configuration
+  ansible.builtin.find:
+    paths: /etc/postgresql
+    recurse: true
+    patterns: postgresql.conf
+    file_type: file
+  register: postgres_ha_config_files
+
+- name: Assert that exactly one PostgreSQL cluster exists
+  ansible.builtin.assert:
+    that:
+      - postgres_ha_config_files.matched == 1
+    fail_msg: >-
+      Expected exactly one PostgreSQL cluster under /etc/postgresql, found
+      {{ postgres_ha_config_files.matched }}.
+
+- name: Record PostgreSQL HA cluster paths
+  ansible.builtin.set_fact:
+    postgres_ha_cluster_conf_dir: "{{ postgres_ha_config_files.files[0].path | dirname }}"
+    postgres_ha_pg_hba_path: "{{ (postgres_ha_config_files.files[0].path | dirname) ~ '/pg_hba.conf' }}"
+    postgres_ha_pg_version: "{{ postgres_ha_config_files.files[0].path.split('/')[3] }}"
+    postgres_ha_pg_data_dir: "{{ '/var/lib/postgresql/' ~ postgres_ha_config_files.files[0].path.split('/')[3] ~ '/main' }}"
+    postgres_ha_pg_bin_dir: "{{ '/usr/lib/postgresql/' ~ postgres_ha_config_files.files[0].path.split('/')[3] ~ '/bin' }}"
+    postgres_ha_primary_host: "{{ hostvars[postgres_ha_cluster.initial_primary].ansible_host }}"
+    postgres_ha_etcd_hosts: >-
+      {{
+        postgres_ha_cluster.dcs.members
+        | map(attribute='host')
+        | map('regex_replace', '^(.*)$', '\\1:' ~ (postgres_ha_cluster.dcs.client_port | string))
+        | join(',')
+      }}
+
+- name: Ensure PostgreSQL service is running for primary adoption
+  ansible.builtin.systemd:
+    name: "{{ postgres_ha_postgresql_service_name }}"
+    enabled: true
+    state: started
+  when: postgres_ha_is_initial_primary | bool
+
+- name: Render managed PostgreSQL HA parameters
+  ansible.builtin.template:
+    src: postgresql-ha.conf.j2
+    dest: "{{ postgres_ha_cluster_conf_dir }}/conf.d/90-lv3-postgres-ha.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart PostgreSQL
+
+- name: Render PostgreSQL host-based authentication policy for HA
+  ansible.builtin.template:
+    src: pg_hba.conf.j2
+    dest: "{{ postgres_ha_pg_hba_path }}"
+    owner: root
+    group: postgres
+    mode: "0640"
+  notify: Restart PostgreSQL
+
+- name: Flush PostgreSQL handlers before Patroni adoption
+  ansible.builtin.meta: flush_handlers
+
+- name: Ensure the Patroni superuser exists on the initial primary
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        DO $$
+        BEGIN
+          IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '{{ postgres_ha_cluster.users.superuser }}') THEN
+            CREATE ROLE {{ postgres_ha_cluster.users.superuser }} LOGIN SUPERUSER PASSWORD '{{ postgres_ha_superuser_password }}';
+          ELSE
+            ALTER ROLE {{ postgres_ha_cluster.users.superuser }} WITH LOGIN SUPERUSER PASSWORD '{{ postgres_ha_superuser_password }}';
+          END IF;
+        END
+        $$;
+  when: postgres_ha_is_initial_primary | bool
+  changed_when: false
+  no_log: true
+
+- name: Ensure the replication role exists on the initial primary
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        DO $$
+        BEGIN
+          IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '{{ postgres_ha_cluster.users.replicator }}') THEN
+            CREATE ROLE {{ postgres_ha_cluster.users.replicator }} LOGIN REPLICATION PASSWORD '{{ postgres_ha_replicator_password }}';
+          ELSE
+            ALTER ROLE {{ postgres_ha_cluster.users.replicator }} WITH LOGIN REPLICATION PASSWORD '{{ postgres_ha_replicator_password }}';
+          END IF;
+        END
+        $$;
+  when: postgres_ha_is_initial_primary | bool
+  changed_when: false
+  no_log: true
+
+- name: Include shared guest observability plumbing for Postgres HA
+  ansible.builtin.include_role:
+    name: lv3.platform.guest_observability
+  vars:
+    guest_observability_state_dir: "{{ postgres_ha_state_dir }}"
+    guest_observability_hostname: "{{ inventory_hostname }}"
+    guest_observability_role: "{{ inventory_hostname }}"
+    guest_observability_service: postgres-ha
+
+- name: Render the Patroni metrics helper
+  ansible.builtin.template:
+    src: lv3-postgres-ha-metrics.py.j2
+    dest: "{{ postgres_ha_metrics_script }}"
+    owner: root
+    group: root
+    mode: "0755"
+  notify: Restart telegraf
+
+- name: Render the Telegraf Postgres HA config
+  ansible.builtin.template:
+    src: telegraf-postgres-ha.conf.j2
+    dest: "{{ postgres_ha_telegraf_config_file }}"
+    owner: root
+    group: telegraf
+    mode: "0640"
+  notify: Restart telegraf
+
+- name: Render the Patroni configuration
+  ansible.builtin.template:
+    src: patroni.yml.j2
+    dest: "{{ postgres_ha_patroni_config_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart lv3 patroni
+
+- name: Render the Patroni systemd unit
+  ansible.builtin.template:
+    src: lv3-patroni.service.j2
+    dest: "{{ postgres_ha_patroni_service_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart lv3 patroni
+
+- name: Check whether Patroni is already active
+  ansible.builtin.command: "systemctl is-active {{ postgres_ha_patroni_service_name }}"
+  register: postgres_ha_patroni_service_state
+  changed_when: false
+  failed_when: false
+
+- name: Stop the distro PostgreSQL service on the replica before Patroni bootstrap
+  ansible.builtin.systemd:
+    name: "{{ postgres_ha_postgresql_service_name }}"
+    enabled: false
+    state: stopped
+  when:
+    - not (postgres_ha_is_initial_primary | bool)
+    - postgres_ha_patroni_service_state.stdout | trim != "active"
+
+- name: Reset the replica data directory before first Patroni bootstrap
+  ansible.builtin.file:
+    path: "{{ postgres_ha_pg_data_dir }}"
+    state: absent
+  when:
+    - not (postgres_ha_is_initial_primary | bool)
+    - postgres_ha_patroni_service_state.stdout | trim != "active"
+    - not ansible_check_mode
+
+- name: Recreate the replica data directory
+  ansible.builtin.file:
+    path: "{{ postgres_ha_pg_data_dir }}"
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: "0700"
+  when:
+    - not (postgres_ha_is_initial_primary | bool)
+    - postgres_ha_patroni_service_state.stdout | trim != "active"
+
+- name: Disable the distro PostgreSQL unit after Patroni adoption
+  ansible.builtin.systemd:
+    name: "{{ postgres_ha_postgresql_service_name }}"
+    enabled: false
+  when: postgres_ha_is_initial_primary | bool
+
+- name: Ensure Patroni is enabled and started
+  ansible.builtin.systemd:
+    name: "{{ postgres_ha_patroni_service_name }}"
+    enabled: true
+    state: started
+    daemon_reload: true
+
+- name: Wait for the Patroni REST API
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ postgres_ha_cluster.patroni_rest_port }}"
+    delay: 0
+    timeout: 120
+
+- name: Include the keepalived VIP role
+  ansible.builtin.include_role:
+    name: lv3.platform.linux_keepalived
+  vars:
+    linux_keepalived_state: "{{ 'MASTER' if (postgres_ha_is_initial_primary | bool) else 'BACKUP' }}"
+    linux_keepalived_interface: "{{ postgres_ha_cluster.keepalived.interface }}"
+    linux_keepalived_virtual_router_id: "{{ postgres_ha_cluster.keepalived.virtual_router_id }}"
+    linux_keepalived_priority: "{{ postgres_ha_keepalived_priority }}"
+    linux_keepalived_advert_int: "{{ postgres_ha_cluster.keepalived.advert_int }}"
+    linux_keepalived_auth_pass: "{{ postgres_ha_cluster.keepalived.auth_pass }}"
+    linux_keepalived_unicast_source_ip: "{{ ansible_host }}"
+    linux_keepalived_unicast_peers: "{{ postgres_ha_peer_hosts }}"
+    linux_keepalived_virtual_ipaddresses:
+      - "{{ postgres_ha_cluster.vip_ipv4 }}/{{ postgres_ha_cluster.vip_cidr }}"
+    linux_keepalived_track_url: "http://127.0.0.1:{{ postgres_ha_cluster.patroni_rest_port }}/leader"
+
+- name: Verify Postgres HA
+  ansible.builtin.import_tasks: verify.yml

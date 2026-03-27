@@ -1,0 +1,35 @@
+{
+  "title": "@@DISPLAY_NAME@@ Overview",
+  "uid": "@@SERVICE_NAME@@-overview",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "timezone": "browser",
+  "tags": ["scaffold", "@@SERVICE_NAME@@"],
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "@@DISPLAY_NAME@@ Health",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "targets": [
+        {
+          "expr": "up{job=\"@@SERVICE_NAME@@\"}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "@@DISPLAY_NAME@@ Request Rate",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+      "targets": [
+        {
+          "expr": "TODO_replace_with_real_metric{service=\"@@SERVICE_ID@@\"}",
+          "refId": "B"
+        }
+      ]
+    }
+  ]
+}

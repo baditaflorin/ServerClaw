@@ -1,0 +1,142 @@
+---
+public_edge_control_plane_host: "{{ groups['proxmox_hosts'][0] }}"
+proxmox_guests: "{{ hostvars[public_edge_control_plane_host].proxmox_guests }}"
+management_tailscale_ipv4: "{{ hostvars[public_edge_control_plane_host].management_tailscale_ipv4 }}"
+platform_port_assignments: "{{ hostvars[public_edge_control_plane_host].platform_port_assignments }}"
+postgres_ha: "{{ hostvars[public_edge_control_plane_host].postgres_ha }}"
+public_edge_service_topology: "{{ platform_service_topology }}"
+public_edge_certbot_email: baditaflorin@gmail.com
+public_edge_cert_name: lv3-edge
+public_edge_acme_challenge_method: dns-hetzner
+public_edge_update_apt_cache: false
+public_edge_sync_generated_static_dirs: true
+public_edge_static_root: /var/www/lv3-edge
+public_edge_generated_static_root: /var/www/lv3-generated
+public_edge_acme_root: /var/www/lv3-edge-acme
+public_edge_dns_hetzner_plugin_version: 3.0.0
+public_edge_dns_hetzner_credentials_file: /etc/letsencrypt/hetzner.ini
+public_edge_dns_hetzner_propagation_seconds: 30
+public_edge_dns_hetzner_virtualenv: /opt/certbot-dns-hetzner
+public_edge_certbot_plugin_path: >-
+  {{ public_edge_dns_hetzner_virtualenv }}/lib/python{{ ansible_python.version.major }}.{{ ansible_python.version.minor }}/site-packages
+public_edge_apex_hostname: lv3.org
+public_edge_probe_hostname: "{{ public_edge_service_topology.nginx_edge.public_hostname }}"
+public_edge_additional_certificate_domains:
+  - "{{ public_edge_apex_hostname }}"
+public_edge_robots_meta_content: "noindex, nofollow"
+public_edge_robots_txt_content: |
+  User-agent: *
+  Disallow: /
+
+  # This domain is a private homelab infrastructure platform.
+  # There is no public content intended for indexing.
+public_edge_generated_build_root: "{{ inventory_dir | dirname }}/build"
+public_edge_static_sites: "{{ public_edge_service_topology | service_topology_edge_static_sites }}"
+public_edge_security_headers_default:
+  strict_transport_security: "max-age=63072000; includeSubDomains; preload"
+  cross_origin_resource_policy: same-origin
+  x_content_type_options: nosniff
+  x_frame_options: DENY
+  referrer_policy: strict-origin-when-cross-origin
+  permissions_policy: "accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
+  x_robots_tag: "noindex, nofollow"
+  content_security_policy: >-
+    default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+    object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline';
+    img-src 'self' data:; font-src 'self' data:; connect-src 'self'; manifest-src 'self'
+public_edge_security_headers_overrides:
+  api.lv3.org:
+    content_security_policy: >-
+      default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none';
+      object-src 'none'
+  docs.lv3.org:
+    content_security_policy: >-
+      default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'
+      https://fonts.googleapis.com; img-src 'self' data:; font-src 'self' data:
+      https://fonts.gstatic.com; connect-src 'self'; manifest-src 'self'
+  grafana.lv3.org:
+    content_security_policy: >-
+      default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self'
+      'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:;
+      connect-src 'self' https://grafana.lv3.org wss://grafana.lv3.org;
+      worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
+  n8n.lv3.org:
+    content_security_policy: >-
+      default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self'
+      'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:;
+      connect-src 'self' https://n8n.lv3.org wss://n8n.lv3.org;
+      worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
+  logs.lv3.org:
+    content_security_policy: >-
+      default-src 'self' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net https://*.duckdb.org;
+      base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none';
+      script-src 'self' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net https://*.duckdb.org;
+      style-src 'self' 'unsafe-inline' blob:; img-src 'self' data:;
+      font-src 'self' data:; connect-src 'self' https://logs.lv3.org wss://logs.lv3.org;
+      manifest-src 'self'
+  ops.lv3.org:
+    content_security_policy: >-
+      default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline' https://unpkg.com;
+      style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:;
+      connect-src 'self'; manifest-src 'self'
+  sso.lv3.org:
+    content_security_policy: >-
+      default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';
+      img-src 'self' data:; font-src 'self' data:; connect-src 'self' https://sso.lv3.org;
+      frame-src 'self'; manifest-src 'self'
+  status.lv3.org:
+    content_security_policy: >-
+      default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';
+      img-src 'self' data:; font-src 'self' data:; connect-src 'self'
+      https://status.lv3.org ws://status.lv3.org wss://status.lv3.org; manifest-src 'self'
+  uptime.lv3.org:
+    content_security_policy: >-
+      default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';
+      img-src 'self' data:; font-src 'self' data:; connect-src 'self'
+      https://uptime.lv3.org ws://uptime.lv3.org wss://uptime.lv3.org; manifest-src 'self'
+public_edge_extra_sites:
+  - hostname: changelog.lv3.org
+    kind: static_dir
+    source_dir: changelog-portal
+  - hostname: docs.lv3.org
+    kind: static_dir
+    source_dir: docs-portal
+public_edge_authenticated_sites:
+  changelog.lv3.org:
+    auth_proxy_upstream: http://127.0.0.1:4180
+  docs.lv3.org:
+    auth_proxy_upstream: http://127.0.0.1:4180
+  langfuse.lv3.org:
+    auth_proxy_upstream: http://127.0.0.1:4180
+  n8n.lv3.org:
+    auth_proxy_upstream: http://127.0.0.1:4180
+    unauthenticated_paths:
+      - /healthz
+    unauthenticated_prefix_paths:
+      - /webhook/
+      - /webhook-test/
+      - /webhook-waiting/
+  logs.lv3.org:
+    auth_proxy_upstream: http://127.0.0.1:4180
+  home.lv3.org:
+    auth_proxy_upstream: http://127.0.0.1:4180
+  ops.lv3.org:
+    auth_proxy_upstream: http://127.0.0.1:4180
+    unauthenticated_paths:
+      - /health
+public_edge_certificate_domains: >-
+  {{
+    (
+      (public_edge_service_topology | service_topology_edge_certificate_domains)
+      + (public_edge_extra_sites | map(attribute='hostname') | list)
+      + public_edge_additional_certificate_domains
+    ) | unique
+  }}
+public_edge_sites: "{{ (public_edge_service_topology | service_topology_edge_sites) + public_edge_extra_sites }}"

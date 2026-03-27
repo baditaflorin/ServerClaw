@@ -1,0 +1,13 @@
+[OPTIONS]
+enable: 1
+policy_in: DROP
+policy_out: ACCEPT
+
+[RULES]
+{% for source in control_plane_recovery_backup_vm_ssh_sources %}
+IN ACCEPT -source {{ source }} -p tcp -dport 22
+{% endfor %}
+{% for rule in control_plane_recovery_backup_vm_service_rules %}
+
+IN ACCEPT -source {{ rule.source }} -p tcp -dport {{ rule.port }}
+{% endfor %}

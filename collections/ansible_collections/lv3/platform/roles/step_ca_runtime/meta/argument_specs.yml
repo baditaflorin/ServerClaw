@@ -1,0 +1,153 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the private step-ca runtime and bootstrap trust material.
+    options:
+      step_ca_name:
+        type: str
+        required: true
+        description:
+          - Human-readable name of the managed private CA.
+      step_ca_version:
+        type: str
+        required: true
+        description:
+          - Container image version used for step-ca.
+      step_ca_cli_version:
+        type: str
+        required: true
+        description:
+          - CLI version installed on the runtime host for bootstrap actions.
+      step_ca_image:
+        type: str
+        required: true
+        description:
+          - Container image reference used for step-ca.
+      step_ca_cli_download_url:
+        type: str
+        required: true
+        description:
+          - Download URL for the pinned step CLI archive.
+      step_ca_site_dir:
+        type: path
+        required: true
+        description:
+          - Base directory for the step-ca runtime stack.
+      step_ca_home:
+        type: path
+        required: true
+        description:
+          - Managed STEPPATH directory used by step-ca.
+      step_ca_compose_file:
+        type: path
+        required: true
+        description:
+          - Compose file path for the step-ca runtime.
+      step_ca_password_dir:
+        type: path
+        required: true
+        description:
+          - Directory that stores step-ca password material.
+      step_ca_container_uid:
+        type: str
+        required: false
+        description:
+          - UID used by the step-ca container runtime.
+      step_ca_container_gid:
+        type: str
+        required: false
+        description:
+          - GID used by the step-ca container runtime.
+      step_ca_remote_root_certificate_file:
+        type: path
+        required: true
+        description:
+          - Guest-local root certificate path published by the role.
+      step_ca_remote_ssh_user_ca_file:
+        type: path
+        required: true
+        description:
+          - Guest-local SSH user CA public key path.
+      step_ca_remote_ssh_host_ca_file:
+        type: path
+        required: true
+        description:
+          - Guest-local SSH host CA public key path.
+      step_ca_ca_password_file:
+        type: path
+        required: true
+        description:
+          - File that stores the CA password used for initialization.
+      step_ca_humans_password_file:
+        type: path
+        required: true
+        description:
+          - File that stores the humans provisioner password.
+      step_ca_agents_password_file:
+        type: path
+        required: true
+        description:
+          - File that stores the agents provisioner password.
+      step_ca_services_password_file:
+        type: path
+        required: true
+        description:
+          - File that stores the services provisioner password.
+      step_ca_hosts_password_file:
+        type: path
+        required: true
+        description:
+          - File that stores the hosts provisioner password.
+      step_ca_healthcheck_path:
+        type: str
+        required: false
+        description:
+          - Health endpoint path used to verify the runtime.
+      step_ca_api_port:
+        type: int
+        required: true
+        description:
+          - Guest-local HTTPS port exposed by step-ca.
+      step_ca_internal_url:
+        type: str
+        required: true
+        description:
+          - Guest-local CA URL used for bootstrap and verification.
+      step_ca_controller_url:
+        type: str
+        required: true
+        description:
+          - Operator-facing URL used to reach the CA from the controller.
+      step_ca_initial_provisioner:
+        type: str
+        required: true
+        description:
+          - Provisioner name created during initial CA bootstrap.
+      step_ca_provisioners:
+        type: list
+        elements: dict
+        required: true
+        description:
+          - Additional provisioners that must exist after convergence.
+      step_ca_server_names:
+        type: list
+        elements: str
+        required: true
+        description:
+          - Subject alternative names included in the CA server certificate.
+      step_ca_local_artifact_dir:
+        type: path
+        required: false
+        description:
+          - Controller-local directory used to store mirrored CA artifacts.
+      step_ca_runtime_packages:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Packages required on the runtime host for bootstrap and verification.
+      step_ca_service_test_name:
+        type: str
+        required: true
+        description:
+          - Test service name used for certificate issuance verification.

@@ -1,0 +1,86 @@
+{% import "_grafana_dashboard_macros.j2" as dashboard %}
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": false,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": {{ none | to_json }},
+  "links": [{% for guest in proxmox_guests %}
+    {
+      "title": {{ guest.name | to_json }},
+      "type": "link",
+      "url": {{ ("/d/lv3-vm-" ~ guest.name ~ "/lv3-vm-" ~ guest.name) | to_json }}
+    }{% if not loop.last %},{% endif %}{% endfor %}
+  ],
+  "panels": [
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 1, 0, 0, "Proxmox Host Load Avg (1m)", "short", dashboard.load_query(monitoring_influxdb_bucket, host_public_hostname)) }},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 2, 6, 0, "Proxmox Host CPU Usage", "percent", dashboard.cpu_query(monitoring_influxdb_bucket, "nodes", host_public_hostname), 0, 100) }},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 3, 12, 0, "Proxmox Host Memory Usage", "percent", dashboard.ratio_query(monitoring_influxdb_bucket, "nodes", host_public_hostname, "mem", "maxmem"), 0, 100) }},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 4, 18, 0, "Proxmox Host Disk Usage", "percent", dashboard.ratio_query(monitoring_influxdb_bucket, "nodes", host_public_hostname, "disk", "maxdisk"), 0, 100) }}{% for guest in proxmox_guests %},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, (loop.index0 * 4) + 5, 0, (loop.index0 + 1) * 8, guest.name ~ " CPU Usage", "percent", dashboard.cpu_query(monitoring_influxdb_bucket, "qemu", guest.name), 0, 100) }},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, (loop.index0 * 4) + 6, 6, (loop.index0 + 1) * 8, guest.name ~ " Memory Usage", "percent", dashboard.ratio_query(monitoring_influxdb_bucket, "qemu", guest.name, "mem", "maxmem"), 0, 100) }},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, (loop.index0 * 4) + 7, 12, (loop.index0 + 1) * 8, guest.name ~ " Disk Usage", "percent", dashboard.ratio_query(monitoring_influxdb_bucket, "qemu", guest.name, "disk", "maxdisk"), 0, 100) }},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, (loop.index0 * 4) + 8, 18, (loop.index0 + 1) * 8, guest.name ~ " Network Throughput", "Bps", dashboard.throughput_query(monitoring_influxdb_bucket, "qemu", guest.name), 0, None) }}{% endfor %},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 21, 0, 40, "NGINX Active Connections", "short", dashboard.nginx_field_query(monitoring_influxdb_bucket, "nginx-lv3", "active"), 0, None) }},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 22, 6, 40, "NGINX Requests Per Second", "reqps", dashboard.nginx_rate_query(monitoring_influxdb_bucket, "nginx-lv3", "requests"), 0, None) }},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 23, 12, 40, "NGINX Accepts And Handled Per Second", "cps", "from(bucket: \"" ~ monitoring_influxdb_bucket ~ "\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"nginx\" and r.host == \"nginx-lv3\" and (r._field == \"accepts\" or r._field == \"handled\")) |> derivative(unit: 1s, nonNegative: true)", 0, None) }},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 24, 18, 40, "NGINX Connection States", "short", "from(bucket: \"" ~ monitoring_influxdb_bucket ~ "\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"nginx\" and r.host == \"nginx-lv3\" and (r._field == \"reading\" or r._field == \"writing\" or r._field == \"waiting\"))", 0, None) }},
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 25, 0, 48, "Drift Status (0 clean / 1 warn / 2 critical)", "short", dashboard.drift_summary_query(monitoring_influxdb_bucket, "status_code"), 6, 4, [{"color": "green", "value": none}, {"color": "yellow", "value": 1}, {"color": "red", "value": 2}]) }},
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 26, 6, 48, "Unsuppressed Drift", "short", dashboard.drift_summary_query(monitoring_influxdb_bucket, "unsuppressed_count")) }},
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 27, 12, 48, "Warn Drift", "short", dashboard.drift_summary_query(monitoring_influxdb_bucket, "warn_count")) }},
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 28, 18, 48, "Critical Drift", "short", dashboard.drift_summary_query(monitoring_influxdb_bucket, "critical_count")) }},
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 29, 0, 52, "Docker Build VM Builds (Selected Range)", "short", dashboard.docker_build_total_query(monitoring_influxdb_bucket, "docker-build-lv3")) }},
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 30, 6, 52, "Docker Build VM Avg Build Time", "ms", dashboard.docker_build_duration_average_query(monitoring_influxdb_bucket, "docker-build-lv3")) }},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 31, 12, 52, "Docker Build VM Builds Over Time", "short", dashboard.docker_build_window_query(monitoring_influxdb_bucket, "docker-build-lv3"), 0, None, 12, 8) }},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 32, 0, 60, "Docker Build VM Build Duration Over Time", "ms", dashboard.docker_build_duration_window_query(monitoring_influxdb_bucket, "docker-build-lv3"), 0, None, 24, 8) }},
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 33, 0, 68, "Backup Restore Status (0 pass / 2 fail)", "short", dashboard.backup_restore_summary_query(monitoring_influxdb_bucket, "status_code"), 6, 4, [{"color": "green", "value": none}, {"color": "red", "value": 2}]) }},
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 34, 6, 68, "Restore Verification Age (Days)", "d", dashboard.backup_restore_summary_query(monitoring_influxdb_bucket, "last_success_age_days"), 6, 4, [{"color": "green", "value": none}, {"color": "yellow", "value": 7}, {"color": "red", "value": 10}]) }},
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 35, 12, 68, "Restore Verification Passes", "short", dashboard.backup_restore_summary_query(monitoring_influxdb_bucket, "pass_count")) }},
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 36, 18, 68, "Restore Verification Failures", "short", dashboard.backup_restore_summary_query(monitoring_influxdb_bucket, "fail_count")) }},
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 37, 0, 76, "Postgres Leader Count", "short", "from(bucket: \"" ~ monitoring_influxdb_bucket ~ "\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"postgres_ha\" and r._field == \"leader\") |> group(columns: [\"host\"]) |> last() |> group() |> sum()") }},
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 38, 6, 76, "Postgres Replica Count", "short", "from(bucket: \"" ~ monitoring_influxdb_bucket ~ "\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"postgres_ha\" and r._field == \"replica\") |> group(columns: [\"host\"]) |> last() |> group() |> sum()") }},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 39, 12, 76, "Postgres Replication Lag", "decbytes", "from(bucket: \"" ~ monitoring_influxdb_bucket ~ "\") |> range(start: v.timeRangeStart, stop: v.timeRangeStop) |> filter(fn: (r) => r._measurement == \"postgres_ha\" and r._field == \"lag_bytes\")", 0, None, 12, 8) }},
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 40, 0, 84, "Security Critical CVEs", "short", dashboard.security_posture_summary_query(monitoring_influxdb_bucket, "total_critical_cves") ~ " |> last()", 6, 4, [{"color": "green", "value": none}, {"color": "red", "value": 1}]) }},
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 41, 6, 84, "Security High CVEs", "short", dashboard.security_posture_summary_query(monitoring_influxdb_bucket, "total_high_cves") ~ " |> last()") }},
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 42, 12, 84, "Lowest Hardening Index", "short", dashboard.security_posture_summary_query(monitoring_influxdb_bucket, "lowest_hardening_index") ~ " |> last()", 6, 4, [{"color": "red", "value": none}, {"color": "yellow", "value": 50}, {"color": "green", "value": 70}]) }},
+    {{ dashboard.stat_panel(monitoring_grafana_datasource_name, 43, 18, 84, "New Lynis Findings", "short", dashboard.security_posture_summary_query(monitoring_influxdb_bucket, "new_lynis_findings") ~ " |> last()") }},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 44, 0, 88, "Security Hardening Index Trend", "short", dashboard.security_posture_host_query(monitoring_influxdb_bucket, "hardening_index"), 0, 100, 12, 8) }},
+    {{ dashboard.timeseries_panel(monitoring_grafana_datasource_name, 45, 12, 88, "Security CVE Trend", "short", "union(tables: [" ~ dashboard.security_posture_summary_query(monitoring_influxdb_bucket, "total_critical_cves") ~ ", " ~ dashboard.security_posture_summary_query(monitoring_influxdb_bucket, "total_high_cves") ~ "])", 0, None, 12, 8) }}
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": [
+    "lv3",
+    "proxmox",
+    "guests"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": {{ monitoring_grafana_dashboard_title | to_json }},
+  "uid": {{ monitoring_grafana_dashboard_uid | to_json }},
+  "version": 2,
+  "weekStart": ""
+}

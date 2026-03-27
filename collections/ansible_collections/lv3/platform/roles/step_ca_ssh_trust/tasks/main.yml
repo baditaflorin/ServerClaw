@@ -1,0 +1,160 @@
+---
+- name: Validate step-ca SSH trust inputs
+  ansible.builtin.assert:
+    that:
+      - step_ca_cli_version | length > 0
+      - step_ca_internal_url | length > 0
+      - step_ca_local_root_certificate_file | length > 0
+      - step_ca_local_ssh_user_ca_file | length > 0
+      - step_ca_local_hosts_password_file | length > 0
+      - step_ca_root_remote_file | length > 0
+      - step_ca_ssh_trusted_user_ca_file | length > 0
+      - step_ca_ssh_host_private_key | length > 0
+      - step_ca_ssh_host_public_key | length > 0
+      - step_ca_ssh_host_certificate_file | length > 0
+      - step_ca_ssh_trust_dropin_file | length > 0
+    fail_msg: "step_ca_ssh_trust requires the controller-local bootstrap artifacts, CA URL, and SSH host-key paths."
+
+- name: Check installed step CLI version on SSH trust target
+  ansible.builtin.command: step version
+  register: step_ca_ssh_step_version
+  changed_when: false
+  failed_when: false
+
+- name: Install pinned step CLI binary on SSH trust target
+  ansible.builtin.shell: |
+    set -euo pipefail
+    workdir="$(mktemp -d)"
+    trap 'rm -rf "$workdir"' EXIT
+    cd "$workdir"
+    curl -fsSLo step.tar.gz "{{ step_ca_cli_download_url }}"
+    tar -xf step.tar.gz
+    install -m 0755 "step_{{ step_ca_cli_version }}/bin/step" /usr/local/bin/step
+  args:
+    executable: /bin/bash
+  when: step_ca_ssh_step_version.rc != 0 or (step_ca_cli_version not in step_ca_ssh_step_version.stdout)
+  changed_when: true
+
+- name: Ensure step-ca SSH trust directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ step_ca_remote_dir }}"
+      mode: "0700"
+    - path: /etc/ssh/sshd_config.d
+      mode: "0755"
+
+- name: Install the step-ca root certificate on the target
+  ansible.builtin.copy:
+    dest: "{{ step_ca_root_remote_file }}"
+    content: "{{ lookup('file', step_ca_local_root_certificate_file) }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Install the step-ca SSH user CA public key on the target
+  ansible.builtin.copy:
+    dest: "{{ step_ca_ssh_trusted_user_ca_file }}"
+    content: "{{ lookup('file', step_ca_local_ssh_user_ca_file) }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Install the hosts provisioner password on the target
+  ansible.builtin.copy:
+    dest: "{{ step_ca_ssh_hosts_password_remote_file }}"
+    content: "{{ lookup('file', step_ca_local_hosts_password_file) }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Build the SSH host certificate principal list
+  ansible.builtin.set_fact:
+    step_ca_ssh_host_principals: >-
+      {{
+        (
+          [
+            inventory_hostname,
+            ansible_hostname | default(''),
+            ansible_fqdn | default(''),
+            ansible_host | default(''),
+            ansible_default_ipv4.address | default('')
+          ]
+          + (ansible_all_ipv4_addresses | default([]))
+          + step_ca_ssh_host_principals_extra
+        )
+        | reject('equalto', '')
+        | reject('equalto', 'localhost')
+        | unique
+        | list
+      }}
+
+- name: Check whether the SSH host certificate needs renewal
+  ansible.builtin.command:
+    argv:
+      - step
+      - ssh
+      - needs-renewal
+      - "{{ step_ca_ssh_host_certificate_file }}"
+      - --expires-in
+      - "{{ step_ca_ssh_host_renew_before }}"
+  register: step_ca_ssh_needs_renewal
+  changed_when: false
+  failed_when: step_ca_ssh_needs_renewal.rc not in [0, 1, 2]
+
+- name: Issue or renew the SSH host certificate from step-ca
+  ansible.builtin.shell: |
+    set -euo pipefail
+    step ssh certificate \
+      --host \
+      --sign \
+      --force \
+      --no-agent \
+      --host-id machine \
+    {% for principal in step_ca_ssh_host_principals %}
+      --principal "{{ principal }}" \
+    {% endfor %}
+      --provisioner "{{ step_ca_ssh_hosts_provisioner_name }}" \
+      --provisioner-password-file "{{ step_ca_ssh_hosts_password_remote_file }}" \
+      --ca-url "{{ step_ca_internal_url }}" \
+      --root "{{ step_ca_root_remote_file }}" \
+      "{{ step_ca_ssh_host_key_id }}" \
+      "{{ step_ca_ssh_host_public_key }}"
+  args:
+    executable: /bin/bash
+  when: step_ca_ssh_needs_renewal.rc != 1
+  changed_when: true
+
+- name: Render the SSH CA trust drop-in
+  ansible.builtin.template:
+    src: sshd-step-ca.conf.j2
+    dest: "{{ step_ca_ssh_trust_dropin_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  register: step_ca_ssh_trust_dropin
+
+- name: Validate full SSH daemon configuration with step-ca trust enabled
+  ansible.builtin.command: /usr/sbin/sshd -t
+  changed_when: false
+
+- name: Reload ssh after step-ca trust changes
+  ansible.builtin.service:
+    name: ssh
+    state: reloaded
+  when: step_ca_ssh_trust_dropin.changed or step_ca_ssh_needs_renewal.rc != 1
+
+- name: Inspect the active SSH host certificate
+  ansible.builtin.command:
+    argv:
+      - step
+      - ssh
+      - inspect
+      - "{{ step_ca_ssh_host_certificate_file }}"
+  register: step_ca_ssh_inspect
+  changed_when: false

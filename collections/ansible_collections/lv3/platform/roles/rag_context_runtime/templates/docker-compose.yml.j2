@@ -1,0 +1,48 @@
+services:
+  openbao-agent:
+    image: {{ platform_context_openbao_agent_image }}
+    container_name: {{ platform_context_openbao_agent_container_name }}
+    user: "0:0"
+    environment:
+      BAO_SKIP_DROP_ROOT: "true"
+    command:
+      - agent
+      - -config=/openbao-agent/agent.hcl
+    network_mode: host
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -s {{ platform_context_env_file }}
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    volumes:
+      - {{ platform_context_openbao_agent_dir }}:/openbao-agent:ro
+      - {{ platform_context_env_file | dirname }}:{{ platform_context_env_file | dirname }}
+
+  qdrant:
+    image: {{ platform_context_qdrant_image }}
+    container_name: qdrant-platform-context
+    restart: unless-stopped
+    volumes:
+      - {{ platform_context_data_dir }}:/qdrant/storage
+
+  platform-context-api:
+    build:
+      context: {{ platform_context_service_dir }}
+      network: host
+    image: {{ platform_context_api_image_name }}:latest
+    container_name: platform-context-api
+    restart: unless-stopped
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+    env_file:
+      - {{ platform_context_env_file }}
+    volumes:
+      - {{ platform_context_corpus_dir }}:{{ platform_context_corpus_dir }}:ro
+    ports:
+      - "{{ platform_context_internal_port }}:8010"

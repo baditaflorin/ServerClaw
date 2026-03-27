@@ -1,0 +1,278 @@
+---
+- name: Validate Ollama runtime inputs
+  ansible.builtin.assert:
+    that:
+      - ollama_runtime_site_dir | length > 0
+      - ollama_runtime_data_dir | length > 0
+      - ollama_runtime_model_dir | length > 0
+      - ollama_runtime_compose_file | length > 0
+      - ollama_runtime_container_name | length > 0
+      - ollama_runtime_image | length > 0
+      - ollama_runtime_port | int > 0
+      - ollama_runtime_base_url | length > 0
+      - ollama_runtime_model_catalog_path | length > 0
+      - ollama_runtime_default_model | length > 0
+    fail_msg: "ollama_runtime requires compose paths, image, service URLs, and a model catalog."
+
+- name: Load the repo-managed Ollama model catalog
+  ansible.builtin.set_fact:
+    ollama_runtime_model_catalog: "{{ lookup('ansible.builtin.file', ollama_runtime_model_catalog_path) | from_yaml }}"
+
+- name: Validate the Ollama model catalog structure
+  ansible.builtin.assert:
+    that:
+      - ollama_runtime_model_catalog is mapping
+      - ollama_runtime_model_catalog.models is sequence
+    fail_msg: "{{ ollama_runtime_model_catalog_path }} must define a models list."
+
+- name: Derive the Ollama startup model set
+  ansible.builtin.set_fact:
+    ollama_runtime_startup_models: >-
+      {{
+        ollama_runtime_model_catalog.models
+        | selectattr('pull_on_startup', 'defined')
+        | selectattr('pull_on_startup')
+        | map(attribute='name')
+        | list
+      }}
+
+- name: Ensure the Ollama directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - "{{ ollama_runtime_site_dir }}"
+    - "{{ ollama_runtime_data_dir }}"
+    - "{{ ollama_runtime_model_dir }}"
+
+- name: Render the Ollama compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ ollama_runtime_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the Ollama image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ ollama_runtime_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ ollama_runtime_site_dir }}"
+  register: ollama_runtime_pull
+  changed_when: >-
+    'Pulling' in ollama_runtime_pull.stdout
+    or 'Downloaded newer image' in ollama_runtime_pull.stdout
+    or 'Pull complete' in ollama_runtime_pull.stdout
+
+- name: Check whether Docker nat chain exists before Ollama startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: ollama_runtime_docker_nat_chain_check
+  changed_when: false
+  failed_when: ollama_runtime_docker_nat_chain_check.rc not in [0, 1]
+
+- name: Restart Docker when the nat chain is missing before Ollama startup
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+  when: ollama_runtime_docker_nat_chain_check.rc == 1
+
+- name: Recheck Docker nat chain before Ollama startup
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: ollama_runtime_docker_nat_chain_recheck
+  changed_when: false
+  failed_when: ollama_runtime_docker_nat_chain_recheck.rc not in [0, 1]
+  retries: 5
+  delay: 2
+  until: ollama_runtime_docker_nat_chain_recheck.rc == 0
+
+- name: Assert Docker nat chain is present before Ollama startup
+  ansible.builtin.assert:
+    that:
+      - ollama_runtime_docker_nat_chain_recheck.rc == 0
+    fail_msg: "Docker is running but the nat DOCKER chain is missing; Ollama published ports will fail."
+
+- name: Start the Ollama runtime and recover Docker nat-chain failures
+  block:
+    - name: Start the Ollama runtime
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ ollama_runtime_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ ollama_runtime_site_dir }}"
+      register: ollama_runtime_up
+      changed_when: >-
+        'Creating' in ollama_runtime_up.stdout
+        or 'Recreating' in ollama_runtime_up.stdout
+        or 'Starting' in ollama_runtime_up.stdout
+  rescue:
+    - name: Flag Docker nat-chain failures during Ollama startup
+      ansible.builtin.set_fact:
+        ollama_runtime_docker_nat_chain_missing: >-
+          {{
+            'No chain/target/match by that name' in (ansible_failed_result.stderr | default(''))
+            or 'Unable to enable DNAT rule' in (ansible_failed_result.stderr | default(''))
+          }}
+
+    - name: Surface unexpected Ollama startup failures
+      ansible.builtin.fail:
+        msg: "{{ ansible_failed_result.stderr | default(ansible_failed_result.msg | default('ollama compose up failed')) }}"
+      when: not ollama_runtime_docker_nat_chain_missing
+
+    - name: Restart Docker to restore nat chain before retrying Ollama startup
+      ansible.builtin.service:
+        name: docker
+        state: restarted
+      when: ollama_runtime_docker_nat_chain_missing
+
+    - name: Retry Ollama startup after Docker nat-chain recovery
+      ansible.builtin.command:
+        argv:
+          - docker
+          - compose
+          - --file
+          - "{{ ollama_runtime_compose_file }}"
+          - up
+          - -d
+          - --remove-orphans
+      args:
+        chdir: "{{ ollama_runtime_site_dir }}"
+      register: ollama_runtime_up
+      changed_when: true
+      when: ollama_runtime_docker_nat_chain_missing
+
+- name: Check whether Ollama publishes the expected host port
+  ansible.builtin.command:
+    argv:
+      - docker
+      - port
+      - "{{ ollama_runtime_container_name }}"
+      - "{{ ollama_runtime_port }}"
+  register: ollama_runtime_port_binding_check
+  changed_when: false
+  failed_when: false
+
+- name: Force-recreate Ollama when the host port binding is missing
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ ollama_runtime_compose_file }}"
+      - up
+      - -d
+      - --force-recreate
+      - --remove-orphans
+  args:
+    chdir: "{{ ollama_runtime_site_dir }}"
+  register: ollama_runtime_force_recreate
+  changed_when: true
+  when: ollama_runtime_port_binding_check.stdout | trim == ''
+
+- name: Recheck Ollama host port binding
+  ansible.builtin.command:
+    argv:
+      - docker
+      - port
+      - "{{ ollama_runtime_container_name }}"
+      - "{{ ollama_runtime_port }}"
+  register: ollama_runtime_port_binding_recheck
+  changed_when: false
+  retries: 5
+  delay: 2
+  until: ollama_runtime_port_binding_recheck.stdout | trim != ''
+
+- name: Wait for Ollama to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ ollama_runtime_port }}"
+    delay: 0
+    timeout: 180
+
+- name: Wait for the Ollama version endpoint
+  ansible.builtin.uri:
+    url: "{{ ollama_runtime_base_url }}/api/version"
+    method: GET
+    status_code: 200
+  register: ollama_runtime_version
+  retries: 24
+  delay: 5
+  until: ollama_runtime_version.status == 200
+  changed_when: false
+
+- name: Check whether declared startup Ollama models are already present
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ ollama_runtime_container_name }}"
+      - ollama
+      - show
+      - "{{ item }}"
+  loop: "{{ ollama_runtime_startup_models }}"
+  when: ollama_runtime_startup_models | length > 0
+  register: ollama_runtime_startup_model_checks
+  failed_when: false
+  changed_when: false
+
+- name: Derive the missing startup Ollama models
+  ansible.builtin.set_fact:
+    ollama_runtime_missing_startup_models: >-
+      {{
+        (ollama_runtime_startup_model_checks.results | default([]))
+        | rejectattr('rc', 'equalto', 0)
+        | map(attribute='item')
+        | list
+      }}
+
+- name: Pull the missing startup Ollama models
+  ansible.builtin.uri:
+    url: "{{ ollama_runtime_base_url }}/api/pull"
+    method: POST
+    body_format: json
+    body:
+      model: "{{ item }}"
+      stream: false
+    status_code: 200
+    timeout: 3600
+  loop: "{{ ollama_runtime_missing_startup_models }}"
+  when: ollama_runtime_missing_startup_models | length > 0
+  register: ollama_runtime_model_pull
+  changed_when: true
+
+- name: Verify the default Ollama model is present
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ ollama_runtime_container_name }}"
+      - ollama
+      - show
+      - "{{ ollama_runtime_default_model }}"
+  register: ollama_runtime_default_model_show
+  changed_when: false

@@ -1,0 +1,4 @@
+---
+openbao_postgres_admin_role: openbao_rotator
+openbao_postgres_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/postgres-rotator-password.txt
+openbao_postgres_database: postgres

@@ -1,0 +1,91 @@
+---
+- name: Verify the NGINX service is active
+  ansible.builtin.command: systemctl is-active nginx
+  register: public_edge_verify_service
+  changed_when: false
+  failed_when: public_edge_verify_service.stdout | trim != "active"
+
+- name: Verify the HTTP edge entrypoint responds for the probe hostname
+  ansible.builtin.uri:
+    url: http://127.0.0.1/
+    method: GET
+    headers:
+      Host: "{{ public_edge_probe_hostname }}"
+    status_code:
+      - 200
+      - 301
+      - 302
+      - 308
+    follow_redirects: none
+  register: public_edge_verify_http
+  changed_when: false
+
+- name: Verify the HTTPS edge entrypoint responds for the probe hostname
+  ansible.builtin.uri:
+    url: https://127.0.0.1/
+    method: GET
+    headers:
+      Host: "{{ public_edge_probe_hostname }}"
+    status_code: 200
+    validate_certs: false
+  when: public_edge_certificate_after.stat.exists
+  register: public_edge_verify_https
+  changed_when: false
+
+- name: Verify the probe hostname response applies the crawl policy header
+  ansible.builtin.command:
+    argv:
+      - curl
+      - -kfsSI
+      - --resolve
+      - "{{ public_edge_probe_hostname }}:443:127.0.0.1"
+      - "https://{{ public_edge_probe_hostname }}/"
+  when: public_edge_certificate_after.stat.exists
+  register: public_edge_verify_probe_headers
+  changed_when: false
+  failed_when: >-
+    ('x-robots-tag: ' ~ public_edge_robots_meta_content) not in
+    (public_edge_verify_probe_headers.stdout | lower)
+
+- name: Verify the probe hostname robots.txt disallows crawling
+  ansible.builtin.command:
+    argv:
+      - curl
+      - -kfsS
+      - --resolve
+      - "{{ public_edge_probe_hostname }}:443:127.0.0.1"
+      - "https://{{ public_edge_probe_hostname }}/robots.txt"
+  when: public_edge_certificate_after.stat.exists
+  register: public_edge_verify_probe_robots
+  changed_when: false
+  failed_when: "'Disallow: /' not in public_edge_verify_probe_robots.stdout"
+
+- name: Verify the probe hostname HTML includes the robots meta tag
+  ansible.builtin.command:
+    argv:
+      - curl
+      - -kfsS
+      - --resolve
+      - "{{ public_edge_probe_hostname }}:443:127.0.0.1"
+      - "https://{{ public_edge_probe_hostname }}/"
+  when: public_edge_certificate_after.stat.exists
+  register: public_edge_verify_probe_html
+  changed_when: false
+  failed_when: >-
+    ('<meta name="robots" content="' ~ public_edge_robots_meta_content ~ '">') not in
+    (public_edge_verify_probe_html.stdout | lower)
+
+- name: Verify the apex hostname robots.txt is available over TLS
+  ansible.builtin.command:
+    argv:
+      - curl
+      - -kfsSI
+      - --resolve
+      - "{{ public_edge_apex_hostname }}:443:127.0.0.1"
+      - "https://{{ public_edge_apex_hostname }}/robots.txt"
+  when: public_edge_certificate_after.stat.exists
+  register: public_edge_verify_apex_robots
+  changed_when: false
+  failed_when: >-
+    ('x-robots-tag: ' ~ public_edge_robots_meta_content) not in
+    (public_edge_verify_apex_robots.stdout | lower)

@@ -1,0 +1,63 @@
+site_name: LV3 Platform Docs
+site_url: https://docs.lv3.org
+site_description: Generated developer portal and service documentation for the LV3 platform.
+docs_dir: docs/site-generated
+site_dir: build/docs-portal
+use_directory_urls: true
+
+theme:
+  name: material
+  custom_dir: docs/theme-overrides
+  features:
+    - navigation.tabs
+    - navigation.indexes
+    - navigation.top
+    - content.code.copy
+    - content.tabs.link
+  palette:
+    - scheme: default
+      primary: teal
+      accent: amber
+
+plugins:
+  - search
+  - swagger-ui-tag:
+      validatorUrl: "none"
+      filter_files:
+        - api/openapi.md
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Home: index.md
+  - Services:
+      - Overview: services/index.md
+  - API:
+      - Overview: api/index.md
+      - OpenAPI: api/openapi.md
+  - Runbooks:
+      - Index: runbooks/index.md
+  - Architecture:
+      - ADR Index: architecture/index.md
+  - Reference:
+      - Overview: reference/index.md
+      - Ports: reference/ports.md
+      - Subdomains: reference/subdomains.md
+      - Identities: reference/identities.md
+      - Secrets: reference/secrets.md
+  - Releases:
+      - Changelog: changelog.md
+      - Release Notes: releases/index.md
+      - Upgrade Guide: upgrade/v1.md

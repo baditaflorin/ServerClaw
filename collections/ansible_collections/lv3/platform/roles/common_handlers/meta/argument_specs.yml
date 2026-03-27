@@ -1,0 +1,9 @@
+---
+argument_specs:
+  main:
+    short_description: Shared handler role for common platform service actions.
+    options:
+      common_handlers_service_name:
+        type: str
+        required: false
+        default: ""

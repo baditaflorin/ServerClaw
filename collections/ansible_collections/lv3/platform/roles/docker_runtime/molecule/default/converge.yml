@@ -1,0 +1,10 @@
+---
+- name: Converge docker_runtime on the ephemeral fixture
+  hosts: all
+  gather_facts: true
+  become: true
+  vars_files:
+    - "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}/inventory/group_vars/all.yml"
+    - "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}/inventory/host_vars/proxmox_florin.yml"
+  roles:
+    - lv3.platform.docker_runtime

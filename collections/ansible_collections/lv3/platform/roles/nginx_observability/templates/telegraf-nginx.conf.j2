@@ -1,0 +1,37 @@
+{% set service_name = guest_observability_service | default("nginx") %}
+[agent]
+  hostname = "{{ guest_observability_hostname }}"
+  omit_hostname = false
+
+[global_tags]
+  role = "{{ guest_observability_role }}"
+  service = "{{ service_name }}"
+
+[[outputs.influxdb_v2]]
+  urls = ["{{ guest_observability_influx_url }}"]
+  token = "{{ lookup('file', guest_observability_writer_token_local_file) | trim }}"
+  organization = "{{ monitoring_influxdb_org }}"
+  bucket = "{{ monitoring_influxdb_bucket }}"
+
+[[inputs.cpu]]
+  percpu = true
+  totalcpu = true
+  collect_cpu_time = false
+  report_active = true
+
+[[inputs.mem]]
+
+[[inputs.disk]]
+  ignore_fs = ["tmpfs", "devtmpfs", "devfs", "overlay", "squashfs"]
+
+[[inputs.diskio]]
+
+[[inputs.net]]
+
+[[inputs.system]]
+
+[[inputs.processes]]
+
+[[inputs.nginx]]
+  urls = ["{{ nginx_observability_stub_status_url }}"]
+  response_timeout = "5s"

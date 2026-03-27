@@ -1,0 +1,24 @@
+---
+common_assert_vars_required: []
+common_assert_vars_expressions: []
+common_assert_vars_fail_msg: Common role variable assertion failed.
+
+common_directory_tree_paths: []
+common_directory_tree_owner: root
+common_directory_tree_group: root
+common_directory_tree_mode: "0755"
+common_directory_tree_state: directory
+common_directory_tree_recurse: false
+
+common_systemd_unit_name: ""
+common_systemd_unit_enabled: true
+common_systemd_unit_state: started
+common_systemd_unit_daemon_reload: false
+common_systemd_unit_verify_active: false
+common_systemd_unit_expected_active_state: active
+
+common_wait_port_host: 127.0.0.1
+common_wait_port_port: 0
+common_wait_port_delay: 0
+common_wait_port_timeout: 120
+common_wait_port_state: started

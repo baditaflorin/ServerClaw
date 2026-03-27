@@ -1,0 +1,79 @@
+---
+argument_specs:
+  main:
+    short_description: Configure the docker-build guest as the shared build cache host.
+    options:
+      build_server_packages:
+        type: list
+        elements: str
+        required: false
+        default:
+          - apt-cacher-ng
+        description:
+          - Packages required for the build cache baseline.
+      build_server_workspace:
+        type: str
+        required: false
+        default: /opt/builds/proxmox_florin_server
+        description:
+          - Remote workspace root used by build-server automation.
+      build_server_packer_plugin_cache:
+        type: str
+        required: false
+        default: /opt/builds/.packer.d
+        description:
+          - Shared Packer plugin cache path on the build server.
+      build_server_ansible_collection_cache:
+        type: str
+        required: false
+        default: /opt/builds/.ansible/collections
+        description:
+          - Shared Ansible collection cache path on the build server.
+      build_server_ansible_requirements_sha_file:
+        type: str
+        required: false
+        default: /opt/builds/.ansible/requirements.sha
+        description:
+          - SHA marker file used to skip redundant Galaxy installs.
+      build_server_pip_cache_volume:
+        type: str
+        required: false
+        default: pip-cache
+        description:
+          - Docker named volume reserved for Python wheel and sdist downloads.
+      build_server_apt_cacher_port:
+        type: int
+        required: false
+        default: 3142
+        description:
+          - TCP port exposed by apt-cacher-ng on the build server.
+      build_server_buildkit_service_name:
+        type: str
+        required: false
+        default: lv3-buildkitd
+        description:
+          - Systemd unit name for the managed BuildKit daemon.
+      build_server_buildkit_builder_name:
+        type: str
+        required: false
+        default: lv3-cache
+        description:
+          - Docker buildx builder name backed by the managed BuildKit daemon.
+      build_server_buildkit_config_file:
+        type: str
+        required: false
+        default: /etc/buildkit/buildkitd.toml
+        description:
+          - BuildKit daemon configuration file rendered by this role.
+      build_server_buildkit_cache_dir:
+        type: str
+        required: false
+        default: /opt/builds/.buildkit-cache
+        description:
+          - Host path used as the BuildKit worker root and cache store.
+      build_server_buildkit_cache_gb:
+        type: int
+        required: false
+        default: 50
+        description:
+          - Soft cache retention target for BuildKit garbage collection.

@@ -1,0 +1,9 @@
+name: {{ etcd_cluster_member_name | to_json }}
+data-dir: {{ etcd_cluster_member_data_dir | to_json }}
+initial-cluster-token: {{ etcd_cluster_member_initial_cluster_token | to_json }}
+initial-cluster-state: {{ etcd_cluster_member_initial_cluster_state | to_json }}
+initial-cluster: "{% for member in etcd_cluster_member_cluster %}{{ member.name }}=http://{{ member.host }}:{{ etcd_cluster_member_peer_port }}{% if not loop.last %},{% endif %}{% endfor %}"
+listen-client-urls: {{ ('http://127.0.0.1:' ~ (etcd_cluster_member_client_port | string) ~ ',http://' ~ etcd_cluster_member_host ~ ':' ~ (etcd_cluster_member_client_port | string)) | to_json }}
+advertise-client-urls: {{ ('http://' ~ etcd_cluster_member_host ~ ':' ~ (etcd_cluster_member_client_port | string)) | to_json }}
+listen-peer-urls: {{ ('http://' ~ etcd_cluster_member_host ~ ':' ~ (etcd_cluster_member_peer_port | string)) | to_json }}
+initial-advertise-peer-urls: {{ ('http://' ~ etcd_cluster_member_host ~ ':' ~ (etcd_cluster_member_peer_port | string)) | to_json }}

@@ -1,0 +1,45 @@
+---
+- name: Verify Patroni listens on the managed TCP port
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ postgres_ha_cluster.postgres_port }}"
+    delay: 0
+    timeout: 60
+
+- name: Query the local Patroni state
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ postgres_ha_cluster.patroni_rest_port }}/patroni"
+    method: GET
+    return_content: true
+    status_code: 200
+  register: postgres_ha_patroni_state
+  changed_when: false
+
+- name: Assert the local Patroni role is healthy
+  ansible.builtin.assert:
+    that:
+      - postgres_ha_patroni_state.json.role in ['leader', 'replica']
+      - postgres_ha_patroni_state.json.state in ['running', 'streaming']
+    fail_msg: "Patroni is not reporting a healthy leader or replica state."
+
+- name: Verify the cluster membership from the initial primary
+  ansible.builtin.command:
+    argv:
+      - patronictl
+      - -c
+      - "{{ postgres_ha_patroni_config_file }}"
+      - list
+      - --format
+      - json
+  register: postgres_ha_cluster_list
+  changed_when: false
+  run_once: true
+  delegate_to: "{{ postgres_ha_cluster.initial_primary }}"
+
+- name: Assert both PostgreSQL members are present in Patroni
+  ansible.builtin.assert:
+    that:
+      - (postgres_ha_cluster_list.stdout | from_json) | length == 2
+    fail_msg: "Patroni did not report the expected two-member PostgreSQL cluster."
+  run_once: true
+  delegate_to: localhost

@@ -1,0 +1,62 @@
+<div class="panel search-panel">
+  <form class="search-form" hx-post="/actions/search" hx-target="#search-panel" hx-swap="innerHTML">
+    <div>
+      <label class="form-label" for="search-query">Query</label>
+      <input id="search-query" name="query" value="{{ search_query }}" placeholder="certificate renewal, converge netbox, postgres connection pool">
+    </div>
+    <div class="search-form-row">
+      <div>
+        <label class="form-label" for="search-collection">Collection</label>
+        <select id="search-collection" name="collection">
+          <option value="">All collections</option>
+          {% for item in search_collections %}
+          <option value="{{ item }}" {% if search_collection == item %}selected{% endif %}>{{ item }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="muted">
+        BM25 plus trigram matching with synonym expansion from `config/search-synonyms.yaml`.
+      </div>
+      <button class="action-button" type="submit">Search</button>
+    </div>
+  </form>
+
+  {% if search_error %}
+  <div class="action-result danger">
+    <strong>Search failed</strong>
+    <span>{{ search_error }}</span>
+  </div>
+  {% endif %}
+
+  {% if search_expanded_query and search_expanded_query != search_query %}
+  <div class="banner warning">
+    <strong>Expanded query</strong>
+    <span>{{ search_expanded_query }}</span>
+  </div>
+  {% endif %}
+
+  <div class="search-results">
+    {% for result in search_results %}
+    <article class="search-result">
+      <div class="search-result-head">
+        <strong>{{ result.title }}</strong>
+        <span class="pill">{{ result.collection }} · {{ "%.2f"|format(result.score) }}</span>
+      </div>
+      {% if result.url %}
+      {% if result.url.startswith("docs/") %}
+      <p><a href="{{ docs_base_url }}/{{ result.url }}" target="_blank" rel="noreferrer">{{ result.url }}</a></p>
+      {% else %}
+      <p>{{ result.url }}</p>
+      {% endif %}
+      {% endif %}
+      <p class="muted">{{ result.snippet }}</p>
+    </article>
+    {% endfor %}
+    {% if search_query and not search_results and not search_error %}
+    <div class="action-result ok">
+      <strong>No matches</strong>
+      <span>No indexed documents matched "{{ search_query }}".</span>
+    </div>
+    {% endif %}
+  </div>
+</div>

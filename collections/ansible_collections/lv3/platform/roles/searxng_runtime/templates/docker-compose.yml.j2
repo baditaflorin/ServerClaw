@@ -1,0 +1,28 @@
+services:
+  valkey:
+    image: {{ searxng_runtime_valkey_image }}
+    container_name: {{ searxng_runtime_valkey_container_name }}
+    command:
+      - valkey-server
+      - --save
+      - "30"
+      - "1"
+      - --loglevel
+      - warning
+    restart: unless-stopped
+    volumes:
+      - {{ searxng_runtime_valkey_data_dir }}:/data
+
+  searxng:
+    image: {{ searxng_runtime_image }}
+    container_name: {{ searxng_runtime_container_name }}
+    restart: unless-stopped
+    depends_on:
+      - valkey
+    ports:
+      - "{{ searxng_runtime_port }}:8080"
+    volumes:
+      - {{ searxng_runtime_config_dir }}:/etc/searxng
+      - {{ searxng_runtime_cache_dir }}:/var/cache/searxng
+    environment:
+      SEARXNG_BASE_URL: "{{ searxng_runtime_public_base_url }}/"

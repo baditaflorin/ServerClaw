@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lv3.org/schema/api-gateway-catalog.schema.json",
+  "title": "LV3 API Gateway Catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "services"],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "services": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "upstream",
+          "gateway_prefix",
+          "auth",
+          "required_role",
+          "strip_prefix",
+          "timeout_seconds"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "upstream": {
+            "type": "string"
+          },
+          "gateway_prefix": {
+            "type": "string"
+          },
+          "auth": {
+            "const": "keycloak_jwt"
+          },
+          "required_role": {
+            "type": "string"
+          },
+          "strip_prefix": {
+            "type": "boolean"
+          },
+          "timeout_seconds": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "healthcheck_path": {
+            "type": "string"
+          },
+          "openapi_path": {
+            "type": "string"
+          },
+          "forward_authorization": {
+            "type": "boolean"
+          },
+          "upstream_auth_env_var": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

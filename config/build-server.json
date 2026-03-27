@@ -1,0 +1,75 @@
+{
+  "host": "ops@10.10.10.30",
+  "ssh_key": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519",
+  "ssh_options": [
+    "-o",
+    "IdentitiesOnly=yes",
+    "-o",
+    "StrictHostKeyChecking=accept-new",
+    "-o",
+    "UserKnownHostsFile=/dev/null",
+    "-o",
+    "ProxyCommand=ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@100.64.0.1 -W %h:%p"
+  ],
+  "workspace_root": "/home/ops/builds/proxmox_florin_server",
+  "default_timeout_seconds": 900,
+  "docker_socket": "unix:///var/run/docker.sock",
+  "pip_cache_volume": "pip-cache",
+  "packer_plugin_cache": "/opt/builds/.packer.d",
+  "ansible_collection_cache": "/opt/builds/.ansible/collections",
+  "ansible_requirements_sha_file": "/opt/builds/.ansible/requirements.sha",
+  "apt_proxy_url": "http://10.10.10.30:3142",
+  "registry_base": "registry.lv3.org",
+  "galaxy_server_url": "https://galaxy.lv3.org/",
+  "galaxy_server_name": "internal_galaxy",
+  "collection_root": "collections/ansible_collections/lv3/platform",
+  "commands": {
+    "remote-lint": {
+      "runner_label": "lint-ansible",
+      "command": "command -v yamllint >/dev/null 2>&1 || python3 -m pip install --break-system-packages --quiet yamllint==1.37.1; command -v ansible-lint >/dev/null 2>&1 || python3 -m pip install --break-system-packages --quiet ansible-lint==24.12.2; export ANSIBLE_CONFIG=/workspace/ansible.cfg; export ANSIBLE_COLLECTIONS_PATH=/workspace/collections${LV3_ANSIBLE_COLLECTIONS_DIR:+:$LV3_ANSIBLE_COLLECTIONS_DIR}; find . -path ./.git -prune -o -type f \\( -name '*.yml' -o -name '*.yaml' \\) -print0 | xargs -0 yamllint -c .yamllint && ANSIBLE_LINT_NODEPS=1 ansible-lint playbooks collections/ansible_collections/lv3/platform",
+      "local_fallback_command": "./scripts/validate_repo.sh yaml ansible-lint"
+    },
+    "remote-validate": {
+      "runner_label": "validate-schemas",
+      "command": "./scripts/validate_repo.sh generated-vars ansible-syntax role-argument-specs shell json health-probes alert-rules data-models generated-docs generated-portals",
+      "local_fallback_command": "./scripts/validate_repo.sh generated-vars ansible-syntax role-argument-specs shell json health-probes alert-rules data-models generated-docs generated-portals"
+    },
+    "pre-push-gate": {
+      "skip_docker": true,
+      "command": "mkdir -p .local/validation-gate .local/trivy-cache && LV3_ANSIBLE_COLLECTIONS_DIR=/opt/builds/.ansible/collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/opt/builds/.ansible/requirements.sha LV3_PACKER_PLUGIN_CACHE_DIR=/opt/builds/.packer.d LV3_TRIVY_CACHE_DIR=.local/trivy-cache python3 scripts/run_gate.py --workspace . --status-file .local/validation-gate/last-run.json --source build-server",
+      "local_fallback_command": "mkdir -p .local/validation-gate .local/trivy-cache .local/packer-plugin-cache .ansible/validation/collections && LV3_ANSIBLE_COLLECTIONS_DIR=.ansible/validation/collections LV3_PACKER_PLUGIN_CACHE_DIR=.local/packer-plugin-cache LV3_TRIVY_CACHE_DIR=.local/trivy-cache python3 scripts/run_gate.py --workspace . --status-file .local/validation-gate/last-run.json --source local-fallback"
+    },
+    "remote-pre-push": {
+      "skip_docker": true,
+      "command": "mkdir -p .local/validation-gate .local/trivy-cache && LV3_ANSIBLE_COLLECTIONS_DIR=/opt/builds/.ansible/collections LV3_ANSIBLE_COLLECTIONS_SHA_FILE=/opt/builds/.ansible/requirements.sha LV3_PACKER_PLUGIN_CACHE_DIR=/opt/builds/.packer.d LV3_TRIVY_CACHE_DIR=.local/trivy-cache python3 scripts/run_gate.py --workspace . --status-file .local/validation-gate/last-run.json --source build-server",
+      "local_fallback_command": "mkdir -p .local/validation-gate .local/trivy-cache .local/packer-plugin-cache .ansible/validation/collections && LV3_ANSIBLE_COLLECTIONS_DIR=.ansible/validation/collections LV3_PACKER_PLUGIN_CACHE_DIR=.local/packer-plugin-cache LV3_TRIVY_CACHE_DIR=.local/trivy-cache python3 scripts/run_gate.py --workspace . --status-file .local/validation-gate/last-run.json --source local-fallback"
+    },
+    "remote-packer-build": {
+      "runner_label": "packer-validate",
+      "skip_docker": true,
+      "command": "test -n \"$IMAGE\" || { echo \"set IMAGE=<name>\" >&2; exit 1; }; ./scripts/build_packer_template.sh \"$IMAGE\"",
+      "local_fallback_command": "test -n \"$IMAGE\" || { echo \"set IMAGE=<name>\" >&2; exit 1; }; ./scripts/build_packer_template.sh \"$IMAGE\""
+    },
+    "remote-packer-validate": {
+      "runner_label": "packer-validate",
+      "skip_docker": true,
+      "command": "./scripts/validate_packer_templates.sh",
+      "local_fallback_command": "./scripts/validate_packer_templates.sh"
+    },
+    "remote-image-build": {
+      "runner_label": "image-build",
+      "skip_docker": true,
+      "command": "test -n \"$SERVICE\" || { echo \"set SERVICE=<service-id>\" >&2; exit 1; }; test -n \"$COMMAND\" || { echo \"set COMMAND='docker build ...'\" >&2; exit 1; }; bash -lc \"$COMMAND\"",
+      "local_fallback_command": "test -n \"$SERVICE\" || { echo \"set SERVICE=<service-id>\" >&2; exit 1; }; test -n \"$COMMAND\" || { echo \"set COMMAND='docker build ...'\" >&2; exit 1; }; bash -lc \"$COMMAND\""
+    },
+    "remote-exec": {
+      "runner_label": "shell",
+      "skip_docker": true,
+      "command": "test -n \"$COMMAND\" || { echo \"set COMMAND=<shell-command>\" >&2; exit 1; }; bash -lc \"$COMMAND\"",
+      "local_fallback_command": "test -n \"$COMMAND\" || { echo \"set COMMAND=<shell-command>\" >&2; exit 1; }; bash -lc \"$COMMAND\""
+    },
+    "check-build-server": {
+      "builtin": "check-build-server"
+    }
+  }
+}

@@ -1,0 +1,72 @@
+---
+- name: Run Lynis security scans on the selected hosts
+  hosts: all
+  become: true
+  gather_facts: false
+  vars:
+    security_scan_output_dir: "{{ security_scan_output_dir | default(playbook_dir ~ '/../../.local/security-posture/lynis') }}"
+    security_scan_remote_dir: /var/tmp/lv3-security-posture
+    security_scan_report_file: "{{ security_scan_remote_dir }}/{{ inventory_hostname }}-lynis-report.dat"
+  tasks:
+    - name: Ensure the remote Lynis working directory exists
+      ansible.builtin.file:
+        path: "{{ security_scan_remote_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Ensure Lynis is installed
+      ansible.builtin.apt:
+        name: lynis
+        state: present
+        update_cache: true
+        force_apt_get: true
+
+    - name: Remove a stale Lynis pid file before starting a new audit
+      ansible.builtin.shell: |
+        if [ ! -f /var/run/lynis.pid ]; then
+          exit 0
+        fi
+        if pgrep -x lynis >/dev/null 2>&1; then
+          exit 0
+        fi
+        rm -f /var/run/lynis.pid
+        echo removed
+      args:
+        executable: /bin/bash
+      register: security_scan_lynis_pid_cleanup
+      changed_when: "'removed' in security_scan_lynis_pid_cleanup.stdout"
+
+    - name: Run the Lynis system audit
+      ansible.builtin.command:
+        argv:
+          - lynis
+          - audit
+          - system
+          - --cronjob
+          - --quiet
+          - --report-file
+          - "{{ security_scan_report_file }}"
+      register: security_scan_lynis_audit
+      changed_when: false
+
+    - name: Ensure the local output directory exists
+      ansible.builtin.file:
+        path: "{{ security_scan_output_dir }}"
+        state: directory
+        mode: "0755"
+      delegate_to: localhost
+      become: false
+
+    - name: Fetch the generated Lynis report
+      ansible.builtin.fetch:
+        src: "{{ security_scan_report_file }}"
+        dest: "{{ security_scan_output_dir }}/"
+        flat: true
+
+    - name: Record the Lynis exit code for troubleshooting
+      ansible.builtin.copy:
+        dest: "{{ security_scan_output_dir }}/{{ inventory_hostname }}-lynis.exitcode"
+        content: "{{ security_scan_lynis_audit.rc }}\n"
+        mode: "0644"
+      delegate_to: localhost
+      become: false

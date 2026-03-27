@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0.0",
+  "image_id": "portainer_runtime",
+  "image_ref": "docker.io/portainer/portainer-ce:2.33.6@sha256:3d8e3d85d0653baf49ebe7875200f0e5c4da79c8ebea380acddf40896e4d59eb",
+  "scanner": "trivy",
+  "scanner_image": "docker.io/aquasec/trivy:0.63.0",
+  "scanned_on": "2026-03-22",
+  "summary": {
+    "critical": 3,
+    "high": 10
+  },
+  "targets_with_findings": [
+    {
+      "target": "docker",
+      "class": "lang-pkgs",
+      "type": "gobinary",
+      "critical": 1,
+      "high": 3
+    },
+    {
+      "target": "portainer",
+      "class": "lang-pkgs",
+      "type": "gobinary",
+      "critical": 2,
+      "high": 7
+    }
+  ],
+  "raw_report": "receipts/image-scans/2026-03-22-portainer-runtime.trivy.json"
+}

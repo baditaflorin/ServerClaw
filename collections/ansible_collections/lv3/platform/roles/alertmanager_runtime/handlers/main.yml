@@ -1,0 +1,11 @@
+---
+- name: Restart Alertmanager
+  ansible.builtin.systemd:
+    name: "{{ alertmanager_runtime_service_name }}"
+    state: restarted
+
+- name: Restart Prometheus
+  ansible.builtin.systemd:
+    name: lv3-prometheus
+    state: restarted
+    daemon_reload: true

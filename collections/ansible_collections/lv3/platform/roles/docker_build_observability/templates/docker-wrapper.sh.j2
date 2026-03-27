@@ -1,0 +1,41 @@
+#!/bin/bash
+set -u
+
+real_binary="{{ docker_build_observability_docker_real_binary }}"
+metric_host="{{ docker_build_observability_hostname }}"
+socket_host="{{ docker_build_observability_socket_host }}"
+socket_port="{{ docker_build_observability_socket_port }}"
+build_command=""
+
+if [[ "${1:-}" == "build" ]]; then
+  build_command="build"
+elif [[ "${1:-}" == "buildx" && "${2:-}" == "build" ]]; then
+  build_command="buildx_build"
+elif [[ "${1:-}" == "buildx" && "${2:-}" == "bake" ]]; then
+  build_command="buildx_bake"
+elif [[ "${1:-}" == "compose" && "${2:-}" == "build" ]]; then
+  build_command="compose_build"
+fi
+
+if [[ -z "${build_command}" ]]; then
+  exec "${real_binary}" "$@"
+fi
+
+start_time_ns="$(date +%s%N)"
+status="success"
+exit_code=0
+
+if "${real_binary}" "$@"; then
+  exit_code=0
+else
+  exit_code=$?
+  status="failure"
+fi
+
+end_time_ns="$(date +%s%N)"
+duration_ms="$(((end_time_ns - start_time_ns) / 1000000))"
+
+printf 'docker_builds,host=%s,command=%s,status=%s count=1i,exit_code=%si,start_time_ns=%si,end_time_ns=%si,duration_ms=%si %s\n' \
+  "${metric_host}" "${build_command}" "${status}" "${exit_code}" "${start_time_ns}" "${end_time_ns}" "${duration_ms}" "${end_time_ns}" >"/dev/udp/${socket_host}/${socket_port}" || true
+
+exit "${exit_code}"

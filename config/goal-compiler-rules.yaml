@@ -1,0 +1,288 @@
+schema_version: 1.0.0
+rules:
+  - id: run-workflow
+    patterns:
+      - type: template
+        value: run {workflow}
+    action: execute
+    target_kind: workflow
+    default_risk_class: MEDIUM
+    allowed_tools:
+      - windmill-trigger
+    rollback_path: null
+    requires_approval_above: MEDIUM
+    ttl_seconds: 300
+    workflow_id: "{workflow}"
+    workflow_candidates: []
+    success_criteria:
+      - workflow {workflow_id} returns success
+    preconditions:
+      - workflow {workflow} is defined and reachable
+    scope_defaults:
+      allowed_hosts: []
+      allowed_services: []
+      allowed_vmids: []
+
+  - id: deploy-service
+    patterns:
+      - type: template
+        value: deploy {service}
+    action: deploy
+    target_kind: service
+    default_risk_class: MEDIUM
+    allowed_tools:
+      - windmill-trigger
+      - ansible-playbook
+    rollback_path: rollback-{service}
+    requires_approval_above: LOW
+    ttl_seconds: 300
+    workflow_id: null
+    workflow_candidates:
+      - converge-{service}
+      - deploy-{service}
+    success_criteria:
+      - workflow {workflow_id} returns success
+      - service {service} reports healthy
+    preconditions:
+      - target service {service} is cataloged
+    scope_defaults:
+      allowed_hosts: []
+      allowed_services: []
+      allowed_vmids: []
+
+  - id: converge-service
+    patterns:
+      - type: template
+        value: converge {service}
+      - type: template
+        value: apply {service}
+    action: converge
+    target_kind: service
+    default_risk_class: MEDIUM
+    allowed_tools:
+      - windmill-trigger
+      - ansible-playbook
+    rollback_path: rollback-{service}
+    requires_approval_above: LOW
+    ttl_seconds: 300
+    workflow_id: null
+    workflow_candidates:
+      - converge-{service}
+      - deploy-{service}
+    success_criteria:
+      - workflow {workflow_id} returns success
+      - service {service} reports healthy
+    preconditions:
+      - target service {service} is cataloged
+    scope_defaults:
+      allowed_hosts: []
+      allowed_services: []
+      allowed_vmids: []
+
+  - id: rotate-secret
+    patterns:
+      - type: template
+        value: rotate secret for {service}
+      - type: template
+        value: rotate {service} credentials
+    action: rotate
+    target_kind: service
+    default_risk_class: HIGH
+    allowed_tools:
+      - openbao-rotate
+      - windmill-trigger
+    rollback_path: restore-secret-from-openbao-snapshot
+    requires_approval_above: LOW
+    ttl_seconds: 300
+    workflow_id: rotate-secret
+    workflow_candidates: []
+    success_criteria:
+      - workflow {workflow_id} returns success
+      - rotated credentials for {service} validate successfully
+    preconditions:
+      - secret catalog entry exists for {service}
+    scope_defaults:
+      allowed_hosts: []
+      allowed_services: []
+      allowed_vmids: []
+
+  - id: restart-service
+    patterns:
+      - type: template
+        value: restart {service}
+    action: restart
+    target_kind: service
+    default_risk_class: HIGH
+    allowed_tools:
+      - windmill-trigger
+      - ansible-playbook
+    rollback_path: rollback-{service}
+    requires_approval_above: LOW
+    ttl_seconds: 300
+    workflow_id: null
+    workflow_candidates:
+      - converge-{service}
+    success_criteria:
+      - workflow {workflow_id} returns success
+      - service {service} restarts and becomes healthy
+    preconditions:
+      - target service {service} is cataloged
+    scope_defaults:
+      allowed_hosts: []
+      allowed_services: []
+      allowed_vmids: []
+
+  - id: rollback-service
+    patterns:
+      - type: template
+        value: rollback {service}
+    action: rollback
+    target_kind: service
+    default_risk_class: HIGH
+    allowed_tools:
+      - windmill-trigger
+    rollback_path: null
+    requires_approval_above: LOW
+    ttl_seconds: 300
+    workflow_id: rollback-{service}
+    workflow_candidates: []
+    success_criteria:
+      - workflow {workflow_id} returns success
+      - service {service} returns to the previous healthy revision
+    preconditions:
+      - a prior deployment exists for {service}
+    scope_defaults:
+      allowed_hosts: []
+      allowed_services: []
+      allowed_vmids: []
+
+  - id: check-platform-drift
+    patterns:
+      - type: template
+        value: check platform drift
+      - type: template
+        value: check drift
+    action: check
+    target_kind: platform
+    default_risk_class: LOW
+    allowed_tools:
+      - windmill-trigger
+    rollback_path: null
+    requires_approval_above: HIGH
+    ttl_seconds: 300
+    workflow_id: check-platform-drift
+    workflow_candidates: []
+    success_criteria:
+      - workflow {workflow_id} returns success
+      - drift report is recorded
+    preconditions:
+      - validation inputs for drift detection are available
+    scope_defaults:
+      allowed_hosts: []
+      allowed_services: []
+      allowed_vmids: []
+
+  - id: check-service
+    patterns:
+      - type: template
+        value: check {service}
+      - type: template
+        value: query status of {service}
+      - type: template
+        value: status {service}
+    action: query
+    target_kind: service
+    default_risk_class: LOW
+    allowed_tools:
+      - get-platform-status
+      - windmill-trigger
+    rollback_path: null
+    requires_approval_above: HIGH
+    ttl_seconds: 300
+    workflow_id: null
+    workflow_candidates:
+      - healthcheck-{service}
+    success_criteria:
+      - service {service} status is returned without mutation
+    preconditions:
+      - target service {service} is cataloged
+    scope_defaults:
+      allowed_hosts: []
+      allowed_services: []
+      allowed_vmids: []
+
+  - id: open-maintenance-window
+    patterns:
+      - type: template
+        value: open maintenance window for {service}
+    action: open_maintenance
+    target_kind: service
+    default_risk_class: MEDIUM
+    allowed_tools:
+      - get-maintenance-windows
+      - windmill-trigger
+    rollback_path: close-maintenance-window
+    requires_approval_above: LOW
+    ttl_seconds: 300
+    workflow_id: open-maintenance-window
+    workflow_candidates: []
+    success_criteria:
+      - workflow {workflow_id} returns success
+      - maintenance window for {service} is visible
+    preconditions:
+      - maintenance metadata is supplied by the caller
+    scope_defaults:
+      allowed_hosts: []
+      allowed_services: []
+      allowed_vmids: []
+
+  - id: close-maintenance-window
+    patterns:
+      - type: template
+        value: close maintenance window for {service}
+    action: close_maintenance
+    target_kind: service
+    default_risk_class: LOW
+    allowed_tools:
+      - get-maintenance-windows
+      - windmill-trigger
+    rollback_path: open-maintenance-window
+    requires_approval_above: HIGH
+    ttl_seconds: 300
+    workflow_id: close-maintenance-window
+    workflow_candidates: []
+    success_criteria:
+      - workflow {workflow_id} returns success
+      - maintenance window for {service} is removed
+    preconditions:
+      - maintenance window for {service} exists
+    scope_defaults:
+      allowed_hosts: []
+      allowed_services: []
+      allowed_vmids: []
+
+  - id: validate-repository
+    patterns:
+      - type: template
+        value: validate repository
+      - type: template
+        value: run validation
+    action: validate
+    target_kind: repository
+    default_risk_class: LOW
+    allowed_tools:
+      - windmill-trigger
+    rollback_path: null
+    requires_approval_above: HIGH
+    ttl_seconds: 300
+    workflow_id: validate
+    workflow_candidates: []
+    success_criteria:
+      - workflow {workflow_id} returns success
+      - validation gate reports pass
+    preconditions:
+      - repository checkout is available to the worker
+    scope_defaults:
+      allowed_hosts: []
+      allowed_services: []
+      allowed_vmids: []

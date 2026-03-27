@@ -1,0 +1,15 @@
+{
+  "controller_url": "{{ step_ca_controller_url }}",
+  "internal_url": "{{ step_ca_internal_url }}",
+  "fingerprint": "{{ step_ca_root_fingerprint }}",
+  "root_certificate": "{{ step_ca_local_root_certificate_file }}",
+  "ssh_user_ca": "{{ step_ca_local_ssh_user_ca_file }}",
+  "ssh_host_ca": "{{ step_ca_local_ssh_host_ca_file }}",
+  "ssh_known_hosts": "{{ step_ca_local_known_hosts_file }}",
+  "provisioner_passwords": {
+    "humans": "{{ step_ca_local_humans_password_file }}",
+    "agents": "{{ step_ca_local_agents_password_file }}",
+    "services": "{{ step_ca_local_services_password_file }}",
+    "hosts": "{{ step_ca_local_hosts_password_file }}"
+  }
+}

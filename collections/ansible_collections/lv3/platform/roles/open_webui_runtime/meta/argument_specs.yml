@@ -1,0 +1,125 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the Open WebUI runtime and bootstrap state.
+    options:
+      open_webui_site_dir:
+        type: path
+        required: true
+        description:
+          - Base directory for the Open WebUI runtime stack.
+      open_webui_data_dir:
+        type: path
+        required: true
+        description:
+          - Persistent application data directory.
+      open_webui_secret_dir:
+        type: path
+        required: true
+        description:
+          - Directory that stores Open WebUI secrets.
+      open_webui_compose_file:
+        type: path
+        required: true
+        description:
+          - Compose file path for the managed runtime.
+      open_webui_env_file:
+        type: path
+        required: true
+        description:
+          - Environment file rendered for Open WebUI.
+      open_webui_container_name:
+        type: str
+        required: true
+        description:
+          - Expected container name used for verification.
+      open_webui_port:
+        type: int
+        required: true
+        description:
+          - Guest-local TCP port exposed by Open WebUI.
+      open_webui_host_proxy_port:
+        type: int
+        required: true
+        description:
+          - Host-side proxy port used for operator access.
+      open_webui_image:
+        type: str
+        required: true
+        description:
+          - Container image reference used for Open WebUI.
+      open_webui_admin_name:
+        type: str
+        required: true
+        description:
+          - Display name assigned to the bootstrap admin user.
+      open_webui_admin_email:
+        type: str
+        required: true
+        description:
+          - Email address assigned to the bootstrap admin user.
+      open_webui_internal_base_url:
+        type: str
+        required: true
+        description:
+          - Guest-local base URL used for runtime verification.
+      open_webui_controller_url:
+        type: str
+        required: true
+        description:
+          - Operator-facing URL used to reach Open WebUI from the controller.
+      open_webui_local_artifact_dir:
+        type: path
+        required: false
+        description:
+          - Controller-local directory for Open WebUI artifacts.
+      open_webui_admin_password_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file that stores the bootstrap admin password.
+      open_webui_secret_key_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file that stores the application secret key.
+      open_webui_provider_env_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local provider environment file consumed by the role.
+      open_webui_oidc_client_secret_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file that stores the OIDC client secret.
+      open_webui_admin_password_remote_file:
+        type: path
+        required: true
+        description:
+          - Guest-local file that stores the bootstrap admin password.
+      open_webui_secret_key_remote_file:
+        type: path
+        required: true
+        description:
+          - Guest-local file that stores the application secret key.
+      open_webui_enable_oidc:
+        type: bool
+        required: false
+        description:
+          - Whether OIDC authentication should be configured.
+      open_webui_enable_openai_api:
+        type: bool
+        required: false
+        description:
+          - Whether OpenAI-compatible upstream API access is enabled.
+      open_webui_enable_ollama_api:
+        type: bool
+        required: false
+        description:
+          - Whether Ollama-compatible upstream API access is enabled.
+      open_webui_ollama_base_url:
+        type: str
+        required: false
+        description:
+          - Base URL used by Open WebUI for the local Ollama connector.

@@ -1,0 +1,4 @@
+ansible_user: "{{ proxmox_guest_ci_user }}"
+ansible_become: true
+ansible_become_method: sudo
+ansible_ssh_common_args: "{{ proxmox_guest_ssh_common_args.proxmox_host_jump }}"

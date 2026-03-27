@@ -1,0 +1,143 @@
+---
+openbao_version: 2.5.1
+openbao_image: "{{ container_image_catalog.images.openbao_runtime.ref }}"
+openbao_container_name: lv3-openbao
+openbao_site_dir: /opt/openbao
+openbao_config_dir: "{{ openbao_site_dir }}/config"
+openbao_data_dir: "{{ openbao_site_dir }}/data"
+openbao_log_dir: "{{ openbao_site_dir }}/logs"
+openbao_policy_dir: "{{ openbao_site_dir }}/policies"
+openbao_tls_dir: "{{ openbao_site_dir }}/tls"
+openbao_compose_file: "{{ openbao_site_dir }}/docker-compose.yml"
+openbao_config_file: "{{ openbao_config_dir }}/openbao.hcl"
+openbao_tls_enabled: true
+openbao_http_bind_address: 127.0.0.1
+openbao_http_port: "{{ platform_ports.openbao_http_port }}"
+openbao_tls_bind_address: 0.0.0.0
+openbao_tls_port: "{{ platform_ports.openbao_proxy_port }}"
+openbao_cluster_port: 8202
+openbao_local_cluster_port: 8203
+openbao_runtime_uid: "100"
+openbao_runtime_gid: "1000"
+openbao_tls_mount_dir: /openbao/tls
+openbao_controller_url: "{{ platform_service_topology | platform_service_url('openbao', 'controller') }}"
+openbao_postgres_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+openbao_api_addr: >-
+  {{
+    openbao_controller_url
+    if openbao_tls_enabled
+    else 'http://127.0.0.1:' ~ (openbao_http_port | string)
+  }}
+openbao_cluster_addr: "http://127.0.0.1:{{ openbao_cluster_port }}"
+openbao_raft_path: /openbao/data
+openbao_raft_node_id: "{{ inventory_hostname }}"
+openbao_audit_path: "sys/audit/file-main"
+openbao_audit_file_path: /openbao/logs/audit.log
+openbao_tls_server_cert_host_file: "{{ openbao_tls_dir }}/server.crt"
+openbao_tls_server_key_host_file: "{{ openbao_tls_dir }}/server.key"
+openbao_tls_client_ca_host_file: "{{ openbao_tls_dir }}/root_ca.crt"
+openbao_tls_server_cert_file: "{{ openbao_tls_mount_dir }}/server.crt"
+openbao_tls_server_key_file: "{{ openbao_tls_mount_dir }}/server.key"
+openbao_tls_client_ca_file: "{{ openbao_tls_mount_dir }}/root_ca.crt"
+openbao_tls_certificate_subject: "{{ platform_host.management.tailscale_ipv4 }}"
+openbao_tls_server_sans:
+  - "{{ platform_service_topology | platform_service_host('openbao') }}"
+  - "{{ platform_host.management.tailscale_ipv4 }}"
+openbao_tls_certificate_not_after: 24h
+openbao_tls_cert_renew_before_seconds: 21600
+openbao_tls_renewal_timer_name: lv3-openbao-cert-renew
+openbao_tls_renewal_script_path: "/usr/local/libexec/{{ openbao_tls_renewal_timer_name }}.sh"
+openbao_tls_renewal_service_path: "/etc/systemd/system/{{ openbao_tls_renewal_timer_name }}.service"
+openbao_tls_renewal_timer_path: "/etc/systemd/system/{{ openbao_tls_renewal_timer_name }}.timer"
+openbao_tls_renewal_on_calendar: "*:0/15"
+openbao_tls_renewal_randomized_delay_seconds: 60
+openbao_tls_reload_command: "docker compose --file {{ openbao_compose_file }} restart openbao"
+openbao_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao
+openbao_init_local_file: "{{ openbao_local_artifact_dir }}/init.json"
+openbao_ops_password_local_file: "{{ openbao_local_artifact_dir }}/ops-password.txt"
+openbao_breakglass_password_local_file: "{{ openbao_local_artifact_dir }}/breakglass-password.txt"
+openbao_postgres_rotator_password_local_file: "{{ openbao_local_artifact_dir }}/postgres-rotator-password.txt"
+openbao_controller_approle_local_file: "{{ openbao_local_artifact_dir }}/controller-automation-approle.json"
+openbao_mail_platform_approle_local_file: "{{ openbao_local_artifact_dir }}/mail-platform-approle.json"
+openbao_secret_rotation_approle_local_file: "{{ openbao_local_artifact_dir }}/secret-rotation-approle.json"
+openbao_secret_catalog_file: "{{ playbook_dir }}/../config/secret-catalog.json"
+openbao_controller_secret_manifest_file: "{{ playbook_dir }}/../config/controller-local-secrets.json"
+openbao_init_key_shares: 3
+openbao_init_key_threshold: 2
+openbao_userpass_users:
+  - username: ops
+    password_local_file: "{{ openbao_ops_password_local_file }}"
+    policies:
+      - lv3-human-ops
+    token_ttl: 8h
+    token_max_ttl: 24h
+  - username: breakglass
+    password_local_file: "{{ openbao_breakglass_password_local_file }}"
+    policies:
+      - lv3-breakglass
+    token_ttl: 15m
+    token_max_ttl: 1h
+openbao_policies:
+  - name: lv3-human-ops
+    src: policy-lv3-human-ops.hcl.j2
+  - name: lv3-breakglass
+    src: policy-lv3-breakglass.hcl.j2
+  - name: lv3-agent-controller
+    src: policy-lv3-agent-controller.hcl.j2
+  - name: lv3-agent-secret-rotation
+    src: policy-lv3-agent-secret-rotation.hcl.j2
+  - name: lv3-service-mail-platform
+    src: policy-lv3-service-mail-platform.hcl.j2
+openbao_approles:
+  - name: controller-automation
+    policies:
+      - lv3-agent-controller
+    token_ttl: 15m
+    token_max_ttl: 1h
+    token_num_uses: 0
+    secret_id_ttl: 15m
+    secret_id_num_uses: 1
+    local_file: "{{ openbao_controller_approle_local_file }}"
+  - name: mail-platform
+    policies:
+      - lv3-service-mail-platform
+    token_ttl: 15m
+    token_max_ttl: 1h
+    token_num_uses: 0
+    secret_id_ttl: 15m
+    secret_id_num_uses: 1
+    local_file: "{{ openbao_mail_platform_approle_local_file }}"
+  - name: secret-rotation
+    policies:
+      - lv3-agent-secret-rotation
+    token_ttl: 15m
+    token_max_ttl: 1h
+    token_num_uses: 0
+    secret_id_ttl: 15m
+    secret_id_num_uses: 1
+    local_file: "{{ openbao_secret_rotation_approle_local_file }}"
+openbao_transit_keys:
+  - controller-automation
+  - mail-platform
+openbao_database_mount_path: database
+openbao_database_name: lv3-postgres
+openbao_database_allowed_roles:
+  - postgres-readonly
+openbao_database_connection_url: >-
+  postgresql://{{ "{{username}}" }}:{{ "{{password}}" }}@{{ openbao_postgres_host }}:5432/postgres?sslmode=disable
+openbao_database_plugin_name: postgresql-database-plugin
+openbao_database_password_authentication: scram-sha-256
+openbao_database_roles:
+  - name: postgres-readonly
+    db_name: "{{ openbao_database_name }}"
+    creation_statements: !unsafe |-
+      CREATE ROLE "{{name}}" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';
+      GRANT pg_read_all_data TO "{{name}}";
+    revocation_statements: !unsafe |-
+      DROP ROLE IF EXISTS "{{name}}";
+    default_ttl: 1h
+    max_ttl: 24h
+openbao_seeded_secret_paths:
+  controller_proxmox_api: agents/controller/proxmox-api-primary
+  controller_monitoring: agents/controller/monitoring
+  mail_platform_runtime: services/mail-platform/runtime

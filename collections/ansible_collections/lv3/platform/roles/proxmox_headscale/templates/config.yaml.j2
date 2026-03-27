@@ -1,0 +1,86 @@
+server_url: {{ headscale_server_url }}
+listen_addr: {{ headscale_listen_addr }}
+metrics_listen_addr: {{ headscale_metrics_listen_addr }}
+grpc_listen_addr: {{ headscale_grpc_listen_addr }}
+grpc_allow_insecure: false
+
+noise:
+  private_key_path: {{ headscale_noise_private_key_path }}
+
+prefixes:
+  v4: {{ headscale_prefix_v4 }}
+  v6: {{ headscale_prefix_v6 }}
+  allocation: sequential
+
+derp:
+  server:
+    enabled: false
+    region_id: 999
+    region_code: headscale
+    region_name: Headscale Embedded DERP
+    verify_clients: true
+    stun_listen_addr: "0.0.0.0:3478"
+    private_key_path: {{ headscale_derp_private_key_path }}
+    automatically_add_embedded_derp_region: true
+  urls:
+{% for url in headscale_derp_urls %}
+    - {{ url }}
+{% endfor %}
+  paths: []
+  auto_update_enabled: true
+  update_frequency: 24h
+
+disable_check_updates: false
+ephemeral_node_inactivity_timeout: 30m
+
+database:
+  type: sqlite
+  debug: false
+  sqlite:
+    path: {{ headscale_database_path }}
+    write_ahead_log: true
+    wal_autocheckpoint: 1000
+
+acme_url: https://acme-v02.api.letsencrypt.org/directory
+acme_email: ""
+tls_letsencrypt_hostname: ""
+tls_letsencrypt_cache_dir: {{ headscale_tls_cache_dir }}
+tls_letsencrypt_challenge_type: HTTP-01
+tls_letsencrypt_listen: ":http"
+tls_cert_path: ""
+tls_key_path: ""
+
+log:
+  level: {{ headscale_log_level }}
+  format: text
+
+policy:
+  mode: file
+  path: {{ headscale_policy_file }}
+
+dns:
+  magic_dns: {{ headscale_dns_magic | bool | ternary('true', 'false') }}
+  base_domain: {{ headscale_dns_base_domain }}
+  override_local_dns: {{ headscale_dns_override_local | bool | ternary('true', 'false') }}
+  nameservers:
+    global:
+{% for nameserver in headscale_dns_nameservers_global %}
+      - {{ nameserver }}
+{% endfor %}
+  search_domains:
+{% if headscale_dns_search_domains | length == 0 %}
+    []
+{% else %}
+{% for domain in headscale_dns_search_domains %}
+    - {{ domain }}
+{% endfor %}
+{% endif %}
+  extra_records: []
+
+unix_socket: {{ headscale_unix_socket }}
+unix_socket_permission: "0660"
+
+logtail:
+  enabled: false
+
+randomize_client_port: {{ headscale_randomize_client_port | bool | ternary('true', 'false') }}

@@ -1,0 +1,108 @@
+---
+- name: Validate Loki log agent inputs
+  ansible.builtin.assert:
+    that:
+      - loki_log_agent_prereq_packages | length > 0
+      - loki_log_agent_packages | length > 0
+      - loki_log_agent_keyring_dir | length > 0
+      - loki_log_agent_repo_key_url | length > 0
+      - loki_log_agent_repo_keyring | length > 0
+      - loki_log_agent_repo_file | length > 0
+      - loki_log_agent_config_file | length > 0
+      - loki_log_agent_service_name | length > 0
+      - loki_log_agent_hostname | length > 0
+      - loki_log_agent_role | length > 0
+      - loki_log_agent_environment | length > 0
+      - loki_log_agent_lane | length > 0
+      - loki_log_agent_loki_push_url | length > 0
+    fail_msg: "loki_log_agent requires package, config, and target Loki inputs."
+
+- name: Ensure Loki log agent prerequisite packages are present
+  ansible.builtin.apt:
+    name: "{{ loki_log_agent_prereq_packages }}"
+    state: present
+
+- name: Ensure Loki log agent APT keyring directory exists
+  ansible.builtin.file:
+    path: "{{ loki_log_agent_keyring_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Install Grafana repository key for Loki log agent
+  ansible.builtin.get_url:
+    url: "{{ loki_log_agent_repo_key_url }}"
+    dest: "{{ loki_log_agent_repo_keyring }}"
+    mode: "0644"
+
+- name: Install Grafana repository definition for Loki log agent
+  ansible.builtin.copy:
+    dest: "{{ loki_log_agent_repo_file }}"
+    mode: "0644"
+    content: |
+      deb [signed-by={{ loki_log_agent_repo_keyring }}] https://apt.grafana.com stable main
+
+- name: Install Loki log agent packages
+  ansible.builtin.apt:
+    name: "{{ loki_log_agent_packages }}"
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure alloy can read required log sources
+  ansible.builtin.user:
+    name: alloy
+    groups: "{{ (loki_log_agent_additional_groups + (['docker'] if loki_log_agent_docker_logs_enabled else [])) | unique }}"
+    append: true
+  notify: Restart Alloy
+
+- name: Ensure extra file-scrape parent directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop: >-
+    {{
+      loki_log_agent_file_scrapes
+      | map(attribute='paths')
+      | flatten
+      | map('dirname')
+      | list
+      | unique
+    }}
+  when: loki_log_agent_file_scrapes | length > 0
+
+- name: Ensure extra file-scrape targets exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: touch
+    owner: root
+    group: adm
+    mode: "0640"
+    access_time: preserve
+    modification_time: preserve
+  loop: "{{ loki_log_agent_file_scrapes | map(attribute='paths') | flatten | list }}"
+  when: loki_log_agent_file_scrapes | length > 0
+
+- name: Render Alloy Loki log agent configuration
+  ansible.builtin.template:
+    src: config.alloy.j2
+    dest: "{{ loki_log_agent_config_file }}"
+    owner: root
+    group: alloy
+    mode: "0640"
+  notify: Restart Alloy
+
+- name: Flush Loki log agent handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Ensure Alloy service is enabled and started
+  ansible.builtin.systemd:
+    name: "{{ loki_log_agent_service_name }}"
+    enabled: true
+    state: started
+
+- name: Verify Alloy service is active
+  ansible.builtin.command: "systemctl is-active {{ loki_log_agent_service_name }}"
+  register: loki_log_agent_service_status
+  changed_when: false
+  failed_when: loki_log_agent_service_status.stdout | trim != "active"

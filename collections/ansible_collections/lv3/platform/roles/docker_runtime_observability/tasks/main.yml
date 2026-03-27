@@ -1,0 +1,63 @@
+---
+- name: Validate docker runtime observability inputs
+  ansible.builtin.assert:
+    that:
+      - docker_runtime_observability_state_dir | length > 0
+      - docker_runtime_observability_telegraf_config_file | length > 0
+      - docker_runtime_observability_hostname | length > 0
+      - docker_runtime_observability_role | length > 0
+      - docker_runtime_observability_docker_socket_endpoint | length > 0
+    fail_msg: "docker_runtime_observability requires Telegraf config, Docker socket, and service identity inputs."
+
+- name: Prepare shared guest observability plumbing for docker runtime telemetry
+  ansible.builtin.include_role:
+    name: lv3.platform.guest_observability
+    public: true
+    tasks_from: setup
+  vars:
+    guest_observability_state_dir: "{{ docker_runtime_observability_state_dir }}"
+    guest_observability_hostname: "{{ docker_runtime_observability_hostname }}"
+    guest_observability_role: "{{ docker_runtime_observability_role }}"
+    guest_observability_service: docker-runtime
+
+- name: Ensure telegraf can read the local Docker socket
+  ansible.builtin.user:
+    name: telegraf
+    groups: docker
+    append: true
+  notify: Restart Telegraf
+
+- name: Render Telegraf docker runtime observability configuration
+  ansible.builtin.template:
+    src: telegraf-docker-runtime.conf.j2
+    dest: "{{ docker_runtime_observability_telegraf_config_file }}"
+    owner: root
+    group: telegraf
+    mode: "0640"
+  no_log: true
+  notify: Restart Telegraf
+
+- name: Flush docker runtime observability handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Verify shared guest observability services for docker runtime telemetry
+  ansible.builtin.include_role:
+    name: lv3.platform.guest_observability
+    public: true
+    tasks_from: verify
+
+- name: Verify docker runtime Telegraf configuration is rendered
+  ansible.builtin.command:
+    argv:
+      - grep
+      - -F
+      - '[[inputs.docker]]'
+      - "{{ docker_runtime_observability_telegraf_config_file }}"
+  register: docker_runtime_observability_telegraf_config
+  changed_when: false
+
+- name: Verify telegraf is in the docker group
+  ansible.builtin.command: id -nG telegraf
+  register: docker_runtime_observability_telegraf_groups
+  changed_when: false
+  failed_when: "'docker' not in docker_runtime_observability_telegraf_groups.stdout.split()"

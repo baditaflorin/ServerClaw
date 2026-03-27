@@ -1,0 +1,12 @@
+# Release 0.177.10
+
+- Date: 2026-03-27
+
+## Summary
+- completed ADR 0119 latest-main live apply by hardening Windmill seed sync and replaying the scheduler dispatcher, lane, watchdog, and watchdog-loop paths from the current mainline
+
+## Platform Impact
+- platform_version advances to 0.130.30; ADR 0119 is now verified from main with durable worker checkout refresh, bootstrap-session auth fallback, scheduler token propagation, and the repo-managed scheduler schedules enabled on production Windmill.
+
+## Upgrade Guide
+- [docs/upgrade/v1.md](docs/upgrade/v1.md)

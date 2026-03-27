@@ -1,0 +1,14 @@
+[Unit]
+Description=LV3 etcd member
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=notify
+ExecStart=/usr/bin/etcd --config-file {{ etcd_cluster_member_config_file }}
+Restart=always
+RestartSec=5
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

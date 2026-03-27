@@ -1,0 +1,27 @@
+{
+  "branch": "codex/adr-0181-metadata-replication",
+  "bundle_id": "20260327T103801Z-dca744432518",
+  "head_commit": "dca7444325188bf11303d789155f0b092cd86056",
+  "receipt_id": "20260327T103801Z-dca744432518-control-metadata-witness",
+  "recorded_at": "2026-03-27T10:38:07Z",
+  "repo_version": "0.177.4",
+  "schema_version": "1.0.0",
+  "targets": {
+    "archive": {
+      "generation_dir": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-metadata-witness/archive/generations/20260327T103801Z-dca744432518",
+      "latest_pointer": "/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-metadata-witness/archive/latest",
+      "status": "pass"
+    },
+    "git_remote": {
+      "commit": "dca7444325188bf11303d789155f0b092cd86056",
+      "remote": "origin",
+      "remote_ref": "refs/heads/main",
+      "remote_url": "git@github.com:baditaflorin/proxmox_florin_server.git",
+      "status": "pass"
+    }
+  },
+  "verification": {
+    "bundle_clone": "pass",
+    "snapshot_contract": "pass"
+  }
+}

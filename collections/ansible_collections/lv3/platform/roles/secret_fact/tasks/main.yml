@@ -1,0 +1,41 @@
+---
+- name: Assert secret_fact inputs are present
+  ansible.builtin.assert:
+    that:
+      - secret_path | length > 0
+      - secret_fact_name | length > 0
+      - secret_fact_token | length > 0
+    fail_msg: "secret_fact requires secret_path, secret_fact_name, and secret_fact_token."
+
+- name: Fetch the requested OpenBao secret
+  ansible.builtin.uri:
+    url: "{{ secret_fact_openbao_url }}/v1/kv/data/{{ secret_path }}"
+    method: GET
+    headers:
+      X-Vault-Token: "{{ secret_fact_token }}"
+    validate_certs: "{{ secret_fact_validate_certs }}"
+    status_code: 200
+  register: secret_fact_response
+  no_log: true
+
+- name: Publish the requested secret value as a fact
+  vars:
+    secret_fact_payload: >-
+      {{
+        (
+          secret_fact_response.json.data.data
+          if (
+            secret_fact_response.json.data is mapping
+            and 'data' in secret_fact_response.json.data
+          )
+          else secret_fact_response.json.data
+        )
+      }}
+  ansible.builtin.set_fact:
+    "{{ secret_fact_name }}": >-
+      {{
+        (secret_fact_payload[secret_fact_field]
+        if secret_fact_field | length > 0
+        else secret_fact_payload)
+      }}
+  no_log: true

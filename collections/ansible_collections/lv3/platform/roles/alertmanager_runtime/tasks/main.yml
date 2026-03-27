@@ -1,0 +1,165 @@
+---
+- name: Validate Alertmanager runtime inputs
+  ansible.builtin.assert:
+    that:
+      - alertmanager_runtime_package | length > 0
+      - alertmanager_runtime_service_name | length > 0
+      - alertmanager_runtime_config_template | length > 0
+      - alertmanager_runtime_config_file | length > 0
+      - alertmanager_runtime_data_dir | length > 0
+      - alertmanager_runtime_rules_dir | length > 0
+      - alertmanager_runtime_platform_rules_source | length > 0
+      - alertmanager_runtime_ntfy_password_local_file | length > 0
+      - alertmanager_runtime_mattermost_webhook_manifest_local_file | length > 0
+    fail_msg: "alertmanager_runtime requires package, config, rules, and controller-local secret inputs."
+
+- name: Ensure controller-local ntfy password exists
+  ansible.builtin.stat:
+    path: "{{ alertmanager_runtime_ntfy_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: alertmanager_runtime_ntfy_password_local
+
+- name: Fail if controller-local ntfy password is missing
+  ansible.builtin.fail:
+    msg: >-
+      {{ alertmanager_runtime_ntfy_password_local_file }} is missing on the control machine.
+      Converge ntfy first so Alertmanager can authenticate to the paging topic.
+  when: not alertmanager_runtime_ntfy_password_local.stat.exists
+
+- name: Ensure controller-local Mattermost webhook manifest exists
+  ansible.builtin.stat:
+    path: "{{ alertmanager_runtime_mattermost_webhook_manifest_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: alertmanager_runtime_mattermost_manifest_local
+
+- name: Fail if controller-local Mattermost webhook manifest is missing
+  ansible.builtin.fail:
+    msg: >-
+      {{ alertmanager_runtime_mattermost_webhook_manifest_local_file }} is missing on the control machine.
+      Converge Mattermost first so Alertmanager can route to repo-managed incoming webhooks.
+  when: not alertmanager_runtime_mattermost_manifest_local.stat.exists
+
+- name: Ensure Alertmanager package is present
+  ansible.builtin.apt:
+    name:
+      - "{{ alertmanager_runtime_package }}"
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure Alertmanager directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: root
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ alertmanager_runtime_config_file | dirname }}"
+      group: root
+      mode: "0755"
+    - path: "{{ alertmanager_runtime_data_dir }}"
+      group: root
+      mode: "0755"
+    - path: "{{ alertmanager_runtime_rules_dir }}"
+      group: prometheus
+      mode: "0755"
+
+- name: Read controller-local ntfy password
+  ansible.builtin.slurp:
+    src: "{{ alertmanager_runtime_ntfy_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: alertmanager_runtime_ntfy_password_raw
+  no_log: true
+
+- name: Load controller-local Mattermost webhook manifest
+  ansible.builtin.set_fact:
+    alertmanager_runtime_ntfy_password: "{{ alertmanager_runtime_ntfy_password_raw.content | b64decode | trim }}"
+    alertmanager_runtime_mattermost_webhooks: "{{ lookup('ansible.builtin.file', alertmanager_runtime_mattermost_webhook_manifest_local_file) | from_json }}"
+  no_log: true
+
+- name: Persist Alertmanager ntfy password
+  ansible.builtin.copy:
+    dest: "{{ alertmanager_runtime_ntfy_password_file }}"
+    content: "{{ alertmanager_runtime_ntfy_password }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+  notify: Restart Alertmanager
+
+- name: Derive Alertmanager Mattermost webhook URLs
+  ansible.builtin.set_fact:
+    alertmanager_runtime_mattermost_critical_webhook_url: >-
+      {{
+        (
+          alertmanager_runtime_mattermost_webhooks.webhooks.get(
+            'alerts_critical',
+            alertmanager_runtime_mattermost_webhooks.webhooks.get('alerts', {}),
+          )
+        ).get('internal_url', '')
+      }}
+    alertmanager_runtime_mattermost_warning_webhook_url: >-
+      {{
+        (
+          alertmanager_runtime_mattermost_webhooks.webhooks.get('alerts', {})
+        ).get('internal_url', '')
+      }}
+    alertmanager_runtime_mattermost_info_webhook_url: >-
+      {{
+        (
+          alertmanager_runtime_mattermost_webhooks.webhooks.get(
+            'ops',
+            alertmanager_runtime_mattermost_webhooks.webhooks.get(
+              'workflows',
+              alertmanager_runtime_mattermost_webhooks.webhooks.get('alerts', {}),
+            ),
+          )
+        ).get('internal_url', '')
+      }}
+  no_log: true
+
+- name: Assert Alertmanager Mattermost webhook URLs are available
+  ansible.builtin.assert:
+    that:
+      - alertmanager_runtime_mattermost_critical_webhook_url | length > 0
+      - alertmanager_runtime_mattermost_warning_webhook_url | length > 0
+      - alertmanager_runtime_mattermost_info_webhook_url | length > 0
+    fail_msg: >-
+      Alertmanager requires repo-managed Mattermost incoming webhook URLs for
+      critical, warning, and informational notifications.
+  no_log: true
+
+- name: Render Alertmanager configuration
+  ansible.builtin.template:
+    src: "{{ alertmanager_runtime_config_template }}"
+    dest: "{{ alertmanager_runtime_config_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  no_log: true
+  notify: Restart Alertmanager
+
+- name: Copy platform alert rules
+  ansible.builtin.copy:
+    src: "{{ alertmanager_runtime_platform_rules_source }}"
+    dest: "{{ alertmanager_runtime_rules_dir }}/platform.yml"
+    owner: root
+    group: prometheus
+    mode: "0644"
+  notify: Restart Prometheus
+
+- name: Enable and start Alertmanager
+  ansible.builtin.systemd:
+    name: "{{ alertmanager_runtime_service_name }}"
+    enabled: true
+    state: started
+
+- name: Flush Alertmanager handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Verify Alertmanager runtime health probes
+  ansible.builtin.import_tasks: verify.yml

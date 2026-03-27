@@ -1,0 +1,16 @@
+services:
+  openbao:
+    image: {{ openbao_image }}
+    container_name: {{ openbao_container_name }}
+    user: "0:0"
+    command:
+      - server
+    restart: unless-stopped
+    ports:
+      - "{{ openbao_tls_bind_address }}:{{ openbao_tls_port }}:{{ openbao_tls_port }}"
+      - "{{ openbao_http_bind_address }}:{{ openbao_http_port }}:{{ openbao_http_port }}"
+    volumes:
+      - {{ openbao_config_dir }}:/openbao/config
+      - {{ openbao_data_dir }}:/openbao/data
+      - {{ openbao_log_dir }}:/openbao/logs
+      - {{ openbao_tls_dir }}:/openbao/tls

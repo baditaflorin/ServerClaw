@@ -1,0 +1,78 @@
+---
+- name: Create one Proxmox fixture for Molecule
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Require MOLECULE_FIXTURE_NAME
+      ansible.builtin.assert:
+        that:
+          - lookup('ansible.builtin.env', 'MOLECULE_FIXTURE_NAME') | length > 0
+        fail_msg: MOLECULE_FIXTURE_NAME must be set before running the proxmox-fixture driver.
+
+    - name: Provision the fixture
+      ansible.builtin.command:
+        argv:
+          - python3
+          - "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}/scripts/fixture_manager.py"
+          - up
+          - "{{ lookup('ansible.builtin.env', 'MOLECULE_FIXTURE_NAME') }}"
+          - --json
+          - --skip-role-converge
+      register: molecule_fixture_up
+      when: lookup('ansible.builtin.env', 'MOLECULE_FIXTURE_SKIP_VERIFY') | default('0', true) not in ['1', 'true', 'yes']
+      changed_when: true
+
+    - name: Provision the fixture without built-in verification
+      ansible.builtin.command:
+        argv:
+          - python3
+          - "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}/scripts/fixture_manager.py"
+          - up
+          - "{{ lookup('ansible.builtin.env', 'MOLECULE_FIXTURE_NAME') }}"
+          - --json
+          - --skip-role-converge
+          - --skip-verify
+      register: molecule_fixture_up
+      when: lookup('ansible.builtin.env', 'MOLECULE_FIXTURE_SKIP_VERIFY') | default('0', true) in ['1', 'true', 'yes']
+      changed_when: true
+
+    - name: Parse fixture payload
+      ansible.builtin.set_fact:
+        molecule_fixture_payload: "{{ molecule_fixture_up.stdout | from_json }}"
+
+    - name: Load controller-local secret manifest
+      ansible.builtin.set_fact:
+        molecule_controller_secrets: >-
+          {{
+            lookup('ansible.builtin.file', lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') ~ '/config/controller-local-secrets.json')
+            | from_json
+          }}
+
+    - name: Write Molecule environment file
+      ansible.builtin.copy:
+        dest: "{{ lookup('ansible.builtin.env', 'MOLECULE_EPHEMERAL_DIRECTORY') }}/molecule.env"
+        mode: "0600"
+        content: |
+          MOLECULE_FIXTURE_NAME={{ molecule_fixture_payload.fixture_id }}
+          MOLECULE_FIXTURE_IP={{ molecule_fixture_payload.ip_address }}
+          MOLECULE_FIXTURE_RECEIPT={{ molecule_fixture_payload.receipt_id }}
+
+    - name: Write delegated inventory for subsequent Molecule steps
+      ansible.builtin.copy:
+        dest: "{{ lookup('ansible.builtin.env', 'MOLECULE_EPHEMERAL_DIRECTORY') }}/inventory.json"
+        mode: "0600"
+        content: |
+          {
+            "all": {
+              "hosts": {
+                "fixture": {
+                  "ansible_become": true,
+                  "ansible_host": "{{ molecule_fixture_payload.ip_address }}",
+                  "ansible_python_interpreter": "/usr/bin/python3",
+                  "ansible_ssh_common_args": "-o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i {{ molecule_controller_secrets.secrets.bootstrap_ssh_private_key.path }} -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=5 ops@65.108.75.123 -W %h:%p\"",
+                  "ansible_ssh_private_key_file": "{{ molecule_controller_secrets.secrets.bootstrap_ssh_private_key.path }}",
+                  "ansible_user": "ops"
+                }
+              }
+            }
+          }

@@ -1,0 +1,40 @@
+### Managed by Ansible
+
+source /etc/network/interfaces.d/*
+
+auto lo
+iface lo inet loopback
+iface lo inet6 loopback
+
+iface {{ management_interface }} inet manual
+iface {{ management_interface }} inet6 manual
+
+auto {{ proxmox_wan_bridge }}
+iface {{ proxmox_wan_bridge }} inet static
+    address {{ management_ipv4 }}/{{ management_ipv4_cidr }}
+    gateway {{ management_gateway4 }}
+    bridge-ports {{ management_interface }}
+    bridge-stp off
+    bridge-fd 0
+    up route add -net {{ hetzner_ipv4_route_network }} netmask {{ hetzner_ipv4_route_netmask }} gw {{ management_gateway4 }} dev {{ proxmox_wan_bridge }} || true
+    down route del -net {{ hetzner_ipv4_route_network }} netmask {{ hetzner_ipv4_route_netmask }} gw {{ management_gateway4 }} dev {{ proxmox_wan_bridge }} || true
+
+iface {{ proxmox_wan_bridge }} inet6 static
+    address {{ management_ipv6 }}/{{ management_ipv6_cidr }}
+    gateway {{ management_gateway6 }}
+
+auto {{ proxmox_internal_bridge }}
+iface {{ proxmox_internal_bridge }} inet static
+    address {{ proxmox_internal_ipv4 }}/{{ proxmox_internal_cidr }}
+    bridge-ports none
+    bridge-stp off
+    bridge-fd 0
+{% if proxmox_staging_bridge_enabled | default(false) %}
+
+auto {{ proxmox_staging_bridge }}
+iface {{ proxmox_staging_bridge }} inet static
+    address {{ proxmox_staging_ipv4 }}/{{ proxmox_staging_cidr }}
+    bridge-ports none
+    bridge-stp off
+    bridge-fd 0
+{% endif %}

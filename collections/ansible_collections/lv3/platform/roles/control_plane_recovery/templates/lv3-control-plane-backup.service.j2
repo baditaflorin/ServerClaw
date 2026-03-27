@@ -1,0 +1,8 @@
+[Unit]
+Description=LV3 control-plane backup export
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart={{ control_plane_recovery_runtime_backup_script }}

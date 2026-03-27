@@ -1,0 +1,17 @@
+# Identity Reference
+
+## Identity Classes
+
+| Class | Interactive Use | Automation Use | Description |
+| --- | --- | --- | --- |
+{% for row in classes -%}
+| `{{ row.id }}` | {{ row.interactive_use }} | {{ row.automation_use }} | {{ row.description }} |
+{% endfor %}
+
+## Managed Identities
+
+| ID | Principal | Class | Owner | Purpose |
+| --- | --- | --- | --- | --- |
+{% for row in identities -%}
+| `{{ row.id }}` | `{{ row.principal }}` | `{{ row.class }}` | {{ row.owner }} | {{ row.purpose }} |
+{% endfor %}

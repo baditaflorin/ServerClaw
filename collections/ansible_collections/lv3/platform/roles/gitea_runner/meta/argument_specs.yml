@@ -1,0 +1,38 @@
+---
+argument_specs:
+  main:
+    short_description: Deploy the managed Gitea Actions runner on docker-build-lv3.
+    options:
+      gitea_runner_site_dir:
+        type: path
+        required: true
+      gitea_runner_data_dir:
+        type: path
+        required: true
+      gitea_runner_compose_file:
+        type: path
+        required: true
+      gitea_runner_compose_bin:
+        type: str
+        required: true
+      gitea_runner_config_file:
+        type: path
+        required: true
+      gitea_runner_image:
+        type: str
+        required: true
+      gitea_runner_container_name:
+        type: str
+        required: true
+      gitea_runner_instance_url:
+        type: str
+        required: true
+      gitea_runner_registration_token_local_file:
+        type: path
+        required: true
+      gitea_runner_name:
+        type: str
+        required: true
+      gitea_runner_labels:
+        type: str
+        required: true

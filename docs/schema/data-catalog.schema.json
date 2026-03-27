@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/schema/data-catalog.schema.json",
+  "title": "Platform Data Catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schema_version", "data_stores"],
+  "properties": {
+    "$schema": {
+      "const": "docs/schema/data-catalog.schema.json"
+    },
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "data_stores": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "service",
+          "name",
+          "class",
+          "retention_days",
+          "backup_included",
+          "access_role",
+          "pii_risk",
+          "locations",
+          "notes"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]*$"
+          },
+          "service": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]*$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "class": {
+            "type": "string",
+            "enum": ["secret", "confidential", "internal", "public"]
+          },
+          "retention_days": {
+            "type": ["integer", "null"],
+            "minimum": 1
+          },
+          "backup_included": {
+            "type": "boolean"
+          },
+          "access_role": {
+            "type": "string",
+            "minLength": 1
+          },
+          "pii_risk": {
+            "type": "string",
+            "enum": ["none", "low", "medium", "high"]
+          },
+          "locations": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "retention_paths": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "notes": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

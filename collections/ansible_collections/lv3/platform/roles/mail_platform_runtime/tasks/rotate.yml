@@ -1,0 +1,394 @@
+---
+- name: Assert the mail platform rotation request is valid
+  ansible.builtin.assert:
+    that:
+      - secret_rotation_secret_id | length > 0
+      - secret_rotation_new_value | length > 0
+      - secret_rotation_selected_secret.apply_target in ['mail_platform_runtime_field', 'mail_platform_profile_field']
+    fail_msg: "mail_platform_runtime rotate.yml requires a valid mail-platform secret rotation contract."
+
+- name: Ensure local mail platform artifact directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0700"
+  loop:
+    - "{{ mail_platform_local_artifact_dir }}"
+    - "{{ mail_platform_profile_local_artifact_dir }}"
+  delegate_to: localhost
+  become: false
+
+- name: Read current mail platform core secrets
+  ansible.builtin.slurp:
+    src: "{{ item.path }}"
+  loop:
+    - name: stalwart_admin_password
+      path: "{{ mail_platform_admin_password_file }}"
+    - name: mailbox_password
+      path: "{{ mail_platform_mailbox_password_file }}"
+    - name: metrics_password
+      path: "{{ mail_platform_metrics_password_file }}"
+    - name: gateway_api_key
+      path: "{{ mail_platform_gateway_api_key_file }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: mail_platform_rotation_core_secret_raw
+  no_log: true
+
+- name: Record current mail platform core secret facts
+  ansible.builtin.set_fact:
+    mail_platform_rotation_current_admin_password: "{{ mail_platform_rotation_core_secret_raw.results[0].content | b64decode | trim }}"
+    mail_platform_rotation_current_mailbox_password: "{{ mail_platform_rotation_core_secret_raw.results[1].content | b64decode | trim }}"
+    mail_platform_rotation_current_metrics_password: "{{ mail_platform_rotation_core_secret_raw.results[2].content | b64decode | trim }}"
+    mail_platform_rotation_current_gateway_api_key: "{{ mail_platform_rotation_core_secret_raw.results[3].content | b64decode | trim }}"
+  no_log: true
+
+- name: Build the mail platform profile secret specs
+  ansible.builtin.set_fact:
+    mail_platform_rotation_profile_secret_specs: >-
+      {{
+        (mail_platform_rotation_profile_secret_specs | default([]))
+        + [
+            {
+              'profile_id': item.id,
+              'field_name': 'mailbox_password',
+              'path': mail_platform_profile_secret_dir ~ '/' ~ item.id ~ '-mailbox-password'
+            },
+            {
+              'profile_id': item.id,
+              'field_name': 'gateway_api_key',
+              'path': mail_platform_profile_secret_dir ~ '/' ~ item.id ~ '-gateway-api-key'
+            }
+          ]
+      }}
+  loop: "{{ mail_platform_notification_profiles }}"
+  loop_control:
+    label: "{{ item.id }}"
+
+- name: Read current mail platform profile secrets
+  ansible.builtin.slurp:
+    src: "{{ item.path }}"
+  loop: "{{ mail_platform_rotation_profile_secret_specs }}"
+  loop_control:
+    label: "{{ item.profile_id }} {{ item.field_name }}"
+  register: mail_platform_rotation_profile_secret_raw
+  no_log: true
+
+- name: Record the effective mail platform core secret values
+  ansible.builtin.set_fact:
+    mail_platform_admin_password: >-
+      {{
+        secret_rotation_new_value
+        if secret_rotation_selected_secret.apply_target == 'mail_platform_runtime_field'
+        and secret_rotation_selected_secret.apply_field == 'stalwart_admin_password'
+        else mail_platform_rotation_current_admin_password
+      }}
+    mail_platform_mailbox_password: >-
+      {{
+        secret_rotation_new_value
+        if secret_rotation_selected_secret.apply_target == 'mail_platform_runtime_field'
+        and secret_rotation_selected_secret.apply_field == 'mailbox_password'
+        else mail_platform_rotation_current_mailbox_password
+      }}
+    mail_platform_metrics_password: >-
+      {{
+        secret_rotation_new_value
+        if secret_rotation_selected_secret.apply_target == 'mail_platform_runtime_field'
+        and secret_rotation_selected_secret.apply_field == 'metrics_password'
+        else mail_platform_rotation_current_metrics_password
+      }}
+    mail_platform_gateway_api_key: >-
+      {{
+        secret_rotation_new_value
+        if secret_rotation_selected_secret.apply_target == 'mail_platform_runtime_field'
+        and secret_rotation_selected_secret.apply_field == 'gateway_api_key'
+        else mail_platform_rotation_current_gateway_api_key
+      }}
+  no_log: true
+
+- name: Build runtime notification profile facts with the rotated secret applied
+  ansible.builtin.set_fact:
+    mail_platform_notification_profiles_runtime: >-
+      {{
+        (mail_platform_notification_profiles_runtime | default([]))
+        + [
+            item
+            | combine(
+                {
+                  'mailbox_password': (
+                    secret_rotation_new_value
+                    if secret_rotation_selected_secret.apply_target == 'mail_platform_profile_field'
+                    and secret_rotation_selected_secret.profile_id == item.id
+                    and secret_rotation_selected_secret.apply_field == 'mailbox_password'
+                    else (
+                      mail_platform_rotation_profile_secret_raw.results
+                      | selectattr('item.profile_id', 'equalto', item.id)
+                      | selectattr('item.field_name', 'equalto', 'mailbox_password')
+                      | map(attribute='content')
+                      | first
+                      | b64decode
+                      | trim
+                    )
+                  ),
+                  'gateway_api_key': (
+                    secret_rotation_new_value
+                    if secret_rotation_selected_secret.apply_target == 'mail_platform_profile_field'
+                    and secret_rotation_selected_secret.profile_id == item.id
+                    and secret_rotation_selected_secret.apply_field == 'gateway_api_key'
+                    else (
+                      mail_platform_rotation_profile_secret_raw.results
+                      | selectattr('item.profile_id', 'equalto', item.id)
+                      | selectattr('item.field_name', 'equalto', 'gateway_api_key')
+                      | map(attribute='content')
+                      | first
+                      | b64decode
+                      | trim
+                    )
+                  ),
+                  'mailbox_password_file': mail_platform_profile_secret_dir ~ '/' ~ item.id ~ '-mailbox-password',
+                  'mailbox_password_local_file': mail_platform_profile_local_artifact_dir ~ '/' ~ item.id ~ '-mailbox-password.txt',
+                  'gateway_api_key_file': mail_platform_profile_secret_dir ~ '/' ~ item.id ~ '-gateway-api-key',
+                  'gateway_api_key_local_file': mail_platform_profile_local_artifact_dir ~ '/' ~ item.id ~ '-gateway-api-key.txt'
+                }
+              )
+          ]
+      }}
+  loop: "{{ mail_platform_notification_profiles }}"
+  loop_control:
+    label: "{{ item.id }}"
+  no_log: true
+
+- name: Record managed mailbox runtime facts
+  ansible.builtin.set_fact:
+    mail_platform_managed_mailboxes_runtime:
+      - localpart: "{{ mail_platform_mailbox_localpart }}"
+        address: "{{ mail_platform_mailbox_address }}"
+        password: "{{ mail_platform_mailbox_password }}"
+        description: "{{ mail_platform_mailbox_description }}"
+  no_log: true
+
+- name: Append notification profile mailboxes to the managed mailbox list
+  ansible.builtin.set_fact:
+    mail_platform_managed_mailboxes_runtime: >-
+      {{
+        mail_platform_managed_mailboxes_runtime
+        + [
+            {
+              'localpart': item.mailbox_localpart,
+              'address': item.mailbox_address,
+              'password': item.mailbox_password,
+              'description': item.description
+            }
+          ]
+      }}
+  loop: "{{ mail_platform_notification_profiles_runtime }}"
+  loop_control:
+    label: "{{ item.id }}"
+  no_log: true
+
+- name: Record the target secret file paths
+  ansible.builtin.set_fact:
+    mail_platform_rotation_runtime_remote_files:
+      stalwart_admin_password: "{{ mail_platform_admin_password_file }}"
+      mailbox_password: "{{ mail_platform_mailbox_password_file }}"
+      metrics_password: "{{ mail_platform_metrics_password_file }}"
+      gateway_api_key: "{{ mail_platform_gateway_api_key_file }}"
+    mail_platform_rotation_runtime_local_files:
+      stalwart_admin_password: "{{ mail_platform_admin_password_local_file }}"
+      mailbox_password: "{{ mail_platform_mailbox_password_local_file }}"
+      metrics_password: "{{ mail_platform_metrics_password_local_file }}"
+      gateway_api_key: "{{ mail_platform_gateway_api_key_local_file }}"
+    mail_platform_rotation_remote_target_file: >-
+      {{
+        mail_platform_rotation_runtime_remote_files[secret_rotation_selected_secret.apply_field]
+        if secret_rotation_selected_secret.apply_target == 'mail_platform_runtime_field'
+        else (
+          mail_platform_profile_secret_dir
+          ~ '/'
+          ~ secret_rotation_selected_secret.profile_id
+          ~ (
+            '-mailbox-password'
+            if secret_rotation_selected_secret.apply_field == 'mailbox_password'
+            else '-gateway-api-key'
+          )
+        )
+      }}
+    mail_platform_rotation_local_target_file: >-
+      {{
+        mail_platform_rotation_runtime_local_files[secret_rotation_selected_secret.apply_field]
+        if secret_rotation_selected_secret.apply_target == 'mail_platform_runtime_field'
+        else (
+          mail_platform_profile_local_artifact_dir
+          ~ '/'
+          ~ secret_rotation_selected_secret.profile_id
+          ~ (
+            '-mailbox-password.txt'
+            if secret_rotation_selected_secret.apply_field == 'mailbox_password'
+            else '-gateway-api-key.txt'
+          )
+        )
+      }}
+  no_log: true
+
+- name: Persist the rotated mail-platform secret on the runtime host
+  ansible.builtin.copy:
+    dest: "{{ mail_platform_rotation_remote_target_file }}"
+    content: "{{ secret_rotation_new_value }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Mirror the rotated mail-platform secret to the control machine
+  ansible.builtin.copy:
+    dest: "{{ mail_platform_rotation_local_target_file }}"
+    content: "{{ secret_rotation_new_value }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Render the Stalwart configuration file with rotated secrets
+  ansible.builtin.template:
+    src: stalwart-config.toml.j2
+    dest: "{{ mail_platform_stalwart_config_file }}"
+    owner: root
+    group: root
+    mode: "0640"
+  no_log: true
+
+- name: Render the mail platform bootstrap script with rotated secrets
+  ansible.builtin.template:
+    src: bootstrap-mail-platform.py.j2
+    dest: "{{ mail_platform_stalwart_bootstrap_file }}"
+    owner: root
+    group: root
+    mode: "0750"
+  no_log: true
+
+- name: Render the mail gateway environment file with rotated secrets
+  ansible.builtin.template:
+    src: mail-gateway.env.j2
+    dest: "{{ mail_platform_gateway_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Render the notification profiles catalog with rotated secrets
+  ansible.builtin.template:
+    src: notification-profiles.json.j2
+    dest: "{{ mail_platform_gateway_profiles_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Check whether the Docker nat chain exists before mail-platform rotation recreates published ports
+  ansible.builtin.command:
+    argv:
+      - iptables
+      - -t
+      - nat
+      - -S
+      - DOCKER
+  register: mail_platform_rotation_docker_nat_chain
+  changed_when: false
+  failed_when: false
+
+- name: Restore Docker networking when the nat chain is missing before mail-platform rotation
+  ansible.builtin.service:
+    name: docker
+    state: restarted
+  when: mail_platform_rotation_docker_nat_chain.rc != 0
+
+- name: Force-recreate the mail platform runtime with rotated secret material after Docker networking recovery
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ mail_platform_compose_file }}"
+      - up
+      - -d
+      - --force-recreate
+      - stalwart
+      - mail-gateway
+  args:
+    chdir: "{{ mail_platform_site_dir }}"
+  register: mail_platform_rotation_up
+  changed_when: >-
+    'Recreating' in mail_platform_rotation_up.stdout
+    or 'Creating' in mail_platform_rotation_up.stdout
+    or 'Starting' in mail_platform_rotation_up.stdout
+  when: mail_platform_rotation_docker_nat_chain.rc != 0
+
+- name: Restart the mail platform runtime with rotated secret material
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ mail_platform_compose_file }}"
+      - up
+      - -d
+      - --force-recreate
+      - stalwart
+      - mail-gateway
+  args:
+    chdir: "{{ mail_platform_site_dir }}"
+  register: mail_platform_rotation_up
+  changed_when: >-
+    'Recreating' in mail_platform_rotation_up.stdout
+    or 'Creating' in mail_platform_rotation_up.stdout
+    or 'Starting' in mail_platform_rotation_up.stdout
+  when: mail_platform_rotation_docker_nat_chain.rc == 0
+
+- name: Wait for the Stalwart management API after rotation
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ mail_platform_stalwart_http_port }}"
+    delay: 0
+    timeout: 120
+
+- name: Wait for the private mail submission relay after rotation
+  ansible.builtin.wait_for:
+    host: "{{ ansible_host }}"
+    port: "{{ mail_platform_internal_submission_port }}"
+    delay: 0
+    timeout: 120
+
+- name: Wait for the mail gateway API after rotation
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ mail_platform_gateway_port }}"
+    delay: 0
+    timeout: 120
+
+- name: Reconcile mail principals after rotation
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ mail_platform_stalwart_bootstrap_file }}"
+  register: mail_platform_rotation_bootstrap
+  changed_when: "'changed' in mail_platform_rotation_bootstrap.stdout"
+  no_log: true
+
+- name: Verify the mail gateway health endpoint after rotation
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ mail_platform_gateway_port }}/healthz"
+    method: GET
+    status_code: 200
+  register: mail_platform_rotation_health
+  changed_when: false
+
+- name: Verify the mail gateway CRUD API after rotation
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ mail_platform_gateway_port }}/v1/domains"
+    method: GET
+    headers:
+      X-API-Key: "{{ mail_platform_gateway_api_key }}"
+    status_code: 200
+  register: mail_platform_rotation_domains
+  changed_when: false
+  no_log: true

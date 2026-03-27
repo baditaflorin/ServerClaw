@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lv3.org/schema/mutation-audit-event.json",
+  "title": "LV3 Mutation Audit Event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "ts",
+    "actor",
+    "surface",
+    "action",
+    "target",
+    "outcome",
+    "correlation_id",
+    "evidence_ref"
+  ],
+  "properties": {
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "class",
+        "id"
+      ],
+      "properties": {
+        "class": {
+          "type": "string",
+          "enum": [
+            "operator",
+            "agent",
+            "service",
+            "automation"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "surface": {
+      "type": "string",
+      "enum": [
+        "ansible",
+        "windmill",
+        "openbao",
+        "nats",
+        "command-catalog",
+        "manual"
+      ]
+    },
+    "action": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
+    "target": {
+      "type": "string",
+      "minLength": 1
+    },
+    "outcome": {
+      "type": "string",
+      "enum": [
+        "success",
+        "failure",
+        "rejected"
+      ]
+    },
+    "correlation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_ref": {
+      "type": "string"
+    }
+  }
+}

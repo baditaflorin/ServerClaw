@@ -1,0 +1,25 @@
+---
+services:
+  runner:
+    image: {{ gitea_runner_image }}
+    container_name: {{ gitea_runner_container_name }}
+    restart: unless-stopped
+    environment:
+      CONFIG_FILE: /config.yaml
+      GITEA_INSTANCE_URL: {{ gitea_runner_instance_url }}
+      GITEA_RUNNER_REGISTRATION_TOKEN: {{ gitea_runner_registration_token }}
+      GITEA_RUNNER_NAME: {{ gitea_runner_name }}
+      GITEA_RUNNER_LABELS: {{ gitea_runner_labels }}
+    volumes:
+      - {{ gitea_runner_config_file }}:/config.yaml
+      - {{ gitea_runner_data_dir }}:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - default
+
+networks:
+  default:
+    name: {{ gitea_runner_network_name }}
+    ipam:
+      config:
+        - subnet: {{ gitea_runner_network_subnet }}

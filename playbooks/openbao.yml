@@ -1,0 +1,196 @@
+- name: Prepare PostgreSQL for OpenBao dynamic credentials
+  hosts: "{{ 'postgres_guests:&staging' if (env | default('production')) == 'staging' else 'postgres_guests:&production' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - security
+    - service-openbao
+
+  pre_tasks:
+    - name: Ensure target guest is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.postgres_vm
+    - role: lv3.platform.openbao_postgres_backend
+
+- name: Converge OpenBao on the Docker runtime VM
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - security
+    - service-openbao
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.openbao
+        playbook_execution_audit_target: openbao
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.openbao_runtime
+
+  post_tasks:
+    - name: Run shared post-verify checks
+      ansible.builtin.import_tasks: tasks/post-verify.yml
+      vars:
+        service_health_probe_id: openbao
+        playbook_execution_post_verify_audit_action: playbook.verify.openbao
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: openbao
+
+- name: Verify PostgreSQL dynamic credentials end to end
+  hosts: "{{ 'postgres_guests:&staging' if (env | default('production')) == 'staging' else 'postgres_guests:&production' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - security
+    - service-openbao
+
+  tasks:
+    - name: Read the controller AppRole artifact
+      ansible.builtin.slurp:
+        src: "{{ openbao_controller_approle_local_file }}"
+      delegate_to: localhost
+      become: false
+      register: openbao_verify_controller_approle_raw
+      no_log: true
+
+    - name: Record controller AppRole verification facts
+      ansible.builtin.set_fact:
+        openbao_verify_controller_approle: "{{ openbao_verify_controller_approle_raw.content | b64decode | from_json }}"
+      no_log: true
+
+    - name: Login to OpenBao as the controller AppRole
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ openbao_http_port }}/v1/auth/approle/login"
+        method: POST
+        body_format: json
+        body:
+          role_id: "{{ openbao_verify_controller_approle.role_id }}"
+          secret_id: "{{ openbao_verify_controller_approle.secret_id }}"
+        return_content: true
+        status_code: 200
+      delegate_to: "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
+      register: openbao_verify_controller_login
+      no_log: true
+
+    - name: Request a PostgreSQL dynamic credential
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ openbao_http_port }}/v1/database/creds/postgres-readonly"
+        method: GET
+        headers:
+          X-Vault-Token: "{{ openbao_verify_controller_login.json.auth.client_token }}"
+        return_content: true
+        status_code: 200
+      delegate_to: "{{ playbook_execution_host_patterns.docker_runtime[playbook_execution_env] }}"
+      register: openbao_verify_postgres_dynamic_credential
+      retries: 6
+      delay: 5
+      until:
+        - openbao_verify_postgres_dynamic_credential.status == 200
+        - (openbao_verify_postgres_dynamic_credential.json.data.username | default('')) | length > 0
+      no_log: true
+
+    - name: Verify the issued PostgreSQL credential against the local database
+      ansible.builtin.shell: |
+        set -euo pipefail
+        PGPASSWORD='{{ openbao_verify_postgres_dynamic_credential.json.data.password }}' \
+        psql \
+          --host 127.0.0.1 \
+          --username '{{ openbao_verify_postgres_dynamic_credential.json.data.username }}' \
+          --dbname '{{ openbao_postgres_database }}' \
+          --tuples-only \
+          --no-align \
+          --command 'select current_user'
+      args:
+        executable: /bin/bash
+      register: openbao_verify_postgres_login
+      changed_when: false
+      no_log: true
+
+    - name: Assert the issued PostgreSQL credential works
+      ansible.builtin.assert:
+        that:
+          - openbao_verify_postgres_login.stdout | trim == openbao_verify_postgres_dynamic_credential.json.data.username
+        fail_msg: "The OpenBao-issued PostgreSQL dynamic credential could not authenticate successfully."
+
+- name: Refresh persisted OpenBao AppRole artifacts after end-to-end verification
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - security
+    - service-openbao
+  vars:
+    openbao_verification_approles:
+      - name: controller-automation
+        local_file: "{{ openbao_controller_approle_local_file }}"
+      - name: mail-platform
+        local_file: "{{ openbao_mail_platform_approle_local_file }}"
+
+  tasks:
+    - name: Read the OpenBao init payload from the control machine
+      ansible.builtin.slurp:
+        src: "{{ openbao_init_local_file }}"
+      delegate_to: localhost
+      become: false
+      register: openbao_refresh_init_payload_raw
+      no_log: true
+
+    - name: Record the OpenBao init payload facts
+      ansible.builtin.set_fact:
+        openbao_refresh_init_payload: "{{ openbao_refresh_init_payload_raw.content | b64decode | from_json }}"
+      no_log: true
+
+    - name: Read AppRole role IDs for refreshed controller-local artifacts
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ openbao_http_port }}/v1/auth/approle/role/{{ item.name }}/role-id"
+        method: GET
+        headers:
+          X-Vault-Token: "{{ openbao_refresh_init_payload.root_token }}"
+        return_content: true
+        status_code: 200
+      loop: "{{ openbao_verification_approles }}"
+      register: openbao_refresh_role_ids
+      no_log: true
+
+    - name: Generate refreshed AppRole secret IDs after end-to-end verification
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ openbao_http_port }}/v1/auth/approle/role/{{ item.name }}/secret-id"
+        method: POST
+        headers:
+          X-Vault-Token: "{{ openbao_refresh_init_payload.root_token }}"
+        body_format: json
+        body: {}
+        return_content: true
+        status_code: 200
+      loop: "{{ openbao_verification_approles }}"
+      register: openbao_refresh_secret_ids
+      no_log: true
+
+    - name: Persist refreshed AppRole artifacts locally after end-to-end verification
+      ansible.builtin.copy:
+        dest: "{{ item.item.local_file }}"
+        content: "{{ {'role_name': item.item.name, 'auth_path': 'approle', 'role_id': (openbao_refresh_role_ids.results | selectattr('item.name', 'equalto', item.item.name) | map(attribute='json.data.role_id') | first), 'secret_id': item.json.data.secret_id, 'secret_id_accessor': item.json.data.secret_id_accessor, 'generated_at': ansible_date_time.iso8601} | to_nice_json }}\n"
+        mode: "0600"
+      loop: "{{ openbao_refresh_secret_ids.results | default([]) }}"
+      delegate_to: localhost
+      become: false
+      no_log: true

@@ -1,0 +1,18 @@
+---
+homepage_site_dir: /opt/homepage
+homepage_config_dir: "{{ homepage_site_dir }}/config"
+homepage_compose_file: "{{ homepage_site_dir }}/docker-compose.yml"
+homepage_container_name: homepage
+homepage_image: "{{ container_image_catalog.images.homepage_runtime.ref }}"
+homepage_bind_host: "{{ ansible_host }}"
+homepage_port: "{{ platform_service_topology | platform_service_port('homepage', 'internal') }}"
+homepage_internal_url: "{{ platform_service_topology | platform_service_url('homepage', 'internal') }}"
+homepage_public_url: "https://{{ (hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('homepage')).public_hostname }}"
+homepage_public_host: "{{ (hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('homepage')).public_hostname }}"
+homepage_allowed_hosts:
+  - "{{ homepage_public_host }}"
+  - "{{ homepage_bind_host }}:{{ homepage_port }}"
+  - "127.0.0.1:{{ homepage_port }}"
+  - "localhost:{{ homepage_port }}"
+homepage_config_generator_local_python: "{{ ansible_playbook_python }}"
+homepage_config_generator_local_script: "{{ playbook_dir }}/../scripts/generate_homepage_config.py"

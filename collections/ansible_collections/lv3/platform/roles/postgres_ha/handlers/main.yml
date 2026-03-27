@@ -1,0 +1,16 @@
+---
+- name: Restart PostgreSQL
+  ansible.builtin.systemd:
+    name: "{{ postgres_ha_postgresql_service_name }}"
+    state: restarted
+
+- name: Restart lv3 patroni
+  ansible.builtin.systemd:
+    name: "{{ postgres_ha_patroni_service_name }}"
+    state: restarted
+    daemon_reload: true
+
+- name: Restart telegraf
+  ansible.builtin.systemd:
+    name: telegraf
+    state: restarted

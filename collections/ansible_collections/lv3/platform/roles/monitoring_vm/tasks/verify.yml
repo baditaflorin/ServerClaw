@@ -1,0 +1,196 @@
+---
+- name: Verify Grafana health endpoint responds
+  ansible.builtin.uri:
+    url: http://127.0.0.1:3000/api/health
+    method: GET
+    status_code: 200
+  register: monitoring_verify_grafana_health
+  retries: 20
+  delay: 3
+  until: monitoring_verify_grafana_health.status == 200
+  changed_when: false
+
+- name: Verify blackbox exporter health endpoint responds
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ monitoring_blackbox_exporter_port }}/-/healthy"
+    method: GET
+    status_code: 200
+  register: monitoring_verify_blackbox_health
+  retries: 20
+  delay: 3
+  until: monitoring_verify_blackbox_health.status == 200
+  changed_when: false
+
+- name: Verify blackbox exporter metrics endpoint responds
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ monitoring_blackbox_exporter_port }}/metrics"
+    method: GET
+    status_code: 200
+  register: monitoring_verify_blackbox_exporter_metrics
+  changed_when: false
+
+- name: Verify Grafana datasource is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/datasources/name/{{ monitoring_grafana_datasource_name | urlencode }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_verify_grafana_datasource
+  changed_when: false
+  no_log: true
+
+- name: Verify Grafana Loki datasource is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/datasources/name/{{ monitoring_grafana_loki_datasource_name | urlencode }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_verify_grafana_loki_datasource
+  changed_when: false
+  no_log: true
+
+- name: Verify Grafana Prometheus datasource is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/datasources/uid/{{ monitoring_grafana_prometheus_datasource_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_verify_grafana_prometheus_datasource
+  changed_when: false
+  no_log: true
+
+- name: Verify Grafana Tempo datasource is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/datasources/uid/{{ monitoring_grafana_tempo_datasource_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_verify_grafana_tempo_datasource
+  changed_when: false
+  no_log: true
+
+- name: Verify LV3 platform dashboard is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/{{ monitoring_grafana_dashboard_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_verify_platform_dashboard
+  changed_when: false
+  no_log: true
+
+- name: Verify LV3 mail platform dashboard is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/{{ monitoring_grafana_mail_dashboard_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_verify_mail_dashboard
+  changed_when: false
+  no_log: true
+
+- name: Verify LV3 SLO dashboard is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/{{ monitoring_grafana_slo_dashboard_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_verify_slo_dashboard
+  changed_when: false
+  no_log: true
+
+- name: Verify LV3 capacity dashboard is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/{{ monitoring_grafana_capacity_dashboard_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_verify_capacity_dashboard
+  changed_when: false
+  no_log: true
+
+- name: Verify public Grafana dashboard URLs redirect unauthenticated viewers to login
+  ansible.builtin.uri:
+    url: "{{ monitoring_grafana_public_url }}/d/{{ monitoring_grafana_dashboard_uid }}/{{ monitoring_grafana_dashboard_uid }}"
+    method: GET
+    follow_redirects: none
+    status_code: 302
+  delegate_to: localhost
+  become: false
+  register: monitoring_verify_public_dashboard_redirect
+  changed_when: false
+
+- name: Assert the public Grafana dashboard redirect points at login
+  ansible.builtin.assert:
+    that:
+      - "'/login' in (monitoring_verify_public_dashboard_redirect.location | default(''))"
+    fail_msg: "Unauthenticated requests to the public Grafana dashboard URL are not being redirected to login."
+
+- name: Verify the public Grafana health endpoint is not exposed
+  ansible.builtin.uri:
+    url: "{{ monitoring_grafana_public_url }}/api/health"
+    method: GET
+    status_code: 404
+  delegate_to: localhost
+  become: false
+  register: monitoring_verify_public_health_block
+  changed_when: false
+
+- name: Verify Grafana version headers are stripped at the public edge
+  ansible.builtin.command:
+    argv:
+      - curl
+      - -fsSI
+      - "{{ monitoring_grafana_public_url }}/login"
+  delegate_to: localhost
+  become: false
+  register: monitoring_verify_public_login_headers
+  changed_when: false
+  failed_when: >-
+    monitoring_verify_public_login_headers.rc != 0
+    or 'X-Grafana-Version:' in monitoring_verify_public_login_headers.stdout
+    or 'Via:' in monitoring_verify_public_login_headers.stdout
+
+- name: Verify Prometheus SLO rules are loaded
+  ansible.builtin.uri:
+    url: "{{ monitoring_prometheus_url }}/api/v1/rules"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: monitoring_verify_prometheus_rules
+  changed_when: false
+  failed_when: >
+    monitoring_verify_prometheus_rules.status != 200
+    or 'slo_recording_rules' not in (monitoring_verify_prometheus_rules.content | default(''))
+    or 'slo_alert_rules' not in (monitoring_verify_prometheus_rules.content | default(''))
+
+- name: Verify VM detail dashboards are provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/lv3-vm-{{ item.name }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  loop: "{{ hostvars[groups['proxmox_hosts'][0]].proxmox_guests }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: monitoring_verify_vm_dashboards
+  changed_when: false
+  no_log: true

@@ -1,0 +1,194 @@
+{
+  "$schema": "docs/schema/api-gateway-catalog.schema.json",
+  "schema_version": "1.0.0",
+  "services": [
+    {
+      "id": "dozzle",
+      "name": "Dozzle",
+      "upstream": "http://10.10.10.20:8089",
+      "gateway_prefix": "/v1/dozzle",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 60,
+      "healthcheck_path": "/healthcheck"
+    },
+    {
+      "id": "grafana",
+      "name": "Grafana",
+      "upstream": "http://10.10.10.40:3000",
+      "gateway_prefix": "/v1/grafana",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/api/health"
+    },
+    {
+      "id": "gitea",
+      "name": "Gitea",
+      "upstream": "http://10.10.10.20:3003",
+      "gateway_prefix": "/v1/gitea",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/api/healthz"
+    },
+    {
+      "id": "keycloak",
+      "name": "Keycloak",
+      "upstream": "http://10.10.10.20:18080",
+      "gateway_prefix": "/v1/keycloak",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/realms/lv3/.well-known/openid-configuration"
+    },
+    {
+      "id": "langfuse",
+      "name": "Langfuse",
+      "upstream": "http://10.10.10.20:3002",
+      "gateway_prefix": "/v1/langfuse",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/api/public/health"
+    },
+    {
+      "id": "mail_platform",
+      "name": "Mail Platform",
+      "upstream": "http://10.10.10.20:8081",
+      "gateway_prefix": "/v1/mail-platform",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/health"
+    },
+    {
+      "id": "mattermost",
+      "name": "Mattermost",
+      "upstream": "http://10.10.10.20:8065",
+      "gateway_prefix": "/v1/mattermost",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/api/v4/system/ping"
+    },
+    {
+      "id": "netbox",
+      "name": "NetBox",
+      "upstream": "http://10.10.10.20:8082",
+      "gateway_prefix": "/v1/netbox",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/api/"
+    },
+    {
+      "id": "open_webui",
+      "name": "Open WebUI",
+      "upstream": "http://10.10.10.20:8088",
+      "gateway_prefix": "/v1/open-webui",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/health"
+    },
+    {
+      "id": "openbao",
+      "name": "OpenBao",
+      "upstream": "https://10.10.10.20:8200",
+      "gateway_prefix": "/v1/openbao",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/v1/sys/health"
+    },
+    {
+      "id": "ops_portal",
+      "name": "Ops Portal",
+      "upstream": "http://10.10.10.20:8092",
+      "gateway_prefix": "/v1/ops-portal",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/health"
+    },
+    {
+      "id": "platform_context_api",
+      "name": "Platform Context API",
+      "upstream": "http://10.10.10.20:8010",
+      "gateway_prefix": "/v1/platform-context",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/health",
+      "openapi_path": "/openapi.json"
+    },
+    {
+      "id": "portainer",
+      "name": "Portainer",
+      "upstream": "https://10.10.10.20:9443",
+      "gateway_prefix": "/v1/portainer",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/api/status"
+    },
+    {
+      "id": "vaultwarden",
+      "name": "Vaultwarden",
+      "upstream": "https://10.10.10.20:8222",
+      "gateway_prefix": "/v1/vaultwarden",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/alive"
+    },
+    {
+      "id": "uptime_kuma",
+      "name": "Uptime Kuma",
+      "upstream": "http://10.10.10.20:3001",
+      "gateway_prefix": "/v1/uptime-kuma",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-read",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/api/health"
+    },
+    {
+      "id": "windmill",
+      "name": "Windmill",
+      "upstream": "http://10.10.10.20:8000",
+      "gateway_prefix": "/v1/windmill",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/api/version"
+    },
+    {
+      "id": "semaphore",
+      "name": "Semaphore",
+      "upstream": "http://10.10.10.20:3004",
+      "gateway_prefix": "/v1/semaphore",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/api/ping"
+    }
+  ]
+}

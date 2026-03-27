@@ -1,0 +1,36 @@
+vrrp_script chk_patroni_leader {
+  script "{{ linux_keepalived_track_script }}"
+  interval 2
+  fall 2
+  rise 2
+}
+
+vrrp_instance postgres_vip {
+  state {{ linux_keepalived_state }}
+  interface {{ linux_keepalived_interface }}
+  virtual_router_id {{ linux_keepalived_virtual_router_id }}
+  priority {{ linux_keepalived_priority }}
+  advert_int {{ linux_keepalived_advert_int }}
+  unicast_src_ip {{ linux_keepalived_unicast_source_ip }}
+{% if linux_keepalived_unicast_peers | length > 0 %}
+  unicast_peer {
+{% for peer in linux_keepalived_unicast_peers %}
+    {{ peer }}
+{% endfor %}
+  }
+{% endif %}
+{% if linux_keepalived_auth_pass | length > 0 %}
+  authentication {
+    auth_type PASS
+    auth_pass {{ linux_keepalived_auth_pass }}
+  }
+{% endif %}
+  virtual_ipaddress {
+{% for address in linux_keepalived_virtual_ipaddresses %}
+    {{ address }}
+{% endfor %}
+  }
+  track_script {
+    chk_patroni_leader
+  }
+}

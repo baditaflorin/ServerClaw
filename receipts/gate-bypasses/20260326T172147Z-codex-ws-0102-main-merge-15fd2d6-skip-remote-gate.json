@@ -1,0 +1,8 @@
+{
+  "created_at": "2026-03-26T17:21:47.492568+00:00",
+  "bypass": "skip_remote_gate",
+  "reason": "origin/main push blocked by unrelated schema-validation worktree-path failure and baseline docs/adr/.index.yaml yamllint errors while merging ADR 0102",
+  "source": "manual-main-integration",
+  "branch": "codex/ws-0102-main-merge",
+  "commit": "15fd2d68a9c9fd456f4782e41b1b7b6acd425d20"
+}

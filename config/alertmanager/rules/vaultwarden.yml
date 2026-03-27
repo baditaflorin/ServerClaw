@@ -1,0 +1,14 @@
+groups:
+  - name: vaultwarden-alerts
+    rules:
+      - alert: VaultwardenDown
+        expr: probe_success{service="vaultwarden",probe_kind="readiness"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: vaultwarden
+        annotations:
+          summary: Vaultwarden is unreachable on the private HTTPS endpoint.
+          description: The Vaultwarden readiness probe has been failing for at least two minutes.
+          runbook_url: https://docs.lv3.org/runbooks/configure-vaultwarden/
+          dashboard_url: https://grafana.lv3.org/d/lv3-vaultwarden/lv3-vaultwarden

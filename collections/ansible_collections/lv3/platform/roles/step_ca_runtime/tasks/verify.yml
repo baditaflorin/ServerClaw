@@ -1,0 +1,60 @@
+---
+- name: Verify the private step-ca API is listening locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ step_ca_api_port }}"
+    delay: 0
+    timeout: 120
+
+- name: Verify the step-ca health endpoint locally
+  ansible.builtin.uri:
+    url: "https://127.0.0.1:{{ step_ca_api_port }}{{ step_ca_healthcheck_path }}"
+    method: GET
+    ca_path: "{{ step_ca_home }}/certs/root_ca.crt"
+    status_code: 200
+  register: step_ca_verify_healthcheck
+  changed_when: false
+
+- name: Verify X.509 issuance with the services provisioner
+  ansible.builtin.command:
+    argv:
+      - step
+      - ca
+      - certificate
+      - "{{ step_ca_service_test_name }}"
+      - "{{ step_ca_site_dir }}/service-test.crt"
+      - "{{ step_ca_site_dir }}/service-test.key"
+      - --force
+      - --ca-url
+      - "{{ step_ca_internal_url }}"
+      - --root
+      - "{{ step_ca_home }}/certs/root_ca.crt"
+      - --provisioner
+      - services
+      - --provisioner-password-file
+      - "{{ step_ca_services_password_file }}"
+      - --password-file
+      - "{{ step_ca_services_password_file }}"
+      - --san
+      - "{{ step_ca_service_test_name }}"
+      - --not-after
+      - 1h
+  register: step_ca_verify_issue
+  retries: 5
+  delay: 2
+  until: step_ca_verify_issue.rc == 0
+  changed_when: false
+  no_log: true
+
+- name: Verify the issued X.509 test certificate chains to the root
+  ansible.builtin.command:
+    argv:
+      - openssl
+      - verify
+      - -CAfile
+      - "{{ step_ca_home }}/certs/root_ca.crt"
+      - -untrusted
+      - "{{ step_ca_home }}/certs/intermediate_ca.crt"
+      - "{{ step_ca_site_dir }}/service-test.crt"
+  register: step_ca_verify_chain
+  changed_when: false

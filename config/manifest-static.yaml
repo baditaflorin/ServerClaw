@@ -1,0 +1,63 @@
+schema_version: "1.0.0"
+environment: production
+refresh_interval_minutes: 60
+identity:
+  platform_name: lv3.org
+  operator: Florin Badita
+  description: Single-node Proxmox homelab with repository-managed agentic operations automation.
+registered_agents:
+  - agent_id: agent/observation-loop
+    trust_tier: T2
+    description: Scheduled observation loop that collects repo-managed findings and drift evidence.
+    status: active
+    principal: lv3-agent-hub
+    owner: Repository automation
+    source_identity_id: lv3-agent-hub
+  - agent_id: agent/triage-loop
+    trust_tier: T2
+    description: Alert-driven triage workflow that proposes the cheapest safe next action.
+    status: active
+    principal: lv3-agent-hub
+    owner: Repository automation
+    source_identity_id: lv3-agent-hub
+  - agent_id: agent/proxmox-automation
+    trust_tier: T3
+    description: Governed Proxmox API mutation identity for repo-managed automation.
+    status: active
+    principal: lv3-automation@pve
+    owner: Repository automation
+    source_identity_id: lv3-automation-proxmox
+agentic_architecture:
+  overview: Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.
+  entry_points:
+    - component: Platform CLI
+      endpoint: lv3 <instruction>
+      adr: "0090"
+    - component: Ops portal
+      endpoint: https://ops.lv3.org
+      adr: "0093"
+    - component: Windmill workflows
+      endpoint: https://windmill.lv3.org
+      adr: "0044"
+    - component: API gateway
+      endpoint: https://api.lv3.org
+      adr: "0092"
+  pipeline:
+    - Goal compiler (ADR 0112)
+    - Change risk scoring (ADR 0116)
+    - Budgeted workflow scheduler (ADR 0119)
+    - Workflow catalog routing (ADR 0035)
+    - Validation gate (ADR 0087)
+    - Live apply receipts and deployment history (ADR 0036 / ADR 0081)
+  autonomous_loop:
+    - Agent observation loop (ADR 0071)
+    - Incident triage (ADR 0114)
+    - Maintenance suppression (ADR 0080)
+    - Release and promotion controls (ADR 0073 / ADR 0110)
+data_sources:
+  service_catalog: config/service-capability-catalog.json
+  workflow_catalog: config/workflow-catalog.json
+  stack_state: versions/stack.yaml
+  deployment_history: receipts/live-applies
+  release_notes: docs/release-notes
+  adr_corpus: docs/adr

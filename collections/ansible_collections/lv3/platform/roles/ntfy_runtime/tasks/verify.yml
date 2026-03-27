@@ -1,0 +1,31 @@
+---
+- name: Verify ntfy health endpoint responds
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ ntfy_runtime_port }}/v1/health"
+    method: GET
+    status_code: 200
+  register: ntfy_runtime_health
+  retries: 20
+  delay: 3
+  until: ntfy_runtime_health.status == 200
+  changed_when: false
+
+- name: Verify the ntfy container is running
+  ansible.builtin.command:
+    argv:
+      - docker
+      - ps
+      - --filter
+      - "name={{ ntfy_runtime_container_name }}"
+      - --filter
+      - status=running
+      - --format
+      - "{{ '{{' }}.Names{{ '}}' }}"
+  register: ntfy_runtime_running
+  changed_when: false
+
+- name: Assert the ntfy container is running
+  ansible.builtin.assert:
+    that:
+      - ntfy_runtime_running.stdout_lines | select('equalto', ntfy_runtime_container_name) | list | length == 1
+    fail_msg: "ntfy container is not running."

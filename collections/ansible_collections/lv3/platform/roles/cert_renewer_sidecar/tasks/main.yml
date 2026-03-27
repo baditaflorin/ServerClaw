@@ -1,0 +1,15 @@
+---
+- name: Validate cert renewer sidecar inputs
+  ansible.builtin.assert:
+    that:
+      - cert_renewer_sidecar_ca_url | length > 0
+      - cert_renewer_sidecar_output_path | length > 0
+    fail_msg: "cert_renewer_sidecar requires a CA URL and output path."
+
+- name: Render the cert renewer sidecar compose fragment
+  ansible.builtin.template:
+    src: cert-renewer-sidecar.yml.j2
+    dest: "{{ cert_renewer_sidecar_output_path }}"
+    owner: root
+    group: root
+    mode: "0644"

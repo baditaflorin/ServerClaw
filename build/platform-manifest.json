@@ -1,0 +1,3644 @@
+{
+  "$schema": "docs/schema/platform-manifest.schema.json",
+  "manifest_version": "1.0.0",
+  "repo_version": "0.177.12",
+  "platform_version": "0.130.31",
+  "generated_at": "2026-03-27T17:00:55Z",
+  "next_refresh_at": "2026-03-27T18:00:55Z",
+  "environment": "production",
+  "identity": {
+    "platform_name": "lv3.org",
+    "operator": "Florin Badita",
+    "description": "Single-node Proxmox homelab with repository-managed agentic operations automation.",
+    "host_id": "proxmox_florin",
+    "provider": "hetzner-dedicated"
+  },
+  "health": {
+    "summary": "degraded",
+    "mode": "repo_evidence",
+    "services": {
+      "alertmanager": {
+        "service_name": "Alertmanager",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "http://10.10.10.40:9093",
+        "last_live_apply": "2026-03-27T00:00:00Z"
+      },
+      "api_gateway": {
+        "service_name": "Platform API Gateway",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://api.lv3.org",
+        "last_live_apply": "2026-03-27T00:00:00Z"
+      },
+      "backup_pbs": {
+        "service_name": "Proxmox Backup Server",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://10.10.10.60:8007",
+        "last_live_apply": "2026-03-27T00:00:00Z"
+      },
+      "changelog_portal": {
+        "service_name": "Deployment History Portal",
+        "status": "degraded",
+        "score": 0.75,
+        "safe_to_act": false,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: health probe, SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://changelog.lv3.org",
+        "last_live_apply": "2026-03-26T00:00:00Z"
+      },
+      "docker_build": {
+        "service_name": "Docker Build VM",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://build.lv3.org",
+        "last_live_apply": "2026-03-27T00:00:00Z"
+      },
+      "docker_runtime": {
+        "service_name": "Docker Runtime VM",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://docker.lv3.org",
+        "last_live_apply": "2026-03-27T00:00:00Z"
+      },
+      "docs_portal": {
+        "service_name": "Developer Portal",
+        "status": "degraded",
+        "score": 0.75,
+        "safe_to_act": false,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: health probe, SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://docs.lv3.org",
+        "last_live_apply": "2026-03-26T00:00:00Z"
+      },
+      "dozzle": {
+        "service_name": "Dozzle",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://logs.lv3.org",
+        "last_live_apply": "2026-03-27T00:00:00Z",
+        "slo_status": "unknown"
+      },
+      "gitea": {
+        "service_name": "Gitea",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "http://100.64.0.1:3009",
+        "last_live_apply": "2026-03-27T00:00:00Z",
+        "slo_status": "unknown"
+      },
+      "grafana": {
+        "service_name": "Grafana",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://grafana.lv3.org",
+        "last_live_apply": "2026-03-27T00:00:00Z",
+        "slo_status": "unknown"
+      },
+      "headscale": {
+        "service_name": "Headscale",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://headscale.lv3.org",
+        "last_live_apply": "2026-03-27T00:00:00Z"
+      },
+      "homepage": {
+        "service_name": "Homepage",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://home.lv3.org",
+        "last_live_apply": "2026-03-27T00:00:00Z",
+        "slo_status": "unknown"
+      },
+      "keycloak": {
+        "service_name": "Keycloak",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://sso.lv3.org",
+        "last_live_apply": "2026-03-27T00:00:00Z",
+        "slo_status": "unknown"
+      },
+      "langfuse": {
+        "service_name": "Langfuse",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://langfuse.lv3.org",
+        "last_live_apply": "2026-03-27T00:00:00Z",
+        "slo_status": "unknown"
+      },
+      "mail_platform": {
+        "service_name": "Mail Platform",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://mail.lv3.org",
+        "last_live_apply": "2026-03-27T00:00:00Z"
+      },
+      "mattermost": {
+        "service_name": "Mattermost",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "http://100.64.0.1:8066",
+        "last_live_apply": "2026-03-27T00:00:00Z"
+      },
+      "n8n": {
+        "service_name": "n8n",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://n8n.lv3.org",
+        "last_live_apply": "2026-03-27T00:00:00Z"
+      },
+      "netbox": {
+        "service_name": "NetBox",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "http://100.64.0.1:8004",
+        "last_live_apply": "2026-03-27T00:00:00Z",
+        "slo_status": "unknown"
+      },
+      "nginx_edge": {
+        "service_name": "NGINX Edge",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://nginx.lv3.org",
+        "last_live_apply": "2026-03-27T00:00:00Z",
+        "slo_status": "unknown"
+      },
+      "ntfy": {
+        "service_name": "ntfy",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "http://10.10.10.20:2586",
+        "last_live_apply": "2026-03-27T00:00:00Z"
+      },
+      "ntopng": {
+        "service_name": "ntopng",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "http://100.64.0.1:3001",
+        "last_live_apply": "2026-03-27T00:00:00Z"
+      },
+      "ollama": {
+        "service_name": "Ollama",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "http://10.10.10.20:11434",
+        "last_live_apply": "2026-03-27T00:00:00Z"
+      },
+      "open_webui": {
+        "service_name": "Open WebUI",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "http://100.64.0.1:8008",
+        "last_live_apply": "2026-03-27T00:00:00Z",
+        "slo_status": "unknown"
+      },
+      "openbao": {
+        "service_name": "OpenBao",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://100.64.0.1:8200",
+        "last_live_apply": "2026-03-27T00:00:00Z"
+      },
+      "ops_portal": {
+        "service_name": "Platform Operations Portal",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://ops.lv3.org",
+        "last_live_apply": "2026-03-27T00:00:00Z"
+      },
+      "platform_context_api": {
+        "service_name": "Platform Context API",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "http://100.64.0.1:8010",
+        "last_live_apply": "2026-03-27T00:00:00Z",
+        "slo_status": "unknown"
+      },
+      "portainer": {
+        "service_name": "Portainer",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://100.64.0.1:9444",
+        "last_live_apply": "2026-03-27T00:00:00Z"
+      },
+      "postgres": {
+        "service_name": "PostgreSQL",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "postgres://database.lv3.org:5432",
+        "last_live_apply": "2026-03-27T00:00:00Z"
+      },
+      "proxmox_ui": {
+        "service_name": "Proxmox UI",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://proxmox.lv3.org",
+        "last_live_apply": "2026-03-27T00:00:00Z"
+      },
+      "searxng": {
+        "service_name": "SearXNG",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "http://search.lv3.org",
+        "last_live_apply": "2026-03-27T00:00:00Z"
+      },
+      "semaphore": {
+        "service_name": "Semaphore",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "http://100.118.189.95:8020",
+        "last_live_apply": "2026-03-27T00:00:00Z",
+        "slo_status": "unknown"
+      },
+      "status_page": {
+        "service_name": "Public Status Page",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://status.lv3.org",
+        "last_live_apply": "2026-03-27T00:00:00Z",
+        "slo_status": "unknown"
+      },
+      "step_ca": {
+        "service_name": "step-ca",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
+        "lifecycle_status": "active",
+        "primary_url": "https://100.64.0.1:9443",
+        "last_live_apply": "2026-03-27T00:00:00Z"
+      },
+      "uptime_kuma": {
+        "service_name": "Uptime Kuma",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://uptime.lv3.org",
+        "last_live_apply": "2026-03-27T00:00:00Z",
+        "slo_status": "unknown"
+      },
+      "vaultwarden": {
+        "service_name": "Vaultwarden",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://vault.lv3.org",
+        "last_live_apply": "2026-03-27T00:00:00Z",
+        "slo_status": "unknown"
+      },
+      "windmill": {
+        "service_name": "Windmill",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "http://100.64.0.1:8005",
+        "last_live_apply": "2026-03-27T00:00:00Z",
+        "slo_status": "unknown"
+      }
+    }
+  },
+  "incidents": {
+    "open_count": 0,
+    "items": []
+  },
+  "maintenance": {
+    "active_windows": [],
+    "upcoming_windows": []
+  },
+  "capabilities": {
+    "available_workflows": [
+      {
+        "id": "adr-0077-compose-runtime-secrets-live-apply",
+        "description": "Converge the OpenBao Agent runtime-secret injection path across the migrated docker-runtime-lv3 platform applications and verify that the services now consume `/run/lv3-secrets/<service>/runtime.env` instead of compose-directory `.env` files.",
+        "tags": [
+          "adr-0077-compose-runtime-secrets-live-apply",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/compose-secrets-injection.md"
+      },
+      {
+        "id": "audit-token-inventory",
+        "description": "Run the ADR 0141 token inventory audit against the canonical token policy and emit a receipt plus ledger event.",
+        "tags": [
+          "audit-token-inventory",
+          "diagnostic",
+          "repo-only",
+          "validated"
+        ],
+        "risk_class": "LOW",
+        "automation_eligible": true,
+        "agent_trust_required": "T1",
+        "execution_class": "diagnostic",
+        "live_impact": "repo_only",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 120,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 0,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "abort_silently"
+        },
+        "runbook": "docs/runbooks/token-lifecycle-management.md"
+      },
+      {
+        "id": "capacity-report",
+        "description": "Render the repository-managed capacity model report, combining committed allocations, planned growth, and optional live metrics from the monitoring VM.",
+        "tags": [
+          "capacity-report",
+          "mutation",
+          "repo-only",
+          "validated"
+        ],
+        "risk_class": "MEDIUM",
+        "automation_eligible": true,
+        "agent_trust_required": "T2",
+        "execution_class": "mutation",
+        "live_impact": "repo_only",
+        "budget": {
+          "max_duration_seconds": 600,
+          "max_steps": 200,
+          "max_concurrent_instances": 3,
+          "max_touched_hosts": 10,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/capacity-model.md"
+      },
+      {
+        "id": "check-platform-drift",
+        "description": "Run the ADR 0071 observation loop checks and emit structured findings from the controller command lane.",
+        "tags": [
+          "check-platform-drift",
+          "diagnostic",
+          "preflight",
+          "repo-only",
+          "validated"
+        ],
+        "risk_class": "LOW",
+        "automation_eligible": true,
+        "agent_trust_required": "T1",
+        "execution_class": "diagnostic",
+        "live_impact": "repo_only",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 0,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "abort_silently"
+        },
+        "runbook": "docs/runbooks/agent-observation-loop.md"
+      },
+      {
+        "id": "close-maintenance-window",
+        "description": "Close one ADR 0080 maintenance window and emit the matching platform.maintenance.closed or platform.maintenance.force_closed event.",
+        "tags": [
+          "close-maintenance-window",
+          "external-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "external_live",
+        "budget": {
+          "max_duration_seconds": 1200,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/maintenance-windows.md"
+      },
+      {
+        "id": "collection-publish",
+        "description": "Build the lv3.platform Ansible collection, validate the local tarball path, and publish it to the configured internal Galaxy server.",
+        "tags": [
+          "collection-publish",
+          "mutation",
+          "preflight",
+          "repo-only",
+          "validated"
+        ],
+        "risk_class": "MEDIUM",
+        "automation_eligible": true,
+        "agent_trust_required": "T2",
+        "execution_class": "mutation",
+        "live_impact": "repo_only",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 0,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/ansible-collection-development.md"
+      },
+      {
+        "id": "configure-backup-vm",
+        "description": "Converge the dedicated backup VM, host-side PBS integration, and the optional ADR 0100 off-site copy of backup-lv3.",
+        "tags": [
+          "configure-backup-vm",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 260,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-backup-vm.md"
+      },
+      {
+        "id": "configure-edge-publication",
+        "description": "Publish repo-managed public hostnames at the NGINX edge.",
+        "tags": [
+          "configure-edge-publication",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-edge-publication.md"
+      },
+      {
+        "id": "configure-ingress",
+        "description": "Converge public ingress forwarding from the host to the NGINX edge VM.",
+        "tags": [
+          "configure-ingress",
+          "host-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_live",
+        "budget": {
+          "max_duration_seconds": 1200,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-public-ingress.md"
+      },
+      {
+        "id": "configure-network",
+        "description": "Converge the host bridge and NAT network model for guest connectivity.",
+        "tags": [
+          "configure-network",
+          "host-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_live",
+        "budget": {
+          "max_duration_seconds": 1200,
+          "max_steps": 180,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-proxmox-network.md"
+      },
+      {
+        "id": "configure-tailscale",
+        "description": "Converge host Tailscale installation and subnet-router settings.",
+        "tags": [
+          "configure-tailscale",
+          "host-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_live",
+        "budget": {
+          "max_duration_seconds": 1200,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-tailscale-access.md"
+      },
+      {
+        "id": "continuous-drift-detection",
+        "description": "Run the ADR 0091 multi-source drift suite through the build server and publish structured drift events plus a stored receipt.",
+        "tags": [
+          "continuous-drift-detection",
+          "diagnostic",
+          "guest-live",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "MEDIUM",
+        "automation_eligible": true,
+        "agent_trust_required": "T2",
+        "execution_class": "diagnostic",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "abort_silently"
+        },
+        "runbook": "docs/runbooks/drift-detection.md"
+      },
+      {
+        "id": "converge-api-gateway",
+        "description": "Converge the unified platform API gateway on docker-runtime-lv3 and publish it at api.lv3.org through the shared NGINX edge.",
+        "tags": [
+          "converge-api-gateway",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-api-gateway.md"
+      },
+      {
+        "id": "converge-control-plane-recovery",
+        "description": "Converge scheduled control-plane backups on docker-runtime-lv3, stage controller recovery references, validate recurring restore drills on backup-lv3, and publish a verified off-host witness bundle.",
+        "tags": [
+          "converge-control-plane-recovery",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-control-plane-recovery.md"
+      },
+      {
+        "id": "converge-docker-runtime",
+        "description": "Converge the Docker runtime baseline on docker-runtime-lv3.",
+        "tags": [
+          "converge-docker-runtime",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-docker-runtime.md"
+      },
+      {
+        "id": "converge-dozzle",
+        "description": "Deploy the Dozzle hub on docker-runtime-lv3, join remote log agents from docker-build-lv3 and monitoring-lv3, and publish logs.lv3.org through the shared authenticated edge.",
+        "tags": [
+          "converge-dozzle",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1500,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-dozzle.md"
+      },
+      {
+        "id": "converge-gitea",
+        "description": "Converge private Gitea on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and register the self-hosted Actions runner on docker-build-lv3.",
+        "tags": [
+          "converge-gitea",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1500,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 4,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-gitea.md"
+      },
+      {
+        "id": "converge-guest-network-policy",
+        "description": "Converge the default-deny guest network policy on the Proxmox host and all managed guests.",
+        "tags": [
+          "converge-guest-network-policy",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1500,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-guest-network-policy.md"
+      },
+      {
+        "id": "converge-headscale",
+        "description": "Deploy the repo-managed Headscale control plane on the Proxmox host, publish it through the shared NGINX edge, and reconcile the public DNS record for headscale.lv3.org.",
+        "tags": [
+          "converge-headscale",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1500,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-headscale.md"
+      },
+      {
+        "id": "converge-homepage",
+        "description": "Deploy the Homepage unified service dashboard on docker-runtime-lv3 and publish it at home.lv3.org through the shared authenticated edge.",
+        "tags": [
+          "converge-homepage",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1500,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-homepage.md"
+      },
+      {
+        "id": "converge-keycloak",
+        "description": "Converge Keycloak on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at sso.lv3.org, and wire Grafana through the shared SSO broker.",
+        "tags": [
+          "converge-keycloak",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-keycloak.md"
+      },
+      {
+        "id": "converge-langfuse",
+        "description": "Converge Langfuse on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at langfuse.lv3.org, and verify repo-managed trace ingestion.",
+        "tags": [
+          "converge-langfuse",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 350,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-langfuse.md"
+      },
+      {
+        "id": "converge-mail-platform",
+        "description": "Converge the Dockerized mail platform, host SMTP ingress, DNS, sender profiles, Grafana mail telemetry, and mail-gateway trace export.",
+        "tags": [
+          "converge-mail-platform",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1500,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-mail-platform.md"
+      },
+      {
+        "id": "converge-mattermost",
+        "description": "Converge Mattermost on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, expose the operator-only Tailscale proxy on the Proxmox host, and seed the repo-managed collaboration channels and incoming webhooks.",
+        "tags": [
+          "converge-mattermost",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1500,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-mattermost.md"
+      },
+      {
+        "id": "converge-monitoring",
+        "description": "Converge the monitoring VM, guest telemetry paths, Grafana dashboards, Prometheus service-graph metrics, Tempo tracing, and centralized Loki log shipping.",
+        "tags": [
+          "converge-monitoring",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1500,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/monitoring-stack.md"
+      },
+      {
+        "id": "converge-n8n",
+        "description": "Converge n8n on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and publish it at n8n.lv3.org with a protected editor path and public webhook ingress.",
+        "tags": [
+          "converge-n8n",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1200,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-n8n.md"
+      },
+      {
+        "id": "converge-netbox",
+        "description": "Converge private NetBox on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish the host-side Tailscale proxy, and synchronize canonical repo inventory into the API.",
+        "tags": [
+          "converge-netbox",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1500,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-netbox.md"
+      },
+      {
+        "id": "converge-ntfy",
+        "description": "Deploy the private ntfy paging gateway on docker-runtime-lv3 and persist the repo-managed credential used by Alertmanager critical routing.",
+        "tags": [
+          "converge-ntfy",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-ntfy.md"
+      },
+      {
+        "id": "converge-ntopng",
+        "description": "Converge host-local ntopng capture on the Proxmox bridges and expose the operator-only Tailscale proxy path.",
+        "tags": [
+          "converge-ntopng",
+          "host-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_live",
+        "budget": {
+          "max_duration_seconds": 1200,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-ntopng.md"
+      },
+      {
+        "id": "converge-ollama",
+        "description": "Deploy the private Ollama runtime on docker-runtime-lv3, sync the repo-managed startup model catalog, and verify local inference health.",
+        "tags": [
+          "converge-ollama",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 3600,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-ollama.md"
+      },
+      {
+        "id": "converge-open-webui",
+        "description": "Deploy private Open WebUI on docker-runtime-lv3 with repo-managed bootstrap auth and an operator-only Tailscale proxy on the Proxmox host.",
+        "tags": [
+          "converge-open-webui",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1500,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-open-webui.md"
+      },
+      {
+        "id": "converge-openbao",
+        "description": "Deploy private OpenBao on docker-runtime-lv3, seed scoped secrets, configure Transit, and enable PostgreSQL dynamic credentials.",
+        "tags": [
+          "converge-openbao",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-openbao.md"
+      },
+      {
+        "id": "converge-portainer",
+        "description": "Converge the private Portainer runtime on docker-runtime-lv3, publish it through the Proxmox host Tailscale proxy, and persist the controller-local bootstrap auth.",
+        "tags": [
+          "converge-portainer",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1500,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-portainer.md"
+      },
+      {
+        "id": "converge-postgres-vm",
+        "description": "Converge the dedicated PostgreSQL guest baseline on postgres-lv3.",
+        "tags": [
+          "converge-postgres-vm",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-postgres-vm.md"
+      },
+      {
+        "id": "converge-rag-context",
+        "description": "Deploy the private platform context API with Qdrant on docker-runtime-lv3, publish it through the Proxmox host Tailscale proxy, and seed the initial retrieval corpus.",
+        "tags": [
+          "converge-rag-context",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1500,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/rag-platform-context.md"
+      },
+      {
+        "id": "converge-searxng",
+        "description": "Deploy the private SearXNG runtime on docker-runtime-lv3, publish its tailnet-only hostname through the Proxmox host proxy, and re-render Open WebUI to use the local search endpoint.",
+        "tags": [
+          "converge-searxng",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 320,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-searxng.md"
+      },
+      {
+        "id": "converge-semaphore",
+        "description": "Converge the private Semaphore runtime on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish the Tailscale proxy on the Proxmox host, and seed the self-test project plus controller-local auth artifacts.",
+        "tags": [
+          "converge-semaphore",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1500,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-semaphore.md"
+      },
+      {
+        "id": "converge-step-ca",
+        "description": "Deploy the private step-ca runtime, expose it over the host Tailscale path, and enable SSH CA trust on the Proxmox host and managed guests.",
+        "tags": [
+          "converge-step-ca",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1500,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-step-ca.md"
+      },
+      {
+        "id": "converge-vaultwarden",
+        "description": "Converge private Vaultwarden on docker-runtime-lv3, provision its PostgreSQL backend, publish the Tailscale-only HTTPS hostname, and persist the controller-local bootstrap admin artifacts.",
+        "tags": [
+          "converge-vaultwarden",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1500,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-vaultwarden.md"
+      },
+      {
+        "id": "converge-windmill",
+        "description": "Converge Windmill on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and expose the operator-only Tailscale proxy on the Proxmox host.",
+        "tags": [
+          "converge-windmill",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1500,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-windmill.md"
+      },
+      {
+        "id": "database-dns",
+        "description": "Publish the private database.lv3.org DNS record toward the Patroni-managed PostgreSQL VIP.",
+        "tags": [
+          "database-dns",
+          "external-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "external_live",
+        "budget": {
+          "max_duration_seconds": 1200,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/postgres-failover.md"
+      },
+      {
+        "id": "deploy-and-promote",
+        "description": "Validate a staged service change, enforce the ADR 0073 promotion gate, and then apply the approved production promotion.",
+        "tags": [
+          "deploy-and-promote",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/environment-promotion-pipeline.md"
+      },
+      {
+        "id": "deploy-uptime-kuma",
+        "description": "Deploy Uptime Kuma on the Docker runtime VM and publish it at uptime.lv3.org.",
+        "tags": [
+          "deploy-uptime-kuma",
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 1500,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/deploy-uptime-kuma.md"
+      },
+      {
+        "id": "disaster-recovery-runbook",
+        "description": "Render the ADR 0100 ordered recovery plan, current DR evidence summary, and table-top review state.",
+        "tags": [
+          "diagnostic",
+          "disaster-recovery-runbook",
+          "repo-only",
+          "validated"
+        ],
+        "risk_class": "LOW",
+        "automation_eligible": true,
+        "agent_trust_required": "T1",
+        "execution_class": "diagnostic",
+        "live_impact": "repo_only",
+        "budget": {
+          "max_duration_seconds": 3600,
+          "max_steps": 320,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "escalate_to_operator"
+        },
+        "runbook": "docs/runbooks/disaster-recovery.md"
+      },
+      {
+        "id": "ephemeral-vm-reaper",
+        "description": "Sweep the governed ADR 0106 ephemeral VM pool, retag unowned temporary VMs with a one-hour grace period, and destroy expired VMs.",
+        "tags": [
+          "ephemeral-vm-reaper",
+          "host-live",
+          "mutation",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_live",
+        "budget": {
+          "max_duration_seconds": 1200,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/ephemeral-fixtures.md"
+      },
+      {
+        "id": "fault-injection",
+        "description": "Run the ADR 0171 controlled fault-injection subset on docker-runtime-lv3, record a JSON report, and optionally publish failure notifications.",
+        "tags": [
+          "diagnostic",
+          "fault-injection",
+          "guest-live",
+          "validated"
+        ],
+        "risk_class": "MEDIUM",
+        "automation_eligible": true,
+        "agent_trust_required": "T2",
+        "execution_class": "diagnostic",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 120,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/fault-injection.md"
+      },
+      {
+        "id": "fixture-expiry-reaper",
+        "description": "Destroy any ADR 0088 ephemeral fixture whose lifetime window has expired and record one reaper-run receipt for the scan.",
+        "tags": [
+          "fixture-expiry-reaper",
+          "host-live",
+          "mutation",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_live",
+        "budget": {
+          "max_duration_seconds": 1200,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/ephemeral-fixtures.md"
+      },
+      {
+        "id": "gate-status",
+        "description": "Show the configured validation gate checks plus the last local, bypass, and post-merge results.",
+        "tags": [
+          "diagnostic",
+          "gate-status",
+          "repo-only"
+        ],
+        "risk_class": "LOW",
+        "automation_eligible": true,
+        "agent_trust_required": "T1",
+        "execution_class": "diagnostic",
+        "live_impact": "repo_only",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 0,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "abort_silently"
+        },
+        "runbook": "docs/runbooks/validation-gate.md"
+      },
+      {
+        "id": "generate-status-docs",
+        "description": "Regenerate the README status fragments that are derived from canonical repository state.",
+        "tags": [
+          "generate-status-docs",
+          "mutation",
+          "repo-only",
+          "validated"
+        ],
+        "risk_class": "MEDIUM",
+        "automation_eligible": true,
+        "agent_trust_required": "T2",
+        "execution_class": "mutation",
+        "live_impact": "repo_only",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 0,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/generate-status-documents.md"
+      },
+      {
+        "id": "harden-access",
+        "description": "Converge the host access baseline for routine non-root operations.",
+        "tags": [
+          "harden-access",
+          "host-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_live",
+        "budget": {
+          "max_duration_seconds": 1200,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/harden-access.md"
+      },
+      {
+        "id": "harden-guest-access",
+        "description": "Converge the Linux guest access baseline for the managed VM fleet.",
+        "tags": [
+          "guest-live",
+          "harden-guest-access",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/harden-access.md"
+      },
+      {
+        "id": "harden-security",
+        "description": "Converge the Proxmox host security baseline including firewall, notifications, ACME, and TOTP.",
+        "tags": [
+          "harden-security",
+          "host-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_live",
+        "budget": {
+          "max_duration_seconds": 1200,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/complete-security-baseline.md"
+      },
+      {
+        "id": "install-hooks",
+        "description": "Install the repo-managed pre-commit and pre-push hook layers for this checkout.",
+        "tags": [
+          "install-hooks",
+          "mutation",
+          "repo-only"
+        ],
+        "risk_class": "MEDIUM",
+        "automation_eligible": true,
+        "agent_trust_required": "T2",
+        "execution_class": "mutation",
+        "live_impact": "repo_only",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 0,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/validation-gate.md"
+      },
+      {
+        "id": "install-proxmox",
+        "description": "Install Proxmox VE on the Debian host from the repo-managed package path.",
+        "tags": [
+          "host-live",
+          "install-proxmox",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_live",
+        "budget": {
+          "max_duration_seconds": 2400,
+          "max_steps": 320,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/install-proxmox.md"
+      },
+      {
+        "id": "live-apply-waves",
+        "description": "Execute one reviewed dependency-wave manifest so each wave acquires its locks up front and runs its playbooks in parallel.",
+        "tags": [
+          "host-and-guest-live",
+          "live-apply-waves",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 3600,
+          "max_steps": 400,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 6,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/dependency-wave-parallel-apply.md"
+      },
+      {
+        "id": "merge-config-changes",
+        "description": "Merge pending ADR 0158 staged config changes into the merge-eligible registry files and emit conflict or merged events for downstream consumers.",
+        "tags": [
+          "guest-live",
+          "merge-config-changes",
+          "mutation",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 300,
+          "max_steps": 100,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/config-merge-protocol.md"
+      },
+      {
+        "id": "nightly-integration-tests",
+        "description": "Run the ADR 0111 nightly integration suite, post the summary to Mattermost, and emit GlitchTip failures when checks regress.",
+        "tags": [
+          "diagnostic",
+          "guest-live",
+          "nightly-integration-tests",
+          "validated"
+        ],
+        "risk_class": "MEDIUM",
+        "automation_eligible": true,
+        "agent_trust_required": "T2",
+        "execution_class": "diagnostic",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 3600,
+          "max_steps": 400,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "abort_silently"
+        },
+        "runbook": "docs/runbooks/integration-test-suite.md"
+      },
+      {
+        "id": "open-maintenance-window",
+        "description": "Open one ADR 0080 maintenance window in the private NATS KV bucket before a planned live change.",
+        "tags": [
+          "external-live",
+          "mutation",
+          "open-maintenance-window",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "external_live",
+        "budget": {
+          "max_duration_seconds": 1200,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/maintenance-windows.md"
+      },
+      {
+        "id": "operator-offboard",
+        "description": "Disable one ADR 0108 human operator across Keycloak, OpenBao, Tailscale, and the repo-authoritative roster while preserving audit history.",
+        "tags": [
+          "external-live",
+          "mutation",
+          "operator-offboard",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "external_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 220,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "escalate_to_operator"
+        },
+        "runbook": "docs/runbooks/operator-offboarding.md"
+      },
+      {
+        "id": "operator-onboard",
+        "description": "Apply one ADR 0108 human-operator onboarding change across the repo-authoritative roster, Keycloak, OpenBao, step-ca, Tailscale, and Mattermost.",
+        "tags": [
+          "external-live",
+          "mutation",
+          "operator-onboard",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "external_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 220,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "escalate_to_operator"
+        },
+        "runbook": "docs/runbooks/operator-onboarding.md"
+      },
+      {
+        "id": "packer-template-rebuild",
+        "description": "Validate and rebuild the repo-managed Proxmox VM template catalog in dependency order, then refresh the template manifest metadata.",
+        "tags": [
+          "host-live",
+          "mutation",
+          "packer-template-rebuild",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_live",
+        "budget": {
+          "max_duration_seconds": 7200,
+          "max_steps": 400,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/packer-vm-templates.md"
+      },
+      {
+        "id": "platform-observation-loop",
+        "description": "Run the ADR 0126 observation-to-action closure loop over one batch of observation findings and persist per-service loop runs.",
+        "tags": [
+          "diagnostic",
+          "platform-observation-loop",
+          "repo-only",
+          "validated"
+        ],
+        "risk_class": "LOW",
+        "automation_eligible": true,
+        "agent_trust_required": "T1",
+        "execution_class": "diagnostic",
+        "live_impact": "repo_only",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 0,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "abort_silently"
+        },
+        "runbook": "docs/runbooks/observation-to-action-closure-loop.md"
+      },
+      {
+        "id": "portainer-manage",
+        "description": "Run governed Portainer API actions such as listing containers, reading logs, or restarting one container through the repo-managed wrapper.",
+        "tags": [
+          "external-live",
+          "mutation",
+          "portainer-manage",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "external_live",
+        "budget": {
+          "max_duration_seconds": 1200,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-portainer.md"
+      },
+      {
+        "id": "post-merge-gate",
+        "description": "Re-run the ADR 0087 validation manifest after merge to main from the Windmill worker checkout.",
+        "tags": [
+          "diagnostic",
+          "post-merge-gate",
+          "repo-only"
+        ],
+        "risk_class": "LOW",
+        "automation_eligible": true,
+        "agent_trust_required": "T1",
+        "execution_class": "diagnostic",
+        "live_impact": "repo_only",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 0,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "abort_silently"
+        },
+        "runbook": "docs/runbooks/validation-gate.md"
+      },
+      {
+        "id": "pre-push-gate",
+        "description": "Run the ADR 0087 repository validation gate through the build server with local Docker fallback.",
+        "tags": [
+          "diagnostic",
+          "pre-push-gate",
+          "repo-only"
+        ],
+        "risk_class": "LOW",
+        "automation_eligible": true,
+        "agent_trust_required": "T1",
+        "execution_class": "diagnostic",
+        "live_impact": "repo_only",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 0,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "abort_silently"
+        },
+        "runbook": "docs/runbooks/validation-gate.md"
+      },
+      {
+        "id": "provision-api-access",
+        "description": "Create and verify the durable Proxmox API automation identity and token.",
+        "tags": [
+          "host-live",
+          "mutation",
+          "preflight",
+          "provision-api-access",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_live",
+        "budget": {
+          "max_duration_seconds": 1200,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/proxmox-api-automation.md"
+      },
+      {
+        "id": "provision-guests",
+        "description": "Provision the Debian cloud template and declared guest VMs on Proxmox.",
+        "tags": [
+          "host-and-guest-live",
+          "mutation",
+          "preflight",
+          "provision-guests",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "host_and_guest_live",
+        "budget": {
+          "max_duration_seconds": 2400,
+          "max_steps": 320,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 4,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/provision-guests.md"
+      },
+      {
+        "id": "provision-subdomain",
+        "description": "Converge one catalogued lv3.org hostname through the Hetzner DNS role and, when applicable, refresh the shared NGINX edge publication.",
+        "tags": [
+          "external-live",
+          "mutation",
+          "preflight",
+          "provision-subdomain",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "external_live",
+        "budget": {
+          "max_duration_seconds": 1200,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/subdomain-governance.md"
+      },
+      {
+        "id": "quarterly-access-review",
+        "description": "Build the ADR 0108 quarterly access review summary and optionally post it to Mattermost.",
+        "tags": [
+          "diagnostic",
+          "quarterly-access-review",
+          "repo-only",
+          "validated"
+        ],
+        "risk_class": "LOW",
+        "automation_eligible": true,
+        "agent_trust_required": "T1",
+        "execution_class": "diagnostic",
+        "live_impact": "repo_only",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 0,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "abort_silently"
+        },
+        "runbook": "docs/runbooks/operator-offboarding.md"
+      },
+      {
+        "id": "restore-verification",
+        "description": "Run the ADR 0099 backup-restore verification workflow, write one receipt, emit the mutation-audit event, and optionally publish NATS and Mattermost summaries.",
+        "tags": [
+          "diagnostic",
+          "guest-live",
+          "preflight",
+          "restore-verification",
+          "validated"
+        ],
+        "risk_class": "MEDIUM",
+        "automation_eligible": true,
+        "agent_trust_required": "T2",
+        "execution_class": "diagnostic",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 5400,
+          "max_steps": 400,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/backup-restore-verification.md"
+      },
+      {
+        "id": "rotate-grafana-service-token",
+        "description": "Rotate one ADR 0141 governed Grafana service account token through the configured token hook contract.",
+        "tags": [
+          "external-live",
+          "mutation",
+          "rotate-grafana-service-token",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "external_live",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 120,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/token-lifecycle-management.md"
+      },
+      {
+        "id": "rotate-keycloak-client-secret",
+        "description": "Rotate one ADR 0141 governed Keycloak client secret through the configured token hook contract.",
+        "tags": [
+          "external-live",
+          "mutation",
+          "rotate-keycloak-client-secret",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "external_live",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 120,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/token-lifecycle-management.md"
+      },
+      {
+        "id": "rotate-platform-cli-token",
+        "description": "Rotate one ADR 0141 governed local platform CLI token through the configured token hook contract.",
+        "tags": [
+          "mutation",
+          "repo-only",
+          "rotate-platform-cli-token",
+          "validated"
+        ],
+        "risk_class": "MEDIUM",
+        "automation_eligible": true,
+        "agent_trust_required": "T2",
+        "execution_class": "mutation",
+        "live_impact": "repo_only",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 120,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 0,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/token-lifecycle-management.md"
+      },
+      {
+        "id": "rotate-secret",
+        "description": "Plan or apply one repo-managed secret rotation, update the owning service without a full reconverge, and persist the rotated value in OpenBao.",
+        "tags": [
+          "guest-live",
+          "mutation",
+          "preflight",
+          "rotate-secret",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/secret-rotation-and-lifecycle.md"
+      },
+      {
+        "id": "rotate-windmill-token",
+        "description": "Rotate one ADR 0141 governed Windmill API token through the configured token hook contract.",
+        "tags": [
+          "external-live",
+          "mutation",
+          "rotate-windmill-token",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "external_live",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 120,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/token-lifecycle-management.md"
+      },
+      {
+        "id": "run-triage",
+        "description": "Run the ADR 0114 rule-based incident triage engine for one alert payload, write the report, and optionally post the summary to Mattermost.",
+        "tags": [
+          "diagnostic",
+          "repo-only",
+          "run-triage",
+          "validated"
+        ],
+        "risk_class": "LOW",
+        "automation_eligible": true,
+        "agent_trust_required": "T1",
+        "execution_class": "diagnostic",
+        "live_impact": "repo_only",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 0,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "abort_silently"
+        },
+        "runbook": "docs/runbooks/incident-triage-engine.md"
+      },
+      {
+        "id": "runbook-executor",
+        "description": "Execute one structured runbook definition from YAML, JSON, or Markdown front matter, persist the step trace, and support resume after escalation.",
+        "tags": [
+          "diagnostic",
+          "repo-only",
+          "runbook-executor",
+          "validated"
+        ],
+        "risk_class": "LOW",
+        "automation_eligible": true,
+        "agent_trust_required": "T1",
+        "execution_class": "diagnostic",
+        "live_impact": "repo_only",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 200,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 0,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "abort_silently"
+        },
+        "runbook": "docs/runbooks/runbook-automation-executor.md"
+      },
+      {
+        "id": "scheduler-watchdog-loop",
+        "description": "Run one ADR 0172 watchdog pass over running mutation jobs, abort stale executions, and emit a heartbeat.",
+        "tags": [
+          "diagnostic",
+          "repo-only",
+          "scheduler-watchdog-loop",
+          "validated"
+        ],
+        "risk_class": "LOW",
+        "automation_eligible": true,
+        "agent_trust_required": "T1",
+        "execution_class": "diagnostic",
+        "live_impact": "repo_only",
+        "budget": {
+          "max_duration_seconds": 25,
+          "max_steps": 100,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 0,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "abort_silently"
+        },
+        "runbook": "docs/runbooks/budgeted-workflow-scheduler.md"
+      },
+      {
+        "id": "security-posture-scan",
+        "description": "Run the ADR 0102 Lynis and Trivy security posture workflow, store a receipt, and publish security events.",
+        "tags": [
+          "diagnostic",
+          "preflight",
+          "repo-only",
+          "security-posture-scan",
+          "validated"
+        ],
+        "risk_class": "LOW",
+        "automation_eligible": true,
+        "agent_trust_required": "T1",
+        "execution_class": "diagnostic",
+        "live_impact": "repo_only",
+        "budget": {
+          "max_duration_seconds": 3600,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "abort_silently"
+        },
+        "runbook": "docs/runbooks/security-posture-reporting.md"
+      },
+      {
+        "id": "semaphore-manage",
+        "description": "Run governed Semaphore API actions such as listing projects, listing templates, launching the seeded self-test job, or reading one task output.",
+        "tags": [
+          "external-live",
+          "mutation",
+          "preflight",
+          "semaphore-manage",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "external_live",
+        "budget": {
+          "max_duration_seconds": 1200,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-semaphore.md"
+      },
+      {
+        "id": "subdomain-exposure-audit",
+        "description": "Run the ADR 0139 subdomain exposure registry audit, check live DNS and edge auth behavior, and store one receipt.",
+        "tags": [
+          "diagnostic",
+          "guest-live",
+          "preflight",
+          "subdomain-exposure-audit",
+          "validated"
+        ],
+        "risk_class": "MEDIUM",
+        "automation_eligible": true,
+        "agent_trust_required": "T2",
+        "execution_class": "diagnostic",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 120,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "abort_silently"
+        },
+        "runbook": "docs/runbooks/subdomain-exposure-audit.md"
+      },
+      {
+        "id": "sync-operators",
+        "description": "Reconcile the merged ADR 0108 operator roster into the live identity systems from the authoritative config/operators.yaml file.",
+        "tags": [
+          "external-live",
+          "mutation",
+          "preflight",
+          "sync-operators",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "external_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 220,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 3,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/operator-onboarding.md"
+      },
+      {
+        "id": "token-exposure-response",
+        "description": "Run the ADR 0141 exposure response workflow for one governed token, including revocation, replacement, incident receipt generation, and session invalidation when required.",
+        "tags": [
+          "external-live",
+          "mutation",
+          "token-exposure-response",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "external_live",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 150,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/token-exposure-response.md"
+      },
+      {
+        "id": "triage-calibration",
+        "description": "Calibrate ADR 0114 rule precision and recall against resolved incident cases and publish the weekly summary.",
+        "tags": [
+          "diagnostic",
+          "repo-only",
+          "triage-calibration",
+          "validated"
+        ],
+        "risk_class": "LOW",
+        "automation_eligible": true,
+        "agent_trust_required": "T1",
+        "execution_class": "diagnostic",
+        "live_impact": "repo_only",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 0,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "abort_silently"
+        },
+        "runbook": "docs/runbooks/incident-triage-engine.md"
+      },
+      {
+        "id": "uptime-kuma-manage",
+        "description": "Run repo-local Uptime Kuma client actions such as bootstrap, monitor reconciliation, status-page reconciliation, or maintenance inspection.",
+        "tags": [
+          "external-live",
+          "mutation",
+          "preflight",
+          "uptime-kuma-manage",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "external_live",
+        "budget": {
+          "max_duration_seconds": 1200,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/deploy-uptime-kuma.md"
+      },
+      {
+        "id": "uptime-robot-manage",
+        "description": "Run repo-local Uptime Robot automation for independent public status monitoring contacts and monitors.",
+        "tags": [
+          "external-live",
+          "mutation",
+          "preflight",
+          "uptime-robot-manage",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "external_live",
+        "budget": {
+          "max_duration_seconds": 1200,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/public-status-page.md"
+      },
+      {
+        "id": "validate",
+        "description": "Run the repository validation pipeline used before merge to main.",
+        "tags": [
+          "diagnostic",
+          "repo-only",
+          "validate"
+        ],
+        "risk_class": "LOW",
+        "automation_eligible": true,
+        "agent_trust_required": "T1",
+        "execution_class": "diagnostic",
+        "live_impact": "repo_only",
+        "budget": {
+          "max_duration_seconds": 900,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 0,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "abort_silently"
+        },
+        "runbook": "docs/runbooks/validate-repository-automation.md"
+      },
+      {
+        "id": "weekly-capacity-report",
+        "description": "Generate the weekly Windmill payload used to post the current platform capacity summary to Mattermost.",
+        "tags": [
+          "mutation",
+          "repo-only",
+          "validated",
+          "weekly-capacity-report"
+        ],
+        "risk_class": "MEDIUM",
+        "automation_eligible": true,
+        "agent_trust_required": "T2",
+        "execution_class": "mutation",
+        "live_impact": "repo_only",
+        "budget": {
+          "max_duration_seconds": 600,
+          "max_steps": 200,
+          "max_concurrent_instances": 3,
+          "max_touched_hosts": 10,
+          "max_restarts": 1,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/capacity-model.md"
+      },
+      {
+        "id": "weekly-security-scan",
+        "description": "Run the ADR 0142 public-surface security scan, store a receipt, and publish high or critical findings.",
+        "tags": [
+          "diagnostic",
+          "preflight",
+          "repo-only",
+          "validated",
+          "weekly-security-scan"
+        ],
+        "risk_class": "LOW",
+        "automation_eligible": true,
+        "agent_trust_required": "T1",
+        "execution_class": "diagnostic",
+        "live_impact": "repo_only",
+        "budget": {
+          "max_duration_seconds": 3600,
+          "max_steps": 200,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 0,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "abort_silently"
+        },
+        "runbook": "docs/runbooks/public-surface-security-scan.md"
+      }
+    ],
+    "automation_eligible_runbooks": [
+      {
+        "id": "agent-observation-loop",
+        "title": "Agent Observation Loop",
+        "agent_trust_required": "T1",
+        "steps": 10,
+        "path": "docs/runbooks/agent-observation-loop.md",
+        "workflow_ids": [
+          "check-platform-drift"
+        ]
+      },
+      {
+        "id": "ansible-collection-development",
+        "title": "Ansible Collection Development",
+        "agent_trust_required": "T2",
+        "steps": 6,
+        "path": "docs/runbooks/ansible-collection-development.md",
+        "workflow_ids": [
+          "collection-publish"
+        ]
+      },
+      {
+        "id": "backup-restore-verification",
+        "title": "Backup Restore Verification",
+        "agent_trust_required": "T2",
+        "steps": 9,
+        "path": "docs/runbooks/backup-restore-verification.md",
+        "workflow_ids": [
+          "restore-verification"
+        ]
+      },
+      {
+        "id": "budgeted-workflow-scheduler",
+        "title": "Budgeted Workflow Scheduler",
+        "agent_trust_required": "T1",
+        "steps": 0,
+        "path": "docs/runbooks/budgeted-workflow-scheduler.md",
+        "workflow_ids": [
+          "scheduler-watchdog-loop"
+        ]
+      },
+      {
+        "id": "capacity-model",
+        "title": "Capacity Model",
+        "agent_trust_required": "T2",
+        "steps": 8,
+        "path": "docs/runbooks/capacity-model.md",
+        "workflow_ids": [
+          "capacity-report",
+          "weekly-capacity-report"
+        ]
+      },
+      {
+        "id": "complete-security-baseline",
+        "title": "Complete Security Baseline Runbook",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/complete-security-baseline.md",
+        "workflow_ids": [
+          "harden-security"
+        ]
+      },
+      {
+        "id": "compose-secrets-injection",
+        "title": "Compose Runtime Secrets Injection",
+        "agent_trust_required": "T3",
+        "steps": 3,
+        "path": "docs/runbooks/compose-secrets-injection.md",
+        "workflow_ids": [
+          "adr-0077-compose-runtime-secrets-live-apply"
+        ]
+      },
+      {
+        "id": "config-merge-protocol",
+        "title": "Config Merge Protocol",
+        "agent_trust_required": "T3",
+        "steps": 2,
+        "path": "docs/runbooks/config-merge-protocol.md",
+        "workflow_ids": [
+          "merge-config-changes"
+        ]
+      },
+      {
+        "id": "configure-api-gateway",
+        "title": "Configure API Gateway",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-api-gateway.md",
+        "workflow_ids": [
+          "converge-api-gateway"
+        ]
+      },
+      {
+        "id": "configure-backup-vm",
+        "title": "Configure Backup VM",
+        "agent_trust_required": "T3",
+        "steps": 9,
+        "path": "docs/runbooks/configure-backup-vm.md",
+        "workflow_ids": [
+          "configure-backup-vm"
+        ]
+      },
+      {
+        "id": "configure-control-plane-recovery",
+        "title": "Configure Control-Plane Recovery",
+        "agent_trust_required": "T3",
+        "steps": 9,
+        "path": "docs/runbooks/configure-control-plane-recovery.md",
+        "workflow_ids": [
+          "converge-control-plane-recovery"
+        ]
+      },
+      {
+        "id": "configure-docker-runtime",
+        "title": "Configure Docker Runtime Runbook",
+        "agent_trust_required": "T3",
+        "steps": 6,
+        "path": "docs/runbooks/configure-docker-runtime.md",
+        "workflow_ids": [
+          "converge-docker-runtime"
+        ]
+      },
+      {
+        "id": "configure-dozzle",
+        "title": "Configure Dozzle",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-dozzle.md",
+        "workflow_ids": [
+          "converge-dozzle"
+        ]
+      },
+      {
+        "id": "configure-edge-publication",
+        "title": "Configure Edge Publication",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-edge-publication.md",
+        "workflow_ids": [
+          "configure-edge-publication"
+        ]
+      },
+      {
+        "id": "configure-gitea",
+        "title": "Configure Gitea",
+        "agent_trust_required": "T3",
+        "steps": 4,
+        "path": "docs/runbooks/configure-gitea.md",
+        "workflow_ids": [
+          "converge-gitea"
+        ]
+      },
+      {
+        "id": "configure-guest-network-policy",
+        "title": "Configure Guest Network Policy",
+        "agent_trust_required": "T3",
+        "steps": 14,
+        "path": "docs/runbooks/configure-guest-network-policy.md",
+        "workflow_ids": [
+          "converge-guest-network-policy"
+        ]
+      },
+      {
+        "id": "configure-headscale",
+        "title": "Configure Headscale",
+        "agent_trust_required": "T3",
+        "steps": 10,
+        "path": "docs/runbooks/configure-headscale.md",
+        "workflow_ids": [
+          "converge-headscale"
+        ]
+      },
+      {
+        "id": "configure-homepage",
+        "title": "Configure Homepage",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-homepage.md",
+        "workflow_ids": [
+          "converge-homepage"
+        ]
+      },
+      {
+        "id": "configure-keycloak",
+        "title": "Configure Keycloak",
+        "agent_trust_required": "T3",
+        "steps": 9,
+        "path": "docs/runbooks/configure-keycloak.md",
+        "workflow_ids": [
+          "converge-keycloak"
+        ]
+      },
+      {
+        "id": "configure-langfuse",
+        "title": "Configure Langfuse",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-langfuse.md",
+        "workflow_ids": [
+          "converge-langfuse"
+        ]
+      },
+      {
+        "id": "configure-mail-platform",
+        "title": "Configure Mail Platform",
+        "agent_trust_required": "T3",
+        "steps": 21,
+        "path": "docs/runbooks/configure-mail-platform.md",
+        "workflow_ids": [
+          "converge-mail-platform"
+        ]
+      },
+      {
+        "id": "configure-mattermost",
+        "title": "Configure Mattermost",
+        "agent_trust_required": "T3",
+        "steps": 8,
+        "path": "docs/runbooks/configure-mattermost.md",
+        "workflow_ids": [
+          "converge-mattermost"
+        ]
+      },
+      {
+        "id": "configure-n8n",
+        "title": "Configure n8n",
+        "agent_trust_required": "T3",
+        "steps": 3,
+        "path": "docs/runbooks/configure-n8n.md",
+        "workflow_ids": [
+          "converge-n8n"
+        ]
+      },
+      {
+        "id": "configure-netbox",
+        "title": "Configure NetBox",
+        "agent_trust_required": "T3",
+        "steps": 8,
+        "path": "docs/runbooks/configure-netbox.md",
+        "workflow_ids": [
+          "converge-netbox"
+        ]
+      },
+      {
+        "id": "configure-ntfy",
+        "title": "Configure Ntfy",
+        "agent_trust_required": "T3",
+        "steps": 3,
+        "path": "docs/runbooks/configure-ntfy.md",
+        "workflow_ids": [
+          "converge-ntfy"
+        ]
+      },
+      {
+        "id": "configure-ntopng",
+        "title": "Configure ntopng Private Flow Visibility",
+        "agent_trust_required": "T3",
+        "steps": 9,
+        "path": "docs/runbooks/configure-ntopng.md",
+        "workflow_ids": [
+          "converge-ntopng"
+        ]
+      },
+      {
+        "id": "configure-ollama",
+        "title": "Configure Ollama",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-ollama.md",
+        "workflow_ids": [
+          "converge-ollama"
+        ]
+      },
+      {
+        "id": "configure-open-webui",
+        "title": "Configure Open WebUI",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-open-webui.md",
+        "workflow_ids": [
+          "converge-open-webui"
+        ]
+      },
+      {
+        "id": "configure-openbao",
+        "title": "Configure OpenBao",
+        "agent_trust_required": "T3",
+        "steps": 15,
+        "path": "docs/runbooks/configure-openbao.md",
+        "workflow_ids": [
+          "converge-openbao"
+        ]
+      },
+      {
+        "id": "configure-portainer",
+        "title": "Configure Portainer",
+        "agent_trust_required": "T3",
+        "steps": 4,
+        "path": "docs/runbooks/configure-portainer.md",
+        "workflow_ids": [
+          "converge-portainer",
+          "portainer-manage"
+        ]
+      },
+      {
+        "id": "configure-postgres-vm",
+        "title": "Configure PostgreSQL VM Runbook",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-postgres-vm.md",
+        "workflow_ids": [
+          "converge-postgres-vm"
+        ]
+      },
+      {
+        "id": "configure-proxmox-network",
+        "title": "Configure Proxmox Network Runbook",
+        "agent_trust_required": "T3",
+        "steps": 7,
+        "path": "docs/runbooks/configure-proxmox-network.md",
+        "workflow_ids": [
+          "configure-network"
+        ]
+      },
+      {
+        "id": "configure-public-ingress",
+        "title": "Configure Public Ingress Runbook",
+        "agent_trust_required": "T3",
+        "steps": 3,
+        "path": "docs/runbooks/configure-public-ingress.md",
+        "workflow_ids": [
+          "configure-ingress"
+        ]
+      },
+      {
+        "id": "configure-searxng",
+        "title": "Configure SearXNG",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-searxng.md",
+        "workflow_ids": [
+          "converge-searxng"
+        ]
+      },
+      {
+        "id": "configure-semaphore",
+        "title": "Configure Semaphore",
+        "agent_trust_required": "T3",
+        "steps": 5,
+        "path": "docs/runbooks/configure-semaphore.md",
+        "workflow_ids": [
+          "converge-semaphore",
+          "semaphore-manage"
+        ]
+      },
+      {
+        "id": "configure-step-ca",
+        "title": "Configure step-ca",
+        "agent_trust_required": "T3",
+        "steps": 10,
+        "path": "docs/runbooks/configure-step-ca.md",
+        "workflow_ids": [
+          "converge-step-ca"
+        ]
+      },
+      {
+        "id": "configure-tailscale-access",
+        "title": "Configure Tailscale Private Access",
+        "agent_trust_required": "T3",
+        "steps": 6,
+        "path": "docs/runbooks/configure-tailscale-access.md",
+        "workflow_ids": [
+          "configure-tailscale"
+        ]
+      },
+      {
+        "id": "configure-vaultwarden",
+        "title": "Configure Vaultwarden",
+        "agent_trust_required": "T3",
+        "steps": 15,
+        "path": "docs/runbooks/configure-vaultwarden.md",
+        "workflow_ids": [
+          "converge-vaultwarden"
+        ]
+      },
+      {
+        "id": "configure-windmill",
+        "title": "Configure Windmill",
+        "agent_trust_required": "T3",
+        "steps": 20,
+        "path": "docs/runbooks/configure-windmill.md",
+        "workflow_ids": [
+          "converge-windmill"
+        ]
+      },
+      {
+        "id": "dependency-wave-parallel-apply",
+        "title": "Dependency Wave Parallel Apply",
+        "agent_trust_required": "T3",
+        "steps": 5,
+        "path": "docs/runbooks/dependency-wave-parallel-apply.md",
+        "workflow_ids": [
+          "live-apply-waves"
+        ]
+      },
+      {
+        "id": "deploy-uptime-kuma",
+        "title": "Deploy Uptime Kuma",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/deploy-uptime-kuma.md",
+        "workflow_ids": [
+          "deploy-uptime-kuma",
+          "uptime-kuma-manage"
+        ]
+      },
+      {
+        "id": "disaster-recovery",
+        "title": "Disaster Recovery",
+        "agent_trust_required": "T1",
+        "steps": 0,
+        "path": "docs/runbooks/disaster-recovery.md",
+        "workflow_ids": [
+          "disaster-recovery-runbook"
+        ]
+      },
+      {
+        "id": "drift-detection",
+        "title": "Drift Detection",
+        "agent_trust_required": "T2",
+        "steps": 0,
+        "path": "docs/runbooks/drift-detection.md",
+        "workflow_ids": [
+          "continuous-drift-detection"
+        ]
+      },
+      {
+        "id": "environment-promotion-pipeline",
+        "title": "Environment Promotion Pipeline",
+        "agent_trust_required": "T3",
+        "steps": 18,
+        "path": "docs/runbooks/environment-promotion-pipeline.md",
+        "workflow_ids": [
+          "deploy-and-promote"
+        ]
+      },
+      {
+        "id": "ephemeral-fixtures",
+        "title": "Ephemeral Fixtures",
+        "agent_trust_required": "T3",
+        "steps": 9,
+        "path": "docs/runbooks/ephemeral-fixtures.md",
+        "workflow_ids": [
+          "ephemeral-vm-reaper",
+          "fixture-expiry-reaper"
+        ]
+      },
+      {
+        "id": "fault-injection",
+        "title": "Fault Injection",
+        "agent_trust_required": "T2",
+        "steps": 6,
+        "path": "docs/runbooks/fault-injection.md",
+        "workflow_ids": [
+          "fault-injection"
+        ]
+      },
+      {
+        "id": "generate-status-documents",
+        "title": "Generate Status Documents",
+        "agent_trust_required": "T2",
+        "steps": 0,
+        "path": "docs/runbooks/generate-status-documents.md",
+        "workflow_ids": [
+          "generate-status-docs"
+        ]
+      },
+      {
+        "id": "harden-access",
+        "title": "Harden Access Runbook",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/harden-access.md",
+        "workflow_ids": [
+          "harden-access",
+          "harden-guest-access"
+        ]
+      },
+      {
+        "id": "incident-triage-engine",
+        "title": "Incident Triage Engine",
+        "agent_trust_required": "T1",
+        "steps": 0,
+        "path": "docs/runbooks/incident-triage-engine.md",
+        "workflow_ids": [
+          "run-triage",
+          "triage-calibration"
+        ]
+      },
+      {
+        "id": "install-proxmox",
+        "title": "Install Proxmox Runbook",
+        "agent_trust_required": "T3",
+        "steps": 7,
+        "path": "docs/runbooks/install-proxmox.md",
+        "workflow_ids": [
+          "install-proxmox"
+        ]
+      },
+      {
+        "id": "integration-test-suite",
+        "title": "Integration Test Suite",
+        "agent_trust_required": "T2",
+        "steps": 0,
+        "path": "docs/runbooks/integration-test-suite.md",
+        "workflow_ids": [
+          "nightly-integration-tests"
+        ]
+      },
+      {
+        "id": "maintenance-windows",
+        "title": "Maintenance Windows",
+        "agent_trust_required": "T3",
+        "steps": 7,
+        "path": "docs/runbooks/maintenance-windows.md",
+        "workflow_ids": [
+          "close-maintenance-window",
+          "open-maintenance-window"
+        ]
+      },
+      {
+        "id": "monitoring-stack",
+        "title": "Monitoring Stack Runbook",
+        "agent_trust_required": "T3",
+        "steps": 20,
+        "path": "docs/runbooks/monitoring-stack.md",
+        "workflow_ids": [
+          "converge-monitoring"
+        ]
+      },
+      {
+        "id": "observation-to-action-closure-loop",
+        "title": "Observation-to-Action Closure Loop",
+        "agent_trust_required": "T1",
+        "steps": 0,
+        "path": "docs/runbooks/observation-to-action-closure-loop.md",
+        "workflow_ids": [
+          "platform-observation-loop"
+        ]
+      },
+      {
+        "id": "operator-offboarding",
+        "title": "Operator Offboarding",
+        "agent_trust_required": "T3",
+        "steps": 7,
+        "path": "docs/runbooks/operator-offboarding.md",
+        "workflow_ids": [
+          "operator-offboard",
+          "quarterly-access-review"
+        ]
+      },
+      {
+        "id": "operator-onboarding",
+        "title": "Operator Onboarding",
+        "agent_trust_required": "T3",
+        "steps": 7,
+        "path": "docs/runbooks/operator-onboarding.md",
+        "workflow_ids": [
+          "operator-onboard",
+          "sync-operators"
+        ]
+      },
+      {
+        "id": "packer-vm-templates",
+        "title": "Packer VM Templates",
+        "agent_trust_required": "T3",
+        "steps": 4,
+        "path": "docs/runbooks/packer-vm-templates.md",
+        "workflow_ids": [
+          "packer-template-rebuild"
+        ]
+      },
+      {
+        "id": "postgres-failover",
+        "title": "PostgreSQL Failover Runbook",
+        "agent_trust_required": "T3",
+        "steps": 4,
+        "path": "docs/runbooks/postgres-failover.md",
+        "workflow_ids": [
+          "database-dns"
+        ]
+      },
+      {
+        "id": "provision-guests",
+        "title": "Provision Guests Runbook",
+        "agent_trust_required": "T3",
+        "steps": 5,
+        "path": "docs/runbooks/provision-guests.md",
+        "workflow_ids": [
+          "provision-guests"
+        ]
+      },
+      {
+        "id": "proxmox-api-automation",
+        "title": "Proxmox API Automation Runbook",
+        "agent_trust_required": "T3",
+        "steps": 3,
+        "path": "docs/runbooks/proxmox-api-automation.md",
+        "workflow_ids": [
+          "provision-api-access"
+        ]
+      },
+      {
+        "id": "public-status-page",
+        "title": "Public Status Page",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/public-status-page.md",
+        "workflow_ids": [
+          "uptime-robot-manage"
+        ]
+      },
+      {
+        "id": "public-surface-security-scan",
+        "title": "Public Surface Security Scan",
+        "agent_trust_required": "T1",
+        "steps": 6,
+        "path": "docs/runbooks/public-surface-security-scan.md",
+        "workflow_ids": [
+          "weekly-security-scan"
+        ]
+      },
+      {
+        "id": "rag-platform-context",
+        "title": "RAG Platform Context",
+        "agent_trust_required": "T3",
+        "steps": 9,
+        "path": "docs/runbooks/rag-platform-context.md",
+        "workflow_ids": [
+          "converge-rag-context"
+        ]
+      },
+      {
+        "id": "runbook-automation-executor",
+        "title": "Runbook Automation Executor",
+        "agent_trust_required": "T1",
+        "steps": 0,
+        "path": "docs/runbooks/runbook-automation-executor.md",
+        "workflow_ids": [
+          "runbook-executor"
+        ]
+      },
+      {
+        "id": "secret-rotation-and-lifecycle",
+        "title": "Secret Rotation And Lifecycle",
+        "agent_trust_required": "T3",
+        "steps": 24,
+        "path": "docs/runbooks/secret-rotation-and-lifecycle.md",
+        "workflow_ids": [
+          "rotate-secret"
+        ]
+      },
+      {
+        "id": "security-posture-reporting",
+        "title": "Security Posture Reporting",
+        "agent_trust_required": "T1",
+        "steps": 6,
+        "path": "docs/runbooks/security-posture-reporting.md",
+        "workflow_ids": [
+          "security-posture-scan"
+        ]
+      },
+      {
+        "id": "subdomain-exposure-audit",
+        "title": "Subdomain Exposure Audit",
+        "agent_trust_required": "T2",
+        "steps": 4,
+        "path": "docs/runbooks/subdomain-exposure-audit.md",
+        "workflow_ids": [
+          "subdomain-exposure-audit"
+        ]
+      },
+      {
+        "id": "subdomain-governance",
+        "title": "Subdomain Governance",
+        "agent_trust_required": "T3",
+        "steps": 9,
+        "path": "docs/runbooks/subdomain-governance.md",
+        "workflow_ids": [
+          "provision-subdomain"
+        ]
+      },
+      {
+        "id": "token-exposure-response",
+        "title": "Token Exposure Response",
+        "agent_trust_required": "T3",
+        "steps": 6,
+        "path": "docs/runbooks/token-exposure-response.md",
+        "workflow_ids": [
+          "token-exposure-response"
+        ]
+      },
+      {
+        "id": "token-lifecycle-management",
+        "title": "Token Lifecycle Management",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/token-lifecycle-management.md",
+        "workflow_ids": [
+          "audit-token-inventory",
+          "rotate-grafana-service-token",
+          "rotate-keycloak-client-secret",
+          "rotate-platform-cli-token",
+          "rotate-windmill-token"
+        ]
+      },
+      {
+        "id": "validate-repository-automation",
+        "title": "Validate Repository Automation Runbook",
+        "agent_trust_required": "T1",
+        "steps": 0,
+        "path": "docs/runbooks/validate-repository-automation.md",
+        "workflow_ids": [
+          "validate"
+        ]
+      },
+      {
+        "id": "validation-gate",
+        "title": "Validation Gate Runbook",
+        "agent_trust_required": "T2",
+        "steps": 0,
+        "path": "docs/runbooks/validation-gate.md",
+        "workflow_ids": [
+          "gate-status",
+          "install-hooks",
+          "post-merge-gate",
+          "pre-push-gate"
+        ]
+      }
+    ]
+  },
+  "agents": {
+    "registered": [
+      {
+        "agent_id": "agent/observation-loop",
+        "trust_tier": "T2",
+        "description": "Scheduled observation loop that collects repo-managed findings and drift evidence.",
+        "status": "active",
+        "principal": "lv3-agent-hub",
+        "owner": "Repository automation",
+        "source_identity_id": "lv3-agent-hub"
+      },
+      {
+        "agent_id": "agent/proxmox-automation",
+        "trust_tier": "T3",
+        "description": "Governed Proxmox API mutation identity for repo-managed automation.",
+        "status": "active",
+        "principal": "lv3-automation@pve",
+        "owner": "Repository automation",
+        "source_identity_id": "lv3-automation-proxmox"
+      },
+      {
+        "agent_id": "agent/triage-loop",
+        "trust_tier": "T2",
+        "description": "Alert-driven triage workflow that proposes the cheapest safe next action.",
+        "status": "active",
+        "principal": "lv3-agent-hub",
+        "owner": "Repository automation",
+        "source_identity_id": "lv3-agent-hub"
+      }
+    ]
+  },
+  "recent_changes": {
+    "last_version": "0.177.11",
+    "deployed_at": "2026-03-27",
+    "summary": "completed the first live staging activation for ADR 0183 by applying the staging VMs on `vmbr20`, recording the staging live-apply receipt, and codifying `network_firewall = false` for staged VM NICs until staged guest-network-policy automation exists",
+    "release_notes_url": "docs/release-notes/0.177.12.md"
+  },
+  "agentic_architecture": {
+    "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
+    "entry_points": [
+      {
+        "component": "Platform CLI",
+        "endpoint": "lv3 <instruction>",
+        "adr": "0090"
+      },
+      {
+        "component": "Ops portal",
+        "endpoint": "https://ops.lv3.org",
+        "adr": "0093"
+      },
+      {
+        "component": "Windmill workflows",
+        "endpoint": "https://windmill.lv3.org",
+        "adr": "0044"
+      },
+      {
+        "component": "API gateway",
+        "endpoint": "https://api.lv3.org",
+        "adr": "0092"
+      }
+    ],
+    "pipeline": [
+      "Goal compiler (ADR 0112)",
+      "Change risk scoring (ADR 0116)",
+      "Budgeted workflow scheduler (ADR 0119)",
+      "Workflow catalog routing (ADR 0035)",
+      "Validation gate (ADR 0087)",
+      "Live apply receipts and deployment history (ADR 0036 / ADR 0081)"
+    ],
+    "autonomous_loop": [
+      "Agent observation loop (ADR 0071)",
+      "Incident triage (ADR 0114)",
+      "Maintenance suppression (ADR 0080)",
+      "Release and promotion controls (ADR 0073 / ADR 0110)"
+    ]
+  },
+  "data_sources": {
+    "service_catalog": "config/service-capability-catalog.json",
+    "workflow_catalog": "config/workflow-catalog.json",
+    "stack_state": "versions/stack.yaml",
+    "deployment_history": "receipts/live-applies",
+    "release_notes": "docs/release-notes",
+    "adr_corpus": "docs/adr"
+  },
+  "known_gaps": [
+    {
+      "adr": "0058",
+      "title": "NATS JetStream For Internal Event Bus And Agent Coordination",
+      "status": "Proposed",
+      "implementation_status": "Not Implemented",
+      "path": "docs/adr/0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md"
+    },
+    {
+      "adr": "0061",
+      "title": "GlitchTip For Application Exceptions And Task Failures",
+      "status": "Proposed",
+      "implementation_status": "Not Implemented",
+      "path": "docs/adr/0061-glitchtip-for-application-exceptions-and-task-failures.md"
+    },
+    {
+      "adr": "0118",
+      "title": "Replayable Failure Case Library",
+      "status": "Proposed",
+      "implementation_status": "Not Implemented",
+      "path": "docs/adr/0118-replayable-failure-case-library.md"
+    },
+    {
+      "adr": "0183",
+      "title": "Auxiliary Cloud Failure Domain for Witness, Recovery, and Burst Capacity",
+      "status": "Proposed",
+      "implementation_status": "Not Implemented",
+      "path": "docs/adr/0183-auxiliary-cloud-failure-domain-for-witness-recovery-and-burst-capacity.md"
+    },
+    {
+      "adr": "0184",
+      "title": "Failure-Domain Labels and Anti-Affinity Policy",
+      "status": "Proposed",
+      "implementation_status": "Not Implemented",
+      "path": "docs/adr/0184-failure-domain-labels-and-anti-affinity-policy.md"
+    },
+    {
+      "adr": "0185",
+      "title": "Branch-Scoped Ephemeral Preview Environments",
+      "status": "Proposed",
+      "implementation_status": "Not Implemented",
+      "path": "docs/adr/0185-branch-scoped-ephemeral-preview-environments.md"
+    },
+    {
+      "adr": "0186",
+      "title": "Prewarmed Fixture Pools and Lease-Based Ephemeral Capacity",
+      "status": "Proposed",
+      "implementation_status": "Not Implemented",
+      "path": "docs/adr/0186-prewarmed-fixture-pools-and-lease-based-ephemeral-capacity.md"
+    },
+    {
+      "adr": "0187",
+      "title": "Anonymized Seed Data Snapshots for Repeatable Tests",
+      "status": "Proposed",
+      "implementation_status": "Not Implemented",
+      "path": "docs/adr/0187-anonymized-seed-data-snapshots-for-repeatable-tests.md"
+    },
+    {
+      "adr": "0188",
+      "title": "Failover Rehearsal Gate for Redundancy Tiers",
+      "status": "Proposed",
+      "implementation_status": "Not Implemented",
+      "path": "docs/adr/0188-failover-rehearsal-gate-for-redundancy-tiers.md"
+    },
+    {
+      "adr": "0189",
+      "title": "Network Impairment Test Matrix for Staging and Previews",
+      "status": "Proposed",
+      "implementation_status": "Not Implemented",
+      "path": "docs/adr/0189-network-impairment-test-matrix-for-staging-and-previews.md"
+    },
+    {
+      "adr": "0190",
+      "title": "Synthetic Transaction Replay for Capacity and Recovery Validation",
+      "status": "Proposed",
+      "implementation_status": "Not Implemented",
+      "path": "docs/adr/0190-synthetic-transaction-replay-for-capacity-and-recovery-validation.md"
+    },
+    {
+      "adr": "0191",
+      "title": "Immutable Guest Replacement for Stateful and Edge Services",
+      "status": "Proposed",
+      "implementation_status": "Not Implemented",
+      "path": "docs/adr/0191-immutable-guest-replacement-for-stateful-and-edge-services.md"
+    },
+    {
+      "adr": "0192",
+      "title": "Separate Capacity Classes for Standby, Recovery, and Preview Workloads",
+      "status": "Proposed",
+      "implementation_status": "Not Implemented",
+      "path": "docs/adr/0192-separate-capacity-classes-for-standby-recovery-and-preview-workloads.md"
+    }
+  ]
+}

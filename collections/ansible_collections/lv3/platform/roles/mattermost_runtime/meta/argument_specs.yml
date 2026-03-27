@@ -1,0 +1,151 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the Mattermost runtime and repo-managed ChatOps bootstrap state.
+    options:
+      mattermost_team_name:
+        type: str
+        required: true
+        description:
+          - Short team name used for the managed Mattermost workspace.
+      mattermost_team_display_name:
+        type: str
+        required: true
+        description:
+          - Human-readable display name used for the managed Mattermost team.
+      mattermost_site_dir:
+        type: path
+        required: true
+        description:
+          - Base directory for the Mattermost runtime stack.
+      mattermost_secret_dir:
+        type: path
+        required: true
+        description:
+          - Directory that stores Mattermost secrets.
+      mattermost_compose_file:
+        type: path
+        required: true
+        description:
+          - Compose file path for the managed Mattermost stack.
+      mattermost_env_file:
+        type: path
+        required: true
+        description:
+          - Environment file rendered for Mattermost.
+      mattermost_bootstrap_file:
+        type: path
+        required: true
+        description:
+          - Bootstrap helper script rendered by the role.
+      mattermost_server_port:
+        type: int
+        required: true
+        description:
+          - Guest-local TCP port exposed by Mattermost.
+      mattermost_host_proxy_port:
+        type: int
+        required: false
+        description:
+          - Host-side proxy port used for operator access.
+      mattermost_image:
+        type: str
+        required: false
+        description:
+          - Container image reference used for Mattermost.
+      mattermost_database_name:
+        type: str
+        required: true
+        description:
+          - PostgreSQL database name used by Mattermost.
+      mattermost_database_user:
+        type: str
+        required: true
+        description:
+          - PostgreSQL login role used by Mattermost.
+      mattermost_database_host:
+        type: str
+        required: true
+        description:
+          - PostgreSQL host used by Mattermost.
+      mattermost_database_port:
+        type: int
+        required: false
+        description:
+          - PostgreSQL port used by Mattermost.
+      mattermost_database_password_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file that stores the Mattermost database password.
+      mattermost_admin_username:
+        type: str
+        required: true
+        description:
+          - Bootstrap admin username created by the role.
+      mattermost_admin_email:
+        type: str
+        required: true
+        description:
+          - Email address assigned to the bootstrap admin account.
+      mattermost_admin_password_remote_file:
+        type: path
+        required: false
+        description:
+          - Guest-local file that stores the Mattermost admin password.
+      mattermost_admin_password_local_file:
+        type: path
+        required: false
+        description:
+          - Controller-local file that stores the Mattermost admin password.
+      mattermost_webhooks_remote_file:
+        type: path
+        required: false
+        description:
+          - Guest-local webhook manifest rendered by the bootstrap workflow.
+      mattermost_webhooks_local_file:
+        type: path
+        required: false
+        description:
+          - Controller-local mirror of the Mattermost webhook manifest.
+      mattermost_local_artifact_dir:
+        type: path
+        required: false
+        description:
+          - Controller-local directory for Mattermost artifacts.
+      mattermost_container_name:
+        type: str
+        required: false
+        description:
+          - Expected container name used for verification.
+      mattermost_private_base_url:
+        type: str
+        required: false
+        description:
+          - Guest-local base URL used for verification and bootstrap.
+      mattermost_controller_url:
+        type: str
+        required: true
+        description:
+          - Operator-facing URL used to reach Mattermost from the controller.
+      mattermost_message_retention_hours:
+        type: int
+        required: false
+        description:
+          - Global Mattermost message retention window expressed in hours.
+      mattermost_file_retention_hours:
+        type: int
+        required: false
+        description:
+          - Global Mattermost attachment retention window expressed in hours.
+      mattermost_retention_deletion_job_start_time:
+        type: str
+        required: false
+        description:
+          - Local server time used for the nightly Mattermost retention job.
+      mattermost_channels:
+        type: list
+        elements: dict
+        required: true
+        description:
+          - Repo-managed channel definitions and webhook bootstrap metadata.

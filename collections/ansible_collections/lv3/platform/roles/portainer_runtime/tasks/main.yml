@@ -1,0 +1,277 @@
+---
+- name: Validate Portainer runtime inputs
+  ansible.builtin.assert:
+    that:
+      - portainer_image | length > 0
+      - portainer_container_name | length > 0
+      - portainer_site_dir | length > 0
+      - portainer_data_dir | length > 0
+      - portainer_compose_file | length > 0
+      - portainer_local_artifact_dir | length > 0
+      - portainer_admin_password_local_file | length > 0
+      - portainer_admin_auth_local_file | length > 0
+      - portainer_admin_username | length > 0
+      - portainer_endpoint_name | length > 0
+      - portainer_endpoint_creation_type | int >= 0
+      - portainer_controller_url | length > 0
+      - portainer_private_url | length > 0
+      - portainer_https_port | int > 0
+    fail_msg: "portainer_runtime requires image, compose paths, admin bootstrap, and controller URL inputs."
+
+- name: Ensure the Portainer local artifact directory exists
+  ansible.builtin.file:
+    path: "{{ portainer_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Ensure the Portainer admin password exists locally
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ portainer_admin_password_local_file }}" ]; then
+      umask 077
+      openssl rand -base64 24 > "{{ portainer_admin_password_local_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  become: false
+  register: portainer_admin_password_generation
+  changed_when: "'changed' in portainer_admin_password_generation.stdout"
+  no_log: true
+
+- name: Read the Portainer admin password from the control machine
+  ansible.builtin.slurp:
+    src: "{{ portainer_admin_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: portainer_admin_password_raw
+  no_log: true
+
+- name: Record Portainer bootstrap facts
+  ansible.builtin.set_fact:
+    portainer_admin_password: "{{ portainer_admin_password_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Ensure Portainer runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - "{{ portainer_site_dir }}"
+    - "{{ portainer_data_dir }}"
+
+- name: Render the Portainer compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ portainer_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the Portainer image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ portainer_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ portainer_site_dir }}"
+  register: portainer_pull
+  changed_when: >-
+    'Pulling' in portainer_pull.stdout
+    or 'Downloaded newer image' in portainer_pull.stdout
+    or 'Pull complete' in portainer_pull.stdout
+
+- name: Start the Portainer stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ portainer_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ portainer_site_dir }}"
+  register: portainer_up
+  changed_when: >-
+    'Creating' in portainer_up.stdout
+    or 'Recreating' in portainer_up.stdout
+    or 'Starting' in portainer_up.stdout
+
+- name: Wait for Portainer to listen on the private runtime IP
+  ansible.builtin.wait_for:
+    host: "{{ ansible_host }}"
+    port: "{{ portainer_https_port }}"
+    delay: 0
+    timeout: 180
+
+- name: Initialize the Portainer admin user when needed
+  ansible.builtin.uri:
+    url: "{{ portainer_private_url }}/api/users/admin/init"
+    method: POST
+    body_format: json
+    body:
+      Username: "{{ portainer_admin_username }}"
+      Password: "{{ portainer_admin_password }}"
+    status_code:
+      - 200
+      - 409
+    return_content: true
+    validate_certs: "{{ portainer_verify_ssl }}"
+  register: portainer_admin_init
+  changed_when: portainer_admin_init.status == 200
+  failed_when: false
+  no_log: true
+
+- name: Assert Portainer admin initialization returned an expected result
+  ansible.builtin.assert:
+    that:
+      - portainer_admin_init.status in [200, 409]
+    fail_msg: >-
+      Portainer admin initialization returned status {{ portainer_admin_init.status }}.
+      Response: {{ portainer_admin_init.content | default('') }}
+
+- name: Authenticate to Portainer
+  ansible.builtin.uri:
+    url: "{{ portainer_controller_url }}/api/auth"
+    method: POST
+    body_format: json
+    body:
+      username: "{{ portainer_admin_username }}"
+      password: "{{ portainer_admin_password }}"
+    status_code: 200
+    return_content: true
+    validate_certs: "{{ portainer_verify_ssl }}"
+  register: portainer_auth
+  delegate_to: localhost
+  become: false
+  retries: 12
+  delay: 5
+  until:
+    - portainer_auth.status == 200
+    - (portainer_auth.json.jwt | default('')) | length > 0
+  changed_when: false
+  no_log: true
+
+- name: Create the Portainer local environment when needed
+  ansible.builtin.shell: |
+    set -euo pipefail
+    response_file="$(mktemp)"
+    status_code="$(
+      curl -sk \
+        -o "${response_file}" \
+        -w "%{http_code}" \
+        -H "Authorization: Bearer {{ portainer_auth.json.jwt }}" \
+        -F "Name={{ portainer_endpoint_name }}" \
+        -F "EndpointCreationType={{ portainer_endpoint_creation_type }}" \
+        "{{ portainer_controller_url }}/api/endpoints"
+    )"
+    cat "${response_file}"
+    printf '\nHTTP_STATUS=%s\n' "${status_code}"
+    rm -f "${response_file}"
+  args:
+    executable: /bin/bash
+  register: portainer_local_endpoint_create
+  delegate_to: localhost
+  become: false
+  changed_when: "'HTTP_STATUS=200' in portainer_local_endpoint_create.stdout"
+  failed_when: >-
+    'HTTP_STATUS=200' not in portainer_local_endpoint_create.stdout
+    and 'HTTP_STATUS=409' not in portainer_local_endpoint_create.stdout
+  no_log: true
+
+- name: Assert Portainer local environment creation returned an expected result
+  ansible.builtin.assert:
+    that:
+      - "'HTTP_STATUS=200' in portainer_local_endpoint_create.stdout or 'HTTP_STATUS=409' in portainer_local_endpoint_create.stdout"
+    fail_msg: >-
+      Portainer local environment creation did not return HTTP 200 or 409.
+
+- name: Read the Portainer environment list
+  ansible.builtin.uri:
+    url: "{{ portainer_controller_url }}/api/endpoints"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ portainer_auth.json.jwt }}"
+    status_code: 200
+    return_content: true
+    validate_certs: "{{ portainer_verify_ssl }}"
+  register: portainer_endpoints
+  delegate_to: localhost
+  become: false
+  changed_when: false
+  no_log: true
+
+- name: Record the local Portainer endpoint id
+  ansible.builtin.set_fact:
+    portainer_endpoint_id: >-
+      {{
+        (
+          portainer_endpoints.json
+          | default([])
+          | selectattr('Name', 'defined')
+          | selectattr('Name', 'equalto', portainer_endpoint_name)
+          | map(attribute='Id')
+          | first
+        )
+        | default(
+          (
+            portainer_endpoints.json
+            | default([])
+            | selectattr('name', 'defined')
+            | selectattr('name', 'equalto', portainer_endpoint_name)
+            | map(attribute='id')
+            | first
+          )
+        )
+      }}
+  no_log: true
+
+- name: Assert that the Portainer local endpoint is available
+  ansible.builtin.assert:
+    that:
+      - (portainer_endpoints.json | default([])) | length > 0
+      - (portainer_endpoint_id | string) | length > 0
+    fail_msg: "Portainer did not expose a usable local endpoint after bootstrap."
+
+- name: Persist Portainer controller auth locally
+  ansible.builtin.copy:
+    dest: "{{ portainer_admin_auth_local_file }}"
+    content: "{{ {'base_url': portainer_controller_url, 'private_url': portainer_private_url, 'username': portainer_admin_username, 'password': portainer_admin_password, 'endpoint_id': portainer_endpoint_id, 'endpoint_name': portainer_endpoint_name, 'verify_ssl': portainer_verify_ssl} | to_nice_json }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Verify the Portainer container is running
+  ansible.builtin.command:
+    argv:
+      - docker
+      - ps
+      - --filter
+      - "name={{ portainer_container_name }}"
+      - --filter
+      - status=running
+      - --format
+      - "{{ '{{' }}.Names{{ '}}' }}"
+  register: portainer_running
+  changed_when: false
+
+- name: Assert the Portainer container is running
+  ansible.builtin.assert:
+    that:
+      - portainer_running.stdout_lines | select('equalto', portainer_container_name) | list | length == 1
+    fail_msg: "Portainer container is not running."
+
+- name: Verify Portainer health probes
+  ansible.builtin.import_tasks: verify.yml

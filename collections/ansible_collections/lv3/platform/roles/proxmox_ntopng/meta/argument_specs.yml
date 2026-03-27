@@ -1,0 +1,73 @@
+---
+argument_specs:
+  main:
+    short_description: Install and configure ntopng on the Proxmox host.
+    options:
+      ntopng_repo_package_url:
+        type: str
+        required: true
+        description:
+          - URL for the upstream ntop repository bootstrap package.
+      ntopng_repo_package_file:
+        type: path
+        required: true
+        description:
+          - Temporary file path used to stage the ntop repository package.
+      ntopng_packages:
+        type: list
+        elements: str
+        required: true
+        description:
+          - Packages installed to provide ntopng and its dependencies.
+      ntopng_state_dir:
+        type: path
+        required: true
+        description:
+          - Directory that stores managed ntopng state and secrets.
+      ntopng_admin_password_file:
+        type: path
+        required: true
+        description:
+          - File that stores the managed ntopng admin password.
+      ntopng_local_networks_file:
+        type: path
+        required: true
+        description:
+          - File that stores the repo-managed ntopng local network definitions.
+      ntopng_config_file:
+        type: path
+        required: true
+        description:
+          - ntopng configuration fragment rendered by the role.
+      ntopng_http_port:
+        type: int
+        required: true
+        description:
+          - TCP port exposed by ntopng HTTP.
+      ntopng_https_port:
+        type: int
+        required: false
+        description:
+          - TCP port exposed by ntopng HTTPS when enabled.
+      ntopng_interfaces:
+        type: list
+        elements: str
+        required: true
+        description:
+          - Network interfaces monitored by ntopng.
+      ntopng_local_networks:
+        type: list
+        elements: str
+        required: true
+        description:
+          - Local network definitions passed to ntopng.
+      ntopng_probe_target:
+        type: str
+        required: false
+        description:
+          - Internal target used for connectivity verification.
+      ntopng_operator_url:
+        type: str
+        required: true
+        description:
+          - Guest-local operator URL used for ntopng verification.

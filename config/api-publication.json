@@ -1,0 +1,287 @@
+{
+  "schema_version": "1.0.0",
+  "default_publication_tier": "internal-only",
+  "tiers": {
+    "internal-only": {
+      "title": "Internal-Only",
+      "summary": "Reachable only from LV3 private networks, loopback paths, or explicitly trusted control-plane hosts.",
+      "approval_rule": "This is the default tier for new APIs and HTTP callbacks. Do not publish these surfaces through public DNS or the public edge."
+    },
+    "operator-only": {
+      "title": "Operator-Only",
+      "summary": "Reachable only from approved operator devices over private access such as Tailscale.",
+      "approval_rule": "These surfaces may be discoverable through an informational hostname, but the live API must stay private and require operator credentials."
+    },
+    "public-edge": {
+      "title": "Public Edge",
+      "summary": "Intentionally published on a public domain through the named edge model.",
+      "approval_rule": "Public API publication requires an explicit ADR or approved implementation record plus a declared public hostname."
+    }
+  },
+  "surfaces": [
+    {
+      "id": "platform-api-gateway",
+      "title": "Platform API gateway",
+      "lane": "api",
+      "lane_surface_ref": "platform-api-gateway",
+      "publication_tier": "public-edge",
+      "public_hostnames": ["api.lv3.org"],
+      "reachability": "Reachable on https://api.lv3.org through the NGINX edge, with Keycloak bearer-token authentication enforced by the gateway itself.",
+      "approval_notes": "ADR 0092 approves this single public-edge gateway surface so downstream service APIs can stay internal implementation detail."
+    },
+    {
+      "id": "headscale-control-plane",
+      "title": "Headscale control plane",
+      "lane": "api",
+      "lane_surface_ref": "headscale-control-plane",
+      "publication_tier": "public-edge",
+      "public_hostnames": ["headscale.lv3.org"],
+      "reachability": "Reachable on https://headscale.lv3.org through the shared NGINX edge, with node-registration keys and API keys enforcing access to the mesh control plane.",
+      "approval_notes": "ADR 0144 explicitly approves this public hostname because the mesh control plane must be reachable for client registration while node-to-node traffic stays private."
+    },
+    {
+      "id": "proxmox-management-api",
+      "title": "Proxmox management API",
+      "lane": "api",
+      "lane_surface_ref": "proxmox-management-api",
+      "publication_tier": "operator-only",
+      "reachability": "Reachable only over the Proxmox host Tailscale address on port 8006.",
+      "approval_notes": "The public proxmox.lv3.org hostname remains informational only; routine administration stays on the private operator path."
+    },
+    {
+      "id": "step-ca-api",
+      "title": "step-ca API",
+      "lane": "api",
+      "lane_surface_ref": "step-ca-api",
+      "publication_tier": "internal-only",
+      "reachability": "Reachable through the Proxmox host Tailscale proxy for approved controller and trust-bootstrap traffic only.",
+      "approval_notes": "Keep the CA endpoint off the public edge and limit callers to trusted control-plane actors."
+    },
+    {
+      "id": "openbao-api",
+      "title": "OpenBao API",
+      "lane": "api",
+      "lane_surface_ref": "openbao-api",
+      "publication_tier": "internal-only",
+      "reachability": "Reachable through the Proxmox host Tailscale proxy and the runtime loopback listener, with client-certificate authentication on the external path.",
+      "approval_notes": "This secret-authority API stays private even though it has a host-level proxy; do not publish it through public DNS or NGINX."
+    },
+    {
+      "id": "windmill-api",
+      "title": "Windmill API",
+      "lane": "api",
+      "lane_surface_ref": "windmill-api",
+      "publication_tier": "operator-only",
+      "reachability": "Reachable only through the Proxmox host Tailscale proxy on port 8005.",
+      "approval_notes": "Windmill administrative and workflow APIs are operator-facing private surfaces, not public application endpoints."
+    },
+    {
+      "id": "netbox-api",
+      "title": "NetBox API",
+      "lane": "api",
+      "lane_surface_ref": "netbox-api",
+      "publication_tier": "operator-only",
+      "reachability": "Reachable only through the Proxmox host Tailscale proxy on port 8004.",
+      "approval_notes": "This is the private visual inventory plane for operators and repo-managed sync; do not publish it through public DNS or the NGINX edge."
+    },
+    {
+      "id": "portainer-api",
+      "title": "Portainer API",
+      "lane": "api",
+      "lane_surface_ref": "portainer-api",
+      "publication_tier": "operator-only",
+      "reachability": "Reachable only through the Proxmox host Tailscale proxy on port 9444.",
+      "approval_notes": "Portainer stays private-only for operator and governed wrapper use; do not publish it through public DNS or the NGINX edge."
+    },
+    {
+      "id": "vaultwarden-api",
+      "title": "Vaultwarden API",
+      "lane": "api",
+      "lane_surface_ref": "vaultwarden-api",
+      "publication_tier": "operator-only",
+      "reachability": "Reachable only through the Proxmox host Tailscale proxy at https://vault.lv3.org with the internal CA trust chain.",
+      "approval_notes": "Vaultwarden remains private-only for named operators and bounded bootstrap automation; do not publish it through public DNS or the NGINX edge."
+    },
+    {
+      "id": "mail-gateway-api",
+      "title": "Mail gateway API",
+      "lane": "api",
+      "lane_surface_ref": "mail-gateway-api",
+      "publication_tier": "internal-only",
+      "reachability": "Reachable only on the LV3 private guest network at docker-runtime-lv3:8081.",
+      "approval_notes": "This is the sanctioned machine-facing mail automation API and must stay off the public edge."
+    },
+    {
+      "id": "mattermost-operator-api",
+      "title": "Mattermost operator API",
+      "lane": "api",
+      "lane_surface_ref": "mattermost-operator-api",
+      "publication_tier": "operator-only",
+      "reachability": "Reachable only through the Proxmox host Tailscale proxy on port 8066.",
+      "approval_notes": "Mattermost stays private-first and operator-only; future SSO may change authentication, not exposure."
+    },
+    {
+      "id": "langfuse-observability-api",
+      "title": "Langfuse observability API",
+      "lane": "api",
+      "lane_surface_ref": "langfuse-observability-api",
+      "publication_tier": "public-edge",
+      "public_hostnames": ["langfuse.lv3.org"],
+      "reachability": "Reachable on https://langfuse.lv3.org/api/public through the shared NGINX edge, authenticated with project-scoped API keys for ingestion and Keycloak-backed browser login for operators.",
+      "approval_notes": "ADR 0146 approves this public-edge observability surface so agent traces can be emitted without relying on private network paths."
+    },
+    {
+      "id": "open-webui-operator-workbench",
+      "title": "Open WebUI operator workbench",
+      "lane": "api",
+      "lane_surface_ref": "open-webui-operator-workbench",
+      "publication_tier": "operator-only",
+      "reachability": "Reachable only through the Proxmox host Tailscale proxy on port 8008.",
+      "approval_notes": "This conversational operator surface stays private and requires approved operator credentials; do not publish it through the public edge."
+    },
+    {
+      "id": "ollama-local-inference-api",
+      "title": "Ollama local inference API",
+      "lane": "api",
+      "lane_surface_ref": "ollama-local-inference-api",
+      "publication_tier": "internal-only",
+      "reachability": "Reachable only on the LV3 private guest network at docker-runtime-lv3:11434.",
+      "approval_notes": "This private local-inference surface is consumed only by repo-managed internal callers such as Open WebUI and bounded goal-compiler fallback routing; do not publish it through public DNS or the NGINX edge."
+    },
+    {
+      "id": "platform-context-api",
+      "title": "Platform context API",
+      "lane": "api",
+      "lane_surface_ref": "platform-context-api",
+      "publication_tier": "operator-only",
+      "reachability": "Reachable only through the Proxmox host Tailscale proxy on port 8010 and requires the controller-local bearer token.",
+      "approval_notes": "This governed retrieval and tool API remains private-first and is intended for approved operators, Open WebUI global tools, and other authenticated internal agent runtimes."
+    },
+    {
+      "id": "stalwart-mail-events",
+      "title": "Stalwart mail event webhook",
+      "lane": "event",
+      "lane_surface_ref": "stalwart-mail-events",
+      "publication_tier": "internal-only",
+      "reachability": "Reachable only from the private mail-platform stack on docker-runtime-lv3.",
+      "approval_notes": "Event callbacks stay on private or container-local networks unless a future ADR approves explicit publication."
+    },
+    {
+      "id": "mattermost-incoming-webhooks",
+      "title": "Mattermost incoming webhooks",
+      "lane": "event",
+      "lane_surface_ref": "mattermost-incoming-webhooks",
+      "publication_tier": "internal-only",
+      "reachability": "Reachable on the private Mattermost runtime at docker-runtime-lv3:8065, with mirrored webhook ids retained under .local/mattermost for controlled routing.",
+      "approval_notes": "Treat these webhook ids as secret-bearing internal event sinks even though operator verification can traverse the Proxmox host Tailscale proxy."
+    },
+    {
+      "id": "platform-finding-subjects",
+      "title": "Platform finding event subjects",
+      "lane": "event",
+      "lane_surface_ref": "platform-finding-subjects",
+      "publication_tier": "internal-only",
+      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "approval_notes": "ADR 0071 finding events stay private-first and use one canonical subject so subscribers do not depend on producer-specific topic naming."
+    },
+    {
+      "id": "platform-watchdog-subjects",
+      "title": "Platform watchdog event subjects",
+      "lane": "event",
+      "lane_surface_ref": "platform-watchdog-subjects",
+      "publication_tier": "internal-only",
+      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "approval_notes": "ADR 0172 watchdog heartbeat and stale-job abort events stay private-first because they expose live control-plane recovery behavior."
+    },
+    {
+      "id": "platform-api-request-events",
+      "title": "Platform API request events",
+      "lane": "event",
+      "lane_surface_ref": "platform-api-request-events",
+      "publication_tier": "internal-only",
+      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "approval_notes": "ADR 0092 request events stay private-first because they expose operator and service call patterns that should not leave the internal event plane."
+    },
+    {
+      "id": "platform-drift-subjects",
+      "title": "Platform drift event subjects",
+      "lane": "event",
+      "lane_surface_ref": "platform-drift-subjects",
+      "publication_tier": "internal-only",
+      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "approval_notes": "ADR 0091 drift subjects stay private-first because they disclose real-time divergence between repo intent and live platform state."
+    },
+    {
+      "id": "platform-security-subjects",
+      "title": "Platform security event subjects",
+      "lane": "event",
+      "lane_surface_ref": "platform-security-subjects",
+      "publication_tier": "internal-only",
+      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "approval_notes": "ADR 0102 security posture subjects stay private-first because they expose active hardening gaps and live image vulnerability findings."
+    },
+    {
+      "id": "maintenance-window-subjects",
+      "title": "Maintenance window event subjects",
+      "lane": "event",
+      "lane_surface_ref": "maintenance-window-subjects",
+      "publication_tier": "internal-only",
+      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "approval_notes": "ADR 0080 maintenance subjects stay private-first because they disclose planned change timing and active alert-suppression scope."
+    },
+    {
+      "id": "platform-backup-subjects",
+      "title": "Backup verification event subjects",
+      "lane": "event",
+      "lane_surface_ref": "platform-backup-subjects",
+      "publication_tier": "internal-only",
+      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "approval_notes": "ADR 0099 backup verification events stay private-first because they disclose restore posture and recent backup health."
+    },
+    {
+      "id": "platform-world-state-events",
+      "title": "World-state refresh events",
+      "lane": "event",
+      "lane_surface_ref": "platform-world-state-events",
+      "publication_tier": "internal-only",
+      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "approval_notes": "ADR 0113 world-state refresh events stay private-first because they expose live collection cadence and surface freshness for internal automation."
+    },
+    {
+      "id": "platform-ledger-events",
+      "title": "Mutation-ledger fan-out events",
+      "lane": "event",
+      "lane_surface_ref": "platform-ledger-events",
+      "publication_tier": "internal-only",
+      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "approval_notes": "ADR 0115 ledger fan-out stays private-first because it exposes operator and automation mutations in near real time."
+    },
+    {
+      "id": "platform-agent-events",
+      "title": "Agent coordination event subjects",
+      "lane": "event",
+      "lane_surface_ref": "platform-agent-events",
+      "publication_tier": "internal-only",
+      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "approval_notes": "ADR 0161 coordination events stay private-first because they expose live agent activity, target selection, and blocked or escalated session state."
+    },
+    {
+      "id": "platform-execution-events",
+      "title": "Execution lifecycle event subjects",
+      "lane": "event",
+      "lane_surface_ref": "platform-execution-events",
+      "publication_tier": "internal-only",
+      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "approval_notes": "Execution lifecycle and deadlock-detection subjects stay private-first because they expose live mutation flow control, blocked work, and retry timing."
+    },
+    {
+      "id": "platform-config-merge-events",
+      "title": "Config-merge status events",
+      "lane": "event",
+      "lane_surface_ref": "platform-config-merge-events",
+      "publication_tier": "internal-only",
+      "reachability": "Published only on the private docker-runtime-lv3 NATS runtime and consumed by approved internal subscribers.",
+      "approval_notes": "ADR 0158 config-merge events stay private-first because they expose pending registry mutations and merge conflicts in near real time."
+    }
+  ]
+}

@@ -1,0 +1,1216 @@
+---
+- name: Validate monitoring VM inputs
+  ansible.builtin.assert:
+    that:
+      - monitoring_stack_packages | length > 0
+      - monitoring_stack_dir | length > 0
+      - monitoring_grafana_admin_user | length > 0
+      - monitoring_grafana_dashboard_uid | length > 0
+      - monitoring_grafana_dashboard_file | length > 0
+      - monitoring_grafana_vm_dashboard_dir | length > 0
+      - monitoring_grafana_loki_datasource_name | length > 0
+      - monitoring_grafana_prometheus_datasource_uid | length > 0
+      - monitoring_grafana_tempo_datasource_uid | length > 0
+      - monitoring_influxdb_url | length > 0
+      - monitoring_influxdb_org | length > 0
+      - monitoring_influxdb_bucket | length > 0
+      - monitoring_loki_config_file | length > 0
+      - monitoring_loki_data_dir | length > 0
+      - monitoring_loki_http_url | length > 0
+      - monitoring_prometheus_config_file | length > 0
+      - monitoring_prometheus_rules_dir | length > 0
+      - monitoring_prometheus_file_sd_dir | length > 0
+      - monitoring_blackbox_exporter_config_file | length > 0
+      - monitoring_blackbox_exporter_env_file | length > 0
+      - monitoring_grafana_slo_dashboard_file | length > 0
+      - monitoring_tempo_deb_url | length > 0
+      - monitoring_tempo_deb_checksum | length > 0
+      - monitoring_tempo_config_file | length > 0
+      - monitoring_otelcol_deb_url | length > 0
+      - monitoring_otelcol_deb_checksum | length > 0
+      - monitoring_otelcol_config_file | length > 0
+      - groups['proxmox_hosts'] | length > 0
+    fail_msg: "monitoring_vm requires monitoring paths plus an available proxmox_hosts inventory group."
+
+- name: Ensure monitoring prerequisite packages are present
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gpg
+      - openssl
+    state: present
+
+- name: Ensure APT keyring directory exists
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: "0755"
+
+- name: Install Grafana repository key
+  ansible.builtin.get_url:
+    url: "{{ monitoring_grafana_repo_key_url }}"
+    dest: "{{ monitoring_grafana_repo_keyring }}"
+    mode: "0644"
+
+- name: Install Grafana repository definition
+  ansible.builtin.copy:
+    dest: "{{ monitoring_grafana_repo_file }}"
+    mode: "0644"
+    content: |
+      deb [signed-by={{ monitoring_grafana_repo_keyring }}] https://apt.grafana.com stable main
+
+- name: Install InfluxData repository key
+  ansible.builtin.get_url:
+    url: "{{ monitoring_influxdb_repo_key_url }}"
+    dest: /tmp/influxdata-archive.key
+    mode: "0644"
+
+- name: Convert InfluxData repository key into a gpg keyring
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --dearmor
+      - --yes
+      - --output
+      - "{{ monitoring_influxdb_repo_keyring }}"
+      - /tmp/influxdata-archive.key
+    creates: "{{ monitoring_influxdb_repo_keyring }}"
+
+- name: Install InfluxData repository definition
+  ansible.builtin.copy:
+    dest: "{{ monitoring_influxdb_repo_file }}"
+    mode: "0644"
+    content: |
+      deb [signed-by={{ monitoring_influxdb_repo_keyring }}] https://repos.influxdata.com/debian stable main
+
+- name: Install monitoring stack packages
+  ansible.builtin.apt:
+    name: "{{ monitoring_stack_packages }}"
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure monitoring secret directory exists
+  ansible.builtin.file:
+    path: "{{ monitoring_stack_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Ensure Grafana datasource provisioning directory exists
+  ansible.builtin.file:
+    path: /etc/grafana/provisioning/datasources
+    state: directory
+    owner: root
+    group: grafana
+    mode: "0750"
+
+- name: Ensure Grafana dashboard provisioning directory exists
+  ansible.builtin.file:
+    path: /etc/grafana/provisioning/dashboards
+    state: directory
+    owner: root
+    group: grafana
+    mode: "0750"
+
+- name: Ensure Grafana dashboard storage directory exists
+  ansible.builtin.file:
+    path: "{{ monitoring_grafana_dashboard_dir }}"
+    state: directory
+    owner: root
+    group: grafana
+    mode: "0755"
+
+- name: Ensure Grafana VM dashboard storage directory exists
+  ansible.builtin.file:
+    path: "{{ monitoring_grafana_vm_dashboard_dir }}"
+    state: directory
+    owner: root
+    group: grafana
+    mode: "0755"
+
+- name: Ensure Prometheus rules directory exists
+  ansible.builtin.file:
+    path: "{{ monitoring_prometheus_rules_dir }}"
+    state: directory
+    owner: root
+    group: prometheus
+    mode: "0755"
+
+- name: Ensure Prometheus file_sd directory exists
+  ansible.builtin.file:
+    path: "{{ monitoring_prometheus_file_sd_dir }}"
+    state: directory
+    owner: root
+    group: prometheus
+    mode: "0755"
+
+- name: Include tracing infrastructure tasks
+  ansible.builtin.include_tasks: tracing.yml
+
+- name: Render blackbox exporter environment
+  ansible.builtin.copy:
+    dest: "{{ monitoring_blackbox_exporter_env_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      ARGS="--config.file={{ monitoring_blackbox_exporter_config_file }} --web.listen-address=127.0.0.1:{{ monitoring_blackbox_exporter_port }}"
+  notify: Restart Blackbox Exporter
+
+- name: Copy Prometheus SLO recording rules
+  ansible.builtin.copy:
+    src: "{{ monitoring_prometheus_slo_rules_source_file }}"
+    dest: "{{ monitoring_prometheus_slo_rules_file }}"
+    owner: root
+    group: prometheus
+    mode: "0644"
+  notify: Restart Prometheus
+
+- name: Copy Prometheus SLO alert rules
+  ansible.builtin.copy:
+    src: "{{ monitoring_prometheus_slo_alerts_source_file }}"
+    dest: "{{ monitoring_prometheus_slo_alerts_file }}"
+    owner: root
+    group: prometheus
+    mode: "0644"
+  notify: Restart Prometheus
+
+- name: Copy Prometheus SLO probe targets
+  ansible.builtin.copy:
+    src: "{{ monitoring_prometheus_slo_targets_source_file }}"
+    dest: "{{ monitoring_prometheus_slo_targets_file }}"
+    owner: root
+    group: prometheus
+    mode: "0644"
+  notify: Restart Prometheus
+
+- name: Generate Grafana admin password
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ monitoring_grafana_admin_password_file }}" ]; then
+      umask 077
+      openssl rand -base64 24 > "{{ monitoring_grafana_admin_password_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: monitoring_grafana_password_generation
+  changed_when: "'changed' in monitoring_grafana_password_generation.stdout"
+
+- name: Generate InfluxDB admin password
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ monitoring_influxdb_admin_password_file }}" ]; then
+      umask 077
+      openssl rand -base64 24 > "{{ monitoring_influxdb_admin_password_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: monitoring_influx_admin_password_generation
+  changed_when: "'changed' in monitoring_influx_admin_password_generation.stdout"
+
+- name: Read Grafana admin password
+  ansible.builtin.slurp:
+    src: "{{ monitoring_grafana_admin_password_file }}"
+  register: monitoring_grafana_admin_password_raw
+  no_log: true
+
+- name: Read InfluxDB admin password
+  ansible.builtin.slurp:
+    src: "{{ monitoring_influxdb_admin_password_file }}"
+  register: monitoring_influxdb_admin_password_raw
+  no_log: true
+
+- name: Set monitoring secret facts
+  ansible.builtin.set_fact:
+    monitoring_grafana_admin_password: "{{ monitoring_grafana_admin_password_raw.content | b64decode | trim }}"
+    monitoring_influxdb_admin_password: "{{ monitoring_influxdb_admin_password_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Configure Grafana server binding
+  community.general.ini_file:
+    path: /etc/grafana/grafana.ini
+    section: server
+    option: http_addr
+    value: 0.0.0.0
+    mode: "0640"
+  notify: Restart Grafana
+
+- name: Disable Grafana self-service signup
+  community.general.ini_file:
+    path: /etc/grafana/grafana.ini
+    section: users
+    option: allow_sign_up
+    value: "false"
+    mode: "0640"
+  notify: Restart Grafana
+
+- name: Disable anonymous Grafana access
+  community.general.ini_file:
+    path: /etc/grafana/grafana.ini
+    section: auth.anonymous
+    option: enabled
+    value: "false"
+    mode: "0640"
+  notify: Restart Grafana
+
+- name: Keep the Grafana login form available for recovery
+  community.general.ini_file:
+    path: /etc/grafana/grafana.ini
+    section: auth
+    option: disable_login_form
+    value: "false"
+    mode: "0640"
+  notify: Restart Grafana
+
+- name: Disable Grafana public dashboards
+  community.general.ini_file:
+    path: /etc/grafana/grafana.ini
+    section: public_dashboards
+    option: enabled
+    value: "false"
+    mode: "0640"
+  notify: Restart Grafana
+
+- name: Disable Grafana embedding
+  community.general.ini_file:
+    path: /etc/grafana/grafana.ini
+    section: security
+    option: allow_embedding
+    value: "false"
+    mode: "0640"
+  notify: Restart Grafana
+
+- name: Bound Grafana annotation retention
+  community.general.ini_file:
+    path: /etc/grafana/grafana.ini
+    section: annotations
+    option: max_age
+    value: "{{ monitoring_grafana_annotation_retention }}"
+    mode: "0640"
+  notify: Restart Grafana
+
+- name: Enable and start InfluxDB
+  ansible.builtin.systemd:
+    name: influxdb
+    enabled: true
+    state: started
+
+- name: Wait for InfluxDB API
+  ansible.builtin.uri:
+    url: "{{ monitoring_influxdb_url }}/health"
+    method: GET
+    status_code: 200
+  register: monitoring_influxdb_health
+  retries: 20
+  delay: 3
+  until: monitoring_influxdb_health.status == 200
+
+- name: Check whether InfluxDB setup is still allowed
+  ansible.builtin.uri:
+    url: "{{ monitoring_influxdb_url }}/api/v2/setup"
+    method: GET
+    status_code: 200
+  register: monitoring_influxdb_setup_status
+  changed_when: false
+
+- name: Check whether the local InfluxDB operator token exists
+  ansible.builtin.stat:
+    path: "{{ monitoring_influxdb_operator_token_file }}"
+  register: monitoring_influxdb_operator_token_stat
+
+- name: Fail if InfluxDB is initialized without the local operator token
+  ansible.builtin.fail:
+    msg: >-
+      InfluxDB is already initialized on {{ inventory_hostname }}, but
+      {{ monitoring_influxdb_operator_token_file }} is missing. Recover or recreate
+      the operator token on the monitoring VM before rerunning this playbook.
+  when:
+    - not monitoring_influxdb_setup_status.json.allowed
+    - not monitoring_influxdb_operator_token_stat.stat.exists
+
+- name: Generate InfluxDB operator token seed
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ monitoring_influxdb_operator_token_file }}" ]; then
+      umask 077
+      openssl rand -hex 32 > "{{ monitoring_influxdb_operator_token_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: monitoring_influx_operator_token_generation
+  changed_when: "'changed' in monitoring_influx_operator_token_generation.stdout"
+  when: monitoring_influxdb_setup_status.json.allowed or monitoring_influxdb_operator_token_stat.stat.exists
+
+- name: Read InfluxDB operator token
+  ansible.builtin.slurp:
+    src: "{{ monitoring_influxdb_operator_token_file }}"
+  register: monitoring_influxdb_operator_token_raw
+  no_log: true
+
+- name: Set InfluxDB operator token fact
+  ansible.builtin.set_fact:
+    monitoring_influxdb_operator_token: "{{ monitoring_influxdb_operator_token_raw.content | b64decode | trim }}"
+  no_log: true
+
+- name: Initialize InfluxDB v2
+  ansible.builtin.command:
+    argv:
+      - influx
+      - setup
+      - --force
+      - --host
+      - "{{ monitoring_influxdb_url }}"
+      - --username
+      - "{{ monitoring_influxdb_admin_user }}"
+      - --password
+      - "{{ monitoring_influxdb_admin_password }}"
+      - --org
+      - "{{ monitoring_influxdb_org }}"
+      - --bucket
+      - "{{ monitoring_influxdb_bucket }}"
+      - --retention
+      - "0s"
+      - --token
+      - "{{ monitoring_influxdb_operator_token }}"
+  when: monitoring_influxdb_setup_status.json.allowed
+  changed_when: true
+  no_log: true
+
+- name: Read InfluxDB organization metadata
+  ansible.builtin.command:
+    argv:
+      - influx
+      - org
+      - list
+      - --host
+      - "{{ monitoring_influxdb_url }}"
+      - --name
+      - "{{ monitoring_influxdb_org }}"
+      - --json
+  environment:
+    INFLUX_TOKEN: "{{ monitoring_influxdb_operator_token }}"
+  register: monitoring_influxdb_orgs
+  changed_when: false
+  no_log: true
+
+- name: Set InfluxDB organization fact
+  ansible.builtin.set_fact:
+    monitoring_influxdb_org_record: "{{ (monitoring_influxdb_orgs.stdout | from_json | first) }}"
+  no_log: true
+
+- name: Read InfluxDB bucket metadata
+  ansible.builtin.command:
+    argv:
+      - influx
+      - bucket
+      - list
+      - --host
+      - "{{ monitoring_influxdb_url }}"
+      - --name
+      - "{{ monitoring_influxdb_bucket }}"
+      - --json
+  environment:
+    INFLUX_TOKEN: "{{ monitoring_influxdb_operator_token }}"
+  register: monitoring_influxdb_buckets
+  changed_when: false
+  no_log: true
+
+- name: Set InfluxDB bucket fact
+  ansible.builtin.set_fact:
+    monitoring_influxdb_bucket_record: "{{ (monitoring_influxdb_buckets.stdout | from_json | first) }}"
+  no_log: true
+
+- name: Read existing InfluxDB auth records
+  ansible.builtin.command:
+    argv:
+      - influx
+      - auth
+      - list
+      - --host
+      - "{{ monitoring_influxdb_url }}"
+      - --json
+  environment:
+    INFLUX_TOKEN: "{{ monitoring_influxdb_operator_token }}"
+  register: monitoring_influxdb_auths
+  changed_when: false
+  no_log: true
+
+- name: Set InfluxDB auth facts
+  ansible.builtin.set_fact:
+    monitoring_influxdb_proxmox_writer_auth: >-
+      {{
+        (
+          monitoring_influxdb_auths.stdout | from_json
+          | selectattr('description', 'equalto', monitoring_influxdb_proxmox_writer_description)
+          | list
+          | first
+        ) | default({})
+      }}
+    monitoring_influxdb_guest_writer_auth: >-
+      {{
+        (
+          monitoring_influxdb_auths.stdout | from_json
+          | selectattr('description', 'equalto', monitoring_influxdb_guest_writer_description)
+          | list
+          | first
+        ) | default({})
+      }}
+    monitoring_influxdb_grafana_reader_auth: >-
+      {{
+        (
+          monitoring_influxdb_auths.stdout | from_json
+          | selectattr('description', 'equalto', monitoring_influxdb_grafana_reader_description)
+          | list
+          | first
+        ) | default({})
+      }}
+  no_log: true
+
+- name: Check whether proxmox writer token file exists
+  ansible.builtin.stat:
+    path: "{{ monitoring_influxdb_proxmox_writer_token_file }}"
+  register: monitoring_influxdb_proxmox_writer_token_stat
+
+- name: Delete existing proxmox writer auth if token file is missing
+  ansible.builtin.command:
+    argv:
+      - influx
+      - auth
+      - delete
+      - --host
+      - "{{ monitoring_influxdb_url }}"
+      - --id
+      - "{{ monitoring_influxdb_proxmox_writer_auth.id }}"
+  environment:
+    INFLUX_TOKEN: "{{ monitoring_influxdb_operator_token }}"
+  when:
+    - monitoring_influxdb_proxmox_writer_auth | length > 0
+    - not monitoring_influxdb_proxmox_writer_token_stat.stat.exists
+  changed_when: true
+  no_log: true
+
+- name: Create proxmox writer auth
+  ansible.builtin.command:
+    argv:
+      - influx
+      - auth
+      - create
+      - --host
+      - "{{ monitoring_influxdb_url }}"
+      - --org
+      - "{{ monitoring_influxdb_org }}"
+      - --description
+      - "{{ monitoring_influxdb_proxmox_writer_description }}"
+      - --write-bucket
+      - "{{ monitoring_influxdb_bucket_record.id }}"
+      - --json
+  environment:
+    INFLUX_TOKEN: "{{ monitoring_influxdb_operator_token }}"
+  register: monitoring_influxdb_proxmox_writer_auth_created
+  when: >
+    monitoring_influxdb_proxmox_writer_auth | length == 0
+    or not monitoring_influxdb_proxmox_writer_token_stat.stat.exists
+  changed_when: true
+  no_log: true
+
+- name: Persist proxmox writer token
+  ansible.builtin.copy:
+    dest: "{{ monitoring_influxdb_proxmox_writer_token_file }}"
+    content: "{{ (monitoring_influxdb_proxmox_writer_auth_created.stdout | from_json).token }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+  when: monitoring_influxdb_proxmox_writer_auth_created is changed
+  no_log: true
+
+- name: Check whether Grafana reader token file exists
+  ansible.builtin.stat:
+    path: "{{ monitoring_grafana_datasource_token_file }}"
+  register: monitoring_grafana_datasource_token_stat
+
+- name: Check whether guest writer token file exists
+  ansible.builtin.stat:
+    path: "{{ monitoring_influxdb_guest_writer_token_file }}"
+  register: monitoring_influxdb_guest_writer_token_stat
+
+- name: Delete existing guest writer auth if token file is missing
+  ansible.builtin.command:
+    argv:
+      - influx
+      - auth
+      - delete
+      - --host
+      - "{{ monitoring_influxdb_url }}"
+      - --id
+      - "{{ monitoring_influxdb_guest_writer_auth.id }}"
+  environment:
+    INFLUX_TOKEN: "{{ monitoring_influxdb_operator_token }}"
+  when:
+    - monitoring_influxdb_guest_writer_auth | length > 0
+    - not monitoring_influxdb_guest_writer_token_stat.stat.exists
+  changed_when: true
+  no_log: true
+
+- name: Create guest writer auth
+  ansible.builtin.command:
+    argv:
+      - influx
+      - auth
+      - create
+      - --host
+      - "{{ monitoring_influxdb_url }}"
+      - --org
+      - "{{ monitoring_influxdb_org }}"
+      - --description
+      - "{{ monitoring_influxdb_guest_writer_description }}"
+      - --write-bucket
+      - "{{ monitoring_influxdb_bucket_record.id }}"
+      - --json
+  environment:
+    INFLUX_TOKEN: "{{ monitoring_influxdb_operator_token }}"
+  register: monitoring_influxdb_guest_writer_auth_created
+  when: >
+    monitoring_influxdb_guest_writer_auth | length == 0
+    or not monitoring_influxdb_guest_writer_token_stat.stat.exists
+  changed_when: true
+  no_log: true
+
+- name: Persist guest writer token
+  ansible.builtin.copy:
+    dest: "{{ monitoring_influxdb_guest_writer_token_file }}"
+    content: "{{ (monitoring_influxdb_guest_writer_auth_created.stdout | from_json).token }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+  when: monitoring_influxdb_guest_writer_auth_created is changed
+  no_log: true
+
+- name: Delete existing Grafana reader auth if token file is missing
+  ansible.builtin.command:
+    argv:
+      - influx
+      - auth
+      - delete
+      - --host
+      - "{{ monitoring_influxdb_url }}"
+      - --id
+      - "{{ monitoring_influxdb_grafana_reader_auth.id }}"
+  environment:
+    INFLUX_TOKEN: "{{ monitoring_influxdb_operator_token }}"
+  when:
+    - monitoring_influxdb_grafana_reader_auth | length > 0
+    - not monitoring_grafana_datasource_token_stat.stat.exists
+  changed_when: true
+  no_log: true
+
+- name: Create Grafana reader auth
+  ansible.builtin.command:
+    argv:
+      - influx
+      - auth
+      - create
+      - --host
+      - "{{ monitoring_influxdb_url }}"
+      - --org
+      - "{{ monitoring_influxdb_org }}"
+      - --description
+      - "{{ monitoring_influxdb_grafana_reader_description }}"
+      - --read-bucket
+      - "{{ monitoring_influxdb_bucket_record.id }}"
+      - --json
+  environment:
+    INFLUX_TOKEN: "{{ monitoring_influxdb_operator_token }}"
+  register: monitoring_influxdb_grafana_reader_auth_created
+  when: >
+    monitoring_influxdb_grafana_reader_auth | length == 0
+    or not monitoring_grafana_datasource_token_stat.stat.exists
+  changed_when: true
+  no_log: true
+
+- name: Persist Grafana reader token
+  ansible.builtin.copy:
+    dest: "{{ monitoring_grafana_datasource_token_file }}"
+    content: "{{ (monitoring_influxdb_grafana_reader_auth_created.stdout | from_json).token }}\n"
+    owner: root
+    group: grafana
+    mode: "0640"
+  when: monitoring_influxdb_grafana_reader_auth_created is changed
+  no_log: true
+  notify: Restart Grafana
+
+- name: Read Grafana reader token
+  ansible.builtin.slurp:
+    src: "{{ monitoring_grafana_datasource_token_file }}"
+  register: monitoring_grafana_datasource_token_raw
+  no_log: true
+
+- name: Render Grafana InfluxDB datasource provisioning
+  ansible.builtin.template:
+    src: grafana-influxdb-datasource.yml.j2
+    dest: "{{ monitoring_grafana_provisioning_file }}"
+    owner: root
+    group: grafana
+    mode: "0640"
+  vars:
+    monitoring_grafana_datasource_token: "{{ monitoring_grafana_datasource_token_raw.content | b64decode | trim }}"
+  no_log: true
+  notify: Restart Grafana
+
+- name: Render Grafana Loki datasource provisioning
+  ansible.builtin.template:
+    src: grafana-loki-datasource.yml.j2
+    dest: "{{ monitoring_grafana_loki_provisioning_file }}"
+    owner: root
+    group: grafana
+    mode: "0640"
+  notify: Restart Grafana
+
+- name: Render Grafana Prometheus datasource provisioning
+  ansible.builtin.template:
+    src: grafana-prometheus-datasource.yml.j2
+    dest: "{{ monitoring_grafana_prometheus_provisioning_file }}"
+    owner: root
+    group: grafana
+    mode: "0640"
+  notify: Restart Grafana
+
+- name: Render Grafana Tempo datasource provisioning
+  ansible.builtin.template:
+    src: grafana-tempo-datasource.yml.j2
+    dest: "{{ monitoring_grafana_tempo_provisioning_file }}"
+    owner: root
+    group: grafana
+    mode: "0640"
+  notify: Restart Grafana
+
+- name: Remove Grafana file-provider dashboard provisioning
+  ansible.builtin.file:
+    path: /etc/grafana/provisioning/dashboards/lv3-dashboards.yml
+    state: absent
+  notify: Restart Grafana
+
+- name: Render LV3 platform dashboard
+  ansible.builtin.template:
+    src: lv3-platform-overview.json.j2
+    dest: "{{ monitoring_grafana_dashboard_file }}"
+    owner: root
+    group: grafana
+    mode: "0644"
+  vars:
+    host_public_hostname: "{{ hostvars[groups['proxmox_hosts'][0]].host_public_hostname }}"
+    proxmox_guests: "{{ hostvars[groups['proxmox_hosts'][0]].proxmox_guests }}"
+  register: monitoring_grafana_dashboard_file_rendered
+  notify: Restart Grafana
+
+- name: Render LV3 mail platform dashboard
+  ansible.builtin.template:
+    src: lv3-mail-platform.json.j2
+    dest: "{{ monitoring_grafana_mail_dashboard_file }}"
+    owner: root
+    group: grafana
+    mode: "0644"
+  register: monitoring_grafana_mail_dashboard_file_rendered
+  notify: Restart Grafana
+
+- name: Copy LV3 SLO overview dashboard
+  ansible.builtin.copy:
+    src: "{{ monitoring_grafana_slo_dashboard_source_file }}"
+    dest: "{{ monitoring_grafana_slo_dashboard_file }}"
+    owner: root
+    group: grafana
+    mode: "0644"
+  register: monitoring_grafana_slo_dashboard_file_rendered
+  notify: Restart Grafana
+
+- name: Copy LV3 capacity overview dashboard
+  ansible.builtin.copy:
+    src: "{{ monitoring_grafana_capacity_dashboard_source_file }}"
+    dest: "{{ monitoring_grafana_capacity_dashboard_file }}"
+    owner: root
+    group: grafana
+    mode: "0644"
+  register: monitoring_grafana_capacity_dashboard_file_rendered
+  notify: Restart Grafana
+
+- name: Enable and start blackbox exporter
+  ansible.builtin.systemd:
+    name: "{{ monitoring_blackbox_exporter_service_name }}"
+    enabled: true
+    state: started
+
+- name: Enable and start Grafana
+  ansible.builtin.systemd:
+    name: grafana-server
+    enabled: true
+    state: started
+
+- name: Flush monitoring service handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Wait for Grafana health endpoint
+  ansible.builtin.uri:
+    url: http://127.0.0.1:3000/api/health
+    method: GET
+    status_code: 200
+  register: monitoring_grafana_health
+  retries: 20
+  delay: 3
+  until: monitoring_grafana_health.status == 200
+
+- name: Wait for blackbox exporter metrics endpoint
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ monitoring_blackbox_exporter_port }}/metrics"
+    method: GET
+    status_code: 200
+  register: monitoring_blackbox_exporter_health
+  retries: 20
+  delay: 3
+  until: monitoring_blackbox_exporter_health.status == 200
+
+- name: Check current Grafana admin password hash marker
+  ansible.builtin.stat:
+    path: "{{ monitoring_grafana_admin_password_hash_file }}"
+  register: monitoring_grafana_admin_password_hash_stat
+
+- name: Read Grafana admin password hash marker
+  ansible.builtin.slurp:
+    src: "{{ monitoring_grafana_admin_password_hash_file }}"
+  register: monitoring_grafana_admin_password_hash_raw
+  when: monitoring_grafana_admin_password_hash_stat.stat.exists
+  no_log: true
+
+- name: Reset Grafana admin password when the managed secret changes
+  ansible.builtin.command:
+    argv:
+      - grafana-cli
+      - --homepath
+      - /usr/share/grafana
+      - admin
+      - reset-admin-password
+      - "{{ monitoring_grafana_admin_password }}"
+  when: >
+    not monitoring_grafana_admin_password_hash_stat.stat.exists
+    or (monitoring_grafana_admin_password_hash_raw.content | b64decode | trim)
+      != (monitoring_grafana_admin_password | hash('sha256'))
+  changed_when: true
+  no_log: true
+
+- name: Persist Grafana admin password hash marker
+  ansible.builtin.copy:
+    dest: "{{ monitoring_grafana_admin_password_hash_file }}"
+    content: "{{ monitoring_grafana_admin_password | hash('sha256') }}\n"
+    owner: grafana
+    group: grafana
+    mode: "0600"
+  no_log: true
+
+- name: Ensure local monitoring artifact directory exists
+  ansible.builtin.file:
+    path: "{{ monitoring_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Read proxmox writer token
+  ansible.builtin.slurp:
+    src: "{{ monitoring_influxdb_proxmox_writer_token_file }}"
+  register: monitoring_influxdb_proxmox_writer_token_raw
+  no_log: true
+
+- name: Read guest writer token
+  ansible.builtin.slurp:
+    src: "{{ monitoring_influxdb_guest_writer_token_file }}"
+  register: monitoring_influxdb_guest_writer_token_raw
+  no_log: true
+
+- name: Mirror proxmox writer token to the control machine
+  ansible.builtin.copy:
+    dest: "{{ monitoring_proxmox_writer_token_local_file }}"
+    content: "{{ monitoring_influxdb_proxmox_writer_token_raw.content | b64decode }}"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Mirror guest writer token to the control machine
+  ansible.builtin.copy:
+    dest: "{{ monitoring_guest_writer_token_local_file }}"
+    content: "{{ monitoring_influxdb_guest_writer_token_raw.content | b64decode }}"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Verify Grafana datasource is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/datasources/name/{{ monitoring_grafana_datasource_name | urlencode }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_grafana_datasource_check
+  changed_when: false
+  no_log: true
+
+- name: Verify Grafana Loki datasource is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/datasources/name/{{ monitoring_grafana_loki_datasource_name | urlencode }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_grafana_loki_datasource_check
+  changed_when: false
+  no_log: true
+
+- name: Verify Grafana Prometheus datasource is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/datasources/uid/{{ monitoring_grafana_prometheus_datasource_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_grafana_prometheus_datasource_check
+  changed_when: false
+  no_log: true
+
+- name: Verify Grafana Tempo datasource is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/datasources/uid/{{ monitoring_grafana_tempo_datasource_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_grafana_tempo_datasource_check
+  changed_when: false
+  no_log: true
+
+- name: Ensure LV3 Grafana folder exists
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/folders/{{ monitoring_grafana_folder_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code:
+      - 200
+      - 404
+  register: monitoring_grafana_folder_existing
+  changed_when: false
+  failed_when: monitoring_grafana_folder_existing.status not in [200, 404]
+  no_log: true
+
+- name: Create LV3 Grafana folder when missing
+  ansible.builtin.uri:
+    url: http://127.0.0.1:3000/api/folders
+    method: POST
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    body_format: json
+    body:
+      uid: "{{ monitoring_grafana_folder_uid }}"
+      title: "{{ monitoring_grafana_folder_title }}"
+    status_code:
+      - 200
+      - 412
+  when: monitoring_grafana_folder_existing.status == 404
+  changed_when: monitoring_grafana_folder_existing.status == 404
+  no_log: true
+
+- name: Check whether LV3 platform dashboard already exists
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/{{ monitoring_grafana_dashboard_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code:
+      - 200
+      - 404
+  register: monitoring_grafana_dashboard_existing
+  changed_when: false
+  failed_when: monitoring_grafana_dashboard_existing.status not in [200, 404]
+  no_log: true
+
+- name: Check whether LV3 mail platform dashboard already exists
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/{{ monitoring_grafana_mail_dashboard_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code:
+      - 200
+      - 404
+  register: monitoring_grafana_mail_dashboard_existing
+  changed_when: false
+  failed_when: monitoring_grafana_mail_dashboard_existing.status not in [200, 404]
+  no_log: true
+
+- name: Check whether LV3 SLO dashboard already exists
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/{{ monitoring_grafana_slo_dashboard_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code:
+      - 200
+      - 404
+  register: monitoring_grafana_slo_dashboard_existing
+  changed_when: false
+  failed_when: monitoring_grafana_slo_dashboard_existing.status not in [200, 404]
+  no_log: true
+
+- name: Check whether LV3 capacity dashboard already exists
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/{{ monitoring_grafana_capacity_dashboard_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code:
+      - 200
+      - 404
+  register: monitoring_grafana_capacity_dashboard_existing
+  changed_when: false
+  failed_when: monitoring_grafana_capacity_dashboard_existing.status not in [200, 404]
+  no_log: true
+
+- name: Check whether VM detail dashboards already exist
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/lv3-vm-{{ item.name }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code:
+      - 200
+      - 404
+  loop: "{{ hostvars[groups['proxmox_hosts'][0]].proxmox_guests }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: monitoring_grafana_vm_dashboards_existing
+  changed_when: false
+  no_log: true
+
+- name: Read rendered LV3 platform dashboard
+  ansible.builtin.slurp:
+    src: "{{ monitoring_grafana_dashboard_file }}"
+  register: monitoring_grafana_dashboard_payload_raw
+  no_log: true
+
+- name: Read rendered LV3 mail platform dashboard
+  ansible.builtin.slurp:
+    src: "{{ monitoring_grafana_mail_dashboard_file }}"
+  register: monitoring_grafana_mail_dashboard_payload_raw
+  no_log: true
+
+- name: Read rendered LV3 SLO overview dashboard
+  ansible.builtin.slurp:
+    src: "{{ monitoring_grafana_slo_dashboard_file }}"
+  register: monitoring_grafana_slo_dashboard_payload_raw
+  no_log: true
+
+- name: Read rendered LV3 capacity overview dashboard
+  ansible.builtin.slurp:
+    src: "{{ monitoring_grafana_capacity_dashboard_file }}"
+  register: monitoring_grafana_capacity_dashboard_payload_raw
+  no_log: true
+
+- name: Render VM detail dashboards
+  ansible.builtin.template:
+    src: lv3-vm-detail.json.j2
+    dest: "{{ monitoring_grafana_vm_dashboard_dir }}/{{ item.name }}-detail.json"
+    owner: root
+    group: grafana
+    mode: "0644"
+  vars:
+    monitoring_dashboard_guest: "{{ item }}"
+  loop: "{{ hostvars[groups['proxmox_hosts'][0]].proxmox_guests }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: monitoring_grafana_vm_dashboard_files_rendered
+  notify: Restart Grafana
+
+- name: Read rendered VM detail dashboards
+  ansible.builtin.slurp:
+    src: "{{ monitoring_grafana_vm_dashboard_dir }}/{{ item.name }}-detail.json"
+  loop: "{{ hostvars[groups['proxmox_hosts'][0]].proxmox_guests }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: monitoring_grafana_vm_dashboard_payloads_raw
+  no_log: true
+
+- name: Import LV3 platform dashboard into Grafana
+  ansible.builtin.uri:
+    url: http://127.0.0.1:3000/api/dashboards/db
+    method: POST
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    body_format: json
+    body:
+      dashboard: "{{ monitoring_grafana_dashboard_payload_raw.content | b64decode | from_json }}"
+      folderUid: "{{ monitoring_grafana_folder_uid }}"
+      overwrite: true
+    status_code: 200
+  register: monitoring_grafana_dashboard_import
+  changed_when: monitoring_grafana_dashboard_file_rendered is changed or monitoring_grafana_dashboard_existing.status == 404
+  when: monitoring_grafana_dashboard_file_rendered is changed or monitoring_grafana_dashboard_existing.status == 404
+  no_log: true
+
+- name: Import LV3 mail platform dashboard into Grafana
+  ansible.builtin.uri:
+    url: http://127.0.0.1:3000/api/dashboards/db
+    method: POST
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    body_format: json
+    body:
+      dashboard: "{{ monitoring_grafana_mail_dashboard_payload_raw.content | b64decode | from_json }}"
+      folderUid: "{{ monitoring_grafana_folder_uid }}"
+      overwrite: true
+    status_code: 200
+  register: monitoring_grafana_mail_dashboard_import
+  changed_when: monitoring_grafana_mail_dashboard_file_rendered is changed or monitoring_grafana_mail_dashboard_existing.status == 404
+  when: monitoring_grafana_mail_dashboard_file_rendered is changed or monitoring_grafana_mail_dashboard_existing.status == 404
+  no_log: true
+
+- name: Import LV3 SLO dashboard into Grafana
+  ansible.builtin.uri:
+    url: http://127.0.0.1:3000/api/dashboards/db
+    method: POST
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    body_format: json
+    body:
+      dashboard: "{{ monitoring_grafana_slo_dashboard_payload_raw.content | b64decode | from_json }}"
+      folderUid: "{{ monitoring_grafana_folder_uid }}"
+      overwrite: true
+    status_code: 200
+  register: monitoring_grafana_slo_dashboard_import
+  changed_when: monitoring_grafana_slo_dashboard_file_rendered is changed or monitoring_grafana_slo_dashboard_existing.status == 404
+  when: monitoring_grafana_slo_dashboard_file_rendered is changed or monitoring_grafana_slo_dashboard_existing.status == 404
+  no_log: true
+
+- name: Import LV3 capacity dashboard into Grafana
+  ansible.builtin.uri:
+    url: http://127.0.0.1:3000/api/dashboards/db
+    method: POST
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    body_format: json
+    body:
+      dashboard: "{{ monitoring_grafana_capacity_dashboard_payload_raw.content | b64decode | from_json }}"
+      folderUid: "{{ monitoring_grafana_folder_uid }}"
+      overwrite: true
+    status_code: 200
+  register: monitoring_grafana_capacity_dashboard_import
+  changed_when: monitoring_grafana_capacity_dashboard_file_rendered is changed or monitoring_grafana_capacity_dashboard_existing.status == 404
+  when: monitoring_grafana_capacity_dashboard_file_rendered is changed or monitoring_grafana_capacity_dashboard_existing.status == 404
+  no_log: true
+
+- name: Import VM detail dashboards into Grafana
+  ansible.builtin.uri:
+    url: http://127.0.0.1:3000/api/dashboards/db
+    method: POST
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    body_format: json
+    body:
+      dashboard: "{{ item.1.content | b64decode | from_json }}"
+      folderUid: "{{ monitoring_grafana_folder_uid }}"
+      overwrite: true
+    status_code: 200
+  loop: "{{ hostvars[groups['proxmox_hosts'][0]].proxmox_guests | zip(monitoring_grafana_vm_dashboard_payloads_raw.results, monitoring_grafana_vm_dashboard_files_rendered.results, monitoring_grafana_vm_dashboards_existing.results) | list }}"
+  loop_control:
+    label: "{{ item.0.name }}"
+  when: >
+    (item.2.changed | default(false))
+    or (item.3.status == 404)
+  changed_when: true
+  no_log: true
+
+- name: Verify Grafana dashboard is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/{{ monitoring_grafana_dashboard_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_grafana_dashboard_check
+  changed_when: false
+  no_log: true
+
+- name: Verify LV3 mail platform dashboard is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/{{ monitoring_grafana_mail_dashboard_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_grafana_mail_dashboard_check
+  changed_when: false
+  no_log: true
+
+- name: Verify LV3 SLO dashboard is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/{{ monitoring_grafana_slo_dashboard_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_grafana_slo_dashboard_check
+  changed_when: false
+  no_log: true
+
+- name: Verify LV3 capacity dashboard is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/{{ monitoring_grafana_capacity_dashboard_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_grafana_capacity_dashboard_check
+  changed_when: false
+  no_log: true
+
+- name: Verify VM detail dashboards are provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/lv3-vm-{{ item.name }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  loop: "{{ hostvars[groups['proxmox_hosts'][0]].proxmox_guests }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: monitoring_grafana_vm_dashboard_checks
+  changed_when: false
+  no_log: true
+
+- name: Verify monitoring service health probes
+  ansible.builtin.import_tasks: verify.yml

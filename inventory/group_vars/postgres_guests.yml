@@ -1,0 +1,3 @@
+---
+postgres_vm_client_allowed_sources_extra:
+  - "{{ platform_guest_catalog.by_name['docker-runtime-lv3'].ipv4 }}/32"

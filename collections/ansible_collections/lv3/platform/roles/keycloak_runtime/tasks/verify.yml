@@ -1,0 +1,26 @@
+---
+- name: Verify the Keycloak management liveness endpoint
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ keycloak_local_management_port }}/health/live"
+    method: GET
+    status_code: 200
+  register: keycloak_verify_live
+  retries: 24
+  delay: 5
+  until: keycloak_verify_live.status == 200
+  changed_when: false
+
+- name: Verify the Keycloak realm discovery endpoint responds locally
+  ansible.builtin.uri:
+    url: "{{ keycloak_local_admin_url }}/realms/{{ keycloak_realm_name }}/.well-known/openid-configuration"
+    method: GET
+    return_content: true
+    status_code: 200
+  register: keycloak_verify_discovery
+  changed_when: false
+
+- name: Assert the Keycloak discovery document matches the public issuer
+  ansible.builtin.assert:
+    that:
+      - keycloak_verify_discovery.json.issuer == keycloak_public_base_url ~ '/realms/' ~ keycloak_realm_name
+    fail_msg: "Keycloak answered locally, but the realm discovery document does not match the expected public issuer."

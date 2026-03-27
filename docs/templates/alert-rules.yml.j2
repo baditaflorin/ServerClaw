@@ -1,0 +1,12 @@
+groups:
+  - name: @@SERVICE_NAME@@-alerts
+    rules:
+      - alert: @@ENV_VAR_PREFIX@@ServiceUnhealthy
+        expr: up{job="@@SERVICE_NAME@@"} == 0
+        for: 5m
+        labels:
+          severity: warning
+          service: @@SERVICE_ID@@
+        annotations:
+          summary: "@@DISPLAY_NAME@@ is unhealthy"
+          description: "TODO: replace the scaffolded alert description for @@DISPLAY_NAME@@."

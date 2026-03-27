@@ -1,0 +1,23 @@
+---
+argument_specs:
+  main:
+    short_description: Converge and rotate the PostgreSQL backend for Windmill.
+    options:
+      windmill_database_name:
+        type: str
+        required: true
+      windmill_database_user:
+        type: str
+        required: true
+      windmill_database_support_role:
+        type: str
+        required: true
+      windmill_postgres_secret_dir:
+        type: path
+        required: true
+      windmill_postgres_password_file:
+        type: path
+        required: true
+      windmill_database_password_local_file:
+        type: path
+        required: true

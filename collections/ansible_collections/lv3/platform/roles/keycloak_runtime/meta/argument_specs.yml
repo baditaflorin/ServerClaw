@@ -1,0 +1,241 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the Keycloak runtime, realm bootstrap, and brokered identities.
+    options:
+      keycloak_service_topology:
+        type: dict
+        required: true
+        description:
+          - Service topology entry for the Keycloak publication surface.
+      keycloak_image:
+        type: str
+        required: true
+        description:
+          - Container image reference for Keycloak.
+      keycloak_realm_name:
+        type: str
+        required: true
+        description:
+          - Realm identifier that should exist after convergence.
+      keycloak_realm_display_name:
+        type: str
+        required: true
+        description:
+          - Human-readable display name for the managed realm.
+      keycloak_site_dir:
+        type: path
+        required: true
+        description:
+          - Base directory for the Keycloak runtime stack.
+      keycloak_secret_dir:
+        type: path
+        required: true
+        description:
+          - Guest-local directory that stores Keycloak bootstrap secrets.
+      keycloak_compose_file:
+        type: path
+        required: true
+        description:
+          - Compose file path for the runtime stack.
+      keycloak_env_file:
+        type: path
+        required: true
+        description:
+          - Environment file rendered for Keycloak.
+      keycloak_database_name:
+        type: str
+        required: true
+        description:
+          - PostgreSQL database name used by Keycloak.
+      keycloak_database_user:
+        type: str
+        required: true
+        description:
+          - PostgreSQL login role used by Keycloak.
+      keycloak_database_password_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file that stores the runtime database password.
+      keycloak_internal_http_port:
+        type: int
+        required: true
+        description:
+          - Guest-local HTTP port exposed by the runtime stack.
+      keycloak_local_http_port:
+        type: int
+        required: true
+        description:
+          - Loopback-only admin API port used for local verification.
+      keycloak_local_management_port:
+        type: int
+        required: true
+        description:
+          - Loopback-only management port used for readiness checks.
+      keycloak_bootstrap_admin_username:
+        type: str
+        required: true
+        description:
+          - Break-glass Keycloak bootstrap admin username.
+      keycloak_bootstrap_admin_password_remote_file:
+        type: path
+        required: true
+        description:
+          - Guest-local file containing the generated bootstrap admin password.
+      keycloak_operator_username:
+        type: str
+        required: true
+        description:
+          - Named human operator username to provision in the realm.
+      keycloak_operator_first_name:
+        type: str
+        required: true
+        description:
+          - First name for the named operator account.
+      keycloak_operator_last_name:
+        type: str
+        required: true
+        description:
+          - Last name for the named operator account.
+      keycloak_operator_email:
+        type: str
+        required: true
+        description:
+          - Email address for the named operator account.
+      keycloak_operator_password_remote_file:
+        type: path
+        required: true
+        description:
+          - Guest-local file containing the generated named-operator bootstrap password.
+      keycloak_local_artifact_dir:
+        type: path
+        required: true
+        description:
+          - Controller-local directory used to mirror Keycloak artifacts.
+      keycloak_bootstrap_admin_password_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file used to mirror the bootstrap admin password.
+      keycloak_operator_password_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file used to mirror the named-operator password.
+      keycloak_mail_platform_submission_username:
+        type: str
+        required: true
+        description:
+          - SMTP login username used by Keycloak for reset and action emails through the private mail relay.
+      keycloak_mail_platform_submission_password_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file containing the managed mailbox password used for Keycloak mail submission.
+      keycloak_mail_platform_submission_host:
+        type: str
+        required: true
+        description:
+          - Hostname or IP for the private mail submission relay.
+      keycloak_mail_platform_submission_port:
+        type: int
+        required: true
+        description:
+          - TCP port for the private mail submission relay.
+      keycloak_mail_platform_submission_starttls:
+        type: bool
+        required: true
+        description:
+          - Whether Keycloak should negotiate STARTTLS on the configured submission listener.
+      keycloak_mail_platform_docker_network_name:
+        type: str
+        required: true
+        description:
+          - External Docker network name Keycloak joins so it can reach the Stalwart relay directly.
+      keycloak_mail_platform_from_address:
+        type: str
+        required: true
+        description:
+          - Sender address used for Keycloak transactional mail.
+      keycloak_mail_platform_reply_to_address:
+        type: str
+        required: true
+        description:
+          - Reply-to address used for Keycloak transactional mail.
+      keycloak_realm_smtp_server:
+        type: dict
+        required: true
+        description:
+          - Repo-managed SMTP configuration applied to the Keycloak realm.
+      keycloak_grafana_client_id:
+        type: str
+        required: true
+        description:
+          - OIDC client id used by Grafana.
+      keycloak_grafana_client_secret_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file used to mirror the Grafana client secret.
+      keycloak_ops_portal_client_id:
+        type: str
+        required: true
+        description:
+          - OIDC client id used by the operations portal auth proxy.
+      keycloak_ops_portal_client_secret_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file used to mirror the operations portal client secret.
+      keycloak_agent_client_id:
+        type: str
+        required: true
+        description:
+          - Confidential client id used by approved agent workflows.
+      keycloak_agent_client_secret_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file used to mirror the agent client secret.
+      keycloak_api_gateway_client_id:
+        type: str
+        required: true
+        description:
+          - Confidential client id used by the unified platform API gateway migration path.
+      keycloak_api_gateway_client_secret_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file used to mirror the API gateway client secret.
+      keycloak_grafana_groups:
+        type: dict
+        required: true
+        description:
+          - Mapping of Grafana role group names expected in the realm.
+      keycloak_realm_groups:
+        type: list
+        elements: dict
+        required: true
+        description:
+          - Managed Keycloak groups that must exist in the realm.
+      keycloak_public_base_url:
+        type: str
+        required: true
+        description:
+          - Public issuer base URL for Keycloak.
+      keycloak_local_admin_url:
+        type: str
+        required: true
+        description:
+          - Loopback-only Keycloak admin API URL used for bootstrap.
+      keycloak_grafana_root_url:
+        type: str
+        required: true
+        description:
+          - Public Grafana base URL used when provisioning redirect URIs.
+      keycloak_ops_portal_root_url:
+        type: str
+        required: true
+        description:
+          - Public operations portal base URL used when provisioning redirect URIs.

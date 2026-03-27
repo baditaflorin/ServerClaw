@@ -1,0 +1,51 @@
+schema_version: 1.0.0
+
+circuits:
+  - name: keycloak
+    service: Keycloak OIDC / JWKS
+    failure_threshold: 5
+    recovery_window_s: 30
+    success_threshold: 2
+    timeout_s: 10
+
+  - name: openbao
+    service: OpenBao secret store
+    failure_threshold: 3
+    recovery_window_s: 20
+    success_threshold: 1
+    timeout_s: 5
+
+  - name: windmill
+    service: Windmill workflow engine
+    failure_threshold: 5
+    recovery_window_s: 60
+    success_threshold: 2
+    timeout_s: 15
+
+  - name: nats
+    service: NATS event bus
+    failure_threshold: 10
+    recovery_window_s: 10
+    success_threshold: 3
+    timeout_s: 2
+
+  - name: hetzner_dns
+    service: Hetzner DNS API
+    failure_threshold: 3
+    recovery_window_s: 120
+    success_threshold: 2
+    timeout_s: 30
+
+  - name: anthropic_api
+    service: Anthropic-compatible LLM API
+    failure_threshold: 3
+    recovery_window_s: 300
+    success_threshold: 1
+    timeout_s: 60
+
+  - name: ollama
+    service: Ollama local inference
+    failure_threshold: 5
+    recovery_window_s: 30
+    success_threshold: 2
+    timeout_s: 120

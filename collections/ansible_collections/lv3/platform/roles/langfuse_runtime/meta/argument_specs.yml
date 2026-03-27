@@ -1,0 +1,32 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the Langfuse runtime on docker-runtime-lv3.
+    options:
+      langfuse_site_dir:
+        type: path
+        required: true
+      langfuse_secret_dir:
+        type: path
+        required: true
+      langfuse_compose_file:
+        type: path
+        required: true
+      langfuse_env_file:
+        type: path
+        required: true
+      langfuse_internal_port:
+        type: int
+        required: true
+      langfuse_internal_base_url:
+        type: str
+        required: true
+      langfuse_public_base_url:
+        type: str
+        required: true
+      langfuse_database_password_local_file:
+        type: path
+        required: true
+      langfuse_keycloak_client_secret_local_file:
+        type: path
+        required: true

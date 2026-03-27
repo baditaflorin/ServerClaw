@@ -1,0 +1,3307 @@
+# ============================================================================
+# ADR Metadata Index — ADR 0164
+# ============================================================================
+# GENERATED FILE — do not edit by hand
+# Regenerate: python scripts/generate_adr_index.py --write
+# ============================================================================
+
+schema_version: 1
+generated: '2026-03-27'
+total_adrs: 200
+implementation_status_summary:
+  Implemented: 181
+  Partial: 3
+  Not Implemented: 15
+  Deprecated: 1
+concerns:
+  agent-coordination:
+    - '0153'
+    - '0162'
+  agent-discovery:
+    - '0017'
+    - '0057'
+    - '0060'
+    - 0069
+    - '0070'
+    - '0071'
+    - '0125'
+    - 0128
+    - '0131'
+    - '0156'
+    - '0163'
+    - '0164'
+    - '0167'
+    - 0168
+    - 0181
+  api:
+    - 0049
+    - '0075'
+    - '0145'
+  automation:
+    - '0030'
+    - '0035'
+    - 0039
+    - '0044'
+    - '0062'
+    - 0079
+    - 0086
+    - '0100'
+    - 0108
+    - 0119
+    - '0122'
+    - 0129
+    - '0130'
+    - 0149
+    - '0151'
+    - '0165'
+    - '0176'
+  bootstrap:
+    - '0001'
+    - '0003'
+  ci-cd:
+    - 0009
+    - '0031'
+    - 0048
+    - '0073'
+    - 0082
+    - 0087
+    - 0091
+    - 0092
+    - 0093
+    - '0105'
+    - '0114'
+    - '0143'
+    - 0159
+    - '0160'
+    - '0164'
+    - 0168
+    - '0171'
+    - 0180
+    - 0183
+    - 0186
+    - 0188
+    - 0190
+    - 0192
+  documentation:
+    - '0074'
+    - 0081
+    - 0094
+    - 0095
+    - 0097
+    - '0121'
+    - '0134'
+    - '0135'
+    - 0148
+  host-os:
+    - '0002'
+    - '0004'
+    - '0006'
+    - '0010'
+    - '0011'
+    - '0012'
+    - '0016'
+    - '0163'
+  identity:
+    - '0007'
+    - '0046'
+    - '0133'
+    - '0150'
+  monitoring:
+    - '0041'
+    - '0052'
+    - '0053'
+    - '0146'
+  networking:
+    - '0015'
+    - '0021'
+    - 0058
+    - 0059
+    - '0076'
+    - '0124'
+    - 0139
+    - '0161'
+    - 0183
+    - 0189
+  platform:
+    - 0019
+    - '0025'
+    - '0036'
+    - '0037'
+    - 0038
+    - '0040'
+    - '0045'
+    - '0050'
+    - '0055'
+    - '0061'
+    - '0063'
+    - '0064'
+    - '0066'
+    - 0068
+    - 0078
+    - 0080
+    - 0083
+    - 0088
+    - 0089
+    - 0090
+    - 0096
+    - 0098
+    - '0103'
+    - '0104'
+    - '0106'
+    - '0107'
+    - 0109
+    - '0112'
+    - '0113'
+    - '0115'
+    - '0116'
+    - '0117'
+    - 0118
+    - '0123'
+    - '0126'
+    - '0127'
+    - '0132'
+    - '0137'
+    - '0144'
+    - '0152'
+    - 0158
+    - '0166'
+    - '0166'
+    - 0169
+    - '0173'
+    - '0174'
+    - '0175'
+    - '0177'
+    - 0178
+    - 0179
+    - 0182
+    - 0184
+    - 0185
+  release:
+    - 0008
+    - '0110'
+    - '0120'
+    - '0155'
+  resilience:
+    - '0163'
+    - '0167'
+    - '0170'
+    - '0172'
+  security:
+    - '0034'
+    - '0042'
+    - '0043'
+    - '0047'
+    - '0056'
+    - '0065'
+    - '0077'
+    - '0101'
+    - '0102'
+    - '0136'
+    - 0138
+    - '0140'
+    - '0141'
+    - '0142'
+    - '0147'
+    - '0165'
+  storage:
+    - '0020'
+    - '0051'
+    - 0099
+  testing:
+    - '0111'
+    - 0187
+  vm-topology:
+    - '0005'
+    - '0013'
+    - '0014'
+    - 0018
+    - '0022'
+    - '0023'
+    - '0024'
+    - '0026'
+    - '0027'
+    - 0028
+    - 0029
+    - '0032'
+    - '0033'
+    - '0054'
+    - '0067'
+    - '0072'
+    - 0084
+    - 0085
+    - '0154'
+    - '0157'
+    - 0191
+discovery_queries:
+  how do we bootstrap:
+    - '0001'
+    - '0003'
+    - '0004'
+    - '0005'
+  authentication and identity:
+    - '0007'
+    - '0056'
+    - '0147'
+  ci and testing:
+    - '0031'
+    - 0083
+    - '0111'
+    - '0143'
+  automation and workflows:
+    - '0044'
+    - 0090
+  disaster recovery:
+    - 0029
+    - '0051'
+  monitoring and observability:
+    - '0011'
+    - '0027'
+    - '0032'
+  networking and ingress:
+    - '0012'
+    - '0013'
+    - '0014'
+    - '0015'
+  vm management:
+    - '0010'
+    - '0016'
+    - 0018
+  agent access and coordination:
+    - '0007'
+    - 0090
+    - '0131'
+    - '0132'
+  multi-agent handoff:
+    - '0163'
+    - '0164'
+    - '0165'
+    - '0166'
+    - '0167'
+    - 0168
+  deployment and release:
+    - 0081
+    - '0143'
+  local services:
+    - '0023'
+    - '0024'
+    - '0027'
+    - '0043'
+    - '0044'
+  security hardening:
+    - '0006'
+    - '0007'
+    - '0024'
+    - '0047'
+    - '0102'
+  data and state:
+    - '0033'
+    - '0037'
+    - 0038
+    - '0132'
+agent_discovery_tips:
+  - Search 'keywords' fields for terms relevant to your task
+  - Use 'concern' to find all ADRs in a domain
+  - Use 'discovery_queries' for common question patterns
+  - Check 'implementation_status' to skip Proposed decisions
+  - This file is generated — run 'python scripts/generate_adr_index.py --write' to refresh
+adr_index:
+  - adr: '0001'
+    title: Bootstrap Dedicated Host With Ansible
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: bootstrap
+    keywords:
+      - bootstrap
+      - dedicated
+      - host
+      - ansible
+    summary: 'We will treat the build as two stages:'
+    filename: 0001-bootstrap-dedicated-host-with-ansible.md
+    implemented_version: 0.2.0
+  - adr: '0002'
+    title: Target Proxmox VE 9 on Debian 13
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: host-os
+    keywords:
+      - target
+      - proxmox
+      - ve
+      - debian
+    summary: 'We will target:'
+    filename: 0002-target-proxmox-ve-9-on-debian-13.md
+    implemented_version: 0.2.0
+  - adr: '0003'
+    title: Prefer Hetzner Rescue Plus Installimage For Bootstrap
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: bootstrap
+    keywords:
+      - prefer
+      - hetzner
+      - rescue
+      - plus
+      - installimage
+      - bootstrap
+    summary: We will prefer Hetzner Rescue System plus installimage for first bootstrap instead of relying on the automatic
+      installer
+    filename: 0003-prefer-hetzner-rescue-plus-installimage-for-bootstrap.md
+    implemented_version: 0.1.0
+  - adr: '0004'
+    title: Install Proxmox VE From Debian Packages
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: host-os
+    keywords:
+      - install
+      - proxmox
+      - ve
+      - from
+      - debian
+      - packages
+    summary: We will install Proxmox VE 9 on top of the existing Debian 13 system using official Proxmox package repositories
+      and Ans
+    filename: 0004-install-proxmox-ve-from-debian-packages.md
+    implemented_version: 0.2.0
+  - adr: '0005'
+    title: Single-Node First Topology
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: vm-topology
+    keywords:
+      - single-node
+      - first
+      - topology
+    summary: We will design the first delivery as a single Proxmox node with local storage and external backups, not as a
+      cluster and
+    filename: 0005-single-node-first-topology.md
+    implemented_version: 0.2.0
+  - adr: '0006'
+    title: Security Baseline For Proxmox Host
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: host-os
+    keywords:
+      - security
+      - baseline
+      - proxmox
+      - host
+    summary: 'We will apply the following baseline before declaring the node ready for workloads:'
+    filename: 0006-security-baseline-for-proxmox-host.md
+    implemented_version: 0.13.0
+  - adr: '0007'
+    title: Agent-Oriented Access Model
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: identity
+    keywords:
+      - agent-oriented
+      - access
+      - model
+    summary: 'We will use a layered access model:'
+    filename: 0007-agent-oriented-access-model.md
+    implemented_version: 0.14.0
+  - adr: 0008
+    title: Versioning Model For Repo And Host
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: release
+    keywords:
+      - versioning
+      - model
+      - repo
+      - host
+    summary: We will use two semantic version streams plus one observed-state registry.
+    filename: 0008-versioning-model-for-repo-and-host.md
+    implemented_version: 0.1.0
+  - adr: 0009
+    title: DRY And Solid Engineering Principles
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: ci-cd
+    keywords:
+      - dry
+      - solid
+      - engineering
+      - principles
+    summary: 'We will treat the following as core repository rules:'
+    filename: 0009-dry-and-solid-engineering-principles.md
+    implemented_version: 0.1.0
+  - adr: '0010'
+    title: Initial Proxmox VM Topology
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: host-os
+    keywords:
+      - initial
+      - proxmox
+      - vm
+      - topology
+    summary: We will start with a simple four-VM topology on a private Proxmox-managed network in the 10.10.10.0/24 range.
+    filename: 0010-initial-proxmox-vm-topology.md
+    implemented_version: 0.6.0
+  - adr: '0011'
+    title: Monitoring VM With Grafana And Proxmox Metrics
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: host-os
+    keywords:
+      - monitoring
+      - vm
+      - grafana
+      - proxmox
+      - metrics
+    summary: We will create a dedicated monitoring VM on the internal Proxmox network.
+    filename: 0011-monitoring-vm-with-grafana-and-proxmox-metrics.md
+    implemented_version: 0.23.0
+  - adr: '0012'
+    title: Proxmox Host Bridge And NAT Network
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: host-os
+    keywords:
+      - proxmox
+      - host
+      - bridge
+      - nat
+      - network
+    summary: 'We will configure the Proxmox host with two bridges:'
+    filename: 0012-proxmox-host-bridge-and-nat-network.md
+    implemented_version: 0.3.0
+  - adr: '0013'
+    title: Public Ingress And Guest Egress Model
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: vm-topology
+    keywords:
+      - public
+      - ingress
+      - guest
+      - egress
+      - model
+    summary: We will use a single-edge ingress model in phase one.
+    filename: 0013-public-ingress-and-guest-egress-model.md
+    implemented_version: 0.12.0
+  - adr: '0014'
+    title: Operator Access To Private Guest Network
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-21'
+    concern: vm-topology
+    keywords:
+      - operator
+      - access
+      - private
+      - guest
+      - network
+    summary: We will use a two-stage operator access model.
+    filename: 0014-operator-access-to-private-guest-network.md
+    implemented_version: 0.8.0
+  - adr: '0015'
+    title: lv3.org DNS And Subdomain Model
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: networking
+    keywords:
+      - lv3
+      - org
+      - dns
+      - subdomain
+      - model
+    summary: We will use named subdomains under lv3.org for platform entry points.
+    filename: 0015-lv3-org-dns-and-subdomain-model.md
+    implemented_version: 0.5.0
+  - adr: '0016'
+    title: Provision Guests From Debian 13 Cloud Template
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: host-os
+    keywords:
+      - provision
+      - guests
+      - from
+      - debian
+      - cloud
+      - template
+    summary: We will provision the first guests from a reusable Debian 13 cloud-image template using Proxmox qm plus cloud-init.
+    filename: 0016-provision-guests-from-debian-13-cloud-template.md
+    implemented_version: 0.6.0
+  - adr: '0017'
+    title: ADR Lifecycle And Implementation Metadata
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: agent-discovery
+    keywords:
+      - adr
+      - lifecycle
+      - implementation
+      - metadata
+    summary: 'Every ADR in this repository must carry these metadata fields near the top of the document:'
+    filename: 0017-adr-lifecycle-and-implementation-metadata.md
+    implemented_version: 0.7.0
+  - adr: 0018
+    title: Non-Root Operations For Host And Guests
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-21'
+    concern: vm-topology
+    keywords:
+      - non-root
+      - operations
+      - host
+      - guests
+    summary: We will make ops the default interactive and automation identity for both the Proxmox host and Debian guests.
+    filename: 0018-non-root-operations-for-host-and-guests.md
+    implemented_version: 0.10.0
+  - adr: 0019
+    title: Parallel ADR Delivery With Workstreams
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - parallel
+      - adr
+      - delivery
+      - workstreams
+    summary: 'We will separate architecture, implementation streams, and release:'
+    filename: 0019-parallel-adr-delivery-with-workstreams.md
+    implemented_version: 0.15.0
+  - adr: '0020'
+    title: Initial Storage And Backup Model
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-22'
+    concern: storage
+    keywords:
+      - initial
+      - storage
+      - backup
+      - model
+    summary: 'We will use this initial model:'
+    filename: 0020-initial-storage-and-backup-model.md
+  - adr: '0021'
+    title: Public Subdomain Publication At The NGINX Edge
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: networking
+    keywords:
+      - public
+      - subdomain
+      - publication
+      - at
+      - nginx
+      - edge
+    summary: We will publish subdomains deliberately at the NGINX edge.
+    filename: 0021-public-subdomain-publication-at-the-nginx-edge.md
+    implemented_version: 0.22.0
+  - adr: '0022'
+    title: NGINX Guest Observability Via Telegraf And Stub Status
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - nginx
+      - guest
+      - observability
+      - telegraf
+      - stub
+      - status
+    summary: 'We will monitor the NGINX guest with a guest-local telemetry path built from:'
+    filename: 0022-nginx-guest-observability-via-telegraf-and-stub-status.md
+    implemented_version: 0.25.0
+  - adr: '0023'
+    title: Docker Runtime VM Baseline
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - docker
+      - runtime
+      - vm
+      - baseline
+    summary: We will manage the Docker runtime VM with a dedicated runtime baseline role and playbook.
+    filename: 0023-docker-runtime-vm-baseline.md
+    implemented_version: 0.25.0
+  - adr: '0024'
+    title: Docker Guest Security Baseline
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - docker
+      - guest
+      - security
+      - baseline
+    summary: We will handle Docker guest hardening as its own workstream, separate from package installation and separate
+      from worklo
+    filename: 0024-docker-guest-security-baseline.md
+  - adr: '0025'
+    title: Compose-Managed Runtime Stacks
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - compose-managed
+      - runtime
+      - stacks
+    summary: Long-running workloads on docker-runtime-lv3 will use a compose-managed deployment model.
+    filename: 0025-compose-managed-runtime-stacks.md
+  - adr: '0026'
+    title: Dedicated PostgreSQL VM Baseline
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - dedicated
+      - postgresql
+      - vm
+      - baseline
+    summary: 'We will manage PostgreSQL through a dedicated Debian 13 VM with these rules:'
+    filename: 0026-dedicated-postgresql-vm-baseline.md
+    implemented_version: 0.27.0
+  - adr: '0027'
+    title: Uptime Kuma On The Docker Runtime VM
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - uptime
+      - kuma
+      - docker
+      - runtime
+      - vm
+    summary: We run Uptime Kuma on the Docker runtime VM under /opt/uptime-kuma.
+    filename: 0027-uptime-kuma-on-the-docker-runtime-vm.md
+    implemented_version: 0.28.0
+  - adr: 0028
+    title: Docker Build VM Build Count And Duration Telemetry Via CLI Wrapper Events
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - docker
+      - build
+      - vm
+      - build
+      - count
+      - duration
+      - telemetry
+      - cli
+    summary: We will count Docker builds on docker-build-lv3 by using a repo-managed Docker CLI wrapper and the existing guest-to-mon
+    filename: 0028-docker-build-vm-build-count-telemetry-via-cli-wrapper-events.md
+  - adr: 0029
+    title: Dedicated Backup VM With Local PBS
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - dedicated
+      - backup
+      - vm
+      - local
+      - pbs
+    summary: We will create a dedicated internal backup VM and run Proxmox Backup Server inside it.
+    filename: 0029-dedicated-backup-vm-with-local-pbs.md
+    implemented_version: 0.30.0
+  - adr: '0030'
+    title: Role Interface Contracts And Defaults Boundaries
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: automation
+    keywords:
+      - role
+      - interface
+      - contracts
+      - defaults
+      - boundaries
+    summary: We will make each role own an explicit interface contract.
+    filename: 0030-role-interface-contracts-and-defaults-boundaries.md
+    implemented_version: 0.31.0
+  - adr: '0031'
+    title: Repository Validation Pipeline For Automation Changes
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: ci-cd
+    keywords:
+      - repository
+      - validation
+      - pipeline
+      - automation
+      - changes
+    summary: We will define one repository validation pipeline and make it the standard integration gate.
+    filename: 0031-repository-validation-pipeline-for-automation-changes.md
+    implemented_version: 0.32.0
+  - adr: '0032'
+    title: Shared Guest Observability Framework
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - shared
+      - guest
+      - observability
+      - framework
+    summary: We will introduce a shared guest-observability framework and keep service-specific details as thin extensions.
+    filename: 0032-shared-guest-observability-framework.md
+    implemented_version: 0.33.0
+  - adr: '0033'
+    title: Declarative Service Topology Catalog
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - declarative
+      - service
+      - topology
+      - catalog
+    summary: We will introduce one declarative service-topology catalog as the canonical source for workload metadata.
+    filename: 0033-declarative-service-topology-catalog.md
+    implemented_version: 0.34.0
+  - adr: '0034'
+    title: Controller-Local Secret Manifest And Preflight
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: security
+    keywords:
+      - controller-local
+      - secret
+      - manifest
+      - preflight
+    summary: We will define a controller-local secret manifest and a standard preflight check.
+    filename: 0034-controller-local-secret-manifest-and-preflight.md
+    implemented_version: 0.35.0
+  - adr: '0035'
+    title: Workflow Catalog And Machine-Readable Execution Contracts
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: automation
+    keywords:
+      - workflow
+      - catalog
+      - machine-readable
+      - execution
+      - contracts
+    summary: We will define one workflow catalog as the canonical machine-readable contract for repository execution paths.
+    filename: 0035-workflow-catalog-and-machine-readable-execution-contracts.md
+    implemented_version: 0.36.0
+  - adr: '0036'
+    title: Live Apply Receipts And Verification Evidence
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - live
+      - apply
+      - receipts
+      - verification
+      - evidence
+    summary: We will record structured live-apply receipts and verification evidence in the repository.
+    filename: 0036-live-apply-receipts-and-verification-evidence.md
+    implemented_version: 0.37.0
+  - adr: '0037'
+    title: Schema-Validated Repository Data Models
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - schema-validated
+      - repository
+      - data
+      - models
+    summary: We will define explicit schemas for the repository's canonical machine-readable data models and validate them
+      in the sta
+    filename: 0037-schema-validated-repository-data-models.md
+    implemented_version: 0.40.0
+  - adr: 0038
+    title: Generated Status Documents From Canonical State
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - generated
+      - status
+      - documents
+      - from
+      - canonical
+      - state
+    summary: We will generate selected status-facing documentation fragments from canonical repository state.
+    filename: 0038-generated-status-documents-from-canonical-state.md
+    implemented_version: 0.41.0
+  - adr: 0039
+    title: Shared Controller Automation Toolkit
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: automation
+    keywords:
+      - shared
+      - controller
+      - automation
+      - toolkit
+    summary: We will define one shared controller automation toolkit for repo-local scripts.
+    filename: 0039-shared-controller-automation-toolkit.md
+    implemented_version: 0.42.0
+  - adr: '0040'
+    title: Docker Runtime Container Telemetry Via Telegraf Docker Input
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - docker
+      - runtime
+      - container
+      - telemetry
+      - telegraf
+      - docker
+      - input
+    summary: We will collect container runtime telemetry on docker-runtime-lv3 by reusing the shared guest observability framework
+      an
+    filename: 0040-docker-runtime-container-telemetry-via-telegraf-docker-input.md
+    implemented_version: 0.38.0
+  - adr: '0041'
+    title: Dockerized Mail Platform For Server Delivery, API Automation, And Grafana Observability
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: monitoring
+    keywords:
+      - dockerized
+      - mail
+      - platform
+      - server
+      - delivery
+      - api
+      - automation
+      - grafana
+    summary: 'We will standardize on a Dockerized mail platform built around Stalwart as the primary mail server, with a private
+      mail '
+    filename: 0041-dockerized-mail-platform-for-server-delivery-api-and-observability.md
+    implemented_version: 0.43.0
+  - adr: '0042'
+    title: step-ca For SSH And Internal TLS
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: security
+    keywords:
+      - step-ca
+      - ssh
+      - internal
+      - tls
+    summary: We will standardize on step-ca as the internal certificate authority for LV3.
+    filename: 0042-step-ca-for-ssh-and-internal-tls.md
+    implemented_version: 0.45.0
+  - adr: '0043'
+    title: OpenBao For Secrets, Transit, And Dynamic Credentials
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: security
+    keywords:
+      - openbao
+      - secrets
+      - transit
+      - dynamic
+      - credentials
+    summary: We will use OpenBao as the platform secret authority.
+    filename: 0043-openbao-for-secrets-transit-and-dynamic-credentials.md
+    implemented_version: 0.48.0
+  - adr: '0044'
+    title: Windmill For Agent And Operator Workflows
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: automation
+    keywords:
+      - windmill
+      - agent
+      - operator
+      - workflows
+    summary: We will use Windmill as the first on-platform workflow runtime for agents and operators.
+    filename: 0044-windmill-for-agent-and-operator-workflows.md
+    implemented_version: 0.47.0
+  - adr: '0045'
+    title: Control-Plane Communication Lanes
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - control-plane
+      - communication
+      - lanes
+    summary: We will standardize on four control-plane communication lanes.
+    filename: 0045-control-plane-communication-lanes.md
+    implemented_version: 0.45.0
+  - adr: '0046'
+    title: Identity Classes For Humans, Services, And Agents
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: identity
+    keywords:
+      - identity
+      - classes
+      - humans
+      - services
+      - agents
+    summary: All platform identities must belong to one of four classes.
+    filename: 0046-identity-classes-for-humans-services-and-agents.md
+    implemented_version: 0.45.0
+  - adr: '0047'
+    title: Short-Lived Credentials And Internal mTLS
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: security
+    keywords:
+      - short-lived
+      - credentials
+      - internal
+      - mtls
+    summary: We will prefer short-lived credentials and mutual TLS for new internal access paths.
+    filename: 0047-short-lived-credentials-and-internal-mtls.md
+    implemented_version: 0.49.0
+  - adr: 0048
+    title: Command Catalog And Approval Gates
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: ci-cd
+    keywords:
+      - command
+      - catalog
+      - approval
+      - gates
+    summary: All recurring mutating operations must be represented as named command contracts.
+    filename: 0048-command-catalog-and-approval-gates.md
+    implemented_version: 0.45.0
+  - adr: 0049
+    title: Private-First API Publication Model
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: api
+    keywords:
+      - private-first
+      - api
+      - publication
+      - model
+    summary: Every API must be classified into one of three publication tiers.
+    filename: 0049-private-first-api-publication-model.md
+    implemented_version: 0.50.0
+  - adr: '0050'
+    title: Transactional Email And Notification Profiles
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - transactional
+      - email
+      - notification
+      - profiles
+    summary: We will define distinct notification profiles on top of the mail platform from ADR 0041.
+    filename: 0050-transactional-email-and-notification-profiles.md
+    implemented_version: 0.52.0
+  - adr: '0051'
+    title: Control-Plane Backup, Recovery, And Break-Glass
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: storage
+    keywords:
+      - control-plane
+      - backup
+      - recovery
+      - break-glass
+    summary: We will treat control-plane state as a distinct backup and recovery concern.
+    filename: 0051-control-plane-backup-recovery-and-break-glass.md
+    implemented_version: 0.63.0
+  - adr: '0052'
+    title: Centralized Log Aggregation With Grafana Loki
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: monitoring
+    keywords:
+      - centralized
+      - log
+      - aggregation
+      - grafana
+      - loki
+    summary: We will add a centralized log plane using Grafana Loki.
+    filename: 0052-centralized-log-aggregation-with-grafana-loki.md
+    implemented_version: 0.57.0
+  - adr: '0053'
+    title: OpenTelemetry Traces And Service Maps With Grafana Tempo
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: monitoring
+    keywords:
+      - opentelemetry
+      - traces
+      - service
+      - maps
+      - grafana
+      - tempo
+    summary: We will add distributed tracing and service-map support with OpenTelemetry and Grafana Tempo.
+    filename: 0053-opentelemetry-traces-and-service-maps-with-grafana-tempo.md
+    implemented_version: 0.55.0
+  - adr: '0054'
+    title: NetBox For Topology, IPAM, And Inventory
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - netbox
+      - topology
+      - ipam
+      - inventory
+    summary: We will use NetBox as the visual infrastructure inventory and IPAM plane.
+    filename: 0054-netbox-for-topology-ipam-and-inventory.md
+    implemented_version: 0.58.0
+  - adr: '0055'
+    title: Portainer For Read-Mostly Docker Runtime Operations
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - portainer
+      - read-mostly
+      - docker
+      - runtime
+      - operations
+    summary: We will use Portainer as the private read-mostly operations console for the Docker runtime boundary.
+    filename: 0055-portainer-for-read-mostly-docker-runtime-operations.md
+    implemented_version: 0.56.0
+  - adr: '0056'
+    title: Keycloak For Operator And Agent SSO
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: security
+    keywords:
+      - keycloak
+      - operator
+      - agent
+      - sso
+    summary: 'We will use Keycloak as the shared SSO and identity-broker layer for internal operator-facing and approved agent-facing '
+    filename: 0056-keycloak-for-operator-and-agent-sso.md
+    implemented_version: 0.66.0
+  - adr: '0057'
+    title: Mattermost For ChatOps And Operator-Agent Collaboration
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: agent-discovery
+    keywords:
+      - mattermost
+      - chatops
+      - operator-agent
+      - collaboration
+    summary: We will use Mattermost as the private ChatOps and operator-agent collaboration surface.
+    filename: 0057-mattermost-for-chatops-and-operator-agent-collaboration.md
+    implemented_version: 0.59.0
+  - adr: 0058
+    title: NATS JetStream For Internal Event Bus And Agent Coordination
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-03-22'
+    concern: networking
+    keywords:
+      - nats
+      - jetstream
+      - internal
+      - event
+      - bus
+      - agent
+      - coordination
+    summary: We will use NATS JetStream as the internal event-distribution backbone for control-plane and agent-oriented events.
+    filename: 0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md
+  - adr: 0059
+    title: ntopng For Private Network Flow Visibility
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: networking
+    keywords:
+      - ntopng
+      - private
+      - network
+      - flow
+      - visibility
+    summary: We will add ntopng as the visual network-flow analysis surface for the private platform network.
+    filename: 0059-ntopng-for-private-network-flow-visibility.md
+    implemented_version: 0.53.0
+  - adr: '0060'
+    title: Open WebUI For Operator And Agent Workbench
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: agent-discovery
+    keywords:
+      - open
+      - webui
+      - operator
+      - agent
+      - workbench
+    summary: We will add an internal operator-and-agent workbench using Open WebUI or an equivalent repo-managed LLM console.
+    filename: 0060-open-webui-for-operator-and-agent-workbench.md
+    implemented_version: 0.54.0
+  - adr: '0061'
+    title: GlitchTip For Application Exceptions And Task Failures
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - glitchtip
+      - application
+      - exceptions
+      - task
+      - failures
+    summary: We will use GlitchTip or an equivalent self-hosted Sentry-compatible platform for application exception and task-failure
+    filename: 0061-glitchtip-for-application-exceptions-and-task-failures.md
+  - adr: '0062'
+    title: Ansible Role Composability And DRY Defaults
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: automation
+    keywords:
+      - ansible
+      - role
+      - composability
+      - dry
+      - defaults
+    summary: We will refactor the role layer to enforce composability and eliminate duplication.
+    filename: 0062-ansible-role-composability-and-dry-defaults.md
+    implemented_version: 0.60.0
+  - adr: '0063'
+    title: Centralised Vars And Computed Facts Library
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - centralised
+      - vars
+      - computed
+      - facts
+      - library
+    summary: We will establish a centralised vars and computed facts library with a clear resolution order.
+    filename: 0063-centralised-vars-and-computed-facts-library.md
+    implemented_version: 0.68.0
+  - adr: '0064'
+    title: Health Probe Contracts For All Services
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - health
+      - probe
+      - contracts
+      - all
+      - services
+    summary: We will define a health probe contract for every managed service and enforce it in the Ansible role for that
+      service.
+    filename: 0064-health-probe-contracts-for-all-services.md
+    implemented_version: 0.61.0
+  - adr: '0065'
+    title: Secret Rotation Automation With OpenBao
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: security
+    keywords:
+      - secret
+      - rotation
+      - automation
+      - openbao
+    summary: We will implement automated secret rotation for all non-ephemeral credentials using OpenBao as the rotation authority.
+    filename: 0065-secret-rotation-automation-with-openbao.md
+    implemented_version: 0.62.0
+  - adr: '0066'
+    title: Structured Mutation Audit Log
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - structured
+      - mutation
+      - audit
+      - log
+    summary: We will emit a structured JSON mutation audit event for every platform mutation across all governed surfaces.
+    filename: 0066-structured-mutation-audit-log.md
+    implemented_version: 0.78.0
+  - adr: '0067'
+    title: Guest Network Policy Enforcement
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - guest
+      - network
+      - policy
+      - enforcement
+    summary: We will define and enforce an explicit network policy for all inter-guest and host-to-guest traffic.
+    filename: 0067-guest-network-policy-enforcement.md
+    implemented_version: 0.64.0
+  - adr: 0068
+    title: Container Image Policy And Supply Chain Integrity
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - container
+      - image
+      - policy
+      - supply
+      - chain
+      - integrity
+    summary: We will define and enforce a container image policy covering pinning, provenance, and scanning.
+    filename: 0068-container-image-policy-and-supply-chain-integrity.md
+    implemented_version: 0.67.0
+  - adr: 0069
+    title: Agent Tool Registry And Governed Tool Calls
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: agent-discovery
+    keywords:
+      - agent
+      - tool
+      - registry
+      - governed
+      - tool
+      - calls
+    summary: We will define an agent tool registry as a machine-readable catalog of named tools available to agents and operators.
+    filename: 0069-agent-tool-registry-and-governed-tool-calls.md
+    implemented_version: 0.61.0
+  - adr: '0070'
+    title: Retrieval-Augmented Context For Platform Queries
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: agent-discovery
+    keywords:
+      - retrieval-augmented
+      - context
+      - platform
+      - queries
+    summary: 'We will build a retrieval-augmented generation (RAG) index over the platform''s authoritative documents and
+      expose it as '
+    filename: 0070-rag-context-for-platform-queries.md
+    implemented_version: 0.71.0
+  - adr: '0071'
+    title: Agent Observation Loop And Autonomous Drift Detection
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: agent-discovery
+    keywords:
+      - agent
+      - observation
+      - loop
+      - autonomous
+      - drift
+      - detection
+    summary: We will implement a scheduled agent observation loop that detects drift and publishes structured findings.
+    filename: 0071-agent-observation-loop-and-drift-detection.md
+    implemented_version: 0.59.0
+  - adr: '0072'
+    title: Staging And Production Environment Topology
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: vm-topology
+    keywords:
+      - staging
+      - production
+      - environment
+      - topology
+    summary: 'We will model two named environments for this platform: production and staging.'
+    filename: 0072-staging-and-production-environment-topology.md
+    implemented_version: 0.75.0
+  - adr: '0073'
+    title: Environment Promotion Gate And Deployment Pipeline
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: ci-cd
+    keywords:
+      - environment
+      - promotion
+      - gate
+      - deployment
+      - pipeline
+    summary: 'We will define a formal promotion pipeline with three phases: validate → stage → promote.'
+    filename: 0073-environment-promotion-gate-and-deployment-pipeline.md
+    implemented_version: 0.82.0
+  - adr: '0074'
+    title: Platform Operations Portal
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: documentation
+    keywords:
+      - platform
+      - operations
+      - portal
+    summary: 'We will deploy a Platform Operations Portal (ops.lv3.org) as a lightweight static web application served from
+      the NGINX '
+    filename: 0074-platform-operations-portal.md
+    implemented_version: 0.69.0
+  - adr: '0075'
+    title: Service Capability Catalog
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: api
+    keywords:
+      - service
+      - capability
+      - catalog
+    summary: We will define a canonical config/service-capability-catalog.json that is the authoritative index for every service
+      on t
+    filename: 0075-service-capability-catalog.md
+    implemented_version: 0.69.0
+  - adr: '0076'
+    title: Subdomain Governance And DNS Lifecycle
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: networking
+    keywords:
+      - subdomain
+      - governance
+      - dns
+      - lifecycle
+    summary: We will define a subdomain governance model covering naming, ownership, TLS provisioning, and lifecycle.
+    filename: 0076-subdomain-governance-and-dns-lifecycle.md
+    implemented_version: 0.84.0
+  - adr: '0077'
+    title: Compose Runtime Secrets Injection Via OpenBao Agent
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: security
+    keywords:
+      - compose
+      - runtime
+      - secrets
+      - injection
+      - openbao
+      - agent
+    summary: We will replace .env file secret injection with OpenBao Agent sidecar injection for all Docker Compose stacks.
+    filename: 0077-compose-runtime-secrets-injection.md
+    implemented_version: 0.83.0
+  - adr: 0078
+    title: Service Scaffold Generator
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - service
+      - scaffold
+      - generator
+    summary: We will implement make scaffold-service as the canonical repo-local generator for new service skeletons.
+    filename: 0078-service-scaffold-generator.md
+    implemented_version: 0.96.0
+  - adr: 0079
+    title: Playbook Decomposition And Shared Execution Model
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: automation
+    keywords:
+      - playbook
+      - decomposition
+      - shared
+      - execution
+      - model
+    summary: We will restructure the playbook layer into a declared, composable, environment-aware execution model.
+    filename: 0079-playbook-decomposition-and-shared-execution-model.md
+    implemented_version: 0.77.0
+  - adr: 0080
+    title: Maintenance Window And Change Suppression Protocol
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - maintenance
+      - window
+      - change
+      - suppression
+      - protocol
+    summary: We will implement a maintenance window protocol based on a NATS KV flag and a governed open/close workflow.
+    filename: 0080-maintenance-window-and-change-suppression-protocol.md
+    implemented_version: 0.86.0
+  - adr: 0081
+    title: Platform Changelog And Deployment History Portal
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: documentation
+    keywords:
+      - platform
+      - changelog
+      - deployment
+      - history
+      - portal
+    summary: We will generate a Deployment History Portal (changelog.lv3.org) as part of the operations portal suite (ADR
+      0074).
+    filename: 0081-platform-changelog-and-deployment-history.md
+    implemented_version: 0.81.0
+  - adr: 0082
+    title: Remote Build Execution Gateway
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: ci-cd
+    keywords:
+      - remote
+      - build
+      - execution
+      - gateway
+    summary: 'We will implement a Remote Build Execution Gateway consisting of:'
+    filename: 0082-remote-build-execution-gateway.md
+    implemented_version: 0.80.0
+  - adr: 0083
+    title: Docker-Based Check Runner on Build Server
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - docker-based
+      - check
+      - runner
+      - build
+      - server
+    summary: We will maintain a set of platform check runner images defined in docker/check-runners/ and published to the
+      internal re
+    filename: 0083-docker-based-check-runner.md
+    implemented_version: 0.87.0
+  - adr: 0084
+    title: Packer VM Template Pipeline
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - packer
+      - vm
+      - template
+      - pipeline
+    summary: We will maintain a Packer VM Template Pipeline defined under packer/ and executed on the build server.
+    filename: 0084-packer-vm-template-pipeline.md
+    implemented_version: 0.91.0
+  - adr: 0085
+    title: OpenTofu IaC for VM Lifecycle Management
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: vm-topology
+    keywords:
+      - opentofu
+      - iac
+      - vm
+      - lifecycle
+      - management
+    summary: We will introduce OpenTofu (tofu) for all Proxmox resource management and move VM lifecycle out of Ansible.
+    filename: 0085-opentofu-vm-lifecycle.md
+    implemented_version: 0.92.0
+  - adr: 0086
+    title: Ansible Collection Packaging and Versioned Role Distribution
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: automation
+    keywords:
+      - ansible
+      - collection
+      - packaging
+      - versioned
+      - role
+      - distribution
+    summary: We will restructure the roles/ directory into a proper Ansible Collection lv3.platform and publish it to the
+      internal An
+    filename: 0086-ansible-collection-packaging.md
+    implemented_version: 0.88.0
+  - adr: 0087
+    title: Repository Validation Gate (Pre-Push and CI)
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: ci-cd
+    keywords:
+      - repository
+      - validation
+      - gate
+      - pre-push
+      - ci
+    summary: We will implement a two-layer validation gate — local pre-commit hooks and a remote build server check — enforced
+      on eve
+    filename: 0087-repository-validation-gate.md
+    implemented_version: 0.93.0
+  - adr: 0088
+    title: Ephemeral Infrastructure Fixtures
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - ephemeral
+      - infrastructure
+      - fixtures
+    summary: We will implement ephemeral infrastructure fixtures — on-demand VMs provisioned from Packer templates, used for
+      tests, a
+    filename: 0088-ephemeral-infrastructure-fixtures.md
+    implemented_version: 0.95.0
+  - adr: 0089
+    title: Build Artifact Cache and Layer Registry
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - build
+      - artifact
+      - cache
+      - layer
+      - registry
+    summary: We will maintain a multi-layer build artifact cache on the build server, consisting of four components.
+    filename: 0089-build-artifact-cache.md
+    implemented_version: 0.87.0
+  - adr: 0090
+    title: Unified Platform CLI (`lv3`)
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: platform
+    keywords:
+      - unified
+      - platform
+      - cli
+      - lv3
+    summary: We will implement a lv3 CLI tool at scripts/lv3cli.py, installed as lv3 in the operator's PATH via make install-cli.
+    filename: 0090-unified-platform-cli.md
+    implemented_version: 0.91.0
+  - adr: 0091
+    title: Continuous Drift Detection and Reconciliation
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-22'
+    concern: ci-cd
+    keywords:
+      - continuous
+      - drift
+      - detection
+      - reconciliation
+    summary: 'We will implement continuous drift detection as a scheduled Windmill workflow that:'
+    filename: 0091-continuous-drift-detection.md
+    implemented_version: 0.94.0
+  - adr: 0092
+    title: Unified Platform API Gateway
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: ci-cd
+    keywords:
+      - unified
+      - platform
+      - api
+      - gateway
+    summary: We will deploy a platform API gateway on docker-runtime-lv3 as a FastAPI-based aggregation and proxy service,
+      exposed on
+    filename: 0092-unified-platform-api-gateway.md
+    implemented_version: 0.101.0
+  - adr: 0093
+    title: Interactive Ops Portal with Live Actions
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: ci-cd
+    keywords:
+      - interactive
+      - ops
+      - portal
+      - live
+      - actions
+    summary: We will replace the static generated ops portal with a server-side-rendered interactive portal built with FastHTML
+      (Pyth
+    filename: 0093-interactive-ops-portal.md
+    implemented_version: 0.97.0
+  - adr: 0094
+    title: Developer Portal and Service Documentation Site
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: documentation
+    keywords:
+      - developer
+      - portal
+      - service
+      - documentation
+      - site
+    summary: We will generate a static documentation site using MkDocs with the Material theme, auto-populated from the canonical
+      pla
+    filename: 0094-developer-portal-and-documentation-site.md
+    implemented_version: 0.97.0
+  - adr: 0095
+    title: Unified Search Across Platform Services
+    status: Deprecated
+    implementation_status: Deprecated
+    date: '2026-03-23'
+    concern: documentation
+    keywords:
+      - unified
+      - search
+      - across
+      - platform
+      - services
+    summary: We will deploy Zinc Search (a lightweight Elasticsearch-compatible search engine) on docker-runtime-lv3 and build
+      a sear
+    filename: 0095-unified-platform-search.md
+    implemented_version: 0.119.0
+  - adr: 0096
+    title: SLO Definitions and Error Budget Tracking
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: platform
+    keywords:
+      - slo
+      - definitions
+      - error
+      - budget
+      - tracking
+    summary: We will define SLOs in a canonical catalog, derive Prometheus rules and Grafana dashboard assets from that catalog,
+      prob
+    filename: 0096-slo-definitions-and-error-budget-tracking.md
+    implemented_version: 0.106.0
+  - adr: 0097
+    title: Alerting Routing and On-Call Runbook Model
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: documentation
+    keywords:
+      - alerting
+      - routing
+      - on-call
+      - runbook
+      - model
+    summary: We will implement a two-tier alert routing model with Alertmanager as the routing engine, severity-based destination
+      map
+    filename: 0097-alerting-routing-and-oncall-runbook-model.md
+    implemented_version: 0.114.0
+  - adr: 0098
+    title: Postgres High Availability and Automated Failover
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: platform
+    keywords:
+      - postgres
+      - high
+      - availability
+      - automated
+      - failover
+    summary: We will provision a second PostgreSQL VM (postgres-replica-lv3, VMID 151) and implement Patroni-managed streaming
+      replic
+    filename: 0098-postgres-high-availability.md
+    implemented_version: 0.103.0
+  - adr: 0099
+    title: Automated Backup Restore Verification
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: storage
+    keywords:
+      - automated
+      - backup
+      - restore
+      - verification
+    summary: We will implement a weekly automated restore verification workflow that restores the three most critical VM backups
+      into
+    filename: 0099-automated-backup-restore-verification.md
+    implemented_version: 0.99.0
+  - adr: '0100'
+    title: Formal RTO/RPO Targets and Disaster Recovery Playbook
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: automation
+    keywords:
+      - formal
+      - rto
+      - rpo
+      - targets
+      - disaster
+      - recovery
+      - playbook
+    summary: We will define formal platform RTO/RPO targets, store them in machine-readable repo data, publish the ordered
+      disaster r
+    filename: 0100-rto-rpo-targets-and-disaster-recovery-playbook.md
+    implemented_version: 0.97.0
+  - adr: '0101'
+    title: Automated Certificate Lifecycle Management
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: security
+    keywords:
+      - automated
+      - certificate
+      - lifecycle
+      - management
+    summary: We will implement a three-layer certificate lifecycle covering inventory, automated renewal where this repository
+      actual
+    filename: 0101-automated-certificate-lifecycle-management.md
+    implemented_version: 0.177.6
+  - adr: '0102'
+    title: Security Posture Reporting and Benchmark Drift
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: security
+    keywords:
+      - security
+      - posture
+      - reporting
+      - benchmark
+      - drift
+    summary: We will implement a weekly automated security posture report using two complementary tools — Lynis for host or
+      guest OS-
+    filename: 0102-security-posture-reporting.md
+    implemented_version: 0.109.0
+  - adr: '0103'
+    title: Data Classification and Retention Policy
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: platform
+    keywords:
+      - data
+      - classification
+      - retention
+      - policy
+    summary: We will define a platform data classification model with four classes, assign every data store in the platform
+      to a clas
+    filename: 0103-data-classification-and-retention-policy.md
+    implemented_version: 0.102.0
+  - adr: '0104'
+    title: Service Dependency Graph and Failure Propagation Model
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: platform
+    keywords:
+      - service
+      - dependency
+      - graph
+      - failure
+      - propagation
+      - model
+    summary: We will define a machine-readable service dependency graph in config/dependency-graph.json, generate a visual
+      dependency
+    filename: 0104-service-dependency-graph.md
+    implemented_version: 0.108.0
+  - adr: '0105'
+    title: Platform Capacity Model and Resource Quota Enforcement
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: ci-cd
+    keywords:
+      - platform
+      - capacity
+      - model
+      - resource
+      - quota
+      - enforcement
+    summary: We will keep a repository-managed capacity model for the Proxmox host, use it to render operator-facing reports,
+      and exp
+    filename: 0105-platform-capacity-model.md
+    implemented_version: 0.115.0
+  - adr: '0106'
+    title: Ephemeral Environment Lifecycle and Teardown Policy
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: platform
+    keywords:
+      - ephemeral
+      - environment
+      - lifecycle
+      - teardown
+      - policy
+    summary: We will establish a formal ephemeral environment lifecycle policy with a defined VMID range, a maximum lifetime
+      enforced
+    filename: 0106-ephemeral-environment-lifecycle-policy.md
+    implemented_version: 0.97.0
+  - adr: '0107'
+    title: Platform Extension Model for Adding New Services
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: platform
+    keywords:
+      - platform
+      - extension
+      - model
+      - adding
+      - new
+      - services
+    summary: We will define a platform extension checklist as a machine-readable schema, enhance the scaffold generator (ADR
+      0078) to
+    filename: 0107-platform-extension-model.md
+    implemented_version: 0.107.0
+  - adr: 0108
+    title: Operator Onboarding and Off-boarding Workflow
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: automation
+    keywords:
+      - operator
+      - onboarding
+      - off-boarding
+      - workflow
+    summary: We will implement a Windmill-backed operator onboarding and off-boarding workflow that provisions and revokes
+      access acr
+    filename: 0108-operator-onboarding-and-offboarding.md
+    implemented_version: 0.105.0
+  - adr: 0109
+    title: Public Status Page
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: platform
+    keywords:
+      - public
+      - status
+      - page
+    summary: We will publish a repo-managed public status page at status.lv3.org, backed by Uptime Kuma and supplemented by
+      an indepe
+    filename: 0109-public-status-page.md
+    implemented_version: 0.104.0
+  - adr: '0110'
+    title: Platform Versioning, Release Notes, and Upgrade Path
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: release
+    keywords:
+      - platform
+      - versioning
+      - release
+      - notes
+      - upgrade
+      - path
+    summary: We will define platform-level semantic versioning semantics, a structured release process, machine-readable release
+      note
+    filename: 0110-platform-versioning-and-upgrade-path.md
+    implemented_version: 0.104.0
+  - adr: '0111'
+    title: End-to-End Integration Test Suite
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-23'
+    concern: testing
+    keywords:
+      - end-to-end
+      - integration
+      - test
+      - suite
+    summary: We will build an end-to-end integration test suite (tests/integration/) written in Python using pytest with httpx
+      for HT
+    filename: 0111-end-to-end-integration-test-suite.md
+    implemented_version: 0.100.0
+  - adr: '0112'
+    title: Deterministic Goal Compiler
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: platform
+    keywords:
+      - deterministic
+      - goal
+      - compiler
+    summary: We will introduce a deterministic goal compiler as a Python module rooted at platform/goalcompiler/ that transforms
+      oper
+    filename: 0112-deterministic-goal-compiler.md
+    implemented_version: 0.117.1
+  - adr: '0113'
+    title: World-State Materializer
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: platform
+    keywords:
+      - world-state
+      - materializer
+    summary: We will build a world-state materializer that continuously refreshes a canonical materialized view of platform
+      state int
+    filename: 0113-world-state-materializer.md
+    implemented_version: 0.113.0
+  - adr: '0114'
+    title: Rule-Based Incident Triage Engine
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: ci-cd
+    keywords:
+      - rule-based
+      - incident
+      - triage
+      - engine
+    summary: We will implement a rule-based incident triage engine as a Windmill workflow triggered on every firing alert
+      from the al
+    filename: 0114-rule-based-incident-triage-engine.md
+    implemented_version: 0.111.0
+  - adr: '0115'
+    title: Event-Sourced Mutation Ledger
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: platform
+    keywords:
+      - event-sourced
+      - mutation
+      - ledger
+    summary: We will promote the mutation audit log into a full event-sourced mutation ledger by replacing the flat audit
+      log table w
+    filename: 0115-event-sourced-mutation-ledger.md
+    implemented_version: 0.110.0
+  - adr: '0116'
+    title: Change Risk Scoring Without LLMs
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: platform
+    keywords:
+      - change
+      - risk
+      - scoring
+      - without
+      - llms
+    summary: We will implement a deterministic change risk scoring engine as a Python module at scripts/riskscorer/ that computes
+      a n
+    filename: 0116-change-risk-scoring.md
+    implemented_version: 0.112.0
+  - adr: '0117'
+    title: Service Dependency Graph As First-Class Runtime
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: platform
+    keywords:
+      - service
+      - dependency
+      - graph
+      - as
+      - first-class
+      - runtime
+    summary: We will persist a machine-usable dependency graph for services, hosts, networks, DNS names, certificates, and
+      data flows
+    filename: 0117-service-dependency-graph-runtime.md
+    implemented_version: 0.117.0
+  - adr: 0118
+    title: Replayable Failure Case Library
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-03-24'
+    concern: platform
+    keywords:
+      - replayable
+      - failure
+      - case
+      - library
+    summary: We will build a replayable failure case library stored in Postgres with a full-text search index, queryable via
+      the plat
+    filename: 0118-replayable-failure-case-library.md
+  - adr: 0119
+    title: Budgeted Workflow Scheduler
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: automation
+    keywords:
+      - budgeted
+      - workflow
+      - scheduler
+    summary: We will implement a budgeted workflow scheduler as a thin orchestration layer between the goal compiler (ADR
+      0112) and W
+    filename: 0119-budgeted-workflow-scheduler.md
+    implemented_version: 0.118.0
+  - adr: '0120'
+    title: Dry-Run Semantic Diff Engine
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: release
+    keywords:
+      - dry-run
+      - semantic
+      - diff
+      - engine
+    summary: 'We will implement a dry-run semantic diff engine as a Python module platform/diffengine/ that computes a SemanticDiff
+      — '
+    filename: 0120-dry-run-semantic-diff-engine.md
+    implemented_version: 0.116.0
+  - adr: '0121'
+    title: Local Search and Indexing Fabric
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: documentation
+    keywords:
+      - local
+      - search
+      - indexing
+      - fabric
+    summary: We will build a local search and indexing fabric entirely within Postgres, using pgtrgm (trigram matching) and
+      the built
+    filename: 0121-local-search-and-indexing-fabric.md
+    implemented_version: 0.119.0
+  - adr: '0122'
+    title: Windmill Operator Access Admin Surface
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: automation
+    keywords:
+      - windmill
+      - operator
+      - access
+      - admin
+      - surface
+    summary: We will add a repo-managed Windmill raw app that acts as the operator access admin console for ADR 0108.
+    filename: 0122-windmill-operator-access-admin.md
+    implemented_version: 0.120.0
+  - adr: '0123'
+    title: Service Uptime Contracts And Monitor-Backed Health
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: platform
+    keywords:
+      - service
+      - uptime
+      - contracts
+      - monitor-backed
+      - health
+    summary: We will make the health-probe catalog the canonical uptime contract and drive both Uptime Kuma configuration
+      and interna
+    filename: 0123-service-uptime-contracts-and-monitor-backed-health.md
+    implemented_version: 0.121.0
+  - adr: '0124'
+    title: Platform Event Taxonomy And Canonical NATS Topics
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: networking
+    keywords:
+      - platform
+      - event
+      - taxonomy
+      - canonical
+      - nats
+      - topics
+    summary: We will treat config/event-taxonomy.yaml as the canonical registry for platform NATS topics and the minimum payload
+      cont
+    filename: 0124-platform-event-taxonomy-and-canonical-nats-topics.md
+    implemented_version: 0.128.0
+  - adr: '0125'
+    title: Agent Capability Bounds and Autonomous Action Policy
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: agent-discovery
+    keywords:
+      - agent
+      - capability
+      - bounds
+      - autonomous
+      - action
+      - policy
+    summary: We will define an agent capability policy as a per-identity configuration in config/agent-policies.yaml(/Users/live/Docu
+    filename: 0125-agent-capability-bounds-and-autonomous-action-policy.md
+    implemented_version: 0.143.0
+  - adr: '0126'
+    title: Observation-to-Action Closure Loop
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: platform
+    keywords:
+      - observation-to-action
+      - closure
+      - loop
+    summary: We implement a durable closure loop under platform/closureloop/(/Users/live/Documents/GITHUBPROJECTS/proxmoxflorinserver
+    filename: 0126-observation-to-action-closure-loop.md
+    implemented_version: 0.131.0
+  - adr: '0127'
+    title: Intent Deduplication and Conflict Resolution
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: platform
+    keywords:
+      - intent
+      - deduplication
+      - conflict
+      - resolution
+    summary: We implement an intent conflict gate in front of scheduler submission.
+    filename: 0127-intent-deduplication-and-conflict-resolution.md
+    implemented_version: 0.122.0
+  - adr: 0128
+    title: Platform Health Composite Index
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: agent-discovery
+    keywords:
+      - platform
+      - health
+      - composite
+      - index
+    summary: We will maintain a per-service composite health index backed by Postgres and refreshed from a Windmill workflow
+      every mi
+    filename: 0128-platform-health-composite-index.md
+    implemented_version: 0.125.0
+  - adr: 0129
+    title: Runbook Automation Executor
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-25'
+    concern: automation
+    keywords:
+      - runbook
+      - automation
+      - executor
+    summary: 'We will implement a runbook automation executor in repository-managed Python with:'
+    filename: 0129-runbook-automation-executor.md
+    implemented_version: 0.132.0
+  - adr: '0130'
+    title: Agent State Persistence Across Workflow Boundaries
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: automation
+    keywords:
+      - agent
+      - state
+      - persistence
+      - across
+      - workflow
+      - boundaries
+    summary: We will implement an agent state store in Postgres, accessible via a thin AgentStateClient API. The store is
+      a scratchpa
+    filename: 0130-agent-state-persistence-across-workflow-boundaries.md
+    implemented_version: 0.122.0
+  - adr: '0131'
+    title: Multi-Agent Handoff Protocol
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: agent-discovery
+    keywords:
+      - multi-agent
+      - handoff
+      - protocol
+    summary: 'We will implement a repository-managed handoff protocol with four concrete surfaces:'
+    filename: 0131-multi-agent-handoff-protocol.md
+    implemented_version: 0.126.0
+  - adr: '0132'
+    title: Self-Describing Platform Manifest
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: platform
+    keywords:
+      - self-describing
+      - platform
+      - manifest
+    summary: We will generate and continuously publish a self-describing platform manifest as a structured JSON document,
+      refreshed o
+    filename: 0132-self-describing-platform-manifest.md
+    implemented_version: 0.140.0
+  - adr: '0133'
+    title: Portal Authentication by Default
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: identity
+    keywords:
+      - portal
+      - authentication
+      - by
+      - default
+    summary: We will enforce authentication by default for portal services.
+    filename: 0133-portal-authentication-by-default.md
+    implemented_version: 0.130.0
+  - adr: '0134'
+    title: Changelog Portal Content Redaction
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-25'
+    concern: documentation
+    keywords:
+      - changelog
+      - portal
+      - content
+      - redaction
+    summary: We implement a config-backed changelog redaction pipeline between raw history collection and portal rendering.
+    filename: 0134-changelog-portal-content-redaction.md
+    implemented_version: 0.133.0
+  - adr: '0135'
+    title: Developer Portal Sensitivity Classification
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: documentation
+    keywords:
+      - developer
+      - portal
+      - sensitivity
+      - classification
+    summary: We will classify developer-portal content by sensitivity and enforce that classification in the generated MkDocs
+      source.
+    filename: 0135-developer-portal-sensitivity-classification.md
+    implemented_version: 0.124.0
+  - adr: '0136'
+    title: HTTP Security Headers Hardening
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: security
+    keywords:
+      - http
+      - security
+      - headers
+      - hardening
+    summary: 'We standardise HTTP security headers in the nginxedgepublication role and make the edge authoritative for those
+      headers '
+    filename: 0136-http-security-headers-hardening.md
+    implemented_version: 0.141.0
+  - adr: '0137'
+    title: Robots.txt and Crawl Policy
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-25'
+    concern: platform
+    keywords:
+      - robots
+      - txt
+      - crawl
+      - policy
+    summary: 'The platform will apply one crawl policy across the entire public edge:'
+    filename: 0137-robots-and-crawl-policy.md
+    implemented_version: 0.134.0
+  - adr: 0138
+    title: Published Artifact Secret Scanning
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: security
+    keywords:
+      - published
+      - artifact
+      - secret
+      - scanning
+    summary: We will add a published artifact secret-scanning stage that runs before merge and before artifact publication.
+    filename: 0138-published-artifact-secret-scanning.md
+    implemented_version: 0.123.0
+  - adr: 0139
+    title: Subdomain Exposure Audit and Registry
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: networking
+    keywords:
+      - subdomain
+      - exposure
+      - audit
+      - registry
+    summary: 'We will maintain a deterministic subdomain exposure registry generated from:'
+    filename: 0139-subdomain-exposure-audit-and-registry.md
+    implemented_version: 0.127.0
+  - adr: '0140'
+    title: Grafana Public Access Hardening
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: security
+    keywords:
+      - grafana
+      - public
+      - access
+      - hardening
+    summary: We will harden Grafana's public publication with repository-managed controls at both the Grafana runtime and
+      the NGINX e
+    filename: 0140-grafana-public-access-hardening.md
+    implemented_version: 0.124.1
+  - adr: '0141'
+    title: API Token Lifecycle and Exposure Response
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: security
+    keywords:
+      - api
+      - token
+      - lifecycle
+      - exposure
+      - response
+    summary: We will define a token lifecycle policy in config/token-policy.yaml and implement automated enforcement and a
+      runbook fo
+    filename: 0141-api-token-lifecycle-and-exposure-response.md
+    implemented_version: 0.135.0
+  - adr: '0142'
+    title: Public Surface Automated Security Scan
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: security
+    keywords:
+      - public
+      - surface
+      - automated
+      - security
+      - scan
+    summary: We will run a repo-managed weekly public-surface security scan that writes structured receipts under receipts/security-s
+    filename: 0142-public-surface-automated-security-scan.md
+    implemented_version: 0.129.0
+  - adr: '0143'
+    title: Gitea for Self-Hosted Git and Webhook-Driven Automation
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: ci-cd
+    keywords:
+      - gitea
+      - self-hosted
+      - git
+      - webhook-driven
+      - automation
+    summary: We will deploy Gitea as a self-hosted git service on the docker-runtime-lv3 VM, replacing the external git provider
+      as t
+    filename: 0143-gitea-for-self-hosted-git-and-ci.md
+    implemented_version: 0.165.0
+  - adr: '0144'
+    title: Headscale For Zero-Trust Mesh VPN
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-25'
+    concern: platform
+    keywords:
+      - headscale
+      - zero-trust
+      - mesh
+      - vpn
+    summary: We will run Headscale on the Proxmox host as the authoritative control plane for the LV3 mesh VPN while continuing
+      to us
+    filename: 0144-headscale-for-zero-trust-mesh-vpn.md
+    implemented_version: 0.148.1
+  - adr: '0145'
+    title: Ollama for Local LLM Inference API
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: api
+    keywords:
+      - ollama
+      - local
+      - llm
+      - inference
+      - api
+    summary: We run Ollama as a private, repo-managed runtime on docker-runtime-lv3.
+    filename: 0145-ollama-for-local-llm-inference.md
+    implemented_version: 0.142.0
+  - adr: '0146'
+    title: Langfuse For Agent Observability
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: monitoring
+    keywords:
+      - langfuse
+      - agent
+      - observability
+    summary: We will deploy self-hosted Langfuse on docker-runtime-lv3 and publish it at https://langfuse.lv3.org.
+    filename: 0146-langfuse-for-agent-observability.md
+    implemented_version: 0.163.0
+  - adr: '0147'
+    title: Vaultwarden for Operator Credential Management
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: security
+    keywords:
+      - vaultwarden
+      - operator
+      - credential
+      - management
+    summary: We will deploy Vaultwarden on docker-runtime-lv3 as a Bitwarden-compatible self-hosted credential vault for operator
+      use
+    filename: 0147-vaultwarden-for-operator-credential-management.md
+    implemented_version: 0.147.0
+  - adr: 0148
+    title: SearXNG for Agent Web Search
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: documentation
+    keywords:
+      - searxng
+      - agent
+      - web
+      - search
+    summary: We will deploy SearXNG on docker-runtime-lv3 as a self-hosted search aggregation API for agent and operator use.
+    filename: 0148-searxng-for-agent-web-search.md
+    implemented_version: 0.175.0
+  - adr: 0149
+    title: Semaphore For Ansible Job Management UI And API
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-25'
+    concern: automation
+    keywords:
+      - semaphore
+      - ansible
+      - job
+      - management
+      - ui
+      - api
+    summary: 'We will deploy Semaphore privately on docker-runtime-lv3 with a PostgreSQL backend on postgres-lv3 and a Tailscale-only '
+    filename: 0149-semaphore-for-ansible-job-management-ui-and-api.md
+    implemented_version: 0.158.0
+  - adr: '0150'
+    title: Dozzle for Real-Time Container Log Access
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: identity
+    keywords:
+      - dozzle
+      - real-time
+      - container
+      - log
+      - access
+    summary: We run Dozzle as a repo-managed hub-and-agent deployment.
+    filename: 0150-dozzle-for-real-time-container-log-access.md
+    implemented_version: 0.168.0
+  - adr: '0151'
+    title: n8n for Webhook and API Integration Automation
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-25'
+    concern: automation
+    keywords:
+      - n8n
+      - webhook
+      - api
+      - integration
+      - automation
+    summary: 'We run n8n as a repo-managed compose service on docker-runtime-lv3, backed by PostgreSQL on postgres-lv3, and
+      published '
+    filename: 0151-n8n-for-webhook-and-api-integration-automation.md
+    implemented_version: 0.148.0
+  - adr: '0152'
+    title: Homepage for Unified Service Dashboard
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: platform
+    keywords:
+      - homepage
+      - unified
+      - service
+      - dashboard
+    summary: We run Homepage on docker-runtime-lv3 as the unified LV3 service dashboard and generate its repo-managed configuration
+      d
+    filename: 0152-homepage-for-unified-service-dashboard.md
+    implemented_version: 0.169.0
+  - adr: '0153'
+    title: Distributed Resource Lock Registry
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: agent-coordination
+    keywords:
+      - distributed
+      - resource
+      - lock
+      - registry
+    summary: We will implement a distributed resource lock registry backed by NATS JetStream Key-Value (KV) store, providing
+      hierarch
+    filename: 0153-distributed-resource-lock-registry.md
+    implemented_version: 0.150.0
+  - adr: '0154'
+    title: VM-Scoped Parallel Execution Lanes
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: vm-topology
+    keywords:
+      - vm-scoped
+      - parallel
+      - execution
+      - lanes
+    summary: 'We will treat the Proxmox host plus each managed VM as an execution lane with explicit capacity, and the scheduler
+      will '
+    filename: 0154-vm-scoped-parallel-execution-lanes.md
+    implemented_version: 0.155.0
+  - adr: '0155'
+    title: Intent Queue with Release-Triggered Scheduling
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: release
+    keywords:
+      - intent
+      - queue
+      - release-triggered
+      - scheduling
+    summary: We will implement a durable intent queue with priority scheduling and release-triggered dispatch as a platform
+      service.
+    filename: 0155-intent-queue-with-release-triggered-scheduling.md
+    implemented_version: 0.158.0
+  - adr: '0156'
+    title: Agent Session Workspace Isolation
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-25'
+    concern: agent-discovery
+    keywords:
+      - agent
+      - session
+      - workspace
+      - isolation
+    summary: We implement a checkout-aware session workspace contract for controller automation.
+    filename: 0156-agent-session-workspace-isolation.md
+    implemented_version: 0.143.2
+  - adr: '0157'
+    title: Per-VM Concurrency Budget and Resource Reservation
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: vm-topology
+    keywords:
+      - per-vm
+      - concurrency
+      - budget
+      - resource
+      - reservation
+    summary: We will implement a per-VM concurrency budget with a reservation-based admission control model. Every ExecutionIntent
+      mu
+    filename: 0157-per-vm-concurrency-budget-and-resource-reservation.md
+    implemented_version: 0.151.0
+  - adr: 0158
+    title: Conflict-Free Configuration Merge Protocol
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: platform
+    keywords:
+      - conflict-free
+      - configuration
+      - merge
+      - protocol
+    summary: We treat selected registry files as merge-eligible collections and stage changes in a database-backed queue before
+      a sin
+    filename: 0158-conflict-free-configuration-merge-protocol.md
+    implemented_version: 0.154.0
+  - adr: 0159
+    title: Speculative Parallel Execution with Compensating Transactions
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: ci-cd
+    keywords:
+      - speculative
+      - parallel
+      - execution
+      - compensating
+      - transactions
+    summary: The repository now implements speculative execution as an opt-in extension of the existing scheduler and conflict
+      regist
+    filename: 0159-speculative-parallel-execution-with-compensating-transactions.md
+    implemented_version: 0.144.0
+  - adr: '0160'
+    title: Parallel Dry-Run Fan-Out for Intent Batch Validation
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: ci-cd
+    keywords:
+      - parallel
+      - dry-run
+      - fan-out
+      - intent
+      - batch
+      - validation
+    summary: 'We implement a controller-local parallel dry-run fan-out for multi-intent batches: all semantic dry-runs in
+      a batch exec'
+    filename: 0160-parallel-dry-run-fan-out-for-intent-batch-validation.md
+    implemented_version: 0.145.0
+  - adr: '0161'
+    title: Real-Time Agent Coordination Map
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-25'
+    concern: networking
+    keywords:
+      - real-time
+      - agent
+      - coordination
+      - map
+    summary: We implement a real-time agent coordination map with JetStream KV as the preferred backing store and a repo-local
+      file-b
+    filename: 0161-real-time-agent-coordination-map.md
+    implemented_version: 0.156.0
+  - adr: '0162'
+    title: Distributed Deadlock Detection and Resolution
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: agent-coordination
+    keywords:
+      - distributed
+      - deadlock
+      - detection
+      - resolution
+    summary: We will implement a distributed deadlock detector as a periodic Windmill workflow that scans the lock registry
+      and inten
+    filename: 0162-distributed-deadlock-detection-and-resolution.md
+    implemented_version: 0.150.0
+  - adr: '0163'
+    title: Platform-Wide Retry Taxonomy and Exponential Backoff
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: resilience
+    keywords:
+      - platform-wide
+      - retry
+      - taxonomy
+      - exponential
+      - backoff
+    summary: We will define a platform-wide error taxonomy and a standard retry policy implementation in platform/retry/policy.py
+      tha
+    filename: 0163-platform-wide-retry-taxonomy-and-exponential-backoff.md
+    implemented_version: 0.149.0
+  - adr: '0163'
+    title: Proxmox Break-Glass SSH Port
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-26'
+    concern: host-os
+    keywords:
+      - proxmox
+      - break-glass
+      - ssh
+      - port
+    summary: Add a dedicated break-glass SSH port (proxmoxbreakglasssshport, default 2222)
+    filename: 0163-proxmox-break-glass-ssh-port.md
+    implemented_version: 0.123.0
+  - adr: '0163'
+    title: Repository Structure Index for Agent Discovery
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-26'
+    concern: agent-discovery
+    keywords:
+      - repository
+      - structure
+      - index
+      - agent
+      - discovery
+    summary: 'We will maintain a machine-readable repository structure index at .repo-structure.yaml that documents:'
+    filename: 0163-repository-structure-index.md
+    implemented_version: 0.173.0
+  - adr: '0164'
+    title: ADR Metadata Index and Fast Discovery Protocol
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-26'
+    concern: agent-discovery
+    keywords:
+      - adr
+      - metadata
+      - index
+      - fast
+      - discovery
+      - protocol
+    summary: 'We will maintain a machine-readable ADR metadata index at docs/adr/.index.yaml that includes:'
+    filename: 0164-adr-metadata-index.md
+    implemented_version: 0.173.0
+  - adr: '0164'
+    title: Circuit Breaker Pattern for External Service Calls
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: ci-cd
+    keywords:
+      - circuit
+      - breaker
+      - pattern
+      - external
+      - service
+      - calls
+    summary: We implement a shared, repo-managed circuit breaker layer for external and high-impact internal service calls.
+    filename: 0164-circuit-breaker-pattern-for-external-service-calls.md
+    implemented_version: 0.152.0
+  - adr: '0165'
+    title: Playbook and Role Metadata Standard for Agent Discovery
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-26'
+    concern: automation
+    keywords:
+      - playbook
+      - role
+      - metadata
+      - standard
+      - agent
+      - discovery
+    summary: 'All Ansible playbooks and roles in this repository must include a metadata block at the start documenting:'
+    filename: 0165-playbook-role-metadata-standard.md
+    implemented_version: 0.173.0
+  - adr: '0165'
+    title: Workflow Idempotency Keys and Double-Execution Prevention
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: security
+    keywords:
+      - workflow
+      - idempotency
+      - keys
+      - double-execution
+      - prevention
+    summary: We will add a repository-managed idempotency layer on the workflow submission path.
+    filename: 0165-workflow-idempotency-keys-and-double-execution-prevention.md
+    implemented_version: 0.153.0
+  - adr: '0166'
+    title: Canonical Configuration Locations Registry
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-26'
+    concern: platform
+    keywords:
+      - canonical
+      - configuration
+      - locations
+      - registry
+    summary: 'We will maintain a canonical configuration locations registry at .config-locations.yaml documenting:'
+    filename: 0166-canonical-configuration-locations.md
+    implemented_version: 0.173.0
+  - adr: '0166'
+    title: Canonical Error Response Format and Error Code Registry
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-24'
+    concern: platform
+    keywords:
+      - canonical
+      - error
+      - response
+      - format
+      - error
+      - code
+      - registry
+    summary: We will define a canonical error envelope and an error code registry as the single source of truth for all platform
+      erro
+    filename: 0166-canonical-error-response-format-and-error-code-registry.md
+    implemented_version: 0.162.0
+  - adr: '0167'
+    title: Agent Handoff and Context Preservation Protocol
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-26'
+    concern: agent-discovery
+    keywords:
+      - agent
+      - handoff
+      - context
+      - preservation
+      - protocol
+    summary: 'All agents working on this repository must follow this handoff protocol:'
+    filename: 0167-agent-handoff-and-context-preservation.md
+    implemented_version: 0.173.0
+  - adr: '0167'
+    title: Graceful Degradation Mode Declarations
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-25'
+    concern: resilience
+    keywords:
+      - graceful
+      - degradation
+      - mode
+      - declarations
+    summary: We will make graceful degradation a declared and testable part of the platform contract.
+    filename: 0167-graceful-degradation-mode-declarations.md
+    implemented_version: 0.146.1
+  - adr: 0168
+    title: Ansible Role Idempotency CI Enforcement
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: ci-cd
+    keywords:
+      - ansible
+      - role
+      - idempotency
+      - ci
+      - enforcement
+    summary: We will enforce Ansible role idempotency through a repo-managed coverage policy and a CI validation gate.
+    filename: 0168-ansible-role-idempotency-ci-enforcement.md
+    implemented_version: 0.146.0
+  - adr: 0168
+    title: Automated Enforcement of Agent Discovery and Handoff Standards
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-26'
+    concern: agent-discovery
+    keywords:
+      - automated
+      - enforcement
+      - agent
+      - discovery
+      - handoff
+      - standards
+    summary: 'Add automated validation to the pre-push-gate (scripts/validaterepo.sh) that enforces:'
+    filename: 0168-automated-enforcement-of-agent-standards.md
+    implemented_version: 0.173.0
+  - adr: 0169
+    title: Structured Log Field Contract
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: platform
+    keywords:
+      - structured
+      - log
+      - field
+      - contract
+    summary: We standardise structured JSON logging for platform-managed runtime code and execution entrypoints.
+    filename: 0169-structured-log-field-contract.md
+    implemented_version: 0.146.1
+  - adr: '0170'
+    title: Platform-Wide Timeout Hierarchy
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-25'
+    concern: resilience
+    keywords:
+      - platform-wide
+      - timeout
+      - hierarchy
+    summary: We will define a repository-managed timeout hierarchy in config/timeout-hierarchy.yaml(/Users/live/Documents/GITHUBPROJE
+    filename: 0170-platform-wide-timeout-hierarchy.md
+    implemented_version: 0.157.0
+  - adr: '0171'
+    title: Controlled Fault Injection for Resilience Validation
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: ci-cd
+    keywords:
+      - controlled
+      - fault
+      - injection
+      - resilience
+      - validation
+    summary: We will implement a controlled fault injection suite as a monthly Windmill workflow run-fault-injection that
+      verifies ea
+    filename: 0171-controlled-fault-injection-for-resilience-validation.md
+    implemented_version: 0.166.0
+  - adr: '0172'
+    title: Watchdog Escalation and Stale Job Self-Healing
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-24'
+    concern: resilience
+    keywords:
+      - watchdog
+      - escalation
+      - stale
+      - job
+      - self-healing
+    summary: We extend the scheduler watchdog into a stale-job backstop that can operate from repo-managed Windmill schedules
+      as well
+    filename: 0172-watchdog-escalation-and-stale-job-self-healing.md
+    implemented_version: 0.146.2
+  - adr: '0173'
+    title: Workstream Surface Ownership Manifest
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-26'
+    concern: platform
+    keywords:
+      - workstream
+      - surface
+      - ownership
+      - manifest
+    summary: 'We will define a surface ownership manifest for every active workstream. The manifest becomes the canonical
+      declaration '
+    filename: 0173-workstream-surface-ownership-manifest.md
+    implemented_version: 0.176.6
+  - adr: '0174'
+    title: Integration-Only Canonical Truth Assembly
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-26'
+    concern: platform
+    keywords:
+      - integration-only
+      - canonical
+      - truth
+      - assembly
+    summary: 'We will treat top-level canonical truth files as integration-only assembled outputs. Workstream branches will
+      no longer '
+    filename: 0174-integration-only-canonical-truth-assembly.md
+    implemented_version: 0.176.3
+  - adr: '0175'
+    title: Cross-Workstream Interface Contracts
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-26'
+    concern: platform
+    keywords:
+      - cross-workstream
+      - interface
+      - contracts
+    summary: We will define explicit interface contracts for shared producer-consumer boundaries touched by more than one
+      workstream,
+    filename: 0175-cross-workstream-interface-contracts.md
+    implemented_version: 0.176.7
+  - adr: '0176'
+    title: Inventory Sharding and Host-Scoped Ansible Execution
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-26'
+    concern: automation
+    keywords:
+      - inventory
+      - sharding
+      - host-scoped
+      - ansible
+      - execution
+    summary: We will structure mutable Ansible execution around inventory shards and host-scoped play metadata.
+    filename: 0176-inventory-sharding-and-host-scoped-ansible-execution.md
+    implemented_version: 0.177.0
+  - adr: '0177'
+    title: Run Namespace Partitioning for Parallel Tooling
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-26'
+    concern: platform
+    keywords:
+      - run
+      - namespace
+      - partitioning
+      - parallel
+      - tooling
+    summary: We will require every mutable execution path to run inside a run namespace identified by runid.
+    filename: 0177-run-namespace-partitioning-for-parallel-tooling.md
+    implemented_version: 0.177.2
+  - adr: 0178
+    title: Dependency Wave Manifests for Parallel Apply
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-26'
+    concern: platform
+    keywords:
+      - dependency
+      - wave
+      - manifests
+      - parallel
+      - apply
+    summary: We will represent every multi-step rollout as a dependency wave manifest. A wave is a set of changes that may
+      run in par
+    filename: 0178-dependency-wave-manifests-for-parallel-apply.md
+    implemented_version: 0.176.1
+  - adr: 0179
+    title: Service Redundancy Tier Matrix
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-26'
+    concern: platform
+    keywords:
+      - service
+      - redundancy
+      - tier
+      - matrix
+    summary: 'We will classify all platform services into a redundancy tier matrix. The tier determines the required recovery
+      assets, '
+    filename: 0179-service-redundancy-tier-matrix.md
+    implemented_version: 0.176.5
+  - adr: 0180
+    title: Standby Capacity Reservation and Placement Rules
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-26'
+    concern: ci-cd
+    keywords:
+      - standby
+      - capacity
+      - reservation
+      - placement
+      - rules
+    summary: We will reserve standby capacity and define placement rules for any service declared as R2 or higher in ADR 0179.
+    filename: 0180-standby-capacity-reservation-and-placement-rules.md
+    implemented_version: 0.176.4
+  - adr: 0181
+    title: Off-Host Witness and Control Metadata Replication
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-26'
+    concern: agent-discovery
+    keywords:
+      - off-host
+      - witness
+      - control
+      - metadata
+      - replication
+    summary: 'We will maintain off-host replicated control metadata in at least two independent locations outside the primary
+      Proxmox '
+    filename: 0181-off-host-witness-and-control-metadata-replication.md
+    implemented_version: 0.176.2
+  - adr: 0182
+    title: Live Apply Merge Train and Rollback Bundle
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-26'
+    concern: platform
+    keywords:
+      - live
+      - apply
+      - merge
+      - train
+      - rollback
+      - bundle
+    summary: We will use a live apply merge train that batches ready workstreams into a reviewed integration set and requires
+      a rollb
+    filename: 0182-live-apply-merge-train-and-rollback-bundle.md
+    implemented_version: 0.176.6
+  - adr: 0183
+    title: Auxiliary Cloud Failure Domain for Witness, Recovery, and Burst Capacity
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-03-27'
+    concern: ci-cd
+    keywords:
+      - auxiliary
+      - cloud
+      - failure
+      - domain
+      - witness
+      - recovery
+      - burst
+      - capacity
+    summary: We will add a small auxiliary cloud failure domain using Hetzner Cloud for non-primary control-plane resilience
+      and burs
+    filename: 0183-auxiliary-cloud-failure-domain-for-witness-recovery-and-burst-capacity.md
+  - adr: 0183
+    title: Keycloak Uses Shared-Mail-Network Internal Submission
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: networking
+    keywords:
+      - keycloak
+      - uses
+      - shared-mail-network
+      - internal
+      - submission
+    summary: 'Keycloak will:'
+    filename: 0183-keycloak-mail-network-internal-submission.md
+  - adr: 0184
+    title: Failure-Domain Labels and Anti-Affinity Policy
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-03-27'
+    concern: platform
+    keywords:
+      - failure-domain
+      - labels
+      - anti-affinity
+      - policy
+    summary: We will require failure-domain labels and anti-affinity declarations for all managed primaries, standbys, restore
+      target
+    filename: 0184-failure-domain-labels-and-anti-affinity-policy.md
+  - adr: 0185
+    title: Branch-Scoped Ephemeral Preview Environments
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-03-27'
+    concern: platform
+    keywords:
+      - branch-scoped
+      - ephemeral
+      - preview
+      - environments
+    summary: 'We will support branch-scoped ephemeral preview environments assembled from the branch''s release manifest and
+      destroyed '
+    filename: 0185-branch-scoped-ephemeral-preview-environments.md
+  - adr: 0186
+    title: Prewarmed Fixture Pools and Lease-Based Ephemeral Capacity
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-03-27'
+    concern: ci-cd
+    keywords:
+      - prewarmed
+      - fixture
+      - pools
+      - lease-based
+      - ephemeral
+      - capacity
+    summary: We will manage ephemeral compute as lease-based capacity pools with a small set of prewarmed fixtures per common
+      templat
+    filename: 0186-prewarmed-fixture-pools-and-lease-based-ephemeral-capacity.md
+  - adr: 0187
+    title: Anonymized Seed Data Snapshots for Repeatable Tests
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-03-27'
+    concern: testing
+    keywords:
+      - anonymized
+      - seed
+      - data
+      - snapshots
+      - repeatable
+      - tests
+    summary: We will maintain anonymized seed data snapshots for repeatable preview, restore, and failover tests.
+    filename: 0187-anonymized-seed-data-snapshots-for-repeatable-tests.md
+  - adr: 0188
+    title: Failover Rehearsal Gate for Redundancy Tiers
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-03-27'
+    concern: ci-cd
+    keywords:
+      - failover
+      - rehearsal
+      - gate
+      - redundancy
+      - tiers
+    summary: We will require scheduled failover or recovery rehearsals for services that claim redundancy tiers above rebuild-only
+      re
+    filename: 0188-failover-rehearsal-gate-for-redundancy-tiers.md
+  - adr: 0189
+    title: Network Impairment Test Matrix for Staging and Previews
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-03-27'
+    concern: networking
+    keywords:
+      - network
+      - impairment
+      - test
+      - matrix
+      - staging
+      - previews
+    summary: We will define a network impairment test matrix for preview, fixture, standby, and recovery environments.
+    filename: 0189-network-impairment-test-matrix-for-staging-and-previews.md
+  - adr: 0190
+    title: Synthetic Transaction Replay for Capacity and Recovery Validation
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-03-27'
+    concern: ci-cd
+    keywords:
+      - synthetic
+      - transaction
+      - replay
+      - capacity
+      - recovery
+      - validation
+    summary: We will maintain a synthetic transaction replay harness for capacity, failover, and recovery validation.
+    filename: 0190-synthetic-transaction-replay-for-capacity-and-recovery-validation.md
+  - adr: 0191
+    title: Immutable Guest Replacement for Stateful and Edge Services
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-03-27'
+    concern: vm-topology
+    keywords:
+      - immutable
+      - guest
+      - replacement
+      - stateful
+      - edge
+      - services
+    summary: For stateful and edge services at redundancy tier R1 or higher, the default change path will be immutable guest
+      replacem
+    filename: 0191-immutable-guest-replacement-for-stateful-and-edge-services.md
+  - adr: 0192
+    title: Separate Capacity Classes for Standby, Recovery, and Preview Workloads
+    status: Proposed
+    implementation_status: Not Implemented
+    date: '2026-03-27'
+    concern: ci-cd
+    keywords:
+      - separate
+      - capacity
+      - classes
+      - standby
+      - recovery
+      - preview
+      - workloads
+    summary: We will classify spare capacity into separate reservation classes with explicit admission rules.
+    filename: 0192-separate-capacity-classes-for-standby-recovery-and-preview-workloads.md

@@ -1,0 +1,58 @@
+<section class="panel drift-panel">
+  <div class="drift-summary">
+    <div>
+      <span class="label">Latest drift run</span>
+      <strong>{{ drift_report.generated_at or "Not recorded" }}</strong>
+    </div>
+    <div>
+      <span class="label">Status</span>
+      <strong class="status-{{ (drift_summary.status or 'unknown')|status_tone }}">{{ drift_summary.status or "unknown" }}</strong>
+    </div>
+    <div>
+      <span class="label">Unsuppressed</span>
+      <strong>{{ drift_summary.unsuppressed_count or 0 }}</strong>
+    </div>
+  </div>
+
+  {% if drift_report.records %}
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Service</th>
+        <th>Source</th>
+        <th>Severity</th>
+        <th>Detail</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in drift_report.records[:8] %}
+      <tr>
+        <td>{{ item.service or item.resource or "n/a" }}</td>
+        <td>{{ item.source }}</td>
+        <td><span class="status-dot {{ (item.severity or 'unknown')|status_tone }}">{{ item.severity or "unknown" }}</span></td>
+        <td>{{ item.detail }}</td>
+        <td>
+          {% if item.service %}
+          <button
+            class="action-button secondary"
+            hx-post="/actions/services/{{ item.service }}/deploy"
+            hx-target="#drift-reconcile-result"
+            hx-swap="innerHTML"
+            hx-confirm="Reconcile {{ item.service }} through the deployment pipeline?">
+            Reconcile
+          </button>
+          {% else %}
+          <span class="muted">No service action</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">No drift receipt is available yet.</p>
+  {% endif %}
+
+  <div id="drift-reconcile-result"></div>
+</section>

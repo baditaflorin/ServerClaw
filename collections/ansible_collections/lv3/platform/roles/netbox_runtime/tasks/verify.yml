@@ -1,0 +1,26 @@
+---
+- name: Verify the NetBox HTTP login surface responds
+  ansible.builtin.uri:
+    url: "{{ netbox_private_base_url }}/login/"
+    method: GET
+    status_code: 200
+  register: netbox_verify_http
+  retries: 30
+  delay: 10
+  until: netbox_verify_http.status == 200
+  changed_when: false
+
+- name: Verify the NetBox bootstrap API token
+  ansible.builtin.uri:
+    url: "{{ netbox_private_base_url }}/api/users/users/?limit=1"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ netbox_superuser_api_token }}"
+    status_code: 200
+    return_content: true
+  register: netbox_verify_api_token
+  retries: 12
+  delay: 5
+  until: netbox_verify_api_token.status == 200
+  changed_when: false
+  no_log: true

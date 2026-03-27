@@ -1,0 +1,4 @@
+# depends_on:
+#   - playbooks/services/postgres-vm.yml
+---
+- import_playbook: ../semaphore.yml

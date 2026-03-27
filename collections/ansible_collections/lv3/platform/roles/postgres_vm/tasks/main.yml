@@ -1,0 +1,93 @@
+---
+- name: Validate PostgreSQL role inputs
+  ansible.builtin.assert:
+    that:
+      - postgres_vm_packages | length > 0
+      - postgres_vm_postgresql_service_name | length > 0
+      - postgres_vm_listen_addresses | length > 0
+      - postgres_vm_admin_role is match('^[a-z_][a-z0-9_]*$')
+    fail_msg: "postgres_vm requires PostgreSQL package and listener inputs, and postgres_vm_admin_role must be a safe identifier."
+
+- name: Install PostgreSQL guest packages
+  ansible.builtin.apt:
+    name: "{{ postgres_vm_packages }}"
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure PostgreSQL service is enabled and started
+  ansible.builtin.service:
+    name: "{{ postgres_vm_postgresql_service_name }}"
+    enabled: true
+    state: started
+
+- name: Discover PostgreSQL cluster configuration
+  ansible.builtin.find:
+    paths: /etc/postgresql
+    recurse: true
+    patterns: postgresql.conf
+    file_type: file
+  register: postgres_vm_config_files
+
+- name: Assert that exactly one PostgreSQL cluster exists
+  ansible.builtin.assert:
+    that:
+      - postgres_vm_config_files.matched == 1
+    fail_msg: >-
+      Expected exactly one PostgreSQL cluster under /etc/postgresql, found
+      {{ postgres_vm_config_files.matched }}.
+
+- name: Record PostgreSQL cluster paths
+  ansible.builtin.set_fact:
+    postgres_vm_cluster_conf_dir: "{{ postgres_vm_config_files.files[0].path | dirname }}"
+    postgres_vm_managed_conf_path: "{{ (postgres_vm_config_files.files[0].path | dirname) ~ '/conf.d/90-lv3-postgres.conf' }}"
+    postgres_vm_hba_path: "{{ (postgres_vm_config_files.files[0].path | dirname) ~ '/pg_hba.conf' }}"
+
+- name: Ensure PostgreSQL conf.d directory exists
+  ansible.builtin.file:
+    path: "{{ postgres_vm_cluster_conf_dir }}/conf.d"
+    state: directory
+    mode: "0755"
+
+- name: Render managed PostgreSQL settings
+  ansible.builtin.template:
+    src: postgresql-lv3.conf.j2
+    dest: "{{ postgres_vm_managed_conf_path }}"
+    mode: "0644"
+  notify: Restart PostgreSQL
+
+- name: Render PostgreSQL host-based authentication policy
+  ansible.builtin.template:
+    src: pg_hba.conf.j2
+    dest: "{{ postgres_vm_hba_path }}"
+    owner: root
+    group: postgres
+    mode: "0640"
+  notify: Restart PostgreSQL
+
+- name: Check whether PostgreSQL admin role already exists
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -Atqc
+      - "SELECT 1 FROM pg_roles WHERE rolname = '{{ postgres_vm_admin_role }}'"
+  register: postgres_vm_admin_role_check
+  changed_when: false
+
+- name: Create PostgreSQL admin role for local peer access
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "CREATE ROLE {{ postgres_vm_admin_role }} LOGIN CREATEDB CREATEROLE"
+  when: postgres_vm_admin_role_check.stdout != "1"
+  changed_when: true
+
+- name: Verify PostgreSQL health probes
+  ansible.builtin.import_tasks: verify.yml

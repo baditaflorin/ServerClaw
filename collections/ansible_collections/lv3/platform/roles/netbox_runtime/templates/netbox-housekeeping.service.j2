@@ -1,0 +1,8 @@
+[Unit]
+Description=Run NetBox housekeeping
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart={{ netbox_housekeeping_script }}

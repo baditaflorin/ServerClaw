@@ -1,0 +1,51 @@
+---
+gitea_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('gitea') }}"
+gitea_keycloak_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('keycloak') }}"
+gitea_site_dir: /opt/gitea
+gitea_data_dir: "{{ gitea_site_dir }}/data"
+gitea_secret_dir: /etc/lv3/gitea
+gitea_compose_file: "{{ gitea_site_dir }}/docker-compose.yml"
+gitea_env_file: "{{ compose_runtime_secret_root }}/gitea/runtime.env"
+gitea_legacy_env_file: "{{ gitea_site_dir }}/gitea.env"
+gitea_bootstrap_script: "{{ gitea_site_dir }}/bootstrap-gitea.sh"
+gitea_openbao_agent_dir: "{{ gitea_site_dir }}/openbao"
+gitea_openbao_agent_image: "{{ openbao_agent_image }}"
+gitea_openbao_agent_container_name: gitea-openbao-agent
+gitea_network_name: gitea_runtime_default
+gitea_network_subnet: 172.16.240.0/24
+gitea_openbao_secret_path: services/gitea/runtime-env
+gitea_openbao_policy_name: lv3-service-gitea-runtime
+gitea_openbao_approle_name: gitea-runtime
+gitea_image: docker.io/gitea/gitea:1.25.5-rootless@sha256:fb134070432dec3fd2bde580436d1a54469e34d7e156b7fae68b6f422bbf8d59
+gitea_container_name: gitea
+gitea_http_port: "{{ platform_service_topology | platform_service_port('gitea', 'internal') }}"
+gitea_host_proxy_port: "{{ platform_service_topology | platform_service_port('gitea', 'controller') }}"
+gitea_public_hostname: "{{ gitea_service_topology.public_hostname }}"
+gitea_root_url: "{{ gitea_service_topology.urls.public | default(gitea_controller_url) }}"
+gitea_private_base_url: "{{ platform_service_topology | platform_service_url('gitea', 'internal') }}"
+gitea_controller_url: "{{ platform_service_topology | platform_service_url('gitea', 'controller') }}"
+gitea_database_name: gitea
+gitea_database_user: gitea
+gitea_database_host: "{{ hostvars[playbook_execution_host_patterns.postgres[playbook_execution_env]].ansible_host }}"
+gitea_database_port: 5432
+gitea_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/database-password.txt
+gitea_oidc_client_id: gitea-oauth
+gitea_oidc_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/gitea-client-secret.txt
+gitea_oidc_discovery_url: "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration"
+gitea_oidc_internal_discovery_url: "http://{{ gitea_keycloak_service_topology.private_ip }}:8091/realms/lv3/.well-known/openid-configuration"
+gitea_oidc_required_claim_name: groups
+gitea_oidc_required_claim_value: lv3-platform-admins
+gitea_admin_username: ops-gitea
+gitea_admin_email: "{{ proxmox_notification_email }}"
+gitea_admin_password_remote_file: "{{ gitea_secret_dir }}/admin-password"
+gitea_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/admin-password.txt
+gitea_admin_token_remote_file: "{{ gitea_secret_dir }}/admin-token"
+gitea_admin_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/admin-token.txt
+gitea_runner_registration_token_remote_file: "{{ gitea_secret_dir }}/runner-registration-token"
+gitea_runner_registration_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/runner-registration-token.txt
+gitea_webhook_secret_remote_file: "{{ gitea_secret_dir }}/webhook-secret"
+gitea_webhook_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/webhook-secret.txt
+gitea_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea
+gitea_repo_org: ops
+gitea_repo_name: proxmox_florin_server
+gitea_prereceive_hook_template: "{{ gitea_site_dir }}/pre-receive.validation-hook"

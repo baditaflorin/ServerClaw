@@ -1,0 +1,36 @@
+---
+control_plane_recovery_store_root: /srv/control-plane-recovery
+control_plane_recovery_store_user: lv3-control-plane-backup
+control_plane_recovery_store_group: "{{ control_plane_recovery_store_user }}"
+control_plane_recovery_store_runtime_root: "{{ control_plane_recovery_store_root }}/runtime/docker-runtime-lv3"
+control_plane_recovery_store_controller_dir: "{{ control_plane_recovery_store_root }}/controller"
+control_plane_recovery_store_drill_dir: "{{ control_plane_recovery_store_root }}/drills"
+control_plane_recovery_store_tmp_dir: "{{ control_plane_recovery_store_root }}/tmp"
+control_plane_recovery_store_runtime_ssh_public_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/control-plane-recovery/ssh/docker-runtime-backup.id_ed25519.pub
+control_plane_recovery_store_restore_drill_script: /usr/local/libexec/lv3-control-plane-restore-drill.sh
+control_plane_recovery_store_restore_drill_service: lv3-control-plane-restore-drill.service
+control_plane_recovery_store_restore_drill_timer: lv3-control-plane-restore-drill.timer
+control_plane_recovery_restore_drill_on_calendar: "*-*-* 05:45:00"
+control_plane_recovery_store_restore_drill_state_file: "{{ control_plane_recovery_store_drill_dir }}/last-restore-drill.json"
+control_plane_recovery_store_required_step_ca_paths:
+  - opt/step-ca/home/config/ca.json
+  - opt/step-ca/home/certs/root_ca.crt
+  - opt/step-ca/secrets/ca-password.txt
+control_plane_recovery_store_required_openbao_paths:
+  - opt/openbao/config/openbao.hcl
+  - opt/openbao/tls/server.crt
+  - opt/openbao/policies/lv3-agent-controller.hcl
+control_plane_recovery_store_required_windmill_paths:
+  - opt/windmill/docker-compose.yml
+  - etc/lv3/windmill/superadmin-secret
+control_plane_recovery_store_required_mail_paths:
+  - opt/mail-platform/docker-compose.yml
+  - opt/mail-platform/stalwart/etc/config.toml
+  - etc/lv3/mail-platform/gateway-api-key
+control_plane_recovery_store_required_controller_bundle_paths:
+  - step-ca/step-ca/certs/root_ca.crt
+  - openbao/openbao/init.json
+  - windmill/windmill/superadmin-secret.txt
+  - mail-platform/mail-platform/brevo-api-key.txt
+  - proxmox-api/lv3-automation-primary.json
+  - tfa/proxmox-ops-pam-totp.json

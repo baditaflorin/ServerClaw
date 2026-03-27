@@ -1,0 +1,2 @@
+---
+proxmox_access_linux_access_permit_root_login: prohibit-password

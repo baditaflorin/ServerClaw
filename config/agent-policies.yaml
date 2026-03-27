@@ -1,0 +1,106 @@
+- agent_id: agent/observation-loop
+  description: Scheduled observation findings flowing into the ADR 0126 closure loop.
+  identity_class: service-agent
+  trust_tier: T2
+  read_surfaces:
+    - world_state
+    - maintenance_windows
+    - search
+    - ledger
+    - health_probes
+  autonomous_actions:
+    max_risk_class: LOW
+    allowed_workflow_tags:
+      - diagnostic
+      - auto_check
+    disallowed_workflow_ids: []
+    max_daily_autonomous_executions: 20
+  escalation:
+    on_risk_above: LOW
+    escalation_target: mattermost:#platform-findings
+    escalation_event: platform.findings.observation
+
+- agent_id: operator:lv3_cli
+  description: Interactive operator session acting through the lv3 CLI.
+  identity_class: operator-agent
+  trust_tier: T3
+  read_surfaces:
+    - world_state
+    - maintenance_windows
+    - search
+    - ledger
+    - health_probes
+    - netbox
+    - opentofu_state
+  autonomous_actions:
+    max_risk_class: MEDIUM
+    allowed_workflow_tags:
+      - diagnostic
+      - converge
+      - mutation
+      - remediation
+      - rotate_secret
+      - validation
+    disallowed_workflow_ids:
+      - converge-control-plane-recovery
+      - converge-guest-network-policy
+    max_daily_autonomous_executions: 100
+  escalation:
+    on_risk_above: MEDIUM
+    escalation_target: operator
+    escalation_event: platform.intent.rejected
+
+- agent_id: agent/triage-loop
+  description: Automated incident triage and discriminating auto-check execution.
+  identity_class: service-agent
+  trust_tier: T2
+  read_surfaces:
+    - world_state
+    - maintenance_windows
+    - search
+    - ledger
+    - loki_logs
+    - health_probes
+  autonomous_actions:
+    max_risk_class: LOW
+    allowed_workflow_tags:
+      - diagnostic
+      - auto_check
+      - validation
+    disallowed_workflow_ids:
+      - converge-guest-network-policy
+    max_daily_autonomous_executions: 20
+  escalation:
+    on_risk_above: LOW
+    escalation_target: mattermost:#platform-incidents
+    escalation_event: platform.intent.rejected
+
+- agent_id: agent/claude-code
+  description: Interactive Claude Code sessions acting on behalf of an operator.
+  identity_class: operator-agent
+  trust_tier: T3
+  read_surfaces:
+    - world_state
+    - maintenance_windows
+    - search
+    - ledger
+    - loki_logs
+    - health_probes
+    - netbox
+    - opentofu_state
+  autonomous_actions:
+    max_risk_class: MEDIUM
+    allowed_workflow_tags:
+      - diagnostic
+      - converge
+      - remediation
+      - rotate_secret
+      - validation
+    disallowed_workflow_ids:
+      - converge-control-plane-recovery
+      - converge-guest-network-policy
+    max_daily_autonomous_executions: 50
+  escalation:
+    on_risk_above: MEDIUM
+    escalation_target: operator
+    escalation_event: platform.intent.rejected

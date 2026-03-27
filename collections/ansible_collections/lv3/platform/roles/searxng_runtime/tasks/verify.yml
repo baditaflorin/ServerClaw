@@ -1,0 +1,30 @@
+---
+- name: Verify the SearXNG root page responds
+  ansible.builtin.uri:
+    url: "{{ searxng_runtime_internal_base_url }}"
+    method: GET
+    status_code: 200
+  register: searxng_runtime_verify_root
+  retries: 12
+  delay: 5
+  until: searxng_runtime_verify_root.status == 200
+  changed_when: false
+
+- name: Verify the SearXNG JSON search endpoint responds
+  ansible.builtin.uri:
+    url: "{{ searxng_runtime_internal_base_url }}/search?q={{ searxng_runtime_default_query | urlencode }}&format=json"
+    method: GET
+    status_code: 200
+    return_content: true
+  register: searxng_runtime_verify_query
+  retries: 6
+  delay: 5
+  until: searxng_runtime_verify_query.status == 200
+  changed_when: false
+
+- name: Assert SearXNG returns JSON search results
+  ansible.builtin.assert:
+    that:
+      - searxng_runtime_verify_query.json.results is defined
+      - searxng_runtime_verify_query.json.results is sequence
+    fail_msg: "SearXNG did not return a JSON search results list during verification."

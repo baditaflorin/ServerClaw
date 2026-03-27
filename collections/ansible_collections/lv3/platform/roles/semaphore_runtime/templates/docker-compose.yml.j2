@@ -1,0 +1,37 @@
+services:
+  openbao-agent:
+    image: {{ semaphore_openbao_agent_image }}
+    container_name: {{ semaphore_openbao_agent_container_name }}
+    user: "0:0"
+    environment:
+      BAO_SKIP_DROP_ROOT: "true"
+    command:
+      - agent
+      - -config=/openbao-agent/agent.hcl
+    network_mode: host
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -s {{ semaphore_env_file }}
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    volumes:
+      - {{ semaphore_openbao_agent_dir }}:/openbao-agent:ro
+      - {{ semaphore_env_file | dirname }}:{{ semaphore_env_file | dirname }}
+
+  semaphore:
+    image: {{ semaphore_image }}
+    container_name: {{ semaphore_container_name }}
+    restart: unless-stopped
+    env_file:
+      - {{ semaphore_env_file }}
+    depends_on:
+      openbao-agent:
+        condition: service_healthy
+    ports:
+      - "{{ semaphore_server_port }}:{{ semaphore_server_port }}"
+    volumes:
+      - {{ semaphore_data_dir }}:/var/lib/semaphore
+      - {{ semaphore_repo_checkout_host_path }}:{{ semaphore_repo_checkout_container_path }}

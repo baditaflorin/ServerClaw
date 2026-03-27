@@ -1,0 +1,81 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the managed Stalwart and gateway mail platform stack.
+    options:
+      mail_platform_domain:
+        type: str
+        required: true
+        description:
+          - Primary mail domain served by the platform.
+      mail_platform_hostname:
+        type: str
+        required: true
+        description:
+          - Public hostname for the mail platform entrypoint.
+      mail_platform_mailbox_localpart:
+        type: str
+        required: false
+        description:
+          - Localpart for the operator mailbox provisioned on the platform.
+      mail_platform_mailbox_address:
+        type: str
+        required: true
+        description:
+          - Full email address used for the managed operator mailbox.
+      mail_platform_site_dir:
+        type: path
+        required: true
+        description:
+          - Base directory for the mail platform stack.
+      mail_platform_stalwart_dir:
+        type: path
+        required: true
+        description:
+          - Base directory for the Stalwart runtime.
+      mail_platform_gateway_dir:
+        type: path
+        required: true
+        description:
+          - Base directory for the notification gateway runtime.
+      mail_platform_compose_file:
+        type: path
+        required: true
+        description:
+          - Compose file rendered for the mail platform stack.
+      mail_platform_stalwart_http_port:
+        type: int
+        required: false
+        description:
+          - HTTP port exposed by the Stalwart admin surface.
+      mail_platform_internal_submission_port:
+        type: int
+        required: false
+        description:
+          - Private SMTP submission port exposed only for local platform workloads on docker-runtime-lv3.
+      mail_platform_gateway_bind_port:
+        type: int
+        required: false
+        description:
+          - Local TCP port used by the gateway API.
+      mail_platform_secret_dir:
+        type: path
+        required: false
+        description:
+          - Directory that stores generated mail platform secrets.
+      mail_platform_brevo_api_key_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file containing the Brevo API key.
+      mail_platform_brevo_sender_email:
+        type: str
+        required: true
+        description:
+          - Default sender address used for Brevo fallback delivery.
+      mail_platform_notification_profiles:
+        type: list
+        elements: dict
+        required: true
+        description:
+          - Repo-managed sender profiles and policy metadata exposed by the gateway.

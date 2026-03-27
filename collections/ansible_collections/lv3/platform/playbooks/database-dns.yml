@@ -1,0 +1,17 @@
+---
+- name: Manage tailnet DNS name for PostgreSQL
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    database_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('postgres') }}"
+
+  roles:
+    - role: lv3.platform.hetzner_dns_record
+      vars:
+        hetzner_dns_record_zone_name: "{{ hetzner_dns_zone_name }}"
+        hetzner_dns_record_name: "{{ database_service_topology.dns.name }}"
+        hetzner_dns_record_type: "{{ database_service_topology.dns.type }}"
+        hetzner_dns_record_value: "{{ database_service_topology.dns.target }}"
+        hetzner_dns_record_ttl: "{{ database_service_topology.dns.ttl }}"

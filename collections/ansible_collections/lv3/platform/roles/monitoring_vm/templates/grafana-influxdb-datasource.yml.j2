@@ -1,0 +1,15 @@
+apiVersion: 1
+
+datasources:
+  - name: {{ monitoring_grafana_datasource_name }}
+    type: influxdb
+    access: proxy
+    url: {{ monitoring_influxdb_url }}
+    isDefault: true
+    jsonData:
+      version: Flux
+      organization: {{ monitoring_influxdb_org }}
+      defaultBucket: {{ monitoring_influxdb_bucket }}
+      tlsSkipVerify: false
+    secureJsonData:
+      token: {{ monitoring_grafana_datasource_token }}

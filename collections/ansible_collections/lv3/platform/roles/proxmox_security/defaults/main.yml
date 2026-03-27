@@ -1,0 +1,17 @@
+---
+proxmox_notification_email: baditaflorin@gmail.com
+proxmox_notification_author: Proxmox LV3
+proxmox_notification_endpoint_name: lv3-ops-email
+proxmox_notification_endpoint_comment: LV3 operations mailbox
+proxmox_notification_matcher_name: lv3-all-events
+proxmox_notification_matcher_comment: Send all Proxmox notifications to LV3 operations
+proxmox_acme_account_name: default
+proxmox_acme_contact_email: baditaflorin@gmail.com
+proxmox_acme_directory: https://acme-v02.api.letsencrypt.org/directory
+proxmox_acme_plugin_id: lv3-hetzner-dns
+proxmox_acme_domain: proxmox.lv3.org
+proxmox_acme_validation_delay: 30
+proxmox_security_manage_acme: true
+proxmox_tfa_description: Primary TOTP
+proxmox_management_allowed_tcp_ports: []
+proxmox_breakglass_ssh_port: 2222

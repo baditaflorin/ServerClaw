@@ -1,0 +1,57 @@
+services:
+{% if dozzle_runtime_is_hub %}
+  dozzle:
+    image: {{ dozzle_runtime_image }}
+    container_name: {{ dozzle_runtime_hub_container_name }}
+    restart: unless-stopped
+    network_mode: host
+    depends_on:
+      - dozzle-agent
+    command:
+      - "--addr"
+      - ":{{ dozzle_runtime_hub_port }}"
+{% if dozzle_runtime_disable_analytics %}
+      - "--no-analytics"
+{% endif %}
+      - "--release-check-mode"
+      - "{{ dozzle_runtime_release_check_mode }}"
+{% for remote_agent in dozzle_runtime_remote_agents %}
+      - "--remote-agent"
+      - "{{ remote_agent }}"
+{% endfor %}
+    healthcheck:
+      test:
+        - CMD
+        - /dozzle
+        - healthcheck
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+{% endif %}
+  dozzle-agent:
+    image: {{ dozzle_runtime_image }}
+    container_name: {{ dozzle_runtime_agent_container_name }}
+    restart: unless-stopped
+    network_mode: host
+    command:
+{% if dozzle_runtime_disable_analytics %}
+      - "--no-analytics"
+{% endif %}
+      - "--release-check-mode"
+      - "{{ dozzle_runtime_release_check_mode }}"
+      - "agent"
+      - "--agent-addr"
+      - ":{{ dozzle_runtime_agent_port }}"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    healthcheck:
+      test:
+        - CMD
+        - /dozzle
+        - healthcheck
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s

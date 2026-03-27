@@ -1,0 +1,22 @@
+---
+- name: Verify Alertmanager health endpoint responds
+  ansible.builtin.uri:
+    url: "{{ alertmanager_runtime_url }}/-/healthy"
+    method: GET
+    status_code: 200
+  register: alertmanager_runtime_health
+  retries: 20
+  delay: 3
+  until: alertmanager_runtime_health.status == 200
+  changed_when: false
+
+- name: Verify Alertmanager readiness endpoint responds
+  ansible.builtin.uri:
+    url: "{{ alertmanager_runtime_url }}/-/ready"
+    method: GET
+    status_code: 200
+  register: alertmanager_runtime_ready
+  retries: 20
+  delay: 3
+  until: alertmanager_runtime_ready.status == 200
+  changed_when: false

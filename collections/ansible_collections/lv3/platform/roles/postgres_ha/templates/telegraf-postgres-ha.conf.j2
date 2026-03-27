@@ -1,0 +1,18 @@
+[agent]
+  hostname = "{{ inventory_hostname }}"
+  omit_hostname = false
+
+[global_tags]
+  role = "{{ inventory_hostname }}"
+  service = "postgres-ha"
+
+[[outputs.influxdb_v2]]
+  urls = ["{{ guest_observability_influx_url }}"]
+  token = "{{ lookup('file', guest_observability_writer_token_local_file) | trim }}"
+  organization = "{{ monitoring_influxdb_org }}"
+  bucket = "{{ monitoring_influxdb_bucket }}"
+
+[[inputs.exec]]
+  commands = ["python3 {{ postgres_ha_metrics_script }}"]
+  timeout = "5s"
+  data_format = "influx"

@@ -1,0 +1,259 @@
+playbooks:
+  playbooks/api-gateway.yml:
+    playbook_id: api-gateway
+    mutation_scope: host
+    shared_surfaces:
+      - service:api-gateway
+      - config/api-gateway-catalog.json
+  playbooks/backup-vm.yml:
+    playbook_id: backup-vm
+    mutation_scope: platform
+    shared_surfaces:
+      - service:backup-vm
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/control-plane-recovery.yml:
+    playbook_id: control-plane-recovery
+    mutation_scope: platform
+    shared_surfaces:
+      - service:control-plane-recovery
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/database-dns.yml:
+    playbook_id: database-dns
+    mutation_scope: platform
+    shared_surfaces:
+      - service:database-dns
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/docker-runtime.yml:
+    playbook_id: docker-runtime
+    mutation_scope: host
+    shared_surfaces:
+      - service:docker-runtime
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/gitea.yml:
+    playbook_id: gitea
+    mutation_scope: platform
+    shared_surfaces:
+      - service:gitea
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/guest-access.yml:
+    playbook_id: guest-access
+    mutation_scope: platform
+    shared_surfaces:
+      - service:guest-access
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/guest-network-policy.yml:
+    playbook_id: guest-network-policy
+    mutation_scope: platform
+    shared_surfaces:
+      - service:guest-network-policy
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/headscale.yml:
+    playbook_id: headscale
+    mutation_scope: platform
+    shared_surfaces:
+      - service:headscale
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/homepage.yml:
+    playbook_id: homepage
+    mutation_scope: platform
+    shared_surfaces:
+      - service:homepage
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/keycloak.yml:
+    playbook_id: keycloak
+    mutation_scope: platform
+    shared_surfaces:
+      - service:keycloak
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/langfuse.yml:
+    playbook_id: langfuse
+    mutation_scope: platform
+    shared_surfaces:
+      - service:langfuse
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/mail-platform.yml:
+    playbook_id: mail-platform
+    mutation_scope: platform
+    shared_surfaces:
+      - service:mail-platform
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/mattermost.yml:
+    playbook_id: mattermost
+    mutation_scope: platform
+    shared_surfaces:
+      - service:mattermost
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/n8n.yml:
+    playbook_id: n8n
+    mutation_scope: platform
+    shared_surfaces:
+      - service:n8n
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/netbox.yml:
+    playbook_id: netbox
+    mutation_scope: platform
+    shared_surfaces:
+      - service:netbox
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/ntfy.yml:
+    playbook_id: ntfy
+    mutation_scope: host
+    shared_surfaces:
+      - service:ntfy
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/ntopng.yml:
+    playbook_id: ntopng
+    mutation_scope: host
+    shared_surfaces:
+      - service:ntopng
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/ops-portal.yml:
+    playbook_id: ops-portal
+    mutation_scope: host
+    shared_surfaces:
+      - service:ops-portal
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/open-webui.yml:
+    playbook_id: open-webui
+    mutation_scope: platform
+    shared_surfaces:
+      - service:open-webui
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/openbao.yml:
+    playbook_id: openbao
+    mutation_scope: platform
+    shared_surfaces:
+      - service:openbao
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/portainer.yml:
+    playbook_id: portainer
+    mutation_scope: platform
+    shared_surfaces:
+      - service:portainer
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/postgres-vm.yml:
+    playbook_id: postgres-vm
+    mutation_scope: platform
+    shared_surfaces:
+      - service:postgres-vm
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/provision-subdomain.yml:
+    playbook_id: provision-subdomain
+    mutation_scope: platform
+    shared_surfaces:
+      - service:subdomain-catalog
+      - config/subdomain-catalog.json
+  playbooks/public-edge.yml:
+    playbook_id: public-edge
+    mutation_scope: host
+    shared_surfaces:
+      - service:public-edge
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/proxmox-install.yml:
+    playbook_id: proxmox-install
+    mutation_scope: host
+    shared_surfaces:
+      - service:proxmox-install
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/rag-context.yml:
+    playbook_id: rag-context
+    mutation_scope: platform
+    shared_surfaces:
+      - service:rag-context
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/searxng.yml:
+    playbook_id: searxng
+    mutation_scope: platform
+    shared_surfaces:
+      - service:searxng
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/semaphore.yml:
+    playbook_id: semaphore
+    mutation_scope: platform
+    shared_surfaces:
+      - service:semaphore
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/step-ca.yml:
+    playbook_id: step-ca
+    mutation_scope: platform
+    shared_surfaces:
+      - service:step-ca
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/uptime-kuma.yml:
+    playbook_id: uptime-kuma
+    mutation_scope: platform
+    shared_surfaces:
+      - service:uptime-kuma
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/vaultwarden.yml:
+    playbook_id: vaultwarden
+    mutation_scope: platform
+    shared_surfaces:
+      - service:vaultwarden
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/windmill.yml:
+    playbook_id: windmill
+    mutation_scope: platform
+    shared_surfaces:
+      - service:windmill
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/build-artifact-cache.yml:
+    playbook_id: build-artifact-cache
+    mutation_scope: host
+    shared_surfaces:
+      - service:build-artifact-cache
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/docker-build-observability.yml:
+    playbook_id: docker-build-observability
+    mutation_scope: host
+    shared_surfaces:
+      - service:docker-build-observability
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/docker-runtime-observability.yml:
+    playbook_id: docker-runtime-observability
+    mutation_scope: host
+    shared_surfaces:
+      - service:docker-runtime-observability
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/grafana.yml:
+    playbook_id: grafana
+    mutation_scope: host
+    shared_surfaces:
+      - service:grafana
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/guest-log-shipping.yml:
+    playbook_id: guest-log-shipping
+    mutation_scope: platform
+    shared_surfaces:
+      - service:guest-log-shipping
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/nginx-observability.yml:
+    playbook_id: nginx-observability
+    mutation_scope: host
+    shared_surfaces:
+      - service:nginx-observability
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/proxmox-host-log-shipping.yml:
+    playbook_id: proxmox-host-log-shipping
+    mutation_scope: host
+    shared_surfaces:
+      - service:proxmox-host-log-shipping
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/services/proxmox-metrics.yml:
+    playbook_id: proxmox-metrics
+    mutation_scope: host
+    shared_surfaces:
+      - service:proxmox-metrics
+      - inventory/host_vars/proxmox_florin.yml
+  collections/ansible_collections/lv3/platform/playbooks/dozzle.yml:
+    playbook_id: dozzle
+    mutation_scope: platform
+    shared_surfaces:
+      - service:dozzle
+      - inventory/host_vars/proxmox_florin.yml
+  collections/ansible_collections/lv3/platform/playbooks/ollama.yml:
+    playbook_id: ollama
+    mutation_scope: host
+    shared_surfaces:
+      - service:ollama
+      - inventory/host_vars/proxmox_florin.yml

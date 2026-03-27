@@ -1,0 +1,54 @@
+---
+- name: Verify the Dozzle agent healthcheck succeeds
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ dozzle_runtime_agent_container_name }}"
+      - /dozzle
+      - healthcheck
+  register: dozzle_runtime_agent_healthcheck
+  changed_when: false
+
+- name: Verify the Dozzle hub healthcheck succeeds
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ dozzle_runtime_hub_port }}/healthcheck"
+    method: GET
+    status_code:
+      - 200
+    validate_certs: false
+    return_content: false
+    timeout: 30
+  register: dozzle_runtime_hub_healthcheck
+  retries: 12
+  delay: 2
+  until: dozzle_runtime_hub_healthcheck.status == 200
+  changed_when: false
+  when: dozzle_runtime_is_hub
+
+- name: Verify the local Dozzle agent is reachable from the hub container
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ dozzle_runtime_hub_container_name }}"
+      - /dozzle
+      - agent-test
+      - "127.0.0.1:{{ dozzle_runtime_agent_port }}"
+  register: dozzle_runtime_local_agent_test
+  changed_when: false
+  when: dozzle_runtime_is_hub
+
+- name: Verify the remote Dozzle agents are reachable from the hub container
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ dozzle_runtime_hub_container_name }}"
+      - /dozzle
+      - agent-test
+      - "{{ item }}"
+  loop: "{{ dozzle_runtime_remote_agents | reject('equalto', '127.0.0.1:' ~ (dozzle_runtime_agent_port | string)) | list }}"
+  register: dozzle_runtime_remote_agent_tests
+  changed_when: false
+  when: dozzle_runtime_is_hub

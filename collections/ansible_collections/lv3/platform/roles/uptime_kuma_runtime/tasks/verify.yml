@@ -1,0 +1,28 @@
+---
+- name: Verify the Uptime Kuma container is running
+  ansible.builtin.command:
+    argv:
+      - docker
+      - ps
+      - --filter
+      - "name={{ uptime_kuma_container_name }}"
+      - --filter
+      - status=running
+      - --format
+      - "{{ '{{' }}.Names{{ '}}' }}"
+  register: uptime_kuma_verify_running
+  changed_when: false
+
+- name: Assert the Uptime Kuma container is running
+  ansible.builtin.assert:
+    that:
+      - uptime_kuma_verify_running.stdout_lines | select('equalto', uptime_kuma_container_name) | list | length == 1
+    fail_msg: "Uptime Kuma container is not running."
+
+- name: Verify the Uptime Kuma web UI responds locally
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ uptime_kuma_port }}"
+    method: GET
+    status_code: 200
+  register: uptime_kuma_verify_http
+  changed_when: false

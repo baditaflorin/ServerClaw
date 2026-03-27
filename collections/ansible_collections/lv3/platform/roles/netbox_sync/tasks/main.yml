@@ -1,0 +1,93 @@
+---
+- name: Validate NetBox sync inputs
+  ansible.builtin.assert:
+    that:
+      - netbox_controller_url | length > 0
+      - netbox_superuser_api_token_local_file | length > 0
+      - netbox_sync_script_path | length > 0
+      - netbox_sync_host_vars_path | length > 0
+      - netbox_sync_stack_path | length > 0
+      - netbox_sync_lane_catalog_path | length > 0
+    fail_msg: "netbox_sync requires the controller URL, token file, and canonical repo data paths."
+
+- name: Ensure the NetBox sync script exists
+  ansible.builtin.stat:
+    path: "{{ netbox_sync_script_path }}"
+  register: netbox_sync_script_stat
+
+- name: Fail if the NetBox sync script is missing
+  ansible.builtin.fail:
+    msg: "{{ netbox_sync_script_path }} is missing from the current worktree."
+  when: not netbox_sync_script_stat.stat.exists
+
+- name: Ensure the NetBox API token exists locally
+  ansible.builtin.stat:
+    path: "{{ netbox_superuser_api_token_local_file }}"
+  register: netbox_sync_token_stat
+
+- name: Fail if the NetBox API token is missing locally
+  ansible.builtin.fail:
+    msg: "{{ netbox_superuser_api_token_local_file }} is missing on the control machine."
+  when: not netbox_sync_token_stat.stat.exists
+
+- name: Synchronize the canonical repository inventory into NetBox
+  ansible.builtin.command:
+    argv:
+      - uvx
+      - --from
+      - pyyaml
+      - python
+      - "{{ netbox_sync_script_path }}"
+      - --api-url
+      - "{{ netbox_controller_url }}"
+      - --api-token-file
+      - "{{ netbox_superuser_api_token_local_file }}"
+      - --host-vars
+      - "{{ netbox_sync_host_vars_path }}"
+      - --stack
+      - "{{ netbox_sync_stack_path }}"
+      - --lane-catalog
+      - "{{ netbox_sync_lane_catalog_path }}"
+  register: netbox_sync_apply
+  changed_when: "(netbox_sync_apply.stdout | from_json).changed | bool"
+
+- name: Record the NetBox sync summary
+  ansible.builtin.set_fact:
+    netbox_sync_apply_summary: "{{ netbox_sync_apply.stdout | from_json }}"
+
+- name: Assert the NetBox sync created the expected inventory surfaces
+  ansible.builtin.assert:
+    that:
+      - netbox_sync_apply_summary.site_name == 'LV3 Hetzner'
+      - netbox_sync_apply_summary.device_name == 'proxmox_florin'
+      - netbox_sync_apply_summary.vm_count >= 6
+      - netbox_sync_apply_summary.prefix_count >= 2
+      - netbox_sync_apply_summary.service_count >= 5
+    fail_msg: "NetBox sync completed, but the expected site, host, VM, prefix, or service inventory was not present."
+
+- name: Re-run the NetBox sync to verify idempotency
+  ansible.builtin.command:
+    argv:
+      - uvx
+      - --from
+      - pyyaml
+      - python
+      - "{{ netbox_sync_script_path }}"
+      - --api-url
+      - "{{ netbox_controller_url }}"
+      - --api-token-file
+      - "{{ netbox_superuser_api_token_local_file }}"
+      - --host-vars
+      - "{{ netbox_sync_host_vars_path }}"
+      - --stack
+      - "{{ netbox_sync_stack_path }}"
+      - --lane-catalog
+      - "{{ netbox_sync_lane_catalog_path }}"
+  register: netbox_sync_verify
+  changed_when: false
+
+- name: Assert the NetBox sync is idempotent
+  ansible.builtin.assert:
+    that:
+      - not ((netbox_sync_verify.stdout | from_json).changed | bool)
+    fail_msg: "The second NetBox sync run still reported changes, so the repo-to-NetBox contract is not idempotent yet."

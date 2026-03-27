@@ -1,0 +1,31 @@
+path "sys/health" {
+  capabilities = ["read"]
+}
+
+path "kv/data/agents/controller/*" {
+  capabilities = ["read"]
+}
+
+path "kv/metadata/agents/controller/*" {
+  capabilities = ["read", "list"]
+}
+
+path "transit/encrypt/controller-automation" {
+  capabilities = ["update"]
+}
+
+path "transit/decrypt/controller-automation" {
+  capabilities = ["update"]
+}
+
+path "transit/sign/controller-automation" {
+  capabilities = ["update"]
+}
+
+path "transit/verify/controller-automation" {
+  capabilities = ["update"]
+}
+
+path "database/creds/postgres-readonly" {
+  capabilities = ["read"]
+}

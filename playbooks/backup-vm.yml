@@ -1,0 +1,106 @@
+---
+- name: Ensure the backup VM is provisioned on the Proxmox host
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  tags:
+    - tier-1
+    - data
+    - service-backup-vm
+  vars:
+    proxmox_guests_active: >-
+      {{
+        proxmox_guests
+        | selectattr('vmid', 'equalto', backup_vm_vmid)
+        | list
+      }}
+
+  roles:
+    - role: lv3.platform.proxmox_guests
+      tags:
+        - guests
+        - backup-vm
+
+  post_tasks:
+    - name: Stop the backup VM from Proxmox after qm set changes
+      ansible.builtin.command: "qm stop {{ backup_vm_vmid }} --skiplock 1"
+      register: backup_vm_stop
+      failed_when: backup_vm_stop.rc not in [0, 255]
+      changed_when: true
+      tags:
+        - guests
+        - backup-vm
+
+    - name: Start the backup VM from Proxmox after the forced stop
+      ansible.builtin.command: "qm start {{ backup_vm_vmid }}"
+      register: backup_vm_start_after_stop
+      failed_when: backup_vm_start_after_stop.rc not in [0, 255]
+      changed_when: backup_vm_start_after_stop.rc == 0
+      tags:
+        - guests
+        - backup-vm
+
+- name: Configure the backup VM guest
+  hosts: "{{ 'backup_guests:&staging' if (env | default('production')) == 'staging' else 'backup_guests:&production' }}"
+  become: true
+  gather_facts: false
+  tags:
+    - tier-2
+    - data
+    - service-backup-vm
+  vars:
+    proxmox_guest_ssh_connection_mode: proxmox_host_jump
+
+  pre_tasks:
+    - name: Wait for the backup VM SSH service to be reachable
+      ansible.builtin.wait_for_connection:
+        timeout: 300
+
+    - name: Gather facts after SSH is ready
+      ansible.builtin.setup:
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.backup_vm
+      tags:
+        - backup-vm
+        - pbs
+
+- name: Configure Proxmox host backups against the PBS target
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  tags:
+    - tier-1
+    - data
+    - service-backup-vm
+  vars:
+    proxmox_backup_storage_enabled_override: true
+
+  roles:
+    - role: lv3.platform.proxmox_backups
+      tags:
+        - backups
+        - storage
+
+- name: Configure optional off-site backup of backup-lv3
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  tags:
+    - tier-1
+    - data
+    - service-backup-vm
+    - offsite-backups
+  vars:
+    proxmox_backup_storage: "{{ dr_offsite_backup_storage }}"
+    proxmox_backup_jobs: "{{ dr_offsite_backup_jobs }}"
+    proxmox_backup_jobs_marker_id: "{{ dr_offsite_backup_storage.id }}"
+
+  roles:
+    - role: lv3.platform.proxmox_backups
+      when: dr_offsite_backup_storage.enabled | bool
+      tags:
+        - backups
+        - storage
+        - offsite-backups

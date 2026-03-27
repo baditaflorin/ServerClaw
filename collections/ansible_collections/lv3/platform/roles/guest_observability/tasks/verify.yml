@@ -1,0 +1,12 @@
+---
+- name: Ensure Telegraf service is enabled and started for guest observability
+  ansible.builtin.systemd:
+    name: "{{ guest_observability_telegraf_service_name }}"
+    enabled: true
+    state: started
+
+- name: Verify Telegraf service is active for guest observability
+  ansible.builtin.command: "systemctl is-active {{ guest_observability_telegraf_service_name }}"
+  register: guest_observability_telegraf_status
+  changed_when: false
+  failed_when: guest_observability_telegraf_status.stdout | trim != "active"

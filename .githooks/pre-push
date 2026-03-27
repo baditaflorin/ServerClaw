@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+
+if [[ "${SKIP_REMOTE_GATE:-0}" == "1" ]]; then
+  echo "validation gate: skipping remote gate because SKIP_REMOTE_GATE=1"
+  python3 scripts/log_gate_bypass.py \
+    --bypass skip_remote_gate \
+    --source pre-push-hook \
+    --reason "${GATE_BYPASS_REASON:-unspecified}"
+  exit 0
+fi
+
+echo "validation gate: validating canonical NATS topics"
+uv run --with pyyaml python scripts/validate_nats_topics.py --validate
+
+echo "validation gate: running remote pre-push gate"
+scripts/remote_exec.sh pre-push-gate --local-fallback

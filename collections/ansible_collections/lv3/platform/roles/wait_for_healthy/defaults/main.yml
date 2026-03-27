@@ -1,0 +1,5 @@
+---
+health_expected_status: 200
+health_timeout_seconds: 60
+health_retry_delay: 5
+health_validate_certs: false

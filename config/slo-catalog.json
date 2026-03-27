@@ -1,0 +1,168 @@
+{
+  "$schema": "docs/schema/slo-catalog.schema.json",
+  "schema_version": "1.0.0",
+  "review_note": "Initial objectives should be recalibrated after 30 days of production telemetry.",
+  "slos": [
+    {
+      "id": "status-page-availability",
+      "service_id": "status_page",
+      "indicator": "availability",
+      "objective_percent": 99.9,
+      "window_days": 30,
+      "target_url": "https://status.lv3.org",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The public status page remains externally reachable as the last-resort platform signal."
+    },
+    {
+      "id": "grafana-availability",
+      "service_id": "grafana",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "https://grafana.lv3.org",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "Grafana remains reachable through the public LV3 edge."
+    },
+    {
+      "id": "dozzle-availability",
+      "service_id": "dozzle",
+      "indicator": "availability",
+      "objective_percent": 99.0,
+      "window_days": 30,
+      "target_url": "http://10.10.10.20:8089/healthcheck",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The Dozzle hub remains reachable on the private runtime network for real-time container log access."
+    },
+    {
+      "id": "gitea-availability",
+      "service_id": "gitea",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "http://10.10.10.20:3003/api/healthz",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The private Gitea runtime remains reachable for repository hosting, webhooks, and self-hosted CI orchestration."
+    },
+    {
+      "id": "homepage-availability",
+      "service_id": "homepage",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "https://home.lv3.org",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The unified operator dashboard remains reachable through the authenticated LV3 edge."
+    },
+    {
+      "id": "keycloak-availability",
+      "service_id": "keycloak",
+      "indicator": "availability",
+      "objective_percent": 99.7,
+      "window_days": 30,
+      "target_url": "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "Keycloak discovery remains reachable for operator and service authentication."
+    },
+    {
+      "id": "keycloak-latency",
+      "service_id": "keycloak",
+      "indicator": "latency",
+      "objective_percent": 95.0,
+      "window_days": 30,
+      "target_url": "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration",
+      "probe_module": "http_2xx_follow_redirects",
+      "latency_threshold_ms": 500,
+      "description": "Keycloak discovery responds in under 500ms for 95% of probes."
+    },
+    {
+      "id": "langfuse-availability",
+      "service_id": "langfuse",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "https://langfuse.lv3.org/api/public/health",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "Langfuse remains reachable through the public LV3 edge for trace ingestion and operator access."
+    },
+    {
+      "id": "uptime-kuma-availability",
+      "service_id": "uptime_kuma",
+      "indicator": "availability",
+      "objective_percent": 99.9,
+      "window_days": 30,
+      "target_url": "https://uptime.lv3.org",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "Uptime Kuma remains reachable through the public status surface."
+    },
+    {
+      "id": "nginx-edge-availability",
+      "service_id": "nginx_edge",
+      "indicator": "availability",
+      "objective_percent": 99.95,
+      "window_days": 30,
+      "target_url": "https://nginx.lv3.org",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The edge reverse proxy remains reachable for published services."
+    },
+    {
+      "id": "open-webui-availability",
+      "service_id": "open_webui",
+      "indicator": "availability",
+      "objective_percent": 99.0,
+      "window_days": 30,
+      "target_url": "http://10.10.10.20:8088",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "Open WebUI remains reachable on the private runtime network."
+    },
+    {
+      "id": "windmill-availability",
+      "service_id": "windmill",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "http://10.10.10.20:8000/api/version",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "Windmill API stays reachable for scheduled automation."
+    },
+    {
+      "id": "netbox-availability",
+      "service_id": "netbox",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "http://10.10.10.20:8082/login/",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "NetBox remains reachable for inventory, IPAM, and topology workflows."
+    },
+    {
+      "id": "vaultwarden-availability",
+      "service_id": "vaultwarden",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "https://vault.lv3.org/alive",
+      "probe_module": "http_2xx_insecure_tls",
+      "description": "Vaultwarden remains reachable on the private Tailscale operator path."
+    },
+    {
+      "id": "platform-context-api-availability",
+      "service_id": "platform_context_api",
+      "indicator": "availability",
+      "objective_percent": 99.0,
+      "window_days": 30,
+      "target_url": "http://10.10.10.20:8010/healthz",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The platform context API remains reachable for agent-assisted operator workflows."
+    },
+    {
+      "id": "semaphore-availability",
+      "service_id": "semaphore",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "http://10.10.10.20:3004/api/ping",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "Semaphore stays reachable for private Ansible job launches and API-based task inspection."
+    }
+  ]
+}

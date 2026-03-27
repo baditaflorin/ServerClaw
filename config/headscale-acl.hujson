@@ -1,0 +1,24 @@
+{
+  "autoApprovers": {
+    "routes": {
+      "10.10.10.0/24": ["ops@"],
+    }
+  },
+
+  "acls": [
+    {
+      "action": "accept",
+      "src": ["autogroup:member"],
+      "dst": ["autogroup:self:*", "10.10.10.0/24:*"]
+    }
+  ],
+
+  "ssh": [
+    {
+      "action": "accept",
+      "src": ["autogroup:member"],
+      "dst": ["autogroup:self"],
+      "users": ["root", "autogroup:nonroot"]
+    }
+  ]
+}

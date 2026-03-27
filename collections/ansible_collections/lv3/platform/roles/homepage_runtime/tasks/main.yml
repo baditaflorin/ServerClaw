@@ -1,0 +1,125 @@
+---
+- name: Validate Homepage runtime inputs
+  ansible.builtin.assert:
+    that:
+      - homepage_site_dir | length > 0
+      - homepage_config_dir | length > 0
+      - homepage_compose_file | length > 0
+      - homepage_container_name | length > 0
+      - homepage_image | length > 0
+      - homepage_bind_host | length > 0
+      - homepage_port | int > 0
+      - homepage_internal_url | length > 0
+      - homepage_public_url | length > 0
+      - homepage_public_host | length > 0
+      - homepage_allowed_hosts | length > 0
+      - homepage_config_generator_local_python | length > 0
+      - homepage_config_generator_local_script | length > 0
+    fail_msg: >-
+      homepage_runtime requires compose paths, generated config paths, a pinned image,
+      public and private URLs, and a local config generation script.
+
+- name: Ensure Homepage runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - "{{ homepage_site_dir }}"
+    - "{{ homepage_config_dir }}"
+
+- name: Create a temporary local directory for rendered Homepage config
+  ansible.builtin.tempfile:
+    state: directory
+    suffix: homepage-config
+  delegate_to: localhost
+  become: false
+  register: homepage_local_config_dir
+
+- name: Render Homepage config from canonical repo catalogs
+  ansible.builtin.command:
+    argv:
+      - "{{ homepage_config_generator_local_python }}"
+      - "{{ homepage_config_generator_local_script }}"
+      - --output-dir
+      - "{{ homepage_local_config_dir.path }}"
+      - --write
+  delegate_to: localhost
+  become: false
+  changed_when: false
+
+- name: Copy generated Homepage config to the guest
+  ansible.builtin.copy:
+    src: "{{ homepage_local_config_dir.path }}/{{ item }}"
+    dest: "{{ homepage_config_dir }}/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - bookmarks.yaml
+    - custom.css
+    - services.yaml
+    - settings.yaml
+    - widgets.yaml
+
+- name: Remove the temporary local Homepage config directory
+  ansible.builtin.file:
+    path: "{{ homepage_local_config_dir.path }}"
+    state: absent
+  delegate_to: localhost
+  become: false
+  changed_when: false
+
+- name: Render the Homepage compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ homepage_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the Homepage image
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ homepage_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ homepage_site_dir }}"
+  register: homepage_pull
+  changed_when: >-
+    'Pulling' in homepage_pull.stdout
+    or 'Downloaded newer image' in homepage_pull.stdout
+    or 'Pull complete' in homepage_pull.stdout
+
+- name: Start the Homepage stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ homepage_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ homepage_site_dir }}"
+  register: homepage_up
+  changed_when: >-
+    'Creating' in homepage_up.stdout
+    or 'Recreating' in homepage_up.stdout
+    or 'Starting' in homepage_up.stdout
+
+- name: Wait for Homepage to listen locally
+  ansible.builtin.wait_for:
+    host: "{{ homepage_bind_host }}"
+    port: "{{ homepage_port }}"
+    delay: 0
+    timeout: 180
+
+- name: Verify Homepage health probes
+  ansible.builtin.import_tasks: verify.yml

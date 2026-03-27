@@ -1,0 +1,23 @@
+---
+- name: Verify the Ollama version endpoint responds
+  ansible.builtin.uri:
+    url: "{{ ollama_runtime_base_url }}/api/version"
+    method: GET
+    status_code: 200
+  register: ollama_runtime_verify_version
+  retries: 12
+  delay: 5
+  until: ollama_runtime_verify_version.status == 200
+  changed_when: false
+
+- name: Verify the default Ollama model is available
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ ollama_runtime_container_name }}"
+      - ollama
+      - show
+      - "{{ ollama_runtime_default_model }}"
+  register: ollama_runtime_verify_model
+  changed_when: false

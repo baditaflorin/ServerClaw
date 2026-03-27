@@ -1,0 +1,18 @@
+services:
+  step-ca:
+    image: {{ step_ca_image }}
+    container_name: step-ca
+    restart: unless-stopped
+    environment:
+      STEPPATH: {{ step_ca_home }}
+    entrypoint:
+      - /usr/local/bin/step-ca
+    command:
+      - {{ step_ca_home }}/config/ca.json
+      - --password-file
+      - {{ step_ca_ca_password_file }}
+    ports:
+      - "{{ step_ca_api_port }}:{{ step_ca_api_port }}"
+    volumes:
+      - {{ step_ca_home }}:{{ step_ca_home }}
+      - {{ step_ca_password_dir }}:{{ step_ca_password_dir }}

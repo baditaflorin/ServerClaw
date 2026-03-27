@@ -1,0 +1,19 @@
+# Runbooks
+
+These pages are copied from `docs/runbooks/` and rewritten for the published documentation site.
+
+{% if featured %}
+## Starter Runbooks
+
+{% for item in featured -%}
+- [{{ item.title }}]({{ item.link }}) — `{{ item.sensitivity }}` / {{ item.portal_display }}
+{% endfor %}
+{% endif %}
+
+## Full Index
+
+| Runbook | Sensitivity | Portal View |
+| --- | --- | --- |
+{% for item in runbooks -%}
+| [{{ item.title }}]({{ item.link }}) | `{{ item.sensitivity }}` | {{ item.portal_display }} |
+{% endfor %}

@@ -1,0 +1,71 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the n8n runtime and bootstrap owner state.
+    options:
+      n8n_site_dir:
+        type: path
+        required: true
+      n8n_data_dir:
+        type: path
+        required: true
+      n8n_secret_dir:
+        type: path
+        required: true
+      n8n_compose_file:
+        type: path
+        required: true
+      n8n_env_file:
+        type: path
+        required: true
+      n8n_container_name:
+        type: str
+        required: true
+      n8n_port:
+        type: int
+        required: true
+      n8n_image:
+        type: str
+        required: true
+      n8n_internal_base_url:
+        type: str
+        required: true
+      n8n_public_base_url:
+        type: str
+        required: true
+      n8n_public_hostname:
+        type: str
+        required: true
+      n8n_database_host:
+        type: str
+        required: true
+      n8n_database_name:
+        type: str
+        required: true
+      n8n_database_user:
+        type: str
+        required: true
+      n8n_database_password_local_file:
+        type: path
+        required: true
+      n8n_owner_password_local_file:
+        type: path
+        required: true
+      n8n_encryption_key_local_file:
+        type: path
+        required: true
+      n8n_owner_password_remote_file:
+        type: path
+        required: true
+      n8n_encryption_key_remote_file:
+        type: path
+        required: true
+      n8n_owner_email:
+        type: str
+        required: true
+      n8n_owner_first_name:
+        type: str
+        required: true
+      n8n_owner_last_name:
+        type: str
+        required: true

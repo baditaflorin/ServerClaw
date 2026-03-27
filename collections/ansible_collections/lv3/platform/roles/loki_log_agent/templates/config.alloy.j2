@@ -1,0 +1,150 @@
+logging {
+  level  = "info"
+  format = "logfmt"
+}
+
+loki.write "lv3" {
+  endpoint {
+    url = "{{ loki_log_agent_loki_push_url }}"
+  }
+}
+
+{% if loki_log_agent_journal_enabled %}
+loki.relabel "journal" {
+  forward_to = [loki.write.lv3.receiver]
+
+  rule {
+    source_labels = ["__journal__systemd_unit"]
+    target_label  = "unit"
+  }
+
+  rule {
+    source_labels = ["__journal_priority_keyword"]
+    target_label  = "level"
+  }
+
+  rule {
+    source_labels = ["__journal_syslog_identifier"]
+    target_label  = "syslog_identifier"
+  }
+}
+
+loki.source.journal "system" {
+  forward_to    = [loki.write.lv3.receiver]
+  max_age       = "{{ loki_log_agent_journal_max_age }}"
+  relabel_rules = loki.relabel.journal.rules
+  labels = {
+    host        = "{{ loki_log_agent_hostname }}",
+    node_role   = "{{ loki_log_agent_role }}",
+    environment = "{{ loki_log_agent_environment }}",
+    lane        = "{{ loki_log_agent_lane }}",
+    source      = "journal",
+  }
+}
+{% endif %}
+{% if loki_log_agent_nginx_logs_enabled %}
+loki.source.file "nginx_access" {
+  targets = [
+{% for log_path in loki_log_agent_nginx_access_logs %}
+    {
+      __path__     = "{{ log_path }}",
+      host         = "{{ loki_log_agent_hostname }}",
+      node_role    = "{{ loki_log_agent_role }}",
+      service      = "nginx",
+      environment  = "{{ loki_log_agent_environment }}",
+      lane         = "{{ loki_log_agent_lane }}",
+      source       = "file",
+      log_type     = "access",
+    },
+{% endfor %}
+  ]
+  forward_to = [loki.write.lv3.receiver]
+  file_match {
+    enabled = true
+  }
+}
+
+loki.source.file "nginx_error" {
+  targets = [
+{% for log_path in loki_log_agent_nginx_error_logs %}
+    {
+      __path__     = "{{ log_path }}",
+      host         = "{{ loki_log_agent_hostname }}",
+      node_role    = "{{ loki_log_agent_role }}",
+      service      = "nginx",
+      environment  = "{{ loki_log_agent_environment }}",
+      lane         = "{{ loki_log_agent_lane }}",
+      source       = "file",
+      log_type     = "error",
+    },
+{% endfor %}
+  ]
+  forward_to = [loki.write.lv3.receiver]
+  file_match {
+    enabled = true
+  }
+}
+{% endif %}
+{% if loki_log_agent_docker_logs_enabled %}
+discovery.docker "containers" {
+  host             = "{{ loki_log_agent_docker_host }}"
+  refresh_interval = "{{ loki_log_agent_docker_refresh_interval }}"
+}
+
+loki.relabel "docker" {
+  forward_to = [loki.write.lv3.receiver]
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    replacement   = "$1"
+    target_label  = "container"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_project"]
+    target_label  = "compose_project"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    target_label  = "service"
+  }
+}
+
+loki.source.docker "containers" {
+  host          = "{{ loki_log_agent_docker_host }}"
+  targets       = discovery.docker.containers.targets
+  relabel_rules = loki.relabel.docker.rules
+  forward_to    = [loki.write.lv3.receiver]
+  labels = {
+    host        = "{{ loki_log_agent_hostname }}",
+    node_role   = "{{ loki_log_agent_role }}",
+    environment = "{{ loki_log_agent_environment }}",
+    lane        = "{{ loki_log_agent_lane }}",
+    source      = "docker",
+  }
+}
+{% endif %}
+{% for scrape in loki_log_agent_file_scrapes %}
+loki.source.file "{{ scrape.name }}" {
+  targets = [
+{% for log_path in scrape.paths %}
+    {
+      __path__     = "{{ log_path }}",
+      host         = "{{ loki_log_agent_hostname }}",
+      node_role    = "{{ loki_log_agent_role }}",
+      environment  = "{{ loki_log_agent_environment }}",
+      lane         = "{{ loki_log_agent_lane }}",
+{% for label_key, label_value in scrape.labels.items() %}
+      {{ label_key }} = "{{ label_value }}",
+{% endfor %}
+    },
+{% endfor %}
+  ]
+  forward_to = [loki.write.lv3.receiver]
+  file_match {
+    enabled = true
+  }
+}
+{% endfor %}

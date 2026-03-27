@@ -1,0 +1,52 @@
+---
+argument_specs:
+  main:
+    short_description: Install and configure the Headscale control plane on the Proxmox host.
+    options:
+      headscale_version:
+        type: str
+        required: false
+        default: 0.28.0
+      headscale_deb_url:
+        type: str
+        required: false
+      headscale_deb_file:
+        type: str
+        required: false
+      headscale_server_url:
+        type: str
+        required: false
+      headscale_listen_addr:
+        type: str
+        required: false
+      headscale_metrics_listen_addr:
+        type: str
+        required: false
+      headscale_grpc_listen_addr:
+        type: str
+        required: false
+      headscale_policy_source_file:
+        type: str
+        required: false
+      headscale_policy_file:
+        type: str
+        required: false
+      headscale_config_file:
+        type: str
+        required: false
+      headscale_state_dir:
+        type: str
+        required: false
+      headscale_database_path:
+        type: str
+        required: false
+      headscale_healthcheck_url:
+        type: str
+        required: false
+      headscale_subnet_router_node_name:
+        type: str
+        required: false
+      headscale_auto_approved_routes:
+        type: list
+        elements: str
+        required: false

@@ -1,0 +1,10 @@
+[Unit]
+Description=LV3 Tailscale TCP proxy service for {{ item.name }}
+After=network-online.target tailscaled.service
+Wants=network-online.target
+Requires=tailscaled.service
+
+[Service]
+ExecStart=/lib/systemd/systemd-socket-proxyd {{ item.upstream_host }}:{{ item.upstream_port }}
+DynamicUser=yes
+PrivateTmp=yes

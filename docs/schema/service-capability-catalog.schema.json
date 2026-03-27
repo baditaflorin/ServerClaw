@@ -1,0 +1,396 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/schema/service-capability-catalog.schema.json",
+  "title": "Service Capability Catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schema_version", "services"],
+  "properties": {
+    "$schema": {
+      "const": "docs/schema/service-capability-catalog.schema.json"
+    },
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "services": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "description",
+          "category",
+          "lifecycle_status",
+          "vm",
+          "exposure",
+          "environments"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]*$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "observability",
+              "security",
+              "automation",
+              "data",
+              "communication",
+              "access",
+              "infrastructure"
+            ]
+          },
+          "lifecycle_status": {
+            "type": "string",
+            "enum": ["active", "planned", "retiring"]
+          },
+          "vm": {
+            "type": "string",
+            "minLength": 1
+          },
+          "vmid": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "internal_url": {
+            "type": "string",
+            "minLength": 1
+          },
+          "public_url": {
+            "type": "string",
+            "minLength": 1
+          },
+          "subdomain": {
+            "type": "string",
+            "minLength": 1
+          },
+          "exposure": {
+            "type": "string",
+            "enum": [
+              "edge-static",
+              "edge-published",
+              "informational-only",
+              "private-only"
+            ]
+          },
+          "uptime_monitor_name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "adr": {
+            "type": "string",
+            "pattern": "^\\d{4}$"
+          },
+          "health_probe_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_]*$"
+          },
+          "image_catalog_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9_-]*$"
+            },
+            "uniqueItems": true
+          },
+          "secret_catalog_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9_]*$"
+            },
+            "uniqueItems": true
+          },
+          "degradation_modes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/degradationMode"
+            }
+          },
+          "runbook": {
+            "type": "string",
+            "minLength": 1
+          },
+          "dashboard_url": {
+            "type": "string",
+            "minLength": 1
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "environments": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["production"],
+            "properties": {
+              "production": {
+                "$ref": "#/$defs/environmentBinding"
+              },
+              "staging": {
+                "$ref": "#/$defs/environmentBinding"
+              }
+            }
+          },
+          "notes": {
+            "type": "string"
+          },
+          "redundancy": {
+            "$ref": "#/$defs/redundancyDeclaration"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "resourceTriplet": {
+      "type": "object",
+      "required": [
+        "ram_gb",
+        "vcpu",
+        "disk_gb"
+      ],
+      "properties": {
+        "ram_gb": {
+          "type": "number",
+          "minimum": 0
+        },
+        "vcpu": {
+          "type": "number",
+          "minimum": 0
+        },
+        "disk_gb": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "environmentBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "url"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["active", "planned"]
+        },
+        "url": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subdomain": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "degradationMode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dependency",
+        "dependency_type",
+        "degraded_behaviour",
+        "degraded_for_seconds_max",
+        "recovery_signal",
+        "tested_by"
+      ],
+      "properties": {
+        "dependency": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_-]*$"
+        },
+        "dependency_type": {
+          "type": "string",
+          "enum": ["hard", "soft", "optional"]
+        },
+        "degraded_behaviour": {
+          "type": "string",
+          "minLength": 1
+        },
+        "degraded_for_seconds_max": {
+          "type": "integer",
+          "minimum": -1
+        },
+        "recovery_signal": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tested_by": {
+          "type": "string",
+          "pattern": "^fault:[a-z0-9][a-z0-9-]*$"
+        }
+      }
+    },
+    "redundancyDeclaration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tier",
+        "rto_target",
+        "rpo_target",
+        "backup_source",
+        "standby_location",
+        "failover_trigger",
+        "failback_method"
+      ],
+      "properties": {
+        "tier": {
+          "type": "string",
+          "enum": ["R0", "R1", "R2", "R3"]
+        },
+        "rto_target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rpo_target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "backup_source": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_-]*$"
+        },
+        "standby_location": {
+          "type": "string",
+          "minLength": 1
+        },
+        "failover_trigger": {
+          "type": "string",
+          "minLength": 1
+        },
+        "failback_method": {
+          "type": "string",
+          "minLength": 1
+        },
+        "standby": {
+          "$ref": "#/$defs/standbyDeclaration"
+        }
+      }
+    },
+    "standbyDeclaration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "vm",
+        "reservation",
+        "placement",
+        "failure_domain_honesty"
+      ],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["warm", "passive", "active"]
+        },
+        "vm": {
+          "type": "string",
+          "minLength": 1
+        },
+        "vmid": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "reservation": {
+          "$ref": "#/$defs/standbyReservation"
+        },
+        "placement": {
+          "$ref": "#/$defs/standbyPlacement"
+        },
+        "failure_domain_honesty": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "standbyReservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resources",
+        "storage_class",
+        "required_network_attachment"
+      ],
+      "properties": {
+        "resources": {
+          "$ref": "#/$defs/resourceTriplet"
+        },
+        "storage_class": {
+          "type": "string",
+          "minLength": 1
+        },
+        "required_network_attachment": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "standbyPlacement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "primary_compose_project",
+        "standby_compose_project",
+        "primary_namespace",
+        "standby_namespace",
+        "primary_data_paths",
+        "standby_data_paths"
+      ],
+      "properties": {
+        "primary_compose_project": {
+          "type": "string",
+          "minLength": 1
+        },
+        "standby_compose_project": {
+          "type": "string",
+          "minLength": 1
+        },
+        "primary_namespace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "standby_namespace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "primary_data_paths": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "standby_data_paths": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

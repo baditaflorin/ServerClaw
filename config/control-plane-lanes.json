@@ -1,0 +1,525 @@
+{
+  "schema_version": "1.0.0",
+  "lanes": {
+    "command": {
+      "title": "Command Lane",
+      "purpose": "Shell-level administration and repair over governed SSH paths.",
+      "transport": "ssh",
+      "network_paths": [
+        "tailscale",
+        "lv3_private"
+      ],
+      "identity_boundary": "Named human or agent identities land on ops and escalate with explicit sudo when needed.",
+      "steady_state_rules": [
+        "Use SSH only for command-lane access.",
+        "Prefer Tailscale or the LV3 private network over public IPv4 for steady-state administration.",
+        "Do not use routine direct root login."
+      ],
+      "current_surfaces": [
+        {
+          "id": "proxmox-host-ops-ssh",
+          "kind": "ssh_endpoint",
+          "endpoint": "ops@100.64.0.1",
+          "auth": "Named SSH key for ops plus sudo on the Proxmox host.",
+          "owner_refs": [
+            "proxmox_florin"
+          ],
+          "workflow_refs": [
+            "install-proxmox",
+            "configure-network",
+            "configure-ingress",
+            "configure-tailscale",
+            "converge-headscale",
+            "provision-guests",
+            "harden-access",
+            "harden-security",
+            "provision-api-access",
+            "configure-backups",
+            "converge-rag-context"
+          ],
+          "notes": "This is the steady-state host administration path for operator and automation access."
+        },
+        {
+          "id": "guest-ops-ssh-via-proxmox-jump",
+          "kind": "ssh_endpoint",
+          "endpoint": "ops@10.10.10.0/24 via ProxyJump through ops@100.64.0.1",
+          "auth": "Named SSH key for ops on guests, reached through the approved Proxmox jump path.",
+          "owner_refs": [
+            "nginx-lv3",
+            "docker-runtime-lv3",
+            "docker-build-lv3",
+            "monitoring-lv3",
+            "postgres-lv3",
+            "backup-lv3"
+          ],
+          "workflow_refs": [
+            "configure-edge-publication",
+            "harden-guest-access",
+            "converge-monitoring",
+            "converge-docker-runtime",
+            "converge-homepage",
+            "converge-postgres-vm",
+            "converge-mail-platform",
+            "converge-rag-context",
+            "converge-portainer",
+            "converge-vaultwarden",
+            "deploy-uptime-kuma",
+            "configure-backup-vm",
+            "database-dns"
+          ],
+          "notes": "This remains the current governed guest path until the full Tailscale subnet-route operating model is completed."
+        }
+      ]
+    },
+    "api": {
+      "title": "API Lane",
+      "purpose": "Private-first management APIs and automation endpoints.",
+      "transport": "https",
+      "network_paths": [
+        "private_first",
+        "operator_private"
+      ],
+      "identity_boundary": "Use scoped tokens, API keys, or future client certificates instead of shared administrative passwords.",
+      "steady_state_rules": [
+        "Default new APIs to internal-only or operator-only publication.",
+        "Use machine-scoped credentials rather than shared interactive accounts.",
+        "Document each sanctioned control-plane API endpoint in this catalog."
+      ],
+      "current_surfaces": [
+        {
+          "id": "platform-api-gateway",
+          "kind": "service_api",
+          "endpoint": "https://api.lv3.org/v1",
+          "auth": "Keycloak-issued bearer tokens validated against the LV3 realm JWKS by the gateway before request forwarding.",
+          "service_refs": [
+            "api_gateway"
+          ],
+          "workflow_refs": [],
+          "notes": "This is the single authenticated HTTP front door for approved platform APIs and the native /v1/platform endpoints."
+        },
+        {
+          "id": "proxmox-management-api",
+          "kind": "management_api",
+          "endpoint": "https://100.64.0.1:8006/api2/json",
+          "auth": "lv3-automation@pve token with privilege separation for automation; ops@pam for routine operator administration.",
+          "service_refs": [
+            "proxmox_ui"
+          ],
+          "workflow_refs": [
+            "provision-api-access"
+          ],
+          "notes": "The Proxmox management API is operator-only and private-first even though proxmox.lv3.org exists as an informational hostname."
+        },
+        {
+          "id": "step-ca-api",
+          "kind": "service_api",
+          "endpoint": "https://100.64.0.1:9443",
+          "auth": "step-ca JWK provisioners with controller-local password material and mirrored root trust bootstrap artifacts under .local/step-ca.",
+          "service_refs": [
+            "step_ca"
+          ],
+          "workflow_refs": [
+            "converge-step-ca"
+          ],
+          "notes": "This is the private internal CA endpoint for SSH certificates and internal X.509 issuance."
+        },
+        {
+          "id": "openbao-api",
+          "kind": "service_api",
+          "endpoint": "https://100.64.0.1:8200",
+          "auth": "OpenBao userpass or AppRole credentials plus required step-ca-issued client certificates for the external mTLS listener.",
+          "service_refs": [
+            "openbao"
+          ],
+          "workflow_refs": [
+            "converge-openbao"
+          ],
+          "notes": "This is the private secret-authority API published through the Proxmox host Tailscale path and protected by internal mTLS."
+        },
+        {
+          "id": "windmill-api",
+          "kind": "service_api",
+          "endpoint": "http://100.64.0.1:8005/api",
+          "auth": "Windmill scoped bearer tokens and the controller-local superadmin bootstrap secret for initial verification only.",
+          "service_refs": [
+            "windmill"
+          ],
+          "workflow_refs": [
+            "converge-windmill"
+          ],
+          "notes": "This is the operator-facing workflow runtime API exposed only through the Proxmox host Tailscale proxy."
+        },
+        {
+          "id": "netbox-api",
+          "kind": "service_api",
+          "endpoint": "http://100.64.0.1:8004/api/",
+          "auth": "Bootstrap NetBox API token mirrored under .local/netbox/api-token.txt until brokered identity is introduced.",
+          "service_refs": [
+            "netbox"
+          ],
+          "workflow_refs": [
+            "converge-netbox"
+          ],
+          "notes": "This is the private Tailscale-published NetBox API used for repo-managed synchronization and operator inventory browsing."
+        },
+        {
+          "id": "portainer-api",
+          "kind": "service_api",
+          "endpoint": "https://100.64.0.1:9444",
+          "auth": "Controller-local Portainer bootstrap auth under .local/portainer; governed machine actions flow through scripts/portainer_tool.py rather than broad Docker shell access.",
+          "service_refs": [
+            "portainer"
+          ],
+          "workflow_refs": [
+            "converge-portainer",
+            "portainer-manage"
+          ],
+          "notes": "This is the private Docker runtime operations console and API published only through the Proxmox host Tailscale proxy."
+        },
+        {
+          "id": "vaultwarden-api",
+          "kind": "service_api",
+          "endpoint": "https://vault.lv3.org",
+          "auth": "Named Vaultwarden operator accounts for routine use; the controller-local admin token is reserved for bounded bootstrap and recovery-safe automation.",
+          "service_refs": [
+            "vaultwarden"
+          ],
+          "workflow_refs": [
+            "converge-vaultwarden"
+          ],
+          "notes": "This is the private shared credential-vault API and web surface exposed only through the Proxmox host Tailscale path with an internal CA certificate."
+        },
+        {
+          "id": "mail-gateway-api",
+          "kind": "service_api",
+          "endpoint": "http://10.10.10.20:8081",
+          "auth": "Private X-API-Key stored under .local/mail-platform on the controller.",
+          "service_refs": [
+            "mail_platform"
+          ],
+          "workflow_refs": [
+            "converge-mail-platform"
+          ],
+          "notes": "This is the sanctioned internal mail automation API for sends plus mailbox and domain CRUD."
+        },
+        {
+          "id": "mattermost-operator-api",
+          "kind": "service_api",
+          "endpoint": "http://100.64.0.1:8066/api/v4",
+          "auth": "Private Mattermost admin login today; future operator SSO integration will follow ADR 0056.",
+          "service_refs": [
+            "mattermost"
+          ],
+          "workflow_refs": [
+            "converge-mattermost"
+          ],
+          "notes": "This is the private ChatOps and operator-agent collaboration API surface exposed through the Proxmox host Tailscale proxy."
+        },
+        {
+          "id": "headscale-control-plane",
+          "kind": "service_api",
+          "endpoint": "https://headscale.lv3.org",
+          "auth": "Headscale node registration keys for mesh clients and controller-local API keys for administrative automation.",
+          "service_refs": [
+            "headscale"
+          ],
+          "workflow_refs": [
+            "converge-headscale"
+          ],
+          "notes": "This is the repo-managed mesh control plane. Node-to-node traffic remains WireGuard peer-to-peer or DERP-relayed after registration."
+        },
+        {
+          "id": "langfuse-observability-api",
+          "kind": "service_api",
+          "endpoint": "https://langfuse.lv3.org/api/public",
+          "auth": "Project-scoped Langfuse public and secret API keys mirrored under .local/langfuse plus Keycloak-backed browser sign-in for interactive operator use.",
+          "service_refs": [
+            "langfuse"
+          ],
+          "workflow_refs": [
+            "converge-langfuse"
+          ],
+          "notes": "This is the sanctioned agent-observability API surface for trace ingestion and read-back verification."
+        },
+        {
+          "id": "open-webui-operator-workbench",
+          "kind": "service_api",
+          "endpoint": "http://100.64.0.1:8008",
+          "auth": "Repo-managed bootstrap admin password today; future OIDC through Keycloak once ADR 0056 is live.",
+          "service_refs": [
+            "open_webui"
+          ],
+          "workflow_refs": [
+            "converge-open-webui"
+          ],
+          "notes": "This is the private operator-and-agent workbench. Keep model connectors repo-authoritative and do not publish it through the public edge."
+        },
+        {
+          "id": "ollama-local-inference-api",
+          "kind": "service_api",
+          "endpoint": "http://10.10.10.20:11434",
+          "auth": "Private network reachability only; the service is intentionally not published on the public edge and is consumed by repo-managed local callers such as Open WebUI and the goal compiler.",
+          "service_refs": [
+            "ollama"
+          ],
+          "workflow_refs": [
+            "converge-ollama"
+          ],
+          "notes": "This is the sanctioned private local-inference API on docker-runtime-lv3. Access remains on the LV3 internal network or through governed SSH verification paths."
+        },
+        {
+          "id": "platform-context-api",
+          "kind": "service_api",
+          "endpoint": "http://100.64.0.1:8010",
+          "auth": "Controller-local bearer token mirrored under .local/platform-context/api-token.txt and used by the governed retrieval and query tooling.",
+          "service_refs": [
+            "platform_context_api"
+          ],
+          "workflow_refs": [
+            "converge-rag-context"
+          ],
+          "notes": "This is the private tool and retrieval API that backs the repo-grounded platform context surface for Open WebUI and other approved agent runtimes."
+        }
+      ]
+    },
+    "message": {
+      "title": "Message Lane",
+      "purpose": "Outbound transactional mail and operator notifications routed through governed mail identities.",
+      "transport": "authenticated_submission",
+      "network_paths": [
+        "lv3_private",
+        "published_mail_ingress"
+      ],
+      "identity_boundary": "Use dedicated sender profiles and notification endpoints instead of one shared global SMTP credential.",
+      "steady_state_rules": [
+        "Submit platform mail through the internal mail platform rather than arbitrary external SMTP relays.",
+        "Keep operator notifications and automation-generated mail attributable to distinct senders.",
+        "Treat notification fan-out as part of the documented mail workflow."
+      ],
+      "current_surfaces": [
+        {
+          "id": "mail-platform-submission",
+          "kind": "mail_submission",
+          "endpoint": "10.10.10.20:1587",
+          "auth": "Managed mailbox or service-specific credentials handled by the internal mail platform.",
+          "service_refs": [
+            "mail_platform"
+          ],
+          "workflow_refs": [
+            "converge-mail-platform"
+          ],
+          "notes": "Stalwart on docker-runtime-lv3 exposes a private submission relay on port 1587 for local platform workloads while public client submission remains on port 587."
+        },
+        {
+          "id": "proxmox-host-operator-notifications",
+          "kind": "notification_profile",
+          "endpoint": "lv3-ops-email sendmail endpoint with catch-all matcher to baditaflorin@gmail.com",
+          "auth": "Repo-managed Proxmox notification target and matcher configuration.",
+          "owner_refs": [
+            "proxmox_florin"
+          ],
+          "workflow_refs": [
+            "harden-security"
+          ],
+          "notes": "Host-originated operator notifications already follow a named endpoint and matcher instead of ad hoc shell mailers."
+        }
+      ]
+    },
+    "event": {
+      "title": "Event Lane",
+      "purpose": "Signed or explicitly trusted webhook-style callbacks for asynchronous control-plane events.",
+      "transport": "mixed",
+      "network_paths": [
+        "lv3_private",
+        "explicit_publication"
+      ],
+      "identity_boundary": "Use scoped webhook secrets, signatures, or future client certificates for non-interactive callbacks.",
+      "steady_state_rules": [
+        "Event sinks must be documented and intentionally reachable.",
+        "Do not treat arbitrary callback URLs as implicit control paths.",
+        "Capture event endpoints that feed automation, telemetry, or approval systems."
+      ],
+      "current_surfaces": [
+        {
+          "id": "stalwart-mail-events",
+          "kind": "webhook",
+          "endpoint": "http://10.10.10.20:8081/webhooks/stalwart",
+          "auth": "Private internal callback from Stalwart to the mail gateway inside the mail platform stack.",
+          "service_refs": [
+            "mail_platform"
+          ],
+          "workflow_refs": [
+            "converge-mail-platform"
+          ],
+          "notes": "Mail delivery, auth, and queue events already flow through a defined webhook sink for telemetry and downstream automation."
+        },
+        {
+          "id": "mattermost-incoming-webhooks",
+          "kind": "webhook",
+          "endpoint": "http://10.10.10.20:8065/hooks/<managed-id>",
+          "auth": "Opaque incoming webhook ids generated by the repo-managed Mattermost bootstrap and mirrored locally under .local/mattermost/incoming-webhooks.json.",
+          "service_refs": [
+            "mattermost"
+          ],
+          "workflow_refs": [
+            "converge-mattermost"
+          ],
+          "notes": "These private-only webhooks route Grafana alerts, workflow notifications, approvals, and operator-agent handoffs into the managed Mattermost channels."
+        },
+        {
+          "id": "platform-finding-subjects",
+          "kind": "event_subject",
+          "endpoint": "platform.findings.*",
+          "auth": "Internal NATS publication from ADR 0071 through the private docker-runtime-lv3 event bus runtime.",
+          "owner_refs": [
+            "proxmox_florin"
+          ],
+          "workflow_refs": [
+            "check-platform-drift",
+            "scheduler-watchdog-loop"
+          ],
+          "notes": "The canonical findings route now covers observation-loop findings and watchdog escalation findings so consumers subscribe to one stable findings namespace instead of per-producer topics."
+        },
+        {
+          "id": "platform-watchdog-subjects",
+          "kind": "event_subject",
+          "endpoint": "platform.watchdog.*",
+          "auth": "Internal NATS publication from ADR 0172 through the private docker-runtime-lv3 event bus runtime.",
+          "owner_refs": [
+            "proxmox_florin"
+          ],
+          "workflow_refs": [
+            "scheduler-watchdog-loop"
+          ],
+          "notes": "The watchdog publishes its liveness heartbeat and stale-job abort events on the canonical platform.watchdog.* namespace."
+        },
+        {
+          "id": "platform-api-request-events",
+          "kind": "event_subject",
+          "endpoint": "platform.api.request",
+          "auth": "Internal NATS publication from ADR 0092 through the private docker-runtime-lv3 event bus runtime.",
+          "service_refs": [
+            "api_gateway"
+          ],
+          "workflow_refs": [],
+          "notes": "The API gateway emits one canonical request event per completed HTTP request so downstream analytics and audit consumers can subscribe without scraping HTTP logs."
+        },
+        {
+          "id": "platform-drift-subjects",
+          "kind": "event_subject",
+          "endpoint": "platform.drift.*",
+          "auth": "Internal NATS publication from ADR 0091 through the private docker-runtime-lv3 event bus runtime.",
+          "owner_refs": [
+            "proxmox_florin"
+          ],
+          "workflow_refs": [
+            "continuous-drift-detection"
+          ],
+          "notes": "Each scheduled drift run publishes per-record warn, critical, and unreachable events so portal, alerting, and future reconciliation workflows can subscribe to platform state divergence directly."
+        },
+        {
+          "id": "platform-security-subjects",
+          "kind": "event_subject",
+          "endpoint": "platform.security.*",
+          "auth": "Internal NATS publication from ADR 0102 and ADR 0142 through the private docker-runtime-lv3 event bus runtime.",
+          "owner_refs": [
+            "proxmox_florin"
+          ],
+          "workflow_refs": [
+            "security-posture-scan",
+            "weekly-security-scan"
+          ],
+          "notes": "Scheduled security workflows publish summary events plus high or critical findings so operators and future automation can react without polling the receipt directories."
+        },
+        {
+          "id": "maintenance-window-subjects",
+          "kind": "event_subject",
+          "endpoint": "platform.maintenance.*",
+          "auth": "Internal NATS publication for ADR 0080 platform.maintenance.opened, platform.maintenance.closed, and platform.maintenance.force_closed events through the private docker-runtime-lv3 event bus runtime.",
+          "owner_refs": [
+            "proxmox_florin"
+          ],
+          "workflow_refs": [
+            "open-maintenance-window",
+            "close-maintenance-window"
+          ],
+          "notes": "Maintenance-window state changes are published on named internal subjects so operators and future automation can see when alert suppression begins or ends."
+        },
+        {
+          "id": "platform-backup-subjects",
+          "kind": "event_subject",
+          "endpoint": "platform.backup.restore-verification.*",
+          "auth": "Internal NATS publication from ADR 0099 through the private docker-runtime-lv3 event bus runtime.",
+          "owner_refs": [
+            "proxmox_florin"
+          ],
+          "workflow_refs": [
+            "restore-verification"
+          ],
+          "notes": "Restore verification emits canonical completion and failure subjects so backup policy consumers can react without polling receipts."
+        },
+        {
+          "id": "platform-world-state-events",
+          "kind": "event_subject",
+          "endpoint": "platform.world_state.refreshed",
+          "auth": "Internal NATS publication from ADR 0113 through the private docker-runtime-lv3 event bus runtime.",
+          "owner_refs": [
+            "proxmox_florin"
+          ],
+          "workflow_refs": [],
+          "notes": "Each successful world-state materialization refresh emits one canonical platform.world_state.refreshed event for downstream graph, health, and automation consumers."
+        },
+        {
+          "id": "platform-ledger-events",
+          "kind": "event_subject",
+          "endpoint": "platform.ledger.event_written",
+          "auth": "Internal NATS publication from ADR 0115 through the private docker-runtime-lv3 event bus runtime.",
+          "owner_refs": [
+            "proxmox_florin"
+          ],
+          "workflow_refs": [],
+          "notes": "Each committed mutation-ledger row fans out on the canonical platform.ledger.event_written subject for downstream mirrors and reactive consumers."
+        },
+        {
+          "id": "platform-agent-events",
+          "kind": "event_subject",
+          "endpoint": "platform.agent.*",
+          "auth": "Internal NATS publication from ADR 0161 through the private docker-runtime-lv3 event bus runtime.",
+          "owner_refs": [
+            "proxmox_florin"
+          ],
+          "workflow_refs": [
+            "converge-windmill"
+          ],
+          "notes": "Agent coordination publishers emit canonical platform.agent.* subjects so operators and future automation can observe live multi-agent session state without scraping worker-local state."
+        },
+        {
+          "id": "platform-execution-events",
+          "kind": "event_subject",
+          "endpoint": "platform.execution.*",
+          "auth": "Internal NATS publication from ADR 0119 and ADR 0162 through the private docker-runtime-lv3 event bus runtime.",
+          "owner_refs": [
+            "proxmox_florin"
+          ],
+          "workflow_refs": [
+            "converge-windmill"
+          ],
+          "notes": "Execution lifecycle publishers emit canonical execution subjects, including deadlock detection and livelock findings, so operators and future schedulers can react without polling worker state files."
+        },
+        {
+          "id": "platform-config-merge-events",
+          "kind": "event_subject",
+          "endpoint": "platform.config.*",
+          "auth": "Internal NATS publication from ADR 0158 through the private docker-runtime-lv3 Windmill worker runtime.",
+          "owner_refs": [
+            "proxmox_florin"
+          ],
+          "workflow_refs": [
+            "merge-config-changes"
+          ],
+          "notes": "Each merge-eligible config change publishes merged or conflict events so downstream consumers can react without polling config_change_staging directly."
+        }
+      ]
+    }
+  }
+}

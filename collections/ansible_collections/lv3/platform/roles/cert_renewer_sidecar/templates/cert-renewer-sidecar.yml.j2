@@ -1,0 +1,12 @@
+{{ cert_renewer_sidecar_name }}:
+  image: {{ cert_renewer_sidecar_image }}
+  restart: {{ cert_renewer_sidecar_restart }}
+  command:
+    - /bin/sh
+    - -ec
+    - >-
+      exec step ca renew --daemon
+      --ca-url {{ cert_renewer_sidecar_ca_url }}
+      --root {{ cert_renewer_sidecar_root_file }}
+      {% if cert_renewer_sidecar_exec_command | length > 0 %}--exec '{{ cert_renewer_sidecar_exec_command }}' {% endif %}
+      {{ cert_renewer_sidecar_certificate_file }} {{ cert_renewer_sidecar_key_file }}

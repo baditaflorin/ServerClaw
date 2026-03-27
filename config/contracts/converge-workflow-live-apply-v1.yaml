@@ -1,0 +1,43 @@
+schema_version: 1.0.0
+contract_id: converge-workflow-live-apply-v1
+owner: adr-0175-cross-workstream-interface-contracts
+version: 1.0.0
+compatibility: backward_compatible_minor
+producer_paths:
+  - Makefile
+  - config/workflow-catalog.json
+  - config/command-catalog.json
+consumer_paths:
+  - scripts/preflight_controller_local.py
+  - scripts/promotion_pipeline.py
+  - scripts/live_apply_receipts.py
+  - scripts/lv3_cli.py
+input_schema:
+  type: workflow_contract
+  required_fields:
+    - description
+    - lifecycle_status
+    - preferred_entrypoint
+    - preflight
+    - validation_targets
+    - live_impact
+    - owner_runbook
+    - implementation_refs
+output_schema:
+  type: live_apply_execution_surface
+  required_fields:
+    - workflow_id
+    - command_id
+    - playbook_ref
+    - receipt_required
+validator: validate_converge_workflow_contract
+fixtures:
+  - tests/test_interface_contracts.py::test_converge_workflow_contract_validates
+metadata:
+  workflow_prefix: converge-
+  required_validation_target: validate
+  receipt_required: true
+  generic_live_apply_targets:
+    - live-apply-group
+    - live-apply-service
+    - live-apply-site

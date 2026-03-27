@@ -1,0 +1,68 @@
+---
+semaphore_site_dir: /opt/semaphore
+semaphore_data_dir: "{{ semaphore_site_dir }}/data"
+semaphore_secret_dir: /etc/lv3/semaphore
+semaphore_compose_file: "{{ semaphore_site_dir }}/docker-compose.yml"
+semaphore_env_file: "{{ compose_runtime_secret_root }}/semaphore/runtime.env"
+semaphore_legacy_env_file: "{{ semaphore_site_dir }}/semaphore.env"
+semaphore_openbao_agent_dir: "{{ semaphore_site_dir }}/openbao"
+semaphore_openbao_agent_image: "{{ openbao_agent_image }}"
+semaphore_openbao_agent_container_name: semaphore-openbao-agent
+semaphore_openbao_secret_path: services/semaphore/runtime-env
+semaphore_openbao_policy_name: lv3-service-semaphore-runtime
+semaphore_openbao_approle_name: semaphore-runtime
+semaphore_server_port: "{{ platform_service_topology | platform_service_port('semaphore', 'internal') }}"
+semaphore_host_proxy_port: "{{ platform_service_topology | platform_service_port('semaphore', 'controller') }}"
+semaphore_image: "{{ container_image_catalog.images.semaphore_runtime.ref }}"
+semaphore_container_name: semaphore
+semaphore_database_name: semaphore
+semaphore_database_user: semaphore_admin
+semaphore_database_inventory_host: postgres-lv3
+semaphore_database_host: "{{ hostvars[semaphore_database_inventory_host].ansible_host }}"
+semaphore_database_port: 5432
+semaphore_database_password_local_file: "{{ playbook_dir }}/../.local/semaphore/database-password.txt"
+semaphore_local_artifact_dir: "{{ playbook_dir }}/../.local/semaphore"
+semaphore_admin_password_local_file: "{{ semaphore_local_artifact_dir }}/admin-password.txt"
+semaphore_admin_password_guest_file: "{{ semaphore_secret_dir }}/admin-password"
+semaphore_api_token_local_file: "{{ semaphore_local_artifact_dir }}/api-token.txt"
+semaphore_admin_auth_local_file: "{{ semaphore_local_artifact_dir }}/admin-auth.json"
+semaphore_bootstrap_spec_local_file: "{{ semaphore_local_artifact_dir }}/bootstrap-spec.json"
+semaphore_admin_username: ops-semaphore
+semaphore_admin_name: LV3 Operations
+semaphore_admin_email: ops-semaphore@lv3.org
+semaphore_private_base_url: "{{ platform_service_topology | platform_service_url('semaphore', 'internal') }}"
+semaphore_controller_url: "{{ platform_service_topology | platform_service_url('semaphore', 'controller') }}"
+semaphore_verify_ssl: false
+semaphore_project_name: LV3 Semaphore
+semaphore_repository_name: lv3-repo
+semaphore_inventory_name: semaphore-localhost
+semaphore_self_test_template_name: Semaphore Self-Test
+semaphore_repo_checkout_repo_root_local_dir: "{{ playbook_dir }}/.."
+semaphore_repo_checkout_host_path: /srv/proxmox_florin_server-semaphore
+semaphore_repo_checkout_container_path: /srv/proxmox_florin_server
+semaphore_repo_checkout_sync_paths:
+  - ansible.cfg
+  - collections
+  - inventory
+  - playbooks
+semaphore_bootstrap_templates:
+  - name: "{{ semaphore_self_test_template_name }}"
+    playbook: playbooks/semaphore-self.yml
+    arguments: "[]"
+    allow_override_args_in_task: false
+    allow_override_branch_in_task: false
+    allow_parallel_tasks: false
+    app: ansible
+    autorun: false
+    survey_vars: []
+    vaults: []
+    suppress_success_alerts: false
+    task_params:
+      allow_debug: false
+      allow_override_inventory: false
+      allow_override_limit: false
+      allow_override_tags: false
+      allow_override_skip_tags: false
+      limit: []
+      tags: []
+      skip_tags: []

@@ -1,0 +1,109 @@
+---
+argument_specs:
+  main:
+    short_description: Publish repo-managed public services through the NGINX edge VM.
+    options:
+      public_edge_service_topology:
+        type: dict
+        required: true
+        description:
+          - Canonical service topology used to derive edge publication state.
+      public_edge_certbot_email:
+        type: str
+        required: true
+        description:
+          - Email address registered with the ACME account.
+      public_edge_cert_name:
+        type: str
+        required: true
+        description:
+          - Certificate name used for the managed edge bundle.
+      public_edge_acme_challenge_method:
+        type: str
+        required: false
+        description:
+          - ACME challenge method for the shared edge certificate (`webroot` or `dns-hetzner`).
+      public_edge_update_apt_cache:
+        type: bool
+        required: false
+        description:
+          - Whether the role should refresh the APT cache before ensuring edge packages are present.
+      public_edge_sync_generated_static_dirs:
+        type: bool
+        required: false
+        description:
+          - Whether controller-generated static portal directories should be copied to the edge host.
+      public_edge_static_root:
+        type: path
+        required: true
+        description:
+          - Document root for repo-managed static public content.
+      public_edge_acme_root:
+        type: path
+        required: true
+        description:
+          - Webroot used for ACME HTTP-01 validation.
+      public_edge_probe_hostname:
+        type: str
+        required: true
+        description:
+          - Hostname used by the edge health probe contract.
+      public_edge_apex_hostname:
+        type: str
+        required: false
+        description:
+          - Apex hostname that should return the shared crawl-policy endpoint.
+      public_edge_additional_certificate_domains:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Extra hostnames appended to the shared edge certificate request.
+      public_edge_robots_meta_content:
+        type: str
+        required: false
+        description:
+          - Global crawl-policy value rendered into `X-Robots-Tag` and HTML robots meta tags.
+      public_edge_robots_txt_content:
+        type: str
+        required: false
+        description:
+          - Shared `robots.txt` body served on the apex and all published hostnames.
+      public_edge_dns_hetzner_plugin_version:
+        type: str
+        required: false
+        description:
+          - Pinned `certbot-dns-hetzner` plugin version installed for DNS-01 validation.
+      public_edge_dns_hetzner_credentials_file:
+        type: path
+        required: false
+        description:
+          - Root-only credential file used by the Hetzner DNS Certbot plugin.
+      public_edge_dns_hetzner_propagation_seconds:
+        type: int
+        required: false
+        description:
+          - Seconds Certbot waits before verifying DNS-01 records through Hetzner DNS.
+      public_edge_certificate_domains:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Domain set rendered into the edge certificate request.
+      public_edge_static_sites:
+        type: list
+        elements: dict
+        required: false
+        description:
+          - Static-site publication definitions derived from service topology.
+      public_edge_sites:
+        type: list
+        elements: dict
+        required: false
+        description:
+          - Full edge publication definitions rendered into NGINX.
+      public_edge_authenticated_sites:
+        type: dict
+        required: false
+        description:
+          - Hostname-indexed auth-gate definitions applied by NGINX before serving protected sites.

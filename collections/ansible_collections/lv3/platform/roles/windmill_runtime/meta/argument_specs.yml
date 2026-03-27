@@ -1,0 +1,129 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the private Windmill runtime and workspace bootstrap.
+    options:
+      windmill_workspace_id:
+        type: str
+        required: true
+        description:
+          - Workspace identifier that should exist after convergence.
+      windmill_workspace_name:
+        type: str
+        required: true
+        description:
+          - Human-readable Windmill workspace name.
+      windmill_site_dir:
+        type: path
+        required: true
+        description:
+          - Base directory for the Windmill runtime stack.
+      windmill_secret_dir:
+        type: path
+        required: true
+        description:
+          - Directory that stores Windmill secrets on the guest.
+      windmill_compose_file:
+        type: path
+        required: true
+        description:
+          - Compose file path for the Windmill runtime stack.
+      windmill_env_file:
+        type: path
+        required: true
+        description:
+          - Environment file rendered for Windmill.
+      windmill_server_port:
+        type: int
+        required: true
+        description:
+          - Local TCP port exposed by the Windmill API.
+      windmill_server_network_mode:
+        type: str
+        required: false
+        description:
+          - Docker networking mode used by the Windmill server container.
+      windmill_server_requires_docker_nat:
+        type: bool
+        required: false
+        description:
+          - Whether the Windmill server startup depends on Docker-managed nat port publishing.
+      windmill_base_url:
+        type: str
+        required: true
+        description:
+          - Operator-facing base URL for Windmill.
+      windmill_database_name:
+        type: str
+        required: true
+        description:
+          - PostgreSQL database name used by Windmill.
+      windmill_database_user:
+        type: str
+        required: true
+        description:
+          - PostgreSQL login role used by Windmill.
+      windmill_database_host:
+        type: str
+        required: true
+        description:
+          - PostgreSQL host for the Windmill runtime.
+      windmill_database_port:
+        type: int
+        required: false
+        description:
+          - PostgreSQL port for the Windmill runtime.
+      windmill_database_password_local_file:
+        type: path
+        required: true
+        description:
+          - Controller-local file that stores the runtime database password.
+      windmill_seed_scripts:
+        type: list
+        elements: dict
+        required: true
+        description:
+          - Repo-managed scripts that should be present in the workspace after convergence.
+      windmill_seed_raw_apps:
+        type: list
+        elements: dict
+        required: false
+        description:
+          - Repo-managed raw apps that should be pushed into the workspace after the script seed sync.
+      windmill_private_base_url:
+        type: str
+        required: false
+        description:
+          - Guest-local base URL used for bootstrap verification.
+      windmill_worker_checkout_repo_root_local_dir:
+        type: path
+        required: false
+        description:
+          - Controller-local repository root used to stage the worker checkout content.
+      windmill_worker_repo_checkout_host_path:
+        type: path
+        required: false
+        description:
+          - Host path that should contain the repo-backed worker checkout.
+      windmill_worker_repo_checkout_container_path:
+        type: path
+        required: false
+        description:
+          - Container path where the worker checkout is bind-mounted for Windmill jobs.
+      windmill_worker_secret_manifest_path:
+        type: path
+        required: false
+        description:
+          - Controller-local secret manifest used to mirror worker-executed secret files into the repo checkout.
+      windmill_worker_secret_mirror_ids:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Controller-local file secrets that should be mirrored into the worker checkout under `.local/`.
+      windmill_worker_checkout_sync_paths:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Repo paths copied from the controller checkout onto the Windmill worker host before runtime startup.

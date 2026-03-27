@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-03-16T01:00:00Z",
+  "environment": "production",
+  "hosts": [
+    {
+      "host": "docker-runtime-lv3",
+      "hardening_index": 74,
+      "hardening_index_delta": null,
+      "finding_counts": {
+        "warning": 1,
+        "suggestion": 0,
+        "suppressed": 0
+      },
+      "new_findings_since_last_scan": 0,
+      "findings": [
+        {
+          "id": "AUTH-9208",
+          "type": "warning",
+          "description": "Set a password hashing iteration count",
+          "suggestion": "",
+          "raw": "AUTH-9208|Set a password hashing iteration count",
+          "suppressed": false
+        }
+      ],
+      "suppressed_findings": []
+    }
+  ],
+  "images": [],
+  "summary": {
+    "host_count": 1,
+    "image_count": 0,
+    "total_critical_cves": 0,
+    "total_high_cves": 0,
+    "lowest_hardening_index": 74,
+    "new_lynis_findings": 0,
+    "status": "clean",
+    "status_code": 0
+  }
+}

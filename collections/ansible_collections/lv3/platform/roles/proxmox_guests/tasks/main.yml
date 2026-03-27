@@ -1,0 +1,167 @@
+---
+- name: Validate Proxmox guest provisioning inputs
+  ansible.builtin.assert:
+    that:
+      - proxmox_storage_id | length > 0
+      - proxmox_internal_bridge | length > 0
+      - proxmox_vm_templates | length > 0
+      - (proxmox_guests_active | default(proxmox_guests)) | length > 0
+    fail_msg: "proxmox_guests requires template catalog, storage, bridge, and guest inventory inputs."
+
+- name: Ensure snippets directory exists
+  ansible.builtin.file:
+    path: /var/lib/vz/snippets
+    state: directory
+    mode: "0755"
+
+- name: Validate each guest references a declared template
+  ansible.builtin.assert:
+    that:
+      - item.template_key is defined
+      - item.template_key in proxmox_vm_templates
+      - proxmox_vm_templates[item.template_key].vmid is defined
+    fail_msg: "Each guest must declare template_key present in proxmox_vm_templates."
+  loop: "{{ proxmox_guests_active | default(proxmox_guests) }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Render cloud-init user-data snippets for guests
+  ansible.builtin.template:
+    src: user-data.yml.j2
+    dest: "/var/lib/vz/snippets/{{ item.name }}-user-data.yml"
+    mode: "0644"
+  loop: "{{ proxmox_guests_active | default(proxmox_guests) }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Check which guest VMs already exist
+  ansible.builtin.command: "qm status {{ item.vmid }}"
+  register: proxmox_guest_status
+  failed_when: false
+  changed_when: false
+  loop: "{{ proxmox_guests_active | default(proxmox_guests) }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Read current guest configurations
+  ansible.builtin.command: "qm config {{ item.vmid }}"
+  register: proxmox_guest_config
+  failed_when: false
+  changed_when: false
+  loop: "{{ proxmox_guests_active | default(proxmox_guests) }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Clone guest VMs from template
+  ansible.builtin.command:
+    argv:
+      - qm
+      - clone
+      - "{{ proxmox_vm_templates[item.item.template_key].vmid | string }}"
+      - "{{ item.item.vmid | string }}"
+      - --name
+      - "{{ item.item.name }}"
+      - --full
+      - "1"
+      - --storage
+      - "{{ proxmox_storage_id }}"
+      - --format
+      - qcow2
+  loop: "{{ proxmox_guest_status.results }}"
+  when: item.rc != 0
+  changed_when: true
+  loop_control:
+    label: "{{ item.item.name }}"
+
+- name: Resize guest disks on first clone
+  ansible.builtin.command:
+    argv:
+      - qm
+      - resize
+      - "{{ item.item.vmid | string }}"
+      - scsi0
+      - "{{ item.item.disk_gb }}G"
+  loop: "{{ proxmox_guest_status.results }}"
+  when: item.rc != 0
+  changed_when: true
+  loop_control:
+    label: "{{ item.item.name }}"
+
+- name: Apply guest hardware and cloud-init settings
+  ansible.builtin.command:
+    argv:
+      - qm
+      - set
+      - "{{ item.vmid | string }}"
+      - --cpu
+      - host
+      - --cores
+      - "{{ item.cores | string }}"
+      - --memory
+      - "{{ item.memory_mb | string }}"
+      - --balloon
+      - "0"
+      - --agent
+      - enabled=1,fstrim_cloned_disks=1
+      - --onboot
+      - "1"
+      - --tags
+      - "{{ item.tags | join(';') }}"
+      - --net0
+      - >-
+        virtio{% if item.macaddr is defined %}={{ item.macaddr }}{% endif %},bridge={{ proxmox_internal_bridge }}
+      - --ipconfig0
+      - "ip={{ item.ipv4 }}/{{ item.cidr }},gw={{ item.gateway4 }}"
+      - --nameserver
+      - "{{ proxmox_guest_nameserver }}"
+      - --searchdomain
+      - "{{ proxmox_guest_searchdomain }}"
+      - --cicustom
+      - "user={{ proxmox_snippets_storage_id }}:snippets/{{ item.name }}-user-data.yml"
+      - --description
+      - "{{ item.role }} VM for lv3.org platform"
+  loop: "{{ proxmox_guests_active | default(proxmox_guests) }}"
+  changed_when: true
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Attach additional guest disks when declared
+  ansible.builtin.command:
+    argv:
+      - qm
+      - set
+      - "{{ item.0.vmid | string }}"
+      - "--{{ item.1.interface }}"
+      - "{{ item.1.storage | default(proxmox_storage_id) }}:{{ item.1.size_gb }}"
+  loop: "{{ (proxmox_guests_active | default(proxmox_guests)) | subelements('extra_disks', skip_missing=True) }}"
+  changed_when: true
+  loop_control:
+    label: "{{ item.0.name }} {{ item.1.interface }}"
+  when: >
+    (
+      proxmox_guest_config.results
+      | selectattr('item.vmid', 'equalto', item.0.vmid)
+      | list
+      | first
+    ).stdout is not search('(?m)^' ~ item.1.interface ~ ':')
+
+- name: Refresh cloud-init seed data after guest config changes
+  ansible.builtin.command:
+    argv:
+      - qm
+      - cloudinit
+      - update
+      - "{{ item.vmid | string }}"
+  loop: "{{ proxmox_guests_active | default(proxmox_guests) }}"
+  loop_control:
+    label: "{{ item.name }}"
+  changed_when: true
+
+- name: Start guest VMs
+  ansible.builtin.command: "qm start {{ item.vmid }}"
+  register: proxmox_guest_start
+  failed_when: proxmox_guest_start.rc not in [0, 255]
+  changed_when: proxmox_guest_start.rc == 0
+  loop: "{{ proxmox_guests_active | default(proxmox_guests) }}"
+  loop_control:
+    label: "{{ item.name }}"

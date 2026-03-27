@@ -1,0 +1,49 @@
+---
+- name: Validate Proxmox repository inputs
+  ansible.builtin.assert:
+    that:
+      - debian_prereq_packages | length > 0
+      - proxmox_key_url | length > 0
+      - proxmox_key_checksum | length > 0
+      - proxmox_keyring_path | length > 0
+      - proxmox_repo_file | length > 0
+      - proxmox_repo_uri | length > 0
+      - proxmox_repo_channel | length > 0
+      - proxmox_suite | length > 0
+    fail_msg: "proxmox_repository requires Debian prerequisites and Proxmox repository metadata."
+
+- name: Disable enterprise repository when using no-subscription channel
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/pve-enterprise.sources
+    state: absent
+  when: proxmox_repo_channel != "pve-enterprise"
+
+- name: Install Debian prerequisite packages
+  ansible.builtin.apt:
+    name: "{{ debian_prereq_packages }}"
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Download Proxmox archive keyring
+  ansible.builtin.get_url:
+    url: "{{ proxmox_key_url }}"
+    dest: "{{ proxmox_keyring_path }}"
+    mode: "0644"
+    checksum: "{{ proxmox_key_checksum }}"
+
+- name: Configure Proxmox package repository
+  ansible.builtin.template:
+    src: proxmox.sources.j2
+    dest: "{{ proxmox_repo_file }}"
+    mode: "0644"
+
+- name: Update apt cache after repository changes
+  ansible.builtin.apt:
+    update_cache: true
+    force_apt_get: true
+
+- name: Fully upgrade Debian base packages
+  ansible.builtin.apt:
+    upgrade: dist
+    autoremove: false

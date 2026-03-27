@@ -1,0 +1,98 @@
+---
+- name: Ensure Hetzner DNS publication for Keycloak
+  hosts: proxmox_hosts
+  become: false
+  gather_facts: false
+
+  tasks:
+    - name: Ensure Hetzner DNS records are present
+      ansible.builtin.include_role:
+        name: lv3.platform.hetzner_dns_records
+        apply:
+          delegate_to: localhost
+          become: false
+      run_once: true
+
+- name: Prepare PostgreSQL for Keycloak
+  hosts: "{{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}"
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.postgres[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.postgres_vm
+      vars:
+        postgres_vm_client_allowed_sources_extra:
+          - >-
+            {{
+              (
+                hostvars['proxmox_florin'].proxmox_guests
+                | selectattr('name', 'equalto', playbook_execution_host_patterns.docker_runtime[playbook_execution_env])
+                | map(attribute='ipv4')
+                | first
+              )
+            }}/32
+    - role: lv3.platform.keycloak_postgres
+
+- name: Converge Keycloak on the Docker runtime VM
+  hosts: "{{ 'docker-runtime-staging-lv3' if (env | default('production')) == 'staging' else 'docker-runtime-lv3' }}"
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.keycloak
+        playbook_execution_audit_target: keycloak
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.keycloak_runtime
+
+- name: Publish Keycloak through the NGINX edge
+  hosts: "{{ 'nginx-staging-lv3' if (env | default('production')) == 'staging' else 'nginx-lv3' }}"
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.nginx_edge[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.nginx_edge_publication
+
+- name: Converge Grafana SSO against Keycloak
+  hosts: "{{ 'monitoring-staging-lv3' if (env | default('production')) == 'staging' else 'monitoring-lv3' }}"
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.monitoring[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.grafana_sso
+      vars:
+        grafana_sso_client_secret: "{{ hostvars[playbook_execution_host_patterns.docker_runtime[playbook_execution_env]].keycloak_grafana_client_secret }}"

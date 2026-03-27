@@ -1,0 +1,25 @@
+version: 1.0.0
+weights:
+  target_criticality: 1.0
+  dependency_fanout: 1.0
+  historical_failure: 1.0
+  mutation_surface: 1.0
+  rollback_confidence: 1.0
+  maintenance_window: 1.0
+  active_incident: 1.0
+  recency: 1.0
+  stale_context_penalty: 1.0
+classification_thresholds:
+  low: 25
+  medium: 50
+  high: 75
+approval_thresholds:
+  auto_run_below: 25
+  soft_gate_below: 50
+  hard_gate_below: 75
+  block_above: 75
+defaults:
+  expected_change_count: 5
+  failure_lookback: 10
+  hours_since_last_mutation_if_unknown: 72
+  stale_context_penalty: 10

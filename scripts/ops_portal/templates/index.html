@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}LV3 Interactive Ops Portal{% endblock %}
+
+{% block content %}
+<main class="portal-main">
+  <section id="overview" class="portal-section">
+    <div class="section-head">
+      <div>
+        <p class="section-kicker">Platform Overview</p>
+        <h2>Real-time service status with live actions</h2>
+      </div>
+      <div class="section-meta">
+        <span class="pill">{{ services|length }} services</span>
+        <span class="pill">{{ maintenance_count }} maintenance windows</span>
+      </div>
+    </div>
+    <div
+      id="overview-panel"
+      hx-get="/partials/overview"
+      hx-trigger="load, every 30s"
+      hx-swap="innerHTML">
+      {% include "partials/overview.html" %}
+    </div>
+  </section>
+
+  <section id="deployments" class="portal-section">
+    <div class="section-head">
+      <div>
+        <p class="section-kicker">Deployment Console</p>
+        <h2>Live browser-side action stream</h2>
+      </div>
+    </div>
+    <div class="panel deployment-console">
+      <div class="console-toolbar">
+        <span class="pill">SSE stream</span>
+        <span class="muted">New deploy, restart, secret, and runbook actions append here.</span>
+      </div>
+      <pre id="deployment-console-log" class="console-log">Connecting to deployment stream…</pre>
+    </div>
+  </section>
+
+  <section id="agents" class="portal-section">
+    <div class="section-head">
+      <div>
+        <p class="section-kicker">Agent Coordination</p>
+        <h2>Live multi-agent session map</h2>
+      </div>
+    </div>
+    <div id="agent-panel" hx-get="/partials/agents" hx-trigger="load, every 15s" hx-swap="innerHTML">
+      {% include "partials/agents.html" %}
+    </div>
+  </section>
+
+  <section id="drift" class="portal-section">
+    <div class="section-head">
+      <div>
+        <p class="section-kicker">Drift Panel</p>
+        <h2>Latest reconciliation pressure across the platform</h2>
+      </div>
+    </div>
+    <div id="drift-panel" hx-get="/partials/drift" hx-trigger="load, every 60s" hx-swap="innerHTML">
+      {% include "partials/drift.html" %}
+    </div>
+  </section>
+
+  <section id="search" class="portal-section">
+    <div class="section-head">
+      <div>
+        <p class="section-kicker">Search Fabric</p>
+        <h2>Query ADRs, runbooks, configs, receipts, and catalog entries in one place</h2>
+      </div>
+    </div>
+    <div id="search-panel" hx-get="/partials/search" hx-trigger="load" hx-swap="innerHTML">
+      {% include "partials/search.html" %}
+    </div>
+  </section>
+
+  <section id="runbooks" class="portal-section">
+    <div class="section-head">
+      <div>
+        <p class="section-kicker">Runbook Launcher</p>
+        <h2>Common operator workflows without leaving the portal</h2>
+      </div>
+    </div>
+    <div id="runbook-panel" hx-get="/partials/runbooks" hx-trigger="load" hx-swap="innerHTML">
+      {% include "partials/runbooks.html" %}
+    </div>
+  </section>
+
+  <section id="changelog" class="portal-section">
+    <div class="section-head">
+      <div>
+        <p class="section-kicker">Changelog</p>
+        <h2>Recent live-apply receipts and unreleased notes</h2>
+      </div>
+    </div>
+    <div id="changelog-panel" hx-get="/partials/changelog" hx-trigger="load" hx-swap="innerHTML">
+      {% include "partials/changelog.html" %}
+    </div>
+  </section>
+</main>
+
+<script>
+  const consoleLog = document.getElementById("deployment-console-log");
+  const stream = new EventSource("/events/deployments");
+
+  function appendConsoleLine(payload) {
+    const timestamp = payload.ts || new Date().toISOString();
+    const message = payload.message || JSON.stringify(payload);
+    if (consoleLog.textContent.includes("Connecting to deployment stream")) {
+      consoleLog.textContent = "";
+    }
+    consoleLog.textContent += `[${timestamp}] ${message}\n`;
+    consoleLog.scrollTop = consoleLog.scrollHeight;
+  }
+
+  stream.addEventListener("heartbeat", () => {});
+  stream.addEventListener("log", (event) => appendConsoleLine(JSON.parse(event.data)));
+  stream.addEventListener("deploy", (event) => appendConsoleLine(JSON.parse(event.data)));
+  stream.addEventListener("secret", (event) => appendConsoleLine(JSON.parse(event.data)));
+  stream.addEventListener("runbook", (event) => appendConsoleLine(JSON.parse(event.data)));
+</script>
+{% endblock %}

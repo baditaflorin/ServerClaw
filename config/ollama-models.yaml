@@ -1,0 +1,22 @@
+schema_version: 1.0.0
+
+models:
+  - name: llama3.2:3b
+    provider: ollama
+    use_cases:
+      - goal_compiler_normalisation
+      - triage_signal_description
+      - runbook_step_summarisation
+      - search_query_expansion
+    max_context: 8192
+    ram_requirement_gb: 4
+    pull_on_startup: true
+
+  - name: qwen2.5:7b
+    provider: ollama
+    use_cases:
+      - structured_extraction
+      - json_generation
+    max_context: 8192
+    ram_requirement_gb: 6
+    pull_on_startup: false

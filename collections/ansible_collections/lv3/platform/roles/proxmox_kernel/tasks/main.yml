@@ -1,0 +1,32 @@
+---
+- name: Validate Proxmox kernel inputs
+  ansible.builtin.assert:
+    that:
+      - proxmox_kernel_packages | length > 0
+    fail_msg: "proxmox_kernel requires a non-empty package list."
+
+- name: Install Proxmox kernel and ifupdown2
+  ansible.builtin.apt:
+    name: "{{ proxmox_kernel_packages }}"
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Reboot into Proxmox kernel if not already running
+  ansible.builtin.reboot:
+    msg: "Rebooting into Proxmox kernel"
+    reboot_timeout: 1800
+    connect_timeout: 10
+    post_reboot_delay: 20
+    test_command: "uname -r"
+  when: "'pve' not in ansible_kernel"
+
+- name: Refresh facts after kernel reboot
+  ansible.builtin.setup:
+  when: "'pve' not in ansible_kernel"
+
+- name: Assert Proxmox kernel is active
+  ansible.builtin.assert:
+    that:
+      - "'pve' in ansible_kernel"
+    fail_msg: "Host did not come back on a Proxmox kernel."

@@ -1,0 +1,244 @@
+---
+- name: Validate Proxmox ntopng inputs
+  ansible.builtin.assert:
+    that:
+      - ntopng_repo_package_url | length > 0
+      - ntopng_repo_package_file | length > 0
+      - ntopng_packages | length > 0
+      - ntopng_state_dir | length > 0
+      - ntopng_admin_password_file | length > 0
+      - ntopng_local_networks_file | length > 0
+      - ntopng_config_file | length > 0
+      - ntopng_interfaces | length > 0
+      - ntopng_local_networks | length > 0
+      - ntopng_probe_target | length > 0
+      - ntopng_operator_url | length > 0
+    fail_msg: >-
+      proxmox_ntopng requires repository settings, monitored interfaces, local-network
+      metadata, a generated admin-password path, and an operator access URL.
+
+- name: Ensure ntopng repository prerequisites are present
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - gnupg
+      - lsb-release
+      - wget
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Download the ntop repository bootstrap package
+  ansible.builtin.get_url:
+    url: "{{ ntopng_repo_package_url }}"
+    dest: "{{ ntopng_repo_package_file }}"
+    mode: "0644"
+
+- name: Install the ntop package repository bootstrap
+  ansible.builtin.apt:
+    deb: "{{ ntopng_repo_package_file }}"
+
+- name: Install ntopng packages
+  ansible.builtin.apt:
+    name: "{{ ntopng_packages }}"
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure ntopng state directory exists
+  ansible.builtin.file:
+    path: "{{ ntopng_state_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Render ntopng local-networks definitions
+  ansible.builtin.template:
+    src: local-networks.txt.j2
+    dest: "{{ ntopng_local_networks_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart ntopng
+
+- name: Render ntopng LV3 config
+  ansible.builtin.template:
+    src: ntopng-lv3.conf.j2
+    dest: "{{ ntopng_config_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart ntopng
+
+- name: Generate ntopng admin password
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ ntopng_admin_password_file }}" ]; then
+      umask 077
+      openssl rand -base64 24 > "{{ ntopng_admin_password_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: ntopng_admin_password_generation
+  changed_when: "'changed' in ntopng_admin_password_generation.stdout"
+
+- name: Read ntopng admin password
+  ansible.builtin.slurp:
+    src: "{{ ntopng_admin_password_file }}"
+  register: ntopng_admin_password_raw
+  no_log: true
+
+- name: Set ntopng admin password facts
+  ansible.builtin.set_fact:
+    ntopng_admin_password: "{{ ntopng_admin_password_raw.content | b64decode | trim }}"
+    ntopng_admin_password_hash: "{{ (ntopng_admin_password_raw.content | b64decode | trim) | hash('md5') }}"
+  no_log: true
+
+- name: Ensure redis-server is enabled and started
+  ansible.builtin.systemd:
+    name: redis-server
+    enabled: true
+    state: started
+
+- name: Read current ntopng admin password hash
+  ansible.builtin.command: redis-cli --raw GET ntopng.user.admin.password
+  register: ntopng_current_admin_hash
+  changed_when: false
+  failed_when: false
+  no_log: true
+
+- name: Read ntopng admin password changed flag
+  ansible.builtin.command: redis-cli --raw GET ntopng.prefs.admin_password_changed
+  register: ntopng_admin_password_changed_flag
+  changed_when: false
+  failed_when: false
+  no_log: true
+
+- name: Store the managed ntopng admin password hash
+  ansible.builtin.command:
+    argv:
+      - redis-cli
+      - SET
+      - ntopng.user.admin.password
+      - "{{ ntopng_admin_password_hash }}"
+  when: ntopng_current_admin_hash.stdout != ntopng_admin_password_hash
+  changed_when: true
+  no_log: true
+  notify: Restart ntopng
+
+- name: Mark the ntopng admin password as changed
+  ansible.builtin.command:
+    argv:
+      - redis-cli
+      - SET
+      - ntopng.prefs.admin_password_changed
+      - "1"
+  when: ntopng_admin_password_changed_flag.stdout != "1"
+  changed_when: true
+  notify: Restart ntopng
+
+- name: Flush ntopng handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Ensure ntopng is enabled and started
+  ansible.builtin.systemd:
+    name: ntopng
+    enabled: true
+    state: started
+
+- name: Wait for local ntopng HTTP endpoint
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ ntopng_http_port }}/"
+    method: GET
+    status_code:
+      - 200
+      - 302
+  register: ntopng_local_http_check
+  retries: 20
+  delay: 3
+  until: ntopng_local_http_check.status in [200, 302]
+
+- name: Query ntopng interfaces over the operator access path
+  ansible.builtin.uri:
+    url: "{{ ntopng_operator_url }}/lua/rest/v2/get/ntopng/interfaces.lua"
+    method: GET
+    force_basic_auth: true
+    url_username: admin
+    url_password: "{{ ntopng_admin_password }}"
+    return_content: true
+    status_code: 200
+  register: ntopng_interfaces_response
+  retries: 20
+  delay: 3
+  until: ntopng_interfaces_response.status == 200
+  no_log: true
+
+- name: Record the monitored ntopng interfaces
+  ansible.builtin.set_fact:
+    ntopng_monitored_interfaces: "{{ ntopng_interfaces_response.json.rsp }}"
+    ntopng_primary_interface_id: >-
+      {{
+        (
+          ntopng_interfaces_response.json.rsp
+          | selectattr('ifname', 'equalto', ntopng_interfaces[0])
+          | map(attribute='ifid')
+          | first
+        )
+      }}
+
+- name: Assert ntopng exposes the configured interfaces
+  ansible.builtin.assert:
+    that:
+      - ntopng_monitored_interfaces | length > 0
+      - ntopng_interfaces | difference(ntopng_monitored_interfaces | map(attribute='ifname') | list) | length == 0
+      - ntopng_primary_interface_id is not none
+    fail_msg: "ntopng did not expose the expected monitored interfaces over the operator access path."
+
+- name: Generate probe traffic across the private bridge
+  ansible.builtin.command:
+    argv:
+      - ping
+      - -c
+      - "3"
+      - -W
+      - "1"
+      - "{{ ntopng_probe_target }}"
+  changed_when: false
+
+- name: Query primary interface counters over the operator access path
+  ansible.builtin.uri:
+    url: "{{ ntopng_operator_url }}/lua/rest/v2/get/interface/data.lua?ifid={{ ntopng_primary_interface_id }}"
+    method: GET
+    force_basic_auth: true
+    url_username: admin
+    url_password: "{{ ntopng_admin_password }}"
+    return_content: true
+    status_code: 200
+  register: ntopng_interface_data_response
+  no_log: true
+
+- name: Query primary interface top hosts over the operator access path
+  ansible.builtin.uri:
+    url: "{{ ntopng_operator_url }}/lua/rest/v2/get/interface/top/hosts.lua?ifid={{ ntopng_primary_interface_id }}"
+    method: GET
+    force_basic_auth: true
+    url_username: admin
+    url_password: "{{ ntopng_admin_password }}"
+    return_content: true
+    status_code: 200
+  register: ntopng_top_hosts_response
+  no_log: true
+
+- name: Assert ntopng sees private-network traffic
+  ansible.builtin.assert:
+    that:
+      - (ntopng_interface_data_response.json.rsp.bytes | int) > 0
+      - (ntopng_interface_data_response.json.rsp.num_hosts | int) > 0
+      - (ntopng_top_hosts_response.json.rsp | length) > 0
+    fail_msg: "ntopng is reachable but did not report visible traffic on the primary monitored interface."
+
+- name: Verify ntopng health probes
+  ansible.builtin.import_tasks: verify.yml

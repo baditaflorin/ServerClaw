@@ -1,0 +1,114 @@
+suite:
+  report_dir: .local/fault-injection
+  scheduled_scenario_names:
+    - fault:keycloak-unavailable
+    - fault:openbao-unavailable
+
+scenarios:
+  - name: fault:keycloak-unavailable
+    description: Stop the local Keycloak container and verify both the local readiness probe and the public discovery endpoint fail during the outage and recover after restart.
+    expected_behaviour: |
+      Keycloak discovery becomes unavailable while the container is stopped.
+      The repo-managed container restart restores both the local readiness path and the
+      public `sso.lv3.org` discovery endpoint inside the configured recovery window.
+    tags:
+      - monthly
+      - deployment_subset
+      - identity
+    fault:
+      kind: service_kill
+      duration_seconds: 25
+      settle_seconds: 5
+      recovery_timeout_seconds: 180
+      docker:
+        compose_project: keycloak
+        compose_service: keycloak
+    probes:
+      before:
+        - kind: health_probe
+          probe_id: keycloak
+          check: readiness
+          expect: reachable
+          execution_context: host_network_helper
+        - kind: http
+          name: keycloak-published-discovery
+          url: https://10.10.10.10/realms/lv3/.well-known/openid-configuration
+          expect: reachable
+          expected_status:
+            - 200
+          timeout_seconds: 10
+          validate_tls: false
+          execution_context: host_network_helper
+          headers:
+            Host: sso.lv3.org
+      during:
+        - kind: health_probe
+          probe_id: keycloak
+          check: readiness
+          expect: unreachable
+          execution_context: host_network_helper
+        - kind: http
+          name: keycloak-published-discovery
+          url: https://10.10.10.10/realms/lv3/.well-known/openid-configuration
+          expect: unreachable
+          expected_status:
+            - 200
+          timeout_seconds: 10
+          validate_tls: false
+          execution_context: host_network_helper
+          headers:
+            Host: sso.lv3.org
+      after:
+        - kind: health_probe
+          probe_id: keycloak
+          check: readiness
+          expect: reachable
+          execution_context: host_network_helper
+        - kind: http
+          name: keycloak-published-discovery
+          url: https://10.10.10.10/realms/lv3/.well-known/openid-configuration
+          expect: reachable
+          expected_status:
+            - 200
+          timeout_seconds: 10
+          validate_tls: false
+          execution_context: host_network_helper
+          headers:
+            Host: sso.lv3.org
+
+  - name: fault:openbao-unavailable
+    description: Pause the local OpenBao container and verify the local health endpoint fails during the outage and returns after the managed unpause.
+    expected_behaviour: |
+      The local OpenBao health endpoint becomes unavailable while the container is paused.
+      The repo-managed unpause restores the HTTP health endpoint inside the recovery window
+      without changing the singleton container's seal state after the scenario completes.
+    tags:
+      - monthly
+      - deployment_subset
+      - secrets
+    fault:
+      kind: service_pause
+      duration_seconds: 15
+      settle_seconds: 3
+      recovery_timeout_seconds: 180
+      docker:
+        container_name: lv3-openbao
+    probes:
+      before:
+        - kind: health_probe
+          probe_id: openbao
+          check: readiness
+          expect: reachable
+          execution_context: host_network_helper
+      during:
+        - kind: health_probe
+          probe_id: openbao
+          check: readiness
+          expect: unreachable
+          execution_context: host_network_helper
+      after:
+        - kind: health_probe
+          probe_id: openbao
+          check: readiness
+          expect: reachable
+          execution_context: host_network_helper

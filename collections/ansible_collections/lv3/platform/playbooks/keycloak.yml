@@ -1,0 +1,74 @@
+---
+- name: Ensure Hetzner DNS publication for Keycloak
+  hosts: proxmox_hosts
+  become: false
+  gather_facts: false
+
+  tasks:
+    - name: Ensure Hetzner DNS records are present
+      ansible.builtin.include_role:
+        name: lv3.platform.hetzner_dns_records
+        apply:
+          delegate_to: localhost
+          become: false
+      run_once: true
+
+- name: Prepare PostgreSQL for Keycloak
+  hosts: postgres_guests
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Ensure target guest is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+  roles:
+    - role: lv3.platform.postgres_vm
+      vars:
+        postgres_vm_client_allowed_sources_extra:
+          - "{{ (hostvars['proxmox_florin'].proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}/32"
+    - role: lv3.platform.keycloak_postgres
+
+- name: Converge Keycloak on the Docker runtime VM
+  hosts: docker-runtime-lv3
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Ensure target guest is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+  roles:
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.keycloak_runtime
+
+- name: Publish Keycloak through the NGINX edge
+  hosts: nginx-lv3
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: lv3.platform.nginx_edge_publication
+
+- name: Converge Grafana SSO against Keycloak
+  hosts: monitoring-lv3
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Ensure target guest is Debian
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "Debian"
+        fail_msg: "This playbook only supports Debian guests."
+
+  roles:
+    - role: lv3.platform.grafana_sso
+      vars:
+        grafana_sso_client_secret: "{{ hostvars['docker-runtime-lv3'].keycloak_grafana_client_secret }}"

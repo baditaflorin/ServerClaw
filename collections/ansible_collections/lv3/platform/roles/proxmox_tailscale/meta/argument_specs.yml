@@ -1,0 +1,73 @@
+---
+argument_specs:
+  main:
+    short_description: Install and attach Tailscale on the Proxmox host.
+    options:
+      tailscale_apt_key_url:
+        type: str
+        required: true
+        description:
+          - URL for the Tailscale APT signing key.
+      tailscale_apt_keyring_path:
+        type: path
+        required: true
+        description:
+          - Destination keyring path for the Tailscale signing key.
+      tailscale_apt_repo_file:
+        type: path
+        required: true
+        description:
+          - Destination file for the Tailscale repository definition.
+      tailscale_apt_repo_url:
+        type: str
+        required: true
+        description:
+          - URL for the managed Tailscale repository definition.
+      proxmox_tailscale_hostname:
+        type: str
+        required: true
+        description:
+          - Advertised Tailscale hostname for the Proxmox host.
+      proxmox_tailscale_advertise_routes:
+        type: list
+        elements: str
+        required: true
+        description:
+          - Subnet routes that the Proxmox host should advertise to the tailnet.
+      proxmox_tailscale_auth_key_env_var:
+        type: str
+        required: true
+        description:
+          - Environment variable name that carries the optional Tailscale auth key.
+      proxmox_tailscale_accept_dns:
+        type: bool
+        required: false
+        description:
+          - Whether the host should accept DNS settings from Tailscale.
+      proxmox_tailscale_snat_subnet_routes:
+        type: bool
+        required: false
+        description:
+          - Whether Tailscale should SNAT advertised subnet routes.
+      proxmox_tailscale_enable_ssh:
+        type: bool
+        required: false
+        description:
+          - Whether Tailscale SSH should be enabled for the host.
+      proxmox_tailscale_stateful_filtering:
+        type: bool
+        required: false
+        description:
+          - Whether stateful filtering should be enabled for subnet routing.
+      proxmox_tailscale_tags:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Optional Tailscale tags attached at login time.
+      proxmox_tailscale_forwarding_interfaces:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Interfaces that should have IPv4 forwarding enabled for subnet routing.

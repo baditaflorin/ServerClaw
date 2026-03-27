@@ -1,0 +1,83 @@
+from pathlib import Path
+
+import yaml
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+DEFAULTS_PATH = REPO_ROOT / "roles" / "monitoring_vm" / "defaults" / "main.yml"
+TASKS_PATH = REPO_ROOT / "roles" / "monitoring_vm" / "tasks" / "main.yml"
+VERIFY_PATH = REPO_ROOT / "roles" / "monitoring_vm" / "tasks" / "verify.yml"
+PLATFORM_DASHBOARD_TEMPLATE = REPO_ROOT / "roles" / "monitoring_vm" / "templates" / "lv3-platform-overview.json.j2"
+MAIL_DASHBOARD_TEMPLATE = REPO_ROOT / "roles" / "monitoring_vm" / "templates" / "lv3-mail-platform.json.j2"
+VM_DASHBOARD_TEMPLATE = REPO_ROOT / "roles" / "monitoring_vm" / "templates" / "lv3-vm-detail.json.j2"
+
+
+def load_tasks(path: Path) -> list[dict]:
+    return yaml.safe_load(path.read_text())
+
+
+def test_defaults_define_public_grafana_url_from_service_topology() -> None:
+    defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
+    assert defaults["monitoring_grafana_public_url"] == (
+        "https://{{ hostvars[groups['proxmox_hosts'][0]].lv3_service_topology.grafana.public_hostname }}"
+    )
+
+
+def test_main_tasks_explicitly_disable_public_dashboards_and_embedding() -> None:
+    tasks = load_tasks(TASKS_PATH)
+    public_dashboards = next(task for task in tasks if task.get("name") == "Disable Grafana public dashboards")
+    login_form = next(task for task in tasks if task.get("name") == "Keep the Grafana login form available for recovery")
+    allow_embedding = next(task for task in tasks if task.get("name") == "Disable Grafana embedding")
+    assert public_dashboards["community.general.ini_file"]["section"] == "public_dashboards"
+    assert public_dashboards["community.general.ini_file"]["option"] == "enabled"
+    assert public_dashboards["community.general.ini_file"]["value"] == "false"
+    assert login_form["community.general.ini_file"]["section"] == "auth"
+    assert login_form["community.general.ini_file"]["option"] == "disable_login_form"
+    assert login_form["community.general.ini_file"]["value"] == "false"
+    assert allow_embedding["community.general.ini_file"]["section"] == "security"
+    assert allow_embedding["community.general.ini_file"]["option"] == "allow_embedding"
+    assert allow_embedding["community.general.ini_file"]["value"] == "false"
+
+
+def test_verify_tasks_check_public_dashboard_lockdown() -> None:
+    tasks = load_tasks(VERIFY_PATH)
+    redirect_check = next(
+        task
+        for task in tasks
+        if task.get("name") == "Verify public Grafana dashboard URLs redirect unauthenticated viewers to login"
+    )
+    health_check = next(
+        task for task in tasks if task.get("name") == "Verify the public Grafana health endpoint is not exposed"
+    )
+    headers_check = next(
+        task for task in tasks if task.get("name") == "Verify Grafana version headers are stripped at the public edge"
+    )
+    assert redirect_check["ansible.builtin.uri"]["follow_redirects"] == "none"
+    assert redirect_check["ansible.builtin.uri"]["status_code"] == 302
+    assert health_check["ansible.builtin.uri"]["status_code"] == 404
+    assert headers_check["ansible.builtin.command"]["argv"][0] == "curl"
+
+
+def test_capacity_dashboard_is_copied_imported_and_verified() -> None:
+    defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
+    main_tasks = load_tasks(TASKS_PATH)
+    verify_tasks = load_tasks(VERIFY_PATH)
+
+    copy_task = next(task for task in main_tasks if task.get("name") == "Copy LV3 capacity overview dashboard")
+    import_task = next(task for task in main_tasks if task.get("name") == "Import LV3 capacity dashboard into Grafana")
+    verify_task = next(task for task in verify_tasks if task.get("name") == "Verify LV3 capacity dashboard is provisioned")
+
+    assert defaults["monitoring_grafana_capacity_dashboard_source_file"] == (
+        "{{ monitoring_repo_root }}/config/grafana/dashboards/capacity-overview.json"
+    )
+    assert defaults["monitoring_grafana_capacity_dashboard_uid"] == "lv3-capacity-overview"
+    assert copy_task["ansible.builtin.copy"]["src"] == "{{ monitoring_grafana_capacity_dashboard_source_file }}"
+    assert import_task["ansible.builtin.uri"]["body"]["folderUid"] == "{{ monitoring_grafana_folder_uid }}"
+    assert verify_task["ansible.builtin.uri"]["url"] == (
+        "http://127.0.0.1:3000/api/dashboards/uid/{{ monitoring_grafana_capacity_dashboard_uid }}"
+    )
+
+
+def test_dashboard_templates_do_not_use_bare_jinja_null_literals() -> None:
+    for template in (PLATFORM_DASHBOARD_TEMPLATE, MAIL_DASHBOARD_TEMPLATE, VM_DASHBOARD_TEMPLATE):
+        assert " null" not in template.read_text()
