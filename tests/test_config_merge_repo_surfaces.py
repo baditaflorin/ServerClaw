@@ -33,12 +33,23 @@ def test_windmill_defaults_seed_config_merge_script_and_schedule() -> None:
             / "main.yml"
         ).read_text(encoding="utf-8")
     )
-    script_paths = {entry["path"] for entry in defaults["windmill_seed_scripts"]}
+    seed_scripts = defaults["windmill_seed_scripts"]
+    script_paths = {entry["path"] for entry in seed_scripts}
     schedule_map = {entry["path"]: entry for entry in defaults["windmill_seed_schedules"]}
+    script_map = {entry["path"]: entry for entry in seed_scripts}
 
     assert "f/lv3/config_merge/merge_config_changes" in script_paths
     assert "f/lv3/config_merge/merge_config_changes_every_minute" in schedule_map
     assert schedule_map["f/lv3/config_merge/merge_config_changes_every_minute"]["args"]["dsn"] == "{{ windmill_database_dsn }}"
+    assert len(script_paths) == len(seed_scripts)
+    assert (
+        script_map["f/lv3/scheduler_watchdog_loop"]["local_file"]
+        == "{{ inventory_dir }}/../config/windmill/scripts/scheduler-watchdog-loop.py"
+    )
+    assert (
+        script_map["f/lv3/scheduler_watchdog"]["local_file"]
+        == "{{ inventory_dir }}/../windmill/scheduler/watchdog-loop.py"
+    )
 
 
 def test_windmill_script_sync_uses_manifest_helper() -> None:
@@ -57,6 +68,9 @@ def test_windmill_script_sync_uses_manifest_helper() -> None:
     assert "Create a local manifest path for repo-managed Windmill scripts" in tasks
     assert "Render the repo-managed Windmill script manifest locally" in tasks
     assert "{{ inventory_dir }}/../scripts/sync_windmill_seed_scripts.py" in tasks
+    assert "uv" in tasks
+    assert "--with" in tasks
+    assert "pyyaml" in tasks
     assert "{{ windmill_seed_script_manifest_local.path }}" in tasks
     assert '--max-attempts' in tasks
     assert '"20"' in tasks

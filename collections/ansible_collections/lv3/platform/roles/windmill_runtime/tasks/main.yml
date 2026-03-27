@@ -148,12 +148,54 @@
   tags:
     - mutation
 
-- name: Expand the staged Windmill worker checkout on the guest
-  ansible.builtin.unarchive:
+- name: Copy the staged Windmill worker checkout archive to the guest
+  ansible.builtin.copy:
     src: "{{ windmill_worker_checkout_archive_local.path }}"
-    dest: "{{ windmill_worker_repo_checkout_host_path }}"
-    extra_opts:
-      - --no-same-owner
+    dest: "{{ windmill_site_dir }}/worker-checkout.tar.gz"
+    mode: "0600"
+  register: windmill_worker_checkout_archive_remote
+
+- name: Check whether the Windmill worker checkout checksum marker exists
+  ansible.builtin.stat:
+    path: "{{ windmill_worker_checkout_checksum_file }}"
+  register: windmill_worker_checkout_checksum_marker
+
+- name: Read the Windmill worker checkout checksum marker
+  ansible.builtin.slurp:
+    src: "{{ windmill_worker_checkout_checksum_file }}"
+  register: windmill_worker_checkout_checksum_marker_raw
+  when: windmill_worker_checkout_checksum_marker.stat.exists
+
+- name: Decide whether the Windmill worker checkout needs to be refreshed
+  ansible.builtin.set_fact:
+    windmill_worker_checkout_needs_refresh: >-
+      {{
+        (not windmill_worker_checkout_checksum_marker.stat.exists)
+        or (
+          (windmill_worker_checkout_checksum_marker_raw.content | default('') | b64decode | trim)
+          != (windmill_worker_checkout_archive_remote.checksum | default(''))
+        )
+      }}
+
+- name: Expand the staged Windmill worker checkout on the guest when the archive changed
+  ansible.builtin.shell: |
+    set -euo pipefail
+    tar -xzf "{{ windmill_site_dir }}/worker-checkout.tar.gz" \
+      --overwrite \
+      -C "{{ windmill_worker_repo_checkout_host_path }}"
+  args:
+    executable: /bin/bash
+  changed_when: windmill_worker_checkout_needs_refresh | bool
+  when: windmill_worker_checkout_needs_refresh | bool
+
+- name: Record the deployed Windmill worker checkout archive checksum
+  ansible.builtin.copy:
+    dest: "{{ windmill_worker_checkout_checksum_file }}"
+    content: "{{ windmill_worker_checkout_archive_remote.checksum | default('') }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+  when: windmill_worker_checkout_needs_refresh | bool
 
 - name: Ensure repo-backed Windmill runtime paths stay writable after checkout sync
   ansible.builtin.include_role:
@@ -1288,6 +1330,11 @@
     mutation_audit_emit_on_success: true
   ansible.builtin.command:
     argv:
+      - uv
+      - run
+      - --no-project
+      - --with
+      - pyyaml
       - python3
       - "{{ inventory_dir }}/../scripts/sync_windmill_seed_scripts.py"
       - --base-url
