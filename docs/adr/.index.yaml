@@ -7,11 +7,11 @@
 
 schema_version: 1
 generated: '2026-03-27'
-total_adrs: 199
+total_adrs: 200
 implementation_status_summary:
-  Implemented: 177
+  Implemented: 181
   Partial: 3
-  Not Implemented: 18
+  Not Implemented: 15
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -120,6 +120,7 @@ concerns:
     - '0124'
     - 0139
     - '0161'
+    - 0183
     - 0189
   platform:
     - 0019
@@ -1856,7 +1857,7 @@ adr_index:
     implemented_version: 0.108.0
   - adr: '0105'
     title: Platform Capacity Model and Resource Quota Enforcement
-    status: Accepted
+    status: Implemented
     implementation_status: Implemented
     date: '2026-03-23'
     concern: ci-cd
@@ -3015,17 +3016,18 @@ adr_index:
     implemented_version: 0.176.3
   - adr: '0175'
     title: Cross-Workstream Interface Contracts
-    status: Proposed
-    implementation_status: Not Implemented
+    status: Accepted
+    implementation_status: Implemented
     date: '2026-03-26'
     concern: platform
     keywords:
       - cross-workstream
       - interface
       - contracts
-    summary: We will define explicit interface contracts for all shared producer-consumer boundaries touched by more than
-      one workstr
+    summary: We will define explicit interface contracts for shared producer-consumer boundaries touched by more than one
+      workstream,
     filename: 0175-cross-workstream-interface-contracts.md
+    implemented_version: 0.176.7
   - adr: '0176'
     title: Inventory Sharding and Host-Scoped Ansible Execution
     status: Implemented
@@ -3043,8 +3045,8 @@ adr_index:
     implemented_version: 0.177.0
   - adr: '0177'
     title: Run Namespace Partitioning for Parallel Tooling
-    status: Proposed
-    implementation_status: Not Implemented
+    status: Implemented
+    implementation_status: Implemented
     date: '2026-03-26'
     concern: platform
     keywords:
@@ -3055,6 +3057,7 @@ adr_index:
       - tooling
     summary: We will require every mutable execution path to run inside a run namespace identified by runid.
     filename: 0177-run-namespace-partitioning-for-parallel-tooling.md
+    implemented_version: 0.177.2
   - adr: 0178
     title: Dependency Wave Manifests for Parallel Apply
     status: Implemented
@@ -3119,8 +3122,8 @@ adr_index:
     implemented_version: 0.176.2
   - adr: 0182
     title: Live Apply Merge Train and Rollback Bundle
-    status: Proposed
-    implementation_status: Not Implemented
+    status: Implemented
+    implementation_status: Implemented
     date: '2026-03-26'
     concern: platform
     keywords:
@@ -3133,6 +3136,7 @@ adr_index:
     summary: We will use a live apply merge train that batches ready workstreams into a reviewed integration set and requires
       a rollb
     filename: 0182-live-apply-merge-train-and-rollback-bundle.md
+    implemented_version: 0.176.6
   - adr: 0183
     title: Auxiliary Cloud Failure Domain for Witness, Recovery, and Burst Capacity
     status: Proposed
@@ -3151,6 +3155,20 @@ adr_index:
     summary: We will add a small auxiliary cloud failure domain using Hetzner Cloud for non-primary control-plane resilience
       and burs
     filename: 0183-auxiliary-cloud-failure-domain-for-witness-recovery-and-burst-capacity.md
+  - adr: 0183
+    title: Keycloak Uses Shared-Mail-Network Internal Submission
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: networking
+    keywords:
+      - keycloak
+      - uses
+      - shared-mail-network
+      - internal
+      - submission
+    summary: 'Keycloak will:'
+    filename: 0183-keycloak-mail-network-internal-submission.md
   - adr: 0184
     title: Failure-Domain Labels and Anti-Affinity Policy
     status: Proposed

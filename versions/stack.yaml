@@ -1,11 +1,12 @@
 schema_version: 1.0.0
-repo_version: 0.177.4
+repo_version: 0.177.5
 platform_version: 0.130.25
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
   latest_receipts:
-    monitoring: 2026-03-25-adr-0096-slo-tracking-live-apply
+    monitoring: 2026-03-27-adr-0105-capacity-model-mainline-live-apply
+    capacity_model: 2026-03-27-adr-0105-capacity-model-mainline-live-apply
     mutation_audit: 2026-03-23-adr-0066-mutation-audit-live-apply
     mutation_ledger: 2026-03-27-adr-0115-mutation-ledger-mainline-live-apply
     public_edge_publication: 2026-03-26-adr-0134-changelog-redaction-live-apply
@@ -919,7 +920,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.4
+    current: 0.177.5
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.130.25

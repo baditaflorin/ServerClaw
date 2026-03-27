@@ -35,6 +35,7 @@
 
 - `uv run --with pytest python -m pytest tests/test_monitoring_vm_role.py tests/test_capacity_report.py tests/test_lv3_cli.py tests/test_promotion_pipeline.py -q`
 - `uv run --with pytest python -m pytest tests/test_weekly_capacity_report_windmill.py -q`
+- `uv run --with pytest python -m pytest tests/test_run_namespace.py tests/test_ansible_execution_scopes.py tests/test_remote_exec.py -q`
 - `make syntax-check-monitoring`
 - `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`
 - `./scripts/validate_repo.sh alert-rules health-probes`
@@ -44,14 +45,16 @@
 - `make weekly-capacity-report`
 - `uv run --with pyyaml python scripts/capacity_report.py --model config/capacity-model.json --check-gate --proposed-change 20,8,100`
 - `BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 make live-apply-service service=grafana env=production EXTRA_ARGS='-e bypass_promotion=true'`
+- `curl -Ik --resolve grafana.lv3.org:443:65.108.75.123 https://grafana.lv3.org/d/lv3-capacity-overview/lv3-capacity-overview`
 
 ## Merge Outcome
 
 - repository implementation completed in `0.115.0`
-- merged to `main` in `0.177.1`
+- merged to `main` in `0.177.5`
 - platform implementation is now recorded in platform version `0.130.24`
 - implementation commit: `851cf901b9bc22515591802fb2fcc5f7a95b6eee`
 - the first production replay imported the dashboard and passed its Grafana verification before a later transient SSH reachability failure in the blackbox verification step
 - the immediate branch replay completed cleanly with `ok=176 changed=0 unreachable=0 failed=0`
-- the current-mainline replay from merge commit `12898d4ef17dc0f8ff3b92523874a61993bed565` completed cleanly with `ok=176 changed=0 unreachable=0 failed=0 skipped=34`
+- the current-mainline replay from source commit `74a489de77890f970c54f4ca2b09e1d755508345` completed cleanly with `ok=176 changed=0 unreachable=0 failed=0 skipped=34`
+- the current-mainline replay also verified the fresh-worktree live-apply path after shortening per-run Ansible control-socket directories under `/tmp`
 - the dashboard uid `lv3-capacity-overview` is published behind `https://grafana.lv3.org/` and both `make capacity-report` and `make weekly-capacity-report` render with live `ssh+influx` metrics

@@ -91,6 +91,7 @@ OpenTofu VM lifecycle automation is now implemented under `tofu/`, the six produ
 The repository now also ships continuous drift detection across OpenTofu, Ansible check mode, runtime Docker image digests, DNS records, and TLS posture, with receipts under `receipts/drift-reports/`, an ops-portal Drift Status panel, and `lv3 diff` routed to `make drift-report`; the live schedule and dashboard metric feed still require apply from `main`.
 The repository now also ships ADR 0100 disaster-recovery targets, a structured recovery runbook, and `make dr-status` / `lv3 release status` readiness views; ADR 0181 off-host witness publication is now live, while the optional second off-site copy of `backup-lv3` still depends on external storage credentials.
 ADR 0096 SLO tracking is now live on `monitoring-lv3`: the repo-managed blackbox exporter, generated Prometheus SLO rules and targets, and the `LV3 SLO Overview` Grafana dashboard were re-converged on 2026-03-25, and `grafana.lv3.org` now keeps `/api/health` blocked while dashboard URLs continue to redirect operators to login.
+ADR 0105 capacity modeling is now live on `monitoring-lv3`: the `lv3-capacity-overview` Grafana dashboard, repo-managed platform alert bundle, and both capacity-report entrypoints were re-verified from latest `main` on 2026-03-27, and the official separate-worktree live-apply path now avoids SSH control-socket overflows by using compact per-run directories under `/tmp`.
 The repository now also ships ADR 0115 mutation-ledger primitives live on production: the `ledger.events` Postgres schema migration, the `platform.ledger` writer/reader/replay package, the one-time `audit_log` migration helper, and optional dual-write from the existing mutation-audit emitter when `LV3_LEDGER_DSN` is configured; the latest `main` replay on 2026-03-27 re-projected the Windmill runtime ledger env and verified a fresh guest-side `execution.completed` row through both `ledger.events` and the compatibility `audit_log` view.
 The repository now also ships ADR 0117 dependency-graph runtime live on production: the `platform.graph` traversal client, `graph.nodes` / `graph.edges` schema migration, repo-managed graph rebuild helpers, `/v1/graph/*` gateway routes, and risk-scorer integration are now verified against the live Windmill, PostgreSQL, and API-gateway runtime after the 2026-03-26 dependency-graph apply.
 The repository now also ships ADR 0121 local search live on production: a repo-managed search fabric under `scripts/search_fabric/`, a persisted local index at `build/search-index/documents.json`, the `lv3 search` CLI command, the `/v1/search` API surface, and an ops-portal search panel backed by the same corpus, with the first production receipt recorded on 2026-03-26 after the API gateway and Windmill worker indexing paths were hardened against malformed corpus files.
@@ -117,7 +118,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.4` |
+| Repository version | `0.177.5` |
 | Platform version | `0.130.25` |
 | Observed check date | `2026-03-27` |
 | Observed OS | `Debian 13` |
@@ -168,6 +169,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `api_gateway` | `2026-03-26-adr-0163-retry-taxonomy-live-apply` |
 | `backup_vm` | `2026-03-22-adr-0029-backup-vm-live-apply` |
 | `build_telemetry` | `2026-03-22-adr-0028-build-telemetry-live-apply` |
+| `capacity_model` | `2026-03-27-adr-0105-capacity-model-mainline-live-apply` |
 | `command_catalog` | `2026-03-22-adr-0048-command-catalog-live-apply` |
 | `config_merge` | `2026-03-26-adr-0158-config-merge-live-apply` |
 | `control_metadata_witness` | `2026-03-27-adr-0181-control-metadata-witness-live-apply` |
@@ -186,7 +188,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `local_search_and_indexing_fabric` | `2026-03-26-adr-0121-search-indexing-fabric-live-apply` |
 | `mail_platform` | `2026-03-24-keycloak-password-reset-mail-live-apply` |
 | `mattermost` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
-| `monitoring` | `2026-03-25-adr-0096-slo-tracking-live-apply` |
+| `monitoring` | `2026-03-27-adr-0105-capacity-model-mainline-live-apply` |
 | `mutation_audit` | `2026-03-23-adr-0066-mutation-audit-live-apply` |
 | `mutation_ledger` | `2026-03-27-adr-0115-mutation-ledger-mainline-live-apply` |
 | `n8n` | `2026-03-26-adr-0151-n8n-live-apply` |
@@ -929,6 +931,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0180: Standby Capacity Reservation and Placement Rules](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0180-standby-capacity-reservation-and-placement-rules.md)
 - [Workstream ADR 0181: Off-Host Witness And Control Metadata Replication](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0181-off-host-witness-replication.md)
 - [Workstream ADR 0182: Live Apply Merge Train and Rollback Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0182-live-apply-merge-train-and-rollback-bundle.md)
+- [Workstream ws-0105-live-apply: Live Apply ADR 0105 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0105-live-apply.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
@@ -946,7 +949,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.4` |
+| Repository version | `0.177.5` |
 | Platform version | `0.130.25` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1063,6 +1066,7 @@ This repository is intentionally opinionated:
 | `0103` | Data classification and retention policy | `merged` | [adr-0103-data-retention-policy.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0103-data-retention-policy.md) |
 | `0104` | Service dependency graph and failure propagation model | `merged` | [adr-0104-dependency-graph.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0104-dependency-graph.md) |
 | `0105` | Platform capacity model and resource quota enforcement | `merged` | [adr-0105-capacity-model.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0105-capacity-model.md) |
+| `0105` | ADR 0105 live apply from latest origin/main | `merged` | [ws-0105-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0105-live-apply.md) |
 | `0106` | Ephemeral environment lifecycle and teardown policy | `merged` | [adr-0106-ephemeral-lifecycle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0106-ephemeral-lifecycle.md) |
 | `0107` | Platform extension model for adding new services | `merged` | [adr-0107-extension-model.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0107-extension-model.md) |
 | `0108` | Operator onboarding and off-boarding workflow | `merged` | [adr-0108-operator-onboarding.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0108-operator-onboarding.md) |
@@ -1072,7 +1076,7 @@ This repository is intentionally opinionated:
 | `0112` | Deterministic goal compiler | `merged` | [adr-0112-goal-compiler.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0112-goal-compiler.md) |
 | `0113` | World-state materializer | `merged` | [adr-0113-world-state-materializer.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0113-world-state-materializer.md) |
 | `0114` | Rule-based incident triage engine | `merged` | [adr-0114-incident-triage-engine.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0114-incident-triage-engine.md) |
-| `0115` | Event-sourced mutation ledger | `live_applied` | [adr-0115-mutation-ledger.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0115-mutation-ledger.md) |
+| `0115` | Event-sourced mutation ledger | `merged` | [adr-0115-mutation-ledger.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0115-mutation-ledger.md) |
 | `0116` | Deterministic workflow change risk scoring | `merged` | [adr-0116-change-risk-scoring.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0116-change-risk-scoring.md) |
 | `0117` | Service dependency graph as first-class runtime | `live_applied` | [adr-0117-dependency-graph-runtime.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0117-dependency-graph-runtime.md) |
 | `0119` | Budgeted workflow scheduler | `merged` | [adr-0119-budgeted-workflow-scheduler.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0119-budgeted-workflow-scheduler.md) |

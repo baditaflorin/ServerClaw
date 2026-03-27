@@ -103,6 +103,7 @@ On 2026-03-26 the monitoring role was extended so the Grafana converge now impor
 
 - `uv run --with pytest python -m pytest tests/test_monitoring_vm_role.py tests/test_capacity_report.py tests/test_lv3_cli.py tests/test_promotion_pipeline.py -q`
 - `uv run --with pytest python -m pytest tests/test_weekly_capacity_report_windmill.py -q`
+- `uv run --with pytest python -m pytest tests/test_run_namespace.py tests/test_ansible_execution_scopes.py tests/test_remote_exec.py -q`
 - `make syntax-check-monitoring`
 - `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`
 - `./scripts/validate_repo.sh alert-rules health-probes`
@@ -112,8 +113,9 @@ On 2026-03-26 the monitoring role was extended so the Grafana converge now impor
 - `make weekly-capacity-report`
 - `uv run --with pyyaml python scripts/capacity_report.py --model config/capacity-model.json --check-gate --proposed-change 20,8,100`
 - `BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 make live-apply-service service=grafana env=production EXTRA_ARGS='-e bypass_promotion=true'`
+- `curl -Ik --resolve grafana.lv3.org:443:65.108.75.123 https://grafana.lv3.org/d/lv3-capacity-overview/lv3-capacity-overview`
 
-The first 2026-03-26 production converge imported and verified the capacity dashboard but later hit a transient SSH reachability failure during a downstream blackbox verification task. An immediate replay from the same `codex/ws-0105-live-apply` worktree then completed cleanly with `ok=176 changed=0 unreachable=0 failed=0`. The current-mainline replay from merge commit `12898d4ef17dc0f8ff3b92523874a61993bed565` completed cleanly again on 2026-03-27 with `ok=176 changed=0 unreachable=0 failed=0 skipped=34`, the public dashboard URL `https://grafana.lv3.org/d/lv3-capacity-overview/lv3-capacity-overview` returned `HTTP/2 302` to Grafana login, and both report entry points rendered with `metrics_source: ssh+influx`.
+The first 2026-03-26 production converge imported and verified the capacity dashboard but later hit a transient SSH reachability failure during a downstream blackbox verification task. An immediate replay from the same `codex/ws-0105-live-apply` worktree then completed cleanly with `ok=176 changed=0 unreachable=0 failed=0`. The current-mainline replay from source commit `74a489de77890f970c54f4ca2b09e1d755508345` completed cleanly again on 2026-03-27 with `ok=176 changed=0 unreachable=0 failed=0 skipped=34`, and that replay also verified the fresh-worktree automation path after shortening per-run Ansible control-socket directories for long isolated worktrees. The public dashboard URL `https://grafana.lv3.org/d/lv3-capacity-overview/lv3-capacity-overview` returned `HTTP/2 302` to Grafana login, and both report entry points rendered with `metrics_source: ssh+influx`.
 
 ## Related ADRs
 
