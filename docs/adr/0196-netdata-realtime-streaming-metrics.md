@@ -49,6 +49,8 @@ We deploy Netdata as a parent-plus-children topology for real-time metrics.
   service-specific browser auth flow.
 - The service is registered in the service, subdomain, health-probe,
   dependency, SLO, and data catalogs.
+- A read-only API gateway route exposes the private Netdata parent under
+  `/v1/realtime` for governed automation without requiring ad hoc host access.
 - The operator CLI adds `lv3 realtime <vm-name>` as the browser-first shortcut
   into the live metrics surface.
 - ADR 0071's observation loop consumes a Netdata anomaly signal so the live
