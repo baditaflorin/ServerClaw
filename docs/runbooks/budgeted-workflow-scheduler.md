@@ -90,8 +90,9 @@ make execution-lane-info LANE=lane:docker-runtime
 
 ## Live Verification
 
-- 2026-03-26 live verification confirmed `f/lv3/intent_queue_dispatcher`, `f/lv3/lane_scheduler`, `f/lv3/scheduler_watchdog`, and `f/lv3/scheduler_watchdog_loop` all returned `status: ok` through `jobs/run_wait_result`.
-- The enabled scheduler surfaces were rechecked after apply: `f/lv3/intent_queue_dispatcher_every_minute`, `f/lv3/lane_scheduler_every_2s`, `f/lv3/scheduler_watchdog_every_30s`, and `f/lv3/scheduler_watchdog_loop_every_10s`.
+- 2026-03-27 latest-main live verification confirmed `f/lv3/windmill_healthcheck`, `f/lv3/intent_queue_dispatcher`, `f/lv3/lane_scheduler`, `f/lv3/scheduler_watchdog`, and `f/lv3/scheduler_watchdog_loop` all returned `status: ok` through `jobs/run_wait_result`.
+- The enabled scheduler surfaces were rechecked after the latest-main replay: `f/lv3/intent_queue_dispatcher_every_minute`, `f/lv3/lane_scheduler_every_2s`, `f/lv3/scheduler_watchdog_every_30s`, and `f/lv3/scheduler_watchdog_loop_every_10s`.
+- The live Windmill API script bodies for `f/lv3/intent_queue_dispatcher`, `f/lv3/lane_scheduler`, `f/lv3/scheduler_watchdog`, and `f/lv3/scheduler_watchdog_loop` now match the checked-in branch sources byte-for-byte after the duplicate seed-path contract was removed from the Windmill defaults.
 - The worker runtime env on `docker-runtime-lv3` now includes `LV3_WINDMILL_BASE_URL` and `LV3_WINDMILL_TOKEN`, and the mirrored worker secret file exists at `/srv/proxmox_florin_server/.local/windmill/superadmin-secret.txt`.
 
 ## Troubleshooting

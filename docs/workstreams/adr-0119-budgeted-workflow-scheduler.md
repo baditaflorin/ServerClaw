@@ -3,8 +3,12 @@
 - ADR: [ADR 0119](../adr/0119-budgeted-workflow-scheduler.md)
 - Title: Orchestration layer between the goal compiler and Windmill — enforces hard per-workflow budgets (duration, steps, concurrency, host count, restart depth) and terminates or escalates on violation
 - Status: live_applied
-- Branch: `codex/ws-0119-live-apply`
-- Worktree: `.worktrees/ws-0119-live-apply`
+- Implemented In Repo Version: 0.177.10
+- Live Applied In Platform Version: 0.130.30
+- Implemented On: 2026-03-27
+- Live Applied On: 2026-03-27
+- Branch: `codex/ws-0119-main-final`
+- Worktree: `.worktrees/ws-0119-main-final`
 - Owner: codex
 - Depends On: `adr-0044-windmill`, `adr-0048-command-catalog`, `adr-0058-nats-event-bus`, `adr-0071-agent-observation-loop`, `adr-0098-postgres-ha`, `adr-0112-goal-compiler`, `adr-0115-mutation-ledger`, `adr-0116-change-risk-scoring`
 - Conflicts With: `adr-0112-goal-compiler` (shared workflow submission path)
@@ -58,24 +62,26 @@
 
 ## Live Apply Evidence
 
-- 2026-03-26 live apply updated the Docker runtime Windmill worker checkout, mirrored the worker-side superadmin secret, and re-synced the repo-managed Windmill scripts from this branch.
+- 2026-03-27 latest-main live apply replayed `playbooks/windmill.yml` successfully from the rebased integration worktree with `docker-runtime-lv3 : ok=216 changed=38 failed=0`.
 - The live Windmill script bodies for `f/lv3/intent_queue_dispatcher`, `f/lv3/lane_scheduler`, `f/lv3/scheduler_watchdog`, and `f/lv3/scheduler_watchdog_loop` were rechecked through the API and matched the branch-local sources byte-for-byte after apply.
 - Manual end-to-end `jobs/run_wait_result` verification succeeded for `f/lv3/windmill_healthcheck`, `f/lv3/intent_queue_dispatcher`, `f/lv3/lane_scheduler`, `f/lv3/scheduler_watchdog`, and `f/lv3/scheduler_watchdog_loop`.
 - The repo-managed schedules `f/lv3/intent_queue_dispatcher_every_minute`, `f/lv3/lane_scheduler_every_2s`, `f/lv3/scheduler_watchdog_every_30s`, and `f/lv3/scheduler_watchdog_loop_every_10s` were verified as enabled after apply.
+- The latest-main replay removed the duplicate `f/lv3/scheduler_watchdog_loop` seed contract from the Windmill defaults, so the wrapper path is now stable and no longer overwritten by the watchdog implementation body during sync.
 - The live worker runtime env on `docker-runtime-lv3` now exposes `LV3_WINDMILL_BASE_URL` and `LV3_WINDMILL_TOKEN`, and `/srv/proxmox_florin_server/.local/windmill/superadmin-secret.txt` exists on the worker checkout.
 
 ## Repo Validation
 
-- `uv run --with pytest python -m pytest -q tests/test_config_merge_windmill.py tests/test_windmill_operator_admin_app.py tests/test_config_merge_repo_surfaces.py` → passed (`30 passed`)
-- `python3 -m py_compile scripts/windmill_run_wait_result.py` → passed
+- `uv run --with pytest python -m pytest -q tests/test_config_merge_repo_surfaces.py tests/test_config_merge_windmill.py tests/test_windmill_operator_admin_app.py tests/test_windmill_circuit_clients.py` → passed (`47 passed`)
+- `python3 -m py_compile scripts/sync_windmill_seed_scripts.py scripts/windmill_run_wait_result.py platform/scheduler/scheduler.py` → passed
 - `ansible-playbook -i inventory/hosts.yml playbooks/windmill.yml --syntax-check` → passed
-- `uvx --from ansible-lint ansible-lint collections/ansible_collections/lv3/platform/roles/windmill_runtime` → passed
-- `./scripts/validate_repo.sh` still fails on the pre-existing unrelated `complexity[tasks]` warning in `collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/main.yml`
+- `uvx --from ansible-lint ansible-lint collections/ansible_collections/lv3/platform/roles/windmill_runtime` → passed with non-fatal warnings only
 
-## Merge Notes
+## Final Integration State
 
-- Leave `VERSION`, release sections in `changelog.md`, top-level integrated `README.md` status, and `versions/stack.yaml` to the main-branch integration step.
-- When merging to `main`, update the protected integration files for the live-applied state and carry forward the branch-local verification notes from this workstream.
+- This workstream is now live-applied from the latest `main`.
+- The mainline release that records the verified state is repository version `0.177.10` with platform version `0.130.30`.
+- The durable receipt for the successful latest-main replay is `receipts/live-applies/2026-03-27-adr-0119-budgeted-workflow-scheduler-mainline-live-apply.json`.
+- No additional merge-to-main cleanup is required for ADR 0119 beyond the normal push of this mainline release.
 
 ## Merge Criteria
 
@@ -91,4 +97,4 @@
 - The watchdog workflow runs every 30 seconds; ensure it has `max_concurrent_instances: 1` in its own budget block to prevent watchdog overlap
 - The rollback chain walk using `actor_intent_id` requires that the goal compiler always sets `actor_intent_id` on rollback intents pointing to the original intent. Verify this is implemented before testing the rollback guard.
 - For the first release, `max_touched_hosts` enforcement is advisory only (logs a warning but does not block). Promote it to a hard block in a follow-up after verifying the Ansible inventory size reporting is reliable across all playbooks.
-- The live apply is complete on platform version `0.130.20`, but the protected integration files still need the main-branch update that this workstream branch intentionally skipped.
+- The latest-main replay fixed a real seed-sync regression: keep `windmill_seed_scripts` path values unique, or Windmill will silently overwrite the earlier script body during manifest replay.

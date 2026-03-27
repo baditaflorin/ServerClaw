@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.177.9
-platform_version: 0.130.29
+repo_version: 0.177.10
+platform_version: 0.130.30
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -29,7 +29,8 @@ live_apply_evidence:
     openbao: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
     vaultwarden: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
     certificate_lifecycle: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
-    windmill: 2026-03-27-adr-0108-operator-onboarding-mainline-live-apply
+    windmill: 2026-03-27-adr-0119-budgeted-workflow-scheduler-mainline-live-apply
+    budgeted_workflow_scheduler: 2026-03-27-adr-0119-budgeted-workflow-scheduler-mainline-live-apply
     observation_to_action_closure_loop: 2026-03-26-adr-0126-observation-to-action-closure-loop-live-apply
     deadlock_detector: 2026-03-26-adr-0162-deadlock-detector-live-apply
     dependency_graph_runtime: 2026-03-26-adr-0117-dependency-graph-live-apply

@@ -103,6 +103,7 @@ The repository now also ships ADR 0113 world-state materializer live on producti
 The repository now also ships ADR 0151 n8n automation live on production: the repo-managed `n8n` runtime is active on `docker-runtime-lv3`, PostgreSQL-backed persistence is pinned to `postgres-lv3` at `10.10.10.50`, and `https://n8n.lv3.org` now serves the protected editor with public webhook prefixes through the shared NGINX edge after the first successful `main`-based live apply on 2026-03-26.
 The repository now also ships ADR 0148 private web search live on production: the repo-managed SearXNG runtime is active on `docker-runtime-lv3`, the Proxmox host publishes the private operator and agent entrypoint on `http://100.64.0.1`, `search.lv3.org` resolves to that tailnet proxy, and Open WebUI now uses the local SearXNG JSON endpoint for governed web search after the 2026-03-26 live apply.
 The repository now also ships ADR 0165 workflow idempotency: `platform.idempotency`, scheduler-side cached result replay, closure-loop trigger scoping, `execution.idempotent_hit` ledger events, and `lv3 intent status <intent_id>` provide deterministic duplicate suppression for platform-managed workflows; the live Windmill converge from `main` on 2026-03-25 now applies and verifies the shared `platform.idempotency_records` schema on `postgres-lv3`.
+The repository now also ships ADR 0119 budgeted workflow scheduling live on production: the latest-main Windmill replay on 2026-03-27 re-verified bootstrap-session auth fallback, worker token propagation, the dispatcher and lane scheduler, and both watchdog seed paths plus their enabled schedules on `docker-runtime-lv3`.
 The repository now also ships ADR 0146 Langfuse observability live on production: `https://langfuse.lv3.org` is published through the shared NGINX edge, the seeded `lv3-agent-observability` project is reachable through the public API, and the 2026-03-26 smoke verification ingested a trace that resolved successfully in the Langfuse UI.
 The developer portal generator now stamps published docs pages with sensitivity metadata, keeps `RESTRICTED` ADRs and runbooks summary-only in portal output, and leaves `CONFIDENTIAL` documents source-only until a dedicated admin-view path exists.
 Portal access is now authentication-by-default on the live platform: `ops.lv3.org`, `docs.lv3.org`, and `changelog.lv3.org` are gated by the shared Keycloak edge auth flow, and Grafana no longer serves anonymous dashboards.
@@ -119,8 +120,8 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.9` |
-| Platform version | `0.130.29` |
+| Repository version | `0.177.10` |
+| Platform version | `0.130.30` |
 | Observed check date | `2026-03-27` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -169,6 +170,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `agent_coordination` | `2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply` |
 | `api_gateway` | `2026-03-26-adr-0163-retry-taxonomy-live-apply` |
 | `backup_vm` | `2026-03-22-adr-0029-backup-vm-live-apply` |
+| `budgeted_workflow_scheduler` | `2026-03-27-adr-0119-budgeted-workflow-scheduler-mainline-live-apply` |
 | `build_telemetry` | `2026-03-22-adr-0028-build-telemetry-live-apply` |
 | `capacity_model` | `2026-03-27-adr-0105-capacity-model-mainline-live-apply` |
 | `certificate_lifecycle` | `2026-03-27-adr-0101-certificate-lifecycle-main-live-apply` |
@@ -219,7 +221,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `tempo_tracing` | `2026-03-22-adr-0053-tempo-traces-live-apply` |
 | `uptime_kuma` | `2026-03-22-adr-0027-uptime-kuma-live-apply` |
 | `vaultwarden` | `2026-03-27-adr-0101-certificate-lifecycle-main-live-apply` |
-| `windmill` | `2026-03-27-adr-0108-operator-onboarding-mainline-live-apply` |
+| `windmill` | `2026-03-27-adr-0119-budgeted-workflow-scheduler-mainline-live-apply` |
 | `world_state_materializer` | `2026-03-27-adr-0113-world-state-materializer-mainline-live-apply` |
 <!-- END GENERATED: platform-status -->
 
@@ -958,8 +960,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.9` |
-| Platform version | `0.130.29` |
+| Repository version | `0.177.10` |
+| Platform version | `0.130.30` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1090,7 +1092,7 @@ This repository is intentionally opinionated:
 | `0115` | Event-sourced mutation ledger | `merged` | [adr-0115-mutation-ledger.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0115-mutation-ledger.md) |
 | `0116` | Deterministic workflow change risk scoring | `merged` | [adr-0116-change-risk-scoring.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0116-change-risk-scoring.md) |
 | `0117` | Service dependency graph as first-class runtime | `live_applied` | [adr-0117-dependency-graph-runtime.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0117-dependency-graph-runtime.md) |
-| `0119` | Budgeted workflow scheduler | `merged` | [adr-0119-budgeted-workflow-scheduler.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0119-budgeted-workflow-scheduler.md) |
+| `0119` | Budgeted workflow scheduler | `live_applied` | [adr-0119-budgeted-workflow-scheduler.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0119-budgeted-workflow-scheduler.md) |
 | `0120` | Dry-run semantic diff engine | `merged` | [adr-0120-dry-run-diff-engine.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0120-dry-run-diff-engine.md) |
 | `0121` | Local search and indexing fabric | `merged` | [adr-0121-search-indexing-fabric.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0121-search-indexing-fabric.md) |
 | `0122` | Windmill operator access admin surface | `live_applied` | [adr-0122-operator-access-admin.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0122-operator-access-admin.md) |
