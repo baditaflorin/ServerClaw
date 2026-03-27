@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.12",
   "platform_version": "0.130.31",
-  "generated_at": "2026-03-27T17:34:19Z",
-  "next_refresh_at": "2026-03-27T18:34:19Z",
+  "generated_at": "2026-03-27T23:11:04Z",
+  "next_refresh_at": "2026-03-28T00:11:04Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -37,7 +37,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://api.lv3.org",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "backup_pbs": {
         "service_name": "Proxmox Backup Server",
@@ -70,7 +70,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://build.lv3.org",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "docker_runtime": {
         "service_name": "Docker Runtime VM",
@@ -81,7 +81,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://docker.lv3.org",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "docs_portal": {
         "service_name": "Developer Portal",
@@ -103,7 +103,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://logs.lv3.org",
-        "last_live_apply": "2026-03-27T00:00:00Z",
+        "last_live_apply": "2026-03-28T00:00:00Z",
         "slo_status": "unknown"
       },
       "gitea": {
@@ -115,7 +115,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:3009",
-        "last_live_apply": "2026-03-27T00:00:00Z",
+        "last_live_apply": "2026-03-28T00:00:00Z",
         "slo_status": "unknown"
       },
       "grafana": {
@@ -139,7 +139,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://headscale.lv3.org",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "homepage": {
         "service_name": "Homepage",
@@ -150,7 +150,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://home.lv3.org",
-        "last_live_apply": "2026-03-27T00:00:00Z",
+        "last_live_apply": "2026-03-28T00:00:00Z",
         "slo_status": "unknown"
       },
       "keycloak": {
@@ -162,7 +162,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://sso.lv3.org",
-        "last_live_apply": "2026-03-27T00:00:00Z",
+        "last_live_apply": "2026-03-28T00:00:00Z",
         "slo_status": "unknown"
       },
       "langfuse": {
@@ -174,7 +174,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://langfuse.lv3.org",
-        "last_live_apply": "2026-03-27T00:00:00Z",
+        "last_live_apply": "2026-03-28T00:00:00Z",
         "slo_status": "unknown"
       },
       "mail_platform": {
@@ -186,7 +186,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://mail.lv3.org",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "mattermost": {
         "service_name": "Mattermost",
@@ -197,7 +197,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:8066",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "n8n": {
         "service_name": "n8n",
@@ -208,7 +208,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://n8n.lv3.org",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "netbox": {
         "service_name": "NetBox",
@@ -219,7 +219,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:8004",
-        "last_live_apply": "2026-03-27T00:00:00Z",
+        "last_live_apply": "2026-03-28T00:00:00Z",
         "slo_status": "unknown"
       },
       "nginx_edge": {
@@ -243,7 +243,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.20:2586",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "ntopng": {
         "service_name": "ntopng",
@@ -254,7 +254,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:3001",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "ollama": {
         "service_name": "Ollama",
@@ -265,7 +265,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://10.10.10.20:11434",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "open_webui": {
         "service_name": "Open WebUI",
@@ -276,7 +276,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:8008",
-        "last_live_apply": "2026-03-27T00:00:00Z",
+        "last_live_apply": "2026-03-28T00:00:00Z",
         "slo_status": "unknown"
       },
       "openbao": {
@@ -288,7 +288,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:8200",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "ops_portal": {
         "service_name": "Platform Operations Portal",
@@ -299,7 +299,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://ops.lv3.org",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "platform_context_api": {
         "service_name": "Platform Context API",
@@ -310,7 +310,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:8010",
-        "last_live_apply": "2026-03-27T00:00:00Z",
+        "last_live_apply": "2026-03-28T00:00:00Z",
         "slo_status": "unknown"
       },
       "portainer": {
@@ -322,7 +322,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:9444",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "postgres": {
         "service_name": "PostgreSQL",
@@ -333,7 +333,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "postgres://database.lv3.org:5432",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "proxmox_ui": {
         "service_name": "Proxmox UI",
@@ -344,7 +344,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://proxmox.lv3.org",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "searxng": {
         "service_name": "SearXNG",
@@ -355,7 +355,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "http://search.lv3.org",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "semaphore": {
         "service_name": "Semaphore",
@@ -366,7 +366,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.118.189.95:8020",
-        "last_live_apply": "2026-03-27T00:00:00Z",
+        "last_live_apply": "2026-03-28T00:00:00Z",
         "slo_status": "unknown"
       },
       "status_page": {
@@ -378,7 +378,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://status.lv3.org",
-        "last_live_apply": "2026-03-27T00:00:00Z",
+        "last_live_apply": "2026-03-28T00:00:00Z",
         "slo_status": "unknown"
       },
       "step_ca": {
@@ -390,7 +390,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://100.64.0.1:9443",
-        "last_live_apply": "2026-03-27T00:00:00Z"
+        "last_live_apply": "2026-03-28T00:00:00Z"
       },
       "uptime_kuma": {
         "service_name": "Uptime Kuma",
@@ -401,7 +401,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://uptime.lv3.org",
-        "last_live_apply": "2026-03-27T00:00:00Z",
+        "last_live_apply": "2026-03-28T00:00:00Z",
         "slo_status": "unknown"
       },
       "vaultwarden": {
@@ -413,7 +413,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://vault.lv3.org",
-        "last_live_apply": "2026-03-27T00:00:00Z",
+        "last_live_apply": "2026-03-28T00:00:00Z",
         "slo_status": "unknown"
       },
       "windmill": {
@@ -425,7 +425,7 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "http://100.64.0.1:8005",
-        "last_live_apply": "2026-03-27T00:00:00Z",
+        "last_live_apply": "2026-03-28T00:00:00Z",
         "slo_status": "unknown"
       }
     }
@@ -3646,13 +3646,6 @@
       "status": "Proposed",
       "implementation_status": "Not Implemented",
       "path": "docs/adr/0188-failover-rehearsal-gate-for-redundancy-tiers.md"
-    },
-    {
-      "adr": "0189",
-      "title": "Network Impairment Test Matrix for Staging and Previews",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0189-network-impairment-test-matrix-for-staging-and-previews.md"
     },
     {
       "adr": "0190",
