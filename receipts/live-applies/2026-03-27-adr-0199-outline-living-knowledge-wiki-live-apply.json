@@ -7,7 +7,7 @@
   "recorded_by": "codex",
   "source_commit": "e213cce2d3f362f5689f8710213ec0090551031e",
   "repo_version_context": "0.177.12",
-  "workflow_id": "ws-0199-live-apply",
+  "workflow_id": "adr-0199-outline-living-knowledge-wiki-live-apply",
   "adr": "0199",
   "summary": "Live-applied ADR 0199 by converging Outline on docker-runtime-lv3 with the Keycloak OIDC client, re-publishing `wiki.lv3.org` through nginx-lv3, rotating the repo-managed Outline API token to the final scope set, pruning the default Welcome collection, and verifying the five governed living-knowledge collections end to end.",
   "targets": [

@@ -313,6 +313,18 @@
         "primary_url": "https://ops.lv3.org",
         "last_live_apply": "2026-03-27T00:00:00Z"
       },
+      "outline": {
+        "service_name": "Outline",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://wiki.lv3.org",
+        "last_live_apply": "2026-03-27T00:00:00Z",
+        "slo_status": "unknown"
+      },
       "platform_context_api": {
         "service_name": "Platform Context API",
         "status": "healthy",
