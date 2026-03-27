@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 from pathlib import Path
 
@@ -81,3 +82,38 @@ def test_remote_command_builds_production_import_target(tmp_path: Path) -> None:
     assert "TF_VAR_proxmox_endpoint=https://proxmox.example.invalid:8006/api2/json" in command
     assert "TF_VAR_proxmox_api_token='lv3-automation@pve!primary=secret-token'" in command
     assert "./scripts/tofu_exec.sh import production module.nginx_lv3.proxmox_virtual_environment_vm.this proxmox_florin/110" in command
+
+
+def test_remote_command_prefers_session_scoped_remote_workspace(tmp_path: Path) -> None:
+    token_file = tmp_path / "token.json"
+    token_file.write_text(
+        json.dumps(
+            {
+                "api_url": "https://proxmox.example.invalid:8006/api2/json",
+                "full_token_id": "lv3-automation@pve!primary",
+                "value": "secret-token",
+            }
+        )
+    )
+
+    completed = subprocess.run(
+        [
+            "python3",
+            str(TOKEN_SCRIPT),
+            "plan",
+            "staging",
+            "--token-file",
+            str(token_file),
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+        env={
+            **dict(os.environ),
+            "LV3_REMOTE_WORKSPACE_ROOT": "/srv/builds/proxmox_florin_server/.lv3-session-workspaces/test/repo",
+        },
+    )
+
+    command = completed.stdout.strip()
+    assert command.startswith("cd /srv/builds/proxmox_florin_server/.lv3-session-workspaces/test/repo && ")
+    assert "./scripts/tofu_exec.sh plan staging" in command

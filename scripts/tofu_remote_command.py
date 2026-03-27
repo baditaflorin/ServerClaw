@@ -51,6 +51,9 @@ def default_token_file() -> Path:
 
 
 def build_server_workspace() -> str:
+    session_workspace = os.environ.get("LV3_REMOTE_WORKSPACE_ROOT")
+    if session_workspace:
+        return session_workspace
     config = json.loads(BUILD_SERVER_CONFIG.read_text(encoding="utf-8"))
     return str(config["workspace_root"])
 
