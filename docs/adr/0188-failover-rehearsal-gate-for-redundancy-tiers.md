@@ -1,10 +1,10 @@
 # ADR 0188: Failover Rehearsal Gate for Redundancy Tiers
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Implemented
+- Implementation Status: Implemented
+- Implemented In Repo Version: not yet (awaiting merge to main)
+- Implemented In Platform Version: 0.130.31
+- Implemented On: 2026-03-27
 - Date: 2026-03-27
 
 ## Context
@@ -60,6 +60,13 @@ Each rehearsal must publish:
 
 - This ADR sets the rehearsal requirement; it does not mandate a single cadence for every service.
 - Services without declared redundancy are not forced into artificial failover drills.
+
+## Implementation Notes
+
+- `config/service-redundancy-catalog.json` now defines default rehearsal freshness policy for `R1`, `R2`, and `R3`, and it records branch-local rehearsal evidence per service when an exercise passes, fails, or expires.
+- `scripts/service_redundancy.py` now reports both the declared tier and the currently implemented tier from fresh rehearsal evidence, so a stale or failed rehearsal downgrades status reporting without rewriting the design tier.
+- The first live apply for this ADR on 2026-03-27 verified the gate against the real production PostgreSQL path and found that the expected warm-standby path is not currently present: VM `151` is absent, `patroni` and `keepalived` are inactive on `postgres-lv3`, and the expected VIP `10.10.10.55:5432` is not reachable from the Proxmox host.
+- Because the live rehearsal could not pass honestly, the current `postgres` implemented claim now falls back to `R0` until the standby guest, Patroni, and VIP publication path are restored and a fresh passing `R2` rehearsal is recorded.
 
 ## Related ADRs
 

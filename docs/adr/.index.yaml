@@ -7,11 +7,11 @@
 
 schema_version: 1
 generated: '2026-03-27'
-total_adrs: 200
+total_adrs: 201
 implementation_status_summary:
-  Implemented: 181
+  Implemented: 183
   Partial: 3
-  Not Implemented: 15
+  Not Implemented: 14
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -174,6 +174,7 @@ concerns:
     - 0178
     - 0179
     - 0182
+    - 0183
     - 0184
     - 0185
   release:
@@ -1919,7 +1920,7 @@ adr_index:
     summary: We will implement a Windmill-backed operator onboarding and off-boarding workflow that provisions and revokes
       access acr
     filename: 0108-operator-onboarding-and-offboarding.md
-    implemented_version: 0.105.0
+    implemented_version: 0.177.8
   - adr: 0109
     title: Public Status Page
     status: Accepted
@@ -3169,6 +3170,19 @@ adr_index:
       - submission
     summary: 'Keycloak will:'
     filename: 0183-keycloak-mail-network-internal-submission.md
+  - adr: 0183
+    title: Multi-Environment Live Lanes
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: platform
+    keywords:
+      - multi-environment
+      - live
+      - lanes
+    summary: We will treat environment lanes as a catalog-driven contract and add an explicit activation path for staging.
+    filename: 0183-multi-environment-live-lanes.md
+    implemented_version: 0.177.9
   - adr: 0184
     title: Failure-Domain Labels and Anti-Affinity Policy
     status: Proposed
@@ -3230,8 +3244,8 @@ adr_index:
     filename: 0187-anonymized-seed-data-snapshots-for-repeatable-tests.md
   - adr: 0188
     title: Failover Rehearsal Gate for Redundancy Tiers
-    status: Proposed
-    implementation_status: Not Implemented
+    status: Implemented
+    implementation_status: Implemented
     date: '2026-03-27'
     concern: ci-cd
     keywords:
@@ -3243,6 +3257,7 @@ adr_index:
     summary: We will require scheduled failover or recovery rehearsals for services that claim redundancy tiers above rebuild-only
       re
     filename: 0188-failover-rehearsal-gate-for-redundancy-tiers.md
+    implemented_version: 0.130.31
   - adr: 0189
     title: Network Impairment Test Matrix for Staging and Previews
     status: Proposed
