@@ -105,7 +105,11 @@ def test_receipt_id_with_session_appends_normalized_suffix(monkeypatch: pytest.M
 def test_receipt_environment_for_path_accepts_catalog_driven_subdirectories(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(live_apply_receipts, "receipt_subdirectory_environments", lambda: {"staging", "development"})
+    monkeypatch.setattr(
+        live_apply_receipts,
+        "receipt_subdirectory_environments",
+        lambda: {"staging", "development", "preview"},
+    )
 
     assert (
         live_apply_receipts.receipt_environment_for_path(
@@ -118,4 +122,10 @@ def test_receipt_environment_for_path_accepts_catalog_driven_subdirectories(
             live_apply_receipts.RECEIPTS_DIR / "2026-03-27-test.json"
         )
         == "production"
+    )
+    assert (
+        live_apply_receipts.receipt_environment_for_path(
+            live_apply_receipts.RECEIPTS_DIR / "preview" / "2026-03-27-test.json"
+        )
+        == "preview"
     )
