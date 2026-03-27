@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.14",
   "platform_version": "0.130.31",
-  "generated_at": "2026-03-27T22:50:46Z",
-  "next_refresh_at": "2026-03-27T23:50:46Z",
+  "generated_at": "2026-03-27T22:54:42Z",
+  "next_refresh_at": "2026-03-27T23:54:42Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3625,13 +3625,6 @@
       "status": "Proposed",
       "implementation_status": "Not Implemented",
       "path": "docs/adr/0190-synthetic-transaction-replay-for-capacity-and-recovery-validation.md"
-    },
-    {
-      "adr": "0192",
-      "title": "Separate Capacity Classes for Standby, Recovery, and Preview Workloads",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0192-separate-capacity-classes-for-standby-recovery-and-preview-workloads.md"
     }
   ]
 }
