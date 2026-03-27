@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0190](../adr/0190-synthetic-transaction-replay-for-capacity-and-recovery-validation.md)
 - Title: live replay, verification, and evidence capture for synthetic transaction replay on restore targets
-- Status: ready to merge
+- Status: merged (unreleased)
 - Branch: `codex/ws-0190-live-apply`
 - Worktree: `.worktrees/ws-0190-live-apply`
 - Owner: codex
@@ -33,9 +33,9 @@
 - ADR 0099 restore verification now records synthetic replay success rate, latency distribution, validation-window context, and the guest execution mode used for the run
 - the workstream also hardened the recovery path by adding a Proxmox guest-agent fallback when restored guests never expose an SSH banner through `vmbr20`
 - live evidence is committed in `receipts/restore-verifications/2026-03-27-ws0190-attempt1.json`, `receipts/restore-verifications/2026-03-27-ws0190-attempt2-qga.json`, and `receipts/restore-verifications/2026-03-27.json`
+- the repository-side implementation is now merged on `main` after release `0.177.15`, and the next repo release cut will assign ADR 0190 its first `Implemented In Repo Version`
 
-## Remaining For Merge To `main`
+## Remaining For Repo Release And Platform Completion
 
-- This branch now carries the release metadata needed for mainline integration: `workstreams.yaml` marks the workstream merge-ready and includes the canonical-truth changelog entry for the release manager.
-- Merge-to-main should flip the workstream registry status to `merged`, cut the next patch repo release, and update ADR 0190 with the released repo version.
+- `workstreams.yaml` now records `ws-0190-live-apply` as merged on `main` with pending canonical-truth release metadata, so the next mainline repo release can assign ADR 0190 its first released repo version without redoing the merge.
 - Platform-version advancement must still wait for a future replay where the restored `docker-runtime-lv3` services themselves become healthy enough for the smoke suite and synthetic replay to pass.

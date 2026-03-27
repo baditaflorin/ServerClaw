@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.15",
   "platform_version": "0.130.31",
-  "generated_at": "2026-03-27T22:55:45Z",
-  "next_refresh_at": "2026-03-27T23:55:45Z",
+  "generated_at": "2026-03-27T23:06:02Z",
+  "next_refresh_at": "2026-03-28T00:06:02Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3618,27 +3618,6 @@
       "status": "Proposed",
       "implementation_status": "Not Implemented",
       "path": "docs/adr/0189-network-impairment-test-matrix-for-staging-and-previews.md"
-    },
-    {
-      "adr": "0190",
-      "title": "Synthetic Transaction Replay for Capacity and Recovery Validation",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0190-synthetic-transaction-replay-for-capacity-and-recovery-validation.md"
-    },
-    {
-      "adr": "0191",
-      "title": "Immutable Guest Replacement for Stateful and Edge Services",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0191-immutable-guest-replacement-for-stateful-and-edge-services.md"
-    },
-    {
-      "adr": "0192",
-      "title": "Separate Capacity Classes for Standby, Recovery, and Preview Workloads",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0192-separate-capacity-classes-for-standby-recovery-and-preview-workloads.md"
     }
   ]
 }

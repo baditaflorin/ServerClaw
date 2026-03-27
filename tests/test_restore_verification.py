@@ -77,6 +77,7 @@ def test_build_target_result_fails_when_synthetic_replay_fails() -> None:
         gateway="10.20.10.1",
         mac_address="BC:24:11:2A:2E:CB",
         smoke_kind="docker-runtime",
+        resources=rv.ResourceAmount(ram_gb=6, vcpu=4, disk_gb=96),
     )
     backup = {
         "volid": "lv3-backup-pbs:backup/qemu/120/2026-03-27T02:30:00Z",
@@ -124,8 +125,28 @@ def test_maybe_write_metrics_skips_without_environment(monkeypatch, tmp_path: Pa
 
 def test_select_restore_targets_filters_requested_names(monkeypatch) -> None:
     targets = [
-        rv.RestoreTarget("postgres-lv3", 150, 900, "vmbr20", "10.20.10.110/24", "10.20.10.1", "BC:24:11:2A:2E:CA", "postgres"),
-        rv.RestoreTarget("docker-runtime-lv3", 120, 901, "vmbr20", "10.20.10.100/24", "10.20.10.1", "BC:24:11:2A:2E:CB", "docker-runtime"),
+        rv.RestoreTarget(
+            "postgres-lv3",
+            150,
+            900,
+            "vmbr20",
+            "10.20.10.110/24",
+            "10.20.10.1",
+            "BC:24:11:2A:2E:CA",
+            "postgres",
+            rv.ResourceAmount(ram_gb=4, vcpu=2, disk_gb=48),
+        ),
+        rv.RestoreTarget(
+            "docker-runtime-lv3",
+            120,
+            901,
+            "vmbr20",
+            "10.20.10.100/24",
+            "10.20.10.1",
+            "BC:24:11:2A:2E:CB",
+            "docker-runtime",
+            rv.ResourceAmount(ram_gb=6, vcpu=4, disk_gb=96),
+        ),
     ]
     monkeypatch.setattr(rv, "load_restore_targets", lambda: targets)
 
@@ -144,6 +165,7 @@ def test_wait_for_guest_access_falls_back_to_qga(monkeypatch) -> None:
         gateway="10.20.10.1",
         mac_address="BC:24:11:2A:2E:CB",
         smoke_kind="docker-runtime",
+        resources=rv.ResourceAmount(ram_gb=6, vcpu=4, disk_gb=96),
     )
     ssh_attempts = iter(
         [
