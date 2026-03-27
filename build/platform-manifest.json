@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.17",
+  "repo_version": "0.177.18",
   "platform_version": "0.130.31",
-  "generated_at": "2026-03-27T23:24:26Z",
-  "next_refresh_at": "2026-03-28T00:24:26Z",
+  "generated_at": "2026-03-27T23:25:31Z",
+  "next_refresh_at": "2026-03-28T00:25:31Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3544,10 +3544,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.16",
+    "last_version": "0.177.17",
     "deployed_at": "2026-03-27",
-    "summary": "merged ADR 0185 branch-scoped ephemeral preview environments after the committed-head live apply proved the preview lifecycle can create, converge, validate, and destroy isolated preview VMs from a separate worktree without interfering with concurrent agent branches",
-    "release_notes_url": "docs/release-notes/0.177.17.md"
+    "summary": "implemented ADR 0184 failure-domain labels and anti-affinity policy, adding repo-validated placement metadata, live Proxmox guest tag convergence, and the verified workstream receipt for the current managed guests",
+    "release_notes_url": "docs/release-notes/0.177.18.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

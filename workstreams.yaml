@@ -4450,7 +4450,7 @@ workstreams:
     canonical_truth:
       changelog_entry: implemented ADR 0184 failure-domain labels and anti-affinity policy, adding repo-validated placement metadata, live Proxmox guest tag convergence, and the verified workstream receipt for the current managed guests
       release_bump: patch
-      included_in_repo_version: null
+      included_in_repo_version: 0.177.18
       latest_receipts:
         failure_domain_policy: 2026-03-27-adr-0184-failure-domain-labels-live-apply
 

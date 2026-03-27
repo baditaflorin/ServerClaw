@@ -3,7 +3,7 @@
 - ADR: [ADR 0184](../adr/0184-failure-domain-labels-and-anti-affinity-policy.md)
 - Title: Make failure-domain labels and anti-affinity policy enforced repo truth, then converge the live Proxmox labels from an isolated latest-main worktree
 - Status: live_applied
-- Implemented In Repo Version: pending merge to main
+- Implemented In Repo Version: 0.177.18
 - Live Applied In Platform Version: 0.130.31
 - Implemented On: 2026-03-27
 - Live Applied On: 2026-03-27
@@ -63,15 +63,12 @@
 - the repo now enforces ADR 0184 through explicit guest and preview-lane placement metadata, a focused validation/report script, and generated platform vars
 - live Proxmox labels are verified on the existing managed guests `110/120/130/140/150/160`
 - the current host still lacks `postgres-replica-lv3` (`151`), so the standby-specific live label remains documented repo truth rather than a verified runtime object until that drift is repaired
+- the workstream merged to `origin/main` on 2026-03-28 in repo version `0.177.18`
 
-## Mainline Integration
+## Post-Merge Notes
 
-- protected integration files remain intentionally untouched on this workstream branch: `README.md`, `VERSION`, `changelog.md`, and `versions/stack.yaml`
-- merge-to-main should decide whether to cut a repo release entry and whether the verified live apply warrants updating canonical integrated summaries
-- the branch-local receipt for this workstream is `receipts/live-applies/2026-03-27-adr-0184-failure-domain-labels-live-apply.json`
-
-## Notes For The Next Assistant
-
+- the `main` integration step advanced the repository release metadata to `0.177.18`
+- `versions/stack.yaml` intentionally keeps platform version `0.130.31` because no fresh mainline live apply was required to preserve the already-verified branch-local platform state
 - the stock `make provision-guests` replay still exposes pre-existing PostgreSQL standby drift on the host: `qm status 151` fails and template `9002` is absent
 - a scoped replay against the guests that actually exist applied the ADR 0184 tags cleanly, and `backup-lv3` then required one explicit `qm set 160 --tags ...` follow-up so its recovery tags matched the repo policy
-- merge-to-main should keep the receipt note about the missing `151` object intact until the standby VM is restored and re-verified
+- the release-integrated branch-local receipt for this workstream remains `receipts/live-applies/2026-03-27-adr-0184-failure-domain-labels-live-apply.json`

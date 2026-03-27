@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-28'
 total_adrs: 203
 implementation_status_summary:
-  Implemented: 186
-  Partial: 4
-  Not Implemented: 12
+  Implemented: 188
+  Partial: 3
+  Not Implemented: 11
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -3187,8 +3187,8 @@ adr_index:
     implemented_version: 0.177.9
   - adr: 0184
     title: Failure-Domain Labels and Anti-Affinity Policy
-    status: Accepted
-    implementation_status: Partial
+    status: Implemented
+    implementation_status: Implemented
     date: '2026-03-27'
     concern: platform
     keywords:
@@ -3199,7 +3199,7 @@ adr_index:
     summary: We will require failure-domain labels and anti-affinity declarations for all managed primaries, standbys, restore
       target
     filename: 0184-failure-domain-labels-and-anti-affinity-policy.md
-    implemented_version: 0.130.31
+    implemented_version: 0.177.18
   - adr: 0185
     title: Branch-Scoped Ephemeral Preview Environments
     status: Implemented
@@ -3214,7 +3214,7 @@ adr_index:
     summary: 'We will support branch-scoped ephemeral preview environments assembled from the branch''s release manifest and
       destroyed '
     filename: 0185-branch-scoped-ephemeral-preview-environments.md
-    implemented_version: 0.177.12
+    implemented_version: 0.177.17
   - adr: 0186
     title: Prewarmed Fixture Pools and Lease-Based Ephemeral Capacity
     status: Proposed

@@ -1,8 +1,8 @@
 # ADR 0184: Failure-Domain Labels and Anti-Affinity Policy
 
-- Status: Accepted
-- Implementation Status: Partial
-- Implemented In Repo Version: pending merge to main from `codex/ws-0184-live-apply`
+- Status: Implemented
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.18
 - Implemented In Platform Version: 0.130.31
 - Implemented On: 2026-03-27
 - Date: 2026-03-27
@@ -58,6 +58,8 @@ Placement decisions become reviewable repository truth. Every redundancy claim, 
 
 - This ADR defines placement metadata and policy, not the allocator implementation.
 - Anti-affinity is only as strong as the declared failure domains; dishonest labels still produce dishonest outcomes.
+
+The repository integration for this ADR landed on `main` in repo version `0.177.18` on 2026-03-28. `versions/stack.yaml` keeps platform version `0.130.31` because the live verification happened from the ADR workstream branch rather than from a fresh post-merge `main` replay, and the pre-existing missing `postgres-replica-lv3` (`151`) standby remains documented live drift rather than a newly introduced regression.
 
 ## Related ADRs
 
