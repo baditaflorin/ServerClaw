@@ -292,6 +292,7 @@
         "vcpu": 6,
         "disk_gb": 128
       },
+      "capacity_class": "ha_reserved",
       "disk_paths": [
         "/"
       ],
@@ -303,6 +304,7 @@
       "id": "ephemeral-pool",
       "kind": "ephemeral_pool",
       "status": "reserved",
+      "capacity_class": "preview_burst",
       "vmid_range": {
         "start": 910,
         "end": 979
@@ -314,6 +316,18 @@
         "disk_gb": 100
       },
       "notes": "Shared peak reservation for ADR 0106 ephemeral fixtures so transient test VMs cannot silently consume production headroom."
+    },
+    {
+      "id": "recovery-drill-pool",
+      "kind": "planned_growth",
+      "status": "reserved",
+      "capacity_class": "recovery_reserved",
+      "reserved": {
+        "ram_gb": 4,
+        "vcpu": 2,
+        "disk_gb": 48
+      },
+      "notes": "Protected headroom for restore and disaster-recovery rehearsals. Declared drills may borrow preview_burst before any break-glass use of ha_reserved."
     }
   ]
 }
