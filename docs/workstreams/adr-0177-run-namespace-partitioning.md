@@ -66,8 +66,8 @@
 
 ## Outcome
 
-- merged in repo version `0.175.3`
-- live apply not yet performed from `main`
+- merged in repo version `0.177.2`
+- no platform live apply was required because ADR 0177 changes controller-local tooling and release metadata, not live service configuration
 
 ## Notes For The Next Assistant
 

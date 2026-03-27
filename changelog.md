@@ -12,14 +12,13 @@ Versioned release notes live under [docs/release-notes/README.md](/Users/live/Do
 
 ## Unreleased
 
-- implemented ADR 0177 run namespace partitioning so controller-local mutable tooling now resolves a canonical `.local/runs/<run_id>/` bundle with dedicated `ansible/`, `tofu/`, `rendered/`, `logs/`, and `receipts/` subpaths
-- routed Makefile live-apply and OpenTofu entrypoints through the new namespace wrapper, updated `scripts/tofu_exec.sh` to keep isolated runtime copies and plan outputs, and forwarded `LV3_RUN_ID` through the remote execution gateway for build-server OpenTofu runs
-- added focused coverage for namespaced drift and diff execution, including parallel OpenTofu adapter assertions that concurrent runs use distinct per-run plan directories
 ## Latest Release
 
-- [0.177.1 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.1.md)
+- [0.177.2 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.2.md)
 
 ## Previous Releases
+
+- [0.177.1 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.1.md)
 
 - [0.177.0 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.0.md)
 

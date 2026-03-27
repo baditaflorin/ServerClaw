@@ -1,10 +1,10 @@
 # ADR 0177: Run Namespace Partitioning for Parallel Tooling
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Implemented
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.2
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-27
 - Date: 2026-03-26
 
 ## Context
@@ -48,6 +48,15 @@ Expected subpaths:
 ### Publish boundary
 
 Artifacts produced inside a run namespace are disposable until promoted. A run may fail, be retried, or be discarded without polluting shared paths.
+
+## Implementation Notes
+
+Repository implementation landed in `0.177.2`.
+
+- `scripts/run_namespace.py` resolves canonical `.local/runs/<run_id>/...` paths and can pre-create the namespace tree.
+- `scripts/run_with_namespace.sh`, `Makefile`, and `scripts/tofu_exec.sh` now route mutable Ansible and OpenTofu execution through per-run temp, plan, log, and runtime paths.
+- `scripts/remote_exec.sh`, the diff-engine adapters, and `scripts/drift_detector.py` forward and consume `LV3_RUN_ID` so nested and parallel tooling stays namespaced.
+- focused regression coverage verifies namespaced drift/diff behavior, remote forwarding, and concurrent OpenTofu adapter isolation.
 
 ## Consequences
 

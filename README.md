@@ -117,7 +117,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.1` |
+| Repository version | `0.177.2` |
 | Platform version | `0.130.24` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -541,6 +541,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Distributed Resource Lock Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/resource-lock-registry.md)
 - [Retry Taxonomy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/retry-taxonomy.md)
 - [Rotate Certificates](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/rotate-certificates.md)
+- [Run Namespace Partitioning](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/run-namespace-partitioning.md)
 - [Runbook Automation Executor](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/runbook-automation-executor.md)
 - [Scaffold A New Service](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/scaffold-new-service.md)
 - [Search Indexing Fabric](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/search-indexing-fabric.md)
@@ -920,6 +921,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0174: Integration-Only Canonical Truth Assembly](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0174-canonical-truth-assembly.md)
 - [Workstream ADR 0175: Cross-Workstream Interface Contracts](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0175-cross-workstream-interface-contracts.md)
 - [Workstream ADR 0176: Inventory Sharding And Host-Scoped Ansible Execution](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0176-inventory-sharding.md)
+- [Workstream ADR 0177: Run Namespace Partitioning](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0177-run-namespace-partitioning.md)
 - [Workstream ADR 0178: Dependency Wave Manifests](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0178-dependency-wave-manifests.md)
 - [Workstream ADR 0179: Service Redundancy Tier Matrix](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0179-service-redundancy-tier-matrix.md)
 - [Workstream ADR 0180: Standby Capacity Reservation and Placement Rules](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0180-standby-capacity-reservation-and-placement-rules.md)
@@ -942,7 +944,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.1` |
+| Repository version | `0.177.2` |
 | Platform version | `0.130.24` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1123,9 +1125,11 @@ This repository is intentionally opinionated:
 | `0170` | Platform-wide timeout hierarchy | `live_applied` | [adr-0170-timeout-hierarchy.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0170-timeout-hierarchy.md) |
 | `0171` | Controlled fault injection for resilience validation | `live_applied` | [adr-0171-controlled-fault-injection.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0171-controlled-fault-injection.md) |
 | `0172` | Watchdog escalation and stale job self-healing | `merged` | [adr-0172-watchdog-escalation-and-stale-job-self-healing.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0172-watchdog-escalation-and-stale-job-self-healing.md) |
+| `0172` | Watchdog escalation and stale job self-healing | `merged` | [adr-0172-watchdog-escalation-and-stale-job-self-healing.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0172-watchdog-escalation-and-stale-job-self-healing.md) |
 | `0173` | Workstream surface ownership manifest | `live_applied` | [adr-0173-workstream-surface-ownership-manifest.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0173-workstream-surface-ownership-manifest.md) |
 | `0174` | Integration-only canonical truth assembly | `merged` | [adr-0174-canonical-truth-assembly.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0174-canonical-truth-assembly.md) |
 | `0175` | Cross-workstream interface contracts | `merged` | [adr-0175-cross-workstream-interface-contracts.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0175-cross-workstream-interface-contracts.md) |
+| `0177` | Run namespace partitioning for parallel tooling | `merged` | [adr-0177-run-namespace-partitioning.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0177-run-namespace-partitioning.md) |
 | `0178` | Dependency wave manifests for parallel apply | `merged` | [adr-0178-dependency-wave-manifests.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0178-dependency-wave-manifests.md) |
 | `0179` | Service redundancy tier matrix | `merged` | [adr-0179-service-redundancy-tier-matrix.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0179-service-redundancy-tier-matrix.md) |
 | `0181` | Off-host witness and control metadata replication | `merged` | [adr-0181-off-host-witness-replication.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0181-off-host-witness-replication.md) |

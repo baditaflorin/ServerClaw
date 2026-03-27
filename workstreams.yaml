@@ -3940,6 +3940,12 @@ workstreams:
       - scripts/drift_detector.py
       - docs/runbooks/run-namespace-partitioning.md
     ready_to_merge: false
+    live_applied: false
+    canonical_truth:
+      changelog_entry: implemented ADR 0177 run namespace partitioning so controller-local Ansible and OpenTofu tooling now uses per-run namespaces, forwards `LV3_RUN_ID` through remote execution, and verifies concurrent isolated plan directories in focused tests
+      release_bump: patch
+      included_in_repo_version: 0.177.2
+      latest_receipts: {}
   - id: adr-0150-dozzle
     adr: "0150"
     title: Dozzle for real-time container log access
