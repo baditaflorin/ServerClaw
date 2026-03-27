@@ -924,8 +924,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.9
+    current: 0.177.10
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.29
+    current: 0.130.30
     meaning: intended platform release for the actual server configuration
