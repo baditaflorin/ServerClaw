@@ -582,6 +582,11 @@ network_policy:
           ports:
             - 22
           description: Operator and Ansible SSH access
+        - source: docker-runtime-lv3
+          protocol: tcp
+          ports:
+            - 22
+          description: Control-plane recovery archive delivery from docker-runtime-lv3
         - source: host
           protocol: tcp
           ports:
