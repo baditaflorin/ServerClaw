@@ -12,7 +12,21 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        env:
+          GITEA_ACTOR: ${{ github.actor }}
+          GITEA_REF: ${{ github.ref }}
+          GITEA_REPOSITORY: ${{ github.repository }}
+          GITEA_SERVER_URL: ${{ github.server_url }}
+          GITEA_SHA: ${{ github.sha }}
+          GITEA_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          AUTH_HEADER="$(printf '%s:%s' "${GITEA_ACTOR}" "${GITEA_TOKEN}" | base64 | tr -d '\n')"
+          rm -rf .git
+          git init .
+          git remote add origin "${GITEA_SERVER_URL}/${GITEA_REPOSITORY}.git"
+          git -c http.extraHeader="Authorization: Basic ${AUTH_HEADER}" fetch --depth 1 origin "${GITEA_SHA}"
+          git checkout --detach FETCH_HEAD
 
       - name: Validate repository data models
         run: python3 scripts/validate_repository_data_models.py
