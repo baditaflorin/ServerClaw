@@ -64,6 +64,23 @@ def test_load_manifest_and_build_docker_command(tmp_path: Path) -> None:
     assert command[-3:] == ["sh", "-c", "echo ok"]
 
 
+def test_build_docker_command_marks_workspace_as_safe_git_directory(tmp_path: Path) -> None:
+    parallel_check = load_parallel_check_module()
+    check = parallel_check.CheckDefinition(
+        label="schema-validation",
+        image="registry.lv3.org/check-runner/python:3.12.10",
+        command="python scripts/validate_repository_data_models.py --validate",
+        working_dir="/workspace",
+        timeout_seconds=30,
+    )
+
+    command = parallel_check.build_docker_command(check, tmp_path, "docker")
+
+    assert "GIT_CONFIG_COUNT=1" in command
+    assert "GIT_CONFIG_KEY_0=safe.directory" in command
+    assert "GIT_CONFIG_VALUE_0=/workspace" in command
+
+
 def test_build_docker_command_mounts_worktree_git_metadata(tmp_path: Path) -> None:
     parallel_check = load_parallel_check_module()
     repo_root = tmp_path / "repo"
