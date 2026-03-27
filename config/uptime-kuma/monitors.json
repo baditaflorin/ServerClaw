@@ -65,6 +65,19 @@
     ]
   },
   {
+    "name": "Excalidraw Public",
+    "type": "http",
+    "url": "https://draw.lv3.org",
+    "description": "Private Excalidraw publication through the authenticated shared NGINX edge.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 5,
+    "accepted_statuscodes": [
+      "200-399"
+    ]
+  },
+  {
     "name": "Langfuse Public Health",
     "type": "http",
     "url": "https://langfuse.lv3.org/api/public/health",

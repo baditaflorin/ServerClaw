@@ -45,7 +45,9 @@ def minimal_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     monkeypatch.setenv("LV3_MAINTENANCE_WINDOWS_FILE", str(maintenance_state))
     (tmp_path / "config").mkdir()
     (tmp_path / "docs" / "adr").mkdir(parents=True)
+    (tmp_path / "docs" / "diagrams").mkdir(parents=True)
     (tmp_path / "docs" / "runbooks").mkdir(parents=True)
+    (tmp_path / "docs" / "diagrams" / "network-topology.excalidraw").write_text("{}", encoding="utf-8")
     (tmp_path / "inventory").mkdir()
     (tmp_path / "receipts" / "live-applies").mkdir(parents=True)
     (tmp_path / "receipts" / "dr-table-top-reviews").mkdir(parents=True)
@@ -734,6 +736,22 @@ def test_vm_list_uses_inventory(
 def test_completion_suggests_services(minimal_repo: Path) -> None:
     candidates = lv3_cli.completion_candidates(["lv3", "open"], "g")
     assert candidates == ["grafana"]
+
+
+def test_completion_suggests_diagram_names(minimal_repo: Path) -> None:
+    candidates = lv3_cli.completion_candidates(["lv3", "diagram", "open"], "n")
+    assert candidates == ["network-topology"]
+
+
+def test_diagram_open_dry_run_prints_local_browser_target(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    exit_code = lv3_cli.main(["diagram", "open", "network-topology", "--dry-run"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "open diagram network-topology" in captured.out
+    assert "file://" in captured.out
 
 
 def test_loop_start_outputs_resolved_run(capsys: pytest.CaptureFixture[str], minimal_repo: Path) -> None:

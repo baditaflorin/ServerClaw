@@ -119,6 +119,46 @@ groups:
           description: The Dozzle hub remains reachable on the private runtime network
             for real-time container log access.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_excalidraw_availability
+        expr: (slo:excalidraw_availability:error_rate_5m > (14 * 0.005000)) and (slo:excalidraw_availability:error_rate_1h
+          > (14 * 0.005000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: excalidraw
+          slo_id: excalidraw-availability
+          indicator: availability
+        annotations:
+          summary: excalidraw-availability is burning its error budget at 14x
+          description: The private Excalidraw publication remains reachable through
+            the authenticated LV3 edge.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_excalidraw_availability
+        expr: slo:excalidraw_availability:error_rate_1h > (3 * 0.005000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: excalidraw
+          slo_id: excalidraw-availability
+          indicator: availability
+        annotations:
+          summary: excalidraw-availability is burning its error budget at 3x
+          description: The private Excalidraw publication remains reachable through
+            the authenticated LV3 edge.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_excalidraw_availability
+        expr: slo:excalidraw_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: excalidraw
+          slo_id: excalidraw-availability
+          indicator: availability
+        annotations:
+          summary: excalidraw-availability has less than 10% error budget remaining
+          description: The private Excalidraw publication remains reachable through
+            the authenticated LV3 edge.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_gitea_availability
         expr: (slo:gitea_availability:error_rate_5m > (14 * 0.005000)) and (slo:gitea_availability:error_rate_1h
           > (14 * 0.005000))

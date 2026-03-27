@@ -144,6 +144,8 @@ platform_ports:
   langfuse_port: 3002
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
+  excalidraw_port: 3095
+  excalidraw_room_port: 3096
   ollama_api_port: 11434
   n8n_port: 5678
   open_webui_port: 8088
@@ -190,6 +192,8 @@ platform_port_assignments:
   langfuse_port: 3002
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
+  excalidraw_port: 3095
+  excalidraw_room_port: 3096
   ollama_api_port: 11434
   n8n_port: 5678
   open_webui_port: 8088
@@ -1117,6 +1121,37 @@ platform_service_topology:
     urls:
       public: https://logs.lv3.org
       internal: http://10.10.10.20:8089
+  excalidraw:
+    service_name: excalidraw
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: draw.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: draw
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:3095
+      prefix_proxy_routes:
+        - path: /socket.io/
+          upstream: http://10.10.10.20:{{ platform_port_assignments.excalidraw_room_port
+            }}
+    service_id: excalidraw
+    ports:
+      internal: 3095
+    urls:
+      public: https://draw.lv3.org
+      internal: http://10.10.10.20:3095
   open_webui:
     service_name: open-webui
     owning_vm: docker-runtime-lv3
@@ -1475,6 +1510,10 @@ platform_dns_records:
       value: 65.108.75.123
       ttl: 60
     - name: logs
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: draw
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -2038,6 +2077,37 @@ public_edge_service_topology:
     urls:
       public: https://logs.lv3.org
       internal: http://10.10.10.20:8089
+  excalidraw:
+    service_name: excalidraw
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: draw.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: draw
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:3095
+      prefix_proxy_routes:
+        - path: /socket.io/
+          upstream: http://10.10.10.20:{{ platform_port_assignments.excalidraw_room_port
+            }}
+    service_id: excalidraw
+    ports:
+      internal: 3095
+    urls:
+      public: https://draw.lv3.org
+      internal: http://10.10.10.20:3095
   open_webui:
     service_name: open-webui
     owning_vm: docker-runtime-lv3
@@ -2455,6 +2525,8 @@ searxng_host_proxy_port: 80
 langfuse_port: 3002
 dozzle_http_port: 8089
 dozzle_agent_port: 7007
+excalidraw_port: 3095
+excalidraw_room_port: 3096
 ollama_api_port: 11434
 n8n_port: 5678
 open_webui_port: 8088
