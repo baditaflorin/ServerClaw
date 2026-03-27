@@ -180,6 +180,42 @@
       "live_tracking_expected": true
     },
     {
+      "fqdn": "draw.lv3.org",
+      "service_id": "excalidraw",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0202",
+      "dns_record_type": "A",
+      "route_mode": "edge",
+      "route_source": "service_topology",
+      "route_kind": "proxy",
+      "edge_auth": "oauth2_proxy",
+      "unauthenticated_paths": [],
+      "unauthenticated_prefix_paths": [],
+      "repo_route_service_id": "excalidraw",
+      "repo_route_metadata": {
+        "enabled": true,
+        "tls": true,
+        "upstream": "http://10.10.10.20:{{ platform_port_assignments.excalidraw_port }}",
+        "prefix_proxy_routes": [
+          {
+            "path": "/socket.io/",
+            "upstream": "http://10.10.10.20:{{ platform_port_assignments.excalidraw_room_port }}"
+          }
+        ]
+      },
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "live_tracking_expected": true
+    },
+    {
       "fqdn": "git.lv3.org",
       "service_id": "gitea",
       "environment": "production",
@@ -777,12 +813,12 @@
     }
   ],
   "summary": {
-    "catalog_total": 26,
-    "active_total": 22,
-    "active_public_dns_total": 18,
+    "catalog_total": 27,
+    "active_total": 23,
+    "active_public_dns_total": 19,
     "active_private_total": 4,
     "planned_total": 4,
-    "edge_total": 17,
-    "edge_oidc_total": 8
+    "edge_total": 18,
+    "edge_oidc_total": 9
   }
 }

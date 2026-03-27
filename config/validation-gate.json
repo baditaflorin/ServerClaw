@@ -18,10 +18,10 @@
     "cache_mounts": ["ansible_collections"]
   },
   "dependency-graph": {
-    "description": "Validate the service dependency graph schema, cross references, and generated Mermaid markdown.",
+    "description": "Validate the service dependency graph schema, cross references, generated Mermaid markdown, and generated Excalidraw architecture scenes.",
     "severity": "error",
     "image": "registry.lv3.org/check-runner/python:3.12.10",
-    "command": "python scripts/validate_dependency_graph.py >/dev/null && python scripts/generate_dependency_diagram.py --check >/dev/null",
+    "command": "python scripts/validate_dependency_graph.py >/dev/null && python scripts/generate_dependency_diagram.py --check >/dev/null && python scripts/generate_diagrams.py --check >/dev/null",
     "working_dir": "/workspace",
     "timeout_seconds": 120
   },

@@ -64,7 +64,7 @@ live_apply_evidence:
     staging_environment: 2026-03-27-adr-0183-staging-live-apply
     immutable_guest_replacement: 2026-03-27-adr-0191-immutable-guest-replacement-live-apply
     capacity_classes: 2026-03-27-adr-0192-capacity-classes-live-apply
-    service_redundancy: 2026-03-27-adr-0188-failover-rehearsal-gate-live-apply
+    excalidraw: 2026-03-27-adr-0202-excalidraw-auto-generated-architecture-diagrams-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated

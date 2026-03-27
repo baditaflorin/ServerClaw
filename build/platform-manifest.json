@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.16",
   "platform_version": "0.130.31",
-  "generated_at": "2026-03-27T23:04:17Z",
-  "next_refresh_at": "2026-03-28T00:04:17Z",
+  "generated_at": "2026-03-27T23:04:49Z",
+  "next_refresh_at": "2026-03-28T00:04:49Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -59,7 +59,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: health probe, SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://changelog.lv3.org",
-        "last_live_apply": "2026-03-26T00:00:00Z"
+        "last_live_apply": "2026-03-27T00:00:00Z"
       },
       "docker_build": {
         "service_name": "Docker Build VM",
@@ -92,7 +92,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: health probe, SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://docs.lv3.org",
-        "last_live_apply": "2026-03-26T00:00:00Z"
+        "last_live_apply": "2026-03-27T00:00:00Z"
       },
       "dozzle": {
         "service_name": "Dozzle",
@@ -103,6 +103,18 @@
         "reason": "Repository evidence is complete enough for normal automation.",
         "lifecycle_status": "active",
         "primary_url": "https://logs.lv3.org",
+        "last_live_apply": "2026-03-27T00:00:00Z",
+        "slo_status": "unknown"
+      },
+      "excalidraw": {
+        "service_name": "Excalidraw",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://draw.lv3.org",
         "last_live_apply": "2026-03-27T00:00:00Z",
         "slo_status": "unknown"
       },
@@ -853,6 +865,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/configure-dozzle.md"
+      },
+      {
+        "id": "converge-excalidraw",
+        "description": "Deploy the private Excalidraw frontend and collaboration room on docker-runtime-lv3 and publish draw.lv3.org through the shared authenticated edge.",
+        "tags": [
+          "converge-excalidraw",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1500,
+          "max_steps": 300,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 2,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-excalidraw.md"
       },
       {
         "id": "converge-gitea",
@@ -2867,6 +2905,16 @@
         ]
       },
       {
+        "id": "configure-excalidraw",
+        "title": "Configure Excalidraw",
+        "agent_trust_required": "T3",
+        "steps": 0,
+        "path": "docs/runbooks/configure-excalidraw.md",
+        "workflow_ids": [
+          "converge-excalidraw"
+        ]
+      },
+      {
         "id": "configure-gitea",
         "title": "Configure Gitea",
         "agent_trust_required": "T3",
@@ -3498,7 +3546,7 @@
   "recent_changes": {
     "last_version": "0.177.15",
     "deployed_at": "2026-03-27",
-    "summary": "implemented ADR 0188 failover rehearsal gating so redundancy reporting now distinguishes declared tiers from currently proven tiers and the unproven PostgreSQL warm-standby path is surfaced as implemented `R0`",
+    "summary": "implemented ADR 0202 by publishing private Excalidraw at draw.lv3.org, generating committed architecture diagrams from repo-managed platform data, and recording verified live-apply evidence",
     "release_notes_url": "docs/release-notes/0.177.16.md"
   },
   "agentic_architecture": {

@@ -1501,6 +1501,30 @@ def open_service_url(service_id: str, environment: str, *, dry_run: bool, explai
     return 0 if webbrowser.open(url) else 1
 
 
+def available_diagrams() -> list[str]:
+    diagrams_dir = repo_path("docs", "diagrams")
+    if not diagrams_dir.exists():
+        return []
+    return sorted(path.stem for path in diagrams_dir.glob("*.excalidraw"))
+
+
+def open_diagram_source(diagram_name: str, *, dry_run: bool, explain: bool, no_color: bool) -> int:
+    diagrams_dir = repo_path("docs", "diagrams")
+    path = diagrams_dir / f"{diagram_name}.excalidraw"
+    if not path.exists():
+        raise SystemExit(f"Unknown diagram '{diagram_name}'.")
+    uri = path.resolve().as_uri()
+    plan = CommandPlan(
+        label=f"open diagram {diagram_name}",
+        route="controller local browser",
+        command=["python3", "-m", "webbrowser", uri],
+    )
+    print_plan(plan, no_color=no_color)
+    if dry_run or explain:
+        return 0
+    return 0 if webbrowser.open(uri) else 1
+
+
 def manifest_show_command(*, as_json: bool, refresh: bool) -> int:
     import platform_manifest
 
@@ -2243,6 +2267,7 @@ def completion_candidates(words: list[str], current: str) -> list[str]:
         "capacity",
         "promote",
         "run",
+        "diagram",
         "runbook",
         "logs",
         "ssh",
@@ -2258,6 +2283,10 @@ def completion_candidates(words: list[str], current: str) -> list[str]:
     if words[1] in {"deploy", "impact", "status", "logs", "open"}:
         candidates = sorted(set(load_service_map()) | set(SERVICE_ALIASES))
         return [service_id for service_id in candidates if service_id.startswith(current)]
+    if words[1:3] == ["diagram", "open"]:
+        return [diagram for diagram in available_diagrams() if diagram.startswith(current)]
+    if words[1] == "diagram" and len(words) == 3:
+        return [action for action in ["open"] if action.startswith(current)]
     if words[1] == "validate" and "--service" in words:
         candidates = sorted(set(load_service_map()) | set(SERVICE_ALIASES))
         return [service_id for service_id in candidates if service_id.startswith(current)]
@@ -2596,6 +2625,13 @@ def build_parser() -> argparse.ArgumentParser:
     open_parser.add_argument("--dry-run", action="store_true")
     open_parser.add_argument("--explain", action="store_true")
 
+    diagram = subparsers.add_parser("diagram", help="Open one generated Excalidraw source file.")
+    diagram_subparsers = diagram.add_subparsers(dest="diagram_action", required=True)
+    diagram_open = diagram_subparsers.add_parser("open", help="Open one generated diagram source locally.")
+    diagram_open.add_argument("name")
+    diagram_open.add_argument("--dry-run", action="store_true")
+    diagram_open.add_argument("--explain", action="store_true")
+
     manifest = subparsers.add_parser("manifest", help="Inspect or refresh the platform manifest.")
     manifest_subparsers = manifest.add_subparsers(dest="manifest_action", required=True)
     manifest_show = manifest_subparsers.add_parser("show", help="Show the generated platform manifest.")
@@ -2896,6 +2932,9 @@ def main(argv: list[str] | None = None) -> int:
         return ssh_command(args.vm_name, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
     if args.command == "open":
         return open_service_url(args.service, args.env, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
+    if args.command == "diagram":
+        if args.diagram_action == "open":
+            return open_diagram_source(args.name, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
     if args.command == "manifest":
         if args.manifest_action == "show":
             return manifest_show_command(as_json=args.json, refresh=args.refresh)

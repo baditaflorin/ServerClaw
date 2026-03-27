@@ -3,10 +3,10 @@
 - Date: 2026-03-28
 
 ## Summary
-- implemented ADR 0188 failover rehearsal gating so redundancy reporting now distinguishes declared tiers from currently proven tiers and the unproven PostgreSQL warm-standby path is surfaced as implemented `R0`
+- implemented ADR 0202 by publishing private Excalidraw at draw.lv3.org, generating committed architecture diagrams from repo-managed platform data, and recording verified live-apply evidence
 
 ## Platform Impact
-- no live platform version bump; this release publishes ADR 0188 rehearsal-gated redundancy reporting and records the verified PostgreSQL warm-standby gap as implemented R0 until a fresh passing failover rehearsal exists
+- no platform version bump; ADR 0202 is already live on production and this release integrates the Excalidraw runtime, generated architecture diagrams, and recorded live-apply evidence on main
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)
