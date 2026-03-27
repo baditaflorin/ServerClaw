@@ -136,21 +136,11 @@ windmill_worker_repo_secret_directories:
     mode: "0700"
 windmill_worker_repo_secret_files:
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/keycloak/bootstrap-admin-password.txt"
+    src: "{{ windmill_controller_local_root }}/keycloak/bootstrap-admin-password.txt"
     mode: "0600"
-    content: >-
-      {{
-        lookup('ansible.builtin.file', windmill_controller_local_root ~ '/keycloak/bootstrap-admin-password.txt', errors='ignore')
-        | default('', true)
-        | trim
-      }}
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/openbao/init.json"
+    src: "{{ windmill_controller_local_root }}/openbao/init.json"
     mode: "0600"
-    content: >-
-      {{
-        lookup('ansible.builtin.file', windmill_controller_local_root ~ '/openbao/init.json', errors='ignore')
-        | default('', true)
-        | trim
-      }}
 windmill_worker_checkout_sync_paths:
   - ansible.cfg
   - callback_plugins

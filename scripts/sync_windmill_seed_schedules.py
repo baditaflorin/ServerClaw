@@ -10,6 +10,8 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
+DEFAULT_HTTP_TIMEOUT_S = 10.0
+
 
 class SyncError(RuntimeError):
     pass
@@ -32,16 +34,19 @@ def request_json_or_text(
     method: str,
     payload: dict | None = None,
     expected_statuses: tuple[int, ...],
+    timeout_s: float = DEFAULT_HTTP_TIMEOUT_S,
 ) -> tuple[int, str]:
     url = f"{base_url}/api/w/{urllib.parse.quote(workspace, safe='')}/{path}"
     request = build_request(url, token, method, payload)
     try:
-        with urllib.request.urlopen(request) as response:
+        with urllib.request.urlopen(request, timeout=timeout_s) as response:
             status = response.status
             body = response.read().decode("utf-8")
     except urllib.error.HTTPError as exc:
         status = exc.code
         body = exc.read().decode("utf-8")
+    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        raise SyncError(f"{method} {path} transport failure: {exc}") from exc
     if status not in expected_statuses:
         raise SyncError(f"{method} {path} returned {status}: {body[:500]}")
     return status, body
@@ -58,7 +63,7 @@ def schedule_payload(spec: dict) -> dict:
     }
 
 
-def schedule_exists(*, base_url: str, workspace: str, token: str, schedule_path: str) -> bool:
+def schedule_exists(*, base_url: str, workspace: str, token: str, schedule_path: str, timeout_s: float) -> bool:
     _, body = request_json_or_text(
         base_url=base_url,
         workspace=workspace,
@@ -66,11 +71,12 @@ def schedule_exists(*, base_url: str, workspace: str, token: str, schedule_path:
         path=f"schedules/exists/{urllib.parse.quote(schedule_path, safe='')}",
         method="GET",
         expected_statuses=(200,),
+        timeout_s=timeout_s,
     )
     return body.strip().lower() == "true"
 
 
-def create_schedule(*, base_url: str, workspace: str, token: str, spec: dict) -> None:
+def create_schedule(*, base_url: str, workspace: str, token: str, spec: dict, timeout_s: float) -> None:
     payload = {
         "path": spec["path"],
         "schedule": spec["schedule"],
@@ -91,12 +97,13 @@ def create_schedule(*, base_url: str, workspace: str, token: str, spec: dict) ->
         method="POST",
         payload=payload,
         expected_statuses=(200, 201, 400),
+        timeout_s=timeout_s,
     )
     if status == 400 and "already exists" not in body.lower():
         raise SyncError(f"create {spec['path']} returned 400: {body[:500]}")
 
 
-def update_schedule(*, base_url: str, workspace: str, token: str, spec: dict) -> None:
+def update_schedule(*, base_url: str, workspace: str, token: str, spec: dict, timeout_s: float) -> None:
     request_json_or_text(
         base_url=base_url,
         workspace=workspace,
@@ -105,6 +112,7 @@ def update_schedule(*, base_url: str, workspace: str, token: str, spec: dict) ->
         method="POST",
         payload=schedule_payload(spec),
         expected_statuses=(200,),
+        timeout_s=timeout_s,
     )
 
 
@@ -116,14 +124,33 @@ def sync_schedule(
     spec: dict,
     max_attempts: int,
     settle_interval_s: float,
+    request_timeout_s: float,
 ) -> dict:
     last_error = ""
     for attempt in range(1, max_attempts + 1):
         try:
-            if schedule_exists(base_url=base_url, workspace=workspace, token=token, schedule_path=spec["path"]):
-                update_schedule(base_url=base_url, workspace=workspace, token=token, spec=spec)
+            if schedule_exists(
+                base_url=base_url,
+                workspace=workspace,
+                token=token,
+                schedule_path=spec["path"],
+                timeout_s=request_timeout_s,
+            ):
+                update_schedule(
+                    base_url=base_url,
+                    workspace=workspace,
+                    token=token,
+                    spec=spec,
+                    timeout_s=request_timeout_s,
+                )
                 return {"path": spec["path"], "attempts": attempt, "status": "updated"}
-            create_schedule(base_url=base_url, workspace=workspace, token=token, spec=spec)
+            create_schedule(
+                base_url=base_url,
+                workspace=workspace,
+                token=token,
+                spec=spec,
+                timeout_s=request_timeout_s,
+            )
             return {"path": spec["path"], "attempts": attempt, "status": "created"}
         except (OSError, SyncError) as exc:
             last_error = str(exc)[:500]
@@ -138,6 +165,7 @@ def main() -> int:
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--max-attempts", type=int, default=8)
     parser.add_argument("--settle-interval", type=float, default=1.0)
+    parser.add_argument("--http-timeout", type=float, default=DEFAULT_HTTP_TIMEOUT_S)
     args = parser.parse_args()
 
     token = os.environ.get("WINDMILL_TOKEN", "").strip()
@@ -157,6 +185,7 @@ def main() -> int:
                     spec=spec,
                     max_attempts=args.max_attempts,
                     settle_interval_s=args.settle_interval,
+                    request_timeout_s=args.http_timeout,
                 )
             )
     except Exception as exc:

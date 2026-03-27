@@ -95,9 +95,9 @@ def test_windmill_defaults_use_git_common_dir_for_shared_local_artifacts() -> No
     )
 
     expected_lookup = "rev-parse --path-format=absolute --git-common-dir"
-    assert expected_lookup in runtime_defaults["windmill_local_artifact_dir"]
+    assert expected_lookup in runtime_defaults["windmill_controller_repo_common_root"]
     assert expected_lookup in postgres_defaults["windmill_local_artifact_dir"]
-    assert "/.local/windmill" in runtime_defaults["windmill_local_artifact_dir"]
+    assert runtime_defaults["windmill_local_artifact_dir"] == "{{ windmill_controller_repo_common_root ~ '/.local/windmill' }}"
     assert "/.local/windmill" in postgres_defaults["windmill_local_artifact_dir"]
     assert runtime_defaults["windmill_database_password_local_file"] == "{{ windmill_local_artifact_dir }}/database-password.txt"
     assert runtime_defaults["windmill_database_dsn"].startswith("postgres://{{ windmill_database_user }}:")

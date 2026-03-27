@@ -186,8 +186,8 @@
 
 - name: Mirror the Windmill worker checkout bootstrap secret files
   ansible.builtin.copy:
+    src: "{{ item.src }}"
     dest: "{{ item.path }}"
-    content: "{{ item.content }}\n"
     mode: "{{ item.mode }}"
   loop: "{{ windmill_worker_repo_secret_files }}"
   no_log: true
@@ -534,11 +534,16 @@
   tags:
     - mutation
 
-- name: Verify Docker responds before Windmill startup
-  ansible.builtin.command: docker info --format '{{ "{{ .ServerVersion }}" }}'
+- name: Check whether Docker nat chain exists before Windmill startup
+  ansible.builtin.command: iptables -t nat -S DOCKER
+  register: windmill_docker_nat_chain_check
   changed_when: false
   failed_when: windmill_docker_nat_chain_check.rc not in [0, 1]
   when: windmill_server_requires_docker_nat | bool
+
+- name: Verify Docker responds before Windmill startup
+  ansible.builtin.command: docker info --format '{{ "{{ .ServerVersion }}" }}'
+  changed_when: false
 
 - name: Restart Docker when the nat chain is missing before Windmill startup
   ansible.builtin.systemd:
@@ -564,7 +569,6 @@
       - windmill_docker_nat_chain_recheck.rc == 0
     fail_msg: "Docker is running but the nat DOCKER chain is missing; Windmill published ports will fail."
   when: windmill_server_requires_docker_nat | bool
-
 - name: Start Windmill and wait for the API socket
   block:
     - name: Start the Windmill stack

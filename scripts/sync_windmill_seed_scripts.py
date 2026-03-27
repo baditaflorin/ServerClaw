@@ -11,7 +11,22 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+def resolve_repo_root(script_path: Path | None = None) -> Path:
+    candidate = (script_path or Path(__file__)).resolve()
+    for parent in (candidate.parent, *candidate.parents):
+        if (
+            (parent / "platform" / "__init__.py").exists()
+            and (
+                (parent / "platform" / "retry.py").exists()
+                or (parent / "platform" / "retry").is_dir()
+                or (parent / "platform" / "retry" / "__init__.py").exists()
+            )
+        ):
+            return parent
+    raise RuntimeError(f"Unable to resolve repository root from {candidate}")
+
+
+REPO_ROOT = resolve_repo_root()
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
@@ -187,7 +202,7 @@ def sync_script(
                 timeout_s=max(3.0, settle_interval_s * 4),
                 interval_s=settle_interval_s,
             )
-        except RetryableSyncError as exc:
+        except (RetryableSyncError, OSError) as exc:
             raise PlatformRetryError(
                 str(exc),
                 code="platform:windmill_seed_sync_pending",
@@ -197,7 +212,7 @@ def sync_script(
             pass
         try:
             status, body = create_script(base_url=base_url, workspace=workspace, token=token, spec=spec, content=content)
-        except RetryableSyncError as exc:
+        except (RetryableSyncError, OSError) as exc:
             raise PlatformRetryError(
                 str(exc),
                 code="platform:windmill_seed_sync_pending",

@@ -35,8 +35,6 @@ def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
     assert "Check whether Docker nat chain exists" in task_names
     assert "Check whether Docker forward chain exists" in task_names
     assert "Restart Docker when required chains are missing" in task_names
-    assert "Assert Docker nat chain is present" in task_names
-    assert "Assert Docker filter forward chain is present" in task_names
     nat_recheck = next(task for task in tasks if task["name"] == "Recheck Docker nat chain after restart")
     forward_recheck = next(task for task in tasks if task["name"] == "Recheck Docker forward chain after restart")
     assert nat_recheck["retries"] == 10

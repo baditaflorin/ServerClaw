@@ -234,6 +234,63 @@ def test_schedule_sync_helper_retries_connection_reset_during_update(
         spec=spec,
         max_attempts=3,
         settle_interval_s=0.0,
+        request_timeout_s=5.0,
     )
 
     assert payload == {"path": "f/lv3/quarterly_access_review_every_monday_0900", "attempts": 2, "status": "updated"}
+
+
+def test_schedule_sync_helper_uses_configured_http_timeout(monkeypatch: pytest.MonkeyPatch) -> None:
+    module = load_module("schedule_sync_helper_timeout", SCHEDULE_SYNC_HELPER_PATH)
+    captured: dict[str, object] = {}
+
+    class FakeResponse:
+        status = 200
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+        def read(self) -> bytes:
+            return b"true"
+
+    def fake_urlopen(request, timeout):
+        captured["url"] = request.full_url
+        captured["timeout"] = timeout
+        return FakeResponse()
+
+    monkeypatch.setattr(module.urllib.request, "urlopen", fake_urlopen)
+
+    status, body = module.request_json_or_text(
+        base_url="http://windmill.internal",
+        workspace="lv3",
+        token="token",
+        path="schedules/exists/f%2Flv3%2Fquarterly_access_review_every_monday_0900",
+        method="GET",
+        expected_statuses=(200,),
+        timeout_s=7.5,
+    )
+
+    assert status == 200
+    assert body == "true"
+    assert captured["timeout"] == 7.5
+    assert captured["url"] == (
+        "http://windmill.internal/api/w/lv3/"
+        "schedules/exists/f%2Flv3%2Fquarterly_access_review_every_monday_0900"
+    )
+
+
+def test_sync_helper_resolves_repo_root_from_shard_adjacent_script_path(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    shard_script = repo_root / ".ansible" / "shards" / "run-123" / ".." / "scripts" / "sync_windmill_seed_scripts.py"
+    (repo_root / "platform").mkdir(parents=True)
+    (repo_root / "platform" / "__init__.py").write_text("# stub\n", encoding="utf-8")
+    (repo_root / "platform" / "retry.py").write_text("# stub\n", encoding="utf-8")
+    shard_script.parent.mkdir(parents=True, exist_ok=True)
+    shard_script.write_text("# stub\n", encoding="utf-8")
+
+    module = load_module("sync_helper_repo_root", SYNC_HELPER_PATH)
+
+    assert module.resolve_repo_root(shard_script) == repo_root.resolve()
