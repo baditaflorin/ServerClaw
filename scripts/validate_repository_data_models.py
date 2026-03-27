@@ -48,6 +48,7 @@ from slo_tracking import (
     load_slo_catalog,
 )
 from service_completeness import load_context as load_service_completeness_context
+from service_redundancy import load_redundancy_catalog, validate_redundancy_catalog
 from workflow_catalog import (
     load_secret_manifest,
     load_workflow_catalog,
@@ -265,6 +266,9 @@ def validate_no_scaffold_placeholders() -> None:
         IMAGE_CATALOG_PATH: load_json(IMAGE_CATALOG_PATH),
         repo_path("config", "service-capability-catalog.json"): load_json(
             repo_path("config", "service-capability-catalog.json")
+        ),
+        repo_path("config", "service-redundancy-catalog.json"): load_json(
+            repo_path("config", "service-redundancy-catalog.json")
         ),
         repo_path("config", "api-gateway-catalog.json"): load_json(
             repo_path("config", "api-gateway-catalog.json")
@@ -2280,6 +2284,7 @@ def validate_repository_data_models() -> int:
     api_publication_catalog, _, _ = load_api_publication_catalog()
     validate_api_publication_catalog(api_publication_catalog, lane_catalog)
     load_service_completeness_context()
+    validate_redundancy_catalog(load_redundancy_catalog())
     validate_mutation_audit_schema(load_mutation_audit_schema())
     validate_receipts()
     validate_promotion_receipts()

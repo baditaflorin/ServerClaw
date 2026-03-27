@@ -12,6 +12,7 @@ It answers:
 - which runbook owns it
 - which health probe, images, and secrets are attached to it
 - which dependency failures are expected to degrade it and what the declared fallback mode is
+- which redundancy declaration to consult in `config/service-redundancy-catalog.json`
 
 ## Update Rules
 
@@ -23,12 +24,14 @@ Update the catalog when:
 4. its runbook or ADR changes
 5. its health probe, image, or secret references change
 6. its graceful-degradation declarations change
+7. its redundancy declaration moves to a different VM, standby type, or recovery path
 
 The catalog is the input for:
 
 - `scripts/generate_ops_portal.py`
 - `make services`
 - `make show-service SERVICE=<id>`
+- `scripts/service_redundancy.py`
 - future CLI and agent discovery surfaces
 
 ## Validation
@@ -70,3 +73,9 @@ make show-service SERVICE=grafana
 ```
 
 This prints the lifecycle state, VM, URLs, health probe, image or secret references, degradation modes, runbook, dashboard, and tags for the selected service.
+
+For the redundancy tier, recovery objective, backup sources, and failover metadata, query the paired catalog:
+
+```bash
+uv run --with pyyaml --with jsonschema python scripts/service_redundancy.py --service grafana
+```

@@ -1,10 +1,10 @@
 # ADR 0179: Service Redundancy Tier Matrix
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Implemented
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.176.5
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-27
 - Date: 2026-03-26
 
 ## Context
@@ -64,6 +64,17 @@ Each managed service must declare:
 
 - This ADR classifies resilience targets; it does not itself implement replicas or failover.
 - A service cannot claim an implemented tier above what the current failure domains support.
+
+## Repo Implementation
+
+This ADR is implemented in repository automation by:
+
+- `config/service-redundancy-catalog.json` for the machine-readable per-service tier declarations
+- `docs/schema/service-redundancy-catalog.schema.json` for the contract
+- `scripts/service_redundancy.py` for validation, operator inspection, and live-apply interpretation
+- `Makefile` `live-apply-*` preflight hooks so deployment refuses unsupported tier claims before Ansible runs
+- `scripts/validate_repository_data_models.py` so `make validate` enforces the catalog
+- `docs/runbooks/service-redundancy-tier-matrix.md` for operator maintenance and inspection guidance
 
 ## Related ADRs
 
