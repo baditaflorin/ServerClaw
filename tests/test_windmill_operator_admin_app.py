@@ -292,10 +292,14 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Ensure the Windmill bootstrap workspace user is consistent" in tasks
     assert "INSERT INTO usr" in tasks
     assert "INSERT INTO usr_to_group" in tasks
+    assert "Authenticate the Windmill bootstrap admin session" in tasks
+    assert "/api/auth/login" in tasks
+    assert "windmill_bootstrap_session_token" in tasks
     assert "Ensure the Windmill bootstrap admin login type matches the managed contract" in tasks
     assert "/api/users/set_login_type/" in tasks
     assert "Ensure the Windmill bootstrap admin password matches the managed secret" in tasks
     assert "/api/users/set_password_of/" in tasks
+    assert 'Authorization: "Bearer {{ windmill_bootstrap_session_token }}"' in tasks
     assert "Sync repo-managed Windmill scripts" in tasks
     assert "scripts/sync_windmill_seed_scripts.py" in tasks
     assert "WINDMILL_TOKEN" in tasks
@@ -303,12 +307,16 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "scripts/sync_windmill_seed_schedules.py" in tasks
     assert '$1 == "DATABASE_URL"' in tasks
     assert '. "{{ windmill_env_file }}"' not in tasks
+    assert "Converge repo-managed Windmill schedule enabled flags" in tasks
+    assert 'psql "${database_url}"' in tasks
+    assert "become: true" in tasks
     assert "Sync repo-managed Windmill raw apps" in tasks
     assert "wmill sync push" in tasks
     assert "--skip-scripts" in tasks
     assert "--includes \"{{ item.sync_pattern }}\"" in tasks
     assert "--skip-branch-validation" in tasks
     assert "WM_TOKEN" in tasks
+    assert 'WM_TOKEN: "{{ windmill_bootstrap_session_token }}"' in tasks
     assert "BASE_INTERNAL_URL" in tasks
     assert "windmill_runtime_api_base_url" in tasks
     assert "Build the local staging archive for the Windmill worker checkout" in tasks

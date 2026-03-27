@@ -47,7 +47,6 @@ class RetryableSyncError(SyncError):
 class SyncTransportError(RetryableSyncError):
     pass
 
-
 def login_with_bootstrap_secret(base_url: str, secret: str) -> str:
     request = urllib.request.Request(
         f"{base_url.rstrip('/')}/api/auth/login",

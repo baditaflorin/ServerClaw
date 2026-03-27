@@ -182,6 +182,7 @@ class HttpWindmillClient:
         self._internal_api_retry_policy = policy_for_surface("internal_api")
         self._request_timeout_seconds = resolve_timeout_seconds("http_request", request_timeout_seconds)
         self._circuit_breaker = circuit_breaker
+        self._session_token: str | None = None
         if self._circuit_breaker is None:
             registry = circuit_registry or CircuitRegistry(REPO_ROOT)
             if registry.has_policy("windmill"):
@@ -189,6 +190,29 @@ class HttpWindmillClient:
                     "windmill",
                     exception_classifier=should_count_urllib_exception,
                 )
+
+    def _login_with_bootstrap_secret(self) -> str:
+        payload = json.dumps(
+            {
+                "email": "superadmin_secret@windmill.dev",
+                "password": self._token,
+            }
+        ).encode("utf-8")
+        request = urllib.request.Request(
+            f"{self._base_url}/api/auth/login",
+            data=payload,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(
+            request,
+            timeout=resolve_timeout_seconds("http_request", self._request_timeout_seconds),
+        ) as response:
+            token = response.read().decode("utf-8").strip()
+        if not token:
+            raise RuntimeError("Windmill bootstrap login returned an empty session token")
+        self._session_token = token
+        return token
 
     def _request(
         self,
@@ -198,9 +222,11 @@ class HttpWindmillClient:
         payload: Any | None = None,
         timeout: float | None = None,
         retry: bool = True,
+        allow_login_retry: bool = True,
     ) -> Any:
         data = None
-        headers = {"Authorization": f"Bearer {self._token}"}
+        auth_token = self._session_token or self._token
+        headers = {"Authorization": f"Bearer {auth_token}"}
         if payload is not None:
             data = json.dumps(payload).encode("utf-8")
             headers["Content-Type"] = "application/json"
@@ -228,9 +254,35 @@ class HttpWindmillClient:
                 return response.read().decode("utf-8")
 
         if self._circuit_breaker is not None:
-            body = self._circuit_breaker.call(execute)
+            try:
+                body = self._circuit_breaker.call(execute)
+            except urllib.error.HTTPError as exc:
+                if exc.code != 401 or not allow_login_retry or self._session_token is not None:
+                    raise
+                self._login_with_bootstrap_secret()
+                return self._request(
+                    path,
+                    method=method,
+                    payload=payload,
+                    timeout=timeout,
+                    retry=retry,
+                    allow_login_retry=False,
+                )
         else:
-            body = execute()
+            try:
+                body = execute()
+            except urllib.error.HTTPError as exc:
+                if exc.code != 401 or not allow_login_retry or self._session_token is not None:
+                    raise
+                self._login_with_bootstrap_secret()
+                return self._request(
+                    path,
+                    method=method,
+                    payload=payload,
+                    timeout=timeout,
+                    retry=retry,
+                    allow_login_retry=False,
+                )
         if not body.strip():
             return None
         try:

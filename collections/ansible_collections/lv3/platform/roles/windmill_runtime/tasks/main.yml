@@ -588,6 +588,21 @@
       - windmill_docker_nat_chain_recheck.rc == 0
     fail_msg: "Docker is running but the nat DOCKER chain is missing; Windmill published ports will fail."
   when: windmill_server_requires_docker_nat | bool
+
+- name: Remove stale Windmill compose replacement containers before startup
+  ansible.builtin.shell: |
+    set -euo pipefail
+    stale_ids="$(docker ps -aq \
+      --filter label=com.docker.compose.project=windmill \
+      --filter label=com.docker.compose.replace)"
+    if [ -z "$stale_ids" ]; then
+      exit 0
+    fi
+    docker rm -f $stale_ids
+  args:
+    executable: /bin/bash
+  register: windmill_stale_replace_cleanup
+  changed_when: windmill_stale_replace_cleanup.stdout | trim != ""
 - name: Start Windmill and wait for the API socket
   block:
     - name: Start the Windmill stack
@@ -724,12 +739,96 @@
   until: windmill_version.status == 200
   changed_when: false
 
+- name: Check whether the rendered Windmill runtime env exposes worker scheduler variables
+  ansible.builtin.shell: |
+    set -euo pipefail
+    test -s "{{ windmill_env_file }}"
+    grep '^LV3_WINDMILL_BASE_URL=' "{{ windmill_env_file }}"
+    grep '^LV3_WINDMILL_TOKEN=' "{{ windmill_env_file }}"
+  args:
+    executable: /bin/bash
+  register: windmill_runtime_env_contract
+  changed_when: false
+  failed_when: false
+
+- name: Recreate the OpenBao agent and Windmill worker services when the runtime env contract is stale
+  vars:
+    mutation_audit_action: restart.windmill_runtime_contract
+    mutation_audit_target: windmill-runtime
+  args:
+    chdir: "{{ windmill_site_dir }}"
+    executable: /bin/bash
+  ansible.builtin.shell: |
+    set -euo pipefail
+    stale_ids="$(docker ps -aq \
+      --filter label=com.docker.compose.project=windmill \
+      --filter label=com.docker.compose.replace)"
+    if [ -n "$stale_ids" ]; then
+      docker rm -f $stale_ids
+    fi
+    docker compose --file "{{ windmill_compose_file }}" up -d --force-recreate \
+      openbao-agent windmill_server windmill_worker windmill_worker_native
+  register: windmill_runtime_env_recreate
+  changed_when: >-
+    'Creating' in windmill_runtime_env_recreate.stdout
+    or 'Recreating' in windmill_runtime_env_recreate.stdout
+    or 'Starting' in windmill_runtime_env_recreate.stdout
+  when: windmill_runtime_env_contract.rc != 0
+  tags:
+    - mutation
+
+- name: Wait for the rendered Windmill runtime env to expose worker scheduler variables
+  ansible.builtin.shell: |
+    set -euo pipefail
+    test -s "{{ windmill_env_file }}"
+    grep '^LV3_WINDMILL_BASE_URL=' "{{ windmill_env_file }}"
+    grep '^LV3_WINDMILL_TOKEN=' "{{ windmill_env_file }}"
+  args:
+    executable: /bin/bash
+  register: windmill_runtime_env_contract_verify
+  retries: 18
+  delay: 5
+  until: windmill_runtime_env_contract_verify.rc == 0
+  changed_when: false
+
+- name: Recheck the Windmill API version endpoint after runtime env contract reconciliation
+  ansible.builtin.uri:
+    url: "{{ windmill_runtime_api_base_url }}/api/version"
+    method: GET
+    status_code: 200
+  register: windmill_version_post_contract
+  retries: 18
+  delay: 5
+  until: windmill_version_post_contract.status == 200
+  changed_when: false
+
+- name: Authenticate the Windmill bootstrap admin session
+  ansible.builtin.uri:
+    url: "{{ windmill_runtime_api_base_url }}/api/auth/login"
+    method: POST
+    body_format: json
+    body:
+      email: "{{ windmill_bootstrap_identity_email }}"
+      password: "{{ windmill_superadmin_secret }}"
+    return_content: true
+    status_code: 200
+  register: windmill_bootstrap_session_login
+  retries: 6
+  delay: 5
+  until: windmill_bootstrap_session_login.status | default(0) == 200
+  changed_when: false
+  no_log: true
+
+- name: Record the Windmill bootstrap admin session token
+  ansible.builtin.set_fact:
+    windmill_bootstrap_session_token: "{{ windmill_bootstrap_session_login.content | trim }}"
+  no_log: true
 - name: Check whether the Windmill workspace already exists
   ansible.builtin.uri:
     url: "{{ windmill_private_base_url }}/api/workspaces/exists"
     method: POST
     headers:
-      Authorization: "Bearer {{ windmill_superadmin_secret }}"
+      Authorization: "Bearer {{ windmill_bootstrap_session_token }}"
     body_format: json
     body:
       id: "{{ windmill_workspace_id }}"
@@ -748,7 +847,7 @@
     url: "{{ windmill_private_base_url }}/api/workspaces/create"
     method: POST
     headers:
-      Authorization: "Bearer {{ windmill_superadmin_secret }}"
+      Authorization: "Bearer {{ windmill_bootstrap_session_token }}"
     body_format: json
     body:
       id: "{{ windmill_workspace_id }}"
@@ -847,7 +946,7 @@
     url: "{{ windmill_private_base_url }}/api/users/set_login_type/{{ windmill_bootstrap_identity_email | urlencode }}"
     method: POST
     headers:
-      Authorization: "Bearer {{ windmill_superadmin_secret }}"
+      Authorization: "Bearer {{ windmill_bootstrap_session_token }}"
     body_format: json
     body:
       login_type: "{{ windmill_bootstrap_identity_login_type }}"
@@ -861,7 +960,7 @@
     url: "{{ windmill_private_base_url }}/api/users/set_password_of/{{ windmill_bootstrap_identity_email | urlencode }}"
     method: POST
     headers:
-      Authorization: "Bearer {{ windmill_superadmin_secret }}"
+      Authorization: "Bearer {{ windmill_bootstrap_session_token }}"
     body_format: json
     body:
       password: "{{ windmill_superadmin_secret }}"
@@ -1204,7 +1303,7 @@
   delegate_to: localhost
   become: false
   environment:
-    WINDMILL_TOKEN: "{{ windmill_superadmin_secret }}"
+    WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"
   register: windmill_seed_script_sync
   changed_when: false
   tags:
@@ -1275,8 +1374,8 @@
   register: windmill_seed_raw_app_sync
   environment:
     WM_WORKSPACE: "{{ windmill_workspace_id }}"
-    WM_TOKEN: "{{ windmill_superadmin_secret }}"
-    BASE_INTERNAL_URL: "{{ windmill_private_base_url }}"
+    WM_TOKEN: "{{ windmill_bootstrap_session_token }}"
+    BASE_INTERNAL_URL: "{{ windmill_runtime_api_base_url }}"
   changed_when: false
   when: (windmill_seed_raw_apps | default([])) | length > 0
   tags:
@@ -1320,7 +1419,7 @@
   delegate_to: localhost
   become: false
   environment:
-    WINDMILL_TOKEN: "{{ windmill_superadmin_secret }}"
+    WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"
   register: windmill_seed_schedule_sync
   changed_when: false
   tags:
@@ -1363,7 +1462,7 @@
   delegate_to: localhost
   become: false
   environment:
-    WINDMILL_TOKEN: "{{ windmill_superadmin_secret }}"
+    WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"
   register: windmill_healthcheck
   changed_when: false
   no_log: true

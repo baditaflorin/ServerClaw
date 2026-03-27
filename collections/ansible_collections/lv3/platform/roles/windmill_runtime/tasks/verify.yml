@@ -23,7 +23,7 @@
   delegate_to: localhost
   become: false
   environment:
-    WINDMILL_TOKEN: "{{ windmill_superadmin_secret }}"
+    WINDMILL_TOKEN: "{{ windmill_bootstrap_session_token }}"
   register: windmill_verify_healthcheck
   changed_when: false
   no_log: true
