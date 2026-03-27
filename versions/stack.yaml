@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.177.3
-platform_version: 0.130.24
+repo_version: 0.177.4
+platform_version: 0.130.25
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -54,7 +54,7 @@ live_apply_evidence:
     semaphore: 2026-03-25-adr-0149-semaphore-live-apply
     searxng: 2026-03-26-adr-0148-searxng-live-apply
     ops_portal: 2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply
-    ollama: 2026-03-25-adr-0145-ollama-live-apply
+    ollama: 2026-03-27-adr-0176-inventory-sharding-mainline-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated
@@ -914,8 +914,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.2
+    current: 0.177.4
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.24
+    current: 0.130.25
     meaning: intended platform release for the actual server configuration

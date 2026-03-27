@@ -47,3 +47,17 @@ def test_shell_and_make_output_include_partitioned_paths(tmp_path: Path) -> None
     }
     assert make_payload["RUN_NAMESPACE_ROOT"].endswith(".local/runs/test-run")
     assert make_payload["RUN_NAMESPACE_ANSIBLE_LOG_PATH"].endswith("/logs/ansible.log")
+
+
+def test_ansible_control_path_dir_is_short_and_temp_local(tmp_path: Path) -> None:
+    namespace = run_namespace.resolve_run_namespace(
+        repo_root=tmp_path,
+        run_id="a" * 64,
+    )
+
+    control_path_dir = Path(namespace.ansible_control_path_dir)
+
+    assert str(control_path_dir).startswith("/tmp/lv3-acp/")
+    assert len(str(control_path_dir)) < len(namespace.root)
+    assert len(str(control_path_dir)) <= 80
+    assert control_path_dir.name

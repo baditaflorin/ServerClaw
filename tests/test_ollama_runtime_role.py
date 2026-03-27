@@ -36,6 +36,35 @@ def test_role_verifies_default_model_inside_container() -> None:
     assert verify_task["ansible.builtin.command"]["argv"][-2:] == ["show", "{{ ollama_runtime_default_model }}"]
 
 
+def test_role_recovers_missing_docker_nat_chain_before_startup() -> None:
+    tasks = load_tasks()
+    precheck_task = next(task for task in tasks if task.get("name") == "Check whether Docker nat chain exists before Ollama startup")
+    assert precheck_task["ansible.builtin.command"]["argv"] == ["iptables", "-t", "nat", "-S", "DOCKER"]
+
+    start_block = next(
+        task for task in tasks if task.get("name") == "Start the Ollama runtime and recover Docker nat-chain failures"
+    )
+    rescue_names = [task["name"] for task in start_block["rescue"]]
+    assert "Restart Docker to restore nat chain before retrying Ollama startup" in rescue_names
+    assert "Retry Ollama startup after Docker nat-chain recovery" in rescue_names
+
+
+def test_role_force_recreates_ollama_when_port_binding_is_missing() -> None:
+    tasks = load_tasks()
+    port_check = next(task for task in tasks if task.get("name") == "Check whether Ollama publishes the expected host port")
+    assert port_check["ansible.builtin.command"]["argv"] == [
+        "docker",
+        "port",
+        "{{ ollama_runtime_container_name }}",
+        "{{ ollama_runtime_port }}",
+    ]
+
+    recreate_task = next(
+        task for task in tasks if task.get("name") == "Force-recreate Ollama when the host port binding is missing"
+    )
+    assert "--force-recreate" in recreate_task["ansible.builtin.command"]["argv"]
+
+
 def test_compose_template_exposes_private_runtime_port_and_model_volume() -> None:
     template = COMPOSE_TEMPLATE.read_text()
     assert '"{{ ollama_runtime_port }}:11434"' in template
@@ -45,5 +74,9 @@ def test_compose_template_exposes_private_runtime_port_and_model_volume() -> Non
 def test_host_network_policy_allows_private_ollama_access() -> None:
     host_vars = yaml.safe_load((REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml").read_text())
     docker_runtime_rules = host_vars["network_policy"]["guests"]["docker-runtime-lv3"]["allowed_inbound"]
-    guest_rule = next(rule for rule in docker_runtime_rules if rule["source"] == "all_guests")
+    guest_rule = next(
+        rule
+        for rule in docker_runtime_rules
+        if rule["source"] == "all_guests" and 11434 in rule["ports"]
+    )
     assert 11434 in guest_rule["ports"]

@@ -3,7 +3,7 @@
 - Status: Implemented
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.177.0
-- Implemented In Platform Version: not yet
+- Implemented In Platform Version: 0.130.25
 - Implemented On: 2026-03-27
 - Date: 2026-03-26
 
@@ -77,3 +77,4 @@ Playbooks should continue to be grouped by concern, but every mutable playbook m
 - Mutable Ansible execution now uses the repo-managed catalog at `config/ansible-execution-scopes.yaml` to declare each leaf playbook's shard class and shared surfaces.
 - `scripts/ansible_scope_runner.py` resolves wrapper imports, derives the actual target host set from `ansible-playbook --list-hosts`, renders a per-run shard inventory, and executes `ansible-playbook` with a matching `--limit`.
 - `Makefile` live-apply targets and dedicated converge playbooks now route through the scoped runner, and the repository data-model gate validates catalog coverage before merge.
+- The first fully synchronized `main` replay completed on 2026-03-27 through `make live-apply-service service=ollama env=production`, with evidence recorded in `receipts/live-applies/2026-03-27-adr-0176-inventory-sharding-mainline-live-apply.json`.

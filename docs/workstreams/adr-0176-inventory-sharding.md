@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0176](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0176-inventory-sharding-and-host-scoped-ansible-execution.md)
 - Title: Repo-managed Ansible execution scopes, shard inventories, and host-limited live apply
-- Status: implemented
+- Status: live_applied
 - Branch: `codex/adr-0176-inventory-sharding`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/worktree-adr-0176-inventory-sharding`
 - Owner: codex
@@ -39,7 +39,9 @@
 
 ## Expected Live Surfaces
 
-- none yet; the implementation is repo-side until a live apply from `main` uses the scoped runner
+- the merged-main `live-apply-service` path renders a run-scoped shard inventory under `.ansible/shards/<run-id>/`
+- host-scoped replays execute with a matching `--limit` while preserving the full repo-relative inventory context required by shared host vars
+- the first synchronized production replay evidence is the `ollama` converge recorded in `receipts/live-applies/2026-03-27-adr-0176-inventory-sharding-mainline-live-apply.json`
 
 ## Verification
 
@@ -56,7 +58,15 @@
 - the runner writes a real shard inventory and replays Ansible successfully with a matching `--limit`
 - the repository gate rejects scope-catalog drift before merge
 
+## Outcome
+
+- repository implementation merged on `main` in repo release `0.177.0`
+- the first fully synchronized `main` replay advanced platform version to `0.130.25` on 2026-03-27 from origin/main commit `f076a89c`
+- `make live-apply-service service=ollama env=production` completed with `docker-runtime-lv3 : ok=90 changed=1 unreachable=0 failed=0 skipped=19`
+- the final scope plan for run `e78ee2968d0140deba22cec891c50baf` rendered `.ansible/shards/e78ee2968d0140deba22cec891c50baf/ollama-production.json` with `limit_expression` `docker-runtime-lv3`
+- the post-apply verification returned `{"version":"0.18.2"}` and showed `0.0.0.0:11434->11434/tcp, [::]:11434->11434/tcp` published for the `ollama` container
+
 ## Notes For The Next Assistant
 
-- The repo implementation is complete in release `0.177.0`, but `Implemented In Platform Version` intentionally remains `not yet` until a `main`-based live apply uses this path.
+- The synchronized-main replay surfaced and fixed two broader integration regressions outside the ADR 0176 core: ADR 0177 namespaced Ansible SSH control sockets were too long on macOS, and the Ollama runtime needed explicit Docker nat-chain plus host-port recovery after replaying Docker and guest-firewall roles together.
 - If a later branch adds true lane-scoped playbooks, extend `config/ansible-execution-scopes.yaml` with `mutation_scope: lane` plus `target_lane`; the resolver and validator already support that class.

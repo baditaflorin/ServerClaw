@@ -117,8 +117,8 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.2` |
-| Platform version | `0.130.24` |
+| Repository version | `0.177.4` |
+| Platform version | `0.130.25` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -193,7 +193,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `notification_profiles` | `2026-03-22-adr-0050-notification-profiles-live-apply` |
 | `ntopng` | `2026-03-22-adr-0059-ntopng-live-apply` |
 | `observation_to_action_closure_loop` | `2026-03-26-adr-0126-observation-to-action-closure-loop-live-apply` |
-| `ollama` | `2026-03-25-adr-0145-ollama-live-apply` |
+| `ollama` | `2026-03-27-adr-0176-inventory-sharding-mainline-live-apply` |
 | `open_webui` | `2026-03-25-adr-0145-open-webui-ollama-connector-live-apply` |
 | `openbao` | `2026-03-26-adr-0171-fault-injection-live-apply` |
 | `ops_portal` | `2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply` |
@@ -761,6 +761,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0181: Off-Host Witness and Control Metadata Replication](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0181-off-host-witness-and-control-metadata-replication.md)
 - [ADR 0182: Live Apply Merge Train and Rollback Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0182-live-apply-merge-train-and-rollback-bundle.md)
 - [ADR 0183: Auxiliary Cloud Failure Domain for Witness, Recovery, and Burst Capacity](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0183-auxiliary-cloud-failure-domain-for-witness-recovery-and-burst-capacity.md)
+- [ADR 0183: Keycloak Uses Shared-Mail-Network Internal Submission](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0183-keycloak-mail-network-internal-submission.md)
 - [ADR 0184: Failure-Domain Labels and Anti-Affinity Policy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0184-failure-domain-labels-and-anti-affinity-policy.md)
 - [ADR 0185: Branch-Scoped Ephemeral Preview Environments](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0185-branch-scoped-ephemeral-preview-environments.md)
 - [ADR 0186: Prewarmed Fixture Pools and Lease-Based Ephemeral Capacity](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0186-prewarmed-fixture-pools-and-lease-based-ephemeral-capacity.md)
@@ -944,8 +945,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.2` |
-| Platform version | `0.130.24` |
+| Repository version | `0.177.4` |
+| Platform version | `0.130.25` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1125,10 +1126,10 @@ This repository is intentionally opinionated:
 | `0170` | Platform-wide timeout hierarchy | `live_applied` | [adr-0170-timeout-hierarchy.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0170-timeout-hierarchy.md) |
 | `0171` | Controlled fault injection for resilience validation | `live_applied` | [adr-0171-controlled-fault-injection.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0171-controlled-fault-injection.md) |
 | `0172` | Watchdog escalation and stale job self-healing | `merged` | [adr-0172-watchdog-escalation-and-stale-job-self-healing.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0172-watchdog-escalation-and-stale-job-self-healing.md) |
-| `0172` | Watchdog escalation and stale job self-healing | `merged` | [adr-0172-watchdog-escalation-and-stale-job-self-healing.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0172-watchdog-escalation-and-stale-job-self-healing.md) |
 | `0173` | Workstream surface ownership manifest | `live_applied` | [adr-0173-workstream-surface-ownership-manifest.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0173-workstream-surface-ownership-manifest.md) |
 | `0174` | Integration-only canonical truth assembly | `merged` | [adr-0174-canonical-truth-assembly.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0174-canonical-truth-assembly.md) |
 | `0175` | Cross-workstream interface contracts | `merged` | [adr-0175-cross-workstream-interface-contracts.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0175-cross-workstream-interface-contracts.md) |
+| `0176` | Inventory sharding and host-scoped Ansible execution | `live_applied` | [adr-0176-inventory-sharding.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0176-inventory-sharding.md) |
 | `0177` | Run namespace partitioning for parallel tooling | `merged` | [adr-0177-run-namespace-partitioning.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0177-run-namespace-partitioning.md) |
 | `0178` | Dependency wave manifests for parallel apply | `merged` | [adr-0178-dependency-wave-manifests.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0178-dependency-wave-manifests.md) |
 | `0179` | Service redundancy tier matrix | `merged` | [adr-0179-service-redundancy-tier-matrix.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0179-service-redundancy-tier-matrix.md) |

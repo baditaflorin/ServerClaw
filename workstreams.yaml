@@ -94,7 +94,7 @@ workstreams:
   - id: adr-0176-inventory-sharding
     adr: "0176"
     title: Inventory sharding and host-scoped Ansible execution
-    status: implemented
+    status: live_applied
     owner: codex
     branch: codex/adr-0176-inventory-sharding
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/worktree-adr-0176-inventory-sharding
@@ -145,8 +145,8 @@ workstreams:
             - changelog.md
             - versions/stack.yaml
           mode: generated
-    ready_to_merge: true
-    live_applied: false
+    ready_to_merge: false
+    live_applied: true
 
   - id: adr-0163-retry-taxonomy
     adr: "0163"
@@ -3894,29 +3894,6 @@ workstreams:
       - versions/stack.yaml
     ready_to_merge: false
     live_applied: true
-
-  - id: adr-0172-watchdog-escalation
-    adr: "0172"
-    title: Watchdog escalation and stale job self-healing
-    status: merged
-    owner: codex
-    branch: codex/adr-0172-watchdog
-    worktree_path: .worktrees/codex-adr-0172-watchdog
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0172-watchdog-escalation-and-stale-job-self-healing.md
-    depends_on:
-      - adr-0044-windmill
-      - adr-0115-mutation-ledger
-      - adr-0119-budgeted-workflow-scheduler
-    conflicts_with: []
-    shared_surfaces:
-      - platform/scheduler/watchdog.py
-      - platform/scheduler/scheduler.py
-      - windmill/scheduler/watchdog-loop.py
-      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
-      - config/workflow-catalog.json
-      - config/ledger-event-types.yaml
-      - docs/runbooks/budgeted-workflow-scheduler.md
-    ready_to_merge: false
 
   - id: adr-0177-run-namespace-partitioning
     adr: "0177"

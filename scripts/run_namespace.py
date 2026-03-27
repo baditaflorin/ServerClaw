@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import sys
@@ -46,6 +47,10 @@ def resolve_run_namespace(
     root = checkout_root / ".local" / "runs" / session.session_slug
     ansible_dir = root / "ansible"
     logs_dir = root / "logs"
+    control_path_key = hashlib.sha256(
+        f"{checkout_root}:{session.session_slug}".encode("utf-8")
+    ).hexdigest()[:12]
+    control_path_dir = Path("/tmp") / "lv3-acp" / control_path_key
     return RunNamespace(
         run_id=session.session_id,
         run_slug=session.session_slug,
@@ -54,7 +59,7 @@ def resolve_run_namespace(
         ansible_dir=str(ansible_dir),
         ansible_tmp_dir=str(ansible_dir / "tmp"),
         ansible_retry_dir=str(ansible_dir / "retry"),
-        ansible_control_path_dir=str(ansible_dir / "cp"),
+        ansible_control_path_dir=str(control_path_dir),
         tofu_dir=str(root / "tofu"),
         rendered_dir=str(root / "rendered"),
         logs_dir=str(logs_dir),
