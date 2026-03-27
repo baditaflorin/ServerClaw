@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.12",
   "platform_version": "0.130.31",
-  "generated_at": "2026-03-27T17:00:55Z",
-  "next_refresh_at": "2026-03-27T18:00:55Z",
+  "generated_at": "2026-03-27T20:39:50Z",
+  "next_refresh_at": "2026-03-27T21:39:50Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -59,7 +59,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: health probe, SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://changelog.lv3.org",
-        "last_live_apply": "2026-03-26T00:00:00Z"
+        "last_live_apply": "2026-03-27T00:00:00Z"
       },
       "docker_build": {
         "service_name": "Docker Build VM",
@@ -92,7 +92,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: health probe, SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://docs.lv3.org",
-        "last_live_apply": "2026-03-26T00:00:00Z"
+        "last_live_apply": "2026-03-27T00:00:00Z"
       },
       "dozzle": {
         "service_name": "Dozzle",
@@ -300,6 +300,18 @@
         "lifecycle_status": "active",
         "primary_url": "https://ops.lv3.org",
         "last_live_apply": "2026-03-27T00:00:00Z"
+      },
+      "plane": {
+        "service_name": "Plane",
+        "status": "healthy",
+        "score": 0.95,
+        "safe_to_act": true,
+        "source": "repo_evidence",
+        "reason": "Repository evidence is complete enough for normal automation.",
+        "lifecycle_status": "active",
+        "primary_url": "https://tasks.lv3.org",
+        "last_live_apply": "2026-03-27T00:00:00Z",
+        "slo_status": "unknown"
       },
       "platform_context_api": {
         "service_name": "Platform Context API",
@@ -1271,6 +1283,32 @@
         "runbook": "docs/runbooks/configure-openbao.md"
       },
       {
+        "id": "converge-plane",
+        "description": "Converge Plane on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at tasks.lv3.org, and verify the repo-managed ADR synchronization path.",
+        "tags": [
+          "converge-plane",
+          "guest-live",
+          "mutation",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "guest_live",
+        "budget": {
+          "max_duration_seconds": 1800,
+          "max_steps": 350,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 4,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-plane.md"
+      },
+      {
         "id": "converge-portainer",
         "description": "Converge the private Portainer runtime on docker-runtime-lv3, publish it through the Proxmox host Tailscale proxy, and persist the controller-local bootstrap auth.",
         "tags": [
@@ -2012,6 +2050,32 @@
           "escalation_action": "notify_and_abort"
         },
         "runbook": "docs/runbooks/packer-vm-templates.md"
+      },
+      {
+        "id": "plane-manage",
+        "description": "Run governed Plane API actions such as inspecting the bootstrap identity, listing projects, listing issues, creating one issue, or synchronizing ADRs into Plane.",
+        "tags": [
+          "external-live",
+          "mutation",
+          "plane-manage",
+          "preflight",
+          "validated"
+        ],
+        "risk_class": "HIGH",
+        "automation_eligible": true,
+        "agent_trust_required": "T3",
+        "execution_class": "mutation",
+        "live_impact": "external_live",
+        "budget": {
+          "max_duration_seconds": 1200,
+          "max_steps": 250,
+          "max_concurrent_instances": 1,
+          "max_touched_hosts": 1,
+          "max_restarts": 0,
+          "max_rollback_depth": 1,
+          "escalation_action": "notify_and_abort"
+        },
+        "runbook": "docs/runbooks/configure-plane.md"
       },
       {
         "id": "platform-observation-loop",
@@ -3014,6 +3078,17 @@
         "path": "docs/runbooks/configure-openbao.md",
         "workflow_ids": [
           "converge-openbao"
+        ]
+      },
+      {
+        "id": "configure-plane",
+        "title": "Configure Plane",
+        "agent_trust_required": "T3",
+        "steps": 8,
+        "path": "docs/runbooks/configure-plane.md",
+        "workflow_ids": [
+          "converge-plane",
+          "plane-manage"
         ]
       },
       {
