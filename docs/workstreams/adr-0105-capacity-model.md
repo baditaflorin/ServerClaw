@@ -51,10 +51,10 @@
 
 - repository implementation completed in `0.115.0`
 - merged to `main` in `0.177.5`
-- platform implementation is now recorded in platform version `0.130.24`
-- implementation commit: `851cf901b9bc22515591802fb2fcc5f7a95b6eee`
+- platform implementation is first recorded in platform version `0.130.24`, and the latest merged-main replay advanced the live platform state to `0.130.26`
+- implementation commit: `2907637daca87ee2bb739c0dd821eee0834aa319`
 - the first production replay imported the dashboard and passed its Grafana verification before a later transient SSH reachability failure in the blackbox verification step
-- the immediate branch replay completed cleanly with `ok=176 changed=0 unreachable=0 failed=0`
-- the current-mainline replay from source commit `74a489de77890f970c54f4ca2b09e1d755508345` completed cleanly with `ok=176 changed=0 unreachable=0 failed=0 skipped=34`
+- the immediate branch replay completed cleanly with `ok=176 changed=0 unreachable=0 failed=0 skipped=34`
+- the current-mainline replay from source commit `2907637daca87ee2bb739c0dd821eee0834aa319` completed cleanly with `ok=176 changed=0 unreachable=0 failed=0 skipped=34`
 - the current-mainline replay also verified the fresh-worktree live-apply path after shortening per-run Ansible control-socket directories under `/tmp`
 - the dashboard uid `lv3-capacity-overview` is published behind `https://grafana.lv3.org/` and both `make capacity-report` and `make weekly-capacity-report` render with live `ssh+influx` metrics

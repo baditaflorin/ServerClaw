@@ -5,8 +5,8 @@
   "applied_on": "2026-03-27",
   "recorded_on": "2026-03-27",
   "recorded_by": "codex",
-  "source_commit": "74a489de",
-  "repo_version_context": "0.177.3",
+  "source_commit": "2907637daca87ee2bb739c0dd821eee0834aa319",
+  "repo_version_context": "0.177.5",
   "workflow_id": "adr-0105-capacity-model-mainline-live-apply",
   "adr": "0105",
   "summary": "Replayed ADR 0105 from the latest origin/main integration branch, verified the live LV3 capacity dashboard and capacity-report entrypoints end to end on monitoring-lv3, and fixed the separate-worktree live-apply path by shortening per-run Ansible SSH control-socket directories while preserving primary inventory group vars for scoped runs.",
@@ -75,7 +75,7 @@
   ],
   "notes": [
     "The first 2026-03-26 production replay from `codex/ws-0105-live-apply` imported and verified the capacity dashboard before a later transient SSH reachability failure in downstream blackbox verification; the immediate replay then completed cleanly with `ok=176 changed=0 unreachable=0 failed=0 skipped=34`.",
-    "The first 2026-03-27 replay from the fresh latest-main worktree failed before host connection because the longer worktree path overflowed the default Ansible SSH `ControlPath`; source commit `38a34a49` shortened those per-run socket directories and the official replay then succeeded from the same isolated worktree model.",
+    "The first 2026-03-27 replay from the fresh latest-main worktree failed before host connection because the longer worktree path overflowed the default Ansible SSH `ControlPath`; the rebased implementation commit `2907637daca87ee2bb739c0dd821eee0834aa319` shortened those per-run socket directories and the official replay then succeeded from the same isolated worktree model.",
     "Fresh worktrees do not include untracked `.local/` controller secrets, so the live apply used an explicit absolute `BOOTSTRAP_KEY` path from the main checkout."
   ]
 }

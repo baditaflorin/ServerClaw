@@ -8,7 +8,7 @@
 - kept the weekly capacity Windmill wrapper and monitoring converge aligned with clean worktree execution so repository automation and production live apply now succeed from isolated worktrees
 
 ## Platform Impact
-- repository version advances to 0.177.5; platform version remains 0.130.25 while ADR 0105 stays verified live from the latest `main`
+- repository version advances to 0.177.5; platform version advances to 0.130.26 after the successful latest-main ADR 0105 replay
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

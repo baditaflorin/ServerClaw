@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.4",
-  "platform_version": "0.130.24",
-  "generated_at": "2026-03-27T10:38:32Z",
-  "next_refresh_at": "2026-03-27T11:38:32Z",
+  "repo_version": "0.177.5",
+  "platform_version": "0.130.26",
+  "generated_at": "2026-03-27T10:54:21Z",
+  "next_refresh_at": "2026-03-27T11:54:21Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -48,7 +48,7 @@
         "reason": "Repository evidence is sufficient; missing supplemental evidence: SLO.",
         "lifecycle_status": "active",
         "primary_url": "https://10.10.10.60:8007",
-        "last_live_apply": "2026-03-22T00:00:00Z"
+        "last_live_apply": "2026-03-27T00:00:00Z"
       },
       "changelog_portal": {
         "service_name": "Deployment History Portal",
@@ -3496,10 +3496,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.3",
+    "last_version": "0.177.4",
     "deployed_at": "2026-03-27",
     "summary": "replayed ADR 0105 from the latest `main`, verified the live `lv3-capacity-overview` Grafana dashboard and capacity-report entrypoints end to end, and recorded the mainline live-apply receipt hardened fresh parallel-worktree automation by preserving the primary inventory alongside shard inventories and moving Ansible SSH control sockets to compact per-run paths under `/tmp`",
-    "release_notes_url": "docs/release-notes/0.177.4.md"
+    "release_notes_url": "docs/release-notes/0.177.5.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

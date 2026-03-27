@@ -1,8 +1,10 @@
 # ADR 0163: Proxmox Break-Glass SSH Port
 
-- Status: Accepted
+- Status: Implemented
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.123.0
+- Implemented In Platform Version: 0.130.18
+- Implemented On: 2026-03-26
 - Date: 2026-03-26
 
 ## Context

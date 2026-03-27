@@ -35,11 +35,11 @@
 
 ## Outcome
 
-- implementation commit `851cf901b9bc22515591802fb2fcc5f7a95b6eee` adds the capacity dashboard converge plus the fresh-worktree weekly wrapper fix
+- implementation commit `2907637daca87ee2bb739c0dd821eee0834aa319` adds the capacity dashboard converge plus the fresh-worktree weekly wrapper fix
 - the first production replay imported and verified the dashboard, then later hit a transient SSH reachability failure in a downstream verification task
-- the immediate replay completed cleanly with `ok=176 changed=0 unreachable=0 failed=0`
-- the current-mainline replay from source commit `74a489de77890f970c54f4ca2b09e1d755508345` completed cleanly with `ok=176 changed=0 unreachable=0 failed=0 skipped=34`
+- the immediate replay completed cleanly with `ok=176 changed=0 unreachable=0 failed=0 skipped=34`
+- the current-mainline replay from source commit `2907637daca87ee2bb739c0dd821eee0834aa319` completed cleanly with `ok=176 changed=0 unreachable=0 failed=0 skipped=34`
 - the current-mainline replay also proved the official live-apply entrypoint from a separate worktree after shortening per-run Ansible control-socket directories under `/tmp`
-- merged to `main` in repo version `0.177.5`, with the live platform version advanced to `0.130.25`
+- merged to `main` in repo version `0.177.5`, with the live platform version advanced to `0.130.26`
 - the public dashboard path redirects to Grafana login, confirming the live route for uid `lv3-capacity-overview`
 - `make capacity-report` and `make weekly-capacity-report` both render successfully with live `metrics_source: ssh+influx`

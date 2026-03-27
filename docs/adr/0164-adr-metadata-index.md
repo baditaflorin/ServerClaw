@@ -1,8 +1,10 @@
 # ADR 0164: ADR Metadata Index and Fast Discovery Protocol
 
-- Status: Accepted
+- Status: Implemented
 - Implementation Status: Implemented
-- Implemented Version: 0.173.0
+- Implemented In Repo Version: 0.173.0
+- Implemented In Platform Version: not applicable (repo-only)
+- Implemented On: 2026-03-26
 - Date: 2026-03-26
 
 ## Context

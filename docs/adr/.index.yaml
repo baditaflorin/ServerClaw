@@ -2743,7 +2743,7 @@ adr_index:
     implemented_version: 0.149.0
   - adr: '0163'
     title: Proxmox Break-Glass SSH Port
-    status: Accepted
+    status: Implemented
     implementation_status: Implemented
     date: '2026-03-26'
     concern: host-os
@@ -2757,7 +2757,7 @@ adr_index:
     implemented_version: 0.123.0
   - adr: '0163'
     title: Repository Structure Index for Agent Discovery
-    status: Accepted
+    status: Implemented
     implementation_status: Implemented
     date: '2026-03-26'
     concern: agent-discovery
@@ -2772,7 +2772,7 @@ adr_index:
     implemented_version: 0.173.0
   - adr: '0164'
     title: ADR Metadata Index and Fast Discovery Protocol
-    status: Accepted
+    status: Implemented
     implementation_status: Implemented
     date: '2026-03-26'
     concern: agent-discovery
@@ -2804,7 +2804,7 @@ adr_index:
     implemented_version: 0.152.0
   - adr: '0165'
     title: Playbook and Role Metadata Standard for Agent Discovery
-    status: Accepted
+    status: Implemented
     implementation_status: Implemented
     date: '2026-03-26'
     concern: automation
@@ -2835,7 +2835,7 @@ adr_index:
     implemented_version: 0.153.0
   - adr: '0166'
     title: Canonical Configuration Locations Registry
-    status: Accepted
+    status: Implemented
     implementation_status: Implemented
     date: '2026-03-26'
     concern: platform
@@ -2867,7 +2867,7 @@ adr_index:
     implemented_version: 0.162.0
   - adr: '0167'
     title: Agent Handoff and Context Preservation Protocol
-    status: Accepted
+    status: Implemented
     implementation_status: Implemented
     date: '2026-03-26'
     concern: agent-discovery
@@ -2911,7 +2911,7 @@ adr_index:
     implemented_version: 0.146.0
   - adr: 0168
     title: Automated Enforcement of Agent Discovery and Handoff Standards
-    status: Accepted
+    status: Implemented
     implementation_status: Implemented
     date: '2026-03-26'
     concern: agent-discovery
