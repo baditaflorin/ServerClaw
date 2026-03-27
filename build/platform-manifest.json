@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.12",
+  "repo_version": "0.177.13",
   "platform_version": "0.130.31",
-  "generated_at": "2026-03-27T22:43:04Z",
-  "next_refresh_at": "2026-03-27T23:43:04Z",
+  "generated_at": "2026-03-27T22:50:03Z",
+  "next_refresh_at": "2026-03-27T23:50:03Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3496,10 +3496,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.11",
+    "last_version": "0.177.12",
     "deployed_at": "2026-03-27",
-    "summary": "completed the first live staging activation for ADR 0183 by applying the staging VMs on `vmbr20`, recording the staging live-apply receipt, and codifying `network_firewall = false` for staged VM NICs until staged guest-network-policy automation exists",
-    "release_notes_url": "docs/release-notes/0.177.12.md"
+    "summary": "implemented ADR 0191 immutable guest replacement for stateful and edge services, adding the governed planner, fail-closed production live-apply guard, and verified Grafana monitoring exception receipt on `monitoring-lv3`",
+    "release_notes_url": "docs/release-notes/0.177.13.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

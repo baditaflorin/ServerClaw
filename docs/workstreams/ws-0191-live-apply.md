@@ -75,10 +75,11 @@
 - the bounded production replay `make live-apply-service service=grafana env=production ALLOW_IN_PLACE_MUTATION=true EXTRA_ARGS='-e bypass_promotion=true'` completed cleanly with `monitoring-lv3 : ok=176 changed=0 unreachable=0 failed=0 skipped=34`
 - `curl -Ik --resolve grafana.lv3.org:443:65.108.75.123 https://grafana.lv3.org/d/lv3-platform-overview/lv3-platform-overview` returned `HTTP/2 302` to `/login`, and the local monitoring guest health endpoints for Grafana, Prometheus, Alertmanager, Blackbox Exporter, and Tempo all remained healthy
 - the branch records receipt `2026-03-27-adr-0191-immutable-guest-replacement-live-apply` and verifies the production platform change on canonical platform version `0.130.31` from repo version context `0.177.12`
+- the workstream merged to `origin/main` on 2026-03-28 in repo version `0.177.13`
 - the broad repo gate now reaches repository data model validation, where `make validate` currently stops on the unrelated preexisting `ansible-scope-runner` error `playbook 'playbooks/proxmox-staging-bridge.yml' does not define imports or a leaf catalog entry`
 
-## Remaining For Merge To `main`
+## Post-Merge Notes
 
-- protected integration files remain intentionally untouched on this workstream branch and still require the normal integration step on `main`: `VERSION`, release sections in `changelog.md`, canonical observed state in `versions/stack.yaml`, and the top-level README integrated status summary
-- merge to `main` still needs the official repo/platform version advancement and any final canonical-truth release note mapping after this branch is reviewed
+- the `main` integration step advanced the repository release metadata to `0.177.13`
+- `versions/stack.yaml` intentionally keeps platform version `0.130.31` because no fresh mainline live apply was required to preserve the already-verified branch-local platform state
 - a separate follow-up workstream still needs to clear the unrelated broad-gate blocker in `playbooks/proxmox-staging-bridge.yml` so `make validate` can complete end to end from this repo tip
