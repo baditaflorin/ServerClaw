@@ -1,0 +1,8 @@
+{
+  "created_at": "2026-03-27T04:55:43.783891+00:00",
+  "bypass": "skip_remote_gate",
+  "reason": "unspecified",
+  "source": "pre-push-hook",
+  "branch": "codex/adr-0181-metadata-replication",
+  "commit": "0297ac32b58160edce06253e0cfe21a9d16aab10"
+}
