@@ -12,6 +12,12 @@ This runbook covers:
 - the OpenTofu VM declarations already committed under `tofu/environments/staging/`
 - the minimum checks needed before claiming staging is available
 
+Current live state on 2026-03-27:
+
+- `vmbr20` is live on the Proxmox host
+- `docker-runtime-staging-lv3` (`10.20.10.20`) and `monitoring-staging-lv3` (`10.20.10.40`) exist and are reachable over SSH through the Proxmox jump
+- the staged OpenTofu declarations currently keep Proxmox NIC firewall disabled (`firewall=0`) until staged guest-network-policy automation is added
+
 ## Topology
 
 - bridge: `vmbr20`
@@ -50,6 +56,8 @@ Apply only after review:
 ```bash
 make remote-tofu-apply ENV=staging
 ```
+
+If the remote apply wrapper hits the session-runtime ownership bug on the build server, reuse the reviewed `RUN_ID`, repair ownership on the session-scoped plan directory, and replay `scripts/tofu_exec.sh apply staging` directly on `docker-build-lv3`.
 
 ## Safe Checks
 

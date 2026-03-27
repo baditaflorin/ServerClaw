@@ -25,7 +25,7 @@
     {
       "id": "staging",
       "name": "Staging",
-      "status": "planned",
+      "status": "active",
       "purpose": "Pre-production validation lane for staged edge-published and operator-facing services.",
       "base_domain": "staging.lv3.org",
       "hostname_pattern": "<service>.staging.lv3.org",
@@ -41,7 +41,7 @@
         "cidr": 24,
         "network": "10.20.10.0/24"
       },
-      "notes": "Repo topology is defined now; live staged publication remains pending service-specific rollout from main."
+      "notes": "Live from 2026-03-27 with docker-runtime-staging-lv3 and monitoring-staging-lv3 on vmbr20; staged guest network policy and service bindings remain follow-up work."
     }
   ]
 }

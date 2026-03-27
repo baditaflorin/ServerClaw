@@ -120,8 +120,8 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.11` |
-| Platform version | `0.130.30` |
+| Repository version | `0.177.12` |
+| Platform version | `0.130.31` |
 | Observed check date | `2026-03-27` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -217,6 +217,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `security_posture_reporting` | `2026-03-26-adr-0102-security-posture-live-apply` |
 | `semaphore` | `2026-03-25-adr-0149-semaphore-live-apply` |
 | `short_lived_credentials_and_mtls` | `2026-03-22-adr-0047-short-lived-credentials-live-apply` |
+| `staging_environment` | `2026-03-27-adr-0183-staging-live-apply` |
 | `step_ca` | `2026-03-27-adr-0101-certificate-lifecycle-main-live-apply` |
 | `tempo_tracing` | `2026-03-22-adr-0053-tempo-traces-live-apply` |
 | `uptime_kuma` | `2026-03-22-adr-0027-uptime-kuma-live-apply` |
@@ -960,8 +961,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.11` |
-| Platform version | `0.130.30` |
+| Repository version | `0.177.12` |
+| Platform version | `0.130.31` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1153,7 +1154,7 @@ This repository is intentionally opinionated:
 | `0179` | Service redundancy tier matrix | `merged` | [adr-0179-service-redundancy-tier-matrix.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0179-service-redundancy-tier-matrix.md) |
 | `0181` | Off-host witness and control metadata replication | `live_applied` | [adr-0181-off-host-witness-replication.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0181-off-host-witness-replication.md) |
 | `0182` | Live apply merge train and rollback bundle | `merged` | [adr-0182-live-apply-merge-train-and-rollback-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0182-live-apply-merge-train-and-rollback-bundle.md) |
-| `0183` | Multi-environment live lanes | `merged` | [adr-0183-multi-environment-live-lanes.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0183-multi-environment-live-lanes.md) |
+| `0183` | Multi-environment live lanes | `live_applied` | [adr-0183-multi-environment-live-lanes.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0183-multi-environment-live-lanes.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

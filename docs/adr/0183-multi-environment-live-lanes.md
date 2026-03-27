@@ -3,7 +3,7 @@
 - Status: Implemented
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.177.9
-- Implemented In Platform Version: not yet
+- Implemented In Platform Version: 0.130.31
 - Implemented On: 2026-03-27
 - Date: 2026-03-27
 
@@ -59,4 +59,6 @@ This workstream starts by:
 - wiring the Proxmox network role for the optional `vmbr20` staging bridge
 - adding a focused runbook and playbook for staging activation
 
-No live platform change is claimed by this ADR until `vmbr20` and staged VMs are actually applied from `main`.
+The first live platform activation completed on 2026-03-27 by applying `vmbr20` plus the staged `docker-runtime` and `monitoring` VMs from `main`.
+
+Repository version `0.177.12` also records the follow-up staging VM module change that keeps Proxmox NIC firewall disabled until staged guest-network-policy automation exists, matching the live state that made the staged guests reachable.

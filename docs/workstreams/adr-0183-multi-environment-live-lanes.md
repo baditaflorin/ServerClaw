@@ -2,11 +2,11 @@
 
 - ADR: [ADR 0183](../adr/0183-multi-environment-live-lanes.md)
 - Title: Make environment lanes catalog-driven, add a controlled staging activation path, and leave room for future development lanes without hardcoded rewrites
-- Status: merged
+- Status: live_applied
 - Implemented In Repo Version: 0.177.9
-- Live Applied In Platform Version: not yet
+- Live Applied In Platform Version: 0.130.31
 - Implemented On: 2026-03-27
-- Live Applied On: not yet
+- Live Applied On: 2026-03-27
 - Branch: `codex/adr-0183-main-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/worktree-adr-0183-main-live-apply`
 - Owner: codex
@@ -56,6 +56,8 @@
 
 ## Notes For The Next Assistant
 
-- do not mark the staging lane live until `vmbr20` exists on the Proxmox host and at least one staged VM is reachable
+- the staging lane is now live on `vmbr20` with VMIDs `220` and `240`, and both staged guests are reachable over SSH through the Proxmox jump
 - keep promotion logic explicitly `staging -> production` even if general environment selection becomes catalog-driven elsewhere
 - if a future `development` lane is added, prefer a narrow fixture-backed or controller-local model first instead of another long-lived VM fleet
+- `make remote-tofu-apply ENV=staging` still hit the build-server session-runtime ownership bug during the first live activation; the successful replay repaired ownership on the session-scoped plan directory and executed `scripts/tofu_exec.sh apply staging` directly on `docker-build-lv3`
+- repository version `0.177.12` codifies `network_firewall = false` for the staged VM declarations because the cluster-wide Proxmox firewall default-drop blocked first-boot reachability before staged guest-network-policy automation existed

@@ -4115,7 +4115,7 @@ workstreams:
   - id: adr-0183-multi-environment-live-lanes
     adr: "0183"
     title: Multi-environment live lanes
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0183-main-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/worktree-adr-0183-main-live-apply
@@ -4183,9 +4183,10 @@ workstreams:
             - docs/runbooks/staging-environment.md
           mode: exclusive
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
     canonical_truth:
       changelog_entry: implemented ADR 0183 catalog-driven environment lanes and the repo-managed staging bridge activation path so staging can be brought up safely from main without ad hoc Proxmox network edits
       release_bump: patch
-      included_in_repo_version: 0.177.9
-      latest_receipts: {}
+      included_in_repo_version: 0.177.12
+      latest_receipts:
+        staging_environment: 2026-03-27-adr-0183-staging-live-apply

@@ -23,6 +23,7 @@ module "docker_runtime_staging_lv3" {
   memory_mb               = 8192
   disk_gb                 = 64
   bridge                  = var.bridge
+  network_firewall        = false
   mac_address             = "BC:24:11:20:00:20"
   ip_address              = "10.20.10.20"
   ip_cidr                 = 24
@@ -50,6 +51,7 @@ module "monitoring_staging_lv3" {
   memory_mb               = 4096
   disk_gb                 = 48
   bridge                  = var.bridge
+  network_firewall        = false
   mac_address             = "BC:24:11:20:00:40"
   ip_address              = "10.20.10.40"
   ip_cidr                 = 24
