@@ -68,7 +68,7 @@
     {
       "check": "Windmill runtime reconcile",
       "result": "partial",
-      "observed": "The repo-side Windmill converge path was exercised repeatedly, but concurrent `playbooks/windmill.yml` runs from other worktrees kept rewriting the same `docker-runtime-lv3` env surfaces and temp artifacts. This branch identified and fixed the missing ledger projection in both `windmill.env.j2` and `windmill.env.ctmpl.j2`, updated the live OpenBao secret once, and temporarily observed the ledger vars inside `windmill-windmill_worker-1`, but later concurrent converges overwrote the on-disk runtime env again before a clean uncontested replay could finish."
+      "observed": "The repo-side Windmill converge path was exercised repeatedly, but concurrent `playbooks/windmill.yml` runs from other worktrees kept rewriting the same `docker-runtime-lv3` env surfaces and temp artifacts. This branch identified and fixed the missing ledger projection in both `windmill-runtime.env.j2` and `windmill-runtime.env.ctmpl.j2`, updated the live OpenBao secret once, and temporarily observed the ledger vars inside `windmill-windmill_worker-1`, but later concurrent converges overwrote the on-disk runtime env again before a clean uncontested replay could finish."
     },
     {
       "check": "Broad repository validation",
@@ -84,8 +84,8 @@
   "evidence_refs": [
     "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml",
     "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml",
-    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill.env.ctmpl.j2",
-    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill.env.j2",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.ctmpl.j2",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.j2",
     "docs/adr/0115-event-sourced-mutation-ledger.md",
     "docs/runbooks/mutation-ledger.md",
     "docs/workstreams/adr-0115-mutation-ledger.md",

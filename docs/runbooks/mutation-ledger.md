@@ -14,13 +14,13 @@ It is the repo-side reference for:
 
 ## Canonical Sources
 
-- schema migration: [migrations/0011_ledger_schema.sql](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-mutation-ledger/migrations/0011_ledger_schema.sql)
-- event type registry: [config/ledger-event-types.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-mutation-ledger/config/ledger-event-types.yaml)
-- writer: [platform/ledger/writer.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-mutation-ledger/platform/ledger/writer.py)
-- reader: [platform/ledger/reader.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-mutation-ledger/platform/ledger/reader.py)
-- replay API: [platform/ledger/replay.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-mutation-ledger/platform/ledger/replay.py)
-- migration helper: [windmill/ledger/migrate-audit-log.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-mutation-ledger/windmill/ledger/migrate-audit-log.py)
-- legacy bridge: [scripts/mutation_audit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server-mutation-ledger/scripts/mutation_audit.py)
+- schema migration: [migrations/0011_ledger_schema.sql](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/migrations/0011_ledger_schema.sql)
+- event type registry: [config/ledger-event-types.yaml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/ledger-event-types.yaml)
+- writer: [platform/ledger/writer.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/ledger/writer.py)
+- reader: [platform/ledger/reader.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/ledger/reader.py)
+- replay API: [platform/ledger/replay.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/ledger/replay.py)
+- migration helper: [windmill/ledger/migrate-audit-log.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/windmill/ledger/migrate-audit-log.py)
+- legacy bridge: [scripts/mutation_audit.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/mutation_audit.py)
 
 ## Schema Summary
 
@@ -147,10 +147,10 @@ Other target kinds raise `NotImplementedError` until their projection logic is d
 
 When projecting the ledger DSN into the Windmill runtime, keep both templates in sync:
 
-- [roles/windmill_runtime/templates/windmill.env.j2](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0115-live-apply/roles/windmill_runtime/templates/windmill.env.j2)
-- [roles/windmill_runtime/templates/windmill.env.ctmpl.j2](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0115-live-apply/roles/windmill_runtime/templates/windmill.env.ctmpl.j2)
+- [collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.j2](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0115-main-merge/collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.j2)
+- [collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.ctmpl.j2](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0115-main-merge/collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.ctmpl.j2)
 
-If only the OpenBao-backed template is updated, the later static `windmill.env.j2` render will still overwrite `/run/lv3-secrets/windmill/runtime.env` without the ledger keys.
+If only the OpenBao-backed template is updated, the later static `windmill-runtime.env.j2` render will still overwrite `/run/lv3-secrets/windmill/runtime.env` without the ledger keys.
 
 During the 2026-03-26 production apply, concurrent Windmill converges from other worktrees repeatedly rewrote the same env surfaces. When this happens:
 
@@ -158,3 +158,8 @@ During the 2026-03-26 production apply, concurrent Windmill converges from other
 - update the rendered `/run/lv3-secrets/windmill/runtime.env` with the same ledger values if another converge already flattened the file
 - recycle the Windmill compose services
 - if the restart fails because the Docker `DOCKER` nat chain is missing, restart `docker` first and then rerun `docker compose --file /opt/windmill/docker-compose.yml up -d --remove-orphans`
+- if `make converge-windmill` later fails during `sync_windmill_seed_scripts.py` with `Remote end closed connection without response` after the stack restart, verify the workers with `docker compose -f /opt/windmill/docker-compose.yml ps` and recover them with `docker compose -f /opt/windmill/docker-compose.yml up -d windmill_worker windmill_worker_native` before rerunning the broader sync
+
+Mainline verification note:
+
+- the 2026-03-27 replay from the latest `origin/main` re-verified the ledger projection through both the rendered runtime env and `windmill-windmill_worker-1`; the remaining intermittent issue is the broader post-restart seed-sync connection loss on `f/lv3/operator_onboard`

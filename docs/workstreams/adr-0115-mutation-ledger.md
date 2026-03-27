@@ -2,9 +2,9 @@
 
 - ADR: [ADR 0115](../adr/0115-event-sourced-mutation-ledger.md)
 - Title: Promote the mutation audit log into a fully typed, append-only event stream with before/after state and replay capability — the canonical operational memory for the whole platform
-- Status: merged
-- Branch: `codex/ws-0115-live-apply`
-- Worktree: `.worktrees/ws-0115-live-apply`
+- Status: live_applied
+- Branch: `codex/ws-0115-main-merge`
+- Worktree: `.worktrees/ws-0115-main-merge`
 - Owner: codex
 - Depends On: `adr-0058-nats-event-bus`, `adr-0066-mutation-audit-log`, `adr-0098-postgres-ha`
 - Conflicts With: `adr-0112-goal-compiler` (both add event types to ledger), `adr-0114-triage-engine` (writes triage reports to ledger)
@@ -75,4 +75,5 @@
 - merged in repo version `0.110.0`
 - 2026-03-26 live apply verified the production Postgres ledger schema on platform version `0.130.20`, including the `audit_log` compatibility view, append-only trigger enforcement, and a live `execution.completed` row written from `docker-runtime-lv3`
 - the live migration helper observed no SQL `audit_log` source table, so the first production rollout migrated `0` legacy rows and installed the compatibility view over an empty initial stream
-- Windmill runtime automation was exercised repeatedly during the live apply, but concurrent `playbooks/windmill.yml` runs from other worktrees kept rewriting the same `docker-runtime-lv3` env surfaces; merge-to-main still needs one clean replay of `playbooks/windmill.yml` after shared-surface contention stops so `LV3_LEDGER_DSN` and `LV3_LEDGER_NATS_URL` stay durable in `/run/lv3-secrets/windmill/runtime.env`
+- 2026-03-27 replay from the latest `origin/main` verified the Windmill runtime projection on `docker-runtime-lv3`: `/run/lv3-secrets/windmill/runtime.env` and `windmill-windmill_worker-1` both carried `LV3_LEDGER_DSN` and `LV3_LEDGER_NATS_URL`, and a fresh guest-side emit wrote `2|execution.completed|operator:ops|host|proxmox_florin|ws0115-main-ledger-emit-20260327T044831Z` into `ledger.events`
+- the same 2026-03-27 replay exposed a broader Windmill automation issue outside ADR 0115 itself: `make converge-windmill` recovered from a container startup race but later failed during `sync_windmill_seed_scripts.py` on `f/lv3/operator_onboard` with `Remote end closed connection without response`; targeted `docker compose -f /opt/windmill/docker-compose.yml up -d windmill_worker windmill_worker_native` recovery restored the workers and let ADR 0115 verification complete
