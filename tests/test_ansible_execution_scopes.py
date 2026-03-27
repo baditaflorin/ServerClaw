@@ -225,6 +225,7 @@ playbook: playbooks/leaf-alpha.yml
     assert (repo_root / ".ansible" / "shards" / "config").resolve() == (repo_root / "config").resolve()
     assert calls[0][0] == "ansible-playbook"
     assert calls[1][0] == "ansible-inventory"
+    assert "-l" not in calls[1]
 
 
 def test_real_repo_scope_resolution_for_live_apply_paths() -> None:
