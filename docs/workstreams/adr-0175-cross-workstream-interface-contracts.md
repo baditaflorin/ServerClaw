@@ -58,7 +58,7 @@
 
 ## Outcome
 
-- repository implementation completed in `0.176.1`
+- repository implementation completed in `0.176.7`
 - the first contract set covers the shared workstream registry and the live-apply converge workflow surface
 - no platform version bump was required because this change is repo-only
 
