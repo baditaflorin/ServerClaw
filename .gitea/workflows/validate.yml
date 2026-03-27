@@ -28,8 +28,13 @@ jobs:
           git -c http.extraHeader="Authorization: Basic ${AUTH_HEADER}" fetch --depth 1 origin "${GITEA_SHA}"
           git checkout --detach FETCH_HEAD
 
+      - name: Install runner prerequisites
+        run: |
+          set -eu
+          apk add --no-cache python3 py3-jsonschema py3-yaml
+
       - name: Validate repository data models
-        run: python3 scripts/validate_repository_data_models.py
+        run: python3 scripts/validate_repository_data_models.py --validate
 
       - name: Validate service completeness
-        run: python3 scripts/service_completeness.py
+        run: python3 scripts/service_completeness.py --validate

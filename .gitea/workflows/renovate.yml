@@ -34,8 +34,13 @@ jobs:
           git -c http.extraHeader="Authorization: Basic ${AUTH_HEADER}" fetch --depth 1 origin "${GITEA_SHA}"
           git checkout --detach FETCH_HEAD
 
+      - name: Install runner prerequisites
+        run: |
+          set -eu
+          apk add --no-cache docker-cli python3 py3-jsonschema py3-yaml
+
       - name: Validate Renovate config
-        run: make validate-renovate-config
+        run: python3 scripts/renovate_config.py --validate
 
       - name: Run Renovate
         env:
