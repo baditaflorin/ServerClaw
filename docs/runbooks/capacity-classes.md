@@ -6,11 +6,11 @@ ADR 0192 separates spare capacity into protected classes so preview, recovery, a
 
 ## Repo Surfaces
 
-- [config/capacity-model.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0192-live-apply/config/capacity-model.json)
-- [docs/schema/capacity-model.schema.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0192-live-apply/docs/schema/capacity-model.schema.json)
-- [scripts/capacity_report.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0192-live-apply/scripts/capacity_report.py)
-- [scripts/fixture_manager.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0192-live-apply/scripts/fixture_manager.py)
-- [scripts/restore_verification.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0192-live-apply/scripts/restore_verification.py)
+- [config/capacity-model.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/capacity-model.json)
+- [docs/schema/capacity-model.schema.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/schema/capacity-model.schema.json)
+- [scripts/capacity_report.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/capacity_report.py)
+- [scripts/fixture_manager.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/fixture_manager.py)
+- [scripts/restore_verification.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/restore_verification.py)
 
 ## Classes
 

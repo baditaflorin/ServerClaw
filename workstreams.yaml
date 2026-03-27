@@ -21,7 +21,7 @@ workstreams:
     owner: codex
     branch: codex/ws-0192-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0192-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0192-live-apply/docs/workstreams/ws-0192-live-apply.md
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0192-live-apply.md
     depends_on:
       - adr-0105-capacity-model
       - adr-0180-standby-capacity
@@ -70,8 +70,14 @@ workstreams:
             - tests/test_capacity_report.py
           mode: shared_contract
           contract: capacity-model-schema-v1
-    ready_to_merge: true
+    ready_to_merge: false
     live_applied: true
+    canonical_truth:
+      changelog_entry: completed ADR 0192 by separating `ha_reserved`, `recovery_reserved`, and `preview_burst` capacity classes in mainline automation and recording the verified live apply evidence for preview and restore admission checks
+      release_bump: patch
+      included_in_repo_version: 0.177.13
+      latest_receipts:
+        capacity_classes: 2026-03-27-adr-0192-capacity-classes-live-apply
 
   - id: adr-0180-standby-capacity
     adr: "0180"

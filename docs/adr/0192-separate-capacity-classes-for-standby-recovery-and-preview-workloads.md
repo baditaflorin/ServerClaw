@@ -2,7 +2,7 @@
 
 - Status: Implemented
 - Implementation Status: Implemented
-- Implemented In Repo Version: not yet (awaiting merge to `main`)
+- Implemented In Repo Version: 0.177.13
 - Implemented In Platform Version: 0.130.31
 - Implemented On: 2026-03-27
 - Date: 2026-03-27
@@ -63,7 +63,8 @@ Current occupancy and blocked requests should be visible in machine-readable sta
 - The repository now models `ha_reserved`, `recovery_reserved`, and `preview_burst` directly in `config/capacity-model.json`.
 - `scripts/capacity_report.py` renders the class totals and evaluates admission requests for preview, recovery-drill, and break-glass scenarios.
 - `scripts/fixture_manager.py` now treats the reservation-backed `ephemeral_pool` as the canonical `preview_burst` surface, and `scripts/restore_verification.py` checks `recovery_reserved` before starting a drill.
-- The live verification on 2026-03-27 used the branch commit `40df2935` against the real platform state. Protected integration files still wait for merge to `main`.
+- The live verification on 2026-03-27 used the branch commit `40df2935` against the real platform state.
+- The implementation was merged into `main` and released in repository version `0.177.13` on 2026-03-28.
 
 ## Related ADRs
 
