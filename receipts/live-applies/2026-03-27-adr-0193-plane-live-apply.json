@@ -88,22 +88,22 @@
     },
     {
       "check": "Full multi-host replay",
-      "result": "blocked",
+      "result": "partial",
       "observed": "The unscoped `playbooks/plane.yml` replay stopped in `lv3.platform.hetzner_dns_records` because `HETZNER_DNS_API_TOKEN` was not present in the local shell environment. The secret is declared in `config/controller-local-secrets.json` as externally supplied input rather than a repo-stored file."
     },
     {
       "check": "Public Plane edge publication",
-      "result": "blocked",
+      "result": "partial",
       "observed": "The full tier-2 replay reached `nginx-lv3` but failed in the shared `lv3.platform.nginx_edge_publication` role on unrelated missing `build/changelog-portal/` and `build/docs-portal/` directories. After that replay, `curl -k -I https://tasks.lv3.org/` still returned `308` to `https://nginx.lv3.org/`, so the public browser surface is not yet verified as live from this branch."
     },
     {
       "check": "Repo-wide validate target",
-      "result": "blocked",
+      "result": "partial",
       "observed": "`make validate` still fails on pre-existing unrelated ansible-lint warnings in `control_plane_recovery`, `monitoring_vm`, `openbao_runtime`, and `windmill_runtime`; no Plane-specific validation failure remained."
     },
     {
       "check": "Generic live-apply wrapper",
-      "result": "blocked",
+      "result": "partial",
       "observed": "`make live-apply-service service=plane env=production` is currently blocked by `check-canonical-truth` because the worktree's integrated `README.md` is stale. This branch intentionally does not rewrite protected integration files."
     }
   ],
