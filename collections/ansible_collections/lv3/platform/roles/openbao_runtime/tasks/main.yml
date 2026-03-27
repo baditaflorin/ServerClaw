@@ -522,6 +522,10 @@
       type: userpass
       description: LV3 named human and break-glass access
     status_code: 204
+  register: openbao_enable_userpass_result
+  retries: 6
+  delay: 2
+  until: openbao_enable_userpass_result.status == 204
   when: "'userpass/' not in openbao_auth_methods.json"
   no_log: true
   tags:
@@ -542,6 +546,10 @@
       type: approle
       description: LV3 service and agent access
     status_code: 204
+  register: openbao_enable_approle_result
+  retries: 6
+  delay: 2
+  until: openbao_enable_approle_result.status == 204
   when: "'approle/' not in openbao_auth_methods.json"
   no_log: true
   tags:
@@ -574,6 +582,10 @@
       options:
         version: "2"
     status_code: 204
+  register: openbao_enable_kv_result
+  retries: 6
+  delay: 2
+  until: openbao_enable_kv_result.status == 204
   when: "'kv/' not in openbao_secret_engines.json"
   no_log: true
   tags:
@@ -594,6 +606,10 @@
       type: transit
       description: LV3 managed encryption and signing
     status_code: 204
+  register: openbao_enable_transit_result
+  retries: 6
+  delay: 2
+  until: openbao_enable_transit_result.status == 204
   when: "'transit/' not in openbao_secret_engines.json"
   no_log: true
   tags:
@@ -614,6 +630,10 @@
       type: database
       description: LV3 dynamic database credentials
     status_code: 204
+  register: openbao_enable_database_result
+  retries: 6
+  delay: 2
+  until: openbao_enable_database_result.status == 204
   when: "(openbao_database_mount_path ~ '/') not in openbao_secret_engines.json"
   no_log: true
   tags:
@@ -678,6 +698,10 @@
       token_ttl: "{{ item.token_ttl }}"
       token_max_ttl: "{{ item.token_max_ttl }}"
     status_code: 204
+  register: openbao_userpass_upsert_result
+  retries: 6
+  delay: 2
+  until: openbao_userpass_upsert_result.status == 204
   loop: "{{ openbao_userpass_users }}"
   no_log: true
   tags:
@@ -702,6 +726,10 @@
       secret_id_ttl: "{{ item.secret_id_ttl }}"
       secret_id_num_uses: "{{ item.secret_id_num_uses }}"
     status_code: 204
+  register: openbao_approle_upsert_result
+  retries: 6
+  delay: 2
+  until: openbao_approle_upsert_result.status == 204
   loop: "{{ openbao_approles }}"
   no_log: true
   tags:
@@ -735,6 +763,10 @@
     body:
       type: aes256-gcm96
     status_code: 200
+  register: openbao_transit_key_create_result
+  retries: 6
+  delay: 2
+  until: openbao_transit_key_create_result.status == 200
   loop: "{{ openbao_transit_key_statuses.results }}"
   when: item.status == 404
   no_log: true
@@ -760,6 +792,10 @@
       password: "{{ openbao_postgres_rotator_password }}"
       password_authentication: "{{ openbao_database_password_authentication }}"
     status_code: 204
+  register: openbao_database_backend_result
+  retries: 6
+  delay: 2
+  until: openbao_database_backend_result.status == 204
   no_log: true
   tags:
     - mutation
@@ -782,6 +818,10 @@
       default_ttl: "{{ item.default_ttl }}"
       max_ttl: "{{ item.max_ttl }}"
     status_code: 204
+  register: openbao_database_role_result
+  retries: 6
+  delay: 2
+  until: openbao_database_role_result.status == 204
   loop: "{{ openbao_database_roles }}"
   tags:
     - mutation
@@ -886,6 +926,10 @@
     body:
       data: "{{ openbao_controller_proxmox_api_secret }}"
     status_code: 200
+  register: openbao_store_controller_secret_result
+  retries: 6
+  delay: 2
+  until: openbao_store_controller_secret_result.status == 200
   when: >-
     openbao_controller_proxmox_api_current.status == 404
     or (openbao_controller_proxmox_api_current.json.data.data | default({})) != openbao_controller_proxmox_api_secret
@@ -907,6 +951,10 @@
     body:
       data: "{{ openbao_controller_monitoring_secret }}"
     status_code: 200
+  register: openbao_store_monitoring_secret_result
+  retries: 6
+  delay: 2
+  until: openbao_store_monitoring_secret_result.status == 200
   when: >-
     openbao_controller_monitoring_current.status == 404
     or (openbao_controller_monitoring_current.json.data.data | default({})) != openbao_controller_monitoring_secret
@@ -928,6 +976,10 @@
     body:
       data: "{{ openbao_mail_platform_runtime_secret }}"
     status_code: 200
+  register: openbao_store_mail_platform_secret_result
+  retries: 6
+  delay: 2
+  until: openbao_store_mail_platform_secret_result.status == 200
   when: >-
     openbao_mail_platform_runtime_current.status == 404
     or (openbao_mail_platform_runtime_current.json.data.data | default({})) != openbao_mail_platform_runtime_secret

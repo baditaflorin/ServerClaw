@@ -42,8 +42,9 @@
 - The step-ca replay now keeps `ca.json` server names aligned with the current controller topology, starts the container with `STEPPATH=/opt/step-ca/home`, and removes the misplaced guest-firewall role from the Proxmox-host SSH trust play so `make converge-step-ca` completes end to end.
 - The probe contract now validates `step-ca` endpoints from git worktrees, models short-lived 24-hour certificates with hour-based warning windows, probes Vaultwarden through the host Tailscale IP with `vault.lv3.org` SNI, and uses a corrected readiness command for `step-ca`.
 - `openbao-proxy` probes cleanly with `status: ok`; `vaultwarden-private` is reachable through `curl --resolve vault.lv3.org:443:100.64.0.1 https://vault.lv3.org/`; and `curl --cacert ... https://100.64.0.1:9443/health` now succeeds directly against `step-ca-proxy` without the legacy SAN workaround.
+- The final `main` integration replay on `2026-03-27` completed with `make converge-step-ca`, `make converge-vaultwarden`, and `make converge-openbao` all passing after adding an SSH reconnect guard to the `step_ca_runtime` verification path and bounded retries around the flakiest `openbao_runtime` mutation calls.
+- The canonical release and live state are now advanced on `main` in repo version `0.176.8` and platform version `0.130.24`, with the verified replay recorded in `receipts/live-applies/2026-03-27-adr-0101-certificate-lifecycle-main-live-apply.json`.
 
 ## Remaining For Merge To `main`
 
-- Keep this branch’s protected integration files unchanged until the mainline integrator decides the release cut: `VERSION`, release sections in `changelog.md`, the top-level `README.md` integrated status summary, and `versions/stack.yaml`.
-- When these automation, probe-contract, and documentation fixes merge to `main`, do the normal mainline release bookkeeping there instead of on this workstream branch.
+- None. The protected integration files were updated during the final mainline release step on `2026-03-27`.

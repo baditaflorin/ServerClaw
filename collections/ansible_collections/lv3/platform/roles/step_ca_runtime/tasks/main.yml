@@ -513,5 +513,14 @@
   delegate_to: localhost
   become: false
 
+- name: Reset SSH connection before final step-ca runtime verification
+  ansible.builtin.meta: reset_connection
+
+- name: Wait for SSH to recover before final step-ca runtime verification
+  ansible.builtin.wait_for_connection:
+    delay: 0
+    sleep: 2
+    timeout: 120
+
 - name: Verify step-ca health probes
   ansible.builtin.import_tasks: verify.yml

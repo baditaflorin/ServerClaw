@@ -2162,7 +2162,7 @@ workstreams:
       - config/certificate-catalog.json
       - TLS-owning service roles
       - systemd unit files on VMs
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: true
 
   - id: ws-0101-live-apply
@@ -2184,7 +2184,7 @@ workstreams:
       - config/certificate-catalog.json
       - docs/runbooks/configure-openbao.md
       - receipts/live-applies/
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: true
 
   - id: adr-0102-security-posture-reporting

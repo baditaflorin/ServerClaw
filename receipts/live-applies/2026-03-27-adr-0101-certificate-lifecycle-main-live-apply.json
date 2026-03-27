@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-27-adr-0101-certificate-lifecycle-main-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-27",
+  "recorded_on": "2026-03-27",
+  "recorded_by": "codex",
+  "source_commit": "80b434e6026d1c00b833ec2817613bf8b0c2ab6d",
+  "repo_version_context": "0.176.8",
+  "platform_version_context": "0.130.24",
+  "workflow_id": "converge-openbao",
+  "adr": "0101",
+  "summary": "Integrated ADR 0101 onto mainline release 0.176.8, hardened the flaky step-ca and OpenBao live-apply paths, and re-verified the repo-managed OpenBao and Vaultwarden certificate lifecycle end to end from the dedicated main-integration worktree.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 150,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "openbao_proxy",
+      "address": "https://100.64.0.1:8200"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "step_ca_proxy",
+      "address": "https://100.64.0.1:9443"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "vaultwarden_private",
+      "address": "https://vault.lv3.org"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused repository tests",
+      "result": "pass",
+      "observed": "`tests/test_tls_cert_probe.py`, `tests/test_generate_cert_renewal_config.py`, `tests/test_tls_cert_drift.py`, `tests/test_platform_observation_tool.py`, and `tests/test_compose_runtime_secret_injection.py` all passed from the main-integration worktree."
+    },
+    {
+      "check": "Repository data-model and syntax validation",
+      "result": "pass",
+      "observed": "`uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, `python3 scripts/generate_cert_renewal_config.py --pretty`, `make syntax-check-openbao`, and `make syntax-check-step-ca` all completed successfully."
+    },
+    {
+      "check": "step-ca live apply from current mainline integration",
+      "result": "pass",
+      "observed": "`make converge-step-ca` completed successfully after the role reset its SSH connection and waited for recovery before the final verification block, eliminating the transient post-start verification failure on `docker-runtime-lv3`."
+    },
+    {
+      "check": "Vaultwarden recovery and replay",
+      "result": "pass",
+      "observed": "`make converge-vaultwarden` restored Docker bridge egress policy on `docker-runtime-lv3`, recovered Vaultwarden's PostgreSQL reachability, and re-verified the private controller path through the host Tailscale proxy."
+    },
+    {
+      "check": "OpenBao live apply from current mainline integration",
+      "result": "pass",
+      "observed": "`make converge-openbao` completed successfully after bounded retries were added around the flakiest OpenBao mutation calls, and the end-to-end AppRole, transit, and PostgreSQL dynamic credential verification paths all passed."
+    },
+    {
+      "check": "Managed certificate probes",
+      "result": "pass",
+      "observed": "`python3 scripts/tls_cert_probe.py --certificate-id openbao-proxy --fail-on never` reported `status: ok` with `hours_remaining: 10`, and `python3 scripts/tls_cert_probe.py --certificate-id vaultwarden-private --fail-on never` reported `status: ok` with `hours_remaining: 12`."
+    },
+    {
+      "check": "step-ca proxy health",
+      "result": "pass",
+      "observed": "`curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt https://100.64.0.1:9443/health` returned `{\\\"status\\\":\\\"ok\\\"}`."
+    },
+    {
+      "check": "Renewal timers active on docker-runtime-lv3",
+      "result": "pass",
+      "observed": "`lv3-openbao-cert-renew.timer` and `lv3-vaultwarden-cert-renew.timer` both report `Active: active (waiting)` on `docker-runtime-lv3`."
+    }
+  ],
+  "evidence_refs": [
+    "collections/ansible_collections/lv3/platform/roles/openbao_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/step_ca_runtime/tasks/main.yml",
+    "docs/adr/0101-automated-certificate-lifecycle-management.md",
+    "docs/workstreams/adr-0101-certificate-lifecycle.md",
+    "docs/workstreams/ws-0101-live-apply.md",
+    "receipts/live-applies/2026-03-27-adr-0101-certificate-lifecycle-main-live-apply.json"
+  ],
+  "notes": [
+    "This receipt supersedes the earlier workstream-local replay receipt now that ADR 0101 is fully integrated on mainline release 0.176.8.",
+    "The live replay touched step-ca, Vaultwarden, and OpenBao together because the managed certificate lifecycle spans those three surfaces.",
+    "The `source_commit` field references the latest fetched `origin/main` baseline the verified main-integration replay was rebased onto."
+  ]
+}
