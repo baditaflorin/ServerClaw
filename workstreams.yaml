@@ -17,7 +17,7 @@ workstreams:
   - id: ws-0192-live-apply
     adr: "0192"
     title: Live apply ADR 0192 capacity classes for standby, recovery, and preview workloads
-    status: implemented
+    status: live_applied
     owner: codex
     branch: codex/ws-0192-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0192-live-apply
@@ -68,8 +68,8 @@ workstreams:
             - tests/test_capacity_report.py
           mode: shared_contract
           contract: capacity-model-schema-v1
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
 
   - id: adr-0180-standby-capacity
     adr: "0180"

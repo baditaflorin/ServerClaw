@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0192](../adr/0192-separate-capacity-classes-for-standby-recovery-and-preview-workloads.md)
 - Title: production replay of separated capacity classes for standby, recovery, and preview automation
-- Status: implemented
+- Status: live_applied
 - Branch: `codex/ws-0192-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0192-live-apply`
 - Owner: codex
@@ -29,10 +29,12 @@
 
 ## Outcome
 
-- repository implementation adds explicit `capacity_class` metadata to the capacity model and schema
-- `capacity_report.py` now emits class summaries plus class-based admission results for preview, recovery, and break-glass borrowing
-- `fixture_manager.py` now consumes the reservation-backed `preview_burst` pool instead of requiring the legacy top-level pool mapping
-- `restore_verification.py` now refuses to start when the declared recovery drill cannot be admitted by the protected recovery capacity rules
+- implementation commit `40df293577053160f03a901ab316c26e58d22974` adds explicit `capacity_class` metadata to the capacity model and schema
+- `make capacity-report NO_LIVE_METRICS=true` and `make capacity-report` both rendered the new class summaries from this worktree, with the live path reporting `Metrics source: ssh+influx`
+- the preview admission check approved `4,2,32` inside `preview_burst`, and the declared restore-drill admission check approved `4,2,48` inside `recovery_reserved`
+- `uv run --with pyyaml python scripts/fixture_manager.py list --no-refresh-health` returned `No active fixtures`, so the live preview occupancy was zero at verification time
+- `./scripts/validate_repo.sh data-models` still fails on the unrelated mainline issue `playbooks/proxmox-staging-bridge.yml` missing an ansible-scope-runner leaf catalog entry; the ADR 0192 focused validation surfaces passed
+- merge-to-main still needs the protected integration files updated separately: `README.md`, `VERSION`, `changelog.md`, and `versions/stack.yaml`
 
 ## Merge Criteria
 

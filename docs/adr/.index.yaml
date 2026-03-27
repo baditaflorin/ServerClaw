@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-28'
 total_adrs: 202
 implementation_status_summary:
-  Implemented: 184
+  Implemented: 185
   Partial: 3
-  Not Implemented: 14
+  Not Implemented: 13
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -3307,8 +3307,8 @@ adr_index:
     implemented_version: 0.177.13
   - adr: 0192
     title: Separate Capacity Classes for Standby, Recovery, and Preview Workloads
-    status: Proposed
-    implementation_status: Not Implemented
+    status: Implemented
+    implementation_status: Implemented
     date: '2026-03-27'
     concern: ci-cd
     keywords:
@@ -3321,6 +3321,7 @@ adr_index:
       - workloads
     summary: We will classify spare capacity into separate reservation classes with explicit admission rules.
     filename: 0192-separate-capacity-classes-for-standby-recovery-and-preview-workloads.md
+    implemented_version: 0.130.31
   - adr: 0198
     title: Qdrant Vector Search for Semantic Platform RAG
     status: Implemented
