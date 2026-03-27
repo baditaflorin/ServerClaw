@@ -4415,7 +4415,7 @@ workstreams:
     owner: codex
     branch: "codex/ws-0202-live-apply"
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/worktree-ws-0202-live-apply
-    doc: /Users/live/Documents/GITHUB_PROJECTS/worktree-ws-0202-live-apply/docs/workstreams/adr-0202-excalidraw-auto-generated-architecture-diagrams.md
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0202-excalidraw-auto-generated-architecture-diagrams.md
     depends_on:
       - adr-0038-generated-status-docs
       - adr-0075-service-capability-catalog
@@ -4441,6 +4441,6 @@ workstreams:
     canonical_truth:
       changelog_entry: implemented ADR 0202 by publishing private Excalidraw at draw.lv3.org, generating committed architecture diagrams from repo-managed platform data, and recording verified live-apply evidence
       release_bump: patch
-      included_in_repo_version: null
+      included_in_repo_version: 0.177.16
       latest_receipts:
         excalidraw: 2026-03-27-adr-0202-excalidraw-auto-generated-architecture-diagrams-live-apply

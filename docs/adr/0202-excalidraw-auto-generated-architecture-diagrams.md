@@ -1,8 +1,8 @@
 # ADR 0202: Excalidraw Auto Generated Architecture Diagrams
 
 - Status: Accepted
-- Implementation Status: Implemented on workstream branch
-- Implemented In Repo Version: 0.177.12
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.16
 - Implemented In Platform Version: 0.130.31
 - Implemented On: 2026-03-27
 - Date: 2026-03-27

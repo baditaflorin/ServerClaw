@@ -7,9 +7,9 @@
 
 schema_version: 1
 generated: '2026-03-28'
-total_adrs: 202
+total_adrs: 203
 implementation_status_summary:
-  Implemented: 185
+  Implemented: 186
   Partial: 3
   Not Implemented: 13
   Deprecated: 1
@@ -3354,4 +3354,4 @@ adr_index:
       - diagrams
     summary: We will add a repo-managed Excalidraw publication at draw.lv3.org and commit a
     filename: 0202-excalidraw-auto-generated-architecture-diagrams.md
-    implemented_version: 0.177.12
+    implemented_version: 0.177.16

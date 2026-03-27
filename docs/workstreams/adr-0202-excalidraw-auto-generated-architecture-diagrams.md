@@ -2,8 +2,8 @@
 
 - ADR: [ADR 0202](../adr/0202-excalidraw-auto-generated-architecture-diagrams.md)
 - Title: Private Excalidraw publication at `draw.lv3.org` plus generated `.excalidraw` architecture scenes
-- Status: live_applied
-- Implemented In Repo Version: 0.177.12
+- Status: merged
+- Implemented In Repo Version: 0.177.16
 - Implemented In Platform Version: 0.130.31
 - Implemented On: 2026-03-27
 - Branch: `codex/ws-0202-live-apply`
@@ -65,10 +65,10 @@
 
 ## Outcome
 
+- merged in repo version `0.177.16`
 - the repo-managed Excalidraw runtime, diagram generator, catalog wiring, and shared-edge publication are implemented and live on production
 - the production rollout is recorded in `receipts/live-applies/2026-03-27-adr-0202-excalidraw-auto-generated-architecture-diagrams-live-apply.json`
-- branch-local validation confirmed the new Excalidraw automation paths; the only remaining repo-level validation exception is `./scripts/validate_repo.sh generated-docs`, which still wants to rewrite the integration-owned top-level `README.md` and therefore must wait for merge-to-`main`
-- merge to `main` still needs the normal integration step for shared release files only: `VERSION`, `changelog.md`, top-level `README.md`, and `versions/stack.yaml`
+- branch-local validation confirmed the new Excalidraw automation paths, and the integration step on `main` has now updated the shared release files and canonical README outputs
 
 ## Notes For The Next Assistant
 
