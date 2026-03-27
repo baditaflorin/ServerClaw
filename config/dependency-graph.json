@@ -325,6 +325,15 @@
       "tier": 2,
       "category": "automation",
       "adr": "0149"
+    },
+    {
+      "id": "plane",
+      "service": "plane",
+      "name": "Plane",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "automation",
+      "adr": "0193"
     }
   ],
   "edges": [
@@ -639,6 +648,30 @@
       "to": "openbao",
       "type": "startup_only",
       "description": "Semaphore loads database and bootstrap secrets from the OpenBao agent before the container starts."
+    },
+    {
+      "from": "plane",
+      "to": "postgres",
+      "type": "hard",
+      "description": "Plane persists workspaces, projects, users, and issue metadata in Postgres."
+    },
+    {
+      "from": "plane",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Plane consumes mirrored runtime secrets from the OpenBao sidecar before the containers start."
+    },
+    {
+      "from": "plane",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Authenticated browser access to tasks.lv3.org depends on the shared Keycloak-backed edge auth path, while the private controller path remains available for governed automation."
+    },
+    {
+      "from": "plane",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public access to tasks.lv3.org depends on the shared NGINX edge publication path."
     }
   ]
 }

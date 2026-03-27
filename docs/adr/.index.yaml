@@ -7,10 +7,10 @@
 
 schema_version: 1
 generated: '2026-03-27'
-total_adrs: 200
+total_adrs: 202
 implementation_status_summary:
-  Implemented: 181
-  Partial: 3
+  Implemented: 182
+  Partial: 4
   Not Implemented: 15
   Deprecated: 1
 concerns:
@@ -174,8 +174,10 @@ concerns:
     - 0178
     - 0179
     - 0182
+    - 0183
     - 0184
     - 0185
+    - 0193
   release:
     - 0008
     - '0110'
@@ -1919,7 +1921,7 @@ adr_index:
     summary: We will implement a Windmill-backed operator onboarding and off-boarding workflow that provisions and revokes
       access acr
     filename: 0108-operator-onboarding-and-offboarding.md
-    implemented_version: 0.105.0
+    implemented_version: 0.177.8
   - adr: 0109
     title: Public Status Page
     status: Accepted
@@ -3169,6 +3171,19 @@ adr_index:
       - submission
     summary: 'Keycloak will:'
     filename: 0183-keycloak-mail-network-internal-submission.md
+  - adr: 0183
+    title: Multi-Environment Live Lanes
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: platform
+    keywords:
+      - multi-environment
+      - live
+      - lanes
+    summary: We will treat environment lanes as a catalog-driven contract and add an explicit activation path for staging.
+    filename: 0183-multi-environment-live-lanes.md
+    implemented_version: 0.177.9
   - adr: 0184
     title: Failure-Domain Labels and Anti-Affinity Policy
     status: Proposed
@@ -3305,3 +3320,17 @@ adr_index:
       - workloads
     summary: We will classify spare capacity into separate reservation classes with explicit admission rules.
     filename: 0192-separate-capacity-classes-for-standby-recovery-and-preview-workloads.md
+  - adr: 0193
+    title: Plane Kanban Task Board
+    status: Accepted
+    implementation_status: Partial
+    date: '2026-03-27'
+    concern: platform
+    keywords:
+      - plane
+      - kanban
+      - task
+      - board
+    summary: We will run a self-hosted Plane task board on docker-runtime-lv3 and treat it as a repo-managed service.
+    filename: 0193-plane-kanban-task-board.md
+    implemented_version: 0.177.12

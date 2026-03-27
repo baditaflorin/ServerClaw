@@ -1,0 +1,152 @@
+---
+# Playbook: plane.yml
+# Purpose: Converge the repo-managed Plane task board, its PostgreSQL backend, the host-side Tailscale proxy, and the authenticated edge publication path.
+# Use case: Run during production Plane deployment, upgrade, or recovery when the task board and its ADR sync automation must match repo truth.
+#
+# Inputs (required):
+#   - env (str, required): Target environment selector used by the scoped Ansible wrapper.
+#
+# Inputs (optional):
+#   - proxmox_guest_ssh_connection_mode (str, optional, default=proxmox_host_jump): SSH path to managed guests.
+#
+# Outputs:
+#   - Plane runtime converged on docker-runtime-lv3, PostgreSQL access prepared on postgres-lv3, tasks.lv3.org published through the edge, and controller-local auth artifacts refreshed.
+#
+# Idempotency: Fully idempotent
+#              Runtime secrets and bootstrap artifacts are reused when present, and repeat runs reconcile the same Plane workspace/project/API token contract.
+#
+# Dependencies:
+#   - ADR 0193: Plane Kanban Task Board
+#   - Requires: OpenBao, docker-runtime-lv3, postgres-lv3, and the shared NGINX edge to be reachable
+#   - Role: plane_postgres — provisions the Plane database and login
+#   - Role: plane_runtime — deploys Plane, bootstraps auth, and verifies controller workflows
+#
+# Related ADRs: 0096, 0146, 0149, 0152, 0193
+# Related Runbooks: docs/runbooks/configure-plane.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-27
+
+- name: Converge the Tailscale operator proxy for Plane
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  tags:
+    - tier-1
+    - automation
+    - service-plane
+
+  roles:
+    - role: lv3.platform.proxmox_tailscale_proxy
+    - role: lv3.platform.proxmox_security
+      vars:
+        proxmox_security_manage_acme: false
+
+- name: Ensure Hetzner DNS publication for Plane
+  hosts: proxmox_hosts
+  become: false
+  gather_facts: false
+  tags:
+    - tier-1
+    - automation
+    - service-plane
+
+  tasks:
+    - name: Ensure Hetzner DNS records are present
+      ansible.builtin.include_role:
+        name: lv3.platform.hetzner_dns_records
+        apply:
+          delegate_to: localhost
+          become: false
+      run_once: true
+
+- name: Converge PostgreSQL access for Plane
+  hosts: postgres-lv3
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - automation
+    - service-plane
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - postgres-lv3
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.postgres_vm
+      vars:
+        postgres_vm_client_allowed_sources_extra:
+          - >-
+            {{
+              (
+                hostvars['proxmox_florin'].proxmox_guests
+                | selectattr('name', 'equalto', playbook_execution_host_patterns.docker_runtime[playbook_execution_env])
+                | map(attribute='ipv4')
+                | first
+              )
+            }}/32
+    - role: lv3.platform.plane_postgres
+
+- name: Converge Plane on the Docker runtime VM
+  hosts: docker-runtime-lv3
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - automation
+    - service-plane
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.plane
+        playbook_execution_audit_target: plane
+        required_hosts:
+          - docker-runtime-lv3
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.plane_runtime
+
+  post_tasks:
+    - name: Run shared post-verify checks
+      ansible.builtin.import_tasks: tasks/post-verify.yml
+      vars:
+        service_health_probe_id: plane
+        playbook_execution_post_verify_audit_action: playbook.verify.plane
+
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: plane
+
+- name: Publish Plane through the NGINX edge
+  hosts: nginx-lv3
+  become: true
+  gather_facts: true
+  tags:
+    - tier-2
+    - automation
+    - service-plane
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - nginx-lv3
+
+  roles:
+    - role: lv3.platform.nginx_edge_publication

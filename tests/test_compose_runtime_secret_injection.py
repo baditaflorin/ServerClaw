@@ -9,6 +9,7 @@ ROLE_RUNTIME_PATHS = {
     "mattermost_runtime": "/run/lv3-secrets/mattermost/runtime.env",
     "open_webui_runtime": "/run/lv3-secrets/open-webui/runtime.env",
     "netbox_runtime": "/run/lv3-secrets/netbox/runtime.env",
+    "plane_runtime": "/run/lv3-secrets/plane/runtime.env",
     "rag_context_runtime": "/run/lv3-secrets/platform-context/runtime.env",
 }
 

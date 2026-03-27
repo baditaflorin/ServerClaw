@@ -312,6 +312,13 @@
       "requires_oidc": false,
       "requires_secrets": true,
       "requires_compose_secrets": true
+    },
+    "plane": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": false,
+      "requires_secrets": true,
+      "requires_compose_secrets": true
     }
   }
 }

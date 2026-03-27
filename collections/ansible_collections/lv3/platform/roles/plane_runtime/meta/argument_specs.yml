@@ -1,0 +1,35 @@
+---
+argument_specs:
+  main:
+    short_description: Converge the Plane runtime on docker-runtime-lv3.
+    options:
+      plane_site_dir:
+        type: path
+        required: true
+      plane_secret_dir:
+        type: path
+        required: true
+      plane_compose_file:
+        type: path
+        required: true
+      plane_env_file:
+        type: path
+        required: true
+      plane_internal_port:
+        type: int
+        required: true
+      plane_internal_base_url:
+        type: str
+        required: true
+      plane_controller_url:
+        type: str
+        required: true
+      plane_public_base_url:
+        type: str
+        required: true
+      plane_database_password_local_file:
+        type: path
+        required: true
+      plane_api_token_local_file:
+        type: path
+        required: true

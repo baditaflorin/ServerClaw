@@ -1,0 +1,73 @@
+---
+- name: Verify the Plane local health endpoint
+  ansible.builtin.uri:
+    url: "{{ plane_internal_base_url }}{{ plane_healthcheck_path }}"
+    method: GET
+    return_content: true
+    status_code: 200
+  register: plane_verify_health
+  retries: 30
+  delay: 5
+  until:
+    - plane_verify_health.status == 200
+  changed_when: false
+
+- name: Verify the Plane controller auth identity
+  ansible.builtin.command:
+    argv:
+      - uv
+      - run
+      - --with
+      - pyyaml
+      - python
+      - "{{ playbook_dir }}/../scripts/plane_tool.py"
+      - --auth-file
+      - "{{ plane_admin_auth_local_file }}"
+      - whoami
+  delegate_to: localhost
+  become: false
+  register: plane_verify_whoami
+  changed_when: false
+  no_log: true
+
+- name: Verify the Plane bootstrap project exists
+  ansible.builtin.command:
+    argv:
+      - uv
+      - run
+      - --with
+      - pyyaml
+      - python
+      - "{{ playbook_dir }}/../scripts/plane_tool.py"
+      - --auth-file
+      - "{{ plane_admin_auth_local_file }}"
+      - list-projects
+      - --workspace
+      - "{{ plane_bootstrap_workspace_slug }}"
+  delegate_to: localhost
+  become: false
+  register: plane_verify_projects
+  changed_when: false
+  no_log: true
+
+- name: Verify the Plane issue list is reachable
+  ansible.builtin.command:
+    argv:
+      - uv
+      - run
+      - --with
+      - pyyaml
+      - python
+      - "{{ playbook_dir }}/../scripts/plane_tool.py"
+      - --auth-file
+      - "{{ plane_admin_auth_local_file }}"
+      - list-issues
+      - --workspace
+      - "{{ plane_bootstrap_workspace_slug }}"
+      - --project
+      - "{{ plane_bootstrap_project_identifier }}"
+  delegate_to: localhost
+  become: false
+  register: plane_verify_issues
+  changed_when: false
+  no_log: true

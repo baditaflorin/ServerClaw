@@ -897,3 +897,58 @@ groups:
           slo_id: semaphore-availability
           service_id: semaphore
           indicator: availability
+      - record: slo:plane_availability:success_ratio_5m
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="plane-availability"}[5m])
+        labels:
+          slo_id: plane-availability
+          service_id: plane
+          indicator: availability
+      - record: slo:plane_availability:success_ratio_1h
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="plane-availability"}[1h])
+        labels:
+          slo_id: plane-availability
+          service_id: plane
+          indicator: availability
+      - record: slo:plane_availability:success_ratio_30d
+        expr: avg_over_time(probe_success{job="slo-blackbox",slo_id="plane-availability"}[30d])
+        labels:
+          slo_id: plane-availability
+          service_id: plane
+          indicator: availability
+      - record: slo:plane_availability:error_rate_5m
+        expr: 1 - slo:plane_availability:success_ratio_5m
+        labels:
+          slo_id: plane-availability
+          service_id: plane
+          indicator: availability
+      - record: slo:plane_availability:error_rate_1h
+        expr: 1 - slo:plane_availability:success_ratio_1h
+        labels:
+          slo_id: plane-availability
+          service_id: plane
+          indicator: availability
+      - record: slo:plane_availability:error_rate_30d
+        expr: 1 - slo:plane_availability:success_ratio_30d
+        labels:
+          slo_id: plane-availability
+          service_id: plane
+          indicator: availability
+      - record: slo:plane_availability:budget_remaining
+        expr: clamp_min(1 - (slo:plane_availability:error_rate_30d / 0.010000), 0)
+        labels:
+          slo_id: plane-availability
+          service_id: plane
+          indicator: availability
+      - record: slo:plane_availability:burn_rate_1h
+        expr: slo:plane_availability:error_rate_1h / 0.010000
+        labels:
+          slo_id: plane-availability
+          service_id: plane
+          indicator: availability
+      - record: slo:plane_availability:time_to_budget_exhaustion_days
+        expr: (slo:plane_availability:budget_remaining * 30) / clamp_min(slo:plane_availability:burn_rate_1h,
+          0.001)
+        labels:
+          slo_id: plane-availability
+          service_id: plane
+          indicator: availability

@@ -4415,6 +4415,114 @@
         "max_rollback_depth": 1,
         "escalation_action": "notify_and_abort"
       }
+    },
+    "converge-plane": {
+      "description": "Converge Plane on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at tasks.lv3.org, and verify the repo-managed ADR synchronization path.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-plane",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-plane"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "plane_database_password",
+          "plane_secret_key",
+          "plane_live_server_secret_key",
+          "plane_rabbitmq_password",
+          "plane_aws_secret_access_key",
+          "plane_bootstrap_admin_password",
+          "plane_api_token",
+          "plane_admin_auth"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-plane"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-plane.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/plane.yml",
+        "roles/plane_postgres",
+        "roles/plane_runtime",
+        "inventory/host_vars/proxmox_florin.yml",
+        "scripts/plane_bootstrap.py",
+        "scripts/plane_tool.py",
+        "scripts/sync_adrs_to_plane.py",
+        "platform/ansible/plane.py"
+      ],
+      "outputs": [
+        "A repo-managed Plane runtime on docker-runtime-lv3 with PostgreSQL on postgres-lv3, public publication at tasks.lv3.org, mirrored bootstrap credentials, and synchronized ADR issues in the seeded project."
+      ],
+      "verification_commands": [
+        "make syntax-check-plane",
+        "curl -fsS http://100.64.0.1:8011/",
+        "make plane-manage ACTION=whoami",
+        "make plane-manage ACTION=list-projects",
+        "make plane-manage ACTION=sync-adrs"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 350,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 4,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "plane-manage": {
+      "description": "Run governed Plane API actions such as inspecting the bootstrap identity, listing projects, listing issues, creating one issue, or synchronizing ADRs into Plane.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "plane-manage",
+        "command": "make plane-manage ACTION=list-projects"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "plane_admin_auth"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "external_live",
+      "owner_runbook": "docs/runbooks/configure-plane.md",
+      "implementation_refs": [
+        "Makefile",
+        "scripts/plane_tool.py",
+        "scripts/sync_adrs_to_plane.py",
+        "platform/ansible/plane.py"
+      ],
+      "outputs": [
+        "Governed Plane workspace inspection and ADR synchronization through the repo-managed wrapper instead of ad hoc API calls."
+      ],
+      "verification_commands": [
+        "make plane-manage ACTION=whoami",
+        "make plane-manage ACTION=list-projects",
+        "make plane-manage ACTION=list-issues",
+        "make plane-manage ACTION=sync-adrs"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
     }
   }
 }

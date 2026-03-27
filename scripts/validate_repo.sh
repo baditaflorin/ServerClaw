@@ -25,6 +25,19 @@ Examples:
 EOF
 }
 
+count_matches() {
+  local pattern="$1"
+  shift
+  local output
+
+  output=$("$@" | grep -cE "$pattern" 2>/dev/null || true)
+  output="${output//$'\n'/}"
+  if [[ -z "$output" ]]; then
+    output="0"
+  fi
+  printf '%s\n' "$output"
+}
+
 require_command() {
   if ! command -v "$1" >/dev/null 2>&1; then
     echo "Missing required command: $1" >&2
@@ -252,6 +265,7 @@ validate_health_probes() {
     step_ca_runtime
     openbao_runtime
     semaphore_runtime
+    plane_runtime
     windmill_runtime
     mattermost_runtime
     mail_platform_runtime
@@ -361,7 +375,9 @@ _validate_workstream_entry() {
   [[ ! -f "$workstreams_file" ]] && return 0
 
   local entry_count
-  entry_count=$(grep -c "branch:.*\"$current_branch\"" "$workstreams_file" 2>/dev/null || echo "0")
+  entry_count=$(grep -c "branch:.*\"$current_branch\"" "$workstreams_file" 2>/dev/null || true)
+  entry_count="${entry_count//$'\n'/}"
+  [[ -z "$entry_count" ]] && entry_count="0"
 
   if [[ "$entry_count" -eq 0 ]]; then
     echo "WARNING: Branch '$current_branch' not found in workstreams.yaml (ADR 0167)" >&2
@@ -374,10 +390,8 @@ _validate_workstream_entry() {
 _validate_adr_index_current() {
   local adr_changes index_updated
 
-  adr_changes=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
-    grep -c '^docs/adr/0[0-9]' || echo "0")
-  index_updated=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
-    grep -c '^docs/adr/\.index\.yaml' || echo "0")
+  adr_changes=$(count_matches '^docs/adr/0[0-9]' git -C "$REPO_ROOT" diff --name-only --cached)
+  index_updated=$(count_matches '^docs/adr/\.index\.yaml' git -C "$REPO_ROOT" diff --name-only --cached)
 
   if [[ "$adr_changes" -gt 0 ]] && [[ "$index_updated" -eq 0 ]]; then
     # Check if index exists at all
@@ -397,10 +411,8 @@ _validate_adr_index_current() {
 _validate_config_registry_updated() {
   local new_config_files registry_updated
 
-  new_config_files=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
-    grep -cE '^(config/|inventory/|versions)' || echo "0")
-  registry_updated=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
-    grep -c '^\.config-locations\.yaml' || echo "0")
+  new_config_files=$(count_matches '^(config/|inventory/|versions)' git -C "$REPO_ROOT" diff --name-only --cached)
+  registry_updated=$(count_matches '^\.config-locations\.yaml' git -C "$REPO_ROOT" diff --name-only --cached)
 
   if [[ "$new_config_files" -gt 3 ]] && [[ "$registry_updated" -eq 0 ]]; then
     echo "WARNING: Config files changed but .config-locations.yaml not updated (ADR 0166)" >&2
@@ -412,9 +424,10 @@ _validate_structure_index_updated() {
   local new_dirs structure_updated
 
   new_dirs=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
-    grep -oE '^[^/]+/' | sort -u | wc -l | tr -d ' ' || echo "0")
-  structure_updated=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
-    grep -c '^\.repo-structure\.yaml' || echo "0")
+    grep -oE '^[^/]+/' | sort -u | wc -l | tr -d ' ')
+  new_dirs="${new_dirs//$'\n'/}"
+  [[ -z "$new_dirs" ]] && new_dirs="0"
+  structure_updated=$(count_matches '^\.repo-structure\.yaml' git -C "$REPO_ROOT" diff --name-only --cached)
 
   if [[ "$new_dirs" -gt 2 ]] && [[ "$structure_updated" -eq 0 ]]; then
     echo "WARNING: New top-level directories detected but .repo-structure.yaml not updated (ADR 0163)" >&2

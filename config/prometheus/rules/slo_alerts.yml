@@ -627,3 +627,43 @@ groups:
           description: Semaphore stays reachable for private Ansible job launches
             and API-based task inspection.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_plane_availability
+        expr: (slo:plane_availability:error_rate_5m > (14 * 0.010000)) and (slo:plane_availability:error_rate_1h
+          > (14 * 0.010000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: plane
+          slo_id: plane-availability
+          indicator: availability
+        annotations:
+          summary: plane-availability is burning its error budget at 14x
+          description: Plane remains reachable through the public LV3 edge for ADR
+            board tracking and issue synchronization.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_plane_availability
+        expr: slo:plane_availability:error_rate_1h > (3 * 0.010000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: plane
+          slo_id: plane-availability
+          indicator: availability
+        annotations:
+          summary: plane-availability is burning its error budget at 3x
+          description: Plane remains reachable through the public LV3 edge for ADR
+            board tracking and issue synchronization.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_plane_availability
+        expr: slo:plane_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: plane
+          slo_id: plane-availability
+          indicator: availability
+        annotations:
+          summary: plane-availability has less than 10% error budget remaining
+          description: Plane remains reachable through the public LV3 edge for ADR
+            board tracking and issue synchronization.
+          runbook: docs/runbooks/slo-tracking.md

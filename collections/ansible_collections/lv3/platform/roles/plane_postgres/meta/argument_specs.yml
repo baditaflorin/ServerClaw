@@ -1,0 +1,17 @@
+---
+argument_specs:
+  main:
+    short_description: Prepare the Plane PostgreSQL database and login on postgres-lv3.
+    options:
+      plane_database_name:
+        type: str
+        required: true
+      plane_database_user:
+        type: str
+        required: true
+      plane_database_support_role:
+        type: str
+        required: true
+      plane_database_password_local_file:
+        type: path
+        required: true
