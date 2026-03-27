@@ -45,7 +45,7 @@ jobs:
       - name: Run Renovate
         env:
           LOG_LEVEL: info
-          RENOVATE_CONFIG_FILE: config/renovate.json
+          RENOVATE_CONFIG_FILE: /workspace/config/renovate.json
           RENOVATE_ENDPOINT: http://10.10.10.20:3003
           RENOVATE_PLATFORM: gitea
           RENOVATE_REPOSITORIES: ops/proxmox_florin_server

@@ -4,6 +4,7 @@ import argparse
 import json
 import os
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -47,11 +48,29 @@ def git_commit_lookup_available() -> bool:
     return command_succeeds(["git", "cat-file", "-e", "HEAD^{commit}"])
 
 
+def published_snapshot_context() -> bool:
+    if not git_metadata_available():
+        return False
+    completed = subprocess.run(
+        ["git", "show", "-s", "--format=%s", "HEAD"],
+        cwd=REPO_ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if completed.returncode != 0:
+        return False
+    subject = completed.stdout.strip()
+    return subject.startswith("Publish internal Gitea snapshot for ")
+
+
 def validate_source_commit(commit: str, path: Path) -> None:
     if git_commit_lookup_available():
-        if not git_commit_exists(commit):
-            raise ValueError(f"{path.name}: source_commit '{commit}' is not a valid git commit")
-        return
+        if git_commit_exists(commit):
+            return
+        if published_snapshot_context() and COMMIT_HASH_PATTERN.fullmatch(commit):
+            return
+        raise ValueError(f"{path.name}: source_commit '{commit}' is not a valid git commit")
 
     if not COMMIT_HASH_PATTERN.fullmatch(commit):
         raise ValueError(
