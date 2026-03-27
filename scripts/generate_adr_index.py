@@ -78,6 +78,11 @@ class AdrMeta(NamedTuple):
     filename: str        # relative path under docs/adr/
 
 
+class IndentedSafeDumper(yaml.SafeDumper):
+    def increase_indent(self, flow: bool = False, indentless: bool = False):  # type: ignore[override]
+        return super().increase_indent(flow, False)
+
+
 # ---------------------------------------------------------------------------
 # Parsing helpers
 # ---------------------------------------------------------------------------
@@ -324,7 +329,17 @@ def main(argv: list[str] | None = None) -> int:
         "# Regenerate: python scripts/generate_adr_index.py --write\n"
         "# ============================================================================\n\n"
     )
-    content = header + yaml.dump(index, default_flow_style=False, sort_keys=False, allow_unicode=True, width=120)
+    body = yaml.dump(
+        index,
+        Dumper=IndentedSafeDumper,
+        default_flow_style=False,
+        sort_keys=False,
+        allow_unicode=True,
+        indent=2,
+        width=120,
+    )
+    body = re.sub(r"^(\s*)-\s{2,}", r"\1- ", body, flags=re.MULTILINE)
+    content = header + body
 
     if args.write:
         INDEX_PATH.write_text(content, encoding="utf-8")

@@ -30,6 +30,7 @@
 ## Expected Repo Surfaces
 
 - `scripts/workstream_surface_ownership.py`
+- `scripts/generate_adr_index.py`
 - `scripts/validate_repository_data_models.py`
 - `scripts/validate_repo.sh`
 - `tests/test_workstream_surface_ownership.py`
