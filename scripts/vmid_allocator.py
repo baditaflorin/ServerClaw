@@ -4,9 +4,12 @@
 from __future__ import annotations
 
 import argparse
+import ipaddress
 import json
 import os
+import ssl
 import urllib.request
+from urllib.parse import urlparse
 from pathlib import Path
 from typing import Any
 
@@ -45,7 +48,10 @@ def read_api_credentials(
 
     payload_path = token_file or default_token_file()
     payload = json.loads(payload_path.read_text(encoding="utf-8"))
-    return payload["api_url"], f"{payload['full_token_id']}={payload['value']}"
+    return (
+        resolved_endpoint or payload["api_url"],
+        resolved_token or f"{payload['full_token_id']}={payload['value']}",
+    )
 
 
 def parse_cluster_vmids(payload: dict[str, Any]) -> set[int]:
@@ -62,12 +68,19 @@ def parse_cluster_vmids(payload: dict[str, Any]) -> set[int]:
 
 
 def fetch_cluster_vmids(endpoint: str, api_token: str) -> set[int]:
+    parsed = urlparse(endpoint)
+    context = None
+    try:
+        ipaddress.ip_address(parsed.hostname or "")
+        context = ssl._create_unverified_context()
+    except ValueError:
+        context = None
     api_root = endpoint.rstrip("/")
     request = urllib.request.Request(
         f"{api_root}/cluster/resources?type=vm",
         headers={"Authorization": f"PVEAPIToken={api_token}"},
     )
-    with urllib.request.urlopen(request, timeout=10) as response:
+    with urllib.request.urlopen(request, timeout=10, context=context) as response:
         payload = json.loads(response.read().decode("utf-8"))
     return parse_cluster_vmids(payload)
 

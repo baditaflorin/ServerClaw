@@ -25,7 +25,7 @@
       "members": [
         {
           "id": "runtime",
-          "template": "lv3-docker-host",
+          "template": "lv3-debian-base",
           "resources": {
             "cores": 2,
             "memory_mb": 4096,
@@ -34,6 +34,9 @@
           "roles_under_test": [
             "lv3.platform.docker_runtime"
           ],
+          "ansible_vars": {
+            "docker_runtime_container_forward_compat_enabled": false
+          },
           "smoke_checks": [
             {
               "command": "id ops >/dev/null",

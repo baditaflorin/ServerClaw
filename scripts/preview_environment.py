@@ -37,11 +37,13 @@ from fixture_manager import (
     isoformat,
     mac_from_vmid,
     parse_timestamp,
+    prepare_guest_for_converge,
     proxmox_api_credentials,
     release_receipt,
     save_receipt,
     utc_now,
     verify_fixture,
+    wait_for_cloud_init,
     wait_for_ssh,
     destroy_fixture,
 )
@@ -265,6 +267,7 @@ def build_member_definition(
             f"preview-member-{member['id']}",
         ],
         "roles_under_test": list(member.get("roles_under_test", [])),
+        "ansible_vars": dict(member.get("ansible_vars", {})),
         "verify": list(member.get("smoke_checks", [])),
         "smoke_checks": list(member.get("smoke_checks", [])),
         "synthetic_checks": list(member.get("synthetic_checks", [])),
@@ -549,7 +552,7 @@ def create_preview(
     manifest_path: Path,
     owner: str | None,
     ttl_hours: float | None,
-    policy: str,
+    policy: str | None,
 ) -> dict[str, Any]:
     catalog, profile = profile_by_id(profile_id)
     resolved_branch = branch or current_branch()
@@ -558,10 +561,11 @@ def create_preview(
     ensure_no_active_preview_for_slug(slug)
     resolved_owner = sanitize_slug(owner or getpass.getuser())
     resolved_ttl_hours = ttl_hours if ttl_hours is not None else float(profile["ttl_hours"])
+    resolved_policy = policy or str(catalog.get("default_ephemeral_policy") or DEFAULT_EPHEMERAL_POLICY)
     ttl_minutes = ensure_ephemeral_lifetime_minutes(
         lifetime_hours=resolved_ttl_hours,
         definition={"lifetime_minutes": int(round(float(profile["ttl_hours"]) * 60))},
-        policy=policy,
+        policy=resolved_policy,
         extend=False,
     )
     preview_id = f"{dt.date.today().isoformat()}-adr-0185-{slug}-{compact_timestamp(utc_now()).lower()}"
@@ -596,7 +600,7 @@ def create_preview(
                 vm_id=vm_id,
                 owner=resolved_owner,
                 purpose=f"{slug}-{member['id']}",
-                policy=policy,
+                policy=resolved_policy,
             )
             receipt["lifetime_minutes"] = ttl_minutes
             receipt["expires_at"] = isoformat(parse_timestamp(receipt["created_at"]) + dt.timedelta(minutes=ttl_minutes))
@@ -606,7 +610,7 @@ def create_preview(
                     owner=receipt["owner"],
                     purpose=receipt["purpose"],
                     expires_epoch=receipt["expires_epoch"],
-                    policy=policy,
+                    policy=resolved_policy,
                 )
             )
             members.append(receipt)
@@ -635,7 +639,7 @@ def create_preview(
         manifest_path=manifest_path,
         owner=resolved_owner,
         ttl_hours=resolved_ttl_hours,
-        policy=policy,
+        policy=resolved_policy,
         members=members,
         catalog=catalog,
     )
@@ -646,8 +650,10 @@ def create_preview(
         for member in members:
             save_receipt(member)
             runtime_dir = ensure_runtime_files(member)
-            apply_fixture(runtime_dir, endpoint, api_token)
+            apply_fixture(runtime_dir, endpoint, api_token, receipt=member)
             wait_for_ssh(member)
+            wait_for_cloud_init(member)
+            prepare_guest_for_converge(member)
             converge_roles(member)
             verification = verify_fixture(member, member["definition"])
             if not verification["ok"]:
@@ -679,7 +685,7 @@ def create_preview(
         for member in reversed(provisioned or members):
             runtime_dir = REPO_ROOT / member["runtime_dir"]
             try:
-                destroy_fixture(runtime_dir, endpoint, api_token)
+                destroy_fixture(runtime_dir, endpoint, api_token, receipt=member)
             except Exception:
                 pass
             member["status"] = "failed"
@@ -724,7 +730,7 @@ def destroy_preview(preview_id: str) -> dict[str, Any]:
     endpoint, api_token = proxmox_api_credentials()
     for member in reversed(state.get("members", [])):
         runtime_dir = REPO_ROOT / member["runtime_dir"]
-        destroy_fixture(runtime_dir, endpoint, api_token)
+        destroy_fixture(runtime_dir, endpoint, api_token, receipt=member)
         member["status"] = "destroyed"
         member["destroyed_at"] = isoformat(utc_now())
         archive_receipt(member)
@@ -803,7 +809,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     create.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST_PATH)
     create.add_argument("--owner")
     create.add_argument("--ttl-hours", type=float)
-    create.add_argument("--policy", default=DEFAULT_EPHEMERAL_POLICY)
+    create.add_argument("--policy")
     create.add_argument("--json", action="store_true")
 
     validate = subparsers.add_parser("validate", help="Run smoke and synthetic validation against an active preview.")
@@ -838,7 +844,7 @@ def main(argv: list[str] | None = None) -> int:
                 workstream=args.workstream,
                 branch=args.branch,
                 profile_id=args.profile,
-                manifest=args.manifest if args.manifest.is_absolute() else REPO_ROOT / args.manifest,
+                manifest_path=args.manifest if args.manifest.is_absolute() else REPO_ROOT / args.manifest,
                 owner=args.owner,
                 ttl_hours=args.ttl_hours,
                 policy=args.policy,

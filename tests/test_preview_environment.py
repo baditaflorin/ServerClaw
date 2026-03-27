@@ -41,6 +41,26 @@ def test_preview_slug_truncates_and_stabilizes() -> None:
     assert len(slug) <= 48
 
 
+def test_build_member_definition_copies_ansible_vars() -> None:
+    definition = preview_environment.build_member_definition(
+        preview_id="preview-123",
+        slug="ws-0185-live-apply",
+        profile_id="runtime-smoke",
+        member={
+            "id": "runtime",
+            "template": "lv3-debian-base",
+            "resources": {"cores": 2, "memory_mb": 4096, "disk_gb": 32},
+            "roles_under_test": ["lv3.platform.docker_runtime"],
+            "ansible_vars": {"docker_runtime_container_forward_compat_enabled": False},
+        },
+        ip_address="10.20.10.130",
+        catalog={"network_pool": {"bridge": "vmbr20", "gateway": "10.20.10.1", "cidr": 24}},
+        ttl_hours=1,
+    )
+
+    assert definition["ansible_vars"] == {"docker_runtime_container_forward_compat_enabled": False}
+
+
 def test_finalize_preview_evidence_writes_live_apply_receipt(tmp_path: Path, monkeypatch) -> None:
     evidence_dir = tmp_path / "receipts" / "preview-environments"
     live_receipts_dir = tmp_path / "receipts" / "live-applies" / "preview"

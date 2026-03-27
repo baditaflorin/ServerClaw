@@ -155,6 +155,9 @@
                     "minLength": 1
                   }
                 },
+                "ansible_vars": {
+                  "type": "object"
+                },
                 "smoke_checks": {
                   "type": "array",
                   "items": {
