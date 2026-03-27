@@ -2,9 +2,9 @@
 
 - ADR: [ADR 0173](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0173-workstream-surface-ownership-manifest.md)
 - Title: Add machine-readable ownership manifests for active workstreams and enforce branch edits against them
-- Status: implemented
-- Implemented In Repo Version: 0.176.1
-- Implemented In Platform Version: not yet
+- Status: live_applied
+- Implemented In Repo Version: 0.176.6
+- Implemented In Platform Version: not applicable (repository-only)
 - Implemented On: 2026-03-27
 - Branch: `codex/adr-0173-ownership-manifest`
 - Worktree: `../worktree-adr-0173-ownership-manifest`
@@ -50,6 +50,7 @@
 - `workstreams.yaml` remains the machine-readable source of truth and uses `workstream-registry-v1` for shared registry updates
 - the ownership validator script and tests are exclusive to this workstream
 - release files are updated in this implementation cut because the user explicitly requested a version bump alongside the ADR landing
+- this workstream is considered `live_applied` once merged to `main` because the enforcement surface is the repository itself, not a separately converged platform service
 
 ## Verification
 

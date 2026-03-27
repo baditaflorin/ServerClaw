@@ -38,6 +38,56 @@ workstreams:
       - scripts/promotion_pipeline.py
       - Makefile
       - docs/runbooks/capacity-model.md
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: standby_capacity_repo_surface
+          paths:
+            - docs/adr/0180-standby-capacity-reservation-and-placement-rules.md
+            - docs/workstreams/adr-0180-standby-capacity-reservation-and-placement-rules.md
+            - scripts/standby_capacity.py
+            - tests/test_standby_capacity.py
+            - docs/runbooks/capacity-model.md
+          mode: exclusive
+        - id: service_capability_catalog_contract
+          paths:
+            - config/service-capability-catalog.json
+          mode: shared_contract
+          contract: service-capability-catalog-v1
+        - id: capacity_model_contract
+          paths:
+            - config/capacity-model.json
+          mode: shared_contract
+          contract: capacity-model-v1
+        - id: service_capability_schema_contract
+          paths:
+            - docs/schema/service-capability-catalog.schema.json
+            - scripts/service_catalog.py
+            - tests/test_validate_service_catalog.py
+          mode: shared_contract
+          contract: service-capability-catalog-schema-v1
+        - id: capacity_model_schema_contract
+          paths:
+            - docs/schema/capacity-model.schema.json
+            - scripts/capacity_report.py
+            - tests/test_capacity_report.py
+          mode: shared_contract
+          contract: capacity-model-schema-v1
+        - id: promotion_pipeline_contract
+          paths:
+            - scripts/promotion_pipeline.py
+            - tests/test_promotion_pipeline.py
+          mode: shared_contract
+          contract: promotion-pipeline-v1
+        - id: makefile_contract
+          paths:
+            - Makefile
+          mode: shared_contract
+          contract: makefile-validation-targets-v1
     ready_to_merge: false
     live_applied: false
 
@@ -3565,7 +3615,7 @@ workstreams:
   - id: adr-0173-workstream-surface-ownership-manifest
     adr: "0173"
     title: Workstream surface ownership manifest
-    status: implemented
+    status: live_applied
     owner: codex
     branch: codex/adr-0173-ownership-manifest
     worktree_path: ../worktree-adr-0173-ownership-manifest
@@ -3617,7 +3667,7 @@ workstreams:
             - versions/stack.yaml
           mode: exclusive
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0166-canonical-error-response-format
     adr: "0166"

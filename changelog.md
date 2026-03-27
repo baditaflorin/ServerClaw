@@ -12,6 +12,8 @@ Versioned release notes live under [docs/release-notes/README.md](/Users/live/Do
 
 ## Unreleased
 
+- marked ADR 0173 live_applied on `main` as a repository-only enforcement change
+
 ## Latest Release
 
 - [0.176.6 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.176.6.md)
