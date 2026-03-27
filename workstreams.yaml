@@ -4190,3 +4190,66 @@ workstreams:
       included_in_repo_version: 0.177.12
       latest_receipts:
         staging_environment: 2026-03-27-adr-0183-staging-live-apply
+
+  - id: ws-0191-live-apply
+    adr: "0191"
+    title: Immutable guest replacement for stateful and edge services
+    status: implemented
+    owner: codex
+    branch: codex/ws-0191-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0191-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0191-live-apply.md
+    depends_on:
+      - adr-0179-service-redundancy-tier-matrix
+      - adr-0182-live-apply-merge-train
+    conflicts_with: []
+    shared_surfaces:
+      - config/immutable-guest-replacement-catalog.json
+      - docs/schema/immutable-guest-replacement-catalog.schema.json
+      - scripts/immutable_guest_replacement.py
+      - scripts/validate_repository_data_models.py
+      - Makefile
+      - docs/runbooks/immutable-guest-replacement.md
+      - docs/runbooks/deploy-a-service.md
+      - docs/runbooks/service-redundancy-tier-matrix.md
+      - docs/runbooks/validate-repository-automation.md
+      - docs/adr/0191-immutable-guest-replacement-for-stateful-and-edge-services.md
+      - receipts/live-applies/
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr-0191-repo-surface
+          paths:
+            - config/immutable-guest-replacement-catalog.json
+            - docs/schema/immutable-guest-replacement-catalog.schema.json
+            - scripts/immutable_guest_replacement.py
+            - tests/test_immutable_guest_replacement.py
+            - docs/runbooks/immutable-guest-replacement.md
+            - docs/adr/0191-immutable-guest-replacement-for-stateful-and-edge-services.md
+            - docs/workstreams/ws-0191-live-apply.md
+          mode: exclusive
+        - id: repo-validation-pipeline-contract
+          paths:
+            - scripts/validate_repository_data_models.py
+            - docs/runbooks/validate-repository-automation.md
+            - .config-locations.yaml
+          mode: shared_contract
+          contract: repo-validation-pipeline-v1
+        - id: live-apply-service-contract
+          paths:
+            - Makefile
+            - docs/runbooks/deploy-a-service.md
+            - docs/runbooks/service-redundancy-tier-matrix.md
+          mode: shared_contract
+          contract: live-apply-entrypoints-v1
+        - id: live-apply-evidence
+          paths:
+            - receipts/live-applies/**
+          mode: shared_contract
+          contract: live-apply-receipts-v1
+    ready_to_merge: false
+    live_applied: false

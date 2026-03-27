@@ -226,6 +226,18 @@ service_configuration:
     format: JSON
     update_by: "scripts/service_catalog.py --write"
 
+  config/immutable-guest-replacement-catalog.json:
+    purpose: Guest-level ADR 0191 policy for immutable replacement, validation mode, and documented in-place exceptions
+    owner: human
+    format: JSON
+    use_for: Determining which production guests default to immutable replacement instead of in-place mutation
+    update_when: Changing the replacement policy, preview method, or rollback window for a governed guest
+    validation: "uv run --with pyyaml --with jsonschema python scripts/immutable_guest_replacement.py --validate"
+    related_files:
+      - "docs/schema/immutable-guest-replacement-catalog.schema.json: JSON Schema for the catalog"
+      - "scripts/immutable_guest_replacement.py: Validation, planning, and live-apply guard"
+      - "docs/runbooks/immutable-guest-replacement.md: Operator workflow and exception path"
+
   config/dependency-graph.json:
     purpose: Service dependency graph
     owner: automation
