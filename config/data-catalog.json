@@ -64,6 +64,21 @@
       "notes": "Dozzle is read-only and does not persist its own datastore; it exposes recent container log buffers from the managed Docker hosts for real-time debugging."
     },
     {
+      "id": "excalidraw-generated-scenes",
+      "service": "excalidraw",
+      "name": "Generated Excalidraw scene set",
+      "class": "internal",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-read",
+      "pii_risk": "low",
+      "locations": [
+        "docs/diagrams/*.excalidraw",
+        "/opt/excalidraw/bootstrap-app.sh"
+      ],
+      "notes": "The committed architecture scene sources are regenerated from repo truth and remain part of normal repository backup scope."
+    },
+    {
       "id": "tempo-traces",
       "service": "grafana",
       "name": "Tempo trace blocks",

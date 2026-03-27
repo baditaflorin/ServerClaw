@@ -1,12 +1,12 @@
-# Release 0.177.15
+# Release 0.177.16
 
 - Date: 2026-03-28
 
 ## Summary
-- completed ADR 0192 by separating `ha_reserved`, `recovery_reserved`, and `preview_burst` capacity classes in mainline automation and recording the verified live apply evidence for preview and restore admission checks
+- implemented ADR 0202 by publishing private Excalidraw at draw.lv3.org, generating committed architecture diagrams from repo-managed platform data, and recording verified live-apply evidence
 
 ## Platform Impact
-- platform_version remains 0.130.31; ADR 0192 capacity-class admission and reporting are now integrated on main, and canonical stack state records the 2026-03-27 live-apply receipt
+- no platform version bump; ADR 0202 is already live on production and this release integrates the Excalidraw runtime, generated architecture diagrams, and recorded live-apply evidence on main
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

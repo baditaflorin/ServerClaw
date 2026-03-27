@@ -1,0 +1,88 @@
+---
+# Purpose: Define the supported inputs for the Excalidraw runtime role.
+# Use case: Used by argument-spec validation before converging the Excalidraw frontend and room stack.
+#
+# Inputs (required):
+#   - excalidraw_runtime_site_dir (path, required): Runtime directory on docker-runtime-lv3.
+#   - excalidraw_runtime_compose_file (path, required): Rendered compose file path.
+#   - excalidraw_runtime_bootstrap_script (path, required): Frontend bootstrap script path.
+#   - excalidraw_runtime_app_container_name (str, required): Frontend container name.
+#   - excalidraw_runtime_room_container_name (str, required): Collaboration room container name.
+#   - excalidraw_runtime_app_image (str, required): Pinned frontend image reference.
+#   - excalidraw_runtime_room_image (str, required): Pinned room image reference.
+#   - excalidraw_runtime_app_port (int, required): Loopback-published frontend port.
+#   - excalidraw_runtime_room_port (int, required): Loopback-published room port.
+#   - excalidraw_runtime_bind_host (str, required): Host interface used for local publishing.
+#   - excalidraw_runtime_public_url (str, required): Public service URL.
+#   - excalidraw_runtime_public_host (str, required): Public hostname.
+#   - excalidraw_runtime_collab_origin (str, required): Desired private collaboration origin embedded in frontend assets.
+#   - excalidraw_runtime_upstream_collab_origin (str, required): Upstream collaboration origin to replace.
+#
+# Inputs (optional):
+#   - excalidraw_runtime_app_container_port (int, optional, default=80): Container-internal frontend listen port.
+#
+# Outputs:
+#   - Enforces the role contract before the Excalidraw runtime converge runs.
+#
+# Idempotency: Fully idempotent
+#              Argument-spec validation is read-only.
+#
+# Dependencies:
+#   - ADR 0202: Defines the private Excalidraw runtime model and publication contract.
+#   - Requires: collections/ansible_collections/lv3/platform/roles/excalidraw_runtime/defaults/main.yml.
+#   - Role: excalidraw_runtime — validates role inputs before task execution.
+#
+# Related ADRs: 0165
+# Related Runbooks: docs/runbooks/configure-excalidraw.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-27
+argument_specs:
+  main:
+    short_description: Converge the Excalidraw frontend and collaboration room runtime.
+    options:
+      excalidraw_runtime_site_dir:
+        type: path
+        required: true
+      excalidraw_runtime_compose_file:
+        type: path
+        required: true
+      excalidraw_runtime_bootstrap_script:
+        type: path
+        required: true
+      excalidraw_runtime_app_container_name:
+        type: str
+        required: true
+      excalidraw_runtime_room_container_name:
+        type: str
+        required: true
+      excalidraw_runtime_app_image:
+        type: str
+        required: true
+      excalidraw_runtime_room_image:
+        type: str
+        required: true
+      excalidraw_runtime_app_port:
+        type: int
+        required: true
+      excalidraw_runtime_room_port:
+        type: int
+        required: true
+      excalidraw_runtime_app_container_port:
+        type: int
+        required: false
+      excalidraw_runtime_bind_host:
+        type: str
+        required: true
+      excalidraw_runtime_public_url:
+        type: str
+        required: true
+      excalidraw_runtime_public_host:
+        type: str
+        required: true
+      excalidraw_runtime_collab_origin:
+        type: str
+        required: true
+      excalidraw_runtime_upstream_collab_origin:
+        type: str
+        required: true

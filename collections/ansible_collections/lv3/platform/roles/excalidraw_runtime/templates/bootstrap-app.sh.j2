@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+
+asset_files=$(grep -R -l -F '{{ excalidraw_runtime_upstream_collab_origin }}' /usr/share/nginx/html/assets || true)
+if [ -n "$asset_files" ]; then
+  for asset in $asset_files; do
+    sed -i "s|{{ excalidraw_runtime_upstream_collab_origin }}|{{ excalidraw_runtime_collab_origin }}|g" "$asset"
+  done
+fi
+
+exec nginx -g 'daemon off;'
