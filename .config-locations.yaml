@@ -73,6 +73,26 @@ infrastructure_state:
     update_when: Generated on push; do NOT edit manually
     update_by: "scripts/platform_manifest.py --write"
 
+  config/preview-environment-profiles.json:
+    purpose: Canonical catalog of ADR 0185 branch-scoped preview profiles, network pool, and TTL defaults
+    owner: human
+    format: JSON
+    use_for: Creating and validating ephemeral branch previews on the governed Proxmox pool
+    update_when: Adding or changing preview profiles, network pool limits, or branch-preview defaults
+    update_by: Agent or human implementing ADR 0185 preview automation
+    validation: "python3 scripts/preview_environment.py validate-catalog"
+    related_files:
+      - "docs/schema/preview-environment-profiles.schema.json: Schema for the profile catalog"
+      - "scripts/preview_environment.py: Lifecycle automation for create/validate/destroy"
+
+  receipts/preview-environments/:
+    purpose: Durable branch-local evidence for completed preview create/validate/destroy cycles
+    owner: automation
+    format: JSON
+    use_for: Proving which branch preview ran, what it provisioned, how it validated, and when it was torn down
+    update_when: After a preview environment is destroyed and its evidence is finalized
+    update_by: "scripts/preview_environment.py destroy"
+
 # ============================================================================
 # VERSIONING AND RELEASES
 # ============================================================================

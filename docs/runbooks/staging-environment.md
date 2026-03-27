@@ -15,6 +15,7 @@ This runbook covers:
 Current live state on 2026-03-27:
 
 - `vmbr20` is live on the Proxmox host
+- host nftables currently forwards `10.20.10.0/24` and masquerades it out `vmbr0`, which branch-scoped previews also depend on
 - `docker-runtime-staging-lv3` (`10.20.10.20`) and `monitoring-staging-lv3` (`10.20.10.40`) exist and are reachable over SSH through the Proxmox jump
 - the staged OpenTofu declarations currently keep Proxmox NIC firewall disabled (`firewall=0`) until staged guest-network-policy automation is added
 
@@ -42,6 +43,8 @@ Expected result:
 - `/etc/network/interfaces` contains a managed `vmbr20` stanza
 - `ip -brief addr show vmbr20` reports `10.20.10.1/24`
 - the Tailscale route set includes `10.20.10.0/24`
+- `nft list chain inet filter forward` accepts `ip saddr 10.20.10.0/24`
+- `nft list chain ip nat postrouting` masquerades `ip saddr 10.20.10.0/24 oifname "vmbr0"`
 
 ## Stage The VMs
 

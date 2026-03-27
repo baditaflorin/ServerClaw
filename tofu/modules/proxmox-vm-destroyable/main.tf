@@ -40,9 +40,9 @@ resource "proxmox_virtual_environment_vm" "this" {
   }
 
   agent {
-    enabled = true
-    trim    = true
-    timeout = "15m"
+    enabled = var.agent_enabled
+    trim    = var.agent_enabled
+    timeout = var.agent_timeout
   }
 
   operating_system {
@@ -132,6 +132,6 @@ resource "proxmox_virtual_environment_vm" "this" {
 
   lifecycle {
     prevent_destroy = false
-    ignore_changes  = [agent[0].type, clone, keyboard_layout, node_name]
+    ignore_changes  = [clone, keyboard_layout, node_name]
   }
 }

@@ -60,6 +60,7 @@ from workflow_catalog import (
 )
 from workstream_surface_ownership import validate_registry as validate_workstream_surface_ownership_registry
 from platform.config_merge import validate_merge_eligible_catalog
+from preview_environment import load_profile_catalog, validate_profile_catalog
 
 
 STACK_PATH = repo_path("versions", "stack.yaml")
@@ -2373,6 +2374,10 @@ def validate_slo_catalog_assets() -> None:
         raise ValueError("generated SLO artifacts are out of date")
 
 
+def validate_preview_environment_profiles() -> None:
+    validate_profile_catalog(load_profile_catalog())
+
+
 def validate_repository_data_models() -> int:
     load_dependency_graph(validate_schema=True)
     secret_manifest = load_secret_manifest()
@@ -2419,6 +2424,7 @@ def validate_repository_data_models() -> int:
     validate_maintenance_window_schema()
     validate_capacity_model_schema()
     validate_capacity_model()
+    validate_preview_environment_profiles()
     load_public_surface_scan_policy()
     validate_vm_template_manifest(host_vars_context["proxmox_vm_templates"])
     validate_operator_roster(load_yaml(ROSTER_PATH))

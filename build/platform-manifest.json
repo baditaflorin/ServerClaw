@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.16",
+  "repo_version": "0.177.17",
   "platform_version": "0.130.31",
-  "generated_at": "2026-03-27T23:13:49Z",
-  "next_refresh_at": "2026-03-28T00:13:49Z",
+  "generated_at": "2026-03-27T23:24:26Z",
+  "next_refresh_at": "2026-03-28T00:24:26Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3544,10 +3544,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.15",
+    "last_version": "0.177.16",
     "deployed_at": "2026-03-27",
-    "summary": "implemented ADR 0202 by publishing private Excalidraw at draw.lv3.org, generating committed architecture diagrams from repo-managed platform data, and recording verified live-apply evidence",
-    "release_notes_url": "docs/release-notes/0.177.16.md"
+    "summary": "merged ADR 0185 branch-scoped ephemeral preview environments after the committed-head live apply proved the preview lifecycle can create, converge, validate, and destroy isolated preview VMs from a separate worktree without interfering with concurrent agent branches",
+    "release_notes_url": "docs/release-notes/0.177.17.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
@@ -3624,13 +3624,6 @@
       "status": "Proposed",
       "implementation_status": "Not Implemented",
       "path": "docs/adr/0183-auxiliary-cloud-failure-domain-for-witness-recovery-and-burst-capacity.md"
-    },
-    {
-      "adr": "0185",
-      "title": "Branch-Scoped Ephemeral Preview Environments",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0185-branch-scoped-ephemeral-preview-environments.md"
     },
     {
       "adr": "0186",

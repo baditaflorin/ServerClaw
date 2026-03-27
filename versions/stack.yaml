@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.177.16
+repo_version: 0.177.17
 platform_version: 0.130.31
 
 live_apply_evidence:
@@ -61,6 +61,7 @@ live_apply_evidence:
     ops_portal: 2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply
     ollama: 2026-03-27-adr-0176-inventory-sharding-mainline-live-apply
     operator_access: 2026-03-27-adr-0108-operator-onboarding-mainline-live-apply
+    preview_environment: 2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z
     staging_environment: 2026-03-27-adr-0183-staging-live-apply
     immutable_guest_replacement: 2026-03-27-adr-0191-immutable-guest-replacement-live-apply
     capacity_classes: 2026-03-27-adr-0192-capacity-classes-live-apply
@@ -928,7 +929,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.16
+    current: 0.177.17
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.130.31

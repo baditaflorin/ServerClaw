@@ -11,6 +11,7 @@ from controller_automation_toolkit import load_json, repo_path
 ENVIRONMENT_TOPOLOGY_PATH = repo_path("config", "environment-topology.json")
 DEFAULT_ENVIRONMENTS = ("production", "staging")
 DEFAULT_PRIMARY_ENVIRONMENT = "production"
+RECEIPT_ONLY_ENVIRONMENTS = ("preview",)
 
 
 def _ordered_environment_ids(environment_ids: set[str]) -> tuple[str, ...]:
@@ -69,5 +70,13 @@ def primary_environment(path: Path | None = None) -> str:
     return choices[0] if choices else DEFAULT_PRIMARY_ENVIRONMENT
 
 
+def receipt_environment_ids(path: Path | None = None) -> tuple[str, ...]:
+    configured = list(configured_environment_ids(path))
+    for environment in RECEIPT_ONLY_ENVIRONMENTS:
+        if environment not in configured:
+            configured.append(environment)
+    return tuple(configured)
+
+
 def receipt_subdirectory_environments(path: Path | None = None) -> set[str]:
-    return set(configured_environment_ids(path)) - {primary_environment(path)}
+    return set(receipt_environment_ids(path)) - {primary_environment(path)}
