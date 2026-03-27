@@ -2320,7 +2320,7 @@ workstreams:
   - id: ws-0189-live-apply
     adr: "0189"
     title: ADR 0189 live apply from latest origin/main
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/ws-0189-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0189-live-apply
@@ -2381,7 +2381,13 @@ workstreams:
           mode: shared_contract
           contract: makefile-validation-targets-v1
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0189 governed network-impairment matrix rendering and hardened the mirrored Windmill worker checkout so repo-managed Python jobs no longer trip stale editable-build metadata before startup
+      release_bump: patch
+      included_in_repo_version: 0.177.12
+      latest_receipts:
+        network_impairment_matrix: 2026-03-27-adr-0189-network-impairment-matrix-live-apply
 
   - id: adr-0106-ephemeral-lifecycle
     adr: "0106"

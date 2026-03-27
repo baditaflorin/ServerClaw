@@ -80,3 +80,4 @@ Expected:
 
 - ADR 0189 defines the safe matrix and assertion contract. It does not authorize ad hoc production network chaos.
 - The current live rollout seeds a safe diagnostic workflow only; actual preview and fixture execution lanes remain follow-up work under ADR 0185 and ADR 0088.
+- If the Windmill API returns editable-build or missing-`PyYAML` bootstrap errors for repo-managed scripts, replay `make live-apply-service service=windmill env=production EXTRA_ARGS='-e bypass_promotion=true'` so the worker checkout is resynchronized and stale packaging metadata is pruned before retrying the governed job.
