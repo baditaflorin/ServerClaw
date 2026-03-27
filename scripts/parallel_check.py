@@ -120,6 +120,11 @@ def build_docker_command(
 ) -> list[str]:
     mount_args = ["-v", f"{workspace.resolve()}:/workspace"]
     env_args: list[str] = []
+    safe_directories = sorted({"/workspace", check.working_dir})
+    env_args.extend(["-e", f"GIT_CONFIG_COUNT={len(safe_directories)}"])
+    for index, safe_directory in enumerate(safe_directories):
+        env_args.extend(["-e", f"GIT_CONFIG_KEY_{index}=safe.directory"])
+        env_args.extend(["-e", f"GIT_CONFIG_VALUE_{index}={safe_directory}"])
     git_metadata_file = workspace / ".git"
     if git_metadata_file.is_file():
         gitdir_line = git_metadata_file.read_text(encoding="utf-8").strip()

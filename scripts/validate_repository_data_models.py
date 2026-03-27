@@ -40,6 +40,7 @@ from promotion_pipeline import validate_promotion_receipts
 from public_surface_scan import load_public_surface_scan_policy
 from validate_ephemeral_vmid import validate_ephemeral_vmid_ranges
 from generate_slo_rules import outputs_match as slo_outputs_match
+from immutable_guest_replacement import load_guest_replacement_catalog, validate_guest_replacement_catalog
 from slo_tracking import (
     GRAFANA_DASHBOARD_PATH,
     PROMETHEUS_ALERTS_PATH,
@@ -2390,6 +2391,7 @@ def validate_repository_data_models() -> int:
     validate_api_publication_catalog(api_publication_catalog, lane_catalog)
     load_service_completeness_context()
     validate_redundancy_catalog(load_redundancy_catalog())
+    validate_guest_replacement_catalog(load_guest_replacement_catalog())
     validate_mutation_audit_schema(load_mutation_audit_schema())
     validate_receipts()
     validate_promotion_receipts()

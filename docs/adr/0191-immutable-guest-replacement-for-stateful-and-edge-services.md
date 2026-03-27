@@ -1,10 +1,10 @@
 # ADR 0191: Immutable Guest Replacement for Stateful and Edge Services
 
-- Status: Proposed
-- Implementation Status: Not Implemented
+- Status: Accepted
+- Implementation Status: Live applied on workstream branch
 - Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented In Platform Version: 0.130.31 (branch-local live apply verified; merge-to-main metadata pending)
+- Implemented On: 2026-03-27
 - Date: 2026-03-27
 
 ## Context
@@ -40,6 +40,43 @@ In-place mutation is reserved for:
 - low-tier services explicitly classified as rebuild-only
 - narrow configuration changes already proven reversible
 
+## Implementation
+
+### Policy catalog
+
+The repository now records ADR 0191 policy decisions in `config/immutable-guest-replacement-catalog.json`, validated by `docs/schema/immutable-guest-replacement-catalog.schema.json`.
+
+Each governed entry binds a service to:
+
+- the guest that must be treated as the replacement boundary
+- its redundancy and service classification
+- the expected validation mode before cutover
+- the rollback retention window
+
+### Planner and live-apply guard
+
+`scripts/immutable_guest_replacement.py` is the operator entry point for ADR 0191. It validates the catalog, prints a replacement plan for a governed service, and enforces a failed-closed preflight for the production `live-apply-service` path.
+
+The `Makefile` now exposes:
+
+- `make immutable-guest-replacement-plan service=<service-id>`
+- an ADR 0191 preflight inside `make live-apply-service`
+
+When a governed service is targeted for production live apply, the preflight rejects in-place mutation unless the operator explicitly supplies `ALLOW_IN_PLACE_MUTATION=true` for the documented narrow exception path.
+
+### Repository validation and operator guidance
+
+`scripts/validate_repository_data_models.py` now validates the immutable replacement catalog along with the rest of the repository data models.
+
+The operational guidance lives in:
+
+- `docs/runbooks/immutable-guest-replacement.md`
+- `docs/runbooks/deploy-a-service.md`
+- `docs/runbooks/service-redundancy-tier-matrix.md`
+- `docs/runbooks/validate-repository-automation.md`
+
+These updates make the repo-side contract explicit before a full guest replacement controller exists.
+
 ## Consequences
 
 **Positive**
@@ -58,6 +95,21 @@ In-place mutation is reserved for:
 
 - This ADR changes the preferred delivery pattern; it does not require every guest to become cattle overnight.
 - Immutable replacement does not remove the need for backups, rehearsals, or standby validation.
+
+## Verification
+
+- `uv run --with pytest --with pyyaml --with jsonschema python -m pytest -q tests/test_immutable_guest_replacement.py tests/test_service_redundancy.py tests/test_live_apply_receipts.py`
+- `uv run --with pyyaml --with jsonschema python scripts/immutable_guest_replacement.py --validate`
+- `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`
+- `python3 -m py_compile scripts/immutable_guest_replacement.py scripts/validate_repository_data_models.py`
+- `make immutable-guest-replacement-plan service=grafana`
+- `uv run --with pyyaml --with jsonschema python scripts/immutable_guest_replacement.py --check-live-apply --service grafana`
+- `make live-apply-service service=grafana env=production ALLOW_IN_PLACE_MUTATION=true EXTRA_ARGS='-e bypass_promotion=true'`
+- `curl -Ik --resolve grafana.lv3.org:443:65.108.75.123 https://grafana.lv3.org/d/lv3-platform-overview/lv3-platform-overview`
+
+The guard now fails closed for governed services. On 2026-03-27 the explicit preflight check for `grafana` returned exit code `2` and instructed the operator to use the replacement planner or acknowledge the narrow in-place exception with `ALLOW_IN_PLACE_MUTATION=true`.
+
+The bounded production replay with the documented exception completed successfully on `monitoring-lv3` with `ok=176 changed=0 unreachable=0 failed=0 skipped=34`. The public Grafana route still returned `HTTP/2 302` to `/login`, and the local health endpoints for Grafana, Prometheus, Alertmanager, Blackbox Exporter, and Tempo all remained healthy after the replay.
 
 ## Related ADRs
 

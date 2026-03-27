@@ -65,6 +65,7 @@ Validation checks:
 - current platform tier ceiling versus declared failure-domain count
 - declared rehearsal gate defaults for `R1`, `R2`, and `R3`
 - rehearsal-proof structure for trigger, target environment, duration, observed RTO, data-loss or lag note, health verification, rollback result, and evidence reference
+- immutable guest replacement policies still validate for the governed production guests
 
 ## Live Apply Guard
 
@@ -86,6 +87,14 @@ That preflight:
 - resolves the deployment mode implied by each service tier
 - prints the declared tier, platform-supported tier, and currently implemented tier from fresh rehearsal evidence
 - rejects any service that claims a tier above what the current platform can honestly support
+
+ADR 0191 adds a second production guard for governed guests:
+
+```bash
+uv run --with pyyaml --with jsonschema python scripts/immutable_guest_replacement.py --check-live-apply --service grafana
+```
+
+That guard layers on top of the redundancy tier matrix and blocks in-place production mutation when the service's guest is required to roll out by immutable replacement unless the operator sets the documented narrow exception path.
 
 ## Querying One Service
 

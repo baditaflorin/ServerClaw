@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.12",
   "platform_version": "0.130.31",
-  "generated_at": "2026-03-27T17:23:45Z",
-  "next_refresh_at": "2026-03-27T18:23:45Z",
+  "generated_at": "2026-03-27T17:50:11Z",
+  "next_refresh_at": "2026-03-27T18:50:11Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3618,13 +3618,6 @@
       "status": "Proposed",
       "implementation_status": "Not Implemented",
       "path": "docs/adr/0190-synthetic-transaction-replay-for-capacity-and-recovery-validation.md"
-    },
-    {
-      "adr": "0191",
-      "title": "Immutable Guest Replacement for Stateful and Edge Services",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0191-immutable-guest-replacement-for-stateful-and-edge-services.md"
     },
     {
       "adr": "0192",
