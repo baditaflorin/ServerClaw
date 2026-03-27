@@ -18,6 +18,7 @@ ALLOWED_MUTATION_SCOPES = {"host", "lane", "platform"}
 ALLOWED_EXECUTION_CLASSES = {"mutation", "diagnostic"}
 LIST_HOSTS_HEADER_PATTERN = re.compile(r"^\s+hosts \(\d+\):$")
 IMPORT_PLAYBOOK_PATTERN = re.compile(r"^\s*-\s*import_playbook:\s*(?P<path>.+?)\s*$")
+SHARD_COMPAT_EXCLUDES = {".ansible", ".git"}
 
 
 class AnsibleExecutionScopeError(RuntimeError):
@@ -318,6 +319,24 @@ def _augment_localhost(payload: dict[str, Any]) -> dict[str, Any]:
     return payload
 
 
+def ensure_shard_repo_compatibility(*, compat_root: Path, repo_root: Path = REPO_ROOT) -> None:
+    compat_root.mkdir(parents=True, exist_ok=True)
+    for source in repo_root.iterdir():
+        if source.name in SHARD_COMPAT_EXCLUDES:
+            continue
+        target = compat_root / source.name
+        if target.exists() or target.is_symlink():
+            try:
+                if target.resolve() == source.resolve():
+                    continue
+            except OSError:
+                pass
+            raise AnsibleExecutionScopeError(
+                f"inventory shard compatibility path '{target}' already exists and does not point at '{source}'"
+            )
+        target.symlink_to(source, target_is_directory=source.is_dir())
+
+
 def render_inventory_shard(
     *,
     target_hosts: tuple[str, ...],
@@ -357,6 +376,7 @@ def render_inventory_shard(
         payload = _augment_localhost(payload)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
+    ensure_shard_repo_compatibility(compat_root=output_path.parent.parent, repo_root=repo_root)
     try:
         import yaml
     except ModuleNotFoundError as exc:  # pragma: no cover - runtime guard

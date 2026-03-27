@@ -221,6 +221,8 @@ playbook: playbooks/leaf-alpha.yml
     assert plan.limit_expression == "alpha"
     assert plan.mutation_scope == "host"
     assert Path(plan.inventory_shard_path).read_text(encoding="utf-8")
+    assert (repo_root / ".ansible" / "shards" / "config").is_symlink()
+    assert (repo_root / ".ansible" / "shards" / "config").resolve() == (repo_root / "config").resolve()
     assert calls[0][0] == "ansible-playbook"
     assert calls[1][0] == "ansible-inventory"
 
