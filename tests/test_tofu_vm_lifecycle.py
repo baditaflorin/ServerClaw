@@ -13,6 +13,9 @@ from session_workspace import resolve_session_workspace
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PRODUCTION_MAIN = REPO_ROOT / "tofu" / "environments" / "production" / "main.tf"
 STAGING_MAIN = REPO_ROOT / "tofu" / "environments" / "staging" / "main.tf"
+PRODUCTION_TFVARS = REPO_ROOT / "tofu" / "environments" / "production" / "terraform.tfvars"
+STAGING_TFVARS = REPO_ROOT / "tofu" / "environments" / "staging" / "terraform.tfvars"
+HOST_VARS = REPO_ROOT / "inventory" / "host_vars" / "proxmox_florin.yml"
 TOKEN_SCRIPT = REPO_ROOT / "scripts" / "tofu_remote_command.py"
 REMOTE_WORKSPACE_BASE = Path("/home/ops/builds/proxmox_florin_server")
 
@@ -49,6 +52,19 @@ def test_staging_environment_declares_minimum_vm_set() -> None:
     assert 'vm_id                   = 220' in staging
     assert 'module "monitoring_staging_lv3"' in staging
     assert 'vm_id                   = 240' in staging
+
+
+def test_tofu_environments_target_live_proxmox_node_name() -> None:
+    host_vars = yaml.safe_load(HOST_VARS.read_text())
+    proxmox_node_name = host_vars["proxmox_node_name"]
+
+    production_tfvars = PRODUCTION_TFVARS.read_text()
+    staging_tfvars = STAGING_TFVARS.read_text()
+
+    assert f'node_name               = "{proxmox_node_name}"' in production_tfvars
+    assert f'template_node_name      = "{proxmox_node_name}"' in production_tfvars
+    assert f'node_name               = "{proxmox_node_name}"' in staging_tfvars
+    assert f'template_node_name      = "{proxmox_node_name}"' in staging_tfvars
 
 
 def test_remote_command_builds_production_import_target(tmp_path: Path) -> None:

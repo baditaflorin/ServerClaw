@@ -1,5 +1,5 @@
-node_name               = "proxmox_florin"
-template_node_name      = "proxmox_florin"
+node_name               = "Debian-trixie-latest-amd64-base"
+template_node_name      = "Debian-trixie-latest-amd64-base"
 template_vmid           = 9000
 datastore_id            = "local"
 cloud_init_datastore_id = "local"

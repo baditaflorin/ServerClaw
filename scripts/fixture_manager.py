@@ -167,9 +167,14 @@ def controller_secret_path(secret_id: str) -> Path:
 
 
 def default_fixture_context() -> dict[str, str]:
+    proxmox_node_name = yaml_scalar(
+        HOST_VARS_PATH,
+        "proxmox_node_name",
+        yaml_scalar(HOST_VARS_PATH, "host_public_hostname", "proxmox_florin"),
+    )
     return {
-        "node_name": "proxmox_florin",
-        "template_node_name": "proxmox_florin",
+        "node_name": proxmox_node_name,
+        "template_node_name": proxmox_node_name,
         "datastore_id": yaml_scalar(GROUP_VARS_PATH, "proxmox_storage_id", "local"),
         "cloud_init_datastore_id": yaml_scalar(GROUP_VARS_PATH, "proxmox_snippets_storage_id", "local"),
         "ci_user": yaml_scalar(GROUP_VARS_PATH, "proxmox_guest_ci_user", "ops"),
