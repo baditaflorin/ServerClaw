@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LV3 Renovate Config",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "$schema",
+    "enabledManagers",
+    "customManagers",
+    "packageRules"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://docs.renovatebot.com/renovate-schema.json"
+    },
+    "enabledManagers": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "string"
+      }
+    },
+    "customManagers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "customType",
+          "managerFilePatterns",
+          "matchStrings",
+          "datasourceTemplate",
+          "autoReplaceStringTemplate"
+        ],
+        "properties": {
+          "customType": {
+            "type": "string",
+            "const": "regex"
+          },
+          "managerFilePatterns": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "matchStrings": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "datasourceTemplate": {
+            "type": "string",
+            "const": "docker"
+          },
+          "autoReplaceStringTemplate": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "packageRules": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "matchUpdateTypes": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "automerge": {
+            "type": "boolean"
+          },
+          "automergeType": {
+            "type": "string"
+          },
+          "groupName": {
+            "type": "string"
+          },
+          "matchManagers": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "rangeStrategy": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

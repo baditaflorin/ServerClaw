@@ -2875,6 +2875,7 @@
         "generated_secret_ids": [
           "gitea_database_password",
           "gitea_admin_password",
+          "gitea_renovate_token",
           "gitea_webhook_secret",
           "gitea_runner_registration_token"
         ]
@@ -2891,6 +2892,7 @@
         "collections/ansible_collections/lv3/platform/roles/gitea_postgres",
         "collections/ansible_collections/lv3/platform/roles/gitea_runtime",
         "collections/ansible_collections/lv3/platform/roles/gitea_runner",
+        "scripts/publish_gitea_repo.py",
         "inventory/host_vars/proxmox_florin.yml",
         "config/service-capability-catalog.json",
         "config/health-probe-catalog.json"

@@ -22,8 +22,30 @@ PYYAML_INSTALL_HINT: Final[str] = (
 _MISSING = object()
 
 
+def _resolve_shared_repo_root() -> Path:
+    completed = subprocess.run(
+        ["git", "-C", str(REPO_ROOT), "rev-parse", "--path-format=absolute", "--git-common-dir"],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if completed.returncode != 0:
+        return REPO_ROOT
+    common_dir = completed.stdout.strip()
+    if not common_dir:
+        return REPO_ROOT
+    return Path(common_dir).resolve().parent
+
+
+SHARED_REPO_ROOT: Final[Path] = _resolve_shared_repo_root()
+
+
 def repo_path(*parts: str) -> Path:
     return REPO_ROOT.joinpath(*parts)
+
+
+def shared_repo_path(*parts: str) -> Path:
+    return SHARED_REPO_ROOT.joinpath(*parts)
 
 
 def load_json(path: Path, default: Any = _MISSING) -> Any:

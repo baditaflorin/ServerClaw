@@ -14,6 +14,60 @@ release_policy:
   breaking_change_criteria: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/version-semantics.json
 
 workstreams:
+  - id: ws-0195-live-apply
+    adr: "0195"
+    title: Renovate automated dependency PRs live apply
+    status: ready
+    owner: codex
+    branch: codex/ws-0195-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0195-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0195-live-apply.md
+    depends_on:
+      - adr-0143-gitea
+      - adr-0168-idempotency-ci
+    conflicts_with: []
+    shared_surfaces:
+      - config/renovate.json
+      - .gitea/workflows/renovate.yml
+      - collections/ansible_collections/lv3/platform/roles/gitea_runtime/
+      - scripts/publish_gitea_repo.py
+      - docs/runbooks/configure-gitea.md
+      - docs/runbooks/configure-renovate.md
+      - workstreams.yaml
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: renovate_repo_surface
+          paths:
+            - docs/adr/0195-renovate-automated-dependency-prs.md
+            - docs/workstreams/ws-0195-live-apply.md
+            - docs/runbooks/configure-renovate.md
+            - config/renovate.json
+            - docs/schema/renovate-config.schema.json
+            - scripts/renovate_config.py
+            - scripts/publish_gitea_repo.py
+            - tests/test_renovate_config.py
+          mode: exclusive
+        - id: gitea_runtime_contract
+          paths:
+            - collections/ansible_collections/lv3/platform/roles/gitea_runtime/
+            - docs/runbooks/configure-gitea.md
+            - config/controller-local-secrets.json
+            - config/secret-catalog.json
+            - config/workflow-catalog.json
+            - Makefile
+            - .config-locations.yaml
+            - .gitea/workflows/renovate.yml
+            - tests/test_gitea_runtime_role.py
+          mode: shared_contract
+          contract: gitea-renovate-live-apply-v1
+    ready_to_merge: false
+    live_applied: false
+
   - id: adr-0180-standby-capacity
     adr: "0180"
     title: Standby capacity reservation and placement rules

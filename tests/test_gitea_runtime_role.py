@@ -44,6 +44,11 @@ def test_gitea_bootstrap_script_creates_admin_token_and_runner_token() -> None:
     assert "generate-access-token" in template
     assert "--raw" in template
     assert "generate-runner-token" in template
+    assert 'renovate_secret_name="{{ gitea_renovate_actions_secret_name }}"' in template
+    assert '/actions/secrets/${renovate_secret_name}' in template
+    assert 'repos/${repo_org}/${repo_name}/collaborators/${renovate_user}' in template
+    assert 'chown 1000:1000 "${repo_hook_dir}"' in template
+    assert 'install -o 1000 -g 1000 -m 0755 "${hook_template}" "${repo_hook_dir}/pre-receive"' in template
 
 
 def test_runner_defaults_use_mirrored_registration_token() -> None:
@@ -51,6 +56,14 @@ def test_runner_defaults_use_mirrored_registration_token() -> None:
     assert "gitea_runner_compose_bin: docker" in defaults
     assert ".local/gitea/runner-registration-token.txt" in defaults
     assert "docker-build-lv3" in defaults
+
+
+def test_gitea_defaults_use_git_common_dir_for_shared_local_artifacts() -> None:
+    defaults = ROLE_DEFAULTS.read_text()
+    assert "rev-parse --path-format=absolute --git-common-dir" in defaults
+    assert "gitea_local_artifact_dir: \"{{ gitea_controller_repo_common_root ~ '/.local/gitea' }}\"" in defaults
+    assert "gitea_admin_token_local_file: \"{{ gitea_local_artifact_dir }}/admin-token.txt\"" in defaults
+    assert "gitea_renovate_token_local_file: \"{{ gitea_local_artifact_dir }}/renovate-token.txt\"" in defaults
 
 
 def test_runner_compose_uses_registration_token_env() -> None:
@@ -78,6 +91,7 @@ def test_runtime_tasks_require_oidc_secret_and_database_password() -> None:
     assert "Ensure the Gitea OIDC client secret exists on the control machine" in names
     assert "Mirror the Gitea admin token to the control machine" in names
     assert "Mirror the Gitea runner registration token to the control machine" in names
+    assert "Mirror the Gitea Renovate token to the control machine" in names
 
 
 def test_gitea_waits_on_the_published_service_address() -> None:

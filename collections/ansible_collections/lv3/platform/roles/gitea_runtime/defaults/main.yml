@@ -28,9 +28,20 @@ gitea_database_name: gitea
 gitea_database_user: gitea
 gitea_database_host: "{{ hostvars[playbook_execution_host_patterns.postgres[playbook_execution_env]].ansible_host }}"
 gitea_database_port: 5432
-gitea_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/database-password.txt
+gitea_controller_repo_common_root: >-
+  {{
+    (
+      lookup(
+        'ansible.builtin.pipe',
+        'git -C ' ~ ((playbook_dir | dirname) | quote) ~ ' rev-parse --path-format=absolute --git-common-dir'
+      )
+      | dirname
+    )
+  }}
+gitea_local_artifact_dir: "{{ gitea_controller_repo_common_root ~ '/.local/gitea' }}"
+gitea_database_password_local_file: "{{ gitea_local_artifact_dir }}/database-password.txt"
 gitea_oidc_client_id: gitea-oauth
-gitea_oidc_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/gitea-client-secret.txt
+gitea_oidc_client_secret_local_file: "{{ gitea_controller_repo_common_root }}/.local/keycloak/gitea-client-secret.txt"
 gitea_oidc_discovery_url: "https://sso.lv3.org/realms/lv3/.well-known/openid-configuration"
 gitea_oidc_internal_discovery_url: "http://{{ gitea_keycloak_service_topology.private_ip }}:8091/realms/lv3/.well-known/openid-configuration"
 gitea_oidc_required_claim_name: groups
@@ -38,14 +49,19 @@ gitea_oidc_required_claim_value: lv3-platform-admins
 gitea_admin_username: ops-gitea
 gitea_admin_email: "{{ proxmox_notification_email }}"
 gitea_admin_password_remote_file: "{{ gitea_secret_dir }}/admin-password"
-gitea_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/admin-password.txt
+gitea_admin_password_local_file: "{{ gitea_local_artifact_dir }}/admin-password.txt"
 gitea_admin_token_remote_file: "{{ gitea_secret_dir }}/admin-token"
-gitea_admin_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/admin-token.txt
+gitea_admin_token_local_file: "{{ gitea_local_artifact_dir }}/admin-token.txt"
+gitea_renovate_username: renovate-bot
+gitea_renovate_email: renovate-bot@lv3.org
+gitea_renovate_password_remote_file: "{{ gitea_secret_dir }}/renovate-password"
+gitea_renovate_token_remote_file: "{{ gitea_secret_dir }}/renovate-token"
+gitea_renovate_token_local_file: "{{ gitea_local_artifact_dir }}/renovate-token.txt"
+gitea_renovate_actions_secret_name: RENOVATE_TOKEN
 gitea_runner_registration_token_remote_file: "{{ gitea_secret_dir }}/runner-registration-token"
-gitea_runner_registration_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/runner-registration-token.txt
+gitea_runner_registration_token_local_file: "{{ gitea_local_artifact_dir }}/runner-registration-token.txt"
 gitea_webhook_secret_remote_file: "{{ gitea_secret_dir }}/webhook-secret"
-gitea_webhook_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/webhook-secret.txt
-gitea_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea
+gitea_webhook_secret_local_file: "{{ gitea_local_artifact_dir }}/webhook-secret.txt"
 gitea_repo_org: ops
 gitea_repo_name: proxmox_florin_server
 gitea_prereceive_hook_template: "{{ gitea_site_dir }}/pre-receive.validation-hook"

@@ -361,7 +361,7 @@ _validate_workstream_entry() {
   [[ ! -f "$workstreams_file" ]] && return 0
 
   local entry_count
-  entry_count=$(grep -c "branch:.*\"$current_branch\"" "$workstreams_file" 2>/dev/null || echo "0")
+  entry_count=$(grep -c "branch:.*$current_branch" "$workstreams_file" 2>/dev/null || true)
 
   if [[ "$entry_count" -eq 0 ]]; then
     echo "WARNING: Branch '$current_branch' not found in workstreams.yaml (ADR 0167)" >&2
@@ -375,9 +375,9 @@ _validate_adr_index_current() {
   local adr_changes index_updated
 
   adr_changes=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
-    grep -c '^docs/adr/0[0-9]' || echo "0")
+    grep -c '^docs/adr/0[0-9]' || true)
   index_updated=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
-    grep -c '^docs/adr/\.index\.yaml' || echo "0")
+    grep -c '^docs/adr/\.index\.yaml' || true)
 
   if [[ "$adr_changes" -gt 0 ]] && [[ "$index_updated" -eq 0 ]]; then
     # Check if index exists at all
@@ -398,9 +398,9 @@ _validate_config_registry_updated() {
   local new_config_files registry_updated
 
   new_config_files=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
-    grep -cE '^(config/|inventory/|versions)' || echo "0")
+    grep -cE '^(config/|inventory/|versions)' || true)
   registry_updated=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
-    grep -c '^\.config-locations\.yaml' || echo "0")
+    grep -c '^\.config-locations\.yaml' || true)
 
   if [[ "$new_config_files" -gt 3 ]] && [[ "$registry_updated" -eq 0 ]]; then
     echo "WARNING: Config files changed but .config-locations.yaml not updated (ADR 0166)" >&2
@@ -411,10 +411,12 @@ _validate_config_registry_updated() {
 _validate_structure_index_updated() {
   local new_dirs structure_updated
 
-  new_dirs=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
-    grep -oE '^[^/]+/' | sort -u | wc -l | tr -d ' ' || echo "0")
+  new_dirs=$( (
+    git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
+      grep -oE '^[^/]+/' || true
+  ) | sort -u | wc -l | tr -d ' ' )
   structure_updated=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
-    grep -c '^\.repo-structure\.yaml' || echo "0")
+    grep -c '^\.repo-structure\.yaml' || true)
 
   if [[ "$new_dirs" -gt 2 ]] && [[ "$structure_updated" -eq 0 ]]; then
     echo "WARNING: New top-level directories detected but .repo-structure.yaml not updated (ADR 0163)" >&2

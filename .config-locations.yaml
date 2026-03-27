@@ -238,6 +238,18 @@ service_configuration:
     format: JSON
     use_for: Controlling which validation checks are active
 
+  config/renovate.json:
+    purpose: Repo-managed Renovate configuration for internal Gitea dependency PR automation
+    owner: human
+    format: JSON
+    use_for: Defining which repo dependencies Renovate scans, groups, and auto-merges
+    update_when: Adjusting dependency automation policy or file coverage
+    validation: "make validate-renovate-config"
+    related_files:
+      - ".gitea/workflows/renovate.yml: Scheduled internal Gitea Actions entrypoint"
+      - "docs/schema/renovate-config.schema.json: Local schema guard for the repo policy"
+      - "docs/runbooks/configure-renovate.md: Operational procedure"
+
   docker/docker-compose.yml:
     purpose: Docker Compose reference for services on docker-runtime-lv3
     owner: human  # template
