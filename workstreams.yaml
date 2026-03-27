@@ -294,7 +294,7 @@ workstreams:
     canonical_truth:
       changelog_entry: implemented ADR 0174 integration-only canonical truth assembly, release-note derivation, and live-apply canonical truth preflight
       release_bump: patch
-      included_in_repo_version: 0.176.1
+      included_in_repo_version: 0.176.2
       latest_receipts: {}
 
   - id: adr-0025-docker-compose-stacks

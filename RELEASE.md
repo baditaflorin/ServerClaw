@@ -1,12 +1,12 @@
-# Release 0.176.1
+# Release 0.176.2
 
 - Date: 2026-03-27
 
 ## Summary
-- implement ADR 0178 with dependency-wave manifests, a playbook apply catalog, a controller-local parallel wave executor, and an operator runbook for manifest-driven live apply
+- implemented ADR 0174 integration-only canonical truth assembly, release-note derivation, and live-apply canonical truth preflight
 
 ## Platform Impact
-- no live platform version bump; this release adds dependency-wave manifests, parallel wave execution, and operator runbook coverage for manifest-driven live apply
+- no live platform version bump; this release adds integration-only canonical truth assembly and live-apply preflight for release surfaces
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

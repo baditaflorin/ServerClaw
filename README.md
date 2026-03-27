@@ -117,7 +117,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.176.1` |
+| Repository version | `0.176.2` |
 | Platform version | `0.130.23` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -466,6 +466,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Data Retention](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/data-retention.md)
 - [Deadlock Detection](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/deadlock-detection.md)
 - [Dependency Graph Operations](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/dependency-graph.md)
+- [Dependency Wave Parallel Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/dependency-wave-parallel-apply.md)
 - [Deploy a Service](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/deploy-a-service.md)
 - [Deploy Uptime Kuma](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/deploy-uptime-kuma.md)
 - [Deployment History Portal](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/deployment-history-portal.md)
@@ -911,6 +912,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0171: Controlled Fault Injection for Resilience Validation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0171-controlled-fault-injection.md)
 - [Workstream ADR 0172: Watchdog Escalation and Stale Job Self-Healing](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0172-watchdog-escalation-and-stale-job-self-healing.md)
 - [Workstream ADR 0174: Integration-Only Canonical Truth Assembly](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0174-canonical-truth-assembly.md)
+- [Workstream ADR 0178: Dependency Wave Manifests](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0178-dependency-wave-manifests.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
@@ -928,7 +930,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.176.1` |
+| Repository version | `0.176.2` |
 | Platform version | `0.130.23` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1112,6 +1114,7 @@ This repository is intentionally opinionated:
 | `0172` | Watchdog escalation and stale job self-healing | `merged` | [adr-0172-watchdog-escalation-and-stale-job-self-healing.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0172-watchdog-escalation-and-stale-job-self-healing.md) |
 | `0172` | Watchdog escalation and stale job self-healing | `merged` | [adr-0172-watchdog-escalation-and-stale-job-self-healing.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0172-watchdog-escalation-and-stale-job-self-healing.md) |
 | `0174` | Integration-only canonical truth assembly | `merged` | [adr-0174-canonical-truth-assembly.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0174-canonical-truth-assembly.md) |
+| `0178` | Dependency wave manifests for parallel apply | `merged` | [adr-0178-dependency-wave-manifests.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0178-dependency-wave-manifests.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

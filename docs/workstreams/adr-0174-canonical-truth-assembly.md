@@ -54,5 +54,5 @@
 
 ## Outcome
 
-- repository implementation is complete on `main` in repo release `0.176.1`
+- repository implementation is complete on `main` in repo release `0.176.2`
 - no live platform version change is claimed; this workstream governs integration and release automation only
