@@ -238,6 +238,35 @@ def test_platform_context_http_sets_trace_header(tmp_path: Path) -> None:
     asyncio.run(run())
 
 
+def test_platform_context_query_falls_back_to_keyword_search(tmp_path: Path, monkeypatch) -> None:
+    repo_root = make_repo(tmp_path)
+    service = PlatformContextService(
+        ServiceConfig(
+            api_token="test-token",
+            corpus_root=repo_root,
+            error_registry_path=repo_root / "config" / "error-codes.yaml",
+            collection_name="test",
+            qdrant_url=None,
+            qdrant_location=":memory:",
+            embedding_backend="token-hash",
+            embedding_model="unused",
+            embedding_dimension=384,
+        )
+    )
+    service.rebuild_from_local_corpus()
+
+    def fail_query_points(*args, **kwargs):
+        raise RuntimeError("qdrant unavailable")
+
+    monkeypatch.setattr(service.client, "query_points", fail_query_points)
+
+    payload = service.query("how does step-ca issue SSH certificates", 3)
+
+    assert payload["retrieval_backend"] == "keyword-fallback"
+    assert payload["matches"]
+    assert any("SSH certificates" in match["content"] for match in payload["matches"])
+
+
 def test_build_config_uses_corpus_root_for_default_observability_paths(tmp_path: Path, monkeypatch) -> None:
     repo_root = make_repo(tmp_path)
     monkeypatch.setenv("PLATFORM_CONTEXT_API_TOKEN", "test-token")

@@ -44,6 +44,7 @@ except ImportError:  # pragma: no cover - packaged entrypoint path
 
 from platform.health import HealthCompositeClient, ServiceHealthNotFoundError
 from platform.idempotency import IdempotencyStore
+from platform.llm import PlatformContextRetriever
 from platform.scheduler import build_scheduler
 from scripts.risk_scorer import ExecutionIntent, assemble_context, compile_workflow_intent, score_intent
 CLI_VERSION = "0.1.0"
@@ -1945,6 +1946,36 @@ def search_command(query: str, *, collection: str | None, limit: int, rebuild: b
     return 0
 
 
+def query_platform_context_command(question: str, *, limit: int, json_output: bool) -> int:
+    try:
+        retriever = PlatformContextRetriever(timeout_seconds=30)
+        payload = retriever.retrieve_payload(question, top_k=limit)
+    except (OSError, RuntimeError, ValueError) as exc:
+        print(f"Platform context query failed: {exc}", file=sys.stderr)
+        return 1
+    if json_output:
+        emit_json(payload)
+        return 0
+    matches = payload.get("matches", [])
+    if not matches:
+        print(f"No platform-context matches for '{question}'.")
+        return 0
+    for index, match in enumerate(matches, start=1):
+        citation = [str(match.get("source_path", "") or "unknown")]
+        adr_number = match.get("adr_number")
+        section_heading = match.get("section_heading")
+        if adr_number:
+            citation.append(f"ADR {adr_number}")
+        if section_heading:
+            citation.append(str(section_heading))
+        print(f"[{index}] {' | '.join(citation)}  score={float(match.get('score', 0.0) or 0.0):.3f}")
+        content = str(match.get("content", "") or "").strip()
+        if content:
+            print(textwrap.shorten(content.replace("\n", " "), width=200, placeholder=" ..."))
+        print()
+    return 0
+
+
 def agent_state_client(agent_id: str, task_id: str) -> AgentStateClient:
     return AgentStateClient(agent_id=agent_id, task_id=task_id)
 
@@ -2392,6 +2423,14 @@ def build_parser() -> argparse.ArgumentParser:
     search.add_argument("--limit", type=int, default=10)
     search.add_argument("--rebuild", action="store_true")
 
+    query_platform_context = subparsers.add_parser(
+        "query-platform-context",
+        help="Query the private semantic platform context service.",
+    )
+    query_platform_context.add_argument("question")
+    query_platform_context.add_argument("--limit", type=int, default=5)
+    query_platform_context.add_argument("--json", action="store_true")
+
     status = subparsers.add_parser("status", help="Show service health status.")
     status.add_argument("service", nargs="?")
     status.add_argument("--env", default=DEFAULT_ENVIRONMENT, choices=ENVIRONMENT_CHOICES)
@@ -2743,6 +2782,8 @@ def main(argv: list[str] | None = None) -> int:
         )
     if args.command == "search":
         return search_command(args.query, collection=args.collection, limit=args.limit, rebuild=args.rebuild)
+    if args.command == "query-platform-context":
+        return query_platform_context_command(args.question, limit=args.limit, json_output=args.json)
     if args.command == "status":
         return status_command(args.service, args.env, timeout=args.timeout, no_color=no_color)
     if args.command == "health":

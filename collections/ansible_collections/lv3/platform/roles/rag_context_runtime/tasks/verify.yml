@@ -66,6 +66,7 @@
 - name: Assert the platform context query returned cited results
   ansible.builtin.assert:
     that:
+      - platform_context_query.json.retrieval_backend == "vector"
       - (platform_context_query.json.matches | default([])) | length > 0
       - (platform_context_query.json.matches[0].source_path | default('')) | length > 0
     fail_msg: "Platform context API responded, but the query did not return cited matches."
