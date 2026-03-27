@@ -1663,23 +1663,28 @@
       "implementation_refs": [
         "Makefile",
         "config/windmill/scripts/restore-verification.py",
+        "config/synthetic-transaction-catalog.json",
         "docs/runbooks/backup-restore-verification.md",
+        "docs/runbooks/synthetic-transaction-replay.md",
         "receipts/restore-verifications",
         "scripts/restore_verification.py",
+        "scripts/synthetic_transaction_replay.py",
         "scripts/smoke_tests/backup_vm_smoke.py",
         "scripts/smoke_tests/docker_runtime_smoke.py",
         "scripts/smoke_tests/postgres_smoke.py",
         "tests/test_restore_verification.py",
+        "tests/test_synthetic_transaction_replay.py",
         "tests/test_restore_verification_windmill.py"
       ],
       "outputs": [
-        "A dated restore-verification receipt recording the selected backup, restore duration, boot time, per-target smoke tests, and overall pass or fail status.",
+        "A dated restore-verification receipt recording the selected backup, restore duration, boot time, per-target smoke tests, synthetic replay success rate, latency distribution, and overall pass or fail status.",
         "Mutation-audit evidence plus optional NATS and Mattermost notifications for the restore-verification run."
       ],
       "verification_commands": [
-        "python3 -m py_compile scripts/restore_verification.py scripts/smoke_tests/postgres_smoke.py scripts/smoke_tests/docker_runtime_smoke.py scripts/smoke_tests/backup_vm_smoke.py config/windmill/scripts/restore-verification.py",
-        "uv run --with pytest --with pyyaml pytest tests/test_restore_verification.py tests/test_restore_verification_windmill.py -q",
-        "python3 scripts/restore_verification.py --help"
+        "python3 -m py_compile scripts/restore_verification.py scripts/synthetic_transaction_replay.py scripts/smoke_tests/postgres_smoke.py scripts/smoke_tests/docker_runtime_smoke.py scripts/smoke_tests/backup_vm_smoke.py config/windmill/scripts/restore-verification.py",
+        "uv run --with pytest --with pyyaml pytest tests/test_restore_verification.py tests/test_restore_verification_windmill.py tests/test_synthetic_transaction_replay.py -q",
+        "python3 scripts/synthetic_transaction_replay.py --target restore-docker-runtime --dry-run",
+        "uv run --with pyyaml python scripts/restore_verification.py --help"
       ],
       "execution_class": "diagnostic",
       "budget": {

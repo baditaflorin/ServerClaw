@@ -1,0 +1,63 @@
+{
+  "environment": "production",
+  "overall": "fail",
+  "results": [
+    {
+      "backup_date": "2026-03-27T01:34:51Z",
+      "backup_volid": "lv3-backup-pbs:backup/vm/150/2026-03-27T01:34:51Z",
+      "overall": "fail",
+      "source_vmid": 150,
+      "target_vmid": 900,
+      "tests": [
+        {
+          "error": "SSH did not become ready for restored guest 10.20.10.110",
+          "name": "restore_workflow",
+          "required": true,
+          "status": "fail"
+        }
+      ],
+      "vm": "postgres-lv3"
+    },
+    {
+      "backup_date": "2026-03-27T01:30:19Z",
+      "backup_volid": "lv3-backup-pbs:backup/vm/120/2026-03-27T01:30:19Z",
+      "overall": "fail",
+      "source_vmid": 120,
+      "target_vmid": 901,
+      "tests": [
+        {
+          "error": "SSH did not become ready for restored guest 10.20.10.100",
+          "name": "restore_workflow",
+          "required": true,
+          "status": "fail"
+        }
+      ],
+      "vm": "docker-runtime-lv3"
+    },
+    {
+      "backup_date": "",
+      "backup_volid": "",
+      "overall": "fail",
+      "source_vmid": 160,
+      "target_vmid": 902,
+      "tests": [
+        {
+          "error": "no PBS backups available",
+          "name": "restore_workflow",
+          "required": true,
+          "status": "fail"
+        }
+      ],
+      "vm": "backup-lv3"
+    }
+  ],
+  "run_date": "2026-03-27T17:27:40Z",
+  "schema_version": "1.0",
+  "summary": {
+    "fail_count": 3,
+    "pass_count": 0,
+    "summary": "0/3 VMs passed restore verification",
+    "target_count": 3
+  },
+  "triggered_by": "ws-0190-live-apply"
+}

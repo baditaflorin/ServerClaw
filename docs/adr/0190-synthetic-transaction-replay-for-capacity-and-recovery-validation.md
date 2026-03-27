@@ -1,10 +1,10 @@
 # ADR 0190: Synthetic Transaction Replay for Capacity and Recovery Validation
 
-- Status: Proposed
-- Implementation Status: Not Implemented
+- Status: Implemented
+- Implementation Status: Implemented
 - Implemented In Repo Version: not yet
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-27
 - Date: 2026-03-27
 
 ## Context
@@ -72,3 +72,9 @@ Each replay run must record:
 - ADR 0171: Controlled fault injection for resilience validation
 - ADR 0185: Branch-scoped ephemeral preview environments
 - ADR 0187: Anonymized seed data snapshots for repeatable tests
+
+## Implementation Notes
+
+- The repository now ships `scripts/synthetic_transaction_replay.py` plus `config/synthetic-transaction-catalog.json` as the governed replay harness for privacy-safe control-plane request sequences.
+- ADR 0099 `scripts/restore_verification.py` now embeds the first live replay target on restored `docker-runtime-lv3`, records per-scenario latency and success-rate data, and falls back to Proxmox guest-agent execution when the restored guest never exposes an SSH banner through the fixture network.
+- The 2026-03-27 latest-`origin/main` live replay proved the new harness and fallback path end to end, but the restored `docker-runtime-lv3` services themselves remained unhealthy after boot: Keycloak still refused loopback connections, NetBox and Windmill reset their local sockets, and OpenBao stayed sealed with HTTP `503`. Platform version advancement remains blocked until the underlying restore-health gap is resolved.

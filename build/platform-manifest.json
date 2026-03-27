@@ -2749,7 +2749,7 @@
         "id": "backup-restore-verification",
         "title": "Backup Restore Verification",
         "agent_trust_required": "T2",
-        "steps": 9,
+        "steps": 10,
         "path": "docs/runbooks/backup-restore-verification.md",
         "workflow_ids": [
           "restore-verification"
@@ -3625,6 +3625,20 @@
       "status": "Proposed",
       "implementation_status": "Not Implemented",
       "path": "docs/adr/0190-synthetic-transaction-replay-for-capacity-and-recovery-validation.md"
+    },
+    {
+      "adr": "0191",
+      "title": "Immutable Guest Replacement for Stateful and Edge Services",
+      "status": "Proposed",
+      "implementation_status": "Not Implemented",
+      "path": "docs/adr/0191-immutable-guest-replacement-for-stateful-and-edge-services.md"
+    },
+    {
+      "adr": "0192",
+      "title": "Separate Capacity Classes for Standby, Recovery, and Preview Workloads",
+      "status": "Proposed",
+      "implementation_status": "Not Implemented",
+      "path": "docs/adr/0192-separate-capacity-classes-for-standby-recovery-and-preview-workloads.md"
     }
   ]
 }

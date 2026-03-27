@@ -3275,8 +3275,8 @@ adr_index:
     filename: 0189-network-impairment-test-matrix-for-staging-and-previews.md
   - adr: 0190
     title: Synthetic Transaction Replay for Capacity and Recovery Validation
-    status: Proposed
-    implementation_status: Not Implemented
+    status: Implemented
+    implementation_status: Implemented
     date: '2026-03-27'
     concern: ci-cd
     keywords:
