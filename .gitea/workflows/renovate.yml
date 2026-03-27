@@ -37,7 +37,7 @@ jobs:
       - name: Install runner prerequisites
         run: |
           set -eu
-          apk add --no-cache docker-cli python3 py3-jsonschema py3-yaml
+          apk add --no-cache nodejs npm python3 py3-jsonschema py3-yaml
 
       - name: Validate Renovate config
         run: python3 scripts/renovate_config.py --validate
@@ -45,19 +45,9 @@ jobs:
       - name: Run Renovate
         env:
           LOG_LEVEL: info
-          RENOVATE_CONFIG_FILE: /workspace/config/renovate.json
+          RENOVATE_CONFIG_FILE: config/renovate.json
           RENOVATE_ENDPOINT: http://10.10.10.20:3003
           RENOVATE_PLATFORM: gitea
           RENOVATE_REPOSITORIES: ops/proxmox_florin_server
           RENOVATE_TOKEN: ${{ secrets.RENOVATE_TOKEN }}
-        run: |
-          docker run --rm --pull always \
-            -e LOG_LEVEL \
-            -e RENOVATE_CONFIG_FILE \
-            -e RENOVATE_ENDPOINT \
-            -e RENOVATE_PLATFORM \
-            -e RENOVATE_REPOSITORIES \
-            -e RENOVATE_TOKEN \
-            -v "$PWD:/workspace" \
-            -w /workspace \
-            ghcr.io/renovatebot/renovate:39
+        run: npx --yes renovate@39
