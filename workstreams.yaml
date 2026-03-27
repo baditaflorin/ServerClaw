@@ -75,7 +75,7 @@ workstreams:
     canonical_truth:
       changelog_entry: completed ADR 0192 by separating `ha_reserved`, `recovery_reserved`, and `preview_burst` capacity classes in mainline automation and recording the verified live apply evidence for preview and restore admission checks
       release_bump: patch
-      included_in_repo_version: 0.177.13
+      included_in_repo_version: 0.177.14
       latest_receipts:
         capacity_classes: 2026-03-27-adr-0192-capacity-classes-live-apply
 

@@ -6,7 +6,7 @@
 - Branch: `codex/ws-0192-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0192-live-apply`
 - Owner: codex
-- Included In Repo Version: `0.177.13`
+- Included In Repo Version: `0.177.14`
 - Depends On: `adr-0105-capacity-model`, `adr-0180-standby-capacity`, `adr-0183-auxiliary-cloud-failure-domain`, `adr-0186-prewarmed-fixture-pools`
 - Conflicts With: none
 - Shared Surfaces: `config/capacity-model.json`, `docs/schema/capacity-model.schema.json`, `scripts/capacity_report.py`, `scripts/fixture_manager.py`, `scripts/restore_verification.py`, `scripts/validate_ephemeral_vmid.py`, `docs/runbooks/capacity-classes.md`, `receipts/live-applies/`, `workstreams.yaml`
@@ -35,7 +35,7 @@
 - the preview admission check approved `4,2,32` inside `preview_burst`, and the declared restore-drill admission check approved `4,2,48` inside `recovery_reserved`
 - `uv run --with pyyaml python scripts/fixture_manager.py list --no-refresh-health` returned `No active fixtures`, so the live preview occupancy was zero at verification time
 - `./scripts/validate_repo.sh data-models` still fails on the unrelated mainline issue `playbooks/proxmox-staging-bridge.yml` missing an ansible-scope-runner leaf catalog entry; the ADR 0192 focused validation surfaces passed
-- the workstream was merged into `main` and released in repository version `0.177.13` on 2026-03-28
+- the workstream was merged into `main` and released in repository version `0.177.14` on 2026-03-28
 
 ## Merge Criteria
 
