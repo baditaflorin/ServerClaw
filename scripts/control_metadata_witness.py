@@ -86,6 +86,11 @@ def git_output(repo_root: Path, *args: str) -> str:
     return require_command(["git", "-C", str(repo_root), *args]).stdout.strip()
 
 
+def canonical_repo_root(repo_root: Path) -> Path:
+    resolved_root = repo_root.resolve()
+    return Path(git_output(resolved_root, "rev-parse", "--show-toplevel"))
+
+
 def git_current_branch(repo_root: Path) -> str:
     branch = run_command(["git", "-C", str(repo_root), "symbolic-ref", "--quiet", "--short", "HEAD"])
     if branch.returncode != 0:
@@ -222,7 +227,7 @@ def build_local_witness_bundle(
     git_remote: str = "origin",
     git_remote_ref: str | None = None,
 ) -> tuple[Path, dict[str, Any]]:
-    repo_root = repo_root.resolve()
+    repo_root = canonical_repo_root(repo_root)
     staging_root.mkdir(parents=True, exist_ok=True)
 
     head_commit = git_output(repo_root, "rev-parse", "HEAD")

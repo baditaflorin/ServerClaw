@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -142,3 +143,34 @@ def test_resolve_remote_ref_prefers_current_branch_when_upstream_points_at_main(
     resolved = witness.resolve_remote_ref(repo_root, "origin", None)
 
     assert resolved == "refs/heads/feature/witness"
+
+
+def test_sync_uses_git_toplevel_when_invoked_from_scoped_shard_copy(tmp_path: Path) -> None:
+    repo_root, _ = build_repo(tmp_path)
+    shard_root = repo_root / ".ansible" / "shards"
+    shard_root.mkdir(parents=True)
+
+    for child in repo_root.iterdir():
+        if child.name in {".git", ".ansible"}:
+            continue
+        target = shard_root / child.name
+        if child.is_dir():
+            shutil.copytree(child, target)
+        else:
+            shutil.copy2(child, target)
+
+    archive_root = tmp_path / "archive"
+    staging_root = shard_root / ".local" / "control-metadata-witness" / "staging"
+    receipt_dir = tmp_path / "receipts"
+
+    generation_dir, receipt_path, receipt = witness.sync_control_metadata_witness(
+        shard_root,
+        archive_root=archive_root,
+        staging_root=staging_root,
+        receipt_dir=receipt_dir,
+    )
+
+    assert generation_dir.exists()
+    assert receipt_path.exists()
+    assert receipt["head_commit"] == git(repo_root, "rev-parse", "HEAD").stdout.strip()
+    witness.verify_generation(generation_dir)
