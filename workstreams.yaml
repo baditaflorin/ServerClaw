@@ -4282,3 +4282,9 @@ workstreams:
           contract: live-apply-receipts-v1
     ready_to_merge: false
     live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0191 immutable guest replacement for stateful and edge services, adding the governed planner, fail-closed production live-apply guard, and verified Grafana monitoring exception receipt on `monitoring-lv3`
+      release_bump: patch
+      included_in_repo_version: 0.177.13
+      latest_receipts:
+        immutable_guest_replacement: 2026-03-27-adr-0191-immutable-guest-replacement-live-apply

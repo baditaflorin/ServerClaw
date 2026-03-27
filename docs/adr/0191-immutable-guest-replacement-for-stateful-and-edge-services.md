@@ -1,9 +1,9 @@
 # ADR 0191: Immutable Guest Replacement for Stateful and Edge Services
 
-- Status: Accepted
-- Implementation Status: Live applied on workstream branch
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: 0.130.31 (branch-local live apply verified; merge-to-main metadata pending)
+- Status: Implemented
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.13
+- Implemented In Platform Version: 0.130.31
 - Implemented On: 2026-03-27
 - Date: 2026-03-27
 
@@ -110,6 +110,8 @@ These updates make the repo-side contract explicit before a full guest replaceme
 The guard now fails closed for governed services. On 2026-03-27 the explicit preflight check for `grafana` returned exit code `2` and instructed the operator to use the replacement planner or acknowledge the narrow in-place exception with `ALLOW_IN_PLACE_MUTATION=true`.
 
 The bounded production replay with the documented exception completed successfully on `monitoring-lv3` with `ok=176 changed=0 unreachable=0 failed=0 skipped=34`. The public Grafana route still returned `HTTP/2 302` to `/login`, and the local health endpoints for Grafana, Prometheus, Alertmanager, Blackbox Exporter, and Tempo all remained healthy after the replay.
+
+The repository integration for this ADR landed on `main` in repo version `0.177.13` on 2026-03-28. `versions/stack.yaml` keeps platform version `0.130.31` because the live verification happened from the ADR workstream branch rather than from a fresh post-merge `main` replay.
 
 ## Related ADRs
 
