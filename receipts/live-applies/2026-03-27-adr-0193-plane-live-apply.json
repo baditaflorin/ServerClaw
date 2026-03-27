@@ -7,7 +7,7 @@
   "recorded_by": "codex",
   "source_commit": "73121fc9e2ac3272e59706a01f090535e32cbed9",
   "repo_version_context": "0.177.12",
-  "workflow_id": "ws-0193-live-apply",
+  "workflow_id": "converge-plane",
   "adr": "0193",
   "summary": "Live-applied the repo-managed Plane runtime, PostgreSQL access, Proxmox-host Tailscale proxy, controller-local bootstrap artifacts, and ADR synchronization path for ADR 0193, then verified the controller-facing Plane workflow end to end. The remaining public-edge browser verification is blocked by shared Hetzner DNS and NGINX static-site publication prerequisites outside the Plane runtime itself.",
   "targets": [
