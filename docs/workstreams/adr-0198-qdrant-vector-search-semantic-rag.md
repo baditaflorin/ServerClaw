@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0198](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0198-live-apply/docs/adr/0198-qdrant-vector-search-semantic-rag.md)
 - Title: Semantic retrieval for platform RAG using Qdrant and local Ollama embeddings
-- Status: live_applied
+- Status: merged
 - Branch: `codex/ws-0198-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0198-live-apply`
 - Owner: codex

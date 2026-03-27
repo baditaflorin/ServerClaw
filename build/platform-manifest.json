@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.13",
+  "repo_version": "0.177.14",
   "platform_version": "0.130.31",
-  "generated_at": "2026-03-27T22:44:32Z",
-  "next_refresh_at": "2026-03-27T23:44:32Z",
+  "generated_at": "2026-03-27T22:50:46Z",
+  "next_refresh_at": "2026-03-27T23:50:46Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3359,7 +3359,7 @@
         "id": "rag-platform-context",
         "title": "RAG Platform Context",
         "agent_trust_required": "T3",
-        "steps": 9,
+        "steps": 11,
         "path": "docs/runbooks/rag-platform-context.md",
         "workflow_ids": [
           "converge-rag-context"
@@ -3496,10 +3496,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.12",
+    "last_version": "0.177.13",
     "deployed_at": "2026-03-27",
-    "summary": "implemented ADR 0191 immutable guest replacement for stateful and edge services, adding the governed planner, fail-closed production live-apply guard, and verified Grafana monitoring exception receipt on `monitoring-lv3`",
-    "release_notes_url": "docs/release-notes/0.177.13.md"
+    "summary": "completed ADR 0198 by switching platform-context retrieval to local Ollama semantic embeddings, expanding the indexed corpus, and grounding the operator CLI plus LLM client with cited vector matches",
+    "release_notes_url": "docs/release-notes/0.177.14.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
