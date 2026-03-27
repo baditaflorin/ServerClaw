@@ -23,9 +23,10 @@ platform_context_private_url: "http://{{ ansible_host }}:{{ platform_context_int
 platform_context_qdrant_image: qdrant/qdrant:v1.15.1
 platform_context_api_image_name: lv3-platform-context-api
 platform_context_qdrant_collection: platform_context
-platform_context_embedding_backend: sentence-transformers
-platform_context_embedding_model: sentence-transformers/all-MiniLM-L6-v2
-platform_context_embedding_dimension: 384
+platform_context_embedding_backend: ollama
+platform_context_embedding_model: nomic-embed-text
+platform_context_embedding_dimension: 0
+platform_context_ollama_url: "http://{{ ansible_host }}:{{ ollama_api_port | default(11434) }}"
 platform_context_repo_root: "{{ playbook_dir | dirname }}"
 platform_context_corpus_sources:
   - src: "{{ platform_context_repo_root }}/docs/adr"
@@ -69,4 +70,4 @@ platform_context_service_sources:
     dest: scripts/controller_automation_toolkit.py
   - src: "{{ platform_context_repo_root }}/requirements/platform-context-api.txt"
     dest: requirements.txt
-platform_context_local_rebuild_script: "{{ platform_context_repo_root }}/scripts/build_rag_index.py"
+platform_context_local_rebuild_script: "{{ platform_context_repo_root }}/scripts/index_platform_knowledge.py"

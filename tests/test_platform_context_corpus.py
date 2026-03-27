@@ -47,3 +47,22 @@ def test_build_chunks_normalizes_mirrored_corpus_paths(tmp_path: Path) -> None:
     source_paths = {chunk["source_path"] for chunk in chunks}
     assert "docs/adr/0042-step-ca.md" in source_paths
     assert "docs/runbooks/rag-platform-context.md" in source_paths
+
+
+def test_build_chunks_includes_error_codes_and_dependency_catalogs(tmp_path: Path) -> None:
+    write(tmp_path / "config" / "error-codes.yaml", "schema_version: 1.0.0\nerror_codes: {}\n")
+    write(tmp_path / "config" / "dependency-graph.json", '{"schema_version":"1.0.0","nodes":[],"edges":[]}')
+    write(tmp_path / "config" / "command-catalog.json", '{"commands":{}}')
+    write(tmp_path / "config" / "workflow-catalog.json", '{"workflows":{}}')
+    write(tmp_path / "config" / "agent-tool-registry.json", '{"tools":[]}')
+    write(tmp_path / "config" / "service-capability-catalog.json", '{"services":[]}')
+    write(tmp_path / "config" / "slo-catalog.json", '{"slos":[]}')
+    write(tmp_path / "versions" / "stack.yaml", "platform_version: 1.0.0\n")
+    write(tmp_path / "VERSION", "1.0.0\n")
+    write(tmp_path / "changelog.md", "# Changelog\n")
+
+    chunks = build_chunks(tmp_path)
+
+    chunk_kinds = {(chunk["source_path"], chunk["document_kind"]) for chunk in chunks}
+    assert ("config/error-codes.yaml", "error_code_catalog") in chunk_kinds
+    assert ("config/dependency-graph.json", "catalog") in chunk_kinds
