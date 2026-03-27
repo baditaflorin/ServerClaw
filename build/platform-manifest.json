@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.15",
+  "repo_version": "0.177.16",
   "platform_version": "0.130.31",
-  "generated_at": "2026-03-27T22:55:45Z",
-  "next_refresh_at": "2026-03-27T23:55:45Z",
+  "generated_at": "2026-03-27T23:04:17Z",
+  "next_refresh_at": "2026-03-28T00:04:17Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3496,10 +3496,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.14",
+    "last_version": "0.177.15",
     "deployed_at": "2026-03-27",
-    "summary": "completed ADR 0192 by separating `ha_reserved`, `recovery_reserved`, and `preview_burst` capacity classes in mainline automation and recording the verified live apply evidence for preview and restore admission checks",
-    "release_notes_url": "docs/release-notes/0.177.15.md"
+    "summary": "implemented ADR 0188 failover rehearsal gating so redundancy reporting now distinguishes declared tiers from currently proven tiers and the unproven PostgreSQL warm-standby path is surfaced as implemented `R0`",
+    "release_notes_url": "docs/release-notes/0.177.16.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

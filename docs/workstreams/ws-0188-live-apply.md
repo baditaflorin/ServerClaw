@@ -3,7 +3,7 @@
 - ADR: [ADR 0188](../adr/0188-failover-rehearsal-gate-for-redundancy-tiers.md)
 - Title: live apply and verification for redundancy-tier rehearsal freshness gating
 - Status: live_applied
-- Implemented In Repo Version: 0.177.15
+- Implemented In Repo Version: 0.177.16
 - Live Applied In Platform Version: 0.130.31
 - Implemented On: 2026-03-27
 - Live Applied On: 2026-03-27
@@ -40,6 +40,6 @@
 
 ## Mainline Integration
 
-- merged to `main` in repository version `0.177.15`
+- merged to `main` in repository version `0.177.16`
 - no platform version bump was required because the verified live evidence already belongs to platform version `0.130.31`
 - a separate follow-up repair workstream is still required to recreate VM `151`, restore Patroni and VIP operation, and record a fresh passing `R2` rehearsal before `postgres` can honestly regain an implemented `R2` claim
