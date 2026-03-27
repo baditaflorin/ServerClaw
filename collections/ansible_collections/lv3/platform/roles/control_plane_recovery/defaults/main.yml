@@ -16,4 +16,36 @@ control_plane_recovery_runtime_backup_target_host: "{{ hostvars['backup-lv3'].an
 control_plane_recovery_runtime_backup_target_user: lv3-control-plane-backup
 control_plane_recovery_runtime_backup_target_dir: /srv/control-plane-recovery/runtime/docker-runtime-lv3
 control_plane_recovery_runtime_backup_target_controller_dir: /srv/control-plane-recovery/controller
+control_plane_recovery_controller_repo_common_root: >-
+  {{
+    (
+      lookup(
+        'ansible.builtin.pipe',
+        'git -C ' ~ ((playbook_dir | dirname) | quote) ~ ' rev-parse --path-format=absolute --git-common-dir'
+      )
+      | dirname
+    )
+  }}
+control_plane_recovery_windmill_backup_database_inventory_host: >-
+  {{ 'postgres-staging-lv3' if (env | default('production')) == 'staging' else 'postgres-lv3' }}
+control_plane_recovery_windmill_backup_database_host: >-
+  {{ hostvars[control_plane_recovery_windmill_backup_database_inventory_host].ansible_host }}
+control_plane_recovery_windmill_backup_database_port: 5432
+control_plane_recovery_windmill_backup_database_name: windmill
+control_plane_recovery_windmill_backup_database_user: patroni
+control_plane_recovery_windmill_backup_database_password_local_file: >-
+  {{ control_plane_recovery_controller_repo_common_root }}/.local/postgres-ha/patroni-superuser-password.txt
+control_plane_recovery_windmill_backup_database_password: >-
+  {{
+    lookup(
+      'ansible.builtin.file',
+      control_plane_recovery_windmill_backup_database_password_local_file,
+      errors='ignore'
+    )
+    | default('', true)
+    | trim
+  }}
+control_plane_recovery_windmill_backup_database_dsn: >-
+  {%- set password = control_plane_recovery_windmill_backup_database_password | trim -%}
+  {%- if password | length == 0 -%}{{ "" }}{%- else -%}postgresql://{{ control_plane_recovery_windmill_backup_database_user }}:{{ password | urlencode | replace('/', '%2F') }}@{{ control_plane_recovery_windmill_backup_database_host }}:{{ control_plane_recovery_windmill_backup_database_port }}/{{ control_plane_recovery_windmill_backup_database_name }}?sslmode=disable{%- endif -%}
 control_plane_recovery_run_backup_now: true

@@ -87,6 +87,16 @@ def test_control_plane_recovery_no_longer_requires_windmill_env_file() -> None:
     assert "opt/windmill/windmill.env" not in defaults_text
 
 
+def test_control_plane_recovery_uses_dedicated_windmill_backup_dsn() -> None:
+    defaults_text = (REPO_ROOT / "roles" / "control_plane_recovery" / "defaults" / "main.yml").read_text()
+    template_text = (REPO_ROOT / "roles" / "control_plane_recovery" / "templates" / "lv3-control-plane-backup.sh.j2").read_text()
+
+    assert "patroni-superuser-password.txt" in defaults_text
+    assert "control_plane_recovery_windmill_backup_database_dsn" in defaults_text
+    assert '. "{{ windmill_env_file }}"' not in template_text
+    assert "control_plane_recovery_windmill_backup_database_dsn" in template_text
+
+
 def test_mail_gateway_image_includes_telemetry_module() -> None:
     dockerfile_text = (REPO_ROOT / "roles" / "mail_platform_runtime" / "templates" / "mail-gateway.Dockerfile.j2").read_text()
     app_text = (REPO_ROOT / "roles" / "mail_platform_runtime" / "files" / "mail-gateway" / "app.py").read_text()

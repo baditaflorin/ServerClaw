@@ -10,6 +10,7 @@
       - control_plane_recovery_runtime_backup_target_user | length > 0
       - control_plane_recovery_runtime_backup_target_dir | length > 0
       - control_plane_recovery_runtime_openbao_backup_policy_name | length > 0
+      - control_plane_recovery_windmill_backup_database_dsn | length > 0
       - openbao_init_local_file | length > 0
       - step_ca_home | length > 0
       - step_ca_password_dir | length > 0

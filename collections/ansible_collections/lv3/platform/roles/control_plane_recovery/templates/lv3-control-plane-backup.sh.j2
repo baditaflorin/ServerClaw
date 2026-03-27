@@ -21,12 +21,10 @@ curl -fsS \
   "http://127.0.0.1:{{ openbao_http_port }}/v1/sys/storage/raft/snapshot" \
   > "${run_dir}/openbao-raft.snap"
 
-(
-  set -a
-  . "{{ windmill_env_file }}"
-  set +a
-  pg_dump --format=custom --file "${run_dir}/windmill-db.dump" "${DATABASE_URL}"
-)
+pg_dump \
+  --format=custom \
+  --file "${run_dir}/windmill-db.dump" \
+  "{{ control_plane_recovery_windmill_backup_database_dsn }}"
 tar --zstd -cpf "${run_dir}/windmill-files.tar.zst" -C / opt/windmill etc/lv3/windmill
 tar --zstd -cpf "${run_dir}/mail-platform.tar.zst" -C / opt/mail-platform etc/lv3/mail-platform
 
