@@ -256,6 +256,7 @@ workstreams:
             - docs/runbooks/rag-platform-context.md
             - inventory/group_vars/all.yml
             - platform/llm/**
+            - receipts/live-applies/2026-03-27-adr-0198-semantic-rag-live-apply.json
             - scripts/index_platform_knowledge.py
             - scripts/platform_context_corpus.py
             - scripts/platform_context_service.py

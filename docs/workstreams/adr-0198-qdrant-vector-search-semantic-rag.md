@@ -68,6 +68,7 @@
 - The managed converge pulled `nomic-embed-text:latest` into the local Ollama runtime on `docker-runtime-lv3`, rebuilt the platform-context corpus, and completed the live query verification with cited results.
 - Post-apply operator verification through `PYTHONPATH=. uv run --with pyyaml python scripts/lv3_cli.py query-platform-context ... --json`, `PYTHONPATH=. uv run --with pyyaml python scripts/query_platform_context.py --question ...`, and a direct authenticated `curl` to `/v1/context/query` all returned `retrieval_backend: "vector"`.
 - The live health probe returned `{"status":"ok","collection":"platform_context"}`, and the platform-context API logs recorded answered queries with `retrieval_backend":"vector"` after the rollout.
+- The durable replay evidence is captured in `receipts/live-applies/2026-03-27-adr-0198-semantic-rag-live-apply.json`.
 
 ## Notes For The Next Assistant
 
