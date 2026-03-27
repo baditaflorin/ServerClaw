@@ -82,7 +82,7 @@ workstreams:
   - id: ws-0185-live-apply
     adr: "0185"
     title: Branch-scoped ephemeral preview environments
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/ws-0185-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0185-live-apply
@@ -137,8 +137,8 @@ workstreams:
             - Makefile
           mode: shared_contract
           contract: preview-environment-entrypoints-v1
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
 
   - id: adr-0180-standby-capacity
     adr: "0180"

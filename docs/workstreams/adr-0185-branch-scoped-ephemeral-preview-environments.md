@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0185](../adr/0185-branch-scoped-ephemeral-preview-environments.md)
 - Title: Add a repo-managed branch preview lifecycle on the governed ephemeral VM pool and record branch-local evidence for create, validate, and destroy
-- Status: ready
+- Status: live_applied
 - Branch: `codex/ws-0185-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0185-live-apply`
 - Owner: codex
@@ -53,6 +53,27 @@
 - `make generate-platform-manifest`
 - `make validate-data-models`
 
+## Live Apply Outcome
+
+- committed-head replay preview id: `2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z`
+- profile: `runtime-smoke`
+- preview domain: `ws-0185-live-apply.preview.lv3.org`
+- preview member: VM `910` at `10.20.10.130`
+- lifecycle result: create, validate, and destroy all passed through repo automation
+- smoke verification: `id ops >/dev/null`
+- synthetic verification: `systemctl is-active docker`, `docker info >/dev/null`
+- durable evidence:
+  - [receipts/preview-environments/2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0185-live-apply/receipts/preview-environments/2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z.json)
+  - [receipts/live-applies/preview/2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0185-live-apply/receipts/live-applies/preview/2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z.json)
+
+## Operational Notes
+
+- early retries exposed a live host drift bug: `vmbr20` existed, but the nftables forward and postrouting chains were missing `10.20.10.0/24`
+- branch-local replay of `playbooks/proxmox-staging-bridge.yml` restored the required host rules and unblocked preview guest egress
+- preview converge now waits for SSH, waits for cloud-init and apt lock release, forces APT over IPv4, and provisions the guest via Proxmox host automation over the `ops@100.64.0.1` jump path
+- the `runtime-smoke` preview member disables `docker_runtime_container_forward_compat_enabled` because the minimal preview image does not own a managed guest firewall contract
+- during failed bring-up attempts, bounded manual cleanup of stale VM `910` with `qm stop` and `qm destroy --purge` was required; the final committed-head replay completed entirely through repo automation
+
 ## Merge Criteria
 
 - preview lifecycle automation passes local validation
@@ -61,5 +82,9 @@
 
 ## Notes For The Next Assistant
 
-- after live apply, update this document with the exact preview id, verification details, and the remaining merge-to-main steps
-- keep README, VERSION, changelog release sections, and versions/stack.yaml unchanged until the final integrated replay
+- merge to `main` must still update the protected integration files that this workstream intentionally left unchanged:
+  - `README.md`
+  - `VERSION`
+  - release sections in `changelog.md`
+  - `versions/stack.yaml`
+- keep the successful branch-local evidence above; do not reintroduce superseded preview receipts from earlier failed retries

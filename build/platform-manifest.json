@@ -3633,13 +3633,6 @@
       "path": "docs/adr/0184-failure-domain-labels-and-anti-affinity-policy.md"
     },
     {
-      "adr": "0185",
-      "title": "Branch-Scoped Ephemeral Preview Environments",
-      "status": "Proposed",
-      "implementation_status": "Not Implemented",
-      "path": "docs/adr/0185-branch-scoped-ephemeral-preview-environments.md"
-    },
-    {
       "adr": "0186",
       "title": "Prewarmed Fixture Pools and Lease-Based Ephemeral Capacity",
       "status": "Proposed",

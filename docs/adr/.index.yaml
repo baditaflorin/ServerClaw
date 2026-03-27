@@ -3201,8 +3201,8 @@ adr_index:
     filename: 0184-failure-domain-labels-and-anti-affinity-policy.md
   - adr: 0185
     title: Branch-Scoped Ephemeral Preview Environments
-    status: Proposed
-    implementation_status: Not Implemented
+    status: Implemented
+    implementation_status: Implemented
     date: '2026-03-27'
     concern: platform
     keywords:
@@ -3213,6 +3213,7 @@ adr_index:
     summary: 'We will support branch-scoped ephemeral preview environments assembled from the branch''s release manifest and
       destroyed '
     filename: 0185-branch-scoped-ephemeral-preview-environments.md
+    implemented_version: 0.177.12
   - adr: 0186
     title: Prewarmed Fixture Pools and Lease-Based Ephemeral Capacity
     status: Proposed
