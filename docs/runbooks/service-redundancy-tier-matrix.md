@@ -52,6 +52,7 @@ Validation checks:
 - valid tier-to-standby mapping (`R0` -> `none`, `R1` -> `cold`, `R2` -> `warm`, `R3` -> `active`)
 - known standby locations for non-empty standby modes
 - current platform tier ceiling versus declared failure-domain count
+- immutable guest replacement policies still validate for the governed production guests
 
 ## Live Apply Guard
 
@@ -72,6 +73,14 @@ That preflight:
 - validates the catalog
 - resolves the deployment mode implied by each service tier
 - rejects any service that claims a tier above what the current platform can honestly support
+
+ADR 0191 adds a second production guard for governed guests:
+
+```bash
+uv run --with pyyaml --with jsonschema python scripts/immutable_guest_replacement.py --check-live-apply --service grafana
+```
+
+That guard layers on top of the redundancy tier matrix and blocks in-place production mutation when the service's guest is required to roll out by immutable replacement unless the operator sets the documented narrow exception path.
 
 ## Querying One Service
 
