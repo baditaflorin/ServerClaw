@@ -582,6 +582,31 @@
       "live_tracking_expected": true
     },
     {
+      "fqdn": "search.lv3.org",
+      "service_id": "searxng",
+      "environment": "production",
+      "status": "active",
+      "exposure": "private-only",
+      "auth_requirement": "private_network",
+      "target": "100.64.0.1",
+      "target_port": 80,
+      "owner_adr": "0148",
+      "dns_record_type": "A",
+      "route_mode": "dns-only",
+      "route_source": "dns-only",
+      "route_kind": null,
+      "edge_auth": "none",
+      "unauthenticated_paths": [],
+      "unauthenticated_prefix_paths": [],
+      "repo_route_service_id": null,
+      "repo_route_metadata": {},
+      "tls": {
+        "provider": "none",
+        "auto_renew": false
+      },
+      "live_tracking_expected": false
+    },
+    {
       "fqdn": "sso.lv3.org",
       "service_id": "keycloak",
       "environment": "production",
@@ -752,10 +777,10 @@
     }
   ],
   "summary": {
-    "catalog_total": 25,
-    "active_total": 21,
+    "catalog_total": 26,
+    "active_total": 22,
     "active_public_dns_total": 18,
-    "active_private_total": 3,
+    "active_private_total": 4,
     "planned_total": 4,
     "edge_total": 17,
     "edge_oidc_total": 8
