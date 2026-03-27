@@ -1503,7 +1503,6 @@ def validate_workstreams_release_policy() -> None:
         raise ValueError("workstreams.yaml.release_policy.breaking_change_criteria must point to config/version-semantics.json")
     validate_workstream_surface_ownership_registry(registry)
 
-
 def validate_workstream_canonical_truth_metadata() -> None:
     registry = load_yaml(WORKSTREAMS_PATH)
     workstreams = require_list(registry.get("workstreams"), "workstreams.yaml.workstreams")
@@ -1551,6 +1550,96 @@ def validate_workstream_canonical_truth_metadata() -> None:
                 receipt_id,
                 f"{workstream_path}.canonical_truth.latest_receipts[{capability}]",
             )
+
+def validate_workstream_live_apply_contracts() -> None:
+    registry = load_yaml(WORKSTREAMS_PATH)
+    workstreams = require_list(registry.get("workstreams"), "workstreams.yaml.workstreams")
+    allowed_surface_modes = {"exclusive", "shared_contract", "generated", "read_only"}
+    allowed_rollback_step_kinds = {"shell", "file_restore", "runbook"}
+    for index, item in enumerate(workstreams):
+        path = f"workstreams.yaml.workstreams[{index}]"
+        workstream = require_mapping(item, path)
+        live_apply = workstream.get("live_apply")
+        if live_apply is None:
+            continue
+        live_apply = require_mapping(live_apply, f"{path}.live_apply")
+
+        docs = require_mapping(live_apply.get("docs"), f"{path}.live_apply.docs")
+        adr_paths = docs.get("adrs")
+        if adr_paths is None:
+            top_level_doc = workstream.get("doc")
+            adr_paths = [top_level_doc] if isinstance(top_level_doc, str) and top_level_doc.strip() else []
+        require_string_list(adr_paths, f"{path}.live_apply.docs.adrs")
+        require_string_list(docs.get("runbooks"), f"{path}.live_apply.docs.runbooks")
+
+        ownership = require_mapping(live_apply.get("ownership", {}), f"{path}.live_apply.ownership")
+        surfaces = ownership.get("surfaces")
+        if surfaces is None:
+            fallback_surfaces = workstream.get("shared_surfaces")
+            if isinstance(fallback_surfaces, list):
+                surfaces = [{"id": surface, "mode": "exclusive"} for surface in fallback_surfaces]
+        surfaces = require_list(surfaces, f"{path}.live_apply.ownership.surfaces")
+        if not surfaces:
+            raise ValueError(f"{path}.live_apply.ownership.surfaces must not be empty")
+        for surface_index, raw_surface in enumerate(surfaces):
+            surface_path = f"{path}.live_apply.ownership.surfaces[{surface_index}]"
+            surface = require_mapping(raw_surface, surface_path)
+            require_str(surface.get("id"), f"{surface_path}.id")
+            require_enum(surface.get("mode"), f"{surface_path}.mode", allowed_surface_modes)
+            if surface.get("paths") is not None:
+                require_string_list(surface.get("paths"), f"{surface_path}.paths")
+
+        checks = require_list(live_apply.get("validation_checks"), f"{path}.live_apply.validation_checks")
+        if not checks:
+            raise ValueError(f"{path}.live_apply.validation_checks must not be empty")
+        for check_index, raw_check in enumerate(checks):
+            check_path = f"{path}.live_apply.validation_checks[{check_index}]"
+            check = require_mapping(raw_check, check_path)
+            require_str(check.get("id"), f"{check_path}.id")
+            if check.get("argv") is not None:
+                require_string_list(check.get("argv"), f"{check_path}.argv")
+            else:
+                require_str(check.get("command"), f"{check_path}.command")
+
+        apply_plan = require_mapping(live_apply.get("apply_plan"), f"{path}.live_apply.apply_plan")
+        waves = require_list(apply_plan.get("waves"), f"{path}.live_apply.apply_plan.waves")
+        if not waves:
+            raise ValueError(f"{path}.live_apply.apply_plan.waves must not be empty")
+        for wave_index, raw_wave in enumerate(waves):
+            wave_path = f"{path}.live_apply.apply_plan.waves[{wave_index}]"
+            wave = require_mapping(raw_wave, wave_path)
+            require_str(wave.get("wave_id"), f"{wave_path}.wave_id")
+            steps = require_list(wave.get("steps"), f"{wave_path}.steps")
+            if not steps:
+                raise ValueError(f"{wave_path}.steps must not be empty")
+            for step_index, raw_step in enumerate(steps):
+                step_path = f"{wave_path}.steps[{step_index}]"
+                step = require_mapping(raw_step, step_path)
+                require_str(step.get("id"), f"{step_path}.id")
+                if step.get("argv") is not None:
+                    require_string_list(step.get("argv"), f"{step_path}.argv")
+                else:
+                    require_str(step.get("command"), f"{step_path}.command")
+
+        rollback_bundle = require_mapping(live_apply.get("rollback_bundle"), f"{path}.live_apply.rollback_bundle")
+        require_str(rollback_bundle.get("strategy"), f"{path}.live_apply.rollback_bundle.strategy")
+        rollback_steps = require_list(rollback_bundle.get("steps"), f"{path}.live_apply.rollback_bundle.steps")
+        if not rollback_steps:
+            raise ValueError(f"{path}.live_apply.rollback_bundle.steps must not be empty")
+        for step_index, raw_step in enumerate(rollback_steps):
+            step_path = f"{path}.live_apply.rollback_bundle.steps[{step_index}]"
+            step = require_mapping(raw_step, step_path)
+            require_str(step.get("id"), f"{step_path}.id")
+            kind = require_enum(step.get("kind"), f"{step_path}.kind", allowed_rollback_step_kinds)
+            if kind == "shell":
+                if step.get("argv") is not None:
+                    require_string_list(step.get("argv"), f"{step_path}.argv")
+                else:
+                    require_str(step.get("command"), f"{step_path}.command")
+            elif kind == "file_restore":
+                require_string_list(step.get("paths"), f"{step_path}.paths")
+            else:
+                require_str(step.get("path"), f"{step_path}.path")
 
 
 def validate_merge_eligible_files_contract() -> None:
@@ -2302,6 +2391,7 @@ def validate_repository_data_models() -> int:
     validate_merge_eligible_files_contract()
     validate_workstreams_release_policy()
     validate_workstream_canonical_truth_metadata()
+    validate_workstream_live_apply_contracts()
     validate_triage_rule_contracts()
     validate_changelog_redaction_contract()
     validate_platform_finding_schema()

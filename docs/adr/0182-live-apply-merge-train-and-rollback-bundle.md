@@ -1,10 +1,10 @@
 # ADR 0182: Live Apply Merge Train and Rollback Bundle
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Implemented
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.175.3
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-27
 - Date: 2026-03-26
 
 ## Context
@@ -58,6 +58,17 @@ Each train item must declare the fastest credible reversal path, such as:
 
 - The merge train adds ceremony before live apply.
 - Some ready workstreams will wait behind a shared-surface bottleneck.
+
+## Implementation Notes
+
+The repository implementation now ships:
+
+- `platform/live_apply/merge_train.py` for queue state, wave planning, rollback bundle generation, and rollback execution
+- `scripts/live_apply_merge_train.py` plus `make live-apply-train-*` targets for operators
+- `scripts/validate_repository_data_models.py` validation for train-eligible `workstreams.yaml` metadata
+- `docs/runbooks/live-apply-merge-train.md` for the operator workflow
+
+This ADR currently claims repository implementation only. No live platform version is recorded until the train is exercised from `main` against the real environment.
 
 ## Boundaries
 
