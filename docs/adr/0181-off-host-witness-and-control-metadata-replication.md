@@ -1,10 +1,10 @@
 # ADR 0181: Off-Host Witness and Control Metadata Replication
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Implemented
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.176.2
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-27
 - Date: 2026-03-26
 
 ## Context
@@ -63,6 +63,13 @@ Replication is not considered healthy unless a periodic drill proves the witness
 
 - This ADR covers control metadata, not full runtime service availability.
 - Off-host metadata does not eliminate the need for PBS backups and restore verification.
+
+## Implementation Notes
+
+- [scripts/control_metadata_witness.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/control_metadata_witness.py) now builds a recoverable witness bundle containing a `repo.bundle`, an immutable `repo-snapshot.tar`, and a manifest that points operators back to the recovery-critical repo surfaces without copying live secret values.
+- [playbooks/control-plane-recovery.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/control-plane-recovery.yml) now publishes the off-host witness generation only after the existing restore drill passes, and it re-verifies the `latest` archive generation before the live apply completes.
+- The witness archive promotion keeps the previous `latest` pointer intact if copy or verification fails, so a broken generation never replaces the last known-good off-host bundle.
+- [scripts/generate_dr_report.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/generate_dr_report.py) and the disaster-recovery runbooks now surface witness receipt health explicitly so recovery does not depend on ad hoc controller context.
 
 ## Related ADRs
 

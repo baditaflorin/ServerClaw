@@ -42,6 +42,16 @@ def build_runbook_plan(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
             "deadline_minutes": 45,
             "steps": [
                 {
+                    "id": "inspect_witness_bundle",
+                    "kind": "manual",
+                    "summary": "Inspect the latest off-host witness bundle before restoring infrastructure state.",
+                    "command": (
+                        "LV3_CONTROL_METADATA_WITNESS_ARCHIVE_ROOT=${LV3_CONTROL_METADATA_WITNESS_ARCHIVE_ROOT:?set LV3_CONTROL_METADATA_WITNESS_ARCHIVE_ROOT} "
+                        f"python3 {repo_root / 'scripts' / 'control_metadata_witness.py'} verify "
+                        '--archive-root "$LV3_CONTROL_METADATA_WITNESS_ARCHIVE_ROOT"'
+                    ),
+                },
+                {
                     "id": "reinstall_host",
                     "kind": "manual",
                     "summary": "Reinstall Debian 13 on replacement Hetzner hardware and restore Proxmox VE.",

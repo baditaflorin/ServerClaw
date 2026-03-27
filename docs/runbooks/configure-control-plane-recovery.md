@@ -35,7 +35,8 @@ make converge-control-plane-recovery
 5. Creates a scoped OpenBao backup token used only for managed Raft snapshots.
 6. Builds a controller-local recovery bundle and mirrors it into `backup-lv3`.
 7. Enables a scheduled restore drill on `backup-lv3`.
-8. Runs one immediate backup and one immediate restore drill for verification.
+8. After the restore drill passes, builds a git-backed witness bundle from the repo checkout and publishes one immutable off-host generation.
+9. Runs one immediate backup, one immediate restore drill, and one witness verification pass.
 
 ## Scheduled Policy
 
@@ -78,6 +79,26 @@ Inspect the controller recovery bundle:
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand="ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 -W %h:%p" ops@10.10.10.60 'ls -lah /srv/control-plane-recovery/controller'
 ```
 
+Inspect the latest off-host witness receipt written during the live apply:
+
+```bash
+ls -1 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/witness-replication | tail -n 1
+```
+
+Verify the latest off-host witness generation directly:
+
+```bash
+LV3_CONTROL_METADATA_WITNESS_ARCHIVE_ROOT=/path/to/off-host/archive python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/control_metadata_witness.py verify --archive-root "$LV3_CONTROL_METADATA_WITNESS_ARCHIVE_ROOT"
+```
+
+## Off-Host Witness Inputs
+
+Set these controller-side environment variables before `make converge-control-plane-recovery` when ADR 0181 witness replication is enabled:
+
+- `LV3_CONTROL_METADATA_WITNESS_ARCHIVE_ROOT`: mounted off-host path that stores immutable witness generations and the `latest` pointer
+- `LV3_CONTROL_METADATA_WITNESS_GIT_REMOTE`: git remote used as the first witness target, default `origin`
+- `LV3_CONTROL_METADATA_WITNESS_GIT_REMOTE_REF`: optional exact remote ref that must match local `HEAD`; defaults to the current upstream branch or `refs/heads/<current-branch>`
+
 ## Break-Glass Notes
 
 - The controller bundle includes repo-managed recovery references needed to reconnect to the live control plane.
@@ -98,4 +119,4 @@ The automated restore drill validates archive integrity and key file presence, b
 
 ## Limitation
 
-This workflow improves control-plane recovery materially, but it still shares the same physical host failure domain as the rest of the platform. It is not a substitute for off-host replication or a second recovery site.
+This workflow now covers one repo-managed off-host witness archive, but it still depends on the configured remote git provider and archive mount existing outside the Proxmox host. It is not a substitute for a second recovery site.

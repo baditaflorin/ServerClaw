@@ -18,8 +18,15 @@ The recovery anchor is `backup-lv3` (VM `160`). Recover that VM first from off-s
 - Hetzner reinstall access exists
 - the break-glass references in [break-glass.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/break-glass.md) are available
 - the off-site Proxmox storage target for VM `160` is reachable
+- the off-host witness archive for ADR 0181 is reachable
 
 ## Tier 0: Rebuild The Host
+
+Verify the latest off-host witness bundle first:
+
+```bash
+LV3_CONTROL_METADATA_WITNESS_ARCHIVE_ROOT=/path/to/off-host/archive python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/control_metadata_witness.py verify --archive-root "$LV3_CONTROL_METADATA_WITNESS_ARCHIVE_ROOT"
+```
 
 Reinstall Debian 13 and restore Proxmox VE first.
 
@@ -136,4 +143,4 @@ When these are set, `make configure-backup-vm` also converges:
 
 ## Current Gap
 
-As of the 2026-03-23 table-top review, the repo implementation is complete but the live platform still has no off-site storage configured. The DR readiness report records that gap explicitly.
+As of the 2026-03-23 table-top review, the repo implementation is complete but the live platform still has no off-site storage configured. The DR readiness report records that gap explicitly. ADR 0181 adds the repo-managed witness-bundle publication path, but the live archive mount and its periodic drill still depend on the controller environment variables being configured at apply time.

@@ -214,6 +214,12 @@ control_plane_recovery_backup_store_root: /srv/control-plane-recovery
 control_plane_recovery_backup_store_user: lv3-control-plane-backup
 control_plane_recovery_backup_on_calendar: "*-*-* 01,07,13,19:15:00"
 control_plane_recovery_restore_drill_on_calendar: "*-*-* 05:45:00"
+control_metadata_witness_script: "{{ inventory_dir | dirname }}/scripts/control_metadata_witness.py"
+control_metadata_witness_archive_root: "{{ lookup('ansible.builtin.env', 'LV3_CONTROL_METADATA_WITNESS_ARCHIVE_ROOT') | default('', true) }}"
+control_metadata_witness_git_remote: "{{ lookup('ansible.builtin.env', 'LV3_CONTROL_METADATA_WITNESS_GIT_REMOTE') | default('origin', true) }}"
+control_metadata_witness_git_remote_ref: "{{ lookup('ansible.builtin.env', 'LV3_CONTROL_METADATA_WITNESS_GIT_REMOTE_REF') | default('', true) }}"
+control_metadata_witness_receipt_dir: "{{ inventory_dir | dirname }}/receipts/witness-replication"
+control_metadata_witness_enabled: "{{ (control_metadata_witness_archive_root | trim | length) > 0 }}"
 
 dr_offsite_backup_storage:
   enabled: "{{ (lookup('ansible.builtin.env', 'PROXMOX_DR_OFFSITE_ENABLED') | default('false', true)) | bool }}"

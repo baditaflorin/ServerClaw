@@ -1196,7 +1196,7 @@
       }
     },
     "converge-control-plane-recovery": {
-      "description": "Converge scheduled control-plane backups, controller recovery bundle refresh, and restore-drill validation.",
+      "description": "Converge scheduled control-plane backups, controller recovery bundle refresh, restore-drill validation, and an off-host control-metadata witness publication.",
       "workflow_id": "converge-control-plane-recovery",
       "scope": "guest_runtime",
       "approval_policy": "sensitive_live_change",
@@ -1230,16 +1230,18 @@
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record timer status, archive landing, controller bundle refresh, and a passing restore drill on backup-lv3."
+        "notes": "Record timer status, archive landing, controller bundle refresh, a passing restore drill on backup-lv3, and the latest witness-replication receipt for the immutable off-host generation."
       },
       "failure_guidance": {
         "stop_conditions": [
           "Stop if runtime archive delivery, controller bundle refresh, or restore-drill verification fails.",
-          "Stop if the change would weaken the documented break-glass path or remove the only working recovery reference."
+          "Stop if the change would weaken the documented break-glass path or remove the only working recovery reference.",
+          "Stop if the git remote witness or off-host archive target does not match the verified local control metadata after the apply."
         ],
         "rollback_guidance": [
           "Reapply the last known-good recovery automation before changing component runtimes again.",
-          "Preserve the prior controller bundle and backup archives until the new drill passes."
+          "Preserve the prior controller bundle and backup archives until the new drill passes.",
+          "Keep the prior off-host witness generation as the active latest pointer until the new archive verifies cleanly."
         ]
       }
     },

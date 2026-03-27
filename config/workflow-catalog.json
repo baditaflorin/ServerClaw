@@ -2191,7 +2191,7 @@
       }
     },
     "converge-control-plane-recovery": {
-      "description": "Converge scheduled control-plane backups on docker-runtime-lv3, stage controller recovery references, and validate recurring restore drills on backup-lv3.",
+      "description": "Converge scheduled control-plane backups on docker-runtime-lv3, stage controller recovery references, validate recurring restore drills on backup-lv3, and publish a verified off-host witness bundle.",
       "lifecycle_status": "active",
       "preferred_entrypoint": {
         "kind": "make_target",
@@ -2230,12 +2230,13 @@
         "inventory/group_vars/all.yml"
       ],
       "outputs": [
-        "Scheduled runtime exports for step-ca, OpenBao, Windmill, and the mail platform on docker-runtime-lv3 plus backup-lv3 restore drills and a mirrored controller recovery bundle."
+        "Scheduled runtime exports for step-ca, OpenBao, Windmill, and the mail platform on docker-runtime-lv3 plus backup-lv3 restore drills, a mirrored controller recovery bundle, and an immutable off-host witness generation with a witness-replication receipt."
       ],
       "verification_commands": [
         "make syntax-check-control-plane-recovery",
         "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 -W %h:%p\" ops@10.10.10.20 'sudo systemctl status lv3-control-plane-backup.timer --no-pager'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 -W %h:%p\" ops@10.10.10.60 'sudo systemctl status lv3-control-plane-restore-drill.timer --no-pager'"
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -o ProxyCommand=\"ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 -W %h:%p\" ops@10.10.10.60 'sudo systemctl status lv3-control-plane-restore-drill.timer --no-pager'",
+        "LV3_CONTROL_METADATA_WITNESS_ARCHIVE_ROOT=/path/to/off-host/archive python3 /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/control_metadata_witness.py verify --archive-root \"$LV3_CONTROL_METADATA_WITNESS_ARCHIVE_ROOT\""
       ],
       "execution_class": "mutation",
       "budget": {

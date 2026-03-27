@@ -85,3 +85,40 @@
         that:
           - (control_plane_recovery_restore_drill_state_raw.content | b64decode | from_json).result == "pass"
         fail_msg: "The control-plane restore drill did not record a successful result."
+
+    - name: Replicate the verified control metadata witness bundle off-host
+      ansible.builtin.command:
+        argv:
+          - python3
+          - "{{ control_metadata_witness_script }}"
+          - sync
+          - --repo-root
+          - "{{ inventory_dir | dirname }}"
+          - --archive-root
+          - "{{ control_metadata_witness_archive_root }}"
+          - --receipt-dir
+          - "{{ control_metadata_witness_receipt_dir }}"
+          - --git-remote
+          - "{{ control_metadata_witness_git_remote }}"
+          - --git-remote-ref
+          - "{{ control_metadata_witness_git_remote_ref }}"
+      delegate_to: localhost
+      become: false
+      run_once: true
+      register: control_metadata_witness_sync
+      changed_when: true
+      when: control_metadata_witness_enabled | bool
+
+    - name: Verify the latest off-host control metadata witness generation
+      ansible.builtin.command:
+        argv:
+          - python3
+          - "{{ control_metadata_witness_script }}"
+          - verify
+          - --archive-root
+          - "{{ control_metadata_witness_archive_root }}"
+      delegate_to: localhost
+      become: false
+      run_once: true
+      changed_when: false
+      when: control_metadata_witness_enabled | bool

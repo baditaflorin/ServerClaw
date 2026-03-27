@@ -16,6 +16,7 @@ DEFAULT_TARGETS_PATH = repo_path("config", "disaster-recovery-targets.json")
 DEFAULT_STACK_PATH = repo_path("versions", "stack.yaml")
 DEFAULT_TABLE_TOP_DIR = repo_path("receipts", "dr-table-top-reviews")
 DEFAULT_RESTORE_DIR = repo_path("receipts", "restore-verifications")
+DEFAULT_WITNESS_DIR = repo_path("receipts", "witness-replication")
 DEFAULT_ADR_DIR = repo_path("docs", "adr")
 UTC = dt.timezone.utc
 
@@ -141,6 +142,31 @@ def _load_offsite_status(targets: dict[str, Any], stack: dict[str, Any]) -> dict
     }
 
 
+def _load_witness_status(witness_dir: Path) -> dict[str, Any]:
+    latest_receipt = _latest_json_receipt(witness_dir)
+    if latest_receipt is None:
+        return {
+            "configured": False,
+            "status": "missing",
+            "checked_at": "not recorded",
+            "path": "",
+            "detail": "no witness replication receipt recorded",
+        }
+    path, payload = latest_receipt
+    targets = payload.get("targets", {}) if isinstance(payload, dict) else {}
+    git_target = targets.get("git_remote", {}) if isinstance(targets, dict) else {}
+    archive_target = targets.get("archive", {}) if isinstance(targets, dict) else {}
+    healthy = git_target.get("status") == "pass" and archive_target.get("status") == "pass"
+    checked_at = str(payload.get("recorded_at") or "unknown")
+    return {
+        "configured": healthy,
+        "status": "pass" if healthy else "warn",
+        "checked_at": checked_at,
+        "path": _display_path(path),
+        "detail": f"git={git_target.get('status', 'unknown')} archive={archive_target.get('status', 'unknown')}",
+    }
+
+
 def _collect_adr_metadata(adr_dir: Path) -> dict[str, dict[str, str]]:
     metadata: dict[str, dict[str, str]] = {}
     for path in sorted(adr_dir.glob("*.md")):
@@ -167,6 +193,7 @@ def build_dr_report(
     stack_path: Path = DEFAULT_STACK_PATH,
     table_top_dir: Path = DEFAULT_TABLE_TOP_DIR,
     restore_dir: Path = DEFAULT_RESTORE_DIR,
+    witness_dir: Path = DEFAULT_WITNESS_DIR,
     adr_dir: Path = DEFAULT_ADR_DIR,
     today: dt.date | None = None,
 ) -> dict[str, Any]:
@@ -177,6 +204,7 @@ def build_dr_report(
     restore_evidence = _load_restore_evidence(stack, restore_dir)
     table_top_review = _load_table_top_review(table_top_dir)
     offsite_backup = _load_offsite_status(targets, stack)
+    witness_status = _load_witness_status(witness_dir)
     review_policy = targets.get("review_policy", {})
     table_top_interval_days = int(review_policy.get("table_top_interval_days", 90))
 
@@ -195,6 +223,14 @@ def build_dr_report(
             restore_recent = (dt.datetime.combine(today, dt.time.min, tzinfo=UTC) - checked_at).days <= 30
         except ValueError:
             restore_recent = False
+
+    witness_recent = False
+    if witness_status["status"] == "pass":
+        try:
+            checked_at = _parse_datetime(witness_status["checked_at"])
+            witness_recent = (dt.datetime.combine(today, dt.time.min, tzinfo=UTC) - checked_at).days <= 30
+        except ValueError:
+            witness_recent = False
 
     checks = [
         {
@@ -222,6 +258,12 @@ def build_dr_report(
             ),
         },
         {
+            "id": "off_host_witness",
+            "label": "Off-host witness",
+            "status": "pass" if witness_recent else "warn",
+            "detail": f"{witness_status['detail']} at {witness_status['checked_at']}",
+        },
+        {
             "id": "table_top_review",
             "label": "Table-top review",
             "status": "pass" if table_top_recent else "warn",
@@ -243,6 +285,7 @@ def build_dr_report(
         "restore_evidence": restore_evidence,
         "table_top_review": table_top_review,
         "offsite_backup": offsite_backup,
+        "witness_status": witness_status,
         "checks": checks,
         "overall_status": overall_status,
         "adr_summary": {
@@ -313,6 +356,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--stack", type=Path, default=DEFAULT_STACK_PATH)
     parser.add_argument("--table-top-dir", type=Path, default=DEFAULT_TABLE_TOP_DIR)
     parser.add_argument("--restore-dir", type=Path, default=DEFAULT_RESTORE_DIR)
+    parser.add_argument("--witness-dir", type=Path, default=DEFAULT_WITNESS_DIR)
     parser.add_argument("--adr-dir", type=Path, default=DEFAULT_ADR_DIR)
     parser.add_argument("--format", choices=["text", "json", "release"], default="text")
     parser.add_argument("--strict", action="store_true", help="Exit non-zero when readiness is degraded.")
@@ -326,6 +370,7 @@ def main(argv: list[str] | None = None) -> int:
         stack_path=args.stack,
         table_top_dir=args.table_top_dir,
         restore_dir=args.restore_dir,
+        witness_dir=args.witness_dir,
         adr_dir=args.adr_dir,
     )
     if args.format == "json":
