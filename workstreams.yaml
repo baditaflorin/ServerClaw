@@ -4239,5 +4239,9 @@ workstreams:
             - config/command-catalog.json
           mode: shared_contract
           contract: restore-verification-workflow-v2
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: false
+    canonical_truth:
+      changelog_entry: implemented ADR 0190 synthetic transaction replay for restore verification, including the governed replay catalog, guest-agent restore fallback, and committed live-apply evidence for the current restore-health gap
+      release_bump: patch
+      included_in_repo_version: null

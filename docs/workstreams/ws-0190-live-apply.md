@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0190](../adr/0190-synthetic-transaction-replay-for-capacity-and-recovery-validation.md)
 - Title: live replay, verification, and evidence capture for synthetic transaction replay on restore targets
-- Status: implemented
+- Status: ready to merge
 - Branch: `codex/ws-0190-live-apply`
 - Worktree: `.worktrees/ws-0190-live-apply`
 - Owner: codex
@@ -36,6 +36,6 @@
 
 ## Remaining For Merge To `main`
 
-- Do not bump `VERSION`, update `changelog.md`, touch `README.md`, or advance `versions/stack.yaml` on this branch.
-- Merge-to-main can carry the repository implementation once reviewers are satisfied with the new harness and the restore-verification fallback behavior.
-- Platform-version advancement must wait for a future replay where the restored `docker-runtime-lv3` services themselves become healthy enough for the smoke suite and synthetic replay to pass.
+- This branch now carries the release metadata needed for mainline integration: `workstreams.yaml` marks the workstream merge-ready and includes the canonical-truth changelog entry for the release manager.
+- Merge-to-main should flip the workstream registry status to `merged`, cut the next patch repo release, and update ADR 0190 with the released repo version.
+- Platform-version advancement must still wait for a future replay where the restored `docker-runtime-lv3` services themselves become healthy enough for the smoke suite and synthetic replay to pass.
