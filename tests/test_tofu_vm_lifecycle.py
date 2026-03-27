@@ -7,11 +7,14 @@ from pathlib import Path
 
 import yaml
 
+from session_workspace import resolve_session_workspace
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PRODUCTION_MAIN = REPO_ROOT / "tofu" / "environments" / "production" / "main.tf"
 STAGING_MAIN = REPO_ROOT / "tofu" / "environments" / "staging" / "main.tf"
 TOKEN_SCRIPT = REPO_ROOT / "scripts" / "tofu_remote_command.py"
+REMOTE_WORKSPACE_BASE = Path("/home/ops/builds/proxmox_florin_server")
 
 
 def _module_block(contents: str, module_name: str) -> str:
@@ -77,7 +80,12 @@ def test_remote_command_builds_production_import_target(tmp_path: Path) -> None:
     )
 
     command = completed.stdout.strip()
-    assert command.startswith("cd /home/ops/builds/proxmox_florin_server && ")
+    expected_workspace = resolve_session_workspace(
+        repo_root=REPO_ROOT,
+        remote_workspace_base=REMOTE_WORKSPACE_BASE,
+    ).remote_workspace_root
+    assert expected_workspace is not None
+    assert command.startswith(f"cd {expected_workspace} && ")
     assert "TOFU_DOCKER_NETWORK=host" in command
     assert "TF_VAR_proxmox_endpoint=https://proxmox.example.invalid:8006/api2/json" in command
     assert "TF_VAR_proxmox_api_token='lv3-automation@pve!primary=secret-token'" in command

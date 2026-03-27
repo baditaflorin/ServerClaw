@@ -10,6 +10,7 @@ import shlex
 from pathlib import Path
 
 from environment_catalog import environment_choices
+from session_workspace import resolve_session_workspace
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -55,7 +56,11 @@ def build_server_workspace() -> str:
     if session_workspace:
         return session_workspace
     config = json.loads(BUILD_SERVER_CONFIG.read_text(encoding="utf-8"))
-    return str(config["workspace_root"])
+    workspace = resolve_session_workspace(
+        repo_root=REPO_ROOT,
+        remote_workspace_base=Path(str(config["workspace_root"])),
+    )
+    return workspace.remote_workspace_root or str(config["workspace_root"])
 
 
 def read_token_payload(token_file: Path | None) -> tuple[str, str]:
