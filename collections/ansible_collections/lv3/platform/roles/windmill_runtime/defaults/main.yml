@@ -179,6 +179,11 @@ windmill_worker_runtime_writable_directories:
     mode: "1777"
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures/locks"
     mode: "1777"
+windmill_worker_checkout_stale_paths:
+  - "{{ windmill_worker_repo_checkout_host_path }}/pyproject.toml"
+  - "{{ windmill_worker_repo_checkout_host_path }}/setup.py"
+  - "{{ windmill_worker_repo_checkout_host_path }}/setup.cfg"
+  - "{{ windmill_worker_repo_checkout_host_path }}/lv3_platform_cli.egg-info"
 windmill_operator_manager_env:
   LV3_OPERATOR_MANAGER_SURFACE: windmill
   LV3_OPENBAO_URL: http://lv3-openbao:8201
@@ -288,6 +293,11 @@ windmill_seed_scripts:
     language: python3
     summary: ADR 0171 controlled fault injection
     description: Repo-managed Windmill wrapper that runs the bounded Keycloak and OpenBao fault-injection subset on docker-runtime-lv3.
+  - path: f/lv3/network-impairment-matrix
+    local_file: "{{ playbook_dir }}/../config/windmill/scripts/network-impairment-matrix.py"
+    language: python3
+    summary: ADR 0189 network impairment matrix
+    description: Repo-managed Windmill wrapper that renders the staging, preview, fixture, standby, and recovery network-impairment matrix from the released checkout.
   - path: f/lv3/disaster_recovery_runbook
     local_file: "{{ inventory_dir }}/../config/windmill/scripts/disaster-recovery-runbook.py"
     language: python3
