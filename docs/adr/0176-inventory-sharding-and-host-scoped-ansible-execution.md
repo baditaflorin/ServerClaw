@@ -1,10 +1,10 @@
 # ADR 0176: Inventory Sharding and Host-Scoped Ansible Execution
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Implemented
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.0
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-27
 - Date: 2026-03-26
 
 ## Context
@@ -71,3 +71,9 @@ Playbooks should continue to be grouped by concern, but every mutable playbook m
 - ADR 0154: VM-scoped parallel execution lanes
 - ADR 0157: Per-VM concurrency budget and resource reservation
 - ADR 0178: Dependency wave manifests for parallel apply
+
+## Implementation Notes
+
+- Mutable Ansible execution now uses the repo-managed catalog at `config/ansible-execution-scopes.yaml` to declare each leaf playbook's shard class and shared surfaces.
+- `scripts/ansible_scope_runner.py` resolves wrapper imports, derives the actual target host set from `ansible-playbook --list-hosts`, renders a per-run shard inventory, and executes `ansible-playbook` with a matching `--limit`.
+- `Makefile` live-apply targets and dedicated converge playbooks now route through the scoped runner, and the repository data-model gate validates catalog coverage before merge.
