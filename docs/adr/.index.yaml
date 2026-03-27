@@ -6,11 +6,12 @@
 # ============================================================================
 
 schema_version: 1
-generated: '2026-03-26'
-total_adrs: 179
+generated: '2026-03-27'
+total_adrs: 199
 implementation_status_summary:
-  Implemented: 175
+  Implemented: 170
   Partial: 3
+  Not Implemented: 25
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -31,6 +32,7 @@ concerns:
   - '0164'
   - '0167'
   - 0168
+  - 0181
   api:
   - 0049
   - '0075'
@@ -52,6 +54,7 @@ concerns:
   - 0149
   - '0151'
   - '0165'
+  - '0176'
   bootstrap:
   - '0001'
   - '0003'
@@ -73,6 +76,12 @@ concerns:
   - '0164'
   - 0168
   - '0171'
+  - 0180
+  - 0183
+  - 0186
+  - 0188
+  - 0190
+  - 0192
   documentation:
   - '0074'
   - 0081
@@ -111,6 +120,7 @@ concerns:
   - '0124'
   - 0139
   - '0161'
+  - 0189
   platform:
   - 0019
   - '0025'
@@ -156,6 +166,15 @@ concerns:
   - '0166'
   - '0166'
   - 0169
+  - '0173'
+  - '0174'
+  - '0175'
+  - '0177'
+  - 0178
+  - 0179
+  - 0182
+  - 0184
+  - 0185
   release:
   - 0008
   - '0110'
@@ -189,6 +208,7 @@ concerns:
   - 0099
   testing:
   - '0111'
+  - 0187
   vm-topology:
   - '0005'
   - '0013'
@@ -210,6 +230,7 @@ concerns:
   - 0085
   - '0154'
   - '0157'
+  - 0191
 discovery_queries:
   how do we bootstrap:
   - '0001'
@@ -623,7 +644,7 @@ adr_index:
 - adr: '0024'
   title: Docker Guest Security Baseline
   status: Accepted
-  implementation_status: Implemented
+  implementation_status: Not Implemented
   date: '2026-03-22'
   concern: vm-topology
   keywords:
@@ -637,7 +658,7 @@ adr_index:
 - adr: '0025'
   title: Compose-Managed Runtime Stacks
   status: Accepted
-  implementation_status: Implemented
+  implementation_status: Not Implemented
   date: '2026-03-22'
   concern: platform
   keywords:
@@ -1123,7 +1144,7 @@ adr_index:
 - adr: 0058
   title: NATS JetStream For Internal Event Bus And Agent Coordination
   status: Proposed
-  implementation_status: Implemented
+  implementation_status: Not Implemented
   date: '2026-03-22'
   concern: networking
   keywords:
@@ -1169,7 +1190,7 @@ adr_index:
 - adr: '0061'
   title: GlitchTip For Application Exceptions And Task Failures
   status: Proposed
-  implementation_status: Implemented
+  implementation_status: Not Implemented
   date: '2026-03-22'
   concern: platform
   keywords:
@@ -2033,7 +2054,7 @@ adr_index:
 - adr: 0118
   title: Replayable Failure Case Library
   status: Proposed
-  implementation_status: Implemented
+  implementation_status: Not Implemented
   date: '2026-03-24'
   concern: platform
   keywords:
@@ -2959,3 +2980,299 @@ adr_index:
     as well
   filename: 0172-watchdog-escalation-and-stale-job-self-healing.md
   implemented_version: 0.146.2
+- adr: '0173'
+  title: Workstream Surface Ownership Manifest
+  status: Proposed
+  implementation_status: Not Implemented
+  date: '2026-03-26'
+  concern: platform
+  keywords:
+  - workstream
+  - surface
+  - ownership
+  - manifest
+  summary: 'We will define a surface ownership manifest for every active workstream. The manifest becomes the canonical declaration '
+  filename: 0173-workstream-surface-ownership-manifest.md
+- adr: '0174'
+  title: Integration-Only Canonical Truth Assembly
+  status: Proposed
+  implementation_status: Not Implemented
+  date: '2026-03-26'
+  concern: platform
+  keywords:
+  - integration-only
+  - canonical
+  - truth
+  - assembly
+  summary: 'We will treat top-level canonical truth files as integration-only assembled outputs. Workstream branches will
+    no longer '
+  filename: 0174-integration-only-canonical-truth-assembly.md
+- adr: '0175'
+  title: Cross-Workstream Interface Contracts
+  status: Proposed
+  implementation_status: Not Implemented
+  date: '2026-03-26'
+  concern: platform
+  keywords:
+  - cross-workstream
+  - interface
+  - contracts
+  summary: We will define explicit interface contracts for all shared producer-consumer boundaries touched by more than one
+    workstr
+  filename: 0175-cross-workstream-interface-contracts.md
+- adr: '0176'
+  title: Inventory Sharding and Host-Scoped Ansible Execution
+  status: Proposed
+  implementation_status: Not Implemented
+  date: '2026-03-26'
+  concern: automation
+  keywords:
+  - inventory
+  - sharding
+  - host-scoped
+  - ansible
+  - execution
+  summary: We will structure mutable Ansible execution around inventory shards and host-scoped play metadata.
+  filename: 0176-inventory-sharding-and-host-scoped-ansible-execution.md
+- adr: '0177'
+  title: Run Namespace Partitioning for Parallel Tooling
+  status: Proposed
+  implementation_status: Not Implemented
+  date: '2026-03-26'
+  concern: platform
+  keywords:
+  - run
+  - namespace
+  - partitioning
+  - parallel
+  - tooling
+  summary: We will require every mutable execution path to run inside a run namespace identified by runid.
+  filename: 0177-run-namespace-partitioning-for-parallel-tooling.md
+- adr: 0178
+  title: Dependency Wave Manifests for Parallel Apply
+  status: Proposed
+  implementation_status: Not Implemented
+  date: '2026-03-26'
+  concern: platform
+  keywords:
+  - dependency
+  - wave
+  - manifests
+  - parallel
+  - apply
+  summary: We will represent every multi-step rollout as a dependency wave manifest. A wave is a set of changes that may run
+    in par
+  filename: 0178-dependency-wave-manifests-for-parallel-apply.md
+- adr: 0179
+  title: Service Redundancy Tier Matrix
+  status: Proposed
+  implementation_status: Not Implemented
+  date: '2026-03-26'
+  concern: platform
+  keywords:
+  - service
+  - redundancy
+  - tier
+  - matrix
+  summary: 'We will classify all platform services into a redundancy tier matrix. The tier determines the required recovery
+    assets, '
+  filename: 0179-service-redundancy-tier-matrix.md
+- adr: 0180
+  title: Standby Capacity Reservation and Placement Rules
+  status: Proposed
+  implementation_status: Not Implemented
+  date: '2026-03-26'
+  concern: ci-cd
+  keywords:
+  - standby
+  - capacity
+  - reservation
+  - placement
+  - rules
+  summary: We will reserve standby capacity and define placement rules for any service declared as R2 or higher in ADR 0179.
+  filename: 0180-standby-capacity-reservation-and-placement-rules.md
+- adr: 0181
+  title: Off-Host Witness and Control Metadata Replication
+  status: Proposed
+  implementation_status: Not Implemented
+  date: '2026-03-26'
+  concern: agent-discovery
+  keywords:
+  - off-host
+  - witness
+  - control
+  - metadata
+  - replication
+  summary: 'We will maintain off-host replicated control metadata in at least two independent locations outside the primary
+    Proxmox '
+  filename: 0181-off-host-witness-and-control-metadata-replication.md
+- adr: 0182
+  title: Live Apply Merge Train and Rollback Bundle
+  status: Proposed
+  implementation_status: Not Implemented
+  date: '2026-03-26'
+  concern: platform
+  keywords:
+  - live
+  - apply
+  - merge
+  - train
+  - rollback
+  - bundle
+  summary: We will use a live apply merge train that batches ready workstreams into a reviewed integration set and requires
+    a rollb
+  filename: 0182-live-apply-merge-train-and-rollback-bundle.md
+- adr: 0183
+  title: Auxiliary Cloud Failure Domain for Witness, Recovery, and Burst Capacity
+  status: Proposed
+  implementation_status: Not Implemented
+  date: '2026-03-27'
+  concern: ci-cd
+  keywords:
+  - auxiliary
+  - cloud
+  - failure
+  - domain
+  - witness
+  - recovery
+  - burst
+  - capacity
+  summary: We will add a small auxiliary cloud failure domain using Hetzner Cloud for non-primary control-plane resilience
+    and burs
+  filename: 0183-auxiliary-cloud-failure-domain-for-witness-recovery-and-burst-capacity.md
+- adr: 0184
+  title: Failure-Domain Labels and Anti-Affinity Policy
+  status: Proposed
+  implementation_status: Not Implemented
+  date: '2026-03-27'
+  concern: platform
+  keywords:
+  - failure-domain
+  - labels
+  - anti-affinity
+  - policy
+  summary: We will require failure-domain labels and anti-affinity declarations for all managed primaries, standbys, restore
+    target
+  filename: 0184-failure-domain-labels-and-anti-affinity-policy.md
+- adr: 0185
+  title: Branch-Scoped Ephemeral Preview Environments
+  status: Proposed
+  implementation_status: Not Implemented
+  date: '2026-03-27'
+  concern: platform
+  keywords:
+  - branch-scoped
+  - ephemeral
+  - preview
+  - environments
+  summary: 'We will support branch-scoped ephemeral preview environments assembled from the branch''s release manifest and
+    destroyed '
+  filename: 0185-branch-scoped-ephemeral-preview-environments.md
+- adr: 0186
+  title: Prewarmed Fixture Pools and Lease-Based Ephemeral Capacity
+  status: Proposed
+  implementation_status: Not Implemented
+  date: '2026-03-27'
+  concern: ci-cd
+  keywords:
+  - prewarmed
+  - fixture
+  - pools
+  - lease-based
+  - ephemeral
+  - capacity
+  summary: We will manage ephemeral compute as lease-based capacity pools with a small set of prewarmed fixtures per common
+    templat
+  filename: 0186-prewarmed-fixture-pools-and-lease-based-ephemeral-capacity.md
+- adr: 0187
+  title: Anonymized Seed Data Snapshots for Repeatable Tests
+  status: Proposed
+  implementation_status: Not Implemented
+  date: '2026-03-27'
+  concern: testing
+  keywords:
+  - anonymized
+  - seed
+  - data
+  - snapshots
+  - repeatable
+  - tests
+  summary: We will maintain anonymized seed data snapshots for repeatable preview, restore, and failover tests.
+  filename: 0187-anonymized-seed-data-snapshots-for-repeatable-tests.md
+- adr: 0188
+  title: Failover Rehearsal Gate for Redundancy Tiers
+  status: Proposed
+  implementation_status: Not Implemented
+  date: '2026-03-27'
+  concern: ci-cd
+  keywords:
+  - failover
+  - rehearsal
+  - gate
+  - redundancy
+  - tiers
+  summary: We will require scheduled failover or recovery rehearsals for services that claim redundancy tiers above rebuild-only
+    re
+  filename: 0188-failover-rehearsal-gate-for-redundancy-tiers.md
+- adr: 0189
+  title: Network Impairment Test Matrix for Staging and Previews
+  status: Proposed
+  implementation_status: Not Implemented
+  date: '2026-03-27'
+  concern: networking
+  keywords:
+  - network
+  - impairment
+  - test
+  - matrix
+  - staging
+  - previews
+  summary: We will define a network impairment test matrix for preview, fixture, standby, and recovery environments.
+  filename: 0189-network-impairment-test-matrix-for-staging-and-previews.md
+- adr: 0190
+  title: Synthetic Transaction Replay for Capacity and Recovery Validation
+  status: Proposed
+  implementation_status: Not Implemented
+  date: '2026-03-27'
+  concern: ci-cd
+  keywords:
+  - synthetic
+  - transaction
+  - replay
+  - capacity
+  - recovery
+  - validation
+  summary: We will maintain a synthetic transaction replay harness for capacity, failover, and recovery validation.
+  filename: 0190-synthetic-transaction-replay-for-capacity-and-recovery-validation.md
+- adr: 0191
+  title: Immutable Guest Replacement for Stateful and Edge Services
+  status: Proposed
+  implementation_status: Not Implemented
+  date: '2026-03-27'
+  concern: vm-topology
+  keywords:
+  - immutable
+  - guest
+  - replacement
+  - stateful
+  - edge
+  - services
+  summary: For stateful and edge services at redundancy tier R1 or higher, the default change path will be immutable guest
+    replacem
+  filename: 0191-immutable-guest-replacement-for-stateful-and-edge-services.md
+- adr: 0192
+  title: Separate Capacity Classes for Standby, Recovery, and Preview Workloads
+  status: Proposed
+  implementation_status: Not Implemented
+  date: '2026-03-27'
+  concern: ci-cd
+  keywords:
+  - separate
+  - capacity
+  - classes
+  - standby
+  - recovery
+  - preview
+  - workloads
+  summary: We will classify spare capacity into separate reservation classes with explicit admission rules.
+  filename: 0192-separate-capacity-classes-for-standby-recovery-and-preview-workloads.md

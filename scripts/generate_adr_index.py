@@ -56,6 +56,8 @@ CONCERN_RULES: list[tuple[str, list[str]]] = [
 ]
 
 STATUS_KEYWORDS = {
+    "Not Implemented": ["not implemented"],
+    "Partial": ["partial", "partially implemented"],
     "Implemented": ["implemented", "live", "deployed"],
     "Accepted": ["accepted"],
     "Deprecated": ["deprecated", "superseded"],
@@ -109,13 +111,16 @@ def _extract_status(text: str) -> tuple[str, str]:
     """Return (status, implementation_status)."""
     status = _extract_value(text, "Status", "Proposed")
     impl = _extract_value(text, "Implementation Status", status)
-    # Normalise
+    status_lower = status.lower()
+    impl_lower = impl.lower()
+    # Normalise with longer and negated phrases first so "not implemented"
+    # does not collapse into "Implemented".
     for normalised, variants in STATUS_KEYWORDS.items():
-        if any(v in status.lower() for v in variants):
+        if any(v in status_lower for v in variants):
             status = normalised
             break
     for normalised, variants in STATUS_KEYWORDS.items():
-        if any(v in impl.lower() for v in variants):
+        if any(v in impl_lower for v in variants):
             impl = normalised
             break
     return status, impl
