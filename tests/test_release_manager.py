@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pytest
 
+import canonical_truth
 import controller_automation_toolkit as toolkit
 import generate_release_notes
 import release_manager
@@ -159,6 +160,16 @@ workstreams:
     monkeypatch.setattr(release_manager, "VERSION_SEMANTICS_PATH", tmp_path / "config" / "version-semantics.json")
     monkeypatch.setattr(release_manager, "CHANGELOG_PATH", tmp_path / "changelog.md")
     monkeypatch.setattr(release_manager, "RELEASE_NOTES_INDEX_PATH", tmp_path / "docs" / "release-notes" / "README.md")
+    monkeypatch.setattr(canonical_truth, "infer_release_bump", lambda: "patch")
+    monkeypatch.setattr(canonical_truth, "load_workstream_canonical_truth", lambda *args, **kwargs: [])
+    monkeypatch.setattr(canonical_truth, "assemble_changelog_text", lambda changelog_text, **kwargs: changelog_text)
+    monkeypatch.setattr(
+        canonical_truth,
+        "assemble_stack_text",
+        lambda stack_text, *, version, **kwargs: release_manager.update_stack_repo_version(stack_text, version),
+    )
+    monkeypatch.setattr(canonical_truth, "mark_pending_workstreams_released", lambda version, **kwargs: [])
+    monkeypatch.setattr(canonical_truth, "write_assembled_truth", lambda **kwargs: [])
 
     monkeypatch.setattr(generate_release_notes, "CHANGELOG_PATH", tmp_path / "changelog.md")
     monkeypatch.setattr(generate_release_notes, "RELEASE_NOTES_INDEX_PATH", tmp_path / "docs" / "release-notes" / "README.md")
@@ -199,3 +210,15 @@ def test_release_cut_updates_core_release_files(release_repo: Path) -> None:
     assert (release_repo / "RELEASE.md").exists()
     assert (release_repo / "docs" / "release-notes" / "0.1.1.md").exists()
     assert "[0.1.1](" in (release_repo / "docs" / "release-notes" / "README.md").read_text()
+
+
+def test_release_cut_can_infer_bump_from_canonical_truth_metadata(release_repo: Path) -> None:
+    exit_code = release_manager.main(
+        [
+            "--platform-impact",
+            "no live platform version bump; repository-only release",
+        ]
+    )
+
+    assert exit_code == 0
+    assert (release_repo / "VERSION").read_text().strip() == "0.1.1"

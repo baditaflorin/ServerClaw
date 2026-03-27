@@ -117,7 +117,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.176.0` |
+| Repository version | `0.176.1` |
 | Platform version | `0.130.23` |
 | Observed check date | `2026-03-23` |
 | Observed OS | `Debian 13` |
@@ -416,6 +416,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Break-Glass Recovery](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/break-glass-recovery.md)
 - [Break-Glass References](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/break-glass.md)
 - [Budgeted Workflow Scheduler](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/budgeted-workflow-scheduler.md)
+- [Canonical Truth Assembly](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/canonical-truth-assembly.md)
 - [Capacity Model](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/capacity-model.md)
 - [Certificate Expired](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/cert-expired.md)
 - [Change Risk Scoring](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/change-risk-scoring.md)
@@ -752,6 +753,16 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0180: Standby Capacity Reservation and Placement Rules](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0180-standby-capacity-reservation-and-placement-rules.md)
 - [ADR 0181: Off-Host Witness and Control Metadata Replication](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0181-off-host-witness-and-control-metadata-replication.md)
 - [ADR 0182: Live Apply Merge Train and Rollback Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0182-live-apply-merge-train-and-rollback-bundle.md)
+- [ADR 0183: Auxiliary Cloud Failure Domain for Witness, Recovery, and Burst Capacity](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0183-auxiliary-cloud-failure-domain-for-witness-recovery-and-burst-capacity.md)
+- [ADR 0184: Failure-Domain Labels and Anti-Affinity Policy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0184-failure-domain-labels-and-anti-affinity-policy.md)
+- [ADR 0185: Branch-Scoped Ephemeral Preview Environments](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0185-branch-scoped-ephemeral-preview-environments.md)
+- [ADR 0186: Prewarmed Fixture Pools and Lease-Based Ephemeral Capacity](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0186-prewarmed-fixture-pools-and-lease-based-ephemeral-capacity.md)
+- [ADR 0187: Anonymized Seed Data Snapshots for Repeatable Tests](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0187-anonymized-seed-data-snapshots-for-repeatable-tests.md)
+- [ADR 0188: Failover Rehearsal Gate for Redundancy Tiers](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0188-failover-rehearsal-gate-for-redundancy-tiers.md)
+- [ADR 0189: Network Impairment Test Matrix for Staging and Previews](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0189-network-impairment-test-matrix-for-staging-and-previews.md)
+- [ADR 0190: Synthetic Transaction Replay for Capacity and Recovery Validation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0190-synthetic-transaction-replay-for-capacity-and-recovery-validation.md)
+- [ADR 0191: Immutable Guest Replacement for Stateful and Edge Services](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0191-immutable-guest-replacement-for-stateful-and-edge-services.md)
+- [ADR 0192: Separate Capacity Classes for Standby, Recovery, and Preview Workloads](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0192-separate-capacity-classes-for-standby-recovery-and-preview-workloads.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -899,6 +910,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0170: Platform-Wide Timeout Hierarchy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0170-timeout-hierarchy.md)
 - [Workstream ADR 0171: Controlled Fault Injection for Resilience Validation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0171-controlled-fault-injection.md)
 - [Workstream ADR 0172: Watchdog Escalation and Stale Job Self-Healing](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0172-watchdog-escalation-and-stale-job-self-healing.md)
+- [Workstream ADR 0174: Integration-Only Canonical Truth Assembly](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0174-canonical-truth-assembly.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
@@ -916,7 +928,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.176.0` |
+| Repository version | `0.176.1` |
 | Platform version | `0.130.23` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1099,6 +1111,7 @@ This repository is intentionally opinionated:
 | `0171` | Controlled fault injection for resilience validation | `live_applied` | [adr-0171-controlled-fault-injection.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0171-controlled-fault-injection.md) |
 | `0172` | Watchdog escalation and stale job self-healing | `merged` | [adr-0172-watchdog-escalation-and-stale-job-self-healing.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0172-watchdog-escalation-and-stale-job-self-healing.md) |
 | `0172` | Watchdog escalation and stale job self-healing | `merged` | [adr-0172-watchdog-escalation-and-stale-job-self-healing.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0172-watchdog-escalation-and-stale-job-self-healing.md) |
+| `0174` | Integration-only canonical truth assembly | `merged` | [adr-0174-canonical-truth-assembly.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0174-canonical-truth-assembly.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow

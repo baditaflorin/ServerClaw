@@ -70,6 +70,10 @@ def update_changelog_for_release(changelog_text: str, version: str) -> str:
     updated = changelog_text[: match.start()] + f"{match.group(1)}{match.group(3)}" + changelog_text[match.end() :]
     if "## Unreleased" not in updated:
         raise ValueError("failed to clear the changelog Unreleased section")
+    latest_match = LATEST_RELEASE_PATTERN.search(updated)
+    if not latest_match:
+        raise ValueError("failed to read the changelog latest release section")
+    previous_latest_block = latest_match.group(2).strip()
     latest_link = (
         "## Latest Release\n\n"
         f"- [{version} release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/{version}.md)\n"
@@ -77,6 +81,16 @@ def update_changelog_for_release(changelog_text: str, version: str) -> str:
     updated, count = LATEST_RELEASE_PATTERN.subn(latest_link, updated, count=1)
     if count != 1:
         raise ValueError("failed to update the changelog latest release section")
+    if previous_latest_block:
+        updated, previous_count = re.subn(
+            r"(^## Previous Releases\n)",
+            f"## Previous Releases\n\n{previous_latest_block}\n",
+            updated,
+            count=1,
+            flags=re.MULTILINE,
+        )
+        if previous_count != 1:
+            raise ValueError("failed to preserve the previous latest release section")
     return updated
 
 

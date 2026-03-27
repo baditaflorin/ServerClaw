@@ -13,6 +13,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+import canonical_truth
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path, run_command
 from generate_release_notes import (
     CHANGELOG_PATH,
@@ -348,18 +349,31 @@ def write_release(version: str, *, platform_impact: str, released_on: str | None
     blockers = release_blockers_result(load_version_semantics())
     if not blockers.met:
         raise ValueError(f"cannot cut a release while blockers remain: {blockers.detail}")
-    notes = extract_unreleased_items(CHANGELOG_PATH.read_text())
+    workstreams = canonical_truth.load_workstream_canonical_truth()
+    assembled_changelog = canonical_truth.assemble_changelog_text(
+        CHANGELOG_PATH.read_text(),
+        workstreams=workstreams,
+    )
+    notes = extract_unreleased_items(assembled_changelog)
     if not notes:
         raise ValueError("changelog.md has no bullet items under '## Unreleased'")
     VERSION_PATH.write_text(f"{version}\n")
-    STACK_PATH.write_text(update_stack_repo_version(STACK_PATH.read_text(), version))
-    CHANGELOG_PATH.write_text(update_changelog_for_release(CHANGELOG_PATH.read_text(), version))
+    STACK_PATH.write_text(
+        canonical_truth.assemble_stack_text(
+            STACK_PATH.read_text(),
+            version=version,
+            workstreams=workstreams,
+        )
+    )
+    CHANGELOG_PATH.write_text(update_changelog_for_release(assembled_changelog, version))
     write_release_artifacts(
         version,
         notes=notes,
         platform_impact=platform_impact,
         released_on=released_on,
     )
+    canonical_truth.mark_pending_workstreams_released(version)
+    canonical_truth.write_assembled_truth(update_readme=True)
     return {"version": version, "notes": notes}
 
 
@@ -432,12 +446,19 @@ def main(argv: list[str] | None = None) -> int:
             version = args.version or VERSION_PATH.read_text().strip()
             return create_tag(version, push=args.push, dry_run=args.dry_run)
 
+        if not args.version and not args.bump:
+            args.bump = canonical_truth.infer_release_bump()
         if bool(args.version) == bool(args.bump):
             raise ValueError("choose exactly one of --version or --bump")
         current_version = VERSION_PATH.read_text().strip()
         next_version = args.version or bump_semver(current_version, args.bump)
         if args.dry_run:
-            notes = extract_unreleased_items(CHANGELOG_PATH.read_text())
+            notes = extract_unreleased_items(
+                canonical_truth.assemble_changelog_text(
+                    CHANGELOG_PATH.read_text(),
+                    workstreams=canonical_truth.load_workstream_canonical_truth(),
+                )
+            )
             print(f"Current version: {current_version}")
             print(f"Next version: {next_version}")
             print(f"Unreleased notes: {len(notes)}")

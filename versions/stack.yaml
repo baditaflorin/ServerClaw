@@ -54,7 +54,6 @@ live_apply_evidence:
     searxng: 2026-03-26-adr-0148-searxng-live-apply
     ops_portal: 2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply
     ollama: 2026-03-25-adr-0145-ollama-live-apply
-
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated

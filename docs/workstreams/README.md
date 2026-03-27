@@ -31,6 +31,15 @@ Workstream branches should avoid updating:
 
 Those are integration surfaces and should normally be updated only when work is merged to `main`.
 
+## Canonical Truth Metadata
+
+When a workstream should feed the integration-only canonical outputs, add a `canonical_truth` block to its `workstreams.yaml` entry.
+
+- `changelog_entry` supplies one assembled `## Unreleased` bullet
+- `release_bump` declares the minimum repo version bump for that workstream
+- `included_in_repo_version` stays `null` until the release manager cuts the version that includes the workstream
+- `latest_receipts` maps capability IDs to the live-apply receipt that should appear in `versions/stack.yaml`
+
 ## Minimum Merge Gate
 
 Before a workstream is merged to `main`, the minimum repository validation command is:

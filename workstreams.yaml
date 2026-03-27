@@ -267,6 +267,36 @@ workstreams:
     ready_to_merge: false
     live_applied: false
 
+  - id: adr-0174-canonical-truth-assembly
+    adr: "0174"
+    title: Integration-only canonical truth assembly
+    status: merged
+    owner: codex
+    branch: codex/adr-0174-canonical-truth
+    worktree_path: ../worktree-adr-0174-canonical-truth
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0174-canonical-truth-assembly.md
+    depends_on:
+      - adr-0110-platform-versioning
+    conflicts_with: []
+    shared_surfaces:
+      - scripts/canonical_truth.py
+      - scripts/release_manager.py
+      - scripts/generate_status_docs.py
+      - scripts/validate_repository_data_models.py
+      - Makefile
+      - scripts/validate_repo.sh
+      - README.md
+      - VERSION
+      - changelog.md
+      - versions/stack.yaml
+    ready_to_merge: false
+    live_applied: false
+    canonical_truth:
+      changelog_entry: implemented ADR 0174 integration-only canonical truth assembly, release-note derivation, and live-apply canonical truth preflight
+      release_bump: patch
+      included_in_repo_version: 0.176.1
+      latest_receipts: {}
+
   - id: adr-0025-docker-compose-stacks
     adr: "0025"
     title: Compose-managed runtime stacks

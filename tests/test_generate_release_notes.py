@@ -30,6 +30,7 @@ def test_extract_unreleased_items_and_update_changelog() -> None:
     assert "0.97.0 release notes" in updated
     assert "added release manager" not in updated
     assert "## Previous Releases" in updated
+    assert "0.96.0 release notes" in updated
     assert "0.95.0 release notes" in updated
 
 

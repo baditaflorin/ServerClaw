@@ -1489,6 +1489,55 @@ def validate_workstreams_release_policy() -> None:
         raise ValueError("workstreams.yaml.release_policy.breaking_change_criteria must point to config/version-semantics.json")
 
 
+def validate_workstream_canonical_truth_metadata() -> None:
+    registry = load_yaml(WORKSTREAMS_PATH)
+    workstreams = require_list(registry.get("workstreams"), "workstreams.yaml.workstreams")
+    allowed_release_bumps = {"patch", "minor", "major"}
+    semver_pattern = re.compile(r"^\d+\.\d+\.\d+$")
+
+    for index, workstream in enumerate(workstreams):
+        workstream_path = f"workstreams.yaml.workstreams[{index}]"
+        workstream = require_mapping(workstream, workstream_path)
+        canonical_truth = workstream.get("canonical_truth")
+        if canonical_truth is None:
+            continue
+        canonical_truth = require_mapping(canonical_truth, f"{workstream_path}.canonical_truth")
+
+        changelog_entry = canonical_truth.get("changelog_entry")
+        if changelog_entry is not None:
+            require_str(changelog_entry, f"{workstream_path}.canonical_truth.changelog_entry")
+
+        release_bump = canonical_truth.get("release_bump")
+        if release_bump is not None:
+            release_bump = require_str(release_bump, f"{workstream_path}.canonical_truth.release_bump")
+            if release_bump not in allowed_release_bumps:
+                raise ValueError(
+                    f"{workstream_path}.canonical_truth.release_bump must be one of {sorted(allowed_release_bumps)}"
+                )
+
+        included_in_repo_version = canonical_truth.get("included_in_repo_version")
+        if included_in_repo_version is not None:
+            included_in_repo_version = require_str(
+                included_in_repo_version,
+                f"{workstream_path}.canonical_truth.included_in_repo_version",
+            )
+            if not semver_pattern.fullmatch(included_in_repo_version):
+                raise ValueError(
+                    f"{workstream_path}.canonical_truth.included_in_repo_version must use semantic version format"
+                )
+
+        latest_receipts = require_mapping(
+            canonical_truth.get("latest_receipts", {}),
+            f"{workstream_path}.canonical_truth.latest_receipts",
+        )
+        for capability, receipt_id in latest_receipts.items():
+            require_str(capability, f"{workstream_path}.canonical_truth.latest_receipts.key")
+            require_str(
+                receipt_id,
+                f"{workstream_path}.canonical_truth.latest_receipts[{capability}]",
+            )
+
+
 def validate_merge_eligible_files_contract() -> None:
     validate_merge_eligible_catalog(MERGE_ELIGIBLE_FILES_PATH)
 
@@ -2236,6 +2285,7 @@ def validate_repository_data_models() -> int:
     validate_version_semantics()
     validate_merge_eligible_files_contract()
     validate_workstreams_release_policy()
+    validate_workstream_canonical_truth_metadata()
     validate_triage_rule_contracts()
     validate_changelog_redaction_contract()
     validate_platform_finding_schema()

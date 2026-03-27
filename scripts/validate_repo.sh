@@ -221,6 +221,7 @@ validate_data_models() {
 
 validate_generated_docs() {
   echo "Generated status document validation"
+  uvx --from pyyaml python "$REPO_ROOT/scripts/canonical_truth.py" --check >/dev/null
   uvx --from pyyaml python "$REPO_ROOT/scripts/generate_status_docs.py" --check >/dev/null
   uv run --with jsonschema python "$REPO_ROOT/scripts/generate_dependency_diagram.py" --check >/dev/null
 }
