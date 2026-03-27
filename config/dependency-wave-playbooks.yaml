@@ -1,0 +1,57 @@
+schema_version: 1.0.0
+
+playbooks:
+  - path: playbooks/guest-network-policy.yml
+    workflow_id: converge-guest-network-policy
+    make_target: converge-guest-network-policy
+    mutation_scope: platform
+    shared_surfaces:
+      - network:guest-policy
+      - firewall:guest-egress
+    lock_resources:
+      - network:guest-policy
+      - firewall:guest-egress
+
+  - path: playbooks/openbao.yml
+    workflow_id: converge-openbao
+    make_target: converge-openbao
+    mutation_scope: platform
+    shared_surfaces:
+      - service:openbao
+      - secret-store:dynamic-credentials
+    lock_resources:
+      - service:openbao
+      - secret-store:dynamic-credentials
+
+  - path: playbooks/step-ca.yml
+    workflow_id: converge-step-ca
+    make_target: converge-step-ca
+    mutation_scope: platform
+    shared_surfaces:
+      - service:step_ca
+      - trust:ssh-ca
+    lock_resources:
+      - service:step_ca
+      - trust:ssh-ca
+
+  - path: playbooks/monitoring-stack.yml
+    workflow_id: converge-monitoring
+    make_target: converge-monitoring
+    mutation_scope: platform
+    shared_surfaces:
+      - observability:monitoring-stack
+      - dashboards:grafana
+    lock_resources:
+      - observability:monitoring-stack
+      - dashboards:grafana
+
+  - path: playbooks/uptime-kuma.yml
+    workflow_id: deploy-uptime-kuma
+    make_target: deploy-uptime-kuma
+    mutation_scope: platform
+    shared_surfaces:
+      - observability:uptime-kuma
+      - edge:uptime-kuma
+    lock_resources:
+      - observability:uptime-kuma
+      - edge:uptime-kuma

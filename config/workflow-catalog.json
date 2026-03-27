@@ -3639,6 +3639,53 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "live-apply-waves": {
+      "description": "Execute one reviewed dependency-wave manifest so each wave acquires its locks up front and runs its playbooks in parallel.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "live-apply-waves",
+        "command": "make live-apply-waves manifest=config/dependency-waves/security-observability-bootstrap.yaml WAVE_ARGS='--dry-run'"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/dependency-wave-parallel-apply.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/dependency-wave-playbooks.yaml",
+        "config/dependency-waves/security-observability-bootstrap.yaml",
+        "scripts/dependency_wave_apply.py",
+        "platform/ansible/dependency_waves.py",
+        "tests/test_dependency_wave_apply.py",
+        "docs/runbooks/dependency-wave-parallel-apply.md",
+        "docs/adr/0178-dependency-wave-manifests-for-parallel-apply.md"
+      ],
+      "outputs": [
+        "A JSON execution summary containing the resolved wave order, the per-playbook make command, lock resources, and success or failure for every wave item."
+      ],
+      "verification_commands": [
+        "uv run --with pytest --with pyyaml python -m pytest tests/test_dependency_wave_apply.py -q",
+        "make live-apply-waves manifest=config/dependency-waves/security-observability-bootstrap.yaml WAVE_ARGS='--dry-run'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 3600,
+        "max_steps": 400,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 6,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "collection-publish": {
       "description": "Build the lv3.platform Ansible collection, validate the local tarball path, and publish it to the configured internal Galaxy server.",
       "lifecycle_status": "active",

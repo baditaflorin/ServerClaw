@@ -242,6 +242,31 @@ workstreams:
     ready_to_merge: true
     live_applied: true
 
+  - id: adr-0178-dependency-wave
+    adr: "0178"
+    title: Dependency wave manifests for parallel apply
+    status: merged
+    owner: codex
+    branch: codex/adr-0178-dependency-wave
+    worktree_path: ../worktree-adr-0178-dependency-wave
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0178-dependency-wave-manifests.md
+    depends_on:
+      - adr-0153-distributed-resource-lock-registry
+      - adr-0154-vm-scoped-execution-lanes
+      - adr-0176-inventory-sharding
+    conflicts_with:
+      - adr-0176-inventory-sharding
+      - adr-0182-live-apply-merge-train
+    shared_surfaces:
+      - platform/ansible/
+      - scripts/dependency_wave_apply.py
+      - Makefile
+      - config/workflow-catalog.json
+      - config/dependency-wave-playbooks.yaml
+      - docs/runbooks/dependency-wave-parallel-apply.md
+    ready_to_merge: false
+    live_applied: false
+
   - id: adr-0025-docker-compose-stacks
     adr: "0025"
     title: Compose-managed runtime stacks
