@@ -73,7 +73,7 @@
 - Patched `vaultwarden_runtime` so current `main` also installs a repository-managed TLS renewal timer for the private Vaultwarden listener
 - Extended `config/health-probe-catalog.json` with `tls_certificate_ids`
 - Added the emergency manual-rotation runbook and the repo-managed alert rules file
-- The final mainline integration and verified live apply completed on `2026-03-27` in repo release `0.177.5`, and the canonical platform state now records it at platform version `0.130.26`
+- The final mainline integration and verified live apply completed on `2026-03-27` in repo release `0.177.6`, and the canonical platform state now records it at platform version `0.130.27`
 - The live-apply follow-up fixed two contract gaps on top of the merged implementation: `scripts/tls_cert_probe.py` now resolves the shared `.local/step-ca` trust root from git worktrees, and the catalog now models the 24-hour OpenBao and Vaultwarden certificates with hour-based warning windows instead of permanent false-critical day thresholds
 
 ## Notes For The Next Assistant

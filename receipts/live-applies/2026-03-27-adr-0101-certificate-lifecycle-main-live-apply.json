@@ -5,12 +5,12 @@
   "applied_on": "2026-03-27",
   "recorded_on": "2026-03-27",
   "recorded_by": "codex",
-  "source_commit": "80b434e6026d1c00b833ec2817613bf8b0c2ab6d",
-  "repo_version_context": "0.177.5",
-  "platform_version_context": "0.130.26",
+  "source_commit": "78fce22269ce5226fa5ccf68f8c367b91cf2c54f",
+  "repo_version_context": "0.177.6",
+  "platform_version_context": "0.130.27",
   "workflow_id": "converge-openbao",
   "adr": "0101",
-  "summary": "Integrated ADR 0101 onto mainline release 0.177.5, hardened the flaky step-ca and OpenBao live-apply paths, and re-verified the repo-managed OpenBao and Vaultwarden certificate lifecycle end to end from the dedicated main-integration worktree.",
+  "summary": "Integrated ADR 0101 onto mainline release 0.177.6, hardened the flaky step-ca and OpenBao live-apply paths, and re-verified the repo-managed OpenBao and Vaultwarden certificate lifecycle end to end from the dedicated main-integration worktree.",
   "targets": [
     {
       "kind": "host",
@@ -96,7 +96,7 @@
     "receipts/live-applies/2026-03-27-adr-0101-certificate-lifecycle-main-live-apply.json"
   ],
   "notes": [
-    "This receipt supersedes the earlier workstream-local replay receipt now that ADR 0101 is fully integrated on mainline release 0.177.5.",
+    "This receipt supersedes the earlier workstream-local replay receipt now that ADR 0101 is fully integrated on mainline release 0.177.6.",
     "The live replay touched step-ca, Vaultwarden, and OpenBao together because the managed certificate lifecycle spans those three surfaces.",
     "The `source_commit` field references the latest fetched `origin/main` baseline the verified main-integration replay was rebased onto."
   ]

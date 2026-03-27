@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.5",
-  "platform_version": "0.130.26",
-  "generated_at": "2026-03-27T10:54:21Z",
-  "next_refresh_at": "2026-03-27T11:54:21Z",
+  "repo_version": "0.177.6",
+  "platform_version": "0.130.27",
+  "generated_at": "2026-03-27T11:17:35Z",
+  "next_refresh_at": "2026-03-27T12:17:35Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3010,7 +3010,7 @@
         "id": "configure-openbao",
         "title": "Configure OpenBao",
         "agent_trust_required": "T3",
-        "steps": 11,
+        "steps": 15,
         "path": "docs/runbooks/configure-openbao.md",
         "workflow_ids": [
           "converge-openbao"
@@ -3496,10 +3496,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.4",
+    "last_version": "0.177.5",
     "deployed_at": "2026-03-27",
-    "summary": "replayed ADR 0105 from the latest `main`, verified the live `lv3-capacity-overview` Grafana dashboard and capacity-report entrypoints end to end, and recorded the mainline live-apply receipt hardened fresh parallel-worktree automation by preserving the primary inventory alongside shard inventories and moving Ansible SSH control sockets to compact per-run paths under `/tmp`",
-    "release_notes_url": "docs/release-notes/0.177.5.md"
+    "summary": "Integrated ADR 0101 automated certificate lifecycle management on `main`, including the repo-managed OpenBao and Vaultwarden renewal timers plus the validated `step-ca`-backed TLS probe contract. Hardened `step_ca_runtime` live apply with an SSH reconnect guard so the final verification block survives the post-start restart window on `docker-runtime-lv3`.",
+    "release_notes_url": "docs/release-notes/0.177.6.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

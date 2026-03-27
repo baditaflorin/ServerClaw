@@ -1806,7 +1806,7 @@ adr_index:
     summary: We will implement a three-layer certificate lifecycle covering inventory, automated renewal where this repository
       actual
     filename: 0101-automated-certificate-lifecycle-management.md
-    implemented_version: 0.98.0
+    implemented_version: 0.177.6
   - adr: '0102'
     title: Security Posture Reporting and Benchmark Drift
     status: Accepted
