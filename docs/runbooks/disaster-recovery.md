@@ -143,4 +143,4 @@ When these are set, `make configure-backup-vm` also converges:
 
 ## Current Gap
 
-As of the 2026-03-23 table-top review, the repo implementation is complete but the live platform still has no off-site storage configured. The DR readiness report records that gap explicitly. ADR 0181 adds the repo-managed witness-bundle publication path, but the live archive mount and its periodic drill still depend on the controller environment variables being configured at apply time.
+As of the 2026-03-27 replay from `main`, ADR 0181 witness publication is live: `converge-control-plane-recovery` now republishes and re-verifies the off-host witness archive during the restore-drill workflow, and the latest durable witness receipt is `receipts/witness-replication/20260327T103801Z-dca744432518-control-metadata-witness.json`. The remaining DR gap is the optional second copy of `backup-lv3` itself, which still depends on the `PROXMOX_DR_OFFSITE_*` credentials when a separate off-site backup target is desired.

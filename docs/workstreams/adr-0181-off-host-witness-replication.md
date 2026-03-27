@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0181](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0181-off-host-witness-and-control-metadata-replication.md)
 - Title: Off-host witness bundle for recovery metadata
-- Status: merged
+- Status: live_applied
 - Branch: `codex/adr-0181-metadata-replication`
 - Worktree: `../worktree-adr-0181-metadata-replication`
 - Owner: codex
@@ -59,5 +59,6 @@
 
 ## Notes For The Next Assistant
 
-- Repository support is merged, but the live controller still needs `LV3_CONTROL_METADATA_WITNESS_ARCHIVE_ROOT` set to a real off-host mount before the workflow can publish outside the Proxmox host.
-- The git remote witness check is intentionally strict: the selected remote ref must point at the same commit as local `HEAD`.
+- The live `main` replay succeeded on 2026-03-27 from commit `dca74443`, with `make converge-control-plane-recovery PLATFORM_TRACE_ID=adr0181main2` rerunning the runtime backup, restore drill, off-host witness publication, and witness verification end to end.
+- The durable witness receipt for the merged replay is `receipts/witness-replication/20260327T103801Z-dca744432518-control-metadata-witness.json`, and the latest archive generation is `20260327T103801Z-dca744432518`.
+- The git remote witness check remains intentionally strict: the selected remote ref must point at the same commit as local `HEAD`.

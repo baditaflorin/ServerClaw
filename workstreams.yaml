@@ -3950,7 +3950,7 @@ workstreams:
   - id: adr-0181-off-host-witness
     adr: "0181"
     title: Off-host witness and control metadata replication
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/adr-0181-metadata-replication
     worktree_path: ../worktree-adr-0181-metadata-replication
@@ -3972,7 +3972,7 @@ workstreams:
       - config/workflow-catalog.json
       - receipts/witness-replication/
     ready_to_merge: false
-    live_applied: false
+    live_applied: true
 
   - id: adr-0179-service-redundancy-tier-matrix
     adr: "0179"

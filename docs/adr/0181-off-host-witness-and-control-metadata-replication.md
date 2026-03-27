@@ -3,7 +3,7 @@
 - Status: Implemented
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.176.2
-- Implemented In Platform Version: not yet
+- Implemented In Platform Version: 0.130.25
 - Implemented On: 2026-03-27
 - Date: 2026-03-26
 

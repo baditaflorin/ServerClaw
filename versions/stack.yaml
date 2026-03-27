@@ -37,7 +37,8 @@ live_apply_evidence:
     identity_taxonomy: 2026-03-22-adr-0046-identity-classes-live-apply
     command_catalog: 2026-03-22-adr-0048-command-catalog-live-apply
     config_merge: 2026-03-26-adr-0158-config-merge-live-apply
-    control_plane_recovery: 2026-03-22-adr-0051-control-plane-recovery-live-apply
+    control_plane_recovery: 2026-03-27-adr-0181-control-metadata-witness-live-apply
+    control_metadata_witness: 2026-03-27-adr-0181-control-metadata-witness-live-apply
     local_search_and_indexing_fabric: 2026-03-26-adr-0121-search-indexing-fabric-live-apply
     notification_profiles: 2026-03-22-adr-0050-notification-profiles-live-apply
     platform_event_taxonomy: 2026-03-26-adr-0124-platform-event-taxonomy-live-apply
@@ -364,7 +365,7 @@ desired_state:
       - uptime.lv3.org
 
 observed_state:
-  checked_at: 2026-03-23
+  checked_at: 2026-03-27
   access:
     ssh_bootstrap_key_working: true
     host_ops_user_working: true
@@ -381,7 +382,7 @@ observed_state:
     proxmox_api_token_present: true
     proxmox_api_token_verified: true
   control_plane:
-    reviewed_at: 2026-03-22
+    reviewed_at: 2026-03-27
     command_lane_host_ssh_certificate_verified: true
     command_lane_guest_jump_verified: true
     api_lane_proxmox_token_verified: true
@@ -392,10 +393,14 @@ observed_state:
     event_lane_mail_webhook_verified: true
     recovery_backup_store_ssh_source_verified: true
     recovery_backup_timer_active: true
-    recovery_backup_latest_timestamp: 20260322T212846Z
-    recovery_restore_drill_checked_at: 2026-03-22T21:29:48Z
+    recovery_backup_latest_timestamp: 20260327T103713Z
+    recovery_restore_drill_checked_at: 2026-03-27T10:37:39Z
     recovery_restore_drill_result: pass
     recovery_controller_bundle_mirrored: true
+    control_metadata_witness_checked_at: 2026-03-27T10:38:07Z
+    control_metadata_witness_result: pass
+    control_metadata_witness_generation: 20260327T103801Z-dca744432518
+    control_metadata_witness_receipt: 20260327T103801Z-dca744432518-control-metadata-witness
   identity_taxonomy:
     reviewed_at: 2026-03-22
     all_identities_documented: true
