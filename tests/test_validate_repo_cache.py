@@ -33,3 +33,10 @@ def test_validate_repo_avoids_bash4_only_mapfile() -> None:
 
     assert "load_lines_into_array()" in script
     assert "mapfile" not in script
+
+
+def test_validate_repo_supports_workstream_surface_stage() -> None:
+    script = VALIDATE_REPO_SCRIPT.read_text()
+
+    assert "workstream-surfaces" in script
+    assert "scripts/workstream_surface_ownership.py" in script

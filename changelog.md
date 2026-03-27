@@ -12,6 +12,8 @@ Versioned release notes live under [docs/release-notes/README.md](/Users/live/Do
 
 ## Unreleased
 
+- implemented ADR 0173 workstream surface ownership manifests and branch validation
+
 ## Latest Release
 
 - [0.176.3 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.176.3.md)

@@ -54,6 +54,7 @@ from workflow_catalog import (
     validate_secret_manifest,
     validate_workflow_catalog,
 )
+from workstream_surface_ownership import validate_registry as validate_workstream_surface_ownership_registry
 from platform.config_merge import validate_merge_eligible_catalog
 
 
@@ -1487,6 +1488,7 @@ def validate_workstreams_release_policy() -> None:
     )
     if not breaking_change_path.endswith("/config/version-semantics.json"):
         raise ValueError("workstreams.yaml.release_policy.breaking_change_criteria must point to config/version-semantics.json")
+    validate_workstream_surface_ownership_registry(registry)
 
 
 def validate_workstream_canonical_truth_metadata() -> None:

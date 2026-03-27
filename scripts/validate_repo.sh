@@ -17,7 +17,7 @@ export ANSIBLE_COLLECTIONS_PATH="$REPO_ROOT/collections:$ANSIBLE_COLLECTIONS_DIR
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|ansible-idempotency|shell|json|compose-runtime-envs|retry-guard|data-models|generated-docs|generated-portals|health-probes|alert-rules|tofu|agent-standards]...
+  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|ansible-idempotency|shell|json|compose-runtime-envs|retry-guard|data-models|workstream-surfaces|generated-docs|generated-portals|health-probes|alert-rules|tofu|agent-standards]...
 
 Examples:
   scripts/validate_repo.sh
@@ -217,6 +217,12 @@ validate_data_models() {
   python3 "$REPO_ROOT/scripts/validate_service_completeness.py" --validate >/dev/null
   uv run --with pyyaml python "$REPO_ROOT/scripts/agent_tool_registry.py" --export-mcp >/dev/null
   python3 "$REPO_ROOT/scripts/mutation_audit.py" --validate-schema >/dev/null
+}
+
+validate_workstream_surfaces() {
+  echo "Workstream surface ownership validation"
+  uv run --with pyyaml python "$REPO_ROOT/scripts/workstream_surface_ownership.py" --validate-registry >/dev/null
+  uv run --with pyyaml python "$REPO_ROOT/scripts/workstream_surface_ownership.py" --validate-branch --base-ref origin/main >/dev/null
 }
 
 validate_generated_docs() {
@@ -436,6 +442,7 @@ for stage in "$@"; do
       validate_alert_rules
       validate_tofu
       validate_data_models
+      validate_workstream_surfaces
       validate_generated_docs
       validate_generated_portals
       validate_agent_standards
@@ -472,6 +479,9 @@ for stage in "$@"; do
       ;;
     data-models)
       validate_data_models
+      ;;
+    workstream-surfaces)
+      validate_workstream_surfaces
       ;;
     health-probes)
       validate_health_probes

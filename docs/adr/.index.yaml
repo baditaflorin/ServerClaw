@@ -9,9 +9,9 @@ schema_version: 1
 generated: '2026-03-27'
 total_adrs: 199
 implementation_status_summary:
-  Implemented: 170
+  Implemented: 171
   Partial: 3
-  Not Implemented: 25
+  Not Implemented: 24
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -2982,8 +2982,8 @@ adr_index:
   implemented_version: 0.146.2
 - adr: '0173'
   title: Workstream Surface Ownership Manifest
-  status: Proposed
-  implementation_status: Not Implemented
+  status: Implemented
+  implementation_status: Implemented
   date: '2026-03-26'
   concern: platform
   keywords:
@@ -2993,6 +2993,7 @@ adr_index:
   - manifest
   summary: 'We will define a surface ownership manifest for every active workstream. The manifest becomes the canonical declaration '
   filename: 0173-workstream-surface-ownership-manifest.md
+  implemented_version: 0.176.1
 - adr: '0174'
   title: Integration-Only Canonical Truth Assembly
   status: Proposed

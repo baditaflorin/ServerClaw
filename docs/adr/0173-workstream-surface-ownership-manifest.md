@@ -1,10 +1,10 @@
 # ADR 0173: Workstream Surface Ownership Manifest
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Implemented
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.176.1
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-27
 - Date: 2026-03-26
 
 ## Context
@@ -66,6 +66,13 @@ Validation will reject a workstream branch when it:
 1. edits a path outside its declared owned surfaces
 2. edits a `generated` surface directly
 3. claims `exclusive` ownership of a surface already owned by another active workstream
+
+The repository implementation now enforces this with:
+
+- `ownership_manifest` entries for active workstreams in `workstreams.yaml`
+- `scripts/workstream_surface_ownership.py` for registry and branch diff validation
+- `scripts/validate_repository_data_models.py` integration for schema checks
+- `scripts/validate_repo.sh workstream-surfaces` for branch-local enforcement
 
 ### Ownership transfer
 

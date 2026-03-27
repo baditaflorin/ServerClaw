@@ -166,6 +166,50 @@ workstreams:
       - inventory/host_vars/proxmox_florin.yml
       - config/service-capability-catalog.json
       - config/control-plane-lanes.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: headscale_runtime_repo_surface
+          paths:
+            - collections/ansible_collections/lv3/platform/roles/proxmox_headscale/**
+            - playbooks/headscale.yml
+            - playbooks/services/headscale.yml
+            - config/headscale-acl.hujson
+            - docs/adr/0144-headscale-for-zero-trust-mesh-vpn.md
+            - docs/workstreams/adr-0144-headscale.md
+            - docs/runbooks/configure-headscale.md
+          mode: exclusive
+        - id: inventory_hosts_contract
+          paths:
+            - inventory/hosts.yml
+          mode: shared_contract
+          contract: inventory-hosts-v1
+        - id: proxmox_host_vars_contract
+          paths:
+            - inventory/host_vars/proxmox_florin.yml
+          mode: shared_contract
+          contract: proxmox-host-vars-v1
+        - id: service_capability_catalog_contract
+          paths:
+            - config/service-capability-catalog.json
+          mode: shared_contract
+          contract: service-capability-catalog-v1
+        - id: control_plane_lane_contract
+          paths:
+            - config/control-plane-lanes.json
+          mode: shared_contract
+          contract: control-plane-lanes-v1
+        - id: integration_truth
+          paths:
+            - README.md
+            - VERSION
+            - changelog.md
+            - versions/stack.yaml
+          mode: generated
     ready_to_merge: false
     live_applied: true
 
@@ -204,6 +248,34 @@ workstreams:
       - /etc/pve/jobs.cfg
       - backup_policy
       - guest_provisioning
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: backup_vm_repo_surface
+          paths:
+            - playbooks/backup-vm.yml
+            - roles/backup_vm/**
+            - roles/proxmox_backups/**
+            - roles/proxmox_guests/**
+            - docs/adr/0029-dedicated-backup-vm-with-local-pbs.md
+            - docs/workstreams/adr-0029-backup-vm.md
+          mode: exclusive
+        - id: inventory_contract
+          paths:
+            - inventory/**
+          mode: shared_contract
+          contract: inventory-v1
+        - id: integration_truth
+          paths:
+            - README.md
+            - VERSION
+            - changelog.md
+            - versions/stack.yaml
+          mode: generated
     ready_to_merge: false
     live_applied: true
 
@@ -798,6 +870,30 @@ workstreams:
       - alert events
       - agent handoffs
       - internal consumers
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0058_docs
+          paths:
+            - docs/adr/0058-nats-jetstream-for-internal-event-bus-and-agent-coordination.md
+            - docs/workstreams/adr-0058-nats-event-bus.md
+          mode: exclusive
+        - id: visual_agent_operations_runbook
+          paths:
+            - docs/runbooks/plan-visual-agent-operations.md
+          mode: shared_contract
+          contract: visual-agent-operations-runbook-v1
+        - id: integration_truth
+          paths:
+            - README.md
+            - VERSION
+            - changelog.md
+            - versions/stack.yaml
+          mode: generated
     ready_to_merge: false
     live_applied: false
 
@@ -862,6 +958,30 @@ workstreams:
       - workflow failures
       - issue notifications
       - release regressions
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0061_docs
+          paths:
+            - docs/adr/0061-glitchtip-for-application-exceptions-and-task-failures.md
+            - docs/workstreams/adr-0061-glitchtip-failure-signals.md
+          mode: exclusive
+        - id: visual_agent_operations_runbook
+          paths:
+            - docs/runbooks/plan-visual-agent-operations.md
+          mode: shared_contract
+          contract: visual-agent-operations-runbook-v1
+        - id: integration_truth
+          paths:
+            - README.md
+            - VERSION
+            - changelog.md
+            - versions/stack.yaml
+          mode: generated
     ready_to_merge: false
     live_applied: false
 
@@ -965,6 +1085,45 @@ workstreams:
       - Loki mutation-audit label
       - Windmill workflow template
       - command-catalog scripts
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: mutation_audit_repo_surface
+          paths:
+            - callback_plugins/mutation_audit.py
+            - docs/schema/mutation-audit-event.json
+            - scripts/mutation_audit.py
+            - docs/runbooks/mutation-audit-log.md
+            - config/windmill/scripts/lv3-mutation-audit.py
+            - docs/adr/0066-structured-mutation-audit-log.md
+            - docs/workstreams/adr-0066-mutation-audit-log.md
+          mode: exclusive
+        - id: ansible_cfg_contract
+          paths:
+            - ansible.cfg
+          mode: shared_contract
+          contract: ansible-controller-config-v1
+        - id: workflow_catalog_contract
+          paths:
+            - config/workflow-catalog.json
+          mode: shared_contract
+          contract: workflow-catalog-v1
+        - id: command_catalog_contract
+          paths:
+            - config/command-catalog.json
+          mode: shared_contract
+          contract: command-catalog-v1
+        - id: integration_truth
+          paths:
+            - README.md
+            - VERSION
+            - changelog.md
+            - versions/stack.yaml
+          mode: generated
     ready_to_merge: false
     live_applied: false
 
@@ -1685,6 +1844,43 @@ workstreams:
       - config/agent-tool-registry.json
       - config/api-gateway-catalog.json
       - Compose stack docker-runtime-lv3
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: unified_search_repo_surface
+          paths:
+            - scripts/search_fabric/**
+            - scripts/api_gateway/main.py
+            - scripts/lv3_cli.py
+            - docs/adr/0095-unified-platform-search.md
+            - docs/workstreams/adr-0095-unified-search.md
+          mode: exclusive
+        - id: agent_tool_registry_contract
+          paths:
+            - config/agent-tool-registry.json
+          mode: shared_contract
+          contract: agent-tool-registry-v1
+        - id: api_gateway_catalog_contract
+          paths:
+            - config/api-gateway-catalog.json
+          mode: shared_contract
+          contract: api-gateway-catalog-v1
+        - id: health_probe_catalog_contract
+          paths:
+            - config/health-probe-catalog.json
+          mode: shared_contract
+          contract: health-probe-catalog-v1
+        - id: integration_truth
+          paths:
+            - README.md
+            - VERSION
+            - changelog.md
+            - versions/stack.yaml
+          mode: generated
     ready_to_merge: false
     live_applied: false
 
@@ -2898,6 +3094,43 @@ workstreams:
       - collections/ansible_collections/lv3/platform/roles/gitea_runtime
       - config/service-capability-catalog.json
       - versions/stack.yaml
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: gitea_repo_surface
+          paths:
+            - .gitea/workflows/validate.yml
+            - playbooks/gitea.yml
+            - playbooks/services/gitea.yml
+            - playbooks/groups/automation.yml
+            - collections/ansible_collections/lv3/platform/roles/gitea_postgres/**
+            - collections/ansible_collections/lv3/platform/roles/gitea_runtime/**
+            - collections/ansible_collections/lv3/platform/roles/gitea_runner/**
+            - docs/adr/0143-gitea-for-self-hosted-git-and-ci.md
+            - docs/workstreams/adr-0143-gitea-ci.md
+            - docs/runbooks/configure-gitea.md
+          mode: exclusive
+        - id: proxmox_host_vars_contract
+          paths:
+            - inventory/host_vars/proxmox_florin.yml
+          mode: shared_contract
+          contract: proxmox-host-vars-v1
+        - id: service_capability_catalog_contract
+          paths:
+            - config/service-capability-catalog.json
+          mode: shared_contract
+          contract: service-capability-catalog-v1
+        - id: integration_truth
+          paths:
+            - README.md
+            - VERSION
+            - changelog.md
+            - versions/stack.yaml
+          mode: generated
     ready_to_merge: false
     live_applied: true
 
@@ -3300,6 +3533,61 @@ workstreams:
       - config/workflow-catalog.json
       - config/ledger-event-types.yaml
       - docs/runbooks/budgeted-workflow-scheduler.md
+    ready_to_merge: false
+
+  - id: adr-0173-workstream-surface-ownership-manifest
+    adr: "0173"
+    title: Workstream surface ownership manifest
+    status: implemented
+    owner: codex
+    branch: codex/adr-0173-ownership-manifest
+    worktree_path: ../worktree-adr-0173-ownership-manifest
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0173-workstream-surface-ownership-manifest.md
+    depends_on:
+      - adr-0156-agent-session-workspace-isolation
+      - adr-0172-watchdog-escalation
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/
+      - scripts/validate_repo.sh
+      - scripts/validate_repository_data_models.py
+      - VERSION
+      - changelog.md
+      - versions/stack.yaml
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: ownership_validation_runtime
+          paths:
+            - scripts/workstream_surface_ownership.py
+            - scripts/validate_repository_data_models.py
+            - scripts/validate_repo.sh
+            - tests/test_workstream_surface_ownership.py
+            - tests/test_validate_repo_cache.py
+          mode: exclusive
+        - id: workstream_docs_contract
+          paths:
+            - docs/workstreams/README.md
+            - docs/workstreams/TEMPLATE.md
+          mode: shared_contract
+          contract: workstream-docs-v1
+        - id: adr_0173_docs
+          paths:
+            - docs/adr/0173-workstream-surface-ownership-manifest.md
+            - docs/workstreams/adr-0173-workstream-surface-ownership-manifest.md
+            - docs/adr/.index.yaml
+          mode: exclusive
+        - id: integration_release_surface
+          paths:
+            - VERSION
+            - changelog.md
+            - versions/stack.yaml
+          mode: exclusive
     ready_to_merge: false
     live_applied: false
 

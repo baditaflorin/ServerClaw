@@ -9,6 +9,7 @@
 - Depends On:
 - Conflicts With:
 - Shared Surfaces:
+- Ownership Manifest: `workstreams.yaml` `ownership_manifest`
 
 ## Scope
 
@@ -17,6 +18,8 @@
 ## Expected Repo Surfaces
 
 ## Expected Live Surfaces
+
+## Ownership Notes
 
 ## Verification
 
