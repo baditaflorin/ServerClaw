@@ -29,10 +29,19 @@ def test_docker_runtime_patches_nftables_before_starting_docker() -> None:
 
 
 def test_docker_runtime_rechecks_nat_and_forward_chains() -> None:
-    task_names = {task["name"] for task in load_tasks()}
+    tasks = load_tasks()
+    task_names = {task["name"] for task in tasks}
     assert "Flush Docker handlers before chain health checks" in task_names
     assert "Check whether Docker nat chain exists" in task_names
     assert "Check whether Docker forward chain exists" in task_names
     assert "Restart Docker when required chains are missing" in task_names
     assert "Assert Docker nat chain is present" in task_names
     assert "Assert Docker filter forward chain is present" in task_names
+    nat_recheck = next(task for task in tasks if task["name"] == "Recheck Docker nat chain after restart")
+    forward_recheck = next(task for task in tasks if task["name"] == "Recheck Docker forward chain after restart")
+    assert nat_recheck["retries"] == 10
+    assert nat_recheck["delay"] == 2
+    assert nat_recheck["until"] == "docker_runtime_nat_chain_recheck.rc == 0"
+    assert forward_recheck["retries"] == 10
+    assert forward_recheck["delay"] == 2
+    assert forward_recheck["until"] == "docker_runtime_forward_chain_recheck.rc == 0"
