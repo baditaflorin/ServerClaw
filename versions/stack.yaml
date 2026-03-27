@@ -24,9 +24,10 @@ live_apply_evidence:
     guest_network_policy: 2026-03-22-adr-0067-guest-network-policy-live-apply
     runtime_container_telemetry: 2026-03-22-adr-0040-runtime-container-telemetry-live-apply
     mail_platform: 2026-03-24-keycloak-password-reset-mail-live-apply
-    step_ca: 2026-03-22-adr-0042-step-ca-live-apply
-    openbao: 2026-03-26-adr-0171-fault-injection-live-apply
-    vaultwarden: 2026-03-26-adr-0153-live-apply
+    step_ca: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
+    openbao: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
+    vaultwarden: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
+    certificate_lifecycle: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
     windmill: 2026-03-26-adr-0126-observation-to-action-closure-loop-live-apply
     observation_to_action_closure_loop: 2026-03-26-adr-0126-observation-to-action-closure-loop-live-apply
     deadlock_detector: 2026-03-26-adr-0162-deadlock-detector-live-apply

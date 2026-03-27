@@ -353,8 +353,8 @@
         "server_name": "100.64.0.1"
       },
       "policy": {
-        "warn_days": 21,
-        "critical_days": 14
+        "warn_hours": 6,
+        "critical_hours": 2
       },
       "renewal": {
         "agent": "step-ca-self",

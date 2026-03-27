@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 import sys
 from pathlib import Path
+import json
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -129,3 +130,12 @@ def test_evaluate_certificate_warns_on_issuer_mismatch(monkeypatch) -> None:
     assert result["severity"] == "warning"
     assert result["status"] == "issuer_mismatch"
     assert result["expected_issuer"] == "step-ca"
+
+
+def test_step_ca_proxy_catalog_entry_uses_hour_policy() -> None:
+    catalog = json.loads((REPO_ROOT / "config" / "certificate-catalog.json").read_text())
+    certificate = next(
+        item for item in catalog["certificates"] if item["id"] == "step-ca-proxy"
+    )
+
+    assert certificate["policy"] == {"warn_hours": 6, "critical_hours": 2}
