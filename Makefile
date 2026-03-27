@@ -4,7 +4,7 @@ BOOTSTRAP_KEY ?= /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.lo
 ANSIBLE_LOCAL_TEMP ?= /tmp/proxmox_florin_server-ansible-local
 ANSIBLE_REMOTE_TEMP ?= /tmp
 ANSIBLE_ENV := ANSIBLE_LOCAL_TEMP=$(ANSIBLE_LOCAL_TEMP) ANSIBLE_REMOTE_TEMP=$(ANSIBLE_REMOTE_TEMP)
-ANSIBLE_SCOPED_RUN := uvx --from pyyaml python $(REPO_ROOT)/scripts/ansible_scope_runner.py run --inventory $(ANSIBLE_INVENTORY) --run-id $(PLATFORM_TRACE_ID)
+ANSIBLE_SCOPED_RUN = uvx --from pyyaml python $(REPO_ROOT)/scripts/ansible_scope_runner.py run --inventory $(ANSIBLE_INVENTORY) $(if $(strip $(PLATFORM_TRACE_ID)),--run-id $(PLATFORM_TRACE_ID),)
 UPTIME_KUMA_PYTHON ?= $(REPO_ROOT)/.local/uptime-kuma/client-venv/bin/python
 ACTION ?= list-monitors
 UPTIME_KUMA_ARGS ?=
