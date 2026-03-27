@@ -77,7 +77,6 @@ class AdrMeta(NamedTuple):
     summary: str
     filename: str        # relative path under docs/adr/
 
-
 class IndentedSafeDumper(yaml.SafeDumper):
     def increase_indent(self, flow: bool = False, indentless: bool = False):  # type: ignore[override]
         return super().increase_indent(flow, False)

@@ -40,6 +40,9 @@
       - --not-after
       - 1h
   register: step_ca_verify_issue
+  retries: 5
+  delay: 2
+  until: step_ca_verify_issue.rc == 0
   changed_when: false
   no_log: true
 

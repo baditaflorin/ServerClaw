@@ -785,7 +785,22 @@
           "certificate",
           "step-ca-service-test.lv3.internal",
           "/opt/step-ca/service-test.crt",
-          "/opt/step-ca/service-test.key"
+          "/opt/step-ca/service-test.key",
+          "--force",
+          "--ca-url",
+          "https://10.10.10.20:9000",
+          "--root",
+          "/opt/step-ca/home/certs/root_ca.crt",
+          "--provisioner",
+          "services",
+          "--provisioner-password-file",
+          "/opt/step-ca/secrets/services-password.txt",
+          "--password-file",
+          "/opt/step-ca/secrets/services-password.txt",
+          "--san",
+          "step-ca-service-test.lv3.internal",
+          "--not-after",
+          "1h"
         ],
         "success_rc": 0
       },

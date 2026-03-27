@@ -72,6 +72,7 @@
 ## Notes For The Next Assistant
 
 - Repo implementation is merged; the remaining work is live rollout from `main`
+- As of `2026-03-27`, production no longer has VMID `151` in `qm list`, so active production host targeting must not include `postgres-replica-lv3` until ADR 0098 is actually live-applied again.
 - Run `tofu apply` before any Ansible work — the replica VM must exist before Patroni can be configured
 - The keepalived `check_patroni_leader.sh` script must use `curl -sf http://localhost:8008/leader` (returns 200 if leader, 503 if not); do not use `patronictl` in the script — it is too slow for keepalived's 2-second check interval
 - When updating service connection strings to use the VIP DNS, do a rolling restart (one service at a time) rather than all at once; some services require a full container restart to pick up the new connection string

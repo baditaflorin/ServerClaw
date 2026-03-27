@@ -59,14 +59,14 @@ Treat the entire `.local/openbao/` subtree as recovery material and keep it out 
 Basic runtime checks:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'ssh -o StrictHostKeyChecking=no ops@10.10.10.20 docker compose --file /opt/openbao/docker-compose.yml ps'
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.118.189.95 'ssh -o StrictHostKeyChecking=no ops@10.10.10.20 curl -fsS http://127.0.0.1:8201/v1/sys/health'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'ssh -o StrictHostKeyChecking=no ops@10.10.10.20 docker compose --file /opt/openbao/docker-compose.yml ps'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'ssh -o StrictHostKeyChecking=no ops@10.10.10.20 curl -fsS http://127.0.0.1:8201/v1/sys/health'
 ```
 
 Routine operator login over an SSH port forward:
 
 ```bash
-ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -L 8201:127.0.0.1:8201 ops@100.118.189.95 'ssh -o ExitOnForwardFailure=yes -N -L 8201:127.0.0.1:8201 ops@10.10.10.20'
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -L 8201:127.0.0.1:8201 ops@100.64.0.1 'ssh -o ExitOnForwardFailure=yes -N -L 8201:127.0.0.1:8201 ops@10.10.10.20'
 curl --request POST --data "{\"password\":\"$(tr -d '\n' < /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/openbao/ops-password.txt)\"}" http://127.0.0.1:8201/v1/auth/userpass/login/ops
 ```
 
@@ -90,7 +90,7 @@ tar -xf "$tmpdir/step.tar.gz" -C "$tmpdir"
   --force \
   --provisioner services \
   --provisioner-password-file /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/secrets/provisioners/services-password.txt \
-  --ca-url https://100.118.189.95:9443 \
+  --ca-url https://100.64.0.1:9443 \
   --root /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt \
   --san openbao-client.lv3.internal \
   --not-after 1h \
@@ -98,9 +98,9 @@ tar -xf "$tmpdir/step.tar.gz" -C "$tmpdir"
 curl --cert "$tmpdir/client.crt" \
   --key "$tmpdir/client.key" \
   --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt \
-  https://100.118.189.95:8200/v1/sys/health
+  https://100.64.0.1:8200/v1/sys/health
 curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt \
-  https://100.118.189.95:8200/v1/sys/health
+  https://100.64.0.1:8200/v1/sys/health
 ```
 
 ## Notes
@@ -112,7 +112,9 @@ curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local
 
 ## Recovery Notes From The 2026-03-26 Live Apply
 
-If `make converge-openbao` reloads the guest firewall and Docker loses the OpenBao publish rule, the broken state presents as `docker compose up` failing to bind `:8200` with an iptables DNAT error and `docker inspect lv3-openbao` showing an empty `NetworkSettings.Networks` object.
+As of the `2026-03-27` replay, `make converge-openbao` automatically recovers the recurring Docker publish regression by rechecking the guest `DOCKER` and `DOCKER-FORWARD` chains, restarting Docker when they are missing, and recreating the named `lv3-openbao` container before `docker compose up`.
+
+If a future rerun still leaves the guest runtime broken, the failure usually presents as `docker compose up` failing to bind `:8200` with an iptables DNAT error and `docker inspect lv3-openbao` showing an empty `NetworkSettings.Networks` object.
 
 Recover the guest runtime in this order:
 
@@ -127,4 +129,4 @@ After the guest is healthy again, restart the host-side socket activation pair i
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo systemctl stop lv3-tailscale-proxy-openbao.service && sudo systemctl start lv3-tailscale-proxy-openbao.socket'
 ```
 
-The current host Tailscale IP is `100.64.0.1`. The OpenBao proxy certificate already covers that IP, but the `step-ca` proxy certificate still carries the legacy `100.118.189.95` SAN today, so controller-local CA health checks may still need `curl --resolve 100.118.189.95:9443:100.64.0.1 ...` until the proxy certificate is reissued.
+The current host Tailscale IP is `100.64.0.1`, and both the OpenBao and `step-ca` proxy certificates now cover that address directly.

@@ -150,6 +150,30 @@
   when: item.name not in step_ca_provisioner_list.stdout
   changed_when: true
 
+- name: Ensure step-ca server names match the current controller topology
+  ansible.builtin.shell: |
+    set -euo pipefail
+    python3 - <<'PY'
+    import json
+    from pathlib import Path
+
+    path = Path("{{ step_ca_home }}/config/ca.json")
+    payload = json.loads(path.read_text())
+    desired = {{ step_ca_server_names | to_json }}
+    current = payload.get("dnsNames", [])
+
+    if current == desired:
+        raise SystemExit(0)
+
+    payload["dnsNames"] = desired
+    path.write_text(json.dumps(payload, indent=2) + "\n")
+    print("changed")
+    PY
+  args:
+    executable: /bin/bash
+  register: step_ca_server_names_sync
+  changed_when: "'changed' in step_ca_server_names_sync.stdout"
+
 - name: Ensure the step-ca home and secrets are readable by the container user
   ansible.builtin.file:
     path: "{{ item }}"
@@ -185,6 +209,84 @@
     or 'Pull complete' in step_ca_pull.stdout
     or 'Pulling' in step_ca_pull.stdout
 
+- name: Reset SSH connection before Docker chain checks for step-ca startup
+  ansible.builtin.meta: reset_connection
+
+- name: Check whether Docker nat chain exists before step-ca startup
+  ansible.builtin.command: iptables -t nat -S DOCKER
+  register: step_ca_docker_nat_chain_check
+  changed_when: false
+  failed_when: step_ca_docker_nat_chain_check.rc not in [0, 1]
+
+- name: Check whether Docker forward chain exists before step-ca startup
+  ansible.builtin.command: iptables -t filter -S DOCKER-FORWARD
+  register: step_ca_docker_forward_chain_check
+  changed_when: false
+  failed_when: step_ca_docker_forward_chain_check.rc not in [0, 1]
+
+- name: Restart Docker when required chains are missing before step-ca startup
+  ansible.builtin.systemd:
+    name: docker
+    state: restarted
+  when: step_ca_docker_nat_chain_check.rc == 1 or step_ca_docker_forward_chain_check.rc == 1
+
+- name: Recheck Docker nat chain before step-ca startup
+  ansible.builtin.command: iptables -t nat -S DOCKER
+  register: step_ca_docker_nat_chain_recheck
+  changed_when: false
+
+- name: Recheck Docker forward chain before step-ca startup
+  ansible.builtin.command: iptables -t filter -S DOCKER-FORWARD
+  register: step_ca_docker_forward_chain_recheck
+  changed_when: false
+
+- name: Assert Docker nat chain is present before step-ca startup
+  ansible.builtin.assert:
+    that:
+      - step_ca_docker_nat_chain_recheck.rc == 0
+    fail_msg: "Docker is running but the nat DOCKER chain is missing; step-ca published ports will fail."
+
+- name: Assert Docker forward chain is present before step-ca startup
+  ansible.builtin.assert:
+    that:
+      - step_ca_docker_forward_chain_recheck.rc == 0
+    fail_msg: "Docker is running but the filter DOCKER-FORWARD chain is missing; step-ca bridge networking will fail."
+
+- name: Check whether the step-ca container already exists
+  ansible.builtin.command:
+    argv:
+      - docker
+      - container
+      - inspect
+      - step-ca
+  register: step_ca_container_inspect
+  changed_when: false
+  failed_when: false
+
+- name: Check whether the existing step-ca container publishes the expected port
+  ansible.builtin.command:
+    argv:
+      - docker
+      - port
+      - step-ca
+      - "{{ step_ca_api_port }}/tcp"
+  register: step_ca_container_port_check
+  changed_when: false
+  failed_when: false
+  when: step_ca_container_inspect.rc == 0
+
+- name: Remove the stale step-ca container when its published port binding is missing
+  ansible.builtin.command:
+    argv:
+      - docker
+      - rm
+      - -f
+      - step-ca
+  when:
+    - step_ca_container_inspect.rc == 0
+    - step_ca_container_port_check.rc != 0
+  changed_when: true
+
 - name: Start the step-ca stack
   ansible.builtin.command:
     argv:
@@ -202,6 +304,20 @@
     'Creating' in step_ca_up.stdout
     or 'Recreating' in step_ca_up.stdout
     or 'Starting' in step_ca_up.stdout
+
+- name: Restart step-ca after controller SAN changes
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ step_ca_compose_file }}"
+      - restart
+      - step-ca
+  args:
+    chdir: "{{ step_ca_site_dir }}"
+  when: step_ca_server_names_sync.changed
+  changed_when: true
 
 - name: Wait for the private step-ca API to listen locally
   ansible.builtin.wait_for:
@@ -244,6 +360,9 @@
       - --not-after
       - 1h
   register: step_ca_service_test_issue
+  retries: 5
+  delay: 2
+  until: step_ca_service_test_issue.rc == 0
   changed_when: false
   no_log: true
 

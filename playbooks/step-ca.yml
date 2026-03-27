@@ -56,7 +56,6 @@
     - service-step-ca
 
   roles:
-    - role: lv3.platform.linux_guest_firewall
     - role: lv3.platform.step_ca_ssh_trust
       vars:
         step_ca_ssh_host_principals_extra:

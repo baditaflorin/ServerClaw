@@ -3,13 +3,13 @@
   "receipt_id": "2026-03-26-adr-0101-certificate-lifecycle-live-apply",
   "environment": "production",
   "applied_on": "2026-03-26",
-  "recorded_on": "2026-03-26",
+  "recorded_on": "2026-03-27",
   "recorded_by": "codex",
   "source_commit": "9457e4694f5a80b8876ff4e99e400b6960a07cb7",
   "repo_version_context": "0.174.0",
   "workflow_id": "converge-openbao",
   "adr": "0101",
-  "summary": "Replayed ADR 0101 from the latest `origin/main` in an isolated worktree, recovered the OpenBao runtime after a live Docker network regression during converge, verified the OpenBao and Vaultwarden renewal timers, and recorded the remaining platform drift still surfaced by the shared certificate probe contract.",
+  "summary": "Replayed ADR 0101 from the latest `origin/main` in an isolated worktree, fixed the remaining live automation defects surfaced by the first replay, verified both `make converge-openbao` and `make converge-step-ca` end to end, and confirmed the private OpenBao, Vaultwarden, and step-ca proxy paths through the host Tailscale address.",
   "targets": [
     {
       "kind": "host",
@@ -52,12 +52,17 @@
     {
       "check": "Repository data-model and playbook syntax validation",
       "result": "pass",
-      "observed": "`uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, `python3 scripts/generate_cert_renewal_config.py --pretty`, and `make syntax-check-openbao` all completed successfully from the isolated live-apply worktree."
+      "observed": "`uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, `python3 scripts/generate_cert_renewal_config.py --pretty`, `make syntax-check-openbao`, and `make syntax-check-step-ca` all completed successfully from the isolated live-apply worktree."
     },
     {
-      "check": "OpenBao live replay and recovery",
+      "check": "OpenBao live replay and automation recovery",
       "result": "pass",
-      "observed": "The first `make converge-openbao` replay from current `origin/main` exposed stale production inventory for `postgres-replica-lv3` and an OpenBao Docker publish failure after firewall reload (`lv3-openbao` detached from `openbao_default`). Recovery succeeded by restarting Docker on `docker-runtime-lv3`, removing the broken `lv3-openbao` container, removing `openbao_default`, recreating the stack, and restarting the host-side `lv3-tailscale-proxy-openbao` socket pair."
+      "observed": "The first `make converge-openbao` replay from current `origin/main` exposed stale production inventory for `postgres-replica-lv3` and an OpenBao Docker publish failure after firewall reload. The branch now removes `postgres-replica-lv3` from active production targeting and adds Docker NAT/forward-chain recovery to the OpenBao role; a fresh `make converge-openbao` completed successfully against `docker-runtime-lv3` and `postgres-lv3`, including the dynamic PostgreSQL credential verification path."
+    },
+    {
+      "check": "step-ca live replay and SSH trust rollout",
+      "result": "pass",
+      "observed": "`make converge-step-ca` completed successfully after aligning the live `step-ca` server-name set with the current controller topology, exporting `STEPPATH=/opt/step-ca/home` in the container, correcting the `step_ca` readiness probe command, adding short retries to early issuance verification, and removing the misplaced guest-firewall role from the Proxmox-host SSH trust play."
     },
     {
       "check": "Renewal timers active on docker-runtime-lv3",
@@ -80,9 +85,9 @@
       "observed": "`curl -vk --resolve vault.lv3.org:443:100.64.0.1 https://vault.lv3.org/` returned HTTP `200` with a 24-hour `CN=vault.lv3.org` certificate from the LV3 internal CA, confirming the service is healthy through the host Tailscale proxy."
     },
     {
-      "check": "step-ca proxy health and remaining live drift",
-      "result": "partial",
-      "observed": "`curl --resolve 100.118.189.95:9443:100.64.0.1 --cacert ... https://100.118.189.95:9443/health` returned `{\"status\":\"ok\"}`, but `python3 scripts/tls_cert_probe.py --certificate-id step-ca-proxy --fail-on never` still reports `certificate is not valid for '100.64.0.1'` because the live proxy certificate SAN has not yet been rotated from legacy `100.118.189.95`."
+      "check": "step-ca proxy health and live certificate verification",
+      "result": "pass",
+      "observed": "`curl --cacert /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/step-ca/certs/root_ca.crt https://100.64.0.1:9443/health` returned `{\"status\":\"ok\"}`, and `python3 scripts/tls_cert_probe.py --certificate-id step-ca-proxy --fail-on never` no longer reports a SAN mismatch against `100.64.0.1`."
     }
   ],
   "evidence_refs": [
@@ -96,6 +101,6 @@
   "notes": [
     "The branch intentionally does not modify protected integration files: `VERSION`, release sections in `changelog.md`, the top-level `README.md` integrated status summary, or `versions/stack.yaml`.",
     "The shared certificate probe contract now uses the host Tailscale IP for `vaultwarden-private` while keeping `vault.lv3.org` as SNI, which removes a controller-local private-DNS dependency from the validation path.",
-    "The remaining platform issues visible after this replay are unrelated to the ADR 0101 repo implementation itself: stale production inventory for `postgres-replica-lv3` and the legacy SAN on the `step-ca` proxy certificate."
+    "The remaining merge-to-main work is limited to protected integration files and release bookkeeping on `main`; the live issues originally surfaced by this workstream (`postgres-replica-lv3` production targeting and the legacy `step-ca` proxy SAN) are resolved on this branch."
   ]
 }

@@ -3,6 +3,8 @@ services:
     image: {{ step_ca_image }}
     container_name: step-ca
     restart: unless-stopped
+    environment:
+      STEPPATH: {{ step_ca_home }}
     entrypoint:
       - /usr/local/bin/step-ca
     command:
