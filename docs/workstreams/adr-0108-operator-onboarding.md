@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0108](../adr/0108-operator-onboarding-and-offboarding.md)
 - Title: Windmill-backed onboarding/offboarding across Keycloak, step-ca, OpenBao, and Tailscale with operators.yaml as the authoritative roster
-- Status: merged
+- Status: live_applied
 - Branch: `codex/adr-0108-operator-onboarding`
 - Worktree: `.worktrees/adr-0108`
 - Owner: codex
@@ -74,9 +74,11 @@
 - added `lv3 operator add`, `lv3 operator remove`, and `lv3 operator inventory`
 - wired the validation gate and repository data-model checks to validate the operator roster
 - documented the onboarding and offboarding procedures in dedicated runbooks and updated ADR 0108 implementation metadata for release `0.105.0`
+- completed the latest-main durability replay and verified the browser-first Windmill onboarding, inventory, and offboarding path on production; the first mainline release that records that verified state is `0.177.8` with platform version `0.130.29`
 
 ## Notes For The Next Assistant
 
-- The repository-side implementation is complete on `main`, but the live Windmill worker still needs deployment-local environment variables for the Tailscale invite endpoint and optional step-ca registration/revocation hooks.
+- The repository-side implementation is complete on `main` and the latest-main live apply is verified end to end.
+- Optional deployment-local hooks remain graceful when unset: step-ca registration and revocation stay `skipped`, and Tailscale invite and removal stay `skipped` or `unavailable` until their runtime environment variables are configured.
 - `sync-operators` is the mainline reconciliation entrypoint when `config/operators.yaml` changes after merge.
 - The current inventory report can query Keycloak, OpenBao, and Tailscale directly; step-ca inventory remains controller-state-driven because the live deployment does not expose a stable certificate-inventory API in repo automation today.
