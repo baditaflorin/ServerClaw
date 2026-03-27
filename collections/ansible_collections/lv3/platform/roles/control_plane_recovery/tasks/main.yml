@@ -95,7 +95,7 @@
     'http://127.0.0.1:{{ openbao_http_port }}/v1/sys/unseal'
   args:
     executable: /bin/bash
-  loop: "{{ control_plane_recovery_openbao_init_payload.keys_base64[:openbao_init_key_threshold] }}"
+  loop: "{{ control_plane_recovery_openbao_init_payload.keys_base64[:(openbao_init_key_threshold | default(2) | int)] }}"
   when: control_plane_recovery_openbao_seal_status.json.sealed | bool
   changed_when: control_plane_recovery_openbao_seal_status.json.sealed | bool
   failed_when: false
