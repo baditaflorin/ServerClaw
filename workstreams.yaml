@@ -4194,7 +4194,7 @@ workstreams:
   - id: ws-0184-live-apply
     adr: "0184"
     title: Failure-domain labels and anti-affinity policy live apply
-    status: implemented
+    status: live_applied
     owner: codex
     branch: codex/ws-0184-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/worktree-ws-0184-live-apply
@@ -4236,4 +4236,4 @@ workstreams:
             - receipts/live-applies/**
           mode: exclusive
     ready_to_merge: false
-    live_applied: false
+    live_applied: true

@@ -1,10 +1,10 @@
 # ADR 0184: Failure-Domain Labels and Anti-Affinity Policy
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Accepted
+- Implementation Status: Partial
+- Implemented In Repo Version: pending merge to main from `codex/ws-0184-live-apply`
+- Implemented In Platform Version: 0.130.31
+- Implemented On: 2026-03-27
 - Date: 2026-03-27
 
 ## Context
