@@ -266,6 +266,46 @@
         }
       }
     },
+    "excalidraw": {
+      "service_name": "excalidraw",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "excalidraw_runtime",
+      "verify_file": "roles/excalidraw_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The Excalidraw frontend responds on the private runtime listener.",
+        "timeout_seconds": 90,
+        "retries": 18,
+        "delay_seconds": 5,
+        "url": "http://10.10.10.20:3095/",
+        "method": "GET",
+        "expected_status": [200]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The Excalidraw collaboration room responds on its local socket service port.",
+        "timeout_seconds": 90,
+        "retries": 18,
+        "delay_seconds": 5,
+        "url": "http://10.10.10.20:3096/",
+        "method": "GET",
+        "expected_status": [200]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Excalidraw Public",
+          "type": "http",
+          "url": "https://draw.lv3.org",
+          "description": "Private Excalidraw publication through the authenticated shared NGINX edge.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": ["200-399"]
+        }
+      }
+    },
     "langfuse": {
       "service_name": "langfuse",
       "owning_vm": "docker-runtime-lv3",

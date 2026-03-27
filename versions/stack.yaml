@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.177.15
+repo_version: 0.177.16
 platform_version: 0.130.31
 
 live_apply_evidence:
@@ -64,6 +64,7 @@ live_apply_evidence:
     staging_environment: 2026-03-27-adr-0183-staging-live-apply
     immutable_guest_replacement: 2026-03-27-adr-0191-immutable-guest-replacement-live-apply
     capacity_classes: 2026-03-27-adr-0192-capacity-classes-live-apply
+    excalidraw: 2026-03-27-adr-0202-excalidraw-auto-generated-architecture-diagrams-live-apply
 desired_state:
   host_id: proxmox_florin
   provider: hetzner-dedicated
@@ -927,7 +928,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.15
+    current: 0.177.16
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.130.31

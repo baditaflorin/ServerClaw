@@ -2549,6 +2549,56 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-excalidraw": {
+      "description": "Deploy the private Excalidraw frontend and collaboration room on docker-runtime-lv3 and publish draw.lv3.org through the shared authenticated edge.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-excalidraw",
+        "command": "make converge-excalidraw"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": []
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-excalidraw"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-excalidraw.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/excalidraw.yml",
+        "roles/excalidraw_runtime",
+        "roles/nginx_edge_publication",
+        "scripts/generate_diagrams.py",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/service-capability-catalog.json"
+      ],
+      "outputs": [
+        "A private Excalidraw runtime on docker-runtime-lv3 with committed generated architecture scenes and authenticated publication at draw.lv3.org."
+      ],
+      "verification_commands": [
+        "make syntax-check-excalidraw",
+        "uv run --with pyyaml --with jsonschema python scripts/generate_diagrams.py --check",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:3095/ >/dev/null && curl -fsS http://127.0.0.1:3096/'",
+        "dig +short draw.lv3.org @8.8.8.8 && curl -Ik --resolve draw.lv3.org:443:65.108.75.123 https://draw.lv3.org"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1500,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-langfuse": {
       "description": "Converge Langfuse on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at langfuse.lv3.org, and verify repo-managed trace ingestion.",
       "lifecycle_status": "active",

@@ -4462,3 +4462,40 @@ workstreams:
       changelog_entry: implemented ADR 0190 synthetic transaction replay for restore verification, including the governed replay catalog, guest-agent restore fallback, and committed live-apply evidence for the current restore-health gap
       release_bump: patch
       included_in_repo_version: null
+
+  - id: ws-0202-live-apply
+    adr: "0202"
+    title: Excalidraw auto generated architecture diagrams
+    status: live_applied
+    owner: codex
+    branch: "codex/ws-0202-live-apply"
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/worktree-ws-0202-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0202-excalidraw-auto-generated-architecture-diagrams.md
+    depends_on:
+      - adr-0038-generated-status-docs
+      - adr-0075-service-capability-catalog
+      - adr-0133-portal-authentication-by-default
+      - adr-0136-http-security-headers
+    conflicts_with: []
+    shared_surfaces:
+      - inventory/host_vars/proxmox_florin.yml
+      - collections/ansible_collections/lv3/platform/roles/excalidraw_runtime/
+      - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/
+      - playbooks/excalidraw.yml
+      - playbooks/services/excalidraw.yml
+      - scripts/generate_diagrams.py
+      - scripts/lv3_cli.py
+      - config/service-capability-catalog.json
+      - config/health-probe-catalog.json
+      - config/workflow-catalog.json
+      - docs/runbooks/configure-excalidraw.md
+      - docs/adr/0202-excalidraw-auto-generated-architecture-diagrams.md
+      - docs/workstreams/adr-0202-excalidraw-auto-generated-architecture-diagrams.md
+    ready_to_merge: false
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0202 by publishing private Excalidraw at draw.lv3.org, generating committed architecture diagrams from repo-managed platform data, and recording verified live-apply evidence
+      release_bump: patch
+      included_in_repo_version: 0.177.16
+      latest_receipts:
+        excalidraw: 2026-03-27-adr-0202-excalidraw-auto-generated-architecture-diagrams-live-apply

@@ -7,9 +7,9 @@
 
 schema_version: 1
 generated: '2026-03-28'
-total_adrs: 202
+total_adrs: 203
 implementation_status_summary:
-  Implemented: 185
+  Implemented: 186
   Partial: 3
   Not Implemented: 13
   Deprecated: 1
@@ -178,6 +178,7 @@ concerns:
     - 0183
     - 0184
     - 0185
+    - '0202'
   release:
     - 0008
     - '0110'
@@ -3339,3 +3340,18 @@ adr_index:
       operati
     filename: 0198-qdrant-vector-search-semantic-rag.md
     implemented_version: 0.177.12
+  - adr: '0202'
+    title: Excalidraw Auto Generated Architecture Diagrams
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: platform
+    keywords:
+      - excalidraw
+      - auto
+      - generated
+      - architecture
+      - diagrams
+    summary: We will add a repo-managed Excalidraw publication at draw.lv3.org and commit a
+    filename: 0202-excalidraw-auto-generated-architecture-diagrams.md
+    implemented_version: 0.177.16

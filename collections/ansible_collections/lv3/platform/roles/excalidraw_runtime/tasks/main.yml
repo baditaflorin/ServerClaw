@@ -1,0 +1,100 @@
+---
+# Purpose: Converge the Excalidraw frontend and collaboration room runtime on docker-runtime-lv3.
+# Inputs: Excalidraw runtime defaults, pinned container images, and shared-edge publication topology.
+# Outputs: Rendered compose files, patched frontend bootstrap script, and running Excalidraw containers.
+# Idempotency: Partially idempotent; reruns reconcile the same compose stack and reapply the deterministic frontend patch.
+# Dependencies: ADR 0202, ADR 0165; requires docker_runtime and shared nginx_edge_publication outputs.
+- name: Validate Excalidraw runtime inputs
+  ansible.builtin.assert:
+    that:
+      - excalidraw_runtime_site_dir | length > 0
+      - excalidraw_runtime_compose_file | length > 0
+      - excalidraw_runtime_bootstrap_script | length > 0
+      - excalidraw_runtime_app_container_name | length > 0
+      - excalidraw_runtime_room_container_name | length > 0
+      - excalidraw_runtime_app_image | length > 0
+      - excalidraw_runtime_room_image | length > 0
+      - excalidraw_runtime_app_port | int > 0
+      - excalidraw_runtime_room_port | int > 0
+      - excalidraw_runtime_public_url | length > 0
+      - excalidraw_runtime_public_host | length > 0
+      - excalidraw_runtime_collab_origin | length > 0
+      - excalidraw_runtime_upstream_collab_origin | length > 0
+    fail_msg: >-
+      excalidraw_runtime requires the compose paths, pinned frontend and room images,
+      local listener ports, and the shared public collaboration origin.
+
+- name: Ensure the Excalidraw runtime directory exists
+  ansible.builtin.file:
+    path: "{{ excalidraw_runtime_site_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Render the Excalidraw frontend bootstrap script
+  ansible.builtin.template:
+    src: bootstrap-app.sh.j2
+    dest: "{{ excalidraw_runtime_bootstrap_script }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Render the Excalidraw compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ excalidraw_runtime_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the Excalidraw images
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ excalidraw_runtime_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ excalidraw_runtime_site_dir }}"
+  register: excalidraw_runtime_pull
+  changed_when: >-
+    'Pulling' in excalidraw_runtime_pull.stdout
+    or 'Downloaded newer image' in excalidraw_runtime_pull.stdout
+    or 'Pull complete' in excalidraw_runtime_pull.stdout
+
+- name: Start the Excalidraw runtime stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ excalidraw_runtime_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ excalidraw_runtime_site_dir }}"
+  register: excalidraw_runtime_up
+  changed_when: >-
+    'Creating' in excalidraw_runtime_up.stdout
+    or 'Recreating' in excalidraw_runtime_up.stdout
+    or 'Starting' in excalidraw_runtime_up.stdout
+
+- name: Wait for the Excalidraw frontend listener
+  ansible.builtin.wait_for:
+    host: "{{ excalidraw_runtime_bind_host }}"
+    port: "{{ excalidraw_runtime_app_port }}"
+    delay: 0
+    timeout: 180
+
+- name: Wait for the Excalidraw collaboration room listener
+  ansible.builtin.wait_for:
+    host: "{{ excalidraw_runtime_bind_host }}"
+    port: "{{ excalidraw_runtime_room_port }}"
+    delay: 0
+    timeout: 180
+
+- name: Verify the Excalidraw runtime
+  ansible.builtin.import_tasks: verify.yml

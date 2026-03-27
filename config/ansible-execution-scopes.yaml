@@ -29,6 +29,12 @@ playbooks:
     shared_surfaces:
       - service:docker-runtime
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/excalidraw.yml:
+    playbook_id: excalidraw
+    mutation_scope: platform
+    shared_surfaces:
+      - service:excalidraw
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/gitea.yml:
     playbook_id: gitea
     mutation_scope: platform

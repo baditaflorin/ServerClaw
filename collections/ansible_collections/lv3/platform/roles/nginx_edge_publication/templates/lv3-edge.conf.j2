@@ -125,6 +125,7 @@ server {
 {% set proxy_hide_headers = site.proxy_hide_headers | default([]) %}
 {% set blocked_exact_paths = site.blocked_exact_paths | default([]) %}
 {% set server_sent_events = site.server_sent_events | default(false) %}
+{% set prefix_proxy_routes = site.prefix_proxy_routes | default([]) %}
 server {
     listen 80;
     listen [::]:80;
@@ -179,6 +180,27 @@ server {
     }
 
 {% endif %}
+{% for route in prefix_proxy_routes %}
+    location ^~ {{ route.path }} {
+        proxy_pass {{ route.upstream }};
+        proxy_http_version 1.1;
+{{ hide_upstream_security_headers() }}
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_redirect http:// https://;
+        proxy_buffering off;
+        proxy_read_timeout 300s;
+{% for header_name in proxy_hide_headers %}
+        proxy_hide_header {{ header_name }};
+{% endfor %}
+    }
+{% endfor %}
     location / {
         proxy_pass {{ site.upstream }};
         proxy_http_version 1.1;
@@ -329,6 +351,37 @@ server {
     }
 
 {% endif %}
+{% for route in prefix_proxy_routes %}
+    location ^~ {{ route.path }} {
+{% if protected_site %}
+        auth_request /oauth2/auth;
+        error_page 401 = @oauth2_signin;
+        auth_request_set $auth_user $upstream_http_x_auth_request_user;
+        auth_request_set $auth_email $upstream_http_x_auth_request_email;
+        auth_request_set $auth_access_token $upstream_http_x_auth_request_access_token;
+        proxy_set_header X-Auth-Request-User $auth_user;
+        proxy_set_header X-Auth-Request-Email $auth_email;
+        proxy_set_header X-Forwarded-Access-Token $auth_access_token;
+{% endif %}
+        proxy_pass {{ route.upstream }};
+        proxy_http_version 1.1;
+{{ hide_upstream_security_headers() }}
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_redirect http:// https://;
+        proxy_buffering off;
+        proxy_read_timeout 300s;
+{% for header_name in proxy_hide_headers %}
+        proxy_hide_header {{ header_name }};
+{% endfor %}
+    }
+{% endfor %}
     location / {
 {% if protected_site %}
         auth_request /oauth2/auth;
