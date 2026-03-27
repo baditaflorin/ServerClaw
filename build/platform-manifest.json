@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.14",
+  "repo_version": "0.177.15",
   "platform_version": "0.130.31",
-  "generated_at": "2026-03-27T22:54:42Z",
-  "next_refresh_at": "2026-03-27T23:54:42Z",
+  "generated_at": "2026-03-27T22:55:45Z",
+  "next_refresh_at": "2026-03-27T23:55:45Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3496,10 +3496,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.13",
+    "last_version": "0.177.14",
     "deployed_at": "2026-03-27",
-    "summary": "completed ADR 0198 by switching platform-context retrieval to local Ollama semantic embeddings, expanding the indexed corpus, and grounding the operator CLI plus LLM client with cited vector matches",
-    "release_notes_url": "docs/release-notes/0.177.14.md"
+    "summary": "completed ADR 0192 by separating `ha_reserved`, `recovery_reserved`, and `preview_burst` capacity classes in mainline automation and recording the verified live apply evidence for preview and restore admission checks",
+    "release_notes_url": "docs/release-notes/0.177.15.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
