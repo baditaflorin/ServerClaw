@@ -401,6 +401,7 @@ def test_remote_exec_forwards_packer_related_environment_variables(tmp_path: Pat
             "REMOTE_EXEC_VERBOSE": "1",
             "PKR_VAR_proxmox_api_token_secret": "secret-value",
             "PROXMOX_API_TOKEN_ID": "lv3-automation@pve!primary",
+            "LV3_RUN_ID": "adr-0177-run",
         },
     )
 
@@ -409,6 +410,7 @@ def test_remote_exec_forwards_packer_related_environment_variables(tmp_path: Pat
     assert "PKR_VAR_proxmox_api_token_secret=secret-value" in ssh_log
     assert "PROXMOX_API_TOKEN_ID=" in ssh_log
     assert "lv3-automation@pve" in ssh_log
+    assert "LV3_RUN_ID=adr-0177-run" in ssh_log
     assert f"LV3_SESSION_ID={SESSION_ID}" in ssh_log
     assert "LV3_SESSION_SLUG=test-session" in ssh_log
     assert f"LV3_SESSION_LOCAL_ROOT={REMOTE_WORKSPACE_ROOT}/.local/session-workspaces/test-session" in ssh_log

@@ -18,6 +18,7 @@ from datetime import timedelta
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
+import uuid
 
 from controller_automation_toolkit import emit_cli_error, load_json, repo_path, write_json
 from dns_drift import collect_drift as collect_dns_drift
@@ -33,12 +34,12 @@ from drift_lib import (
     workstream_suppression,
 )
 from parse_ansible_drift import parse_ansible_output
+from run_namespace import ensure_run_namespace, resolve_run_namespace
 from tls_cert_drift import collect_drift as collect_tls_drift
 
 
 REPO_ROOT = repo_path()
 DEFAULT_RECEIPT_DIR = repo_path("receipts", "drift-reports")
-DEFAULT_TOFU_PLAN_JSON = Path.home() / ".cache" / "lv3-tofu-plans" / "production.plan.json"
 SERVICE_CATALOG_PATH = repo_path("config", "service-capability-catalog.json")
 HEALTH_PROBE_CATALOG_PATH = repo_path("config", "health-probe-catalog.json")
 
@@ -76,15 +77,27 @@ def parse_tofu_plan(plan_json_path: Path) -> list[dict[str, Any]]:
 
 
 def run_tofu_drift(environment: str, *, command: str | None = None) -> list[dict[str, Any]]:
+    run_namespace = ensure_run_namespace(
+        resolve_run_namespace(
+            repo_root=REPO_ROOT,
+            run_id=f"drift-tofu-{environment}-{uuid.uuid4().hex}",
+        )
+    )
     drift_command = command or f"./scripts/tofu_exec.sh drift {shlex.quote(environment)}"
+    env = os.environ.copy()
+    env.setdefault("LV3_RUN_ID", run_namespace.run_id)
+    env.setdefault("LV3_RUN_SLUG", run_namespace.run_slug)
+    env.setdefault("LV3_RUN_NAMESPACE_ROOT", run_namespace.root)
+    env.setdefault("LV3_RUN_TOFU_DIR", run_namespace.tofu_dir)
     result = subprocess.run(
         ["/bin/bash", "-lc", drift_command],
         cwd=REPO_ROOT,
+        env=env,
         text=True,
         capture_output=True,
         check=False,
     )
-    plan_json = Path.home() / ".cache" / "lv3-tofu-plans" / f"{environment}.plan.json"
+    plan_json = Path(run_namespace.tofu_dir) / f"{environment}.plan.json"
     records = parse_tofu_plan(plan_json)
     if result.returncode not in {0, 2}:
         message = result.stderr.strip() or result.stdout.strip() or "tofu drift command failed"
@@ -103,6 +116,12 @@ def run_tofu_drift(environment: str, *, command: str | None = None) -> list[dict
 
 def run_ansible_drift(environment: str, *, playbook: str, inventory: str, limit: str | None = None) -> list[dict[str, Any]]:
     del environment
+    run_namespace = ensure_run_namespace(
+        resolve_run_namespace(
+            repo_root=REPO_ROOT,
+            run_id=f"drift-ansible-{uuid.uuid4().hex}",
+        )
+    )
     command = [
         "ansible-playbook",
         "-i",
@@ -114,7 +133,20 @@ def run_ansible_drift(environment: str, *, playbook: str, inventory: str, limit:
     if limit:
         command.extend(["-l", limit])
     env = os.environ.copy()
+    env.setdefault("LV3_RUN_ID", run_namespace.run_id)
+    env.setdefault("LV3_RUN_SLUG", run_namespace.run_slug)
+    env.setdefault("LV3_RUN_NAMESPACE_ROOT", run_namespace.root)
+    env.setdefault("LV3_RUN_ANSIBLE_DIR", run_namespace.ansible_dir)
+    env.setdefault("LV3_RUN_ANSIBLE_TMP_DIR", run_namespace.ansible_tmp_dir)
+    env.setdefault("LV3_RUN_ANSIBLE_RETRY_DIR", run_namespace.ansible_retry_dir)
+    env.setdefault("LV3_RUN_ANSIBLE_CONTROL_PATH_DIR", run_namespace.ansible_control_path_dir)
+    env.setdefault("LV3_RUN_LOGS_DIR", run_namespace.logs_dir)
+    env.setdefault("LV3_RUN_ANSIBLE_LOG_PATH", run_namespace.ansible_log_path)
     env.setdefault("ANSIBLE_STDOUT_CALLBACK", "json")
+    env.setdefault("ANSIBLE_LOCAL_TEMP", run_namespace.ansible_tmp_dir)
+    env.setdefault("ANSIBLE_RETRY_FILES_SAVE_PATH", run_namespace.ansible_retry_dir)
+    env.setdefault("ANSIBLE_SSH_CONTROL_PATH_DIR", run_namespace.ansible_control_path_dir)
+    env.setdefault("ANSIBLE_LOG_PATH", run_namespace.ansible_log_path)
     result = subprocess.run(
         command,
         cwd=REPO_ROOT,

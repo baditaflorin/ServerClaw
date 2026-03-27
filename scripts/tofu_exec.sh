@@ -3,12 +3,24 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PYTHON_BIN="${PYTHON_BIN:-python3}"
 TOFU_IMAGE="${TOFU_IMAGE:-registry.lv3.org/check-runner/infra:2026.03.23}"
 TOFU_PLATFORM="${TOFU_PLATFORM:-linux/amd64}"
 TOFU_WORKSPACE="${TOFU_WORKSPACE:-/workspace}"
-TOFU_PLAN_DIR="${TOFU_PLAN_DIR:-${HOME:-/tmp}/.cache/lv3-tofu-plans}"
 TOFU_INIT_BACKEND="${TOFU_INIT_BACKEND:-auto}"
 TOFU_DOCKER_NETWORK="${TOFU_DOCKER_NETWORK:-}"
+
+LV3_RUN_ID="${LV3_RUN_ID:-${RUN_ID:-}}"
+if [[ -n "$LV3_RUN_ID" ]]; then
+  eval "$(
+    "$PYTHON_BIN" "$REPO_ROOT/scripts/run_namespace.py" \
+      --repo-root "$REPO_ROOT" \
+      --run-id "$LV3_RUN_ID" \
+      --ensure \
+      --format shell
+  )"
+fi
+TOFU_PLAN_DIR="${TOFU_PLAN_DIR:-${LV3_RUN_TOFU_DIR:-${HOME:-/tmp}/.cache/lv3-tofu-plans}}"
 
 usage() {
   cat <<'EOF'
@@ -121,7 +133,7 @@ validate_environment() {
   local environment="$1"
   local env_dir
 
-  env_dir="$(environment_dir "$environment")"
+  env_dir="$(prepare_runtime_workspace "$environment" false)"
   run_tofu "$env_dir" init -backend=false -input=false >/dev/null
   run_tofu "$env_dir" validate -no-color
 }
@@ -179,41 +191,24 @@ state_args() {
 
 prepare_runtime_workspace() {
   local environment="$1"
+  local keep_backend="${2:-true}"
   local runtime_root="$TOFU_PLAN_DIR/runtime"
   local runtime_env="$runtime_root/tofu/environments/$environment"
 
   mkdir -p "$runtime_root"
   rsync -a --delete "$REPO_ROOT/tofu/" "$runtime_root/tofu/"
   rsync -a --delete "$REPO_ROOT/keys/" "$runtime_root/keys/"
-  rm -f "$runtime_env/backend.tf"
+  if [[ "$keep_backend" != "true" ]]; then
+    rm -f "$runtime_env/backend.tf"
+  fi
   printf '/plans/runtime/tofu/environments/%s\n' "$environment"
 }
 
-environment_ready() {
-  local environment="$1"
-  local env_dir=""
-
-  env_dir="$REPO_ROOT/$(environment_dir "$environment")"
-
-  [[ -f "$env_dir/.terraform/modules/modules.json" ]] || return 1
-  compgen -G "$env_dir/.terraform/providers/registry.opentofu.org/bpg/proxmox/*/linux_amd64/terraform-provider-proxmox_*" >/dev/null
-}
-
 ensure_initialized() {
-  local environment="$1"
-  local env_dir="$2"
+  local env_dir="$1"
   local -a init_cli_args=()
 
   mapfile -t init_cli_args < <(init_args)
-  if ! use_backend; then
-    run_tofu "$env_dir" init -reconfigure "${init_cli_args[@]}"
-    return 0
-  fi
-
-  if environment_ready "$environment"; then
-    return 0
-  fi
-
   run_tofu "$env_dir" init "${init_cli_args[@]}"
 }
 
@@ -242,19 +237,24 @@ case "$action" in
   init)
     environment="${1:-}"
     [[ -n "$environment" ]] || { usage >&2; exit 1; }
-    env_dir="$(environment_dir "$environment")"
-    ensure_initialized "$environment" "$env_dir"
+    if use_backend; then
+      env_dir="$(prepare_runtime_workspace "$environment" true)"
+    else
+      env_dir="$(prepare_runtime_workspace "$environment" false)"
+    fi
+    ensure_initialized "$env_dir"
     ;;
   plan)
     environment="${1:-}"
     [[ -n "$environment" ]] || { usage >&2; exit 1; }
-    env_dir="$(environment_dir "$environment")"
-    if ! use_backend; then
-      env_dir="$(prepare_runtime_workspace "$environment")"
+    if use_backend; then
+      env_dir="$(prepare_runtime_workspace "$environment" true)"
+    else
+      env_dir="$(prepare_runtime_workspace "$environment" false)"
     fi
     plan_file="$(plan_path "$environment")"
     mapfile -t state_cli_args < <(state_args "$environment")
-    ensure_initialized "$environment" "$env_dir"
+    ensure_initialized "$env_dir"
     run_tofu "$env_dir" plan "${state_cli_args[@]}" -input=false -lock-timeout=60s -out="$plan_file"
     run_tofu "$env_dir" show -json "$plan_file" > "$TOFU_PLAN_DIR/${environment}.plan.json"
     echo "saved plan to $TOFU_PLAN_DIR/${environment}.tfplan"
@@ -263,9 +263,10 @@ case "$action" in
   apply)
     environment="${1:-}"
     [[ -n "$environment" ]] || { usage >&2; exit 1; }
-    env_dir="$(environment_dir "$environment")"
-    if ! use_backend; then
-      env_dir="$(prepare_runtime_workspace "$environment")"
+    if use_backend; then
+      env_dir="$(prepare_runtime_workspace "$environment" true)"
+    else
+      env_dir="$(prepare_runtime_workspace "$environment" false)"
     fi
     plan_file="$(plan_path "$environment")"
     if [[ ! -f "$TOFU_PLAN_DIR/${environment}.tfplan" ]]; then
@@ -273,19 +274,20 @@ case "$action" in
       exit 1
     fi
     mapfile -t state_cli_args < <(state_args "$environment")
-    ensure_initialized "$environment" "$env_dir"
+    ensure_initialized "$env_dir"
     run_tofu "$env_dir" apply "${state_cli_args[@]}" -input=false "$plan_file"
     ;;
   drift)
     environment="${1:-}"
     [[ -n "$environment" ]] || { usage >&2; exit 1; }
-    env_dir="$(environment_dir "$environment")"
-    if ! use_backend; then
-      env_dir="$(prepare_runtime_workspace "$environment")"
+    if use_backend; then
+      env_dir="$(prepare_runtime_workspace "$environment" true)"
+    else
+      env_dir="$(prepare_runtime_workspace "$environment" false)"
     fi
     plan_file="$(plan_path "$environment")"
     mapfile -t state_cli_args < <(state_args "$environment")
-    ensure_initialized "$environment" "$env_dir"
+    ensure_initialized "$env_dir"
     set +e
     run_tofu "$env_dir" plan "${state_cli_args[@]}" -input=false -detailed-exitcode -lock-timeout=60s -out="$plan_file"
     rc=$?
@@ -298,23 +300,26 @@ case "$action" in
     resource_address="${2:-}"
     import_id="${3:-}"
     [[ -n "$environment" && -n "$resource_address" && -n "$import_id" ]] || { usage >&2; exit 1; }
-    env_dir="$(environment_dir "$environment")"
-    if ! use_backend; then
-      env_dir="$(prepare_runtime_workspace "$environment")"
+    if use_backend; then
+      env_dir="$(prepare_runtime_workspace "$environment" true)"
+    else
+      env_dir="$(prepare_runtime_workspace "$environment" false)"
     fi
     mapfile -t state_cli_args < <(state_args "$environment")
-    ensure_initialized "$environment" "$env_dir"
+    ensure_initialized "$env_dir"
     run_tofu "$env_dir" import "${state_cli_args[@]}" -input=false "$resource_address" "$import_id"
     ;;
   show)
     environment="${1:-}"
     state_address="${2:-}"
     [[ -n "$environment" && -n "$state_address" ]] || { usage >&2; exit 1; }
-    env_dir="$(environment_dir "$environment")"
-    if ! use_backend; then
-      env_dir="$(prepare_runtime_workspace "$environment")"
+    if use_backend; then
+      env_dir="$(prepare_runtime_workspace "$environment" true)"
+    else
+      env_dir="$(prepare_runtime_workspace "$environment" false)"
     fi
     mapfile -t state_cli_args < <(state_args "$environment")
+    ensure_initialized "$env_dir"
     run_tofu "$env_dir" state show "${state_cli_args[@]}" "$state_address"
     ;;
   *)

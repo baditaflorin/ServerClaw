@@ -1,9 +1,13 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
+import uuid
 from pathlib import Path
 from typing import Any, Callable
+
+from scripts.run_namespace import ensure_run_namespace, resolve_run_namespace
 
 from ..schema import ChangedObject, unknown_object
 
@@ -38,15 +42,27 @@ class OpenTofuAdapter:
     ) -> list[ChangedObject]:
         del world_state, workflow, service
         environment = str(intent.get("arguments", {}).get("env", "production"))
+        run_namespace = ensure_run_namespace(
+            resolve_run_namespace(
+                repo_root=self.repo_root,
+                run_id=f"tofu-diff-{uuid.uuid4().hex}",
+            )
+        )
+        env = os.environ.copy()
+        env.setdefault("LV3_RUN_ID", run_namespace.run_id)
+        env.setdefault("LV3_RUN_SLUG", run_namespace.run_slug)
+        env.setdefault("LV3_RUN_NAMESPACE_ROOT", run_namespace.root)
+        env.setdefault("LV3_RUN_TOFU_DIR", run_namespace.tofu_dir)
         result = self.runner(
             ["./scripts/tofu_exec.sh", "plan", environment],
             cwd=self.repo_root,
+            env=env,
             text=True,
             capture_output=True,
             check=False,
             timeout=self.spec.timeout_seconds,
         )
-        plan_path = Path.home() / ".cache" / "lv3-tofu-plans" / f"{environment}.plan.json"
+        plan_path = Path(run_namespace.tofu_dir) / f"{environment}.plan.json"
         if not plan_path.exists():
             return [
                 unknown_object(

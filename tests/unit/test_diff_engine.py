@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import json
 import subprocess
+import threading
 from pathlib import Path
 from typing import Any
+from concurrent.futures import ThreadPoolExecutor
 
 import pytest
 
@@ -222,9 +224,11 @@ def test_ansible_adapter_parses_changed_tasks(diff_repo: Path, monkeypatch: pyte
             ]
         }
     )
+    captured_env: dict[str, str] = {}
 
     def runner(*args: Any, **kwargs: Any) -> subprocess.CompletedProcess[str]:
-        del args, kwargs
+        del args
+        captured_env.update(kwargs["env"])
         return subprocess.CompletedProcess(["ansible-playbook"], 2, stdout=stdout, stderr="")
 
     monkeypatch.setattr("platform.diff_engine.adapters.ansible_adapter.shutil.which", lambda command: "/usr/bin/ansible-playbook")
@@ -244,27 +248,29 @@ def test_ansible_adapter_parses_changed_tasks(diff_repo: Path, monkeypatch: pyte
     assert len(changes) == 1
     assert changes[0].object_id == "docker-runtime-lv3:render compose file"
     assert changes[0].confidence == "exact"
+    assert captured_env["LV3_RUN_ID"].startswith("ansible-diff-")
+    assert captured_env["ANSIBLE_LOCAL_TEMP"].startswith(str(diff_repo / ".local" / "runs"))
+    assert captured_env["ANSIBLE_RETRY_FILES_SAVE_PATH"].startswith(str(diff_repo / ".local" / "runs"))
+    assert captured_env["ANSIBLE_LOG_PATH"].startswith(str(diff_repo / ".local" / "runs"))
 
 
-def test_opentofu_adapter_parses_plan_json(diff_repo: Path, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    monkeypatch.setenv("HOME", str(tmp_path))
-    plan_dir = tmp_path / ".cache" / "lv3-tofu-plans"
-    plan_dir.mkdir(parents=True)
-    (plan_dir / "production.plan.json").write_text(
-        json.dumps(
-            {
-                "resource_changes": [
-                    {
-                        "address": "module.proxmox_vm",
-                        "change": {"actions": ["create"], "before": None, "after": {"vmid": 9001}},
-                    }
-                ]
-            }
-        )
-    )
-
+def test_opentofu_adapter_parses_plan_json(diff_repo: Path) -> None:
     def runner(*args: Any, **kwargs: Any) -> subprocess.CompletedProcess[str]:
-        del args, kwargs
+        del args
+        plan_dir = Path(kwargs["env"]["LV3_RUN_TOFU_DIR"])
+        plan_dir.mkdir(parents=True, exist_ok=True)
+        (plan_dir / "production.plan.json").write_text(
+            json.dumps(
+                {
+                    "resource_changes": [
+                        {
+                            "address": "module.proxmox_vm",
+                            "change": {"actions": ["create"], "before": None, "after": {"vmid": 9001}},
+                        }
+                    ]
+                }
+            )
+        )
         return subprocess.CompletedProcess(["./scripts/tofu_exec.sh"], 0, stdout="", stderr="")
 
     adapter = OpenTofuAdapter(
@@ -282,6 +288,51 @@ def test_opentofu_adapter_parses_plan_json(diff_repo: Path, monkeypatch: pytest.
     assert len(changes) == 1
     assert changes[0].change_kind == "create"
     assert changes[0].object_id == "module.proxmox_vm"
+
+
+def test_opentofu_adapter_parallel_runs_use_distinct_namespaces(diff_repo: Path) -> None:
+    seen_plan_dirs: list[str] = []
+    lock = threading.Lock()
+
+    def runner(*args: Any, **kwargs: Any) -> subprocess.CompletedProcess[str]:
+        del args
+        plan_dir = Path(kwargs["env"]["LV3_RUN_TOFU_DIR"])
+        plan_dir.mkdir(parents=True, exist_ok=True)
+        (plan_dir / "production.plan.json").write_text(
+            json.dumps(
+                {
+                    "resource_changes": [
+                        {
+                            "address": "module.parallel_vm",
+                            "change": {"actions": ["update"], "before": {"vmid": 1}, "after": {"vmid": 1}},
+                        }
+                    ]
+                }
+            )
+        )
+        with lock:
+            seen_plan_dirs.append(str(plan_dir))
+        return subprocess.CompletedProcess(["./scripts/tofu_exec.sh"], 0, stdout="", stderr="")
+
+    adapter = OpenTofuAdapter(
+        repo_root=diff_repo,
+        spec=AdapterSpec("opentofu", "x.OpenTofuAdapter", "opentofu"),
+        runner=runner,
+    )
+
+    def run_once() -> list[ChangedObject]:
+        return adapter.compute_diff(
+            {"workflow_id": "vm-update", "arguments": {}},
+            world_state=None,
+            workflow={},
+            service=None,
+        )
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        results = list(executor.map(lambda _item: run_once(), range(2)))
+
+    assert all(result and result[0].object_id == "module.parallel_vm" for result in results)
+    assert len(set(seen_plan_dirs)) == 2
 
 
 def test_docker_adapter_detects_updates_and_restarts(diff_repo: Path) -> None:

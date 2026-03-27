@@ -3,10 +3,12 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
+import uuid
 from pathlib import Path
 from typing import Any, Callable
 
 from scripts.parse_ansible_drift import parse_ansible_output
+from scripts.run_namespace import ensure_run_namespace, resolve_run_namespace
 
 from ..schema import ChangedObject, unknown_object
 
@@ -44,8 +46,27 @@ class AnsibleAdapter:
         inventory = self.repo_root / "inventory" / "hosts.yml"
         limit = service.get("vm") if isinstance(service, dict) else intent.get("target_vm")
         changes: list[ChangedObject] = []
+        run_namespace = ensure_run_namespace(
+            resolve_run_namespace(
+                repo_root=self.repo_root,
+                run_id=f"ansible-diff-{uuid.uuid4().hex}",
+            )
+        )
         env = os.environ.copy()
+        env.setdefault("LV3_RUN_ID", run_namespace.run_id)
+        env.setdefault("LV3_RUN_SLUG", run_namespace.run_slug)
+        env.setdefault("LV3_RUN_NAMESPACE_ROOT", run_namespace.root)
+        env.setdefault("LV3_RUN_ANSIBLE_DIR", run_namespace.ansible_dir)
+        env.setdefault("LV3_RUN_ANSIBLE_TMP_DIR", run_namespace.ansible_tmp_dir)
+        env.setdefault("LV3_RUN_ANSIBLE_RETRY_DIR", run_namespace.ansible_retry_dir)
+        env.setdefault("LV3_RUN_ANSIBLE_CONTROL_PATH_DIR", run_namespace.ansible_control_path_dir)
+        env.setdefault("LV3_RUN_LOGS_DIR", run_namespace.logs_dir)
+        env.setdefault("LV3_RUN_ANSIBLE_LOG_PATH", run_namespace.ansible_log_path)
         env.setdefault("ANSIBLE_STDOUT_CALLBACK", "json")
+        env.setdefault("ANSIBLE_LOCAL_TEMP", run_namespace.ansible_tmp_dir)
+        env.setdefault("ANSIBLE_RETRY_FILES_SAVE_PATH", run_namespace.ansible_retry_dir)
+        env.setdefault("ANSIBLE_SSH_CONTROL_PATH_DIR", run_namespace.ansible_control_path_dir)
+        env.setdefault("ANSIBLE_LOG_PATH", run_namespace.ansible_log_path)
         for playbook in playbooks:
             command = ["ansible-playbook", "-i", str(inventory), str(playbook), "--check", "--diff"]
             if isinstance(limit, str) and limit.strip():
