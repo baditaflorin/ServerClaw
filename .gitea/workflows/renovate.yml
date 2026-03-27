@@ -50,4 +50,4 @@ jobs:
           RENOVATE_PLATFORM: gitea
           RENOVATE_REPOSITORIES: ops/proxmox_florin_server
           RENOVATE_TOKEN: ${{ secrets.RENOVATE_TOKEN }}
-        run: npx --yes renovate@39
+        run: npx --yes renovate@43
