@@ -146,6 +146,141 @@ workstreams:
       latest_receipts:
         preview_environment: 2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z
 
+  - id: ws-0199-live-apply
+    adr: "0199"
+    title: Outline living knowledge wiki
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0199-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0199-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0199-live-apply/docs/workstreams/adr-0199-outline-living-knowledge-wiki.md
+    depends_on:
+      - adr-0043-openbao
+      - adr-0056-keycloak
+      - adr-0077-compose-runtime-secrets-injection
+      - adr-0107-platform-extension-model
+    conflicts_with: []
+    shared_surfaces:
+      - inventory/host_vars/proxmox_florin.yml
+      - inventory/group_vars/platform.yml
+      - config/service-capability-catalog.json
+      - config/subdomain-catalog.json
+      - config/health-probe-catalog.json
+      - config/image-catalog.json
+      - config/secret-catalog.json
+      - config/controller-local-secrets.json
+      - config/api-gateway-catalog.json
+      - config/dependency-graph.json
+      - config/slo-catalog.json
+      - config/data-catalog.json
+      - config/service-completeness.json
+      - config/service-redundancy-catalog.json
+      - config/ansible-execution-scopes.yaml
+      - config/ansible-role-idempotency.yml
+      - config/prometheus/file_sd/slo_targets.yml
+      - config/prometheus/rules/slo_alerts.yml
+      - config/prometheus/rules/slo_rules.yml
+      - config/uptime-kuma/monitors.json
+      - config/grafana/dashboards/slo-overview.json
+      - collections/ansible_collections/lv3/platform/roles/outline_runtime
+      - collections/ansible_collections/lv3/platform/roles/outline_postgres
+      - collections/ansible_collections/lv3/platform/roles/keycloak_runtime
+      - playbooks/outline.yml
+      - playbooks/services/outline.yml
+      - scripts/sync_docs_to_outline.py
+      - scripts/release_manager.py
+      - scripts/sync_windmill_seed_schedules.py
+      - docs/adr/.index.yaml
+      - docs/adr/0199-outline-living-knowledge-wiki.md
+      - docs/workstreams/adr-0199-outline-living-knowledge-wiki.md
+      - docs/runbooks/configure-outline.md
+      - docs/site-generated/architecture/dependency-graph.md
+      - config/alertmanager/rules/outline.yml
+      - config/grafana/dashboards/outline.json
+      - receipts/image-scans/2026-03-27-outline-runtime.json
+      - receipts/image-scans/2026-03-27-outline-runtime.trivy.json
+      - tests/test_outline_playbook.py
+      - tests/test_outline_runtime_role.py
+      - tests/test_outline_sync.py
+      - tests/test_keycloak_runtime_role.py
+      - tests/test_release_manager.py
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: outline_repo_surface
+          paths:
+            - docs/adr/0199-outline-living-knowledge-wiki.md
+            - docs/workstreams/adr-0199-outline-living-knowledge-wiki.md
+            - docs/runbooks/configure-outline.md
+            - playbooks/outline.yml
+            - playbooks/services/outline.yml
+            - collections/ansible_collections/lv3/platform/roles/outline_postgres/**
+            - collections/ansible_collections/lv3/platform/roles/outline_runtime/**
+            - scripts/sync_docs_to_outline.py
+            - config/alertmanager/rules/outline.yml
+            - config/grafana/dashboards/outline.json
+            - receipts/image-scans/2026-03-27-outline-runtime.json
+            - receipts/image-scans/2026-03-27-outline-runtime.trivy.json
+            - tests/test_outline_playbook.py
+            - tests/test_outline_runtime_role.py
+            - tests/test_outline_sync.py
+          mode: exclusive
+        - id: outline_platform_catalog_contract
+          paths:
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/platform.yml
+            - docs/adr/.index.yaml
+            - config/service-capability-catalog.json
+            - config/subdomain-catalog.json
+            - config/health-probe-catalog.json
+            - config/image-catalog.json
+            - config/secret-catalog.json
+            - config/controller-local-secrets.json
+            - config/api-gateway-catalog.json
+            - config/dependency-graph.json
+            - config/slo-catalog.json
+            - config/data-catalog.json
+            - config/service-completeness.json
+            - config/service-redundancy-catalog.json
+            - config/ansible-execution-scopes.yaml
+            - config/ansible-role-idempotency.yml
+            - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/rules/slo_alerts.yml
+            - config/prometheus/rules/slo_rules.yml
+            - config/uptime-kuma/monitors.json
+            - config/grafana/dashboards/slo-overview.json
+          mode: shared_contract
+          contract: outline-platform-catalogs-v1
+        - id: keycloak_outline_client_contract
+          paths:
+            - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/keycloak_runtime/tasks/main.yml
+            - tests/test_keycloak_runtime_role.py
+          mode: shared_contract
+          contract: keycloak-runtime-oidc-clients-v1
+        - id: release_manager_outline_sync_contract
+          paths:
+            - scripts/release_manager.py
+            - tests/test_release_manager.py
+          mode: shared_contract
+          contract: release-manager-v1
+        - id: retry_guard_contract
+          paths:
+            - scripts/sync_windmill_seed_schedules.py
+          mode: shared_contract
+          contract: retry-guard-v1
+        - id: generated_portal_contract
+          paths:
+            - docs/site-generated/architecture/dependency-graph.md
+          mode: shared_contract
+          contract: generated-portals-v1
+    ready_to_merge: true
+    live_applied: true
+
   - id: adr-0180-standby-capacity
     adr: "0180"
     title: Standby capacity reservation and placement rules

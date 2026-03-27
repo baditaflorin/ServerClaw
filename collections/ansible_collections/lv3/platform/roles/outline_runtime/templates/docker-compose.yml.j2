@@ -1,0 +1,83 @@
+services:
+  openbao-agent:
+    image: {{ outline_openbao_agent_image }}
+    container_name: {{ outline_openbao_agent_container_name }}
+    user: "0:0"
+    environment:
+      BAO_SKIP_DROP_ROOT: "true"
+    command:
+      - agent
+      - -config=/openbao-agent/agent.hcl
+    network_mode: host
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - test -s {{ outline_env_file }}
+      interval: 10s
+      timeout: 3s
+      retries: 12
+    volumes:
+      - {{ outline_openbao_agent_dir }}:/openbao-agent:ro
+      - {{ outline_env_file | dirname }}:{{ outline_env_file | dirname }}
+
+  redis:
+    image: {{ outline_redis_image }}
+    container_name: {{ outline_redis_container_name }}
+    restart: unless-stopped
+    command:
+      - redis-server
+      - --requirepass
+      - {{ outline_redis_password }}
+      - --maxmemory-policy
+      - noeviction
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - redis-cli -a "{{ outline_redis_password }}" ping | grep PONG
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  minio:
+    image: {{ outline_minio_image }}
+    container_name: {{ outline_minio_container_name }}
+    restart: unless-stopped
+    command:
+      - server
+      - --console-address
+      - :9001
+      - /data
+    environment:
+      MINIO_ROOT_USER: {{ outline_minio_root_user }}
+      MINIO_ROOT_PASSWORD: {{ outline_minio_root_password }}
+    volumes:
+      - {{ outline_minio_data_dir }}:/data
+
+  outline:
+    image: {{ outline_image }}
+    container_name: {{ outline_container_name }}
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_started
+      openbao-agent:
+        condition: service_healthy
+    extra_hosts:
+{% for item in outline_public_hostname_overrides %}
+      - "{{ item.hostname }}:{{ item.address }}"
+{% endfor %}
+    env_file:
+      - {{ outline_env_file }}
+    ports:
+      - "{{ ansible_host }}:{{ outline_internal_port }}:3000"
+      - "127.0.0.1:{{ outline_internal_port }}:3000"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/_health || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 24

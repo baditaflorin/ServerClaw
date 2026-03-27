@@ -48,6 +48,7 @@ platform_port_assignments:
   searxng_port: 8881
   searxng_host_proxy_port: 80
   langfuse_port: 3002
+  outline_port: 3006
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
   excalidraw_port: 3095
@@ -497,6 +498,11 @@ network_policy:
           ports:
             - 8089
           description: Reverse proxy access to the Dozzle hub
+        - source: nginx-lv3
+          protocol: tcp
+          ports:
+            - 3006
+          description: Reverse proxy access to the Outline knowledge wiki
         - source: nginx-lv3
           protocol: tcp
           ports:
@@ -1069,6 +1075,28 @@ lv3_service_topology:
       noindex: true
       kind: proxy
       upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.langfuse_port }}"
+  outline:
+    service_name: outline
+    owning_vm: docker-runtime-lv3
+    private_ip: "{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}"
+    public_hostname: wiki.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: wiki
+      type: A
+      target: "{{ management_ipv4 }}"
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.outline_port }}"
   dozzle:
     service_name: dozzle
     owning_vm: docker-runtime-lv3

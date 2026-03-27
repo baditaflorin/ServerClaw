@@ -7,7 +7,7 @@
 
 schema_version: 1
 generated: '2026-03-28'
-total_adrs: 203
+total_adrs: 204
 implementation_status_summary:
   Implemented: 188
   Partial: 3
@@ -178,6 +178,7 @@ concerns:
     - 0183
     - 0184
     - 0185
+    - 0199
     - '0202'
   release:
     - 0008
@@ -3342,6 +3343,20 @@ adr_index:
       operati
     filename: 0198-qdrant-vector-search-semantic-rag.md
     implemented_version: 0.177.12
+  - adr: 0199
+    title: Outline Living Knowledge Wiki
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: platform
+    keywords:
+      - outline
+      - living
+      - knowledge
+      - wiki
+    summary: We will deploy Outline on docker-runtime-lv3 and publish it at https://wiki.lv3.org.
+    filename: 0199-outline-living-knowledge-wiki.md
+    implemented_version: 0.130.31
   - adr: '0202'
     title: Excalidraw Auto Generated Architecture Diagrams
     status: Accepted

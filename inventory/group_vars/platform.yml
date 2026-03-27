@@ -142,6 +142,7 @@ platform_ports:
   searxng_port: 8881
   searxng_host_proxy_port: 80
   langfuse_port: 3002
+  outline_port: 3006
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
   excalidraw_port: 3095
@@ -190,6 +191,7 @@ platform_port_assignments:
   searxng_port: 8881
   searxng_host_proxy_port: 80
   langfuse_port: 3002
+  outline_port: 3006
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
   excalidraw_port: 3095
@@ -1219,6 +1221,34 @@ platform_service_topology:
     urls:
       public: https://langfuse.lv3.org
       internal: http://10.10.10.20:3002
+  outline:
+    service_name: outline
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: wiki.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: wiki
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3')
+        | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.outline_port
+        }}
+    service_id: outline
+    ports: {}
+    urls:
+      public: https://wiki.lv3.org
   dozzle:
     service_name: dozzle
     owning_vm: docker-runtime-lv3
@@ -1632,6 +1662,10 @@ platform_dns_records:
       value: 65.108.75.123
       ttl: 60
     - name: langfuse
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: wiki
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -2175,6 +2209,34 @@ public_edge_service_topology:
     urls:
       public: https://langfuse.lv3.org
       internal: http://10.10.10.20:3002
+  outline:
+    service_name: outline
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: wiki.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: wiki
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3')
+        | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.outline_port
+        }}
+    service_id: outline
+    ports: {}
+    urls:
+      public: https://wiki.lv3.org
   dozzle:
     service_name: dozzle
     owning_vm: docker-runtime-lv3
@@ -2649,6 +2711,7 @@ netbox_server_port: 8082
 searxng_port: 8881
 searxng_host_proxy_port: 80
 langfuse_port: 3002
+outline_port: 3006
 dozzle_http_port: 8089
 dozzle_agent_port: 7007
 excalidraw_port: 3095
