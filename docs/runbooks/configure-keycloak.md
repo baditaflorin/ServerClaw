@@ -10,7 +10,7 @@ It covers:
 - Keycloak runtime deployment on `docker-runtime-lv3`
 - public DNS and edge publication at `https://sso.lv3.org`
 - repo-managed realm, groups, initial named operator account, and confidential clients
-- repo-managed realm SMTP settings for password resets and required-action mail through the private mail relay on `10.10.10.20:1587`
+- repo-managed realm SMTP settings for password resets and required-action mail through `lv3-mail-stalwart:1587` on the shared mail Docker network, with STARTTLS disabled
 - Grafana OIDC configuration against the shared Keycloak broker
 - controller-local recovery and client-secret artifacts mirrored under `.local/keycloak/`
 
@@ -37,7 +37,7 @@ The workflow manages these live surfaces:
 - Keycloak runtime under `/opt/keycloak` on `docker-runtime-lv3`
 - shared SSO hostname `https://sso.lv3.org`
 - repo-managed realm `lv3`
-- private Keycloak mail submission relay at `10.10.10.20:1587`
+- internal Keycloak mail submission endpoint `lv3-mail-stalwart:1587` on the shared mail Docker network
 - named operator account `florin.badita`
 - confidential OIDC client `grafana-oauth`
 - confidential agent client `lv3-agent-hub`
@@ -64,7 +64,7 @@ Run these checks after converge:
 3. `curl -s https://sso.lv3.org/realms/lv3/.well-known/openid-configuration`
 4. `curl -I https://grafana.lv3.org/login/generic_oauth`
 5. `curl -s --data "grant_type=client_credentials&client_id=lv3-agent-hub&client_secret=$(cat /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/lv3-agent-hub-client-secret.txt)" https://sso.lv3.org/realms/lv3/protocol/openid-connect/token`
-6. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'python3 - <<'"'"'PY'"'"'\nimport smtplib\nfrom pathlib import Path\npassword = Path(\"/etc/lv3/mail-platform/server-mailbox-password\").read_text().strip()\nclient = smtplib.SMTP(\"10.10.10.20\", 1587, timeout=10)\nclient.ehlo()\nprint(client.login(\"server\", password))\nclient.quit()\nPY'`
+6. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'docker exec keycloak-keycloak-1 getent ahostsv4 lv3-mail-stalwart && docker exec keycloak-keycloak-1 /bin/bash -lc '"'"'"'"'"'"'"'"'timeout 15 bash -lc "exec 3<>/dev/tcp/lv3-mail-stalwart/1587"'"'"'"'"'"'"'"'"''`
 
 ## TOTP Recovery
 
@@ -110,4 +110,4 @@ The password recovery action:
 - Grafana is the first repo-managed consumer of the shared OIDC flow in this rollout. Future app integrations should reuse the same realm and identity taxonomy instead of creating app-local password stores.
 - The Keycloak master bootstrap admin remains a break-glass recovery identity and should not become a routine human login.
 - The named operator account is created with a bootstrap password and a required `CONFIGURE_TOTP` action so MFA enrollment happens on first successful interactive login.
-- Password resets and required-action mail deliberately use the VM-private Stalwart relay on port `1587` without STARTTLS so Keycloak does not depend on trusting the public submission certificate chain during browser recovery flows.
+- Password resets and required-action mail use `lv3-mail-stalwart:1587` over the shared `mail-platform_default` Docker network. This avoids Docker host-port hairpin failures and avoids STARTTLS certificate mismatch on the internal container DNS name.

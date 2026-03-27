@@ -372,6 +372,7 @@
     owner: root
     group: root
     mode: "0640"
+  register: mail_platform_stalwart_config
   no_log: true
 
 - name: Render the mail platform bootstrap script
@@ -441,6 +442,7 @@
     owner: root
     group: root
     mode: "0600"
+  register: mail_platform_gateway_env
   no_log: true
 
 - name: Render the notification profiles catalog
@@ -450,6 +452,7 @@
     owner: root
     group: root
     mode: "0600"
+  register: mail_platform_gateway_profiles
   no_log: true
 
 - name: Render the mail platform Compose file
@@ -459,6 +462,7 @@
     owner: root
     group: root
     mode: "0644"
+  register: mail_platform_compose
 
 - name: Pull the Stalwart image
   ansible.builtin.command:
@@ -524,7 +528,16 @@
 
 - name: Record whether the mail platform startup needs a force recreate
   ansible.builtin.set_fact:
-    mail_platform_force_recreate: "{{ mail_platform_docker_nat_chain.rc != 0 or (mail_platform_stalwart_port_probe.failed | default(false)) }}"
+    mail_platform_force_recreate: >-
+      {{
+        mail_platform_docker_nat_chain.rc != 0
+        or (mail_platform_stalwart_port_probe.failed | default(false))
+        or (mail_platform_stalwart_config.changed | default(false))
+        or (mail_platform_gateway_env.changed | default(false))
+        or (mail_platform_gateway_profiles.changed | default(false))
+        or (mail_platform_compose.changed | default(false))
+        or (mail_platform_gateway_build.changed | default(false))
+      }}
 
 - name: Force-recreate the mail platform stack after Docker networking recovery
   ansible.builtin.command:
@@ -578,6 +591,24 @@
     port: "{{ mail_platform_internal_submission_port }}"
     delay: 0
     timeout: 120
+
+- name: Verify the private mail submission relay keeps STARTTLS disabled and accepts auth
+  ansible.builtin.shell: |
+    python3 - <<'PY'
+    import smtplib
+    from pathlib import Path
+
+    password = Path("{{ mail_platform_mailbox_password_file }}").read_text().strip()
+    with smtplib.SMTP("{{ ansible_host }}", {{ mail_platform_internal_submission_port }}, timeout=10) as client:
+        client.ehlo()
+        if "starttls" in client.esmtp_features:
+            raise SystemExit("internal submission relay unexpectedly advertises STARTTLS")
+        code, response = client.login("{{ mail_platform_mailbox_login }}", password)
+        if code != 235:
+            raise SystemExit(f"unexpected SMTP auth response: {code} {response!r}")
+    PY
+  changed_when: false
+  no_log: true
 
 - name: Wait for the local mail gateway API to listen
   ansible.builtin.wait_for:

@@ -37,6 +37,24 @@
     timeout: 30
   changed_when: false
 
+- name: Verify the private mail submission relay keeps STARTTLS disabled and accepts auth
+  ansible.builtin.shell: |
+    python3 - <<'PY'
+    import smtplib
+    from pathlib import Path
+
+    password = Path("{{ mail_platform_mailbox_password_file }}").read_text().strip()
+    with smtplib.SMTP("{{ ansible_host }}", {{ mail_platform_internal_submission_port }}, timeout=10) as client:
+        client.ehlo()
+        if "starttls" in client.esmtp_features:
+            raise SystemExit("internal submission relay unexpectedly advertises STARTTLS")
+        code, response = client.login("{{ mail_platform_mailbox_login }}", password)
+        if code != 235:
+            raise SystemExit(f"unexpected SMTP auth response: {code} {response!r}")
+    PY
+  changed_when: false
+  no_log: true
+
 - name: Verify the mail domain exists in Stalwart
   ansible.builtin.uri:
     url: "http://127.0.0.1:{{ mail_platform_stalwart_http_port }}/api/principal?types=domain"

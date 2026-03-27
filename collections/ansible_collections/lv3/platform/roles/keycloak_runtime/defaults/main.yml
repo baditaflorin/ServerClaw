@@ -33,8 +33,10 @@ keycloak_bootstrap_admin_password_local_file: /Users/live/Documents/GITHUB_PROJE
 keycloak_operator_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/florin.badita-password.txt
 keycloak_mail_platform_submission_username: server
 keycloak_mail_platform_submission_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/mail-platform/server-mailbox-password.txt
-keycloak_mail_platform_submission_host: "{{ (hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('mail_platform')).private_ip }}"
-keycloak_mail_platform_submission_port: "{{ hostvars['proxmox_florin'].platform_port_assignments.mail_platform_internal_submission_port | default(1587) }}"
+keycloak_mail_platform_submission_host: lv3-mail-stalwart
+keycloak_mail_platform_submission_port: 1587
+keycloak_mail_platform_submission_starttls: false
+keycloak_mail_platform_docker_network_name: mail-platform_default
 keycloak_mail_platform_from_address: server@lv3.org
 keycloak_mail_platform_reply_to_address: server@lv3.org
 keycloak_realm_smtp_server:
@@ -47,7 +49,7 @@ keycloak_realm_smtp_server:
   auth: true
   user: "{{ keycloak_mail_platform_submission_username }}"
   password: "{{ lookup('ansible.builtin.file', keycloak_mail_platform_submission_password_local_file) | trim }}"
-  starttls: false
+  starttls: "{{ keycloak_mail_platform_submission_starttls }}"
   ssl: false
 keycloak_grafana_client_id: grafana-oauth
 keycloak_grafana_client_secret_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/keycloak/grafana-client-secret.txt

@@ -12,6 +12,7 @@ protocol = "smtp"
 [server.listener.internal_submission]
 bind = "[::]:{{ mail_platform_internal_submission_port }}"
 protocol = "smtp"
+tls.enable = false
 
 [server.listener.imaptls]
 bind = "[::]:993"

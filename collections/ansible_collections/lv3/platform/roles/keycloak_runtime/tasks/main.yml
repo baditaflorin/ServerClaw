@@ -183,6 +183,7 @@
     owner: root
     group: root
     mode: "0600"
+  register: keycloak_env_template
   no_log: true
 
 - name: Render the Keycloak compose file
@@ -192,6 +193,7 @@
     owner: root
     group: root
     mode: "0644"
+  register: keycloak_compose_template
 
 - name: Pull the Keycloak image
   ansible.builtin.command:
@@ -251,6 +253,9 @@
     keycloak_force_recreate: >-
       {{
         keycloak_docker_nat_chain.rc != 0
+        or (keycloak_env_template.changed | default(false))
+        or (keycloak_compose_template.changed | default(false))
+        or (keycloak_pull.changed | default(false))
         or (keycloak_local_http_port_probe.failed | default(false))
         or (keycloak_readiness_probe.status | default(0)) != 200
       }}
@@ -344,6 +349,27 @@
   until: keycloak_bootstrap_admin_token_probe.status == 200
   changed_when: false
   no_log: true
+
+- name: Verify Keycloak resolves the internal mail-platform relay host
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - keycloak-keycloak-1
+      - getent
+      - ahostsv4
+      - "{{ keycloak_mail_platform_submission_host }}"
+  register: keycloak_mail_submission_host_lookup
+  changed_when: false
+
+- name: Verify Keycloak reaches the internal mail-platform submission listener
+  ansible.builtin.shell: >-
+    docker exec keycloak-keycloak-1 /bin/bash -lc
+    'timeout 15 bash -lc "exec 3<>/dev/tcp/{{ keycloak_mail_platform_submission_host }}/{{ keycloak_mail_platform_submission_port }}"'
+  args:
+    executable: /bin/bash
+  register: keycloak_mail_submission_probe
+  changed_when: false
 
 - name: Converge Keycloak realm objects
   block:

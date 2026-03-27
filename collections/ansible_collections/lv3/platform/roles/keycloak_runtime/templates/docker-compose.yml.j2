@@ -31,7 +31,15 @@ services:
     depends_on:
       openbao-agent:
         condition: service_healthy
+    networks:
+      - default
+      - mail-platform
     ports:
       - "{{ ansible_host }}:{{ keycloak_internal_http_port }}:8080"
       - "127.0.0.1:{{ keycloak_local_http_port }}:8080"
       - "127.0.0.1:{{ keycloak_local_management_port }}:9000"
+
+networks:
+  mail-platform:
+    external: true
+    name: {{ keycloak_mail_platform_docker_network_name }}

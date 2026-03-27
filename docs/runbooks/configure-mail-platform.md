@@ -9,7 +9,8 @@ It covers:
 - public DNS for `mail.lv3.org` and the `lv3.org` MX record
 - host-side SMTP and IMAPS forwarding on the Proxmox host
 - the Stalwart mail runtime on `docker-runtime-lv3`
-- a private SMTP submission relay on `10.10.10.20:1587` for local platform workloads such as Keycloak
+- a private SMTP submission relay on `10.10.10.20:1587` for VM-local platform workloads that can consume the Docker-runtime host address directly, with STARTTLS intentionally disabled
+- a shared-Docker-network submission path at `lv3-mail-stalwart:1587` for containerized workloads on `docker-runtime-lv3`, also with STARTTLS intentionally disabled
 - the private mail gateway API used by platform services and automation agents
 - profile-scoped sender identities for operator alerts, platform transactional mail, and agent reports
 - Telegraf and Grafana mail telemetry
@@ -43,7 +44,8 @@ The workflow manages these live surfaces:
 - SPF and DMARC TXT records for `lv3.org`
 - Proxmox host NAT forwards for TCP `25`, `587`, and `993` to `docker-runtime-lv3`
 - Stalwart mail server on `docker-runtime-lv3`
-- private submission relay on `10.10.10.20:1587` for local platform workloads on `docker-runtime-lv3`
+- private submission relay on `10.10.10.20:1587` for local platform workloads on `docker-runtime-lv3`, with STARTTLS intentionally disabled
+- shared-network internal submission relay at `lv3-mail-stalwart:1587` for containerized platform workloads on `docker-runtime-lv3`, with STARTTLS intentionally disabled
 - private mail gateway API on `docker-runtime-lv3:8081`
 - scoped notification-profile API keys under `/etc/lv3/mail-platform/profiles/`
 - Telegraf mail telemetry collector on `docker-runtime-lv3`
@@ -76,8 +78,9 @@ Base URL from the private LV3 network:
 The same converge also publishes a private SMTP submission relay for local platform workloads:
 
 - `10.10.10.20:1587`
+- `lv3-mail-stalwart:1587` from containers attached to `mail-platform_default`
 
-That relay is intended for repo-managed services running on `docker-runtime-lv3`, such as Keycloak password-reset mail. Public client submission remains on TCP `587`.
+The host-address form is intended for VM-local platform workloads that can consume the Docker-runtime host address directly. The container-DNS form is intended for workloads that share the mail Docker network on `docker-runtime-lv3`. STARTTLS stays disabled on this listener for plaintext-auth internal consumers. Keycloak uses the shared-network hostname `lv3-mail-stalwart:1587` because both the host-private path and the public hostname path proved unreliable from another container network. Public client submission remains on TCP `587`.
 
 Authentication:
 
@@ -148,13 +151,14 @@ Run these checks after converge:
 6. `ansible-playbook -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/hosts.yml /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/mail-platform-notification-profiles-verify.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --limit docker-runtime-lv3`
 7. `curl -I https://grafana.lv3.org`
 8. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.40 'curl -fsS http://127.0.0.1:3200/api/search/tag/service.name/values | jq -r ''.tagValues[]'' | grep mail-gateway'`
-9. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'python3 - <<'"'"'PY'"'"'\nimport smtplib\nfrom pathlib import Path\npassword = Path(\"/etc/lv3/mail-platform/server-mailbox-password\").read_text().strip()\nclient = smtplib.SMTP(\"10.10.10.20\", 1587, timeout=10)\nclient.ehlo()\nprint(client.login(\"server\", password))\nclient.quit()\nPY'`
+9. `ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.118.189.95 ops@10.10.10.20 'python3 - <<'"'"'PY'"'"'\nimport smtplib\nfrom pathlib import Path\npassword = Path(\"/etc/lv3/mail-platform/server-mailbox-password\").read_text().strip()\nclient = smtplib.SMTP(\"10.10.10.20\", 1587, timeout=10)\nclient.ehlo()\nassert \"starttls\" not in client.esmtp_features, client.esmtp_features\nprint(client.login(\"server\", password))\nclient.quit()\nPY'`
 
 ## Notes
 
 - inbound mail for `server@lv3.org` depends on the public MX record and host NAT being active
 - outbound transactional delivery currently uses the Brevo HTTP API from the mail gateway
-- the private SMTP submission relay on TCP `1587` exists specifically for local platform workloads that need authenticated mail without depending on public STARTTLS certificate trust
+- the private SMTP submission relay on TCP `1587` exists specifically for VM-local platform workloads that need authenticated mail without depending on public STARTTLS certificate trust, so STARTTLS is intentionally disabled on that listener
+- containerized workloads on `docker-runtime-lv3` should prefer the shared-network hostname `lv3-mail-stalwart:1587` over host-published mail ports when they need authenticated internal submission
 - sender governance is enforced through notification-profile-specific mailbox identities and scoped API keys instead of one shared global send credential
 - the first distributed traces for this workflow come from inbound gateway requests plus outbound HTTP calls to Stalwart and Brevo, with `service.namespace=lv3` and `deployment.environment=lv3` exported through `OTEL_RESOURCE_ATTRIBUTES`
 - if direct public SMTP delivery from one profile is required later, add the sender identity, DKIM, and reverse-DNS path explicitly for that profile instead of reusing broad relay assumptions

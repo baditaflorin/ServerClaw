@@ -143,6 +143,16 @@ argument_specs:
         required: true
         description:
           - TCP port for the private mail submission relay.
+      keycloak_mail_platform_submission_starttls:
+        type: bool
+        required: true
+        description:
+          - Whether Keycloak should negotiate STARTTLS on the configured submission listener.
+      keycloak_mail_platform_docker_network_name:
+        type: str
+        required: true
+        description:
+          - External Docker network name Keycloak joins so it can reach the Stalwart relay directly.
       keycloak_mail_platform_from_address:
         type: str
         required: true
