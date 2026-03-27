@@ -531,6 +531,7 @@ def fixture_command(
     fixture_name: str | None = None,
     *,
     purpose: str | None = None,
+    lease_purpose: str | None = None,
     owner: str | None = None,
     lifetime_hours: float | None = None,
     policy: str | None = None,
@@ -551,6 +552,8 @@ def fixture_command(
         command.append(f"FIXTURE={fixture_name}")
     if purpose:
         command.append(f"PURPOSE={purpose}")
+    if lease_purpose:
+        command.append(f"LEASE_PURPOSE={lease_purpose}")
     if owner:
         command.append(f"OWNER={owner}")
     if lifetime_hours is not None:
@@ -2434,6 +2437,7 @@ def build_parser() -> argparse.ArgumentParser:
     fixture_create = fixture_subparsers.add_parser("create", aliases=["up"], help="Create one ephemeral fixture VM.")
     fixture_create.add_argument("name", nargs="?")
     fixture_create.add_argument("--purpose")
+    fixture_create.add_argument("--lease-purpose", choices=["fixture", "preview", "recovery-drill", "load-test"])
     fixture_create.add_argument("--owner")
     fixture_create.add_argument("--lifetime-hours", type=float)
     fixture_create.add_argument(
@@ -2766,6 +2770,7 @@ def main(argv: list[str] | None = None) -> int:
                 args.fixture_action,
                 getattr(args, "name", None),
                 purpose=getattr(args, "purpose", None),
+                lease_purpose=getattr(args, "lease_purpose", None),
                 owner=getattr(args, "owner", None),
                 lifetime_hours=getattr(args, "lifetime_hours", None),
                 policy=getattr(args, "policy", None),

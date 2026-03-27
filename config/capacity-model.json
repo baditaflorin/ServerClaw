@@ -311,9 +311,9 @@
       "reserved": {
         "ram_gb": 20,
         "vcpu": 8,
-        "disk_gb": 100
+        "disk_gb": 216
       },
-      "notes": "Shared peak reservation for ADR 0106 ephemeral fixtures so transient test VMs cannot silently consume production headroom."
+      "notes": "Shared ADR 0106 and ADR 0186 reservation for local ephemeral leases plus the prewarmed fixture pool spares; stopped warm members count primarily against disk while active leases remain capped by the RAM and vCPU reservation."
     }
   ]
 }

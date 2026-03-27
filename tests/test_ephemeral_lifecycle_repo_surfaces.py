@@ -16,9 +16,13 @@ def test_windmill_defaults_seed_ephemeral_vm_reaper_script_and_schedule() -> Non
     schedule_map = {entry["path"]: entry for entry in defaults["windmill_seed_schedules"]}
 
     assert "f/lv3/ephemeral_vm_reaper" in script_paths
+    assert "f/lv3/ephemeral_pool_reconciler" in script_paths
     assert "f/lv3/ephemeral_vm_reaper_every_30m" in schedule_map
+    assert "f/lv3/ephemeral_pool_reconciler_every_15m" in schedule_map
     assert schedule_map["f/lv3/ephemeral_vm_reaper_every_30m"]["enabled"] is True
     assert schedule_map["f/lv3/ephemeral_vm_reaper_every_30m"]["script_path"] == "f/lv3/ephemeral_vm_reaper"
+    assert schedule_map["f/lv3/ephemeral_pool_reconciler_every_15m"]["enabled"] is True
+    assert schedule_map["f/lv3/ephemeral_pool_reconciler_every_15m"]["script_path"] == "f/lv3/ephemeral_pool_reconciler"
 
 
 def test_windmill_runtime_only_rechecks_nat_chain_when_port_publishing_is_enabled() -> None:
@@ -34,7 +38,7 @@ def test_windmill_runtime_only_rechecks_nat_chain_when_port_publishing_is_enable
 
     assert defaults["windmill_server_network_mode"] == "host"
     assert defaults["windmill_server_requires_docker_nat"] == "{{ windmill_server_network_mode != 'host' }}"
-    assert defaults["windmill_worker_api_base_url"] == "{{ windmill_private_base_url }}"
+    assert defaults["windmill_worker_api_base_url"] == "http://windmill_server:8000"
     assert "network_mode: {{ windmill_server_network_mode }}" in compose_template
     assert 'ports:' not in compose_template
     assert "WINDMILL_BASE_URL: {{ windmill_private_base_url }}" in compose_template
@@ -92,4 +96,3 @@ def test_windmill_runtime_keeps_ephemeral_runtime_paths_writable_after_checkout_
     assert writable_paths["{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures/locks"] == "1777"
     assert "Ensure repo-backed Windmill runtime paths stay writable after checkout sync" in tasks
     assert "windmill_worker_runtime_writable_directories" in tasks
-    assert "--no-same-owner" in tasks

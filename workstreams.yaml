@@ -14,6 +14,39 @@ release_policy:
   breaking_change_criteria: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/version-semantics.json
 
 workstreams:
+  - id: ws-0186-live-apply
+    adr: "0186"
+    title: ADR 0186 live apply from latest origin/main
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0186-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0186-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0186-live-apply.md
+    depends_on:
+      - adr-0088-ephemeral-fixtures
+      - adr-0105-capacity-model
+      - adr-0106-ephemeral-lifecycle
+      - adr-0183-auxiliary-cloud-failure-domain-for-witness-recovery-and-burst-capacity
+    conflicts_with: []
+    shared_surfaces:
+      - scripts/fixture_manager.py
+      - scripts/lv3_cli.py
+      - scripts/validate_repository_data_models.py
+      - config/ephemeral-capacity-pools.json
+      - config/capacity-model.json
+      - config/workflow-catalog.json
+      - config/command-catalog.json
+      - config/windmill/scripts/ephemeral-pool-reconciler.py
+      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
+      - docs/runbooks/ephemeral-fixtures.md
+      - docs/adr/0186-prewarmed-fixture-pools-and-lease-based-ephemeral-capacity.md
+      - docs/workstreams/ws-0186-live-apply.md
+      - tests/test_fixture_manager.py
+      - tests/test_ephemeral_lifecycle_repo_surfaces.py
+      - .config-locations.yaml
+    ready_to_merge: false
+    live_applied: true
+
   - id: adr-0180-standby-capacity
     adr: "0180"
     title: Standby capacity reservation and placement rules
