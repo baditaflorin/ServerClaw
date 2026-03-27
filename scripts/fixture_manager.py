@@ -121,10 +121,40 @@ def load_capacity_model() -> dict[str, Any]:
 
 
 def load_ephemeral_pool() -> dict[str, Any]:
-    pool = load_capacity_model().get("ephemeral_pool")
+    payload = load_capacity_model()
+    legacy_pool = payload.get("ephemeral_pool")
+    if isinstance(legacy_pool, dict):
+        return legacy_pool
+
+    reservations = payload.get("reservations")
+    if not isinstance(reservations, list):
+        raise ValueError(f"{CAPACITY_MODEL_PATH} must define reservations for the preview_burst pool")
+
+    pool = next(
+        (
+            reservation
+            for reservation in reservations
+            if isinstance(reservation, dict) and reservation.get("kind") == "ephemeral_pool"
+        ),
+        None,
+    )
     if not isinstance(pool, dict):
-        raise ValueError(f"{CAPACITY_MODEL_PATH} must define an ephemeral_pool mapping")
-    return pool
+        raise ValueError(f"{CAPACITY_MODEL_PATH} must define one reservation with kind=ephemeral_pool")
+
+    vmid_range = pool.get("vmid_range")
+    reserved = pool.get("reserved")
+    if not isinstance(vmid_range, dict) or not isinstance(reserved, dict):
+        raise ValueError(f"{CAPACITY_MODEL_PATH} reservations.ephemeral_pool must define vmid_range and reserved mappings")
+
+    return {
+        "vmid_range": [int(vmid_range["start"]), int(vmid_range["end"])],
+        "max_concurrent_vms": int(pool["max_concurrent_vms"]),
+        "reserved_ram_gb": int(reserved["ram_gb"]),
+        "reserved_vcpu": int(reserved["vcpu"]),
+        "reserved_disk_gb": int(reserved["disk_gb"]),
+        "capacity_class": pool.get("capacity_class", "preview_burst"),
+        "notes": pool.get("notes", ""),
+    }
 
 
 def load_fixture_definition(path: Path) -> dict[str, Any]:
@@ -577,13 +607,15 @@ def emit_ephemeral_event(action: str, target: str, *, actor_id: str, evidence_re
 
 def ensure_ephemeral_pool_capacity(definition: dict[str, Any], cluster_resources: list[dict[str, Any]]) -> None:
     pool = load_ephemeral_pool()
+    if pool.get("capacity_class") not in {None, "preview_burst"}:
+        raise ValueError("ephemeral_pool must map to the preview_burst capacity class")
     pool_range = tuple(int(value) for value in pool.get("vmid_range", EPHEMERAL_VMID_RANGE))
     if tuple(int(value) for value in definition["vmid_range"]) != pool_range:
         return
 
     active = filter_ephemeral_cluster_vms(cluster_resources)
     if len(active) >= int(pool["max_concurrent_vms"]):
-        raise RuntimeError("Ephemeral pool capacity exhausted: max_concurrent_vms reached")
+        raise RuntimeError("preview_burst capacity exhausted: max_concurrent_vms reached")
 
     proposed = definition.get("resources")
     if not isinstance(proposed, dict):
@@ -597,11 +629,11 @@ def ensure_ephemeral_pool_capacity(definition: dict[str, Any], cluster_resources
     used_disk_gb = sum(bytes_to_gb(item.get("maxdisk")) for item in active)
 
     if used_ram_gb + proposed_ram_gb > int(pool["reserved_ram_gb"]):
-        raise RuntimeError("Ephemeral pool capacity exhausted: reserved RAM budget exceeded")
+        raise RuntimeError("preview_burst capacity exhausted: reserved RAM budget exceeded")
     if used_vcpu + proposed_vcpu > int(pool["reserved_vcpu"]):
-        raise RuntimeError("Ephemeral pool capacity exhausted: reserved vCPU budget exceeded")
+        raise RuntimeError("preview_burst capacity exhausted: reserved vCPU budget exceeded")
     if used_disk_gb + proposed_disk_gb > int(pool["reserved_disk_gb"]):
-        raise RuntimeError("Ephemeral pool capacity exhausted: reserved disk budget exceeded")
+        raise RuntimeError("preview_burst capacity exhausted: reserved disk budget exceeded")
 
 
 def tofu_command(runtime_dir: Path, *args: str) -> list[str]:
