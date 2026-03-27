@@ -44,6 +44,7 @@ windmill_database_dsn: >-
     | urlencode
     | replace('/', '%2F')
   }}@{{ windmill_database_host }}:{{ windmill_database_port }}/{{ windmill_database_name }}?sslmode=disable
+windmill_platform_dsn: "{{ windmill_database_dsn }}"
 windmill_superadmin_secret_remote_file: "{{ windmill_secret_dir }}/superadmin-secret"
 windmill_local_artifact_dir: >-
   {{
@@ -415,8 +416,9 @@ windmill_seed_schedules:
     schedule: "0 * * * * *"
     timezone: Europe/Bucharest
     script_path: f/lv3/world_state/refresh_proxmox_vms
-    args: {}
-    enabled: false
+    args:
+      dsn: "{{ windmill_platform_dsn }}"
+    enabled: true
     summary: ADR 0113 Proxmox VM world-state refresh
     description: Repo-managed minute refresh definition for the canonical Proxmox VM world-state surface; enable after the worker checkout is applied from main.
     no_flow_overlap: true
@@ -424,8 +426,9 @@ windmill_seed_schedules:
     schedule: "*/30 * * * * *"
     timezone: Europe/Bucharest
     script_path: f/lv3/world_state/refresh_service_health
-    args: {}
-    enabled: false
+    args:
+      dsn: "{{ windmill_platform_dsn }}"
+    enabled: true
     summary: ADR 0113 service health world-state refresh
     description: Repo-managed 30-second refresh definition for the service health world-state surface; enable after the worker checkout is applied from main.
     no_flow_overlap: true
@@ -433,8 +436,9 @@ windmill_seed_schedules:
     schedule: "0 * * * * *"
     timezone: Europe/Bucharest
     script_path: f/lv3/world_state/refresh_container_inventory
-    args: {}
-    enabled: false
+    args:
+      dsn: "{{ windmill_platform_dsn }}"
+    enabled: true
     summary: ADR 0113 container inventory world-state refresh
     description: Repo-managed minute refresh definition for the container inventory world-state surface; enable after the worker checkout is applied from main.
     no_flow_overlap: true
@@ -442,8 +446,9 @@ windmill_seed_schedules:
     schedule: "0 */5 * * * *"
     timezone: Europe/Bucharest
     script_path: f/lv3/world_state/refresh_netbox_topology
-    args: {}
-    enabled: false
+    args:
+      dsn: "{{ windmill_platform_dsn }}"
+    enabled: true
     summary: ADR 0113 NetBox topology world-state refresh
     description: Repo-managed five-minute refresh definition for the NetBox topology world-state surface; enable after the worker checkout is applied from main.
     no_flow_overlap: true
@@ -451,8 +456,9 @@ windmill_seed_schedules:
     schedule: "0 */5 * * * *"
     timezone: Europe/Bucharest
     script_path: f/lv3/world_state/refresh_dns_records
-    args: {}
-    enabled: false
+    args:
+      dsn: "{{ windmill_platform_dsn }}"
+    enabled: true
     summary: ADR 0113 DNS records world-state refresh
     description: Repo-managed five-minute refresh definition for the DNS records world-state surface; enable after the worker checkout is applied from main.
     no_flow_overlap: true
@@ -460,8 +466,9 @@ windmill_seed_schedules:
     schedule: "0 0 * * * *"
     timezone: Europe/Bucharest
     script_path: f/lv3/world_state/refresh_tls_certs
-    args: {}
-    enabled: false
+    args:
+      dsn: "{{ windmill_platform_dsn }}"
+    enabled: true
     summary: ADR 0113 TLS certificate world-state refresh
     description: Repo-managed hourly refresh definition for the TLS certificate expiry world-state surface; enable after the worker checkout is applied from main.
     no_flow_overlap: true
@@ -469,8 +476,9 @@ windmill_seed_schedules:
     schedule: "0 */15 * * * *"
     timezone: Europe/Bucharest
     script_path: f/lv3/world_state/refresh_opentofu_drift
-    args: {}
-    enabled: false
+    args:
+      dsn: "{{ windmill_platform_dsn }}"
+    enabled: true
     summary: ADR 0113 OpenTofu drift world-state refresh
     description: Repo-managed 15-minute refresh definition for the OpenTofu drift world-state surface; enable after the worker checkout is applied from main.
     no_flow_overlap: true
@@ -478,8 +486,9 @@ windmill_seed_schedules:
     schedule: "0 */5 * * * *"
     timezone: Europe/Bucharest
     script_path: f/lv3/world_state/refresh_openbao_secret_expiry
-    args: {}
-    enabled: false
+    args:
+      dsn: "{{ windmill_platform_dsn }}"
+    enabled: true
     summary: ADR 0113 OpenBao secret expiry world-state refresh
     description: Repo-managed five-minute refresh definition for the OpenBao secret expiry world-state surface; enable after the worker checkout is applied from main.
     no_flow_overlap: true
@@ -487,8 +496,9 @@ windmill_seed_schedules:
     schedule: "0 * * * * *"
     timezone: Europe/Bucharest
     script_path: f/lv3/world_state/refresh_maintenance_windows
-    args: {}
-    enabled: false
+    args:
+      dsn: "{{ windmill_platform_dsn }}"
+    enabled: true
     summary: ADR 0113 maintenance window world-state refresh
     description: Repo-managed minute refresh definition for the maintenance window world-state surface; enable after the worker checkout is applied from main.
     no_flow_overlap: true
@@ -496,8 +506,10 @@ windmill_seed_schedules:
     schedule: "0 */5 * * * *"
     timezone: Europe/Bucharest
     script_path: f/lv3/graph/import_from_catalog
-    args: {}
-    enabled: false
+    args:
+      dsn: "{{ windmill_platform_dsn }}"
+      world_state_dsn: "{{ windmill_platform_dsn }}"
+    enabled: true
     summary: ADR 0117 dependency graph rebuild from repo metadata
     description: Repo-managed five-minute placeholder for rebuilding the dependency graph from repo metadata after the graph schema is applied live from main.
     no_flow_overlap: true
@@ -505,8 +517,10 @@ windmill_seed_schedules:
     schedule: "30 */5 * * * *"
     timezone: Europe/Bucharest
     script_path: f/lv3/graph/import_from_netbox
-    args: {}
-    enabled: false
+    args:
+      dsn: "{{ windmill_platform_dsn }}"
+      world_state_dsn: "{{ windmill_platform_dsn }}"
+    enabled: true
     summary: ADR 0117 dependency graph rebuild from NetBox world state
     description: Repo-managed five-minute placeholder for rebuilding the dependency graph after the NetBox topology world-state refresh completes.
     no_flow_overlap: true

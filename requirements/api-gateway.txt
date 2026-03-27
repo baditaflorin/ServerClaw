@@ -4,3 +4,4 @@ uvicorn==0.35.0
 PyYAML==6.0.2
 cryptography==45.0.6
 nats-py==2.11.0
+psycopg[binary]==3.2.9

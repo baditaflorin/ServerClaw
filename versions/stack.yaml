@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.175.2
-platform_version: 0.130.22
+repo_version: 0.176.0
+platform_version: 0.130.23
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -28,6 +28,7 @@ live_apply_evidence:
     windmill: 2026-03-26-adr-0126-observation-to-action-closure-loop-live-apply
     observation_to_action_closure_loop: 2026-03-26-adr-0126-observation-to-action-closure-loop-live-apply
     deadlock_detector: 2026-03-26-adr-0162-deadlock-detector-live-apply
+    dependency_graph_runtime: 2026-03-26-adr-0117-dependency-graph-live-apply
     mattermost: 2026-03-23-adr-0077-compose-runtime-secrets-live-apply
     portainer: 2026-03-22-adr-0055-portainer-live-apply
     short_lived_credentials_and_mtls: 2026-03-22-adr-0047-short-lived-credentials-live-apply
@@ -913,8 +914,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.175.2
+    current: 0.176.0
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.22
+    current: 0.130.23
     meaning: intended platform release for the actual server configuration

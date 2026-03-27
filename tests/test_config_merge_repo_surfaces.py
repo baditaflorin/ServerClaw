@@ -58,6 +58,10 @@ def test_windmill_script_sync_uses_manifest_helper() -> None:
     assert "Render the repo-managed Windmill script manifest locally" in tasks
     assert "{{ inventory_dir }}/../scripts/sync_windmill_seed_scripts.py" in tasks
     assert "{{ windmill_seed_script_manifest_local.path }}" in tasks
+    assert '--max-attempts' in tasks
+    assert '"20"' in tasks
+    assert '--settle-interval' in tasks
+    assert '"2.0"' in tasks
 
 
 def test_windmill_defaults_use_git_common_dir_for_shared_local_artifacts() -> None:

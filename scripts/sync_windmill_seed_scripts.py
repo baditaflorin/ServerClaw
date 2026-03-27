@@ -16,6 +16,10 @@ class SyncError(RuntimeError):
     pass
 
 
+class RetryableSyncError(SyncError):
+    pass
+
+
 def build_request(url: str, token: str, method: str, payload: dict | None = None) -> urllib.request.Request:
     body = None if payload is None else json.dumps(payload).encode("utf-8")
     headers = {"Authorization": f"Bearer {token}"}
@@ -43,8 +47,11 @@ def request_json_or_text(
     except urllib.error.HTTPError as exc:
         status = exc.code
         body = exc.read().decode("utf-8")
+    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        raise RetryableSyncError(f"{method} {path} transient transport failure: {exc}") from exc
     if status not in expected_statuses:
-        raise SyncError(f"{method} {path} returned {status}: {body[:500]}")
+        error_cls = RetryableSyncError if status >= 500 or status in (408, 429) else SyncError
+        raise error_cls(f"{method} {path} returned {status}: {body[:500]}")
     return status, body
 
 
@@ -158,9 +165,9 @@ def sync_script(
     content = Path(spec["local_file"]).read_text(encoding="utf-8")
     last_error = ""
     for attempt in range(1, max_attempts + 1):
-        delete_script(base_url=base_url, workspace=workspace, token=token, script_path=spec["path"])
-        time.sleep(settle_interval_s)
         try:
+            delete_script(base_url=base_url, workspace=workspace, token=token, script_path=spec["path"])
+            time.sleep(settle_interval_s)
             wait_for_absent(
                 base_url=base_url,
                 workspace=workspace,
@@ -169,21 +176,28 @@ def sync_script(
                 timeout_s=max(3.0, settle_interval_s * 4),
                 interval_s=settle_interval_s,
             )
+        except RetryableSyncError as exc:
+            last_error = str(exc)
+            time.sleep(settle_interval_s)
+            continue
         except SyncError:
             pass
-        status, body = create_script(base_url=base_url, workspace=workspace, token=token, spec=spec, content=content)
-        if status == 201:
-            wait_for_content(
-                base_url=base_url,
-                workspace=workspace,
-                token=token,
-                script_path=spec["path"],
-                expected_content=content,
-                timeout_s=max(3.0, settle_interval_s * 4),
-                interval_s=settle_interval_s,
-            )
-            return {"path": spec["path"], "attempts": attempt, "status": "synced"}
-        last_error = body[:500]
+        try:
+            status, body = create_script(base_url=base_url, workspace=workspace, token=token, spec=spec, content=content)
+            if status == 201:
+                wait_for_content(
+                    base_url=base_url,
+                    workspace=workspace,
+                    token=token,
+                    script_path=spec["path"],
+                    expected_content=content,
+                    timeout_s=max(3.0, settle_interval_s * 4),
+                    interval_s=settle_interval_s,
+                )
+                return {"path": spec["path"], "attempts": attempt, "status": "synced"}
+            last_error = body[:500]
+        except RetryableSyncError as exc:
+            last_error = str(exc)
         time.sleep(settle_interval_s)
     raise SyncError(f"failed to sync {spec['path']} after {max_attempts} attempts: {last_error}")
 

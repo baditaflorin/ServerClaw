@@ -172,7 +172,11 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Ensure the Windmill bootstrap admin password matches the managed secret" in tasks
     assert "/api/users/set_password_of/" in tasks
     assert "Create repo-managed Windmill schedules" in tasks
+    assert "Converge repo-managed Windmill schedule enabled flags" in tasks
+    assert 'psql "${DATABASE_URL}"' in tasks
+    assert "become: true" in tasks
     assert "status_code:\n      - 200\n      - 201\n      - 400" in tasks
+    assert "{{ inventory_dir }}/../scripts/sync_windmill_seed_scripts.py" in tasks
     assert "Sync repo-managed Windmill raw apps" in tasks
     assert "wmill sync push" in tasks
     assert "--skip-scripts" in tasks
@@ -182,6 +186,8 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "Build the local staging archive for the Windmill worker checkout" in tasks
     assert "changed_when: false" in tasks
     assert "Expand the staged Windmill worker checkout on the guest" in tasks
+    assert 'src: "{{ windmill_worker_checkout_archive_local.path }}"' in tasks
+    assert "Ensure repo-backed Windmill runtime paths stay writable after checkout sync" in tasks
     assert "Find stale Python bytecode files in the Windmill worker checkout" in tasks
     assert "Remove stale Python bytecode files from the Windmill worker checkout" in tasks
     assert "Find stale Python bytecode cache directories in the Windmill worker checkout" in tasks
@@ -192,6 +198,7 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "file_type: directory" in tasks
     assert '{{ windmill_worker_repo_checkout_host_path }}/scripts' in tasks
     assert '{{ windmill_worker_repo_checkout_host_path }}/platform' in tasks
+    assert "worker-checkout.tar.gz" not in tasks
     assert "windmill_worker_checkout_repo_root_local_dir" in tasks
     assert "windmill_worker_checkout_sync_paths" in tasks
     assert defaults["windmill_worker_repo_checkout_host_path"] == "/srv/proxmox_florin_server"

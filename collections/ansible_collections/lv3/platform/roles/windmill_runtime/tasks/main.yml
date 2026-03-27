@@ -124,17 +124,10 @@
   tags:
     - mutation
 
-- name: Copy the staged Windmill worker checkout archive to the guest
-  ansible.builtin.copy:
-    src: "{{ windmill_worker_checkout_archive_local.path }}"
-    dest: "{{ windmill_site_dir }}/worker-checkout.tar.gz"
-    mode: "0600"
-
 - name: Expand the staged Windmill worker checkout on the guest
   ansible.builtin.unarchive:
-    src: "{{ windmill_site_dir }}/worker-checkout.tar.gz"
+    src: "{{ windmill_worker_checkout_archive_local.path }}"
     dest: "{{ windmill_worker_repo_checkout_host_path }}"
-    remote_src: true
     extra_opts:
       - --no-same-owner
 
@@ -144,11 +137,6 @@
     tasks_from: directory_tree
   vars:
     common_directory_tree_paths: "{{ windmill_worker_runtime_writable_directories }}"
-
-- name: Remove the staged Windmill worker checkout archive from the guest
-  ansible.builtin.file:
-    path: "{{ windmill_site_dir }}/worker-checkout.tar.gz"
-    state: absent
 
 - name: Find stale Python bytecode files in the Windmill worker checkout
   ansible.builtin.find:
@@ -307,6 +295,9 @@
       TF_VAR_proxmox_endpoint: "{{ windmill_proxmox_api_token_payload.api_url }}"
       TF_VAR_proxmox_api_token: >-
         {{ windmill_proxmox_api_token_payload.full_token_id }}={{ windmill_proxmox_api_token_payload.value }}
+      LV3_GRAPH_DSN: "{{ windmill_platform_dsn }}"
+      WORLD_STATE_DSN: "{{ windmill_platform_dsn }}"
+      LV3_LEDGER_DSN: "{{ windmill_platform_dsn }}"
   no_log: true
 
 - name: Ensure the repo-local Proxmox API token directory exists for Windmill jobs
@@ -343,6 +334,23 @@
   become: false
   no_log: true
 
+- name: Create a controller-local staging path for the Windmill OpenBao agent runtime env template
+  ansible.builtin.tempfile:
+    state: file
+    suffix: .ctmpl
+  delegate_to: localhost
+  become: false
+  register: windmill_openbao_agent_template_local
+
+- name: Render the Windmill OpenBao agent runtime env template to a controller-local file
+  ansible.builtin.template:
+    src: "{{ playbook_dir }}/../collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.ctmpl.j2"
+    dest: "{{ windmill_openbao_agent_template_local.path }}"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
 - name: Prepare OpenBao agent runtime secret injection for Windmill
   ansible.builtin.include_role:
     name: lv3.platform.common
@@ -370,13 +378,20 @@
     common_openbao_compose_env_approle_name: "{{ windmill_openbao_approle_name }}"
     common_openbao_compose_env_agent_config_file: "{{ windmill_openbao_agent_dir }}/agent.hcl"
     common_openbao_compose_env_agent_template_file: "{{ windmill_openbao_agent_dir }}/runtime.env.ctmpl"
-    common_openbao_compose_env_agent_template_src: windmill-runtime.env.ctmpl.j2
+    common_openbao_compose_env_agent_template_local_file: "{{ windmill_openbao_agent_template_local.path }}"
     common_openbao_compose_env_role_id_file: "{{ windmill_openbao_agent_dir }}/role_id"
     common_openbao_compose_env_secret_id_file: "{{ windmill_openbao_agent_dir }}/secret_id"
     common_openbao_compose_env_image: "{{ windmill_openbao_agent_image }}"
     common_openbao_compose_env_legacy_env_files:
       - "{{ windmill_legacy_env_file }}"
   no_log: true
+
+- name: Remove the controller-local Windmill OpenBao agent runtime env template staging file
+  ansible.builtin.file:
+    path: "{{ windmill_openbao_agent_template_local.path }}"
+    state: absent
+  delegate_to: localhost
+  become: false
 
 - name: Render the Windmill environment file
   vars:
@@ -735,6 +750,200 @@
   changed_when: false
   no_log: true
 
+- name: Create a temporary path for the ADR 0113 world-state migration
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.tempfile:
+    state: file
+    suffix: .sql
+  register: windmill_world_state_migration_tmp
+
+- name: Copy the ADR 0113 world-state migration to the database host
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../migrations/0010_world_state_schema.sql"
+    dest: "{{ windmill_world_state_migration_tmp.path }}"
+    mode: "0600"
+
+- name: Apply the ADR 0113 world-state migration in the Windmill database
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -f
+      - "{{ windmill_world_state_migration_tmp.path }}"
+  changed_when: false
+
+- name: Remove the temporary ADR 0113 world-state migration file
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.file:
+    path: "{{ windmill_world_state_migration_tmp.path }}"
+    state: absent
+
+- name: Assert the ADR 0113 world-state schema exists in the Windmill database
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -Atqc
+      - "SELECT to_regclass('world_state.current_view')"
+  register: windmill_world_state_schema_check
+  changed_when: false
+
+- name: Fail when the ADR 0113 world-state schema is missing
+  ansible.builtin.assert:
+    that:
+      - windmill_world_state_schema_check.stdout | trim == 'world_state.current_view'
+    fail_msg: "ADR 0113 live schema apply did not create world_state.current_view in the Windmill database."
+
+- name: Refresh the ADR 0113 world-state materialized view in the Windmill database
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - "REFRESH MATERIALIZED VIEW world_state.current_view"
+  changed_when: false
+
+- name: Check whether the ADR 0113 world-state materialized view is populated
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -Atqc
+      - "SELECT ispopulated::text FROM pg_matviews WHERE schemaname = 'world_state' AND matviewname = 'current_view'"
+  register: windmill_world_state_current_view_populated
+  changed_when: false
+
+- name: Fail when the ADR 0113 world-state materialized view is not populated
+  ansible.builtin.assert:
+    that:
+      - windmill_world_state_current_view_populated.stdout | trim == 'true'
+    fail_msg: "ADR 0113 live schema apply left world_state.current_view unpopulated in the Windmill database."
+
+- name: Create a temporary path for the ADR 0117 graph migration
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.tempfile:
+    state: file
+    suffix: .sql
+  register: windmill_graph_migration_tmp
+
+- name: Copy the ADR 0117 graph migration to the database host
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../migrations/0012_graph_schema.sql"
+    dest: "{{ windmill_graph_migration_tmp.path }}"
+    mode: "0600"
+
+- name: Apply the ADR 0117 graph migration in the Windmill database
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -f
+      - "{{ windmill_graph_migration_tmp.path }}"
+  changed_when: false
+
+- name: Remove the temporary ADR 0117 graph migration file
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.file:
+    path: "{{ windmill_graph_migration_tmp.path }}"
+    state: absent
+
+- name: Assert the ADR 0117 graph schema exists in the Windmill database
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -Atqc
+      - "SELECT to_regclass('graph.nodes')"
+  register: windmill_graph_schema_check
+  changed_when: false
+
+- name: Fail when the ADR 0117 graph schema is missing
+  ansible.builtin.assert:
+    that:
+      - windmill_graph_schema_check.stdout | trim == 'graph.nodes'
+    fail_msg: "ADR 0117 live schema apply did not create graph.nodes in the Windmill database."
+
+- name: Ensure the ADR 0117 graph schema is owned by the Windmill database role
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        ALTER SCHEMA graph OWNER TO {{ windmill_database_user }};
+        ALTER TABLE graph.nodes OWNER TO {{ windmill_database_user }};
+        ALTER TABLE graph.edges OWNER TO {{ windmill_database_user }};
+        ALTER SEQUENCE graph.edges_id_seq OWNER TO {{ windmill_database_user }};
+  changed_when: false
+
+- name: Ensure the ADR 0117 graph schema grants runtime access to the Windmill database role
+  delegate_to: "{{ windmill_database_inventory_host }}"
+  become: true
+  become_user: postgres
+  ansible.builtin.command:
+    argv:
+      - psql
+      - -d
+      - "{{ windmill_database_name }}"
+      - -v
+      - ON_ERROR_STOP=1
+      - -c
+      - >-
+        GRANT USAGE ON SCHEMA graph TO {{ windmill_database_user }};
+        GRANT ALL ON ALL TABLES IN SCHEMA graph TO {{ windmill_database_user }};
+        GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA graph TO {{ windmill_database_user }};
+  changed_when: false
+
 - name: Create a temporary path for the ADR 0158 config-merge migration
   delegate_to: "{{ windmill_database_inventory_host }}"
   become: true
@@ -869,9 +1078,9 @@
       - --manifest
       - "{{ windmill_seed_script_manifest_local.path }}"
       - --max-attempts
-      - "8"
+      - "20"
       - --settle-interval
-      - "1.0"
+      - "2.0"
   delegate_to: localhost
   become: false
   environment:
@@ -1028,11 +1237,16 @@
   loop: "{{ windmill_seed_schedule_exists.results }}"
   loop_control:
     label: "{{ item.item.path }}"
+  register: windmill_seed_schedule_update
+  retries: 6
+  delay: 5
+  until: windmill_seed_schedule_update.status | default(0) == 200
   when: item.content | default('false') | trim | bool
   changed_when: false
   no_log: true
 
 - name: Converge repo-managed Windmill schedule enabled flags
+  become: true
   ansible.builtin.shell: |
     set -euo pipefail
     . "{{ windmill_env_file }}"

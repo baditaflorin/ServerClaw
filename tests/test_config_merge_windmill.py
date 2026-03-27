@@ -121,3 +121,70 @@ def test_sync_helper_rejects_unexpected_delete_400(monkeypatch: pytest.MonkeyPat
             token="token",
             script_path="f/lv3/config_merge/merge_config_changes",
         )
+
+
+def test_sync_helper_reports_missing_token(monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    module = load_module("sync_helper_missing_token", SYNC_HELPER_PATH)
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text("[]\n", encoding="utf-8")
+
+    monkeypatch.delenv("WINDMILL_TOKEN", raising=False)
+    monkeypatch.setattr(
+        module.argparse.ArgumentParser,
+        "parse_args",
+        lambda self: type(
+            "Args",
+            (),
+            {
+                "base_url": "http://windmill.internal",
+                "workspace": "lv3",
+                "manifest": manifest,
+                "max_attempts": 1,
+                "settle_interval": 0.0,
+            },
+        )(),
+    )
+
+    assert module.main() == 2
+    captured = capsys.readouterr()
+    assert json.loads(captured.err)["reason"] == "WINDMILL_TOKEN is required"
+
+
+def test_sync_helper_retries_retryable_create_failures(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    module = load_module("sync_helper_retries", SYNC_HELPER_PATH)
+    script_path = tmp_path / "script.py"
+    script_path.write_text("print('ok')\n", encoding="utf-8")
+    calls = {"create": 0}
+
+    monkeypatch.setattr(module, "delete_script", lambda **kwargs: None)
+    monkeypatch.setattr(module, "wait_for_absent", lambda **kwargs: None)
+    monkeypatch.setattr(module, "wait_for_content", lambda **kwargs: None)
+
+    def fake_create_script(**kwargs):
+        calls["create"] += 1
+        if calls["create"] == 1:
+            raise module.RetryableSyncError("connection reset by peer")
+        return 201, "created"
+
+    monkeypatch.setattr(module, "create_script", fake_create_script)
+
+    result = module.sync_script(
+        base_url="http://windmill.internal",
+        workspace="lv3",
+        token="token",
+        spec={
+            "path": "f/lv3/config_merge/merge_config_changes",
+            "language": "python3",
+            "summary": "summary",
+            "description": "desc",
+            "local_file": str(script_path),
+        },
+        max_attempts=3,
+        settle_interval_s=0.0,
+    )
+
+    assert result == {
+        "path": "f/lv3/config_merge/merge_config_changes",
+        "attempts": 2,
+        "status": "synced",
+    }

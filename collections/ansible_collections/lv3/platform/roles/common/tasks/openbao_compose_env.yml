@@ -13,7 +13,11 @@
       - common_openbao_compose_env_approle_name | length > 0
       - common_openbao_compose_env_agent_config_file | length > 0
       - common_openbao_compose_env_agent_template_file | length > 0
-      - common_openbao_compose_env_agent_template_src | length > 0
+      - >-
+        (common_openbao_compose_env_agent_template_local_file | default('') | length > 0)
+        or
+        (common_openbao_compose_env_agent_template_src | default('') | length > 0)
+        or (common_openbao_compose_env_agent_template_content | default('') | length > 0)
       - common_openbao_compose_env_role_id_file | length > 0
       - common_openbao_compose_env_secret_id_file | length > 0
       - common_openbao_compose_env_image | length > 0
@@ -21,7 +25,7 @@
       - openbao_http_port | string | length > 0
     fail_msg: >-
       common openbao_compose_env helper requires runtime paths, OpenBao secret payload,
-      AppRole metadata, and the controller-local OpenBao init payload.
+      AppRole metadata, and either a controller-local template source or pre-rendered template content.
 
 - name: Check whether the controller-local OpenBao init payload exists
   ansible.builtin.stat:
@@ -268,12 +272,37 @@
     mode: "0640"
 
 - name: Render the OpenBao agent runtime env template
+  ansible.builtin.copy:
+    src: "{{ common_openbao_compose_env_agent_template_local_file }}"
+    dest: "{{ common_openbao_compose_env_agent_template_file }}"
+    owner: root
+    group: root
+    mode: "0640"
+  when: common_openbao_compose_env_agent_template_local_file | default('') | length > 0
+  no_log: true
+
+- name: Render the OpenBao agent runtime env template
+  ansible.builtin.copy:
+    dest: "{{ common_openbao_compose_env_agent_template_file }}"
+    content: "{{ common_openbao_compose_env_agent_template_content }}"
+    owner: root
+    group: root
+    mode: "0640"
+  when:
+    - common_openbao_compose_env_agent_template_local_file | default('') | length == 0
+    - common_openbao_compose_env_agent_template_content | default('') | length > 0
+  no_log: true
+
+- name: Render the OpenBao agent runtime env template
   ansible.builtin.template:
     src: "{{ common_openbao_compose_env_agent_template_src }}"
     dest: "{{ common_openbao_compose_env_agent_template_file }}"
     owner: root
     group: root
     mode: "0640"
+  when:
+    - common_openbao_compose_env_agent_template_local_file | default('') | length == 0
+    - common_openbao_compose_env_agent_template_content | default('') | length == 0
   no_log: true
 
 - name: Remove legacy compose-directory env files
