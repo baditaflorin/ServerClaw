@@ -1,0 +1,225 @@
+---
+- name: Validate Netdata runtime inputs
+  ansible.builtin.assert:
+    that:
+      - netdata_runtime_parent_inventory_host | length > 0
+      - netdata_runtime_child_inventory_hosts | length > 0
+      - netdata_runtime_parent_web_port | int > 0
+      - netdata_runtime_parent_private_ip | length > 0
+      - netdata_runtime_parent_public_url | length > 0
+      - netdata_runtime_stream_api_key_local_file | length > 0
+      - netdata_runtime_stream_api_key_remote_file | length > 0
+      - netdata_runtime_state_dir | length > 0
+      - netdata_runtime_parent_bind_to | length > 0
+      - netdata_runtime_child_bind_to | length > 0
+      - netdata_runtime_stream_allow_from | length > 0
+      - netdata_runtime_parent_retention_time | length > 0
+      - netdata_runtime_parent_retention_size | length > 0
+      - netdata_runtime_child_db_mode in ['ram', 'none', 'dbengine']
+      - netdata_runtime_child_history | int > 0
+    fail_msg: "netdata_runtime requires parent, child, API-key, and retention settings."
+
+- name: Ensure Netdata packages are present
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - curl
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Check whether a native Netdata package candidate is available
+  ansible.builtin.command:
+    argv:
+      - apt-cache
+      - policy
+      - netdata
+  register: netdata_runtime_package_policy
+  changed_when: false
+
+- name: Check whether the Netdata repository configuration package is installed
+  ansible.builtin.command:
+    argv:
+      - dpkg-query
+      - -W
+      - -f=${Status}
+      - netdata-repo
+  register: netdata_runtime_repo_package
+  changed_when: false
+  failed_when: false
+
+- name: Download the official Netdata repository bootstrap script
+  ansible.builtin.get_url:
+    url: "{{ netdata_runtime_kickstart_url }}"
+    dest: "{{ netdata_runtime_kickstart_script_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+  when: "'Candidate: (none)' in netdata_runtime_package_policy.stdout"
+
+- name: Bootstrap the official Netdata native package repository when missing
+  ansible.builtin.command:
+    argv: "{{ [netdata_runtime_kickstart_script_path] + netdata_runtime_repo_bootstrap_args }}"
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+  register: netdata_runtime_repo_bootstrap
+  changed_when: "'install ok installed' not in netdata_runtime_repo_package.stdout"
+  when: "'Candidate: (none)' in netdata_runtime_package_policy.stdout"
+
+- name: Re-check the Netdata package policy after repository bootstrap
+  ansible.builtin.command:
+    argv:
+      - apt-cache
+      - policy
+      - netdata
+  register: netdata_runtime_package_policy_refreshed
+  changed_when: false
+  when: "'Candidate: (none)' in netdata_runtime_package_policy.stdout"
+
+- name: Assert a native Netdata package candidate is available
+  ansible.builtin.assert:
+    that:
+      - >-
+        'Candidate: (none)' not in
+        (
+          netdata_runtime_package_policy_refreshed.stdout
+          | default(netdata_runtime_package_policy.stdout, true)
+        )
+    fail_msg: >-
+      No Netdata package candidate is available after attempting to bootstrap the official
+      Netdata package repository for {{ ansible_distribution_release }}.
+
+- name: Ensure Netdata packages are present
+  ansible.builtin.apt:
+    name:
+      - netdata
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure Netdata state directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default('root') }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ netdata_runtime_state_dir }}"
+      mode: "0755"
+    - path: "{{ netdata_runtime_stream_api_key_remote_file | dirname }}"
+      mode: "0700"
+
+- name: Ensure local monitoring artifact directory exists for the stream API key
+  ansible.builtin.file:
+    path: "{{ netdata_runtime_stream_api_key_local_file | dirname }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+  when: netdata_runtime_is_parent
+
+- name: Check whether the local Netdata stream API key exists
+  ansible.builtin.stat:
+    path: "{{ netdata_runtime_stream_api_key_local_file }}"
+  register: netdata_runtime_stream_api_key_local_stat
+  delegate_to: localhost
+  become: false
+  when: netdata_runtime_is_parent
+
+- name: Restore the managed Netdata stream API key from the control machine
+  ansible.builtin.copy:
+    dest: "{{ netdata_runtime_stream_api_key_remote_file }}"
+    content: "{{ lookup('ansible.builtin.file', netdata_runtime_stream_api_key_local_file) | trim }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+  when:
+    - netdata_runtime_is_parent
+    - netdata_runtime_stream_api_key_local_stat.stat.exists
+  notify: Restart Netdata
+  no_log: true
+
+- name: Generate the managed Netdata stream API key on the parent when missing locally
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ netdata_runtime_stream_api_key_remote_file }}" ]; then
+      umask 077
+      cat /proc/sys/kernel/random/uuid > "{{ netdata_runtime_stream_api_key_remote_file }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  register: netdata_runtime_stream_api_key_generation
+  changed_when: "'changed' in netdata_runtime_stream_api_key_generation.stdout"
+  when:
+    - netdata_runtime_is_parent
+    - not netdata_runtime_stream_api_key_local_stat.stat.exists
+  no_log: true
+
+- name: Read the managed Netdata stream API key on the parent
+  ansible.builtin.slurp:
+    src: "{{ netdata_runtime_stream_api_key_remote_file }}"
+  register: netdata_runtime_stream_api_key_raw
+  when: netdata_runtime_is_parent
+  no_log: true
+
+- name: Mirror the generated Netdata stream API key to the control machine
+  ansible.builtin.copy:
+    dest: "{{ netdata_runtime_stream_api_key_local_file }}"
+    content: "{{ netdata_runtime_stream_api_key_raw.content | b64decode }}"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  when:
+    - netdata_runtime_is_parent
+    - not netdata_runtime_stream_api_key_local_stat.stat.exists
+  no_log: true
+
+- name: Read the managed Netdata stream API key from the control machine
+  ansible.builtin.set_fact:
+    netdata_runtime_stream_api_key: "{{ lookup('ansible.builtin.file', netdata_runtime_stream_api_key_local_file) | trim }}"
+  when: netdata_runtime_is_parent
+  no_log: true
+
+- name: Distribute the managed Netdata stream API key to child nodes
+  ansible.builtin.copy:
+    dest: "{{ netdata_runtime_stream_api_key_remote_file }}"
+    content: "{{ hostvars[netdata_runtime_parent_inventory_host].netdata_runtime_stream_api_key }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+  when: not netdata_runtime_is_parent
+  notify: Restart Netdata
+  no_log: true
+
+- name: Render Netdata main configuration
+  ansible.builtin.template:
+    src: netdata.conf.j2
+    dest: /etc/netdata/netdata.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart Netdata
+
+- name: Render Netdata streaming configuration
+  ansible.builtin.template:
+    src: stream.conf.j2
+    dest: /etc/netdata/stream.conf
+    owner: root
+    group: root
+    mode: "0600"
+  notify: Restart Netdata
+  no_log: true
+
+- name: Ensure Netdata is enabled and running
+  ansible.builtin.systemd:
+    name: netdata
+    enabled: true
+    state: started
+
+- name: Flush Netdata handlers before verification
+  ansible.builtin.meta: flush_handlers
+
+- name: Verify the Netdata runtime
+  ansible.builtin.import_tasks: verify.yml

@@ -1,0 +1,148 @@
+---
+# Playbook: realtime.yml
+# Purpose: Converge the Netdata parent and child streaming topology plus the authenticated realtime.lv3.org edge route.
+# Use case: Run when ADR 0196 Netdata real-time streaming metrics must be applied or re-verified on production.
+#
+# Inputs (required):
+#   - proxmox_guest_ssh_connection_mode (str, required): Guest SSH routing mode for the scoped Ansible runner.
+#
+# Inputs (optional):
+#   - bypass_promotion (bool, optional, default=false): Explicit break-glass flag for latest-main live apply flows.
+#
+# Outputs:
+#   - Netdata is converged on the Proxmox host and the selected guests, the monitoring parent exports Prometheus metrics, and realtime.lv3.org is published through the shared authenticated edge.
+#
+# Idempotency: Fully idempotent
+#
+# Dependencies:
+#   - ADR 0196: Netdata real-time streaming metrics.
+#   - Requires: The monitoring VM, nginx edge VM, and approved guest inventory already exist.
+#   - Role: lv3.platform.netdata_runtime — installs and configures the Netdata parent/child topology.
+#
+# Related ADRs: 0011, 0133, 0196
+# Related Runbooks: docs/runbooks/configure-netdata.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-27
+
+- name: Publish Netdata through the shared NGINX edge
+  hosts: nginx-lv3
+  become: true
+  gather_facts: true
+  vars:
+    realtime_repo_root: "{{ lookup('ansible.builtin.env', 'PWD') }}"
+  tags:
+    - tier-1
+    - access
+    - service-realtime
+
+  pre_tasks:
+    - name: Build shared generated portal artifacts required by edge publication
+      ansible.builtin.command:
+        argv:
+          - make
+          - generate-changelog-portal
+          - docs
+      args:
+        chdir: "{{ realtime_repo_root }}"
+      delegate_to: localhost
+      become: false
+      run_once: true
+      changed_when: false
+    - name: Run shared preflight checks for the edge publication
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.realtime.edge
+        playbook_execution_audit_target: realtime
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.nginx_edge[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.public_edge_oidc_auth
+    - role: lv3.platform.nginx_edge_publication
+
+- name: Converge Proxmox guest firewall policy for Netdata parent reachability
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  tags:
+    - tier-1
+    - network
+    - service-realtime
+
+  pre_tasks:
+    - name: Run shared preflight checks for the Proxmox guest firewall policy
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.realtime.network
+        playbook_execution_audit_target: realtime
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.proxmox_hosts[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.proxmox_network
+
+- name: Converge the Netdata parent on monitoring-lv3
+  hosts: monitoring-lv3
+  become: true
+  gather_facts: true
+  tags:
+    - tier-1
+    - observability
+    - service-realtime
+
+  pre_tasks:
+    - name: Run shared preflight checks for the Netdata parent
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.realtime.parent
+        playbook_execution_audit_target: realtime
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.monitoring[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.monitoring_vm
+    - role: lv3.platform.netdata_runtime
+
+  post_tasks:
+    - name: Run shared realtime post-verify checks
+      ansible.builtin.import_tasks: tasks/post-verify.yml
+      vars:
+        service_health_probe_id: realtime
+        playbook_execution_post_verify_audit_action: playbook.verify.realtime
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: realtime
+
+- name: Converge Netdata child agents on the Proxmox host and selected guests
+  hosts: proxmox_florin:nginx-lv3:docker-runtime-lv3:postgres-lv3
+  become: true
+  gather_facts: true
+  tags:
+    - tier-1
+    - observability
+    - service-realtime
+
+  pre_tasks:
+    - name: Run shared preflight checks for Netdata child agents
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.realtime.children
+        playbook_execution_audit_target: realtime
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.proxmox_hosts[playbook_execution_env] }}"
+          - "{{ playbook_execution_required_hosts.nginx_edge[playbook_execution_env] }}"
+          - "{{ playbook_execution_required_hosts.docker_runtime[playbook_execution_env] }}"
+          - "{{ playbook_execution_required_hosts.postgres[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+      when: inventory_hostname != groups['proxmox_hosts'][0]
+    - role: lv3.platform.netdata_runtime

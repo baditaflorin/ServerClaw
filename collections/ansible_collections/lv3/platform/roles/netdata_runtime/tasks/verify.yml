@@ -1,0 +1,27 @@
+---
+- name: Verify the local Netdata info endpoint responds
+  ansible.builtin.uri:
+    url: "{{ netdata_runtime_verify_info_url }}"
+    method: GET
+    status_code: 200
+    return_content: true
+    timeout: 30
+  register: netdata_runtime_verify_info
+  retries: 20
+  delay: 3
+  until: netdata_runtime_verify_info.status == 200
+  changed_when: false
+
+- name: Verify the parent Netdata Prometheus exporter responds
+  ansible.builtin.uri:
+    url: "{{ netdata_runtime_verify_allmetrics_url }}"
+    method: GET
+    status_code: 200
+    return_content: true
+    timeout: 30
+  register: netdata_runtime_verify_allmetrics
+  retries: 20
+  delay: 3
+  until: netdata_runtime_verify_allmetrics.status == 200
+  changed_when: false
+  when: netdata_runtime_is_parent

@@ -1,0 +1,67 @@
+# Workstream ws-0196-live-apply: Live Apply ADR 0196 From Latest `origin/main`
+
+- ADR: [ADR 0196](../adr/0196-netdata-realtime-streaming-metrics.md)
+- Title: production live apply for Netdata parent and child streaming metrics plus the authenticated `realtime.lv3.org` surface from the latest `origin/main`
+- Status: live_applied
+- Implemented In Repo Version: 0.177.12
+- Live Applied In Platform Version: 0.130.31
+- Implemented On: 2026-03-27
+- Live Applied On: 2026-03-27
+- Branch: `codex/ws-0196-live-apply`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0196-live-apply`
+- Owner: codex
+- Depends On: `adr-0011-monitoring`, `adr-0071-agent-observation-loop`, `adr-0133-portal-authentication-by-default`
+- Conflicts With: none
+- Shared Surfaces: `collections/ansible_collections/lv3/platform/roles/netdata_runtime/`, `collections/ansible_collections/lv3/platform/roles/monitoring_vm/`, `collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/`, `config/service-capability-catalog.json`, `config/subdomain-catalog.json`, `receipts/live-applies/`
+
+## Scope
+
+- replay ADR 0196 from an isolated latest-main worktree and branch suitable for
+  parallel agent work
+- apply the Netdata parent and child topology live on production
+- verify the repo automation, validation, Prometheus export, authenticated edge
+  route, and observation-loop integration end to end
+- leave protected integration files for merge-to-main instead of updating them
+  on this workstream branch
+
+## Verification
+
+- `uv run --with pytest --with jsonschema python -m pytest tests/test_generate_platform_vars.py tests/test_subdomain_catalog.py tests/test_validate_service_catalog.py tests/test_nginx_edge_publication_role.py tests/test_monitoring_vm_role.py tests/test_netdata_runtime_role.py tests/test_realtime_playbook.py -q`
+- `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`
+- `make syntax-check-realtime`
+- `make workflow-info WORKFLOW=converge-realtime`
+- `./scripts/validate_repo.sh health-probes alert-rules agent-standards`
+- `BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 make live-apply-service service=realtime env=production EXTRA_ARGS='-e bypass_promotion=true'`
+- `HETZNER_DNS_API_TOKEN=... BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 make converge-realtime env=production`
+- `make uptime-kuma-manage ACTION=bootstrap UPTIME_KUMA_ARGS='--base-url https://uptime.lv3.org'`
+- `make uptime-kuma-manage ACTION=ensure-monitors`
+- `HETZNER_DNS_API_TOKEN=... make provision-subdomain FQDN=realtime.lv3.org env=production`
+- `dig +short realtime.lv3.org`
+- `curl -skI https://realtime.lv3.org/`
+
+## Outcome
+
+- the production Netdata parent-plus-children topology is live on
+  `monitoring-lv3`, `proxmox_florin`, `nginx-lv3`, `docker-runtime-lv3`, and
+  `postgres-lv3`
+- the shared authenticated edge now publishes `https://realtime.lv3.org` with
+  the expanded Let's Encrypt certificate and the expected oauth2 sign-in
+  redirect
+- the final Prometheus query for `netdata_info{job="netdata"}` returned five
+  realtime series, confirming ingestion of the consolidated parent export
+- the generated Uptime Kuma contract now includes `Realtime Metrics Private`,
+  and monitor management works from a separate worktree through the shared auth
+  file path
+- the full live-apply evidence is recorded in
+  `receipts/live-applies/2026-03-27-adr-0196-netdata-realtime-streaming-metrics-live-apply.json`
+- the dedicated `converge-realtime` workflow wrapper is now catalogued,
+  validated, and proven against production in addition to the generic
+  `live-apply-service` path
+
+## Remaining For Merge To `main`
+
+- do not change protected integration files on this workstream branch
+- update `VERSION`, the release sections in `changelog.md`, the top-level
+  `README.md` integrated status summary, and
+  `versions/stack.yaml.live_apply_evidence.latest_receipts.realtime` during the
+  final mainline integration step

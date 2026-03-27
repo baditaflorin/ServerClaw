@@ -204,7 +204,7 @@ validate_retry_guard() {
 
 validate_data_models() {
   echo "Repository data model validation"
-  uvx --from pyyaml python "$REPO_ROOT/scripts/ansible_scope_runner.py" validate >/dev/null
+  uv run --with pyyaml python3 "$REPO_ROOT/scripts/ansible_scope_runner.py" validate >/dev/null
   uv run --with pyyaml python "$REPO_ROOT/scripts/validate_timeout_hierarchy.py" >/dev/null
   python3 "$REPO_ROOT/scripts/check_hardcoded_timeouts.py" >/dev/null
   uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/validate_repository_data_models.py" --validate >/dev/null

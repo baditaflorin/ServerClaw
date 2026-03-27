@@ -29,6 +29,7 @@ PORT_KEYS = (
     "monitoring_tempo_http_port",
     "monitoring_otlp_grpc_port",
     "monitoring_otlp_http_port",
+    "netdata_port",
     "mail_platform_gateway_port",
     "ntfy_port",
     "openbao_http_port",
@@ -368,6 +369,9 @@ def build_service_urls(
     elif service_id == "homepage":
         urls["internal"] = service_url("http", private_ip, ports["homepage_port"])
         port_map["internal"] = ports["homepage_port"]
+    elif service_id == "realtime":
+        urls["internal"] = service_url("http", private_ip, ports["netdata_port"])
+        port_map["internal"] = ports["netdata_port"]
     elif service_id == "status_page":
         urls["internal"] = service_url("http", private_ip, 3001)
         port_map["internal"] = 3001

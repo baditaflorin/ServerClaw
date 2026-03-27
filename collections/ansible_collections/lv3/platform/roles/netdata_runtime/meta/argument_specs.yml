@@ -1,0 +1,61 @@
+---
+argument_specs:
+  main:
+    short_description: Converge Netdata parent and child agents for live streaming metrics.
+    options:
+      netdata_runtime_parent_inventory_host:
+        type: str
+        required: true
+      netdata_runtime_child_inventory_hosts:
+        type: list
+        elements: str
+        required: true
+      netdata_runtime_is_parent:
+        type: bool
+        required: true
+      netdata_runtime_parent_web_port:
+        type: int
+        required: true
+      netdata_runtime_parent_private_ip:
+        type: str
+        required: true
+      netdata_runtime_parent_public_url:
+        type: str
+        required: true
+      netdata_runtime_stream_api_key_local_file:
+        type: path
+        required: true
+      netdata_runtime_stream_api_key_remote_file:
+        type: path
+        required: true
+      netdata_runtime_state_dir:
+        type: path
+        required: true
+      netdata_runtime_parent_bind_to:
+        type: str
+        required: true
+      netdata_runtime_child_bind_to:
+        type: str
+        required: true
+      netdata_runtime_stream_allow_from:
+        type: list
+        elements: str
+        required: true
+      netdata_runtime_parent_retention_time:
+        type: str
+        required: true
+      netdata_runtime_parent_retention_size:
+        type: str
+        required: true
+      netdata_runtime_child_db_mode:
+        type: str
+        required: true
+      netdata_runtime_child_history:
+        type: int
+        required: true
+      netdata_runtime_verify_info_url:
+        type: str
+        required: true
+      netdata_runtime_verify_allmetrics_url:
+        type: str
+        required: true

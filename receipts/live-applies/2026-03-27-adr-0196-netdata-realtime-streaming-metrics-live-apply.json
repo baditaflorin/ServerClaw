@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-27-adr-0196-netdata-realtime-streaming-metrics-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-27",
+  "recorded_on": "2026-03-27",
+  "recorded_by": "codex",
+  "source_commit": "e213cce2",
+  "repo_version_context": "0.177.12",
+  "workflow_id": "converge-realtime",
+  "adr": "0196",
+  "summary": "Applied ADR 0196 from an isolated latest-main worktree, converged the Netdata parent-plus-children realtime metrics service, published `realtime.lv3.org` behind the shared Keycloak-backed edge, and verified Prometheus ingestion plus Uptime Kuma monitor management end to end.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "65.108.75.123"
+    },
+    {
+      "kind": "guest",
+      "name": "nginx-lv3",
+      "vmid": 110,
+      "address": "10.10.10.10"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "monitoring-lv3",
+      "vmid": 130,
+      "address": "10.10.10.40"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 140,
+      "address": "10.10.10.50"
+    },
+    {
+      "kind": "service_endpoint",
+      "name": "realtime",
+      "address": "https://realtime.lv3.org"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused repository validation",
+      "result": "pass",
+      "observed": "`uv run --with pytest --with jsonschema python -m pytest tests/test_generate_platform_vars.py tests/test_subdomain_catalog.py tests/test_validate_service_catalog.py tests/test_nginx_edge_publication_role.py tests/test_monitoring_vm_role.py tests/test_netdata_runtime_role.py tests/test_realtime_playbook.py -q` passed with `42 passed`, `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate` plus `./scripts/validate_repo.sh health-probes alert-rules agent-standards` passed, and the new workflow governance surfaces answered cleanly through `make syntax-check-realtime` plus `make workflow-info WORKFLOW=converge-realtime`."
+    },
+    {
+      "check": "Realtime syntax and governed live apply",
+      "result": "pass",
+      "observed": "`make live-apply-service service=realtime env=production EXTRA_ARGS='-e bypass_promotion=true'` completed successfully after adding fresh-worktree portal generation, Debian 13 Netdata repository bootstrap, and the monitoring scrape-role replay to the realtime path. The dedicated wrapper `HETZNER_DNS_API_TOKEN=... make converge-realtime env=production` then replayed successfully with `monitoring-lv3 : ok=185 changed=9 failed=0`, `nginx-lv3 : ok=100 changed=3 failed=0`, `proxmox_florin : ok=55 changed=0 failed=0`, `docker-runtime-lv3 : ok=26 changed=2 failed=0`, and `postgres-lv3 : ok=24 changed=0 failed=0`."
+    },
+    {
+      "check": "Prometheus Netdata ingestion",
+      "result": "pass",
+      "observed": "The query `netdata_info{job=\"netdata\"}` on `monitoring-lv3` returned five series for the realtime topology, covering `monitoring-lv3`, `docker-runtime-lv3`, `postgres-lv3`, `nginx-lv3`, and the Proxmox-host-exported parent instance."
+    },
+    {
+      "check": "Public DNS and authenticated edge route",
+      "result": "pass",
+      "observed": "`dig +short realtime.lv3.org` returned `65.108.75.123`, the rerun of `make provision-subdomain FQDN=realtime.lv3.org env=production` completed cleanly, and `curl -skI https://realtime.lv3.org/` returned `HTTP/2 302` redirecting unauthenticated browsers to `/oauth2/sign_in`."
+    },
+    {
+      "check": "Uptime Kuma monitor management",
+      "result": "pass",
+      "observed": "`make uptime-kuma-manage ACTION=bootstrap UPTIME_KUMA_ARGS='--base-url https://uptime.lv3.org'` created the `Realtime Metrics Private` monitor, and `make uptime-kuma-manage ACTION=ensure-monitors` reran successfully from the parallel worktree using the shared durable auth file."
+    }
+  ],
+  "evidence_refs": [
+    "collections/ansible_collections/lv3/platform/playbooks/realtime.yml",
+    "collections/ansible_collections/lv3/platform/roles/netdata_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/netdata_runtime/tasks/verify.yml",
+    "collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/prometheus.yml.j2",
+    "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml",
+    "playbooks/realtime.yml",
+    "playbooks/services/realtime.yml",
+    "docs/adr/0196-netdata-realtime-streaming-metrics.md",
+    "docs/runbooks/configure-netdata.md",
+    "docs/workstreams/adr-0196-netdata-realtime-streaming-metrics.md",
+    "docs/workstreams/ws-0196-live-apply.md",
+    "tests/test_netdata_runtime_role.py",
+    "tests/test_realtime_playbook.py",
+    "workstreams.yaml"
+  ],
+  "notes": [
+    "The first governed `make provision-subdomain FQDN=realtime.lv3.org env=production` attempt failed inside the Hetzner record-creation task while `no_log` was enabled, even though zone lookup and API authentication succeeded.",
+    "A direct Hetzner DNS API POST using the same token sourced from `nginx-lv3` created the missing `realtime` A record. The governed playbook was rerun immediately afterward and completed cleanly, including expansion of the shared Let's Encrypt certificate for `realtime.lv3.org`.",
+    "Protected integration files intentionally remain for merge-to-main: `VERSION`, the release sections in `changelog.md`, the top-level `README.md` integrated status summary, and `versions/stack.yaml` receipt mappings."
+  ]
+}

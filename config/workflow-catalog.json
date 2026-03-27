@@ -2916,6 +2916,59 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-realtime": {
+      "description": "Converge the Netdata parent-plus-children realtime metrics surface across monitoring-lv3, the Proxmox host, and the managed guest nodes, then publish realtime.lv3.org through the shared authenticated edge.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-realtime",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-realtime"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": []
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-realtime"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-netdata.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/realtime.yml",
+        "playbooks/services/realtime.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/realtime.yml",
+        "collections/ansible_collections/lv3/platform/roles/netdata_runtime/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/uptime-kuma/monitors.json"
+      ],
+      "outputs": [
+        "A repo-managed Netdata parent on monitoring-lv3, child streaming from the Proxmox host and guest nodes, Prometheus ingestion of the consolidated export, and the authenticated realtime.lv3.org edge publication."
+      ],
+      "verification_commands": [
+        "make syntax-check-realtime",
+        "HETZNER_DNS_API_TOKEN=... make converge-realtime",
+        "dig +short realtime.lv3.org",
+        "curl -skI https://realtime.lv3.org/"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 350,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 5,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-ntfy": {
       "description": "Deploy the private ntfy paging gateway on docker-runtime-lv3 and persist the repo-managed credential used by Alertmanager critical routing.",
       "lifecycle_status": "active",

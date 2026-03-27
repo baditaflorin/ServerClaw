@@ -1810,6 +1810,47 @@
         ]
       }
     },
+    "converge-realtime": {
+      "description": "Converge the Netdata parent-plus-children realtime metrics surface, Prometheus scrape path, and authenticated realtime.lv3.org publication.",
+      "workflow_id": "converge-realtime",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        },
+        {
+          "name": "hetzner_dns_api_token",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "DNS token used to publish realtime.lv3.org and expand the shared edge certificate."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-realtime passes",
+        "make validate passes before the apply",
+        "The Netdata child topology, Prometheus scrape surface, and shared-edge publication boundary are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the source commit, Prometheus netdata_info verification, the authenticated edge redirect, and the final receipt id for realtime.lv3.org."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the Netdata parent, any declared child stream, Prometheus scrape path, or shared edge publication fails to converge.",
+          "Stop if the rollout would expose realtime.lv3.org outside the intended authenticated edge or private guest-network recovery path."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good Netdata runtime, Prometheus scrape configuration, and edge publication state before retrying.",
+          "Do not leave behind ad hoc package repositories, DNS changes, or NGINX edits after a failed rollout."
+        ]
+      }
+    },
     "converge-ntfy": {
       "description": "Converge the private ntfy paging gateway and the repo-managed Alertmanager credential on docker-runtime-lv3.",
       "workflow_id": "converge-ntfy",

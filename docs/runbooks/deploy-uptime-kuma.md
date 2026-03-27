@@ -98,6 +98,7 @@ curl -I https://status.lv3.org
 
 - Uptime Kuma's built-in API key support is useful for metrics endpoints, but monitor management still uses the internal Socket.IO application flow. The repo client script is built around that supported behavior.
 - Keep `.local/uptime-kuma/` local-only. It contains the durable auth material needed for future repo-driven monitor changes.
+- Parallel worktrees now default `make uptime-kuma-manage` to the primary checkout's `.local/uptime-kuma/admin-session.json`, so monitor reconciliation can reuse the durable session without duplicating auth files across worktrees.
 - Do not hand-edit `config/uptime-kuma/monitors.json`; regenerate it from `config/health-probe-catalog.json`.
 - The NGINX role in this repo now expands the shared `lv3-edge` certificate when a new published hostname is added, so future edge applications should use the same publication path.
 - The public status page runbook lives in `docs/runbooks/public-status-page.md` and covers the independent Uptime Robot monitor contract alongside the Uptime Kuma definition.

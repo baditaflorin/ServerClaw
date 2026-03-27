@@ -149,6 +149,152 @@ workstreams:
       latest_receipts:
         fixture_pools: 2026-03-28-adr-0186-prewarmed-fixture-pools-live-apply
 
+  - id: adr-0196-netdata-realtime-streaming-metrics
+    adr: "0196"
+    title: Netdata realtime streaming metrics
+    status: implemented
+    owner: codex
+    branch: codex/ws-0196-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0196-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0196-netdata-realtime-streaming-metrics.md
+    depends_on:
+      - adr-0011-monitoring
+      - adr-0071-agent-observation-loop
+      - adr-0133-portal-authentication-by-default
+    conflicts_with: []
+    shared_surfaces:
+      - collections/ansible_collections/lv3/platform/roles/netdata_runtime/
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/
+      - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/
+      - inventory/host_vars/proxmox_florin.yml
+      - config/service-capability-catalog.json
+      - config/subdomain-catalog.json
+      - config/health-probe-catalog.json
+      - docs/runbooks/configure-netdata.md
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: realtime_repo_surface
+          paths:
+            - docs/adr/0196-netdata-realtime-streaming-metrics.md
+            - docs/workstreams/adr-0196-netdata-realtime-streaming-metrics.md
+            - docs/runbooks/configure-netdata.md
+            - collections/ansible_collections/lv3/platform/roles/netdata_runtime/**
+            - collections/ansible_collections/lv3/platform/playbooks/realtime.yml
+            - playbooks/realtime.yml
+            - playbooks/services/realtime.yml
+            - tests/test_netdata_runtime_role.py
+            - tests/test_realtime_playbook.py
+          mode: exclusive
+        - id: monitoring_vm_contract
+          paths:
+            - collections/ansible_collections/lv3/platform/roles/monitoring_vm/**
+            - tests/test_monitoring_vm_role.py
+          mode: shared_contract
+          contract: monitoring-stack-role-v1
+        - id: nginx_edge_contract
+          paths:
+            - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/**
+            - tests/test_nginx_edge_publication_role.py
+          mode: shared_contract
+          contract: shared-edge-publication-v1
+        - id: platform_topology_contract
+          paths:
+            - inventory/host_vars/proxmox_florin.yml
+            - inventory/group_vars/platform.yml
+            - scripts/generate_platform_vars.py
+            - tests/test_generate_platform_vars.py
+          mode: shared_contract
+          contract: platform-service-topology-v1
+        - id: platform_catalog_contracts
+          paths:
+            - config/service-capability-catalog.json
+            - config/subdomain-catalog.json
+            - config/health-probe-catalog.json
+            - config/service-completeness.json
+            - config/dependency-graph.json
+            - config/slo-catalog.json
+            - config/service-redundancy-catalog.json
+            - config/data-catalog.json
+            - config/prometheus/file_sd/slo_targets.yml
+            - config/prometheus/rules/slo_alerts.yml
+            - config/prometheus/rules/slo_rules.yml
+            - config/uptime-kuma/monitors.json
+            - config/grafana/dashboards/slo-overview.json
+            - tests/test_subdomain_catalog.py
+            - tests/test_validate_service_catalog.py
+          mode: shared_contract
+          contract: platform-catalog-suite-v1
+    ready_to_merge: false
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0196 Netdata realtime streaming metrics so production now has a repo-managed parent-plus-children Netdata topology, authenticated realtime.lv3.org publication, Prometheus ingestion, and governed read-only API access
+      release_bump: patch
+      included_in_repo_version: 0.177.13
+      latest_receipts:
+        realtime: 2026-03-27-adr-0196-netdata-realtime-streaming-metrics-live-apply
+
+  - id: ws-0196-live-apply
+    adr: "0196"
+    title: ADR 0196 live apply from latest origin/main
+    status: live_applied
+    owner: codex
+    branch: codex/ws-0196-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0196-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0196-live-apply.md
+    depends_on:
+      - adr-0011-monitoring
+      - adr-0071-agent-observation-loop
+      - adr-0133-portal-authentication-by-default
+      - adr-0196-netdata-realtime-streaming-metrics
+    conflicts_with: []
+    shared_surfaces:
+      - collections/ansible_collections/lv3/platform/roles/netdata_runtime/
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/
+      - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/
+      - inventory/host_vars/proxmox_florin.yml
+      - config/service-capability-catalog.json
+      - config/subdomain-catalog.json
+      - config/health-probe-catalog.json
+      - docs/runbooks/configure-netdata.md
+      - receipts/live-applies/
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: realtime_live_apply_docs
+          paths:
+            - docs/workstreams/ws-0196-live-apply.md
+            - receipts/live-applies/
+          mode: exclusive
+        - id: realtime_live_apply_contracts
+          paths:
+            - collections/ansible_collections/lv3/platform/roles/netdata_runtime/**
+            - collections/ansible_collections/lv3/platform/roles/monitoring_vm/**
+            - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/**
+            - inventory/host_vars/proxmox_florin.yml
+            - config/service-capability-catalog.json
+            - config/subdomain-catalog.json
+            - config/health-probe-catalog.json
+            - docs/runbooks/configure-netdata.md
+          mode: shared_contract
+          contract: realtime-live-apply-v1
+    ready_to_merge: false
+    live_applied: true
+    canonical_truth:
+      changelog_entry: completed the ADR 0196 latest-main live integration so realtime.lv3.org, the Netdata parent-plus-children topology, Prometheus ingestion, and the canonical live-apply receipt are now recorded directly on main
+      release_bump: patch
+      included_in_repo_version: 0.177.13
+      latest_receipts:
+        realtime: 2026-03-27-adr-0196-netdata-realtime-streaming-metrics-live-apply
+
   - id: ws-0185-live-apply
     adr: "0185"
     title: Branch-scoped ephemeral preview environments

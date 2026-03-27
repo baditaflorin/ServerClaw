@@ -1,5 +1,6 @@
 ---
 - import_playbook: services/grafana.yml
+- import_playbook: services/realtime.yml
 - import_playbook: services/proxmox-metrics.yml
 - import_playbook: services/proxmox-host-log-shipping.yml
 - import_playbook: services/nginx-observability.yml

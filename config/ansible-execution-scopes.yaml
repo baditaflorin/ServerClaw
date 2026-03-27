@@ -269,6 +269,12 @@ playbooks:
     shared_surfaces:
       - service:dozzle
       - inventory/host_vars/proxmox_florin.yml
+  collections/ansible_collections/lv3/platform/playbooks/realtime.yml:
+    playbook_id: realtime
+    mutation_scope: platform
+    shared_surfaces:
+      - service:realtime
+      - inventory/host_vars/proxmox_florin.yml
   collections/ansible_collections/lv3/platform/playbooks/ollama.yml:
     playbook_id: ollama
     mutation_scope: host

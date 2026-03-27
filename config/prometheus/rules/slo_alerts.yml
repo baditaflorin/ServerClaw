@@ -199,6 +199,46 @@ groups:
           description: The unified operator dashboard remains reachable through the
             authenticated LV3 edge.
           runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOFastBurn_realtime_availability
+        expr: (slo:realtime_availability:error_rate_5m > (14 * 0.010000)) and (slo:realtime_availability:error_rate_1h
+          > (14 * 0.010000))
+        for: 2m
+        labels:
+          severity: critical
+          service_id: realtime
+          slo_id: realtime-availability
+          indicator: availability
+        annotations:
+          summary: realtime-availability is burning its error budget at 14x
+          description: The Netdata parent remains reachable on monitoring-lv3 for
+            real-time streamed platform metrics.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOSlowBurn_realtime_availability
+        expr: slo:realtime_availability:error_rate_1h > (3 * 0.010000)
+        for: 60m
+        labels:
+          severity: warning
+          service_id: realtime
+          slo_id: realtime-availability
+          indicator: availability
+        annotations:
+          summary: realtime-availability is burning its error budget at 3x
+          description: The Netdata parent remains reachable on monitoring-lv3 for
+            real-time streamed platform metrics.
+          runbook: docs/runbooks/slo-tracking.md
+      - alert: SLOBudgetCritical_realtime_availability
+        expr: slo:realtime_availability:budget_remaining < 0.10
+        for: 10m
+        labels:
+          severity: critical
+          service_id: realtime
+          slo_id: realtime-availability
+          indicator: availability
+        annotations:
+          summary: realtime-availability has less than 10% error budget remaining
+          description: The Netdata parent remains reachable on monitoring-lv3 for
+            real-time streamed platform metrics.
+          runbook: docs/runbooks/slo-tracking.md
       - alert: SLOFastBurn_keycloak_availability
         expr: (slo:keycloak_availability:error_rate_5m > (14 * 0.003000)) and (slo:keycloak_availability:error_rate_1h
           > (14 * 0.003000))
