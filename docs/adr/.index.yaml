@@ -6,7 +6,7 @@
 # ============================================================================
 
 schema_version: 1
-generated: '2026-03-27'
+generated: '2026-03-28'
 total_adrs: 201
 implementation_status_summary:
   Implemented: 183
@@ -3289,7 +3289,7 @@ adr_index:
     filename: 0190-synthetic-transaction-replay-for-capacity-and-recovery-validation.md
   - adr: 0191
     title: Immutable Guest Replacement for Stateful and Edge Services
-    status: Accepted
+    status: Implemented
     implementation_status: Implemented
     date: '2026-03-27'
     concern: vm-topology
@@ -3303,7 +3303,7 @@ adr_index:
     summary: For stateful and edge services at redundancy tier R1 or higher, the default change path will be immutable guest
       replacem
     filename: 0191-immutable-guest-replacement-for-stateful-and-edge-services.md
-    implemented_version: 0.130.31
+    implemented_version: 0.177.13
   - adr: 0192
     title: Separate Capacity Classes for Standby, Recovery, and Preview Workloads
     status: Proposed
