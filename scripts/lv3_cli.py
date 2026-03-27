@@ -32,6 +32,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from dependency_graph import dependency_summary, load_dependency_graph
+from environment_catalog import environment_choices, primary_environment
 from platform.conflict import IntentConflictRegistry
 from repo_package_loader import load_repo_package
 import runbook_executor
@@ -59,6 +60,8 @@ SERVICE_ALIASES = {
     "changelog": "changelog_portal",
     "proxmox": "proxmox_ui",
 }
+ENVIRONMENT_CHOICES = list(environment_choices())
+DEFAULT_ENVIRONMENT = primary_environment()
 
 GOAL_COMPILER_MODULE = load_repo_package("lv3_goal_compiler", CODE_ROOT / "platform" / "goal_compiler")
 LEDGER_MODULE = load_repo_package("lv3_platform_ledger", CODE_ROOT / "platform" / "ledger")
@@ -2365,7 +2368,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     deploy = subparsers.add_parser("deploy", help="Deploy one service.")
     deploy.add_argument("service")
-    deploy.add_argument("--env", default="production", choices=["production", "staging"])
+    deploy.add_argument("--env", default=DEFAULT_ENVIRONMENT, choices=ENVIRONMENT_CHOICES)
     deploy.add_argument("--dry-run", action="store_true")
     deploy.add_argument("--explain", action="store_true")
 
@@ -2391,29 +2394,29 @@ def build_parser() -> argparse.ArgumentParser:
 
     status = subparsers.add_parser("status", help="Show service health status.")
     status.add_argument("service", nargs="?")
-    status.add_argument("--env", default="production", choices=["production", "staging"])
+    status.add_argument("--env", default=DEFAULT_ENVIRONMENT, choices=ENVIRONMENT_CHOICES)
     status.add_argument("--timeout", type=float, default=DEFAULT_STATUS_TIMEOUT_SECONDS)
 
     vm = subparsers.add_parser("vm", help="Operate on VM lifecycle routes.")
     vm_subparsers = vm.add_subparsers(dest="vm_action", required=True)
     vm_create = vm_subparsers.add_parser("create", help="Apply the VM environment.")
     vm_create.add_argument("name", nargs="?")
-    vm_create.add_argument("--env", default="production", choices=["production", "staging"])
+    vm_create.add_argument("--env", default=DEFAULT_ENVIRONMENT, choices=ENVIRONMENT_CHOICES)
     vm_create.add_argument("--dry-run", action="store_true")
     vm_create.add_argument("--explain", action="store_true")
     vm_destroy = vm_subparsers.add_parser("destroy", help="Destroy one VM target.")
     vm_destroy.add_argument("name")
-    vm_destroy.add_argument("--env", default="production", choices=["production", "staging"])
+    vm_destroy.add_argument("--env", default=DEFAULT_ENVIRONMENT, choices=ENVIRONMENT_CHOICES)
     vm_destroy.add_argument("--force", action="store_true")
     vm_destroy.add_argument("--dry-run", action="store_true")
     vm_destroy.add_argument("--explain", action="store_true")
     vm_resize = vm_subparsers.add_parser("resize", help="Open the VM IaC file in $EDITOR.")
     vm_resize.add_argument("name", nargs="?")
-    vm_resize.add_argument("--env", default="production", choices=["production", "staging"])
+    vm_resize.add_argument("--env", default=DEFAULT_ENVIRONMENT, choices=ENVIRONMENT_CHOICES)
     vm_resize.add_argument("--dry-run", action="store_true")
     vm_resize.add_argument("--explain", action="store_true")
     vm_list = vm_subparsers.add_parser("list", help="List known VMs.")
-    vm_list.add_argument("--env", default="production", choices=["production", "staging"])
+    vm_list.add_argument("--env", default=DEFAULT_ENVIRONMENT, choices=ENVIRONMENT_CHOICES)
 
     secret = subparsers.add_parser("secret", help="Access managed secrets.")
     secret_subparsers = secret.add_subparsers(dest="secret_action", required=True)
@@ -2457,7 +2460,7 @@ def build_parser() -> argparse.ArgumentParser:
     scaffold.add_argument("--explain", action="store_true")
 
     diff = subparsers.add_parser("diff", help="Show infrastructure drift.")
-    diff.add_argument("--env", default="production", choices=["production", "staging"])
+    diff.add_argument("--env", default=DEFAULT_ENVIRONMENT, choices=ENVIRONMENT_CHOICES)
     diff.add_argument("--dry-run", action="store_true")
     diff.add_argument("--explain", action="store_true")
 
@@ -2550,7 +2553,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     open_parser = subparsers.add_parser("open", help="Open one service URL.")
     open_parser.add_argument("service")
-    open_parser.add_argument("--env", default="production", choices=["production", "staging"])
+    open_parser.add_argument("--env", default=DEFAULT_ENVIRONMENT, choices=ENVIRONMENT_CHOICES)
     open_parser.add_argument("--dry-run", action="store_true")
     open_parser.add_argument("--explain", action="store_true")
 

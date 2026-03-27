@@ -2,6 +2,7 @@
 
 import argparse
 import ipaddress
+import re
 import sys
 from typing import Any
 
@@ -13,10 +14,10 @@ SERVICE_CATALOG_PATH = repo_path("config", "service-capability-catalog.json")
 SUBDOMAIN_CATALOG_PATH = repo_path("config", "subdomain-catalog.json")
 HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 
-ALLOWED_ENVIRONMENTS = {"production", "staging"}
 ALLOWED_ENVIRONMENT_STATUSES = {"active", "planned"}
 ALLOWED_TOPOLOGY_MODELS = {"single-node-shared-edge"}
 ALLOWED_BINDING_STATUSES = {"active", "planned"}
+ENVIRONMENT_ID_PATTERN = re.compile(r"^[a-z][a-z0-9_-]*$")
 
 
 def require_mapping(value: Any, path: str) -> dict[str, Any]:
@@ -61,9 +62,9 @@ def validate_environment_topology(catalog: dict[str, Any], host_vars: dict[str, 
     for index, environment in enumerate(environments):
         environment = require_mapping(environment, f"environments[{index}]")
         env_id = require_str(environment.get("id"), f"environments[{index}].id")
-        if env_id not in ALLOWED_ENVIRONMENTS:
+        if not ENVIRONMENT_ID_PATTERN.fullmatch(env_id):
             raise ValueError(
-                f"environments[{index}].id must be one of {sorted(ALLOWED_ENVIRONMENTS)}"
+                f"environments[{index}].id must match {ENVIRONMENT_ID_PATTERN.pattern}"
             )
         if env_id in seen_ids:
             raise ValueError(f"duplicate environment id: {env_id}")
@@ -117,17 +118,52 @@ def validate_environment_topology(catalog: dict[str, Any], host_vars: dict[str, 
             require_str(environment.get("operator_access"), f"environments[{index}].operator_access")
         if "notes" in environment:
             require_str(environment.get("notes"), f"environments[{index}].notes")
+        private_network = environment.get("private_network")
+        if private_network is not None:
+            private_network = require_mapping(private_network, f"environments[{index}].private_network")
+            require_str(
+                private_network.get("bridge"),
+                f"environments[{index}].private_network.bridge",
+            )
+            gateway_ipv4 = require_str(
+                private_network.get("gateway_ipv4"),
+                f"environments[{index}].private_network.gateway_ipv4",
+            )
+            try:
+                ipaddress.IPv4Address(gateway_ipv4)
+            except ipaddress.AddressValueError as exc:
+                raise ValueError(
+                    f"environments[{index}].private_network.gateway_ipv4 must be a valid IPv4 address"
+                ) from exc
+            cidr = private_network.get("cidr")
+            if isinstance(cidr, bool) or not isinstance(cidr, int) or not 1 <= cidr <= 32:
+                raise ValueError(f"environments[{index}].private_network.cidr must be an integer between 1 and 32")
+            network = require_str(
+                private_network.get("network"),
+                f"environments[{index}].private_network.network",
+            )
+            try:
+                parsed_network = ipaddress.IPv4Network(network, strict=True)
+            except ipaddress.AddressValueError as exc:
+                raise ValueError(
+                    f"environments[{index}].private_network.network must be a valid IPv4 CIDR"
+                ) from exc
+            if parsed_network.prefixlen != cidr:
+                raise ValueError(
+                    f"environments[{index}].private_network.network prefix length must match cidr {cidr}"
+                )
+            if ipaddress.IPv4Address(gateway_ipv4) not in parsed_network:
+                raise ValueError(
+                    f"environments[{index}].private_network.gateway_ipv4 must be inside {parsed_network}"
+                )
 
         if env_id == "production" and base_domain != "lv3.org":
             raise ValueError("production.base_domain must be lv3.org")
-        if env_id == "staging" and base_domain != "staging.lv3.org":
-            raise ValueError("staging.base_domain must be staging.lv3.org")
 
         indexed[env_id] = environment
 
-    missing = ALLOWED_ENVIRONMENTS - set(indexed)
-    if missing:
-        raise ValueError(f"environment topology is missing required environments {sorted(missing)}")
+    if "production" not in indexed:
+        raise ValueError("environment topology must define a production environment")
 
     return indexed
 

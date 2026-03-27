@@ -15,6 +15,7 @@ from typing import Any
 
 from controller_automation_toolkit import load_json, repo_path
 from changelog_redaction import redact_history_entries
+from environment_catalog import receipt_subdirectory_environments
 from mutation_audit import resolve_loki_url
 
 
@@ -26,8 +27,6 @@ DEFAULT_AUDIT_LOOKBACK_DAYS = 90
 DEFAULT_AUDIT_QUERY_LIMIT = 500
 MUTATION_AUDIT_QUERY_URL_ENV = "LV3_MUTATION_AUDIT_LOKI_QUERY_URL"
 MUTATION_AUDIT_QUERY_FILE_ENV = "LV3_MUTATION_AUDIT_QUERY_FILE"
-ALLOWED_ENVIRONMENTS = {"production", "staging"}
-
 
 @dataclass(frozen=True)
 class ServiceMatcher:
@@ -162,7 +161,7 @@ def relative_repo_path(path: Path) -> str:
 
 def receipt_environment(path: Path, root: Path) -> str:
     relative = path.resolve().relative_to(root.resolve())
-    if relative.parts and relative.parts[0] in ALLOWED_ENVIRONMENTS:
+    if relative.parts and relative.parts[0] in receipt_subdirectory_environments():
         return relative.parts[0]
     return "production"
 

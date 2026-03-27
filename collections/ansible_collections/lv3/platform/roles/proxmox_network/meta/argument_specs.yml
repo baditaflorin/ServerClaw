@@ -38,6 +38,32 @@ argument_specs:
         required: true
         description:
           - IPv4 CIDR for the internal guest network.
+      proxmox_staging_bridge_enabled:
+        type: bool
+        required: false
+        default: true
+        description:
+          - Whether the optional staging bridge should be rendered on the Proxmox host.
+      proxmox_staging_bridge:
+        type: str
+        required: false
+        description:
+          - Optional staging bridge name used for the pre-production guest subnet.
+      proxmox_staging_ipv4:
+        type: str
+        required: false
+        description:
+          - Host IPv4 address on the staging bridge.
+      proxmox_staging_cidr:
+        type: int
+        required: false
+        description:
+          - IPv4 prefix length for the staging bridge.
+      proxmox_staging_network:
+        type: str
+        required: false
+        description:
+          - IPv4 CIDR for the staging bridge subnet.
       proxmox_guests:
         type: list
         elements: raw

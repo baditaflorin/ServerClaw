@@ -9,15 +9,19 @@ from typing import Any
 
 from controller_automation_toolkit import emit_cli_error, repo_path
 from deployment_history import DEFAULT_AUDIT_LOOKBACK_DAYS, load_deployment_history, load_service_catalog_data
+from environment_catalog import configured_environment_ids
 from portal_utils import PORTAL_STYLES, escape, page_template, render_badge, render_external_link
 
 
 BUILD_DIR = repo_path("build", "changelog-portal")
+ENVIRONMENT_NAV = [
+    (f"environment/{environment}/index.html", environment.replace("-", " ").title())
+    for environment in configured_environment_ids()
+]
 NAV = [
     ("index.html", "Timeline"),
     ("services/index.html", "Services"),
-    ("environment/production/index.html", "Production"),
-    ("environment/staging/index.html", "Staging"),
+    *ENVIRONMENT_NAV,
     ("promotions/index.html", "Promotions"),
 ]
 
@@ -278,7 +282,7 @@ def render_portal(
             warning_banner + render_service_page(service, service_entries),
         )
 
-    for environment in ("production", "staging"):
+    for environment in configured_environment_ids():
         environment_entries = [item for item in history["entries"] if item.get("environment") == environment]
         write_page(
             output_dir,

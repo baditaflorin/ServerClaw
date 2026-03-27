@@ -14,6 +14,10 @@ proxmox_internal_bridge: vmbr10
 proxmox_internal_ipv4: 10.10.10.1
 proxmox_internal_cidr: 24
 proxmox_internal_network: 10.10.10.0/24
+proxmox_staging_bridge: vmbr20
+proxmox_staging_ipv4: 10.20.10.1
+proxmox_staging_cidr: 24
+proxmox_staging_network: 10.20.10.0/24
 proxmox_public_edge_ipv4: 10.10.10.10
 platform_port_assignments:
   alertmanager_port: 9093
@@ -67,6 +71,7 @@ proxmox_tailscale_login_server: https://headscale.lv3.org
 proxmox_tailscale_tags: []
 proxmox_tailscale_advertise_routes:
   - "{{ proxmox_internal_network }}"
+  - "{{ proxmox_staging_network }}"
 proxmox_tailscale_operator_target_guest: 10.10.10.30
 proxmox_public_ingress_tcp_ports:
   - 25

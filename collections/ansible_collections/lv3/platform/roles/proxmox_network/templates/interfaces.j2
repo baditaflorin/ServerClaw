@@ -29,3 +29,12 @@ iface {{ proxmox_internal_bridge }} inet static
     bridge-ports none
     bridge-stp off
     bridge-fd 0
+{% if proxmox_staging_bridge_enabled | default(false) %}
+
+auto {{ proxmox_staging_bridge }}
+iface {{ proxmox_staging_bridge }} inet static
+    address {{ proxmox_staging_ipv4 }}/{{ proxmox_staging_cidr }}
+    bridge-ports none
+    bridge-stp off
+    bridge-fd 0
+{% endif %}

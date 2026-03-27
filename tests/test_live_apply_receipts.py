@@ -71,3 +71,22 @@ def test_receipt_id_with_session_appends_normalized_suffix(monkeypatch: pytest.M
     receipt_id = live_apply_receipts.receipt_id_with_session("2026-03-25-adr-0156-live-apply")
 
     assert receipt_id == "2026-03-25-adr-0156-live-apply-adr-0156-test"
+
+
+def test_receipt_environment_for_path_accepts_catalog_driven_subdirectories(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(live_apply_receipts, "receipt_subdirectory_environments", lambda: {"staging", "development"})
+
+    assert (
+        live_apply_receipts.receipt_environment_for_path(
+            live_apply_receipts.RECEIPTS_DIR / "development" / "2026-03-27-test.json"
+        )
+        == "development"
+    )
+    assert (
+        live_apply_receipts.receipt_environment_for_path(
+            live_apply_receipts.RECEIPTS_DIR / "2026-03-27-test.json"
+        )
+        == "production"
+    )

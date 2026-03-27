@@ -15,6 +15,7 @@ from controller_automation_toolkit import (
     emit_cli_error,
     load_json,
 )
+from environment_catalog import configured_environment_ids, receipt_subdirectory_environments
 from workflow_catalog import load_workflow_catalog, load_secret_manifest, validate_secret_manifest, validate_workflow_catalog
 
 
@@ -23,7 +24,7 @@ DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 COMMIT_HASH_PATTERN = re.compile(r"^[0-9a-f]{7,64}$")
 LEGACY_WORKFLOW_ID_PATTERN = re.compile(r"^adr-\d{4}-[a-z0-9-]+-live-apply$")
 ALLOWED_RESULTS = {"pass", "partial", "fail"}
-ALLOWED_ENVIRONMENTS = {"production", "staging"}
+ALLOWED_ENVIRONMENTS = set(configured_environment_ids())
 
 
 def load_receipt(path: Path) -> dict:
@@ -58,7 +59,7 @@ def iter_receipt_paths() -> list[Path]:
 
 def receipt_environment_for_path(path: Path) -> str:
     relative = path.relative_to(RECEIPTS_DIR)
-    return "staging" if relative.parts and relative.parts[0] == "staging" else "production"
+    return relative.parts[0] if relative.parts and relative.parts[0] in receipt_subdirectory_environments() else "production"
 
 
 def receipt_relative_path(path: Path) -> Path:

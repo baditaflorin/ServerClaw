@@ -14,6 +14,12 @@
       "topology_model": "single-node-shared-edge",
       "isolation_model": "Production uses the authoritative bare lv3.org hostnames and repo-managed runtime state.",
       "operator_access": "Private-only services stay on the Tailscale-backed operator path through the Proxmox host.",
+      "private_network": {
+        "bridge": "vmbr10",
+        "gateway_ipv4": "10.10.10.1",
+        "cidr": 24,
+        "network": "10.10.10.0/24"
+      },
       "notes": "This is the only environment currently applied live."
     },
     {
@@ -29,6 +35,12 @@
       "topology_model": "single-node-shared-edge",
       "isolation_model": "Staging reuses the shared host and edge VM but must use separate DNS names, secrets, and mutable service state.",
       "operator_access": "Until a dedicated staging access path exists, operator-only staged services follow the same private path as production.",
+      "private_network": {
+        "bridge": "vmbr20",
+        "gateway_ipv4": "10.20.10.1",
+        "cidr": 24,
+        "network": "10.20.10.0/24"
+      },
       "notes": "Repo topology is defined now; live staged publication remains pending service-specific rollout from main."
     }
   ]

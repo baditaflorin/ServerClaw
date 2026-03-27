@@ -11,6 +11,16 @@
       - proxmox_internal_network | length > 0
     fail_msg: "proxmox_network requires management and internal bridge topology inputs."
 
+- name: Validate optional staging bridge inputs
+  ansible.builtin.assert:
+    that:
+      - proxmox_staging_bridge | default('') | length > 0
+      - proxmox_staging_ipv4 | default('') | length > 0
+      - proxmox_staging_network | default('') | length > 0
+      - (proxmox_staging_cidr | default(0) | int) > 0
+    fail_msg: "proxmox_network staging bridge mode requires bridge name, gateway, cidr, and network."
+  when: proxmox_staging_bridge_enabled | default(false) | bool
+
 - name: Ensure nftables is installed
   ansible.builtin.apt:
     name:

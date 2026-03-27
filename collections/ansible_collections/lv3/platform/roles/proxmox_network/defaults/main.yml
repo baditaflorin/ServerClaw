@@ -3,3 +3,4 @@ proxmox_network_enable_ipv4_forwarding: true
 proxmox_public_ingress_tcp_forwards: []
 proxmox_network_conntrack_helper_path: /usr/local/sbin/lv3-proxmox-firewall-conntrack
 proxmox_network_conntrack_service_file: /etc/systemd/system/lv3-proxmox-firewall-conntrack.service
+proxmox_staging_bridge_enabled: true

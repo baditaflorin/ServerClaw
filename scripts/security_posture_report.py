@@ -26,6 +26,7 @@ from drift_lib import (
     run_command,
     utc_now,
 )
+from environment_catalog import environment_choices, primary_environment
 from mutation_audit import build_event, emit_event_best_effort
 from parse_lynis_report import DEFAULT_SUPPRESSIONS_PATH, load_suppressions, parse_path
 from platform_observation_tool import maybe_read_secret_path, post_json_webhook
@@ -37,7 +38,8 @@ DEFAULT_PLAYBOOK = repo_path("playbooks", "tasks", "security-scan.yml")
 DEFAULT_INVENTORY = repo_path("inventory", "hosts.yml")
 DEFAULT_LYNIS_DIR = repo_path(".local", "security-posture", "lynis")
 DEFAULT_TRIVY_SCRIPT = repo_path("scripts", "trivy_scan_running_images.sh")
-DEFAULT_ENVIRONMENT = "production"
+DEFAULT_ENVIRONMENT = primary_environment()
+ENVIRONMENT_CHOICES = environment_choices()
 DEFAULT_LYNIS_HOSTS = {
     "production": [
         "proxmox_florin",
@@ -380,7 +382,7 @@ def post_glitchtip_events(events: list[dict[str, Any]], webhook_url: str) -> Non
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the ADR 0102 security posture workflow and write a receipt.")
-    parser.add_argument("--env", default=DEFAULT_ENVIRONMENT, choices=["production", "staging"])
+    parser.add_argument("--env", default=DEFAULT_ENVIRONMENT, choices=ENVIRONMENT_CHOICES)
     parser.add_argument("--inventory", type=Path, default=DEFAULT_INVENTORY)
     parser.add_argument("--playbook", type=Path, default=DEFAULT_PLAYBOOK)
     parser.add_argument("--lynis-dir", type=Path, default=DEFAULT_LYNIS_DIR)

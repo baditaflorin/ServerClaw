@@ -12,6 +12,8 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
+from environment_catalog import environment_choices, primary_environment
+
 
 def post_json_webhook(url: str, payload: dict[str, Any]) -> None:
     request = urllib.request.Request(
@@ -141,8 +143,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--environment",
-        default="production",
-        choices=("production", "staging"),
+        default=primary_environment(),
+        choices=environment_choices(),
         help="Environment selection forwarded to scripts/integration_suite.py.",
     )
     return parser

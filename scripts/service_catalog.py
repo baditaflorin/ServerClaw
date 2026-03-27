@@ -5,7 +5,8 @@ import sys
 from typing import Any, Final
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
-from environment_topology import ALLOWED_BINDING_STATUSES, ALLOWED_ENVIRONMENTS
+from environment_catalog import configured_environment_ids
+from environment_topology import ALLOWED_BINDING_STATUSES
 
 try:
     import jsonschema
@@ -25,6 +26,7 @@ UPTIME_MONITORS_PATH: Final = repo_path("config", "uptime-kuma", "monitors.json"
 HEALTH_PROBE_CATALOG_PATH: Final = repo_path("config", "health-probe-catalog.json")
 IMAGE_CATALOG_PATH: Final = repo_path("config", "image-catalog.json")
 SECRET_CATALOG_PATH: Final = repo_path("config", "secret-catalog.json")
+ALLOWED_ENVIRONMENTS = set(configured_environment_ids())
 
 ALLOWED_CATEGORIES = {
     "observability",

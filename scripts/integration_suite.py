@@ -13,6 +13,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from environment_catalog import environment_choices, primary_environment
+
 
 DEFAULT_REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_REPORT_DIR = ".local/integration-tests"
@@ -30,6 +32,8 @@ MODE_MARKERS = {
     "all": "integration",
     "destructive": "integration and destructive",
 }
+ENVIRONMENT_CHOICES = environment_choices()
+DEFAULT_ENVIRONMENT = primary_environment()
 
 
 @dataclass(frozen=True)
@@ -120,8 +124,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument(
         "--environment",
-        choices=("production", "staging"),
-        default=os.environ.get("LV3_INTEGRATION_ENVIRONMENT", "production"),
+        choices=ENVIRONMENT_CHOICES,
+        default=os.environ.get("LV3_INTEGRATION_ENVIRONMENT", DEFAULT_ENVIRONMENT),
         help="Environment whose URLs should be resolved from the service catalog.",
     )
     parser.add_argument(
@@ -182,7 +186,7 @@ def resolve_service_url(catalog: dict[str, Any], service_id: str, environment: s
     if isinstance(env_entry, dict) and env_entry.get("status") == "active":
         return normalize_url(env_entry.get("url"))
 
-    if environment == "production":
+    if environment == DEFAULT_ENVIRONMENT:
         return normalize_url(service.get("public_url") or service.get("internal_url"))
     return None
 

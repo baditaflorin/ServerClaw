@@ -14,6 +14,9 @@ table inet filter {
     ct state related,established accept
     ip saddr {{ proxmox_internal_network }} accept
     iifname "tailscale0" ip daddr {{ proxmox_internal_network }} accept
+{% if proxmox_staging_bridge_enabled | default(false) %}
+    iifname "tailscale0" ip daddr {{ proxmox_staging_network }} accept
+{% endif %}
 {% if proxmox_public_ingress_tcp_forwards | default([]) | length > 0 %}
 {% for forward in proxmox_public_ingress_tcp_forwards %}
     iifname "{{ proxmox_wan_bridge }}" ip daddr {{ forward.target_host }} tcp dport {{ forward.target_port }} accept

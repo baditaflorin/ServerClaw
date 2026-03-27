@@ -9,6 +9,8 @@ import os
 import shlex
 from pathlib import Path
 
+from environment_catalog import environment_choices
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SECRET_MANIFEST = REPO_ROOT / "config" / "controller-local-secrets.json"
@@ -33,7 +35,7 @@ STAGING_VMIDS = {
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=["plan", "apply", "drift", "import"])
-    parser.add_argument("environment", choices=["production", "staging"])
+    parser.add_argument("environment", choices=environment_choices())
     parser.add_argument("--vm", help="VM name for import operations.")
     parser.add_argument(
         "--token-file",

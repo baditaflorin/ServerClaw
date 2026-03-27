@@ -36,12 +36,15 @@ from drift_lib import (
 from parse_ansible_drift import parse_ansible_output
 from run_namespace import ensure_run_namespace, resolve_run_namespace
 from tls_cert_drift import collect_drift as collect_tls_drift
+from environment_catalog import environment_choices, primary_environment
 
 
 REPO_ROOT = repo_path()
 DEFAULT_RECEIPT_DIR = repo_path("receipts", "drift-reports")
 SERVICE_CATALOG_PATH = repo_path("config", "service-capability-catalog.json")
 HEALTH_PROBE_CATALOG_PATH = repo_path("config", "health-probe-catalog.json")
+ENVIRONMENT_CHOICES = environment_choices()
+DEFAULT_ENVIRONMENT = primary_environment()
 
 
 def parse_tofu_plan(plan_json_path: Path) -> list[dict[str, Any]]:
@@ -358,7 +361,7 @@ def build_report(records: list[dict[str, Any]], *, environment: str) -> dict[str
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run the full LV3 drift-detection suite.")
-    parser.add_argument("--env", default="production", choices=["production", "staging"])
+    parser.add_argument("--env", default=DEFAULT_ENVIRONMENT, choices=ENVIRONMENT_CHOICES)
     parser.add_argument("--receipt-dir", type=Path, default=DEFAULT_RECEIPT_DIR)
     parser.add_argument("--playbook", default="playbooks/site.yml")
     parser.add_argument("--inventory", default="inventory/hosts.yml")

@@ -5,7 +5,7 @@ import re
 from typing import Any
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
-from environment_topology import ALLOWED_ENVIRONMENTS
+from environment_catalog import configured_environment_ids
 
 
 SUBDOMAIN_CATALOG_PATH = repo_path("config", "subdomain-catalog.json")
@@ -21,6 +21,7 @@ EDGE_ROUTE_EXPOSURES = {"edge-published", "informational-only"}
 PROVISIONABLE_STATUSES = {"active", "planned"}
 HOSTNAME_PATTERN = re.compile(r"^[a-z0-9-]+(\.[a-z0-9-]+)+$")
 PREFIX_PATTERN = re.compile(r"^[a-z0-9-]+$")
+ALLOWED_ENVIRONMENTS = set(configured_environment_ids())
 
 
 def require_mapping(value: Any, path: str) -> dict[str, Any]:
