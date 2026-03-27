@@ -53,6 +53,12 @@ def test_runtime_secret_payloads_are_built_in_follow_up_tasks() -> None:
     assert "- name: Build Mattermost runtime secret payload" in mattermost_tasks
 
 
+def test_windmill_runtime_env_file_is_left_to_openbao() -> None:
+    windmill_tasks = (REPO_ROOT / "roles" / "windmill_runtime" / "tasks" / "main.yml").read_text()
+    assert 'src: windmill-runtime.env.j2' not in windmill_tasks
+    assert 'dest: "{{ windmill_env_file }}"' not in windmill_tasks
+
+
 def test_migrated_compose_templates_include_openbao_agent_sidecars() -> None:
     compose_roles = list(ROLE_RUNTIME_PATHS) + ["mail_platform_runtime"]
     for role_name in compose_roles:

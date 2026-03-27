@@ -1,5 +1,5 @@
 module "fixture_vm" {
-  source = "../proxmox-vm"
+  source = "../proxmox-vm-destroyable"
 
   name                    = var.name
   description             = "${var.description} | fixture=${var.fixture_id} | lifetime=${var.lifetime_minutes}m"
@@ -23,5 +23,4 @@ module "fixture_vm" {
   ssh_authorized_keys     = var.ssh_authorized_keys
   tags                    = distinct(concat(var.tags, ["ephemeral", "fixture"]))
   protection              = false
-  prevent_destroy         = false
 }

@@ -48,3 +48,59 @@ def test_world_state_migration_declares_unique_current_view_index() -> None:
     assert "CREATE MATERIALIZED VIEW world_state.current_view" in migration
     assert "CREATE UNIQUE INDEX IF NOT EXISTS idx_world_state_current_view_surface" in migration
     assert "openbao_secret_expiry" in migration
+
+
+def test_windmill_runtime_templates_export_world_state_and_nats_env() -> None:
+    env_template = (
+        REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.j2"
+    ).read_text()
+    env_ctmpl = (
+        REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/windmill-runtime.env.ctmpl.j2"
+    ).read_text()
+
+    for token in (
+        "LV3_GRAPH_DSN",
+        "WORLD_STATE_DSN",
+        "LV3_NATS_URL",
+        "LV3_NATS_USERNAME",
+        "LV3_NATS_PASSWORD",
+        "LV3_LEDGER_DSN",
+        "LV3_LEDGER_NATS_URL",
+        "TF_VAR_proxmox_endpoint",
+        "TF_VAR_proxmox_api_token",
+        "LV3_TEST_RUNNER_USERNAME",
+        "LV3_TEST_RUNNER_PASSWORD",
+        "LV3_INTEGRATION_ENVIRONMENT",
+        "LV3_WINDMILL_BASE_URL",
+    ):
+        assert token in env_template
+        assert token in env_ctmpl
+
+    for token in (
+        'index .Data.data "LV3_GRAPH_DSN"',
+        'index .Data.data "WORLD_STATE_DSN"',
+        'index .Data.data "LV3_NATS_URL"',
+        'index .Data.data "LV3_NATS_USERNAME"',
+        'index .Data.data "LV3_NATS_PASSWORD"',
+        'index .Data.data "LV3_LEDGER_DSN"',
+        'index .Data.data "LV3_LEDGER_NATS_URL"',
+        'index .Data.data "LV3_TEST_RUNNER_USERNAME"',
+        'index .Data.data "LV3_TEST_RUNNER_PASSWORD"',
+        'index .Data.data "LV3_INTEGRATION_ENVIRONMENT"',
+    ):
+        assert token in env_ctmpl
+
+
+def test_windmill_postgres_tasks_grant_world_state_schema_access() -> None:
+    tasks = (
+        REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_postgres/tasks/main.yml"
+    ).read_text()
+
+    for statement in (
+        "GRANT USAGE ON SCHEMA world_state TO {{ windmill_database_support_role }}",
+        "GRANT ALL ON ALL TABLES IN SCHEMA world_state TO {{ windmill_database_support_role }}",
+        "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA world_state TO {{ windmill_database_support_role }}",
+        "ALTER DEFAULT PRIVILEGES IN SCHEMA world_state GRANT ALL ON TABLES TO {{ windmill_database_support_role }}",
+        "ALTER DEFAULT PRIVILEGES IN SCHEMA world_state GRANT ALL ON SEQUENCES TO {{ windmill_database_support_role }}",
+    ):
+        assert statement in tasks

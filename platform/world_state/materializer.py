@@ -78,6 +78,21 @@ def build_refresh_event(surface: str, *, collected_at: datetime, stale: bool, pa
     }
 
 
+def postgres_matview_is_populated(cursor: Any, current_view: str) -> bool:
+    schema_name, _, view_name = current_view.partition(".")
+    if not view_name:
+        schema_name = "public"
+        view_name = current_view
+    cursor.execute(
+        "SELECT ispopulated FROM pg_matviews WHERE schemaname = %s AND matviewname = %s",
+        [schema_name, view_name],
+    )
+    row = cursor.fetchone()
+    if row is None:
+        return False
+    return bool(row[0])
+
+
 def materialize_surface(
     surface: str,
     payload: Any,
@@ -115,7 +130,10 @@ def materialize_surface(
             connection.commit()
         else:
             connection.commit()
-            cursor.execute(f"REFRESH MATERIALIZED VIEW CONCURRENTLY {current_view}")
+            if postgres_matview_is_populated(cursor, current_view):
+                cursor.execute(f"REFRESH MATERIALIZED VIEW CONCURRENTLY {current_view}")
+            else:
+                cursor.execute(f"REFRESH MATERIALIZED VIEW {current_view}")
             connection.commit()
 
     if event_publisher is not None:

@@ -1,4 +1,11 @@
 ---
+# Purpose: Define Windmill runtime defaults, worker checkout sync, and runtime secret wiring.
+# Inputs: Inventory facts, platform topology helpers, and controller-local secret artifacts.
+# Outputs: Role defaults consumed by the Windmill runtime converge tasks and seeded workers.
+# Idempotency: Fully idempotent; this file only declares defaults.
+# Dependencies: ADR 0077, ADR 0106, ADR 0113, ADR 0165; used by the windmill_runtime role.
+# Related Runbooks: docs/runbooks/configure-windmill.md, docs/runbooks/world-state-materializer.md
+
 windmill_workspace_id: lv3
 windmill_workspace_name: LV3
 windmill_site_dir: /opt/windmill
@@ -34,6 +41,16 @@ windmill_database_inventory_host: >-
 windmill_database_host: >-
   {{ hostvars[windmill_database_inventory_host].ansible_host }}
 windmill_database_port: 5432
+windmill_controller_repo_common_root: >-
+  {{
+    (
+      lookup(
+        'ansible.builtin.pipe',
+        'git -C ' ~ ((playbook_dir | dirname) | quote) ~ ' rev-parse --path-format=absolute --git-common-dir'
+      )
+      | dirname
+    )
+  }}
 windmill_database_password_local_file: "{{ windmill_local_artifact_dir }}/database-password.txt"
 windmill_database_dsn: >-
   postgres://{{ windmill_database_user }}:{{
@@ -44,24 +61,53 @@ windmill_database_dsn: >-
     | urlencode
     | replace('/', '%2F')
   }}@{{ windmill_database_host }}:{{ windmill_database_port }}/{{ windmill_database_name }}?sslmode=disable
-windmill_superadmin_secret_remote_file: "{{ windmill_secret_dir }}/superadmin-secret"
-windmill_local_artifact_dir: >-
+windmill_platform_dsn: "{{ windmill_database_dsn }}"
+windmill_world_state_dsn: "{{ windmill_database_dsn }}"
+windmill_nats_url: nats://127.0.0.1:4222
+windmill_nats_username: jetstream-admin
+windmill_nats_password_local_file: "{{ windmill_controller_repo_common_root }}/.local/nats/jetstream-admin-password.txt"
+windmill_nats_password: >-
   {{
-    (
-      lookup(
-        'ansible.builtin.pipe',
-        'git -C ' ~ ((playbook_dir | dirname) | quote) ~ ' rev-parse --path-format=absolute --git-common-dir'
-      )
-      | dirname
-    )
-    ~ '/.local/windmill'
+    lookup('ansible.builtin.file', windmill_nats_password_local_file, errors='ignore')
+    | default('', true)
+    | trim
   }}
+windmill_ledger_postgres_user: patroni
+windmill_ledger_postgres_database: postgres
+windmill_ledger_postgres_host: "{{ hostvars[windmill_database_inventory_host].ansible_host }}"
+windmill_ledger_postgres_port: 5432
+windmill_ledger_postgres_password_local_file: "{{ windmill_controller_repo_common_root }}/.local/postgres-ha/patroni-superuser-password.txt"
+windmill_ledger_postgres_password: >-
+  {{
+    lookup('ansible.builtin.file', windmill_ledger_postgres_password_local_file, errors='ignore')
+    | default('', true)
+    | trim
+  }}
+windmill_ledger_dsn: >-
+  {%- set password = windmill_ledger_postgres_password | trim -%}
+  {%- if password | length == 0 -%}{{ "" }}{%- else -%}postgresql://{{ windmill_ledger_postgres_user }}:{{ password | urlencode | replace('/', '%2F') }}@{{ windmill_ledger_postgres_host }}:{{ windmill_ledger_postgres_port }}/{{ windmill_ledger_postgres_database }}?sslmode=disable{%- endif -%}
+windmill_ledger_nats_username: jetstream-admin
+windmill_ledger_nats_host: "{{ ansible_host }}"
+windmill_ledger_nats_port: 4222
+windmill_ledger_nats_password_local_file: "{{ windmill_controller_repo_common_root }}/.local/nats/jetstream-admin-password.txt"
+windmill_ledger_nats_password: >-
+  {{
+    lookup('ansible.builtin.file', windmill_ledger_nats_password_local_file, errors='ignore')
+    | default('', true)
+    | trim
+  }}
+windmill_ledger_nats_url: >-
+  {%- set password = windmill_ledger_nats_password | trim -%}
+  {%- if password | length == 0 -%}{{ "" }}{%- else -%}nats://{{ windmill_ledger_nats_username }}:{{ password | urlencode | replace('/', '%2F') }}@{{ windmill_ledger_nats_host }}:{{ windmill_ledger_nats_port }}{%- endif -%}
+windmill_superadmin_secret_remote_file: "{{ windmill_secret_dir }}/superadmin-secret"
+windmill_local_artifact_dir: "{{ windmill_controller_repo_common_root ~ '/.local/windmill' }}"
 windmill_superadmin_secret_local_file: "{{ windmill_local_artifact_dir }}/superadmin-secret.txt"
 windmill_bootstrap_identity_email: superadmin_secret@windmill.dev
 windmill_bootstrap_identity_username: superadmin_secret
 windmill_bootstrap_identity_login_type: password
 windmill_private_base_url: "{{ platform_service_topology | platform_service_url('windmill', 'internal') }}"
 windmill_base_url: "{{ platform_service_topology | platform_service_url('windmill', 'controller') }}"
+windmill_worker_api_base_url: "http://windmill_server:8000"
 windmill_worker_checkout_repo_root_local_dir: "{{ playbook_dir }}/.."
 windmill_worker_repo_checkout_host_path: /srv/proxmox_florin_server
 windmill_worker_repo_checkout_container_path: /srv/proxmox_florin_server
@@ -79,11 +125,15 @@ windmill_worker_checkout_sync_paths:
   - docs
   - filter_plugins
   - inventory
+  - Makefile
   - migrations
   - playbooks
   - platform
   - receipts
+  - pytest.ini
+  - requirements
   - scripts
+  - tests
   - windmill
 windmill_worker_runtime_writable_directories:
   - path: "{{ windmill_worker_repo_checkout_host_path }}/receipts/fixtures"
@@ -104,6 +154,9 @@ windmill_seed_app_repo_root_local_dir: "{{ inventory_dir }}/../config/windmill/a
 windmill_seed_app_sync_dir: "{{ windmill_site_dir }}/seed-apps"
 windmill_mutation_audit_dir: "{{ platform_log_dir }}"
 windmill_mutation_audit_file: "{{ mutation_audit_log_file }}"
+windmill_integration_test_runner_username: test-runner@lv3.org
+windmill_integration_test_runner_password_local_file: >-
+  {{ windmill_controller_repo_common_root }}/.local/integration-tests/test-runner-password.txt
 windmill_seed_scripts:
   - path: f/lv3/windmill_healthcheck
     local_file: "{{ inventory_dir }}/../config/windmill/scripts/lv3-healthcheck.py"
