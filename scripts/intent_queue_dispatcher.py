@@ -95,6 +95,7 @@ def main(
         command = [
             "uv",
             "run",
+            "--no-project",
             "--with",
             "pyyaml",
             "python",
@@ -129,6 +130,7 @@ def main(
         command = [
             "uv",
             "run",
+            "--no-project",
             "--with",
             "pyyaml",
             "python",

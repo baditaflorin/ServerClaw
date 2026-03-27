@@ -86,6 +86,7 @@ def _run_with_uv(repo_root: Path, *, max_dispatches: int) -> dict[str, Any]:
     command = [
         "uv",
         "run",
+        "--no-project",
         "--with",
         "pyyaml",
         "python",

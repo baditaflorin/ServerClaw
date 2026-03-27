@@ -309,6 +309,8 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "--includes \"{{ item.sync_pattern }}\"" in tasks
     assert "--skip-branch-validation" in tasks
     assert "WM_TOKEN" in tasks
+    assert "BASE_INTERNAL_URL" in tasks
+    assert "windmill_runtime_api_base_url" in tasks
     assert "Build the local staging archive for the Windmill worker checkout" in tasks
     assert "changed_when: false" in tasks
     assert "Expand the staged Windmill worker checkout on the guest" in tasks
@@ -341,6 +343,12 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "scripts/windmill_run_wait_result.py" in tasks
     assert "--payload-json" in tasks
     assert "--timeout {{ windmill_seed_job_timeout_seconds }}" in tasks
+    assert "delegate_to: localhost" in tasks
+    assert "become: false" in tasks
+    assert "Decide whether the Windmill worker checkout needs to be refreshed" in tasks
+    assert "windmill_worker_checkout_checksum_file" in tasks
+    assert "windmill_worker_checkout_repo_root_local_dir" in tasks
+    assert "windmill_worker_checkout_sync_paths" in tasks
     assert defaults["windmill_worker_repo_checkout_host_path"] == "/srv/proxmox_florin_server"
     assert defaults["windmill_worker_repo_checkout_container_path"] == "/srv/proxmox_florin_server"
     assert "{{ windmill_worker_repo_checkout_host_path }}:{{ windmill_worker_repo_checkout_container_path }}" in compose_template
