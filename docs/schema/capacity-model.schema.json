@@ -181,7 +181,8 @@
         "kind": {
           "enum": [
             "ephemeral_pool",
-            "planned_growth"
+            "planned_growth",
+            "standby"
           ]
         },
         "status": {
@@ -192,6 +193,23 @@
         },
         "reserved": {
           "$ref": "#/$defs/resourceTriplet"
+        },
+        "service_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_-]*$"
+        },
+        "standby_vm": {
+          "type": "string"
+        },
+        "standby_vmid": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "storage_class": {
+          "type": "string"
+        },
+        "required_network_attachment": {
+          "type": "string"
         },
         "vmid_range": {
           "type": "object",

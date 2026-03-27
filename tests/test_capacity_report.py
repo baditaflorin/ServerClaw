@@ -116,6 +116,7 @@ def test_capacity_gate_rejects_projected_overcommit(capacity_fixture: Path) -> N
 
     assert not approved
     assert any("RAM" in reason for reason in reasons)
+    assert any("vCPU" in reason for reason in reasons)
     assert any("disk" in reason for reason in reasons)
 
 

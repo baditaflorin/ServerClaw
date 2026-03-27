@@ -151,12 +151,38 @@
           },
           "notes": {
             "type": "string"
+          },
+          "redundancy": {
+            "$ref": "#/$defs/redundancyDeclaration"
           }
         }
       }
     }
   },
   "$defs": {
+    "resourceTriplet": {
+      "type": "object",
+      "required": [
+        "ram_gb",
+        "vcpu",
+        "disk_gb"
+      ],
+      "properties": {
+        "ram_gb": {
+          "type": "number",
+          "minimum": 0
+        },
+        "vcpu": {
+          "type": "number",
+          "minimum": 0
+        },
+        "disk_gb": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
     "environmentBinding": {
       "type": "object",
       "additionalProperties": false,
@@ -214,6 +240,155 @@
         "tested_by": {
           "type": "string",
           "pattern": "^fault:[a-z0-9][a-z0-9-]*$"
+        }
+      }
+    },
+    "redundancyDeclaration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tier",
+        "rto_target",
+        "rpo_target",
+        "backup_source",
+        "standby_location",
+        "failover_trigger",
+        "failback_method"
+      ],
+      "properties": {
+        "tier": {
+          "type": "string",
+          "enum": ["R0", "R1", "R2", "R3"]
+        },
+        "rto_target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rpo_target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "backup_source": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_-]*$"
+        },
+        "standby_location": {
+          "type": "string",
+          "minLength": 1
+        },
+        "failover_trigger": {
+          "type": "string",
+          "minLength": 1
+        },
+        "failback_method": {
+          "type": "string",
+          "minLength": 1
+        },
+        "standby": {
+          "$ref": "#/$defs/standbyDeclaration"
+        }
+      }
+    },
+    "standbyDeclaration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "vm",
+        "reservation",
+        "placement",
+        "failure_domain_honesty"
+      ],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["warm", "passive", "active"]
+        },
+        "vm": {
+          "type": "string",
+          "minLength": 1
+        },
+        "vmid": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "reservation": {
+          "$ref": "#/$defs/standbyReservation"
+        },
+        "placement": {
+          "$ref": "#/$defs/standbyPlacement"
+        },
+        "failure_domain_honesty": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "standbyReservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resources",
+        "storage_class",
+        "required_network_attachment"
+      ],
+      "properties": {
+        "resources": {
+          "$ref": "#/$defs/resourceTriplet"
+        },
+        "storage_class": {
+          "type": "string",
+          "minLength": 1
+        },
+        "required_network_attachment": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "standbyPlacement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "primary_compose_project",
+        "standby_compose_project",
+        "primary_namespace",
+        "standby_namespace",
+        "primary_data_paths",
+        "standby_data_paths"
+      ],
+      "properties": {
+        "primary_compose_project": {
+          "type": "string",
+          "minLength": 1
+        },
+        "standby_compose_project": {
+          "type": "string",
+          "minLength": 1
+        },
+        "primary_namespace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "standby_namespace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "primary_data_paths": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "standby_data_paths": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
         }
       }
     }

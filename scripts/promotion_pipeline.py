@@ -44,6 +44,7 @@ from dependency_graph import (
 )
 from platform.logging import get_logger, set_context
 from slo_tracking import build_slo_status_entries, default_prometheus_url, find_budget_breaches
+from standby_capacity import evaluate_service_standby
 from workflow_catalog import (
     load_secret_manifest,
     load_workflow_catalog,
@@ -318,6 +319,8 @@ def check_promotion_gate(
     capacity_model = load_capacity_model()
     capacity_approved, capacity_reasons = check_capacity_gate(capacity_model)
     reasons.extend(capacity_reasons)
+    standby_gate = evaluate_service_standby(service_id, catalog={"services": list(service_index.values())}, model=capacity_model)
+    reasons.extend(standby_gate["reasons"])
 
     slo_gate = evaluate_slo_gate()
     if not slo_gate["checked"]:
@@ -342,6 +345,7 @@ def check_promotion_gate(
             "approved": capacity_approved,
             "reasons": capacity_reasons,
         },
+        "standby_gate": standby_gate,
         "slo_gate": slo_gate,
         "gate_decision": "approved" if not reasons else "rejected",
         "reasons": reasons,

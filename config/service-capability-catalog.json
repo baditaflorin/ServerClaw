@@ -945,6 +945,42 @@
       "adr": "0098",
       "runbook": "docs/runbooks/postgres-failover.md",
       "dashboard_url": "https://grafana.lv3.org/d/lv3-vm-postgres-lv3/lv3-vm-postgres-lv3",
+      "redundancy": {
+        "tier": "R2",
+        "rto_target": "60s planned switchover, 5m unplanned failover",
+        "rpo_target": "0s synchronous replication target",
+        "backup_source": "backup_pbs",
+        "standby_location": "postgres-replica-lv3 on the same Proxmox host",
+        "failover_trigger": "Patroni health loss on postgres-lv3 or operator-initiated switchover.",
+        "failback_method": "Reinitialize the former primary as a Patroni standby before a planned switchover back.",
+        "standby": {
+          "mode": "warm",
+          "vm": "postgres-replica-lv3",
+          "vmid": 151,
+          "reservation": {
+            "resources": {
+              "ram_gb": 8,
+              "vcpu": 4,
+              "disk_gb": 96
+            },
+            "storage_class": "local-lvm",
+            "required_network_attachment": "vmbr10"
+          },
+          "placement": {
+            "primary_compose_project": "systemd:patroni-postgres-lv3",
+            "standby_compose_project": "systemd:patroni-postgres-replica-lv3",
+            "primary_namespace": "guest:postgres-lv3:patroni",
+            "standby_namespace": "guest:postgres-replica-lv3:patroni",
+            "primary_data_paths": [
+              "guest:postgres-lv3:/var/lib/postgresql"
+            ],
+            "standby_data_paths": [
+              "guest:postgres-replica-lv3:/var/lib/postgresql"
+            ]
+          },
+          "failure_domain_honesty": "This warm standby protects against guest-level corruption and software faults, but it does not cover loss of the single Proxmox host."
+        }
+      },
       "tags": [
         "postgres",
         "database",

@@ -121,6 +121,11 @@ class ReservationModel:
     kind: str
     status: str
     reserved: ResourceAmount
+    service_id: str | None = None
+    standby_vm: str | None = None
+    standby_vmid: int | None = None
+    storage_class: str | None = None
+    required_network_attachment: str | None = None
     max_concurrent_vms: int | None = None
     vmid_range: tuple[int, int] | None = None
     notes: str | None = None
@@ -252,6 +257,37 @@ def load_capacity_model(path: Path = CAPACITY_MODEL_PATH) -> CapacityModel:
                 reserved=resource_from_mapping(
                     reservation.get("reserved"),
                     f"{path}.reservations[{index}].reserved",
+                ),
+                service_id=(
+                    require_str(reservation.get("service_id"), f"{path}.reservations[{index}].service_id")
+                    if reservation.get("service_id") is not None
+                    else None
+                ),
+                standby_vm=(
+                    require_str(reservation.get("standby_vm"), f"{path}.reservations[{index}].standby_vm")
+                    if reservation.get("standby_vm") is not None
+                    else None
+                ),
+                standby_vmid=(
+                    int(require_number(reservation.get("standby_vmid"), f"{path}.reservations[{index}].standby_vmid", 1))
+                    if reservation.get("standby_vmid") is not None
+                    else None
+                ),
+                storage_class=(
+                    require_str(
+                        reservation.get("storage_class"),
+                        f"{path}.reservations[{index}].storage_class",
+                    )
+                    if reservation.get("storage_class") is not None
+                    else None
+                ),
+                required_network_attachment=(
+                    require_str(
+                        reservation.get("required_network_attachment"),
+                        f"{path}.reservations[{index}].required_network_attachment",
+                    )
+                    if reservation.get("required_network_attachment") is not None
+                    else None
                 ),
                 max_concurrent_vms=(
                     int(require_number(max_concurrent_vms, f"{path}.reservations[{index}].max_concurrent_vms", 1))
@@ -418,9 +454,10 @@ def validate_capacity_model_payload(payload: dict[str, Any]) -> None:
             reservation.get("kind"),
             f"config/capacity-model.json.reservations[{index}].kind",
         )
-        if kind not in {"ephemeral_pool", "planned_growth"}:
+        if kind not in {"ephemeral_pool", "planned_growth", "standby"}:
             raise ValueError(
-                f"config/capacity-model.json.reservations[{index}].kind must be ephemeral_pool or planned_growth"
+                "config/capacity-model.json.reservations["
+                f"{index}].kind must be ephemeral_pool, planned_growth, or standby"
             )
         status = require_str(
             reservation.get("status"),
@@ -462,6 +499,37 @@ def validate_capacity_model_payload(payload: dict[str, Any]) -> None:
                 f"config/capacity-model.json.reservations[{index}].max_concurrent_vms",
                 1,
             )
+        if kind == "standby":
+            require_str(
+                reservation.get("service_id"),
+                f"config/capacity-model.json.reservations[{index}].service_id",
+            )
+            require_str(
+                reservation.get("standby_vm"),
+                f"config/capacity-model.json.reservations[{index}].standby_vm",
+            )
+            if reservation.get("standby_vmid") is not None:
+                require_number(
+                    reservation.get("standby_vmid"),
+                    f"config/capacity-model.json.reservations[{index}].standby_vmid",
+                    1,
+                )
+            require_str(
+                reservation.get("storage_class"),
+                f"config/capacity-model.json.reservations[{index}].storage_class",
+            )
+            require_str(
+                reservation.get("required_network_attachment"),
+                f"config/capacity-model.json.reservations[{index}].required_network_attachment",
+            )
+            if "vmid_range" in reservation:
+                raise ValueError(
+                    f"config/capacity-model.json.reservations[{index}].vmid_range is not valid for standby reservations"
+                )
+            if "max_concurrent_vms" in reservation:
+                raise ValueError(
+                    f"config/capacity-model.json.reservations[{index}].max_concurrent_vms is not valid for standby reservations"
+                )
 
 
 def normalize_rows(raw_csv: str) -> list[dict[str, str]]:
@@ -784,6 +852,11 @@ def render_json(report: CapacityReport) -> str:
                 "kind": reservation.kind,
                 "status": reservation.status,
                 "reserved": reservation.reserved.__dict__,
+                "service_id": reservation.service_id,
+                "standby_vm": reservation.standby_vm,
+                "standby_vmid": reservation.standby_vmid,
+                "storage_class": reservation.storage_class,
+                "required_network_attachment": reservation.required_network_attachment,
                 "max_concurrent_vms": reservation.max_concurrent_vms,
                 "vmid_range": reservation.vmid_range,
             }
@@ -856,6 +929,10 @@ def check_capacity_gate(
     if projected.ram_gb > target.ram_gb:
         reasons.append(
             f"projected RAM commitment {projected.ram_gb:.1f} GB exceeds target {target.ram_gb:.1f} GB"
+        )
+    if projected.vcpu > target.vcpu:
+        reasons.append(
+            f"projected vCPU commitment {projected.vcpu:.1f} exceeds target {target.vcpu:.1f}"
         )
     if projected.disk_gb > target.disk_gb:
         reasons.append(

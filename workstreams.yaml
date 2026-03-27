@@ -14,6 +14,33 @@ release_policy:
   breaking_change_criteria: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/version-semantics.json
 
 workstreams:
+  - id: adr-0180-standby-capacity
+    adr: "0180"
+    title: Standby capacity reservation and placement rules
+    status: implemented
+    owner: codex
+    branch: codex/adr-0180-standby-capacity
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/worktree-adr-0180-standby-capacity
+    doc: /Users/live/Documents/GITHUB_PROJECTS/worktree-adr-0180-standby-capacity/docs/workstreams/adr-0180-standby-capacity-reservation-and-placement-rules.md
+    depends_on:
+      - adr-0105-capacity-model
+      - adr-0157-per-vm-concurrency-budget
+      - adr-0179-service-redundancy-tier-matrix
+    conflicts_with: []
+    shared_surfaces:
+      - config/service-capability-catalog.json
+      - config/capacity-model.json
+      - docs/schema/service-capability-catalog.schema.json
+      - docs/schema/capacity-model.schema.json
+      - scripts/capacity_report.py
+      - scripts/service_catalog.py
+      - scripts/standby_capacity.py
+      - scripts/promotion_pipeline.py
+      - Makefile
+      - docs/runbooks/capacity-model.md
+    ready_to_merge: false
+    live_applied: false
+
   - id: adr-0163-retry-taxonomy
     adr: "0163"
     title: Platform-wide retry taxonomy and exponential backoff

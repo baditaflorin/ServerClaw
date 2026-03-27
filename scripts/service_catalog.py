@@ -211,6 +211,8 @@ def secret_catalog_ids() -> set[str]:
 
 
 def validate_service_catalog(catalog: dict[str, Any]) -> None:
+    from standby_capacity import validate_catalog_standby_policies
+
     jsonschema.validate(
         instance=catalog,
         schema=load_json(SERVICE_CATALOG_SCHEMA_PATH),
@@ -389,6 +391,8 @@ def validate_service_catalog(catalog: dict[str, Any]) -> None:
             "service capability catalog entries that declare health probes must cover exactly the health-probe catalog services: "
             + "; ".join(details)
         )
+
+    validate_catalog_standby_policies(catalog)
 
 
 def list_services(catalog: dict[str, Any]) -> int:
