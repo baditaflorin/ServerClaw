@@ -1,10 +1,10 @@
 # ADR 0105: Platform Capacity Model and Resource Quota Enforcement
 
-- Status: Accepted
+- Status: Implemented
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.115.0
-- Implemented In Platform Version: not yet
-- Implemented On: 2026-03-24
+- Implemented In Platform Version: 0.130.24
+- Implemented On: 2026-03-27
 - Date: 2026-03-23
 
 ## Context
@@ -61,7 +61,7 @@ The primary entry points are:
 
 - `make capacity-report`
 - `lv3 capacity`
-- `python3 scripts/capacity_report.py --check-gate --proposed-change <ram_gb,vcpu,disk_gb>`
+- `uv run --with pyyaml python scripts/capacity_report.py --check-gate --proposed-change <ram_gb,vcpu,disk_gb>`
 
 ### Promotion gate integration
 
@@ -76,7 +76,7 @@ The repository now includes:
 - `config/alertmanager/rules/platform.yml`
 - `docs/runbooks/capacity-model.md`
 
-These are repository implementations. They do not imply that the dashboard or alert rules have been applied live yet.
+On 2026-03-26 the monitoring role was extended so the Grafana converge now imports the capacity dashboard live, and the weekly Windmill wrapper was fixed to resolve `scripts/capacity_report.py` from a fresh parallel worktree checkout. The production monitoring replay verified the dashboard uid `lv3-capacity-overview`, the repo-managed platform alert bundle, and both operator report entry points with live `ssh+influx` metrics.
 
 ## Consequences
 
@@ -98,6 +98,22 @@ These are repository implementations. They do not imply that the dashboard or al
 - Proxmox-only resource tracking: rejected because it does not produce repo-managed budgets, promotion gate inputs, or reusable report formats
 - reactive resizing only: rejected because it turns capacity planning into incident response
 - external capacity planning software: rejected as disproportionate for the current single-node platform
+
+## Verification
+
+- `uv run --with pytest python -m pytest tests/test_monitoring_vm_role.py tests/test_capacity_report.py tests/test_lv3_cli.py tests/test_promotion_pipeline.py -q`
+- `uv run --with pytest python -m pytest tests/test_weekly_capacity_report_windmill.py -q`
+- `make syntax-check-monitoring`
+- `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`
+- `./scripts/validate_repo.sh alert-rules health-probes`
+- `make capacity-report NO_LIVE_METRICS=true`
+- `make capacity-report`
+- `make weekly-capacity-report NO_LIVE_METRICS=true`
+- `make weekly-capacity-report`
+- `uv run --with pyyaml python scripts/capacity_report.py --model config/capacity-model.json --check-gate --proposed-change 20,8,100`
+- `BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 make live-apply-service service=grafana env=production EXTRA_ARGS='-e bypass_promotion=true'`
+
+The first 2026-03-26 production converge imported and verified the capacity dashboard but later hit a transient SSH reachability failure during a downstream blackbox verification task. An immediate replay from the same `codex/ws-0105-live-apply` worktree then completed cleanly with `ok=176 changed=0 unreachable=0 failed=0`. The current-mainline replay from merge commit `12898d4ef17dc0f8ff3b92523874a61993bed565` completed cleanly again on 2026-03-27 with `ok=176 changed=0 unreachable=0 failed=0 skipped=34`, the public dashboard URL `https://grafana.lv3.org/d/lv3-capacity-overview/lv3-capacity-overview` returned `HTTP/2 302` to Grafana login, and both report entry points rendered with `metrics_source: ssh+influx`.
 
 ## Related ADRs
 

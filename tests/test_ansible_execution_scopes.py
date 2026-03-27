@@ -225,7 +225,66 @@ playbook: playbooks/leaf-alpha.yml
     assert (repo_root / ".ansible" / "shards" / "config").resolve() == (repo_root / "config").resolve()
     assert calls[0][0] == "ansible-playbook"
     assert calls[1][0] == "ansible-inventory"
-    assert "-l" not in calls[1]
+
+
+def test_run_scoped_playbook_uses_primary_inventory_for_group_vars_and_shard_for_scope(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo_root, catalog_path, inventory_path = make_repo(tmp_path)
+    write(repo_root / "playbooks" / "leaf-alpha.yml", "---\n- hosts: alpha\n")
+
+    def fake_plan(*args, **kwargs):
+        del args, kwargs
+        return scopes.PlannedPlaybookExecution(
+            playbook_path="playbooks/leaf-alpha.yml",
+            env="production",
+            run_id="run-456",
+            mutation_scope="host",
+            execution_class="mutation",
+            target_lane=None,
+            target_hosts=("alpha",),
+            limit_expression="alpha",
+            inventory_shard_path=str(repo_root / ".ansible" / "shards" / "run-456" / "leaf-alpha-production.json"),
+            shared_surfaces=("playbooks/leaf-alpha.yml", "service:alpha", "host:alpha"),
+            source_leaf_playbooks=("playbooks/leaf-alpha.yml",),
+        )
+
+    captured: list[list[str]] = []
+
+    def fake_run(command: list[str], cwd: Path, text: bool, check: bool = False):
+        del cwd, text, check
+        captured.append(command)
+        return subprocess.CompletedProcess(command, 0, stdout="", stderr="")
+
+    monkeypatch.setattr(scopes, "plan_playbook_execution", fake_plan)
+    monkeypatch.setattr(scopes.subprocess, "run", fake_run)
+
+    result = scopes.run_scoped_playbook(
+        "playbooks/leaf-alpha.yml",
+        env="production",
+        repo_root=repo_root,
+        catalog_path=catalog_path,
+        inventory_path=inventory_path,
+        passthrough_args=["--private-key", "/tmp/test.id_ed25519"],
+    )
+
+    assert result.returncode == 0
+    assert captured == [
+        [
+            "ansible-playbook",
+            "-i",
+            str(inventory_path),
+            "-i",
+            str(repo_root / ".ansible" / "shards" / "run-456" / "leaf-alpha-production.json"),
+            "--limit",
+            "alpha",
+            str(repo_root / "playbooks" / "leaf-alpha.yml"),
+            "-e",
+            "env=production",
+            "--private-key",
+            "/tmp/test.id_ed25519",
+        ]
+    ]
 
 
 def test_real_repo_scope_resolution_for_live_apply_paths() -> None:

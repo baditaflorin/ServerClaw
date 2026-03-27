@@ -58,6 +58,26 @@ def test_verify_tasks_check_public_dashboard_lockdown() -> None:
     assert headers_check["ansible.builtin.command"]["argv"][0] == "curl"
 
 
+def test_capacity_dashboard_is_copied_imported_and_verified() -> None:
+    defaults = yaml.safe_load(DEFAULTS_PATH.read_text())
+    main_tasks = load_tasks(TASKS_PATH)
+    verify_tasks = load_tasks(VERIFY_PATH)
+
+    copy_task = next(task for task in main_tasks if task.get("name") == "Copy LV3 capacity overview dashboard")
+    import_task = next(task for task in main_tasks if task.get("name") == "Import LV3 capacity dashboard into Grafana")
+    verify_task = next(task for task in verify_tasks if task.get("name") == "Verify LV3 capacity dashboard is provisioned")
+
+    assert defaults["monitoring_grafana_capacity_dashboard_source_file"] == (
+        "{{ monitoring_repo_root }}/config/grafana/dashboards/capacity-overview.json"
+    )
+    assert defaults["monitoring_grafana_capacity_dashboard_uid"] == "lv3-capacity-overview"
+    assert copy_task["ansible.builtin.copy"]["src"] == "{{ monitoring_grafana_capacity_dashboard_source_file }}"
+    assert import_task["ansible.builtin.uri"]["body"]["folderUid"] == "{{ monitoring_grafana_folder_uid }}"
+    assert verify_task["ansible.builtin.uri"]["url"] == (
+        "http://127.0.0.1:3000/api/dashboards/uid/{{ monitoring_grafana_capacity_dashboard_uid }}"
+    )
+
+
 def test_dashboard_templates_do_not_use_bare_jinja_null_literals() -> None:
     for template in (PLATFORM_DASHBOARD_TEMPLATE, MAIL_DASHBOARD_TEMPLATE, VM_DASHBOARD_TEMPLATE):
         assert " null" not in template.read_text()

@@ -147,7 +147,6 @@ workstreams:
           mode: generated
     ready_to_merge: false
     live_applied: true
-
   - id: adr-0163-retry-taxonomy
     adr: "0163"
     title: Platform-wide retry taxonomy and exponential backoff
@@ -2250,8 +2249,8 @@ workstreams:
     title: Platform capacity model and resource quota enforcement
     status: merged
     owner: codex
-    branch: codex/adr-0105-capacity-model
-    worktree_path: .worktrees/adr-0105
+    branch: codex/ws-0105-live-apply
+    worktree_path: ../proxmox_florin_server-ws-0105-live-apply
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0105-capacity-model.md
     depends_on:
       - adr-0010-vm-topology
@@ -2261,11 +2260,40 @@ workstreams:
       - adr-0098-postgres-ha
     conflicts_with: []
     shared_surfaces:
-      - config/
+      - config/capacity-model.json
+      - scripts/capacity_report.py
       - scripts/promotion_pipeline.py
-      - config/grafana/dashboards/
-    ready_to_merge: true
-    live_applied: false
+      - config/grafana/dashboards/capacity-overview.json
+      - config/alertmanager/rules/platform.yml
+      - config/windmill/scripts/weekly-capacity-report.py
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/
+      - docs/runbooks/capacity-model.md
+      - receipts/live-applies/
+    ready_to_merge: false
+    live_applied: true
+
+  - id: ws-0105-live-apply
+    adr: "0105"
+    title: ADR 0105 live apply from latest origin/main
+    status: merged
+    owner: codex
+    branch: codex/ws-0105-live-apply
+    worktree_path: ../proxmox_florin_server-ws-0105-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0105-live-apply.md
+    depends_on:
+      - adr-0011-monitoring
+      - adr-0097-alerting-routing
+      - adr-0105-capacity-model
+    conflicts_with: []
+    shared_surfaces:
+      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/
+      - config/grafana/dashboards/capacity-overview.json
+      - config/alertmanager/rules/platform.yml
+      - config/windmill/scripts/weekly-capacity-report.py
+      - docs/runbooks/capacity-model.md
+      - receipts/live-applies/
+    ready_to_merge: false
+    live_applied: true
 
   - id: adr-0106-ephemeral-lifecycle
     adr: "0106"
@@ -2565,10 +2593,10 @@ workstreams:
   - id: adr-0115-mutation-ledger
     adr: "0115"
     title: Event-sourced mutation ledger
-    status: live_applied
+    status: merged
     owner: codex
-    branch: codex/ws-0115-main-merge
-    worktree_path: .worktrees/ws-0115-main-merge
+    branch: codex/adr-0115-mutation-ledger
+    worktree_path: ../proxmox_florin_server-mutation-ledger
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0115-mutation-ledger.md
     depends_on:
       - adr-0058-nats-event-bus
@@ -2584,13 +2612,7 @@ workstreams:
       - windmill/ledger/
       - scripts/mutation_audit.py
     ready_to_merge: false
-    live_applied: true
-    canonical_truth:
-      changelog_entry: integrated ADR 0115 event-sourced mutation ledger on `main`, including verified production `ledger.events` rollout, `audit_log` compatibility view, append-only enforcement, and Windmill runtime ledger projection
-      release_bump: patch
-      included_in_repo_version: 0.177.1
-      latest_receipts:
-        mutation_ledger: 2026-03-27-adr-0115-mutation-ledger-mainline-live-apply
+    live_applied: false
 
   - id: adr-0114-incident-triage
     adr: "0114"
@@ -4022,5 +4044,5 @@ workstreams:
     canonical_truth:
       changelog_entry: implemented ADR 0182 live-apply merge-train queueing, wave planning, and rollback bundle execution
       release_bump: patch
-      included_in_repo_version: 0.176.7
+      included_in_repo_version: 0.176.6
       latest_receipts: {}

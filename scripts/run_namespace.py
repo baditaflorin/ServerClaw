@@ -8,10 +8,17 @@ import hashlib
 import json
 import os
 import sys
+import tempfile
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
 from session_workspace import resolve_session_workspace
+
+
+def _control_path_dir(*, checkout_root: Path, run_slug: str) -> Path:
+    base_dir = Path("/tmp") if Path("/tmp").exists() else Path(tempfile.gettempdir())
+    token = hashlib.sha256(f"{checkout_root}:{run_slug}".encode("utf-8")).hexdigest()[:12]
+    return base_dir / "lv3-acp" / token
 
 
 @dataclass(frozen=True)
@@ -47,10 +54,7 @@ def resolve_run_namespace(
     root = checkout_root / ".local" / "runs" / session.session_slug
     ansible_dir = root / "ansible"
     logs_dir = root / "logs"
-    control_path_key = hashlib.sha256(
-        f"{checkout_root}:{session.session_slug}".encode("utf-8")
-    ).hexdigest()[:12]
-    control_path_dir = Path("/tmp") / "lv3-acp" / control_path_key
+    ansible_control_path_dir = _control_path_dir(checkout_root=checkout_root, run_slug=session.session_slug)
     return RunNamespace(
         run_id=session.session_id,
         run_slug=session.session_slug,
@@ -59,7 +63,7 @@ def resolve_run_namespace(
         ansible_dir=str(ansible_dir),
         ansible_tmp_dir=str(ansible_dir / "tmp"),
         ansible_retry_dir=str(ansible_dir / "retry"),
-        ansible_control_path_dir=str(control_path_dir),
+        ansible_control_path_dir=str(ansible_control_path_dir),
         tofu_dir=str(root / "tofu"),
         rendered_dir=str(root / "rendered"),
         logs_dir=str(logs_dir),

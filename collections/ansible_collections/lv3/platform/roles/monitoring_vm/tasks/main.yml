@@ -729,6 +729,16 @@
   register: monitoring_grafana_slo_dashboard_file_rendered
   notify: Restart Grafana
 
+- name: Copy LV3 capacity overview dashboard
+  ansible.builtin.copy:
+    src: "{{ monitoring_grafana_capacity_dashboard_source_file }}"
+    dest: "{{ monitoring_grafana_capacity_dashboard_file }}"
+    owner: root
+    group: grafana
+    mode: "0644"
+  register: monitoring_grafana_capacity_dashboard_file_rendered
+  notify: Restart Grafana
+
 - name: Enable and start blackbox exporter
   ansible.builtin.systemd:
     name: "{{ monitoring_blackbox_exporter_service_name }}"
@@ -965,6 +975,21 @@
   failed_when: monitoring_grafana_slo_dashboard_existing.status not in [200, 404]
   no_log: true
 
+- name: Check whether LV3 capacity dashboard already exists
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/{{ monitoring_grafana_capacity_dashboard_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code:
+      - 200
+      - 404
+  register: monitoring_grafana_capacity_dashboard_existing
+  changed_when: false
+  failed_when: monitoring_grafana_capacity_dashboard_existing.status not in [200, 404]
+  no_log: true
+
 - name: Check whether VM detail dashboards already exist
   ansible.builtin.uri:
     url: "http://127.0.0.1:3000/api/dashboards/uid/lv3-vm-{{ item.name }}"
@@ -998,6 +1023,12 @@
   ansible.builtin.slurp:
     src: "{{ monitoring_grafana_slo_dashboard_file }}"
   register: monitoring_grafana_slo_dashboard_payload_raw
+  no_log: true
+
+- name: Read rendered LV3 capacity overview dashboard
+  ansible.builtin.slurp:
+    src: "{{ monitoring_grafana_capacity_dashboard_file }}"
+  register: monitoring_grafana_capacity_dashboard_payload_raw
   no_log: true
 
 - name: Render VM detail dashboards
@@ -1078,6 +1109,24 @@
   when: monitoring_grafana_slo_dashboard_file_rendered is changed or monitoring_grafana_slo_dashboard_existing.status == 404
   no_log: true
 
+- name: Import LV3 capacity dashboard into Grafana
+  ansible.builtin.uri:
+    url: http://127.0.0.1:3000/api/dashboards/db
+    method: POST
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    body_format: json
+    body:
+      dashboard: "{{ monitoring_grafana_capacity_dashboard_payload_raw.content | b64decode | from_json }}"
+      folderUid: "{{ monitoring_grafana_folder_uid }}"
+      overwrite: true
+    status_code: 200
+  register: monitoring_grafana_capacity_dashboard_import
+  changed_when: monitoring_grafana_capacity_dashboard_file_rendered is changed or monitoring_grafana_capacity_dashboard_existing.status == 404
+  when: monitoring_grafana_capacity_dashboard_file_rendered is changed or monitoring_grafana_capacity_dashboard_existing.status == 404
+  no_log: true
+
 - name: Import VM detail dashboards into Grafana
   ansible.builtin.uri:
     url: http://127.0.0.1:3000/api/dashboards/db
@@ -1133,6 +1182,18 @@
     force_basic_auth: true
     status_code: 200
   register: monitoring_grafana_slo_dashboard_check
+  changed_when: false
+  no_log: true
+
+- name: Verify LV3 capacity dashboard is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/{{ monitoring_grafana_capacity_dashboard_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_grafana_capacity_dashboard_check
   changed_when: false
   no_log: true
 

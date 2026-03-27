@@ -44,6 +44,10 @@ monitoring_grafana_slo_dashboard_file: /var/lib/grafana/dashboards/lv3/lv3-slo-o
 monitoring_grafana_slo_dashboard_uid: lv3-slo-overview
 monitoring_grafana_slo_dashboard_title: LV3 SLO Overview
 monitoring_grafana_slo_dashboard_source_file: "{{ monitoring_repo_root }}/config/grafana/dashboards/slo-overview.json"
+monitoring_grafana_capacity_dashboard_file: /var/lib/grafana/dashboards/lv3/lv3-capacity-overview.json
+monitoring_grafana_capacity_dashboard_uid: lv3-capacity-overview
+monitoring_grafana_capacity_dashboard_title: Capacity Overview
+monitoring_grafana_capacity_dashboard_source_file: "{{ monitoring_repo_root }}/config/grafana/dashboards/capacity-overview.json"
 monitoring_influxdb_admin_user: lv3-monitoring-admin
 monitoring_influxdb_admin_password_file: /etc/lv3/monitoring/influxdb-admin-password
 monitoring_influxdb_operator_token_file: /etc/lv3/monitoring/influxdb-operator.token

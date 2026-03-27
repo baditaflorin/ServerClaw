@@ -113,6 +113,18 @@
   changed_when: false
   no_log: true
 
+- name: Verify LV3 capacity dashboard is provisioned
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:3000/api/dashboards/uid/{{ monitoring_grafana_capacity_dashboard_uid }}"
+    method: GET
+    user: "{{ monitoring_grafana_admin_user }}"
+    password: "{{ monitoring_grafana_admin_password }}"
+    force_basic_auth: true
+    status_code: 200
+  register: monitoring_verify_capacity_dashboard
+  changed_when: false
+  no_log: true
+
 - name: Verify public Grafana dashboard URLs redirect unauthenticated viewers to login
   ansible.builtin.uri:
     url: "{{ monitoring_grafana_public_url }}/d/{{ monitoring_grafana_dashboard_uid }}/{{ monitoring_grafana_dashboard_uid }}"

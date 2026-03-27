@@ -346,25 +346,31 @@ def render_inventory_shard(
     repo_root: Path = REPO_ROOT,
     ansible_inventory_bin: str = "ansible-inventory",
 ) -> Path:
-    command = [
-        ansible_inventory_bin,
-        "-i",
-        str(inventory_path),
-        "--list",
-        "--yaml",
-        "-e",
-        f"env={env}",
-    ]
-    result = subprocess.run(command, cwd=repo_root, text=True, capture_output=True, check=False)
-    if result.returncode != 0:
-        raise AnsibleExecutionScopeError(
-            f"failed to render inventory shard for env '{env}': {result.stderr.strip() or result.stdout.strip()}"
-        )
-    try:
-        import yaml
-    except ModuleNotFoundError as exc:  # pragma: no cover - runtime guard
-        raise AnsibleExecutionScopeError("PyYAML is required to render inventory shards") from exc
-    payload = yaml.safe_load(result.stdout)
+    non_local_hosts = [host for host in target_hosts if host != "localhost"]
+    if non_local_hosts:
+        command = [
+            ansible_inventory_bin,
+            "-i",
+            str(inventory_path),
+            "-l",
+            ",".join(non_local_hosts),
+            "--list",
+            "--yaml",
+            "-e",
+            f"env={env}",
+        ]
+        result = subprocess.run(command, cwd=repo_root, text=True, capture_output=True, check=False)
+        if result.returncode != 0:
+            raise AnsibleExecutionScopeError(
+                f"failed to render inventory shard for env '{env}': {result.stderr.strip() or result.stdout.strip()}"
+            )
+        try:
+            import yaml
+        except ModuleNotFoundError as exc:  # pragma: no cover - runtime guard
+            raise AnsibleExecutionScopeError("PyYAML is required to render inventory shards") from exc
+        payload = yaml.safe_load(result.stdout)
+    else:
+        payload = {"all": {"hosts": {}}}
 
     if "localhost" in target_hosts:
         payload = _augment_localhost(payload)
@@ -533,6 +539,8 @@ def run_scoped_playbook(
     )
     command = [
         ansible_playbook_bin,
+        "-i",
+        str(inventory_path),
         "-i",
         plan.inventory_shard_path,
         "--limit",

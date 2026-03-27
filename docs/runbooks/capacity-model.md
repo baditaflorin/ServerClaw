@@ -45,7 +45,7 @@ lv3 capacity --format json
 Evaluate a proposed resource change against the active commitment target:
 
 ```bash
-python3 scripts/capacity_report.py \
+uv run --with pyyaml python scripts/capacity_report.py \
   --check-gate \
   --proposed-change 20,8,100
 ```
@@ -60,6 +60,12 @@ Inspect one service before a manual production live apply:
 
 ```bash
 uv run --with pyyaml python scripts/standby_capacity.py --service postgres
+```
+
+Render the weekly markdown report through the repo entry point:
+
+```bash
+make weekly-capacity-report
 ```
 
 ## Live Metrics Path
@@ -79,9 +85,30 @@ If the monitoring path is unavailable, the report still renders using the commit
 2. update `config/capacity-model.json`
 3. if the service claims `R2` or higher, update its `redundancy.standby` declaration in `config/service-capability-catalog.json`
 4. run `uv run --with pyyaml python scripts/standby_capacity.py --validate`
-5. run `python3 scripts/validate_repository_data_models.py --validate`
-6. run `python3 -m pytest tests/test_capacity_report.py tests/test_standby_capacity.py tests/test_validate_service_catalog.py tests/test_promotion_pipeline.py`
-7. if the integrated mainline truth changes, update ADR/workstream status metadata and release notes on merge
+5. run `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`
+6. run `uv run --with pytest python -m pytest tests/test_capacity_report.py tests/test_lv3_cli.py tests/test_promotion_pipeline.py tests/test_standby_capacity.py tests/test_validate_service_catalog.py tests/test_weekly_capacity_report_windmill.py`
+7. if monitoring surfaces changed, run `make syntax-check-monitoring` and `./scripts/validate_repo.sh alert-rules health-probes`
+8. if the integrated mainline truth changes, update ADR/workstream status metadata and release notes on merge
+
+## Live Apply
+
+For the ADR 0105 monitoring rollout from a parallel worktree, apply the Grafana service bundle directly:
+
+```bash
+BOOTSTRAP_KEY=/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
+make live-apply-service service=grafana env=production EXTRA_ARGS='-e bypass_promotion=true'
+```
+
+Verify the dashboard and reports after converge:
+
+```bash
+make capacity-report
+make weekly-capacity-report
+curl -Ik --resolve grafana.lv3.org:443:65.108.75.123 \
+  https://grafana.lv3.org/d/lv3-capacity-overview/lv3-capacity-overview
+```
+
+For a guest-local Grafana check through the Proxmox jump path, query `http://127.0.0.1:3000/api/dashboards/uid/lv3-capacity-overview` on `monitoring-lv3`.
 
 ## Notes
 
@@ -90,3 +117,5 @@ If the monitoring path is unavailable, the report still renders using the commit
 - a standby can be backed either by a dedicated guest already declared in the capacity model or by an explicit `standby` reservation entry when the standby consumes host headroom without its own guest allocation
 - `make live-apply-service service=<id> env=production` now runs the standby-capacity guard before Ansible
 - the committed dashboard and alert rules are repository artifacts only until they are applied from `main`
+- fresh worktrees do not carry untracked `.local/` controller secrets, so live applies from a parallel worktree should pass an absolute `BOOTSTRAP_KEY` or equivalent controller-local path explicitly
+- `config/windmill/scripts/weekly-capacity-report.py` prepends the repository `scripts/` directory to `sys.path` so the wrapper works from a clean checkout or worktree
