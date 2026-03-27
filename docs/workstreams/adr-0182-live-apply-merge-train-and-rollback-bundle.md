@@ -3,8 +3,8 @@
 - ADR: [ADR 0182](../adr/0182-live-apply-merge-train-and-rollback-bundle.md)
 - Title: Batch ready workstreams into a reviewed live-apply train, serialize shared surfaces into waves, and require an executable rollback bundle before mutation begins
 - Status: merged
-- Branch: `codex/adr-0182-live-apply-merge-train-rollback`
-- Worktree: `../worktree-adr-0182-merge-train-rollback`
+- Branch: `codex/adr-0182-live-apply-landing`
+- Worktree: `/Users/live/Documents/GITHUB_PROJECTS/worktree-adr-0182-live-apply-landing`
 - Owner: codex
 - Depends On: `adr-0155-intent-queue-with-release-triggered-scheduling`, `adr-0173-workstream-surface-ownership-manifest`, `adr-0178-dependency-wave-manifests-for-parallel-apply`
 - Conflicts With: none
@@ -59,5 +59,5 @@
 
 ## Outcome
 
-- merged in repo version `0.175.3`
+- merged in repo version `0.176.6`
 - live platform apply not yet performed from `main`

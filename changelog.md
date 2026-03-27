@@ -12,14 +12,13 @@ Versioned release notes live under [docs/release-notes/README.md](/Users/live/Do
 
 ## Unreleased
 
-- implemented ADR 0182 live-apply merge-train queueing, wave planning, and rollback bundle execution
-- added the operator runbook and workstream contract validation for train-eligible live applies
-
 ## Latest Release
 
-- [0.176.5 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.176.5.md)
+- [0.176.6 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.176.6.md)
 
 ## Previous Releases
+
+- [0.176.5 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.176.5.md)
 
 - [0.176.4 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.176.4.md)
 - [0.176.3 release notes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.176.3.md)

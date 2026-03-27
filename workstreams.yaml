@@ -3879,8 +3879,8 @@ workstreams:
     title: Live apply merge train and rollback bundle
     status: merged
     owner: codex
-    branch: codex/adr-0182-live-apply-merge-train-rollback
-    worktree_path: ../worktree-adr-0182-merge-train-rollback
+    branch: codex/adr-0182-live-apply-landing
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/worktree-adr-0182-live-apply-landing
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0182-live-apply-merge-train-and-rollback-bundle.md
     depends_on:
       - adr-0155-intent-queue-with-release-triggered-scheduling
@@ -3895,3 +3895,8 @@ workstreams:
       - docs/runbooks/live-apply-merge-train.md
     ready_to_merge: false
     live_applied: false
+    canonical_truth:
+      changelog_entry: implemented ADR 0182 live-apply merge-train queueing, wave planning, and rollback bundle execution
+      release_bump: patch
+      included_in_repo_version: 0.176.6
+      latest_receipts: {}
