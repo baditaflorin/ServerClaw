@@ -80,11 +80,15 @@
 - one branch-scoped preview is created, validated, and destroyed on the live Proxmox estate
 - ADR metadata and workstream state clearly record what was live-applied and what still waits for mainline integration
 
-## Notes For The Next Assistant
+## Outcome
 
-- merge to `main` must still update the protected integration files that this workstream intentionally left unchanged:
-  - `README.md`
-  - `VERSION`
-  - release sections in `changelog.md`
-  - `versions/stack.yaml`
+- implementation commits `6d94d8ba01ee306d06189f64df30eb6e712e7ffa` and `9db4ba9221d6586e3fcf3570a78030288c81b220` added the preview profile catalog, lifecycle entrypoints, validation wiring, host-network hardening, and runbook updates needed for branch-scoped ephemeral previews
+- the committed-head replay created preview `2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z`, validated Docker readiness on preview VM `910`, and destroyed the preview cleanly with durable evidence under `receipts/preview-environments/` and `receipts/live-applies/preview/`
+- preview converge now waits for SSH, cloud-init, and apt lock release, forces guest APT over IPv4, and provisions the preview guest over the governed `ops@100.64.0.1` Proxmox jump path
+- the workstream merged to `origin/main` on 2026-03-28 in repo version `0.177.17`
+
+## Post-Merge Notes
+
+- the `main` integration step advanced repository release metadata to `0.177.17`
+- `versions/stack.yaml` intentionally keeps platform version `0.130.31` because ADR 0185 verified branch-scoped preview automation against the already-observed platform baseline rather than introducing a new production platform mutation
 - keep the successful branch-local evidence above; do not reintroduce superseded preview receipts from earlier failed retries

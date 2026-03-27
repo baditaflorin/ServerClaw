@@ -1,8 +1,8 @@
 # ADR 0185: Branch-Scoped Ephemeral Preview Environments
 
 - Status: Implemented
-- Implementation Status: Live Applied On Workstream Branch
-- Implemented In Repo Version: pending merge to `main` (`VERSION` intentionally remains `0.177.12` on workstream branches)
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.17
 - Implemented In Platform Version: 0.130.31
 - Implemented On: 2026-03-27
 - Date: 2026-03-27
