@@ -1,5 +1,5 @@
 schema_version: 1.0.0
-repo_version: 0.177.10
+repo_version: 0.177.11
 platform_version: 0.130.30
 
 live_apply_evidence:
@@ -119,7 +119,7 @@ desired_state:
   automation_access:
     proxmox_api_user: lv3-automation@pve
     proxmox_api_token_id: primary
-    proxmox_api_role: PVEAdmin
+    proxmox_api_role: LV3Automation
     proxmox_api_privilege_separation: true
     proxmox_api_secret_storage: controller_local_only
   identity_taxonomy:
@@ -924,7 +924,7 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.10
+    current: 0.177.11
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
     current: 0.130.30

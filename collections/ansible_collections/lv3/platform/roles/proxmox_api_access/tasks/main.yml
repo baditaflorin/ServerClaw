@@ -11,6 +11,7 @@
       - proxmox_api_token_acl_path | length > 0
       - proxmox_api_token_local_dir | length > 0
       - proxmox_api_token_local_file | length > 0
+      - not (proxmox_api_token_role_manage | bool) or (proxmox_api_token_role_privileges | length > 0)
     fail_msg: "proxmox_api_access requires API identity, token ACL, and local secret path inputs."
 
 - name: Ensure local Proxmox API secret directory exists
@@ -32,6 +33,114 @@
   ansible.builtin.command: pvesh get /access/users --output-format json
   register: proxmox_api_current_users
   changed_when: false
+
+- name: Read current Proxmox roles
+  ansible.builtin.command: pveum role list --output-format json
+  register: proxmox_api_current_roles
+  changed_when: false
+
+- name: Ensure managed Proxmox API role exists
+  ansible.builtin.command:
+    argv:
+      - pveum
+      - role
+      - add
+      - "{{ proxmox_api_token_role }}"
+      - --privs
+      - "{{ proxmox_api_token_role_privileges | join(' ') }}"
+  when:
+    - proxmox_api_token_role_manage | bool
+    - >
+      (
+        proxmox_api_current_roles.stdout | from_json
+        | selectattr('roleid', 'equalto', proxmox_api_token_role)
+        | list
+        | length
+      ) == 0
+  changed_when: true
+
+- name: Fail if the desired managed Proxmox API role collides with a built-in role
+  ansible.builtin.fail:
+    msg: >-
+      proxmox_api_token_role {{ proxmox_api_token_role }} is a built-in Proxmox role with privileges that do not
+      match proxmox_api_token_role_privileges. Choose a custom role name or disable managed role convergence.
+  when:
+    - proxmox_api_token_role_manage | bool
+    - >
+      (
+        proxmox_api_current_roles.stdout | from_json
+        | selectattr('roleid', 'equalto', proxmox_api_token_role)
+        | list
+        | length
+      ) > 0
+    - >
+      (
+        (
+          proxmox_api_current_roles.stdout | from_json
+          | selectattr('roleid', 'equalto', proxmox_api_token_role)
+          | list
+          | first
+        ).special | int
+      ) == 1
+    - >
+      (
+        (
+          (
+            proxmox_api_current_roles.stdout | from_json
+            | selectattr('roleid', 'equalto', proxmox_api_token_role)
+            | list
+            | first
+          ).privs | default('')
+        ).split(',')
+        | map('trim')
+        | reject('equalto', '')
+        | sort
+        | list
+      ) != (proxmox_api_token_role_privileges | sort | list)
+
+- name: Ensure managed Proxmox API role privileges are current
+  ansible.builtin.command:
+    argv:
+      - pveum
+      - role
+      - modify
+      - "{{ proxmox_api_token_role }}"
+      - --privs
+      - "{{ proxmox_api_token_role_privileges | join(' ') }}"
+  when:
+    - proxmox_api_token_role_manage | bool
+    - >
+      (
+        proxmox_api_current_roles.stdout | from_json
+        | selectattr('roleid', 'equalto', proxmox_api_token_role)
+        | list
+        | length
+      ) > 0
+    - >
+      (
+        (
+          proxmox_api_current_roles.stdout | from_json
+          | selectattr('roleid', 'equalto', proxmox_api_token_role)
+          | list
+          | first
+        ).special | int
+      ) == 0
+    - >
+      (
+        (
+          (
+            proxmox_api_current_roles.stdout | from_json
+            | selectattr('roleid', 'equalto', proxmox_api_token_role)
+            | list
+            | first
+          ).privs | default('')
+        ).split(',')
+        | map('trim')
+        | reject('equalto', '')
+        | sort
+        | list
+      ) != (proxmox_api_token_role_privileges | sort | list)
+  changed_when: true
 
 - name: Ensure Proxmox API automation user exists
   ansible.builtin.command:

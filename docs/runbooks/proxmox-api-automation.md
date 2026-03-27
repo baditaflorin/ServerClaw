@@ -9,11 +9,14 @@ Under [ADR 0046](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/doc
 ## Result
 
 - creates the dedicated Proxmox API user `lv3-automation@pve`
-- grants `PVEAdmin` on `/`
+- creates or updates the custom Proxmox role `LV3Automation`
+- grants `LV3Automation` on `/`
 - creates the privilege-separated token `lv3-automation@pve!primary`
 - stores the returned token secret outside git in:
   - `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/proxmox-api/lv3-automation-primary.json`
 - verifies the token against `https://proxmox.lv3.org:8006/api2/json/version`
+
+The managed `LV3Automation` role intentionally preserves the current `PVEAdmin` VM and datastore surface while adding `Sys.Modify`, which the live OpenTofu VM apply path needs on Proxmox VE 9.
 
 ## Command
 
