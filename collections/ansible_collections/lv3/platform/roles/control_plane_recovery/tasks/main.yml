@@ -173,6 +173,15 @@
     group: root
     mode: "0600"
 
+- name: Reset SSH connection after updating runtime known_hosts
+  ansible.builtin.meta: reset_connection
+
+- name: Wait for docker-runtime-lv3 SSH after updating runtime known_hosts
+  ansible.builtin.wait_for_connection:
+    timeout: 120
+    connect_timeout: 5
+    sleep: 2
+
 - name: Read the currently deployed OpenBao backup token artifact if it exists
   ansible.builtin.stat:
     path: "{{ control_plane_recovery_runtime_openbao_backup_token_remote_file }}"
