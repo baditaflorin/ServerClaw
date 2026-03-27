@@ -99,6 +99,7 @@ The repository now also ships ADR 0122 browser-first operator access management:
 The repository now also ships ADR 0130 agent state persistence: `platform.agent.AgentStateClient`, the `agent.state` schema migration, and `lv3 agent state show|delete|verify` provide a governed scratch-state path for resumable agent work and post-handoff integrity validation; the first live schema apply from `main` is still pending.
 The repository now also ships ADR 0131 multi-agent handoffs: `platform.handoff`, the `handoff.transfers` schema migration, mutation-ledger event types, and `lv3 handoff send|list|view|accept|refuse|complete` provide a durable transfer path between agents and operators, with concurrent burst coverage verified in-repo; the first live transport integration from `main` is still pending.
 The repository now also ships ADR 0161 real-time agent coordination: `platform.agent.coordination`, `/v1/platform/agents`, the interactive ops-portal coordination panel, and committed coordination snapshot receipts expose active observation-loop and closure-loop sessions from one shared read model; the first live apply from `main` completed on 2026-03-26 with the coordination surfaces verified on `docker-runtime-lv3`.
+The repository now also ships ADR 0113 world-state materializer live on production: the Windmill worker checkout refreshes nine operational surfaces into `world_state.current_view`, the host-side `WorldStateClient()` probe now works directly on `docker-runtime-lv3`, and the latest-main replay on 2026-03-27 verified every surface fresh with `is_expired = false`.
 The repository now also ships ADR 0151 n8n automation live on production: the repo-managed `n8n` runtime is active on `docker-runtime-lv3`, PostgreSQL-backed persistence is pinned to `postgres-lv3` at `10.10.10.50`, and `https://n8n.lv3.org` now serves the protected editor with public webhook prefixes through the shared NGINX edge after the first successful `main`-based live apply on 2026-03-26.
 The repository now also ships ADR 0148 private web search live on production: the repo-managed SearXNG runtime is active on `docker-runtime-lv3`, the Proxmox host publishes the private operator and agent entrypoint on `http://100.64.0.1`, `search.lv3.org` resolves to that tailnet proxy, and Open WebUI now uses the local SearXNG JSON endpoint for governed web search after the 2026-03-26 live apply.
 The repository now also ships ADR 0165 workflow idempotency: `platform.idempotency`, scheduler-side cached result replay, closure-loop trigger scoping, `execution.idempotent_hit` ledger events, and `lv3 intent status <intent_id>` provide deterministic duplicate suppression for platform-managed workflows; the live Windmill converge from `main` on 2026-03-25 now applies and verifies the shared `platform.idempotency_records` schema on `postgres-lv3`.
@@ -118,8 +119,8 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.6` |
-| Platform version | `0.130.27` |
+| Repository version | `0.177.7` |
+| Platform version | `0.130.28` |
 | Observed check date | `2026-03-27` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -217,7 +218,8 @@ Template VM: `9000` `debian13-cloud-template`
 | `tempo_tracing` | `2026-03-22-adr-0053-tempo-traces-live-apply` |
 | `uptime_kuma` | `2026-03-22-adr-0027-uptime-kuma-live-apply` |
 | `vaultwarden` | `2026-03-27-adr-0101-certificate-lifecycle-main-live-apply` |
-| `windmill` | `2026-03-26-adr-0126-observation-to-action-closure-loop-live-apply` |
+| `windmill` | `2026-03-27-adr-0113-world-state-materializer-mainline-live-apply` |
+| `world_state_materializer` | `2026-03-27-adr-0113-world-state-materializer-mainline-live-apply` |
 <!-- END GENERATED: platform-status -->
 
 The current access posture is:
@@ -951,8 +953,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.6` |
-| Platform version | `0.130.27` |
+| Repository version | `0.177.7` |
+| Platform version | `0.130.28` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1077,7 +1079,7 @@ This repository is intentionally opinionated:
 | `0110` | Platform versioning, release notes, and upgrade path | `merged` | [adr-0110-platform-versioning.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0110-platform-versioning.md) |
 | `0111` | End-to-end integration test suite | `merged` | [adr-0111-integration-test-suite.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0111-integration-test-suite.md) |
 | `0112` | Deterministic goal compiler | `merged` | [adr-0112-goal-compiler.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0112-goal-compiler.md) |
-| `0113` | World-state materializer | `merged` | [adr-0113-world-state-materializer.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0113-world-state-materializer.md) |
+| `0113` | World-state materializer | `live_applied` | [adr-0113-world-state-materializer.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0113-world-state-materializer.md) |
 | `0114` | Rule-based incident triage engine | `merged` | [adr-0114-incident-triage-engine.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0114-incident-triage-engine.md) |
 | `0115` | Event-sourced mutation ledger | `merged` | [adr-0115-mutation-ledger.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0115-mutation-ledger.md) |
 | `0116` | Deterministic workflow change risk scoring | `merged` | [adr-0116-change-risk-scoring.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0116-change-risk-scoring.md) |

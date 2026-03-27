@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.6",
-  "platform_version": "0.130.27",
-  "generated_at": "2026-03-27T11:17:35Z",
-  "next_refresh_at": "2026-03-27T12:17:35Z",
+  "repo_version": "0.177.7",
+  "platform_version": "0.130.28",
+  "generated_at": "2026-03-27T11:36:52Z",
+  "next_refresh_at": "2026-03-27T12:36:52Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3496,10 +3496,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.5",
+    "last_version": "0.177.6",
     "deployed_at": "2026-03-27",
-    "summary": "Integrated ADR 0101 automated certificate lifecycle management on `main`, including the repo-managed OpenBao and Vaultwarden renewal timers plus the validated `step-ca`-backed TLS probe contract. Hardened `step_ca_runtime` live apply with an SSH reconnect guard so the final verification block survives the post-start restart window on `docker-runtime-lv3`.",
-    "release_notes_url": "docs/release-notes/0.177.6.md"
+    "summary": "completed ADR 0113 from the latest `main` with a durable Windmill replay that keeps the world-state runtime env, worker checkout, and scheduled refresh path aligned on production fixed the last live runtime gaps by installing `make` for `opentofu_drift`, installing `python3-psycopg` for host-side `WorldStateClient` checks, and preserving the host-networked Windmill runtime contract introduced by the earlier ADR 0113 repo work",
+    "release_notes_url": "docs/release-notes/0.177.7.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

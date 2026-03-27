@@ -2669,10 +2669,10 @@ workstreams:
   - id: adr-0113-world-state-materializer
     adr: "0113"
     title: World-state materializer
-    status: merged
+    status: live_applied
     owner: codex
-    branch: codex/ws-0113-live-apply
-    worktree_path: .worktrees/ws-0113-live-apply
+    branch: codex/ws-0113-main-live-apply
+    worktree_path: .worktrees/ws-0113-main-live-apply
     doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0113-world-state-materializer.md
     depends_on:
       - adr-0054-netbox-topology
@@ -2690,7 +2690,7 @@ workstreams:
       - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
       - migrations/0010_world_state_schema.sql
     ready_to_merge: true
-    live_applied: false
+    live_applied: true
 
   - id: adr-0122-operator-access-admin
     adr: "0122"

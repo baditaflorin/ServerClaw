@@ -1,12 +1,13 @@
 schema_version: 1.0.0
-repo_version: 0.177.6
-platform_version: 0.130.27
+repo_version: 0.177.7
+platform_version: 0.130.28
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
   latest_receipts:
     monitoring: 2026-03-27-adr-0105-capacity-model-mainline-live-apply
     capacity_model: 2026-03-27-adr-0105-capacity-model-mainline-live-apply
+    world_state_materializer: 2026-03-27-adr-0113-world-state-materializer-mainline-live-apply
     mutation_audit: 2026-03-23-adr-0066-mutation-audit-live-apply
     mutation_ledger: 2026-03-27-adr-0115-mutation-ledger-mainline-live-apply
     public_edge_publication: 2026-03-26-adr-0134-changelog-redaction-live-apply
@@ -28,7 +29,7 @@ live_apply_evidence:
     openbao: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
     vaultwarden: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
     certificate_lifecycle: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
-    windmill: 2026-03-26-adr-0126-observation-to-action-closure-loop-live-apply
+    windmill: 2026-03-27-adr-0113-world-state-materializer-mainline-live-apply
     observation_to_action_closure_loop: 2026-03-26-adr-0126-observation-to-action-closure-loop-live-apply
     deadlock_detector: 2026-03-26-adr-0162-deadlock-detector-live-apply
     dependency_graph_runtime: 2026-03-26-adr-0117-dependency-graph-live-apply
@@ -921,8 +922,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.6
+    current: 0.177.7
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.27
+    current: 0.130.28
     meaning: intended platform release for the actual server configuration

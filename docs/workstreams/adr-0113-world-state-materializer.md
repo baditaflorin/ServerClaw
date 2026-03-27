@@ -2,9 +2,9 @@
 
 - ADR: [ADR 0113](../adr/0113-world-state-materializer.md)
 - Title: Continuously refreshed canonical Postgres materialized view of platform state from Proxmox, NetBox, Docker, TLS, DNS, and OpenTofu — replaces ad hoc re-discovery in all agent workflows
-- Status: merged
-- Branch: `codex/ws-0113-live-apply`
-- Worktree: `.worktrees/ws-0113-live-apply`
+- Status: live_applied
+- Branch: `codex/ws-0113-main-live-apply`
+- Worktree: `.worktrees/ws-0113-main-live-apply`
 - Owner: codex
 - Depends On: `adr-0054-netbox-topology`, `adr-0058-nats-event-bus`, `adr-0064-health-probe-contracts`, `adr-0080-maintenance-windows`, `adr-0085-opentofu-vm-lifecycle`, `adr-0091-drift-detection`, `adr-0098-postgres-ha`
 - Conflicts With: `adr-0117-dependency-graph-runtime` (both read NetBox; coordinate on refresh interval)
@@ -78,18 +78,20 @@
   - the Windmill runtime secret payload and `runtime.env.ctmpl` now carry the combined world-state, NATS, ledger, graph, Proxmox, and test-runner variables
   - the Windmill role no longer overwrites the OpenBao-managed `runtime.env` after calling `openbao_compose_env`
 - Focused repository validation passed with `uv run --with pytest --with pyyaml pytest tests/test_world_state_workers.py tests/test_world_state_repo_surfaces.py tests/test_maintenance_window_tool.py tests/test_compose_runtime_secret_injection.py tests/unit/test_world_state_materializer.py -q`, `python3 -m compileall config/windmill/scripts/world-state platform/world_state scripts/maintenance_window_tool.py`, and `make syntax-check-windmill`.
-- The live platform was concurrently reverted by an older Windmill automation path after the repaired runtime was demonstrated: `/opt/windmill/openbao/runtime.env.ctmpl`, `/run/lv3-secrets/windmill/runtime.env`, and `/srv/proxmox_florin_server/platform/world_state/workers.py` all snapped back to the pre-fix variant before the final steady-state replay finished.
+- 2026-03-27 latest-main replay from `codex/ws-0113-main-live-apply` completed `make converge-windmill` successfully, installed the managed host dependencies needed for `opentofu_drift` and host-side client checks (`make`, `python3-psycopg`), and verified `psycopg 3.2.6` on `docker-runtime-lv3`.
+- The final tight-window proof on 2026-03-27 refreshed `proxmox_vms`, `container_inventory`, `maintenance_windows`, and `service_health` in sequence, then confirmed `WorldStateClient().list_stale()` returned `[]` on `docker-runtime-lv3` and `world_state.current_view` on `postgres-lv3` showed all nine surfaces with `is_expired = false`.
 
-## Remaining Post-Merge Live Follow-Up
+## Final Integration State
 
-- Reapply Windmill from merged `main` after the competing old runtime-env/template automation path is disabled or updated to the new superset contract.
-- Rerun the steady-state live replay for `service_health` and `maintenance_windows` after the old overwrite path stops rewriting `/opt/windmill/openbao/runtime.env.ctmpl`, `/run/lv3-secrets/windmill/runtime.env`, and `/srv/proxmox_florin_server/platform/world_state/workers.py`.
-- Once that stable replay holds, update `versions/stack.yaml`, `VERSION`, `README.md`, and the release notes from `main` as the final integration step.
+- This workstream is live-applied from the latest `main`.
+- The mainline release that records the verified state is repository version `0.177.7` with platform version `0.130.28`.
+- Shared integration files (`VERSION`, `changelog.md`, `README.md`, and `versions/stack.yaml`) are updated in the same mainline release step.
+- The durable receipt for the successful latest-main replay is `receipts/live-applies/2026-03-27-adr-0113-world-state-materializer-mainline-live-apply.json`.
 
 ## Merge Criteria
 
 - All 9 refresh workers are seeded and scheduled in Windmill from repo-managed defaults
-- `WorldStateClient` can be imported and used in a Windmill workflow script
+- `WorldStateClient` can be imported and used in both a Windmill workflow script and the managed `docker-runtime-lv3` host Python environment
 - Stale detection is covered by automated SQLite-backed tests and ready for live verification
 - NATS refresh publication is implemented as best-effort and ready for live verification once the worker runtime has NATS credentials
 

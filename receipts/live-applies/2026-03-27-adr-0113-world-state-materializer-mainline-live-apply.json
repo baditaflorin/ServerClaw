@@ -1,0 +1,79 @@
+{
+  "schema_version": "1.0.0",
+  "receipt_id": "2026-03-27-adr-0113-world-state-materializer-mainline-live-apply",
+  "environment": "production",
+  "applied_on": "2026-03-27",
+  "recorded_on": "2026-03-27",
+  "recorded_by": "codex",
+  "source_commit": "1867450ba3fc27228ed7ac83f6863a87e9ace216",
+  "repo_version_context": "0.177.7",
+  "workflow_id": "converge-windmill",
+  "adr": "0113",
+  "summary": "Completed the ADR 0113 latest-main live apply by replaying Windmill from the current mainline, restoring the durable world-state runtime contract on docker-runtime-lv3, installing the host dependencies needed for drift refreshes and client checks, and verifying that all nine world-state surfaces remain fresh and queryable through both Postgres and WorldStateClient.",
+  "targets": [
+    {
+      "kind": "host",
+      "name": "proxmox_florin",
+      "address": "100.64.0.1"
+    },
+    {
+      "kind": "guest",
+      "name": "docker-runtime-lv3",
+      "vmid": 120,
+      "address": "10.10.10.20"
+    },
+    {
+      "kind": "guest",
+      "name": "postgres-lv3",
+      "vmid": 150,
+      "address": "10.10.10.50"
+    }
+  ],
+  "verification": [
+    {
+      "check": "Focused repository validation",
+      "result": "pass",
+      "observed": "`uv run --with-requirements requirements/integration-tests.txt python -m pytest -q tests/test_world_state_repo_surfaces.py tests/test_world_state_workers.py tests/test_config_merge_windmill.py tests/test_ephemeral_lifecycle_repo_surfaces.py tests/test_windmill_operator_admin_app.py` passed with 28 tests, and `make syntax-check-windmill` passed on the latest-main worktree."
+    },
+    {
+      "check": "Latest-main Windmill converge replay",
+      "result": "pass",
+      "observed": "Two `make converge-windmill` replays from the latest mainline completed successfully; the final replay reported `docker-runtime-lv3 : ok=195 changed=34 unreachable=0 failed=0`, `postgres-lv3 : ok=63 changed=1 failed=0`, and `proxmox_florin : ok=36 changed=4 failed=0`."
+    },
+    {
+      "check": "Managed host dependencies for world-state",
+      "result": "pass",
+      "observed": "On `docker-runtime-lv3`, `/usr/bin/make`, `/usr/bin/rsync`, and `/usr/bin/ssh` were present after converge, `python3 -c \"import psycopg; print(psycopg.__version__)\"` returned `3.2.6`, and `refresh-opentofu-drift.py` completed successfully against the live runtime env."
+    },
+    {
+      "check": "WorldStateClient end-to-end probe",
+      "result": "pass",
+      "observed": "On `docker-runtime-lv3`, `WorldStateClient().list_stale()` returned `[]`, and `WorldStateClient().get()` succeeded for `service_health`, `maintenance_windows`, and `opentofu_drift` with the expected top-level payload keys."
+    },
+    {
+      "check": "Fresh current_view snapshot",
+      "result": "pass",
+      "observed": "Immediately after rerunning the short-window refreshers, `postgres-lv3` returned all nine surfaces from `world_state.current_view` with `stale = false` and `is_expired = false`: `container_inventory`, `dns_records`, `maintenance_windows`, `netbox_topology`, `openbao_secret_expiry`, `opentofu_drift`, `proxmox_vms`, `service_health`, and `tls_cert_expiry`."
+    }
+  ],
+  "evidence_refs": [
+    "docs/adr/0113-world-state-materializer.md",
+    "docs/runbooks/world-state-materializer.md",
+    "docs/workstreams/adr-0113-world-state-materializer.md",
+    "migrations/0010_world_state_schema.sql",
+    "platform/world_state/client.py",
+    "platform/world_state/materializer.py",
+    "platform/world_state/workers.py",
+    "scripts/sync_windmill_seed_scripts.py",
+    "scripts/maintenance_window_tool.py",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml",
+    "collections/ansible_collections/lv3/platform/roles/windmill_runtime/templates/docker-compose.yml.j2",
+    "config/windmill/scripts/world-state/"
+  ],
+  "notes": [
+    "The successful 2026-03-27 replay supersedes the earlier partial 2026-03-26 receipt: the world-state runtime contract is now durable on `docker-runtime-lv3` from the latest mainline.",
+    "Because `service_health` uses a 2-minute stale threshold, the final freshness proof reran `proxmox_vms`, `container_inventory`, `maintenance_windows`, and `service_health` in a tight sequence immediately before the confirming Postgres query.",
+    "The first mainline release that records this verified live state is repository version `0.177.7` with platform version `0.130.28`."
+  ]
+}
