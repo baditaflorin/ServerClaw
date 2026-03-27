@@ -299,9 +299,18 @@ def validate_no_tracked_env_files() -> None:
         text=True,
         check=False,
     )
-    if completed.returncode != 0:
-        raise RuntimeError(completed.stderr.strip() or "git ls-files failed")
-    tracked = [line.strip() for line in completed.stdout.splitlines() if line.strip()]
+    if completed.returncode == 0:
+        tracked = [line.strip() for line in completed.stdout.splitlines() if line.strip()]
+    else:
+        # Some remote validation runners materialize git worktrees through an
+        # alternate `.git-remote/` layout that breaks `git ls-files`. Fall back
+        # to a repository scan so the no-.env invariant still holds there.
+        ignored_dirs = {".ansible", ".claude", ".git", ".local", ".venv", ".worktrees"}
+        tracked = []
+        for path in REPO_ROOT.rglob("*.env"):
+            if any(part in ignored_dirs for part in path.parts):
+                continue
+            tracked.append(str(path.relative_to(REPO_ROOT)))
     if tracked:
         raise ValueError(f"tracked .env files are not allowed: {', '.join(tracked)}")
 
