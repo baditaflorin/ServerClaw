@@ -133,3 +133,32 @@ def test_build_alertmanager_silence_uses_service_matcher():
 
     assert silence["matchers"] == [{"name": "service", "value": "grafana", "isRegex": False}]
     assert silence["comment"] == "Maintenance window: deploy"
+
+
+def test_list_active_windows_uses_direct_worker_nats_env(monkeypatch):
+    monkeypatch.delenv(tool.MAINTENANCE_STATE_FILE_ENV, raising=False)
+    monkeypatch.setenv("LV3_NATS_URL", "nats://worker:4222")
+    monkeypatch.setenv("LV3_NATS_USERNAME", "jetstream-admin")
+    monkeypatch.setenv("LV3_NATS_PASSWORD", "secret")
+    monkeypatch.setattr(
+        tool,
+        "load_controller_context",
+        lambda: (_ for _ in ()).throw(AssertionError("controller context should not be required")),
+    )
+
+    captured = {}
+
+    async def fake_list_windows_async(nats_url, credentials=None):
+        captured["nats_url"] = nats_url
+        captured["credentials"] = credentials
+        return {"maintenance/grafana": {"service_id": "grafana"}}
+
+    monkeypatch.setattr(tool, "list_windows_async", fake_list_windows_async)
+
+    windows = tool.list_active_windows()
+
+    assert windows == {"maintenance/grafana": {"service_id": "grafana"}}
+    assert captured == {
+        "nats_url": "nats://worker:4222",
+        "credentials": {"user": "jetstream-admin", "password": "secret"},
+    }

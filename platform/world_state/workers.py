@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import http.client
 import json
 import os
 import socket
@@ -176,7 +177,7 @@ def probe_service(url: str) -> tuple[str, int | None, str | None]:
             return status, status_code, None
     except urllib.error.HTTPError as exc:
         return "degraded", exc.code, str(exc)
-    except (urllib.error.URLError, TimeoutError) as exc:
+    except (urllib.error.URLError, TimeoutError, OSError, http.client.HTTPException, ssl.SSLError) as exc:
         return "down", None, str(exc)
 
 
@@ -203,7 +204,7 @@ def probe_http_contract(probe: dict[str, Any]) -> tuple[str, int | None, str | N
     except urllib.error.HTTPError as exc:
         status = "ok" if exc.code in expected else "degraded"
         return status, exc.code, f"HTTP {exc.code}"
-    except (urllib.error.URLError, TimeoutError, ssl.SSLError) as exc:
+    except (urllib.error.URLError, TimeoutError, OSError, http.client.HTTPException, ssl.SSLError) as exc:
         return "down", None, str(exc)
 
 
@@ -259,6 +260,16 @@ def probe_via_contract(service: dict[str, Any], contract: dict[str, Any]) -> dic
     }
 
 
+def preferred_probe_source(contract: dict[str, Any]) -> tuple[str, str]:
+    for source in ("readiness", "liveness"):
+        probe = contract.get(source)
+        if not isinstance(probe, dict):
+            continue
+        kind = str(probe.get("kind") or "").strip() or "unknown"
+        return source, kind
+    return "service_catalog", "url"
+
+
 def collect_service_health(repo_root: Path) -> dict[str, Any]:
     fixture = fixture_payload("service_health")
     if fixture is not None:
@@ -273,17 +284,28 @@ def collect_service_health(repo_root: Path) -> dict[str, Any]:
         url = url_for_service(service)
         health_probe_id = str(service.get("health_probe_id") or service.get("id") or "")
         contract = probe_catalog.get(health_probe_id, {})
-        if contract:
-            result = probe_via_contract(service, contract)
-        else:
-            status, http_status, detail = probe_service(url) if url else ("unknown", None, "missing URL")
+        try:
+            if contract:
+                result = probe_via_contract(service, contract)
+            else:
+                status, http_status, detail = probe_service(url) if url else ("unknown", None, "missing URL")
+                result = {
+                    "status": status,
+                    "http_status": http_status,
+                    "error": None if status == "ok" else detail,
+                    "detail": detail,
+                    "probe_source": "service_catalog",
+                    "probe_kind": "url",
+                }
+        except Exception as exc:  # pragma: no cover - defensive per-service guard
+            probe_source, probe_kind = preferred_probe_source(contract)
             result = {
-                "status": status,
-                "http_status": http_status,
-                "error": None if status == "ok" else detail,
-                "detail": detail,
-                "probe_source": "service_catalog",
-                "probe_kind": "url",
+                "status": "down",
+                "http_status": None,
+                "error": str(exc),
+                "detail": str(exc),
+                "probe_source": probe_source,
+                "probe_kind": probe_kind,
             }
         services.append(
             {

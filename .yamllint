@@ -5,6 +5,7 @@ ignore: |
   .ansible/
   .git/
   .local/
+  docs/adr/.index.yaml
 
 rules:
   braces:

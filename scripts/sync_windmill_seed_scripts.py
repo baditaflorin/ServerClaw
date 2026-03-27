@@ -11,6 +11,8 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
+from platform.retry import PlatformRetryError, RetryClass, RetryPolicy, with_retry
+
 
 class SyncError(RuntimeError):
     pass
@@ -163,8 +165,11 @@ def sync_script(
     settle_interval_s: float,
 ) -> dict:
     content = Path(spec["local_file"]).read_text(encoding="utf-8")
-    last_error = ""
-    for attempt in range(1, max_attempts + 1):
+    attempts = 0
+
+    def sync_attempt() -> dict:
+        nonlocal attempts
+        attempts += 1
         try:
             delete_script(base_url=base_url, workspace=workspace, token=token, script_path=spec["path"])
             time.sleep(settle_interval_s)
@@ -177,29 +182,53 @@ def sync_script(
                 interval_s=settle_interval_s,
             )
         except RetryableSyncError as exc:
-            last_error = str(exc)
-            time.sleep(settle_interval_s)
-            continue
+            raise PlatformRetryError(
+                str(exc),
+                code="platform:windmill_seed_sync_pending",
+                retry_class=RetryClass.BACKOFF,
+            ) from exc
         except SyncError:
             pass
         try:
             status, body = create_script(base_url=base_url, workspace=workspace, token=token, spec=spec, content=content)
-            if status == 201:
-                wait_for_content(
-                    base_url=base_url,
-                    workspace=workspace,
-                    token=token,
-                    script_path=spec["path"],
-                    expected_content=content,
-                    timeout_s=max(3.0, settle_interval_s * 4),
-                    interval_s=settle_interval_s,
-                )
-                return {"path": spec["path"], "attempts": attempt, "status": "synced"}
-            last_error = body[:500]
         except RetryableSyncError as exc:
-            last_error = str(exc)
-        time.sleep(settle_interval_s)
-    raise SyncError(f"failed to sync {spec['path']} after {max_attempts} attempts: {last_error}")
+            raise PlatformRetryError(
+                str(exc),
+                code="platform:windmill_seed_sync_pending",
+                retry_class=RetryClass.BACKOFF,
+            ) from exc
+        if status != 201:
+            raise PlatformRetryError(
+                f"failed to sync {spec['path']}: {body[:500]}",
+                code="platform:windmill_seed_sync_pending",
+                retry_class=RetryClass.BACKOFF,
+            )
+        wait_for_content(
+            base_url=base_url,
+            workspace=workspace,
+            token=token,
+            script_path=spec["path"],
+            expected_content=content,
+            timeout_s=max(3.0, settle_interval_s * 4),
+            interval_s=settle_interval_s,
+        )
+        return {"path": spec["path"], "attempts": attempts, "status": "synced"}
+
+    try:
+        return with_retry(
+            sync_attempt,
+            policy=RetryPolicy(
+                max_attempts=max_attempts,
+                base_delay_s=settle_interval_s,
+                max_delay_s=settle_interval_s,
+                multiplier=1.0,
+                jitter=False,
+                transient_max=0,
+            ),
+            error_context=f"windmill seed sync for {spec['path']}",
+        )
+    except Exception as exc:
+        raise SyncError(f"failed to sync {spec['path']} after {max_attempts} attempts: {exc}") from exc
 
 
 def main() -> int:

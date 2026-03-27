@@ -1,0 +1,8 @@
+{
+  "created_at": "2026-03-26T17:06:55.259597+00:00",
+  "bypass": "skip_remote_gate",
+  "reason": "schema-validation remote fallback blocked by mirrored git metadata bug (.git-remote/worktree not a git repository)",
+  "source": "pre-push-hook",
+  "branch": "codex/ws-0113-live-apply",
+  "commit": "ed11f05b84ba767691e76f704ae482ab63729489"
+}

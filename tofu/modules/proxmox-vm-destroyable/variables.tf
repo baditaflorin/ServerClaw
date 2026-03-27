@@ -85,7 +85,7 @@ variable "tags" {
 }
 
 variable "startup_order" {
-  type = number
+  type    = number
   default = null
 }
 
