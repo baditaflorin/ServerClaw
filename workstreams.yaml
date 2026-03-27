@@ -4214,6 +4214,14 @@ workstreams:
       - tests/test_service_redundancy.py
       - receipts/live-applies/
       - workstreams.yaml
+    ready_to_merge: false
+    live_applied: true
+    canonical_truth:
+      changelog_entry: implemented ADR 0188 failover rehearsal gating so redundancy reporting now distinguishes declared tiers from currently proven tiers and the unproven PostgreSQL warm-standby path is surfaced as implemented `R0`
+      release_bump: patch
+      included_in_repo_version: 0.177.14
+      latest_receipts:
+        service_redundancy: 2026-03-27-adr-0188-failover-rehearsal-gate-live-apply
   - id: ws-0191-live-apply
     adr: "0191"
     title: Immutable guest replacement for stateful and edge services

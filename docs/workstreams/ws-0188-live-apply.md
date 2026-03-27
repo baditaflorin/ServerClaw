@@ -3,7 +3,7 @@
 - ADR: [ADR 0188](../adr/0188-failover-rehearsal-gate-for-redundancy-tiers.md)
 - Title: live apply and verification for redundancy-tier rehearsal freshness gating
 - Status: live_applied
-- Implemented In Repo Version: not yet (awaiting merge to main)
+- Implemented In Repo Version: 0.177.14
 - Live Applied In Platform Version: 0.130.31
 - Implemented On: 2026-03-27
 - Live Applied On: 2026-03-27
@@ -36,11 +36,10 @@
 
 - ADR 0188 is now implemented in repo automation through rehearsal policy defaults, proof-aware status evaluation, and operator-visible declared-versus-implemented tier reporting
 - the first live apply proved the new gate is necessary right now: `postgres` still declares `R2`, but the current production evidence only supports `R0` because the standby guest is absent and the Patroni plus VIP path is inactive
-- branch-local receipts and evidence now make that downgrade explicit, so another assistant can merge or continue repair work without relying on hidden chat context
+- the merged mainline truth now records that downgrade explicitly in receipts, release metadata, and canonical status surfaces without rewriting the underlying design tier
 
 ## Mainline Integration
 
-- merge-to-`main` should carry the ADR, runbook, schema, script, test, receipt, and workstream updates from this branch
-- do not update `README.md`, `VERSION`, release sections in `changelog.md`, or `versions/stack.yaml` on this workstream branch
-- after merge, the shared canonical status surfaces should only be updated when a mainline integration step decides whether to publish the downgraded `postgres` implemented claim as integrated truth
+- merged to `main` in repository version `0.177.14`
+- no platform version bump was required because the verified live evidence already belongs to platform version `0.130.31`
 - a separate follow-up repair workstream is still required to recreate VM `151`, restore Patroni and VIP operation, and record a fresh passing `R2` rehearsal before `postgres` can honestly regain an implemented `R2` claim
