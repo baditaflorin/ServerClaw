@@ -1,10 +1,10 @@
 # ADR 0175: Cross-Workstream Interface Contracts
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
+- Status: Accepted
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.176.1
 - Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Implemented On: 2026-03-27
 - Date: 2026-03-26
 
 ## Context
@@ -24,7 +24,7 @@ These boundaries need contract files and compatibility checks so multiple agents
 
 ## Decision
 
-We will define **explicit interface contracts** for all shared producer-consumer boundaries touched by more than one workstream.
+We will define **explicit interface contracts** for shared producer-consumer boundaries touched by more than one workstream, starting with the workstream registry and the live-apply converge workflow handoff.
 
 ### Contract requirements
 
@@ -64,6 +64,11 @@ required_fields:
   - dependencies
 ```
 
+The initial implemented set is:
+
+- `workstream-registry-v1`
+- `converge-workflow-live-apply-v1`
+
 ### Change policy
 
 - breaking contract changes require a new contract version
@@ -87,6 +92,7 @@ required_fields:
 
 - Contracts describe interfaces, not execution order; sequencing still belongs to dependency and apply planning ADRs.
 - Not every internal helper needs a contract; only shared boundaries do.
+- Additional shared boundaries can add new contract files under `config/contracts/` without changing the existing validator entrypoints.
 
 ## Related ADRs
 

@@ -1734,36 +1734,6 @@ workstreams:
     ready_to_merge: false
     live_applied: false
 
-  - id: adr-0091-drift-detection
-    adr: "0091"
-    title: Continuous drift detection and reconciliation
-    status: merged
-    owner: codex
-    branch: codex/adr-0091-drift-detection
-    worktree_path: ../proxmox_florin_server-drift-detection
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0091-drift-detection.md
-    depends_on:
-      - adr-0058-nats-event-bus
-      - adr-0074-ops-portal
-      - adr-0075-service-capability-catalog
-      - adr-0085-opentofu-vm-lifecycle
-      - adr-0090-platform-cli
-    conflicts_with: []
-    shared_surfaces:
-      - scripts/drift_detector.py
-      - scripts/parse_ansible_drift.py
-      - scripts/docker_image_drift.py
-      - scripts/dns_drift.py
-      - scripts/tls_cert_drift.py
-      - config/windmill/scripts/continuous-drift-detection.py
-      - config/workflow-catalog.json
-      - config/control-plane-lanes.json
-      - config/command-catalog.json
-      - receipts/drift-reports
-      - collections/ansible_collections/lv3/platform/roles/monitoring_vm/templates/lv3-platform-overview.json.j2
-      - scripts/generate_ops_portal.py
-      - scripts/lv3_cli.py
-      - docs/runbooks/drift-detection.md
   - id: adr-0078-service-scaffold
     adr: "0078"
     title: Service scaffold generator
@@ -3126,6 +3096,8 @@ workstreams:
       - docs/adr/0136-http-security-headers-hardening.md
       - tests/test_nginx_edge_publication_role.py
       - tests/test_security_headers_audit.py
+    ready_to_merge: false
+    live_applied: true
 
   - id: adr-0145-ollama
     adr: "0145"
@@ -3503,6 +3475,8 @@ workstreams:
       - scripts/workflow_catalog.py
       - config/ledger-event-types.yaml
       - docs/runbooks/speculative-workflow-execution.md
+    ready_to_merge: false
+    live_applied: false
   - id: adr-0164-circuit-breaker-pattern
     adr: "0164"
     title: Circuit breaker pattern for external service calls
@@ -3669,6 +3643,30 @@ workstreams:
     ready_to_merge: false
     live_applied: true
 
+  - id: adr-0175-cross-workstream-interface-contracts
+    adr: "0175"
+    title: Cross-workstream interface contracts
+    status: merged
+    owner: codex
+    branch: codex/adr-0175-interface-contracts
+    worktree_path: ../worktree-adr-0175-interface-contracts
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0175-cross-workstream-interface-contracts.md
+    depends_on:
+      - adr-0079-playbook-decomposition
+      - adr-0158-config-merge-protocol
+    conflicts_with: []
+    shared_surfaces:
+      - config/contracts/
+      - platform/interface_contracts.py
+      - scripts/interface_contracts.py
+      - scripts/validate_repository_data_models.py
+      - Makefile
+      - workstreams.yaml
+      - docs/runbooks/cross-workstream-interface-contracts.md
+      - docs/workstreams/adr-0175-cross-workstream-interface-contracts.md
+    ready_to_merge: false
+    live_applied: false
+
   - id: adr-0166-canonical-error-response-format
     adr: "0166"
     title: Canonical error response format and error code registry
@@ -3827,29 +3825,6 @@ workstreams:
       - versions/stack.yaml
     ready_to_merge: false
     live_applied: true
-
-  - id: adr-0172-watchdog-escalation
-    adr: "0172"
-    title: Watchdog escalation and stale job self-healing
-    status: merged
-    owner: codex
-    branch: codex/adr-0172-watchdog
-    worktree_path: .worktrees/codex-adr-0172-watchdog
-    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0172-watchdog-escalation-and-stale-job-self-healing.md
-    depends_on:
-      - adr-0044-windmill
-      - adr-0115-mutation-ledger
-      - adr-0119-budgeted-workflow-scheduler
-    conflicts_with: []
-    shared_surfaces:
-      - platform/scheduler/watchdog.py
-      - platform/scheduler/scheduler.py
-      - windmill/scheduler/watchdog-loop.py
-      - collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml
-      - config/workflow-catalog.json
-      - config/ledger-event-types.yaml
-      - docs/runbooks/budgeted-workflow-scheduler.md
-    ready_to_merge: false
 
   - id: adr-0150-dozzle
     adr: "0150"

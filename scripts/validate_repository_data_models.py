@@ -31,6 +31,7 @@ from dependency_graph import load_dependency_graph
 from data_catalog import load_data_catalog, validate_data_catalog
 from live_apply_receipts import RECEIPTS_DIR, iter_receipt_paths, validate_receipts
 from platform.circuit import load_circuit_policies
+from platform.interface_contracts import validate_contracts
 from generate_platform_vars import PLATFORM_VARS_PATH, PORT_KEYS, build_platform_vars
 from mutation_audit import load_mutation_audit_schema, validate_mutation_audit_schema
 from operator_manager import ROSTER_PATH, validate_operator_roster
@@ -1641,6 +1642,9 @@ def validate_workstream_live_apply_contracts() -> None:
             else:
                 require_str(step.get("path"), f"{step_path}.path")
 
+def validate_interface_contracts() -> None:
+    validate_contracts()
+
 
 def validate_merge_eligible_files_contract() -> None:
     validate_merge_eligible_catalog(MERGE_ELIGIBLE_FILES_PATH)
@@ -2388,10 +2392,11 @@ def validate_repository_data_models() -> int:
     validate_token_inventory(token_classes, workflow_catalog)
     validate_circuit_policies()
     validate_version_semantics()
-    validate_merge_eligible_files_contract()
     validate_workstreams_release_policy()
     validate_workstream_canonical_truth_metadata()
     validate_workstream_live_apply_contracts()
+    validate_interface_contracts()
+    validate_merge_eligible_files_contract()
     validate_triage_rule_contracts()
     validate_changelog_redaction_contract()
     validate_platform_finding_schema()
