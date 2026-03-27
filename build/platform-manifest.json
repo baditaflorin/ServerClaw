@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.14",
   "platform_version": "0.130.31",
-  "generated_at": "2026-03-27T22:52:25Z",
-  "next_refresh_at": "2026-03-27T23:52:25Z",
+  "generated_at": "2026-03-27T22:50:46Z",
+  "next_refresh_at": "2026-03-27T23:50:46Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3359,7 +3359,7 @@
         "id": "rag-platform-context",
         "title": "RAG Platform Context",
         "agent_trust_required": "T3",
-        "steps": 9,
+        "steps": 11,
         "path": "docs/runbooks/rag-platform-context.md",
         "workflow_ids": [
           "converge-rag-context"
@@ -3498,7 +3498,7 @@
   "recent_changes": {
     "last_version": "0.177.13",
     "deployed_at": "2026-03-27",
-    "summary": "implemented ADR 0188 failover rehearsal gating so redundancy reporting now distinguishes declared tiers from currently proven tiers and the unproven PostgreSQL warm-standby path is surfaced as implemented `R0`",
+    "summary": "completed ADR 0198 by switching platform-context retrieval to local Ollama semantic embeddings, expanding the indexed corpus, and grounding the operator CLI plus LLM client with cited vector matches",
     "release_notes_url": "docs/release-notes/0.177.14.md"
   },
   "agentic_architecture": {

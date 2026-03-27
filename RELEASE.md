@@ -3,10 +3,10 @@
 - Date: 2026-03-28
 
 ## Summary
-- implemented ADR 0188 failover rehearsal gating so redundancy reporting now distinguishes declared tiers from currently proven tiers and the unproven PostgreSQL warm-standby path is surfaced as implemented `R0`
+- completed ADR 0198 by switching platform-context retrieval to local Ollama semantic embeddings, expanding the indexed corpus, and grounding the operator CLI plus LLM client with cited vector matches
 
 ## Platform Impact
-- no live platform version bump; this release publishes ADR 0188 rehearsal-gated redundancy reporting and records the verified PostgreSQL warm-standby gap as implemented R0 until a fresh passing failover rehearsal exists
+- platform-context retrieval now defaults to local Ollama semantic embeddings with cited Qdrant-backed matches
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

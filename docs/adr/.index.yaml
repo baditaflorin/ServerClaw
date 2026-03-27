@@ -7,7 +7,7 @@
 
 schema_version: 1
 generated: '2026-03-28'
-total_adrs: 201
+total_adrs: 202
 implementation_status_summary:
   Implemented: 184
   Partial: 3
@@ -92,6 +92,7 @@ concerns:
     - '0134'
     - '0135'
     - 0148
+    - 0198
   host-os:
     - '0002'
     - '0004'
@@ -3321,3 +3322,20 @@ adr_index:
       - workloads
     summary: We will classify spare capacity into separate reservation classes with explicit admission rules.
     filename: 0192-separate-capacity-classes-for-standby-recovery-and-preview-workloads.md
+  - adr: 0198
+    title: Qdrant Vector Search for Semantic Platform RAG
+    status: Implemented
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: documentation
+    keywords:
+      - qdrant
+      - vector
+      - search
+      - semantic
+      - platform
+      - rag
+    summary: We will make the platform-context retrieval path semantic by default while preserving the existing private-first
+      operati
+    filename: 0198-qdrant-vector-search-semantic-rag.md
+    implemented_version: 0.177.12

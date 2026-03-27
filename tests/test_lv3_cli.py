@@ -465,6 +465,38 @@ def test_logs_dry_run_builds_loki_query(
     assert "query=%7Bservice%3D%22windmill%22%7D" in captured.out
 
 
+def test_query_platform_context_command_prints_matches(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    class FakeRetriever:
+        def __init__(self, timeout_seconds: float = 30) -> None:
+            self.timeout_seconds = timeout_seconds
+
+        def retrieve_payload(self, question: str, top_k: int = 5) -> dict[str, object]:
+            assert question == "how does step-ca issue SSH certificates"
+            assert top_k == 3
+            return {
+                "matches": [
+                    {
+                        "score": 0.95,
+                        "source_path": "docs/adr/0042-step-ca.md",
+                        "adr_number": "0042",
+                        "section_heading": "Decision",
+                        "content": "step-ca issues SSH certificates for humans and services.",
+                    }
+                ]
+            }
+
+    monkeypatch.setattr(lv3_cli, "PlatformContextRetriever", FakeRetriever)
+
+    exit_code = lv3_cli.main(["query-platform-context", "how does step-ca issue SSH certificates", "--limit", "3"])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert "docs/adr/0042-step-ca.md" in captured.out
+    assert "ADR 0042" in captured.out
+
+
 def test_run_dry_run_redacts_token(
     capsys: pytest.CaptureFixture[str], minimal_repo: Path
 ) -> None:
