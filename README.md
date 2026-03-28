@@ -124,7 +124,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.22` |
+| Repository version | `0.177.23` |
 | Platform version | `0.130.32` |
 | Observed check date | `2026-03-28` |
 | Observed OS | `Debian 13` |
@@ -809,6 +809,16 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0198: Qdrant Vector Search for Semantic Platform RAG](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0198-qdrant-vector-search-semantic-rag.md)
 - [ADR 0199: Outline Living Knowledge Wiki](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0199-outline-living-knowledge-wiki.md)
 - [ADR 0202: Excalidraw Auto Generated Architecture Diagrams](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0202-excalidraw-auto-generated-architecture-diagrams.md)
+- [ADR 0204: Self-Correcting Automation Loops](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0204-self-correcting-automation-loops.md)
+- [ADR 0205: Capability Contracts Before Product Selection](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0205-capability-contracts-before-product-selection.md)
+- [ADR 0206: Ports And Adapters For External Integrations](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0206-ports-and-adapters-for-external-integrations.md)
+- [ADR 0207: Anti-Corruption Layers At Provider Boundaries](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0207-anti-corruption-layers-at-provider-boundaries.md)
+- [ADR 0208: Dependency Direction And Composition Roots](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0208-dependency-direction-and-composition-roots.md)
+- [ADR 0209: Use-Case Services And Thin Delivery Adapters](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0209-use-case-services-and-thin-delivery-adapters.md)
+- [ADR 0210: Canonical Domain Models Over Vendor Schemas](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0210-canonical-domain-models-over-vendor-schemas.md)
+- [ADR 0211: Shared Policy Packs And Rule Registries](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0211-shared-policy-packs-and-rule-registries.md)
+- [ADR 0212: Replaceability Scorecards And Vendor Exit Plans](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0212-replaceability-scorecards-and-vendor-exit-plans.md)
+- [ADR 0213: Architecture Fitness Functions In The Validation Gate](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0213-architecture-fitness-functions-in-the-validation-gate.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -971,6 +981,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0198: Qdrant Vector Search for Semantic Platform RAG](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0198-qdrant-vector-search-semantic-rag.md)
 - [Workstream ADR 0199: Outline Living Knowledge Wiki](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0199-outline-living-knowledge-wiki.md)
 - [Workstream ADR 0202: Excalidraw Auto Generated Architecture Diagrams](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0202-excalidraw-auto-generated-architecture-diagrams.md)
+- [Workstream ADR 0204: Architecture Governance Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0204-architecture-governance.md)
 - [Workstream ws-0101-live-apply: ADR 0101 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0101-live-apply.md)
 - [Workstream ws-0105-live-apply: Live Apply ADR 0105 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0105-live-apply.md)
 - [Workstream WS-0108: Operator Onboarding and Off-boarding Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0108-live-apply.md)
@@ -998,7 +1009,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.22` |
+| Repository version | `0.177.23` |
 | Platform version | `0.130.32` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1158,7 +1169,6 @@ This repository is intentionally opinionated:
 | `0146` | Langfuse for agent observability | `live_applied` | [adr-0146-ai-observability.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0146-ai-observability.md) |
 | `0147` | Vaultwarden for operator credential management | `live_applied` | [adr-0147-vaultwarden.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0147-vaultwarden.md) |
 | `0148` | SearXNG for agent web search | `merged` | [adr-0148-searxng-web-search.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0148-searxng-web-search.md) |
-| `0149` | Semaphore for Ansible job management UI and API | `merged` | [adr-0149-semaphore.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0149-semaphore.md) |
 | `0150` | Dozzle for real-time container log access | `live_applied` | [adr-0150-dozzle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0150-dozzle.md) |
 | `0151` | n8n for webhook and API integration automation | `live_applied` | [adr-0151-n8n.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0151-n8n.md) |
 | `0152` | Homepage for unified service dashboard | `live_applied` | [adr-0152-homepage.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0152-homepage.md) |
@@ -1200,7 +1210,6 @@ This repository is intentionally opinionated:
 | `0190` | ADR 0190 live apply from latest origin/main | `merged` | [ws-0190-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0190-live-apply.md) |
 | `0191` | Immutable guest replacement for stateful and edge services | `live_applied` | [ws-0191-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0191-live-apply.md) |
 | `0192` | Live apply ADR 0192 capacity classes for standby, recovery, and preview workloads | `merged` | [ws-0192-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0192-live-apply.md) |
-| `0198` | Qdrant vector search semantic platform RAG | `merged` | [adr-0198-qdrant-vector-search-semantic-rag.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0198-qdrant-vector-search-semantic-rag.md) |
 | `0199` | Outline living knowledge wiki | `merged` | [adr-0199-outline-living-knowledge-wiki.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0199-live-apply/docs/workstreams/adr-0199-outline-living-knowledge-wiki.md) |
 | `0202` | Excalidraw auto generated architecture diagrams | `live_applied` | [adr-0202-excalidraw-auto-generated-architecture-diagrams.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0202-excalidraw-auto-generated-architecture-diagrams.md) |
 <!-- END GENERATED: merged-workstreams -->

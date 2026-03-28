@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.22",
+  "repo_version": "0.177.23",
   "platform_version": "0.130.32",
-  "generated_at": "2026-03-28T01:26:02Z",
-  "next_refresh_at": "2026-03-28T02:26:02Z",
+  "generated_at": "2026-03-28T01:47:13Z",
+  "next_refresh_at": "2026-03-28T02:47:13Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3617,10 +3617,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.21",
+    "last_version": "0.177.22",
     "deployed_at": "2026-03-28",
-    "summary": "implemented ADR 0189 governed network-impairment matrix rendering and hardened the mirrored Windmill worker checkout so repo-managed Python jobs no longer trip stale editable-build metadata before startup",
-    "release_notes_url": "docs/release-notes/0.177.22.md"
+    "summary": "accepted ADRs 0204 through 0213 to govern self-correcting automation, contract-first capability boundaries, ports and adapters, canonical domain models, shared policy registries, and vendor exit planning for future platform work",
+    "release_notes_url": "docs/release-notes/0.177.23.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
