@@ -14,6 +14,81 @@ release_policy:
   breaking_change_criteria: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/version-semantics.json
 
 workstreams:
+  - id: ws-0224-server-resident-ops-adrs
+    adr: "0224"
+    title: Server-resident operations architecture bundle
+    status: merged
+    owner: codex
+    branch: codex/ws-0224-server-resident-ops-adrs-r2
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0224-server-resident-ops-adrs-r2
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0224-server-resident-operations-architecture-bundle.md
+    depends_on:
+      - adr-0043-openbao
+      - adr-0044-windmill
+      - adr-0048-command-catalog
+      - adr-0143-gitea
+      - adr-0214-ha-replication-bundle
+    conflicts_with: []
+    shared_surfaces:
+      - docs/adr/0224-server-resident-operations-as-the-default-control-model.md
+      - docs/adr/0225-server-resident-reconciliation-via-ansible-pull.md
+      - docs/adr/0226-systemd-units-timers-and-paths-for-host-resident-control-loops.md
+      - docs/adr/0227-bounded-command-execution-via-systemd-run-and-approved-wrappers.md
+      - docs/adr/0228-windmill-as-the-default-browser-and-api-operations-surface.md
+      - docs/adr/0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation.md
+      - docs/adr/0230-policy-decisions-via-open-policy-agent-and-conftest.md
+      - docs/adr/0231-local-secret-delivery-via-openbao-agent-and-systemd-credentials.md
+      - docs/adr/0232-nomad-for-durable-batch-and-long-running-internal-jobs.md
+      - docs/adr/0233-signed-release-bundles-via-gitea-releases-and-cosign.md
+      - docs/workstreams/adr-0224-server-resident-operations-architecture-bundle.md
+      - docs/adr/.index.yaml
+      - workstreams.yaml
+      - VERSION
+      - changelog.md
+      - RELEASE.md
+      - docs/release-notes/README.md
+      - docs/release-notes/0.177.33.md
+      - docs/diagrams/agent-coordination-map.excalidraw
+      - build/platform-manifest.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: server_resident_ops_bundle
+          paths:
+            - docs/adr/0224-server-resident-operations-as-the-default-control-model.md
+            - docs/adr/0225-server-resident-reconciliation-via-ansible-pull.md
+            - docs/adr/0226-systemd-units-timers-and-paths-for-host-resident-control-loops.md
+            - docs/adr/0227-bounded-command-execution-via-systemd-run-and-approved-wrappers.md
+            - docs/adr/0228-windmill-as-the-default-browser-and-api-operations-surface.md
+            - docs/adr/0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation.md
+            - docs/adr/0230-policy-decisions-via-open-policy-agent-and-conftest.md
+            - docs/adr/0231-local-secret-delivery-via-openbao-agent-and-systemd-credentials.md
+            - docs/adr/0232-nomad-for-durable-batch-and-long-running-internal-jobs.md
+            - docs/adr/0233-signed-release-bundles-via-gitea-releases-and-cosign.md
+            - docs/workstreams/adr-0224-server-resident-operations-architecture-bundle.md
+            - docs/adr/.index.yaml
+          mode: exclusive
+        - id: integration_release_surfaces
+          paths:
+            - VERSION
+            - changelog.md
+            - RELEASE.md
+            - docs/release-notes/README.md
+            - docs/release-notes/0.177.33.md
+            - docs/diagrams/agent-coordination-map.excalidraw
+            - build/platform-manifest.json
+          mode: exclusive
+    ready_to_merge: true
+    live_applied: false
+    canonical_truth:
+      changelog_entry: accepted ADRs 0224 through 0233 to move routine platform operation from the Codex chat session into server-resident control loops and mature tools including Ansible Pull, systemd, Windmill, Gitea Actions runners, OPA, OpenBao Agent, Nomad, and signed release bundles
+      release_bump: patch
+      included_in_repo_version: 0.177.33
+
   - id: ws-0214-ha-replication-adrs
     adr: "0214"
     title: HA and replication architecture bundle for production and staging

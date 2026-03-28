@@ -7,11 +7,11 @@
 
 schema_version: 1
 generated: '2026-03-28'
-total_adrs: 228
+total_adrs: 238
 implementation_status_summary:
   Implemented: 198
   Partial: 3
-  Not Implemented: 26
+  Not Implemented: 36
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -58,6 +58,7 @@ concerns:
     - 0197
     - '0204'
     - '0221'
+    - 0228
   bootstrap:
     - '0001'
     - '0003'
@@ -88,6 +89,10 @@ concerns:
     - 0190
     - 0192
     - '0213'
+    - '0225'
+    - 0229
+    - '0230'
+    - '0233'
   documentation:
     - '0074'
     - 0081
@@ -202,6 +207,9 @@ concerns:
     - '0217'
     - 0218
     - '0222'
+    - '0226'
+    - '0227'
+    - '0232'
   release:
     - 0008
     - '0110'
@@ -212,6 +220,7 @@ concerns:
     - '0167'
     - '0170'
     - '0172'
+    - '0224'
   security:
     - '0034'
     - '0042'
@@ -230,6 +239,7 @@ concerns:
     - '0147'
     - '0165'
     - 0219
+    - '0231'
   storage:
     - '0020'
     - '0051'
@@ -3753,3 +3763,154 @@ adr_index:
       - profiles
     summary: We will centralize HA and replication intent in one canonical topology
     filename: 0223-canonical-ha-topology-catalog-and-reusable-automation-profiles.md
+  - adr: '0224'
+    title: Server-Resident Operations As The Default Control Model
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: resilience
+    keywords:
+      - server-resident
+      - operations
+      - as
+      - default
+      - control
+      - model
+    summary: We will make server-resident operations the default control model.
+    filename: 0224-server-resident-operations-as-the-default-control-model.md
+  - adr: '0225'
+    title: Server-Resident Reconciliation Via Ansible Pull
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - server-resident
+      - reconciliation
+      - ansible
+      - pull
+    summary: We will use ansible-pull as the default server-resident reconcile
+    filename: 0225-server-resident-reconciliation-via-ansible-pull.md
+  - adr: '0226'
+    title: Systemd Units, Timers, And Paths For Host-Resident Control Loops
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - systemd
+      - units
+      - timers
+      - paths
+      - host-resident
+      - control
+      - loops
+    summary: We will use systemd as the canonical host-resident supervisor for platform
+    filename: 0226-systemd-units-timers-and-paths-for-host-resident-control-loops.md
+  - adr: '0227'
+    title: Bounded Command Execution Via Systemd-Run And Approved Wrappers
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - bounded
+      - command
+      - execution
+      - systemd-run
+      - approved
+      - wrappers
+    summary: We will execute routine governed commands through repo-managed wrappers that
+    filename: 0227-bounded-command-execution-via-systemd-run-and-approved-wrappers.md
+  - adr: 0228
+    title: Windmill As The Default Browser-And-API Operations Surface
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: automation
+    keywords:
+      - windmill
+      - as
+      - default
+      - browser-and-api
+      - operations
+      - surface
+    summary: We will treat Windmill as the default browser-first and API-first operations
+    filename: 0228-windmill-as-the-default-browser-and-api-operations-surface.md
+  - adr: 0229
+    title: Gitea Actions Runners For On-Platform Validation And Release Preparation
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - gitea
+      - actions
+      - runners
+      - on-platform
+      - validation
+      - release
+      - preparation
+    summary: We will use Gitea Actions runners (actrunner) as the default on-platform
+    filename: 0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation.md
+  - adr: '0230'
+    title: Policy Decisions Via Open Policy Agent And Conftest
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - policy
+      - decisions
+      - open
+      - policy
+      - agent
+      - conftest
+    summary: We will use Open Policy Agent (OPA) as the shared decision engine and
+    filename: 0230-policy-decisions-via-open-policy-agent-and-conftest.md
+  - adr: '0231'
+    title: Local Secret Delivery Via OpenBao Agent And Systemd Credentials
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: security
+    keywords:
+      - local
+      - secret
+      - delivery
+      - openbao
+      - agent
+      - systemd
+      - credentials
+    summary: We will standardize host-local secret delivery on OpenBao Agent plus systemd
+    filename: 0231-local-secret-delivery-via-openbao-agent-and-systemd-credentials.md
+  - adr: '0232'
+    title: Nomad For Durable Batch And Long-Running Internal Jobs
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - nomad
+      - durable
+      - batch
+      - long-running
+      - internal
+      - jobs
+    summary: We will adopt Nomad as the future distributed scheduler for internal jobs
+    filename: 0232-nomad-for-durable-batch-and-long-running-internal-jobs.md
+  - adr: '0233'
+    title: Signed Release Bundles Via Gitea Releases And Cosign
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: ci-cd
+    keywords:
+      - signed
+      - release
+      - bundles
+      - gitea
+      - releases
+      - cosign
+    summary: We will package server-consumable control inputs as signed release bundles
+    filename: 0233-signed-release-bundles-via-gitea-releases-and-cosign.md

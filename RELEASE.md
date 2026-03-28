@@ -1,12 +1,12 @@
-# Release 0.177.32
+# Release 0.177.33
 
 - Date: 2026-03-28
 
 ## Summary
-- replayed ADR 0193 from the latest `origin/main`, hardened the Plane controller defaults against topology drift, and re-verified the private controller lane plus authenticated `tasks.lv3.org` publication on merged main
+- accepted ADRs 0224 through 0233 to define a production-oriented server-resident operations model, moving more routine control-plane work away from the Codex chat client and into mature tools such as Ansible Pull, systemd, Windmill, Gitea Actions runners, OPA, OpenBao Agent, Nomad, and signed release bundles
 
 ## Platform Impact
-- promotes the platform to `0.130.36`; this release records the merged-main Plane replay, the topology-safe controller-defaults hardening, and the verified authenticated public edge plus private ADR-sync lanes.
+- no platform version bump; this is a repo-only architecture release that defines how the server should increasingly operate from inside the platform boundary rather than from a live authoring session.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)
