@@ -4,13 +4,13 @@
 # Purpose: Machine-readable directory map enabling LLM agents to discover the
 #          full repository layout in a single read — no exploration needed.
 # Usage:   Read this file first. Use 'for_agents' hints to navigate task work.
-# Updated: 2026-03-26
+# Updated: 2026-03-28
 # Maintained by: Integration agent (human review on major reorganisations)
 # ============================================================================
 
 repository: proxmox_florin_server
 schema_version: 1
-last_updated: "2026-03-26"
+last_updated: "2026-03-28"
 purpose: |
   Infrastructure-as-code for a Hetzner dedicated server running Proxmox VE 9
   on Debian 13. Manages bootstrap, VM provisioning, networking, backup,
@@ -155,6 +155,8 @@ directories:
     for_agents: >
       One subdirectory per service (e.g., config/gitea/, config/keycloak/).
       Read .config-locations.yaml for which file controls which behaviour.
+    key_files:
+      "network-impairment-matrix.yaml": "ADR 0189 governed preview/staging network impairment catalog"
 
   scripts:
     purpose: Utility and helper scripts (Python, Bash)
@@ -165,6 +167,8 @@ directories:
       validate_repo.sh runs all local checks.
       generate_adr_index.py regenerates docs/adr/.index.yaml.
       platform_manifest.py generates build/platform-manifest.json.
+    key_files:
+      "network_impairment_matrix.py": "ADR 0189 CLI and validation helper for governed network impairment scenarios"
 
   tests:
     purpose: Test suites for automated validation
@@ -246,6 +250,8 @@ directories:
     concern: tooling, platform-management
     keywords: [platform, cli, tooling, management]
     for_agents: Platform-level management utilities
+    key_files:
+      "faults/network_impairment_matrix.py": "ADR 0189 typed loader and execution helpers for governed network impairment profiles"
 
   keys:
     purpose: SSH keys and cryptographic material (bootstrap and automation)

@@ -1,10 +1,10 @@
 # ADR 0189: Network Impairment Test Matrix for Staging and Previews
 
-- Status: Proposed
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: not yet
-- Implemented In Platform Version: not yet
-- Implemented On: not yet
+- Status: Implemented
+- Implementation Status: Implemented
+- Implemented In Repo Version: 0.177.22
+- Implemented In Platform Version: 0.130.31
+- Implemented On: 2026-03-27
 - Date: 2026-03-27
 
 ## Context
@@ -66,6 +66,11 @@ Each service participating in the matrix must declare the expected behaviour:
 
 - This ADR defines the matrix and safety rules; it does not replace the broader fault injection framework.
 - The matrix is not a license to chaos-test primaries casually.
+
+## Implementation Notes
+
+- The first implementation ships a repo-managed matrix catalog, a report renderer, and a governed Windmill workflow that renders the selected target-class slice from the mirrored worker checkout.
+- The 2026-03-27 live apply verified the safe `staging` diagnostic path only; actual preview, fixture, standby, and recovery impairments still depend on follow-up execution-lane work under ADR 0088 and ADR 0185.
 
 ## Related ADRs
 

@@ -86,6 +86,7 @@ The repository now also ships the repo-managed `lv3` operator CLI for terminal-f
 The repository now also ships ADR 0156 session workspace isolation for controller automation and the remote build gateway: separate checkouts now resolve to separate session namespaces and remote build-server workspaces, and the first live verification from current `main` completed on 2026-03-26.
 The repository now also ships ADR 0170 timeout hierarchy primitives: `config/timeout-hierarchy.yaml`, shared deadline propagation helpers, validation for catalog and hardcoded timeout drift, and runtime timeout wiring across the API gateway, scheduler, world-state workers, drift helpers, and NetBox sync; the integrated mainline live apply on 2026-03-25 re-converged the API gateway and Windmill with those runtime paths active and hardened the shared OpenBao secret-injection helper to recover from sealed restarts.
 The repository now also ships ADR 0171 controlled fault injection live on production: the repo-managed `fault-injection` Windmill workflow and guarded schedule are present on `docker-runtime-lv3`, and the first `main`-based governed drills for Keycloak and OpenBao both passed on 2026-03-26 with OpenBao using pause/unpause so the secret store stays unsealed after validation.
+The repository now also ships ADR 0189 network impairment matrix automation: the repo-managed Windmill workflow can render the governed staging and preview impairment plan on demand, and the 2026-03-27 live verification also hardened the mirrored worker checkout so repo-managed Python jobs no longer fail on stale editable-build metadata.
 The new ADR 0107 extension model is now implemented in the repository: `make scaffold-service` writes the cross-cutting integration artifacts for a new service, and `lv3 validate --service <service_id>` enforces the completeness checklist with legacy per-check grandfathering until `2026-09-23`.
 OpenTofu VM lifecycle automation is now implemented under `tofu/`, the six production VMs are imported into OpenTofu state through the build-server path, and `make tofu-drift ENV=production` now verifies the current production guest declarations without planned changes.
 The repository now also ships continuous drift detection across OpenTofu, Ansible check mode, runtime Docker image digests, DNS records, and TLS posture, with receipts under `receipts/drift-reports/`, an ops-portal Drift Status panel, and `lv3 diff` routed to `make drift-report`; the live schedule and dashboard metric feed still require apply from `main`.
@@ -123,7 +124,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.22` |
+| Repository version | `0.177.23` |
 | Platform version | `0.130.33` |
 | Observed check date | `2026-03-28` |
 | Observed OS | `Debian 13` |
@@ -207,6 +208,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `mutation_ledger` | `2026-03-27-adr-0115-mutation-ledger-mainline-live-apply` |
 | `n8n` | `2026-03-26-adr-0151-n8n-live-apply` |
 | `netbox` | `2026-03-23-adr-0077-compose-runtime-secrets-live-apply` |
+| `network_impairment_matrix` | `2026-03-27-adr-0189-network-impairment-matrix-live-apply` |
 | `notification_profiles` | `2026-03-22-adr-0050-notification-profiles-live-apply` |
 | `ntopng` | `2026-03-22-adr-0059-ntopng-live-apply` |
 | `observation_to_action_closure_loop` | `2026-03-26-adr-0126-observation-to-action-closure-loop-live-apply` |
@@ -531,6 +533,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Monitoring Stack Runbook](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/monitoring-stack.md)
 - [Mutation Audit Log](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/mutation-audit-log.md)
 - [Mutation Ledger](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/mutation-ledger.md)
+- [Network Impairment Matrix](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/network-impairment-matrix.md)
 - [Network Policy Reference](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/network-policy-reference.md)
 - [Observation-to-Action Closure Loop](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/observation-to-action-closure-loop.md)
 - [Runbook: OpenBao Sealed](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/openbao-sealed.md)
@@ -977,6 +980,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ws-0186-live-apply: Live Apply ADR 0186 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0186-live-apply.md)
 - [Workstream ws-0187-live-apply: ADR 0187 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0187-live-apply.md)
 - [Workstream WS-0188: Failover Rehearsal Gate Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0188-live-apply.md)
+- [Workstream ws-0189-live-apply: ADR 0189 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0189-live-apply.md)
 - [Workstream ws-0190-live-apply: ADR 0190 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0190-live-apply.md)
 - [Workstream ws-0191-live-apply: ADR 0191 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0191-live-apply.md)
 - [Workstream ws-0192-live-apply: Live Apply ADR 0192 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0192-live-apply.md)
@@ -997,7 +1001,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.22` |
+| Repository version | `0.177.23` |
 | Platform version | `0.130.33` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1192,15 +1196,16 @@ This repository is intentionally opinionated:
 | `0182` | Live apply merge train and rollback bundle | `merged` | [adr-0182-live-apply-merge-train-and-rollback-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0182-live-apply-merge-train-and-rollback-bundle.md) |
 | `0183` | Multi-environment live lanes | `live_applied` | [adr-0183-multi-environment-live-lanes.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0183-multi-environment-live-lanes.md) |
 | `0184` | Failure-domain labels and anti-affinity policy live apply | `live_applied` | [ws-0184-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0184-live-apply.md) |
-| `0185` | Branch-scoped ephemeral preview environments | `live_applied` | [adr-0185-branch-scoped-ephemeral-preview-environments.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0185-live-apply/docs/workstreams/adr-0185-branch-scoped-ephemeral-preview-environments.md) |
-| `0186` | Live apply ADR 0186 prewarmed fixture pools and lease-based ephemeral capacity | `live_applied` | [ws-0186-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0186-live-apply.md) |
+| `0185` | Branch-scoped ephemeral preview environments | `merged` | [adr-0185-branch-scoped-ephemeral-preview-environments.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0185-live-apply/docs/workstreams/adr-0185-branch-scoped-ephemeral-preview-environments.md) |
+| `0186` | Live apply ADR 0186 prewarmed fixture pools and lease-based ephemeral capacity | `merged` | [ws-0186-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0186-live-apply.md) |
 | `0187` | ADR 0187 live apply from latest origin/main | `live_applied` | [ws-0187-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0187-live-apply.md) |
 | `0188` | Failover rehearsal gate live apply | `live_applied` | [ws-0188-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/worktree-ws-0188-live-apply/docs/workstreams/ws-0188-live-apply.md) |
+| `0189` | ADR 0189 live apply from latest origin/main | `live_applied` | [ws-0189-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0189-live-apply.md) |
 | `0190` | ADR 0190 live apply from latest origin/main | `merged` | [ws-0190-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0190-live-apply.md) |
 | `0191` | Immutable guest replacement for stateful and edge services | `live_applied` | [ws-0191-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0191-live-apply.md) |
-| `0192` | Live apply ADR 0192 capacity classes for standby, recovery, and preview workloads | `live_applied` | [ws-0192-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0192-live-apply.md) |
+| `0192` | Live apply ADR 0192 capacity classes for standby, recovery, and preview workloads | `merged` | [ws-0192-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0192-live-apply.md) |
 | `0198` | Qdrant vector search semantic platform RAG | `merged` | [adr-0198-qdrant-vector-search-semantic-rag.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0198-qdrant-vector-search-semantic-rag.md) |
-| `0199` | Outline living knowledge wiki | `live_applied` | [adr-0199-outline-living-knowledge-wiki.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0199-live-apply/docs/workstreams/adr-0199-outline-living-knowledge-wiki.md) |
+| `0199` | Outline living knowledge wiki | `merged` | [adr-0199-outline-living-knowledge-wiki.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0199-live-apply/docs/workstreams/adr-0199-outline-living-knowledge-wiki.md) |
 | `0202` | Excalidraw auto generated architecture diagrams | `live_applied` | [adr-0202-excalidraw-auto-generated-architecture-diagrams.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0202-excalidraw-auto-generated-architecture-diagrams.md) |
 <!-- END GENERATED: merged-workstreams -->
 
