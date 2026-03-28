@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0194](../adr/0194-coolify-paas-deploy-from-repo.md)
 - Title: Integrate ADR 0194 live apply into `origin/main`
-- Status: ready
+- Status: merged
 - Branch: `codex/ws-0194-main-merge`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0194-main-merge`
 - Owner: codex
@@ -34,3 +34,9 @@ Carry the verified ADR 0194 Coolify live-apply branch into the latest `origin/ma
 - replay `make converge-coolify` from the merged candidate
 - re-run the governed `deploy-repo` smoke path and edge verification
 - record the canonical mainline live-apply receipt and push the final merge into `origin/main`
+
+## Result
+
+- Merged-main replay completed from commit `2a99afaa` with `coolify-lv3 ok=115 changed=7 failed=0`, `nginx-lv3 ok=71 changed=5 failed=0`, and `proxmox_florin ok=43 changed=5 failed=0`.
+- Governed verification succeeded end to end: `python3 scripts/coolify_tool.py whoami`, a fresh `deploy-repo` smoke deployment with deployment `b112g5up48c9ffekzpmwfw50`, and direct edge probes for `coolify.lv3.org`, `repo-smoke.apps.lv3.org`, and `apps.lv3.org`.
+- Mainline validation gates passed after the final evidence refresh, including the focused `97 passed` pytest slice and the repository automation checks.

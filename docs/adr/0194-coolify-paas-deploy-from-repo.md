@@ -67,17 +67,17 @@ We introduce Coolify as a dedicated repo-managed PaaS guest at `coolify-lv3` and
 
 ## Repository Verification
 
-- `uv run --with pytest --with pyyaml --with jsonschema python -m pytest tests/test_coolify_playbook.py tests/test_coolify_runtime_role.py tests/test_coolify_tool.py tests/test_generate_platform_vars.py tests/test_nginx_edge_publication_role.py tests/test_lv3_cli.py tests/test_service_topology_filters.py tests/test_subdomain_catalog.py tests/test_subdomain_exposure_audit.py -q` passed with `96 passed in 6.05s` on 2026-03-28.
+- `uv run --with pytest --with pyyaml --with jsonschema python -m pytest tests/test_coolify_playbook.py tests/test_coolify_runtime_role.py tests/test_coolify_tool.py tests/test_generate_platform_vars.py tests/test_nginx_edge_publication_role.py tests/test_lv3_cli.py tests/test_service_topology_filters.py tests/test_subdomain_catalog.py tests/test_subdomain_exposure_audit.py tests/test_edge_publication_playbooks.py -q` passed with `97 passed in 2.70s` on 2026-03-28.
 - `./scripts/validate_repo.sh agent-standards` passed on 2026-03-28 from `codex/ws-0194-main-merge` after registering the dedicated main-merge branch in `workstreams.yaml`.
 - `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`, `uv run --with pyyaml python scripts/subdomain_exposure_audit.py --check-registry`, `uv run --with jsonschema python scripts/generate_dependency_diagram.py --check`, `uv run --with pyyaml --with jsonschema python scripts/platform_manifest.py --check`, and `git diff --check` all passed on 2026-03-28.
 
 ## Live Apply Note
 
-Live apply completed first from `codex/ws-0194-live-apply` and then was replayed from merged mainline on `codex/ws-0194-main-merge` commit `d4e92450` on 2026-03-28.
+Live apply completed first from `codex/ws-0194-live-apply` and then was replayed from merged mainline on `codex/ws-0194-main-merge` commit `2a99afaa` on 2026-03-28.
 
-- `make converge-coolify` completed successfully from the merged-main candidate with `coolify-lv3 ok=115 changed=7 failed=0`, `nginx-lv3 ok=71 changed=5 failed=0`, and `proxmox_florin ok=44 changed=8 failed=0`.
+- `make converge-coolify` completed successfully from the merged-main candidate with `coolify-lv3 ok=115 changed=7 failed=0`, `nginx-lv3 ok=71 changed=5 failed=0`, and `proxmox_florin ok=43 changed=5 failed=0`.
 - `python3 scripts/coolify_tool.py whoami` confirmed the private controller path at `http://100.64.0.1:8012`, public dashboard URL `https://coolify.lv3.org`, app space `https://apps.lv3.org`, and a reachable plus usable local deployment server `coolify-lv3`.
-- `python3 scripts/coolify_tool.py deploy-repo --repo https://github.com/coollabsio/coolify-examples --branch main --base-directory /static --app-name repo-smoke --build-pack static --subdomain repo-smoke --wait --timeout 900` finished successfully on the merged-main replay with deployment `m9rpw9ilufx1sw6dcsrw91ki` for application `r4z9zeqpci7uykiw3bj08hrf`.
+- `python3 scripts/coolify_tool.py deploy-repo --repo https://github.com/coollabsio/coolify-examples --branch main --base-directory /static --app-name repo-smoke --build-pack static --subdomain repo-smoke --wait --timeout 900` finished successfully on the merged-main replay with deployment `b112g5up48c9ffekzpmwfw50` for application `r4z9zeqpci7uykiw3bj08hrf`.
 - Direct public-edge verification against `65.108.75.123` showed `https://coolify.lv3.org` returning the expected oauth2-proxy `302` challenge, `https://repo-smoke.apps.lv3.org` returning `200` with the expected example-page content, and `https://apps.lv3.org` returning `404` while no default apex app is assigned.
 - The canonical platform-version evidence now lives in `receipts/live-applies/2026-03-28-adr-0194-coolify-paas-deploy-from-repo-mainline-live-apply.json`, which supersedes the earlier branch-local receipt while preserving it for workstream history.
 

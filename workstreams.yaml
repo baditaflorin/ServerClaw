@@ -17,7 +17,7 @@ workstreams:
   - id: ws-0194-main-merge
     adr: "0194"
     title: Integrate ADR 0194 live apply into origin/main
-    status: ready
+    status: merged
     owner: codex
     branch: codex/ws-0194-main-merge
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0194-main-merge
@@ -126,7 +126,7 @@ workstreams:
             - collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/**
           mode: shared_contract
           contract: coolify-main-merge-v1
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: true
     canonical_truth:
       changelog_entry: integrated ADR 0194 by converging the dedicated Coolify guest, protected dashboard publication, wildcard app ingress, and the governed `lv3 deploy-repo` wrapper with end-to-end repo deployment verification
