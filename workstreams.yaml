@@ -351,7 +351,7 @@ workstreams:
   - id: ws-0242-live-apply
     adr: "0242"
     title: Guided human onboarding live apply via Shepherd tours
-    status: in-progress
+    status: in_progress
     owner: codex
     branch: codex/ws-0242-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0242-live-apply
@@ -366,6 +366,7 @@ workstreams:
       - docs/workstreams/ws-0242-live-apply.md
       - docs/adr/0242-guided-human-onboarding-via-shepherd-tours.md
       - docs/adr/.index.yaml
+      - docs/diagrams/agent-coordination-map.excalidraw
       - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
       - docs/runbooks/configure-windmill.md
       - docs/runbooks/windmill-operator-access-admin.md
@@ -387,6 +388,7 @@ workstreams:
             - docs/workstreams/ws-0242-live-apply.md
             - docs/adr/0242-guided-human-onboarding-via-shepherd-tours.md
             - docs/adr/.index.yaml
+            - docs/diagrams/agent-coordination-map.excalidraw
             - collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml
             - docs/runbooks/configure-windmill.md
             - docs/runbooks/windmill-operator-access-admin.md

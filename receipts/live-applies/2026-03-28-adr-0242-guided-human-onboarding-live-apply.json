@@ -63,7 +63,7 @@
     }
   ],
   "evidence_refs": [
-    "config/windmill/apps/f/lv3/operator_access_admin.raw_app/**",
+    "config/windmill/apps/f/lv3/operator_access_admin.raw_app",
     "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml",
     "docs/adr/0242-guided-human-onboarding-via-shepherd-tours.md",
     "docs/runbooks/configure-windmill.md",

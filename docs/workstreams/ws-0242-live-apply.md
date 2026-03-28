@@ -22,7 +22,9 @@
   `docs/runbooks/operator-onboarding.md`,
   `docs/runbooks/operator-offboarding.md`,
   `docs/adr/0242-guided-human-onboarding-via-shepherd-tours.md`,
-  `docs/adr/.index.yaml`, `scripts/validate_repo.sh`,
+  `docs/adr/.index.yaml`,
+  `docs/diagrams/agent-coordination-map.excalidraw`,
+  `scripts/validate_repo.sh`,
   `tests/test_windmill_operator_admin_app.py`,
   `receipts/live-applies/2026-03-28-adr-0242-guided-human-onboarding-live-apply.json`,
   `workstreams.yaml`
@@ -51,6 +53,7 @@
 - `docs/runbooks/operator-offboarding.md`
 - `docs/adr/0242-guided-human-onboarding-via-shepherd-tours.md`
 - `docs/adr/.index.yaml`
+- `docs/diagrams/agent-coordination-map.excalidraw`
 - `docs/workstreams/ws-0242-live-apply.md`
 - `scripts/validate_repo.sh`
 - `tests/test_windmill_operator_admin_app.py`
