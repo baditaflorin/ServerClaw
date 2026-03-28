@@ -1,4 +1,27 @@
 ---
+# Purpose: Declare the shared defaults for converging the interactive ops portal runtime, synced portal data, and live verification endpoints.
+# Use case: Run from the managed ops-portal playbook when the repo-managed dashboard, templates, or supporting portal data contracts change.
+#
+# Inputs (required):
+#   - hostvars['proxmox_florin'].lv3_service_topology (mapping, required): Service topology facts used to resolve the API gateway contract.
+#
+# Inputs (optional):
+#   - ops_portal_maintenance_windows_file (string, optional, default=""): Override file for active maintenance windows mirrored into the runtime.
+#   - ops_portal_static_api_token (string, optional, default=controller-local file): Static API token used for dashboard-only gateway reads.
+#
+# Outputs:
+#   - Defines the ops-portal filesystem layout, runtime ports, synced config payloads, and verification endpoints consumed by the role tasks.
+#
+# Idempotency: Fully idempotent
+# Dependencies:
+#   - ADR 0093: Interactive ops portal runtime contract
+#   - ADR 0205: Capability contracts before product selection
+#   - Requires: docker-runtime-lv3 topology and platform port assignments
+#   - Role: ops_portal_runtime — converges the managed portal container and synced runtime data
+#
+# Related ADRs: 0093, 0205, 0210
+# Related Runbooks: docs/runbooks/ops-portal-down.md
+
 ops_portal_gateway_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('api_gateway') }}"
 ops_portal_site_dir: /opt/ops-portal
 ops_portal_service_dir: "{{ ops_portal_site_dir }}/service"
@@ -31,6 +54,8 @@ ops_portal_static_api_token: >-
   }}
 ops_portal_maintenance_windows_file: ""
 ops_portal_file_sources:
+  - src: "{{ ops_portal_repo_root }}/config/capability-contract-catalog.json"
+    dest: "{{ ops_portal_data_dir }}/config/capability-contract-catalog.json"
   - src: "{{ ops_portal_repo_root }}/config/service-capability-catalog.json"
     dest: "{{ ops_portal_data_dir }}/config/service-capability-catalog.json"
   - src: "{{ ops_portal_repo_root }}/config/subdomain-exposure-registry.json"

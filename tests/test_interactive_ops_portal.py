@@ -166,6 +166,16 @@ def portal_client(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient]:
                         "adr": "0011",
                     },
                     {
+                        "id": "keycloak",
+                        "name": "Keycloak",
+                        "description": "Identity provider.",
+                        "category": "access",
+                        "lifecycle_status": "active",
+                        "public_url": "https://sso.lv3.org",
+                        "runbook": "docs/runbooks/configure-keycloak.md",
+                        "adr": "0056",
+                    },
+                    {
                         "id": "ops_portal",
                         "name": "Platform Operations Portal",
                         "description": "Interactive control surface.",
@@ -210,7 +220,11 @@ def portal_client(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient]:
                             },
                             "repo_route_service_id": "grafana",
                             "repo_route_metadata": {},
-                            "tls": {"provider": "letsencrypt", "cert_path": "/etc/letsencrypt/live/lv3-edge/", "auto_renew": True},
+                            "tls": {
+                                "provider": "letsencrypt",
+                                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+                                "auto_renew": True,
+                            },
                         },
                         "live_tracking_expected": True,
                         "notes": "Published through the shared edge.",
@@ -236,7 +250,11 @@ def portal_client(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient]:
                             },
                             "repo_route_service_id": "ops_portal",
                             "repo_route_metadata": {},
-                            "tls": {"provider": "letsencrypt", "cert_path": "/etc/letsencrypt/live/lv3-edge/", "auto_renew": True},
+                            "tls": {
+                                "provider": "letsencrypt",
+                                "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+                                "auto_renew": True,
+                            },
                         },
                         "live_tracking_expected": True,
                         "notes": "Authenticated operator entrypoint.",
@@ -251,6 +269,33 @@ def portal_client(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient]:
                     "shared_edge_total": 2,
                     "platform_sso_total": 1,
                 },
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (data_root / "config" / "capability-contract-catalog.json").write_text(
+        json.dumps(
+            {
+                "capabilities": [
+                    {
+                        "id": "identity_provider",
+                        "name": "Identity Provider",
+                        "summary": "Authenticate operators through a contract-first OIDC surface.",
+                        "review_cadence": "quarterly",
+                        "migration_expectations": {
+                            "export_formats": ["realm export JSON"],
+                            "fallback_behaviour": "Existing sessions continue until expiry while new logins fail closed."
+                        },
+                        "current_selection": {
+                            "product_name": "Keycloak",
+                            "service_id": "keycloak",
+                            "selection_adr": "0056",
+                            "runbook": "docs/runbooks/configure-keycloak.md"
+                        }
+                    }
+                ]
             },
             indent=2,
         )
@@ -350,6 +395,9 @@ def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, F
     assert "Recent Live Applies" in response.text
     assert "shared-edge / platform-sso" in response.text
     assert "ops.lv3.org · operator · shared-edge · platform-sso" in response.text
+    assert "Capability Contracts" in response.text
+    assert "Identity Provider" in response.text
+    assert "Keycloak" in response.text
     assert gateway.platform_health_tokens == ["test-token"]
     assert gateway.agent_coordination_tokens == ["test-token"]
     assert gateway.runbook_fetch_tokens == ["test-token"]

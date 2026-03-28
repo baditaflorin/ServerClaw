@@ -311,6 +311,9 @@ def validate_no_scaffold_placeholders() -> None:
         repo_path("config", "service-capability-catalog.json"): load_json(
             repo_path("config", "service-capability-catalog.json")
         ),
+        repo_path("config", "capability-contract-catalog.json"): load_json(
+            repo_path("config", "capability-contract-catalog.json")
+        ),
         repo_path("config", "service-redundancy-catalog.json"): load_json(
             repo_path("config", "service-redundancy-catalog.json")
         ),

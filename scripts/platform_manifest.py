@@ -10,6 +10,7 @@ import re
 from pathlib import Path
 from typing import Any
 
+from capability_contracts import load_capability_contract_catalog, summarize_capability_contracts
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path, write_json
 from deployment_history import collect_live_apply_entries
 from maintenance_window_tool import list_active_windows_best_effort
@@ -36,6 +37,7 @@ RUNTIME_SLO_STATUS_MAP = {
 VERSION_PATH = repo_path("VERSION")
 STACK_PATH = repo_path("versions", "stack.yaml")
 SERVICE_CATALOG_PATH = repo_path("config", "service-capability-catalog.json")
+CAPABILITY_CONTRACT_CATALOG_PATH = repo_path("config", "capability-contract-catalog.json")
 STATIC_CONFIG_PATH = repo_path("config", "manifest-static.yaml")
 SCHEMA_PATH = repo_path("docs", "schema", "platform-manifest.schema.json")
 ADR_DIR = repo_path("docs", "adr")
@@ -536,6 +538,10 @@ def build_manifest(
     static_config = load_static_config()
     stack = load_stack()
     service_catalog = load_service_catalog()
+    capability_contracts = summarize_capability_contracts(
+        load_capability_contract_catalog(CAPABILITY_CONTRACT_CATALOG_PATH),
+        service_catalog=service_catalog,
+    )
     maintenance = build_maintenance_section()
     workflows, runbooks = build_workflow_capabilities()
     manifest = {
@@ -557,6 +563,7 @@ def build_manifest(
         "capabilities": {
             "available_workflows": workflows,
             "automation_eligible_runbooks": runbooks,
+            "capability_contracts": capability_contracts,
         },
         "agents": {
             "registered": build_registered_agents(static_config, stack),

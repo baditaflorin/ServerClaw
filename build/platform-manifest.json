@@ -3874,7 +3874,125 @@
           "pre-push-gate"
         ]
       }
-    ]
+    ],
+    "capability_contracts": {
+      "summary": {
+        "total": 6,
+        "selected": 6,
+        "contract_only": 0,
+        "export_ready": 6
+      },
+      "items": [
+        {
+          "id": "git_forge",
+          "name": "Git Forge",
+          "summary": "Host the canonical repository, issues, pull requests, and webhook-driven automation without coupling other services to one forge vendor.",
+          "scope": "critical_shared_surface",
+          "owner": "platform-operations",
+          "review_cadence": "quarterly",
+          "selected_product": "Gitea",
+          "service_id": "gitea",
+          "service_name": "Gitea",
+          "service_url": "http://100.64.0.1:3009",
+          "selection_adr": "0143",
+          "runbook": "docs/runbooks/configure-gitea.md",
+          "selection_notes": "Selected for self-hosted git, repo bootstrap, webhook control, and lightweight runner coordination.",
+          "export_format_count": 3,
+          "fallback_behaviour": "Git fetch and push access may fail closed during migration, but repository data and webhook contracts remain exportable from committed artifacts.",
+          "failure_mode_count": 1
+        },
+        {
+          "id": "identity_provider",
+          "name": "Identity Provider",
+          "summary": "Authenticate operators, browsers, and automation clients through one governed SSO contract that downstream services can consume without provider-specific coupling.",
+          "scope": "critical_shared_surface",
+          "owner": "platform-operations",
+          "review_cadence": "quarterly",
+          "selected_product": "Keycloak",
+          "service_id": "keycloak",
+          "service_name": "Keycloak",
+          "service_url": "https://sso.lv3.org",
+          "selection_adr": "0056",
+          "runbook": "docs/runbooks/configure-keycloak.md",
+          "selection_notes": "Selected for repo-managed OIDC, MFA, and group-aware operator login across shared edge and private surfaces.",
+          "export_format_count": 3,
+          "fallback_behaviour": "Existing sessions may continue until expiry, but new browser logins fail closed if the provider is unavailable.",
+          "failure_mode_count": 1
+        },
+        {
+          "id": "mesh_control_plane",
+          "name": "Private Access Mesh Control Plane",
+          "summary": "Coordinate zero-trust node enrollment, private routing, and operator access policy without forcing downstream automation to depend on one mesh vendor API.",
+          "scope": "critical_shared_surface",
+          "owner": "platform-operations",
+          "review_cadence": "quarterly",
+          "selected_product": "Headscale",
+          "service_id": "headscale",
+          "service_name": "Headscale",
+          "service_url": "https://headscale.lv3.org",
+          "selection_adr": "0144",
+          "runbook": "docs/runbooks/configure-headscale.md",
+          "selection_notes": "Selected for self-hosted mesh coordination and controlled subnet routing into the private guest network.",
+          "export_format_count": 3,
+          "fallback_behaviour": "Existing private sessions may continue temporarily, but new enrollments or route changes pause until the replacement mesh control plane is ready.",
+          "failure_mode_count": 1
+        },
+        {
+          "id": "secret_authority",
+          "name": "Secret Authority",
+          "summary": "Store, issue, and rotate runtime secrets through one governed contract that keeps downstream workloads independent of a single secret manager API.",
+          "scope": "critical_shared_surface",
+          "owner": "platform-operations",
+          "review_cadence": "quarterly",
+          "selected_product": "OpenBao",
+          "service_id": "openbao",
+          "service_name": "OpenBao",
+          "service_url": "https://100.64.0.1:8200",
+          "selection_adr": "0043",
+          "runbook": "docs/runbooks/configure-openbao.md",
+          "selection_notes": "Selected for repo-managed secret policy, private mTLS publication, and controlled runtime injection.",
+          "export_format_count": 3,
+          "fallback_behaviour": "Existing rendered secrets may remain usable until rotated, but new reads and rotations pause until the replacement authority is available.",
+          "failure_mode_count": 1
+        },
+        {
+          "id": "service_inventory",
+          "name": "Service Inventory And Topology",
+          "summary": "Keep the canonical inventory of hosts, IPs, prefixes, and service ownership in a replaceable topology contract rather than a product-specific data model.",
+          "scope": "critical_shared_surface",
+          "owner": "platform-operations",
+          "review_cadence": "quarterly",
+          "selected_product": "NetBox",
+          "service_id": "netbox",
+          "service_name": "NetBox",
+          "service_url": "http://100.64.0.1:8004",
+          "selection_adr": "0054",
+          "runbook": "docs/runbooks/configure-netbox.md",
+          "selection_notes": "Selected for operator-facing topology browsing while the repo stays canonical for managed inventory inputs.",
+          "export_format_count": 3,
+          "fallback_behaviour": "The repo remains the canonical topology source while live inventory sync is paused or being migrated.",
+          "failure_mode_count": 1
+        },
+        {
+          "id": "workflow_orchestrator",
+          "name": "Workflow Orchestrator",
+          "summary": "Run governed operator and automation workflows behind a stable execution contract so later product changes stay bounded by adapters and workflow metadata.",
+          "scope": "critical_shared_surface",
+          "owner": "platform-operations",
+          "review_cadence": "quarterly",
+          "selected_product": "Windmill",
+          "service_id": "windmill",
+          "service_name": "Windmill",
+          "service_url": "http://100.64.0.1:8005",
+          "selection_adr": "0044",
+          "runbook": "docs/runbooks/configure-windmill.md",
+          "selection_notes": "Selected for governed workflow execution, schedules, and API-backed operator automation.",
+          "export_format_count": 3,
+          "fallback_behaviour": "Paused scheduling is acceptable during migration as long as manual repo-triggered recovery paths remain available.",
+          "failure_mode_count": 1
+        }
+      ]
+    }
   },
   "agents": {
     "registered": [
@@ -3953,6 +4071,7 @@
     ]
   },
   "data_sources": {
+    "capability_contract_catalog": "config/capability-contract-catalog.json",
     "service_catalog": "config/service-capability-catalog.json",
     "workflow_catalog": "config/workflow-catalog.json",
     "stack_state": "versions/stack.yaml",
