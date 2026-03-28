@@ -1,12 +1,12 @@
-# Release 0.177.17
+# Release 0.177.19
 
 - Date: 2026-03-28
 
 ## Summary
-- implemented ADR 0188 failover rehearsal gating so redundancy reporting now distinguishes declared tiers from currently proven tiers and the unproven PostgreSQL warm-standby path is surfaced as implemented `R0`
+- integrated ADR 0199 by publishing the repo-managed Outline living knowledge wiki at `wiki.lv3.org`, wiring the durable `outline.automation` Keycloak bootstrap path, and verifying the governed living-knowledge collections end to end
 
 ## Platform Impact
-- no live platform version bump; this release publishes ADR 0188 rehearsal-gated redundancy reporting and records the verified PostgreSQL warm-standby gap as implemented R0 until a fresh passing failover rehearsal exists
+- Publishes the repo-managed Outline living knowledge wiki at wiki.lv3.org and integrates the release-time sync path.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

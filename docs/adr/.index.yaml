@@ -7,11 +7,11 @@
 
 schema_version: 1
 generated: '2026-03-28'
-total_adrs: 203
+total_adrs: 204
 implementation_status_summary:
-  Implemented: 187
+  Implemented: 189
   Partial: 3
-  Not Implemented: 12
+  Not Implemented: 11
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -178,6 +178,7 @@ concerns:
     - 0183
     - 0184
     - 0185
+    - 0199
     - '0202'
   release:
     - 0008
@@ -3187,8 +3188,8 @@ adr_index:
     implemented_version: 0.177.9
   - adr: 0184
     title: Failure-Domain Labels and Anti-Affinity Policy
-    status: Proposed
-    implementation_status: Not Implemented
+    status: Implemented
+    implementation_status: Implemented
     date: '2026-03-27'
     concern: platform
     keywords:
@@ -3199,10 +3200,11 @@ adr_index:
     summary: We will require failure-domain labels and anti-affinity declarations for all managed primaries, standbys, restore
       target
     filename: 0184-failure-domain-labels-and-anti-affinity-policy.md
+    implemented_version: 0.177.18
   - adr: 0185
     title: Branch-Scoped Ephemeral Preview Environments
-    status: Proposed
-    implementation_status: Not Implemented
+    status: Implemented
+    implementation_status: Implemented
     date: '2026-03-27'
     concern: platform
     keywords:
@@ -3213,6 +3215,7 @@ adr_index:
     summary: 'We will support branch-scoped ephemeral preview environments assembled from the branch''s release manifest and
       destroyed '
     filename: 0185-branch-scoped-ephemeral-preview-environments.md
+    implemented_version: 0.177.17
   - adr: 0186
     title: Prewarmed Fixture Pools and Lease-Based Ephemeral Capacity
     status: Proposed
@@ -3246,8 +3249,8 @@ adr_index:
     filename: 0187-anonymized-seed-data-snapshots-for-repeatable-tests.md
   - adr: 0188
     title: Failover Rehearsal Gate for Redundancy Tiers
-    status: Implemented
-    implementation_status: Implemented
+    status: Proposed
+    implementation_status: Not Implemented
     date: '2026-03-27'
     concern: ci-cd
     keywords:
@@ -3259,7 +3262,6 @@ adr_index:
     summary: We will require scheduled failover or recovery rehearsals for services that claim redundancy tiers above rebuild-only
       re
     filename: 0188-failover-rehearsal-gate-for-redundancy-tiers.md
-    implemented_version: 0.177.17
   - adr: 0189
     title: Network Impairment Test Matrix for Staging and Previews
     status: Proposed
@@ -3341,6 +3343,20 @@ adr_index:
       operati
     filename: 0198-qdrant-vector-search-semantic-rag.md
     implemented_version: 0.177.12
+  - adr: 0199
+    title: Outline Living Knowledge Wiki
+    status: Accepted
+    implementation_status: Implemented
+    date: '2026-03-27'
+    concern: platform
+    keywords:
+      - outline
+      - living
+      - knowledge
+      - wiki
+    summary: We will deploy Outline on docker-runtime-lv3 and publish it at https://wiki.lv3.org.
+    filename: 0199-outline-living-knowledge-wiki.md
+    implemented_version: 0.177.19
   - adr: '0202'
     title: Excalidraw Auto Generated Architecture Diagrams
     status: Accepted

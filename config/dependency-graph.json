@@ -237,6 +237,15 @@
       "adr": "0074"
     },
     {
+      "id": "outline",
+      "service": "outline",
+      "name": "Outline",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "access",
+      "adr": "0199"
+    },
+    {
       "id": "platform_context_api",
       "service": "platform_context_api",
       "name": "Platform Context API",
@@ -600,6 +609,30 @@
       "to": "nginx_edge",
       "type": "hard",
       "description": "The generated portal is published as static content on nginx-lv3."
+    },
+    {
+      "from": "outline",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Outline delegates routine browser sign-in to the shared Keycloak OIDC broker."
+    },
+    {
+      "from": "outline",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public access to wiki.lv3.org depends on the shared NGINX edge publication path."
+    },
+    {
+      "from": "outline",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Outline starts from OpenBao-rendered runtime secrets mirrored into its compose environment."
+    },
+    {
+      "from": "outline",
+      "to": "postgres",
+      "type": "hard",
+      "description": "Outline stores workspace, user, and document metadata in Postgres."
     },
     {
       "from": "platform_context_api",

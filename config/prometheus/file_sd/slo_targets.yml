@@ -1,18 +1,4 @@
 - targets:
-    - https://status.lv3.org
-  labels:
-    service_id: status_page
-    slo_id: status-page-availability
-    indicator: availability
-    probe_module: http_2xx_follow_redirects
-- targets:
-    - https://grafana.lv3.org
-  labels:
-    service_id: grafana
-    slo_id: grafana-availability
-    indicator: availability
-    probe_module: http_2xx_follow_redirects
-- targets:
     - http://10.10.10.20:8089/healthcheck
   labels:
     service_id: dozzle
@@ -31,6 +17,13 @@
   labels:
     service_id: gitea
     slo_id: gitea-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
+    - https://grafana.lv3.org
+  labels:
+    service_id: grafana
+    slo_id: grafana-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
@@ -62,10 +55,10 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - https://uptime.lv3.org
+    - http://10.10.10.20:8082/login/
   labels:
-    service_id: uptime_kuma
-    slo_id: uptime-kuma-availability
+    service_id: netbox
+    slo_id: netbox-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
@@ -83,26 +76,12 @@
     indicator: availability
     probe_module: http_2xx_follow_redirects
 - targets:
-    - http://10.10.10.20:8000/api/version
+    - https://wiki.lv3.org/_health
   labels:
-    service_id: windmill
-    slo_id: windmill-availability
+    service_id: outline
+    slo_id: outline-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects
-- targets:
-    - http://10.10.10.20:8082/login/
-  labels:
-    service_id: netbox
-    slo_id: netbox-availability
-    indicator: availability
-    probe_module: http_2xx_follow_redirects
-- targets:
-    - https://vault.lv3.org/alive
-  labels:
-    service_id: vaultwarden
-    slo_id: vaultwarden-availability
-    indicator: availability
-    probe_module: http_2xx_insecure_tls
 - targets:
     - http://10.10.10.20:8010/healthz
   labels:
@@ -115,5 +94,33 @@
   labels:
     service_id: semaphore
     slo_id: semaphore-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
+    - https://status.lv3.org
+  labels:
+    service_id: status_page
+    slo_id: status-page-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
+    - https://uptime.lv3.org
+  labels:
+    service_id: uptime_kuma
+    slo_id: uptime-kuma-availability
+    indicator: availability
+    probe_module: http_2xx_follow_redirects
+- targets:
+    - https://vault.lv3.org/alive
+  labels:
+    service_id: vaultwarden
+    slo_id: vaultwarden-availability
+    indicator: availability
+    probe_module: http_2xx_insecure_tls
+- targets:
+    - http://10.10.10.20:8000/api/version
+  labels:
+    service_id: windmill
+    slo_id: windmill-availability
     indicator: availability
     probe_module: http_2xx_follow_redirects

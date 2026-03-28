@@ -112,6 +112,14 @@
       "requires_compose_secrets": false,
       "suppression_preset": "legacy-service"
     },
+    "headscale": {
+      "service_type": "vm-service",
+      "requires_subdomain": true,
+      "requires_oidc": false,
+      "requires_secrets": true,
+      "requires_compose_secrets": false,
+      "suppression_preset": "legacy-service"
+    },
     "homepage": {
       "service_type": "compose",
       "requires_subdomain": true,
@@ -156,6 +164,14 @@
       "requires_compose_secrets": true,
       "suppression_preset": "legacy-service"
     },
+    "n8n": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": false,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "suppression_preset": "legacy-service"
+    },
     "netbox": {
       "service_type": "compose",
       "requires_subdomain": false,
@@ -172,19 +188,19 @@
       "requires_compose_secrets": false,
       "suppression_preset": "legacy-service"
     },
-    "ntopng": {
-      "service_type": "vm-service",
-      "requires_subdomain": false,
-      "requires_oidc": false,
-      "requires_secrets": false,
-      "requires_compose_secrets": false,
-      "suppression_preset": "legacy-service"
-    },
     "ntfy": {
       "service_type": "compose",
       "requires_subdomain": false,
       "requires_oidc": false,
       "requires_secrets": true,
+      "requires_compose_secrets": false,
+      "suppression_preset": "legacy-service"
+    },
+    "ntopng": {
+      "service_type": "vm-service",
+      "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_secrets": false,
       "requires_compose_secrets": false,
       "suppression_preset": "legacy-service"
     },
@@ -204,25 +220,9 @@
       "requires_compose_secrets": true,
       "suppression_preset": "legacy-service"
     },
-    "searxng": {
-      "service_type": "compose",
-      "requires_subdomain": true,
-      "requires_oidc": false,
-      "requires_secrets": true,
-      "requires_compose_secrets": false,
-      "suppression_preset": "legacy-service"
-    },
     "openbao": {
       "service_type": "compose",
       "requires_subdomain": false,
-      "requires_oidc": false,
-      "requires_secrets": true,
-      "requires_compose_secrets": true,
-      "suppression_preset": "legacy-service"
-    },
-    "n8n": {
-      "service_type": "compose",
-      "requires_subdomain": true,
       "requires_oidc": false,
       "requires_secrets": true,
       "requires_compose_secrets": true,
@@ -235,6 +235,17 @@
       "requires_secrets": false,
       "requires_compose_secrets": false,
       "suppression_preset": "legacy-service"
+    },
+    "outline": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": true,
+      "requires_secrets": true,
+      "requires_compose_secrets": true,
+      "dashboard_file": "config/grafana/dashboards/outline.json",
+      "alert_rule_file": "config/alertmanager/rules/outline.yml",
+      "keycloak_client_generated": true,
+      "suppressed_checks": {}
     },
     "platform_context_api": {
       "service_type": "compose",
@@ -252,16 +263,6 @@
       "requires_compose_secrets": true,
       "suppression_preset": "legacy-service"
     },
-    "vaultwarden": {
-      "service_type": "compose",
-      "requires_subdomain": true,
-      "requires_oidc": false,
-      "requires_secrets": true,
-      "requires_compose_secrets": false,
-      "dashboard_file": "config/grafana/dashboards/vaultwarden.json",
-      "alert_rule_file": "config/alertmanager/rules/vaultwarden.yml",
-      "suppressed_checks": {}
-    },
     "postgres": {
       "service_type": "vm-service",
       "requires_subdomain": true,
@@ -278,25 +279,32 @@
       "requires_compose_secrets": false,
       "suppression_preset": "legacy-service"
     },
-    "headscale": {
-      "service_type": "vm-service",
+    "searxng": {
+      "service_type": "compose",
       "requires_subdomain": true,
       "requires_oidc": false,
       "requires_secrets": true,
       "requires_compose_secrets": false,
       "suppression_preset": "legacy-service"
     },
-    "step_ca": {
+    "semaphore": {
       "service_type": "compose",
       "requires_subdomain": false,
+      "requires_oidc": false,
+      "requires_secrets": true,
+      "requires_compose_secrets": true
+    },
+    "status_page": {
+      "service_type": "compose",
+      "requires_subdomain": true,
       "requires_oidc": false,
       "requires_secrets": false,
       "requires_compose_secrets": true,
       "suppression_preset": "legacy-service"
     },
-    "status_page": {
+    "step_ca": {
       "service_type": "compose",
-      "requires_subdomain": true,
+      "requires_subdomain": false,
       "requires_oidc": false,
       "requires_secrets": false,
       "requires_compose_secrets": true,
@@ -310,6 +318,16 @@
       "requires_compose_secrets": true,
       "suppression_preset": "legacy-service"
     },
+    "vaultwarden": {
+      "service_type": "compose",
+      "requires_subdomain": true,
+      "requires_oidc": false,
+      "requires_secrets": true,
+      "requires_compose_secrets": false,
+      "dashboard_file": "config/grafana/dashboards/vaultwarden.json",
+      "alert_rule_file": "config/alertmanager/rules/vaultwarden.yml",
+      "suppressed_checks": {}
+    },
     "windmill": {
       "service_type": "compose",
       "requires_subdomain": false,
@@ -317,13 +335,6 @@
       "requires_secrets": true,
       "requires_compose_secrets": true,
       "suppression_preset": "legacy-service"
-    },
-    "semaphore": {
-      "service_type": "compose",
-      "requires_subdomain": false,
-      "requires_oidc": false,
-      "requires_secrets": true,
-      "requires_compose_secrets": true
     }
   }
 }

@@ -809,6 +809,51 @@
       }
     },
     {
+      "id": "outline",
+      "name": "Outline",
+      "description": "Self-hosted living knowledge wiki that publishes repo-managed ADR, runbook, and architecture indexes through Outline.",
+      "category": "access",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:3006",
+      "public_url": "https://wiki.lv3.org",
+      "subdomain": "wiki.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Outline Public Health",
+      "health_probe_id": "outline",
+      "image_catalog_ids": [
+        "outline_runtime",
+        "langfuse_minio_runtime",
+        "langfuse_redis_runtime"
+      ],
+      "secret_catalog_ids": [
+        "outline_database_password",
+        "outline_secret_key",
+        "outline_utils_secret",
+        "outline_redis_password",
+        "outline_minio_root_password",
+        "outline_api_token",
+        "keycloak_outline_client_secret"
+      ],
+      "adr": "0199",
+      "runbook": "docs/runbooks/configure-outline.md",
+      "tags": [
+        "wiki",
+        "knowledge",
+        "outline",
+        "oidc"
+      ],
+      "notes": "Live-apply evidence is tracked on the workstream branch; merge-to-main still must update the integrated README, VERSION, changelog, and versions/stack.yaml surfaces.",
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://wiki.lv3.org",
+          "subdomain": "wiki.lv3.org"
+        }
+      }
+    },
+    {
       "id": "docs_portal",
       "name": "Developer Portal",
       "description": "Generated public documentation site for services, ADRs, runbooks, release notes, and platform reference data.",

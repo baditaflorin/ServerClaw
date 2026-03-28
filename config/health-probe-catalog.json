@@ -438,6 +438,52 @@
         }
       }
     },
+    "outline": {
+      "service_name": "outline",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "outline_runtime",
+      "verify_file": "roles/outline_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The local Outline health endpoint responds on the runtime listener.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:3006/_health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The public Outline health endpoint renders through the shared edge after OIDC and startup configuration settle.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "https://wiki.lv3.org/_health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Outline Public Health",
+          "type": "http",
+          "url": "https://wiki.lv3.org/_health",
+          "description": "Public Outline health endpoint published through the shared NGINX edge VM.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
     "proxmox_ui": {
       "service_name": "proxmox-ui",
       "owning_vm": "proxmox_florin",
