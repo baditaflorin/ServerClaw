@@ -166,6 +166,25 @@ class SubdomainCatalogTests(unittest.TestCase):
             "edge",
         )
 
+    def test_wildcard_alias_routes_are_collected_without_requiring_catalog_literal_entry(self) -> None:
+        edge_route_hostnames = subdomain_catalog.collect_edge_route_hostnames(
+            self.host_vars,
+            self.public_edge_defaults,
+        )
+
+        self.assertIn("*.apps.lv3.org", edge_route_hostnames)
+        self.assertEqual(
+            subdomain_catalog.route_mode_for_entry(
+                {
+                    "fqdn": "repo-smoke.apps.lv3.org",
+                    "status": "planned",
+                    "exposure": "edge-published",
+                },
+                edge_route_hostnames,
+            ),
+            "edge",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

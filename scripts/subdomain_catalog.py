@@ -20,6 +20,7 @@ ALLOWED_AUTH_REQUIREMENTS = {"none", "edge_oidc", "upstream_auth", "private_netw
 EDGE_ROUTE_EXPOSURES = {"edge-published", "informational-only"}
 PROVISIONABLE_STATUSES = {"active", "planned"}
 HOSTNAME_PATTERN = re.compile(r"^[a-z0-9-]+(\.[a-z0-9-]+)+$")
+ROUTE_HOSTNAME_PATTERN = re.compile(r"^(\*\.)?[a-z0-9-]+(\.[a-z0-9-]+)+$")
 PREFIX_PATTERN = re.compile(r"^[a-z0-9-]+$")
 ALLOWED_ENVIRONMENTS = set(configured_environment_ids())
 
@@ -60,6 +61,13 @@ def require_hostname(value: Any, path: str) -> str:
     value = require_str(value, path)
     if not HOSTNAME_PATTERN.match(value):
         raise ValueError(f"{path} must be a lowercase hostname")
+    return value
+
+
+def require_route_hostname(value: Any, path: str) -> str:
+    value = require_str(value, path)
+    if not ROUTE_HOSTNAME_PATTERN.match(value):
+        raise ValueError(f"{path} must be a lowercase hostname or wildcard route hostname")
     return value
 
 
@@ -128,12 +136,27 @@ def validate_reserved_prefixes(catalog: dict[str, Any]) -> dict[str, set[str]]:
     return allowed_fqdns_by_prefix
 
 
-def collect_site_hostnames(site: dict[str, Any], path: str) -> set[str]:
-    hostnames = {require_hostname(site.get("hostname"), f"{path}.hostname")}
+def collect_site_hostnames(
+    site: dict[str, Any],
+    path: str,
+    *,
+    allow_wildcards: bool = False,
+) -> set[str]:
+    require_site_hostname = require_route_hostname if allow_wildcards else require_hostname
+    hostnames = {require_site_hostname(site.get("hostname"), f"{path}.hostname")}
     aliases = site.get("aliases", [])
     for index, alias in enumerate(require_string_list(aliases, f"{path}.aliases")):
-        hostnames.add(require_hostname(alias, f"{path}.aliases[{index}]"))
+        hostnames.add(require_site_hostname(alias, f"{path}.aliases[{index}]"))
     return hostnames
+
+
+def hostname_matches_route(hostname: str, route_hostname: str) -> bool:
+    if hostname == route_hostname:
+        return True
+    if not route_hostname.startswith("*."):
+        return False
+    suffix = route_hostname[1:]
+    return hostname.endswith(suffix) and hostname != route_hostname[2:]
 
 
 def collect_edge_route_hostnames(
@@ -172,6 +195,7 @@ def collect_edge_route_hostnames(
             collect_site_hostnames(
                 route,
                 f"inventory/host_vars/proxmox_florin.yml.lv3_service_topology.{service_id}",
+                allow_wildcards=True,
             )
         )
 
@@ -179,7 +203,9 @@ def collect_edge_route_hostnames(
         require_list(public_edge_defaults.get("public_edge_extra_sites", []), "public_edge_extra_sites")
     ):
         site = require_mapping(site, f"public_edge_extra_sites[{index}]")
-        hostnames.update(collect_site_hostnames(site, f"public_edge_extra_sites[{index}]"))
+        hostnames.update(
+            collect_site_hostnames(site, f"public_edge_extra_sites[{index}]", allow_wildcards=True)
+        )
 
     return hostnames
 
@@ -202,7 +228,11 @@ def get_subdomain_entry(catalog: dict[str, Any], fqdn: str) -> dict[str, Any]:
 
 
 def route_mode_for_entry(entry: dict[str, Any], edge_route_hostnames: set[str]) -> str:
-    return "edge" if entry["fqdn"] in edge_route_hostnames else "dns-only"
+    return (
+        "edge"
+        if any(hostname_matches_route(entry["fqdn"], route_hostname) for route_hostname in edge_route_hostnames)
+        else "dns-only"
+    )
 
 
 def validate_provisionable_subdomain(entry: dict[str, Any], edge_route_hostnames: set[str]) -> str:
@@ -360,7 +390,11 @@ def validate_subdomain_catalog(
             )
 
     if edge_route_hostnames:
-        missing_edge_route_entries = sorted(edge_route_hostnames - seen_fqdns)
+        missing_edge_route_entries = sorted(
+            route_hostname
+            for route_hostname in edge_route_hostnames
+            if not route_hostname.startswith("*.") and route_hostname not in seen_fqdns
+        )
         if missing_edge_route_entries:
             raise ValueError(
                 "repo-managed NGINX routes missing from the subdomain catalog: "

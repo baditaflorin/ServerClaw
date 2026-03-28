@@ -76,6 +76,13 @@ public_edge_security_headers_overrides:
     content_security_policy: >-
       default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none';
       object-src 'none'
+  coolify.lv3.org:
+    content_security_policy: >-
+      default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self'
+      'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:;
+      connect-src 'self' https://coolify.lv3.org wss://coolify.lv3.org;
+      worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
   docs.lv3.org:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
@@ -152,6 +159,8 @@ public_edge_extra_sites:
     source_dir: docs-portal
 public_edge_authenticated_sites:
   changelog.lv3.org:
+    auth_proxy_upstream: http://127.0.0.1:4180
+  coolify.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
   docs.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180

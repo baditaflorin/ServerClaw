@@ -1530,6 +1530,63 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-coolify": {
+      "description": "Converge Coolify on coolify-lv3, publish the authenticated dashboard plus public applications ingress, and verify repo-backed smoke deployment through the governed API wrapper.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-coolify",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-coolify"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "coolify_root_password",
+          "coolify_api_token",
+          "coolify_server_ssh_private_key",
+          "coolify_server_ssh_public_key",
+          "coolify_admin_auth"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-coolify"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-coolify.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/coolify.yml",
+        "playbooks/services/coolify.yml",
+        "roles/coolify_runtime/tasks/main.yml",
+        "roles/coolify_runtime/tasks/verify.yml",
+        "scripts/coolify_tool.py",
+        "inventory/group_vars/all.yml",
+        "inventory/host_vars/proxmox_florin.yml"
+      ],
+      "outputs": [
+        "Coolify runtime on coolify-lv3, the authenticated dashboard at coolify.lv3.org, the public apps ingress at apps.lv3.org, and controller-local bootstrap artifacts under .local/coolify."
+      ],
+      "verification_commands": [
+        "make syntax-check-coolify",
+        "make coolify-manage ACTION=whoami",
+        "make coolify-manage ACTION=deploy-repo COOLIFY_ARGS='--repo https://github.com/coollabsio/coolify-examples --branch main --base-directory static --app-name repo-smoke --wait'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 320,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 4,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "merge-config-changes": {
       "description": "Merge pending ADR 0158 staged config changes into the merge-eligible registry files and emit conflict or merged events for downstream consumers.",
       "lifecycle_status": "active",
@@ -3452,6 +3509,47 @@
       ],
       "verification_commands": [
         "make portainer-manage ACTION=list-containers PORTAINER_ARGS='--all'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "coolify-manage": {
+      "description": "Run governed Coolify API actions such as identity checks, application inventory, or repo-backed smoke deployments through the repo-managed wrapper.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "coolify-manage",
+        "command": "make coolify-manage ACTION=whoami"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "coolify_admin_auth"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "external_live",
+      "owner_runbook": "docs/runbooks/configure-coolify.md",
+      "implementation_refs": [
+        "Makefile",
+        "scripts/coolify_tool.py"
+      ],
+      "outputs": [
+        "Governed Coolify API inspection and bounded repo-backed deployment actions through the repo-managed wrapper instead of ad hoc UI edits."
+      ],
+      "verification_commands": [
+        "make coolify-manage ACTION=whoami",
+        "make coolify-manage ACTION=list-applications"
       ],
       "execution_class": "mutation",
       "budget": {

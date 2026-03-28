@@ -447,6 +447,33 @@ def test_deploy_dry_run_prints_remote_exec_route(
     assert "live-apply-service service=grafana env=production" in captured.out
 
 
+def test_deploy_repo_dry_run_prints_coolify_wrapper_route(
+    capsys: pytest.CaptureFixture[str], minimal_repo: Path
+) -> None:
+    exit_code = lv3_cli.main(
+        [
+            "deploy-repo",
+            "--repo",
+            "https://github.com/coollabsio/coolify-examples",
+            "--branch",
+            "main",
+            "--base-directory",
+            "static",
+            "--app-name",
+            "repo-smoke",
+            "--wait",
+            "--dry-run",
+        ]
+    )
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "Coolify API wrapper" in captured.out
+    assert "make coolify-manage ACTION=deploy-repo" in captured.out
+    assert "--repo https://github.com/coollabsio/coolify-examples" in captured.out
+    assert "--base-directory static" in captured.out
+    assert "--wait" in captured.out
+
+
 def test_open_dry_run_uses_catalog_url(
     capsys: pytest.CaptureFixture[str], minimal_repo: Path
 ) -> None:

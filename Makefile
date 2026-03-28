@@ -11,6 +11,7 @@ UPTIME_KUMA_AUTH_FILE ?= $(PRIMARY_WORKTREE_ROOT)/.local/uptime-kuma/admin-sessi
 ACTION ?= list-monitors
 UPTIME_KUMA_ARGS ?=
 PORTAINER_ARGS ?=
+COOLIFY_ARGS ?=
 RECEIPT ?=
 COMMAND ?=
 CONTRACT ?=
@@ -513,6 +514,9 @@ syntax-check-headscale:
 syntax-check-windmill:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/windmill.yml --syntax-check
 
+syntax-check-coolify:
+	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/coolify.yml --syntax-check
+
 syntax-check-keycloak:
 	$(ANSIBLE_ENV) ansible-playbook -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/keycloak.yml --syntax-check
 
@@ -727,6 +731,11 @@ converge-windmill:
 	$(MAKE) preflight WORKFLOW=converge-windmill
 	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/windmill.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
 
+converge-coolify:
+	$(MAKE) preflight WORKFLOW=converge-coolify
+	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
+	ANSIBLE_HOST_KEY_CHECKING=False $(ANSIBLE_ENV) $(ANSIBLE_SCOPED_RUN) --playbook $(REPO_ROOT)/playbooks/coolify.yml --env $(env) -- --private-key $(BOOTSTRAP_KEY) -e proxmox_guest_ssh_connection_mode=proxmox_host_jump
+
 converge-keycloak:
 	$(MAKE) preflight WORKFLOW=converge-keycloak
 	HETZNER_DNS_API_TOKEN=$${HETZNER_DNS_API_TOKEN:?set HETZNER_DNS_API_TOKEN} \
@@ -847,6 +856,11 @@ uptime-robot-manage:
 	$(MAKE) preflight WORKFLOW=uptime-robot-manage
 	@test -n "$(ACTION)" || (echo "set ACTION=<ensure|list-monitors>"; exit 1)
 	$(PYTHON3) $(REPO_ROOT)/scripts/uptime_robot_tool.py $(ACTION) $(UPTIME_ROBOT_ARGS)
+
+coolify-manage:
+	$(MAKE) preflight WORKFLOW=coolify-manage
+	@test -n "$(ACTION)" || (echo "set ACTION=<whoami|list-applications|deploy-repo>"; exit 1)
+	python3 $(REPO_ROOT)/scripts/coolify_tool.py $(ACTION) $(COOLIFY_ARGS)
 
 portainer-manage:
 	$(MAKE) preflight WORKFLOW=portainer-manage

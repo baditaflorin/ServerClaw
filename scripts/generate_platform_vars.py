@@ -54,6 +54,9 @@ PORT_KEYS = (
     "excalidraw_room_port",
     "ollama_api_port",
     "n8n_port",
+    "coolify_dashboard_port",
+    "coolify_proxy_port",
+    "coolify_host_proxy_port",
     "open_webui_port",
     "open_webui_host_proxy_port",
     "api_gateway_internal_port",
@@ -335,6 +338,14 @@ def build_service_urls(
     elif service_id == "n8n":
         urls["internal"] = service_url("http", private_ip, ports["n8n_port"])
         port_map["internal"] = ports["n8n_port"]
+    elif service_id == "coolify":
+        urls["internal"] = service_url("http", private_ip, ports["coolify_dashboard_port"])
+        urls["controller"] = service_url("http", tailscale_ipv4, ports["coolify_host_proxy_port"])
+        port_map["internal"] = ports["coolify_dashboard_port"]
+        port_map["controller"] = ports["coolify_host_proxy_port"]
+    elif service_id == "coolify_apps":
+        urls["internal"] = service_url("http", private_ip, ports["coolify_proxy_port"])
+        port_map["internal"] = ports["coolify_proxy_port"]
     elif service_id == "open_webui":
         urls["internal"] = service_url("http", private_ip, ports["open_webui_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["open_webui_host_proxy_port"])

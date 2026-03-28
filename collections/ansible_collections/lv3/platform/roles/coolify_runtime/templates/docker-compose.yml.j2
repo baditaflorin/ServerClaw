@@ -1,0 +1,163 @@
+services:
+  proxy:
+    image: {{ coolify_proxy_image }}
+    container_name: {{ coolify_proxy_service_name }}
+    restart: always
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    command:
+      - --ping=true
+      - --ping.entrypoint=http
+      - --api.dashboard=true
+      - --api.insecure=false
+      - --entrypoints.http.address=:80
+      - --entrypoints.https.address=:443
+      - --entrypoints.http.http.encodequerysemicolons=true
+      - --entryPoints.http.http2.maxConcurrentStreams=250
+      - --entrypoints.https.http.encodequerysemicolons=true
+      - --entryPoints.https.http2.maxConcurrentStreams=250
+      - --entrypoints.https.http3
+      - --providers.file.directory=/traefik/dynamic/
+      - --providers.file.watch=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=http
+      - --certificatesresolvers.letsencrypt.acme.storage=/traefik/acme.json
+    ports:
+      - "{{ coolify_proxy_port }}:80"
+      - "443:443"
+      - "443:443/udp"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - {{ coolify_proxy_path }}:/traefik
+    healthcheck:
+      test: wget -qO- http://127.0.0.1:80/ping || exit 1
+      interval: 4s
+      timeout: 2s
+      retries: 5
+    networks:
+      - coolify
+
+  coolify:
+    image: {{ coolify_app_image }}
+    container_name: {{ coolify_service_name }}
+    restart: always
+    working_dir: /var/www/html
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      soketi:
+        condition: service_healthy
+    env_file:
+      - {{ coolify_env_file }}
+    environment:
+      APP_ENV: production
+      PHP_MEMORY_LIMIT: 256M
+      PHP_FPM_PM_CONTROL: dynamic
+      PHP_FPM_PM_START_SERVERS: 1
+      PHP_FPM_PM_MIN_SPARE_SERVERS: 1
+      PHP_FPM_PM_MAX_SPARE_SERVERS: 10
+    volumes:
+      - type: bind
+        source: {{ coolify_env_file }}
+        target: /var/www/html/.env
+        read_only: true
+      - {{ coolify_data_root }}/ssh:/var/www/html/storage/app/ssh
+      - {{ coolify_data_root }}/applications:/var/www/html/storage/app/applications
+      - {{ coolify_data_root }}/databases:/var/www/html/storage/app/databases
+      - {{ coolify_data_root }}/services:/var/www/html/storage/app/services
+      - {{ coolify_data_root }}/backups:/var/www/html/storage/app/backups
+    ports:
+      - "{{ coolify_dashboard_port }}:8080"
+    expose:
+      - "{{ coolify_dashboard_port }}"
+    healthcheck:
+      test: curl --fail http://127.0.0.1:8080/api/health || exit 1
+      interval: 5s
+      retries: 10
+      timeout: 2s
+    networks:
+      - coolify
+
+  postgres:
+    image: {{ coolify_postgres_image }}
+    container_name: {{ coolify_postgres_service_name }}
+    restart: always
+    environment:
+      POSTGRES_USER: coolify
+      POSTGRES_PASSWORD: {{ coolify_db_password }}
+      POSTGRES_DB: coolify
+    volumes:
+      - coolify-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U coolify -d coolify"]
+      interval: 5s
+      retries: 10
+      timeout: 2s
+    networks:
+      - coolify
+
+  redis:
+    image: {{ coolify_redis_image }}
+    container_name: {{ coolify_redis_service_name }}
+    restart: always
+    command: redis-server --save 20 1 --loglevel warning --requirepass {{ coolify_redis_password }}
+    environment:
+      REDIS_PASSWORD: {{ coolify_redis_password }}
+    volumes:
+      - coolify-redis:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a {{ coolify_redis_password }} ping"]
+      interval: 5s
+      retries: 10
+      timeout: 2s
+    networks:
+      - coolify
+
+  soketi:
+    image: {{ coolify_realtime_image }}
+    container_name: {{ coolify_realtime_service_name }}
+    restart: always
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    environment:
+      APP_NAME: Coolify
+      SOKETI_DEBUG: "false"
+      SOKETI_DEFAULT_APP_ID: {{ coolify_pusher_app_id }}
+      SOKETI_DEFAULT_APP_KEY: {{ coolify_pusher_app_key }}
+      SOKETI_DEFAULT_APP_SECRET: {{ coolify_pusher_app_secret }}
+      SOKETI_HOST: 0.0.0.0
+    ports:
+      - "6001:6001"
+      - "6002:6002"
+    volumes:
+      - {{ coolify_data_root }}/ssh:/var/www/html/storage/app/ssh
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:6001/ready && wget -qO- http://127.0.0.1:6002/ready || exit 1"]
+      interval: 5s
+      retries: 10
+      timeout: 2s
+    networks:
+      - coolify
+
+volumes:
+  coolify-db:
+    name: coolify-db
+  coolify-redis:
+    name: coolify-redis
+
+networks:
+  coolify:
+    name: coolify
+    driver: bridge
+    external: false
+    ipam:
+      config:
+        - subnet: {{ coolify_bridge_subnet }}
+          gateway: {{ coolify_bridge_gateway }}

@@ -128,6 +128,40 @@
         "failback_method": "Restore or rebuild docker-runtime-lv3, then replay the required service converges from git."
       }
     },
+    "coolify": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_170"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "coolify-lv3",
+        "failover_trigger": "Restore coolify-lv3 when the Coolify control plane or its managed runtime state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild coolify-lv3, then rerun the Coolify converge and smoke deployment verification from git."
+      }
+    },
+    "coolify_apps": {
+      "tier": "R1",
+      "recovery_objective": {
+        "rto_minutes": 120,
+        "rpo_minutes": 1440
+      },
+      "backup_sources": [
+        "git_repository",
+        "pbs_vm_170"
+      ],
+      "standby": {
+        "kind": "cold",
+        "location": "coolify-lv3",
+        "failover_trigger": "Restore coolify-lv3 when the shared Coolify applications ingress or its managed proxy state cannot be recovered in place.",
+        "failback_method": "Restore or rebuild coolify-lv3, then rerun the Coolify converge and repo-backed smoke deployment verification from git."
+      }
+    },
     "docs_portal": {
       "tier": "R1",
       "recovery_objective": {

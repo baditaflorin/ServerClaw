@@ -941,6 +941,70 @@
       }
     },
     {
+      "id": "coolify",
+      "name": "Coolify",
+      "description": "Repo-managed PaaS control plane for deploying public applications directly from Git repositories.",
+      "category": "infrastructure",
+      "lifecycle_status": "active",
+      "vm": "coolify-lv3",
+      "vmid": 170,
+      "internal_url": "http://100.64.0.1:8012",
+      "public_url": "https://coolify.lv3.org",
+      "subdomain": "coolify.lv3.org",
+      "exposure": "edge-published",
+      "health_probe_id": "coolify",
+      "secret_catalog_ids": [
+        "coolify_root_password",
+        "coolify_api_token",
+        "coolify_server_ssh_private_key"
+      ],
+      "adr": "0194",
+      "runbook": "docs/runbooks/configure-coolify.md",
+      "tags": [
+        "paas",
+        "git",
+        "deployments",
+        "applications"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://coolify.lv3.org",
+          "subdomain": "coolify.lv3.org"
+        }
+      }
+    },
+    {
+      "id": "coolify_apps",
+      "name": "Coolify Apps Ingress",
+      "description": "Shared public ingress surface for Coolify-managed applications published from the coolify-lv3 runtime.",
+      "category": "infrastructure",
+      "lifecycle_status": "active",
+      "vm": "coolify-lv3",
+      "vmid": 170,
+      "internal_url": "http://10.10.10.70:80",
+      "public_url": "https://apps.lv3.org",
+      "subdomain": "apps.lv3.org",
+      "exposure": "edge-published",
+      "health_probe_id": "coolify_apps",
+      "adr": "0194",
+      "runbook": "docs/runbooks/configure-coolify.md",
+      "tags": [
+        "paas",
+        "ingress",
+        "applications",
+        "wildcard"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://apps.lv3.org",
+          "subdomain": "apps.lv3.org",
+          "notes": "Shared entrypoint for repo-managed Coolify applications, with wildcard alias coverage handled by the edge topology."
+        }
+      }
+    },
+    {
       "id": "platform_context_api",
       "name": "Platform Context API",
       "description": "Private retrieval-augmented query API for repository and platform context.",
