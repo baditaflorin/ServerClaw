@@ -14,6 +14,7 @@ def test_makefile_and_playbook_wire_the_control_loop_target() -> None:
     assert "configure-host-control-loops" in makefile
     assert "WORKFLOW=configure-host-control-loops" in makefile
     assert "--tags control-loops" in makefile
+    assert "playbooks/proxmox-install.yml" in makefile
     assert "lv3.platform.proxmox_host_control_loops" in playbook
     assert "- control-loops" in playbook
 
@@ -26,6 +27,10 @@ def test_workflow_catalog_registers_host_control_loops() -> None:
     assert workflow["owner_runbook"] == "docs/runbooks/configure-host-control-loops.md"
     assert workflow["live_impact"] == "host_live"
     assert "roles/proxmox_host_control_loops/tasks/main.yml" in workflow["implementation_refs"]
+    assert any(
+        "systemctl start lv3-host-control-loop-reconcile.service" in command
+        for command in workflow["verification_commands"]
+    )
 
 
 def test_role_renders_service_timer_and_path_units() -> None:

@@ -676,7 +676,7 @@ configure-tailscale:
 
 configure-host-control-loops:
 	$(MAKE) preflight WORKFLOW=configure-host-control-loops
-	$(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/site.yml --private-key $(BOOTSTRAP_KEY) --tags control-loops
+	$(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/proxmox-install.yml --private-key $(BOOTSTRAP_KEY) --tags control-loops
 
 provision-guests:
 	$(MAKE) preflight WORKFLOW=provision-guests

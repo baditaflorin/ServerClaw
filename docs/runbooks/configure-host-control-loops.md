@@ -14,7 +14,7 @@ automation.
 ## Automation Surface
 
 - make target: `make configure-host-control-loops`
-- playbook: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/site.yml`
+- playbook: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/playbooks/proxmox-install.yml`
 - role: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/roles/proxmox_host_control_loops/tasks/main.yml`
 
 ## Apply
@@ -38,6 +38,12 @@ make configure-host-control-loops
 
 ## Verification
 
+Seed or refresh the latest status artifact with an explicit one-shot reconcile:
+
+```bash
+ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo systemctl start lv3-host-control-loop-reconcile.service && sudo cat /var/lib/lv3-host-control-loops/status/latest.json'
+```
+
 Check that the timer is active and scheduled:
 
 ```bash
@@ -50,7 +56,7 @@ Check that the path unit is watching for manual trigger files:
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo systemctl status lv3-host-control-loop-reconcile.path --no-pager'
 ```
 
-Read the latest recorded loop state:
+Read the latest recorded loop state again without replaying the service:
 
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo cat /var/lib/lv3-host-control-loops/status/latest.json'

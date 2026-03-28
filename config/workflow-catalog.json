@@ -882,7 +882,6 @@
       "owner_runbook": "docs/runbooks/configure-host-control-loops.md",
       "implementation_refs": [
         "Makefile",
-        "playbooks/site.yml",
         "playbooks/proxmox-install.yml",
         "roles/proxmox_host_control_loops/tasks/main.yml"
       ],
@@ -894,7 +893,7 @@
         "make syntax-check",
         "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo systemctl status lv3-host-control-loop-reconcile.timer --no-pager'",
         "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo systemctl status lv3-host-control-loop-reconcile.path --no-pager'",
-        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo cat /var/lib/lv3-host-control-loops/status/latest.json'"
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes ops@100.64.0.1 'sudo systemctl start lv3-host-control-loop-reconcile.service && sudo cat /var/lib/lv3-host-control-loops/status/latest.json'"
       ],
       "execution_class": "mutation",
       "target_lane": "lane:proxmox-host",
