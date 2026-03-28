@@ -88,6 +88,7 @@ they become part of integrated repo truth.
 - `python3 scripts/replaceability_scorecards.py --report`
 - `./scripts/validate_repo.sh architecture-fitness`
 - `make validate`
+- `receipts/live-applies/2026-03-28-adr-0212-replaceability-scorecards-live-apply.json`
 
 ## Related ADRs
 

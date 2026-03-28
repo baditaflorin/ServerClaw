@@ -6074,7 +6074,7 @@ workstreams:
   - id: ws-0212-live-apply
     adr: "0212"
     title: Replaceability scorecards and vendor exit plans live apply
-    status: in_progress
+    status: live_applied
     owner: codex
     branch: codex/ws-0212-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0212-live-apply
@@ -6161,12 +6161,14 @@ workstreams:
             - docs/workstreams/adr-0204-architecture-governance.md
             - receipts/live-applies/2026-03-28-adr-0212-replaceability-scorecards-live-apply.json
           mode: exclusive
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
     canonical_truth:
       changelog_entry: implemented ADR 0212 by governing critical integrated product ADRs with machine-checked replaceability scorecards, vendor exit plans, and live docs publication evidence
       release_bump: patch
       included_in_repo_version: 0.177.32
+      latest_receipts:
+        docs_portal: 2026-03-28-adr-0212-replaceability-scorecards-live-apply
 
   - id: ws-0021-edge-cert-repair
     adr: "0021"
