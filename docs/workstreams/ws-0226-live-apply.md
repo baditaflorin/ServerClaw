@@ -3,7 +3,7 @@
 - ADR: [ADR 0226](../adr/0226-systemd-units-timers-and-paths-for-host-resident-control-loops.md)
 - Title: Live apply the systemd service, timer, and path baseline for host-resident control loops on `proxmox_florin`
 - Status: live_applied
-- Implemented In Repo Version: pending merge to main
+- Implemented In Repo Version: 0.177.48
 - Live Applied In Platform Version: 0.130.38
 - Implemented On: 2026-03-28
 - Live Applied On: 2026-03-28
@@ -55,6 +55,7 @@
 - `sudo systemctl start lv3-host-control-loop-reconcile.service` recorded `trigger: scheduled_or_manual` at `2026-03-28T16:39:33Z` with history file `/var/lib/lv3-host-control-loops/runs/20260328T163933Z.json`.
 - Writing `ws-0226-path-20260328T163913Z` to `/var/lib/lv3-host-control-loops/requests/reconcile.request` was consumed immediately; `latest.json` recorded `trigger: path_request` with the request payload at `2026-03-28T16:39:13Z`, journald showed a clean start and finish at `17:39:13 CET`, and `/var/lib/lv3-host-control-loops/runs/20260328T163913Z.json` was created.
 - `make pre-push-gate` was exercised and failed only on shared integration surfaces outside ADR 0226 ownership: stale generated artifacts in `docs/diagrams` and `build/platform-manifest.json`, plus a timeout in the containerized `ansible-lint` step on the local arm64 host.
+- As part of the ADR 0224 exact-main proof, the integrated `0.177.48` candidate kept the live units healthy after the host-local `ansible-pull` replay from private Gitea snapshot `64417a8866bcc103ea3b5815359a6e5027504831`: request payload `ws-0224-path-20260328T201750Z` was consumed into `/var/lib/lv3-host-control-loops/runs/20260328T201751Z.json`, and an immediate manual `systemctl start` recorded `trigger: scheduled_or_manual` at `2026-03-28T20:17:59Z` with history file `/var/lib/lv3-host-control-loops/runs/20260328T201759Z.json`.
 
 ## Outcome
 
@@ -64,13 +65,5 @@
 
 ## Mainline Integration
 
-- Protected integration files intentionally remain untouched on this workstream branch.
-- Merge-to-main still needs the final repo version assignment plus the corresponding `VERSION`, `changelog.md`, top-level `README.md`, and `versions/stack.yaml` updates.
-- The current pre-push gate also requires a separate shared-surface integration step to refresh `build/platform-manifest.json` and regenerate `docs/diagrams` before a mainline push can go green end to end.
-
-## Notes For The Next Assistant
-
-- protected integration files stay untouched on this branch unless this thread
-  explicitly becomes the final mainline integration step
-- rerun `make pre-push-gate` only after the shared generated artifacts outside
-  ADR 0226 ownership have been refreshed on the integration branch
+- Release `0.177.48` now carries ADR 0226 into merged repository truth with refreshed protected surfaces, generated artifacts, and receipt mapping under `host_control_loops`.
+- The exact-main ADR 0224 replay re-proved the already-live unit contract without another controller-side `make configure-host-control-loops` mutation because the live host already matched the repo-managed baseline.
