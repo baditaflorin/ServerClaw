@@ -3,7 +3,7 @@
 - ADR: [ADR 0225](../adr/0225-server-resident-reconciliation-via-ansible-pull.md)
 - Title: Bootstrap a durable Proxmox-host ansible-pull reconcile loop from the merged control repo
 - Status: live_applied
-- Implemented In Repo Version: 0.177.41
+- Implemented In Repo Version: 0.177.43
 - Live Applied In Platform Version: 0.130.39
 - Implemented On: 2026-03-28
 - Live Applied On: 2026-03-28
@@ -65,9 +65,9 @@
 
 ## Mainline Integration
 
-- release `0.177.41` now carries the official repo-version attribution for ADR 0225 on `main`
-- the integrated canonical truth now records `versions/stack.yaml` repo version `0.177.41`, platform version `0.130.39`, and capability receipt `server_resident_reconciliation: 2026-03-28-adr-0225-server-resident-reconciliation-via-ansible-pull-live-apply`
-- this workstream became the final verified integration step, so the protected integration files were updated on the same branch after live verification: `README.md`, `VERSION`, `changelog.md`, `docs/release-notes/README.md`, `docs/release-notes/0.177.41.md`, and `versions/stack.yaml`
+- release `0.177.43` now carries the official repo-version attribution for ADR 0225 on the rebased latest-main integration candidate
+- the integrated canonical truth now records `versions/stack.yaml` repo version `0.177.43`, while the final platform-version bump still waits on one more host replay from that exact rebased candidate
+- the protected integration files were recut on top of the latest `origin/main`: `README.md`, `VERSION`, `changelog.md`, `docs/release-notes/README.md`, `docs/release-notes/0.177.43.md`, and `versions/stack.yaml`
 
 ## Notes For The Next Assistant
 
