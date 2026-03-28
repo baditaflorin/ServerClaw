@@ -1,8 +1,6 @@
-<div class="action-result {{ result.tone }}">
-  <strong>{{ result.title }}</strong>
-  <span>{{ result.detail }}</span>
-  {% if result.job_id %}
-  <span class="muted">Job {{ result.job_id }}</span>
-  {% endif %}
-  <span class="muted">{{ result.timestamp|humanize_timestamp }}</span>
-</div>
+{% from "macros/states.html" import state_message %}
+{{ state_message(result.title, result.detail, result.tone) }}
+{% if result.job_id %}
+<p class="muted action-result-meta">Job {{ result.job_id }}</p>
+{% endif %}
+<p class="muted action-result-meta">{{ result.timestamp|humanize_timestamp }}</p>

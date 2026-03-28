@@ -1,4 +1,5 @@
-<section class="panel drift-panel">
+{% from "macros/states.html" import empty_state %}
+<section class="pf-v5-c-card panel drift-panel">
   <div class="drift-summary">
     <div>
       <span class="label">Latest drift run</span>
@@ -15,7 +16,7 @@
   </div>
 
   {% if drift_report.records %}
-  <table class="data-table">
+  <table class="pf-v5-c-table pf-m-grid-md data-table" role="grid">
     <thead>
       <tr>
         <th>Service</th>
@@ -35,7 +36,7 @@
         <td>
           {% if item.service %}
           <button
-            class="action-button secondary"
+            class="pf-v5-c-button pf-m-secondary action-button"
             hx-post="/actions/services/{{ item.service }}/deploy"
             hx-target="#drift-reconcile-result"
             hx-swap="innerHTML"
@@ -51,7 +52,7 @@
     </tbody>
   </table>
   {% else %}
-  <p class="muted">No drift receipt is available yet.</p>
+  {{ empty_state("No drift receipt available", "The portal has not yet mirrored a drift receipt into this runtime.") }}
   {% endif %}
 
   <div id="drift-reconcile-result"></div>

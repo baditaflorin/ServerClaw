@@ -1,4 +1,5 @@
-<div class="panel search-panel">
+{% from "macros/states.html" import state_message %}
+<div class="pf-v5-c-card panel search-panel">
   <form class="search-form" hx-post="/actions/search" hx-target="#search-panel" hx-swap="innerHTML">
     <div>
       <label class="form-label" for="search-query">Query</label>
@@ -17,27 +18,21 @@
       <div class="muted">
         BM25 plus trigram matching with synonym expansion from `config/search-synonyms.yaml`.
       </div>
-      <button class="action-button" type="submit">Search</button>
+      <button class="pf-v5-c-button pf-m-primary action-button" type="submit">Search</button>
     </div>
   </form>
 
   {% if search_error %}
-  <div class="action-result danger">
-    <strong>Search failed</strong>
-    <span>{{ search_error }}</span>
-  </div>
+  {{ state_message("Search failed", search_error, "danger") }}
   {% endif %}
 
   {% if search_expanded_query and search_expanded_query != search_query %}
-  <div class="banner warning">
-    <strong>Expanded query</strong>
-    <span>{{ search_expanded_query }}</span>
-  </div>
+  {{ state_message("Expanded query", search_expanded_query, "warning") }}
   {% endif %}
 
   <div class="search-results">
     {% for result in search_results %}
-    <article class="search-result">
+    <article class="pf-v5-c-card search-result">
       <div class="search-result-head">
         <strong>{{ result.title }}</strong>
         <span class="pill">{{ result.collection }} · {{ "%.2f"|format(result.score) }}</span>
@@ -53,10 +48,7 @@
     </article>
     {% endfor %}
     {% if search_query and not search_results and not search_error %}
-    <div class="action-result ok">
-      <strong>No matches</strong>
-      <span>No indexed documents matched "{{ search_query }}".</span>
-    </div>
+    {{ state_message("No matches", 'No indexed documents matched "' ~ search_query ~ '".', "ok") }}
     {% endif %}
   </div>
 </div>

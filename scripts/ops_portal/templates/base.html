@@ -4,104 +4,179 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}LV3 Ops Portal{% endblock %}</title>
+  <link rel="stylesheet" href="https://unpkg.com/@patternfly/patternfly@5.4.0/patternfly.min.css">
   <link rel="stylesheet" href="/static/portal.css">
-  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
   <script src="https://unpkg.com/echarts@5.6.0/dist/echarts.min.js"></script>
   <script src="/static/portal.js" defer></script>
 </head>
-<body>
-  <div class="page-shell">
-    <div class="masthead">
-      <div class="masthead-brand">
-        <p class="eyebrow">LV3 Control Surface</p>
-        <strong>Interactive Ops Portal</strong>
-        <span class="muted">Shared actions, runbooks, and cross-application switching.</span>
-      </div>
-      <div class="masthead-tools">
-        <button
-          id="launcher-toggle"
-          class="launcher-toggle"
-          type="button"
-          aria-expanded="false"
-          aria-controls="launcher-shell">
-          Applications
-          <span class="launcher-toggle-meta">{{ launcher.selected_persona.name }}</span>
-        </button>
-        <div class="operator-card">
-          <span class="label">Operator</span>
-          <strong>{{ operator.operator_id }}</strong>
-          {% if operator.operator_email %}
-          <span class="muted">{{ operator.operator_email }}</span>
-          {% endif %}
-          <span class="muted">Rendered {{ generated_at }}</span>
+<body class="portal-app-body">
+  <div class="pf-v5-c-page portal-page" id="portal-page">
+    <a class="portal-skip-link" href="#portal-main">Skip to main content</a>
+
+    <header class="pf-v5-c-masthead portal-masthead" role="banner">
+      <div class="portal-toolbar">
+        <div class="portal-brand">
+          <button
+            class="pf-v5-c-button pf-m-plain portal-nav-toggle"
+            type="button"
+            aria-controls="portal-sidebar"
+            aria-expanded="false"
+            data-portal-nav-toggle>
+            Navigation
+          </button>
+          <div class="portal-brand-copy">
+            <p class="portal-eyebrow">LV3 Human Shell</p>
+            <h1>Interactive Ops Portal</h1>
+            <p class="portal-hero-copy">
+              PatternFly navigation, shared launcher destinations, and live operator workflows in one browser surface.
+            </p>
+          </div>
         </div>
-      </div>
-    </div>
 
-    <section id="launcher-shell" class="launcher-shell" hidden>
-      {% include "partials/launcher.html" %}
-    </section>
-
-    <header class="hero">
-      <div>
-        <p class="eyebrow">Runtime Overview</p>
-        <h1>Interactive Ops Portal</h1>
-        <p class="hero-copy">Live health, drift, deployments, and operator actions in one browser-native surface.</p>
-      </div>
-      <div class="hero-sidecar">
-        <span class="pill">Launcher favorites</span>
-        <strong>{{ launcher.favorites|length }}</strong>
-        <span class="muted">{{ launcher.match_count }} destinations indexed for {{ launcher.selected_persona.name|lower }} use.</span>
+        <div class="portal-toolbar-actions">
+          <button
+            id="launcher-toggle"
+            class="pf-v5-c-button pf-m-secondary launcher-toggle portal-toolbar-link"
+            type="button"
+            aria-expanded="false"
+            aria-controls="launcher-shell">
+            Applications
+            <span class="launcher-toggle-meta">{{ launcher.selected_persona.name }}</span>
+          </button>
+          <a
+            class="pf-v5-c-button pf-m-link portal-toolbar-link"
+            href="{{ docs_base_url }}/runbooks/ops-portal-down.md"
+            target="_blank"
+            rel="noreferrer">
+            Help
+          </a>
+          <a class="pf-v5-c-button pf-m-secondary portal-toolbar-link" href="#drift">
+            Notifications
+            <span class="portal-toolbar-badge">{{ maintenance_count + (drift_summary.unsuppressed_count or 0) }}</span>
+          </a>
+          <details class="portal-user-menu">
+            <summary class="pf-v5-c-button pf-m-plain portal-user-menu__toggle">
+              <span class="portal-user-menu__label">Operator</span>
+              <strong>{{ operator.operator_id }}</strong>
+            </summary>
+            <div class="portal-user-menu__panel">
+              <p class="portal-user-menu__eyebrow">Current session</p>
+              <strong>{{ operator.operator_id }}</strong>
+              {% if operator.operator_email %}
+              <span class="muted">{{ operator.operator_email }}</span>
+              {% endif %}
+              <span class="muted">Launcher persona {{ launcher.selected_persona.name }}</span>
+              <span class="muted">Rendered {{ generated_at|humanize_timestamp }}</span>
+              <div class="link-row">
+                <a href="#runbooks">Runbooks</a>
+                <a href="#changelog">Recent changes</a>
+              </div>
+            </div>
+          </details>
+        </div>
       </div>
     </header>
 
-    <nav class="portal-nav">
-      <a href="#overview">Overview</a>
-      <a href="#deployments">Deployments</a>
-      <a href="#drift">Drift</a>
-      <a href="#search">Search</a>
-      <a href="#runbooks">Runbooks</a>
-      <a href="#changelog">Changelog</a>
-    </nav>
+    <aside class="pf-v5-c-page__sidebar portal-sidebar" id="portal-sidebar" data-portal-sidebar>
+      <div class="portal-sidebar__inner">
+        <section class="portal-sidebar-card">
+          <p class="portal-sidebar-kicker">Shared Navigation</p>
+          <h2>One operator path for status, drift, runbooks, and receipts.</h2>
+          <p class="muted">
+            ADR 0234 starts on the live ops portal and keeps product-native tools as linked destinations instead of
+            embedding them into a one-off shell.
+          </p>
+        </section>
 
-    {% block content %}{% endblock %}
+        <nav class="pf-v5-c-nav portal-shell-nav" aria-label="Primary">
+          <section class="pf-v5-c-nav__section" aria-labelledby="portal-nav-primary">
+            <h2 class="pf-v5-c-nav__section-title" id="portal-nav-primary">This portal</h2>
+            <ul class="pf-v5-c-nav__list">
+              <li class="pf-v5-c-nav__item">
+                <a class="pf-v5-c-nav__link" href="#overview" aria-current="page">
+                  <span class="pf-v5-c-nav__link-text">Overview</span>
+                  <span class="portal-shell-nav-count">{{ services|length }}</span>
+                </a>
+              </li>
+              <li class="pf-v5-c-nav__item">
+                <a class="pf-v5-c-nav__link" href="#deployments">
+                  <span class="pf-v5-c-nav__link-text">Deployments</span>
+                  <span class="portal-shell-nav-count">{{ deployments|length }}</span>
+                </a>
+              </li>
+              <li class="pf-v5-c-nav__item">
+                <a class="pf-v5-c-nav__link" href="#agents">
+                  <span class="pf-v5-c-nav__link-text">Agents</span>
+                  <span class="portal-shell-nav-count">{{ coordination.summary.count }}</span>
+                </a>
+              </li>
+              <li class="pf-v5-c-nav__item">
+                <a class="pf-v5-c-nav__link" href="#drift">
+                  <span class="pf-v5-c-nav__link-text">Drift</span>
+                  <span class="portal-shell-nav-count">{{ drift_summary.unsuppressed_count or 0 }}</span>
+                </a>
+              </li>
+              <li class="pf-v5-c-nav__item">
+                <a class="pf-v5-c-nav__link" href="#search">
+                  <span class="pf-v5-c-nav__link-text">Search</span>
+                  <span class="portal-shell-nav-count">{{ search_collections|length }}</span>
+                </a>
+              </li>
+              <li class="pf-v5-c-nav__item">
+                <a class="pf-v5-c-nav__link" href="#runbooks">
+                  <span class="pf-v5-c-nav__link-text">Runbooks</span>
+                  <span class="portal-shell-nav-count">{{ runbooks|length }}</span>
+                </a>
+              </li>
+              <li class="pf-v5-c-nav__item">
+                <a class="pf-v5-c-nav__link" href="#changelog">
+                  <span class="pf-v5-c-nav__link-text">Changelog</span>
+                  <span class="portal-shell-nav-count">{{ changelog_notes|length }}</span>
+                </a>
+              </li>
+            </ul>
+          </section>
+        </nav>
+
+        <section class="portal-sidebar-card portal-sidebar-card--secondary">
+          <p class="portal-sidebar-kicker">Connected Surfaces</p>
+          <div class="portal-surface-links">
+            <a href="https://home.lv3.org" target="_blank" rel="noreferrer">
+              <strong>Homepage</strong>
+              <span>Discover shared services</span>
+            </a>
+            <a href="{{ docs_base_url }}" target="_blank" rel="noreferrer">
+              <strong>Docs</strong>
+              <span>Reference ADRs and runbooks</span>
+            </a>
+            <a href="https://changelog.lv3.org" target="_blank" rel="noreferrer">
+              <strong>Changelog</strong>
+              <span>Review release and apply history</span>
+            </a>
+            <a href="https://grafana.lv3.org" target="_blank" rel="noreferrer">
+              <strong>Grafana</strong>
+              <span>Observe dashboards and alerts</span>
+            </a>
+            <a href="https://tasks.lv3.org" target="_blank" rel="noreferrer">
+              <strong>Tasks</strong>
+              <span>Plan and track platform work</span>
+            </a>
+            <a href="https://wiki.lv3.org" target="_blank" rel="noreferrer">
+              <strong>Wiki</strong>
+              <span>Read living platform knowledge</span>
+            </a>
+          </div>
+        </section>
+      </div>
+    </aside>
+
+    <main class="pf-v5-c-page__main portal-main-layout" id="portal-main">
+      <section id="launcher-shell" class="launcher-shell" hidden>
+        {% include "partials/launcher.html" %}
+      </section>
+      {% block content %}{% endblock %}
+    </main>
   </div>
-  <script>
-    const launcherToggle = document.getElementById("launcher-toggle");
-    const launcherShell = document.getElementById("launcher-shell");
-
-    function setLauncherOpen(open) {
-      launcherShell.hidden = !open;
-      launcherToggle.setAttribute("aria-expanded", open ? "true" : "false");
-      if (open) {
-        const searchInput = launcherShell.querySelector('input[name="query"]');
-        if (searchInput) {
-          searchInput.focus();
-        }
-      }
-    }
-
-    launcherToggle?.addEventListener("click", () => {
-      const isOpen = launcherToggle.getAttribute("aria-expanded") === "true";
-      setLauncherOpen(!isOpen);
-    });
-
-    document.addEventListener("click", (event) => {
-      if (launcherShell.hidden) {
-        return;
-      }
-      if (launcherShell.contains(event.target) || launcherToggle?.contains(event.target)) {
-        return;
-      }
-      setLauncherOpen(false);
-    });
-
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && !launcherShell.hidden) {
-        setLauncherOpen(false);
-        launcherToggle?.focus();
-      }
-    });
-  </script>
 </body>
 </html>

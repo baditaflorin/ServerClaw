@@ -1,9 +1,14 @@
+{% from "macros/states.html" import empty_state, state_message, unauthorized_state %}
 {% if coordination_warning %}
-<div class="banner warning">Agent coordination data is degraded: {{ coordination_warning }}</div>
+  {% if "401" in coordination_warning or "403" in coordination_warning %}
+    {{ unauthorized_state("The shared gateway rejected the portal session while loading agent coordination. Refresh the browser session and retry.") }}
+  {% else %}
+    {{ state_message("Agent coordination data is degraded", coordination_warning, "warning") }}
+  {% endif %}
 {% endif %}
 
 <div class="overview-grid">
-  <section class="panel summary-panel">
+  <section class="pf-v5-c-card panel summary-panel">
     <div class="stat-block">
       <span class="label">Sessions</span>
       <strong>{{ coordination.summary.count }}</strong>
@@ -22,7 +27,7 @@
     </div>
   </section>
 
-  <section class="panel summary-panel">
+  <section class="pf-v5-c-card panel summary-panel">
     <h3>Snapshot</h3>
     <p class="muted">
       {% if coordination.summary.generated_at %}
@@ -50,7 +55,7 @@
 <div class="service-grid">
   {% if coordination.entries %}
     {% for entry in coordination.entries %}
-    <article class="service-card">
+    <article class="pf-v5-c-card service-card">
       <div class="service-head">
         <div>
           <p class="service-category">agent session</p>
@@ -104,8 +109,6 @@
     </article>
     {% endfor %}
   {% else %}
-  <section class="panel">
-    <p class="muted">No active agent sessions are currently published in the coordination map.</p>
-  </section>
+  {{ empty_state("No active agent sessions", "No coordination snapshots are currently published into the live portal shell.") }}
   {% endif %}
 </div>

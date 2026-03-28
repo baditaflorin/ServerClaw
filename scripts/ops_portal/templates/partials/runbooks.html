@@ -1,10 +1,16 @@
+{% from "macros/states.html" import empty_state, state_message, unauthorized_state %}
 {% if runbook_warning %}
-<div class="banner warning">Runbook launcher data is degraded: {{ runbook_warning }}</div>
+  {% if "401" in runbook_warning or "403" in runbook_warning %}
+    {{ unauthorized_state("The shared gateway rejected the portal session while loading runbooks. Refresh the browser session and retry.") }}
+  {% else %}
+    {{ state_message("Runbook launcher data is degraded", runbook_warning, "warning") }}
+  {% endif %}
 {% endif %}
 
 <div class="runbook-grid">
+  {% if runbooks %}
   {% for runbook in runbooks %}
-  <article class="panel runbook-card">
+  <article class="pf-v5-c-card panel runbook-card">
     <div class="runbook-head">
       <div>
         <p class="service-category">{{ runbook.live_impact }}</p>
@@ -21,9 +27,12 @@
       hx-swap="innerHTML">
       <label class="form-label" for="params-{{ runbook.id }}">Parameters (JSON object)</label>
       <textarea id="params-{{ runbook.id }}" name="parameters" rows="4">{}</textarea>
-      <button class="action-button" type="submit">Launch</button>
+      <button class="pf-v5-c-button pf-m-primary action-button" type="submit">Launch</button>
     </form>
     <div id="runbook-result-{{ runbook.id }}"></div>
   </article>
   {% endfor %}
+  {% else %}
+  {{ empty_state("No runbooks exposed to the portal", "No runbook currently opts into the ops portal delivery surface.") }}
+  {% endif %}
 </div>
