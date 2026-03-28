@@ -97,7 +97,7 @@ workstreams:
   - id: ws-0230-live-apply
     adr: "0230"
     title: Live apply policy decisions via Open Policy Agent and Conftest
-    status: merged
+    status: live_applied
     owner: codex
     branch: codex/ws-0230-live-apply-r2
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0230-live-apply-r2
@@ -190,7 +190,7 @@ workstreams:
     canonical_truth:
       changelog_entry: implemented ADR 0230 by routing command approval, promotion eligibility, and validation-gate policy decisions through one shared OPA and Conftest bundle on both the controller and Windmill worker runtime
       release_bump: patch
-      included_in_repo_version: null
+      included_in_repo_version: 0.177.49
       latest_receipts:
         command_catalog: 2026-03-28-adr-0230-policy-decisions-live-apply
         policy_validation: 2026-03-28-adr-0230-policy-decisions-live-apply

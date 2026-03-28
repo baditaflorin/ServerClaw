@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.48",
+  "repo_version": "0.177.49",
   "platform_version": "0.130.42",
-  "generated_at": "2026-03-28T19:34:49Z",
-  "next_refresh_at": "2026-03-28T20:34:49Z",
+  "generated_at": "2026-03-28T20:16:55Z",
+  "next_refresh_at": "2026-03-28T21:16:55Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3503,7 +3503,7 @@
         "id": "configure-windmill",
         "title": "Configure Windmill",
         "agent_trust_required": "T3",
-        "steps": 21,
+        "steps": 23,
         "path": "docs/runbooks/configure-windmill.md",
         "workflow_ids": [
           "converge-windmill"
@@ -3554,7 +3554,7 @@
         "id": "environment-promotion-pipeline",
         "title": "Environment Promotion Pipeline",
         "agent_trust_required": "T3",
-        "steps": 18,
+        "steps": 20,
         "path": "docs/runbooks/environment-promotion-pipeline.md",
         "workflow_ids": [
           "deploy-and-promote"
@@ -4026,10 +4026,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.47",
+    "last_version": "0.177.48",
     "deployed_at": "2026-03-28",
-    "summary": "integrated ADR 0197 on current main by replaying the public Dify edge, re-verifying the governed `api.lv3.org` tool bridge, and preserving packaged API gateway runbook compatibility plus worktree-safe smoke tracing",
-    "release_notes_url": "docs/release-notes/0.177.48.md"
+    "summary": "implemented ADR 0230 by routing command approval, promotion eligibility, and validation-gate policy decisions through one shared OPA and Conftest bundle on both the controller and Windmill worker runtime",
+    "release_notes_url": "docs/release-notes/0.177.49.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0230](../adr/0230-policy-decisions-via-open-policy-agent-and-conftest.md)
 - Title: Live apply shared OPA and Conftest policy decisions across command approval, promotion gating, and validation automation
-- Status: merged
+- Status: live_applied
 - Implemented In Repo Version: 0.177.49
 - Live Applied In Platform Version: 0.130.42
 - Implemented On: 2026-03-28
