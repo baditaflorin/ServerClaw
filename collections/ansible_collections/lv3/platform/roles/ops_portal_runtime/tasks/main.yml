@@ -123,6 +123,15 @@
     mode: "0644"
     directory_mode: "0755"
 
+- name: Ensure the ops portal overlay directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ ops_portal_runtime_overlay_directories }}"
+
 - name: Overlay the critical ops portal runtime files explicitly
   ansible.builtin.copy:
     src: "{{ item.src }}"
