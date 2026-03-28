@@ -2,7 +2,87 @@ import argparse
 import json
 import shlex
 import subprocess
+import time
+from datetime import datetime, timezone
 from pathlib import Path
+
+
+LOCAL_FALLBACK_STAGES = [
+    "generated-vars",
+    "role-argument-specs",
+    "json",
+    "alert-rules",
+    "data-models",
+    "generated-docs",
+    "generated-portals",
+]
+RUNNER_IMAGE_ERROR_MARKERS = (
+    "unsupported manifest media type",
+    "Unable to find image 'registry.lv3.org/check-runner/",
+)
+
+
+def _run(command: list[str], *, cwd: Path) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(command, cwd=cwd, text=True, capture_output=True, check=False)
+
+
+def _load_gate_status(status_path: Path) -> dict | None:
+    if status_path.exists():
+        return json.loads(status_path.read_text(encoding="utf-8"))
+    return None
+
+
+def _runner_image_pull_failed(stdout: str, stderr: str) -> bool:
+    combined = f"{stdout}\n{stderr}"
+    return any(marker in combined for marker in RUNNER_IMAGE_ERROR_MARKERS)
+
+
+def _fallback_status_payload(*, repo_root: Path, manifest_path: Path, status: str, returncode: int, duration_seconds: float) -> dict:
+    return {
+        "status": status,
+        "source": "windmill-post-merge-local-fallback",
+        "workspace": str(repo_root),
+        "manifest": str(manifest_path),
+        "executed_at": datetime.now(timezone.utc).isoformat(),
+        "checks": [
+            {
+                "id": "local-fallback",
+                "severity": "error",
+                "description": "Run the worker-local validate_repo fallback when runner images are unavailable on the worker host.",
+                "status": status,
+                "returncode": returncode,
+                "duration_seconds": round(duration_seconds, 2),
+                "docker_command": [],
+            }
+        ],
+        "requested_checks": ["local-fallback"],
+    }
+
+
+def _run_local_fallback(repo_root: Path, manifest_path: Path, status_path: Path) -> dict:
+    command = ["./scripts/validate_repo.sh", *LOCAL_FALLBACK_STAGES]
+    started = time.monotonic()
+    result = _run(command, cwd=repo_root)
+    duration_seconds = time.monotonic() - started
+    fallback_status = _fallback_status_payload(
+        repo_root=repo_root,
+        manifest_path=manifest_path,
+        status="passed" if result.returncode == 0 else "failed",
+        returncode=result.returncode,
+        duration_seconds=duration_seconds,
+    )
+    status_path.parent.mkdir(parents=True, exist_ok=True)
+    status_path.write_text(json.dumps(fallback_status, indent=2) + "\n", encoding="utf-8")
+    payload = {
+        "status": "ok" if result.returncode == 0 else "error",
+        "command": " ".join(shlex.quote(part) for part in command),
+        "returncode": result.returncode,
+        "stdout": result.stdout.strip(),
+        "stderr": result.stderr.strip(),
+        "fallback_used": True,
+        "gate_status": fallback_status,
+    }
+    return payload
 
 
 def main(repo_path: str = "/srv/proxmox_florin_server"):
@@ -31,7 +111,7 @@ def main(repo_path: str = "/srv/proxmox_florin_server"):
         "windmill-post-merge",
         "--print-json",
     ]
-    result = subprocess.run(command, cwd=repo_root, text=True, capture_output=True, check=False)
+    result = _run(command, cwd=repo_root)
     payload = {
         "status": "ok" if result.returncode == 0 else "error",
         "command": " ".join(shlex.quote(part) for part in command),
@@ -39,8 +119,17 @@ def main(repo_path: str = "/srv/proxmox_florin_server"):
         "stdout": result.stdout.strip(),
         "stderr": result.stderr.strip(),
     }
-    if status_path.exists():
-        payload["gate_status"] = json.loads(status_path.read_text(encoding="utf-8"))
+    gate_status = _load_gate_status(status_path)
+    if gate_status is not None:
+        payload["gate_status"] = gate_status
+    if result.returncode != 0 and _runner_image_pull_failed(result.stdout, result.stderr):
+        payload["primary_gate_error"] = {
+            "command": payload["command"],
+            "returncode": result.returncode,
+            "stdout": payload["stdout"],
+            "stderr": payload["stderr"],
+        }
+        return _run_local_fallback(repo_root, manifest_path, status_path) | {"primary_gate_error": payload["primary_gate_error"]}
     return payload
 
 
