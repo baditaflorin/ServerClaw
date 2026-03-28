@@ -2,11 +2,11 @@
 
 - ADR: [ADR 0209](../adr/0209-use-case-services-and-thin-delivery-adapters.md)
 - Title: Shared runbook use-case service with thin delivery adapters for CLI, API gateway, Windmill, and the ops portal
-- Status: ready
-- Implemented In Repo Version: N/A
-- Live Applied In Platform Version: N/A
-- Implemented On: N/A
-- Live Applied On: N/A
+- Status: live_applied
+- Implemented In Repo Version: 0.177.38
+- Live Applied In Platform Version: 0.130.38
+- Implemented On: 2026-03-28
+- Live Applied On: 2026-03-28
 - Branch: `codex/ws-0209-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0209-live-apply`
 - Owner: codex
@@ -72,13 +72,22 @@
 - `./scripts/validate_repo.sh agent-standards`
 - live verification: list and execute `validation-gate-status` through the gateway, then confirm the same result renders through the ops portal adapter path
 
-## Merge Criteria
+## Outcome
 
-- shared runbook orchestration lives in one use-case service instead of being duplicated per delivery surface
-- CLI, Windmill, API gateway, and ops portal adapters stay thin and only translate transport-specific input or output
-- the branch records a safe live verification receipt without touching protected integration files that belong to the later `main` merge step
+- the shared runbook orchestration now lives in [`platform/use_cases/runbooks.py`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/platform/use_cases/runbooks.py), with the CLI, Windmill wrapper, API gateway, and ops portal each reduced to thin surface adapters over the same delivery contract
+- the rebased live apply re-converged `api_gateway`, `ops_portal`, and `windmill` from the isolated worktree, and the safe `validation-gate-status` runbook now verifies successfully through all three live paths
+- the workstream also repaired a rebased Windmill topology regression on the branch by switching the runtime defaults back to the host-level port facts actually available in the play context and documenting the guest-local probe endpoints used during verification
+
+## Mainline Integration
+
+- release `0.177.38` now carries the official repo-version attribution for ADR 0209 on `main`
+- the integrated canonical truth now records `versions/stack.yaml` repo version `0.177.38`, platform version `0.130.38`, and maps `api_gateway`, `ops_portal`, and `windmill` to receipt `2026-03-28-adr-0209-use-case-services-live-apply`
+- the protected integration files were updated on this branch because the workstream became the final verified integration step: `README.md`, `VERSION`, `changelog.md`, `docs/release-notes/README.md`, `docs/release-notes/0.177.38.md`, and `versions/stack.yaml`
 
 ## Notes For The Next Assistant
 
 - keep the runbook delivery-surface allowlist explicit; do not implicitly publish every eligible runbook through the portal
 - the safest verification path is the read-only `validation-gate-status` runbook; avoid using mutation-oriented runbooks just to prove adapter wiring
+- `./scripts/validate_repo.sh agent-standards` was re-run while `workstreams.yaml` still marked this branch `ready`; after the final status flip to `live_applied`, that validator is expected to reject the branch because terminal workstreams are no longer considered active branch owners
+- direct SSH verification from `docker-runtime-lv3` should use the guest-local listeners `http://127.0.0.1:8083` for the API gateway and `http://127.0.0.1:8000` for Windmill; `http://100.64.0.1:8005` is the Proxmox-host proxy, not the guest-local bind
+- the successful live replay proved the worker-checkout integrity refresh against the earlier stale Windmill checkout drift, even though long-running unrelated Windmill playbook processes from other workstreams were still visible on the controller during this branch

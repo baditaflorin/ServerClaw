@@ -121,6 +121,7 @@ ADR 0134 changelog redaction is now live on the shared authenticated edge: the p
 ADR 0102 security posture reporting is now live on production: the Windmill-compatible weekly security scan can execute end to end from the worker checkout through the private Proxmox jump path, and committed receipts now include both the first production report and the verified worker replay from 2026-03-26.
 The repository now also ships ADR 0142 public-surface security scanning: `make public-surface-security-scan ENV=production` writes structured receipts under `receipts/security-scan/`, uses `testssl.sh` and `nuclei` container runners for the live public HTTP or HTTPS surface, and can publish high or critical findings on `platform.security.*`; the live weekly schedule still requires apply from `main`.
 The repository now also ships ADR 0129 runbook automation: structured YAML, JSON, and Markdown-front-matter runbooks can execute through `lv3 runbook`, persist resumable run state under `.local/runbooks/runs/`, and reuse the current Windmill plus mutation-audit surfaces.
+The repository now also ships ADR 0209 use-case services and thin delivery adapters live on production: the API gateway and ops portal now expose the same shared structured runbook service already used by the CLI and Windmill wrapper, and the 2026-03-28 latest-main replay re-verified `validation-gate-status` end to end through the worker checkout, `api.lv3.org` gateway contract, and the interactive `ops.lv3.org` runbook launcher.
 The repository now also ships ADR 0137 crawl policy automation live on production: the shared public edge serves a universal `robots.txt`, emits `X-Robots-Tag: noindex, nofollow` across published hostnames, adds robots meta tags to repository-generated HTML surfaces, and includes `lv3.org` in the shared edge certificate definition.
 The repository now also ships the first ADR 0166 canonical error rollout live on production: `config/error-codes.yaml` and `scripts/canonical_errors.py` now normalize repo-managed gateway and platform-context failures behind one trace-id-backed error envelope, and the 2026-03-26 live replay from `main` verified the canonical `AUTH_TOKEN_MISSING` response on both `https://api.lv3.org/v1/health` and `http://100.64.0.1:8010/v1/platform-summary`.
 
@@ -130,8 +131,8 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.37` |
-| Platform version | `0.130.37` |
+| Repository version | `0.177.38` |
+| Platform version | `0.130.38` |
 | Observed check date | `2026-03-28` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -186,7 +187,7 @@ Template VM: `9000` `debian13-cloud-template`
 | Capability | Receipt |
 | --- | --- |
 | `agent_coordination` | `2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply` |
-| `api_gateway` | `2026-03-26-adr-0163-retry-taxonomy-live-apply` |
+| `api_gateway` | `2026-03-28-adr-0209-use-case-services-live-apply` |
 | `backup_vm` | `2026-03-22-adr-0029-backup-vm-live-apply` |
 | `budgeted_workflow_scheduler` | `2026-03-27-adr-0119-budgeted-workflow-scheduler-mainline-live-apply` |
 | `build_telemetry` | `2026-03-22-adr-0028-build-telemetry-live-apply` |
@@ -243,7 +244,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `operator_access_runbooks` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `operator_access_validation` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `operator_access_workflows` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
-| `ops_portal` | `2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply` |
+| `ops_portal` | `2026-03-28-adr-0209-use-case-services-live-apply` |
 | `outline` | `2026-03-28-adr-0199-outline-living-knowledge-wiki-mainline-live-apply` |
 | `plane` | `2026-03-28-adr-0193-plane-mainline-live-apply` |
 | `platform_context` | `2026-03-28-adr-0198-semantic-rag-mainline-live-apply` |
@@ -268,7 +269,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `tempo_tracing` | `2026-03-22-adr-0053-tempo-traces-live-apply` |
 | `uptime_kuma` | `2026-03-22-adr-0027-uptime-kuma-live-apply` |
 | `vaultwarden` | `2026-03-27-adr-0101-certificate-lifecycle-main-live-apply` |
-| `windmill` | `2026-03-28-adr-0204-self-correcting-automation-loops-live-apply` |
+| `windmill` | `2026-03-28-adr-0209-use-case-services-live-apply` |
 | `world_state_materializer` | `2026-03-27-adr-0113-world-state-materializer-mainline-live-apply` |
 <!-- END GENERATED: platform-status -->
 
@@ -1067,6 +1068,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream WS-0204: Self-Correcting Automation Loops Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0204-live-apply.md)
 - [Workstream WS-0206: Ports And Adapters Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0206-live-apply.md)
 - [Workstream WS-0206 Main Merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0206-main-merge.md)
+- [Workstream WS-0209: Runbook Use-Case Service Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0209-live-apply.md)
 - [Workstream ws-0210-live-apply: ADR 0210 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0210-live-apply.md)
 - [Workstream ws-0212-live-apply: ADR 0212 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0212-live-apply.md)
 <!-- END GENERATED: document-index -->
@@ -1086,8 +1088,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.37` |
-| Platform version | `0.130.37` |
+| Repository version | `0.177.38` |
+| Platform version | `0.130.38` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
