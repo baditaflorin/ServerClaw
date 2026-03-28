@@ -1692,7 +1692,7 @@ workstreams:
   - id: adr-0144-headscale
     adr: "0144"
     title: Headscale mesh control plane
-    status: implemented
+    status: merged
     owner: codex
     branch: codex/adr-0144-headscale
     worktree_path: ../proxmox_florin_server-headscale
@@ -1776,7 +1776,7 @@ workstreams:
   - id: adr-0029-backup-vm
     adr: "0029"
     title: Dedicated backup VM with local PBS
-    status: implemented
+    status: merged
     owner: codex
     branch: codex/adr-0026-backup-vm
     worktree_path: ../proxmox_florin_server-backup-vm
@@ -4819,7 +4819,7 @@ workstreams:
   - id: adr-0143-gitea-ci
     adr: "0143"
     title: Private Gitea with self-hosted CI
-    status: implemented
+    status: merged
     owner: codex
     branch: codex/integration-0143-main-refresh-v2
     worktree_path: .worktrees/integration-0134-main/.worktrees/integration-0143-main-refresh-v2
@@ -5994,7 +5994,7 @@ workstreams:
   - id: adr-0204-architecture-governance
     adr: "0204"
     title: Architecture governance bundle for self-correction, clean boundaries, and vendor replaceability
-    status: implemented
+    status: merged
     owner: codex
     branch: codex/adr-0204-architecture-governance
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/adr-0204-architecture-governance
@@ -6070,6 +6070,103 @@ workstreams:
       changelog_entry: accepted ADRs 0204 through 0213 to govern self-correcting automation, contract-first capability boundaries, ports and adapters, canonical domain models, shared policy registries, and vendor exit planning for future platform work
       release_bump: patch
       included_in_repo_version: 0.177.23
+
+  - id: ws-0212-live-apply
+    adr: "0212"
+    title: Replaceability scorecards and vendor exit plans live apply
+    status: in_progress
+    owner: codex
+    branch: codex/ws-0212-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0212-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0212-live-apply.md
+    depends_on:
+      - adr-0205-capability-contracts-before-product-selection
+      - adr-0213-architecture-fitness-functions-in-the-validation-gate
+    conflicts_with: []
+    shared_surfaces:
+      - docs/adr/0029-dedicated-backup-vm-with-local-pbs.md
+      - docs/adr/0042-step-ca-for-ssh-and-internal-tls.md
+      - docs/adr/0043-openbao-for-secrets-transit-and-dynamic-credentials.md
+      - docs/adr/0044-windmill-for-agent-and-operator-workflows.md
+      - docs/adr/0056-keycloak-for-operator-and-agent-sso.md
+      - docs/adr/0143-gitea-for-self-hosted-git-and-ci.md
+      - docs/adr/0144-headscale-for-zero-trust-mesh-vpn.md
+      - docs/adr/0212-replaceability-scorecards-and-vendor-exit-plans.md
+      - docs/adr/0213-architecture-fitness-functions-in-the-validation-gate.md
+      - config/replaceability-review-catalog.json
+      - docs/schema/replaceability-review-catalog.schema.json
+      - scripts/replaceability_scorecards.py
+      - scripts/validate_repository_data_models.py
+      - scripts/validate_repo.sh
+      - platform/interface_contracts.py
+      - Makefile
+      - docs/runbooks/replaceability-scorecards.md
+      - docs/runbooks/validate-repository-automation.md
+      - collections/ansible_collections/lv3/platform/roles/_template/service_scaffold/adr.md.tpl
+      - tests/test_interface_contracts.py
+      - tests/test_replaceability_scorecards.py
+      - tests/test_scaffold_service.py
+      - tests/test_validate_repo_cache.py
+      - docs/adr/.index.yaml
+      - docs/site-generated/architecture/dependency-graph.md
+      - docs/workstreams/ws-0212-live-apply.md
+      - receipts/live-applies/2026-03-28-adr-0212-replaceability-scorecards-live-apply.json
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: replaceability_governed_adrs
+          paths:
+            - docs/adr/0029-dedicated-backup-vm-with-local-pbs.md
+            - docs/adr/0042-step-ca-for-ssh-and-internal-tls.md
+            - docs/adr/0043-openbao-for-secrets-transit-and-dynamic-credentials.md
+            - docs/adr/0044-windmill-for-agent-and-operator-workflows.md
+            - docs/adr/0056-keycloak-for-operator-and-agent-sso.md
+            - docs/adr/0143-gitea-for-self-hosted-git-and-ci.md
+            - docs/adr/0144-headscale-for-zero-trust-mesh-vpn.md
+            - docs/adr/0212-replaceability-scorecards-and-vendor-exit-plans.md
+            - docs/adr/0213-architecture-fitness-functions-in-the-validation-gate.md
+            - docs/adr/.index.yaml
+          mode: exclusive
+        - id: replaceability_repo_surface
+          paths:
+            - config/replaceability-review-catalog.json
+            - docs/schema/replaceability-review-catalog.schema.json
+            - scripts/replaceability_scorecards.py
+            - scripts/validate_repository_data_models.py
+            - scripts/validate_repo.sh
+            - platform/interface_contracts.py
+            - Makefile
+            - docs/runbooks/replaceability-scorecards.md
+            - docs/runbooks/validate-repository-automation.md
+            - .config-locations.yaml
+            - collections/ansible_collections/lv3/platform/roles/_template/service_scaffold/adr.md.tpl
+            - tests/test_interface_contracts.py
+            - tests/test_replaceability_scorecards.py
+            - tests/test_scaffold_service.py
+            - tests/test_validate_repo_cache.py
+          mode: exclusive
+        - id: docs_portal_generated_surface
+          paths:
+            - docs/site-generated/architecture/dependency-graph.md
+          mode: exclusive
+        - id: workstream_docs_and_receipt
+          paths:
+            - docs/workstreams/ws-0212-live-apply.md
+            - docs/workstreams/adr-0143-gitea-ci.md
+            - docs/workstreams/adr-0144-headscale.md
+            - docs/workstreams/adr-0204-architecture-governance.md
+            - receipts/live-applies/2026-03-28-adr-0212-replaceability-scorecards-live-apply.json
+          mode: exclusive
+    ready_to_merge: false
+    live_applied: false
+    canonical_truth:
+      changelog_entry: implemented ADR 0212 by governing critical integrated product ADRs with machine-checked replaceability scorecards, vendor exit plans, and live docs publication evidence
+      release_bump: patch
+      included_in_repo_version: 0.177.32
 
   - id: ws-0021-edge-cert-repair
     adr: "0021"

@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0143](../adr/0143-gitea-for-self-hosted-git-and-ci.md)
 - Title: Private Gitea on docker-runtime-lv3 with Keycloak OIDC, a docker-build-lv3 Actions runner, and repo-managed webhook validation
-- Status: implemented
+- Status: merged
 - Implemented In Repo Version: 0.165.0
 - Implemented In Platform Version: 0.130.15
 - Implemented On: 2026-03-26

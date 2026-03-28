@@ -40,3 +40,10 @@ def test_validate_repo_supports_workstream_surface_stage() -> None:
 
     assert "workstream-surfaces" in script
     assert "scripts/workstream_surface_ownership.py" in script
+
+
+def test_validate_repo_supports_architecture_fitness_stage() -> None:
+    script = VALIDATE_REPO_SCRIPT.read_text()
+
+    assert "architecture-fitness" in script
+    assert "scripts/replaceability_scorecards.py" in script

@@ -39,6 +39,26 @@ Initial shape:
 5. Exclude the backup VM itself from the host backup job.
 6. Keep the existing retention model from ADR 0020 unless a later datastore-specific policy replaces it.
 
+## Replaceability Scorecard
+
+- Capability Definition: `backup_repository` as defined by ADR 0020 backup policy, ADR 0100 recovery targets, and the backup-restore verification runbook.
+- Contract Fit: strong for Proxmox guest backups, datastore verification, pruning, and operator-driven restore drills on the current platform.
+- Data Export / Import: PBS datastores, prune policies, verification history, `storage.cfg` target declarations, and restore receipts are portable enough to seed a replacement backup system.
+- Migration Complexity: medium because backup jobs, datastore copy time, restore verification, and retention enforcement all need parallel validation before cutover.
+- Proprietary Surface Area: medium because PBS-native datastore format, prune semantics, and Proxmox host integration are optimized for the Proxmox stack.
+- Approved Exceptions: the first implementation accepts PBS-native metadata and same-host datastore coupling as a time-bounded exception while off-host backup maturity continues.
+- Fallback / Downgrade: guest-level file backups plus exported VM disk images to an external object store can preserve minimum recovery coverage if PBS must be retired before a full peer replacement is ready.
+- Observability / Audit Continuity: backup job logs, datastore verify results, restore-verification receipts, and schedule history remain the continuity surface during migration.
+
+## Vendor Exit Plan
+
+- Reevaluation Triggers: failed restore drills, unacceptable datastore growth, unsupported retention needs, or a hard requirement for off-host-native replication that PBS cannot meet cleanly.
+- Portable Artifacts: datastore inventories, prune and verify schedules, Proxmox storage target definitions, restore runbooks, restore receipts, and guest backup coverage manifests.
+- Migration Path: stand up the replacement repository in parallel, copy or reseed the protected backup set, replay restore verification against the new target, then repoint Proxmox backup jobs and retire PBS after one successful full backup cycle.
+- Alternative Product: Restic or BorgBackup backed by external object storage.
+- Owner: platform recovery.
+- Review Cadence: quarterly.
+
 ## Consequences
 
 - The platform gets working, automated Proxmox backups without waiting on an external CIFS dependency.

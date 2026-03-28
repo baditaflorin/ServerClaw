@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0144](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0144-headscale-for-zero-trust-mesh-vpn.md)
 - Title: Replace the hosted mesh control plane with repo-managed Headscale while preserving Tailscale client access and the `10.10.10.0/24` subnet route
-- Status: implemented
+- Status: merged
 - Branch: `codex/adr-0144-headscale`
 - Worktree: `../proxmox_florin_server-headscale`
 - Owner: codex

@@ -1,9 +1,10 @@
 # ADR 0212: Replaceability Scorecards And Vendor Exit Plans
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Implemented
+- Implemented In Repo Version: pending merge to main
+- Implemented In Platform Version: 0.130.36
+- Implemented On: 2026-03-28
 - Date: 2026-03-28
 
 ## Context
@@ -39,6 +40,26 @@ The exit plan must define:
 - the minimum migration path to one alternative
 - the owner and review cadence for keeping the plan honest
 
+## Implementation
+
+ADR 0212 is now implemented through four repo-managed surfaces:
+
+1. `config/replaceability-review-catalog.json` defines the governed set of
+   critical integrated product ADRs that must carry replaceability reviews.
+2. `scripts/replaceability_scorecards.py` validates the governed ADR markdown,
+   enforces the required scorecard and exit-plan fields, and can render a
+   current review summary.
+3. `scripts/validate_repo.sh architecture-fitness` and `make validate` now run
+   that fitness function automatically.
+4. The governed ADR set itself now carries concrete `Replaceability Scorecard`
+   and `Vendor Exit Plan` sections, and the updated ADR pages were published to
+   the live docs portal during this workstream.
+
+The first governed set covers the current integrated critical product ADRs for
+backup, trust, secrets, workflow orchestration, shared SSO, source control/CI,
+and mesh access. New critical product ADRs must be added to the catalog when
+they become part of integrated repo truth.
+
 ## Consequences
 
 **Positive**
@@ -60,6 +81,13 @@ The exit plan must define:
   be named, justified, and time-bounded.
 - Replaceability review is required for critical platform surfaces, not for
   throwaway local utilities.
+
+## Verification
+
+- `python3 scripts/replaceability_scorecards.py --validate`
+- `python3 scripts/replaceability_scorecards.py --report`
+- `./scripts/validate_repo.sh architecture-fitness`
+- `make validate`
 
 ## Related ADRs
 
