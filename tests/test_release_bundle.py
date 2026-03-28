@@ -201,3 +201,44 @@ def test_download_asset_retries_transient_http_404(tmp_path: Path, monkeypatch) 
     assert destination.read_bytes() == b"bundle-bytes"
     assert len(observed_calls) == 3
     assert observed_sleeps == [1.0, 2.0]
+
+
+def test_fetch_release_assets_prefers_attachment_detail_download_urls(tmp_path: Path, monkeypatch) -> None:
+    release = {
+        "id": 7,
+        "assets": [
+            {"id": 19, "name": "bundle.tar.gz", "browser_download_url": "http://git.lv3.org:3009/releases/download/bad"},
+            {"id": 20, "name": "bundle.tar.gz.sigstore.json", "browser_download_url": "http://git.lv3.org:3009/releases/download/bad-sigstore"},
+            {"id": 21, "name": "bundle.tar.gz.sha256", "browser_download_url": "http://git.lv3.org:3009/releases/download/bad-sha"},
+        ],
+    }
+    downloaded_urls: list[str] = []
+
+    monkeypatch.setattr(release_bundle, "fetch_release_by_tag", lambda *args, **kwargs: release)
+    monkeypatch.setattr(
+        release_bundle,
+        "fetch_release_asset_detail",
+        lambda **kwargs: {
+            "browser_download_url": f"http://git.lv3.org:3009/attachments/{kwargs['attachment_id']}",
+        },
+    )
+
+    def fake_download_asset(url: str, *, token: str, destination: Path) -> None:
+        downloaded_urls.append(url)
+        destination.write_text("payload")
+
+    monkeypatch.setattr(release_bundle, "download_asset", fake_download_asset)
+
+    release_bundle.fetch_release_assets_by_tag(
+        gitea_url="http://10.10.10.20:3003",
+        repository="ops/proxmox_florin_server",
+        token="token",
+        release_tag="bundle-branch-main-0123456789ab",
+        destination_dir=tmp_path,
+    )
+
+    assert downloaded_urls == [
+        "http://10.10.10.20:3003/attachments/19",
+        "http://10.10.10.20:3003/attachments/21",
+        "http://10.10.10.20:3003/attachments/20",
+    ]

@@ -315,6 +315,22 @@ def fetch_release_by_tag(gitea_url: str, repository: str, token: str, release_ta
     return json.loads(payload.decode("utf-8"))
 
 
+def fetch_release_asset_detail(
+    *,
+    gitea_url: str,
+    repository: str,
+    token: str,
+    release_id: int,
+    attachment_id: int,
+) -> dict[str, Any]:
+    _status, payload = api_request(
+        "GET",
+        repo_api_path(gitea_url, repository, f"releases/{release_id}/assets/{attachment_id}"),
+        token=token,
+    )
+    return json.loads(payload.decode("utf-8"))
+
+
 def ensure_release(
     *,
     gitea_url: str,
@@ -546,6 +562,7 @@ def fetch_release_assets_by_tag(
     release = fetch_release_by_tag(gitea_url, repository, token, release_tag)
     if release is None:
         raise FileNotFoundError(f"release tag '{release_tag}' was not found in {repository}")
+    release_id = int(release["id"])
     assets = release.get("assets", [])
     bundle_assets = [asset for asset in assets if str(asset.get("name", "")).endswith(".tar.gz")]
     if len(bundle_assets) != 1:
@@ -568,7 +585,17 @@ def fetch_release_assets_by_tag(
     downloaded: dict[str, Path] = {}
     for label, asset_name in required_names.items():
         asset = by_name[asset_name]
-        asset_url = asset.get("browser_download_url") or asset.get("url")
+        asset_detail = asset
+        attachment_id = asset.get("id")
+        if attachment_id is not None:
+            asset_detail = fetch_release_asset_detail(
+                gitea_url=gitea_url,
+                repository=repository,
+                token=token,
+                release_id=release_id,
+                attachment_id=int(attachment_id),
+            )
+        asset_url = asset_detail.get("browser_download_url") or asset_detail.get("url") or asset.get("browser_download_url") or asset.get("url")
         if not isinstance(asset_url, str) or not asset_url:
             raise ValueError(f"release asset '{asset_name}' does not expose a download URL")
         asset_url = normalize_asset_url(asset_url, gitea_url=gitea_url)
@@ -579,7 +606,17 @@ def fetch_release_assets_by_tag(
         asset = by_name.get(asset_name)
         if asset is None:
             continue
-        asset_url = asset.get("browser_download_url") or asset.get("url")
+        asset_detail = asset
+        attachment_id = asset.get("id")
+        if attachment_id is not None:
+            asset_detail = fetch_release_asset_detail(
+                gitea_url=gitea_url,
+                repository=repository,
+                token=token,
+                release_id=release_id,
+                attachment_id=int(attachment_id),
+            )
+        asset_url = asset_detail.get("browser_download_url") or asset_detail.get("url") or asset.get("browser_download_url") or asset.get("url")
         if not isinstance(asset_url, str) or not asset_url:
             raise ValueError(f"release asset '{asset_name}' does not expose a download URL")
         asset_url = normalize_asset_url(asset_url, gitea_url=gitea_url)
