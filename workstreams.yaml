@@ -72,7 +72,7 @@ workstreams:
             - docs/adr/.index.yaml
           mode: shared_contract
           contract: adr-index-generator-v1
-    ready_to_merge: false
+    ready_to_merge: true
     live_applied: true
 
   - id: ws-0214-ha-replication-adrs

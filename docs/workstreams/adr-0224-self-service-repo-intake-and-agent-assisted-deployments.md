@@ -62,10 +62,10 @@
 
 ## Expected Live Surfaces
 
-- none yet
-
-The first live smoke path should be a private-repo deployment of the Dockerized
-`education_wemeshup` GitHub repository into `*.apps.lv3.org`.
+- the named application route `education-wemeshup.apps.lv3.org`
+- the wildcard DNS record `*.apps.lv3.org -> 65.108.75.123`
+- the live-apply receipt
+  `receipts/live-applies/2026-03-28-adr-0224-coolify-wildcard-dns-live-apply.json`
 
 ## Ownership Notes
 
@@ -116,6 +116,14 @@ Observed on 2026-03-28:
 - This follow-up extends the generated `hetzner_dns_records` surface so public
   DNS aliases are derived from repo-managed `edge.aliases`, then replays the
   Coolify service converge path to publish `*.apps.lv3.org` automatically.
+- The first scoped DNS publication attempt hit an opaque Hetzner API failure on
+  wildcard-record creation while the Ansible task was still redacted by
+  `no_log`. Replaying the exact `*.apps` POST directly against the Hetzner DNS
+  API succeeded immediately, and the same repo-managed playbook then reran
+  cleanly with `changed=0`.
+- Authoritative and public recursive resolvers now answer `65.108.75.123` for
+  `education-wemeshup.apps.lv3.org`, although the controller's default resolver
+  briefly kept the earlier NXDOMAIN cached after the wildcard record appeared.
 
 ## Merge Criteria
 
