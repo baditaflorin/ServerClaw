@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.54",
+  "repo_version": "0.177.55",
   "platform_version": "0.130.43",
-  "generated_at": "2026-03-28T21:38:02Z",
-  "next_refresh_at": "2026-03-28T22:38:02Z",
+  "generated_at": "2026-03-28T21:54:11Z",
+  "next_refresh_at": "2026-03-28T22:54:11Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -4062,10 +4062,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.53",
+    "last_version": "0.177.54",
     "deployed_at": "2026-03-28",
-    "summary": "integrated ADR 0233 into main by carrying the verified private Gitea release-bundle publication path, durable repository-token secret seeding, and Cosign verification evidence onto the protected release surfaces",
-    "release_notes_url": "docs/release-notes/0.177.54.md"
+    "summary": "records ADR 0226 exact-main evidence on the current mainline by preserving the repaired host control-loop systemd baseline, the canonical mainline replay receipt, and the shared release-truth surfaces while the current live platform baseline remains 0.130.43",
+    "release_notes_url": "docs/release-notes/0.177.55.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
