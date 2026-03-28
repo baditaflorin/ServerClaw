@@ -202,12 +202,31 @@ validate_shell() {
 
 validate_json() {
   local json_file
+  local resolved_json_file=""
   local json_files=()
 
   echo "JSON validation"
   load_lines_into_array json_files < <(tracked_files '*.json')
   for json_file in "${json_files[@]}"; do
-    jq empty "$json_file"
+    if [[ "$json_file" = /* ]]; then
+      resolved_json_file="$json_file"
+    else
+      resolved_json_file="$REPO_ROOT/$json_file"
+    fi
+    if [[ ! -f "$resolved_json_file" ]]; then
+      continue
+    fi
+    if command -v jq >/dev/null 2>&1; then
+      jq empty "$resolved_json_file"
+    else
+      python3 - "$resolved_json_file" <<'PY'
+import json
+import pathlib
+import sys
+
+json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+PY
+    fi
   done
 }
 

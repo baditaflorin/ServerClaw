@@ -31,7 +31,7 @@ See [docs/runbooks/validation-gate.md](/Users/live/Documents/GITHUB_PROJECTS/pro
 - new or changed roles include `meta/argument_specs.yml`
 - playbooks and roles pass the repo-managed `ansible-lint` policy
 - shell scripts pass `shellcheck`
-- repo-managed JSON artifacts pass `jq empty`
+- repo-managed JSON artifacts pass syntax validation via `jq` when available, or a `python3` JSON parser fallback when `jq` is absent
 - service-owning roles ship and import explicit `tasks/verify.yml` contracts
 - canonical repository data models pass schema validation
 - architecture fitness functions verify the governed replaceability scorecards and vendor exit plans for critical product ADRs
@@ -46,6 +46,7 @@ See [docs/runbooks/validation-gate.md](/Users/live/Documents/GITHUB_PROJECTS/pro
 - validation bootstraps `uv` automatically when the host only has `python3` and not a preinstalled `uv` or `uvx` binary
 - validation uses `uv tool run --from ...` for `ansible-core`, `ansible-lint`, and `yamllint`
 - validation runs repo Python validators through `uv run --with ... python3 ...` so the build-server path and local fallback use the same interpreter contract
+- validation resolves tracked JSON files against the repo root, falls back to `python3` when `jq` is unavailable, and skips rsync-excluded generated JSON artifacts that are intentionally absent from mirrored remote workspaces
 - required Ansible collections are installed from [collections/requirements.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/collections/requirements.yml)
 - validation collections are cached under `.ansible/validation/collections`
 - lint-oriented stages operate on tracked repository files so unrelated local work-in-progress does not fail the repo gate
@@ -101,4 +102,5 @@ make validate-generated-docs
 - if validation fails during collection bootstrap, rerun after confirming network access to Ansible Galaxy and package indexes
 - if validation fails on generated vars, regenerate [inventory/group_vars/platform.yml](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/inventory/group_vars/platform.yml) from the canonical inputs instead of hand-editing the file
 - if CI fails but local validation passes, rerun `make validate` from a clean working tree to catch unstaged or ignored-file drift
+- if the build-server mirror is missing a generated JSON artifact that is intentionally excluded from rsync, keep the artifact excluded and extend the validation contract only if the remote gate truly needs that file
 - if a new file type needs validation, extend [scripts/validate_repo.sh](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/validate_repo.sh) and keep `make validate` as the single top-level entry point

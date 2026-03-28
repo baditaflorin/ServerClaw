@@ -50,9 +50,31 @@ def test_validate_repo_supports_architecture_fitness_stage() -> None:
     assert "scripts/replaceability_scorecards.py" in script
 
 
+def test_validate_repo_json_stage_falls_back_without_jq() -> None:
+    script = VALIDATE_REPO_SCRIPT.read_text()
+
+    assert "if command -v jq" in script
+    assert 'resolved_json_file="$REPO_ROOT/$json_file"' in script
+    assert "json.loads" in script
+
+
+def test_validate_repo_json_stage_skips_missing_remote_artifacts() -> None:
+    script = VALIDATE_REPO_SCRIPT.read_text()
+
+    assert 'if [[ ! -f "$resolved_json_file" ]]; then' in script
+    assert "continue" in script
+
+
 def test_check_role_argument_specs_avoids_bash4_only_mapfile() -> None:
     script = CHECK_ROLE_ARGUMENT_SPECS_SCRIPT.read_text()
 
     assert "changed_roles=()" in script
     assert "while IFS= read -r line;" in script
     assert "mapfile" not in script
+
+
+def test_check_role_argument_specs_handles_missing_merge_base_history() -> None:
+    script = CHECK_ROLE_ARGUMENT_SPECS_SCRIPT.read_text()
+
+    assert "changed_from_base" in script
+    assert "2>/dev/null" in script

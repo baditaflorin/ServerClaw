@@ -24,9 +24,14 @@ base_ref() {
 collect_candidate_roles() {
   local base
   base="$(base_ref)"
+  local changed_from_base=""
+
+  if ! changed_from_base="$(git -C "$REPO_ROOT" diff --name-only "$base"...HEAD -- "$COLLECTION_ROLES_ROOT" 2>/dev/null)"; then
+    changed_from_base=""
+  fi
 
   {
-    git -C "$REPO_ROOT" diff --name-only "$base"...HEAD -- "$COLLECTION_ROLES_ROOT"
+    printf '%s\n' "$changed_from_base"
     git -C "$REPO_ROOT" diff --name-only --cached -- "$COLLECTION_ROLES_ROOT"
     git -C "$REPO_ROOT" diff --name-only -- "$COLLECTION_ROLES_ROOT"
     git -C "$REPO_ROOT" ls-files --others --exclude-standard -- "$COLLECTION_ROLES_ROOT"
