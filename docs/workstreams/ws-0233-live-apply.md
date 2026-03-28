@@ -43,7 +43,7 @@
 
 - the private `ops/proxmox_florin_server` Gitea repo carries repo-managed Actions secrets for Cosign signing
 - the self-hosted `docker-build-lv3` runner can assemble a control-plane bundle, sign it with Cosign, and publish the resulting assets into a Gitea Release
-- a follow-up verification path can fetch the private release assets and confirm the detached Cosign signature using the committed public key
+- a follow-up verification path can fetch the private release assets and confirm the published Sigstore bundle using the committed public key
 
 ## Verification
 

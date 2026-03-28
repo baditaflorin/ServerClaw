@@ -65,6 +65,10 @@ def test_write_bundle_archive_embeds_manifest_and_selected_files(tmp_path: Path,
     assert manifest_payload["contents"]["file_count"] == 2
     assert manifest_payload["bundle"]["verification_public_key"] == "keys/gitea-release-bundle-cosign.pub"
     assert manifest_payload["bundle"]["sigstore_bundle_asset"] == "lv3-control-bundle-branch-main-0123456789ab.tar.gz.sigstore.json"
+    assert (
+        manifest_payload["bundle"]["optional_detached_signature_asset"]
+        == "lv3-control-bundle-branch-main-0123456789ab.tar.gz.sig"
+    )
 
 
 def test_resolve_tracked_bundle_files_respects_excludes(tmp_path: Path, monkeypatch) -> None:

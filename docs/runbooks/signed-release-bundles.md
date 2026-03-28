@@ -10,7 +10,7 @@ The current ADR 0233 implementation:
 
 - assembles a repo-managed control bundle with `scripts/release_bundle.py`
 - signs the bundle with a Cosign key pair mirrored only under `.local/gitea/`
-- publishes the bundle, detached signature, Sigstore bundle, and SHA256 sidecar into a private Gitea Release
+- publishes the bundle, Sigstore bundle, and SHA256 sidecar into a private Gitea Release
 - re-downloads and verifies the same release assets through the private Gitea API
 
 ## Bootstrap Signing Material
@@ -100,7 +100,7 @@ python3 scripts/release_bundle.py verify-release \
 The verifier checks:
 
 - the release exists in the private Gitea repo
-- the expected `.tar.gz`, `.sig`, `.sigstore.json`, and `.sha256` assets are present
+- the expected `.tar.gz`, `.sigstore.json`, and `.sha256` assets are present
 - `cosign verify-blob` succeeds with the committed public key and the published Sigstore bundle
 - the detached SHA256 sidecar matches the downloaded bundle
 - the embedded `release-bundle-manifest.json` can be read from the archive
@@ -109,4 +109,5 @@ The verifier checks:
 
 - Non-`main` branch bundles are intentionally published as prereleases.
 - The current live Gitea repo is not automatically synced from `origin/main`, so branch-safe verification should push the workstream branch into Gitea instead of assuming the live Gitea `main` already contains the latest GitHub state.
+- When Cosign also emits a detached `.sig`, the workflow uploads it as an optional compatibility asset, but verification relies on the Sigstore bundle.
 - Rotate the signing key pair deliberately. A new private key requires committing the matching public key update and re-running `make converge-gitea`.

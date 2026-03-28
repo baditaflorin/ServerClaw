@@ -192,7 +192,7 @@ def build_manifest(
             "release_tag": identity.release_tag,
             "release_name": identity.release_name,
             "prerelease": identity.prerelease,
-            "signature_asset": f"{identity.asset_basename}.tar.gz{SIGNATURE_SUFFIX}",
+            "optional_detached_signature_asset": f"{identity.asset_basename}.tar.gz{SIGNATURE_SUFFIX}",
             "sigstore_bundle_asset": f"{identity.asset_basename}.tar.gz{SIGSTORE_BUNDLE_SUFFIX}",
             "sha256_asset": f"{identity.asset_basename}.tar.gz{SHA256_SUFFIX}",
             "verification_public_key": str(public_key_path.relative_to(REPO_ROOT)).replace(os.sep, "/"),
@@ -454,9 +454,8 @@ def sign_bundle(
         raise FileNotFoundError(f"cosign did not materialize the Sigstore bundle at {sigstore_bundle_path}")
     if not signature_path.exists():
         signature_stdout = result.stdout.strip()
-        if not signature_stdout:
-            raise FileNotFoundError(f"cosign did not materialize the detached signature at {signature_path}")
-        signature_path.write_text(signature_stdout + "\n")
+        if signature_stdout:
+            signature_path.write_text(signature_stdout + "\n")
 
 
 def verify_bundle(
@@ -524,10 +523,10 @@ def fetch_release_assets_by_tag(
     bundle_name = str(bundle_asset["name"])
     required_names = {
         "bundle": bundle_name,
-        "signature": f"{bundle_name}{SIGNATURE_SUFFIX}",
         "sha256": f"{bundle_name}{SHA256_SUFFIX}",
     }
     optional_names = {
+        "signature": f"{bundle_name}{SIGNATURE_SUFFIX}",
         "sigstore_bundle": f"{bundle_name}{SIGSTORE_BUNDLE_SUFFIX}",
     }
     by_name = {str(asset["name"]): asset for asset in assets}
@@ -554,6 +553,11 @@ def fetch_release_assets_by_tag(
         asset_path = destination_dir / asset_name
         download_asset(asset_url, token=token, destination=asset_path)
         downloaded[label] = asset_path
+    if "sigstore_bundle" not in downloaded and "signature" not in downloaded:
+        raise FileNotFoundError(
+            f"release '{release_tag}' is missing verification material: expected {bundle_name}{SIGSTORE_BUNDLE_SUFFIX}"
+            f" or {bundle_name}{SIGNATURE_SUFFIX}"
+        )
     return release, downloaded
 
 
@@ -697,8 +701,6 @@ def command_build(args: argparse.Namespace) -> int:
 def command_publish(args: argparse.Namespace) -> int:
     token = load_api_token(args.api_token)
     bundle_path, signature_path, sigstore_bundle_path, sha256_path, manifest, identity = build_release_bundle(args)
-    if not signature_path.exists():
-        raise FileNotFoundError(f"missing bundle signature at {signature_path}")
     if not sigstore_bundle_path.exists():
         raise FileNotFoundError(f"missing Sigstore bundle at {sigstore_bundle_path}")
     release_body = (
@@ -706,6 +708,7 @@ def command_publish(args: argparse.Namespace) -> int:
         f"- Repository: `{args.repository}`\n"
         f"- Bundle asset: `{bundle_path.name}`\n"
         f"- Sigstore bundle asset: `{sigstore_bundle_path.name}`\n"
+        f"- Detached signature asset: `{signature_path.name}` when emitted by Cosign\n"
         f"- Verification key: `{manifest['bundle']['verification_public_key']}`\n"
         f"- File count: `{manifest['contents']['file_count']}`\n"
     )
@@ -724,17 +727,17 @@ def command_publish(args: argparse.Namespace) -> int:
         release=release,
         assets=[
             ReleaseAsset(name=bundle_path.name, path=bundle_path),
-            ReleaseAsset(name=signature_path.name, path=signature_path),
             ReleaseAsset(name=sigstore_bundle_path.name, path=sigstore_bundle_path),
             ReleaseAsset(name=sha256_path.name, path=sha256_path),
-        ],
+        ]
+        + ([ReleaseAsset(name=signature_path.name, path=signature_path)] if signature_path.exists() else []),
     )
     payload = {
         "release_tag": identity.release_tag,
         "release_name": identity.release_name,
         "prerelease": identity.prerelease,
         "bundle_path": str(bundle_path),
-        "signature_path": str(signature_path),
+        "signature_path": str(signature_path) if signature_path.exists() else "",
         "sigstore_bundle_path": str(sigstore_bundle_path),
         "sha256_path": str(sha256_path),
         "release_url": release.get("html_url"),
@@ -771,7 +774,7 @@ def command_verify_release(args: argparse.Namespace) -> int:
         "release_tag": args.release_tag,
         "release_url": release.get("html_url"),
         "bundle_path": str(assets["bundle"]),
-        "signature_path": str(assets["signature"]),
+        "signature_path": str(assets["signature"]) if "signature" in assets else "",
         "sigstore_bundle_path": str(assets["sigstore_bundle"]) if "sigstore_bundle" in assets else "",
         "sha256_path": str(assets["sha256"]),
         "bundle_sha256": actual_sha,
