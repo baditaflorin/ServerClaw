@@ -15,9 +15,10 @@
 - Shared Surfaces: `docs/adr/0224-self-service-repo-intake-and-agent-assisted-deployments.md`,
   `docs/workstreams/adr-0224-self-service-repo-intake-and-agent-assisted-deployments.md`,
   `docs/adr/.index.yaml`, `docs/runbooks/configure-coolify.md`,
-  `inventory/host_vars/proxmox_florin.yml`, `inventory/group_vars/platform.yml`,
-  `config/subdomain-exposure-registry.json`,
+  `inventory/group_vars/platform.yml`, `playbooks/coolify.yml`,
+  `scripts/generate_platform_vars.py`,
   `scripts/coolify_tool.py`, `scripts/lv3_cli.py`,
+  `tests/test_generate_platform_vars.py`, `tests/test_coolify_playbook.py`,
   `tests/test_coolify_tool.py`, `tests/test_lv3_cli.py`, `workstreams.yaml`
 - Ownership Manifest: `workstreams.yaml` `ownership_manifest`
 
@@ -45,11 +46,13 @@
 ## Expected Repo Surfaces
 
 - `docs/runbooks/configure-coolify.md`
-- `inventory/host_vars/proxmox_florin.yml`
 - `inventory/group_vars/platform.yml`
-- `config/subdomain-exposure-registry.json`
+- `playbooks/coolify.yml`
+- `scripts/generate_platform_vars.py`
 - `scripts/coolify_tool.py`
 - `scripts/lv3_cli.py`
+- `tests/test_generate_platform_vars.py`
+- `tests/test_coolify_playbook.py`
 - `tests/test_coolify_tool.py`
 - `tests/test_lv3_cli.py`
 - `docs/adr/0224-self-service-repo-intake-and-agent-assisted-deployments.md`
@@ -107,6 +110,12 @@ Observed on 2026-03-28:
   nftables policy, `education-wemeshup.apps.lv3.org` returned `HTTP/2 200` and
   `/api/v1/catalog/taxonomy` answered with API version `v1`, `2` categories,
   and `6` activities through the public edge.
+- Browser reachability still failed outside controller-local `--resolve` probes
+  because `*.apps.lv3.org` was present only as an NGINX edge alias, not as a
+  managed Hetzner DNS wildcard record.
+- This follow-up extends the generated `hetzner_dns_records` surface so public
+  DNS aliases are derived from repo-managed `edge.aliases`, then replays the
+  Coolify service converge path to publish `*.apps.lv3.org` automatically.
 
 ## Merge Criteria
 

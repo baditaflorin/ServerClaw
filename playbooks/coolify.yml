@@ -82,6 +82,26 @@
       vars:
         proxmox_security_manage_acme: false
 
+- name: Ensure Hetzner DNS publication for Coolify
+  hosts: proxmox_hosts
+  become: false
+  gather_facts: false
+  vars_files:
+    - "{{ lookup('ansible.builtin.env', 'PWD') }}/inventory/group_vars/platform.yml"
+  tags:
+    - tier-1
+    - automation
+    - service-coolify
+
+  tasks:
+    - name: Ensure Hetzner DNS records are present
+      ansible.builtin.include_role:
+        name: lv3.platform.hetzner_dns_records
+        apply:
+          delegate_to: localhost
+          become: false
+      run_once: true
+
 - name: Converge Coolify on the dedicated guest
   hosts: "{{ 'coolify-lv3' if (env | default('production')) == 'production' else 'coolify-staging-lv3' }}"
   become: true

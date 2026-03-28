@@ -33,11 +33,13 @@ workstreams:
       - docs/workstreams/adr-0224-self-service-repo-intake-and-agent-assisted-deployments.md
       - docs/adr/.index.yaml
       - docs/runbooks/configure-coolify.md
-      - inventory/host_vars/proxmox_florin.yml
       - inventory/group_vars/platform.yml
-      - config/subdomain-exposure-registry.json
+      - playbooks/coolify.yml
+      - scripts/generate_platform_vars.py
       - scripts/coolify_tool.py
       - scripts/lv3_cli.py
+      - tests/test_generate_platform_vars.py
+      - tests/test_coolify_playbook.py
       - tests/test_coolify_tool.py
       - tests/test_lv3_cli.py
       - workstreams.yaml
@@ -56,10 +58,12 @@ workstreams:
         - id: repo_intake_runtime_wrapper
           paths:
             - docs/runbooks/configure-coolify.md
-            - inventory/host_vars/proxmox_florin.yml
             - inventory/group_vars/platform.yml
-            - config/subdomain-exposure-registry.json
+            - playbooks/coolify.yml
+            - scripts/generate_platform_vars.py
             - scripts/coolify_tool.py
+            - tests/test_generate_platform_vars.py
+            - tests/test_coolify_playbook.py
             - tests/test_coolify_tool.py
             - tests/test_lv3_cli.py
           mode: exclusive
@@ -68,7 +72,7 @@ workstreams:
             - docs/adr/.index.yaml
           mode: shared_contract
           contract: adr-index-generator-v1
-    ready_to_merge: true
+    ready_to_merge: false
     live_applied: true
 
   - id: ws-0214-ha-replication-adrs

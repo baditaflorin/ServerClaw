@@ -35,6 +35,7 @@ HETZNER_DNS_API_TOKEN=... make converge-coolify
 This workflow:
 
 - provisions or updates the `coolify-lv3` guest on Proxmox
+- publishes the managed `apps.lv3.org` and `*.apps.lv3.org` Hetzner DNS A records
 - converges Docker and the Coolify runtime stack on the guest
 - bootstraps the initial Coolify root account, enables the API, and mints the durable API token
 - registers the local deployment server inside Coolify using the repo-managed SSH key
@@ -116,6 +117,7 @@ Expected results:
 
 - `coolify.lv3.org` returns `302` to the shared oauth2-proxy sign-in flow
 - `repo-smoke.apps.lv3.org` returns `200`
+- public app hostnames under `*.apps.lv3.org` resolve through Hetzner DNS without manual per-app record creation
 - the private GitHub wrapper run creates or reuses a local SSH keypair, a GitHub
   repo deploy key, and a Coolify private key before triggering the deployment
 - Docker Compose applications must use `--compose-domain SERVICE=DOMAIN`

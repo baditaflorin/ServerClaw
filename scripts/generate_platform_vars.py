@@ -121,6 +121,10 @@ def require_list(value: Any, path: str) -> list[Any]:
     return value
 
 
+def require_string_list(value: Any, path: str) -> list[str]:
+    return [require_string(item, f"{path}[{index}]") for index, item in enumerate(require_list(value, path))]
+
+
 def resolve_dns_target(target: str, host_vars: dict[str, Any]) -> str:
     if target == MANAGEMENT_IPV4_TOKEN:
         return require_string(host_vars.get("management_ipv4"), "host_vars.management_ipv4")
@@ -190,6 +194,35 @@ def build_dns_records(
     service_topology: dict[str, Any],
     host_vars: dict[str, Any],
 ) -> dict[str, list[dict[str, Any]]]:
+    def append_record(visibility: str, record: dict[str, Any]) -> None:
+        bucket = records.setdefault(visibility, [])
+        if record not in bucket:
+            bucket.append(record)
+
+    def managed_zone_name(service: dict[str, Any], path: str) -> str:
+        dns = require_mapping(service.get("dns"), f"{path}.dns")
+        public_hostname = require_string(service.get("public_hostname"), f"{path}.public_hostname")
+        dns_name = require_string(dns.get("name"), f"{path}.dns.name")
+        if dns_name == "@":
+            return public_hostname
+        prefix = f"{dns_name}."
+        if not public_hostname.startswith(prefix):
+            raise ValueError(
+                f"{path}.public_hostname must start with {prefix!r} so wildcard aliases can derive the zone name"
+            )
+        zone_name = public_hostname[len(prefix) :]
+        if not zone_name:
+            raise ValueError(f"{path}.public_hostname must include a managed DNS zone suffix")
+        return zone_name
+
+    def relative_record_name(fqdn: str, zone_name: str, path: str) -> str:
+        if fqdn == zone_name:
+            return "@"
+        suffix = f".{zone_name}"
+        if not fqdn.endswith(suffix):
+            raise ValueError(f"{path} must stay inside the managed DNS zone {zone_name}")
+        return fqdn[: -len(suffix)]
+
     records = {
         "public": [
             {
@@ -201,14 +234,13 @@ def build_dns_records(
         ],
         "tailnet": [],
     }
-    for service in service_topology.values():
+    for service_id, service in service_topology.items():
         dns = service.get("dns")
         if not dns or not dns.get("managed"):
             continue
         visibility = dns["visibility"]
-        if visibility not in records:
-            records[visibility] = []
-        records[visibility].append(
+        append_record(
+            visibility,
             {
                 "name": dns["name"],
                 "type": dns["type"],
@@ -216,10 +248,26 @@ def build_dns_records(
                 "ttl": dns["ttl"],
             }
         )
+        edge = require_mapping(service.get("edge", {}), f"service_topology.{service_id}.edge")
+        aliases = require_string_list(edge.get("aliases", []), f"service_topology.{service_id}.edge.aliases")
+        if visibility != "public" or not aliases:
+            continue
+        zone_name = managed_zone_name(service, f"service_topology.{service_id}")
+        for index, alias in enumerate(aliases):
+            append_record(
+                visibility,
+                {
+                    "name": relative_record_name(alias, zone_name, f"service_topology.{service_id}.edge.aliases[{index}]"),
+                    "type": dns["type"],
+                    "value": dns["target"],
+                    "ttl": dns["ttl"],
+                },
+            )
 
     for index, record in enumerate(host_vars.get("mail_platform_dns_records", [])):
         record = require_mapping(record, f"host_vars.mail_platform_dns_records[{index}]")
-        records["public"].append(
+        append_record(
+            "public",
             {
                 "name": require_string(record.get("name"), f"host_vars.mail_platform_dns_records[{index}].name"),
                 "type": require_string(record.get("type"), f"host_vars.mail_platform_dns_records[{index}].type"),

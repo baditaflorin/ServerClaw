@@ -113,6 +113,7 @@ def test_build_platform_vars_includes_plane_publication_topology() -> None:
     assert plane["urls"]["public"] == "https://tasks.lv3.org"
     assert plane["urls"]["controller"] == "http://100.64.0.1:8011"
 
+
 def test_build_service_urls_resolves_realtime_internal_url() -> None:
     ports = {"netdata_port": 19999}
     service = {"owning_vm": "monitoring-lv3"}
@@ -169,4 +170,19 @@ def test_build_service_urls_include_coolify_controller_and_apps_endpoints() -> N
     assert app_urls == {
         "public": "https://apps.lv3.org",
         "internal": "http://10.10.10.70:80",
+    }
+
+
+def test_build_platform_vars_includes_coolify_wildcard_dns_record() -> None:
+    platform_vars = generate_platform_vars.build_platform_vars()
+
+    wildcard_record = next(
+        record for record in platform_vars["hetzner_dns_records"] if record["name"] == "*.apps"
+    )
+
+    assert wildcard_record == {
+        "name": "*.apps",
+        "type": "A",
+        "value": "65.108.75.123",
+        "ttl": 60,
     }
