@@ -84,6 +84,21 @@ argument_specs:
       gitea_runner_registration_token_local_file:
         type: path
         required: true
+      gitea_release_bundle_cosign_private_key_local_file:
+        type: path
+        required: true
+      gitea_release_bundle_cosign_password_local_file:
+        type: path
+        required: true
+      gitea_release_bundle_cosign_public_key_repo_file:
+        type: path
+        required: true
+      gitea_release_bundle_cosign_private_key_secret_name:
+        type: str
+        required: true
+      gitea_release_bundle_cosign_password_secret_name:
+        type: str
+        required: true
       gitea_webhook_secret_remote_file:
         type: path
         required: true

@@ -44,6 +44,8 @@ def test_gitea_bootstrap_script_creates_admin_token_and_runner_token() -> None:
     assert "generate-access-token" in template
     assert "--raw" in template
     assert "generate-runner-token" in template
+    assert "RELEASE_BUNDLE_COSIGN_PRIVATE_KEY" in template
+    assert "/actions/secrets/" in template
 
 
 def test_runner_defaults_use_mirrored_registration_token() -> None:
@@ -76,6 +78,8 @@ def test_runtime_tasks_require_oidc_secret_and_database_password() -> None:
     names = {task["name"] for task in tasks}
     assert "Ensure the Gitea database password exists on the control machine" in names
     assert "Ensure the Gitea OIDC client secret exists on the control machine" in names
+    assert "Ensure the release-bundle Cosign private key exists on the control machine" in names
+    assert "Ensure the release-bundle Cosign password exists on the control machine" in names
     assert "Mirror the Gitea admin token to the control machine" in names
     assert "Mirror the Gitea runner registration token to the control machine" in names
 
@@ -84,3 +88,10 @@ def test_gitea_waits_on_the_published_service_address() -> None:
     tasks = load_tasks()
     wait_task = next(task for task in tasks if task["name"] == "Wait for Gitea to listen locally")
     assert wait_task["ansible.builtin.wait_for"]["host"] == "{{ ansible_host }}"
+
+
+def test_gitea_defaults_include_release_bundle_signing_paths() -> None:
+    defaults = ROLE_DEFAULTS.read_text()
+    assert ".local/gitea/release-bundle-cosign.key" in defaults
+    assert ".local/gitea/release-bundle-cosign.password.txt" in defaults
+    assert "keys/gitea-release-bundle-cosign.pub" in defaults

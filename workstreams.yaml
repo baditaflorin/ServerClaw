@@ -14,6 +14,63 @@ release_policy:
   breaking_change_criteria: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/version-semantics.json
 
 workstreams:
+  - id: ws-0233-live-apply
+    adr: "0233"
+    title: Live apply signed release bundles via Gitea Releases and Cosign
+    status: in_progress
+    owner: codex
+    branch: codex/ws-0233-live-apply
+    worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0233-live-apply
+    doc: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0233-live-apply.md
+    depends_on:
+      - adr-0143-gitea-for-self-hosted-git-and-ci
+      - adr-0168-automated-validation-gate
+      - adr-0229-gitea-actions-runners-for-on-platform-validation-and-release-preparation
+    conflicts_with: []
+    shared_surfaces:
+      - workstreams.yaml
+      - docs/workstreams/ws-0233-live-apply.md
+      - docs/adr/0233-signed-release-bundles-via-gitea-releases-and-cosign.md
+      - docs/runbooks/configure-gitea.md
+      - docs/runbooks/signed-release-bundles.md
+      - config/controller-local-secrets.json
+      - config/workflow-catalog.json
+      - .config-locations.yaml
+      - .gitea/workflows/release-bundle.yml
+      - keys/gitea-release-bundle-cosign.pub
+      - scripts/release_bundle.py
+      - collections/ansible_collections/lv3/platform/roles/gitea_runtime/defaults/main.yml
+      - collections/ansible_collections/lv3/platform/roles/gitea_runtime/tasks/main.yml
+      - collections/ansible_collections/lv3/platform/roles/gitea_runtime/templates/bootstrap-gitea.sh.j2
+      - tests/test_release_bundle.py
+      - tests/test_gitea_runtime_role.py
+    ownership_manifest:
+      owned_surfaces:
+        - id: workstream_registry
+          paths:
+            - workstreams.yaml
+          mode: shared_contract
+          contract: workstream-registry-v1
+        - id: adr_0233_live_apply
+          paths:
+            - docs/workstreams/ws-0233-live-apply.md
+            - docs/adr/0233-signed-release-bundles-via-gitea-releases-and-cosign.md
+            - docs/runbooks/configure-gitea.md
+            - docs/runbooks/signed-release-bundles.md
+            - config/controller-local-secrets.json
+            - config/workflow-catalog.json
+            - .config-locations.yaml
+            - .gitea/workflows/release-bundle.yml
+            - keys/gitea-release-bundle-cosign.pub
+            - scripts/release_bundle.py
+            - collections/ansible_collections/lv3/platform/roles/gitea_runtime/defaults/main.yml
+            - collections/ansible_collections/lv3/platform/roles/gitea_runtime/tasks/main.yml
+            - collections/ansible_collections/lv3/platform/roles/gitea_runtime/templates/bootstrap-gitea.sh.j2
+            - tests/test_release_bundle.py
+            - tests/test_gitea_runtime_role.py
+          mode: exclusive
+    ready_to_merge: false
+    live_applied: false
   - id: ws-0231-live-apply
     adr: "0231"
     title: Live apply ADR 0231 local secret delivery via OpenBao Agent and systemd credentials
