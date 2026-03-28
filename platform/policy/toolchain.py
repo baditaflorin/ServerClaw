@@ -72,10 +72,10 @@ def _platform_key() -> tuple[str, str]:
         "arm64": "arm64",
         "aarch64": "arm64",
     }
-    machine = machine_aliases.get(raw_machine)
-    if machine is None:
+    resolved_machine = machine_aliases.get(raw_machine)
+    if resolved_machine is None:
         raise RuntimeError(f"unsupported machine architecture for ADR 0230 policy tools: {raw_machine}")
-    return raw_system, machine
+    return raw_system, resolved_machine
 
 
 def _opa_asset_name(system: str, machine: str) -> str:

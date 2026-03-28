@@ -40,15 +40,16 @@ def _run(command: list[str], *, cwd: Path, input_text: str | None = None) -> Non
     result = subprocess.run(
         command,
         cwd=cwd,
-        input=input_text,
-        text=True,
+        input=input_text.encode("utf-8") if input_text is not None else None,
         capture_output=True,
         check=False,
     )
     if result.returncode == 0:
         return
+    stdout = result.stdout.decode("utf-8", errors="replace").strip()
+    stderr = result.stderr.decode("utf-8", errors="replace").strip()
     details = "\n".join(
-        part for part in [result.stdout.strip(), result.stderr.strip()] if part
+        part for part in [stdout, stderr] if part
     ).strip()
     if not details:
         details = f"command exited with status {result.returncode}"

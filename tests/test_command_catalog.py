@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import sys
 from pathlib import Path
+from typing import Any, cast
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -25,7 +26,7 @@ def load_module(name: str, relative_path: str):
 
 def test_evaluate_approval_routes_decision_through_policy_engine(monkeypatch) -> None:
     module = load_module("command_catalog_module", "scripts/command_catalog.py")
-    captured: dict[str, object] = {}
+    captured: dict[str, Any] = {}
 
     def fake_policy(payload, *, repo_root=None, toolchain=None):  # type: ignore[no-untyped-def]
         captured["payload"] = payload
@@ -79,7 +80,7 @@ def test_evaluate_approval_routes_decision_through_policy_engine(monkeypatch) ->
     )
 
     assert verdict["approved"] is True
-    policy_input = captured["payload"]
+    policy_input = cast(dict[str, Any], captured["payload"])
     assert policy_input["command_id"] == "promote-to-production"
     assert policy_input["requester_class"] == "human_operator"
     assert policy_input["contract"]["approval_policy"] == "operator_approved"

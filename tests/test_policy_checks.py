@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -78,3 +79,27 @@ def test_validate_repository_policies_runs_opa_and_conftest(tmp_path: Path, monk
     records = json.loads(record_path.read_text())
     assert any(entry[0] == "test" for entry in records)
     assert any(entry[0] == "test" and "--policy" in entry for entry in records)
+
+
+def test_run_decodes_non_utf8_subprocess_output(monkeypatch) -> None:
+    module = load_module("policy_checks_module_decode", "scripts/policy_checks.py")
+
+    def fake_run(*args, **kwargs):  # type: ignore[no-untyped-def]
+        return subprocess.CompletedProcess(
+            args=args[0],
+            returncode=1,
+            stdout=b"stdout ok",
+            stderr=b"stderr byte \xa3",
+        )
+
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
+
+    try:
+        module._run(["fake-tool"], cwd=REPO_ROOT)
+    except RuntimeError as exc:
+        message = str(exc)
+    else:  # pragma: no cover - defensive
+        raise AssertionError("_run should raise when the subprocess fails")
+
+    assert "stdout ok" in message
+    assert "stderr byte" in message
