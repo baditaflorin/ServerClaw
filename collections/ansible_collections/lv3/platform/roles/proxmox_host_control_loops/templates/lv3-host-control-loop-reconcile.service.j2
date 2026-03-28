@@ -1,0 +1,29 @@
+[Unit]
+Description={{ proxmox_host_control_loops_description }}
+After={{ proxmox_host_control_loops_after_units | join(' ') }}
+Wants={{ proxmox_host_control_loops_wants_units | join(' ') }}
+StartLimitIntervalSec={{ proxmox_host_control_loops_start_limit_interval_seconds }}
+StartLimitBurst={{ proxmox_host_control_loops_start_limit_burst }}
+
+[Service]
+Type=oneshot
+User={{ proxmox_host_control_loops_service_user }}
+Group={{ proxmox_host_control_loops_service_group }}
+ExecStart={{ proxmox_host_control_loops_script_path }} --status-file {{ proxmox_host_control_loops_status_file }} --history-dir {{ proxmox_host_control_loops_history_dir }} --request-path {{ proxmox_host_control_loops_reconcile_request_path }} --unit-name {{ proxmox_host_control_loops_service_name }}
+TimeoutStartSec={{ proxmox_host_control_loops_timeout_start_seconds }}
+Restart=on-failure
+RestartSec={{ proxmox_host_control_loops_restart_seconds }}
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+SystemCallArchitectures=native
+ReadWritePaths={{ proxmox_host_control_loops_root }}
+SyslogIdentifier={{ proxmox_host_control_loops_syslog_identifier }}
+UMask=0077

@@ -1,0 +1,102 @@
+---
+# Purpose: Install the canonical ADR 0226 host-resident control-loop script and its managed systemd timer and path units on proxmox_florin.
+# Use case: Run through the control-loops tagged host play when the Proxmox host needs the repo-managed systemd supervisor baseline or a later replay.
+# Inputs:
+#   - proxmox_host_control_loops_*: Filesystem paths, unit names, timer cadence, and service hardening settings.
+# Outputs:
+#   - Rendered host control-loop script under /usr/local/libexec and enabled timer/path units under /etc/systemd/system.
+# Idempotency: Fully idempotent.
+# Dependencies:
+#   - ADR 0220: Orders the loop after the substrate/bootstrap phases reach usable host networking and Proxmox services.
+#   - ADR 0224: Treats the host as a durable runtime for routine operations.
+#   - ADR 0226: Requires service, timer, and path unit coverage.
+#   - Role: lv3.platform.common — reused to assert timer and path units are active after deployment.
+# Related ADRs: 0204, 0220, 0224, 0226
+
+- name: Validate Proxmox host control-loop inputs
+  ansible.builtin.assert:
+    that:
+      - proxmox_host_control_loops_root | length > 0
+      - proxmox_host_control_loops_request_dir | length > 0
+      - proxmox_host_control_loops_history_dir | length > 0
+      - proxmox_host_control_loops_status_file | length > 0
+      - proxmox_host_control_loops_reconcile_request_path | length > 0
+      - proxmox_host_control_loops_script_path | length > 0
+      - proxmox_host_control_loops_service_name | length > 0
+      - proxmox_host_control_loops_timer_name | length > 0
+      - proxmox_host_control_loops_path_name | length > 0
+      - proxmox_host_control_loops_timer_on_calendar | length > 0
+      - proxmox_host_control_loops_service_user | length > 0
+      - proxmox_host_control_loops_service_group | length > 0
+    fail_msg: "proxmox_host_control_loops requires state paths, unit names, schedule, and service identity inputs."
+
+- name: Ensure the host control-loop script directory exists
+  ansible.builtin.file:
+    path: "{{ proxmox_host_control_loops_script_path | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Ensure the host control-loop state directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ proxmox_host_control_loops_service_user }}"
+    group: "{{ proxmox_host_control_loops_service_group }}"
+    mode: "0750"
+  loop:
+    - "{{ proxmox_host_control_loops_root }}"
+    - "{{ proxmox_host_control_loops_request_dir }}"
+    - "{{ proxmox_host_control_loops_history_dir }}"
+    - "{{ proxmox_host_control_loops_status_dir }}"
+
+- name: Render the host control-loop reconcile script
+  ansible.builtin.template:
+    src: lv3-host-control-loop-reconcile.py.j2
+    dest: "{{ proxmox_host_control_loops_script_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Render the host control-loop systemd service
+  ansible.builtin.template:
+    src: lv3-host-control-loop-reconcile.service.j2
+    dest: "/etc/systemd/system/{{ proxmox_host_control_loops_service_name }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the host control-loop systemd timer
+  ansible.builtin.template:
+    src: lv3-host-control-loop-reconcile.timer.j2
+    dest: "/etc/systemd/system/{{ proxmox_host_control_loops_timer_name }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the host control-loop systemd path unit
+  ansible.builtin.template:
+    src: lv3-host-control-loop-reconcile.path.j2
+    dest: "/etc/systemd/system/{{ proxmox_host_control_loops_path_name }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Ensure the host control-loop timer is enabled and active
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: systemd_unit
+  vars:
+    common_systemd_unit_name: "{{ proxmox_host_control_loops_timer_name }}"
+    common_systemd_unit_daemon_reload: true
+    common_systemd_unit_verify_active: true
+
+- name: Ensure the host control-loop path unit is enabled and active
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: systemd_unit
+  vars:
+    common_systemd_unit_name: "{{ proxmox_host_control_loops_path_name }}"
+    common_systemd_unit_daemon_reload: false
+    common_systemd_unit_verify_active: true

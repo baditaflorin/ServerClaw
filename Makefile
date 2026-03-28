@@ -16,7 +16,6 @@ COOLIFY_ARGS ?=
 RECEIPT ?=
 COMMAND ?=
 CONTRACT ?=
-CAPABILITY ?=
 SERVICE ?=
 DURATION_MINUTES ?= 30
 TTL_SECONDS ?= 300
@@ -60,7 +59,7 @@ COLLECTION_NAMESPACE ?= lv3
 COLLECTION_NAME ?= platform
 COLLECTION_ROOT := $(REPO_ROOT)/collections/ansible_collections/$(COLLECTION_NAMESPACE)/$(COLLECTION_NAME)
 COLLECTION_DIST_DIR ?= $(REPO_ROOT)/build/collections
-COLLECTION_VERSION := $(shell python3 -c "import pathlib,re; text=pathlib.Path('$(COLLECTION_ROOT)/galaxy.yml').read_text(); match=re.search(r'^version:\\s*([^\\s]+)\\s*$$', text, re.M); print(match.group(1) if match else '0.0.0')")
+COLLECTION_VERSION := $(shell ruby -ryaml -e 'puts YAML.load_file(ARGV[0]).fetch("version")' "$(COLLECTION_ROOT)/galaxy.yml")
 COLLECTION_TARBALL := $(COLLECTION_DIST_DIR)/$(COLLECTION_NAMESPACE)-$(COLLECTION_NAME)-$(COLLECTION_VERSION).tar.gz
 COLLECTION_SERVER ?= internal_galaxy
 COLLECTION_INSTALL_PATH ?= $(REPO_ROOT)/build/collection-install
@@ -83,7 +82,7 @@ ANSIBLE_PLAYBOOK_CMD := $(RUN_ID_ENV) ANSIBLE_REMOTE_TEMP=$(ANSIBLE_REMOTE_TEMP)
 TOFU_EXEC_CMD := $(RUN_ID_ENV) $(REPO_ROOT)/scripts/run_with_namespace.sh $(REPO_ROOT)/scripts/tofu_exec.sh
 ANSIBLE_TRACE_ARGS := -e platform_trace_id=$(PLATFORM_TRACE_ID) $(if $(PLATFORM_INTENT_ID),-e platform_intent_id=$(PLATFORM_INTENT_ID),)
 
-.PHONY: prepare-run-namespace validate validate-generated-vars validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-ansible-idempotency validate-shell validate-json validate-compose-runtime-envs validate-dependency-direction validate-data-models validate-architecture-fitness validate-interface-contracts validate-health-probes validate-alert-rules validate-tofu generate-platform-vars show-platform-facts generate-slo-rules validate-generated-slo generate-status-docs assemble-canonical-truth check-canonical-truth generate-platform-manifest generate-status generate-ops-portal generate-changelog-portal generate-dependency-diagram generate-diagrams generate-uptime-kuma-monitors validate-generated-uptime-kuma-monitors docs deploy-ops-portal deploy-changelog-portal deploy-docs-portal validate-generated-docs validate-generated-portals receipts receipt-info workflows workflow-info commands command-info interface-contracts interface-contract-info capability-contracts capability-contract-info services show-service environments environment-info preview-create preview-validate preview-destroy preview-list preview-info lanes lane-info execution-lanes execution-lane-info api-publication api-publication-info agent-tools agent-tool-info export-mcp-tools check-image-freshness upgrade-container-image pin-image scaffold-service install-hooks pre-push-gate gate-status dr-status dr-runbook runbook-executor post-merge-gate integration-tests nightly-integration-tests scheduler-watchdog-loop intent-queue-dispatcher platform-observation-loop fault-injection triage-alert triage-calibration search-index-rebuild scan-published-artifacts setup preflight syntax-check syntax-check-monitoring syntax-check-ntfy syntax-check-ntopng syntax-check-api-gateway syntax-check-ops-portal syntax-check-dify syntax-check-gitea syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-openbao syntax-check-step-ca syntax-check-headscale syntax-check-semaphore syntax-check-windmill syntax-check-keycloak syntax-check-langfuse syntax-check-netbox syntax-check-searxng syntax-check-ollama syntax-check-n8n syntax-check-open-webui syntax-check-mattermost syntax-check-portainer syntax-check-vaultwarden syntax-check-rag-context syntax-check-secret-rotation syntax-check-dozzle syntax-check-excalidraw syntax-check-realtime collection-sync collection-build collection-publish collection-install check-platform-drift drift-report subdomain-exposure-audit security-posture-report security-headers-audit public-surface-security-scan open-maintenance-window close-maintenance-window ensure-resource-lock-registry resource-locks resource-lock-acquire resource-lock-release resource-lock-heartbeat operator-onboard operator-offboard sync-operators quarterly-access-review install-proxmox configure-network configure-staging-bridge configure-ingress configure-edge-publication configure-tailscale provision-guests harden-access harden-guest-access harden-security provision-api-access converge-guest-network-policy converge-monitoring converge-ntfy converge-ntopng converge-api-gateway converge-ops-portal converge-dify converge-gitea converge-docker-runtime converge-postgres-vm converge-mail-platform converge-openbao converge-step-ca converge-headscale converge-semaphore converge-windmill converge-control-plane-recovery converge-keycloak converge-langfuse converge-netbox converge-searxng converge-ollama converge-n8n converge-open-webui converge-mattermost converge-portainer converge-vaultwarden converge-rag-context converge-dozzle converge-excalidraw converge-realtime rotate-secret token-inventory-audit token-exposure-response rotate-keycloak-client-secret rotate-windmill-token rotate-grafana-service-token rotate-platform-cli-token deploy-uptime-kuma uptime-kuma-manage uptime-robot-manage portainer-manage semaphore-manage configure-backups configure-backup-vm database-dns provision-subdomain start-workstream capacity-report weekly-capacity-report immutable-guest-replacement-plan synthetic-transaction-replay check-nats-streams apply-nats-streams promote live-apply-group live-apply-service live-apply-site live-apply-waves live-apply-train-status live-apply-train-queue live-apply-train-plan live-apply-train-bundle live-apply-train-run live-apply-train-rollback build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-pool-status fixture-pool-reconcile fixture-reaper install-cli update-cli validate-packer remote-packer-validate packer-template-rebuild remote-tofu-plan remote-tofu-apply tofu-drift tofu-import
+.PHONY: prepare-run-namespace validate validate-generated-vars validate-ansible-syntax validate-yaml validate-role-argument-specs validate-ansible-lint validate-ansible-idempotency validate-shell validate-json validate-compose-runtime-envs validate-data-models validate-architecture-fitness validate-interface-contracts validate-health-probes validate-alert-rules validate-tofu generate-platform-vars show-platform-facts generate-slo-rules validate-generated-slo generate-status-docs assemble-canonical-truth check-canonical-truth generate-platform-manifest generate-status generate-ops-portal generate-changelog-portal generate-dependency-diagram generate-diagrams generate-uptime-kuma-monitors validate-generated-uptime-kuma-monitors docs deploy-ops-portal deploy-changelog-portal deploy-docs-portal validate-generated-docs validate-generated-portals receipts receipt-info workflows workflow-info commands command-info interface-contracts interface-contract-info services show-service environments environment-info preview-create preview-validate preview-destroy preview-list preview-info lanes lane-info execution-lanes execution-lane-info api-publication api-publication-info agent-tools agent-tool-info export-mcp-tools check-image-freshness upgrade-container-image pin-image scaffold-service install-hooks pre-push-gate gate-status dr-status dr-runbook runbook-executor post-merge-gate integration-tests nightly-integration-tests scheduler-watchdog-loop intent-queue-dispatcher platform-observation-loop fault-injection triage-alert triage-calibration search-index-rebuild scan-published-artifacts setup preflight syntax-check syntax-check-monitoring syntax-check-ntfy syntax-check-ntopng syntax-check-api-gateway syntax-check-ops-portal syntax-check-dify syntax-check-gitea syntax-check-guest-network-policy syntax-check-docker-runtime syntax-check-backup-vm syntax-check-control-plane-recovery syntax-check-uptime-kuma syntax-check-mail-platform syntax-check-openbao syntax-check-step-ca syntax-check-headscale syntax-check-semaphore syntax-check-windmill syntax-check-keycloak syntax-check-langfuse syntax-check-netbox syntax-check-searxng syntax-check-ollama syntax-check-n8n syntax-check-open-webui syntax-check-mattermost syntax-check-portainer syntax-check-vaultwarden syntax-check-rag-context syntax-check-secret-rotation syntax-check-dozzle syntax-check-excalidraw syntax-check-realtime collection-sync collection-build collection-publish collection-install check-platform-drift drift-report subdomain-exposure-audit security-posture-report security-headers-audit public-surface-security-scan open-maintenance-window close-maintenance-window ensure-resource-lock-registry resource-locks resource-lock-acquire resource-lock-release resource-lock-heartbeat operator-onboard operator-offboard sync-operators quarterly-access-review install-proxmox configure-network configure-staging-bridge configure-ingress configure-edge-publication configure-tailscale configure-host-control-loops provision-guests harden-access harden-guest-access harden-security provision-api-access converge-guest-network-policy converge-monitoring converge-ntfy converge-ntopng converge-api-gateway converge-ops-portal converge-dify converge-gitea converge-docker-runtime converge-postgres-vm converge-mail-platform converge-openbao converge-step-ca converge-headscale converge-semaphore converge-windmill converge-control-plane-recovery converge-keycloak converge-langfuse converge-netbox converge-searxng converge-ollama converge-n8n converge-open-webui converge-mattermost converge-portainer converge-vaultwarden converge-rag-context converge-dozzle converge-excalidraw converge-realtime rotate-secret token-inventory-audit token-exposure-response rotate-keycloak-client-secret rotate-windmill-token rotate-grafana-service-token rotate-platform-cli-token deploy-uptime-kuma uptime-kuma-manage uptime-robot-manage portainer-manage semaphore-manage configure-backups configure-backup-vm database-dns provision-subdomain start-workstream capacity-report weekly-capacity-report immutable-guest-replacement-plan synthetic-transaction-replay check-nats-streams apply-nats-streams promote live-apply-group live-apply-service live-apply-site live-apply-waves live-apply-train-status live-apply-train-queue live-apply-train-plan live-apply-train-bundle live-apply-train-run live-apply-train-rollback build-check-runners push-check-runners run-checks warm-cache cache-status fixture-up fixture-down fixture-list fixture-pool-status fixture-pool-reconcile fixture-reaper install-cli update-cli validate-packer remote-packer-validate packer-template-rebuild remote-tofu-plan remote-tofu-apply tofu-drift tofu-import
 
 prepare-run-namespace:
 	@$(RUN_ID_ENV) python3 $(REPO_ROOT)/scripts/run_namespace.py --repo-root "$(REPO_ROOT)" --ensure >/dev/null
@@ -117,9 +116,6 @@ validate-json:
 
 validate-compose-runtime-envs:
 	$(REPO_ROOT)/scripts/validate_repo.sh compose-runtime-envs
-
-validate-dependency-direction:
-	python3 $(REPO_ROOT)/scripts/validate_dependency_direction.py
 
 validate-data-models:
 	$(REPO_ROOT)/scripts/validate_repo.sh data-models
@@ -176,7 +172,7 @@ fault-injection:
 	uv run --with pyyaml python $(REPO_ROOT)/scripts/lv3_cli.py run fault-injection --approve-risk $(if $(FAULT_INJECTION_ARGS),--args $(FAULT_INJECTION_ARGS),)
 
 network-impairment-matrix:
-	uv run --with pyyaml --with nats-py python $(REPO_ROOT)/scripts/lv3_cli.py run network-impairment-matrix $(if $(NETWORK_IMPAIRMENT_MATRIX_ARGS),--args $(NETWORK_IMPAIRMENT_MATRIX_ARGS),)
+	uv run --with pyyaml python $(REPO_ROOT)/scripts/lv3_cli.py run network-impairment-matrix $(if $(NETWORK_IMPAIRMENT_MATRIX_ARGS),--args $(NETWORK_IMPAIRMENT_MATRIX_ARGS),)
 
 triage-alert:
 	python3 $(REPO_ROOT)/scripts/incident_triage.py $(TRIAGE_ARGS)
@@ -403,13 +399,6 @@ interface-contracts:
 interface-contract-info:
 	@test -n "$(CONTRACT)" || (echo "set CONTRACT=<contract-id>"; exit 1)
 	uvx --from pyyaml python $(REPO_ROOT)/scripts/interface_contracts.py --contract $(CONTRACT)
-
-capability-contracts:
-	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/capability_contracts.py --list
-
-capability-contract-info:
-	@test -n "$(CAPABILITY)" || (echo "set CAPABILITY=<capability-id>"; exit 1)
-	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/capability_contracts.py --contract $(CAPABILITY)
 
 services:
 	uv run --with pyyaml --with jsonschema python $(REPO_ROOT)/scripts/service_catalog.py --list
@@ -684,6 +673,10 @@ configure-edge-publication:
 configure-tailscale:
 	$(MAKE) preflight WORKFLOW=configure-tailscale
 	$(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/site.yml --private-key $(BOOTSTRAP_KEY) --tags tailscale
+
+configure-host-control-loops:
+	$(MAKE) preflight WORKFLOW=configure-host-control-loops
+	$(ANSIBLE_PLAYBOOK_CMD) -i $(ANSIBLE_INVENTORY) $(REPO_ROOT)/playbooks/site.yml --private-key $(BOOTSTRAP_KEY) --tags control-loops
 
 provision-guests:
 	$(MAKE) preflight WORKFLOW=provision-guests
