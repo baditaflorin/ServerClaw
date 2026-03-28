@@ -7,11 +7,11 @@
 
 schema_version: 1
 generated: '2026-03-28'
-total_adrs: 218
+total_adrs: 228
 implementation_status_summary:
   Implemented: 198
   Partial: 3
-  Not Implemented: 16
+  Not Implemented: 26
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -57,9 +57,12 @@ concerns:
     - '0176'
     - 0197
     - '0204'
+    - '0221'
   bootstrap:
     - '0001'
     - '0003'
+    - '0215'
+    - '0220'
   ci-cd:
     - 0009
     - '0031'
@@ -194,6 +197,11 @@ concerns:
     - '0210'
     - '0211'
     - '0212'
+    - '0214'
+    - '0216'
+    - '0217'
+    - 0218
+    - '0222'
   release:
     - 0008
     - '0110'
@@ -221,6 +229,7 @@ concerns:
     - '0142'
     - '0147'
     - '0165'
+    - 0219
   storage:
     - '0020'
     - '0051'
@@ -250,6 +259,7 @@ concerns:
     - '0154'
     - '0157'
     - 0191
+    - '0223'
 discovery_queries:
   how do we bootstrap:
     - '0001'
@@ -3589,3 +3599,157 @@ adr_index:
       - gate
     summary: We will add architecture fitness functions to the repository validation gate.
     filename: 0213-architecture-fitness-functions-in-the-validation-gate.md
+  - adr: '0214'
+    title: Production And Staging Cells As The Unit Of High Availability
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - production
+      - staging
+      - cells
+      - as
+      - unit
+      - high
+      - availability
+    summary: We will treat each environment as a cell. A cell is the smallest complete
+    filename: 0214-production-and-staging-cells-as-the-unit-of-high-availability.md
+  - adr: '0215'
+    title: Node Role Taxonomy For Bootstrap, Control, State, Edge, Workload, Observability, Recovery, And Build
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: bootstrap
+    keywords:
+      - node
+      - role
+      - taxonomy
+      - bootstrap
+      - control
+      - state
+      - edge
+      - workload
+    summary: We will classify every server, VM, and future node pool by primary node role.
+    filename: 0215-node-role-taxonomy-for-bootstrap-control-state-edge-workload-observability-recovery-and-build.md
+  - adr: '0216'
+    title: Service Criticality Rings For Foundation, Core, Supporting, And Peripheral Functions
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - service
+      - criticality
+      - rings
+      - foundation
+      - core
+      - supporting
+      - peripheral
+      - functions
+    summary: We will classify services into criticality rings. Rings express recovery and
+    filename: 0216-service-criticality-rings-for-foundation-core-supporting-and-peripheral-functions.md
+  - adr: '0217'
+    title: One-Way Environment Data Flow And Replication Authority
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - one-way
+      - environment
+      - data
+      - flow
+      - replication
+      - authority
+    summary: We will enforce one-way data authority between environments.
+    filename: 0217-one-way-environment-data-flow-and-replication-authority.md
+  - adr: 0218
+    title: Relational Database Replication And Single-Writer Policy
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - relational
+      - database
+      - replication
+      - single-writer
+      - policy
+    summary: We will use a single-writer, environment-local HA policy for relational
+    filename: 0218-relational-database-replication-and-single-writer-policy.md
+  - adr: 0219
+    title: Data-Class Replication Policies For Queues, Object Stores, Search, Cache, Secrets, And Time-Series
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: security
+    keywords:
+      - data-class
+      - replication
+      - policies
+      - queues
+      - object
+      - stores
+      - search
+      - cache
+    summary: We will govern replication by data class rather than by product name alone.
+    filename: 0219-data-class-replication-policies-for-queues-object-stores-search-cache-secrets-and-time-series.md
+  - adr: '0220'
+    title: Bootstrap And Recovery Sequencing For Environment Cells
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: bootstrap
+    keywords:
+      - bootstrap
+      - recovery
+      - sequencing
+      - environment
+      - cells
+    summary: We will define a standard bootstrap and recovery sequence for every
+    filename: 0220-bootstrap-and-recovery-sequencing-for-environment-cells.md
+  - adr: '0221'
+    title: Role-Based Node Pools And Placement Boundaries
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: automation
+    keywords:
+      - role-based
+      - node
+      - pools
+      - placement
+      - boundaries
+    summary: We will use role-based node pools with explicit placement boundaries.
+    filename: 0221-role-based-node-pools-and-placement-boundaries.md
+  - adr: '0222'
+    title: Failover Authority And Service Endpoint Separation
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: platform
+    keywords:
+      - failover
+      - authority
+      - service
+      - endpoint
+      - separation
+    summary: Every replicated service must declare both failover authority and
+    filename: 0222-failover-authority-and-service-endpoint-separation.md
+  - adr: '0223'
+    title: Canonical HA Topology Catalog And Reusable Automation Profiles
+    status: Accepted
+    implementation_status: Not Implemented
+    date: '2026-03-28'
+    concern: vm-topology
+    keywords:
+      - canonical
+      - ha
+      - topology
+      - catalog
+      - reusable
+      - automation
+      - profiles
+    summary: We will centralize HA and replication intent in one canonical topology
+    filename: 0223-canonical-ha-topology-catalog-and-reusable-automation-profiles.md

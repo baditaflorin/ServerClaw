@@ -3,10 +3,10 @@
 - Date: 2026-03-28
 
 ## Summary
-- replayed ADR 0193 from the latest `origin/main`, hardened the Plane controller defaults against topology drift, and re-verified the private controller lane plus authenticated `tasks.lv3.org` publication on merged main
+- accepted ADRs 0214 through 0223 to define the target HA and replication architecture across production and staging, including cells, node roles, service criticality rings, single-writer relational policy, non-relational data-class replication rules, bootstrap sequencing, placement boundaries, failover authority, and reusable DRY automation profiles
 
 ## Platform Impact
-- promotes the platform to `0.130.36`; this release records the merged-main Plane replay, the topology-safe controller-defaults hardening, and the verified authenticated public edge plus private ADR-sync lanes.
+- no platform version bump; this is a repo-only architecture release that records the target production and staging HA model without changing live infrastructure from `main`.
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)
