@@ -4,7 +4,7 @@
 - Title: Live apply Apache ECharts-backed operator visualization panels in the interactive ops portal
 - Status: live_applied
 - Implemented In Repo Version: pending main merge
-- Live Applied In Platform Version: `0.130.42` context on the branch-local replay; canonical mainline bump still pending
+- Live Applied In Platform Version: `0.130.44`
 - Implemented On: 2026-03-28
 - Live Applied On: 2026-03-28
 - Branch: `codex/ws-0240-live-apply`
@@ -49,8 +49,7 @@
 ## Verification
 
 - `python3 -m py_compile scripts/ops_portal/app.py`
-- `uv run --with pytest --with pyyaml --with jsonschema --with-requirements requirements/ops-portal.txt python -m pytest -q tests/test_interactive_ops_portal.py`
-- `uv run --with pytest --with pyyaml --with jsonschema --with-requirements requirements/ops-portal.txt python -m pytest -q tests/test_ops_portal.py`
+- `uv run --with pytest --with pyyaml --with jsonschema --with-requirements requirements/ops-portal.txt python -m pytest -q tests/test_interactive_ops_portal.py tests/test_runtime_assurance_scoreboard.py tests/test_ops_portal.py`
 - `make syntax-check-ops-portal`
 - `make validate-data-models`
 - `./scripts/validate_repo.sh agent-standards`
@@ -59,9 +58,9 @@
 
 ## Live Apply Outcome
 
-- the exact `codex/ws-0240-live-apply` runtime sources were replayed onto `docker-runtime-lv3` with `make converge-ops-portal`, and the portal role mirrored `config/dependency-graph.json` into `/opt/ops-portal/data/config/dependency-graph.json` alongside the existing receipt data set
-- the running `ops-portal` container stayed healthy after the replay, the local health endpoint returned `{"status":"ok"}`, and the guest-local root page rendered the new `Health Mix`, `Topology Focus`, `Coordination Mix`, and `Live Apply Cadence` chart sections
-- branch-local verification also confirmed the new same-origin JavaScript bundle at `/static/portal.js`, the inline ECharts option blocks on `/`, `/partials/overview`, `/partials/agents`, and `/partials/changelog`, and the public `https://ops.lv3.org` edge path still redirecting through the expected oauth2 sign-in flow with CSP allowing `https://unpkg.com`
+- the rebased `codex/ws-0240-live-apply` branch was exercised repeatedly through `make converge-ops-portal`; those runs surfaced and fixed the missing overlay-directory failure in `ops_portal_runtime`, but the scoped converge path from this workstation later hit a transient `DOCKER-FORWARD` chain recheck race and repeated local runner `SIGTERM` interruptions before the guest-local portal hashes actually changed
+- because the guest-local service still served stale sources after the interrupted replays, the exact branch payload was mirrored manually into `/opt/ops-portal/service` and `/opt/ops-portal/data`, then rebuilt with `docker compose up -d --build --remove-orphans` on `docker-runtime-lv3`; this fallback used the same repo-managed runtime sources and left a documented manual receipt trail in this branch
+- post-rebuild verification confirmed the running `ops-portal` container serves the branch-matching `app.py`, `runtime_assurance.py`, `overview.html`, `portal.css`, `portal.js`, and `requirements.txt` hashes; the local health endpoint returned `{"status":"ok"}`; the guest-local root page rendered the committed ECharts bundle; `/partials/overview` exposed both the runtime-assurance block and `data-echart-target` chart mounts; and `https://ops.lv3.org` still redirected through the expected oauth2 sign-in flow with CSP allowing `https://unpkg.com`
 
 ## Mainline Integration Outcome
 
@@ -70,12 +69,18 @@
 ## Live Evidence
 
 - branch-local live-apply receipt: `receipts/live-applies/2026-03-28-adr-0240-operator-visualization-panels-live-apply.json`
-- branch-local guest health: `curl -fsS http://127.0.0.1:8092/health` returned `{"status":"ok"}` and `docker ps --filter name=ops-portal --format "{{.Image}} {{.Status}}"` reported `lv3-ops-portal:latest Up ... (healthy)`
+- branch-local guest health: `curl -fsS http://127.0.0.1:8092/health` returned `{"status":"ok"}` and `docker ps --filter name=ops-portal --format "{{.Names}} {{.Status}}"` reported `ops-portal Up ...`
+- branch-local runtime hashes: `sha256sum scripts/ops_portal/app.py scripts/ops_portal/templates/partials/overview.html scripts/ops_portal/static/portal.css scripts/ops_portal/static/portal.js scripts/ops_portal/runtime_assurance.py requirements/ops-portal.txt` matched the same hash set under `/opt/ops-portal/service/...` on `docker-runtime-lv3`
 - mirrored topology input: `/opt/ops-portal/data/config/dependency-graph.json`
-- served chart runtime: `curl -fsS http://127.0.0.1:8092/static/portal.js | sed -n '1,12p'`
-- served chart markup: `curl -fsS http://127.0.0.1:8092/partials/overview`, `curl -fsS http://127.0.0.1:8092/partials/agents`, and `curl -fsS http://127.0.0.1:8092/partials/changelog`
+- served chart runtime: `curl -fsS http://127.0.0.1:8092/static/portal.js | grep -E "echarts|data-echart-target"`
+- served chart markup: `curl -fsS http://127.0.0.1:8092/partials/overview | grep -E "Runtime Assurance|data-echart-target"`
 - public edge verification: `curl -k -I https://ops.lv3.org` returned `302` to `/oauth2/sign_in?rd=https://ops.lv3.org/`
+
+## Automation Notes
+
+- `make converge-ops-portal` was validated from the rebased branch and confirmed the role-level overlay fix, but the long-running scoped replay from this workstation could not be brought to a stable clean finish because later runs were interrupted locally with signal `15` before the guest-local runtime hashes changed
+- another agent integrating this work onto `main` should rerun `make converge-ops-portal` from a stable session after the merge, then cut the canonical merged-main receipt and protected-file updates from that replay
 
 ## Merge-To-Main Notes
 
-- still required on `main`: bump `VERSION`, update `changelog.md`, cut the next release note, update the top-level `README.md` integrated status summary, update `versions/stack.yaml` with the canonical platform version after a merged-main replay, and record a merged-main receipt if the final integration step replays `make converge-ops-portal` from `main`
+- still required on `main`: bump `VERSION`, update `changelog.md`, cut the next release note, update the top-level `README.md` integrated status summary, update `versions/stack.yaml` with the canonical platform version after a merged-main replay, and record a merged-main receipt after rerunning `make converge-ops-portal` from `main`
