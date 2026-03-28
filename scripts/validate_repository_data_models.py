@@ -49,6 +49,10 @@ from shared_policy_packs import (
 from validate_ephemeral_vmid import validate_ephemeral_vmid_ranges
 from generate_slo_rules import outputs_match as slo_outputs_match
 from immutable_guest_replacement import load_guest_replacement_catalog, validate_guest_replacement_catalog
+from replaceability_scorecards import (
+    load_replaceability_review_catalog,
+    validate_replaceability_review_catalog,
+)
 from slo_tracking import (
     GRAFANA_DASHBOARD_PATH,
     PROMETHEUS_ALERTS_PATH,
@@ -89,6 +93,7 @@ CAPACITY_MODEL_PATH = repo_path("config", "capacity-model.json")
 CAPACITY_MODEL_SCHEMA_PATH = repo_path("docs", "schema", "capacity-model.schema.json")
 EPHEMERAL_POOL_CATALOG_PATH = repo_path("config", "ephemeral-capacity-pools.json")
 EPHEMERAL_POOL_SCHEMA_PATH = repo_path("docs", "schema", "ephemeral-capacity-pools.schema.json")
+REPLACEABILITY_REVIEW_CATALOG_PATH = repo_path("config", "replaceability-review-catalog.json")
 VERSION_SEMANTICS_PATH = repo_path("config", "version-semantics.json")
 WORKSTREAMS_PATH = repo_path("workstreams.yaml")
 TRIAGE_RULES_PATH = repo_path("config", "triage-rules.yaml")
@@ -2512,6 +2517,11 @@ def validate_preview_environment_profiles() -> None:
     validate_profile_catalog(load_profile_catalog())
 
 
+def validate_replaceability_review_data() -> None:
+    payload = load_replaceability_review_catalog(REPLACEABILITY_REVIEW_CATALOG_PATH)
+    validate_replaceability_review_catalog(payload)
+
+
 def validate_repository_data_models() -> int:
     load_dependency_graph(validate_schema=True)
     secret_manifest = load_secret_manifest()
@@ -2564,6 +2574,7 @@ def validate_repository_data_models() -> int:
     validate_capacity_model()
     validate_preview_environment_profiles()
     validate_ephemeral_pool_catalog()
+    validate_replaceability_review_data()
     load_public_surface_scan_policy()
     validate_vm_template_manifest(host_vars_context["proxmox_vm_templates"])
     validate_operator_roster(load_yaml(ROSTER_PATH))

@@ -604,6 +604,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [RAG Platform Context](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/rag-platform-context.md)
 - [Remote Build Gateway](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/remote-build-gateway.md)
 - [Repair Guest Netplan MAC Drift](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/repair-guest-netplan-mac-drift.md)
+- [Replaceability Scorecards](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/replaceability-scorecards.md)
 - [Distributed Resource Lock Registry](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/resource-lock-registry.md)
 - [Retry Taxonomy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/retry-taxonomy.md)
 - [Rotate Certificates](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/rotate-certificates.md)
@@ -1067,6 +1068,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream WS-0206 Main Merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0206-main-merge.md)
 - [Workstream ws-0210-live-apply: ADR 0210 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0210-live-apply.md)
 - [Workstream ws-0211-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0211-main-merge.md)
+- [Workstream ws-0212-live-apply: ADR 0212 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0212-live-apply.md)
 <!-- END GENERATED: document-index -->
 
 ## Versioning
@@ -1139,6 +1141,7 @@ This repository is intentionally opinionated:
 | `0026` | Dedicated PostgreSQL VM baseline | `merged` | [adr-0026-postgres-vm.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0026-postgres-vm.md) |
 | `0027` | Uptime Kuma rollout on the Docker runtime VM | `merged` | [adr-0027-uptime-kuma.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0027-uptime-kuma.md) |
 | `0028` | Docker build VM build count and duration telemetry | `live_applied` | [adr-0028-build-telemetry.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0028-build-telemetry.md) |
+| `0029` | Dedicated backup VM with local PBS | `merged` | [adr-0029-backup-vm.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0029-backup-vm.md) |
 | `0040` | Docker runtime container telemetry | `live_applied` | [adr-0040-runtime-container-telemetry.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0040-runtime-container-telemetry.md) |
 | `0041` | Dockerized mail platform with API, Grafana telemetry, and failover delivery | `merged` | [adr-0041-email-platform.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0041-email-platform.md) |
 | `0041` | Dockerized mail platform live rollout | `live_applied` | [adr-0041-email-platform-live.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0041-email-platform-live.md) |
@@ -1241,6 +1244,8 @@ This repository is intentionally opinionated:
 | `0140` | Grafana public access hardening | `live_applied` | [adr-0140-grafana-public-access-hardening.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0140-grafana-public-access-hardening.md) |
 | `0141` | API token lifecycle and exposure response | `merged` | [adr-0141-api-token-lifecycle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0141-api-token-lifecycle.md) |
 | `0142` | Public surface automated security scan | `merged` | [adr-0142-public-surface-security-scan.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0142-public-surface-security-scan.md) |
+| `0143` | Private Gitea with self-hosted CI | `merged` | [adr-0143-gitea-ci.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0143-gitea-ci.md) |
+| `0144` | Headscale mesh control plane | `merged` | [adr-0144-headscale.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0144-headscale.md) |
 | `0145` | Ollama for local LLM inference | `live_applied` | [adr-0145-ollama.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0145-ollama.md) |
 | `0146` | Langfuse for agent observability | `live_applied` | [adr-0146-ai-observability.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0146-ai-observability.md) |
 | `0147` | Vaultwarden for operator credential management | `live_applied` | [adr-0147-vaultwarden.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0147-vaultwarden.md) |
@@ -1295,11 +1300,13 @@ This repository is intentionally opinionated:
 | `0197` | Dify visual workflow canvas live apply | `merged` | [ws-0197-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0197-live-apply.md) |
 | `0199` | Outline living knowledge wiki | `merged` | [adr-0199-outline-living-knowledge-wiki.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0199-live-apply/docs/workstreams/adr-0199-outline-living-knowledge-wiki.md) |
 | `0202` | Excalidraw auto generated architecture diagrams | `live_applied` | [adr-0202-excalidraw-auto-generated-architecture-diagrams.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0202-excalidraw-auto-generated-architecture-diagrams.md) |
+| `0204` | Architecture governance bundle for self-correction, clean boundaries, and vendor replaceability | `merged` | [adr-0204-architecture-governance.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0204-architecture-governance.md) |
 | `0206` | Live apply ADR 0206 ports and adapters for external integrations | `live_applied` | [ws-0206-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0206-live-apply.md) |
 | `0206` | Integrate ADR 0206 live apply into origin/main | `merged` | [ws-0206-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0206-main-merge.md) |
 | `0210` | Live apply canonical publication models over adapter-shaped vendor fields | `merged` | [ws-0210-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0210-live-apply.md) |
 | `0211` | Shared policy packs and rule registries live apply | `merged` | [adr-0211-shared-policy-packs-and-rule-registries.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0211-shared-policy-packs-and-rule-registries.md) |
 | `0211` | Integrate ADR 0211 shared policy registries into origin/main | `merged` | [ws-0211-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0211-main-merge.md) |
+| `0212` | Replaceability scorecards and vendor exit plans live apply | `merged` | [ws-0212-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0212-live-apply.md) |
 | `0214` | HA and replication architecture bundle for production and staging | `merged` | [adr-0214-ha-replication-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0214-ha-replication-architecture-bundle.md) |
 | `0224` | Server-resident operations architecture bundle | `merged` | [adr-0224-server-resident-operations-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0224-server-resident-operations-architecture-bundle.md) |
 <!-- END GENERATED: merged-workstreams -->

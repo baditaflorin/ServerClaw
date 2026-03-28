@@ -34,6 +34,26 @@ The deployed shape is:
 
 We will not enable the embedded DERP server in this phase. Clients continue to use the default upstream DERP map while the control plane and ACL authority move in-house.
 
+## Replaceability Scorecard
+
+- Capability Definition: `mesh_access_control_plane` as defined by ADR 0014 private guest-network access, ADR 0046 identity classes, and the Headscale runbook.
+- Contract Fit: strong for self-hosted node enrollment, ACL policy, subnet-route approval, and repo-governed operator access while keeping the standard Tailscale client on endpoints.
+- Data Export / Import: ACL policy, tag and route approvals, auth-key policy, node inventory, and operator enrollment guidance are portable enough to seed another mesh control plane.
+- Migration Complexity: medium because every enrolled node, subnet router, and operator device must be rehomed carefully without dropping the canonical private management path.
+- Proprietary Surface Area: medium because Tailnet-compatible control-plane semantics and upstream DERP dependence still shape policy and client behavior.
+- Approved Exceptions: continued use of the upstream DERP map and the Tailscale client protocol are accepted so long as enrollment policy, ACLs, and route approval remain repo-managed.
+- Fallback / Downgrade: the managed Tailscale SaaS control plane can carry the minimum operator-access path again if a replacement self-hosted controller cannot be cut over in time.
+- Observability / Audit Continuity: node inventory, ACL policy history, route status, mesh health probes, and host access receipts remain the continuity surface during migration.
+
+## Vendor Exit Plan
+
+- Reevaluation Triggers: client-protocol breakage, insufficient ACL or auth-key governance, unacceptable operational overhead, or a need for relay and routing controls Headscale cannot provide cleanly.
+- Portable Artifacts: HuJSON ACL policy, node and route inventory, auth-key policy, enrollment procedures, and subnet-router topology notes.
+- Migration Path: stand up the replacement control plane in parallel, mint new enrollment material, migrate the subnet router and one operator device first, move the remaining nodes by wave, and retire Headscale only after the private management path is stable on the replacement.
+- Alternative Product: managed Tailscale or NetBird.
+- Owner: platform networking.
+- Review Cadence: quarterly.
+
 ## Consequences
 
 - The zero-trust mesh control plane becomes repo-managed and recoverable from the platform codebase.

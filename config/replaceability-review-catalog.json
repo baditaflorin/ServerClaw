@@ -1,0 +1,92 @@
+{
+  "$schema": "docs/schema/replaceability-review-catalog.schema.json",
+  "schema_version": "1.0.0",
+  "policy": {
+    "adr": "0212",
+    "scope": "critical_integrated_product_adr",
+    "notes": [
+      "This catalog scopes ADR 0212 to the critical product selections that are already part of the integrated platform truth on current main.",
+      "Each listed ADR must carry the repo-standard `## Replaceability Scorecard` and `## Vendor Exit Plan` sections with the required labeled bullets enforced by `scripts/replaceability_scorecards.py`.",
+      "Capability definition references may point to ADRs, runbooks, or machine-readable catalogs when ADR 0205 capability contracts have not yet been backfilled as dedicated standalone documents."
+    ]
+  },
+  "critical_product_adrs": [
+    {
+      "adr": "0029",
+      "capability_id": "backup_repository",
+      "product_id": "proxmox_backup_server",
+      "critical_surface": "guest_backup_and_restore",
+      "capability_definition_refs": [
+        "docs/adr/0020-initial-storage-and-backup-model.md",
+        "docs/adr/0100-rto-rpo-targets-and-disaster-recovery-playbook.md",
+        "docs/runbooks/backup-restore-verification.md"
+      ]
+    },
+    {
+      "adr": "0042",
+      "capability_id": "internal_trust_authority",
+      "product_id": "step_ca",
+      "critical_surface": "ssh_and_internal_tls_issuance",
+      "capability_definition_refs": [
+        "docs/adr/0046-identity-classes-for-humans-services-and-agents.md",
+        "docs/adr/0047-short-lived-credentials-and-internal-mtls.md",
+        "docs/runbooks/configure-step-ca.md"
+      ]
+    },
+    {
+      "adr": "0043",
+      "capability_id": "platform_secret_authority",
+      "product_id": "openbao",
+      "critical_surface": "secrets_transit_and_dynamic_credentials",
+      "capability_definition_refs": [
+        "docs/adr/0034-controller-local-secret-manifest-and-preflight.md",
+        "docs/adr/0047-short-lived-credentials-and-internal-mtls.md",
+        "docs/runbooks/configure-openbao.md"
+      ]
+    },
+    {
+      "adr": "0044",
+      "capability_id": "workflow_orchestrator",
+      "product_id": "windmill",
+      "critical_surface": "governed_operator_and_agent_workflows",
+      "capability_definition_refs": [
+        "docs/adr/0035-workflow-catalog-and-machine-readable-execution-contracts.md",
+        "docs/adr/0048-command-catalog-and-approval-gates.md",
+        "docs/runbooks/configure-windmill.md"
+      ]
+    },
+    {
+      "adr": "0056",
+      "capability_id": "operator_identity_broker",
+      "product_id": "keycloak",
+      "critical_surface": "shared_operator_and_agent_sso",
+      "capability_definition_refs": [
+        "docs/adr/0046-identity-classes-for-humans-services-and-agents.md",
+        "docs/adr/0047-short-lived-credentials-and-internal-mtls.md",
+        "docs/runbooks/configure-keycloak.md"
+      ]
+    },
+    {
+      "adr": "0143",
+      "capability_id": "source_control_and_repo_local_ci",
+      "product_id": "gitea",
+      "critical_surface": "repo_hosting_and_webhook_driven_automation",
+      "capability_definition_refs": [
+        "docs/adr/0031-repository-validation-pipeline-for-automation-changes.md",
+        "docs/adr/0082-remote-build-execution-gateway.md",
+        "docs/runbooks/configure-gitea.md"
+      ]
+    },
+    {
+      "adr": "0144",
+      "capability_id": "mesh_access_control_plane",
+      "product_id": "headscale",
+      "critical_surface": "operator_and_subnet_mesh_access",
+      "capability_definition_refs": [
+        "docs/adr/0014-operator-access-to-private-guest-network.md",
+        "docs/adr/0046-identity-classes-for-humans-services-and-agents.md",
+        "docs/runbooks/configure-headscale.md"
+      ]
+    }
+  ]
+}

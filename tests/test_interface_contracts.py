@@ -7,6 +7,7 @@ from pathlib import Path
 if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
     del sys.modules["platform"]
 
+import platform.interface_contracts as interface_contracts
 from platform.interface_contracts import check_live_apply_target, validate_contracts
 
 
@@ -26,6 +27,24 @@ def load_interface_contracts_module():
 
 def test_workstream_registry_contract_validates() -> None:
     contracts = validate_contracts()
+    assert any(contract["contract_id"] == "workstream-registry-v1" for contract in contracts)
+
+
+def test_workstream_registry_contract_accepts_in_progress_status(
+    tmp_path: Path, monkeypatch
+) -> None:
+    workstreams_path = tmp_path / "workstreams.yaml"
+    workstreams_path.write_text(
+        (REPO_ROOT / "workstreams.yaml")
+        .read_text(encoding="utf-8")
+        .replace("status: merged", "status: in_progress", 1),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(interface_contracts, "WORKSTREAMS_PATH", workstreams_path)
+
+    contracts = interface_contracts.validate_contracts()
+
     assert any(contract["contract_id"] == "workstream-registry-v1" for contract in contracts)
 
 

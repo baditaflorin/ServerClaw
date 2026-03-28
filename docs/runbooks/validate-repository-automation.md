@@ -34,6 +34,7 @@ See [docs/runbooks/validation-gate.md](/Users/live/Documents/GITHUB_PROJECTS/pro
 - repo-managed JSON artifacts pass `jq empty`
 - service-owning roles ship and import explicit `tasks/verify.yml` contracts
 - canonical repository data models pass schema validation
+- architecture fitness functions verify the governed replaceability scorecards and vendor exit plans for critical product ADRs
 - generated status documents are current for their canonical inputs
 - the workflow catalog, command catalog, control-plane lane catalog, and controller-local secret manifest cross-reference cleanly
 - the API publication catalog classifies every governed API and webhook surface
@@ -67,6 +68,7 @@ make validate-ansible-lint
 make validate-shell
 make validate-json
 make validate-data-models
+make validate-architecture-fitness
 make validate-health-probes
 make validate-generated-docs
 ```
@@ -86,7 +88,10 @@ make validate-generated-docs
 - [config/health-probe-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/health-probe-catalog.json)
 - [config/uptime-kuma/monitors.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/uptime-kuma/monitors.json)
 - [config/immutable-guest-replacement-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/immutable-guest-replacement-catalog.json)
+- [config/replaceability-review-catalog.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/replaceability-review-catalog.json)
 - [receipts/live-applies](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/receipts/live-applies)
+
+`make validate-architecture-fitness` currently enforces ADR 0212 by checking that every governed critical product ADR carries the required `Replaceability Scorecard` and `Vendor Exit Plan` sections with non-placeholder values.
 
 ## Troubleshooting
 

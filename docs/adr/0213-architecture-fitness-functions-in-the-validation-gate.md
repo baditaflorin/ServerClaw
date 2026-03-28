@@ -1,9 +1,10 @@
 # ADR 0213: Architecture Fitness Functions In The Validation Gate
 
 - Status: Accepted
-- Implementation Status: Not Implemented
-- Implemented In Repo Version: N/A
-- Implemented In Platform Version: N/A
+- Implementation Status: Partial
+- Implemented In Repo Version: 0.177.36
+- Implemented In Platform Version: 0.130.36
+- Implemented On: 2026-03-28
 - Date: 2026-03-28
 
 ## Context
@@ -36,6 +37,17 @@ The intended checks include:
 
 New fitness functions may begin as warn-only checks, but each one must declare a
 path to eventual blocking enforcement if it proves useful.
+
+## Implementation
+
+The first implemented ADR 0213 fitness function is now live in
+`scripts/replaceability_scorecards.py` and enforced through
+`./scripts/validate_repo.sh architecture-fitness`.
+
+This initial slice blocks merges when a governed critical product ADR is missing
+its required ADR 0212 `Replaceability Scorecard` or `Vendor Exit Plan` fields.
+The broader ADR 0213 scope remains partial because the other intended
+architecture checks in this ADR are still follow-up work.
 
 ## Consequences
 

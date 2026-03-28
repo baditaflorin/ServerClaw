@@ -3,8 +3,8 @@
   "manifest_version": "1.0.0",
   "repo_version": "0.177.36",
   "platform_version": "0.130.37",
-  "generated_at": "2026-03-28T12:29:47Z",
-  "next_refresh_at": "2026-03-28T13:29:47Z",
+  "generated_at": "2026-03-28T12:23:36Z",
+  "next_refresh_at": "2026-03-28T13:23:36Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -3874,7 +3874,7 @@
   "recent_changes": {
     "last_version": "0.177.35",
     "deployed_at": "2026-03-28",
-    "summary": "integrated ADR 0211 by promoting the shared policy registry into main and re-verifying the governed headscale live-apply path from merged main",
+    "summary": "implemented ADR 0212 by governing critical integrated product ADRs with aligned the dependency-graph and generated-diagram validation paths so the",
     "release_notes_url": "docs/release-notes/0.177.36.md"
   },
   "agentic_architecture": {

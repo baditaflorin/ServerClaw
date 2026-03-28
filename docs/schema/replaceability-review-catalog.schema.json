@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/schema/replaceability-review-catalog.schema.json",
+  "title": "Replaceability Review Catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schema_version",
+    "policy",
+    "critical_product_adrs"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "docs/schema/replaceability-review-catalog.schema.json"
+    },
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "adr",
+        "scope",
+        "notes"
+      ],
+      "properties": {
+        "adr": {
+          "type": "string",
+          "pattern": "^[0-9]{4}$"
+        },
+        "scope": {
+          "type": "string",
+          "enum": [
+            "critical_integrated_product_adr"
+          ]
+        },
+        "notes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "critical_product_adrs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/reviewedAdr"
+      }
+    }
+  },
+  "$defs": {
+    "reviewedAdr": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "adr",
+        "capability_id",
+        "product_id",
+        "critical_surface",
+        "capability_definition_refs"
+      ],
+      "properties": {
+        "adr": {
+          "type": "string",
+          "pattern": "^[0-9]{4}$"
+        },
+        "capability_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_]*$"
+        },
+        "product_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_]*$"
+        },
+        "critical_surface": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_]*$"
+        },
+        "capability_definition_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}
