@@ -515,16 +515,16 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert 'psql "${database_url}"' in tasks
     assert "become: true" in tasks
     assert "Sync repo-managed Windmill raw apps" in tasks
-    assert "Install repo-managed Windmill raw app frontend dependencies" in tasks
+    assert "Install frontend dependencies for repo-managed Windmill raw apps" in tasks
     assert "register: windmill_seed_raw_app_frontend_install" in tasks
-    assert "missing package-lock.json for {{ item.path }}" in tasks
     assert "npm ci --no-audit --no-fund" in tasks
+    assert "npm install --no-package-lock --no-audit --no-fund" in tasks
     assert "npm ci --prefix" not in tasks
     assert "npm install --prefix" not in tasks
     assert tasks.count("retries: 3") >= 2
     assert tasks.count("delay: 5") >= 2
     assert "until: windmill_seed_raw_app_frontend_install.rc == 0" in tasks
-    assert tasks.index("Install repo-managed Windmill raw app frontend dependencies") < tasks.index(
+    assert tasks.index("Install frontend dependencies for repo-managed Windmill raw apps") < tasks.index(
         "Sync repo-managed Windmill raw apps"
     )
     assert "wmill sync push" in tasks

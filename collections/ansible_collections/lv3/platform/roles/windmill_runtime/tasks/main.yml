@@ -1824,7 +1824,7 @@
     mode: preserve
   when: (windmill_seed_raw_apps | default([])) | length > 0
 
-- name: Install repo-managed Windmill raw app frontend dependencies
+- name: Install frontend dependencies for repo-managed Windmill raw apps
   vars:
     mutation_audit_action: sync.windmill_raw_app_dependencies
     mutation_audit_target: "{{ item.path }}"
@@ -1843,11 +1843,10 @@
       - -lc
       - >-
         cd /workspace/{{ item.relative_dir }}
-        && if [ -f package.json ] && [ ! -f package-lock.json ]; then
-          echo "missing package-lock.json for {{ item.path }}" >&2;
-          exit 1;
-        elif [ -f package-lock.json ]; then
+        && if [ -f package-lock.json ]; then
           npm ci --no-audit --no-fund;
+        elif [ -f package.json ]; then
+          npm install --no-package-lock --no-audit --no-fund;
         fi
   loop: "{{ windmill_seed_raw_apps | default([]) }}"
   loop_control:
