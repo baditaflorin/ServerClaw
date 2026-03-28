@@ -3,7 +3,7 @@
 - Status: Accepted
 - Implementation Status: Implemented
 - Implemented In Repo Version: 0.177.27
-- Implemented In Platform Version: 0.177.12
+- Implemented In Platform Version: 0.130.34
 - Implemented On: 2026-03-27
 - Date: 2026-03-27
 
@@ -48,9 +48,9 @@ The initial production contract is:
 
 ## Implementation Notes
 
-This ADR is implemented by the `ws-0193-live-apply` workstream on branch `codex/ws-0193-live-apply`.
+This ADR was first implemented by the `ws-0193-live-apply` workstream on branch `codex/ws-0193-live-apply`.
 
-The live-apply branch must:
+The live-apply branch:
 
 - add the Plane service to the repo-managed topology and validation catalogs
 - converge the PostgreSQL and runtime automation
@@ -58,18 +58,22 @@ The live-apply branch must:
 - bootstrap the initial Plane workspace and project
 - verify issue creation plus ADR synchronization end to end
 
-Shared integration files remain intentionally unchanged on the workstream branch until merge to `main`.
+The follow-on `ws-0193-main-merge` workstream replayed the service from the latest merged `origin/main`, recorded the final mainline receipt, and updated the protected integration truth after the replay was verified.
 
 ## Live Apply Status
 
-As of 2026-03-27, the full repo-managed Plane path is replayed and verified from this workstream branch across the Proxmox host, PostgreSQL VM, Docker runtime VM, and shared NGINX edge VM.
+As of 2026-03-28, the merged-main replay is verified across the Proxmox host, PostgreSQL VM, Docker runtime VM, and shared NGINX edge VM.
 
 Verified live evidence includes:
 
-- `ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory/hosts.yml playbooks/plane.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e env=production -e proxmox_guest_ssh_connection_mode=proxmox_host_jump` completed successfully
+- `make live-apply-service service=plane env=production ALLOW_IN_PLACE_MUTATION=true` reconverged the Proxmox host, PostgreSQL VM, Docker runtime VM, Plane bootstrap, and ADR-sync path from the merged-main candidate
+- `make configure-edge-publication env=production` completed successfully after regenerating the shared `build/changelog-portal` and `build/docs-portal` artifacts needed by the NGINX publication lane
 - `http://100.64.0.1:8011/api/instances/` returns `200`
-- the seeded `lv3-platform` workspace and `ADR` project exist and are reachable through `make plane-manage`
-- `scripts/sync_adrs_to_plane.py` synchronized 202 ADR records into Plane, and the full playbook replay now tolerates a transient first sync failure through role-level retries
-- the docker-runtime stack is up on `docker-runtime-lv3`, with the Plane API, web, proxy, admin, live, worker, MinIO, RabbitMQ, and Valkey containers running
-- `https://tasks.lv3.org/` returns `302` to the shared oauth2-proxy sign-in path, and that sign-in path returns `302` into the shared Keycloak realm instead of the previous `https://nginx.lv3.org/` fallback
-- the shared NGINX edge certificate expansion now succeeds through the repo-managed `webroot` ACME path
+- `make plane-manage ACTION=whoami` reports the seeded `ops@lv3.org` identity against workspace `lv3-platform`, project `ADR`, and private controller URL `http://100.64.0.1:8011`
+- the controller-local ADR sync summary at `.local/plane/adr-sync-summary.json` now records 218 synchronized ADR issues for the live `ADR` Plane project
+- `https://tasks.lv3.org/` returns `302` to the shared oauth2-proxy sign-in path, confirming the authenticated public entrypoint instead of the previous `https://nginx.lv3.org/` fallback
+
+The merged-main replay also confirmed two shared dependency repairs that are now part of the recorded evidence:
+
+- the missing provider-side Hetzner A records for `coolify.lv3.org` and `apps.lv3.org` were repaired to match repo intent before the shared DNS lane was replayed
+- the Plane runtime secret-injection lane now depends on OpenBao already being unsealed; the mainline replay was only resumed once the local OpenBao API again reported `sealed: false`

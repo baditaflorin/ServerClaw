@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.177.30
-platform_version: 0.130.35
+repo_version: 0.177.32
+platform_version: 0.130.36
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -72,7 +72,7 @@ live_apply_evidence:
     coolify_apps: 2026-03-28-adr-0194-coolify-paas-deploy-from-repo-mainline-live-apply
     outline: 2026-03-28-adr-0199-outline-living-knowledge-wiki-mainline-live-apply
     network_impairment_matrix: 2026-03-27-adr-0189-network-impairment-matrix-live-apply
-    plane: 2026-03-27-adr-0193-plane-live-apply
+    plane: 2026-03-28-adr-0193-plane-mainline-live-apply
     service_redundancy: 2026-03-27-adr-0188-failover-rehearsal-gate-live-apply
     fixture_pools: 2026-03-28-adr-0186-prewarmed-fixture-pools-live-apply
     seed_data_snapshots: 2026-03-28-adr-0187-anonymized-seed-data-snapshots-mainline-live-apply
@@ -982,8 +982,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.30
+    current: 0.177.32
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.35
+    current: 0.130.36
     meaning: intended platform release for the actual server configuration

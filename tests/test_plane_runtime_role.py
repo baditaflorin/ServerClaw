@@ -20,6 +20,9 @@ def test_plane_runtime_defaults_list_trusted_proxies() -> None:
         "10.10.10.10",
         "100.64.0.1",
     ]
+    assert defaults["plane_internal_port"] == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('plane', 'internal') }}"
+    assert defaults["plane_internal_base_url"] == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('plane', 'internal') }}"
+    assert defaults["plane_controller_url"] == "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('plane', 'controller') }}"
 
 
 def test_plane_env_templates_render_trusted_proxies_as_caddy_arguments() -> None:

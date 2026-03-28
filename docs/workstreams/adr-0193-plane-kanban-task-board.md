@@ -76,4 +76,8 @@
 - `ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory/hosts.yml playbooks/plane.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e env=production -e proxmox_guest_ssh_connection_mode=proxmox_host_jump --limit nginx-lv3` passed after switching the shared edge certificate automation to the repo-managed `webroot` ACME path
 - `ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory/hosts.yml playbooks/plane.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e env=production -e proxmox_guest_ssh_connection_mode=proxmox_host_jump` passed end to end across `proxmox_florin`, `postgres-lv3`, `docker-runtime-lv3`, and `nginx-lv3`
 - `https://tasks.lv3.org/` now returns `302` to `https://tasks.lv3.org/oauth2/sign_in?...`, and that sign-in path returns `302` into the shared `sso.lv3.org` realm flow
-- `main` now carries the protected integration updates for `README.md`, `VERSION`, `changelog.md`, and `versions/stack.yaml` alongside the verified Plane live-apply evidence
+- merged-main replay from `codex/ws-0193-main-merge` verified the same service from the latest `origin/main`, including the topology-safe Plane controller defaults added after the initial merge candidate
+- `make live-apply-service service=plane env=production ALLOW_IN_PLACE_MUTATION=true` reconverged the host, PostgreSQL, runtime, bootstrap, and ADR-sync lanes from merged main
+- the final public replay required regenerating `build/changelog-portal/` and `build/docs-portal/` before `make configure-edge-publication env=production` succeeded on `nginx-lv3`
+- the current `.local/plane/adr-sync-summary.json` now records 218 synchronized ADR issues in Plane
+- the mainline evidence is recorded in `receipts/live-applies/2026-03-28-adr-0193-plane-mainline-live-apply.json`
