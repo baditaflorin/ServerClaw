@@ -1,0 +1,65 @@
+---
+coolify_app_image: ghcr.io/coollabsio/coolify:latest
+coolify_realtime_image: ghcr.io/coollabsio/coolify-realtime:1.0.11
+coolify_postgres_image: postgres:15-alpine
+coolify_redis_image: redis:7-alpine
+
+coolify_service_name: coolify
+coolify_proxy_service_name: coolify-proxy
+coolify_realtime_service_name: coolify-realtime
+coolify_postgres_service_name: coolify-db
+coolify_redis_service_name: coolify-redis
+coolify_proxy_image: traefik:v3.6
+coolify_container_uid: "9999"
+coolify_container_gid: "9999"
+
+coolify_site_dir: /opt/coolify
+coolify_bootstrap_dir: /etc/coolify/bootstrap
+coolify_data_root: /data/coolify
+coolify_compose_file: "{{ coolify_site_dir }}/docker-compose.yml"
+coolify_env_file: "{{ coolify_data_root }}/source/.env"
+coolify_bootstrap_private_key_file: "{{ coolify_bootstrap_dir }}/server-key"
+coolify_proxy_path: "{{ coolify_data_root }}/proxy"
+
+coolify_dashboard_port: "{{ platform_service_topology | platform_service_port('coolify', 'internal') }}"
+coolify_proxy_port: "{{ platform_service_topology | platform_service_port('coolify_apps', 'internal') }}"
+coolify_controller_url: "{{ platform_service_topology | platform_service_url('coolify', 'controller') }}"
+coolify_private_url: "http://{{ ansible_host }}:{{ coolify_dashboard_port }}"
+coolify_public_url: https://coolify.lv3.org
+coolify_apps_public_url: https://apps.lv3.org
+coolify_tunnel_host: "{{ hostvars['proxmox_florin'].ansible_host | default(hostvars['proxmox_florin'].management_ipv4 | default(''), true) }}"
+coolify_tunnel_user: ops
+coolify_bridge_subnet: 172.18.0.0/16
+coolify_bridge_gateway: 172.18.0.1
+
+coolify_root_username: LV3 Ops
+coolify_root_email: ops@lv3.org
+coolify_api_token_name: lv3-automation
+coolify_api_allowed_ips:
+  - 127.0.0.1
+  - "{{ coolify_bridge_gateway }}"
+  - 10.10.10.1
+coolify_verify_ssl: false
+
+coolify_server_name: coolify-lv3
+coolify_server_description: Repo-managed local deployment target for LV3 application deploys.
+coolify_server_user: root
+coolify_server_host: host.docker.internal
+coolify_server_port: 22
+coolify_server_proxy_type: TRAEFIK
+
+coolify_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/coolify
+coolify_root_password_local_file: "{{ coolify_local_artifact_dir }}/root-password.txt"
+coolify_api_token_local_file: "{{ coolify_local_artifact_dir }}/api-token.txt"
+coolify_server_key_local_file: "{{ coolify_local_artifact_dir }}/server-key"
+coolify_server_key_public_local_file: "{{ coolify_local_artifact_dir }}/server-key.pub"
+coolify_admin_auth_local_file: "{{ coolify_local_artifact_dir }}/admin-auth.json"
+
+coolify_smoke_project_name: LV3 Apps
+coolify_smoke_environment_name: production
+coolify_smoke_app_name: repo-smoke
+coolify_smoke_repo_url: https://github.com/coollabsio/coolify-examples
+coolify_smoke_repo_branch: main
+coolify_smoke_base_directory: static
+coolify_smoke_domain: http://apps.lv3.org
+coolify_smoke_alias_domain: http://repo-smoke.apps.lv3.org

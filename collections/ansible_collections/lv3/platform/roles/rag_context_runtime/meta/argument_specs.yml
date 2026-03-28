@@ -1,4 +1,39 @@
 ---
+# Purpose: Declare the validated input contract for the rag_context_runtime role.
+# Use case: Used by Ansible argument validation before the platform-context runtime converge and verification tasks run.
+#
+# Inputs (required):
+#   - platform_context_site_dir (path, required): Runtime root directory.
+#   - platform_context_service_dir (path, required): API service build context directory.
+#   - platform_context_corpus_dir (path, required): Mirrored corpus directory.
+#   - platform_context_data_dir (path, required): Qdrant data directory.
+#   - platform_context_secret_dir (path, required): Secret directory.
+#   - platform_context_compose_file (path, required): Compose file path.
+#   - platform_context_env_file (path, required): Runtime env file path.
+#   - platform_context_api_token_remote_file (path, required): Guest-side API token path.
+#   - platform_context_api_token_local_file (path, required): Controller-local API token artifact.
+#   - platform_context_internal_port (int, required): Local API listener port.
+#
+# Inputs (optional):
+#   - platform_context_controller_url (str, optional): Controller-facing API URL.
+#   - platform_context_private_url (str, optional): Guest-local API URL.
+#   - platform_context_verification_question (str, optional): Verification query prompt.
+#
+# Outputs:
+#   - Argument-spec validation metadata for the rag_context_runtime role.
+#
+# Idempotency: Fully idempotent
+#              This file only declares validation metadata.
+#
+# Dependencies:
+#   - ADR 0198: Defines the semantic RAG runtime contract.
+#   - Role: rag_context_runtime — validates inputs before converge and verification.
+#
+# Related ADRs: 0165, 0198
+# Related Runbooks: docs/runbooks/rag-platform-context.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
 argument_specs:
   main:
     short_description: Converge the private platform context RAG runtime and corpus mirror.
@@ -103,6 +138,32 @@ argument_specs:
         required: true
         description:
           - Embedding vector dimension expected by the Qdrant collection.
+      platform_context_verify_rebuild_local:
+        type: bool
+        required: false
+        description:
+          - Rebuild the full mirrored corpus inline during verification when enabled.
+      platform_context_seed_when_degraded:
+        type: bool
+        required: false
+        description:
+          - Repair a degraded vector collection with a bounded controller-side semantic seed rebuild.
+      platform_context_verification_question:
+        type: str
+        required: false
+        description:
+          - Query used to verify that the live retrieval path returns cited vector results.
+      platform_context_seed_sources:
+        type: list
+        elements: str
+        required: false
+        description:
+          - Repo-relative paths used for bounded semantic seed repair when the live vector index is degraded.
+      platform_context_ollama_url:
+        type: str
+        required: false
+        description:
+          - Base URL for the local Ollama runtime used by semantic embeddings.
       platform_context_repo_root:
         type: path
         required: false

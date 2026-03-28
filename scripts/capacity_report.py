@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import math
 import shlex
 import subprocess
 import sys
@@ -13,12 +14,20 @@ from pathlib import Path
 from typing import Any
 
 from controller_automation_toolkit import REPO_ROOT, load_json, load_yaml
+from shared_policy_packs import load_shared_policy_packs
 
 
 CAPACITY_MODEL_PATH = REPO_ROOT / "config" / "capacity-model.json"
 INVENTORY_PATH = REPO_ROOT / "inventory" / "hosts.yml"
 SECRET_MANIFEST_PATH = REPO_ROOT / "config" / "controller-local-secrets.json"
+FIXTURE_RECEIPTS_DIR = REPO_ROOT / "receipts" / "fixtures"
 SSH_TIMEOUT_SECONDS = 10
+SHARED_POLICIES = load_shared_policy_packs()
+CAPACITY_CLASSES = SHARED_POLICIES.capacity_class_ids
+REQUESTER_CLASS_ALIASES = SHARED_POLICIES.requester_class_aliases
+PRIMARY_CLASS_FOR_REQUESTER = SHARED_POLICIES.primary_capacity_class_by_requester
+DECLARED_DRILL_BORROW_BY_REQUESTER = SHARED_POLICIES.declared_drill_borrow_by_requester
+BREAK_GLASS_BORROW_BY_REQUESTER = SHARED_POLICIES.break_glass_borrow_by_requester
 
 
 def require_mapping(value: Any, path: str) -> dict[str, Any]:
@@ -56,6 +65,14 @@ def safe_percent(numerator: float, denominator: float) -> float:
 
 def clamp_negative(value: float) -> float:
     return value if value >= 0 else 0.0
+
+
+def subtract_resources(total: "ResourceAmount", occupied: "ResourceAmount") -> "ResourceAmount":
+    return ResourceAmount(
+        ram_gb=clamp_negative(total.ram_gb - occupied.ram_gb),
+        vcpu=clamp_negative(total.vcpu - occupied.vcpu),
+        disk_gb=clamp_negative(total.disk_gb - occupied.disk_gb),
+    )
 
 
 @dataclass(frozen=True)
@@ -112,6 +129,7 @@ class GuestModel:
     allocated: ResourceAmount
     budget: ResourceAmount
     disk_paths: tuple[str, ...]
+    capacity_class: str | None = None
     notes: str | None = None
 
 
@@ -121,6 +139,7 @@ class ReservationModel:
     kind: str
     status: str
     reserved: ResourceAmount
+    capacity_class: str | None = None
     service_id: str | None = None
     standby_vm: str | None = None
     standby_vmid: int | None = None
@@ -158,6 +177,15 @@ class CapacityReport:
     host_actuals: HostActuals
     guest_actuals: dict[str, GuestActuals]
     metrics_source: str
+
+
+@dataclass(frozen=True)
+class CapacityClassState:
+    identifier: str
+    reserved: ResourceAmount
+    occupied: ResourceAmount
+    available: ResourceAmount
+    sources: tuple[str, ...]
 
 
 def resource_from_mapping(value: Any, path: str) -> ResourceAmount:
@@ -222,6 +250,14 @@ def load_capacity_model(path: Path = CAPACITY_MODEL_PATH) -> CapacityModel:
                     f"{path}.guests[{index}].budget",
                 ),
                 disk_paths=disk_paths,
+                capacity_class=(
+                    require_str(
+                        guest.get("capacity_class"),
+                        f"{path}.guests[{index}].capacity_class",
+                    )
+                    if guest.get("capacity_class") is not None
+                    else None
+                ),
                 notes=guest.get("notes"),
             )
         )
@@ -257,6 +293,14 @@ def load_capacity_model(path: Path = CAPACITY_MODEL_PATH) -> CapacityModel:
                 reserved=resource_from_mapping(
                     reservation.get("reserved"),
                     f"{path}.reservations[{index}].reserved",
+                ),
+                capacity_class=(
+                    require_str(
+                        reservation.get("capacity_class"),
+                        f"{path}.reservations[{index}].capacity_class",
+                    )
+                    if reservation.get("capacity_class") is not None
+                    else ("preview_burst" if reservation.get("kind") == "ephemeral_pool" else "ha_reserved" if reservation.get("kind") == "standby" else None)
                 ),
                 service_id=(
                     require_str(reservation.get("service_id"), f"{path}.reservations[{index}].service_id")
@@ -432,6 +476,21 @@ def validate_capacity_model_payload(payload: dict[str, Any]) -> None:
                 path_value,
                 f"config/capacity-model.json.guests[{index}].disk_paths[{disk_index}]",
             )
+        capacity_class = guest.get("capacity_class")
+        if capacity_class is not None:
+            require_str(
+                capacity_class,
+                f"config/capacity-model.json.guests[{index}].capacity_class",
+            )
+            if capacity_class not in CAPACITY_CLASSES:
+                raise ValueError(
+                    "config/capacity-model.json.guests["
+                    f"{index}].capacity_class must be one of {list(CAPACITY_CLASSES)}"
+                )
+            if status != "planned":
+                raise ValueError(
+                    f"config/capacity-model.json.guests[{index}].capacity_class is only valid for planned guests"
+                )
 
     for missing_guest in sorted(inventory_guest_names - seen_names):
         raise ValueError(
@@ -471,7 +530,22 @@ def validate_capacity_model_payload(payload: dict[str, Any]) -> None:
             reservation.get("reserved"),
             f"config/capacity-model.json.reservations[{index}].reserved",
         )
+        capacity_class = reservation.get("capacity_class")
+        if capacity_class is not None:
+            require_str(
+                capacity_class,
+                f"config/capacity-model.json.reservations[{index}].capacity_class",
+            )
+            if capacity_class not in CAPACITY_CLASSES:
+                raise ValueError(
+                    "config/capacity-model.json.reservations["
+                    f"{index}].capacity_class must be one of {list(CAPACITY_CLASSES)}"
+                )
         if kind == "ephemeral_pool":
+            if capacity_class not in {None, "preview_burst"}:
+                raise ValueError(
+                    f"config/capacity-model.json.reservations[{index}].capacity_class must be preview_burst for ephemeral_pool"
+                )
             vmid_range = require_mapping(
                 reservation.get("vmid_range"),
                 f"config/capacity-model.json.reservations[{index}].vmid_range",
@@ -500,6 +574,10 @@ def validate_capacity_model_payload(payload: dict[str, Any]) -> None:
                 1,
             )
         if kind == "standby":
+            if capacity_class not in {None, "ha_reserved"}:
+                raise ValueError(
+                    f"config/capacity-model.json.reservations[{index}].capacity_class must be ha_reserved for standby reservations"
+                )
             require_str(
                 reservation.get("service_id"),
                 f"config/capacity-model.json.reservations[{index}].service_id",
@@ -530,6 +608,230 @@ def validate_capacity_model_payload(payload: dict[str, Any]) -> None:
                 raise ValueError(
                     f"config/capacity-model.json.reservations[{index}].max_concurrent_vms is not valid for standby reservations"
                 )
+        if kind == "planned_growth" and capacity_class == "ha_reserved":
+            raise ValueError(
+                f"config/capacity-model.json.reservations[{index}] planned_growth must not use ha_reserved; use a planned standby guest or standby reservation instead"
+            )
+
+
+def normalize_requester_class(value: str) -> str:
+    normalized = value.strip().lower().replace(" ", "_")
+    canonical = REQUESTER_CLASS_ALIASES.get(normalized)
+    if canonical is None:
+        raise ValueError(
+            f"requester class '{value}' must be one of {sorted(REQUESTER_CLASS_ALIASES)}"
+        )
+    return canonical
+
+
+def resources_fit(available: ResourceAmount, requested: ResourceAmount) -> bool:
+    return (
+        available.ram_gb >= requested.ram_gb
+        and available.vcpu >= requested.vcpu
+        and available.disk_gb >= requested.disk_gb
+    )
+
+
+def class_sources(model: CapacityModel) -> dict[str, list[str]]:
+    sources = {identifier: [] for identifier in CAPACITY_CLASSES}
+    for guest in model.guests:
+        if guest.capacity_class is None:
+            continue
+        sources[guest.capacity_class].append(f"guest:{guest.name}[{guest.status}]")
+    for reservation in model.reservations:
+        if reservation.capacity_class is None:
+            continue
+        sources[reservation.capacity_class].append(
+            f"reservation:{reservation.identifier}[{reservation.kind}]"
+        )
+    return sources
+
+
+def reserved_capacity_by_class(model: CapacityModel) -> dict[str, ResourceAmount]:
+    totals = {identifier: ZERO_RESOURCES for identifier in CAPACITY_CLASSES}
+    for guest in model.guests:
+        if guest.capacity_class is None:
+            continue
+        guest_resources = guest.allocated if guest.status == "active" else guest.budget
+        totals[guest.capacity_class] = totals[guest.capacity_class].add(guest_resources)
+    for reservation in model.reservations:
+        if reservation.capacity_class is None:
+            continue
+        totals[reservation.capacity_class] = totals[reservation.capacity_class].add(reservation.reserved)
+    return totals
+
+
+def active_fixture_preview_usage() -> ResourceAmount:
+    if not FIXTURE_RECEIPTS_DIR.exists():
+        return ZERO_RESOURCES
+
+    total = ZERO_RESOURCES
+    for path in sorted(FIXTURE_RECEIPTS_DIR.glob("*.json")):
+        try:
+            payload = load_json(path)
+        except Exception:
+            continue
+        if not isinstance(payload, dict) or payload.get("status") != "active":
+            continue
+        definition = payload.get("definition")
+        resources = definition.get("resources") if isinstance(definition, dict) else None
+        if not isinstance(resources, dict):
+            continue
+        memory_mb = resources.get("memory_mb")
+        cores = resources.get("cores")
+        disk_gb = resources.get("disk_gb")
+        if (
+            not isinstance(memory_mb, (int, float))
+            or not isinstance(cores, (int, float))
+            or not isinstance(disk_gb, (int, float))
+        ):
+            continue
+        total = total.add(
+            ResourceAmount(
+                ram_gb=math.ceil(float(memory_mb) / 1024.0),
+                vcpu=float(cores),
+                disk_gb=float(disk_gb),
+            )
+        )
+    return total
+
+
+def occupied_capacity_by_class(model: CapacityModel) -> dict[str, ResourceAmount]:
+    occupied = {identifier: ZERO_RESOURCES for identifier in CAPACITY_CLASSES}
+    occupied[PRIMARY_CLASS_FOR_REQUESTER["preview"]] = active_fixture_preview_usage()
+    return occupied
+
+
+def summarize_capacity_classes(model: CapacityModel) -> list[CapacityClassState]:
+    reserved = reserved_capacity_by_class(model)
+    occupied = occupied_capacity_by_class(model)
+    sources = class_sources(model)
+    return [
+        CapacityClassState(
+            identifier=identifier,
+            reserved=reserved[identifier],
+            occupied=occupied[identifier],
+            available=subtract_resources(reserved[identifier], occupied[identifier]),
+            sources=tuple(sorted(sources[identifier])),
+        )
+        for identifier in CAPACITY_CLASSES
+    ]
+
+
+def capacity_class_state_map(model: CapacityModel) -> dict[str, CapacityClassState]:
+    return {entry.identifier: entry for entry in summarize_capacity_classes(model)}
+
+
+def check_capacity_class_request(
+    model: CapacityModel,
+    *,
+    requester_class: str,
+    requested: ResourceAmount,
+    declared_drill: bool = False,
+    break_glass_ref: str | None = None,
+    duration_hours: float | None = None,
+) -> dict[str, Any]:
+    canonical_requester = normalize_requester_class(requester_class)
+    primary_class = PRIMARY_CLASS_FOR_REQUESTER[canonical_requester]
+    states = capacity_class_state_map(model)
+    primary_available = states[primary_class].available
+    declared_drill_borrow_classes = DECLARED_DRILL_BORROW_BY_REQUESTER.get(canonical_requester, ())
+    break_glass_borrow_classes = BREAK_GLASS_BORROW_BY_REQUESTER.get(canonical_requester, ())
+
+    result: dict[str, Any] = {
+        "approved": False,
+        "requester_class": canonical_requester,
+        "primary_class": primary_class,
+        "requested": requested.__dict__,
+        "admitted_classes": [primary_class],
+        "borrowed_from": [],
+        "declared_drill": declared_drill,
+        "break_glass_ref": break_glass_ref,
+        "duration_hours": duration_hours,
+        "reasons": [],
+        "conditions": [],
+        "capacity_classes": [
+            {
+                "id": state.identifier,
+                "reserved": state.reserved.__dict__,
+                "occupied": state.occupied.__dict__,
+                "available": state.available.__dict__,
+            }
+            for state in states.values()
+        ],
+    }
+
+    if resources_fit(primary_available, requested):
+        result["approved"] = True
+        return result
+
+    if declared_drill_borrow_classes:
+        if not declared_drill:
+            result["reasons"].append(
+                f"{canonical_requester} requests may borrow from "
+                f"{', '.join(declared_drill_borrow_classes)} only for a declared drill"
+            )
+        else:
+            combined = primary_available
+            admitted_classes = [primary_class]
+            for borrow_class in declared_drill_borrow_classes:
+                combined = combined.add(states[borrow_class].available)
+                admitted_classes.append(borrow_class)
+            if resources_fit(combined, requested):
+                result["approved"] = True
+                result["borrowed_from"] = admitted_classes[1:]
+                result["admitted_classes"] = admitted_classes
+                result["conditions"].append(
+                    "Declared recovery drill approved with protected spillover."
+                )
+                return result
+
+    if break_glass_borrow_classes:
+        if not break_glass_ref:
+            result["reasons"].append(
+                "borrowing from protected classes requires explicit break-glass evidence"
+            )
+        if duration_hours is None or duration_hours <= 0:
+            result["reasons"].append(
+                "borrowing from protected classes must declare a positive time-bounded duration"
+            )
+        if break_glass_ref and duration_hours is not None and duration_hours > 0:
+            combined = primary_available
+            admitted_classes = [primary_class]
+            if declared_drill:
+                for borrow_class in declared_drill_borrow_classes:
+                    combined = combined.add(states[borrow_class].available)
+                    if borrow_class not in admitted_classes:
+                        admitted_classes.append(borrow_class)
+            for borrow_class in break_glass_borrow_classes:
+                combined = combined.add(states[borrow_class].available)
+                if borrow_class not in admitted_classes:
+                    admitted_classes.append(borrow_class)
+            if resources_fit(combined, requested):
+                result["approved"] = True
+                result["borrowed_from"] = admitted_classes[1:]
+                result["admitted_classes"] = admitted_classes
+                result["conditions"].append(
+                    f"Break-glass admission approved with evidence `{break_glass_ref}` for {duration_hours:g}h."
+                )
+                return result
+            result["reasons"].append(
+                "requested resources still exceed the combined available protected capacity"
+            )
+
+    if canonical_requester == "preview":
+        result["reasons"].append(
+            "preview demand must remain within preview_burst and should spill to the auxiliary cloud domain before protected classes are borrowed"
+        )
+    elif canonical_requester == "standby":
+        result["reasons"].append(
+            "standby promotion requests must fit within the protected ha_reserved class"
+        )
+    else:
+        result["reasons"].append(
+            "requested resources exceed the available class capacity for this admission rule"
+        )
+    return result
 
 
 def normalize_rows(raw_csv: str) -> list[dict[str, str]]:
@@ -776,6 +1078,16 @@ def render_text(report: CapacityReport) -> str:
                 f"{reservation.identifier} [{reservation.kind}] "
                 f"{reservation.reserved.ram_gb:.0f}GB RAM / {reservation.reserved.vcpu:.0f} vCPU / {reservation.reserved.disk_gb:.0f}GB disk"
             )
+    lines.extend(["", "Capacity classes:"])
+    for state in summarize_capacity_classes(model):
+        sources = ", ".join(state.sources) if state.sources else "none declared"
+        lines.append(
+            "- "
+            f"{state.identifier} reserved={state.reserved.ram_gb:.0f}GB/{state.reserved.vcpu:.0f}vCPU/{state.reserved.disk_gb:.0f}GB "
+            f"occupied={state.occupied.ram_gb:.0f}GB/{state.occupied.vcpu:.0f}vCPU/{state.occupied.disk_gb:.0f}GB "
+            f"available={state.available.ram_gb:.0f}GB/{state.available.vcpu:.0f}vCPU/{state.available.disk_gb:.0f}GB "
+            f"sources={sources}"
+        )
     return "\n".join(lines) + "\n"
 
 
@@ -813,6 +1125,27 @@ def render_markdown(report: CapacityReport) -> str:
             )
             + " |"
         )
+    lines.extend(
+        [
+            "",
+            "| Capacity Class | Reserved | Occupied | Available | Sources |",
+            "| --- | --- | --- | --- | --- |",
+        ]
+    )
+    for state in summarize_capacity_classes(model):
+        lines.append(
+            "| "
+            + " | ".join(
+                [
+                    state.identifier,
+                    f"{state.reserved.ram_gb:.0f} GB / {state.reserved.vcpu:.0f} / {state.reserved.disk_gb:.0f} GB",
+                    f"{state.occupied.ram_gb:.0f} GB / {state.occupied.vcpu:.0f} / {state.occupied.disk_gb:.0f} GB",
+                    f"{state.available.ram_gb:.0f} GB / {state.available.vcpu:.0f} / {state.available.disk_gb:.0f} GB",
+                    ", ".join(state.sources) if state.sources else "none declared",
+                ]
+            )
+            + " |"
+        )
     return "\n".join(lines) + "\n"
 
 
@@ -840,6 +1173,7 @@ def render_json(report: CapacityReport) -> str:
                 "name": guest.name,
                 "status": guest.status,
                 "environment": guest.environment,
+                "capacity_class": guest.capacity_class,
                 "allocated": guest.allocated.__dict__,
                 "budget": guest.budget.__dict__,
                 "actual": report.guest_actuals.get(guest.name, GuestActuals()).__dict__,
@@ -852,6 +1186,7 @@ def render_json(report: CapacityReport) -> str:
                 "kind": reservation.kind,
                 "status": reservation.status,
                 "reserved": reservation.reserved.__dict__,
+                "capacity_class": reservation.capacity_class,
                 "service_id": reservation.service_id,
                 "standby_vm": reservation.standby_vm,
                 "standby_vmid": reservation.standby_vmid,
@@ -861,6 +1196,16 @@ def render_json(report: CapacityReport) -> str:
                 "vmid_range": reservation.vmid_range,
             }
             for reservation in model.reservations
+        ],
+        "capacity_classes": [
+            {
+                "id": state.identifier,
+                "reserved": state.reserved.__dict__,
+                "occupied": state.occupied.__dict__,
+                "available": state.available.__dict__,
+                "sources": list(state.sources),
+            }
+            for state in summarize_capacity_classes(model)
         ],
     }
     return json.dumps(payload, indent=2) + "\n"
@@ -910,6 +1255,34 @@ def render_prometheus(report: CapacityReport) -> str:
             lines.append(f"lv3_guest_actual_vcpu_p95{{{labels}}} {actuals.cpu_used_cores_p95:.6f}")
         if actuals.disk_used_gb is not None:
             lines.append(f"lv3_guest_actual_disk_gb{{{labels}}} {actuals.disk_used_gb:.6f}")
+    for state in summarize_capacity_classes(model):
+        lines.append(
+            f'lv3_capacity_class_reserved_ram_gb{{host="{model.host.identifier}",capacity_class="{state.identifier}"}} {state.reserved.ram_gb:.6f}'
+        )
+        lines.append(
+            f'lv3_capacity_class_occupied_ram_gb{{host="{model.host.identifier}",capacity_class="{state.identifier}"}} {state.occupied.ram_gb:.6f}'
+        )
+        lines.append(
+            f'lv3_capacity_class_available_ram_gb{{host="{model.host.identifier}",capacity_class="{state.identifier}"}} {state.available.ram_gb:.6f}'
+        )
+        lines.append(
+            f'lv3_capacity_class_reserved_vcpu{{host="{model.host.identifier}",capacity_class="{state.identifier}"}} {state.reserved.vcpu:.6f}'
+        )
+        lines.append(
+            f'lv3_capacity_class_occupied_vcpu{{host="{model.host.identifier}",capacity_class="{state.identifier}"}} {state.occupied.vcpu:.6f}'
+        )
+        lines.append(
+            f'lv3_capacity_class_available_vcpu{{host="{model.host.identifier}",capacity_class="{state.identifier}"}} {state.available.vcpu:.6f}'
+        )
+        lines.append(
+            f'lv3_capacity_class_reserved_disk_gb{{host="{model.host.identifier}",capacity_class="{state.identifier}"}} {state.reserved.disk_gb:.6f}'
+        )
+        lines.append(
+            f'lv3_capacity_class_occupied_disk_gb{{host="{model.host.identifier}",capacity_class="{state.identifier}"}} {state.occupied.disk_gb:.6f}'
+        )
+        lines.append(
+            f'lv3_capacity_class_available_disk_gb{{host="{model.host.identifier}",capacity_class="{state.identifier}"}} {state.available.disk_gb:.6f}'
+        )
     return "\n".join(lines) + "\n"
 
 
@@ -970,6 +1343,11 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--no-live-metrics", action="store_true")
     parser.add_argument("--check-gate", action="store_true")
+    parser.add_argument("--check-class-request", action="store_true")
+    parser.add_argument("--requester-class", help="Capacity requester class: preview, recovery, or standby.")
+    parser.add_argument("--declared-drill", action="store_true")
+    parser.add_argument("--break-glass-ref")
+    parser.add_argument("--duration-hours", type=float)
     parser.add_argument(
         "--proposed-change",
         action="append",
@@ -980,6 +1358,22 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         model = load_capacity_model(args.model)
+        requested = ZERO_RESOURCES
+        for change in parse_proposed_changes(args.proposed_change):
+            requested = requested.add(change)
+        if args.check_class_request:
+            if not args.requester_class:
+                raise ValueError("--requester-class is required with --check-class-request")
+            payload = check_capacity_class_request(
+                model,
+                requester_class=args.requester_class,
+                requested=requested,
+                declared_drill=args.declared_drill,
+                break_glass_ref=args.break_glass_ref,
+                duration_hours=args.duration_hours,
+            )
+            print(json.dumps(payload, indent=2))
+            return 0 if payload["approved"] else 2
         if args.check_gate:
             approved, reasons = check_capacity_gate(
                 model,

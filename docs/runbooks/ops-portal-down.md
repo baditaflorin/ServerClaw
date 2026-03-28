@@ -51,7 +51,7 @@ If the logs show `Acquisition timeout while waiting for new connection`, the JDB
 1. Re-apply the portal runtime:
 
 ```bash
-ansible-playbook playbooks/ops-portal.yml
+make converge-ops-portal
 ```
 
 2. If the runtime is healthy locally but the public hostname fails, re-apply the edge:
@@ -62,9 +62,13 @@ ansible-playbook playbooks/public-edge.yml
 
 3. If gateway-backed actions fail while the UI shell loads, confirm the configured `GATEWAY_URL` from `/opt/ops-portal/ops-portal.env` and verify the API gateway separately before restarting the portal.
 
-4. If the callback includes `error=invalid_scope`, verify the rendered oauth2-proxy config on `nginx-lv3` does not request a custom `groups` scope. The portal relies on a client-mapped `groups` claim, so the requested scope must stay `openid profile email` unless a real Keycloak client scope named `groups` is added and assigned.
+4. If the portal shell loads but the publication badges are missing or stale,
+   confirm `/opt/ops-portal/data/config/subdomain-exposure-registry.json` was
+   updated with the current repo commit before rebuilding the runtime.
 
-5. If the auth failure is actually Keycloak, recover the runtime from the Proxmox host through the guest agent:
+5. If the callback includes `error=invalid_scope`, verify the rendered oauth2-proxy config on `nginx-lv3` does not request a custom `groups` scope. The portal relies on a client-mapped `groups` claim, so the requested scope must stay `openid profile email` unless a real Keycloak client scope named `groups` is added and assigned.
+
+6. If the auth failure is actually Keycloak, recover the runtime from the Proxmox host through the guest agent:
 
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \
@@ -78,14 +82,14 @@ ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/he
   \"qm guest exec 120 -- /bin/sh -lc 'cd /opt/keycloak && docker compose up -d --force-recreate keycloak'\"
 ```
 
-6. Re-verify the IdP and portal redirect path:
+7. Re-verify the IdP and portal redirect path:
 
 ```bash
 curl -I https://sso.lv3.org/realms/lv3/.well-known/openid-configuration
 curl -I https://ops.lv3.org/oauth2/sign_in
 ```
 
-7. If login is healthy but password-reset mail is still broken, verify the realm SMTP path and the private relay on `docker-runtime-lv3`:
+8. If login is healthy but password-reset mail is still broken, verify the realm SMTP path and the private relay on `docker-runtime-lv3`:
 
 ```bash
 ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 \

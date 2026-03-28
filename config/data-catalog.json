@@ -64,6 +64,36 @@
       "notes": "Dozzle is read-only and does not persist its own datastore; it exposes recent container log buffers from the managed Docker hosts for real-time debugging."
     },
     {
+      "id": "excalidraw-generated-scenes",
+      "service": "excalidraw",
+      "name": "Generated Excalidraw scene set",
+      "class": "internal",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-read",
+      "pii_risk": "low",
+      "locations": [
+        "docs/diagrams/*.excalidraw",
+        "/opt/excalidraw/bootstrap-app.sh"
+      ],
+      "notes": "The committed architecture scene sources are regenerated from repo truth and remain part of normal repository backup scope."
+    },
+    {
+      "id": "netdata-realtime-metrics",
+      "service": "realtime",
+      "name": "Netdata realtime metrics store",
+      "class": "internal",
+      "retention_days": 1,
+      "backup_included": false,
+      "access_role": "platform-read",
+      "pii_risk": "low",
+      "locations": [
+        "/var/cache/netdata",
+        "https://realtime.lv3.org"
+      ],
+      "notes": "Netdata stores short-lived host and guest metrics for live operator troubleshooting and anomaly triage; long-term retention remains outside the scope of this service."
+    },
+    {
       "id": "tempo-traces",
       "service": "grafana",
       "name": "Tempo trace blocks",
@@ -228,6 +258,34 @@
       "notes": "Shared operator credentials, recovery codes, and TOTP seeds remain until explicit deletion or rotation removes them from the private vault."
     },
     {
+      "id": "outline-attachment-storage",
+      "service": "outline",
+      "name": "Outline attachment storage",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "/opt/outline/data/minio/outline"
+      ],
+      "notes": "S3-compatible MinIO storage holds attachment objects and future uploaded evidence referenced from wiki documents."
+    },
+    {
+      "id": "outline-knowledge-metadata",
+      "service": "outline",
+      "name": "Outline knowledge metadata",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": false,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "Outline PostgreSQL database"
+      ],
+      "notes": "Outline stores workspace, user, collection, and document metadata that may include operator identities and operational text."
+    },
+    {
       "id": "live-apply-receipts",
       "service": "platform_control_plane",
       "name": "Live-apply receipts",
@@ -344,6 +402,34 @@
         "/opt/semaphore/data"
       ],
       "notes": "Task output can contain operator context, playbook names, and limited execution logs, so it should stay private and be retained long enough for incident review."
+    },
+    {
+      "id": "plane-workspace-store",
+      "service": "plane",
+      "name": "Plane workspace and issue store",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "Plane PostgreSQL database"
+      ],
+      "notes": "Plane stores project boards, issue metadata, and operator-entered planning content that should remain recoverable across normal backup cycles."
+    },
+    {
+      "id": "plane-object-storage",
+      "service": "plane",
+      "name": "Plane attachment object storage",
+      "class": "confidential",
+      "retention_days": 365,
+      "backup_included": true,
+      "access_role": "platform-operator",
+      "pii_risk": "medium",
+      "locations": [
+        "/opt/plane/data/minio"
+      ],
+      "notes": "Plane attachment uploads and exported artifacts are persisted in the local MinIO-backed object store on docker-runtime-lv3."
     }
   ]
 }

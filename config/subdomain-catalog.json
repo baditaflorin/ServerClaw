@@ -19,6 +19,14 @@
       "notes": "Reserved for the generated developer portal and documentation site."
     },
     {
+      "prefix": "draw",
+      "owner_adr": "0202",
+      "allowed_fqdns": [
+        "draw.lv3.org"
+      ],
+      "notes": "Reserved for the private Excalidraw architecture diagram surface."
+    },
+    {
       "prefix": "git",
       "owner_adr": "0143",
       "allowed_fqdns": [
@@ -45,6 +53,14 @@
       "notes": "Reserved for a future governed API gateway surface."
     },
     {
+      "prefix": "agents",
+      "owner_adr": "0197",
+      "allowed_fqdns": [
+        "agents.lv3.org"
+      ],
+      "notes": "Reserved for the Dify visual workflow canvas edge surface."
+    },
+    {
       "prefix": "smtp",
       "owner_adr": "0041",
       "notes": "Reserved for mail submission and transport naming."
@@ -65,7 +81,9 @@
     {
       "prefix": "logs",
       "owner_adr": "0150",
-      "allowed_fqdns": ["logs.lv3.org"],
+      "allowed_fqdns": [
+        "logs.lv3.org"
+      ],
       "notes": "Reserved for the Dozzle real-time container log surface."
     }
   ],
@@ -88,6 +106,23 @@
       "notes": "Published publicly through the shared NGINX edge and verified live from current main."
     },
     {
+      "fqdn": "apps.lv3.org",
+      "service_id": "coolify_apps",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "none",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0194",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Shared public applications ingress published through the NGINX edge with wildcard alias coverage for Coolify-managed applications."
+    },
+    {
       "fqdn": "build.lv3.org",
       "service_id": "docker_build",
       "environment": "production",
@@ -102,6 +137,23 @@
         "cert_path": "/etc/letsencrypt/live/lv3-edge/",
         "auto_renew": true
       }
+    },
+    {
+      "fqdn": "agents.lv3.org",
+      "service_id": "dify",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0197",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
     },
     {
       "fqdn": "database.lv3.org",
@@ -170,6 +222,23 @@
       "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
     },
     {
+      "fqdn": "coolify.lv3.org",
+      "service_id": "coolify",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0194",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Coolify dashboard published through the shared authenticated NGINX edge with the private controller API proxied on the management tailnet."
+    },
+    {
       "fqdn": "docker.lv3.org",
       "service_id": "docker_runtime",
       "environment": "production",
@@ -200,6 +269,23 @@
         "cert_path": "/etc/letsencrypt/live/lv3-edge/",
         "auto_renew": true
       }
+    },
+    {
+      "fqdn": "draw.lv3.org",
+      "service_id": "excalidraw",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0202",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Private Excalidraw publication for repo-generated architecture scenes through the shared authenticated NGINX edge."
     },
     {
       "fqdn": "home.lv3.org",
@@ -244,6 +330,23 @@
       "target": "65.108.75.123",
       "target_port": 443,
       "owner_adr": "0150",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
+    },
+    {
+      "fqdn": "realtime.lv3.org",
+      "service_id": "realtime",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0196",
       "tls": {
         "provider": "letsencrypt",
         "cert_path": "/etc/letsencrypt/live/lv3-edge/",
@@ -332,6 +435,23 @@
         "auto_renew": true
       },
       "notes": "Interactive runtime is live behind oauth2-proxy and Keycloak on the shared NGINX edge."
+    },
+    {
+      "fqdn": "wiki.lv3.org",
+      "service_id": "outline",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "upstream_auth",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0199",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Published through the shared NGINX edge while Outline itself delegates browser authentication to the repo-managed Keycloak OIDC client."
     },
     {
       "fqdn": "headscale.lv3.org",
@@ -498,6 +618,23 @@
         "auto_renew": true
       },
       "notes": "Planned staged monitoring hostname on the shared NGINX edge."
+    },
+    {
+      "fqdn": "tasks.lv3.org",
+      "service_id": "plane",
+      "environment": "production",
+      "status": "active",
+      "exposure": "edge-published",
+      "auth_requirement": "edge_oidc",
+      "target": "65.108.75.123",
+      "target_port": 443,
+      "owner_adr": "0193",
+      "tls": {
+        "provider": "letsencrypt",
+        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+        "auto_renew": true
+      },
+      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
     }
   ]
 }

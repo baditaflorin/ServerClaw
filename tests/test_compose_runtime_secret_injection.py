@@ -9,6 +9,7 @@ ROLE_RUNTIME_PATHS = {
     "mattermost_runtime": "/run/lv3-secrets/mattermost/runtime.env",
     "open_webui_runtime": "/run/lv3-secrets/open-webui/runtime.env",
     "netbox_runtime": "/run/lv3-secrets/netbox/runtime.env",
+    "plane_runtime": "/run/lv3-secrets/plane/runtime.env",
     "rag_context_runtime": "/run/lv3-secrets/platform-context/runtime.env",
 }
 
@@ -115,3 +116,20 @@ def test_mail_gateway_image_includes_telemetry_module() -> None:
     assert "from telemetry import configure_telemetry" in app_text
     assert "COPY telemetry.py ./" in dockerfile_text
     assert "uvicorn app:app --host 0.0.0.0 --port 8081" in dockerfile_text
+
+
+def test_ops_portal_image_includes_publication_contract_helper() -> None:
+    dockerfile_text = (
+        REPO_ROOT
+        / "collections"
+        / "ansible_collections"
+        / "lv3"
+        / "platform"
+        / "roles"
+        / "ops_portal_runtime"
+        / "templates"
+        / "Dockerfile.j2"
+    ).read_text()
+    app_text = (REPO_ROOT / "scripts" / "ops_portal" / "app.py").read_text()
+    assert "from publication_contract import registry_entries" in app_text
+    assert "COPY publication_contract.py ./publication_contract.py" in dockerfile_text

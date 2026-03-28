@@ -4,7 +4,6 @@ import argparse
 import json
 import os
 import re
-import subprocess
 import sys
 from pathlib import Path
 
@@ -16,7 +15,7 @@ from controller_automation_toolkit import (
     emit_cli_error,
     load_json,
 )
-from environment_catalog import configured_environment_ids, receipt_subdirectory_environments
+from environment_catalog import receipt_environment_ids, receipt_subdirectory_environments
 from workflow_catalog import load_workflow_catalog, load_secret_manifest, validate_secret_manifest, validate_workflow_catalog
 
 
@@ -25,7 +24,14 @@ DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 COMMIT_HASH_PATTERN = re.compile(r"^[0-9a-f]{7,64}$")
 LEGACY_WORKFLOW_ID_PATTERN = re.compile(r"^adr-\d{4}-[a-z0-9-]+-live-apply$")
 ALLOWED_RESULTS = {"pass", "partial", "fail"}
-ALLOWED_ENVIRONMENTS = set(configured_environment_ids())
+ALLOWED_ENVIRONMENTS = set(receipt_environment_ids())
+ALLOWED_CORRECTION_LOOP_DIAGNOSES = {
+    "transient_failure",
+    "contract_drift",
+    "dependency_outage",
+    "stale_input",
+    "irreversible_data_loss_risk",
+}
 
 
 def load_receipt(path: Path) -> dict:
@@ -48,29 +54,11 @@ def git_commit_lookup_available() -> bool:
     return command_succeeds(["git", "cat-file", "-e", "HEAD^{commit}"])
 
 
-def published_snapshot_context() -> bool:
-    if not git_metadata_available():
-        return False
-    completed = subprocess.run(
-        ["git", "show", "-s", "--format=%s", "HEAD"],
-        cwd=REPO_ROOT,
-        text=True,
-        capture_output=True,
-        check=False,
-    )
-    if completed.returncode != 0:
-        return False
-    subject = completed.stdout.strip()
-    return subject.startswith("Publish internal Gitea snapshot for ")
-
-
 def validate_source_commit(commit: str, path: Path) -> None:
     if git_commit_lookup_available():
-        if git_commit_exists(commit):
-            return
-        if published_snapshot_context() and COMMIT_HASH_PATTERN.fullmatch(commit):
-            return
-        raise ValueError(f"{path.name}: source_commit '{commit}' is not a valid git commit")
+        if not git_commit_exists(commit):
+            raise ValueError(f"{path.name}: source_commit '{commit}' is not a valid git commit")
+        return
 
     if not COMMIT_HASH_PATTERN.fullmatch(commit):
         raise ValueError(
@@ -204,6 +192,21 @@ def validate_receipt(receipt: dict, path: Path, workflow_catalog: dict) -> None:
         if not isinstance(note, str) or not note:
             raise ValueError(f"{path.name}: notes entries must be non-empty strings")
 
+    correction_loop = receipt.get("correction_loop")
+    if correction_loop is not None:
+        if not isinstance(correction_loop, dict):
+            raise ValueError(f"{path.name}: correction_loop must be an object when present")
+        for field in ("loop_id", "surface", "repair_action", "verification"):
+            value = correction_loop.get(field)
+            if not isinstance(value, str) or not value.strip():
+                raise ValueError(f"{path.name}: correction_loop.{field} must be a non-empty string")
+        diagnosis = correction_loop.get("diagnosis")
+        if diagnosis is not None:
+            if not isinstance(diagnosis, str) or diagnosis not in ALLOWED_CORRECTION_LOOP_DIAGNOSES:
+                raise ValueError(
+                    f"{path.name}: correction_loop.diagnosis must be one of {sorted(ALLOWED_CORRECTION_LOOP_DIAGNOSES)}"
+                )
+
 
 def validate_receipts() -> int:
     secret_manifest = load_secret_manifest()
@@ -291,6 +294,15 @@ def show_receipt(receipt_id: str) -> int:
     print("Evidence refs:")
     for ref in receipt["evidence_refs"]:
         print(f"  - {ref}")
+    correction_loop = receipt.get("correction_loop")
+    if isinstance(correction_loop, dict):
+        print("Correction loop:")
+        print(f"  - loop_id: {correction_loop['loop_id']}")
+        print(f"  - surface: {correction_loop['surface']}")
+        if correction_loop.get("diagnosis"):
+            print(f"  - diagnosis: {correction_loop['diagnosis']}")
+        print(f"  - repair_action: {correction_loop['repair_action']}")
+        print(f"  - verification: {correction_loop['verification']}")
     if receipt["notes"]:
         print("Notes:")
         for note in receipt["notes"]:

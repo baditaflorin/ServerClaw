@@ -1,0 +1,153 @@
+---
+# Playbook: coolify.yml
+# Purpose: Provision the dedicated Coolify VM, converge the Coolify control plane, and publish its edge and private access paths.
+# Use case: Run for ADR 0194 live apply and later reconciles of the repo-managed Coolify platform surface.
+#
+# Inputs (required):
+#   - bootstrap_ssh_private_key (controller secret, required): Controller-side SSH key used through the Proxmox jump path.
+#   - HETZNER_DNS_API_TOKEN (env, required): DNS token used for edge certificate expansion and publication.
+#
+# Inputs (optional):
+#   - env (string, optional, default=production): Target deployment environment.
+#   - proxmox_guest_ssh_connection_mode (string, optional, default=proxmox_host_jump): Guest SSH path used by scoped runs.
+#
+# Outputs:
+#   - The dedicated coolify-lv3 VM exists and runs the repo-managed Coolify stack.
+#   - The Proxmox host private controller proxy and NGINX edge publication include the Coolify routes.
+#   - Controller-local Coolify bootstrap artifacts are refreshed under .local/coolify.
+#
+# Idempotency: Partially idempotent
+#              The runtime converge is idempotent, but the live deployment server validation and API token rotation intentionally refresh state on each run.
+#
+# Dependencies:
+#   - ADR 0194: Coolify PaaS deploy from repo.
+#   - Requires: Existing Proxmox host access, shared NGINX edge VM, and Docker-host VM template support.
+#   - Role: lv3.platform.proxmox_guests — ensures the dedicated Coolify VM exists.
+#   - Role: lv3.platform.coolify_runtime — converges Coolify, bootstrap auth, and the local deployment server.
+#
+# Related ADRs: 0025, 0056, 0143, 0176
+# Related Runbooks: docs/runbooks/configure-coolify.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-27
+
+- name: Ensure the Coolify VM is provisioned on the Proxmox host
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  vars_files:
+    - "{{ lookup('ansible.builtin.env', 'PWD') }}/inventory/group_vars/platform.yml"
+  tags:
+    - tier-1
+    - automation
+    - service-coolify
+  vars:
+    proxmox_guests_active: >-
+      {{
+        proxmox_guests
+        | selectattr('role', 'equalto', 'coolify')
+        | list
+      }}
+
+  roles:
+    - role: lv3.platform.proxmox_guests
+
+  post_tasks:
+    - name: Stop the Coolify VM from Proxmox after qm set changes
+      ansible.builtin.command: "qm stop {{ proxmox_guests_active[0].vmid }} --skiplock 1"
+      register: coolify_vm_stop
+      failed_when: coolify_vm_stop.rc not in [0, 255]
+      changed_when: true
+
+    - name: Start the Coolify VM from Proxmox after the forced stop
+      ansible.builtin.command: "qm start {{ proxmox_guests_active[0].vmid }}"
+      register: coolify_vm_start_after_stop
+      failed_when: coolify_vm_start_after_stop.rc not in [0, 255]
+      changed_when: coolify_vm_start_after_stop.rc == 0
+
+- name: Converge the Coolify private controller proxy and host firewall
+  hosts: proxmox_hosts
+  become: true
+  gather_facts: true
+  vars_files:
+    - "{{ lookup('ansible.builtin.env', 'PWD') }}/inventory/group_vars/platform.yml"
+  tags:
+    - tier-1
+    - automation
+    - service-coolify
+
+  roles:
+    - role: lv3.platform.proxmox_tailscale_proxy
+    - role: lv3.platform.proxmox_security
+      vars:
+        proxmox_security_manage_acme: false
+
+- name: Converge Coolify on the dedicated guest
+  hosts: "{{ 'coolify-lv3' if (env | default('production')) == 'production' else 'coolify-staging-lv3' }}"
+  become: true
+  gather_facts: false
+  vars_files:
+    - "{{ lookup('ansible.builtin.env', 'PWD') }}/inventory/group_vars/platform.yml"
+  tags:
+    - tier-2
+    - automation
+    - service-coolify
+
+  pre_tasks:
+    - name: Wait for the Coolify guest SSH service to be reachable
+      ansible.builtin.wait_for_connection:
+        timeout: 300
+
+    - name: Gather facts after SSH is ready
+      ansible.builtin.setup:
+
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_audit_action: playbook.start.coolify
+        playbook_execution_audit_target: coolify
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.coolify[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.docker_runtime
+    - role: lv3.platform.coolify_runtime
+
+  post_tasks:
+    - name: Run shared post-verify checks
+      ansible.builtin.import_tasks: tasks/post-verify.yml
+      vars:
+        service_health_probe_id: coolify
+        playbook_execution_post_verify_audit_action: playbook.verify.coolify
+
+    - name: Run shared completion notifications
+      ansible.builtin.import_tasks: tasks/notify.yml
+      vars:
+        playbook_execution_notification_service: coolify
+
+- name: Publish Coolify on the NGINX edge
+  hosts: "{{ 'nginx-lv3' if (env | default('production')) == 'production' else 'nginx-staging-lv3' }}"
+  become: true
+  gather_facts: true
+  vars_files:
+    - "{{ lookup('ansible.builtin.env', 'PWD') }}/inventory/group_vars/platform.yml"
+  tags:
+    - tier-1
+    - automation
+    - service-coolify
+
+  pre_tasks:
+    - name: Run shared preflight checks
+      ansible.builtin.import_tasks: tasks/preflight.yml
+      vars:
+        playbook_execution_require_debian: true
+        playbook_execution_emit_audit: false
+        required_hosts:
+          - "{{ playbook_execution_required_hosts.nginx_edge[playbook_execution_env] }}"
+
+  roles:
+    - role: lv3.platform.linux_guest_firewall
+    - role: lv3.platform.public_edge_oidc_auth
+    - role: lv3.platform.nginx_edge_publication

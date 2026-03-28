@@ -1,0 +1,117 @@
+---
+argument_specs:
+  main:
+    short_description: Converge Coolify, its bootstrap state, and the local deployment server.
+    options:
+      coolify_app_image:
+        type: str
+        required: true
+      coolify_realtime_image:
+        type: str
+        required: true
+      coolify_postgres_image:
+        type: str
+        required: true
+      coolify_redis_image:
+        type: str
+        required: true
+      coolify_site_dir:
+        type: path
+        required: true
+      coolify_bootstrap_dir:
+        type: path
+        required: true
+      coolify_data_root:
+        type: path
+        required: true
+      coolify_compose_file:
+        type: path
+        required: true
+      coolify_env_file:
+        type: path
+        required: true
+      coolify_dashboard_port:
+        type: int
+        required: true
+      coolify_proxy_port:
+        type: int
+        required: true
+      coolify_controller_url:
+        type: str
+        required: true
+      coolify_private_url:
+        type: str
+        required: true
+      coolify_public_url:
+        type: str
+        required: true
+      coolify_apps_public_url:
+        type: str
+        required: true
+      coolify_root_username:
+        type: str
+        required: true
+      coolify_root_email:
+        type: str
+        required: true
+      coolify_api_token_name:
+        type: str
+        required: true
+      coolify_api_allowed_ips:
+        type: list
+        elements: str
+        required: true
+      coolify_local_artifact_dir:
+        type: path
+        required: true
+      coolify_root_password_local_file:
+        type: path
+        required: true
+      coolify_api_token_local_file:
+        type: path
+        required: true
+      coolify_server_key_local_file:
+        type: path
+        required: true
+      coolify_server_key_public_local_file:
+        type: path
+        required: true
+      coolify_admin_auth_local_file:
+        type: path
+        required: true
+      coolify_server_name:
+        type: str
+        required: true
+      coolify_server_host:
+        type: str
+        required: true
+      coolify_server_user:
+        type: str
+        required: true
+      coolify_server_port:
+        type: int
+        required: true
+      coolify_smoke_project_name:
+        type: str
+        required: true
+      coolify_smoke_environment_name:
+        type: str
+        required: true
+      coolify_smoke_app_name:
+        type: str
+        required: true
+      coolify_smoke_repo_url:
+        type: str
+        required: true
+      coolify_smoke_repo_branch:
+        type: str
+        required: true
+      coolify_smoke_base_directory:
+        type: str
+        required: true
+      coolify_smoke_domain:
+        type: str
+        required: true
+      coolify_smoke_alias_domain:
+        type: str
+        required: true

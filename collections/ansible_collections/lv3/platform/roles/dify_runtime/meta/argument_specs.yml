@@ -1,0 +1,32 @@
+# Purpose: Declare the required variable contract for the Dify runtime role.
+# Use case: Evaluated before Dify runtime convergence so invalid or incomplete inputs fail fast.
+# Inputs: Runtime paths, public URL, internal port, and controller-local database password location.
+# Outputs: Documents and enforces the minimum interface for the Dify runtime role.
+# Idempotency: Fully idempotent because this file only declares argument metadata.
+# Dependencies: ADR 0165, ADR 0030, and ADR 0197.
+---
+argument_specs:
+  main:
+    short_description: Converge the repo-managed Dify runtime stack.
+    options:
+      dify_site_dir:
+        type: str
+        required: true
+      dify_secret_dir:
+        type: str
+        required: true
+      dify_compose_file:
+        type: str
+        required: true
+      dify_env_file:
+        type: str
+        required: true
+      dify_port:
+        type: int
+        required: true
+      dify_public_base_url:
+        type: str
+        required: true
+      dify_database_password_local_file:
+        type: str
+        required: true

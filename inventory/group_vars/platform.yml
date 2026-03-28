@@ -95,6 +95,11 @@ platform_host:
         listen_port: 8020
         upstream_host: 10.10.10.20
         upstream_port: 3004
+      - name: plane
+        listen_address: 100.64.0.1
+        listen_port: 8011
+        upstream_host: 10.10.10.20
+        upstream_port: 8093
       - name: open-webui
         listen_address: 100.64.0.1
         listen_port: 8008
@@ -115,6 +120,11 @@ platform_host:
         listen_port: 443
         upstream_host: 10.10.10.20
         upstream_port: 8222
+      - name: coolify
+        listen_address: 100.64.0.1
+        listen_port: 8012
+        upstream_host: 10.10.10.70
+        upstream_port: 8000
 platform_ports:
   alertmanager_port: 9093
   monitoring_grafana_port: 3000
@@ -125,6 +135,7 @@ platform_ports:
   monitoring_tempo_http_port: 3200
   monitoring_otlp_grpc_port: 4317
   monitoring_otlp_http_port: 4318
+  netdata_port: 19999
   mail_platform_gateway_port: 8081
   ntfy_port: 2586
   openbao_http_port: 8201
@@ -142,10 +153,17 @@ platform_ports:
   searxng_port: 8881
   searxng_host_proxy_port: 80
   langfuse_port: 3002
+  dify_port: 8094
+  outline_port: 3006
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
+  excalidraw_port: 3095
+  excalidraw_room_port: 3096
   ollama_api_port: 11434
   n8n_port: 5678
+  coolify_dashboard_port: 8000
+  coolify_proxy_port: 80
+  coolify_host_proxy_port: 8012
   open_webui_port: 8088
   open_webui_host_proxy_port: 8008
   api_gateway_internal_port: 8083
@@ -153,6 +171,8 @@ platform_ports:
   platform_context_host_proxy_port: 8010
   homepage_port: 3090
   ops_portal_port: 8092
+  plane_port: 8093
+  plane_host_proxy_port: 8011
   ntopng_http_port: 3000
   ntopng_proxy_port: 3001
   portainer_https_port: 9443
@@ -171,6 +191,7 @@ platform_port_assignments:
   monitoring_tempo_http_port: 3200
   monitoring_otlp_grpc_port: 4317
   monitoring_otlp_http_port: 4318
+  netdata_port: 19999
   mail_platform_gateway_port: 8081
   ntfy_port: 2586
   openbao_http_port: 8201
@@ -188,10 +209,17 @@ platform_port_assignments:
   searxng_port: 8881
   searxng_host_proxy_port: 80
   langfuse_port: 3002
+  dify_port: 8094
+  outline_port: 3006
   dozzle_http_port: 8089
   dozzle_agent_port: 7007
+  excalidraw_port: 3095
+  excalidraw_room_port: 3096
   ollama_api_port: 11434
   n8n_port: 5678
+  coolify_dashboard_port: 8000
+  coolify_proxy_port: 80
+  coolify_host_proxy_port: 8012
   open_webui_port: 8088
   open_webui_host_proxy_port: 8008
   api_gateway_internal_port: 8083
@@ -199,6 +227,8 @@ platform_port_assignments:
   platform_context_host_proxy_port: 8010
   homepage_port: 3090
   ops_portal_port: 8092
+  plane_port: 8093
+  plane_host_proxy_port: 8011
   ntopng_http_port: 3000
   ntopng_proxy_port: 3001
   portainer_https_port: 9443
@@ -225,6 +255,11 @@ platform_guest_catalog:
         - ingress
         - nginx
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: edge-publication
+        co_location_exceptions: []
       packages:
         - nginx
     - vmid: 120
@@ -243,6 +278,11 @@ platform_guest_catalog:
         - docker
         - runtime
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: runtime-shared
+        co_location_exceptions: []
       packages:
         - docker.io
     - vmid: 130
@@ -260,6 +300,11 @@ platform_guest_catalog:
         - docker
         - build
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: build-jobs
+        co_location_exceptions: []
       packages:
         - docker.io
         - git
@@ -281,6 +326,11 @@ platform_guest_catalog:
         - monitoring
         - grafana
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: observability-core
+        co_location_exceptions: []
       packages:
         - prometheus-node-exporter
     - vmid: 150
@@ -298,6 +348,11 @@ platform_guest_catalog:
         - postgres
         - database
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: postgres-ha
+        co_location_exceptions: []
       packages:
         - acl
         - nftables
@@ -319,6 +374,15 @@ platform_guest_catalog:
         - database
         - ha
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: standby
+        anti_affinity_group: postgres-ha
+        co_location_exceptions:
+          - scope: failure_domain
+            rationale: The platform still has only one active failure domain, so the
+              PostgreSQL standby carries an explicit temporary same-domain waiver
+              until auxiliary capacity is live.
       packages:
         - acl
         - nftables
@@ -343,9 +407,40 @@ platform_guest_catalog:
         - backup
         - pbs
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: recovery
+        anti_affinity_group: control-plane-recovery
+        co_location_exceptions:
+          - scope: failure_domain
+            rationale: Backup and restore automation still share the dedicated host
+              while the auxiliary cloud recovery domain remains planned but not active.
       packages:
         - acl
         - xfsprogs
+    - vmid: 170
+      name: coolify-lv3
+      role: coolify
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.70
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:C7:84:19
+      cores: 4
+      memory_mb: 8192
+      disk_gb: 96
+      tags:
+        - paas
+        - coolify
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: paas-control-plane
+        co_location_exceptions: []
+      packages:
+        - docker.io
+        - git
   by_name:
     nginx-lv3:
       vmid: 110
@@ -364,6 +459,11 @@ platform_guest_catalog:
         - ingress
         - nginx
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: edge-publication
+        co_location_exceptions: []
       packages:
         - nginx
     docker-runtime-lv3:
@@ -383,6 +483,11 @@ platform_guest_catalog:
         - docker
         - runtime
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: runtime-shared
+        co_location_exceptions: []
       packages:
         - docker.io
     docker-build-lv3:
@@ -401,6 +506,11 @@ platform_guest_catalog:
         - docker
         - build
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: build-jobs
+        co_location_exceptions: []
       packages:
         - docker.io
         - git
@@ -423,6 +533,11 @@ platform_guest_catalog:
         - monitoring
         - grafana
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: observability-core
+        co_location_exceptions: []
       packages:
         - prometheus-node-exporter
     postgres-lv3:
@@ -441,6 +556,11 @@ platform_guest_catalog:
         - postgres
         - database
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: postgres-ha
+        co_location_exceptions: []
       packages:
         - acl
         - nftables
@@ -463,6 +583,15 @@ platform_guest_catalog:
         - database
         - ha
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: standby
+        anti_affinity_group: postgres-ha
+        co_location_exceptions:
+          - scope: failure_domain
+            rationale: The platform still has only one active failure domain, so the
+              PostgreSQL standby carries an explicit temporary same-domain waiver
+              until auxiliary capacity is live.
       packages:
         - acl
         - nftables
@@ -488,9 +617,41 @@ platform_guest_catalog:
         - backup
         - pbs
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: recovery
+        anti_affinity_group: control-plane-recovery
+        co_location_exceptions:
+          - scope: failure_domain
+            rationale: Backup and restore automation still share the dedicated host
+              while the auxiliary cloud recovery domain remains planned but not active.
       packages:
         - acl
         - xfsprogs
+    coolify-lv3:
+      vmid: 170
+      name: coolify-lv3
+      role: coolify
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.70
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:C7:84:19
+      cores: 4
+      memory_mb: 8192
+      disk_gb: 96
+      tags:
+        - paas
+        - coolify
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: paas-control-plane
+        co_location_exceptions: []
+      packages:
+        - docker.io
+        - git
   by_role:
     nginx:
       vmid: 110
@@ -509,6 +670,11 @@ platform_guest_catalog:
         - ingress
         - nginx
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: edge-publication
+        co_location_exceptions: []
       packages:
         - nginx
     docker-runtime:
@@ -528,6 +694,11 @@ platform_guest_catalog:
         - docker
         - runtime
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: runtime-shared
+        co_location_exceptions: []
       packages:
         - docker.io
     docker-build:
@@ -546,6 +717,11 @@ platform_guest_catalog:
         - docker
         - build
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: build-jobs
+        co_location_exceptions: []
       packages:
         - docker.io
         - git
@@ -568,6 +744,11 @@ platform_guest_catalog:
         - monitoring
         - grafana
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: observability-core
+        co_location_exceptions: []
       packages:
         - prometheus-node-exporter
     postgres:
@@ -586,6 +767,11 @@ platform_guest_catalog:
         - postgres
         - database
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: postgres-ha
+        co_location_exceptions: []
       packages:
         - acl
         - nftables
@@ -608,6 +794,15 @@ platform_guest_catalog:
         - database
         - ha
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: standby
+        anti_affinity_group: postgres-ha
+        co_location_exceptions:
+          - scope: failure_domain
+            rationale: The platform still has only one active failure domain, so the
+              PostgreSQL standby carries an explicit temporary same-domain waiver
+              until auxiliary capacity is live.
       packages:
         - acl
         - nftables
@@ -633,9 +828,41 @@ platform_guest_catalog:
         - backup
         - pbs
         - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: recovery
+        anti_affinity_group: control-plane-recovery
+        co_location_exceptions:
+          - scope: failure_domain
+            rationale: Backup and restore automation still share the dedicated host
+              while the auxiliary cloud recovery domain remains planned but not active.
       packages:
         - acl
         - xfsprogs
+    coolify:
+      vmid: 170
+      name: coolify-lv3
+      role: coolify
+      template_key: lv3-debian-base
+      ipv4: 10.10.10.70
+      cidr: 24
+      gateway4: 10.10.10.1
+      macaddr: BC:24:11:C7:84:19
+      cores: 4
+      memory_mb: 8192
+      disk_gb: 96
+      tags:
+        - paas
+        - coolify
+        - lv3
+      placement:
+        failure_domain: host:proxmox_florin
+        placement_class: primary
+        anti_affinity_group: paas-control-plane
+        co_location_exceptions: []
+      packages:
+        - docker.io
+        - git
 platform_service_topology:
   nginx_edge:
     service_name: nginx-edge
@@ -707,6 +934,35 @@ platform_service_topology:
       tempo: http://10.10.10.40:3200
       otlp_grpc: http://10.10.10.40:4317
       otlp_http: http://10.10.10.40:4318/v1/traces
+  realtime:
+    service_name: realtime
+    owning_vm: monitoring-lv3
+    private_ip: 10.10.10.40
+    public_hostname: realtime.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: realtime
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      server_sent_events: true
+      upstream: http://10.10.10.40:19999
+    service_id: realtime
+    ports:
+      internal: 19999
+    urls:
+      public: https://realtime.lv3.org
+      internal: http://10.10.10.40:19999
   headscale:
     service_name: headscale
     owning_vm: proxmox_florin
@@ -1089,6 +1345,95 @@ platform_service_topology:
     urls:
       public: https://langfuse.lv3.org
       internal: http://10.10.10.20:3002
+  dify:
+    service_name: dify
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: agents.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: agents
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8094
+    service_id: dify
+    ports:
+      internal: 8094
+    urls:
+      public: https://agents.lv3.org
+      internal: http://10.10.10.20:8094
+  plane:
+    service_name: plane
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: tasks.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: tasks
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8093
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:8011
+    service_id: plane
+    ports:
+      internal: 8093
+      controller: 8011
+    urls:
+      public: https://tasks.lv3.org
+      internal: http://10.10.10.20:8093
+      controller: http://100.64.0.1:8011
+  outline:
+    service_name: outline
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: wiki.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: wiki
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3')
+        | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.outline_port
+        }}
+    service_id: outline
+    ports: {}
+    urls:
+      public: https://wiki.lv3.org
   dozzle:
     service_name: dozzle
     owning_vm: docker-runtime-lv3
@@ -1117,6 +1462,37 @@ platform_service_topology:
     urls:
       public: https://logs.lv3.org
       internal: http://10.10.10.20:8089
+  excalidraw:
+    service_name: excalidraw
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: draw.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: draw
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:3095
+      prefix_proxy_routes:
+        - path: /socket.io/
+          upstream: http://10.10.10.20:{{ platform_port_assignments.excalidraw_room_port
+            }}
+    service_id: excalidraw
+    ports:
+      internal: 3095
+    urls:
+      public: https://draw.lv3.org
+      internal: http://10.10.10.20:3095
   open_webui:
     service_name: open-webui
     owning_vm: docker-runtime-lv3
@@ -1175,6 +1551,71 @@ platform_service_topology:
     urls:
       public: https://n8n.lv3.org
       internal: http://10.10.10.20:5678
+  coolify:
+    service_name: coolify
+    owning_vm: coolify-lv3
+    private_ip: 10.10.10.70
+    public_hostname: coolify.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: coolify
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.70:8000
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:8012
+    service_id: coolify
+    ports:
+      internal: 8000
+      controller: 8012
+    urls:
+      public: https://coolify.lv3.org
+      internal: http://10.10.10.70:8000
+      controller: http://100.64.0.1:8012
+  coolify_apps:
+    service_name: coolify-apps
+    owning_vm: coolify-lv3
+    private_ip: 10.10.10.70
+    public_hostname: apps.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: apps
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.70:80
+      aliases:
+        - '*.apps.lv3.org'
+      crawl_policy_enabled: false
+      security_headers_enabled: false
+      preserve_upstream_security_headers: true
+    service_id: coolify_apps
+    ports:
+      internal: 80
+    urls:
+      public: https://apps.lv3.org
+      internal: http://10.10.10.70:80
   api_gateway:
     service_name: api-gateway
     owning_vm: docker-runtime-lv3
@@ -1442,6 +1883,10 @@ platform_dns_records:
       type: A
       value: 65.108.75.123
       ttl: 60
+    - name: realtime
+      type: A
+      value: 65.108.75.123
+      ttl: 60
     - name: headscale
       type: A
       value: 65.108.75.123
@@ -1474,11 +1919,35 @@ platform_dns_records:
       type: A
       value: 65.108.75.123
       ttl: 60
+    - name: agents
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: tasks
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: wiki
+      type: A
+      value: 65.108.75.123
+      ttl: 60
     - name: logs
       type: A
       value: 65.108.75.123
       ttl: 60
+    - name: draw
+      type: A
+      value: 65.108.75.123
+      ttl: 60
     - name: n8n
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: coolify
+      type: A
+      value: 65.108.75.123
+      ttl: 60
+    - name: apps
       type: A
       value: 65.108.75.123
       ttl: 60
@@ -1553,6 +2022,7 @@ platform_management_allowed_tcp_ports:
   - 8080
   - 8005
   - 8008
+  - 8011
   - 8066
   - 8010
   - 9444
@@ -1628,6 +2098,35 @@ public_edge_service_topology:
       tempo: http://10.10.10.40:3200
       otlp_grpc: http://10.10.10.40:4317
       otlp_http: http://10.10.10.40:4318/v1/traces
+  realtime:
+    service_name: realtime
+    owning_vm: monitoring-lv3
+    private_ip: 10.10.10.40
+    public_hostname: realtime.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: realtime
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      server_sent_events: true
+      upstream: http://10.10.10.40:19999
+    service_id: realtime
+    ports:
+      internal: 19999
+    urls:
+      public: https://realtime.lv3.org
+      internal: http://10.10.10.40:19999
   headscale:
     service_name: headscale
     owning_vm: proxmox_florin
@@ -2010,6 +2509,95 @@ public_edge_service_topology:
     urls:
       public: https://langfuse.lv3.org
       internal: http://10.10.10.20:3002
+  dify:
+    service_name: dify
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: agents.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: agents
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8094
+    service_id: dify
+    ports:
+      internal: 8094
+    urls:
+      public: https://agents.lv3.org
+      internal: http://10.10.10.20:8094
+  plane:
+    service_name: plane
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: tasks.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: tasks
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.20:8093
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:8011
+    service_id: plane
+    ports:
+      internal: 8093
+      controller: 8011
+    urls:
+      public: https://tasks.lv3.org
+      internal: http://10.10.10.20:8093
+      controller: http://100.64.0.1:8011
+  outline:
+    service_name: outline
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: wiki.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: wiki
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3')
+        | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.outline_port
+        }}
+    service_id: outline
+    ports: {}
+    urls:
+      public: https://wiki.lv3.org
   dozzle:
     service_name: dozzle
     owning_vm: docker-runtime-lv3
@@ -2038,6 +2626,37 @@ public_edge_service_topology:
     urls:
       public: https://logs.lv3.org
       internal: http://10.10.10.20:8089
+  excalidraw:
+    service_name: excalidraw
+    owning_vm: docker-runtime-lv3
+    private_ip: 10.10.10.20
+    public_hostname: draw.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: draw
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.20:3095
+      prefix_proxy_routes:
+        - path: /socket.io/
+          upstream: http://10.10.10.20:{{ platform_port_assignments.excalidraw_room_port
+            }}
+    service_id: excalidraw
+    ports:
+      internal: 3095
+    urls:
+      public: https://draw.lv3.org
+      internal: http://10.10.10.20:3095
   open_webui:
     service_name: open-webui
     owning_vm: docker-runtime-lv3
@@ -2096,6 +2715,71 @@ public_edge_service_topology:
     urls:
       public: https://n8n.lv3.org
       internal: http://10.10.10.20:5678
+  coolify:
+    service_name: coolify
+    owning_vm: coolify-lv3
+    private_ip: 10.10.10.70
+    public_hostname: coolify.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: coolify
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      noindex: true
+      kind: proxy
+      upstream: http://10.10.10.70:8000
+    access:
+      kind: tailscale-tcp-proxy
+      url: http://100.64.0.1:8012
+    service_id: coolify
+    ports:
+      internal: 8000
+      controller: 8012
+    urls:
+      public: https://coolify.lv3.org
+      internal: http://10.10.10.70:8000
+      controller: http://100.64.0.1:8012
+  coolify_apps:
+    service_name: coolify-apps
+    owning_vm: coolify-lv3
+    private_ip: 10.10.10.70
+    public_hostname: apps.lv3.org
+    exposure_model: edge-published
+    observability:
+      guest_dashboard: false
+      service_telemetry: false
+    dns:
+      managed: true
+      visibility: public
+      name: apps
+      type: A
+      target: 65.108.75.123
+      ttl: 60
+    edge:
+      enabled: true
+      tls: true
+      kind: proxy
+      upstream: http://10.10.10.70:80
+      aliases:
+        - '*.apps.lv3.org'
+      crawl_policy_enabled: false
+      security_headers_enabled: false
+      preserve_upstream_security_headers: true
+    service_id: coolify_apps
+    ports:
+      internal: 80
+    urls:
+      public: https://apps.lv3.org
+      internal: http://10.10.10.70:80
   api_gateway:
     service_name: api-gateway
     owning_vm: docker-runtime-lv3
@@ -2388,6 +3072,10 @@ netbox_host_proxy_port: 8004
 netbox_controller_url: http://100.64.0.1:8004
 open_webui_host_proxy_port: 8008
 open_webui_controller_url: http://100.64.0.1:8008
+plane_port: 8093
+plane_host_proxy_port: 8011
+plane_private_base_url: http://10.10.10.20:8093
+plane_controller_url: http://100.64.0.1:8011
 api_gateway_internal_port: 8083
 api_gateway_public_url: https://api.lv3.org
 api_gateway_internal_url: http://10.10.10.20:8083
@@ -2430,6 +3118,7 @@ proxmox_management_allowed_tcp_ports:
   - 8080
   - 8005
   - 8008
+  - 8011
   - 8066
   - 8010
   - 9444
@@ -2444,6 +3133,7 @@ monitoring_prometheus_port: 9090
 monitoring_tempo_http_port: 3200
 monitoring_otlp_grpc_port: 4317
 monitoring_otlp_http_port: 4318
+netdata_port: 19999
 mail_platform_gateway_port: 8081
 ntfy_port: 2586
 openbao_http_port: 8201
@@ -2453,10 +3143,17 @@ netbox_server_port: 8082
 searxng_port: 8881
 searxng_host_proxy_port: 80
 langfuse_port: 3002
+dify_port: 8094
+outline_port: 3006
 dozzle_http_port: 8089
 dozzle_agent_port: 7007
+excalidraw_port: 3095
+excalidraw_room_port: 3096
 ollama_api_port: 11434
 n8n_port: 5678
+coolify_dashboard_port: 8000
+coolify_proxy_port: 80
+coolify_host_proxy_port: 8012
 open_webui_port: 8088
 homepage_port: 3090
 ops_portal_port: 8092

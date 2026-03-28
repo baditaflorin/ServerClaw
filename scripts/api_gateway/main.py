@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import base64
+import hmac
 import hashlib
 import importlib.util
 import json
@@ -32,7 +33,7 @@ REPO_ROOT = _resolve_repo_root()
 import httpx
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
-from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
+from fastapi import Body, Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
@@ -68,6 +69,7 @@ def _load_repo_platform_package() -> None:
 _load_repo_platform_package()
 
 from api_gateway_catalog import load_api_gateway_catalog
+from agent_tool_registry import call_tool, load_agent_tool_registry
 from canonical_errors import ErrorRegistry
 GRAPH_RUNTIME_IMPORT_ERROR: str | None = None
 
@@ -108,6 +110,7 @@ from platform.health import HealthCompositeClient, ServiceHealthNotFoundError
 from platform.logging import clear_context, generate_trace_id, get_logger, set_context
 from platform.retry import async_with_retry, policy_for_surface
 from platform.timeouts import TimeoutContext, resolve_timeout_seconds
+from platform.use_cases.runbooks import RunbookRunStore, RunbookSurfaceError, RunbookUseCaseService, WindmillWorkflowRunner
 from platform.world_state.client import SurfaceNotFoundError, WorldStateClient, WorldStateUnavailable
 from platform.world_state.materializer import SQLITE_CURRENT_VIEW_NAME, SQLITE_SNAPSHOTS_TABLE_NAME
 from platform.world_state.workers import collect_service_health
@@ -179,6 +182,12 @@ class SecretRotationRequest(BaseModel):
     parameters: dict[str, Any] = Field(default_factory=dict)
 
 
+class RunbookExecuteRequest(BaseModel):
+    runbook_id: str = Field(min_length=2)
+    parameters: dict[str, Any] = Field(default_factory=dict)
+    delivery_surface: str = Field(default="api_gateway")
+
+
 @dataclass(frozen=True)
 class GatewayService:
     id: str
@@ -213,6 +222,9 @@ class GatewayConfig:
     nats_password: str | None
     deploy_webhook_url: str | None
     secret_rotation_webhook_url: str | None
+    windmill_base_url: str | None
+    windmill_token: str | None
+    runbook_runs_dir: Path
     openapi_include_upstreams: bool
     circuit_policy_path: Path
     degradation_state_path: Path
@@ -221,6 +233,8 @@ class GatewayConfig:
     world_state_dsn: str | None = None
     clock_skew_seconds: int = 30
     keycloak_retry_after_seconds: int = 30
+    dify_tools_api_key: str | None = None
+    dify_tools_api_key_header: str = "X-LV3-Dify-Api-Key"
 
 
 class KeycloakJWTVerifier:
@@ -606,6 +620,7 @@ class GatewayRuntime:
             world_state_dsn=config.world_state_dsn,
             ledger_dsn=config.world_state_dsn or config.graph_dsn,
         )
+        self._runbook_service: RunbookUseCaseService | None = None
 
     def service_circuit(self, service_id: str) -> Any | None:
         if not self.circuit_registry.has_policy(service_id):
@@ -639,6 +654,21 @@ class GatewayRuntime:
 
     def workflow_catalog(self) -> dict[str, Any]:
         return json_file(self.config.workflow_catalog_path, {"workflows": {}})
+
+    def runbook_service(self) -> RunbookUseCaseService:
+        if self._runbook_service is None:
+            if not self.config.windmill_base_url or not self.config.windmill_token:
+                raise RuntimeError("runbook execution requires LV3_GATEWAY_WINDMILL_BASE_URL and LV3_GATEWAY_WINDMILL_TOKEN")
+            self._runbook_service = RunbookUseCaseService(
+                repo_root=self.config.repo_root,
+                workflow_runner=WindmillWorkflowRunner(
+                    base_url=self.config.windmill_base_url,
+                    token=self.config.windmill_token,
+                    repo_root=self.config.repo_root,
+                ),
+                store=RunbookRunStore(self.config.runbook_runs_dir),
+            )
+        return self._runbook_service
 
     def platform_vars(self) -> dict[str, Any]:
         return yaml_file(self.config.platform_vars_path, {})
@@ -847,6 +877,9 @@ def build_config() -> GatewayConfig:
         nats_password=os.environ.get("LV3_NATS_PASSWORD") or None,
         deploy_webhook_url=os.environ.get("LV3_GATEWAY_DEPLOY_WEBHOOK_URL") or None,
         secret_rotation_webhook_url=os.environ.get("LV3_GATEWAY_SECRET_ROTATION_WEBHOOK_URL") or None,
+        windmill_base_url=os.environ.get("LV3_GATEWAY_WINDMILL_BASE_URL") or None,
+        windmill_token=os.environ.get("LV3_GATEWAY_WINDMILL_TOKEN") or None,
+        runbook_runs_dir=Path(os.environ.get("LV3_GATEWAY_RUNBOOK_RUNS_DIR", "/data/runbooks/runs")),
         degradation_state_path=Path(
             os.environ.get("LV3_GATEWAY_DEGRADATION_STATE_PATH", "/data/degradation-state.json")
         ),
@@ -866,6 +899,8 @@ def build_config() -> GatewayConfig:
         openapi_include_upstreams=os.environ.get("LV3_GATEWAY_INCLUDE_UPSTREAM_OPENAPI", "false").lower()
         in {"1", "true", "yes"},
         keycloak_retry_after_seconds=int(os.environ.get("LV3_GATEWAY_KEYCLOAK_RETRY_AFTER_SECONDS", "30")),
+        dify_tools_api_key=os.environ.get("LV3_DIFY_TOOLS_API_KEY") or None,
+        dify_tools_api_key_header=os.environ.get("LV3_DIFY_TOOLS_API_KEY_HEADER", "X-LV3-Dify-Api-Key"),
     )
 
 
@@ -905,6 +940,29 @@ async def require_identity(request: Request) -> dict[str, Any]:
         "roles": extract_roles(claims),
         "subject": subject_from_claims(claims),
         "token": token,
+    }
+    set_context(actor_id=identity["subject"])
+    request.state.identity = identity
+    return identity
+
+
+def require_dify_tools_identity(request: Request) -> dict[str, Any]:
+    runtime: GatewayRuntime = request.app.state.runtime
+    expected_api_key = (runtime.config.dify_tools_api_key or "").strip()
+    if not expected_api_key:
+        raise HTTPException(status_code=503, detail="dify tools api key is not configured")
+
+    header_name = runtime.config.dify_tools_api_key_header
+    provided_api_key = request.headers.get(header_name, "").strip()
+    if not provided_api_key:
+        raise HTTPException(status_code=401, detail="missing dify tools api key")
+    if not hmac.compare_digest(provided_api_key, expected_api_key):
+        raise HTTPException(status_code=401, detail="invalid dify tools api key")
+
+    identity = {
+        "claims": {"sub": "service/dify"},
+        "roles": {"service-automation"},
+        "subject": "service/dify",
     }
     set_context(actor_id=identity["subject"])
     request.state.identity = identity
@@ -967,6 +1025,21 @@ def canonical_error_from_http_exception(request: Request, exc: HTTPException) ->
             retry_after = None
 
     if exc.status_code == 401:
+        if "dify tools api key" in detail_lower:
+            header = "X-LV3-Dify-Api-Key"
+            if "missing" in detail_lower:
+                return (
+                    "AUTH_TOKEN_MISSING",
+                    "Dify tools API key is required for this endpoint.",
+                    {"header": header},
+                    retry_after,
+                )
+            return (
+                "AUTH_TOKEN_INVALID",
+                "Dify tools API key could not be validated.",
+                {"header": header, "reason": "token_validation"},
+                retry_after,
+            )
         if "missing bearer token" in detail_lower:
             return (
                 "AUTH_TOKEN_MISSING",
@@ -1083,6 +1156,19 @@ def require_graph_runtime(runtime: GatewayRuntime) -> DependencyGraphClient:
             detail = f"dependency graph runtime unavailable: {GRAPH_RUNTIME_IMPORT_ERROR}"
         raise HTTPException(status_code=503, detail=detail)
     return runtime.graph_client
+
+
+def require_runbook_service(runtime: GatewayRuntime) -> RunbookUseCaseService:
+    try:
+        return runtime.runbook_service()
+    except RuntimeError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "dependency": "runbook_runtime",
+                "message": str(exc),
+            },
+        ) from exc
 
 
 def create_app(config: GatewayConfig | None = None) -> FastAPI:
@@ -1541,6 +1627,132 @@ def create_app(config: GatewayConfig | None = None) -> FastAPI:
 
         await emit_request_event(request, identity=identity, status_code=202, started_at=started_at)
         return response_payload
+
+    @app.get("/v1/platform/runbooks")
+    async def platform_runbooks(
+        request: Request,
+        delivery_surface: str = Query(default="api_gateway"),
+        identity: dict[str, Any] = Depends(require_identity),
+    ) -> dict[str, Any]:
+        started_at = time.perf_counter()
+        if not has_required_role(identity, "platform-read"):
+            raise HTTPException(status_code=403, detail="missing required role 'platform-read'")
+        runtime: GatewayRuntime = request.app.state.runtime
+        service = require_runbook_service(runtime)
+        runbooks = await asyncio.to_thread(service.list_runbooks, surface=delivery_surface)
+        await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
+        return {
+            "request_id": request.state.request_id,
+            "delivery_surface": delivery_surface,
+            "runbooks": runbooks,
+        }
+
+    @app.post("/v1/platform/runbooks/execute")
+    async def platform_runbook_execute(
+        body: RunbookExecuteRequest,
+        request: Request,
+        identity: dict[str, Any] = Depends(require_identity),
+    ) -> dict[str, Any]:
+        started_at = time.perf_counter()
+        if not has_required_role(identity, "platform-operator"):
+            raise HTTPException(status_code=403, detail="missing required role 'platform-operator'")
+        runtime: GatewayRuntime = request.app.state.runtime
+        service = require_runbook_service(runtime)
+        try:
+            record = await asyncio.to_thread(
+                service.execute,
+                body.runbook_id,
+                body.parameters,
+                actor_id=identity["subject"],
+                surface=body.delivery_surface,
+            )
+        except FileNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=f"unknown runbook: {body.runbook_id}") from exc
+        except RunbookSurfaceError as exc:
+            raise HTTPException(status_code=403, detail=str(exc)) from exc
+        await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
+        return {
+            "request_id": request.state.request_id,
+            "run_id": record["run_id"],
+            "runbook_id": record["runbook_id"],
+            "status": record["status"],
+            "delivery_surface": body.delivery_surface,
+            "message": f"Runbook {record['runbook_id']} finished with status {record['status']}.",
+        }
+
+    @app.get("/v1/platform/runbooks/{run_id}")
+    async def platform_runbook_status(
+        run_id: str,
+        request: Request,
+        identity: dict[str, Any] = Depends(require_identity),
+    ) -> dict[str, Any]:
+        started_at = time.perf_counter()
+        if not has_required_role(identity, "platform-read"):
+            raise HTTPException(status_code=403, detail="missing required role 'platform-read'")
+        runtime: GatewayRuntime = request.app.state.runtime
+        service = require_runbook_service(runtime)
+        try:
+            record = await asyncio.to_thread(service.status, run_id)
+        except FileNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=f"runbook run not found: {run_id}") from exc
+        await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
+        return record
+
+    @app.post("/v1/platform/runbooks/{run_id}/approve")
+    async def platform_runbook_approve(
+        run_id: str,
+        request: Request,
+        identity: dict[str, Any] = Depends(require_identity),
+    ) -> dict[str, Any]:
+        started_at = time.perf_counter()
+        if not has_required_role(identity, "platform-operator"):
+            raise HTTPException(status_code=403, detail="missing required role 'platform-operator'")
+        runtime: GatewayRuntime = request.app.state.runtime
+        service = require_runbook_service(runtime)
+        try:
+            record = await asyncio.to_thread(service.resume, run_id, actor_id=identity["subject"])
+        except FileNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=f"runbook run not found: {run_id}") from exc
+        await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
+        return {
+            "request_id": request.state.request_id,
+            "run_id": record["run_id"],
+            "runbook_id": record["runbook_id"],
+            "status": record["status"],
+            "message": f"Runbook {record['runbook_id']} finished with status {record['status']}.",
+        }
+
+    @app.post("/v1/dify-tools/{tool_name}")
+    async def dify_tools_call(
+        tool_name: str,
+        request: Request,
+        body: dict[str, Any] = Body(default_factory=dict),
+    ) -> Any:
+        started_at = time.perf_counter()
+        identity = require_dify_tools_identity(request)
+        try:
+            registry, _workflow_catalog = await asyncio.to_thread(load_agent_tool_registry)
+        except (OSError, ValueError, RuntimeError, json.JSONDecodeError) as exc:
+            raise HTTPException(status_code=503, detail=f"agent tool registry unavailable: {exc}") from exc
+
+        try:
+            result, _audit_event = await asyncio.to_thread(
+                call_tool,
+                registry,
+                tool_name,
+                body,
+                actor_class="service_identity",
+            )
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+        if result.get("isError"):
+            payload = result.get("structuredContent") or {"error": "tool handler failed"}
+            await emit_request_event(request, identity=identity, status_code=502, started_at=started_at)
+            return JSONResponse(status_code=502, content=payload)
+
+        await emit_request_event(request, identity=identity, status_code=200, started_at=started_at)
+        return result.get("structuredContent", {})
 
     @app.get("/v1/openapi.json")
     async def gateway_openapi(

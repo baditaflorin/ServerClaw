@@ -1,0 +1,11 @@
+[Unit]
+Description=LV3 server-resident ansible-pull reconciliation
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists={{ server_resident_reconciliation_http_token_remote_file }}
+
+[Service]
+Type=oneshot
+ExecStart={{ server_resident_reconciliation_wrapper_path }}
+TimeoutStartSec={{ server_resident_reconciliation_timeout_start_sec }}
+WorkingDirectory={{ server_resident_reconciliation_checkout_path }}

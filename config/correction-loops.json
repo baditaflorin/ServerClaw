@@ -1,0 +1,450 @@
+{
+  "$schema": "docs/schema/correction-loop-catalog.schema.json",
+  "schema_version": "1.0.0",
+  "required_workflow_ids": [
+    "platform-observation-loop",
+    "scheduler-watchdog-loop"
+  ],
+  "loops": [
+    {
+      "id": "ansible_reconcile",
+      "description": "Bounded converge and host-configuration workflows repair declared infrastructure by replaying the repo-managed reconcile path before any broader rollback or replacement step.",
+      "applies_to": {
+        "workflow_id_prefixes": [
+          "configure-",
+          "converge-",
+          "harden-",
+          "provision-"
+        ],
+        "workflow_ids": [
+          "adr-0077-compose-runtime-secrets-live-apply",
+          "deploy-uptime-kuma",
+          "install-proxmox"
+        ]
+      },
+      "invariant": "The governed host or service converge path leaves repo-managed infrastructure aligned with inventory intent and any declared post-verify probe healthy.",
+      "observation_sources": [
+        "The workflow exit status and task-level change set from the bounded Ansible entrypoint.",
+        "The shared post-verify health-probe contract under config/health-probe-catalog.json.",
+        "Inventory, controller-local secrets, and live host or guest state gathered by the playbook preflight."
+      ],
+      "diagnosis_taxonomy": [
+        "transient_failure",
+        "contract_drift",
+        "dependency_outage",
+        "stale_input",
+        "irreversible_data_loss_risk"
+      ],
+      "repair_actions": [
+        {
+          "kind": "no_op",
+          "summary": "Record evidence when the declared service or host state is already healthy and no reconcile is needed.",
+          "requires_approval": false,
+          "destructive": false
+        },
+        {
+          "kind": "reconcile",
+          "summary": "Replay the same repo-managed converge path because the contract is intended to be idempotent.",
+          "requires_approval": false,
+          "destructive": false
+        },
+        {
+          "kind": "rollback",
+          "summary": "Use the service-specific rollback, failback, or immutable replacement path when a known-good state is still recoverable.",
+          "requires_approval": true,
+          "destructive": false
+        },
+        {
+          "kind": "escalate",
+          "summary": "Escalate before any destructive mutation or when the reconcile path cannot prove the repair is safe.",
+          "requires_approval": true,
+          "destructive": false
+        }
+      ],
+      "verification": {
+        "source": "workflow verification_commands plus shared post-verify health probes",
+        "success_signal": "The converge command exits cleanly and the declared health or readiness probe reports a healthy target."
+      },
+      "escalation": {
+        "boundary": "Stop when replay would exceed the bounded idempotent contract, a destructive replacement is required, or the target is not safe for autonomous mutation.",
+        "target": "operator",
+        "runbook": "docs/runbooks/playbook-execution-model.md"
+      },
+      "retry_budget_cycles": 3
+    },
+    {
+      "id": "external_control_surface_reconcile",
+      "description": "Provider API, DNS, publication, dashboard, and maintenance-window mutations reconcile an external control surface by replaying the governed request before any manual intervention.",
+      "applies_to": {
+        "workflow_ids": [
+          "close-maintenance-window",
+          "coolify-manage",
+          "database-dns",
+          "open-maintenance-window",
+          "plane-manage",
+          "portainer-manage",
+          "semaphore-manage",
+          "uptime-kuma-manage",
+          "uptime-robot-manage"
+        ]
+      },
+      "invariant": "The targeted external control surface reflects the declared repo state or approved operator request, and the affected service still matches its published contract.",
+      "observation_sources": [
+        "The provider or control-plane API response for the governed mutation.",
+        "The generated receipt, command contract, or live-control export written by the workflow.",
+        "Any linked service-health or publication probe that proves the external state is actually usable."
+      ],
+      "diagnosis_taxonomy": [
+        "transient_failure",
+        "contract_drift",
+        "dependency_outage",
+        "stale_input",
+        "irreversible_data_loss_risk"
+      ],
+      "repair_actions": [
+        {
+          "kind": "no_op",
+          "summary": "Record that the requested external state already matches the declared contract.",
+          "requires_approval": false,
+          "destructive": false
+        },
+        {
+          "kind": "reconcile",
+          "summary": "Replay the same governed external API call or publication helper with the current repo inputs.",
+          "requires_approval": false,
+          "destructive": false
+        },
+        {
+          "kind": "rollback",
+          "summary": "Restore the previous known-good publication, DNS, or control-plane state when the external surface supports bounded rollback.",
+          "requires_approval": true,
+          "destructive": false
+        },
+        {
+          "kind": "escalate",
+          "summary": "Escalate when the provider response is unsafe, the action is destructive, or the external state cannot be verified from the governed probes.",
+          "requires_approval": true,
+          "destructive": false
+        }
+      ],
+      "verification": {
+        "source": "Workflow-specific verification_commands plus any linked health or publication probes.",
+        "success_signal": "The external control surface returns the expected state and any affected service endpoint still satisfies its governed probe."
+      },
+      "escalation": {
+        "boundary": "Stop when the external system rejects the request semantically, when rollback would delete state without prior approval, or when verification cannot prove the new state is usable.",
+        "target": "operator",
+        "runbook": "docs/runbooks/maintenance-windows.md"
+      },
+      "retry_budget_cycles": 2
+    },
+    {
+      "id": "identity_and_credential_reconcile",
+      "description": "Identity and secret workflows repair one named principal or credential contract by replaying the governed sync or rotation path before escalating to a human.",
+      "applies_to": {
+        "workflow_ids": [
+          "operator-offboard",
+          "operator-onboard",
+          "rotate-grafana-service-token",
+          "rotate-keycloak-client-secret",
+          "rotate-platform-cli-token",
+          "rotate-secret",
+          "rotate-windmill-token",
+          "sync-operators",
+          "token-exposure-response"
+        ]
+      },
+      "invariant": "The authoritative roster or secret contract is converged across the approved identity authorities, controller-local artifacts, and downstream runtime consumers.",
+      "observation_sources": [
+        "The repo-authoritative roster, token inventory, or secret catalog inputs for the named identity or credential.",
+        "The external identity or secret authority response returned by the workflow.",
+        "The governed inventory, whoami, or audit command used to prove the rotated or synchronized state."
+      ],
+      "diagnosis_taxonomy": [
+        "transient_failure",
+        "contract_drift",
+        "dependency_outage",
+        "stale_input",
+        "irreversible_data_loss_risk"
+      ],
+      "repair_actions": [
+        {
+          "kind": "no_op",
+          "summary": "Record that the identity or credential contract already matches the current authoritative state.",
+          "requires_approval": false,
+          "destructive": false
+        },
+        {
+          "kind": "reconcile",
+          "summary": "Replay the same repo-managed sync or rotation path with the named identity or secret contract.",
+          "requires_approval": false,
+          "destructive": false
+        },
+        {
+          "kind": "rollback",
+          "summary": "Restore the previous known-good principal or credential linkage only when the bounded rollback path is explicitly documented by the owning runbook.",
+          "requires_approval": true,
+          "destructive": false
+        },
+        {
+          "kind": "escalate",
+          "summary": "Escalate when revocation, replacement, or consumer fallout could destroy access without a reviewed rollback plan.",
+          "requires_approval": true,
+          "destructive": false
+        }
+      ],
+      "verification": {
+        "source": "Workflow verification_commands plus controller-local inventory and whoami checks.",
+        "success_signal": "The authoritative identity or secret state and the governed verification command agree on the new principal or credential contract."
+      },
+      "escalation": {
+        "boundary": "Stop when the repair would revoke access without a validated replacement path, or when a downstream consumer still points at stale credentials after bounded replay.",
+        "target": "operator",
+        "runbook": "docs/runbooks/operator-onboarding.md"
+      },
+      "retry_budget_cycles": 1
+    },
+    {
+      "id": "fixture_and_pool_reconcile",
+      "description": "Ephemeral fixture and warm-pool workflows reconcile lease, expiry, and pool-count drift with the governed fixture catalog before operators intervene.",
+      "applies_to": {
+        "workflow_ids": [
+          "ephemeral-pool-reconcile",
+          "ephemeral-vm-reaper",
+          "fixture-expiry-reaper"
+        ]
+      },
+      "invariant": "The ephemeral fleet matches the governed receipt retention, TTL, and warm-pool targets recorded in the repo catalogs.",
+      "observation_sources": [
+        "Ephemeral fixture receipts and archived run state under receipts and .local.",
+        "The governed pool catalog and lease metadata.",
+        "The live Proxmox fixture inventory and summary receipts emitted by the reaper or reconcile job."
+      ],
+      "diagnosis_taxonomy": [
+        "transient_failure",
+        "contract_drift",
+        "dependency_outage",
+        "stale_input",
+        "irreversible_data_loss_risk"
+      ],
+      "repair_actions": [
+        {
+          "kind": "no_op",
+          "summary": "Record that the fixture inventory already matches the governed receipt and pool contract.",
+          "requires_approval": false,
+          "destructive": false
+        },
+        {
+          "kind": "reconcile",
+          "summary": "Replay the bounded reaper or pool reconcile pass so the governed catalog can restore counts and archive the right evidence.",
+          "requires_approval": false,
+          "destructive": false
+        },
+        {
+          "kind": "replace",
+          "summary": "Destroy and refill one ephemeral member only when the fixture policy explicitly pre-approves that destructive correction path.",
+          "requires_approval": true,
+          "destructive": true
+        },
+        {
+          "kind": "escalate",
+          "summary": "Escalate when a receipt cannot be trusted, a live lease is ambiguous, or destructive cleanup would exceed the governed fixture policy.",
+          "requires_approval": true,
+          "destructive": false
+        }
+      ],
+      "verification": {
+        "source": "Fixture receipts, pool-status output, and the reaper or reconcile summary receipt.",
+        "success_signal": "The generated summary receipt shows the expected expired, skipped, and replenished members with no unresolved lease ambiguity."
+      },
+      "escalation": {
+        "boundary": "Stop when receipt parsing fails, when a fixture lease is still active, or when cleanup would destroy state that the policy does not pre-approve.",
+        "target": "operator",
+        "runbook": "docs/runbooks/ephemeral-fixtures.md"
+      },
+      "retry_budget_cycles": 1
+    },
+    {
+      "id": "promotion_and_batch_reconcile",
+      "description": "Promotion and dependency-wave workflows repair batch or staged rollout drift by replaying the governed gate and converge path, not by bypassing evidence or approval surfaces.",
+      "applies_to": {
+        "workflow_ids": [
+          "deploy-and-promote",
+          "live-apply-waves"
+        ]
+      },
+      "invariant": "The staged or grouped rollout runs only through the governed evidence chain, leaves every targeted service healthy, and preserves a bounded rollback path.",
+      "observation_sources": [
+        "Staging receipts, promotion receipts, and wave receipts referenced by the rollout.",
+        "The validation gate and command-approval outcome that authorize the batch.",
+        "The per-service verification commands and health probes executed after the rollout."
+      ],
+      "diagnosis_taxonomy": [
+        "transient_failure",
+        "contract_drift",
+        "dependency_outage",
+        "stale_input",
+        "irreversible_data_loss_risk"
+      ],
+      "repair_actions": [
+        {
+          "kind": "no_op",
+          "summary": "Record that the staged or grouped rollout already completed and the evidence chain is still current.",
+          "requires_approval": false,
+          "destructive": false
+        },
+        {
+          "kind": "reconcile",
+          "summary": "Replay the governed promotion gate or dependency wave from the same bounded manifest and evidence set.",
+          "requires_approval": false,
+          "destructive": false
+        },
+        {
+          "kind": "rollback",
+          "summary": "Use the batch rollback bundle, previous healthy receipt, or failback plan when the rollout must be unwound within the documented window.",
+          "requires_approval": true,
+          "destructive": false
+        },
+        {
+          "kind": "escalate",
+          "summary": "Escalate when the staged evidence is stale, rollback would be destructive, or the grouped rollout leaves an unsafe partial state.",
+          "requires_approval": true,
+          "destructive": false
+        }
+      ],
+      "verification": {
+        "source": "The linked staging or wave receipts plus the targeted service health or verification commands.",
+        "success_signal": "Every targeted service passes its bounded verification slice and the final receipt chain is complete."
+      },
+      "escalation": {
+        "boundary": "Stop when the evidence chain is stale, incomplete, or points at a partial rollout that lacks a documented rollback bundle.",
+        "target": "operator",
+        "runbook": "docs/runbooks/environment-promotion-pipeline.md"
+      },
+      "retry_budget_cycles": 1
+    },
+    {
+      "id": "repo_state_publication_reconcile",
+      "description": "Repository-state publication workflows keep generated artifacts, package outputs, and merge-authored config state aligned with their canonical inputs before they affect live automation.",
+      "applies_to": {
+        "workflow_ids": [
+          "capacity-report",
+          "collection-publish",
+          "generate-status-docs",
+          "install-hooks",
+          "merge-config-changes",
+          "packer-template-rebuild",
+          "weekly-capacity-report"
+        ]
+      },
+      "invariant": "The generated repo artifact or publication output matches the current canonical inputs and any downstream automation consumes the refreshed artifact rather than stale state.",
+      "observation_sources": [
+        "Generated file diffs, publication receipts, or merge receipts emitted by the workflow.",
+        "The validating command or downstream repo check that consumes the refreshed artifact.",
+        "The governing catalog or manifest that defines the authoritative input set."
+      ],
+      "diagnosis_taxonomy": [
+        "transient_failure",
+        "contract_drift",
+        "dependency_outage",
+        "stale_input",
+        "irreversible_data_loss_risk"
+      ],
+      "repair_actions": [
+        {
+          "kind": "no_op",
+          "summary": "Record that the generated or published repo surface already matches its canonical inputs.",
+          "requires_approval": false,
+          "destructive": false
+        },
+        {
+          "kind": "reconcile",
+          "summary": "Regenerate or republish the bounded artifact from the same canonical source of truth.",
+          "requires_approval": false,
+          "destructive": false
+        },
+        {
+          "kind": "rollback",
+          "summary": "Restore the previous known-good generated artifact or publication bundle when the new output breaks a downstream contract.",
+          "requires_approval": true,
+          "destructive": false
+        },
+        {
+          "kind": "escalate",
+          "summary": "Escalate when the generated state cannot be reproduced from the current repo inputs or when republishing would overwrite an unknown artifact.",
+          "requires_approval": true,
+          "destructive": false
+        }
+      ],
+      "verification": {
+        "source": "Workflow verification_commands plus the downstream validation gate that consumes the refreshed artifact.",
+        "success_signal": "The regenerated or republished artifact passes the same repo validation or publication health check that depends on it."
+      },
+      "escalation": {
+        "boundary": "Stop when canonical inputs are inconsistent, when publication would overwrite untracked external state, or when the regenerated artifact fails the same downstream gate twice.",
+        "target": "operator",
+        "runbook": "docs/runbooks/validate-repository-automation.md"
+      },
+      "retry_budget_cycles": 1
+    },
+    {
+      "id": "runtime_self_correction_watchers",
+      "description": "The watchdog and observation-loop runtimes are themselves governed correction loops: they must emit durable state, choose the narrowest safe repair action first, and stop at explicit safety boundaries.",
+      "applies_to": {
+        "workflow_ids": [
+          "platform-observation-loop",
+          "scheduler-watchdog-loop"
+        ]
+      },
+      "invariant": "The live automation loop observes drift or stale execution, records the diagnosis and bounded repair path, and either proves the repair succeeded or escalates cleanly.",
+      "observation_sources": [
+        "The incoming finding batch or running-job snapshot handled by the loop.",
+        "Durable loop-run state, scheduler heartbeat files, and watchdog action history written under .local/state.",
+        "The workflow-catalog verification block or world-state service-health entry used to prove the target recovered."
+      ],
+      "diagnosis_taxonomy": [
+        "transient_failure",
+        "contract_drift",
+        "dependency_outage",
+        "stale_input",
+        "irreversible_data_loss_risk"
+      ],
+      "repair_actions": [
+        {
+          "kind": "no_op",
+          "summary": "Record evidence when the observation target is already healthy or the running job set is already within the bounded safety contract.",
+          "requires_approval": false,
+          "destructive": false
+        },
+        {
+          "kind": "reconcile",
+          "summary": "Replay the bounded observation or watchdog tick so the runtime can re-evaluate drift and dispatch the narrowest approved repair path.",
+          "requires_approval": false,
+          "destructive": false
+        },
+        {
+          "kind": "rollback",
+          "summary": "Use the owning workflow rollback, failback, or previous-known-good state when the loop has evidence that the prior state is recoverable.",
+          "requires_approval": true,
+          "destructive": false
+        },
+        {
+          "kind": "escalate",
+          "summary": "Escalate when the loop hits an unsafe mutation boundary, exhausts its bounded re-triage budget, or would need a destructive action that is not pre-approved by contract.",
+          "requires_approval": true,
+          "destructive": false
+        }
+      ],
+      "verification": {
+        "source": "The durable loop run record, watchdog heartbeat or action history, and the workflow or service-health verification probe chosen by the runtime.",
+        "success_signal": "The loop records a healthy no-op or a verified repair outcome and persists that evidence in its durable state."
+      },
+      "escalation": {
+        "boundary": "Stop when repeated re-triage or stale-job recovery reaches the configured safety ceiling, or when a destructive mutation would require a separate approval path.",
+        "target": "operator",
+        "runbook": "docs/runbooks/observation-to-action-closure-loop.md"
+      },
+      "retry_budget_cycles": 3
+    }
+  ]
+}

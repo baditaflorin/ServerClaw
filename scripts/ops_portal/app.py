@@ -20,6 +20,11 @@ from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
 try:
+    from scripts.publication_contract import registry_entries
+except ImportError:  # pragma: no cover - packaged import path
+    from publication_contract import registry_entries
+
+try:
     from search_fabric.collectors import available_collections
 except ImportError:  # pragma: no cover - packaged import path
     from scripts.search_fabric.collectors import available_collections
@@ -71,6 +76,7 @@ class PortalSettings:
     session_secret: str
     static_api_token: str | None
     service_catalog_path: Path
+    publication_registry_path: Path
     workflow_catalog_path: Path
     changelog_path: Path
     live_applies_dir: Path
@@ -89,6 +95,12 @@ class PortalSettings:
             static_api_token=os.getenv("OPS_PORTAL_STATIC_API_TOKEN") or None,
             service_catalog_path=Path(
                 os.getenv("OPS_PORTAL_SERVICE_CATALOG", data_root / "config" / "service-capability-catalog.json")
+            ),
+            publication_registry_path=Path(
+                os.getenv(
+                    "OPS_PORTAL_PUBLICATION_REGISTRY",
+                    data_root / "config" / "subdomain-exposure-registry.json",
+                )
             ),
             workflow_catalog_path=Path(
                 os.getenv("OPS_PORTAL_WORKFLOW_CATALOG", data_root / "config" / "workflow-catalog.json")
@@ -203,16 +215,20 @@ class GatewayClient:
 
     async def launch_runbook(
         self,
-        workflow_id: str,
+        runbook_id: str,
         *,
         token: str | None = None,
         parameters: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         return await self._request(
             "POST",
-            "/v1/platform/runbooks/launch",
+            "/v1/platform/runbooks/execute",
             token=token,
-            payload={"workflow_id": workflow_id, "parameters": parameters or {}, "source": "portal"},
+            payload={
+                "runbook_id": runbook_id,
+                "parameters": parameters or {},
+                "delivery_surface": "ops_portal",
+            },
         )
 
     async def search(
@@ -228,6 +244,10 @@ class GatewayClient:
             params["collection"] = collection
         return await self._request("GET", f"/v1/search?{httpx.QueryParams(params)}", token=token)
 
+    async def fetch_runbooks(self, *, token: str | None = None, delivery_surface: str = "ops_portal") -> dict[str, Any]:
+        params = httpx.QueryParams({"delivery_surface": delivery_surface})
+        return await self._request("GET", f"/v1/platform/runbooks?{params}", token=token)
+
 
 @dataclass
 class PortalRepository:
@@ -236,6 +256,10 @@ class PortalRepository:
     def load_service_catalog(self) -> list[dict[str, Any]]:
         payload = load_json_file(self.settings.service_catalog_path, {"services": []})
         return payload.get("services", [])
+
+    def load_publication_registry(self) -> list[dict[str, Any]]:
+        payload = load_json_file(self.settings.publication_registry_path, {"publications": []})
+        return registry_entries(payload)
 
     def load_workflow_catalog(self) -> list[dict[str, Any]]:
         payload = load_json_file(self.settings.workflow_catalog_path, {"workflows": {}})
@@ -393,6 +417,7 @@ def status_tone(status: str) -> str:
 
 def build_service_models(
     services: list[dict[str, Any]],
+    publications: list[dict[str, Any]],
     health: dict[str, dict[str, str]],
     drift_report: dict[str, Any],
     maintenance_windows: list[dict[str, Any]],
@@ -416,10 +441,21 @@ def build_service_models(
         if service_id:
             windows_by_service[service_id].append(window)
 
+    publications_by_service: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for publication in publications:
+        service_id = publication.get("service_id")
+        if not isinstance(service_id, str) or not service_id:
+            continue
+        publications_by_service[service_id].append(publication)
+
     models = []
     for service in sorted(services, key=lambda item: (item.get("category", ""), item["name"])):
         service_id = service["id"]
         deployment = latest_deploy_by_service.get(service_id)
+        publication_models = sorted(
+            publications_by_service.get(service_id, []),
+            key=lambda item: item.get("fqdn", ""),
+        )
         models.append(
             {
                 "id": service_id,
@@ -439,6 +475,16 @@ def build_service_models(
                 "maintenance_windows": windows_by_service.get(service_id, []) + windows_by_service.get("all", []),
                 "last_deployment": deployment,
                 "logs_url": build_logs_url(settings.grafana_logs_url, service_id),
+                "publications": [
+                    {
+                        "fqdn": publication["fqdn"],
+                        "delivery_model": publication.get("publication", {}).get("delivery_model", "unknown"),
+                        "access_model": publication.get("publication", {}).get("access_model", "unknown"),
+                        "audience": publication.get("publication", {}).get("audience", "unknown"),
+                        "status": publication.get("status", "unknown"),
+                    }
+                    for publication in publication_models
+                ],
             }
         )
     return models
@@ -488,17 +534,12 @@ def template_root() -> Path:
     return Path(__file__).resolve().parent
 
 
-def build_runbook_models(workflows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    featured_ids = {
-        "rotate-secret",
-        "configure-step-ca",
-        "configure-backups",
-        "drift-report",
-        "post-merge-gate",
-        "validate",
-    }
-    featured = [item for item in workflows if item["id"] in featured_ids]
-    return featured or workflows[:6]
+def build_runbook_models(runbooks: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    featured_ids = {"validation-gate-status"}
+    featured = [item for item in runbooks if item["id"] in featured_ids]
+    remainder = [item for item in runbooks if item["id"] not in featured_ids]
+    combined = featured + remainder
+    return combined[:6]
 
 
 def normalize_agent_coordination(payload: dict[str, Any] | None) -> dict[str, Any]:
@@ -553,6 +594,7 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
     gateway: Any = request.app.state.gateway_client
 
     services = repository.load_service_catalog()
+    publications = repository.load_publication_registry()
     workflows = repository.load_workflow_catalog()
     maintenance_windows = repository.load_maintenance_windows()
     deployments = repository.recent_deployments(services)
@@ -566,6 +608,13 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
     except Exception as exc:  # noqa: BLE001
         health_payload = {"warning": str(exc)}
     try:
+        runbook_payload = await gateway.fetch_runbooks(
+            token=read_api_token(session, request.app.state.settings),
+            delivery_surface="ops_portal",
+        )
+    except Exception as exc:  # noqa: BLE001
+        runbook_payload = {"warning": str(exc), "runbooks": []}
+    try:
         coordination_payload = await gateway.fetch_agent_coordination(
             token=read_api_token(session, request.app.state.settings),
         )
@@ -574,8 +623,11 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
 
     health = normalize_health(health_payload, services)
     coordination = normalize_agent_coordination(coordination_payload)
+    raw_runbooks = runbook_payload.get("runbooks") if isinstance(runbook_payload, dict) else []
+    runbooks = raw_runbooks if isinstance(raw_runbooks, list) else []
     service_models = build_service_models(
         services,
+        publications,
         health,
         drift_report,
         maintenance_windows,
@@ -591,13 +643,14 @@ async def build_dashboard_context(request: Request) -> dict[str, Any]:
         "services": service_models,
         "maintenance_windows": active_maintenance,
         "maintenance_count": len(active_maintenance),
-        "runbooks": build_runbook_models(workflows),
+        "runbooks": build_runbook_models(runbooks),
         "deployments": deployments[:10],
         "changelog_notes": changelog_notes,
         "drift_report": drift_report,
         "drift_summary": drift_summary,
         "health_warning": health_payload.get("warning") if isinstance(health_payload, dict) else None,
         "coordination_warning": coordination_payload.get("warning") if isinstance(coordination_payload, dict) else None,
+        "runbook_warning": runbook_payload.get("warning") if isinstance(runbook_payload, dict) else None,
         "coordination": coordination,
         "deployment_events": deployment_console_seed(),
         "generated_at": isoformat(utc_now()),
@@ -727,7 +780,7 @@ def create_app(
         try:
             result = await gateway.trigger_deploy(
                 service_id,
-                token=session.get("api_token") or None,
+                token=read_api_token(session, request.app.state.settings),
                 restart_only=restart_only,
             )
             job_id = result.get("job_id", "queued")
@@ -765,7 +818,10 @@ def create_app(
         gateway = request.app.state.gateway_client
         broker: EventBroker = request.app.state.event_broker
         try:
-            result = await gateway.rotate_secret(service_id, token=session.get("api_token") or None)
+            result = await gateway.rotate_secret(
+                service_id,
+                token=read_api_token(session, request.app.state.settings),
+            )
             summary = result.get("message") or "Secret rotation queued."
             tone = "ok"
             status = "queued"
@@ -786,10 +842,10 @@ def create_app(
         }
         return templates.TemplateResponse(request=request, name="partials/action_result.html", context=context)
 
-    @app.post("/actions/runbooks/{workflow_id}", response_class=HTMLResponse)
+    @app.post("/actions/runbooks/{runbook_id}", response_class=HTMLResponse)
     async def launch_runbook_action(
         request: Request,
-        workflow_id: str,
+        runbook_id: str,
         parameters: str = Form(default="{}"),
     ) -> HTMLResponse:
         session = await ensure_session(request)
@@ -800,17 +856,17 @@ def create_app(
             if not isinstance(parsed_parameters, dict):
                 raise ValueError("Runbook parameters must be a JSON object.")
             result = await gateway.launch_runbook(
-                workflow_id,
-                token=session.get("api_token") or None,
+                runbook_id,
+                token=read_api_token(session, request.app.state.settings),
                 parameters=parsed_parameters,
             )
-            detail = result.get("message") or "Runbook queued."
-            tone = "ok"
-            status = "queued"
+            status = str(result.get("status") or "completed")
+            detail = result.get("message") or f"Runbook {runbook_id} finished with status {status}."
+            tone = "ok" if status == "completed" else "danger" if status == "failed" else "warn"
             await broker.publish(
-                f"{workflow_id}: {detail}",
+                f"{runbook_id}: {detail}",
                 event_type="runbook",
-                metadata={"workflow_id": workflow_id},
+                metadata={"runbook_id": runbook_id, "status": status},
             )
         except Exception as exc:  # noqa: BLE001
             detail = str(exc)
@@ -820,7 +876,7 @@ def create_app(
         context = {
             "request": request,
             "result": {
-                "title": f"Runbook: {workflow_id}",
+                "title": f"Runbook: {runbook_id}",
                 "status": status,
                 "detail": detail,
                 "tone": tone,

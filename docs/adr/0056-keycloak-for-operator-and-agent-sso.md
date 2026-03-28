@@ -40,6 +40,26 @@ Initial integration targets:
 - Portainer
 - Mattermost
 
+## Replaceability Scorecard
+
+- Capability Definition: `operator_identity_broker` as defined by ADR 0046 identity classes, ADR 0047 short-lived credential policy, and the Keycloak operator runbook.
+- Contract Fit: strong for shared OIDC and SAML brokering, MFA-capable operator login, and scoped service or agent clients across internal apps.
+- Data Export / Import: realm exports, client definitions, group and role mappings, identity-provider settings, and oauth2-proxy integrations can be exported and recreated on another broker.
+- Migration Complexity: medium because every dependent application, callback URL, oauth2-proxy config, and operator session policy must be cut over without locking out administrators.
+- Proprietary Surface Area: medium because realm, client, and role semantics are Keycloak-shaped even though the repo keeps canonical identities, app ownership, and auth publication intent outside the broker.
+- Approved Exceptions: Keycloak-native realm export structure and admin API workflows are accepted while the canonical operator, service, and agent identity taxonomy remains repo-governed.
+- Fallback / Downgrade: per-application local admin accounts plus step-ca-protected break-glass access can preserve minimum operator control while a replacement identity broker is brought online.
+- Observability / Audit Continuity: login events, admin audit records, oauth2-proxy logs, and app health probes remain the continuity surface through migration.
+
+## Vendor Exit Plan
+
+- Reevaluation Triggers: unacceptable upgrade or recovery friction, missing federation features, broken MFA posture, or a sustained mismatch between Keycloak roles and the platform identity taxonomy.
+- Portable Artifacts: realm exports, client inventory, group and role mappings, oauth2-proxy configuration, runbooks, and application OIDC integration manifests.
+- Migration Path: stand up the replacement broker in parallel, mirror critical clients and group mappings, cut apps over one by one behind shared edge auth, verify operator login and service-client flows, then retire Keycloak once all governed apps authenticate cleanly.
+- Alternative Product: Authentik or Zitadel.
+- Owner: platform identity.
+- Review Cadence: quarterly.
+
 ## Consequences
 
 - Operator access becomes more consistent across the internal control plane.

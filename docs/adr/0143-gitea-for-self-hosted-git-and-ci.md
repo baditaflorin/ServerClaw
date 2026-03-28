@@ -91,6 +91,26 @@ Gitea's API is used by agents for:
 
 For disaster recovery and external collaboration, a Gitea mirror job can push to the external provider after each successful push to local Gitea. The external provider is no longer the source of truth.
 
+## Replaceability Scorecard
+
+- Capability Definition: `source_control_and_repo_local_ci` as defined by ADR 0031 validation-gate requirements, ADR 0082 remote-build execution, and the Gitea runbook.
+- Contract Fit: strong for self-hosted git, local webhook delivery, repo-local CI execution, and platform-adjacent agent automation without exposing private APIs externally.
+- Data Export / Import: bare git repositories, LFS objects, organization and team metadata, webhook definitions, Actions runner configuration, and issue or project exports can be migrated to another forge with bounded translation work.
+- Migration Complexity: medium-high because remotes, webhooks, CI secrets, self-hosted runners, and operator habits must all move together to avoid losing delivery automation.
+- Proprietary Surface Area: medium because issue, Actions, and package-registry semantics are forge-specific even though the canonical repo, validation commands, and webhook targets stay repo-managed.
+- Approved Exceptions: Gitea Actions compatibility and pre-receive hook wiring are accepted because the repo keeps workflow definitions, validation commands, and release automation outside forge-specific exports where possible.
+- Fallback / Downgrade: a mirrored external forge with the same bare repositories and webhook targets can carry minimum source-control and pull-based delivery while a replacement self-hosted forge is cut over.
+- Observability / Audit Continuity: webhook delivery logs, pre-receive hook outcomes, runner health, git history, and live-apply receipts remain the continuity surface during migration.
+
+## Vendor Exit Plan
+
+- Reevaluation Triggers: unsupported security posture, webhook or runner instability, packaging or issue-tracking lock-in that grows beyond the repo boundary, or an inability to keep server-side validation enforceable.
+- Portable Artifacts: git repositories, LFS objects, organization and team manifests, runner registration details, webhook inventory, repo settings, and release automation contracts.
+- Migration Path: seed the replacement forge from the canonical repositories first, mirror webhook targets and validation hooks, move runners and CI secrets by wave, switch developer remotes and automation entrypoints, then leave Gitea read-only until rollback confidence expires.
+- Alternative Product: Forgejo.
+- Owner: platform delivery.
+- Review Cadence: quarterly.
+
 ## Consequences
 
 **Positive**

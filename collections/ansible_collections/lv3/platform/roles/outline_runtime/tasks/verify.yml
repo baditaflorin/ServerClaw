@@ -1,0 +1,13 @@
+---
+# Purpose: Verify the local Outline runtime health after compose convergence.
+
+- name: Verify the Outline local health endpoint
+  ansible.builtin.uri:
+    url: "{{ outline_internal_base_url }}/_health"
+    method: GET
+    status_code: 200
+  register: outline_verify_local_health
+  retries: 12
+  delay: 5
+  until: outline_verify_local_health.status == 200
+  changed_when: false

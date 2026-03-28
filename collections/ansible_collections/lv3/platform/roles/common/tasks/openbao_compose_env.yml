@@ -1,3 +1,9 @@
+# Purpose: Render and install an OpenBao-backed compose environment injection bundle for a runtime service.
+# Use case: Included by runtime roles that source their `.env` material from OpenBao instead of committing secrets.
+# Inputs: Service name, runtime paths, OpenBao secret payload, AppRole metadata, and agent template inputs.
+# Outputs: Ensures the OpenBao policy, AppRole, agent config, and compose env rendering assets exist for the target service.
+# Idempotency: Partially idempotent because secret writes and AppRole material can rotate when requested inputs change.
+# Dependencies: ADR 0165, ADR 0043, ADR 0077, and ADR 0197.
 ---
 - name: Validate OpenBao compose env helper inputs
   ansible.builtin.assert:
@@ -99,6 +105,9 @@
     return_content: true
     status_code: 200
   register: common_openbao_compose_env_unsealed_status
+  retries: 12
+  delay: 2
+  until: common_openbao_compose_env_unsealed_status.status == 200
   changed_when: false
 
 - name: Assert the local OpenBao API is unsealed before runtime secret injection

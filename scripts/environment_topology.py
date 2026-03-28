@@ -7,6 +7,7 @@ import sys
 from typing import Any
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
+from shared_policy_packs import load_shared_policy_packs
 
 
 ENVIRONMENT_TOPOLOGY_PATH = repo_path("config", "environment-topology.json")
@@ -17,6 +18,9 @@ HOST_VARS_PATH = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 ALLOWED_ENVIRONMENT_STATUSES = {"active", "planned"}
 ALLOWED_TOPOLOGY_MODELS = {"single-node-shared-edge"}
 ALLOWED_BINDING_STATUSES = {"active", "planned"}
+SHARED_POLICIES = load_shared_policy_packs()
+ALLOWED_ENVIRONMENT_PLACEMENT_CLASSES = SHARED_POLICIES.environment_placement_classes
+ALLOWED_RESERVED_CAPACITY_EXCLUSIONS = SHARED_POLICIES.reserved_capacity_exclusions
 ENVIRONMENT_ID_PATTERN = re.compile(r"^[a-z][a-z0-9_-]*$")
 
 
@@ -36,6 +40,19 @@ def require_str(value: Any, path: str) -> str:
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"{path} must be a non-empty string")
     return value
+
+
+def require_string_list(value: Any, path: str) -> list[str]:
+    items = require_list(value, path)
+    normalized: list[str] = []
+    seen: set[str] = set()
+    for index, item in enumerate(items):
+        text = require_str(item, f"{path}[{index}]")
+        if text in seen:
+            raise ValueError(f"{path} must not contain duplicates")
+        seen.add(text)
+        normalized.append(text)
+    return normalized
 
 
 def load_environment_topology() -> dict[str, Any]:
@@ -118,6 +135,55 @@ def validate_environment_topology(catalog: dict[str, Any], host_vars: dict[str, 
             require_str(environment.get("operator_access"), f"environments[{index}].operator_access")
         if "notes" in environment:
             require_str(environment.get("notes"), f"environments[{index}].notes")
+        if "placement" in environment:
+            placement = require_mapping(environment.get("placement"), f"environments[{index}].placement")
+            require_str(
+                placement.get("failure_domain"),
+                f"environments[{index}].placement.failure_domain",
+            )
+            placement_class = require_str(
+                placement.get("placement_class"),
+                f"environments[{index}].placement.placement_class",
+            )
+            if placement_class not in ALLOWED_ENVIRONMENT_PLACEMENT_CLASSES:
+                raise ValueError(
+                    "environments["
+                    f"{index}].placement.placement_class must be one of "
+                    f"{sorted(ALLOWED_ENVIRONMENT_PLACEMENT_CLASSES)}"
+                )
+            require_str(
+                placement.get("anti_affinity_group"),
+                f"environments[{index}].placement.anti_affinity_group",
+            )
+            for exception_index, exception in enumerate(
+                require_list(
+                    placement.get("co_location_exceptions"),
+                    f"environments[{index}].placement.co_location_exceptions",
+                )
+            ):
+                exception = require_mapping(
+                    exception,
+                    f"environments[{index}].placement.co_location_exceptions[{exception_index}]",
+                )
+                require_str(
+                    exception.get("scope"),
+                    f"environments[{index}].placement.co_location_exceptions[{exception_index}].scope",
+                )
+                require_str(
+                    exception.get("rationale"),
+                    f"environments[{index}].placement.co_location_exceptions[{exception_index}].rationale",
+                )
+            exclusions = require_string_list(
+                placement.get("reserved_capacity_exclusions"),
+                f"environments[{index}].placement.reserved_capacity_exclusions",
+            )
+            invalid_exclusions = sorted(set(exclusions) - ALLOWED_RESERVED_CAPACITY_EXCLUSIONS)
+            if invalid_exclusions:
+                raise ValueError(
+                    "environments["
+                    f"{index}].placement.reserved_capacity_exclusions contains unknown values: "
+                    + ", ".join(invalid_exclusions)
+                )
         private_network = environment.get("private_network")
         if private_network is not None:
             private_network = require_mapping(private_network, f"environments[{index}].private_network")

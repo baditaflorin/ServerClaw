@@ -8,7 +8,7 @@ import tempfile
 from pathlib import Path
 
 from controller_automation_toolkit import emit_cli_error, repo_path
-from dependency_graph import load_dependency_graph, render_dependency_markdown
+from dependency_graph import load_dependency_graph, render_dependency_page
 
 
 DEFAULT_OUTPUT = repo_path("docs", "site-generated", "architecture", "dependency-graph.md")
@@ -30,7 +30,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 def render() -> str:
     graph = load_dependency_graph(validate_schema=True)
-    return render_dependency_markdown(graph)
+    return render_dependency_page(graph)
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -78,6 +78,58 @@
             "type": "string",
             "minLength": 1
           },
+          "placement": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "failure_domain",
+              "placement_class",
+              "anti_affinity_group",
+              "co_location_exceptions",
+              "reserved_capacity_exclusions"
+            ],
+            "properties": {
+              "failure_domain": {
+                "type": "string",
+                "minLength": 1
+              },
+              "placement_class": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Validated against config/shared-policy-packs.json."
+              },
+              "anti_affinity_group": {
+                "type": "string",
+                "minLength": 1
+              },
+              "co_location_exceptions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["scope", "rationale"],
+                  "properties": {
+                    "scope": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "rationale": {
+                      "type": "string",
+                      "minLength": 1
+                    }
+                  }
+                }
+              },
+              "reserved_capacity_exclusions": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "uniqueItems": true
+              }
+            }
+          },
           "notes": {
             "type": "string"
           },

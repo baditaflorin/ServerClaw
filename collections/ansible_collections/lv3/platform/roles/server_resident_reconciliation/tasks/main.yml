@@ -1,0 +1,138 @@
+---
+- name: Validate server-resident reconciliation inputs
+  ansible.builtin.assert:
+    that:
+      - server_resident_reconciliation_gitea_base_url | length > 0
+      - server_resident_reconciliation_repo_owner | length > 0
+      - server_resident_reconciliation_repo_name | length > 0
+      - server_resident_reconciliation_repo_branch | length > 0
+      - server_resident_reconciliation_inventory_host | length > 0
+      - server_resident_reconciliation_playbook_path | length > 0
+      - server_resident_reconciliation_inventory_path | length > 0
+      - server_resident_reconciliation_checkout_path | length > 0
+      - server_resident_reconciliation_runtime_root | length > 0
+      - server_resident_reconciliation_receipts_dir | length > 0
+      - server_resident_reconciliation_lock_file | length > 0
+      - server_resident_reconciliation_secret_dir | length > 0
+      - server_resident_reconciliation_http_token_remote_file | length > 0
+      - server_resident_reconciliation_gitea_admin_token_local_file | length > 0
+      - server_resident_reconciliation_gitea_read_token_local_file | length > 0
+      - server_resident_reconciliation_gitea_username | length > 0
+      - server_resident_reconciliation_gitea_email | length > 0
+      - server_resident_reconciliation_gitea_login_name | length > 0
+      - server_resident_reconciliation_gitea_source_id | int >= 0
+      - server_resident_reconciliation_gitea_token_name | length > 0
+      - server_resident_reconciliation_askpass_path | length > 0
+      - server_resident_reconciliation_wrapper_path | length > 0
+      - server_resident_reconciliation_service_name | length > 0
+      - server_resident_reconciliation_timer_name | length > 0
+      - server_resident_reconciliation_on_calendar | length > 0
+      - server_resident_reconciliation_timeout_start_sec | int > 0
+    fail_msg: "server_resident_reconciliation requires repository, credential, and runtime paths."
+
+- name: Bootstrap low-privilege Gitea pull access from the controller
+  ansible.builtin.include_tasks: bootstrap_gitea_access.yml
+  when: server_resident_reconciliation_bootstrap_gitea_access | bool
+
+- name: Check whether the host-local Gitea read token exists
+  ansible.builtin.stat:
+    path: "{{ server_resident_reconciliation_http_token_remote_file }}"
+  register: server_resident_reconciliation_remote_token
+
+- name: Fail when the recurring reconcile path lacks its host-local Gitea read token
+  ansible.builtin.fail:
+    msg: >-
+      {{ server_resident_reconciliation_http_token_remote_file }} is missing on the target host.
+      Re-run playbooks/server-resident-reconciliation.yml with
+      server_resident_reconciliation_bootstrap_gitea_access=true from a controller that has
+      {{ server_resident_reconciliation_gitea_admin_token_local_file }}.
+  when:
+    - not (server_resident_reconciliation_bootstrap_gitea_access | bool)
+    - not server_resident_reconciliation_remote_token.stat.exists
+
+- name: Ensure server-resident reconciliation packages are present
+  ansible.builtin.apt:
+    name: "{{ server_resident_reconciliation_managed_packages }}"
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure server-resident reconciliation directories exist
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: directory_tree
+  vars:
+    common_directory_tree_paths:
+      - path: "{{ server_resident_reconciliation_checkout_path | dirname }}"
+        mode: "0755"
+      - path: "{{ server_resident_reconciliation_checkout_path }}"
+        mode: "0755"
+      - path: "{{ server_resident_reconciliation_runtime_root }}"
+        mode: "0755"
+      - path: "{{ server_resident_reconciliation_receipts_dir }}"
+        mode: "0755"
+      - path: "{{ server_resident_reconciliation_secret_dir }}"
+        mode: "0700"
+      - path: "{{ server_resident_reconciliation_wrapper_path | dirname }}"
+        mode: "0755"
+
+- name: Copy the bootstrapped Gitea read token to the host
+  ansible.builtin.copy:
+    src: "{{ server_resident_reconciliation_gitea_read_token_local_file }}"
+    dest: "{{ server_resident_reconciliation_http_token_remote_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  when: server_resident_reconciliation_bootstrap_gitea_access | bool
+  no_log: true
+
+- name: Enforce host-local Gitea read token permissions
+  ansible.builtin.file:
+    path: "{{ server_resident_reconciliation_http_token_remote_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+    state: file
+
+- name: Render the server-resident reconciliation Git askpass helper
+  ansible.builtin.template:
+    src: server-resident-reconciliation-askpass.sh.j2
+    dest: "{{ server_resident_reconciliation_askpass_path }}"
+    owner: root
+    group: root
+    mode: "0750"
+
+- name: Render the server-resident reconciliation wrapper
+  ansible.builtin.template:
+    src: server-resident-reconciliation.sh.j2
+    dest: "{{ server_resident_reconciliation_wrapper_path }}"
+    owner: root
+    group: root
+    mode: "0750"
+
+- name: Render the server-resident reconciliation systemd service
+  ansible.builtin.template:
+    src: lv3-server-resident-reconciliation.service.j2
+    dest: "/etc/systemd/system/{{ server_resident_reconciliation_service_name }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Render the server-resident reconciliation systemd timer
+  ansible.builtin.template:
+    src: lv3-server-resident-reconciliation.timer.j2
+    dest: "/etc/systemd/system/{{ server_resident_reconciliation_timer_name }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Enable the server-resident reconciliation timer
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: systemd_unit
+  vars:
+    common_systemd_unit_name: "{{ server_resident_reconciliation_timer_name }}"
+    common_systemd_unit_enabled: true
+    common_systemd_unit_state: started
+    common_systemd_unit_daemon_reload: true
+    common_systemd_unit_verify_active: false

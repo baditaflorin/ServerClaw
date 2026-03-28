@@ -39,6 +39,19 @@ scrape_configs:
         labels:
           service: otel-collector
 
+  - job_name: netdata
+    metrics_path: /api/v1/allmetrics
+    params:
+      format:
+        - prometheus_all_hosts
+      source:
+        - as-collected
+    static_configs:
+      - targets:
+          - 127.0.0.1:{{ monitoring_netdata_parent_port }}
+        labels:
+          service: realtime
+
   - job_name: slo-blackbox
     metrics_path: /probe
     file_sd_configs:

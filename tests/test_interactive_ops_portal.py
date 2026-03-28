@@ -13,6 +13,7 @@ class FakeGatewayClient:
     def __init__(self) -> None:
         self.platform_health_tokens: list[str | None] = []
         self.agent_coordination_tokens: list[str | None] = []
+        self.runbook_fetch_tokens: list[str | None] = []
         self.service_health_calls: list[dict[str, object]] = []
         self.deploy_calls: list[dict[str, object]] = []
         self.secret_calls: list[str] = []
@@ -80,22 +81,44 @@ class FakeGatewayClient:
         restart_only: bool = False,
         source: str = "portal",
     ) -> dict[str, object]:
-        self.deploy_calls.append({"service_id": service_id, "restart_only": restart_only, "source": source})
+        self.deploy_calls.append(
+            {"service_id": service_id, "restart_only": restart_only, "source": source, "token": token}
+        )
         return {"job_id": "job-123", "message": "Deployment accepted by gateway"}
 
     async def rotate_secret(self, service_id: str, *, token: str | None = None) -> dict[str, object]:
-        self.secret_calls.append(service_id)
+        self.secret_calls.append(f"{service_id}:{token}")
         return {"message": "Secret rotation accepted by gateway"}
+
+    async def fetch_runbooks(
+        self,
+        *,
+        token: str | None = None,
+        delivery_surface: str = "ops_portal",
+    ) -> dict[str, object]:
+        self.runbook_fetch_tokens.append(token)
+        return {
+            "runbooks": [
+                {
+                    "id": "validation-gate-status",
+                    "title": "Inspect validation gate status",
+                    "description": "Show the current validation-gate summary through the shared runbook service.",
+                    "owner_runbook": "docs/runbooks/validation-gate-status.yaml",
+                    "live_impact": "repo_only",
+                    "execution_class": "diagnostic",
+                }
+            ]
+        }
 
     async def launch_runbook(
         self,
-        workflow_id: str,
+        runbook_id: str,
         *,
         token: str | None = None,
         parameters: dict[str, object] | None = None,
     ) -> dict[str, object]:
-        self.runbook_calls.append({"workflow_id": workflow_id, "parameters": parameters or {}})
-        return {"message": "Runbook accepted by gateway"}
+        self.runbook_calls.append({"runbook_id": runbook_id, "parameters": parameters or {}, "token": token})
+        return {"status": "completed", "message": "Runbook completed successfully"}
 
     async def search(
         self,
@@ -154,6 +177,80 @@ def portal_client(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient]:
                         "adr": "0093",
                     },
                 ]
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (data_root / "config" / "subdomain-exposure-registry.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "2.0.0",
+                "zone_name": "lv3.org",
+                "publications": [
+                    {
+                        "fqdn": "grafana.lv3.org",
+                        "service_id": "grafana",
+                        "environment": "production",
+                        "status": "active",
+                        "owner_adr": "0011",
+                        "publication": {
+                            "delivery_model": "shared-edge",
+                            "access_model": "open",
+                            "audience": "public",
+                        },
+                        "adapter": {
+                            "dns": {"target": "65.108.75.123", "target_port": 443, "record_type": "A"},
+                            "routing": {"mode": "edge", "source": "service_topology", "kind": "proxy"},
+                            "edge_auth": {
+                                "provider": "none",
+                                "unauthenticated_paths": [],
+                                "unauthenticated_prefix_paths": [],
+                            },
+                            "repo_route_service_id": "grafana",
+                            "repo_route_metadata": {},
+                            "tls": {"provider": "letsencrypt", "cert_path": "/etc/letsencrypt/live/lv3-edge/", "auto_renew": True},
+                        },
+                        "live_tracking_expected": True,
+                        "notes": "Published through the shared edge.",
+                    },
+                    {
+                        "fqdn": "ops.lv3.org",
+                        "service_id": "ops_portal",
+                        "environment": "production",
+                        "status": "active",
+                        "owner_adr": "0093",
+                        "publication": {
+                            "delivery_model": "shared-edge",
+                            "access_model": "platform-sso",
+                            "audience": "operator",
+                        },
+                        "adapter": {
+                            "dns": {"target": "65.108.75.123", "target_port": 443, "record_type": "A"},
+                            "routing": {"mode": "edge", "source": "service_topology", "kind": "proxy"},
+                            "edge_auth": {
+                                "provider": "oauth2_proxy",
+                                "unauthenticated_paths": [],
+                                "unauthenticated_prefix_paths": [],
+                            },
+                            "repo_route_service_id": "ops_portal",
+                            "repo_route_metadata": {},
+                            "tls": {"provider": "letsencrypt", "cert_path": "/etc/letsencrypt/live/lv3-edge/", "auto_renew": True},
+                        },
+                        "live_tracking_expected": True,
+                        "notes": "Authenticated operator entrypoint.",
+                    },
+                ],
+                "summary": {
+                    "catalog_total": 2,
+                    "active_total": 2,
+                    "active_public_total": 2,
+                    "active_private_total": 0,
+                    "planned_total": 0,
+                    "shared_edge_total": 2,
+                    "platform_sso_total": 1,
+                },
             },
             indent=2,
         )
@@ -223,6 +320,7 @@ def portal_client(tmp_path: Path) -> tuple[TestClient, FakeGatewayClient]:
         session_secret="test-secret",
         static_api_token="test-token",
         service_catalog_path=data_root / "config" / "service-capability-catalog.json",
+        publication_registry_path=data_root / "config" / "subdomain-exposure-registry.json",
         workflow_catalog_path=data_root / "config" / "workflow-catalog.json",
         changelog_path=data_root / "changelog.md",
         live_applies_dir=data_root / "receipts" / "live-applies",
@@ -250,8 +348,11 @@ def test_dashboard_renders_all_major_sections(portal_client: tuple[TestClient, F
     assert "Search Fabric" in response.text
     assert "Runbook Launcher" in response.text
     assert "Recent Live Applies" in response.text
+    assert "shared-edge / platform-sso" in response.text
+    assert "ops.lv3.org · operator · shared-edge · platform-sso" in response.text
     assert gateway.platform_health_tokens == ["test-token"]
     assert gateway.agent_coordination_tokens == ["test-token"]
+    assert gateway.runbook_fetch_tokens == ["test-token"]
 
 
 def test_dashboard_uses_same_origin_static_stylesheet(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
@@ -281,17 +382,21 @@ def test_deploy_action_records_gateway_call(portal_client: tuple[TestClient, Fak
 
     assert response.status_code == 200
     assert "Deployment accepted by gateway" in response.text
-    assert gateway.deploy_calls == [{"service_id": "grafana", "restart_only": False, "source": "portal"}]
+    assert gateway.deploy_calls == [
+        {"service_id": "grafana", "restart_only": False, "source": "portal", "token": "test-token"}
+    ]
 
 
 def test_runbook_action_accepts_json_parameters(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
     client, gateway = portal_client
 
-    response = client.post("/actions/runbooks/rotate-secret", data={"parameters": '{"service":"grafana"}'})
+    response = client.post("/actions/runbooks/validation-gate-status", data={"parameters": '{"service":"grafana"}'})
 
     assert response.status_code == 200
-    assert "Runbook accepted by gateway" in response.text
-    assert gateway.runbook_calls == [{"workflow_id": "rotate-secret", "parameters": {"service": "grafana"}}]
+    assert "Runbook completed successfully" in response.text
+    assert gateway.runbook_calls == [
+        {"runbook_id": "validation-gate-status", "parameters": {"service": "grafana"}, "token": "test-token"}
+    ]
 
 
 def test_search_action_renders_results(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
@@ -302,6 +407,70 @@ def test_search_action_renders_results(portal_client: tuple[TestClient, FakeGate
     assert response.status_code == 200
     assert "Rotate Certificates" in response.text
     assert gateway.search_calls == [{"query": "tls cert expires", "collection": "runbooks", "limit": 8, "token": "test-token"}]
+
+
+def test_dashboard_keeps_runbooks_visible_when_agent_coordination_degrades(
+    portal_client: tuple[TestClient, FakeGatewayClient],
+) -> None:
+    client, gateway = portal_client
+    coordination_failed = {"value": False}
+
+    async def degraded_coordination(token: str | None = None) -> dict[str, object]:
+        gateway.agent_coordination_tokens.append(token)
+        coordination_failed["value"] = True
+        raise RuntimeError("coordination unavailable")
+
+    async def ordering_sensitive_runbooks(
+        *,
+        token: str | None = None,
+        delivery_surface: str = "ops_portal",
+    ) -> dict[str, object]:
+        gateway.runbook_fetch_tokens.append(token)
+        if coordination_failed["value"]:
+            raise RuntimeError("runbook delivery was poisoned by the previous failure")
+        return {
+            "runbooks": [
+                {
+                    "id": "validation-gate-status",
+                    "title": "Inspect validation gate status",
+                    "description": "Show the current validation-gate summary through the shared runbook service.",
+                    "owner_runbook": "docs/runbooks/validation-gate-status.yaml",
+                    "live_impact": "repo_only",
+                    "execution_class": "diagnostic",
+                }
+            ]
+        }
+
+    gateway.fetch_agent_coordination = degraded_coordination  # type: ignore[method-assign]
+    gateway.fetch_runbooks = ordering_sensitive_runbooks  # type: ignore[method-assign]
+
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert "validation-gate-status" in response.text
+    assert "Agent coordination data is degraded: coordination unavailable" in response.text
+    assert gateway.runbook_fetch_tokens == ["test-token"]
+    assert gateway.agent_coordination_tokens == ["test-token"]
+
+
+def test_runbooks_partial_surfaces_gateway_warning(portal_client: tuple[TestClient, FakeGatewayClient]) -> None:
+    client, gateway = portal_client
+
+    async def degraded_runbooks(
+        *,
+        token: str | None = None,
+        delivery_surface: str = "ops_portal",
+    ) -> dict[str, object]:
+        gateway.runbook_fetch_tokens.append(token)
+        raise RuntimeError("runbook index unavailable")
+
+    gateway.fetch_runbooks = degraded_runbooks  # type: ignore[method-assign]
+
+    response = client.get("/partials/runbooks")
+
+    assert response.status_code == 200
+    assert "Runbook launcher data is degraded: runbook index unavailable" in response.text
+    assert gateway.runbook_fetch_tokens == ["test-token"]
 
 
 def test_normalize_health_accepts_service_id_list_payload() -> None:

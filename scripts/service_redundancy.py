@@ -4,9 +4,12 @@ from __future__ import annotations
 
 import argparse
 import sys
+from datetime import date, datetime, timedelta
 from typing import Any, Final
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
+from service_id_resolver import resolve_service_id
+from shared_policy_packs import load_shared_policy_packs
 
 try:
     import jsonschema
@@ -23,15 +26,13 @@ SERVICE_REDUNDANCY_SCHEMA_PATH: Final = repo_path(
 SERVICE_CATALOG_PATH: Final = repo_path("config", "service-capability-catalog.json")
 HOST_VARS_PATH: Final = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 
-TIER_ORDER = {"R0": 0, "R1": 1, "R2": 2, "R3": 3}
-STANDBY_KIND_BY_TIER = {"R0": "none", "R1": "cold", "R2": "warm", "R3": "active"}
-LIVE_APPLY_MODE_BY_TIER = {
-    "R0": "primary_only",
-    "R1": "primary_only",
-    "R2": "primary_and_standby",
-    "R3": "multi_domain",
-}
-KNOWN_EMPTY_LOCATIONS = {"none", "n/a", "not_applicable", "primary-only"}
+SHARED_POLICIES = load_shared_policy_packs()
+TIER_ORDER = SHARED_POLICIES.tier_order
+STANDBY_KIND_BY_TIER = SHARED_POLICIES.standby_kind_by_tier
+LIVE_APPLY_MODE_BY_TIER = SHARED_POLICIES.live_apply_mode_by_tier
+KNOWN_EMPTY_LOCATIONS = SHARED_POLICIES.known_empty_locations
+REHEARSAL_TIER_SEQUENCE = SHARED_POLICIES.rehearsal_tier_sequence
+ALLOWED_REHEARSAL_RESULTS = SHARED_POLICIES.allowed_rehearsal_results
 
 
 def require_mapping(value: Any, path: str) -> dict[str, Any]:
@@ -65,6 +66,14 @@ def require_enum(value: Any, path: str, allowed: set[str]) -> str:
     if value not in allowed:
         raise ValueError(f"{path} must be one of {sorted(allowed)}")
     return value
+
+
+def require_date(value: Any, path: str) -> date:
+    value = require_str(value, path)
+    try:
+        return datetime.strptime(value, "%Y-%m-%d").date()
+    except ValueError as exc:
+        raise ValueError(f"{path} must use YYYY-MM-DD") from exc
 
 
 def require_string_list(value: Any, path: str) -> list[str]:
@@ -117,7 +126,254 @@ def known_locations() -> set[str]:
 
 
 def max_supported_tier_for_domains(failure_domain_count: int) -> str:
-    return "R3" if failure_domain_count >= 2 else "R2"
+    return SHARED_POLICIES.max_supported_tier_for_failure_domain_count(failure_domain_count)
+
+
+def required_rehearsal_tiers(declared_tier: str) -> list[str]:
+    return [
+        tier
+        for tier in REHEARSAL_TIER_SEQUENCE
+        if TIER_ORDER[tier] <= TIER_ORDER[declared_tier]
+    ]
+
+
+def load_rehearsal_gate_policies(catalog: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    platform = require_mapping(catalog.get("platform"), "platform")
+    rehearsal_gate = require_mapping(platform.get("rehearsal_gate"), "platform.rehearsal_gate")
+    tiers = require_mapping(rehearsal_gate.get("tiers"), "platform.rehearsal_gate.tiers")
+    if set(tiers) != set(REHEARSAL_TIER_SEQUENCE):
+        raise ValueError(
+            "platform.rehearsal_gate.tiers must define exactly "
+            + ", ".join(REHEARSAL_TIER_SEQUENCE)
+        )
+
+    normalized: dict[str, dict[str, Any]] = {}
+    for tier in REHEARSAL_TIER_SEQUENCE:
+        policy = require_mapping(tiers.get(tier), f"platform.rehearsal_gate.tiers.{tier}")
+        normalized[tier] = {
+            "tier": tier,
+            "exercise": require_str(
+                policy.get("exercise"),
+                f"platform.rehearsal_gate.tiers.{tier}.exercise",
+            ),
+            "freshness_window_days": require_int(
+                policy.get("freshness_window_days"),
+                f"platform.rehearsal_gate.tiers.{tier}.freshness_window_days",
+                1,
+            ),
+        }
+    return normalized
+
+
+def normalized_rehearsal_metadata(
+    catalog: dict[str, Any],
+    service_id: str,
+    entry: dict[str, Any],
+) -> tuple[dict[str, dict[str, Any]], list[dict[str, Any]]]:
+    policies = {
+        tier: dict(policy)
+        for tier, policy in load_rehearsal_gate_policies(catalog).items()
+    }
+
+    rehearsal = entry.get("rehearsal")
+    if rehearsal is None:
+        return policies, []
+
+    rehearsal = require_mapping(rehearsal, f"services.{service_id}.rehearsal")
+    overrides = rehearsal.get("policies", {})
+    if overrides is None:
+        overrides = {}
+    overrides = require_mapping(overrides, f"services.{service_id}.rehearsal.policies")
+    for tier, override in overrides.items():
+        if tier not in REHEARSAL_TIER_SEQUENCE:
+            raise ValueError(
+                f"services.{service_id}.rehearsal.policies.{tier} must target one of {list(REHEARSAL_TIER_SEQUENCE)}"
+            )
+        override = require_mapping(override, f"services.{service_id}.rehearsal.policies.{tier}")
+        policies[tier] = {
+            "tier": tier,
+            "exercise": require_str(
+                override.get("exercise"),
+                f"services.{service_id}.rehearsal.policies.{tier}.exercise",
+            ),
+            "freshness_window_days": require_int(
+                override.get("freshness_window_days"),
+                f"services.{service_id}.rehearsal.policies.{tier}.freshness_window_days",
+                1,
+            ),
+        }
+
+    proofs_raw = rehearsal.get("proofs", [])
+    if proofs_raw is None:
+        proofs_raw = []
+    proofs_raw = require_list(proofs_raw, f"services.{service_id}.rehearsal.proofs")
+    proofs: list[dict[str, Any]] = []
+    for index, proof in enumerate(proofs_raw):
+        proof = require_mapping(proof, f"services.{service_id}.rehearsal.proofs[{index}]")
+        proves_tier = require_enum(
+            proof.get("proves_tier"),
+            f"services.{service_id}.rehearsal.proofs[{index}].proves_tier",
+            set(REHEARSAL_TIER_SEQUENCE),
+        )
+        performed_on = require_date(
+            proof.get("performed_on"),
+            f"services.{service_id}.rehearsal.proofs[{index}].performed_on",
+        )
+        result = require_enum(
+            proof.get("result"),
+            f"services.{service_id}.rehearsal.proofs[{index}].result",
+            ALLOWED_REHEARSAL_RESULTS,
+        )
+        require_str(
+            proof.get("exercise"),
+            f"services.{service_id}.rehearsal.proofs[{index}].exercise",
+        )
+        require_str(
+            proof.get("trigger"),
+            f"services.{service_id}.rehearsal.proofs[{index}].trigger",
+        )
+        require_str(
+            proof.get("target_environment"),
+            f"services.{service_id}.rehearsal.proofs[{index}].target_environment",
+        )
+        require_int(
+            proof.get("duration_minutes"),
+            f"services.{service_id}.rehearsal.proofs[{index}].duration_minutes",
+            0,
+        )
+        require_int(
+            proof.get("observed_rto_seconds"),
+            f"services.{service_id}.rehearsal.proofs[{index}].observed_rto_seconds",
+            0,
+        )
+        require_str(
+            proof.get("observed_data_loss"),
+            f"services.{service_id}.rehearsal.proofs[{index}].observed_data_loss",
+        )
+        require_str(
+            proof.get("health_verification"),
+            f"services.{service_id}.rehearsal.proofs[{index}].health_verification",
+        )
+        require_str(
+            proof.get("rollback_result"),
+            f"services.{service_id}.rehearsal.proofs[{index}].rollback_result",
+        )
+        require_str(
+            proof.get("evidence_ref"),
+            f"services.{service_id}.rehearsal.proofs[{index}].evidence_ref",
+        )
+        proofs.append(
+            {
+                "proves_tier": proves_tier,
+                "performed_on": performed_on,
+                "result": result,
+                "exercise": proof["exercise"],
+                "trigger": proof["trigger"],
+                "target_environment": proof["target_environment"],
+                "duration_minutes": proof["duration_minutes"],
+                "observed_rto_seconds": proof["observed_rto_seconds"],
+                "observed_data_loss": proof["observed_data_loss"],
+                "health_verification": proof["health_verification"],
+                "rollback_result": proof["rollback_result"],
+                "evidence_ref": proof["evidence_ref"],
+            }
+        )
+
+    proofs.sort(
+        key=lambda item: (item["performed_on"].isoformat(), item["proves_tier"], item["result"]),
+        reverse=True,
+    )
+    return policies, proofs
+
+
+def evaluate_rehearsal_gate(
+    catalog: dict[str, Any],
+    service_id: str,
+    *,
+    reference_date: date | None = None,
+) -> dict[str, Any]:
+    services = require_mapping(catalog.get("services"), "services")
+    if service_id not in services:
+        raise ValueError(f"unknown service: {service_id}")
+
+    entry = require_mapping(services[service_id], f"services.{service_id}")
+    declared_tier = require_enum(entry.get("tier"), f"services.{service_id}.tier", set(TIER_ORDER))
+    reference_date = reference_date or date.today()
+    policies, proofs = normalized_rehearsal_metadata(catalog, service_id, entry)
+
+    required_policies = [dict(policies[tier]) for tier in required_rehearsal_tiers(declared_tier)]
+    latest_pass_by_tier: dict[str, dict[str, Any]] = {}
+    latest_proof_by_tier: dict[str, dict[str, Any]] = {}
+    for proof in proofs:
+        proof_tier = proof["proves_tier"]
+        latest_proof_by_tier.setdefault(proof_tier, proof)
+        if proof["result"] == "pass":
+            latest_pass_by_tier.setdefault(proof_tier, proof)
+
+    if declared_tier == "R0":
+        return {
+            "declared_tier": declared_tier,
+            "implemented_tier": "R0",
+            "status": "not_required",
+            "summary": "No rehearsal is required for R0 services.",
+            "required_policies": [],
+            "proofs": proofs,
+            "qualifying_proof": None,
+        }
+
+    for candidate_tier in reversed(required_rehearsal_tiers(declared_tier)):
+        candidate_policy = policies[candidate_tier]
+        candidate_pass = latest_pass_by_tier.get(candidate_tier)
+        if candidate_pass is None:
+            continue
+        expires_on = candidate_pass["performed_on"] + timedelta(
+            days=candidate_policy["freshness_window_days"]
+        )
+        if reference_date <= expires_on:
+            status = "fresh" if candidate_tier == declared_tier else "downgraded"
+            return {
+                "declared_tier": declared_tier,
+                "implemented_tier": candidate_tier,
+                "status": status,
+                "summary": (
+                    f"Fresh {candidate_tier} rehearsal from {candidate_pass['performed_on'].isoformat()} "
+                    f"via {candidate_policy['exercise']} is valid until {expires_on.isoformat()}."
+                ),
+                "required_policies": required_policies,
+                "proofs": proofs,
+                "qualifying_proof": {**candidate_pass, "expires_on": expires_on},
+            }
+
+    latest_declared_proof = latest_proof_by_tier.get(declared_tier)
+    if latest_declared_proof is None:
+        summary = f"No recorded {declared_tier} rehearsal proof keeps the implemented claim above R0."
+        status = "unproven"
+    elif latest_declared_proof["result"] != "pass":
+        summary = (
+            f"The latest {declared_tier} rehearsal on {latest_declared_proof['performed_on'].isoformat()} "
+            f"did not pass, so the implemented claim falls back to R0."
+        )
+        status = "downgraded"
+    else:
+        declared_policy = policies[declared_tier]
+        expires_on = latest_declared_proof["performed_on"] + timedelta(
+            days=declared_policy["freshness_window_days"]
+        )
+        summary = (
+            f"The latest passing {declared_tier} rehearsal from {latest_declared_proof['performed_on'].isoformat()} "
+            f"expired on {expires_on.isoformat()}, so the implemented claim falls back to R0."
+        )
+        status = "downgraded"
+
+    return {
+        "declared_tier": declared_tier,
+        "implemented_tier": "R0",
+        "status": status,
+        "summary": summary,
+        "required_policies": required_policies,
+        "proofs": proofs,
+        "qualifying_proof": None,
+    }
 
 
 def effective_tier(
@@ -155,6 +411,7 @@ def validate_redundancy_catalog(catalog: dict[str, Any]) -> None:
             "platform.max_supported_tier exceeds what the declared failure_domain_count supports"
         )
     require_string_list(platform.get("notes"), "platform.notes")
+    load_rehearsal_gate_policies(catalog)
 
     services = require_mapping(catalog.get("services"), "services")
     service_catalog_index = load_service_catalog_index()
@@ -219,6 +476,7 @@ def validate_redundancy_catalog(catalog: dict[str, Any]) -> None:
             raise ValueError(
                 f"services.{service_id}.standby.location must reference a known host or guest location"
             )
+        normalized_rehearsal_metadata(catalog, service_id, entry)
 
 
 def build_live_apply_plan(
@@ -230,9 +488,10 @@ def build_live_apply_plan(
     services = require_mapping(catalog.get("services"), "services")
     service_index = load_service_catalog_index()
     if service_id:
-        if service_id not in services:
+        canonical_service_id = resolve_service_id(service_id)
+        if canonical_service_id not in services:
             raise ValueError(f"unknown service: {service_id}")
-        target_ids = [service_id]
+        target_ids = [canonical_service_id]
     else:
         target_ids = active_service_ids(service_index)
 
@@ -256,12 +515,16 @@ def build_live_apply_plan(
             platform_max_tier,
             allow_fallback=allow_fallback,
         )
+        rehearsal_gate = evaluate_rehearsal_gate(catalog, current_service_id)
         standby = require_mapping(entry.get("standby"), f"services.{current_service_id}.standby")
         plans.append(
             {
                 "service_id": current_service_id,
                 "declared_tier": declared_tier,
                 "effective_tier": effective,
+                "implemented_tier": rehearsal_gate["implemented_tier"],
+                "rehearsal_gate_status": rehearsal_gate["status"],
+                "rehearsal_summary": rehearsal_gate["summary"],
                 "live_apply_mode": LIVE_APPLY_MODE_BY_TIER[effective],
                 "standby_kind": require_str(standby.get("kind"), f"services.{current_service_id}.standby.kind"),
                 "standby_location": require_str(
@@ -280,29 +543,37 @@ def list_services(catalog: dict[str, Any]) -> int:
     for service_id, entry in sorted(require_mapping(catalog.get("services"), "services").items()):
         entry = require_mapping(entry, f"services.{service_id}")
         service_name = service_catalog_index[service_id]["name"]
+        rehearsal_gate = evaluate_rehearsal_gate(catalog, service_id)
         print(
             f"  - {service_id} [{service_name}] "
-            f"tier={entry['tier']} standby={entry['standby']['kind']} location={entry['standby']['location']}"
+            f"declared={entry['tier']} implemented={rehearsal_gate['implemented_tier']} "
+            f"gate={rehearsal_gate['status']} standby={entry['standby']['kind']} "
+            f"location={entry['standby']['location']}"
         )
     return 0
 
 
 def show_service(catalog: dict[str, Any], service_id: str) -> int:
+    canonical_service_id = resolve_service_id(service_id)
     services = require_mapping(catalog.get("services"), "services")
-    if service_id not in services:
+    if canonical_service_id not in services:
         print(f"Unknown service: {service_id}", file=sys.stderr)
         return 2
 
     service_catalog_index = load_service_catalog_index()
-    entry = require_mapping(services[service_id], f"services.{service_id}")
-    standby = require_mapping(entry.get("standby"), f"services.{service_id}.standby")
+    entry = require_mapping(services[canonical_service_id], f"services.{canonical_service_id}")
+    standby = require_mapping(entry.get("standby"), f"services.{canonical_service_id}.standby")
     recovery_objective = require_mapping(
         entry.get("recovery_objective"),
-        f"services.{service_id}.recovery_objective",
+        f"services.{canonical_service_id}.recovery_objective",
     )
-    print(f"Service: {service_id}")
-    print(f"Name: {service_catalog_index[service_id]['name']}")
-    print(f"Tier: {entry['tier']}")
+    rehearsal_gate = evaluate_rehearsal_gate(catalog, canonical_service_id)
+    print(f"Service: {canonical_service_id}")
+    print(f"Name: {service_catalog_index[canonical_service_id]['name']}")
+    print(f"Declared Tier: {entry['tier']}")
+    print(f"Implemented Tier: {rehearsal_gate['implemented_tier']}")
+    print(f"Rehearsal Gate: {rehearsal_gate['status']}")
+    print(f"Rehearsal Summary: {rehearsal_gate['summary']}")
     print(
         "Recovery Objective: "
         f"RTO {recovery_objective['rto_minutes']}m / RPO {recovery_objective['rpo_minutes']}m"
@@ -314,6 +585,23 @@ def show_service(catalog: dict[str, Any], service_id: str) -> int:
     print(f"Standby Location: {standby['location']}")
     print(f"Failover Trigger: {standby['failover_trigger']}")
     print(f"Failback Method: {standby['failback_method']}")
+    if rehearsal_gate["required_policies"]:
+        print("Required Rehearsals:")
+        for policy in rehearsal_gate["required_policies"]:
+            print(
+                f"  - {policy['tier']}: {policy['exercise']} within "
+                f"{policy['freshness_window_days']}d"
+            )
+    if rehearsal_gate["proofs"]:
+        print("Recorded Proofs:")
+        for proof in rehearsal_gate["proofs"]:
+            print(
+                f"  - {proof['performed_on'].isoformat()} {proof['proves_tier']} "
+                f"{proof['result']} target={proof['target_environment']} "
+                f"duration={proof['duration_minutes']}m "
+                f"rto={proof['observed_rto_seconds']}s "
+                f"evidence={proof['evidence_ref']}"
+            )
     if "notes" in entry:
         print(f"Notes: {entry['notes']}")
     return 0
@@ -333,9 +621,11 @@ def check_live_apply(
     for plan in plans:
         print(
             f"{plan['service_id']}: declared {plan['declared_tier']} -> "
-            f"effective {plan['effective_tier']} ({plan['live_apply_mode']}) "
+            f"platform {plan['effective_tier']} -> implemented {plan['implemented_tier']} "
+            f"[gate={plan['rehearsal_gate_status']}] ({plan['live_apply_mode']}) "
             f"standby={plan['standby_kind']}@{plan['standby_location']}"
         )
+        print(f"  rehearsal: {plan['rehearsal_summary']}")
     return 0
 
 

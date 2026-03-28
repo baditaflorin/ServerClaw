@@ -15,34 +15,37 @@ map $http_upgrade $connection_upgrade {
 }
 
 {% macro render_security_headers(site, tls_enabled) -%}
+{% if site.security_headers_enabled | default(true) %}
 {% set security_headers = public_edge_security_headers_default | combine(public_edge_security_headers_overrides.get(site.hostname, {}), recursive=True) %}
-{% if tls_enabled and security_headers.strict_transport_security is defined %}
+{% if tls_enabled and security_headers.strict_transport_security is defined and security_headers.strict_transport_security is not none %}
     add_header Strict-Transport-Security "{{ security_headers.strict_transport_security }}" always;
 {% endif %}
-{% if security_headers.cross_origin_resource_policy is defined %}
+{% if security_headers.cross_origin_resource_policy is defined and security_headers.cross_origin_resource_policy is not none %}
     add_header Cross-Origin-Resource-Policy "{{ security_headers.cross_origin_resource_policy }}" always;
 {% endif %}
-{% if security_headers.x_content_type_options is defined %}
+{% if security_headers.x_content_type_options is defined and security_headers.x_content_type_options is not none %}
     add_header X-Content-Type-Options "{{ security_headers.x_content_type_options }}" always;
 {% endif %}
-{% if security_headers.x_frame_options is defined %}
+{% if security_headers.x_frame_options is defined and security_headers.x_frame_options is not none %}
     add_header X-Frame-Options "{{ security_headers.x_frame_options }}" always;
 {% endif %}
-{% if security_headers.referrer_policy is defined %}
+{% if security_headers.referrer_policy is defined and security_headers.referrer_policy is not none %}
     add_header Referrer-Policy "{{ security_headers.referrer_policy }}" always;
 {% endif %}
-{% if security_headers.permissions_policy is defined %}
+{% if security_headers.permissions_policy is defined and security_headers.permissions_policy is not none %}
     add_header Permissions-Policy "{{ security_headers.permissions_policy }}" always;
 {% endif %}
-{% if security_headers.content_security_policy is defined %}
+{% if security_headers.content_security_policy is defined and security_headers.content_security_policy is not none %}
     add_header Content-Security-Policy "{{ security_headers.content_security_policy }}" always;
 {% endif %}
-{% if security_headers.x_robots_tag is defined %}
+{% if security_headers.x_robots_tag is defined and security_headers.x_robots_tag is not none %}
     add_header X-Robots-Tag "{{ security_headers.x_robots_tag }}" always;
+{% endif %}
 {% endif %}
 {%- endmacro %}
 
-{% macro hide_upstream_security_headers() -%}
+{% macro hide_upstream_security_headers(site) -%}
+{% if not site.preserve_upstream_security_headers | default(false) %}
         proxy_hide_header Strict-Transport-Security;
         proxy_hide_header Cross-Origin-Resource-Policy;
         proxy_hide_header X-Content-Type-Options;
@@ -51,6 +54,7 @@ map $http_upgrade $connection_upgrade {
         proxy_hide_header Permissions-Policy;
         proxy_hide_header Content-Security-Policy;
         proxy_hide_header X-Robots-Tag;
+{% endif %}
 {%- endmacro %}
 
 server {
@@ -125,13 +129,16 @@ server {
 {% set proxy_hide_headers = site.proxy_hide_headers | default([]) %}
 {% set blocked_exact_paths = site.blocked_exact_paths | default([]) %}
 {% set server_sent_events = site.server_sent_events | default(false) %}
+{% set prefix_proxy_routes = site.prefix_proxy_routes | default([]) %}
 server {
     listen 80;
     listen [::]:80;
     server_name {{ site.hostname }}{% if site.aliases is defined and site.aliases | length > 0 %} {{ site.aliases | join(' ') }}{% endif %};
 
+{% if site.crawl_policy_enabled | default(true) %}
 {{ crawl_policy_headers() }}
 {{ robots_txt_location() }}
+{% endif %}
 {{ render_security_headers(site, false) }}
 
     root {{ public_edge_static_root }};
@@ -157,7 +164,7 @@ server {
     location = / {
         proxy_pass {{ site.upstream }}{{ site.root_proxy_path }};
         proxy_http_version 1.1;
-{{ hide_upstream_security_headers() }}
+{{ hide_upstream_security_headers(site) }}
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -179,10 +186,31 @@ server {
     }
 
 {% endif %}
+{% for route in prefix_proxy_routes %}
+    location ^~ {{ route.path }} {
+        proxy_pass {{ route.upstream }};
+        proxy_http_version 1.1;
+{{ hide_upstream_security_headers() }}
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_redirect http:// https://;
+        proxy_buffering off;
+        proxy_read_timeout 300s;
+{% for header_name in proxy_hide_headers %}
+        proxy_hide_header {{ header_name }};
+{% endfor %}
+    }
+{% endfor %}
     location / {
         proxy_pass {{ site.upstream }};
         proxy_http_version 1.1;
-{{ hide_upstream_security_headers() }}
+{{ hide_upstream_security_headers(site) }}
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -216,8 +244,10 @@ server {
     http2 on;
     server_name {{ site.hostname }}{% if site.aliases is defined and site.aliases | length > 0 %} {{ site.aliases | join(' ') }}{% endif %};
 
+{% if site.crawl_policy_enabled | default(true) %}
 {{ crawl_policy_headers() }}
 {{ robots_txt_location() }}
+{% endif %}
 {{ render_security_headers(site, true) }}
 
     ssl_certificate /etc/letsencrypt/live/{{ public_edge_cert_name }}/fullchain.pem;
@@ -230,7 +260,7 @@ server {
     location = {{ path }} {
         proxy_pass {{ site.upstream }}{{ path }};
         proxy_http_version 1.1;
-{{ hide_upstream_security_headers() }}
+{{ hide_upstream_security_headers(site) }}
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -246,7 +276,7 @@ server {
     location ^~ {{ path }} {
         proxy_pass {{ site.upstream }};
         proxy_http_version 1.1;
-{{ hide_upstream_security_headers() }}
+{{ hide_upstream_security_headers(site) }}
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -265,7 +295,7 @@ server {
     location /oauth2/ {
         proxy_pass {{ protected_site.auth_proxy_upstream }};
         proxy_http_version 1.1;
-{{ hide_upstream_security_headers() }}
+{{ hide_upstream_security_headers(site) }}
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -278,7 +308,7 @@ server {
     location = /oauth2/auth {
         proxy_pass {{ protected_site.auth_proxy_upstream }};
         proxy_http_version 1.1;
-{{ hide_upstream_security_headers() }}
+{{ hide_upstream_security_headers(site) }}
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -304,7 +334,7 @@ server {
     location = / {
         proxy_pass {{ site.upstream }}{{ site.root_proxy_path }};
         proxy_http_version 1.1;
-{{ hide_upstream_security_headers() }}
+{{ hide_upstream_security_headers(site) }}
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -329,6 +359,37 @@ server {
     }
 
 {% endif %}
+{% for route in prefix_proxy_routes %}
+    location ^~ {{ route.path }} {
+{% if protected_site %}
+        auth_request /oauth2/auth;
+        error_page 401 = @oauth2_signin;
+        auth_request_set $auth_user $upstream_http_x_auth_request_user;
+        auth_request_set $auth_email $upstream_http_x_auth_request_email;
+        auth_request_set $auth_access_token $upstream_http_x_auth_request_access_token;
+        proxy_set_header X-Auth-Request-User $auth_user;
+        proxy_set_header X-Auth-Request-Email $auth_email;
+        proxy_set_header X-Forwarded-Access-Token $auth_access_token;
+{% endif %}
+        proxy_pass {{ route.upstream }};
+        proxy_http_version 1.1;
+{{ hide_upstream_security_headers() }}
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_redirect http:// https://;
+        proxy_buffering off;
+        proxy_read_timeout 300s;
+{% for header_name in proxy_hide_headers %}
+        proxy_hide_header {{ header_name }};
+{% endfor %}
+    }
+{% endfor %}
     location / {
 {% if protected_site %}
         auth_request /oauth2/auth;
@@ -342,7 +403,7 @@ server {
 {% endif %}
         proxy_pass {{ site.upstream }};
         proxy_http_version 1.1;
-{{ hide_upstream_security_headers() }}
+{{ hide_upstream_security_headers(site) }}
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

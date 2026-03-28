@@ -154,6 +154,11 @@
         "budget": {
           "$ref": "#/$defs/resourceTriplet"
         },
+        "capacity_class": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Validated against config/shared-policy-packs.json."
+        },
         "disk_paths": {
           "type": "array",
           "items": {
@@ -193,6 +198,11 @@
         },
         "reserved": {
           "$ref": "#/$defs/resourceTriplet"
+        },
+        "capacity_class": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Validated against config/shared-policy-packs.json."
         },
         "service_id": {
           "type": "string",

@@ -16,14 +16,17 @@ from capacity_report import (
     calculate_committed,
     load_capacity_model,
 )
+from service_id_resolver import resolve_service_id
+from shared_policy_packs import load_shared_policy_packs
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SERVICE_CATALOG_PATH = REPO_ROOT / "config" / "service-capability-catalog.json"
-ALLOWED_REDUNDANCY_TIERS = {"R0", "R1", "R2", "R3"}
-ENFORCED_REDUNDANCY_TIERS = {"R2", "R3"}
-ALLOWED_STANDBY_MODES = {"warm", "passive", "active"}
-CONTROL_PLANE_CATEGORIES = {"automation", "security", "access", "infrastructure"}
+SHARED_POLICIES = load_shared_policy_packs()
+ALLOWED_REDUNDANCY_TIERS = set(SHARED_POLICIES.allowed_redundancy_tiers)
+ENFORCED_REDUNDANCY_TIERS = SHARED_POLICIES.enforced_redundancy_tiers
+ALLOWED_STANDBY_MODES = SHARED_POLICIES.allowed_standby_modes
+CONTROL_PLANE_CATEGORIES = SHARED_POLICIES.control_plane_categories
 
 
 def load_json(path: Path) -> Any:
@@ -132,15 +135,16 @@ def evaluate_service_standby(
     model: CapacityModel | None = None,
     enforce_capacity_target: bool = False,
 ) -> dict[str, Any]:
+    canonical_service_id = resolve_service_id(service_id)
     loaded_catalog = catalog or load_service_catalog()
     indexed = service_index(loaded_catalog)
-    if service_id not in indexed:
+    if canonical_service_id not in indexed:
         raise ValueError(f"unknown service '{service_id}'")
 
-    service = indexed[service_id]
+    service = indexed[canonical_service_id]
     redundancy = service.get("redundancy")
     result: dict[str, Any] = {
-        "service_id": service_id,
+        "service_id": canonical_service_id,
         "approved": True,
         "enforced": False,
         "tier": None,
@@ -151,9 +155,11 @@ def evaluate_service_standby(
     if not isinstance(redundancy, dict):
         return result
 
-    tier = require_str(redundancy.get("tier"), f"service '{service_id}'.redundancy.tier")
+    tier = require_str(redundancy.get("tier"), f"service '{canonical_service_id}'.redundancy.tier")
     if tier not in ALLOWED_REDUNDANCY_TIERS:
-        raise ValueError(f"service '{service_id}'.redundancy.tier must be one of {sorted(ALLOWED_REDUNDANCY_TIERS)}")
+        raise ValueError(
+            f"service '{canonical_service_id}'.redundancy.tier must be one of {sorted(ALLOWED_REDUNDANCY_TIERS)}"
+        )
     result["tier"] = tier
     if tier not in ENFORCED_REDUNDANCY_TIERS:
         return result
@@ -161,22 +167,28 @@ def evaluate_service_standby(
     loaded_model = model or load_capacity_model(CAPACITY_MODEL_PATH)
     result["enforced"] = True
 
-    standby = require_mapping(redundancy.get("standby"), f"service '{service_id}'.redundancy.standby")
+    standby = require_mapping(redundancy.get("standby"), f"service '{canonical_service_id}'.redundancy.standby")
     placement = require_mapping(
         standby.get("placement"),
-        f"service '{service_id}'.redundancy.standby.placement",
+        f"service '{canonical_service_id}'.redundancy.standby.placement",
     )
     reservation = require_mapping(
         standby.get("reservation"),
-        f"service '{service_id}'.redundancy.standby.reservation",
+        f"service '{canonical_service_id}'.redundancy.standby.reservation",
     )
 
-    primary_vm = require_str(service.get("vm"), f"service '{service_id}'.vm")
-    standby_vm = require_str(standby.get("vm"), f"service '{service_id}'.redundancy.standby.vm")
+    primary_vm = require_str(service.get("vm"), f"service '{canonical_service_id}'.vm")
+    standby_vm = require_str(standby.get("vm"), f"service '{canonical_service_id}'.redundancy.standby.vm")
     standby_vmid = standby.get("vmid")
     if standby_vmid is not None:
-        standby_vmid = int(require_number(standby_vmid, f"service '{service_id}'.redundancy.standby.vmid", minimum=1))
-    mode = require_str(standby.get("mode"), f"service '{service_id}'.redundancy.standby.mode")
+        standby_vmid = int(
+            require_number(
+                standby_vmid,
+                f"service '{canonical_service_id}'.redundancy.standby.vmid",
+                minimum=1,
+            )
+        )
+    mode = require_str(standby.get("mode"), f"service '{canonical_service_id}'.redundancy.standby.mode")
     if mode not in ALLOWED_STANDBY_MODES:
         raise ValueError(
             f"service '{service_id}'.redundancy.standby.mode must be one of {sorted(ALLOWED_STANDBY_MODES)}"
@@ -184,60 +196,60 @@ def evaluate_service_standby(
 
     required_resources = resource_from_mapping(
         reservation.get("resources"),
-        f"service '{service_id}'.redundancy.standby.reservation.resources",
+        f"service '{canonical_service_id}'.redundancy.standby.reservation.resources",
     )
     storage_class = require_str(
         reservation.get("storage_class"),
-        f"service '{service_id}'.redundancy.standby.reservation.storage_class",
+        f"service '{canonical_service_id}'.redundancy.standby.reservation.storage_class",
     )
     network_attachment = require_str(
         reservation.get("required_network_attachment"),
-        f"service '{service_id}'.redundancy.standby.reservation.required_network_attachment",
+        f"service '{canonical_service_id}'.redundancy.standby.reservation.required_network_attachment",
     )
 
     primary_compose_project = require_str(
         placement.get("primary_compose_project"),
-        f"service '{service_id}'.redundancy.standby.placement.primary_compose_project",
+        f"service '{canonical_service_id}'.redundancy.standby.placement.primary_compose_project",
     )
     standby_compose_project = require_str(
         placement.get("standby_compose_project"),
-        f"service '{service_id}'.redundancy.standby.placement.standby_compose_project",
+        f"service '{canonical_service_id}'.redundancy.standby.placement.standby_compose_project",
     )
     primary_namespace = require_str(
         placement.get("primary_namespace"),
-        f"service '{service_id}'.redundancy.standby.placement.primary_namespace",
+        f"service '{canonical_service_id}'.redundancy.standby.placement.primary_namespace",
     )
     standby_namespace = require_str(
         placement.get("standby_namespace"),
-        f"service '{service_id}'.redundancy.standby.placement.standby_namespace",
+        f"service '{canonical_service_id}'.redundancy.standby.placement.standby_namespace",
     )
     primary_data_paths = {
         require_str(
             item,
-            f"service '{service_id}'.redundancy.standby.placement.primary_data_paths[{index}]",
+            f"service '{canonical_service_id}'.redundancy.standby.placement.primary_data_paths[{index}]",
         )
         for index, item in enumerate(
             require_list(
                 placement.get("primary_data_paths"),
-                f"service '{service_id}'.redundancy.standby.placement.primary_data_paths",
+                f"service '{canonical_service_id}'.redundancy.standby.placement.primary_data_paths",
             )
         )
     }
     standby_data_paths = {
         require_str(
             item,
-            f"service '{service_id}'.redundancy.standby.placement.standby_data_paths[{index}]",
+            f"service '{canonical_service_id}'.redundancy.standby.placement.standby_data_paths[{index}]",
         )
         for index, item in enumerate(
             require_list(
                 placement.get("standby_data_paths"),
-                f"service '{service_id}'.redundancy.standby.placement.standby_data_paths",
+                f"service '{canonical_service_id}'.redundancy.standby.placement.standby_data_paths",
             )
         )
     }
     failure_domain_honesty = require_str(
         standby.get("failure_domain_honesty"),
-        f"service '{service_id}'.redundancy.standby.failure_domain_honesty",
+        f"service '{canonical_service_id}'.redundancy.standby.failure_domain_honesty",
     )
 
     reasons = result["reasons"]
@@ -287,13 +299,13 @@ def evaluate_service_standby(
             "required_network_attachment": network_attachment,
         }
     else:
-        reservations = matching_standby_reservations(loaded_model, service_id)
+        reservations = matching_standby_reservations(loaded_model, canonical_service_id)
         if not reservations:
             reasons.append(
                 f"service '{service_id}' declares tier {tier} but has no standby guest or standby reservation in the capacity model"
             )
         else:
-            reserved_total = totals_for_reservations(loaded_model, service_id)
+            reserved_total = totals_for_reservations(loaded_model, canonical_service_id)
             shortages = resource_shortfalls(reserved_total, required_resources)
             if shortages:
                 reasons.append(

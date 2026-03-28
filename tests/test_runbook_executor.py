@@ -182,3 +182,37 @@ steps:
     assert first["status"] == "escalated"
     assert resumed["status"] == "completed"
     assert resumed["step_results"]["verify"]["attempts"] == 2
+
+
+def test_executor_enforces_delivery_surface_allowlist(runbook_repo: Path) -> None:
+    (runbook_repo / "docs" / "runbooks" / "gateway-only.yaml").write_text(
+        """
+id: gateway-only
+title: Gateway only diagnostic
+automation:
+  eligible: true
+  delivery_surfaces:
+    - api_gateway
+steps:
+  - id: verify
+    workflow_id: verify-service-health
+    params:
+      service: "{{ params.service }}"
+    success_condition: "result.status == 'healthy'"
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+
+    executor = executor_module.RunbookExecutor(
+        repo_root=runbook_repo,
+        workflow_runner=FakeRunner(lambda *_args, **_kwargs: {"status": "healthy"}),
+        store=executor_module.RunbookRunStore(runbook_repo / ".local" / "runbooks" / "runs"),
+        sleep_fn=lambda *_args, **_kwargs: None,
+    )
+
+    with pytest.raises(executor_module.RunbookSurfaceError):
+        executor.preview("gateway-only", {"service": "grafana"}, surface="cli")
+
+    record = executor.execute("gateway-only", {"service": "grafana"}, surface="api_gateway")
+    assert record["status"] == "completed"

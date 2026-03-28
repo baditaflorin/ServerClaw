@@ -6,6 +6,60 @@ Detailed per-change deployment history is generated separately in the deployment
 
 ## Releases
 
+- [0.177.39](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.39.md)
+
+- [0.177.38](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.38.md)
+
+- [0.177.37](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.37.md)
+
+- [0.177.36](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.36.md)
+
+- [0.177.35](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.35.md)
+
+- [0.177.34](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.34.md)
+
+- [0.177.33](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.33.md)
+
+- [0.177.32](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.32.md)
+
+- [0.177.31](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.31.md)
+
+- [0.177.30](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.30.md)
+
+- [0.177.29](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.29.md)
+
+- [0.177.28](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.28.md)
+
+- [0.177.27](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.27.md)
+
+- [0.177.26](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.26.md)
+
+- [0.177.25](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.25.md)
+
+- [0.177.24](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.24.md)
+
+- [0.177.23](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.23.md)
+
+- [0.177.22](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.22.md)
+
+- [0.177.21](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.21.md)
+
+- [0.177.20](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.20.md)
+
+- [0.177.19](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.19.md)
+
+- [0.177.18](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.18.md)
+
+- [0.177.17](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.17.md)
+
+- [0.177.16](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.16.md)
+
+- [0.177.15](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.15.md)
+
+- [0.177.14](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.14.md)
+
+- [0.177.13](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.13.md)
+
 - [0.177.12](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.12.md)
 
 - [0.177.11](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/release-notes/0.177.11.md)

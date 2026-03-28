@@ -1,0 +1,4 @@
+# depends_on:
+#   - playbooks/services/dify.yml
+---
+- import_playbook: ../dify.yml

@@ -1,0 +1,90 @@
+---
+# Purpose: Bootstrap the public Outline knowledge surface after edge publication.
+
+- name: Validate Outline publication inputs
+  ansible.builtin.assert:
+    that:
+      - outline_public_base_url | length > 0
+      - outline_bootstrap_username | length > 0
+      - outline_operator_password_local_file | length > 0
+      - outline_api_token_name | length > 0
+      - outline_api_token_local_file | length > 0
+      - outline_api_token_scopes | length > 0
+    fail_msg: >-
+      outline_runtime publication requires the public URL, bootstrap operator
+      credentials, and the controller-local API token path.
+
+- name: Check whether the Outline operator password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ outline_operator_password_local_file }}"
+  register: outline_operator_password_local
+
+- name: Fail if the Outline operator password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ outline_operator_password_local_file }} is missing on the control machine.
+      Converge the Keycloak runtime first so the Outline OIDC bootstrap can mint the API token.
+  when: not outline_operator_password_local.stat.exists
+
+- name: Wait for the Outline public health endpoint
+  ansible.builtin.uri:
+    url: "{{ outline_public_base_url }}/_health"
+    method: GET
+    status_code: 200
+  register: outline_publish_public_health
+  retries: 18
+  delay: 5
+  until: outline_publish_public_health.status == 200
+  changed_when: false
+
+- name: Bootstrap the Outline API token when needed
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ inventory_dir }}/../scripts/sync_docs_to_outline.py"
+      - bootstrap-token
+      - --base-url
+      - "{{ outline_public_base_url }}"
+      - --username
+      - "{{ outline_bootstrap_username }}"
+      - --password-file
+      - "{{ outline_operator_password_local_file }}"
+      - --token-name
+      - "{{ outline_api_token_name }}"
+      - --token-file
+      - "{{ outline_api_token_local_file }}"
+      - --scope
+      - "{{ outline_api_token_scopes | join(',') }}"
+  changed_when: "'created api token' in outline_bootstrap_token.stdout"
+  register: outline_bootstrap_token
+  no_log: true
+
+- name: Sync the Outline landing and index documents
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ inventory_dir }}/../scripts/sync_docs_to_outline.py"
+      - sync
+      - --repo-root
+      - "{{ inventory_dir }}/.."
+      - --base-url
+      - "{{ outline_public_base_url }}"
+      - --api-token-file
+      - "{{ outline_api_token_local_file }}"
+  changed_when: "'updated' in outline_sync_docs.stdout or 'created' in outline_sync_docs.stdout"
+  register: outline_sync_docs
+
+- name: Verify the Outline public living knowledge surface
+  ansible.builtin.command:
+    argv:
+      - python3
+      - "{{ inventory_dir }}/../scripts/sync_docs_to_outline.py"
+      - verify
+      - --repo-root
+      - "{{ inventory_dir }}/.."
+      - --base-url
+      - "{{ outline_public_base_url }}"
+      - --api-token-file
+      - "{{ outline_api_token_local_file }}"
+  register: outline_verify_sync
+  changed_when: false

@@ -5,12 +5,17 @@ import yaml
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 ROLE_TASKS = REPO_ROOT / "roles" / "rag_context_runtime" / "tasks" / "main.yml"
+VERIFY_TASKS = REPO_ROOT / "roles" / "rag_context_runtime" / "tasks" / "verify.yml"
 COMPOSE_TEMPLATE = REPO_ROOT / "roles" / "rag_context_runtime" / "templates" / "docker-compose.yml.j2"
 ROLE_DEFAULTS = REPO_ROOT / "roles" / "rag_context_runtime" / "defaults" / "main.yml"
 
 
 def load_tasks() -> list[dict]:
     return yaml.safe_load(ROLE_TASKS.read_text())
+
+
+def load_verify_tasks() -> list[dict]:
+    return yaml.safe_load(VERIFY_TASKS.read_text())
 
 
 def test_pull_task_only_targets_external_qdrant_image() -> None:
@@ -47,3 +52,15 @@ def test_role_restores_docker_nat_chain_before_recreate() -> None:
 def test_role_defaults_do_not_depend_on_platform_service_topology() -> None:
     defaults = ROLE_DEFAULTS.read_text()
     assert "platform_service_topology" not in defaults
+
+
+def test_verify_tasks_repair_degraded_vector_index_from_controller_seed() -> None:
+    tasks = load_verify_tasks()
+    repair_task = next(
+        task
+        for task in tasks
+        if task.get("name") == "Repair a degraded platform context vector index with a bounded controller-side seed rebuild"
+    )
+    assert repair_task["delegate_to"] == "localhost"
+    assert repair_task["become"] is False
+    assert "--include-path" in repair_task["ansible.builtin.command"]["cmd"]

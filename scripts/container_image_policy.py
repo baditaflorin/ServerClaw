@@ -185,10 +185,13 @@ def split_image_reference(registry_ref: str) -> tuple[str, str]:
         return "registry-1.docker.io", registry_ref.removeprefix("docker.io/")
     if registry_ref.startswith("ghcr.io/"):
         return "ghcr.io", registry_ref.removeprefix("ghcr.io/")
+    first_segment = registry_ref.split("/", 1)[0]
+    if "." in first_segment or ":" in first_segment:
+        return first_segment, registry_ref.split("/", 1)[1]
     raise ValueError(f"unsupported registry in '{registry_ref}'")
 
 
-def fetch_bearer_token(registry: str, repository: str) -> str:
+def fetch_bearer_token(registry: str, repository: str) -> str | None:
     if registry == "ghcr.io":
         url = f"https://ghcr.io/token?scope=repository:{repository}:pull"
     elif registry == "registry-1.docker.io":
@@ -197,15 +200,17 @@ def fetch_bearer_token(registry: str, repository: str) -> str:
         )
         url = f"https://auth.docker.io/token?{query}"
     else:
-        raise ValueError(f"unsupported registry '{registry}'")
+        return None
 
     with urllib.request.urlopen(url) as response:
         payload = json.load(response)
     return payload["token"]
 
 
-def fetch_registry_json(url: str, token: str, *, accept: str | None = None) -> dict:
-    headers = {"Authorization": f"Bearer {token}"}
+def fetch_registry_json(url: str, token: str | None, *, accept: str | None = None) -> dict:
+    headers: dict[str, str] = {}
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
     if accept:
         headers["Accept"] = accept
     request = urllib.request.Request(url, headers=headers)
@@ -213,8 +218,10 @@ def fetch_registry_json(url: str, token: str, *, accept: str | None = None) -> d
         return json.load(response)
 
 
-def fetch_registry_payload(url: str, token: str, *, accept: str | None = None) -> tuple[dict, str | None]:
-    headers = {"Authorization": f"Bearer {token}"}
+def fetch_registry_payload(url: str, token: str | None, *, accept: str | None = None) -> tuple[dict, str | None]:
+    headers: dict[str, str] = {}
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
     if accept:
         headers["Accept"] = accept
     request = urllib.request.Request(url, headers=headers)

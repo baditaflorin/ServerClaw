@@ -334,6 +334,9 @@ class ScaffoldServiceTests(unittest.TestCase):
             self.assertTrue((root / "docs" / "adr" / "0002-test-echo.md").is_file())
             self.assertTrue((root / "docs" / "workstreams" / "adr-0002-test-echo.md").is_file())
             self.assertTrue((root / "docs" / "runbooks" / "configure-test-echo.md").is_file())
+            adr_text = (root / "docs" / "adr" / "0002-test-echo.md").read_text()
+            self.assertIn("## Replaceability Scorecard", adr_text)
+            self.assertIn("## Vendor Exit Plan", adr_text)
 
             service_catalog = json.loads((root / "config" / "service-capability-catalog.json").read_text())
             service_entry = next(item for item in service_catalog["services"] if item["id"] == "test_echo")

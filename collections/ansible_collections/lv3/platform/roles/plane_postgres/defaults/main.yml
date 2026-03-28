@@ -1,0 +1,35 @@
+---
+# Purpose: Declare the shared defaults for preparing the Plane PostgreSQL database and controller-local password artifact.
+# Use case: Used whenever the plane_postgres role provisions the Plane database, roles, and mirrored secret files.
+#
+# Inputs (required):
+#   - inventory host facts (generated, required): Selects the target PostgreSQL guest and controller-local artifact paths.
+#
+# Inputs (optional):
+#   - plane_database_name (str, optional, default=plane): Managed Plane database name.
+#   - plane_database_user (str, optional, default=plane_admin): Managed Plane login role.
+#   - plane_database_support_role (str, optional, default=plane_user): Managed support role granted to the login.
+#
+# Outputs:
+#   - Default variable values consumed by the Plane PostgreSQL role tasks.
+#
+# Idempotency: Fully idempotent
+#              This file only declares role defaults.
+#
+# Dependencies:
+#   - ADR 0193: Defines Plane as a repo-managed service with a PostgreSQL backend.
+#   - Requires: Controller-local artifact storage under .local/plane.
+#   - Role: plane_postgres — prepares the Plane database and login on postgres-lv3.
+#
+# Related ADRs: 0165, 0193
+# Related Runbooks: docs/runbooks/configure-plane.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
+plane_database_name: plane
+plane_database_user: plane_admin
+plane_database_support_role: plane_user
+plane_postgres_secret_dir: /etc/lv3/plane
+plane_postgres_password_file: "{{ plane_postgres_secret_dir }}/database-password"
+plane_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/plane
+plane_database_password_local_file: "{{ plane_local_artifact_dir }}/database-password.txt"

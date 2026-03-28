@@ -24,7 +24,8 @@
       "required": [
         "failure_domain_count",
         "max_supported_tier",
-        "notes"
+        "notes",
+        "rehearsal_gate"
       ],
       "properties": {
         "failure_domain_count": {
@@ -33,12 +34,8 @@
         },
         "max_supported_tier": {
           "type": "string",
-          "enum": [
-            "R0",
-            "R1",
-            "R2",
-            "R3"
-          ]
+          "minLength": 1,
+          "description": "Validated against config/shared-policy-packs.json."
         },
         "notes": {
           "type": "array",
@@ -46,6 +43,22 @@
           "items": {
             "type": "string",
             "minLength": 1
+          }
+        },
+        "rehearsal_gate": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "tiers"
+          ],
+          "properties": {
+            "tiers": {
+              "type": "object",
+              "minProperties": 1,
+              "additionalProperties": {
+                "$ref": "#/$defs/rehearsalPolicy"
+              }
+            }
           }
         }
       }
@@ -74,12 +87,8 @@
       "properties": {
         "tier": {
           "type": "string",
-          "enum": [
-            "R0",
-            "R1",
-            "R2",
-            "R3"
-          ]
+          "minLength": 1,
+          "description": "Validated against config/shared-policy-packs.json."
         },
         "recovery_objective": {
           "type": "object",
@@ -120,12 +129,8 @@
           "properties": {
             "kind": {
               "type": "string",
-              "enum": [
-                "none",
-                "cold",
-                "warm",
-                "active"
-              ]
+              "minLength": 1,
+              "description": "Validated against config/shared-policy-packs.json."
             },
             "location": {
               "type": "string",
@@ -143,6 +148,115 @@
         },
         "notes": {
           "type": "string"
+        },
+        "rehearsal": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "proofs"
+          ],
+          "properties": {
+            "policies": {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "#/$defs/rehearsalPolicy"
+              }
+            },
+            "proofs": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/rehearsalProof"
+              }
+            }
+          }
+        }
+      }
+    },
+    "rehearsalPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exercise",
+        "freshness_window_days"
+      ],
+      "properties": {
+        "exercise": {
+          "type": "string",
+          "minLength": 1
+        },
+        "freshness_window_days": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "rehearsalProof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "proves_tier",
+        "result",
+        "performed_on",
+        "exercise",
+        "trigger",
+        "target_environment",
+        "duration_minutes",
+        "observed_rto_seconds",
+        "observed_data_loss",
+        "health_verification",
+        "rollback_result",
+        "evidence_ref"
+      ],
+      "properties": {
+        "proves_tier": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Validated against config/shared-policy-packs.json."
+        },
+        "result": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Validated against config/shared-policy-packs.json."
+        },
+        "performed_on": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        },
+        "exercise": {
+          "type": "string",
+          "minLength": 1
+        },
+        "trigger": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target_environment": {
+          "type": "string",
+          "minLength": 1
+        },
+        "duration_minutes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "observed_rto_seconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "observed_data_loss": {
+          "type": "string",
+          "minLength": 1
+        },
+        "health_verification": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rollback_result": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_ref": {
+          "type": "string",
+          "minLength": 1
         }
       }
     }

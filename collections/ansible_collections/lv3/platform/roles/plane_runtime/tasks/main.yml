@@ -1,0 +1,375 @@
+---
+# Purpose: Converge the Plane runtime stack, managed secrets, bootstrap artifacts, and controller-local access files.
+# Use case: Run during Plane deployment or replay on docker-runtime-lv3 after the Plane PostgreSQL backend is prepared.
+#
+# Inputs (required):
+#   - plane_site_dir (path, required): Runtime root directory.
+#   - plane_secret_dir (path, required): Guest-side secret directory.
+#   - plane_compose_file (path, required): Managed compose file path.
+#   - plane_env_file (path, required): Managed runtime environment file path.
+#   - plane_internal_port (int, required): Internal Plane listener port.
+#   - plane_internal_base_url (str, required): Internal health-check base URL.
+#   - plane_controller_url (str, required): Host-controller access URL.
+#   - plane_public_base_url (str, required): Public authenticated base URL.
+#   - plane_database_password_local_file (path, required): Controller-local database password artifact.
+#   - plane_api_token_local_file (path, required): Controller-local Plane API token artifact.
+#
+# Inputs (optional):
+#   - plane_healthcheck_path (str, optional, default=/api/instances/): Health endpoint used for readiness verification.
+#   - plane_local_artifact_dir (path, optional, default=.local/plane): Controller-local artifact directory.
+#
+# Outputs:
+#   - Managed Plane compose stack, rendered secrets, bootstrap artifacts, controller auth files, and synchronized ADR summary.
+#
+# Idempotency: Fully idempotent
+#              Secrets are generated once and reused, compose replay is repeatable, and bootstrap/sync steps tolerate retries and existing state.
+#
+# Dependencies:
+#   - ADR 0193: Defines Plane deployment, controller access, and ADR synchronization.
+#   - Requires: plane_postgres has already created the Plane database password artifact.
+#   - Role: plane_runtime — converges the Plane runtime and bootstrap flow.
+#
+# Related ADRs: 0165, 0193
+# Related Runbooks: docs/runbooks/configure-plane.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
+- name: Validate Plane runtime inputs
+  ansible.builtin.assert:
+    that:
+      - plane_site_dir | length > 0
+      - plane_secret_dir | length > 0
+      - plane_compose_file | length > 0
+      - plane_env_file | length > 0
+      - plane_internal_port | int > 0
+      - plane_internal_base_url | length > 0
+      - plane_controller_url | length > 0
+      - plane_public_base_url | length > 0
+      - plane_database_password_local_file | length > 0
+      - plane_frontend_image | length > 0
+      - plane_space_image | length > 0
+      - plane_admin_image | length > 0
+      - plane_live_image | length > 0
+      - plane_backend_image | length > 0
+      - plane_proxy_image | length > 0
+      - plane_api_token_local_file | length > 0
+    fail_msg: >-
+      plane_runtime requires runtime paths, pinned image refs, database auth, and
+      controller-local bootstrap artifact paths.
+
+- name: Ensure the Plane database password exists on the control machine
+  ansible.builtin.stat:
+    path: "{{ plane_database_password_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: plane_database_password_local
+
+- name: Fail if the Plane database password is missing locally
+  ansible.builtin.fail:
+    msg: >-
+      {{ plane_database_password_local_file }} is missing on the control machine.
+      Converge plane_postgres before deploying Plane.
+  when: not plane_database_password_local.stat.exists
+
+- name: Ensure the Plane runtime packages are present
+  ansible.builtin.apt:
+    name:
+      - openssl
+      - python3
+    state: present
+    update_cache: true
+    force_apt_get: true
+
+- name: Ensure the Plane runtime directories exist
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default('root') }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - path: "{{ plane_site_dir }}"
+      mode: "0755"
+    - path: "{{ plane_data_dir }}"
+      mode: "0755"
+    - path: "{{ plane_log_dir }}"
+      mode: "0755"
+    - path: "{{ plane_log_dir }}/api"
+      mode: "0755"
+    - path: "{{ plane_migrator_log_dir }}"
+      mode: "0755"
+    - path: "{{ plane_log_dir }}/worker"
+      mode: "0755"
+    - path: "{{ plane_log_dir }}/beat-worker"
+      mode: "0755"
+    - path: "{{ plane_minio_data_dir }}"
+      mode: "0755"
+    - path: "{{ plane_valkey_data_dir }}"
+      mode: "0755"
+    - path: "{{ plane_rabbitmq_data_dir }}"
+      owner: "999"
+      group: "999"
+      mode: "0750"
+    - path: "{{ plane_secret_dir }}"
+      mode: "0700"
+
+- name: Generate the Plane runtime secrets
+  ansible.builtin.shell: |
+    set -euo pipefail
+    if [ ! -s "{{ item.path }}" ]; then
+      umask 077
+      {{ item.command }} > "{{ item.path }}"
+      echo changed
+    fi
+  args:
+    executable: /bin/bash
+  loop:
+    - path: "{{ plane_secret_key_remote_file }}"
+      command: "openssl rand -hex 32"
+    - path: "{{ plane_live_server_secret_key_remote_file }}"
+      command: "openssl rand -hex 32"
+    - path: "{{ plane_rabbitmq_password_remote_file }}"
+      command: "openssl rand -base64 24 | tr -d '\\n'"
+    - path: "{{ plane_aws_secret_access_key_remote_file }}"
+      command: "openssl rand -base64 24 | tr -d '\\n'"
+    - path: "{{ plane_bootstrap_admin_password_remote_file }}"
+      command: "openssl rand -base64 24 | tr -d '\\n'"
+  register: plane_secret_generation
+  changed_when: "'changed' in plane_secret_generation.stdout"
+  no_log: true
+
+- name: Read the Plane runtime secrets
+  ansible.builtin.slurp:
+    src: "{{ item }}"
+  register: plane_secret_reads
+  loop:
+    - "{{ plane_secret_key_remote_file }}"
+    - "{{ plane_live_server_secret_key_remote_file }}"
+    - "{{ plane_rabbitmq_password_remote_file }}"
+    - "{{ plane_aws_secret_access_key_remote_file }}"
+    - "{{ plane_bootstrap_admin_password_remote_file }}"
+  no_log: true
+
+- name: Record the Plane runtime secrets
+  ansible.builtin.set_fact:
+    plane_secret_key: "{{ plane_secret_reads.results[0].content | b64decode | trim }}"
+    plane_live_server_secret_key: "{{ plane_secret_reads.results[1].content | b64decode | trim }}"
+    plane_rabbitmq_password: "{{ plane_secret_reads.results[2].content | b64decode | trim }}"
+    plane_aws_secret_access_key: "{{ plane_secret_reads.results[3].content | b64decode | trim }}"
+    plane_bootstrap_admin_password: "{{ plane_secret_reads.results[4].content | b64decode | trim }}"
+    plane_database_password: "{{ lookup('ansible.builtin.file', plane_database_password_local_file) | trim }}"
+    plane_database_url: >-
+      postgresql://{{ plane_database_user }}:{{ (lookup('ansible.builtin.file', plane_database_password_local_file) | trim) | urlencode }}@{{ plane_database_host }}:5432/{{ plane_database_name }}
+    plane_runtime_secret_payload:
+      SECRET_KEY: "{{ plane_secret_reads.results[0].content | b64decode | trim }}"
+      LIVE_SERVER_SECRET_KEY: "{{ plane_secret_reads.results[1].content | b64decode | trim }}"
+      RABBITMQ_PASSWORD: "{{ plane_secret_reads.results[2].content | b64decode | trim }}"
+      AWS_SECRET_ACCESS_KEY: "{{ plane_secret_reads.results[3].content | b64decode | trim }}"
+      PLANE_ADMIN_PASSWORD: "{{ plane_secret_reads.results[4].content | b64decode | trim }}"
+      DATABASE_PASSWORD: "{{ lookup('ansible.builtin.file', plane_database_password_local_file) | trim }}"
+      DATABASE_URL: >-
+        postgresql://{{ plane_database_user }}:{{ (lookup('ansible.builtin.file', plane_database_password_local_file) | trim) | urlencode }}@{{ plane_database_host }}:5432/{{ plane_database_name }}
+  no_log: true
+
+- name: Ensure the local Plane artifact directory exists
+  ansible.builtin.file:
+    path: "{{ plane_local_artifact_dir }}"
+    state: directory
+    mode: "0700"
+  delegate_to: localhost
+  become: false
+
+- name: Mirror the Plane bootstrap secrets to the control machine
+  ansible.builtin.copy:
+    dest: "{{ item.dest }}"
+    content: "{{ item.content }}\n"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  loop:
+    - dest: "{{ plane_secret_key_local_file }}"
+      content: "{{ plane_secret_key }}"
+    - dest: "{{ plane_live_server_secret_key_local_file }}"
+      content: "{{ plane_live_server_secret_key }}"
+    - dest: "{{ plane_rabbitmq_password_local_file }}"
+      content: "{{ plane_rabbitmq_password }}"
+    - dest: "{{ plane_aws_secret_access_key_local_file }}"
+      content: "{{ plane_aws_secret_access_key }}"
+    - dest: "{{ plane_bootstrap_admin_password_local_file }}"
+      content: "{{ plane_bootstrap_admin_password }}"
+  no_log: true
+
+- name: Prepare OpenBao agent runtime secret injection for Plane
+  ansible.builtin.include_role:
+    name: lv3.platform.common
+    tasks_from: openbao_compose_env
+  vars:
+    common_openbao_compose_env_service_name: plane
+    common_openbao_compose_env_agent_dir: "{{ plane_openbao_agent_dir }}"
+    common_openbao_compose_env_runtime_dir: "{{ plane_env_file | dirname }}"
+    common_openbao_compose_env_env_file: "{{ plane_env_file }}"
+    common_openbao_compose_env_secret_path: "{{ plane_openbao_secret_path }}"
+    common_openbao_compose_env_secret_payload: "{{ plane_runtime_secret_payload }}"
+    common_openbao_compose_env_policy_name: "{{ plane_openbao_policy_name }}"
+    common_openbao_compose_env_policy_rules: |
+      path "sys/health" {
+        capabilities = ["read"]
+      }
+
+      path "kv/data/{{ plane_openbao_secret_path }}" {
+        capabilities = ["read"]
+      }
+
+      path "kv/metadata/{{ plane_openbao_secret_path }}" {
+        capabilities = ["read", "list"]
+      }
+    common_openbao_compose_env_approle_name: "{{ plane_openbao_approle_name }}"
+    common_openbao_compose_env_agent_config_file: "{{ plane_openbao_agent_dir }}/agent.hcl"
+    common_openbao_compose_env_agent_template_file: "{{ plane_openbao_agent_dir }}/runtime.env.ctmpl"
+    common_openbao_compose_env_agent_template_src: plane.env.ctmpl.j2
+    common_openbao_compose_env_role_id_file: "{{ plane_openbao_agent_dir }}/role_id"
+    common_openbao_compose_env_secret_id_file: "{{ plane_openbao_agent_dir }}/secret_id"
+    common_openbao_compose_env_image: "{{ plane_openbao_agent_image }}"
+    common_openbao_compose_env_legacy_env_files:
+      - "{{ plane_legacy_env_file }}"
+  no_log: true
+
+- name: Render the Plane environment file
+  ansible.builtin.template:
+    src: plane.env.j2
+    dest: "{{ plane_env_file }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Render the Plane compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ plane_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Pull the Plane images
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ plane_compose_file }}"
+      - pull
+  args:
+    chdir: "{{ plane_site_dir }}"
+  register: plane_pull
+  retries: 3
+  delay: 15
+  until: plane_pull.rc == 0
+  changed_when: >-
+    'Pulling' in plane_pull.stdout
+    or 'Downloaded newer image' in plane_pull.stdout
+    or 'Pull complete' in plane_pull.stdout
+
+- name: Start the Plane stack
+  ansible.builtin.command:
+    argv:
+      - docker
+      - compose
+      - --file
+      - "{{ plane_compose_file }}"
+      - up
+      - -d
+      - --remove-orphans
+  args:
+    chdir: "{{ plane_site_dir }}"
+  register: plane_up
+  changed_when: >-
+    'Creating' in plane_up.stdout
+    or 'Recreating' in plane_up.stdout
+    or 'Starting' in plane_up.stdout
+
+- name: Wait for Plane to listen locally
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ plane_internal_port }}"
+    delay: 0
+    timeout: 300
+
+- name: Render the Plane bootstrap specification locally
+  ansible.builtin.template:
+    src: bootstrap-spec.json.j2
+    dest: "{{ plane_bootstrap_spec_local_file }}"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  no_log: true
+
+- name: Wait for the controller-facing Plane API to answer
+  ansible.builtin.uri:
+    url: "{{ plane_controller_url }}{{ plane_healthcheck_path }}"
+    method: GET
+    return_content: true
+    status_code: 200
+  delegate_to: localhost
+  become: false
+  register: plane_controller_ping
+  retries: 60
+  delay: 5
+  until:
+    - plane_controller_ping.status == 200
+  changed_when: false
+
+- name: Bootstrap the Plane workspace and controller auth artifacts
+  ansible.builtin.command:
+    argv:
+      - uv
+      - run
+      - --with
+      - pyyaml
+      - python
+      - "{{ playbook_dir }}/../scripts/plane_bootstrap.py"
+      - --base-url
+      - "{{ plane_controller_url }}"
+      - --admin-email
+      - "{{ plane_bootstrap_admin_email }}"
+      - --password-file
+      - "{{ plane_bootstrap_admin_password_local_file }}"
+      - --spec-file
+      - "{{ plane_bootstrap_spec_local_file }}"
+      - --auth-json-output
+      - "{{ plane_admin_auth_local_file }}"
+      - --api-token-output
+      - "{{ plane_api_token_local_file }}"
+      - --existing-token-file
+      - "{{ plane_api_token_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: plane_bootstrap
+  changed_when: false
+  no_log: true
+
+- name: Synchronize ADRs into Plane
+  ansible.builtin.command:
+    argv:
+      - uv
+      - run
+      - --with
+      - pyyaml
+      - python
+      - "{{ playbook_dir }}/../scripts/sync_adrs_to_plane.py"
+      - --auth-file
+      - "{{ plane_admin_auth_local_file }}"
+      - --adr-dir
+      - "{{ plane_sync_adr_dir }}"
+      - --summary-output
+      - "{{ plane_sync_summary_local_file }}"
+  delegate_to: localhost
+  become: false
+  register: plane_sync
+  retries: 4
+  delay: 30
+  until: plane_sync.rc == 0
+  changed_when: false
+
+- name: Verify the Plane runtime
+  ansible.builtin.import_tasks: verify.yml

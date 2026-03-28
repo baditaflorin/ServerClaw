@@ -18,8 +18,8 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.template = TEMPLATE_PATH.read_text()
         self.static_template = STATIC_TEMPLATE_PATH.read_text()
 
-    def test_defaults_enable_pinned_dns_hetzner_acme(self) -> None:
-        self.assertEqual(self.defaults["public_edge_acme_challenge_method"], "dns-hetzner")
+    def test_defaults_use_webroot_acme_with_pinned_hetzner_support(self) -> None:
+        self.assertEqual(self.defaults["public_edge_acme_challenge_method"], "webroot")
         self.assertEqual(self.defaults["public_edge_control_plane_host"], "{{ groups['proxmox_hosts'][0] }}")
         self.assertEqual(
             self.defaults["proxmox_guests"],
@@ -68,8 +68,25 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertNotIn("ops.lv3.org", extra_hostnames)
         self.assertEqual(
             sorted(protected_sites),
-            ["changelog.lv3.org", "docs.lv3.org", "home.lv3.org", "langfuse.lv3.org", "logs.lv3.org", "n8n.lv3.org", "ops.lv3.org"],
+            [
+                "agents.lv3.org",
+                "changelog.lv3.org",
+                "coolify.lv3.org",
+                "docs.lv3.org",
+                "draw.lv3.org",
+                "home.lv3.org",
+                "langfuse.lv3.org",
+                "logs.lv3.org",
+                "n8n.lv3.org",
+                "ops.lv3.org",
+                "realtime.lv3.org",
+                "tasks.lv3.org",
+            ],
         )
+        self.assertEqual(protected_sites["agents.lv3.org"]["unauthenticated_paths"], ["/healthz"])
+        self.assertEqual(protected_sites["agents.lv3.org"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
+        self.assertNotIn("unauthenticated_paths", protected_sites["coolify.lv3.org"])
+        self.assertNotIn("unauthenticated_paths", protected_sites["draw.lv3.org"])
         self.assertNotIn("unauthenticated_paths", protected_sites["langfuse.lv3.org"])
         self.assertEqual(protected_sites["n8n.lv3.org"]["unauthenticated_paths"], ["/healthz"])
         self.assertEqual(
@@ -81,6 +98,8 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertNotIn("unauthenticated_paths", protected_sites["changelog.lv3.org"])
         self.assertNotIn("unauthenticated_paths", protected_sites["logs.lv3.org"])
         self.assertNotIn("unauthenticated_paths", protected_sites["home.lv3.org"])
+        self.assertEqual(protected_sites["tasks.lv3.org"]["auth_proxy_upstream"], "http://127.0.0.1:4180")
+        self.assertNotIn("unauthenticated_paths", protected_sites["realtime.lv3.org"])
 
     def test_tasks_include_dns_hetzner_plugin_and_credentials_flow(self) -> None:
         task_names = {task["name"] for task in self.tasks}
@@ -135,13 +154,21 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertEqual(security_defaults["cross_origin_resource_policy"], "same-origin")
         self.assertEqual(security_defaults["x_content_type_options"], "nosniff")
         self.assertIn("frame-ancestors 'none'", security_defaults["content_security_policy"])
+        self.assertIn("coolify.lv3.org", security_overrides)
+        self.assertIn("draw.lv3.org", security_overrides)
         self.assertIn("grafana.lv3.org", security_overrides)
         self.assertIn("logs.lv3.org", security_overrides)
+        self.assertIn("tasks.lv3.org", security_overrides)
+        self.assertIn("realtime.lv3.org", security_overrides)
+        self.assertIn("'unsafe-eval'", security_overrides["coolify.lv3.org"]["content_security_policy"])
+        self.assertIn("wss://draw.lv3.org", security_overrides["draw.lv3.org"]["content_security_policy"])
         self.assertIn("'unsafe-eval'", security_overrides["grafana.lv3.org"]["content_security_policy"])
         self.assertIn("wss://n8n.lv3.org", security_overrides["n8n.lv3.org"]["content_security_policy"])
         self.assertIn("https://fonts.googleapis.com", security_overrides["docs.lv3.org"]["content_security_policy"])
         self.assertIn("https://cdn.jsdelivr.net", security_overrides["logs.lv3.org"]["content_security_policy"])
         self.assertIn("https://unpkg.com", security_overrides["ops.lv3.org"]["content_security_policy"])
+        self.assertIn("wss://tasks.lv3.org", security_overrides["tasks.lv3.org"]["content_security_policy"])
+        self.assertIn("wss://realtime.lv3.org", security_overrides["realtime.lv3.org"]["content_security_policy"])
 
     def test_template_supports_root_proxy_path_override(self) -> None:
         self.assertIn("site.root_proxy_path is defined", self.template)
@@ -162,17 +189,22 @@ class NginxEdgePublicationRoleTests(unittest.TestCase):
         self.assertIn("site.proxy_hide_headers | default([])", self.template)
         self.assertIn("site.blocked_exact_paths | default([])", self.template)
         self.assertIn("site.server_sent_events | default(false)", self.template)
+        self.assertIn("site.prefix_proxy_routes | default([])", self.template)
         self.assertIn("proxy_hide_header {{ header_name }};", self.template)
         self.assertIn("protected_site.unauthenticated_prefix_paths | default([])", self.template)
         self.assertIn("location ^~ {{ path }} {", self.template)
+        self.assertIn("location ^~ {{ route.path }} {", self.template)
         self.assertIn("proxy_buffering off;", self.template)
 
     def test_template_renders_security_headers_from_default_and_override_maps(self) -> None:
+        self.assertIn("site.security_headers_enabled | default(true)", self.template)
         self.assertIn("public_edge_security_headers_default | combine(", self.template)
         self.assertIn('add_header Strict-Transport-Security', self.template)
         self.assertIn('add_header Cross-Origin-Resource-Policy', self.template)
         self.assertIn('add_header Content-Security-Policy', self.template)
         self.assertIn('add_header Permissions-Policy', self.template)
+        self.assertIn("site.preserve_upstream_security_headers | default(false)", self.template)
+        self.assertIn("site.crawl_policy_enabled | default(true)", self.template)
         self.assertIn('proxy_hide_header Cross-Origin-Resource-Policy;', self.template)
         self.assertIn('proxy_hide_header Content-Security-Policy;', self.template)
 

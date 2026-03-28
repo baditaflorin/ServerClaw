@@ -1,0 +1,28 @@
+---
+# Playbook: services/excalidraw.yml
+# Purpose: Provide the canonical service-scoped entrypoint for the ADR 0202 Excalidraw live apply.
+# Use case: Used by shared live-apply and service-scoped automation paths that target only Excalidraw.
+#
+# Inputs (required):
+#   - None.
+#
+# Inputs (optional):
+#   - None.
+#
+# Outputs:
+#   - Imports the top-level Excalidraw playbook without redefining service scope.
+#
+# Idempotency: Fully idempotent
+#              This file only re-exports the canonical playbook entrypoint.
+#
+# Dependencies:
+#   - ADR 0202: Owns the Excalidraw runtime and generated diagram workflow.
+#   - Requires: playbooks/excalidraw.yml.
+#   - Role: import_playbook — delegates execution to the canonical playbook.
+#
+# Related ADRs: 0165
+# Related Runbooks: docs/runbooks/configure-excalidraw.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-27
+- import_playbook: ../excalidraw.yml

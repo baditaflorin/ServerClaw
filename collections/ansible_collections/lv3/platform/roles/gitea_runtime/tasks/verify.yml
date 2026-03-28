@@ -49,17 +49,9 @@
   become: false
   register: gitea_runner_token_local
 
-- name: Verify the Renovate token was mirrored locally
-  ansible.builtin.stat:
-    path: "{{ gitea_renovate_token_local_file }}"
-  delegate_to: localhost
-  become: false
-  register: gitea_renovate_token_local
-
 - name: Assert the repo-managed Gitea bootstrap artifacts exist
   ansible.builtin.assert:
     that:
       - gitea_admin_token_local.stat.exists
       - gitea_runner_token_local.stat.exists
-      - gitea_renovate_token_local.stat.exists
-    fail_msg: "Gitea started, but the repo-managed admin, runner, or Renovate token artifacts were not mirrored locally."
+    fail_msg: "Gitea started, but the repo-managed admin or runner token artifacts were not mirrored locally."

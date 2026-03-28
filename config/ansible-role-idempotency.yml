@@ -28,6 +28,9 @@ roles:
   common_handlers:
     policy: exempt
     reason: Shared handler include library; not applied as a standalone role.
+  coolify_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   control_plane_recovery:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
@@ -52,10 +55,19 @@ roles:
   docker_runtime_observability:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  dify_postgres:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  dify_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   dozzle_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   etcd_cluster_member:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  excalidraw_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   gitea_postgres:
@@ -130,6 +142,9 @@ roles:
   n8n_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  netdata_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   netbox_postgres:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
@@ -160,7 +175,19 @@ roles:
   ollama_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  outline_postgres:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  outline_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   ops_portal_runtime:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  plane_postgres:
+    policy: tracked
+    reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
+  plane_runtime:
     policy: tracked
     reason: Awaiting a dedicated idempotency scenario and CI-safe fixture.
   portainer_runtime:

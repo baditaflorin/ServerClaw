@@ -1,4 +1,31 @@
 ---
+# Purpose: Declare the shared default inputs for publishing private and public services through the NGINX edge VM.
+# Use case: Used whenever the nginx_edge_publication role renders edge config, certificate domains, and hardened response headers.
+#
+# Inputs (required):
+#   - hostvars / inventory facts (generated, required): Platform topology, guest inventory, and port assignments.
+#
+# Inputs (optional):
+#   - public_edge_sync_generated_static_dirs (bool, optional, default=true): Whether generated static directories are synced on a run.
+#   - public_edge_dns_hetzner_propagation_seconds (int, optional, default=30): DNS wait used for certbot DNS-01 issuance.
+#
+# Outputs:
+#   - Shared defaults consumed by the edge publication role for packages, directories, certificates, proxy sites, and security headers.
+#
+# Idempotency: Fully idempotent
+#              This file only declares role defaults.
+#
+# Dependencies:
+#   - ADR 0133: Keeps operator-facing publications authenticated by default.
+#   - ADR 0136: Defines the hardened edge security-header baseline.
+#   - Requires: inventory topology and host facts to be current.
+#   - Role: nginx_edge_publication — publishes repo-managed sites and certificate domains.
+#
+# Related ADRs: 0133, 0136, 0165
+# Related Runbooks: docs/runbooks/configure-edge-publication.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-27
 public_edge_control_plane_host: "{{ groups['proxmox_hosts'][0] }}"
 proxmox_guests: "{{ hostvars[public_edge_control_plane_host].proxmox_guests }}"
 management_tailscale_ipv4: "{{ hostvars[public_edge_control_plane_host].management_tailscale_ipv4 }}"
@@ -7,7 +34,7 @@ postgres_ha: "{{ hostvars[public_edge_control_plane_host].postgres_ha }}"
 public_edge_service_topology: "{{ platform_service_topology }}"
 public_edge_certbot_email: baditaflorin@gmail.com
 public_edge_cert_name: lv3-edge
-public_edge_acme_challenge_method: dns-hetzner
+public_edge_acme_challenge_method: webroot
 public_edge_update_apt_cache: false
 public_edge_sync_generated_static_dirs: true
 public_edge_static_root: /var/www/lv3-edge
@@ -15,7 +42,7 @@ public_edge_generated_static_root: /var/www/lv3-generated
 public_edge_acme_root: /var/www/lv3-edge-acme
 public_edge_dns_hetzner_plugin_version: 3.0.0
 public_edge_dns_hetzner_credentials_file: /etc/letsencrypt/hetzner.ini
-public_edge_dns_hetzner_propagation_seconds: 30
+public_edge_dns_hetzner_propagation_seconds: 120
 public_edge_dns_hetzner_virtualenv: /opt/certbot-dns-hetzner
 public_edge_certbot_plugin_path: >-
   {{ public_edge_dns_hetzner_virtualenv }}/lib/python{{ ansible_python.version.major }}.{{ ansible_python.version.minor }}/site-packages
@@ -49,12 +76,26 @@ public_edge_security_headers_overrides:
     content_security_policy: >-
       default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none';
       object-src 'none'
+  coolify.lv3.org:
+    content_security_policy: >-
+      default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self'
+      'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:;
+      connect-src 'self' https://coolify.lv3.org wss://coolify.lv3.org;
+      worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
   docs.lv3.org:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
       object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'
       https://fonts.googleapis.com; img-src 'self' data:; font-src 'self' data:
       https://fonts.gstatic.com; connect-src 'self'; manifest-src 'self'
+  draw.lv3.org:
+    content_security_policy: >-
+      default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self'
+      'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:;
+      connect-src 'self' https://draw.lv3.org wss://draw.lv3.org; worker-src 'self' blob:;
+      child-src 'self' blob:; manifest-src 'self'
   grafana.lv3.org:
     content_security_policy: >-
       default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
@@ -69,6 +110,28 @@ public_edge_security_headers_overrides:
       'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:;
       connect-src 'self' https://n8n.lv3.org wss://n8n.lv3.org;
       worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
+  agents.lv3.org:
+    content_security_policy: >-
+      default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self'
+      'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:;
+      connect-src 'self' https://agents.lv3.org wss://agents.lv3.org;
+      worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
+  tasks.lv3.org:
+    content_security_policy: >-
+      default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self'
+      'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:;
+      connect-src 'self' https://tasks.lv3.org wss://tasks.lv3.org;
+      worker-src 'self' blob:; child-src 'self' blob:; manifest-src 'self'
+  realtime.lv3.org:
+    content_security_policy: >-
+      default-src 'self' data: blob:; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+      object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:;
+      style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:;
+      font-src 'self' data:; connect-src 'self' https://realtime.lv3.org ws://realtime.lv3.org
+      wss://realtime.lv3.org; worker-src 'self' blob:; child-src 'self' blob:;
+      manifest-src 'self'
   logs.lv3.org:
     content_security_policy: >-
       default-src 'self' 'wasm-unsafe-eval' blob: https://cdn.jsdelivr.net https://*.duckdb.org;
@@ -111,9 +174,19 @@ public_edge_extra_sites:
 public_edge_authenticated_sites:
   changelog.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
+  coolify.lv3.org:
+    auth_proxy_upstream: http://127.0.0.1:4180
   docs.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
+  draw.lv3.org:
+    auth_proxy_upstream: http://127.0.0.1:4180
+  agents.lv3.org:
+    auth_proxy_upstream: http://127.0.0.1:4180
+    unauthenticated_paths:
+      - /healthz
   langfuse.lv3.org:
+    auth_proxy_upstream: http://127.0.0.1:4180
+  tasks.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
   n8n.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
@@ -124,6 +197,8 @@ public_edge_authenticated_sites:
       - /webhook-test/
       - /webhook-waiting/
   logs.lv3.org:
+    auth_proxy_upstream: http://127.0.0.1:4180
+  realtime.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180
   home.lv3.org:
     auth_proxy_upstream: http://127.0.0.1:4180

@@ -14,17 +14,6 @@
       "healthcheck_path": "/healthcheck"
     },
     {
-      "id": "grafana",
-      "name": "Grafana",
-      "upstream": "http://10.10.10.40:3000",
-      "gateway_prefix": "/v1/grafana",
-      "auth": "keycloak_jwt",
-      "required_role": "platform-operator",
-      "strip_prefix": true,
-      "timeout_seconds": 30,
-      "healthcheck_path": "/api/health"
-    },
-    {
       "id": "gitea",
       "name": "Gitea",
       "upstream": "http://10.10.10.20:3003",
@@ -34,6 +23,17 @@
       "strip_prefix": true,
       "timeout_seconds": 30,
       "healthcheck_path": "/api/healthz"
+    },
+    {
+      "id": "grafana",
+      "name": "Grafana",
+      "upstream": "http://10.10.10.40:3000",
+      "gateway_prefix": "/v1/grafana",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/api/health"
     },
     {
       "id": "keycloak",
@@ -102,6 +102,17 @@
       "healthcheck_path": "/health"
     },
     {
+      "id": "plane",
+      "name": "Plane",
+      "upstream": "http://10.10.10.20:8093",
+      "gateway_prefix": "/v1/plane",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/"
+    },
+    {
       "id": "openbao",
       "name": "OpenBao",
       "upstream": "https://10.10.10.20:8200",
@@ -122,6 +133,17 @@
       "strip_prefix": true,
       "timeout_seconds": 30,
       "healthcheck_path": "/health"
+    },
+    {
+      "id": "outline",
+      "name": "Outline",
+      "upstream": "http://10.10.10.20:3006",
+      "gateway_prefix": "/v1/outline",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/_health"
     },
     {
       "id": "platform_context_api",
@@ -147,15 +169,26 @@
       "healthcheck_path": "/api/status"
     },
     {
-      "id": "vaultwarden",
-      "name": "Vaultwarden",
-      "upstream": "https://10.10.10.20:8222",
-      "gateway_prefix": "/v1/vaultwarden",
+      "id": "semaphore",
+      "name": "Semaphore",
+      "upstream": "http://10.10.10.20:3004",
+      "gateway_prefix": "/v1/semaphore",
       "auth": "keycloak_jwt",
       "required_role": "platform-operator",
       "strip_prefix": true,
       "timeout_seconds": 30,
-      "healthcheck_path": "/alive"
+      "healthcheck_path": "/api/ping"
+    },
+    {
+      "id": "realtime",
+      "name": "Realtime Metrics",
+      "upstream": "http://10.10.10.40:19999",
+      "gateway_prefix": "/v1/realtime",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-read",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/api/v1/info"
     },
     {
       "id": "uptime_kuma",
@@ -169,6 +202,17 @@
       "healthcheck_path": "/api/health"
     },
     {
+      "id": "vaultwarden",
+      "name": "Vaultwarden",
+      "upstream": "https://10.10.10.20:8222",
+      "gateway_prefix": "/v1/vaultwarden",
+      "auth": "keycloak_jwt",
+      "required_role": "platform-operator",
+      "strip_prefix": true,
+      "timeout_seconds": 30,
+      "healthcheck_path": "/alive"
+    },
+    {
       "id": "windmill",
       "name": "Windmill",
       "upstream": "http://10.10.10.20:8000",
@@ -178,17 +222,6 @@
       "strip_prefix": true,
       "timeout_seconds": 30,
       "healthcheck_path": "/api/version"
-    },
-    {
-      "id": "semaphore",
-      "name": "Semaphore",
-      "upstream": "http://10.10.10.20:3004",
-      "gateway_prefix": "/v1/semaphore",
-      "auth": "keycloak_jwt",
-      "required_role": "platform-operator",
-      "strip_prefix": true,
-      "timeout_seconds": 30,
-      "healthcheck_path": "/api/ping"
     }
   ]
 }

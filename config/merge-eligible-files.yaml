@@ -38,6 +38,18 @@ merge_eligible:
       - delete
     drop_key_field_on_write: true
 
+  - file: config/correction-loops.json
+    format: json
+    collection_path:
+      - loops
+    collection_type: list
+    key_field: id
+    conflict_resolution: reject_duplicate_key
+    allowed_operations:
+      - append
+      - update
+      - delete
+
   - file: config/agent-policies.yaml
     format: yaml
     collection_path: []

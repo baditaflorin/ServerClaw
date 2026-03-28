@@ -26,6 +26,19 @@
     ]
   },
   {
+    "name": "Dify Public",
+    "type": "http",
+    "url": "https://agents.lv3.org/healthz",
+    "description": "Dify publication through the shared NGINX edge and oauth2-proxy gate.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
     "name": "Gitea Private",
     "type": "http",
     "url": "http://10.10.10.20:3003/api/healthz",
@@ -65,6 +78,32 @@
     ]
   },
   {
+    "name": "Excalidraw Public",
+    "type": "http",
+    "url": "https://draw.lv3.org",
+    "description": "Private Excalidraw publication through the authenticated shared NGINX edge.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 5,
+    "accepted_statuscodes": [
+      "200-399"
+    ]
+  },
+  {
+    "name": "Realtime Metrics Private",
+    "type": "http",
+    "url": "http://10.10.10.40:19999/api/v1/info",
+    "description": "Private Netdata parent healthcheck on monitoring-lv3.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
     "name": "Langfuse Public Health",
     "type": "http",
     "url": "https://langfuse.lv3.org/api/public/health",
@@ -95,6 +134,19 @@
     "type": "http",
     "url": "https://ops.lv3.org/health",
     "description": "Interactive ops portal health endpoint published through the NGINX edge VM.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 5,
+    "accepted_statuscodes": [
+      "200-299"
+    ]
+  },
+  {
+    "name": "Outline Public Health",
+    "type": "http",
+    "url": "https://wiki.lv3.org/_health",
+    "description": "Public Outline health endpoint published through the shared NGINX edge VM.",
     "interval": 60,
     "retryInterval": 60,
     "maxretries": 0,
@@ -324,6 +376,19 @@
     "maxredirects": 10,
     "accepted_statuscodes": [
       "200-299"
+    ]
+  },
+  {
+    "name": "Plane Public",
+    "type": "http",
+    "url": "https://tasks.lv3.org/",
+    "description": "Public Plane board published through the shared NGINX edge and authenticated by the repo-managed oauth2-proxy flow.",
+    "interval": 60,
+    "retryInterval": 60,
+    "maxretries": 0,
+    "maxredirects": 10,
+    "accepted_statuscodes": [
+      "200-399"
     ]
   }
 ]

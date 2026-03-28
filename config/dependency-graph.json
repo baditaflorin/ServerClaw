@@ -57,6 +57,33 @@
       "adr": "0023"
     },
     {
+      "id": "coolify",
+      "service": "coolify",
+      "name": "Coolify",
+      "vm": "coolify-lv3",
+      "tier": 1,
+      "category": "infrastructure",
+      "adr": "0194"
+    },
+    {
+      "id": "coolify_apps",
+      "service": "coolify_apps",
+      "name": "Coolify Apps Ingress",
+      "vm": "coolify-lv3",
+      "tier": 2,
+      "category": "infrastructure",
+      "adr": "0194"
+    },
+    {
+      "id": "dify",
+      "service": "dify",
+      "name": "Dify",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "automation",
+      "adr": "0197"
+    },
+    {
       "id": "dozzle",
       "service": "dozzle",
       "name": "Dozzle",
@@ -73,6 +100,15 @@
       "tier": 2,
       "category": "access",
       "adr": "0094"
+    },
+    {
+      "id": "excalidraw",
+      "service": "excalidraw",
+      "name": "Excalidraw",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "access",
+      "adr": "0202"
     },
     {
       "id": "gitea",
@@ -109,6 +145,15 @@
       "tier": 3,
       "category": "access",
       "adr": "0152"
+    },
+    {
+      "id": "realtime",
+      "service": "realtime",
+      "name": "Netdata Realtime Metrics",
+      "vm": "monitoring-lv3",
+      "tier": 1,
+      "category": "observability",
+      "adr": "0196"
     },
     {
       "id": "langfuse",
@@ -228,6 +273,15 @@
       "adr": "0074"
     },
     {
+      "id": "outline",
+      "service": "outline",
+      "name": "Outline",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "access",
+      "adr": "0199"
+    },
+    {
       "id": "platform_context_api",
       "service": "platform_context_api",
       "name": "Platform Context API",
@@ -325,6 +379,15 @@
       "tier": 2,
       "category": "automation",
       "adr": "0149"
+    },
+    {
+      "id": "plane",
+      "service": "plane",
+      "name": "Plane",
+      "vm": "docker-runtime-lv3",
+      "tier": 2,
+      "category": "automation",
+      "adr": "0193"
     }
   ],
   "edges": [
@@ -363,6 +426,90 @@
       "to": "nginx_edge",
       "type": "hard",
       "description": "The generated developer portal is published as static content on nginx-lv3."
+    },
+    {
+      "from": "excalidraw",
+      "to": "docker_runtime",
+      "type": "hard",
+      "description": "The Excalidraw frontend and collaboration room are hosted on docker-runtime-lv3."
+    },
+    {
+      "from": "excalidraw",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Operator access to draw.lv3.org depends on the shared Keycloak-backed oauth2-proxy edge flow, while the private runtime can still be verified locally."
+    },
+    {
+      "from": "excalidraw",
+      "to": "nginx_edge",
+      "type": "hard",
+      "description": "The private diagram surface is published at draw.lv3.org through the shared NGINX edge, including the routed /socket.io/ collaboration path."
+    },
+    {
+      "from": "coolify",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Authenticated browser access to coolify.lv3.org depends on the shared Keycloak-backed edge auth path, while the private controller remains reachable over the management network."
+    },
+    {
+      "from": "coolify",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public dashboard access to coolify.lv3.org depends on the shared NGINX edge publication, while the private controller proxy remains reachable directly."
+    },
+    {
+      "from": "coolify_apps",
+      "to": "coolify",
+      "type": "hard",
+      "description": "The shared applications ingress is configured and served by the Coolify runtime and its managed proxy."
+    },
+    {
+      "from": "coolify_apps",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public access to apps.lv3.org depends on the shared NGINX edge publication while the guest-local ingress remains reachable for direct verification."
+    },
+    {
+      "from": "dify",
+      "to": "postgres",
+      "type": "hard",
+      "description": "Dify stores application state, accounts, knowledge metadata, and workflow definitions in Postgres."
+    },
+    {
+      "from": "dify",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Dify loads its mirrored database, admin, and tool-bridge secrets through the OpenBao agent before startup."
+    },
+    {
+      "from": "dify",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public reachability for agents.lv3.org depends on the shared NGINX edge publication path."
+    },
+    {
+      "from": "dify",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Operator browser access to Dify is gated behind the shared oauth2-proxy and Keycloak authentication flow at the edge."
+    },
+    {
+      "from": "dify",
+      "to": "api_gateway",
+      "type": "soft",
+      "description": "Dify uses the governed API gateway route to call named LV3 tools, but the canvas remains reachable without tool invocation."
+    },
+    {
+      "from": "dify",
+      "to": "langfuse",
+      "type": "soft",
+      "description": "Dify can publish workflow traces into Langfuse, but authoring and bootstrap access remain available without trace export."
+    },
+    {
+      "from": "dify",
+      "to": "ollama",
+      "type": "soft",
+      "description": "Dify can use the private Ollama runtime for local model inference, but the canvas can still operate with external model providers."
     },
     {
       "from": "dozzle",
@@ -447,6 +594,18 @@
       "to": "nginx_edge",
       "type": "hard",
       "description": "The unified dashboard is published at home.lv3.org through the shared NGINX edge and is not exposed directly on the public internet."
+    },
+    {
+      "from": "realtime",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Public operator access to realtime.lv3.org depends on the shared Keycloak-backed edge auth path, but the private Netdata parent remains reachable on monitoring-lv3."
+    },
+    {
+      "from": "realtime",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public operator access to realtime.lv3.org depends on the shared NGINX edge publication while the private Netdata parent remains reachable on the guest network."
     },
     {
       "from": "langfuse",
@@ -575,6 +734,30 @@
       "description": "The generated portal is published as static content on nginx-lv3."
     },
     {
+      "from": "outline",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Outline delegates routine browser sign-in to the shared Keycloak OIDC broker."
+    },
+    {
+      "from": "outline",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public access to wiki.lv3.org depends on the shared NGINX edge publication path."
+    },
+    {
+      "from": "outline",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Outline starts from OpenBao-rendered runtime secrets mirrored into its compose environment."
+    },
+    {
+      "from": "outline",
+      "to": "postgres",
+      "type": "hard",
+      "description": "Outline stores workspace, user, and document metadata in Postgres."
+    },
+    {
       "from": "platform_context_api",
       "to": "openbao",
       "type": "startup_only",
@@ -639,6 +822,30 @@
       "to": "openbao",
       "type": "startup_only",
       "description": "Semaphore loads database and bootstrap secrets from the OpenBao agent before the container starts."
+    },
+    {
+      "from": "plane",
+      "to": "postgres",
+      "type": "hard",
+      "description": "Plane persists workspaces, projects, users, and issue metadata in Postgres."
+    },
+    {
+      "from": "plane",
+      "to": "openbao",
+      "type": "startup_only",
+      "description": "Plane consumes mirrored runtime secrets from the OpenBao sidecar before the containers start."
+    },
+    {
+      "from": "plane",
+      "to": "keycloak",
+      "type": "soft",
+      "description": "Authenticated browser access to tasks.lv3.org depends on the shared Keycloak-backed edge auth path, while the private controller path remains available for governed automation."
+    },
+    {
+      "from": "plane",
+      "to": "nginx_edge",
+      "type": "soft",
+      "description": "Public access to tasks.lv3.org depends on the shared NGINX edge publication path."
     }
   ]
 }

@@ -1,3 +1,14 @@
+---
+sensitivity: INTERNAL
+portal_display: full
+tags:
+  - architecture
+  - dependency-graph
+---
+
+!!! note "Sensitivity: INTERNAL"
+    This page is intended for authenticated operators and internal collaborators.
+
 # Service Dependency Graph
 
 Generated from `config/dependency-graph.json`.
@@ -6,8 +17,8 @@ Generated from `config/dependency-graph.json`.
 
 | Tier | Services |
 | --- | --- |
-| `1` | Alertmanager, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Headscale, Mail Platform, NGINX Edge, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
-| `2` | Changelog Portal, Developer Portal, Gitea, Keycloak, Langfuse, Mattermost, NetBox, Open WebUI, Public Status Page, Semaphore, Vaultwarden, Windmill, n8n |
+| `1` | Alertmanager, Coolify, Docker Build VM, Docker Runtime VM, Dozzle, Grafana, Headscale, Mail Platform, NGINX Edge, Netdata Realtime Metrics, Ollama, OpenBao, Platform Context API, Portainer, Postgres, Proxmox Backup Server, Proxmox UI, SearXNG, Uptime Kuma, ntfy, ntopng, step-ca |
+| `2` | Changelog Portal, Coolify Apps Ingress, Developer Portal, Dify, Excalidraw, Gitea, Keycloak, Langfuse, Mattermost, NetBox, Open WebUI, Outline, Plane, Public Status Page, Semaphore, Vaultwarden, Windmill, n8n |
 | `3` | Homepage, Platform API Gateway |
 | `4` | Ops Portal |
 
@@ -16,12 +27,14 @@ Generated from `config/dependency-graph.json`.
 ```mermaid
 graph TD
     alertmanager["Alertmanager\nTier 1"]
+    coolify["Coolify\nTier 1"]
     docker_build["Docker Build VM\nTier 1"]
     docker_runtime["Docker Runtime VM\nTier 1"]
     dozzle["Dozzle\nTier 1"]
     grafana["Grafana\nTier 1"]
     headscale["Headscale\nTier 1"]
     mail_platform["Mail Platform\nTier 1"]
+    realtime["Netdata Realtime Metrics\nTier 1"]
     nginx_edge["NGINX Edge\nTier 1"]
     ntfy["ntfy\nTier 1"]
     ntopng["ntopng\nTier 1"]
@@ -36,7 +49,10 @@ graph TD
     step_ca["step-ca\nTier 1"]
     uptime_kuma["Uptime Kuma\nTier 1"]
     changelog_portal["Changelog Portal\nTier 2"]
+    coolify_apps["Coolify Apps Ingress\nTier 2"]
     docs_portal["Developer Portal\nTier 2"]
+    dify["Dify\nTier 2"]
+    excalidraw["Excalidraw\nTier 2"]
     gitea["Gitea\nTier 2"]
     keycloak["Keycloak\nTier 2"]
     langfuse["Langfuse\nTier 2"]
@@ -44,6 +60,8 @@ graph TD
     n8n["n8n\nTier 2"]
     netbox["NetBox\nTier 2"]
     open_webui["Open WebUI\nTier 2"]
+    outline["Outline\nTier 2"]
+    plane["Plane\nTier 2"]
     status_page["Public Status Page\nTier 2"]
     semaphore["Semaphore\nTier 2"]
     vaultwarden["Vaultwarden\nTier 2"]
@@ -56,9 +74,23 @@ graph TD
     api_gateway -->|hard| keycloak
     api_gateway -->|soft| nginx_edge
     changelog_portal -->|hard| nginx_edge
+    coolify -->|soft| keycloak
+    coolify -->|soft| nginx_edge
+    coolify_apps -->|hard| coolify
+    coolify_apps -->|soft| nginx_edge
+    dify -->|soft| api_gateway
+    dify -->|soft| keycloak
+    dify -->|soft| langfuse
+    dify -->|soft| nginx_edge
+    dify -->|soft| ollama
+    dify -->|startup_only| openbao
+    dify -->|hard| postgres
     docs_portal -->|hard| nginx_edge
     dozzle -->|soft| keycloak
     dozzle -->|soft| nginx_edge
+    excalidraw -->|hard| docker_runtime
+    excalidraw -->|soft| keycloak
+    excalidraw -->|hard| nginx_edge
     gitea -->|soft| docker_build
     gitea -->|soft| keycloak
     gitea -->|startup_only| openbao
@@ -93,8 +125,18 @@ graph TD
     ops_portal -->|hard| api_gateway
     ops_portal -->|hard| keycloak
     ops_portal -->|hard| nginx_edge
+    outline -->|soft| keycloak
+    outline -->|soft| nginx_edge
+    outline -->|startup_only| openbao
+    outline -->|hard| postgres
+    plane -->|soft| keycloak
+    plane -->|soft| nginx_edge
+    plane -->|startup_only| openbao
+    plane -->|hard| postgres
     platform_context_api -->|startup_only| openbao
     platform_context_api -->|reads_from| step_ca
+    realtime -->|soft| keycloak
+    realtime -->|soft| nginx_edge
     semaphore -->|startup_only| openbao
     semaphore -->|hard| postgres
     status_page -->|hard| nginx_edge

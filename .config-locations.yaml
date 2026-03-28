@@ -6,11 +6,11 @@
 #          modifying any configuration.
 # Usage:   Find the section matching your concern; read 'use_for' and
 #          'update_when' before touching any file.
-# Updated: 2026-03-26
+# Updated: 2026-03-28
 # ============================================================================
 
 schema_version: 1
-last_updated: "2026-03-26"
+last_updated: "2026-03-28"
 
 agent_quick_reference:
   find_config: "Check this file → find your concern section → read 'use_for'"
@@ -72,6 +72,52 @@ infrastructure_state:
     use_for: Machine-readable current platform state for tooling
     update_when: Generated on push; do NOT edit manually
     update_by: "scripts/platform_manifest.py --write"
+
+  config/ephemeral-capacity-pools.json:
+    purpose: Canonical lease-based warm-pool catalog for ADR 0186 ephemeral fixtures
+    owner: human
+    format: JSON
+    use_for: Declaring per-fixture warm counts, refill targets, lease ceilings, spillover domains, and pool-local address allocations
+    update_when: Changing governed ephemeral lease and prewarm policy
+    update_by: Agent or human completing ADR 0186 follow-up work
+    validation: "uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate"
+    related_files:
+      - "docs/schema/ephemeral-capacity-pools.schema.json: JSON schema for the pool catalog"
+      - "scripts/fixture_manager.py: pool reconciliation and lease handoff logic"
+      - "docs/runbooks/ephemeral-fixtures.md: operator procedure"
+
+  config/preview-environment-profiles.json:
+    purpose: Canonical catalog of ADR 0185 branch-scoped preview profiles, network pool, and TTL defaults
+    owner: human
+    format: JSON
+    use_for: Creating and validating ephemeral branch previews on the governed Proxmox pool
+    update_when: Adding or changing preview profiles, network pool limits, or branch-preview defaults
+    update_by: Agent or human implementing ADR 0185 preview automation
+    validation: "python3 scripts/preview_environment.py validate-catalog"
+    related_files:
+      - "docs/schema/preview-environment-profiles.schema.json: Schema for the profile catalog"
+      - "scripts/preview_environment.py: Lifecycle automation for create/validate/destroy"
+
+  config/correction-loops.json:
+    purpose: Canonical ADR 0204 registry of governed self-correcting automation loops and their workflow selectors
+    owner: human
+    format: JSON
+    use_for: Declaring the invariant, observation sources, diagnosis taxonomy, repair actions, verification probe, and escalation boundary for mutable automation surfaces
+    update_when: Adding a new mutating workflow, changing repair policy, or adjusting a loop's retry budget
+    update_by: Agent or human implementing ADR 0204 self-correction changes
+    validation: "python3 scripts/correction_loops.py --validate"
+    related_files:
+      - "docs/schema/correction-loop-catalog.schema.json: Schema for the correction-loop catalog"
+      - "scripts/correction_loops.py: Selector resolution and validation helper"
+      - "config/workflow-catalog.json: Workflows that must be covered by the correction-loop selectors"
+
+  receipts/preview-environments/:
+    purpose: Durable branch-local evidence for completed preview create/validate/destroy cycles
+    owner: automation
+    format: JSON
+    use_for: Proving which branch preview ran, what it provisioned, how it validated, and when it was torn down
+    update_when: After a preview environment is destroyed and its evidence is finalized
+    update_by: "scripts/preview_environment.py destroy"
 
 # ============================================================================
 # VERSIONING AND RELEASES
@@ -169,6 +215,40 @@ inventory:
 
 automation:
 
+  config/replaceability-review-catalog.json:
+    purpose: Canonical ADR 0212 catalog of critical integrated product ADRs that must carry replaceability scorecards and vendor exit plans
+    owner: human
+    format: JSON
+    use_for: Declaring which ADRs are governed by the replaceability fitness function and which capability-definition references anchor each review
+    update_when: Adding or removing a governed critical product ADR, or changing its capability identifier or definition references
+    update_by: Agent or human implementing ADR 0212 governance work
+    validation: "python3 scripts/replaceability_scorecards.py --validate"
+    related_files:
+      - "docs/schema/replaceability-review-catalog.schema.json: Schema for the governed replaceability catalog"
+      - "scripts/replaceability_scorecards.py: ADR section validator and summary report"
+      - "docs/runbooks/replaceability-scorecards.md: authoring and review procedure"
+
+  config/seed-data-catalog.json:
+    purpose: Canonical contract for anonymized seed-data snapshot classes and storage paths
+    owner: human
+    format: JSON
+    use_for: Building deterministic tiny/standard/recovery seed snapshots and resolving the managed backup-lv3 store
+    update_when: Adjusting seed classes, dataset volumes, or storage locations
+    validation: "uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate"
+
+  config/network-impairment-matrix.yaml:
+    purpose: Canonical ADR 0189 matrix of governed latency, loss, and outage profiles for preview and staging fault drills
+    owner: human
+    format: YAML
+    use_for: Declaring named network impairment scenarios, scope, and allowed execution surfaces
+    update_when: Adding or changing governed impairment profiles, preview/staging eligibility, or scenario metadata
+    validation: "uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate"
+    related_files:
+      - "platform/faults/network_impairment_matrix.py: typed loader and execution helpers"
+      - "scripts/network_impairment_matrix.py: CLI and repo-surface validation"
+      - "config/windmill/scripts/network-impairment-matrix.py: mirrored worker entrypoint"
+      - "docs/runbooks/network-impairment-matrix.md: operator procedure"
+
   playbooks/site.yml:
     purpose: Main site playbook — full host bootstrap from bare Debian 13
     owner: human  # maintained by platform team
@@ -226,6 +306,18 @@ service_configuration:
     format: JSON
     update_by: "scripts/service_catalog.py --write"
 
+  config/immutable-guest-replacement-catalog.json:
+    purpose: Guest-level ADR 0191 policy for immutable replacement, validation mode, and documented in-place exceptions
+    owner: human
+    format: JSON
+    use_for: Determining which production guests default to immutable replacement instead of in-place mutation
+    update_when: Changing the replacement policy, preview method, or rollback window for a governed guest
+    validation: "uv run --with pyyaml --with jsonschema python scripts/immutable_guest_replacement.py --validate"
+    related_files:
+      - "docs/schema/immutable-guest-replacement-catalog.schema.json: JSON Schema for the catalog"
+      - "scripts/immutable_guest_replacement.py: Validation, planning, and live-apply guard"
+      - "docs/runbooks/immutable-guest-replacement.md: Operator workflow and exception path"
+
   config/dependency-graph.json:
     purpose: Service dependency graph
     owner: automation
@@ -237,18 +329,6 @@ service_configuration:
     owner: human
     format: JSON
     use_for: Controlling which validation checks are active
-
-  config/renovate.json:
-    purpose: Repo-managed Renovate configuration for internal Gitea dependency PR automation
-    owner: human
-    format: JSON
-    use_for: Defining which repo dependencies Renovate scans, groups, and auto-merges
-    update_when: Adjusting dependency automation policy or file coverage
-    validation: "make validate-renovate-config"
-    related_files:
-      - ".gitea/workflows/renovate.yml: Scheduled internal Gitea Actions entrypoint"
-      - "docs/schema/renovate-config.schema.json: Local schema guard for the repo policy"
-      - "docs/runbooks/configure-renovate.md: Operational procedure"
 
   docker/docker-compose.yml:
     purpose: Docker Compose reference for services on docker-runtime-lv3

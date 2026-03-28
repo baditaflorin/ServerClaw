@@ -17,6 +17,18 @@ playbooks:
     shared_surfaces:
       - service:control-plane-recovery
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/coolify.yml:
+    playbook_id: coolify
+    mutation_scope: platform
+    shared_surfaces:
+      - service:coolify
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/dify.yml:
+    playbook_id: dify
+    mutation_scope: platform
+    shared_surfaces:
+      - service:dify
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/database-dns.yml:
     playbook_id: database-dns
     mutation_scope: platform
@@ -28,6 +40,12 @@ playbooks:
     mutation_scope: host
     shared_surfaces:
       - service:docker-runtime
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/excalidraw.yml:
+    playbook_id: excalidraw
+    mutation_scope: platform
+    shared_surfaces:
+      - service:excalidraw
       - inventory/host_vars/proxmox_florin.yml
   playbooks/gitea.yml:
     playbook_id: gitea
@@ -119,6 +137,12 @@ playbooks:
     shared_surfaces:
       - service:open-webui
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/outline.yml:
+    playbook_id: outline
+    mutation_scope: platform
+    shared_surfaces:
+      - service:outline
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/openbao.yml:
     playbook_id: openbao
     mutation_scope: platform
@@ -131,11 +155,23 @@ playbooks:
     shared_surfaces:
       - service:portainer
       - inventory/host_vars/proxmox_florin.yml
+  playbooks/plane.yml:
+    playbook_id: plane
+    mutation_scope: platform
+    shared_surfaces:
+      - service:plane
+      - inventory/host_vars/proxmox_florin.yml
   playbooks/postgres-vm.yml:
     playbook_id: postgres-vm
     mutation_scope: platform
     shared_surfaces:
       - service:postgres-vm
+      - inventory/host_vars/proxmox_florin.yml
+  playbooks/proxmox-staging-bridge.yml:
+    playbook_id: proxmox-staging-bridge
+    mutation_scope: host
+    shared_surfaces:
+      - service:proxmox-staging-bridge
       - inventory/host_vars/proxmox_florin.yml
   playbooks/provision-subdomain.yml:
     playbook_id: provision-subdomain
@@ -157,6 +193,7 @@ playbooks:
       - inventory/host_vars/proxmox_florin.yml
   playbooks/rag-context.yml:
     playbook_id: rag-context
+    canonical_service_id: platform_context_api
     mutation_scope: platform
     shared_surfaces:
       - service:rag-context
@@ -250,6 +287,12 @@ playbooks:
     mutation_scope: platform
     shared_surfaces:
       - service:dozzle
+      - inventory/host_vars/proxmox_florin.yml
+  collections/ansible_collections/lv3/platform/playbooks/realtime.yml:
+    playbook_id: realtime
+    mutation_scope: platform
+    shared_surfaces:
+      - service:realtime
       - inventory/host_vars/proxmox_florin.yml
   collections/ansible_collections/lv3/platform/playbooks/ollama.yml:
     playbook_id: ollama

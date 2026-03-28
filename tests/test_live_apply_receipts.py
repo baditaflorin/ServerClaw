@@ -62,39 +62,6 @@ def test_validate_receipt_accepts_hash_when_git_metadata_lacks_objects(
     )
 
 
-def test_validate_receipt_accepts_hash_from_published_snapshot_without_object(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.setattr(live_apply_receipts, "git_metadata_available", lambda: True)
-    monkeypatch.setattr(live_apply_receipts, "git_commit_lookup_available", lambda: True)
-    monkeypatch.setattr(live_apply_receipts, "git_commit_exists", lambda _commit: False)
-    monkeypatch.setattr(live_apply_receipts, "published_snapshot_context", lambda: True)
-    monkeypatch.setattr(live_apply_receipts, "receipt_environment_for_path", lambda _path: "production")
-
-    live_apply_receipts.validate_receipt(
-        build_receipt("c4db21b414c44e5bcd9d6c1fe5ae4fdd9e5cac99"),
-        Path("2026-03-23-test-receipt.json"),
-        {"workflows": {"test-workflow": {}}},
-    )
-
-
-def test_validate_receipt_rejects_non_hash_from_published_snapshot_without_object(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.setattr(live_apply_receipts, "git_metadata_available", lambda: True)
-    monkeypatch.setattr(live_apply_receipts, "git_commit_lookup_available", lambda: True)
-    monkeypatch.setattr(live_apply_receipts, "git_commit_exists", lambda _commit: False)
-    monkeypatch.setattr(live_apply_receipts, "published_snapshot_context", lambda: True)
-    monkeypatch.setattr(live_apply_receipts, "receipt_environment_for_path", lambda _path: "production")
-
-    with pytest.raises(ValueError, match="not a valid git commit"):
-        live_apply_receipts.validate_receipt(
-            build_receipt("not-a-commit"),
-            Path("2026-03-23-test-receipt.json"),
-            {"workflows": {"test-workflow": {}}},
-        )
-
-
 def test_validate_receipt_rejects_non_hash_when_git_metadata_lacks_objects(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -135,10 +102,36 @@ def test_receipt_id_with_session_appends_normalized_suffix(monkeypatch: pytest.M
     assert receipt_id == "2026-03-25-adr-0156-live-apply-adr-0156-test"
 
 
+def test_validate_receipt_accepts_optional_correction_loop_block(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(live_apply_receipts, "git_metadata_available", lambda: False)
+    monkeypatch.setattr(live_apply_receipts, "receipt_environment_for_path", lambda _path: "production")
+
+    receipt = build_receipt("c4db21b414c44e5bcd9d6c1fe5ae4fdd9e5cac99")
+    receipt["correction_loop"] = {
+        "loop_id": "runtime_self_correction_watchers",
+        "surface": "platform-observation-loop",
+        "diagnosis": "contract_drift",
+        "repair_action": "reconcile",
+        "verification": "durable loop run resolved",
+    }
+
+    live_apply_receipts.validate_receipt(
+        receipt,
+        Path("2026-03-23-test-receipt.json"),
+        {"workflows": {"test-workflow": {}}},
+    )
+
+
 def test_receipt_environment_for_path_accepts_catalog_driven_subdirectories(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(live_apply_receipts, "receipt_subdirectory_environments", lambda: {"staging", "development"})
+    monkeypatch.setattr(
+        live_apply_receipts,
+        "receipt_subdirectory_environments",
+        lambda: {"staging", "development", "preview"},
+    )
 
     assert (
         live_apply_receipts.receipt_environment_for_path(
@@ -151,4 +144,10 @@ def test_receipt_environment_for_path_accepts_catalog_driven_subdirectories(
             live_apply_receipts.RECEIPTS_DIR / "2026-03-27-test.json"
         )
         == "production"
+    )
+    assert (
+        live_apply_receipts.receipt_environment_for_path(
+            live_apply_receipts.RECEIPTS_DIR / "preview" / "2026-03-27-test.json"
+        )
+        == "preview"
     )

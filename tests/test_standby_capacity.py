@@ -275,3 +275,26 @@ def test_standby_rejects_overcommitted_simulated_load(tmp_path: Path, monkeypatc
     assert any("projected standby-aware RAM commitment" in reason for reason in verdict["reasons"])
     assert any("projected standby-aware vCPU commitment" in reason for reason in verdict["reasons"])
     assert any("projected standby-aware disk commitment" in reason for reason in verdict["reasons"])
+
+
+def test_rag_context_alias_resolves_to_platform_context_api() -> None:
+    verdict = standby_capacity.evaluate_service_standby(
+        "rag-context",
+        catalog={
+            "services": [
+                {
+                    "id": "platform_context_api",
+                    "name": "Platform Context API",
+                    "description": "Semantic retrieval service.",
+                    "category": "automation",
+                    "lifecycle_status": "active",
+                    "vm": "docker-runtime-lv3",
+                    "exposure": "private-only",
+                    "environments": {"production": {"status": "active", "url": "http://100.64.0.1:8010"}},
+                }
+            ]
+        },
+    )
+
+    assert verdict["approved"] is True
+    assert verdict["service_id"] == "platform_context_api"

@@ -29,6 +29,7 @@ PORT_KEYS = (
     "monitoring_tempo_http_port",
     "monitoring_otlp_grpc_port",
     "monitoring_otlp_http_port",
+    "netdata_port",
     "mail_platform_gateway_port",
     "ntfy_port",
     "openbao_http_port",
@@ -46,10 +47,17 @@ PORT_KEYS = (
     "searxng_port",
     "searxng_host_proxy_port",
     "langfuse_port",
+    "dify_port",
+    "outline_port",
     "dozzle_http_port",
     "dozzle_agent_port",
+    "excalidraw_port",
+    "excalidraw_room_port",
     "ollama_api_port",
     "n8n_port",
+    "coolify_dashboard_port",
+    "coolify_proxy_port",
+    "coolify_host_proxy_port",
     "open_webui_port",
     "open_webui_host_proxy_port",
     "api_gateway_internal_port",
@@ -57,6 +65,8 @@ PORT_KEYS = (
     "platform_context_host_proxy_port",
     "homepage_port",
     "ops_portal_port",
+    "plane_port",
+    "plane_host_proxy_port",
     "ntopng_http_port",
     "ntopng_proxy_port",
     "portainer_https_port",
@@ -319,15 +329,34 @@ def build_service_urls(
     elif service_id == "langfuse":
         urls["internal"] = service_url("http", private_ip, ports["langfuse_port"])
         port_map["internal"] = ports["langfuse_port"]
+    elif service_id == "dify":
+        urls["internal"] = service_url("http", private_ip, ports["dify_port"])
+        port_map["internal"] = ports["dify_port"]
+    elif service_id == "plane":
+        urls["internal"] = service_url("http", private_ip, ports["plane_port"])
+        urls["controller"] = service_url("http", tailscale_ipv4, ports["plane_host_proxy_port"])
+        port_map["internal"] = ports["plane_port"]
+        port_map["controller"] = ports["plane_host_proxy_port"]
     elif service_id == "dozzle":
         urls["internal"] = service_url("http", private_ip, ports["dozzle_http_port"])
         port_map["internal"] = ports["dozzle_http_port"]
+    elif service_id == "excalidraw":
+        urls["internal"] = service_url("http", private_ip, ports["excalidraw_port"])
+        port_map["internal"] = ports["excalidraw_port"]
     elif service_id == "ollama":
         urls["internal"] = service_url("http", private_ip, ports["ollama_api_port"])
         port_map["internal"] = ports["ollama_api_port"]
     elif service_id == "n8n":
         urls["internal"] = service_url("http", private_ip, ports["n8n_port"])
         port_map["internal"] = ports["n8n_port"]
+    elif service_id == "coolify":
+        urls["internal"] = service_url("http", private_ip, ports["coolify_dashboard_port"])
+        urls["controller"] = service_url("http", tailscale_ipv4, ports["coolify_host_proxy_port"])
+        port_map["internal"] = ports["coolify_dashboard_port"]
+        port_map["controller"] = ports["coolify_host_proxy_port"]
+    elif service_id == "coolify_apps":
+        urls["internal"] = service_url("http", private_ip, ports["coolify_proxy_port"])
+        port_map["internal"] = ports["coolify_proxy_port"]
     elif service_id == "open_webui":
         urls["internal"] = service_url("http", private_ip, ports["open_webui_port"])
         urls["controller"] = service_url("http", tailscale_ipv4, ports["open_webui_host_proxy_port"])
@@ -362,6 +391,9 @@ def build_service_urls(
     elif service_id == "homepage":
         urls["internal"] = service_url("http", private_ip, ports["homepage_port"])
         port_map["internal"] = ports["homepage_port"]
+    elif service_id == "realtime":
+        urls["internal"] = service_url("http", private_ip, ports["netdata_port"])
+        port_map["internal"] = ports["netdata_port"]
     elif service_id == "status_page":
         urls["internal"] = service_url("http", private_ip, 3001)
         port_map["internal"] = 3001
@@ -526,6 +558,7 @@ def build_platform_vars(
     gitea_service = service_topology["gitea"]
     netbox_service = service_topology["netbox"]
     open_webui_service = service_topology["open_webui"]
+    plane_service = service_topology["plane"]
     api_gateway_service = service_topology["api_gateway"]
     headscale_service = service_topology["headscale"]
     openbao_service = service_topology["openbao"]
@@ -628,6 +661,7 @@ def build_platform_vars(
             resolved_ports["headscale_http_port"],
             resolved_ports["windmill_host_proxy_port"],
             resolved_ports["open_webui_host_proxy_port"],
+            resolved_ports["plane_host_proxy_port"],
             resolved_ports["mattermost_host_proxy_port"],
             resolved_ports["platform_context_host_proxy_port"],
             resolved_ports["portainer_host_proxy_port"],
@@ -647,6 +681,10 @@ def build_platform_vars(
         "netbox_controller_url": netbox_service["urls"]["controller"],
         "open_webui_host_proxy_port": resolved_ports["open_webui_host_proxy_port"],
         "open_webui_controller_url": open_webui_service["urls"]["controller"],
+        "plane_port": resolved_ports["plane_port"],
+        "plane_host_proxy_port": resolved_ports["plane_host_proxy_port"],
+        "plane_private_base_url": plane_service["urls"]["internal"],
+        "plane_controller_url": plane_service["urls"]["controller"],
         "api_gateway_internal_port": resolved_ports["api_gateway_internal_port"],
         "api_gateway_public_url": api_gateway_service["urls"]["public"],
         "api_gateway_internal_url": api_gateway_service["urls"]["internal"],
@@ -689,6 +727,7 @@ def build_platform_vars(
             resolved_ports["headscale_http_port"],
             resolved_ports["windmill_host_proxy_port"],
             resolved_ports["open_webui_host_proxy_port"],
+            resolved_ports["plane_host_proxy_port"],
             resolved_ports["mattermost_host_proxy_port"],
             resolved_ports["platform_context_host_proxy_port"],
             resolved_ports["portainer_host_proxy_port"],

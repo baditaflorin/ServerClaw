@@ -78,6 +78,14 @@ def test_capacity_dashboard_is_copied_imported_and_verified() -> None:
     )
 
 
+def test_prometheus_template_scrapes_netdata_parent_exporter() -> None:
+    template = (REPO_ROOT / "roles" / "monitoring_vm" / "templates" / "prometheus.yml.j2").read_text()
+
+    assert "job_name: netdata" in template
+    assert "/api/v1/allmetrics" in template
+    assert "prometheus_all_hosts" in template
+
+
 def test_dashboard_templates_do_not_use_bare_jinja_null_literals() -> None:
     for template in (PLATFORM_DASHBOARD_TEMPLATE, MAIL_DASHBOARD_TEMPLATE, VM_DASHBOARD_TEMPLATE):
         assert " null" not in template.read_text()

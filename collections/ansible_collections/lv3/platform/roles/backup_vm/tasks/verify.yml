@@ -1,4 +1,32 @@
 ---
+# Purpose: Verify that the managed PBS listener, datastore, and seed snapshot directories are readable after backup_vm converge.
+# Use case: Included after backup_vm convergence to prove the backup guest is reachable and its managed storage exists.
+#
+# Inputs (required):
+#   - backup_vm_api_port (int, required): PBS API listener port.
+#   - backup_vm_datastore_name (str, required): Managed datastore name.
+#   - backup_vm_seed_snapshot_store_path (path, required): Seed snapshot storage root.
+#   - backup_vm_seed_snapshot_classes (list[str], required): Seed snapshot class directories.
+#
+# Inputs (optional):
+#   - none
+#
+# Outputs:
+#   - Read-only verification results for the PBS listener, datastore, and seed snapshot directories.
+#
+# Idempotency: Fully idempotent
+#              This task file performs read-only checks and assertions.
+#
+# Dependencies:
+#   - ADR 0029: Requires datastore verification after converge.
+#   - ADR 0187: Requires seed snapshot storage verification.
+#   - Role: backup_vm — verifies the converged PBS guest.
+#
+# Related ADRs: 0029, 0165, 0187
+# Related Runbooks: docs/runbooks/backup-restore-verification.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
 - name: Verify the PBS proxy listener is reachable
   ansible.builtin.wait_for:
     host: 127.0.0.1
@@ -28,3 +56,29 @@
           | length
         ) == 1
     fail_msg: "Managed PBS datastore {{ backup_vm_datastore_name }} is not readable."
+
+- name: Verify the managed seed snapshot store root exists
+  ansible.builtin.stat:
+    path: "{{ backup_vm_seed_snapshot_store_path }}"
+  register: backup_vm_seed_snapshot_store_root
+
+- name: Assert the managed seed snapshot store root exists
+  ansible.builtin.assert:
+    that:
+      - backup_vm_seed_snapshot_store_root.stat.exists
+      - backup_vm_seed_snapshot_store_root.stat.isdir
+    fail_msg: "Managed seed snapshot store root {{ backup_vm_seed_snapshot_store_path }} is not present."
+
+- name: Verify the managed seed snapshot class directories exist
+  ansible.builtin.stat:
+    path: "{{ backup_vm_seed_snapshot_store_path }}/{{ item }}"
+  loop: "{{ backup_vm_seed_snapshot_classes }}"
+  register: backup_vm_seed_snapshot_class_dirs
+
+- name: Assert the managed seed snapshot class directories exist
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists
+      - item.stat.isdir
+    fail_msg: "Managed seed snapshot class directory {{ item.stat.path | default('unknown') }} is not present."
+  loop: "{{ backup_vm_seed_snapshot_class_dirs.results }}"

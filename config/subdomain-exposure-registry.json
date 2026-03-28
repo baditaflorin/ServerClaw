@@ -1,788 +1,1411 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "2.0.0",
   "zone_name": "lv3.org",
-  "subdomains": [
+  "publications": [
+    {
+      "fqdn": "agents.lv3.org",
+      "service_id": "dify",
+      "environment": "production",
+      "status": "active",
+      "owner_adr": "0197",
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "platform-sso",
+        "audience": "operator"
+      },
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "service_topology",
+          "kind": "proxy"
+        },
+        "edge_auth": {
+          "provider": "oauth2_proxy",
+          "unauthenticated_paths": [
+            "/healthz"
+          ],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": "dify",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "noindex": true,
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.dify_port }}"
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
+      },
+      "live_tracking_expected": true,
+      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
+    },
     {
       "fqdn": "api.lv3.org",
       "service_id": "api_gateway",
       "environment": "production",
       "status": "active",
-      "exposure": "edge-published",
-      "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
-      "target_port": 443,
       "owner_adr": "0092",
-      "dns_record_type": "A",
-      "route_mode": "edge",
-      "route_source": "service_topology",
-      "route_kind": "proxy",
-      "edge_auth": "none",
-      "unauthenticated_paths": [],
-      "unauthenticated_prefix_paths": [],
-      "repo_route_service_id": "api_gateway",
-      "repo_route_metadata": {
-        "enabled": true,
-        "tls": true,
-        "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.api_gateway_internal_port }}"
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "upstream-auth",
+        "audience": "operator"
       },
-      "tls": {
-        "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-        "auto_renew": true
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "service_topology",
+          "kind": "proxy"
+        },
+        "edge_auth": {
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": "api_gateway",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.api_gateway_internal_port }}"
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
       },
-      "live_tracking_expected": true
+      "live_tracking_expected": true,
+      "notes": "Published publicly through the shared NGINX edge and verified live from current main."
+    },
+    {
+      "fqdn": "apps.lv3.org",
+      "service_id": "coolify_apps",
+      "environment": "production",
+      "status": "active",
+      "owner_adr": "0194",
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "open",
+        "audience": "public"
+      },
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "service_topology",
+          "kind": "proxy"
+        },
+        "edge_auth": {
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": "coolify_apps",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.coolify_proxy_port }}",
+          "crawl_policy_enabled": false,
+          "security_headers_enabled": false,
+          "preserve_upstream_security_headers": true
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
+      },
+      "live_tracking_expected": true,
+      "notes": "Shared public applications ingress published through the NGINX edge with wildcard alias coverage for Coolify-managed applications."
     },
     {
       "fqdn": "build.lv3.org",
       "service_id": "docker_build",
       "environment": "production",
       "status": "active",
-      "exposure": "informational-only",
-      "auth_requirement": "none",
-      "target": "65.108.75.123",
-      "target_port": 443,
       "owner_adr": "0028",
-      "dns_record_type": "A",
-      "route_mode": "edge",
-      "route_source": "service_topology",
-      "route_kind": "static",
-      "edge_auth": "none",
-      "unauthenticated_paths": [],
-      "unauthenticated_prefix_paths": [],
-      "repo_route_service_id": "docker_build",
-      "repo_route_metadata": {
-        "enabled": true,
-        "tls": true,
-        "slug": "build",
-        "title": "Docker Build VM",
-        "description": "The build VM is a private operator-facing host for interactive build workflows and is not a public web workload.",
-        "meta": "Reach the build VM through the approved operator access path rather than the public edge."
+      "publication": {
+        "delivery_model": "informational-edge",
+        "access_model": "open",
+        "audience": "public"
       },
-      "tls": {
-        "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-        "auto_renew": true
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "service_topology",
+          "kind": "static"
+        },
+        "edge_auth": {
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": "docker_build",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "slug": "build",
+          "title": "Docker Build VM",
+          "description": "The build VM is a private operator-facing host for interactive build workflows and is not a public web workload.",
+          "meta": "Reach the build VM through the approved operator access path rather than the public edge."
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
       },
-      "live_tracking_expected": true
+      "live_tracking_expected": true,
+      "notes": null
     },
     {
       "fqdn": "changelog.lv3.org",
       "service_id": "changelog_portal",
       "environment": "production",
       "status": "active",
-      "exposure": "edge-published",
-      "auth_requirement": "edge_oidc",
-      "target": "65.108.75.123",
-      "target_port": 443,
       "owner_adr": "0081",
-      "dns_record_type": "A",
-      "route_mode": "edge",
-      "route_source": "public_edge_extra_sites",
-      "route_kind": "static_dir",
-      "edge_auth": "oauth2_proxy",
-      "unauthenticated_paths": [],
-      "unauthenticated_prefix_paths": [],
-      "repo_route_service_id": null,
-      "repo_route_metadata": {
-        "source_dir": "changelog-portal"
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "platform-sso",
+        "audience": "operator"
       },
-      "tls": {
-        "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-        "auto_renew": true
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "public_edge_extra_sites",
+          "kind": "static_dir"
+        },
+        "edge_auth": {
+          "provider": "oauth2_proxy",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": null,
+        "repo_route_metadata": {
+          "source_dir": "changelog-portal"
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
       },
-      "live_tracking_expected": true
+      "live_tracking_expected": true,
+      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
+    },
+    {
+      "fqdn": "coolify.lv3.org",
+      "service_id": "coolify",
+      "environment": "production",
+      "status": "active",
+      "owner_adr": "0194",
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "platform-sso",
+        "audience": "operator"
+      },
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "service_topology",
+          "kind": "proxy"
+        },
+        "edge_auth": {
+          "provider": "oauth2_proxy",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": "coolify",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "noindex": true,
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'coolify-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.coolify_dashboard_port }}"
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
+      },
+      "live_tracking_expected": true,
+      "notes": "Coolify dashboard published through the shared authenticated NGINX edge with the private controller API proxied on the management tailnet."
     },
     {
       "fqdn": "database.lv3.org",
       "service_id": "postgres",
       "environment": "production",
       "status": "active",
-      "exposure": "private-only",
-      "auth_requirement": "private_network",
-      "target": "100.64.0.1",
-      "target_port": 5432,
       "owner_adr": "0026",
-      "dns_record_type": "A",
-      "route_mode": "dns-only",
-      "route_source": "dns-only",
-      "route_kind": null,
-      "edge_auth": "none",
-      "unauthenticated_paths": [],
-      "unauthenticated_prefix_paths": [],
-      "repo_route_service_id": null,
-      "repo_route_metadata": {},
-      "tls": {
-        "provider": "none",
-        "auto_renew": false
+      "publication": {
+        "delivery_model": "private-network",
+        "access_model": "private-network",
+        "audience": "private-network"
       },
-      "live_tracking_expected": false
+      "adapter": {
+        "dns": {
+          "target": "100.64.0.1",
+          "target_port": 5432,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "dns-only",
+          "source": "dns-only",
+          "kind": null
+        },
+        "edge_auth": {
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": null,
+        "repo_route_metadata": {},
+        "tls": {
+          "provider": "none",
+          "auto_renew": false
+        }
+      },
+      "live_tracking_expected": false,
+      "notes": "Tailnet-only TCP proxy through the Proxmox host."
     },
     {
       "fqdn": "docker.lv3.org",
       "service_id": "docker_runtime",
       "environment": "production",
       "status": "active",
-      "exposure": "informational-only",
-      "auth_requirement": "none",
-      "target": "65.108.75.123",
-      "target_port": 443,
       "owner_adr": "0023",
-      "dns_record_type": "A",
-      "route_mode": "edge",
-      "route_source": "service_topology",
-      "route_kind": "static",
-      "edge_auth": "none",
-      "unauthenticated_paths": [],
-      "unauthenticated_prefix_paths": [],
-      "repo_route_service_id": "docker_runtime",
-      "repo_route_metadata": {
-        "enabled": true,
-        "tls": true,
-        "slug": "docker",
-        "title": "Docker Runtime VM",
-        "description": "The Docker runtime VM does not currently publish a public web service at this hostname.",
-        "meta": "Public application endpoints should be published deliberately through the NGINX edge when needed."
+      "publication": {
+        "delivery_model": "informational-edge",
+        "access_model": "open",
+        "audience": "public"
       },
-      "tls": {
-        "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-        "auto_renew": true
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "service_topology",
+          "kind": "static"
+        },
+        "edge_auth": {
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": "docker_runtime",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "slug": "docker",
+          "title": "Docker Runtime VM",
+          "description": "The Docker runtime VM does not currently publish a public web service at this hostname.",
+          "meta": "Public application endpoints should be published deliberately through the NGINX edge when needed."
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
       },
-      "live_tracking_expected": true
+      "live_tracking_expected": true,
+      "notes": null
     },
     {
       "fqdn": "docs.lv3.org",
       "service_id": "docs_portal",
       "environment": "production",
       "status": "active",
-      "exposure": "edge-published",
-      "auth_requirement": "edge_oidc",
-      "target": "65.108.75.123",
-      "target_port": 443,
       "owner_adr": "0094",
-      "dns_record_type": "A",
-      "route_mode": "edge",
-      "route_source": "public_edge_extra_sites",
-      "route_kind": "static_dir",
-      "edge_auth": "oauth2_proxy",
-      "unauthenticated_paths": [],
-      "unauthenticated_prefix_paths": [],
-      "repo_route_service_id": null,
-      "repo_route_metadata": {
-        "source_dir": "docs-portal"
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "platform-sso",
+        "audience": "operator"
       },
-      "tls": {
-        "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-        "auto_renew": true
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "public_edge_extra_sites",
+          "kind": "static_dir"
+        },
+        "edge_auth": {
+          "provider": "oauth2_proxy",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": null,
+        "repo_route_metadata": {
+          "source_dir": "docs-portal"
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
       },
-      "live_tracking_expected": true
+      "live_tracking_expected": true,
+      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
+    },
+    {
+      "fqdn": "draw.lv3.org",
+      "service_id": "excalidraw",
+      "environment": "production",
+      "status": "active",
+      "owner_adr": "0202",
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "platform-sso",
+        "audience": "operator"
+      },
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "service_topology",
+          "kind": "proxy"
+        },
+        "edge_auth": {
+          "provider": "oauth2_proxy",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": "excalidraw",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "upstream": "http://10.10.10.20:{{ platform_port_assignments.excalidraw_port }}",
+          "prefix_proxy_routes": [
+            {
+              "path": "/socket.io/",
+              "upstream": "http://10.10.10.20:{{ platform_port_assignments.excalidraw_room_port }}"
+            }
+          ]
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
+      },
+      "live_tracking_expected": true,
+      "notes": "Private Excalidraw publication for repo-generated architecture scenes through the shared authenticated NGINX edge."
     },
     {
       "fqdn": "git.lv3.org",
       "service_id": "gitea",
       "environment": "production",
       "status": "active",
-      "exposure": "private-only",
-      "auth_requirement": "private_network",
-      "target": "100.64.0.1",
-      "target_port": 3009,
       "owner_adr": "0143",
-      "dns_record_type": "A",
-      "route_mode": "dns-only",
-      "route_source": "dns-only",
-      "route_kind": null,
-      "edge_auth": "none",
-      "unauthenticated_paths": [],
-      "unauthenticated_prefix_paths": [],
-      "repo_route_service_id": null,
-      "repo_route_metadata": {},
-      "tls": {
-        "provider": "none",
-        "auto_renew": false
+      "publication": {
+        "delivery_model": "private-network",
+        "access_model": "private-network",
+        "audience": "private-network"
       },
-      "live_tracking_expected": false
+      "adapter": {
+        "dns": {
+          "target": "100.64.0.1",
+          "target_port": 3009,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "dns-only",
+          "source": "dns-only",
+          "kind": null
+        },
+        "edge_auth": {
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": null,
+        "repo_route_metadata": {},
+        "tls": {
+          "provider": "none",
+          "auto_renew": false
+        }
+      },
+      "live_tracking_expected": false,
+      "notes": "Tailnet-only TCP proxy for the private Gitea runtime on docker-runtime-lv3."
     },
     {
       "fqdn": "grafana.lv3.org",
       "service_id": "grafana",
       "environment": "production",
       "status": "active",
-      "exposure": "edge-published",
-      "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
-      "target_port": 443,
       "owner_adr": "0011",
-      "dns_record_type": "A",
-      "route_mode": "edge",
-      "route_source": "service_topology",
-      "route_kind": "proxy",
-      "edge_auth": "none",
-      "unauthenticated_paths": [],
-      "unauthenticated_prefix_paths": [],
-      "repo_route_service_id": "grafana",
-      "repo_route_metadata": {
-        "enabled": true,
-        "tls": true,
-        "noindex": true,
-        "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring-lv3') | map(attribute='ipv4') | first) }}:3000",
-        "proxy_hide_headers": [
-          "X-Grafana-Version",
-          "Via"
-        ],
-        "blocked_exact_paths": [
-          {
-            "path": "/api/health",
-            "status": 404
-          }
-        ]
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "upstream-auth",
+        "audience": "operator"
       },
-      "tls": {
-        "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-        "auto_renew": true
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "service_topology",
+          "kind": "proxy"
+        },
+        "edge_auth": {
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": "grafana",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "noindex": true,
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring-lv3') | map(attribute='ipv4') | first) }}:3000",
+          "proxy_hide_headers": [
+            "X-Grafana-Version",
+            "Via"
+          ],
+          "blocked_exact_paths": [
+            {
+              "path": "/api/health",
+              "status": 404
+            }
+          ]
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
       },
-      "live_tracking_expected": true
+      "live_tracking_expected": true,
+      "notes": null
     },
     {
       "fqdn": "grafana.staging.lv3.org",
       "service_id": "grafana",
       "environment": "staging",
       "status": "planned",
-      "exposure": "edge-published",
-      "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
-      "target_port": 443,
       "owner_adr": "0072",
-      "dns_record_type": "A",
-      "route_mode": "dns-only",
-      "route_source": "dns-only",
-      "route_kind": null,
-      "edge_auth": "none",
-      "unauthenticated_paths": [],
-      "unauthenticated_prefix_paths": [],
-      "repo_route_service_id": null,
-      "repo_route_metadata": {},
-      "tls": {
-        "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-        "auto_renew": true
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "upstream-auth",
+        "audience": "operator"
       },
-      "live_tracking_expected": false
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "dns-only",
+          "source": "dns-only",
+          "kind": null
+        },
+        "edge_auth": {
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": null,
+        "repo_route_metadata": {},
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
+      },
+      "live_tracking_expected": false,
+      "notes": "Planned staging hostname on the shared NGINX edge."
     },
     {
       "fqdn": "headscale.lv3.org",
       "service_id": "headscale",
       "environment": "production",
       "status": "active",
-      "exposure": "edge-published",
-      "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
-      "target_port": 443,
       "owner_adr": "0144",
-      "dns_record_type": "A",
-      "route_mode": "edge",
-      "route_source": "service_topology",
-      "route_kind": "proxy",
-      "edge_auth": "none",
-      "unauthenticated_paths": [],
-      "unauthenticated_prefix_paths": [],
-      "repo_route_service_id": "headscale",
-      "repo_route_metadata": {
-        "enabled": true,
-        "tls": true,
-        "upstream": "http://{{ hostvars['proxmox_florin'].proxmox_internal_ipv4 }}:{{ hostvars['proxmox_florin'].platform_port_assignments.headscale_http_port }}"
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "upstream-auth",
+        "audience": "operator"
       },
-      "tls": {
-        "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-        "auto_renew": true
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "service_topology",
+          "kind": "proxy"
+        },
+        "edge_auth": {
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": "headscale",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "upstream": "http://{{ hostvars['proxmox_florin'].proxmox_internal_ipv4 }}:{{ hostvars['proxmox_florin'].platform_port_assignments.headscale_http_port }}"
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
       },
-      "live_tracking_expected": true
+      "live_tracking_expected": true,
+      "notes": "Published through the shared NGINX edge and proxied to the Proxmox host Headscale listener on 10.10.10.1:8080."
     },
     {
       "fqdn": "home.lv3.org",
       "service_id": "homepage",
       "environment": "production",
       "status": "active",
-      "exposure": "edge-published",
-      "auth_requirement": "edge_oidc",
-      "target": "65.108.75.123",
-      "target_port": 443,
       "owner_adr": "0152",
-      "dns_record_type": "A",
-      "route_mode": "edge",
-      "route_source": "service_topology",
-      "route_kind": "proxy",
-      "edge_auth": "oauth2_proxy",
-      "unauthenticated_paths": [],
-      "unauthenticated_prefix_paths": [],
-      "repo_route_service_id": "homepage",
-      "repo_route_metadata": {
-        "enabled": true,
-        "tls": true,
-        "upstream": "http://10.10.10.20:{{ platform_port_assignments.homepage_port }}"
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "platform-sso",
+        "audience": "operator"
       },
-      "tls": {
-        "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-        "auto_renew": true
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "service_topology",
+          "kind": "proxy"
+        },
+        "edge_auth": {
+          "provider": "oauth2_proxy",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": "homepage",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "upstream": "http://10.10.10.20:{{ platform_port_assignments.homepage_port }}"
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
       },
-      "live_tracking_expected": true
+      "live_tracking_expected": true,
+      "notes": "Unified service dashboard published through the shared NGINX edge and protected by the repo-managed Keycloak oauth2-proxy flow."
     },
     {
       "fqdn": "langfuse.lv3.org",
       "service_id": "langfuse",
       "environment": "production",
       "status": "active",
-      "exposure": "edge-published",
-      "auth_requirement": "edge_oidc",
-      "target": "65.108.75.123",
-      "target_port": 443,
       "owner_adr": "0146",
-      "dns_record_type": "A",
-      "route_mode": "edge",
-      "route_source": "service_topology",
-      "route_kind": "proxy",
-      "edge_auth": "oauth2_proxy",
-      "unauthenticated_paths": [],
-      "unauthenticated_prefix_paths": [],
-      "repo_route_service_id": "langfuse",
-      "repo_route_metadata": {
-        "enabled": true,
-        "tls": true,
-        "noindex": true,
-        "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.langfuse_port }}"
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "platform-sso",
+        "audience": "operator"
       },
-      "tls": {
-        "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-        "auto_renew": true
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "service_topology",
+          "kind": "proxy"
+        },
+        "edge_auth": {
+          "provider": "oauth2_proxy",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": "langfuse",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "noindex": true,
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.langfuse_port }}"
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
       },
-      "live_tracking_expected": true
+      "live_tracking_expected": true,
+      "notes": null
     },
     {
       "fqdn": "logs.lv3.org",
       "service_id": "dozzle",
       "environment": "production",
       "status": "active",
-      "exposure": "edge-published",
-      "auth_requirement": "edge_oidc",
-      "target": "65.108.75.123",
-      "target_port": 443,
       "owner_adr": "0150",
-      "dns_record_type": "A",
-      "route_mode": "edge",
-      "route_source": "service_topology",
-      "route_kind": "proxy",
-      "edge_auth": "oauth2_proxy",
-      "unauthenticated_paths": [],
-      "unauthenticated_prefix_paths": [],
-      "repo_route_service_id": "dozzle",
-      "repo_route_metadata": {
-        "enabled": true,
-        "tls": true,
-        "server_sent_events": true,
-        "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.dozzle_http_port }}"
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "platform-sso",
+        "audience": "operator"
       },
-      "tls": {
-        "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-        "auto_renew": true
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "service_topology",
+          "kind": "proxy"
+        },
+        "edge_auth": {
+          "provider": "oauth2_proxy",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": "dozzle",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "server_sent_events": true,
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.dozzle_http_port }}"
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
       },
-      "live_tracking_expected": true
+      "live_tracking_expected": true,
+      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
     },
     {
       "fqdn": "mail.lv3.org",
       "service_id": "mail_platform",
       "environment": "production",
       "status": "active",
-      "exposure": "informational-only",
-      "auth_requirement": "none",
-      "target": "65.108.75.123",
-      "target_port": 443,
       "owner_adr": "0041",
-      "dns_record_type": "A",
-      "route_mode": "dns-only",
-      "route_source": "dns-only",
-      "route_kind": null,
-      "edge_auth": "none",
-      "unauthenticated_paths": [],
-      "unauthenticated_prefix_paths": [],
-      "repo_route_service_id": null,
-      "repo_route_metadata": {},
-      "tls": {
-        "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-        "auto_renew": true
+      "publication": {
+        "delivery_model": "informational-edge",
+        "access_model": "open",
+        "audience": "public"
       },
-      "live_tracking_expected": true
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "dns-only",
+          "source": "dns-only",
+          "kind": null
+        },
+        "edge_auth": {
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": null,
+        "repo_route_metadata": {},
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
+      },
+      "live_tracking_expected": true,
+      "notes": null
     },
     {
       "fqdn": "n8n.lv3.org",
       "service_id": "n8n",
       "environment": "production",
       "status": "active",
-      "exposure": "edge-published",
-      "auth_requirement": "edge_oidc",
-      "target": "65.108.75.123",
-      "target_port": 443,
       "owner_adr": "0151",
-      "dns_record_type": "A",
-      "route_mode": "edge",
-      "route_source": "service_topology",
-      "route_kind": "proxy",
-      "edge_auth": "oauth2_proxy",
-      "unauthenticated_paths": [
-        "/healthz"
-      ],
-      "unauthenticated_prefix_paths": [
-        "/webhook/",
-        "/webhook-test/",
-        "/webhook-waiting/"
-      ],
-      "repo_route_service_id": "n8n",
-      "repo_route_metadata": {
-        "enabled": true,
-        "tls": true,
-        "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.n8n_port }}"
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "platform-sso",
+        "audience": "operator"
       },
-      "tls": {
-        "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-        "auto_renew": true
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "service_topology",
+          "kind": "proxy"
+        },
+        "edge_auth": {
+          "provider": "oauth2_proxy",
+          "unauthenticated_paths": [
+            "/healthz"
+          ],
+          "unauthenticated_prefix_paths": [
+            "/webhook/",
+            "/webhook-test/",
+            "/webhook-waiting/"
+          ]
+        },
+        "repo_route_service_id": "n8n",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.n8n_port }}"
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
       },
-      "live_tracking_expected": true
+      "live_tracking_expected": true,
+      "notes": "The editor is protected by the shared oauth2-proxy and Keycloak edge flow while /healthz and /webhook* remain intentionally unauthenticated for machine callers."
     },
     {
       "fqdn": "nginx.lv3.org",
       "service_id": "nginx_edge",
       "environment": "production",
       "status": "active",
-      "exposure": "edge-published",
-      "auth_requirement": "none",
-      "target": "65.108.75.123",
-      "target_port": 443,
       "owner_adr": "0021",
-      "dns_record_type": "A",
-      "route_mode": "edge",
-      "route_source": "service_topology",
-      "route_kind": "static",
-      "edge_auth": "none",
-      "unauthenticated_paths": [],
-      "unauthenticated_prefix_paths": [],
-      "repo_route_service_id": "nginx_edge",
-      "repo_route_metadata": {
-        "enabled": true,
-        "tls": true,
-        "slug": "nginx",
-        "title": "LV3 Edge",
-        "description": "NGINX is the public edge for published lv3.org services on this platform.",
-        "meta": "Use the named subdomains for the actual service entry points exposed at the edge."
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "open",
+        "audience": "public"
       },
-      "tls": {
-        "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-        "auto_renew": true
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "service_topology",
+          "kind": "static"
+        },
+        "edge_auth": {
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": "nginx_edge",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "slug": "nginx",
+          "title": "LV3 Edge",
+          "description": "NGINX is the public edge for published lv3.org services on this platform.",
+          "meta": "Use the named subdomains for the actual service entry points exposed at the edge."
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
       },
-      "live_tracking_expected": true
+      "live_tracking_expected": true,
+      "notes": null
     },
     {
       "fqdn": "ops.lv3.org",
       "service_id": "ops_portal",
       "environment": "production",
       "status": "active",
-      "exposure": "edge-published",
-      "auth_requirement": "edge_oidc",
-      "target": "65.108.75.123",
-      "target_port": 443,
       "owner_adr": "0093",
-      "dns_record_type": "A",
-      "route_mode": "edge",
-      "route_source": "service_topology",
-      "route_kind": "proxy",
-      "edge_auth": "oauth2_proxy",
-      "unauthenticated_paths": [
-        "/health"
-      ],
-      "unauthenticated_prefix_paths": [],
-      "repo_route_service_id": "ops_portal",
-      "repo_route_metadata": {
-        "enabled": true,
-        "tls": true,
-        "upstream": "http://10.10.10.20:{{ platform_port_assignments.ops_portal_port }}"
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "platform-sso",
+        "audience": "operator"
       },
-      "tls": {
-        "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-        "auto_renew": true
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "service_topology",
+          "kind": "proxy"
+        },
+        "edge_auth": {
+          "provider": "oauth2_proxy",
+          "unauthenticated_paths": [
+            "/health"
+          ],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": "ops_portal",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "upstream": "http://10.10.10.20:{{ platform_port_assignments.ops_portal_port }}"
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
       },
-      "live_tracking_expected": true
+      "live_tracking_expected": true,
+      "notes": "Interactive runtime is live behind oauth2-proxy and Keycloak on the shared NGINX edge."
     },
     {
       "fqdn": "ops.staging.lv3.org",
       "service_id": "ops_portal",
       "environment": "staging",
       "status": "planned",
-      "exposure": "edge-published",
-      "auth_requirement": "edge_oidc",
-      "target": "65.108.75.123",
-      "target_port": 443,
       "owner_adr": "0072",
-      "dns_record_type": "A",
-      "route_mode": "dns-only",
-      "route_source": "dns-only",
-      "route_kind": null,
-      "edge_auth": "none",
-      "unauthenticated_paths": [],
-      "unauthenticated_prefix_paths": [],
-      "repo_route_service_id": null,
-      "repo_route_metadata": {},
-      "tls": {
-        "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-        "auto_renew": true
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "platform-sso",
+        "audience": "operator"
       },
-      "live_tracking_expected": false
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "dns-only",
+          "source": "dns-only",
+          "kind": null
+        },
+        "edge_auth": {
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": null,
+        "repo_route_metadata": {},
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
+      },
+      "live_tracking_expected": false,
+      "notes": "Planned staging portal generated from the canonical service and environment catalogs."
     },
     {
       "fqdn": "proxmox.lv3.org",
       "service_id": "proxmox_ui",
       "environment": "production",
       "status": "active",
-      "exposure": "informational-only",
-      "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
-      "target_port": 443,
       "owner_adr": "0004",
-      "dns_record_type": "A",
-      "route_mode": "edge",
-      "route_source": "service_topology",
-      "route_kind": "static",
-      "edge_auth": "none",
-      "unauthenticated_paths": [],
-      "unauthenticated_prefix_paths": [],
-      "repo_route_service_id": "proxmox_ui",
-      "repo_route_metadata": {
-        "enabled": true,
-        "tls": true,
-        "slug": "proxmox",
-        "title": "Proxmox Administration",
-        "description": "Proxmox administration remains private and is reached over Tailscale instead of being published directly on the public edge.",
-        "action_url": "https://{{ management_tailscale_ipv4 }}:8006/",
-        "action_label": "Open Private Proxmox UI",
-        "meta": "Use Tailscale host access for routine Proxmox administration."
+      "publication": {
+        "delivery_model": "informational-edge",
+        "access_model": "upstream-auth",
+        "audience": "operator"
       },
-      "tls": {
-        "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-        "auto_renew": true
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "service_topology",
+          "kind": "static"
+        },
+        "edge_auth": {
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": "proxmox_ui",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "slug": "proxmox",
+          "title": "Proxmox Administration",
+          "description": "Proxmox administration remains private and is reached over Tailscale instead of being published directly on the public edge.",
+          "action_url": "https://{{ management_tailscale_ipv4 }}:8006/",
+          "action_label": "Open Private Proxmox UI",
+          "meta": "Use Tailscale host access for routine Proxmox administration."
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
       },
-      "live_tracking_expected": true
+      "live_tracking_expected": true,
+      "notes": null
+    },
+    {
+      "fqdn": "realtime.lv3.org",
+      "service_id": "realtime",
+      "environment": "production",
+      "status": "active",
+      "owner_adr": "0196",
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "platform-sso",
+        "audience": "operator"
+      },
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "service_topology",
+          "kind": "proxy"
+        },
+        "edge_auth": {
+          "provider": "oauth2_proxy",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": "realtime",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "noindex": true,
+          "server_sent_events": true,
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'monitoring-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.netdata_port }}"
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
+      },
+      "live_tracking_expected": true,
+      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
     },
     {
       "fqdn": "search.lv3.org",
       "service_id": "searxng",
       "environment": "production",
       "status": "active",
-      "exposure": "private-only",
-      "auth_requirement": "private_network",
-      "target": "100.64.0.1",
-      "target_port": 80,
       "owner_adr": "0148",
-      "dns_record_type": "A",
-      "route_mode": "dns-only",
-      "route_source": "dns-only",
-      "route_kind": null,
-      "edge_auth": "none",
-      "unauthenticated_paths": [],
-      "unauthenticated_prefix_paths": [],
-      "repo_route_service_id": null,
-      "repo_route_metadata": {},
-      "tls": {
-        "provider": "none",
-        "auto_renew": false
+      "publication": {
+        "delivery_model": "private-network",
+        "access_model": "private-network",
+        "audience": "private-network"
       },
-      "live_tracking_expected": false
+      "adapter": {
+        "dns": {
+          "target": "100.64.0.1",
+          "target_port": 80,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "dns-only",
+          "source": "dns-only",
+          "kind": null
+        },
+        "edge_auth": {
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": null,
+        "repo_route_metadata": {},
+        "tls": {
+          "provider": "none",
+          "auto_renew": false
+        }
+      },
+      "live_tracking_expected": false,
+      "notes": "Tailnet-only HTTP publication through the Proxmox host Tailscale proxy to docker-runtime-lv3."
     },
     {
       "fqdn": "sso.lv3.org",
       "service_id": "keycloak",
       "environment": "production",
       "status": "active",
-      "exposure": "edge-published",
-      "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
-      "target_port": 443,
       "owner_adr": "0056",
-      "dns_record_type": "A",
-      "route_mode": "edge",
-      "route_source": "service_topology",
-      "route_kind": "proxy",
-      "edge_auth": "none",
-      "unauthenticated_paths": [],
-      "unauthenticated_prefix_paths": [],
-      "repo_route_service_id": "keycloak",
-      "repo_route_metadata": {
-        "enabled": true,
-        "tls": true,
-        "upstream": "http://10.10.10.20:8091"
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "upstream-auth",
+        "audience": "operator"
       },
-      "tls": {
-        "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-        "auto_renew": true
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "service_topology",
+          "kind": "proxy"
+        },
+        "edge_auth": {
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": "keycloak",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "upstream": "http://10.10.10.20:8091"
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
       },
-      "live_tracking_expected": true
+      "live_tracking_expected": true,
+      "notes": null
     },
     {
       "fqdn": "sso.staging.lv3.org",
       "service_id": "keycloak",
       "environment": "staging",
       "status": "planned",
-      "exposure": "edge-published",
-      "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
-      "target_port": 443,
       "owner_adr": "0072",
-      "dns_record_type": "A",
-      "route_mode": "dns-only",
-      "route_source": "dns-only",
-      "route_kind": null,
-      "edge_auth": "none",
-      "unauthenticated_paths": [],
-      "unauthenticated_prefix_paths": [],
-      "repo_route_service_id": null,
-      "repo_route_metadata": {},
-      "tls": {
-        "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-        "auto_renew": true
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "upstream-auth",
+        "audience": "operator"
       },
-      "live_tracking_expected": false
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "dns-only",
+          "source": "dns-only",
+          "kind": null
+        },
+        "edge_auth": {
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": null,
+        "repo_route_metadata": {},
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
+      },
+      "live_tracking_expected": false,
+      "notes": "Planned staging identity hostname on the shared NGINX edge."
     },
     {
       "fqdn": "status.lv3.org",
       "service_id": "status_page",
       "environment": "production",
       "status": "active",
-      "exposure": "edge-published",
-      "auth_requirement": "none",
-      "target": "65.108.75.123",
-      "target_port": 443,
       "owner_adr": "0109",
-      "dns_record_type": "A",
-      "route_mode": "edge",
-      "route_source": "service_topology",
-      "route_kind": "proxy",
-      "edge_auth": "none",
-      "unauthenticated_paths": [],
-      "unauthenticated_prefix_paths": [],
-      "repo_route_service_id": "status_page",
-      "repo_route_metadata": {
-        "enabled": true,
-        "tls": true,
-        "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:3001",
-        "root_proxy_path": "/status/lv3-platform"
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "open",
+        "audience": "public"
       },
-      "tls": {
-        "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-        "auto_renew": true
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "service_topology",
+          "kind": "proxy"
+        },
+        "edge_auth": {
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": "status_page",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:3001",
+          "root_proxy_path": "/status/lv3-platform"
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
       },
-      "live_tracking_expected": true
+      "live_tracking_expected": true,
+      "notes": null
+    },
+    {
+      "fqdn": "tasks.lv3.org",
+      "service_id": "plane",
+      "environment": "production",
+      "status": "active",
+      "owner_adr": "0193",
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "platform-sso",
+        "audience": "operator"
+      },
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "service_topology",
+          "kind": "proxy"
+        },
+        "edge_auth": {
+          "provider": "oauth2_proxy",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": "plane",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "noindex": true,
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.plane_port }}"
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
+      },
+      "live_tracking_expected": true,
+      "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
     },
     {
       "fqdn": "uptime.lv3.org",
       "service_id": "uptime_kuma",
       "environment": "production",
       "status": "active",
-      "exposure": "edge-published",
-      "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
-      "target_port": 443,
       "owner_adr": "0027",
-      "dns_record_type": "A",
-      "route_mode": "edge",
-      "route_source": "service_topology",
-      "route_kind": "proxy",
-      "edge_auth": "none",
-      "unauthenticated_paths": [],
-      "unauthenticated_prefix_paths": [],
-      "repo_route_service_id": "uptime_kuma",
-      "repo_route_metadata": {
-        "enabled": true,
-        "tls": true,
-        "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:3001"
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "upstream-auth",
+        "audience": "operator"
       },
-      "tls": {
-        "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-        "auto_renew": true
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "service_topology",
+          "kind": "proxy"
+        },
+        "edge_auth": {
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": "uptime_kuma",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:3001"
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
       },
-      "live_tracking_expected": true
+      "live_tracking_expected": true,
+      "notes": null
     },
     {
       "fqdn": "uptime.staging.lv3.org",
       "service_id": "uptime_kuma",
       "environment": "staging",
       "status": "planned",
-      "exposure": "edge-published",
-      "auth_requirement": "upstream_auth",
-      "target": "65.108.75.123",
-      "target_port": 443,
       "owner_adr": "0072",
-      "dns_record_type": "A",
-      "route_mode": "dns-only",
-      "route_source": "dns-only",
-      "route_kind": null,
-      "edge_auth": "none",
-      "unauthenticated_paths": [],
-      "unauthenticated_prefix_paths": [],
-      "repo_route_service_id": null,
-      "repo_route_metadata": {},
-      "tls": {
-        "provider": "letsencrypt",
-        "cert_path": "/etc/letsencrypt/live/lv3-edge/",
-        "auto_renew": true
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "upstream-auth",
+        "audience": "operator"
       },
-      "live_tracking_expected": false
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "dns-only",
+          "source": "dns-only",
+          "kind": null
+        },
+        "edge_auth": {
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": null,
+        "repo_route_metadata": {},
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
+      },
+      "live_tracking_expected": false,
+      "notes": "Planned staged monitoring hostname on the shared NGINX edge."
     },
     {
       "fqdn": "vault.lv3.org",
       "service_id": "vaultwarden",
       "environment": "production",
       "status": "active",
-      "exposure": "private-only",
-      "auth_requirement": "private_network",
-      "target": "100.118.189.95",
-      "target_port": 443,
       "owner_adr": "0147",
-      "dns_record_type": "A",
-      "route_mode": "dns-only",
-      "route_source": "dns-only",
-      "route_kind": null,
-      "edge_auth": "none",
-      "unauthenticated_paths": [],
-      "unauthenticated_prefix_paths": [],
-      "repo_route_service_id": null,
-      "repo_route_metadata": {},
-      "tls": {
-        "provider": "step-ca",
-        "cert_path": "/opt/vaultwarden/tls",
-        "auto_renew": true
+      "publication": {
+        "delivery_model": "private-network",
+        "access_model": "private-network",
+        "audience": "private-network"
       },
-      "live_tracking_expected": false
+      "adapter": {
+        "dns": {
+          "target": "100.118.189.95",
+          "target_port": 443,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "dns-only",
+          "source": "dns-only",
+          "kind": null
+        },
+        "edge_auth": {
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": null,
+        "repo_route_metadata": {},
+        "tls": {
+          "provider": "step-ca",
+          "cert_path": "/opt/vaultwarden/tls",
+          "auto_renew": true
+        }
+      },
+      "live_tracking_expected": false,
+      "notes": "Tailnet-only HTTPS publication through the Proxmox host using an LV3 internal CA certificate."
+    },
+    {
+      "fqdn": "wiki.lv3.org",
+      "service_id": "outline",
+      "environment": "production",
+      "status": "active",
+      "owner_adr": "0199",
+      "publication": {
+        "delivery_model": "shared-edge",
+        "access_model": "upstream-auth",
+        "audience": "operator"
+      },
+      "adapter": {
+        "dns": {
+          "target": "65.108.75.123",
+          "target_port": 443,
+          "record_type": "A"
+        },
+        "routing": {
+          "mode": "edge",
+          "source": "service_topology",
+          "kind": "proxy"
+        },
+        "edge_auth": {
+          "provider": "none",
+          "unauthenticated_paths": [],
+          "unauthenticated_prefix_paths": []
+        },
+        "repo_route_service_id": "outline",
+        "repo_route_metadata": {
+          "enabled": true,
+          "tls": true,
+          "noindex": true,
+          "upstream": "http://{{ (proxmox_guests | selectattr('name', 'equalto', 'docker-runtime-lv3') | map(attribute='ipv4') | first) }}:{{ platform_port_assignments.outline_port }}"
+        },
+        "tls": {
+          "provider": "letsencrypt",
+          "cert_path": "/etc/letsencrypt/live/lv3-edge/",
+          "auto_renew": true
+        }
+      },
+      "live_tracking_expected": true,
+      "notes": "Published through the shared NGINX edge while Outline itself delegates browser authentication to the repo-managed Keycloak OIDC client."
     }
   ],
   "summary": {
-    "catalog_total": 26,
-    "active_total": 22,
-    "active_public_dns_total": 18,
+    "catalog_total": 33,
+    "active_total": 29,
+    "active_public_total": 25,
     "active_private_total": 4,
     "planned_total": 4,
-    "edge_total": 17,
-    "edge_oidc_total": 8
+    "shared_edge_total": 25,
+    "platform_sso_total": 13
   }
 }

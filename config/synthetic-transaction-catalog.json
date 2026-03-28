@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0",
+  "description": "Privacy-safe synthetic transactions used to compare restore, standby, and preview behaviour under representative control-plane request patterns.",
+  "targets": {
+    "restore-docker-runtime": {
+      "name": "Restored docker-runtime control plane",
+      "description": "Replay representative operator-facing control-plane reads against the isolated docker-runtime restore target after boot and warm-up complete.",
+      "validation_window": {
+        "name": "post_restore_recovery",
+        "detail": "This replay executes against the restored docker-runtime rehearsal target after the guest boots and warm-up completes on the isolated fixture network."
+      },
+      "queue_depth": {
+        "status": "not_applicable",
+        "detail": "The initial restore-rehearsal suite focuses on idempotent HTTP journeys. Queue or backlog probes can be added later for asynchronous workloads."
+      },
+      "scenarios": [
+        {
+          "id": "keycloak-oidc-discovery",
+          "name": "Keycloak OIDC discovery",
+          "kind": "http",
+          "required": true,
+          "iterations": 3,
+          "minimum_success_rate": 1.0,
+          "request": {
+            "url": "http://127.0.0.1:18080/realms/lv3/.well-known/openid-configuration",
+            "method": "GET",
+            "timeout_seconds": 10,
+            "expected_status": [
+              200
+            ],
+            "expect_body_contains": [
+              "\"issuer\"",
+              "/realms/lv3"
+            ]
+          }
+        },
+        {
+          "id": "netbox-login-page",
+          "name": "NetBox login page",
+          "kind": "http",
+          "required": true,
+          "iterations": 3,
+          "minimum_success_rate": 1.0,
+          "request": {
+            "url": "http://127.0.0.1:8082/login/",
+            "method": "GET",
+            "timeout_seconds": 10,
+            "expected_status": [
+              200
+            ],
+            "expect_body_contains": [
+              "NetBox",
+              "csrfmiddlewaretoken"
+            ]
+          }
+        },
+        {
+          "id": "windmill-api-version",
+          "name": "Windmill API version",
+          "kind": "http",
+          "required": true,
+          "iterations": 3,
+          "minimum_success_rate": 1.0,
+          "request": {
+            "url": "http://127.0.0.1:8000/api/version",
+            "method": "GET",
+            "timeout_seconds": 10,
+            "expected_status": [
+              200
+            ],
+            "expect_body_contains": [
+              "CE v"
+            ]
+          }
+        },
+        {
+          "id": "openbao-active-health",
+          "name": "OpenBao active health",
+          "kind": "http",
+          "required": false,
+          "iterations": 3,
+          "minimum_success_rate": 1.0,
+          "request": {
+            "url": "http://127.0.0.1:8201/v1/sys/health",
+            "method": "GET",
+            "timeout_seconds": 10,
+            "expected_status": [
+              200
+            ],
+            "expect_body_contains": [
+              "\"initialized\":true"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

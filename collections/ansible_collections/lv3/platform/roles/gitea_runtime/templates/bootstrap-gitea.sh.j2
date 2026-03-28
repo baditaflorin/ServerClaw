@@ -17,11 +17,6 @@ db_uri="postgresql://{{ gitea_database_user }}:${GITEA_DATABASE_PASSWORD}@{{ git
 admin_password="${GITEA_ADMIN_PASSWORD}"
 oidc_client_secret="${GITEA_KEYCLOAK_CLIENT_SECRET}"
 token_file="{{ gitea_admin_token_remote_file }}"
-renovate_user="{{ gitea_renovate_username }}"
-renovate_email="{{ gitea_renovate_email }}"
-renovate_password_file="{{ gitea_renovate_password_remote_file }}"
-renovate_token_file="{{ gitea_renovate_token_remote_file }}"
-renovate_secret_name="{{ gitea_renovate_actions_secret_name }}"
 runner_token_file="{{ gitea_runner_registration_token_remote_file }}"
 hook_template="{{ gitea_prereceive_hook_template }}"
 
@@ -89,36 +84,7 @@ if [[ ! -s "${runner_token_file}" ]]; then
   changed=true
 fi
 
-if [[ ! -s "${renovate_password_file}" ]]; then
-  umask 077
-  openssl rand -base64 24 > "${renovate_password_file}"
-fi
-
-renovate_password="$(tr -d '\r\n' < "${renovate_password_file}")"
-
-create_renovate_output="$(docker exec "${container}" gitea admin user create \
-  --username "${renovate_user}" \
-  --password "${renovate_password}" \
-  --email "${renovate_email}" \
-  --must-change-password=false 2>&1 || true)"
-if ! grep -qi "already exists" <<<"${create_renovate_output}"; then
-  if [[ -n "${create_renovate_output}" ]]; then
-    changed=true
-  fi
-fi
-
-if [[ ! -s "${renovate_token_file}" ]]; then
-  umask 077
-  docker exec "${container}" gitea admin user generate-access-token \
-    --username "${renovate_user}" \
-    --token-name "repo-managed-renovate-$(date +%s)" \
-    --scopes all \
-    --raw > "${renovate_token_file}"
-  changed=true
-fi
-
 token="$(tr -d '\r\n' < "${token_file}")"
-renovate_token="$(tr -d '\r\n' < "${renovate_token_file}")"
 
 org_status="$(curl -sS -o /tmp/gitea-org.json -w '%{http_code}' \
   -H "Authorization: token ${token}" \
@@ -146,35 +112,9 @@ if [[ "${repo_status}" == "404" ]]; then
 fi
 rm -f /tmp/gitea-repo.json
 
-collaborator_status="$(curl -sS -o /tmp/gitea-collaborator.json -w '%{http_code}' \
-  -H "Authorization: token ${token}" \
-  "${api_url}/api/v1/repos/${repo_org}/${repo_name}/collaborators/${renovate_user}")"
-if [[ "${collaborator_status}" == "404" ]]; then
-  curl -sS \
-    -X PUT \
-    -H "Authorization: token ${token}" \
-    -H 'Content-Type: application/json' \
-    -d '{"permission":"write"}' \
-    "${api_url}/api/v1/repos/${repo_org}/${repo_name}/collaborators/${renovate_user}" >/dev/null
-  changed=true
-fi
-rm -f /tmp/gitea-collaborator.json
-
-renovate_secret_payload="$(
-  printf '%s' "${renovate_token}" | python3 -c 'import json, sys; print(json.dumps({"data": sys.stdin.read()}))'
-)"
-curl -sS \
-  -X PUT \
-  -H "Authorization: token ${token}" \
-  -H 'Content-Type: application/json' \
-  -d "${renovate_secret_payload}" \
-  "${api_url}/api/v1/repos/${repo_org}/${repo_name}/actions/secrets/${renovate_secret_name}" >/dev/null
-
 repo_hook_dir="{{ gitea_data_dir }}/git/repositories/${repo_org}/${repo_name}.git/custom_hooks"
 mkdir -p "${repo_hook_dir}"
-chown 1000:1000 "${repo_hook_dir}"
-chmod 0755 "${repo_hook_dir}"
-install -o 1000 -g 1000 -m 0755 "${hook_template}" "${repo_hook_dir}/pre-receive"
+install -m 0750 "${hook_template}" "${repo_hook_dir}/pre-receive"
 
 if [[ "${changed}" == "true" ]]; then
   echo "GITEA_BOOTSTRAP_CHANGED=true"

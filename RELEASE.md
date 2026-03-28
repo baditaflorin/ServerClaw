@@ -1,12 +1,12 @@
-# Release 0.177.10
+# Release 0.177.39
 
-- Date: 2026-03-27
+- Date: 2026-03-28
 
 ## Summary
-- completed ADR 0119 latest-main live apply by hardening Windmill seed sync and replaying the scheduler dispatcher, lane, watchdog, and watchdog-loop paths from the current mainline
+- integrated ADR 0211 by promoting the shared policy registry into main and re-verifying the governed headscale live-apply path from merged main
 
 ## Platform Impact
-- platform_version advances to 0.130.30; ADR 0119 is now verified from main with durable worker checkout refresh, bootstrap-session auth fallback, scheduler token propagation, and the repo-managed scheduler schedules enabled on production Windmill.
+- keeps the platform at 0.130.38; this release integrates ADR 0211 on top of 0.177.38 so the shared policy registry now governs redundancy, capacity-class, and placement rules across validation, docs, and the verified headscale live-apply path already running on the platform
 
 ## Upgrade Guide
 - [docs/upgrade/v1.md](docs/upgrade/v1.md)

@@ -1,0 +1,8 @@
+{
+  "created_at": "2026-03-27T23:32:31.274808+00:00",
+  "bypass": "skip_remote_gate",
+  "reason": "remote pre-push gate terminated after successful local ADR 0186 validation sweep",
+  "source": "pre-push-hook",
+  "branch": "codex/ws-0186-live-apply",
+  "commit": "0f7f4ea6b6e7e1e465c230cdfaf799d250b770fc"
+}

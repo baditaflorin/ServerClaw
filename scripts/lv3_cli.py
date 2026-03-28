@@ -44,6 +44,7 @@ except ImportError:  # pragma: no cover - packaged entrypoint path
 
 from platform.health import HealthCompositeClient, ServiceHealthNotFoundError
 from platform.idempotency import IdempotencyStore
+from platform.llm import PlatformContextRetriever
 from platform.scheduler import build_scheduler
 from scripts.risk_scorer import ExecutionIntent, assemble_context, compile_workflow_intent, score_intent
 CLI_VERSION = "0.1.0"
@@ -377,6 +378,60 @@ def resolve_deploy_command(service_id: str, environment: str) -> CommandPlan:
     )
 
 
+def resolve_deploy_repo_command(
+    *,
+    repo: str,
+    branch: str,
+    app_name: str,
+    project: str,
+    environment: str,
+    base_directory: str | None,
+    domain: str | None,
+    subdomain: str | None,
+    build_pack: str,
+    wait: bool,
+    force: bool,
+    timeout: int,
+) -> CommandPlan:
+    coolify_args: list[str] = [
+        "--repo",
+        repo,
+        "--branch",
+        branch,
+        "--app-name",
+        app_name,
+        "--project",
+        project,
+        "--environment",
+        environment,
+        "--build-pack",
+        build_pack,
+    ]
+    if base_directory:
+        coolify_args.extend(["--base-directory", base_directory])
+    if domain:
+        coolify_args.extend(["--domain", domain])
+    if subdomain:
+        coolify_args.extend(["--subdomain", subdomain])
+    if wait:
+        coolify_args.append("--wait")
+    if force:
+        coolify_args.append("--force")
+    if timeout != 900:
+        coolify_args.extend(["--timeout", str(timeout)])
+
+    return CommandPlan(
+        label=f"deploy-repo {app_name}",
+        route="controller local -> Coolify API wrapper",
+        command=[
+            "make",
+            "coolify-manage",
+            "ACTION=deploy-repo",
+            f"COOLIFY_ARGS={command_string(coolify_args)}",
+        ],
+    )
+
+
 def resolve_lint_command(local: bool) -> CommandPlan:
     if local:
         return CommandPlan(
@@ -531,6 +586,7 @@ def fixture_command(
     fixture_name: str | None = None,
     *,
     purpose: str | None = None,
+    lease_purpose: str | None = None,
     owner: str | None = None,
     lifetime_hours: float | None = None,
     policy: str | None = None,
@@ -551,6 +607,8 @@ def fixture_command(
         command.append(f"FIXTURE={fixture_name}")
     if purpose:
         command.append(f"PURPOSE={purpose}")
+    if lease_purpose:
+        command.append(f"LEASE_PURPOSE={lease_purpose}")
     if owner:
         command.append(f"OWNER={owner}")
     if lifetime_hours is not None:
@@ -1500,6 +1558,30 @@ def open_service_url(service_id: str, environment: str, *, dry_run: bool, explai
     return 0 if webbrowser.open(url) else 1
 
 
+def available_diagrams() -> list[str]:
+    diagrams_dir = repo_path("docs", "diagrams")
+    if not diagrams_dir.exists():
+        return []
+    return sorted(path.stem for path in diagrams_dir.glob("*.excalidraw"))
+
+
+def open_diagram_source(diagram_name: str, *, dry_run: bool, explain: bool, no_color: bool) -> int:
+    diagrams_dir = repo_path("docs", "diagrams")
+    path = diagrams_dir / f"{diagram_name}.excalidraw"
+    if not path.exists():
+        raise SystemExit(f"Unknown diagram '{diagram_name}'.")
+    uri = path.resolve().as_uri()
+    plan = CommandPlan(
+        label=f"open diagram {diagram_name}",
+        route="controller local browser",
+        command=["python3", "-m", "webbrowser", uri],
+    )
+    print_plan(plan, no_color=no_color)
+    if dry_run or explain:
+        return 0
+    return 0 if webbrowser.open(uri) else 1
+
+
 def manifest_show_command(*, as_json: bool, refresh: bool) -> int:
     import platform_manifest
 
@@ -1945,6 +2027,36 @@ def search_command(query: str, *, collection: str | None, limit: int, rebuild: b
     return 0
 
 
+def query_platform_context_command(question: str, *, limit: int, json_output: bool) -> int:
+    try:
+        retriever = PlatformContextRetriever(timeout_seconds=30)
+        payload = retriever.retrieve_payload(question, top_k=limit)
+    except (OSError, RuntimeError, ValueError) as exc:
+        print(f"Platform context query failed: {exc}", file=sys.stderr)
+        return 1
+    if json_output:
+        emit_json(payload)
+        return 0
+    matches = payload.get("matches", [])
+    if not matches:
+        print(f"No platform-context matches for '{question}'.")
+        return 0
+    for index, match in enumerate(matches, start=1):
+        citation = [str(match.get("source_path", "") or "unknown")]
+        adr_number = match.get("adr_number")
+        section_heading = match.get("section_heading")
+        if adr_number:
+            citation.append(f"ADR {adr_number}")
+        if section_heading:
+            citation.append(str(section_heading))
+        print(f"[{index}] {' | '.join(citation)}  score={float(match.get('score', 0.0) or 0.0):.3f}")
+        content = str(match.get("content", "") or "").strip()
+        if content:
+            print(textwrap.shorten(content.replace("\n", " "), width=200, placeholder=" ..."))
+        print()
+    return 0
+
+
 def agent_state_client(agent_id: str, task_id: str) -> AgentStateClient:
     return AgentStateClient(agent_id=agent_id, task_id=task_id)
 
@@ -2212,6 +2324,7 @@ def completion_candidates(words: list[str], current: str) -> list[str]:
         "capacity",
         "promote",
         "run",
+        "diagram",
         "runbook",
         "logs",
         "ssh",
@@ -2227,6 +2340,10 @@ def completion_candidates(words: list[str], current: str) -> list[str]:
     if words[1] in {"deploy", "impact", "status", "logs", "open"}:
         candidates = sorted(set(load_service_map()) | set(SERVICE_ALIASES))
         return [service_id for service_id in candidates if service_id.startswith(current)]
+    if words[1:3] == ["diagram", "open"]:
+        return [diagram for diagram in available_diagrams() if diagram.startswith(current)]
+    if words[1] == "diagram" and len(words) == 3:
+        return [action for action in ["open"] if action.startswith(current)]
     if words[1] == "validate" and "--service" in words:
         candidates = sorted(set(load_service_map()) | set(SERVICE_ALIASES))
         return [service_id for service_id in candidates if service_id.startswith(current)]
@@ -2372,6 +2489,22 @@ def build_parser() -> argparse.ArgumentParser:
     deploy.add_argument("--dry-run", action="store_true")
     deploy.add_argument("--explain", action="store_true")
 
+    deploy_repo = subparsers.add_parser("deploy-repo", help="Deploy one repository through the governed Coolify wrapper.")
+    deploy_repo.add_argument("--repo", required=True, help="Repository URL.")
+    deploy_repo.add_argument("--branch", default="main", help="Repository branch.")
+    deploy_repo.add_argument("--base-directory", help="Optional base directory inside the repository.")
+    deploy_repo.add_argument("--app-name", default="repo-smoke", help="Coolify application name.")
+    deploy_repo.add_argument("--project", default="LV3 Apps", help="Coolify project name.")
+    deploy_repo.add_argument("--environment", default="production", help="Coolify environment name.")
+    deploy_repo.add_argument("--domain", help="Full domain URL, for example http://apps.lv3.org.")
+    deploy_repo.add_argument("--subdomain", help="Subdomain under apps.lv3.org, for example hello.")
+    deploy_repo.add_argument("--build-pack", default="static", choices=["nixpacks", "static", "dockerfile", "dockercompose"])
+    deploy_repo.add_argument("--wait", action="store_true")
+    deploy_repo.add_argument("--force", action="store_true")
+    deploy_repo.add_argument("--timeout", type=int, default=900)
+    deploy_repo.add_argument("--dry-run", action="store_true")
+    deploy_repo.add_argument("--explain", action="store_true")
+
     impact = subparsers.add_parser("impact", help="Show dependency and failure impact for one service.")
     impact.add_argument("service")
 
@@ -2391,6 +2524,14 @@ def build_parser() -> argparse.ArgumentParser:
     search.add_argument("--collection")
     search.add_argument("--limit", type=int, default=10)
     search.add_argument("--rebuild", action="store_true")
+
+    query_platform_context = subparsers.add_parser(
+        "query-platform-context",
+        help="Query the private semantic platform context service.",
+    )
+    query_platform_context.add_argument("question")
+    query_platform_context.add_argument("--limit", type=int, default=5)
+    query_platform_context.add_argument("--json", action="store_true")
 
     status = subparsers.add_parser("status", help="Show service health status.")
     status.add_argument("service", nargs="?")
@@ -2434,6 +2575,7 @@ def build_parser() -> argparse.ArgumentParser:
     fixture_create = fixture_subparsers.add_parser("create", aliases=["up"], help="Create one ephemeral fixture VM.")
     fixture_create.add_argument("name", nargs="?")
     fixture_create.add_argument("--purpose")
+    fixture_create.add_argument("--lease-purpose", choices=["fixture", "preview", "recovery-drill", "load-test"])
     fixture_create.add_argument("--owner")
     fixture_create.add_argument("--lifetime-hours", type=float)
     fixture_create.add_argument(
@@ -2556,6 +2698,13 @@ def build_parser() -> argparse.ArgumentParser:
     open_parser.add_argument("--env", default=DEFAULT_ENVIRONMENT, choices=ENVIRONMENT_CHOICES)
     open_parser.add_argument("--dry-run", action="store_true")
     open_parser.add_argument("--explain", action="store_true")
+
+    diagram = subparsers.add_parser("diagram", help="Open one generated Excalidraw source file.")
+    diagram_subparsers = diagram.add_subparsers(dest="diagram_action", required=True)
+    diagram_open = diagram_subparsers.add_parser("open", help="Open one generated diagram source locally.")
+    diagram_open.add_argument("name")
+    diagram_open.add_argument("--dry-run", action="store_true")
+    diagram_open.add_argument("--explain", action="store_true")
 
     manifest = subparsers.add_parser("manifest", help="Inspect or refresh the platform manifest.")
     manifest_subparsers = manifest.add_subparsers(dest="manifest_action", required=True)
@@ -2730,6 +2879,26 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "deploy":
         return run_plan(resolve_deploy_command(args.service, args.env), dry_run=args.dry_run, explain=args.explain, no_color=no_color)
+    if args.command == "deploy-repo":
+        return run_plan(
+            resolve_deploy_repo_command(
+                repo=args.repo,
+                branch=args.branch,
+                app_name=args.app_name,
+                project=args.project,
+                environment=args.environment,
+                base_directory=args.base_directory,
+                domain=args.domain,
+                subdomain=args.subdomain,
+                build_pack=args.build_pack,
+                wait=args.wait,
+                force=args.force,
+                timeout=args.timeout,
+            ),
+            dry_run=args.dry_run,
+            explain=args.explain,
+            no_color=no_color,
+        )
     if args.command == "impact":
         return impact_command(args.service)
     if args.command == "lint":
@@ -2743,6 +2912,8 @@ def main(argv: list[str] | None = None) -> int:
         )
     if args.command == "search":
         return search_command(args.query, collection=args.collection, limit=args.limit, rebuild=args.rebuild)
+    if args.command == "query-platform-context":
+        return query_platform_context_command(args.question, limit=args.limit, json_output=args.json)
     if args.command == "status":
         return status_command(args.service, args.env, timeout=args.timeout, no_color=no_color)
     if args.command == "health":
@@ -2766,6 +2937,7 @@ def main(argv: list[str] | None = None) -> int:
                 args.fixture_action,
                 getattr(args, "name", None),
                 purpose=getattr(args, "purpose", None),
+                lease_purpose=getattr(args, "lease_purpose", None),
                 owner=getattr(args, "owner", None),
                 lifetime_hours=getattr(args, "lifetime_hours", None),
                 policy=getattr(args, "policy", None),
@@ -2855,6 +3027,9 @@ def main(argv: list[str] | None = None) -> int:
         return ssh_command(args.vm_name, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
     if args.command == "open":
         return open_service_url(args.service, args.env, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
+    if args.command == "diagram":
+        if args.diagram_action == "open":
+            return open_diagram_source(args.name, dry_run=args.dry_run, explain=args.explain, no_color=no_color)
     if args.command == "manifest":
         if args.manifest_action == "show":
             return manifest_show_command(as_json=args.json, refresh=args.refresh)

@@ -17,6 +17,12 @@ from pathlib import Path
 from typing import Any
 
 from controller_automation_toolkit import emit_cli_error, repo_path, write_json
+from publication_contract import (
+    publication_access_model,
+    publication_audience,
+    publication_delivery_model,
+    registry_entries,
+)
 import subdomain_catalog
 
 
@@ -84,6 +90,52 @@ def _route_entry(
     }
 
 
+def _publication_entry(
+    entry: dict[str, Any],
+    route: dict[str, Any] | None,
+) -> dict[str, Any]:
+    route_mode = "edge" if route else "dns-only"
+    return {
+        "fqdn": entry["fqdn"],
+        "service_id": entry.get("service_id"),
+        "environment": entry["environment"],
+        "status": entry["status"],
+        "owner_adr": entry["owner_adr"],
+        "publication": {
+            "delivery_model": publication_delivery_model(entry["exposure"]),
+            "access_model": publication_access_model(entry["auth_requirement"]),
+            "audience": publication_audience(
+                exposure=entry["exposure"],
+                auth_requirement=entry["auth_requirement"],
+            ),
+        },
+        "adapter": {
+            "dns": {
+                "target": entry["target"],
+                "target_port": entry.get("target_port"),
+                "record_type": hostname_record_type(entry["target"]),
+            },
+            "routing": {
+                "mode": route_mode,
+                "source": route["route_source"] if route else "dns-only",
+                "kind": route["route_kind"] if route else None,
+            },
+            "edge_auth": {
+                "provider": route["edge_auth"] if route else "none",
+                "unauthenticated_paths": route["unauthenticated_paths"] if route else [],
+                "unauthenticated_prefix_paths": route["unauthenticated_prefix_paths"] if route else [],
+            },
+            "repo_route_service_id": route["service_id"] if route else None,
+            "repo_route_metadata": route["metadata"] if route else {},
+            "tls": deepcopy(entry["tls"]),
+        },
+        "live_tracking_expected": entry["status"] == "active"
+        and entry["environment"] == "production"
+        and publication_delivery_model(entry["exposure"]) != "private-network",
+        "notes": entry.get("notes"),
+    }
+
+
 def build_edge_route_index(
     host_vars: dict[str, Any],
     public_edge_defaults: dict[str, Any],
@@ -121,6 +173,7 @@ def build_edge_route_index(
         for hostname in subdomain_catalog.collect_site_hostnames(
             site,
             f"inventory/host_vars/proxmox_florin.yml.lv3_service_topology.{service_id}",
+            allow_wildcards=True,
         ):
             routes[hostname] = _route_entry(
                 hostname=hostname,
@@ -138,7 +191,11 @@ def build_edge_route_index(
         )
     ):
         site = subdomain_catalog.require_mapping(site, f"public_edge_extra_sites[{index}]")
-        for hostname in subdomain_catalog.collect_site_hostnames(site, f"public_edge_extra_sites[{index}]"):
+        for hostname in subdomain_catalog.collect_site_hostnames(
+            site,
+            f"public_edge_extra_sites[{index}]",
+            allow_wildcards=True,
+        ):
             routes[hostname] = _route_entry(
                 hostname=hostname,
                 route_source="public_edge_extra_sites",
@@ -151,6 +208,27 @@ def build_edge_route_index(
             )
 
     return routes
+
+
+def resolve_route_for_hostname(
+    hostname: str,
+    route_index: dict[str, dict[str, Any]] | list[dict[str, Any]],
+) -> dict[str, Any] | None:
+    if isinstance(route_index, list):
+        route_index = {
+            subdomain_catalog.require_str(entry.get("hostname"), "route.hostname"): entry
+            for entry in route_index
+        }
+    route = route_index.get(hostname)
+    if route is not None:
+        return route
+    for route_hostname, route_entry in route_index.items():
+        if subdomain_catalog.hostname_matches_route(hostname, route_hostname):
+            return route_entry
+        for alias in route_entry.get("aliases", []):
+            if subdomain_catalog.hostname_matches_route(hostname, alias):
+                return route_entry
+    return None
 
 
 def build_registry(
@@ -169,52 +247,33 @@ def build_registry(
     subdomain_catalog.validate_subdomain_catalog(catalog, service_catalog, host_vars, public_edge_defaults)
 
     route_index = build_edge_route_index(host_vars, public_edge_defaults)
-    registry_entries: list[dict[str, Any]] = []
+    publication_entries: list[dict[str, Any]] = []
 
     for entry in sorted(catalog["subdomains"], key=lambda item: item["fqdn"]):
-        route = route_index.get(entry["fqdn"])
-        route_mode = "edge" if route else "dns-only"
-        is_public_dns = entry["environment"] == "production" and entry["exposure"] != "private-only"
-        registry_entries.append(
-            {
-                "fqdn": entry["fqdn"],
-                "service_id": entry.get("service_id"),
-                "environment": entry["environment"],
-                "status": entry["status"],
-                "exposure": entry["exposure"],
-                "auth_requirement": entry["auth_requirement"],
-                "target": entry["target"],
-                "target_port": entry.get("target_port"),
-                "owner_adr": entry["owner_adr"],
-                "dns_record_type": hostname_record_type(entry["target"]),
-                "route_mode": route_mode,
-                "route_source": route["route_source"] if route else "dns-only",
-                "route_kind": route["route_kind"] if route else None,
-                "edge_auth": route["edge_auth"] if route else "none",
-                "unauthenticated_paths": route["unauthenticated_paths"] if route else [],
-                "unauthenticated_prefix_paths": route["unauthenticated_prefix_paths"] if route else [],
-                "repo_route_service_id": route["service_id"] if route else None,
-                "repo_route_metadata": route["metadata"] if route else {},
-                "tls": deepcopy(entry["tls"]),
-                "live_tracking_expected": entry["status"] == "active" and is_public_dns,
-            }
-        )
+        route = resolve_route_for_hostname(entry["fqdn"], route_index)
+        publication_entries.append(_publication_entry(entry, route))
 
-    active_entries = [entry for entry in registry_entries if entry["status"] == "active"]
+    active_entries = [entry for entry in publication_entries if entry["status"] == "active"]
     summary = {
-        "catalog_total": len(registry_entries),
+        "catalog_total": len(publication_entries),
         "active_total": len(active_entries),
-        "active_public_dns_total": sum(1 for entry in active_entries if entry["live_tracking_expected"]),
-        "active_private_total": sum(1 for entry in active_entries if entry["exposure"] == "private-only"),
-        "planned_total": sum(1 for entry in registry_entries if entry["status"] == "planned"),
-        "edge_total": sum(1 for entry in registry_entries if entry["route_mode"] == "edge"),
-        "edge_oidc_total": sum(1 for entry in registry_entries if entry["auth_requirement"] == "edge_oidc"),
+        "active_public_total": sum(1 for entry in active_entries if entry["live_tracking_expected"]),
+        "active_private_total": sum(
+            1 for entry in active_entries if entry["publication"]["delivery_model"] == "private-network"
+        ),
+        "planned_total": sum(1 for entry in publication_entries if entry["status"] == "planned"),
+        "shared_edge_total": sum(
+            1 for entry in publication_entries if entry["publication"]["delivery_model"] == "shared-edge"
+        ),
+        "platform_sso_total": sum(
+            1 for entry in publication_entries if entry["publication"]["access_model"] == "platform-sso"
+        ),
     }
 
     return {
-        "schema_version": "1.0.0",
+        "schema_version": "2.0.0",
         "zone_name": "lv3.org",
-        "subdomains": registry_entries,
+        "publications": publication_entries,
         "summary": summary,
     }
 
@@ -230,27 +289,35 @@ def check_registry_current(registry: dict[str, Any]) -> None:
 
 def collect_repo_findings(registry: dict[str, Any]) -> list[dict[str, Any]]:
     findings: list[dict[str, Any]] = []
-    for entry in registry["subdomains"]:
+    for entry in registry_entries(registry):
         if entry.get("status") != "active":
             continue
-        if entry["auth_requirement"] == "edge_oidc" and entry["edge_auth"] != "oauth2_proxy":
+        access_model = entry["publication"]["access_model"]
+        edge_auth_provider = entry["adapter"]["edge_auth"]["provider"]
+        if access_model == "platform-sso" and edge_auth_provider != "oauth2_proxy":
             findings.append(
                 {
                     "check": "repo_edge_auth",
                     "severity": "CRITICAL",
                     "subdomain": entry["fqdn"],
                     "finding": "catalog_requires_edge_oidc_but_route_is_not_protected",
-                    "detail": "Catalog marks the hostname as edge_oidc, but the repo-managed edge route lacks oauth2-proxy protection.",
+                    "detail": (
+                        "The canonical publication model requires platform-sso access, "
+                        "but the repo-managed edge adapter lacks oauth2-proxy protection."
+                    ),
                 }
             )
-        if entry["auth_requirement"] != "edge_oidc" and entry["edge_auth"] == "oauth2_proxy":
+        if access_model != "platform-sso" and edge_auth_provider == "oauth2_proxy":
             findings.append(
                 {
                     "check": "repo_edge_auth",
                     "severity": "WARN",
                     "subdomain": entry["fqdn"],
                     "finding": "route_is_protected_but_catalog_does_not_require_edge_oidc",
-                    "detail": "The repo-managed edge route is protected by oauth2-proxy, but the catalog does not classify it as edge_oidc.",
+                    "detail": (
+                        "The repo-managed edge adapter is protected by oauth2-proxy, "
+                        "but the canonical publication model does not classify the hostname as platform-sso."
+                    ),
                 }
             )
     return findings
@@ -266,14 +333,14 @@ def resolve_public_records(fqdn: str) -> list[str]:
 
 def collect_resolution_findings(registry: dict[str, Any]) -> list[dict[str, Any]]:
     findings: list[dict[str, Any]] = []
-    for entry in registry["subdomains"]:
+    for entry in registry_entries(registry):
         if entry["environment"] != "production":
             continue
-        if entry["exposure"] == "private-only":
+        if entry["publication"]["delivery_model"] == "private-network":
             continue
 
         actual = resolve_public_records(entry["fqdn"])
-        expected = entry["target"]
+        expected = entry["adapter"]["dns"]["target"]
         expected_present = expected in actual
 
         if entry["status"] == "active" and not expected_present:
@@ -313,12 +380,12 @@ def http_probe(url: str) -> tuple[int | None, str, dict[str, str]]:
 
 def collect_http_auth_findings(registry: dict[str, Any]) -> list[dict[str, Any]]:
     findings: list[dict[str, Any]] = []
-    for entry in registry["subdomains"]:
+    for entry in registry_entries(registry):
         if entry["status"] != "active":
             continue
         if entry["environment"] != "production":
             continue
-        if entry["auth_requirement"] != "edge_oidc":
+        if entry["publication"]["access_model"] != "platform-sso":
             continue
 
         _, final_url, _ = http_probe(f"https://{entry['fqdn']}/")
@@ -367,7 +434,7 @@ def fetch_hetzner_zone_records(
 
 def collect_zone_findings(registry: dict[str, Any], zone_records: list[dict[str, Any]]) -> list[dict[str, Any]]:
     findings: list[dict[str, Any]] = []
-    catalog_by_fqdn = {entry["fqdn"]: entry for entry in registry["subdomains"]}
+    catalog_by_fqdn = {entry["fqdn"]: entry for entry in registry_entries(registry)}
     relevant_zone_records = []
 
     for record in zone_records:
@@ -397,7 +464,8 @@ def collect_zone_findings(registry: dict[str, Any], zone_records: list[dict[str,
             )
             continue
         expected = catalog_by_fqdn[fqdn]
-        if expected["dns_record_type"] != record["type"] or expected["target"] != record["value"]:
+        expected_dns = expected["adapter"]["dns"]
+        if expected_dns["record_type"] != record["type"] or expected_dns["target"] != record["value"]:
             findings.append(
                 {
                     "check": "hetzner_zone",
@@ -405,14 +473,16 @@ def collect_zone_findings(registry: dict[str, Any], zone_records: list[dict[str,
                     "subdomain": fqdn,
                     "finding": "zone_record_differs_from_catalog",
                     "detail": (
-                        f"Expected {expected['dns_record_type']} {expected['target']} from the catalog; "
+                        f"Expected {expected_dns['record_type']} {expected_dns['target']} from the catalog; "
                         f"observed {record['type']} {record['value']} in Hetzner DNS."
                     ),
                 }
             )
 
     for fqdn, entry in sorted(catalog_by_fqdn.items()):
-        if entry["environment"] != "production" or entry["exposure"] == "private-only":
+        if entry["environment"] != "production":
+            continue
+        if entry["publication"]["delivery_model"] == "private-network":
             continue
         if entry["status"] != "active":
             continue
@@ -441,10 +511,22 @@ def zone_name_from_record(name: str, zone_name: str) -> str | None:
 
 
 def fetch_tls_metadata(hostname: str, port: int = 443) -> dict[str, Any]:
+    verification_error: str | None = None
+    cert: dict[str, Any]
+
     context = ssl.create_default_context()
-    with socket.create_connection((hostname, port), timeout=10) as sock:
-        with context.wrap_socket(sock, server_hostname=hostname) as tls_sock:
-            cert = tls_sock.getpeercert()
+    try:
+        with socket.create_connection((hostname, port), timeout=10) as sock:
+            with context.wrap_socket(sock, server_hostname=hostname) as tls_sock:
+                cert = tls_sock.getpeercert()
+    except ssl.SSLCertVerificationError as exc:
+        verification_error = str(exc)
+        insecure_context = ssl.create_default_context()
+        insecure_context.check_hostname = False
+        insecure_context.verify_mode = ssl.CERT_NONE
+        with socket.create_connection((hostname, port), timeout=10) as sock:
+            with insecure_context.wrap_socket(sock, server_hostname=hostname) as tls_sock:
+                cert = tls_sock.getpeercert()
 
     not_after = cert.get("notAfter")
     if not not_after:
@@ -455,22 +537,46 @@ def fetch_tls_metadata(hostname: str, port: int = 443) -> dict[str, Any]:
         "expires_at": iso_timestamp(expires_at),
         "days_remaining": int((expires_at - utc_now()).total_seconds() // 86400),
         "issuer": issuer,
+        "verification_error": verification_error,
     }
 
 
 def collect_tls_findings(registry: dict[str, Any]) -> list[dict[str, Any]]:
     findings: list[dict[str, Any]] = []
-    for entry in registry["subdomains"]:
+    for entry in registry_entries(registry):
         if entry["status"] != "active":
             continue
         if entry["environment"] != "production":
             continue
-        if entry["tls"]["provider"] == "none":
+        if entry["adapter"]["tls"]["provider"] == "none":
             continue
-        if entry["target_port"] not in (None, 443):
+        if entry["adapter"]["dns"]["target_port"] not in (None, 443):
             continue
 
-        metadata = fetch_tls_metadata(entry["fqdn"])
+        try:
+            metadata = fetch_tls_metadata(entry["fqdn"])
+        except (OSError, ssl.SSLError, ValueError) as exc:
+            findings.append(
+                {
+                    "check": "tls_certificate",
+                    "severity": "CRITICAL",
+                    "subdomain": entry["fqdn"],
+                    "finding": "tls_probe_failed",
+                    "detail": f"TLS probe failed: {exc}",
+                }
+            )
+            continue
+
+        if metadata.get("verification_error"):
+            findings.append(
+                {
+                    "check": "tls_certificate",
+                    "severity": "CRITICAL",
+                    "subdomain": entry["fqdn"],
+                    "finding": "certificate_hostname_mismatch",
+                    "detail": f"TLS identity verification failed: {metadata['verification_error']}",
+                }
+            )
         if metadata["days_remaining"] < 14:
             findings.append(
                 {
@@ -517,10 +623,10 @@ def build_report(
         "audit_run_id": str(uuid.uuid4()),
         "audited_at": iso_timestamp(utc_now()),
         "registry_path": str(REGISTRY_PATH),
-        "subdomains_in_catalog": registry["summary"]["catalog_total"],
-        "active_subdomains_tracked": registry["summary"]["active_total"],
-        "dns_records_checked": registry["summary"]["active_public_dns_total"] if include_live_dns else 0,
-        "nginx_vhosts_checked": registry["summary"]["edge_total"],
+        "publications_in_catalog": registry["summary"]["catalog_total"],
+        "active_publications_tracked": registry["summary"]["active_total"],
+        "dns_records_checked": registry["summary"]["active_public_total"] if include_live_dns else 0,
+        "nginx_vhosts_checked": registry["summary"]["shared_edge_total"],
         "hetzner_zone_records_checked": len(zone_records),
         "severity_counts": severity_counts,
         "findings": findings,
@@ -528,7 +634,7 @@ def build_report(
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Build and audit the subdomain exposure registry.")
+    parser = argparse.ArgumentParser(description="Build and audit the canonical publication registry.")
     parser.add_argument("--print-registry", action="store_true", help="Print the generated registry JSON.")
     parser.add_argument("--write-registry", action="store_true", help="Write config/subdomain-exposure-registry.json.")
     parser.add_argument("--check-registry", action="store_true", help="Fail if the committed registry is stale.")

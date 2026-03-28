@@ -1,0 +1,16 @@
+#!/bin/sh
+set -eu
+
+prompt="${1:-}"
+
+case "$prompt" in
+  *Username*)
+    printf '%s\n' '{{ server_resident_reconciliation_gitea_username }}'
+    ;;
+  *Password*)
+    cat '{{ server_resident_reconciliation_http_token_remote_file }}'
+    ;;
+  *)
+    exit 1
+    ;;
+esac

@@ -21,16 +21,20 @@ from command_catalog import load_command_catalog, validate_command_catalog
 from api_gateway_catalog import load_api_gateway_catalog, validate_api_gateway_catalog
 from api_publication import load_api_publication_catalog, validate_api_publication_catalog
 from capacity_report import load_capacity_model
+from fixture_manager import load_ephemeral_pool_catalog
 from canonical_errors import ErrorRegistry
 from container_image_policy import load_image_catalog, validate_image_catalog as validate_container_image_catalog
 from changelog_redaction import load_redaction_policy, validate_redaction_policy
+from correction_loops import load_correction_loop_catalog, validate_correction_loop_catalog
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
 from control_plane_lanes import load_lane_catalog
 from data_catalog import load_data_catalog, validate_data_catalog
 from dependency_graph import load_dependency_graph
 from data_catalog import load_data_catalog, validate_data_catalog
+from failure_domain_policy import validate_failure_domain_policy
 from live_apply_receipts import RECEIPTS_DIR, iter_receipt_paths, validate_receipts
 from platform.circuit import load_circuit_policies
+from platform.faults import load_network_impairment_matrix
 from platform.interface_contracts import validate_contracts
 from generate_platform_vars import PLATFORM_VARS_PATH, PORT_KEYS, build_platform_vars
 from mutation_audit import load_mutation_audit_schema, validate_mutation_audit_schema
@@ -38,9 +42,18 @@ from operator_manager import ROSTER_PATH, validate_operator_roster
 from platform.execution_lanes import load_execution_lane_catalog
 from promotion_pipeline import validate_promotion_receipts
 from public_surface_scan import load_public_surface_scan_policy
-from renovate_config import load_renovate_config, validate_renovate_config
+from shared_policy_packs import (
+    SHARED_POLICY_PACKS_PATH,
+    SHARED_POLICY_PACKS_SCHEMA_PATH,
+    load_shared_policy_packs,
+)
 from validate_ephemeral_vmid import validate_ephemeral_vmid_ranges
 from generate_slo_rules import outputs_match as slo_outputs_match
+from immutable_guest_replacement import load_guest_replacement_catalog, validate_guest_replacement_catalog
+from replaceability_scorecards import (
+    load_replaceability_review_catalog,
+    validate_replaceability_review_catalog,
+)
 from slo_tracking import (
     GRAFANA_DASHBOARD_PATH,
     PROMETHEUS_ALERTS_PATH,
@@ -59,6 +72,7 @@ from workflow_catalog import (
 )
 from workstream_surface_ownership import validate_registry as validate_workstream_surface_ownership_registry
 from platform.config_merge import validate_merge_eligible_catalog
+from preview_environment import load_profile_catalog, validate_profile_catalog
 
 
 STACK_PATH = repo_path("versions", "stack.yaml")
@@ -68,6 +82,7 @@ UPTIME_MONITORS_PATH = repo_path("config", "uptime-kuma", "monitors.json")
 HEALTH_PROBE_CATALOG_PATH = repo_path("config", "health-probe-catalog.json")
 CERTIFICATE_CATALOG_PATH = repo_path("config", "certificate-catalog.json")
 SECRET_CATALOG_PATH = repo_path("config", "secret-catalog.json")
+SEED_DATA_CATALOG_PATH = repo_path("config", "seed-data-catalog.json")
 TOKEN_POLICY_PATH = repo_path("config", "token-policy.yaml")
 TOKEN_INVENTORY_PATH = repo_path("config", "token-inventory.yaml")
 IMAGE_CATALOG_PATH = repo_path("config", "image-catalog.json")
@@ -77,6 +92,9 @@ MAINTENANCE_WINDOW_SCHEMA_PATH = repo_path("docs", "schema", "maintenance-window
 VM_TEMPLATE_MANIFEST_PATH = repo_path("config", "vm-template-manifest.json")
 CAPACITY_MODEL_PATH = repo_path("config", "capacity-model.json")
 CAPACITY_MODEL_SCHEMA_PATH = repo_path("docs", "schema", "capacity-model.schema.json")
+EPHEMERAL_POOL_CATALOG_PATH = repo_path("config", "ephemeral-capacity-pools.json")
+EPHEMERAL_POOL_SCHEMA_PATH = repo_path("docs", "schema", "ephemeral-capacity-pools.schema.json")
+REPLACEABILITY_REVIEW_CATALOG_PATH = repo_path("config", "replaceability-review-catalog.json")
 VERSION_SEMANTICS_PATH = repo_path("config", "version-semantics.json")
 WORKSTREAMS_PATH = repo_path("workstreams.yaml")
 TRIAGE_RULES_PATH = repo_path("config", "triage-rules.yaml")
@@ -258,6 +276,30 @@ def validate_placeholder_free(value: Any, path: str) -> None:
             validate_placeholder_free(item, f"{path}.{key}")
 
 
+def current_git_branch() -> str:
+    try:
+        branch = subprocess.check_output(
+            ["git", "-C", str(REPO_ROOT), "rev-parse", "--abbrev-ref", "HEAD"],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except (OSError, subprocess.CalledProcessError):
+        return "HEAD"
+    return branch or "HEAD"
+
+
+def versions_stack_enforces_canonical_guest_fleet() -> bool:
+    registry = load_yaml(WORKSTREAMS_PATH)
+    release_policy = require_mapping(registry.get("release_policy"), "workstreams.yaml.release_policy")
+    branch_policy = require_str(
+        release_policy.get("versions_stack_branch_policy"),
+        "workstreams.yaml.release_policy.versions_stack_branch_policy",
+    )
+    if branch_policy != "main_only":
+        return True
+    return current_git_branch() == "main"
+
+
 def validate_no_scaffold_placeholders() -> None:
     structured_paths = {
         HEALTH_PROBE_CATALOG_PATH: load_json(HEALTH_PROBE_CATALOG_PATH),
@@ -272,6 +314,7 @@ def validate_no_scaffold_placeholders() -> None:
         repo_path("config", "service-redundancy-catalog.json"): load_json(
             repo_path("config", "service-redundancy-catalog.json")
         ),
+        SHARED_POLICY_PACKS_PATH: load_json(SHARED_POLICY_PACKS_PATH),
         repo_path("config", "api-gateway-catalog.json"): load_json(
             repo_path("config", "api-gateway-catalog.json")
         ),
@@ -425,6 +468,22 @@ def validate_service_topology_entry(
     if edge is not None:
         edge = require_mapping(edge, f"lv3_service_topology.{service_id}.edge")
         enabled = require_bool(edge.get("enabled"), f"lv3_service_topology.{service_id}.edge.enabled")
+        aliases = require_string_list(
+            edge.get("aliases", []), f"lv3_service_topology.{service_id}.edge.aliases"
+        )
+        for index, alias in enumerate(aliases):
+            alias = require_str(alias, f"lv3_service_topology.{service_id}.edge.aliases[{index}]")
+            if not (
+                HOSTNAME_PATTERN.match(alias)
+                or (
+                    alias.startswith("*.")
+                    and HOSTNAME_PATTERN.match(alias[2:])
+                    and "." in alias[2:]
+                )
+            ):
+                raise ValueError(
+                    f"lv3_service_topology.{service_id}.edge.aliases[{index}] must be a lowercase hostname or wildcard hostname"
+                )
         if enabled:
             if public_hostname is None:
                 raise ValueError(f"lv3_service_topology.{service_id} enables edge without public_hostname")
@@ -1133,6 +1192,47 @@ def validate_secret_catalog(secret_manifest: dict[str, Any]) -> None:
         require_str(secret.get("glitchtip_component"), f"{path}.glitchtip_component")
 
 
+def validate_seed_data_catalog(secret_manifest: dict[str, Any]) -> None:
+    payload = require_mapping(load_json(SEED_DATA_CATALOG_PATH), str(SEED_DATA_CATALOG_PATH))
+    require_str(payload.get("schema_version"), f"{SEED_DATA_CATALOG_PATH}.schema_version")
+    controller_secret_id = require_identifier(
+        payload.get("controller_secret_id"),
+        f"{SEED_DATA_CATALOG_PATH}.controller_secret_id",
+    )
+    manifest_secrets = require_mapping(secret_manifest.get("secrets"), "secret_manifest.secrets")
+    if controller_secret_id not in manifest_secrets:
+        raise ValueError(
+            f"{SEED_DATA_CATALOG_PATH}.controller_secret_id references unknown controller-local secret '{controller_secret_id}'"
+        )
+    require_str(payload.get("local_snapshot_root"), f"{SEED_DATA_CATALOG_PATH}.local_snapshot_root")
+    require_str(payload.get("guest_stage_root"), f"{SEED_DATA_CATALOG_PATH}.guest_stage_root")
+    remote_store = require_mapping(payload.get("remote_store"), f"{SEED_DATA_CATALOG_PATH}.remote_store")
+    require_identifier(remote_store.get("host"), f"{SEED_DATA_CATALOG_PATH}.remote_store.host")
+    require_str(remote_store.get("base_path"), f"{SEED_DATA_CATALOG_PATH}.remote_store.base_path")
+    require_str(remote_store.get("directory_mode"), f"{SEED_DATA_CATALOG_PATH}.remote_store.directory_mode")
+    databases = require_list(payload.get("managed_postgres_databases"), f"{SEED_DATA_CATALOG_PATH}.managed_postgres_databases")
+    if not databases:
+        raise ValueError(f"{SEED_DATA_CATALOG_PATH}.managed_postgres_databases must not be empty")
+    for index, item in enumerate(databases):
+        require_identifier(item, f"{SEED_DATA_CATALOG_PATH}.managed_postgres_databases[{index}]")
+
+    classes = require_mapping(payload.get("classes"), f"{SEED_DATA_CATALOG_PATH}.classes")
+    if not classes:
+        raise ValueError(f"{SEED_DATA_CATALOG_PATH}.classes must not be empty")
+    expected_datasets = {"identities", "sessions", "workflow_runs", "messages", "assets", "audit_events"}
+    for class_name, class_payload in classes.items():
+        require_identifier(class_name, f"{SEED_DATA_CATALOG_PATH}.classes key '{class_name}'")
+        class_payload = require_mapping(class_payload, f"{SEED_DATA_CATALOG_PATH}.classes.{class_name}")
+        require_str(class_payload.get("description"), f"{SEED_DATA_CATALOG_PATH}.classes.{class_name}.description")
+        datasets = require_mapping(class_payload.get("datasets"), f"{SEED_DATA_CATALOG_PATH}.classes.{class_name}.datasets")
+        if set(datasets.keys()) != expected_datasets:
+            raise ValueError(
+                f"{SEED_DATA_CATALOG_PATH}.classes.{class_name}.datasets must define exactly {sorted(expected_datasets)}"
+            )
+        for dataset_name, count in datasets.items():
+            require_int(count, f"{SEED_DATA_CATALOG_PATH}.classes.{class_name}.datasets.{dataset_name}", 1)
+
+
 def validate_token_policy() -> set[str]:
     payload = require_mapping(load_yaml(TOKEN_POLICY_PATH), str(TOKEN_POLICY_PATH))
     require_semver(payload.get("schema_version"), "config/token-policy.yaml.schema_version")
@@ -1322,6 +1422,39 @@ def validate_capacity_model_schema() -> None:
     for field in ("$schema", "schema_version", "host", "guests", "reservations"):
         if field not in properties:
             raise ValueError(f"docs/schema/capacity-model.schema.json.properties must include '{field}'")
+
+
+def validate_shared_policy_packs() -> None:
+    load_shared_policy_packs()
+
+
+def validate_shared_policy_packs_schema() -> None:
+    schema = require_mapping(load_json(SHARED_POLICY_PACKS_SCHEMA_PATH), str(SHARED_POLICY_PACKS_SCHEMA_PATH))
+    require_str(schema.get("$schema"), "docs/schema/shared-policy-packs.schema.json.$schema")
+    require_str(schema.get("$id"), "docs/schema/shared-policy-packs.schema.json.$id")
+    require_str(schema.get("title"), "docs/schema/shared-policy-packs.schema.json.title")
+    properties = require_mapping(
+        schema.get("properties"),
+        "docs/schema/shared-policy-packs.schema.json.properties",
+    )
+    for field in ("$schema", "schema_version", "packs"):
+        if field not in properties:
+            raise ValueError(f"docs/schema/shared-policy-packs.schema.json.properties must include '{field}'")
+
+
+def validate_ephemeral_pool_catalog() -> None:
+    load_ephemeral_pool_catalog()
+    payload = require_mapping(load_json(EPHEMERAL_POOL_CATALOG_PATH), str(EPHEMERAL_POOL_CATALOG_PATH))
+    require_str(payload.get("$schema"), "config/ephemeral-capacity-pools.json.$schema")
+    if payload["$schema"] != "docs/schema/ephemeral-capacity-pools.schema.json":
+        raise ValueError(
+            "config/ephemeral-capacity-pools.json.$schema must reference docs/schema/ephemeral-capacity-pools.schema.json"
+        )
+    require_semver(payload.get("schema_version"), "config/ephemeral-capacity-pools.json.schema_version")
+    schema = require_mapping(load_json(EPHEMERAL_POOL_SCHEMA_PATH), str(EPHEMERAL_POOL_SCHEMA_PATH))
+    require_str(schema.get("$schema"), "docs/schema/ephemeral-capacity-pools.schema.json.$schema")
+    require_str(schema.get("$id"), "docs/schema/ephemeral-capacity-pools.schema.json.$id")
+    require_str(schema.get("title"), "docs/schema/ephemeral-capacity-pools.schema.json.title")
 
 
 def validate_error_registry() -> None:
@@ -1994,29 +2127,37 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
         ).get("guest_vmids"),
         "versions/stack.yaml.desired_state.guest_provisioning.guest_vmids",
     )
-    if set(guest_network_plan.keys()) != host_vars_context["guest_plan_keys"]:
-        raise ValueError("versions/stack.yaml.desired_state.guest_network_plan keys must match the managed guest fleet")
-    if set(guest_vmids.keys()) != host_vars_context["guest_plan_keys"]:
-        raise ValueError("versions/stack.yaml.desired_state.guest_provisioning.guest_vmids keys must match the managed guest fleet")
-    for key in host_vars_context["guest_plan_keys"]:
-        if (
-            require_ipv4(guest_network_plan.get(key), f"versions/stack.yaml.desired_state.guest_network_plan.{key}")
-            != host_vars_context["guest_ips_by_key"][key]
-        ):
-            raise ValueError(
-                f"versions/stack.yaml.desired_state.guest_network_plan.{key} must match inventory/host_vars/proxmox_florin.yml"
-            )
-        if (
-            require_int(
-                guest_vmids.get(key),
-                f"versions/stack.yaml.desired_state.guest_provisioning.guest_vmids.{key}",
-                1,
-            )
-            != host_vars_context["guest_vmids_by_key"][key]
-        ):
-            raise ValueError(
-                f"versions/stack.yaml.desired_state.guest_provisioning.guest_vmids.{key} must match inventory/host_vars/proxmox_florin.yml"
-            )
+    if versions_stack_enforces_canonical_guest_fleet():
+        if set(guest_network_plan.keys()) != host_vars_context["guest_plan_keys"]:
+            raise ValueError("versions/stack.yaml.desired_state.guest_network_plan keys must match the managed guest fleet")
+        if set(guest_vmids.keys()) != host_vars_context["guest_plan_keys"]:
+            raise ValueError("versions/stack.yaml.desired_state.guest_provisioning.guest_vmids keys must match the managed guest fleet")
+        for key in host_vars_context["guest_plan_keys"]:
+            if (
+                require_ipv4(guest_network_plan.get(key), f"versions/stack.yaml.desired_state.guest_network_plan.{key}")
+                != host_vars_context["guest_ips_by_key"][key]
+            ):
+                raise ValueError(
+                    f"versions/stack.yaml.desired_state.guest_network_plan.{key} must match inventory/host_vars/proxmox_florin.yml"
+                )
+            if (
+                require_int(
+                    guest_vmids.get(key),
+                    f"versions/stack.yaml.desired_state.guest_provisioning.guest_vmids.{key}",
+                    1,
+                )
+                != host_vars_context["guest_vmids_by_key"][key]
+            ):
+                raise ValueError(
+                    f"versions/stack.yaml.desired_state.guest_provisioning.guest_vmids.{key} must match inventory/host_vars/proxmox_florin.yml"
+                )
+    else:
+        for key, value in guest_network_plan.items():
+            require_identifier(key, f"versions/stack.yaml.desired_state.guest_network_plan.{key}")
+            require_ipv4(value, f"versions/stack.yaml.desired_state.guest_network_plan.{key}")
+        for key, value in guest_vmids.items():
+            require_identifier(key, f"versions/stack.yaml.desired_state.guest_provisioning.guest_vmids.{key}")
+            require_int(value, f"versions/stack.yaml.desired_state.guest_provisioning.guest_vmids.{key}", 1)
 
     guest_provisioning = require_mapping(
         desired_state.get("guest_provisioning"), "versions/stack.yaml.desired_state.guest_provisioning"
@@ -2228,8 +2369,9 @@ def validate_versions_stack(host_vars_context: dict[str, Any]) -> None:
             guest.get("running"), f"versions/stack.yaml.observed_state.guests.instances[{index}].running"
         )
         instance_names.add(name)
-    if instance_names != host_vars_context["guest_names"]:
-        raise ValueError("versions/stack.yaml.observed_state.guests.instances must contain the managed guest fleet")
+    if versions_stack_enforces_canonical_guest_fleet():
+        if instance_names != host_vars_context["guest_names"]:
+            raise ValueError("versions/stack.yaml.observed_state.guests.instances must contain the managed guest fleet")
 
     monitoring = require_mapping(observed_state.get("monitoring"), "versions/stack.yaml.observed_state.monitoring")
     require_ipv4(monitoring.get("vm"), "versions/stack.yaml.observed_state.monitoring.vm")
@@ -2372,17 +2514,26 @@ def validate_slo_catalog_assets() -> None:
         raise ValueError("generated SLO artifacts are out of date")
 
 
+def validate_preview_environment_profiles() -> None:
+    validate_profile_catalog(load_profile_catalog())
+
+
+def validate_replaceability_review_data() -> None:
+    payload = load_replaceability_review_catalog(REPLACEABILITY_REVIEW_CATALOG_PATH)
+    validate_replaceability_review_catalog(payload)
+
+
 def validate_repository_data_models() -> int:
     load_dependency_graph(validate_schema=True)
     secret_manifest = load_secret_manifest()
     validate_secret_manifest(secret_manifest)
     workflow_catalog = load_workflow_catalog()
     validate_workflow_catalog(workflow_catalog, secret_manifest)
+    validate_correction_loop_catalog(load_correction_loop_catalog(), workflow_catalog)
     validate_agent_policies(workflow_catalog)
     command_catalog = load_command_catalog()
     validate_command_catalog(command_catalog, workflow_catalog, secret_manifest)
     validate_container_image_catalog(load_image_catalog())
-    validate_renovate_config(load_renovate_config())
     validate_error_registry()
     api_gateway_catalog, _ = load_api_gateway_catalog()
     validate_api_gateway_catalog(api_gateway_catalog)
@@ -2392,6 +2543,7 @@ def validate_repository_data_models() -> int:
     validate_api_publication_catalog(api_publication_catalog, lane_catalog)
     load_service_completeness_context()
     validate_redundancy_catalog(load_redundancy_catalog())
+    validate_guest_replacement_catalog(load_guest_replacement_catalog())
     validate_mutation_audit_schema(load_mutation_audit_schema())
     validate_receipts()
     validate_promotion_receipts()
@@ -2400,8 +2552,10 @@ def validate_repository_data_models() -> int:
     validate_certificate_catalog(host_vars_context)
     validate_health_probe_catalog(host_vars_context)
     validate_data_catalog(load_data_catalog())
+    validate_failure_domain_policy()
     validate_slo_catalog_assets()
     validate_secret_catalog(secret_manifest)
+    validate_seed_data_catalog(secret_manifest)
     token_classes = validate_token_policy()
     validate_token_inventory(token_classes, workflow_catalog)
     validate_circuit_policies()
@@ -2409,14 +2563,20 @@ def validate_repository_data_models() -> int:
     validate_workstreams_release_policy()
     validate_workstream_canonical_truth_metadata()
     validate_workstream_live_apply_contracts()
+    load_network_impairment_matrix()
     validate_interface_contracts()
     validate_merge_eligible_files_contract()
     validate_triage_rule_contracts()
     validate_changelog_redaction_contract()
     validate_platform_finding_schema()
     validate_maintenance_window_schema()
+    validate_shared_policy_packs_schema()
+    validate_shared_policy_packs()
     validate_capacity_model_schema()
     validate_capacity_model()
+    validate_preview_environment_profiles()
+    validate_ephemeral_pool_catalog()
+    validate_replaceability_review_data()
     load_public_surface_scan_policy()
     validate_vm_template_manifest(host_vars_context["proxmox_vm_templates"])
     validate_operator_roster(load_yaml(ROSTER_PATH))

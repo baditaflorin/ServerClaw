@@ -1,0 +1,10 @@
+# Purpose: Define the default PostgreSQL database, role, and controller-local secret path used by Dify.
+# Use case: Loaded whenever the Dify PostgreSQL role provisions or verifies the backing database.
+# Inputs: May be overridden by inventory or playbook variables when Dify database naming changes.
+# Outputs: Supplies stable defaults for the Dify database bootstrap tasks.
+# Idempotency: Fully idempotent because this file only declares role defaults.
+# Dependencies: ADR 0165 and ADR 0197.
+---
+dify_database_name: dify
+dify_database_user: dify
+dify_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/dify/database-password.txt

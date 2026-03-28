@@ -1,0 +1,8 @@
+---
+# Purpose: Provide the service-scoped live-apply entry point for Outline.
+# Use case: Used by make live-apply-service service=outline env=<environment>.
+# Outputs: Imports the full Outline converge playbook without duplicating service logic.
+# Idempotency: Matches playbooks/outline.yml.
+# Dependencies: ADR 0199 and playbooks/outline.yml.
+
+- import_playbook: ../outline.yml

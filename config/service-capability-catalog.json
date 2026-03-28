@@ -166,6 +166,60 @@
       }
     },
     {
+      "id": "dify",
+      "name": "Dify",
+      "description": "Visual LLM workflow and agent canvas with governed LV3 tool sync and trace export support.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8094",
+      "public_url": "https://agents.lv3.org",
+      "subdomain": "agents.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Dify Public",
+      "health_probe_id": "dify",
+      "secret_catalog_ids": [
+        "dify_database_password",
+        "dify_init_password",
+        "dify_admin_password",
+        "dify_secret_key",
+        "dify_redis_password",
+        "dify_qdrant_api_key",
+        "dify_sandbox_api_key",
+        "dify_plugin_daemon_key",
+        "dify_plugin_inner_api_key",
+        "dify_tools_api_key"
+      ],
+      "image_catalog_ids": [
+        "dify_api_runtime",
+        "dify_web_runtime",
+        "dify_redis_runtime",
+        "dify_qdrant_runtime",
+        "dify_sandbox_runtime",
+        "dify_plugin_daemon_runtime",
+        "dify_nginx_runtime",
+        "dify_ssrf_proxy_runtime"
+      ],
+      "adr": "0197",
+      "runbook": "docs/runbooks/configure-dify.md",
+      "tags": [
+        "agents",
+        "llm",
+        "workflow",
+        "canvas",
+        "edge-authenticated"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://agents.lv3.org",
+          "subdomain": "agents.lv3.org",
+          "notes": "Branch-local rollout uses a Dify-local Qdrant sidecar until ADR 0198 lands on main."
+        }
+      }
+    },
+    {
       "id": "gitea",
       "name": "Gitea",
       "description": "Private self-hosted Git service with Keycloak SSO, repo bootstrap automation, and a dedicated Actions runner on docker-build-lv3.",
@@ -241,6 +295,38 @@
       }
     },
     {
+      "id": "excalidraw",
+      "name": "Excalidraw",
+      "description": "Private collaborative whiteboard and architecture diagram surface backed by repo-generated `.excalidraw` scenes.",
+      "category": "access",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:3095",
+      "public_url": "https://draw.lv3.org",
+      "subdomain": "draw.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Excalidraw Public",
+      "health_probe_id": "excalidraw",
+      "adr": "0202",
+      "runbook": "docs/runbooks/configure-excalidraw.md",
+      "dashboard_url": "https://grafana.lv3.org/d/lv3-excalidraw/lv3-excalidraw",
+      "tags": [
+        "architecture",
+        "diagramming",
+        "excalidraw",
+        "operator"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://draw.lv3.org",
+          "subdomain": "draw.lv3.org",
+          "notes": "Live applied on the ADR 0202 workstream branch and protected by the shared Keycloak-backed oauth2-proxy edge flow."
+        }
+      }
+    },
+    {
       "id": "homepage",
       "name": "Homepage",
       "description": "Unified operator-facing dashboard for the current LV3 service inventory, quick links, and live service reachability.",
@@ -270,6 +356,35 @@
           "url": "https://home.lv3.org",
           "subdomain": "home.lv3.org",
           "notes": "Published through the shared NGINX edge and gated behind the repo-managed Keycloak oauth2-proxy flow."
+        }
+      }
+    },
+    {
+      "id": "realtime",
+      "name": "Netdata Realtime Metrics",
+      "description": "Authenticated Netdata parent dashboard for live host and guest metrics streamed into monitoring-lv3.",
+      "category": "observability",
+      "lifecycle_status": "active",
+      "vm": "monitoring-lv3",
+      "vmid": 140,
+      "internal_url": "http://10.10.10.40:19999",
+      "public_url": "https://realtime.lv3.org",
+      "subdomain": "realtime.lv3.org",
+      "exposure": "edge-published",
+      "health_probe_id": "realtime",
+      "adr": "0196",
+      "runbook": "docs/runbooks/configure-netdata.md",
+      "tags": [
+        "metrics",
+        "netdata",
+        "observability",
+        "realtime"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://realtime.lv3.org",
+          "subdomain": "realtime.lv3.org"
         }
       }
     },
@@ -636,6 +751,56 @@
       }
     },
     {
+      "id": "plane",
+      "name": "Plane",
+      "description": "Repo-managed Plane workspace for platform kanban tracking and ADR synchronization.",
+      "category": "automation",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:8093",
+      "public_url": "https://tasks.lv3.org",
+      "subdomain": "tasks.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Plane Public",
+      "health_probe_id": "plane",
+      "image_catalog_ids": [
+        "plane_frontend_runtime",
+        "plane_space_runtime",
+        "plane_admin_runtime",
+        "plane_live_runtime",
+        "plane_backend_runtime",
+        "plane_proxy_runtime",
+        "netbox_redis_runtime",
+        "langfuse_minio_runtime",
+        "plane_rabbitmq_runtime"
+      ],
+      "secret_catalog_ids": [
+        "plane_database_password",
+        "plane_secret_key",
+        "plane_live_server_secret_key",
+        "plane_rabbitmq_password",
+        "plane_aws_secret_access_key",
+        "plane_bootstrap_admin_password",
+        "plane_api_token"
+      ],
+      "adr": "0193",
+      "runbook": "docs/runbooks/configure-plane.md",
+      "tags": [
+        "tasks",
+        "kanban",
+        "adr",
+        "automation"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://tasks.lv3.org",
+          "subdomain": "tasks.lv3.org"
+        }
+      }
+    },
+    {
       "id": "searxng",
       "name": "SearXNG",
       "description": "Private metasearch runtime for operator and agent web lookups with a tailnet-only hostname.",
@@ -777,6 +942,51 @@
       }
     },
     {
+      "id": "outline",
+      "name": "Outline",
+      "description": "Self-hosted living knowledge wiki that publishes repo-managed ADR, runbook, and architecture indexes through Outline.",
+      "category": "access",
+      "lifecycle_status": "active",
+      "vm": "docker-runtime-lv3",
+      "vmid": 120,
+      "internal_url": "http://10.10.10.20:3006",
+      "public_url": "https://wiki.lv3.org",
+      "subdomain": "wiki.lv3.org",
+      "exposure": "edge-published",
+      "uptime_monitor_name": "Outline Public Health",
+      "health_probe_id": "outline",
+      "image_catalog_ids": [
+        "outline_runtime",
+        "langfuse_minio_runtime",
+        "langfuse_redis_runtime"
+      ],
+      "secret_catalog_ids": [
+        "outline_database_password",
+        "outline_secret_key",
+        "outline_utils_secret",
+        "outline_redis_password",
+        "outline_minio_root_password",
+        "outline_api_token",
+        "keycloak_outline_client_secret"
+      ],
+      "adr": "0199",
+      "runbook": "docs/runbooks/configure-outline.md",
+      "tags": [
+        "wiki",
+        "knowledge",
+        "outline",
+        "oidc"
+      ],
+      "notes": "Live-apply evidence is tracked on the workstream branch; merge-to-main still must update the integrated README, VERSION, changelog, and versions/stack.yaml surfaces.",
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://wiki.lv3.org",
+          "subdomain": "wiki.lv3.org"
+        }
+      }
+    },
+    {
       "id": "docs_portal",
       "name": "Developer Portal",
       "description": "Generated public documentation site for services, ADRs, runbooks, release notes, and platform reference data.",
@@ -831,6 +1041,70 @@
           "status": "active",
           "url": "https://logs.lv3.org",
           "subdomain": "logs.lv3.org"
+        }
+      }
+    },
+    {
+      "id": "coolify",
+      "name": "Coolify",
+      "description": "Repo-managed PaaS control plane for deploying public applications directly from Git repositories.",
+      "category": "infrastructure",
+      "lifecycle_status": "active",
+      "vm": "coolify-lv3",
+      "vmid": 170,
+      "internal_url": "http://100.64.0.1:8012",
+      "public_url": "https://coolify.lv3.org",
+      "subdomain": "coolify.lv3.org",
+      "exposure": "edge-published",
+      "health_probe_id": "coolify",
+      "secret_catalog_ids": [
+        "coolify_root_password",
+        "coolify_api_token",
+        "coolify_server_ssh_private_key"
+      ],
+      "adr": "0194",
+      "runbook": "docs/runbooks/configure-coolify.md",
+      "tags": [
+        "paas",
+        "git",
+        "deployments",
+        "applications"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://coolify.lv3.org",
+          "subdomain": "coolify.lv3.org"
+        }
+      }
+    },
+    {
+      "id": "coolify_apps",
+      "name": "Coolify Apps Ingress",
+      "description": "Shared public ingress surface for Coolify-managed applications published from the coolify-lv3 runtime.",
+      "category": "infrastructure",
+      "lifecycle_status": "active",
+      "vm": "coolify-lv3",
+      "vmid": 170,
+      "internal_url": "http://10.10.10.70:80",
+      "public_url": "https://apps.lv3.org",
+      "subdomain": "apps.lv3.org",
+      "exposure": "edge-published",
+      "health_probe_id": "coolify_apps",
+      "adr": "0194",
+      "runbook": "docs/runbooks/configure-coolify.md",
+      "tags": [
+        "paas",
+        "ingress",
+        "applications",
+        "wildcard"
+      ],
+      "environments": {
+        "production": {
+          "status": "active",
+          "url": "https://apps.lv3.org",
+          "subdomain": "apps.lv3.org",
+          "notes": "Shared entrypoint for repo-managed Coolify applications, with wildcard alias coverage handled by the edge topology."
         }
       }
     },

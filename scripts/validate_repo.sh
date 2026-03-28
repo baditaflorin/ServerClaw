@@ -17,7 +17,7 @@ export ANSIBLE_COLLECTIONS_PATH="$REPO_ROOT/collections:$ANSIBLE_COLLECTIONS_DIR
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|ansible-idempotency|shell|json|compose-runtime-envs|retry-guard|data-models|workstream-surfaces|generated-docs|generated-portals|health-probes|alert-rules|tofu|agent-standards]...
+  scripts/validate_repo.sh [all|generated-vars|ansible-syntax|yaml|role-argument-specs|ansible-lint|ansible-idempotency|shell|json|compose-runtime-envs|retry-guard|data-models|architecture-fitness|workstream-surfaces|generated-docs|generated-portals|health-probes|alert-rules|tofu|agent-standards]...
 
 Examples:
   scripts/validate_repo.sh
@@ -204,7 +204,7 @@ validate_retry_guard() {
 
 validate_data_models() {
   echo "Repository data model validation"
-  uvx --from pyyaml python "$REPO_ROOT/scripts/ansible_scope_runner.py" validate >/dev/null
+  uv run --with pyyaml python3 "$REPO_ROOT/scripts/ansible_scope_runner.py" validate >/dev/null
   uv run --with pyyaml python "$REPO_ROOT/scripts/validate_timeout_hierarchy.py" >/dev/null
   python3 "$REPO_ROOT/scripts/check_hardcoded_timeouts.py" >/dev/null
   uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/validate_repository_data_models.py" --validate >/dev/null
@@ -220,6 +220,11 @@ validate_data_models() {
   python3 "$REPO_ROOT/scripts/mutation_audit.py" --validate-schema >/dev/null
 }
 
+validate_architecture_fitness() {
+  echo "Architecture fitness validation"
+  python3 "$REPO_ROOT/scripts/replaceability_scorecards.py" --validate >/dev/null
+}
+
 validate_workstream_surfaces() {
   echo "Workstream surface ownership validation"
   uv run --with pyyaml python "$REPO_ROOT/scripts/workstream_surface_ownership.py" --validate-registry >/dev/null
@@ -231,6 +236,7 @@ validate_generated_docs() {
   uvx --from pyyaml python "$REPO_ROOT/scripts/canonical_truth.py" --check >/dev/null
   uvx --from pyyaml python "$REPO_ROOT/scripts/generate_status_docs.py" --check >/dev/null
   uv run --with jsonschema python "$REPO_ROOT/scripts/generate_dependency_diagram.py" --check >/dev/null
+  uv run --with pyyaml --with jsonschema python "$REPO_ROOT/scripts/generate_diagrams.py" --check >/dev/null
 }
 
 validate_generated_portals() {
@@ -246,12 +252,14 @@ validate_health_probes() {
     alertmanager_runtime
     docker_runtime
     dozzle_runtime
+    excalidraw_runtime
     postgres_vm
     monitoring_vm
     backup_vm
     step_ca_runtime
     openbao_runtime
     semaphore_runtime
+    plane_runtime
     windmill_runtime
     mattermost_runtime
     mail_platform_runtime
@@ -361,7 +369,8 @@ _validate_workstream_entry() {
   [[ ! -f "$workstreams_file" ]] && return 0
 
   local entry_count
-  entry_count=$(grep -c "branch:.*$current_branch" "$workstreams_file" 2>/dev/null || true)
+  entry_count=$(grep -Ec "^[[:space:]]*branch:[[:space:]]*\"?$current_branch\"?[[:space:]]*$" "$workstreams_file" 2>/dev/null || true)
+  entry_count="${entry_count:-0}"
 
   if [[ "$entry_count" -eq 0 ]]; then
     echo "WARNING: Branch '$current_branch' not found in workstreams.yaml (ADR 0167)" >&2
@@ -376,8 +385,10 @@ _validate_adr_index_current() {
 
   adr_changes=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
     grep -c '^docs/adr/0[0-9]' || true)
+  adr_changes="${adr_changes:-0}"
   index_updated=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
     grep -c '^docs/adr/\.index\.yaml' || true)
+  index_updated="${index_updated:-0}"
 
   if [[ "$adr_changes" -gt 0 ]] && [[ "$index_updated" -eq 0 ]]; then
     # Check if index exists at all
@@ -399,8 +410,10 @@ _validate_config_registry_updated() {
 
   new_config_files=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
     grep -cE '^(config/|inventory/|versions)' || true)
+  new_config_files="${new_config_files:-0}"
   registry_updated=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
     grep -c '^\.config-locations\.yaml' || true)
+  registry_updated="${registry_updated:-0}"
 
   if [[ "$new_config_files" -gt 3 ]] && [[ "$registry_updated" -eq 0 ]]; then
     echo "WARNING: Config files changed but .config-locations.yaml not updated (ADR 0166)" >&2
@@ -411,12 +424,16 @@ _validate_config_registry_updated() {
 _validate_structure_index_updated() {
   local new_dirs structure_updated
 
-  new_dirs=$( (
-    git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
-      grep -oE '^[^/]+/' || true
-  ) | sort -u | wc -l | tr -d ' ' )
+  new_dirs=$(
+    (
+      git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
+        grep -oE '^[^/]+/' || true
+    ) | sort -u | wc -l | tr -d ' '
+  )
+  new_dirs=${new_dirs:-0}
   structure_updated=$(git -C "$REPO_ROOT" diff --name-only --cached 2>/dev/null |
     grep -c '^\.repo-structure\.yaml' || true)
+  structure_updated=${structure_updated:-0}
 
   if [[ "$new_dirs" -gt 2 ]] && [[ "$structure_updated" -eq 0 ]]; then
     echo "WARNING: New top-level directories detected but .repo-structure.yaml not updated (ADR 0163)" >&2
@@ -445,6 +462,7 @@ for stage in "$@"; do
       validate_alert_rules
       validate_tofu
       validate_data_models
+      validate_architecture_fitness
       validate_workstream_surfaces
       validate_generated_docs
       validate_generated_portals
@@ -482,6 +500,9 @@ for stage in "$@"; do
       ;;
     data-models)
       validate_data_models
+      ;;
+    architecture-fitness)
+      validate_architecture_fitness
       ;;
     workstream-surfaces)
       validate_workstream_surfaces

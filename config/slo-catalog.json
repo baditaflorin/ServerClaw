@@ -4,26 +4,6 @@
   "review_note": "Initial objectives should be recalibrated after 30 days of production telemetry.",
   "slos": [
     {
-      "id": "status-page-availability",
-      "service_id": "status_page",
-      "indicator": "availability",
-      "objective_percent": 99.9,
-      "window_days": 30,
-      "target_url": "https://status.lv3.org",
-      "probe_module": "http_2xx_follow_redirects",
-      "description": "The public status page remains externally reachable as the last-resort platform signal."
-    },
-    {
-      "id": "grafana-availability",
-      "service_id": "grafana",
-      "indicator": "availability",
-      "objective_percent": 99.5,
-      "window_days": 30,
-      "target_url": "https://grafana.lv3.org",
-      "probe_module": "http_2xx_follow_redirects",
-      "description": "Grafana remains reachable through the public LV3 edge."
-    },
-    {
       "id": "dozzle-availability",
       "service_id": "dozzle",
       "indicator": "availability",
@@ -32,6 +12,16 @@
       "target_url": "http://10.10.10.20:8089/healthcheck",
       "probe_module": "http_2xx_follow_redirects",
       "description": "The Dozzle hub remains reachable on the private runtime network for real-time container log access."
+    },
+    {
+      "id": "excalidraw-availability",
+      "service_id": "excalidraw",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "https://draw.lv3.org",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The private Excalidraw publication remains reachable through the authenticated LV3 edge."
     },
     {
       "id": "gitea-availability",
@@ -44,6 +34,16 @@
       "description": "The private Gitea runtime remains reachable for repository hosting, webhooks, and self-hosted CI orchestration."
     },
     {
+      "id": "grafana-availability",
+      "service_id": "grafana",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "https://grafana.lv3.org",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "Grafana remains reachable through the public LV3 edge."
+    },
+    {
       "id": "homepage-availability",
       "service_id": "homepage",
       "indicator": "availability",
@@ -52,6 +52,16 @@
       "target_url": "https://home.lv3.org",
       "probe_module": "http_2xx_follow_redirects",
       "description": "The unified operator dashboard remains reachable through the authenticated LV3 edge."
+    },
+    {
+      "id": "realtime-availability",
+      "service_id": "realtime",
+      "indicator": "availability",
+      "objective_percent": 99.0,
+      "window_days": 30,
+      "target_url": "http://10.10.10.40:19999/api/v1/info",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The Netdata parent remains reachable on monitoring-lv3 for real-time streamed platform metrics."
     },
     {
       "id": "keycloak-availability",
@@ -85,14 +95,14 @@
       "description": "Langfuse remains reachable through the public LV3 edge for trace ingestion and operator access."
     },
     {
-      "id": "uptime-kuma-availability",
-      "service_id": "uptime_kuma",
+      "id": "netbox-availability",
+      "service_id": "netbox",
       "indicator": "availability",
-      "objective_percent": 99.9,
+      "objective_percent": 99.5,
       "window_days": 30,
-      "target_url": "https://uptime.lv3.org",
+      "target_url": "http://10.10.10.20:8082/login/",
       "probe_module": "http_2xx_follow_redirects",
-      "description": "Uptime Kuma remains reachable through the public status surface."
+      "description": "NetBox remains reachable for inventory, IPAM, and topology workflows."
     },
     {
       "id": "nginx-edge-availability",
@@ -115,34 +125,14 @@
       "description": "Open WebUI remains reachable on the private runtime network."
     },
     {
-      "id": "windmill-availability",
-      "service_id": "windmill",
+      "id": "outline-availability",
+      "service_id": "outline",
       "indicator": "availability",
       "objective_percent": 99.5,
       "window_days": 30,
-      "target_url": "http://10.10.10.20:8000/api/version",
+      "target_url": "https://wiki.lv3.org/_health",
       "probe_module": "http_2xx_follow_redirects",
-      "description": "Windmill API stays reachable for scheduled automation."
-    },
-    {
-      "id": "netbox-availability",
-      "service_id": "netbox",
-      "indicator": "availability",
-      "objective_percent": 99.5,
-      "window_days": 30,
-      "target_url": "http://10.10.10.20:8082/login/",
-      "probe_module": "http_2xx_follow_redirects",
-      "description": "NetBox remains reachable for inventory, IPAM, and topology workflows."
-    },
-    {
-      "id": "vaultwarden-availability",
-      "service_id": "vaultwarden",
-      "indicator": "availability",
-      "objective_percent": 99.5,
-      "window_days": 30,
-      "target_url": "https://vault.lv3.org/alive",
-      "probe_module": "http_2xx_insecure_tls",
-      "description": "Vaultwarden remains reachable on the private Tailscale operator path."
+      "description": "Outline remains reachable through the public LV3 edge for living knowledge browsing and sync automation."
     },
     {
       "id": "platform-context-api-availability",
@@ -163,6 +153,56 @@
       "target_url": "http://10.10.10.20:3004/api/ping",
       "probe_module": "http_2xx_follow_redirects",
       "description": "Semaphore stays reachable for private Ansible job launches and API-based task inspection."
+    },
+    {
+      "id": "status-page-availability",
+      "service_id": "status_page",
+      "indicator": "availability",
+      "objective_percent": 99.9,
+      "window_days": 30,
+      "target_url": "https://status.lv3.org",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "The public status page remains externally reachable as the last-resort platform signal."
+    },
+    {
+      "id": "uptime-kuma-availability",
+      "service_id": "uptime_kuma",
+      "indicator": "availability",
+      "objective_percent": 99.9,
+      "window_days": 30,
+      "target_url": "https://uptime.lv3.org",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "Uptime Kuma remains reachable through the public status surface."
+    },
+    {
+      "id": "vaultwarden-availability",
+      "service_id": "vaultwarden",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "https://vault.lv3.org/alive",
+      "probe_module": "http_2xx_insecure_tls",
+      "description": "Vaultwarden remains reachable on the private Tailscale operator path."
+    },
+    {
+      "id": "windmill-availability",
+      "service_id": "windmill",
+      "indicator": "availability",
+      "objective_percent": 99.5,
+      "window_days": 30,
+      "target_url": "http://10.10.10.20:8000/api/version",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "Windmill API stays reachable for scheduled automation."
+    },
+    {
+      "id": "plane-availability",
+      "service_id": "plane",
+      "indicator": "availability",
+      "objective_percent": 99.0,
+      "window_days": 30,
+      "target_url": "https://tasks.lv3.org/",
+      "probe_module": "http_2xx_follow_redirects",
+      "description": "Plane remains reachable through the public LV3 edge for ADR board tracking and issue synchronization."
     }
   ]
 }

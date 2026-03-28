@@ -246,6 +246,40 @@
         ]
       }
     },
+    "ephemeral-pool-reconcile": {
+      "description": "Run the ADR 0186 warm-pool reconciler so the declared fixture pools stay prewarmed and local spillover decisions remain explicit.",
+      "workflow_id": "ephemeral-pool-reconcile",
+      "scope": "proxmox_host",
+      "approval_policy": "standard_live_change",
+      "inputs": [
+        {
+          "name": "proxmox_api_token_payload",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side Proxmox API token payload used to enumerate, create, stop, and retag governed warm-pool members."
+        }
+      ],
+      "expected_preconditions": [
+        "make validate passes before enabling or manually triggering the reconciler",
+        "config/ephemeral-capacity-pools.json addresses do not overlap active long-lived guests or other warm-pool members",
+        "Operators understand that spillover decisions point to ADR 0183 auxiliary capacity rather than silently borrowing standby reservations"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record created warm members, any explicit spillover decisions, and the resulting pool-status snapshot."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if pool catalog validation fails, Proxmox allocation fails, or the reconciler would exceed the governed local lease or address limits.",
+          "Stop if a warm refill would require standby or recovery reservations instead of the declared auxiliary spillover domain."
+        ],
+        "rollback_guidance": [
+          "Disable the schedule, destroy any partially-created warm member receipts, and restore the previous pool catalog before retrying.",
+          "Treat repeated spillover decisions as a capacity-planning signal and adjust ADR 0186 or ADR 0183 data instead of forcing local overcommit."
+        ]
+      }
+    },
     "fault-injection": {
       "description": "Run the ADR 0171 controlled fault-injection subset on docker-runtime-lv3 through the governed repo workflow.",
       "workflow_id": "fault-injection",
@@ -277,6 +311,40 @@
         "rollback_guidance": [
           "Use the documented ADR 0171 recovery path and repo-managed service converge workflows before attempting another fault run.",
           "Do not continue by layering ad hoc host changes on top of a partially recovered scenario; restore the platform to a known-good repo state first."
+        ]
+      }
+    },
+    "network-impairment-matrix": {
+      "description": "Render the ADR 0189 network impairment matrix from the governed Windmill worker checkout.",
+      "workflow_id": "network-impairment-matrix",
+      "scope": "guest_runtime",
+      "approval_policy": "operator_approved",
+      "inputs": [
+        {
+          "name": "NETWORK_IMPAIRMENT_MATRIX_ARGS",
+          "kind": "operator_parameter",
+          "required": false,
+          "source": "Makefile",
+          "description": "Optional target-class, service, or report-file selectors passed through the repo-managed make target."
+        }
+      ],
+      "expected_preconditions": [
+        "make validate passes before updating or rendering the ADR 0189 matrix",
+        "Operators review the selected target class and confirm the run stays on the safe diagnostic path rather than a live network impairment",
+        "The docker-runtime-lv3 Windmill worker is reachable if the selected run should write and verify the live report"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the selected target class, the generated JSON report path, and the verified Windmill script path."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the matrix fails validation against the service catalog or fault-scenario catalog.",
+          "Stop if the live worker checkout is missing the released matrix script or the Windmill script path cannot be verified."
+        ],
+        "rollback_guidance": [
+          "Replay the Windmill runtime from the released checkout before retrying the matrix run.",
+          "Do not treat a missing or stale matrix report as permission to run ad hoc network impairments on production."
         ]
       }
     },
@@ -1099,6 +1167,47 @@
         ]
       }
     },
+    "converge-coolify": {
+      "description": "Converge the Coolify PaaS VM, publish the authenticated dashboard and public apps ingress, and bootstrap the repo-managed deployment server plus smoke application path.",
+      "workflow_id": "converge-coolify",
+      "scope": "host_and_guest",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        },
+        {
+          "name": "hetzner_dns_api_token",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Hetzner DNS API token required to publish or renew the Coolify dashboard and apps edge certificates."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-coolify passes",
+        "make validate passes before the apply",
+        "The Coolify VM identity, authenticated dashboard exposure, and apps ingress domains are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record VM provisioning, controller bootstrap, dashboard publication, and repo-backed smoke deployment verification."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if VM provisioning, controller bootstrap, server registration, or edge publication fails.",
+          "Stop if the smoke deployment cannot complete through the repo-managed Coolify API path."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good Coolify VM or edge state before retrying.",
+          "Avoid manual Coolify UI edits that leave the repo-managed bootstrap and smoke deployment contract undocumented."
+        ]
+      }
+    },
     "rotate-secret-low-risk": {
       "description": "Plan or apply one low-risk cataloged secret rotation through the repo-managed OpenBao and role-local mutation path.",
       "workflow_id": "rotate-secret",
@@ -1382,6 +1491,88 @@
         ]
       }
     },
+    "converge-ops-portal": {
+      "description": "Converge the interactive ops portal on docker-runtime-lv3 so the browser control plane stays aligned with the shared platform API gateway contracts.",
+      "workflow_id": "converge-ops-portal",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        },
+        {
+          "name": "platform_context_api_token",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Static API token mirrored into the ops portal so runbook actions can call the shared gateway contract."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-ops-portal passes",
+        "make validate passes before the apply",
+        "The shared runbook delivery surfaces and authenticated `ops.lv3.org` browser flows are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the source commit, one rendered runbook panel response, and one successful gateway-backed runbook action from the portal surface."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the portal can no longer load its gateway-backed runbook panel or if authenticated actions stop returning structured results.",
+          "Stop if `ops.lv3.org` serves stale data that drifts from the shared gateway contract."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good portal and runtime configuration from version control before retrying.",
+          "Do not leave `ops.lv3.org` published with a runbook launcher that bypasses or drifts from the shared gateway contract."
+        ]
+      }
+    },
+    "converge-dify": {
+      "description": "Converge the Dify visual workflow canvas on docker-runtime-lv3, publish it at agents.lv3.org, and verify governed tool sync plus smoke workflow export.",
+      "workflow_id": "converge-dify",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        },
+        {
+          "name": "hetzner_dns_api_token",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "DNS token used to publish agents.lv3.org and expand the shared edge certificate."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-dify passes",
+        "make validate passes before the apply",
+        "The edge-auth boundary, governed tool exposure, and branch-local Qdrant sidecar limitation are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the source commit, public health verification, admin bootstrap verification, governed tool sync result, and exported smoke workflow artifact path."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if PostgreSQL, the Dify runtime, the API gateway tool route, or shared-edge publication verification fails.",
+          "Stop if agents.lv3.org becomes reachable outside the intended edge-auth boundary or if the governed tool sync starts returning unauthorized responses."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good Dify and edge configuration from version control before retrying.",
+          "Do not compensate for a broken rollout by hand-editing Dify bootstrap state, datasets, or edge routes outside the repo."
+        ]
+      }
+    },
     "converge-n8n": {
       "description": "Converge n8n with PostgreSQL persistence and publish it at n8n.lv3.org while keeping the editor behind edge auth and public webhooks reachable.",
       "workflow_id": "converge-n8n",
@@ -1488,6 +1679,47 @@
         "rollback_guidance": [
           "Restore the last known-good Homepage runtime and edge configuration before retrying.",
           "Do not leave hand-edited Homepage config files or ad hoc nginx changes behind after a failed rollout."
+        ]
+      }
+    },
+    "converge-excalidraw": {
+      "description": "Converge the private Excalidraw runtime, collaboration room, and authenticated edge publication at draw.lv3.org.",
+      "workflow_id": "converge-excalidraw",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        },
+        {
+          "name": "hetzner_dns_api_token",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "DNS token used if draw.lv3.org expands the shared edge certificate SAN set."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-excalidraw passes",
+        "make validate passes before the apply",
+        "The generated diagrams, shared edge auth boundary, and /socket.io/ publication path are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the local frontend and room listeners, the authenticated public edge behavior, the generated diagram set, and the Uptime Kuma monitor reconciliation."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the Excalidraw frontend, collaboration room, or shared-edge publication fails verification.",
+          "Stop if draw.lv3.org responds without the intended shared auth boundary or if the /socket.io/ route no longer reaches the collaboration backend."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good Excalidraw runtime and edge configuration before retrying.",
+          "Do not compensate for a failed rollout with hand-edited frontend assets or ad hoc nginx changes outside the repo."
         ]
       }
     },
@@ -1698,6 +1930,47 @@
         "rollback_guidance": [
           "Restore the last known-good Dozzle runtime and edge publication state before retrying.",
           "Do not leave behind ad hoc compose, firewall, or NGINX changes after a failed rollout."
+        ]
+      }
+    },
+    "converge-realtime": {
+      "description": "Converge the Netdata parent-plus-children realtime metrics surface, Prometheus scrape path, and authenticated realtime.lv3.org publication.",
+      "workflow_id": "converge-realtime",
+      "scope": "guest_runtime",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        },
+        {
+          "name": "hetzner_dns_api_token",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "DNS token used to publish realtime.lv3.org and expand the shared edge certificate."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-realtime passes",
+        "make validate passes before the apply",
+        "The Netdata child topology, Prometheus scrape surface, and shared-edge publication boundary are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the source commit, Prometheus netdata_info verification, the authenticated edge redirect, and the final receipt id for realtime.lv3.org."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the Netdata parent, any declared child stream, Prometheus scrape path, or shared edge publication fails to converge.",
+          "Stop if the rollout would expose realtime.lv3.org outside the intended authenticated edge or private guest-network recovery path."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good Netdata runtime, Prometheus scrape configuration, and edge publication state before retrying.",
+          "Do not leave behind ad hoc package repositories, DNS changes, or NGINX edits after a failed rollout."
         ]
       }
     },
@@ -2015,6 +2288,47 @@
         ]
       }
     },
+    "coolify-manage": {
+      "description": "Perform governed Coolify API actions such as identity verification, application inventory, or repo-backed smoke deployment through the repo-managed wrapper.",
+      "workflow_id": "coolify-manage",
+      "scope": "external_service",
+      "approval_policy": "standard_live_change",
+      "inputs": [
+        {
+          "name": "coolify_admin_auth",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-local Coolify auth JSON used by the repo-managed wrapper."
+        },
+        {
+          "name": "ACTION",
+          "kind": "operator_parameter",
+          "required": true,
+          "source": "Makefile",
+          "description": "Managed action such as whoami, list-applications, or deploy-repo."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=coolify-manage passes",
+        "make validate passes before a mutating Coolify action",
+        "Repo-backed deployment requests stay within the documented Coolify server, project, and apps ingress boundary"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the requested action, affected application when relevant, and the resulting deployment verification."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the Coolify auth artifact is invalid or the requested API action fails.",
+          "Stop if a requested deployment would rely on undocumented domains, servers, or mutable UI-only state."
+        ],
+        "rollback_guidance": [
+          "Use the repo-managed converge path to restore desired Coolify bootstrap state after controller drift.",
+          "Avoid compensating with manual UI-authored project or application state that is not represented in the repo."
+        ]
+      }
+    },
     "configure-backup-vm": {
       "description": "Converge the dedicated backup VM and its managed Proxmox Backup Server integration.",
       "workflow_id": "configure-backup-vm",
@@ -2269,7 +2583,7 @@
       }
     },
     "run-restore-verification": {
-      "description": "Run the ADR 0099 restore-verification workflow so PBS backups are restored into short-lived staging VMs and validated before the next disaster-recovery event forces the first real restore.",
+      "description": "Run the ADR 0099 restore-verification workflow so PBS backups are restored into short-lived staging VMs and validated with both smoke tests and ADR 0190 synthetic transaction replay before the next disaster-recovery event forces the first real restore.",
       "workflow_id": "restore-verification",
       "scope": "proxmox_host",
       "approval_policy": "standard_live_change",
@@ -2296,7 +2610,7 @@
       ],
       "evidence": {
         "live_apply_receipt_required": true,
-        "notes": "Record the dated restore-verification receipt, the selected backup dates, any failed smoke tests, and the cleanup outcome for VMIDs 900 to 909."
+        "notes": "Record the dated restore-verification receipt, the selected backup dates, any failed smoke tests, the synthetic replay success rate and latency summary, and the cleanup outcome for VMIDs 900 to 909."
       },
       "failure_guidance": {
         "stop_conditions": [
@@ -2854,6 +3168,88 @@
         "rollback_guidance": [
           "Use the repo-managed converge path to restore desired Semaphore project state after bootstrap drift.",
           "Avoid minting ad hoc API tokens or editing project state in the UI without returning the final contract to git."
+        ]
+      }
+    },
+    "converge-plane": {
+      "description": "Converge the Plane runtime, PostgreSQL backend, host-side Tailscale proxy, authenticated edge publication, and seeded ADR synchronization artifacts.",
+      "workflow_id": "converge-plane",
+      "scope": "host_and_guest",
+      "approval_policy": "sensitive_live_change",
+      "inputs": [
+        {
+          "name": "bootstrap_ssh_private_key",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-side SSH key used through the Proxmox jump path."
+        },
+        {
+          "name": "hetzner_dns_api_token",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "DNS token used to publish tasks.lv3.org and expand the shared edge certificate."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=converge-plane passes",
+        "make validate passes before the apply",
+        "The Plane browser surface, private controller path, and seeded ADR synchronization scope are reviewed before rollout"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record PostgreSQL, runtime, proxy, edge publication, controller-local auth artifact generation, and ADR sync verification from the live apply."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if PostgreSQL, the Plane runtime, host-side proxy, or shared-edge publication fails.",
+          "Stop if the seeded workspace, project, or ADR synchronization path does not match the repo-managed contract."
+        ],
+        "rollback_guidance": [
+          "Restore the last known-good Plane runtime and edge configuration from version control before retrying.",
+          "Do not compensate for a failed rollout with undocumented UI-authored workspaces, projects, or API tokens."
+        ]
+      }
+    },
+    "plane-manage": {
+      "description": "Perform governed Plane API actions such as listing workspaces, listing projects, listing issues, creating one issue, or synchronizing ADRs.",
+      "workflow_id": "plane-manage",
+      "scope": "external_service",
+      "approval_policy": "standard_live_change",
+      "inputs": [
+        {
+          "name": "plane_admin_auth",
+          "kind": "controller_secret",
+          "required": true,
+          "source": "config/controller-local-secrets.json",
+          "description": "Controller-local Plane auth JSON used by the repo-managed wrapper."
+        },
+        {
+          "name": "ACTION",
+          "kind": "operator_parameter",
+          "required": true,
+          "source": "Makefile",
+          "description": "Managed action such as whoami, list-workspaces, list-projects, list-issues, create-issue, or sync-adrs."
+        }
+      ],
+      "expected_preconditions": [
+        "make preflight WORKFLOW=plane-manage passes",
+        "make validate passes before a mutating Plane action",
+        "Issue creation and ADR synchronization remain bounded to the seeded workspace and reviewed project scope"
+      ],
+      "evidence": {
+        "live_apply_receipt_required": true,
+        "notes": "Record the requested action, affected issue when relevant, and the verification outcome."
+      },
+      "failure_guidance": {
+        "stop_conditions": [
+          "Stop if the Plane auth artifact is invalid or the requested API action fails.",
+          "Stop if a requested action would silently create or preserve drift outside the documented workspace and project boundary."
+        ],
+        "rollback_guidance": [
+          "Use the repo-managed converge path to restore desired Plane state after bootstrap drift.",
+          "Avoid minting ad hoc API tokens or editing seeded issue state in the UI without returning the final contract to git."
         ]
       }
     }

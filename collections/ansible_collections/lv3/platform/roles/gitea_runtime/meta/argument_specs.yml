@@ -78,24 +78,6 @@ argument_specs:
       gitea_admin_token_local_file:
         type: path
         required: true
-      gitea_renovate_username:
-        type: str
-        required: true
-      gitea_renovate_email:
-        type: str
-        required: true
-      gitea_renovate_password_remote_file:
-        type: path
-        required: true
-      gitea_renovate_token_remote_file:
-        type: path
-        required: true
-      gitea_renovate_token_local_file:
-        type: path
-        required: true
-      gitea_renovate_actions_secret_name:
-        type: str
-        required: true
       gitea_runner_registration_token_remote_file:
         type: path
         required: true

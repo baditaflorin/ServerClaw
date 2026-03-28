@@ -1,0 +1,53 @@
+---
+# Purpose: Verify that the converged Netdata info and allmetrics endpoints respond on the managed realtime runtime.
+# Use case: Included after netdata_runtime convergence to prove the parent service and streamed metrics endpoint are reachable.
+#
+# Inputs (required):
+#   - netdata_runtime_verify_info_url (str, required): Local Netdata info endpoint URL.
+#   - netdata_runtime_verify_allmetrics_url (str, required): Parent allmetrics endpoint URL.
+#   - netdata_runtime_is_parent (bool, required): Whether the current host is the Netdata parent.
+#
+# Inputs (optional):
+#   - none
+#
+# Outputs:
+#   - Read-only verification results for the Netdata info and Prometheus-export endpoints.
+#
+# Idempotency: Fully idempotent
+#              This task file performs read-only endpoint checks.
+#
+# Dependencies:
+#   - ADR 0196: Requires Netdata endpoint verification after converge.
+#   - Role: netdata_runtime — verifies the converged realtime runtime.
+#
+# Related ADRs: 0165, 0196
+# Related Runbooks: docs/runbooks/configure-netdata.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
+- name: Verify the local Netdata info endpoint responds
+  ansible.builtin.uri:
+    url: "{{ netdata_runtime_verify_info_url }}"
+    method: GET
+    status_code: 200
+    return_content: true
+    timeout: 30
+  register: netdata_runtime_verify_info
+  retries: 20
+  delay: 3
+  until: netdata_runtime_verify_info.status == 200
+  changed_when: false
+
+- name: Verify the parent Netdata Prometheus exporter responds
+  ansible.builtin.uri:
+    url: "{{ netdata_runtime_verify_allmetrics_url }}"
+    method: GET
+    status_code: 200
+    return_content: true
+    timeout: 30
+  register: netdata_runtime_verify_allmetrics
+  retries: 20
+  delay: 3
+  until: netdata_runtime_verify_allmetrics.status == 200
+  changed_when: false
+  when: netdata_runtime_is_parent

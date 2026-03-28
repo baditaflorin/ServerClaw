@@ -31,9 +31,6 @@
         },
         "validate_tls": false
       },
-      "tls_certificate_ids": [
-        "nginx-edge-public"
-      ],
       "uptime_kuma": {
         "enabled": true,
         "monitor": {
@@ -134,6 +131,52 @@
         "reason": "Alertmanager is private-only and its operator value is already covered by role verification on monitoring-lv3."
       }
     },
+    "dify": {
+      "service_name": "dify",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "dify_runtime",
+      "verify_file": "roles/dify_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The Dify edge health endpoint responds on the docker-runtime listener.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://10.10.10.20:8094/healthz",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The Dify setup-status endpoint responds and reports the bootstrap step state.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://10.10.10.20:8094/console/api/setup",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Dify Public",
+          "type": "http",
+          "url": "https://agents.lv3.org/healthz",
+          "description": "Dify publication through the shared NGINX edge and oauth2-proxy gate.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
     "gitea": {
       "service_name": "gitea",
       "owning_vm": "docker-runtime-lv3",
@@ -147,7 +190,9 @@
         "delay_seconds": 5,
         "url": "http://10.10.10.20:3003/api/healthz",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "readiness": {
         "kind": "command",
@@ -173,7 +218,9 @@
           "retryInterval": 60,
           "maxretries": 0,
           "maxredirects": 10,
-          "accepted_statuscodes": ["200-299"]
+          "accepted_statuscodes": [
+            "200-299"
+          ]
         }
       }
     },
@@ -239,7 +286,9 @@
         "delay_seconds": 5,
         "url": "http://10.10.10.20:3090/",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "readiness": {
         "kind": "http",
@@ -249,7 +298,9 @@
         "delay_seconds": 5,
         "url": "http://10.10.10.20:3090/",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "uptime_kuma": {
         "enabled": true,
@@ -262,7 +313,95 @@
           "retryInterval": 60,
           "maxretries": 0,
           "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-399"
+          ]
+        }
+      }
+    },
+    "excalidraw": {
+      "service_name": "excalidraw",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "excalidraw_runtime",
+      "verify_file": "roles/excalidraw_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The Excalidraw frontend responds on the private runtime listener.",
+        "timeout_seconds": 90,
+        "retries": 18,
+        "delay_seconds": 5,
+        "url": "http://10.10.10.20:3095/",
+        "method": "GET",
+        "expected_status": [200]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The Excalidraw collaboration room responds on its local socket service port.",
+        "timeout_seconds": 90,
+        "retries": 18,
+        "delay_seconds": 5,
+        "url": "http://10.10.10.20:3096/",
+        "method": "GET",
+        "expected_status": [200]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Excalidraw Public",
+          "type": "http",
+          "url": "https://draw.lv3.org",
+          "description": "Private Excalidraw publication through the authenticated shared NGINX edge.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
           "accepted_statuscodes": ["200-399"]
+        }
+      }
+    },
+    "realtime": {
+      "service_name": "realtime",
+      "owning_vm": "monitoring-lv3",
+      "role": "netdata_runtime",
+      "verify_file": "roles/netdata_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The Netdata parent info endpoint responds on monitoring-lv3.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:19999/api/v1/info",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The Netdata parent exporter responds with consolidated metrics on monitoring-lv3.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:19999/api/v1/allmetrics?format=prometheus_all_hosts&source=as-collected",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Realtime Metrics Private",
+          "type": "http",
+          "url": "http://10.10.10.40:19999/api/v1/info",
+          "description": "Private Netdata parent healthcheck on monitoring-lv3.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
         }
       }
     },
@@ -279,7 +418,9 @@
         "delay_seconds": 5,
         "url": "http://127.0.0.1:3002/api/public/health",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "readiness": {
         "kind": "http",
@@ -289,7 +430,9 @@
         "delay_seconds": 5,
         "url": "http://127.0.0.1:3002/auth/sign-in",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "uptime_kuma": {
         "enabled": true,
@@ -302,7 +445,9 @@
           "retryInterval": 60,
           "maxretries": 0,
           "maxredirects": 5,
-          "accepted_statuscodes": ["200-299"]
+          "accepted_statuscodes": [
+            "200-299"
+          ]
         }
       }
     },
@@ -388,6 +533,52 @@
           "type": "http",
           "url": "https://ops.lv3.org/health",
           "description": "Interactive ops portal health endpoint published through the NGINX edge VM.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 5,
+          "accepted_statuscodes": [
+            "200-299"
+          ]
+        }
+      }
+    },
+    "outline": {
+      "service_name": "outline",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "outline_runtime",
+      "verify_file": "roles/outline_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The local Outline health endpoint responds on the runtime listener.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:3006/_health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The public Outline health endpoint renders through the shared edge after OIDC and startup configuration settle.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "https://wiki.lv3.org/_health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Outline Public Health",
+          "type": "http",
+          "url": "https://wiki.lv3.org/_health",
+          "description": "Public Outline health endpoint published through the shared NGINX edge VM.",
           "interval": 60,
           "retryInterval": 60,
           "maxretries": 0,
@@ -589,7 +780,9 @@
         "delay_seconds": 5,
         "url": "http://127.0.0.1:8089/healthcheck",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "readiness": {
         "kind": "http",
@@ -599,7 +792,9 @@
         "delay_seconds": 5,
         "url": "http://127.0.0.1:8089/healthcheck",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "uptime_kuma": {
         "enabled": true,
@@ -612,7 +807,9 @@
           "retryInterval": 60,
           "maxretries": 0,
           "maxredirects": 10,
-          "accepted_statuscodes": ["200-299"]
+          "accepted_statuscodes": [
+            "200-299"
+          ]
         }
       }
     },
@@ -871,6 +1068,40 @@
         }
       }
     },
+    "coolify": {
+      "service_name": "coolify",
+      "owning_vm": "coolify-lv3",
+      "role": "coolify_runtime",
+      "verify_file": "roles/coolify_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The Coolify API health endpoint responds on the guest-local controller listener.",
+        "timeout_seconds": 120,
+        "retries": 24,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8000/api/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The guest-local Coolify health endpoint remains reachable after repo-managed bootstrap completes; authenticated controller API checks are covered by the role verify contract.",
+        "timeout_seconds": 120,
+        "retries": 1,
+        "delay_seconds": 0,
+        "url": "http://127.0.0.1:8000/api/health",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "The dashboard is OIDC-gated and the repo-managed role plus live-apply verification are the current health contract."
+      }
+    },
     "mattermost": {
       "service_name": "mattermost",
       "owning_vm": "docker-runtime-lv3",
@@ -1057,7 +1288,9 @@
         "delay_seconds": 5,
         "url": "http://127.0.0.1:8881/",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "readiness": {
         "kind": "http",
@@ -1067,7 +1300,9 @@
         "delay_seconds": 5,
         "url": "http://127.0.0.1:8881/search?q=proxmox%20ve&format=json",
         "method": "GET",
-        "expected_status": [200]
+        "expected_status": [
+          200
+        ]
       },
       "uptime_kuma": {
         "enabled": false,
@@ -1452,6 +1687,46 @@
         "reason": "Vaultwarden is private-only and uses an internal CA trust chain, so repo-managed role verification is the current health contract."
       }
     },
+    "coolify_apps": {
+      "service_name": "coolify-apps",
+      "owning_vm": "coolify-lv3",
+      "role": "coolify_runtime",
+      "verify_file": "roles/coolify_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The Coolify public applications ingress answers on the guest-local proxy listener for the managed smoke hostname.",
+        "timeout_seconds": 180,
+        "retries": 18,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ],
+        "headers": {
+          "Host": "apps.lv3.org"
+        }
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The managed smoke deployment is served through the Coolify public applications ingress for the shared hostname.",
+        "timeout_seconds": 180,
+        "retries": 1,
+        "delay_seconds": 0,
+        "url": "http://127.0.0.1/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ],
+        "headers": {
+          "Host": "apps.lv3.org"
+        }
+      },
+      "uptime_kuma": {
+        "enabled": false,
+        "reason": "The ingress currently serves a repo-managed smoke deployment and is verified directly during ADR 0194 live apply."
+      }
+    },
     "semaphore": {
       "service_name": "semaphore",
       "owning_vm": "docker-runtime-lv3",
@@ -1494,6 +1769,52 @@
           "maxredirects": 10,
           "accepted_statuscodes": [
             "200-299"
+          ]
+        }
+      }
+    },
+    "plane": {
+      "service_name": "plane",
+      "owning_vm": "docker-runtime-lv3",
+      "role": "plane_runtime",
+      "verify_file": "roles/plane_runtime/tasks/verify.yml",
+      "liveness": {
+        "kind": "http",
+        "description": "The Plane proxy root responds on the local runtime listener.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8093/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "readiness": {
+        "kind": "http",
+        "description": "The Plane instance API answers locally after the proxy, API, and worker services finish startup.",
+        "timeout_seconds": 300,
+        "retries": 60,
+        "delay_seconds": 5,
+        "url": "http://127.0.0.1:8093/api/instances/",
+        "method": "GET",
+        "expected_status": [
+          200
+        ]
+      },
+      "uptime_kuma": {
+        "enabled": true,
+        "monitor": {
+          "name": "Plane Public",
+          "type": "http",
+          "url": "https://tasks.lv3.org/",
+          "description": "Public Plane board published through the shared NGINX edge and authenticated by the repo-managed oauth2-proxy flow.",
+          "interval": 60,
+          "retryInterval": 60,
+          "maxretries": 0,
+          "maxredirects": 10,
+          "accepted_statuscodes": [
+            "200-399"
           ]
         }
       }

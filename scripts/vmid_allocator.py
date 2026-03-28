@@ -4,9 +4,12 @@
 from __future__ import annotations
 
 import argparse
+import ipaddress
 import json
 import os
+import ssl
 import urllib.request
+from urllib.parse import urlparse
 from pathlib import Path
 from typing import Any
 
@@ -40,12 +43,31 @@ def read_api_credentials(
 ) -> tuple[str, str]:
     resolved_endpoint = endpoint or os.environ.get("TF_VAR_proxmox_endpoint")
     resolved_token = api_token or os.environ.get("TF_VAR_proxmox_api_token")
-    if resolved_endpoint and resolved_token:
-        return resolved_endpoint, resolved_token
-
     payload_path = token_file or default_token_file()
     payload = json.loads(payload_path.read_text(encoding="utf-8"))
-    return payload["api_url"], f"{payload['full_token_id']}={payload['value']}"
+    return (
+        resolved_endpoint or payload["api_url"],
+        resolved_token or f"{payload['full_token_id']}={payload['value']}",
+    )
+
+
+def proxmox_api_insecure(endpoint: str | None = None) -> bool:
+    if os.environ.get("LV3_PROXMOX_API_INSECURE", "").strip().lower() in {"1", "true", "yes", "on"}:
+        return True
+    if not endpoint:
+        return False
+    parsed = urlparse(endpoint)
+    try:
+        ipaddress.ip_address(parsed.hostname or "")
+    except ValueError:
+        return False
+    return True
+
+
+def proxmox_urlopen(request: urllib.request.Request, *, timeout: int, endpoint: str | None = None):
+    if proxmox_api_insecure(endpoint):
+        return urllib.request.urlopen(request, timeout=timeout, context=ssl._create_unverified_context())
+    return urllib.request.urlopen(request, timeout=timeout)
 
 
 def parse_cluster_vmids(payload: dict[str, Any]) -> set[int]:
@@ -67,7 +89,7 @@ def fetch_cluster_vmids(endpoint: str, api_token: str) -> set[int]:
         f"{api_root}/cluster/resources?type=vm",
         headers={"Authorization": f"PVEAPIToken={api_token}"},
     )
-    with urllib.request.urlopen(request, timeout=10) as response:
+    with proxmox_urlopen(request, timeout=10, endpoint=endpoint) as response:
         payload = json.loads(response.read().decode("utf-8"))
     return parse_cluster_vmids(payload)
 

@@ -144,15 +144,17 @@
       "implementation_refs": [
         "Makefile",
         "config/validation-gate.json",
+        "config/windmill/scripts/gate-status.py",
         "scripts/gate_status.py",
         "scripts/log_gate_bypass.py",
         "receipts/gate-bypasses/.gitkeep"
       ],
       "outputs": [
-        "A human-readable summary of enabled validation checks, the last local gate run, the last post-merge gate run, and the latest explicit bypass receipt."
+        "A human-readable or machine-readable summary of enabled validation checks, the last local gate run, the last post-merge gate run, and the latest explicit bypass receipt."
       ],
       "verification_commands": [
-        "make gate-status"
+        "make gate-status",
+        "python3 config/windmill/scripts/gate-status.py --repo-path /srv/proxmox_florin_server"
       ],
       "execution_class": "diagnostic",
       "budget": {
@@ -303,6 +305,56 @@
         "max_restarts": 0,
         "max_rollback_depth": 1,
         "escalation_action": "notify_and_abort"
+      }
+    },
+    "network-impairment-matrix": {
+      "description": "Render the ADR 0189 network impairment matrix for one target class from the live Windmill worker checkout and write a JSON report.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "network-impairment-matrix",
+        "command": "make network-impairment-matrix NETWORK_IMPAIRMENT_MATRIX_ARGS='target_class=staging'"
+      },
+      "preflight": {
+        "required": false,
+        "required_secret_ids": []
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/network-impairment-matrix.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/network-impairment-matrix.yaml",
+        "config/fault-scenarios.yaml",
+        "config/service-capability-catalog.json",
+        "config/windmill/scripts/network-impairment-matrix.py",
+        "docs/adr/0189-network-impairment-test-matrix-for-staging-and-previews.md",
+        "docs/runbooks/network-impairment-matrix.md",
+        "platform/faults/network_impairment_matrix.py",
+        "scripts/network_impairment_matrix.py",
+        "tests/test_network_impairment_matrix.py",
+        "tests/test_network_impairment_matrix_repo_surfaces.py",
+        "tests/test_network_impairment_matrix_windmill.py"
+      ],
+      "outputs": [
+        "A JSON report under .local/network-impairment-matrix/latest.json describing the selected ADR 0189 target-class slice and its linked service degradation contracts."
+      ],
+      "verification_commands": [
+        "python3 -m py_compile scripts/network_impairment_matrix.py config/windmill/scripts/network-impairment-matrix.py platform/faults/network_impairment_matrix.py",
+        "python3 -m pytest tests/test_network_impairment_matrix.py tests/test_network_impairment_matrix_repo_surfaces.py tests/test_network_impairment_matrix_windmill.py -q",
+        "python3 config/windmill/scripts/network-impairment-matrix.py --repo-path /srv/proxmox_florin_server --target-class staging"
+      ],
+      "execution_class": "diagnostic",
+      "budget": {
+        "max_duration_seconds": 600,
+        "max_steps": 40,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "abort_silently"
       }
     },
     "run-triage": {
@@ -1480,6 +1532,63 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-coolify": {
+      "description": "Converge Coolify on coolify-lv3, publish the authenticated dashboard plus public applications ingress, and verify repo-backed smoke deployment through the governed API wrapper.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-coolify",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-coolify"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "coolify_root_password",
+          "coolify_api_token",
+          "coolify_server_ssh_private_key",
+          "coolify_server_ssh_public_key",
+          "coolify_admin_auth"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-coolify"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-coolify.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/coolify.yml",
+        "playbooks/services/coolify.yml",
+        "roles/coolify_runtime/tasks/main.yml",
+        "roles/coolify_runtime/tasks/verify.yml",
+        "scripts/coolify_tool.py",
+        "inventory/group_vars/all.yml",
+        "inventory/host_vars/proxmox_florin.yml"
+      ],
+      "outputs": [
+        "Coolify runtime on coolify-lv3, the authenticated dashboard at coolify.lv3.org, the public apps ingress at apps.lv3.org, and controller-local bootstrap artifacts under .local/coolify."
+      ],
+      "verification_commands": [
+        "make syntax-check-coolify",
+        "make coolify-manage ACTION=whoami",
+        "make coolify-manage ACTION=deploy-repo COOLIFY_ARGS='--repo https://github.com/coollabsio/coolify-examples --branch main --base-directory static --app-name repo-smoke --wait'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 320,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 4,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "merge-config-changes": {
       "description": "Merge pending ADR 0158 staged config changes into the merge-eligible registry files and emit conflict or merged events for downstream consumers.",
       "lifecycle_status": "active",
@@ -1663,23 +1772,28 @@
       "implementation_refs": [
         "Makefile",
         "config/windmill/scripts/restore-verification.py",
+        "config/synthetic-transaction-catalog.json",
         "docs/runbooks/backup-restore-verification.md",
+        "docs/runbooks/synthetic-transaction-replay.md",
         "receipts/restore-verifications",
         "scripts/restore_verification.py",
+        "scripts/synthetic_transaction_replay.py",
         "scripts/smoke_tests/backup_vm_smoke.py",
         "scripts/smoke_tests/docker_runtime_smoke.py",
         "scripts/smoke_tests/postgres_smoke.py",
         "tests/test_restore_verification.py",
+        "tests/test_synthetic_transaction_replay.py",
         "tests/test_restore_verification_windmill.py"
       ],
       "outputs": [
-        "A dated restore-verification receipt recording the selected backup, restore duration, boot time, per-target smoke tests, and overall pass or fail status.",
+        "A dated restore-verification receipt recording the selected backup, restore duration, boot time, per-target smoke tests, synthetic replay success rate, latency distribution, and overall pass or fail status.",
         "Mutation-audit evidence plus optional NATS and Mattermost notifications for the restore-verification run."
       ],
       "verification_commands": [
-        "python3 -m py_compile scripts/restore_verification.py scripts/smoke_tests/postgres_smoke.py scripts/smoke_tests/docker_runtime_smoke.py scripts/smoke_tests/backup_vm_smoke.py config/windmill/scripts/restore-verification.py",
-        "uv run --with pytest --with pyyaml pytest tests/test_restore_verification.py tests/test_restore_verification_windmill.py -q",
-        "python3 scripts/restore_verification.py --help"
+        "python3 -m py_compile scripts/restore_verification.py scripts/synthetic_transaction_replay.py scripts/smoke_tests/postgres_smoke.py scripts/smoke_tests/docker_runtime_smoke.py scripts/smoke_tests/backup_vm_smoke.py config/windmill/scripts/restore-verification.py",
+        "uv run --with pytest --with pyyaml pytest tests/test_restore_verification.py tests/test_restore_verification_windmill.py tests/test_synthetic_transaction_replay.py -q",
+        "python3 scripts/synthetic_transaction_replay.py --target restore-docker-runtime --dry-run",
+        "uv run --with pyyaml python scripts/restore_verification.py --help"
       ],
       "execution_class": "diagnostic",
       "budget": {
@@ -2357,6 +2471,122 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-ops-portal": {
+      "description": "Converge the interactive ops portal on docker-runtime-lv3 so the browser control plane stays aligned with the shared API gateway contracts.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-ops-portal",
+        "command": "make converge-ops-portal"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "platform_context_api_token"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-ops-portal"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/platform-operations-portal.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/ops-portal.yml",
+        "collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/defaults/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/ops_portal_runtime/templates/ops-portal.env.j2",
+        "scripts/ops_portal/app.py",
+        "docs/runbooks/platform-operations-portal.md",
+        "docs/runbooks/ops-portal-down.md"
+      ],
+      "outputs": [
+        "A repo-managed interactive ops portal on docker-runtime-lv3 that stays aligned with the shared platform API gateway contracts for health, coordination, and runbook operations."
+      ],
+      "verification_commands": [
+        "make syntax-check-ops-portal",
+        "ssh ops@100.118.189.95 'ssh ops@10.10.10.20 \"curl -sf http://127.0.0.1:8092/health\"'",
+        "curl -I https://ops.lv3.org"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 900,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "converge-dify": {
+      "description": "Converge Dify on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at agents.lv3.org, and verify the governed tool-sync and workflow export path.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-dify",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-dify"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "dify_database_password",
+          "dify_init_password",
+          "dify_admin_password",
+          "dify_secret_key",
+          "dify_redis_password",
+          "dify_qdrant_api_key",
+          "dify_sandbox_api_key",
+          "dify_plugin_daemon_key",
+          "dify_plugin_inner_api_key",
+          "dify_tools_api_key"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-dify"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-dify.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/dify.yml",
+        "playbooks/services/dify.yml",
+        "collections/ansible_collections/lv3/platform/roles/dify_postgres",
+        "collections/ansible_collections/lv3/platform/roles/dify_runtime",
+        "collections/ansible_collections/lv3/platform/roles/api_gateway_runtime",
+        "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication",
+        "inventory/host_vars/proxmox_florin.yml",
+        "scripts/dify_api.py",
+        "scripts/sync_tools_to_dify.py",
+        "scripts/dify_smoke.py",
+        "platform/dify-workflows/"
+      ],
+      "outputs": [
+        "A repo-managed Dify runtime on docker-runtime-lv3 with PostgreSQL persistence on postgres-lv3, the public agents.lv3.org hostname through the shared authenticated edge, governed LV3 tools exposed through the API gateway, and an exported smoke workflow artifact."
+      ],
+      "verification_commands": [
+        "make syntax-check-dify",
+        "curl -fsS https://agents.lv3.org/healthz",
+        "uv run --with requests --with pyyaml python3 scripts/dify_smoke.py --base-url https://agents.lv3.org --admin-email baditaflorin@gmail.com --admin-password-file .local/dify/admin-password.txt --init-password-file .local/dify/init-password.txt --tools-api-key-file .local/dify/tools-api-key.txt --export-path platform/dify-workflows/lv3-dify-smoke.yml --sync-tools"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 350,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 3,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-n8n": {
       "description": "Converge n8n on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, and publish it at n8n.lv3.org with a protected editor path and public webhook ingress.",
       "lifecycle_status": "active",
@@ -2540,6 +2770,56 @@
         "max_concurrent_instances": 1,
         "max_touched_hosts": 2,
         "max_restarts": 1,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "converge-excalidraw": {
+      "description": "Deploy the private Excalidraw frontend and collaboration room on docker-runtime-lv3 and publish draw.lv3.org through the shared authenticated edge.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-excalidraw",
+        "command": "make converge-excalidraw"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key"
+        ],
+        "generated_secret_ids": []
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-excalidraw"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-excalidraw.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/excalidraw.yml",
+        "roles/excalidraw_runtime",
+        "roles/nginx_edge_publication",
+        "scripts/generate_diagrams.py",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/service-capability-catalog.json"
+      ],
+      "outputs": [
+        "A private Excalidraw runtime on docker-runtime-lv3 with committed generated architecture scenes and authenticated publication at draw.lv3.org."
+      ],
+      "verification_commands": [
+        "make syntax-check-excalidraw",
+        "uv run --with pyyaml --with jsonschema python scripts/generate_diagrams.py --check",
+        "ssh -i /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -o IdentitiesOnly=yes -J ops@100.64.0.1 ops@10.10.10.20 'curl -fsS http://127.0.0.1:3095/ >/dev/null && curl -fsS http://127.0.0.1:3096/'",
+        "dig +short draw.lv3.org @8.8.8.8 && curl -Ik --resolve draw.lv3.org:443:65.108.75.123 https://draw.lv3.org"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1500,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 2,
+        "max_restarts": 0,
         "max_rollback_depth": 1,
         "escalation_action": "notify_and_abort"
       }
@@ -2811,6 +3091,59 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "converge-realtime": {
+      "description": "Converge the Netdata parent-plus-children realtime metrics surface across monitoring-lv3, the Proxmox host, and the managed guest nodes, then publish realtime.lv3.org through the shared authenticated edge.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-realtime",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-realtime"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": []
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-realtime"
+      ],
+      "live_impact": "host_and_guest_live",
+      "owner_runbook": "docs/runbooks/configure-netdata.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/realtime.yml",
+        "playbooks/services/realtime.yml",
+        "collections/ansible_collections/lv3/platform/playbooks/realtime.yml",
+        "collections/ansible_collections/lv3/platform/roles/netdata_runtime/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/monitoring_vm/tasks/main.yml",
+        "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/tasks/main.yml",
+        "inventory/host_vars/proxmox_florin.yml",
+        "config/uptime-kuma/monitors.json"
+      ],
+      "outputs": [
+        "A repo-managed Netdata parent on monitoring-lv3, child streaming from the Proxmox host and guest nodes, Prometheus ingestion of the consolidated export, and the authenticated realtime.lv3.org edge publication."
+      ],
+      "verification_commands": [
+        "make syntax-check-realtime",
+        "HETZNER_DNS_API_TOKEN=... make converge-realtime",
+        "dig +short realtime.lv3.org",
+        "curl -skI https://realtime.lv3.org/"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 350,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 5,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "converge-ntfy": {
       "description": "Deploy the private ntfy paging gateway on docker-runtime-lv3 and persist the repo-managed credential used by Alertmanager critical routing.",
       "lifecycle_status": "active",
@@ -2875,7 +3208,6 @@
         "generated_secret_ids": [
           "gitea_database_password",
           "gitea_admin_password",
-          "gitea_renovate_token",
           "gitea_webhook_secret",
           "gitea_runner_registration_token"
         ]
@@ -2892,7 +3224,6 @@
         "collections/ansible_collections/lv3/platform/roles/gitea_postgres",
         "collections/ansible_collections/lv3/platform/roles/gitea_runtime",
         "collections/ansible_collections/lv3/platform/roles/gitea_runner",
-        "scripts/publish_gitea_repo.py",
         "inventory/host_vars/proxmox_florin.yml",
         "config/service-capability-catalog.json",
         "config/health-probe-catalog.json"
@@ -3296,6 +3627,47 @@
       ],
       "verification_commands": [
         "make portainer-manage ACTION=list-containers PORTAINER_ARGS='--all'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "coolify-manage": {
+      "description": "Run governed Coolify API actions such as identity checks, application inventory, or repo-backed smoke deployments through the repo-managed wrapper.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "coolify-manage",
+        "command": "make coolify-manage ACTION=whoami"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "coolify_admin_auth"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "external_live",
+      "owner_runbook": "docs/runbooks/configure-coolify.md",
+      "implementation_refs": [
+        "Makefile",
+        "scripts/coolify_tool.py"
+      ],
+      "outputs": [
+        "Governed Coolify API inspection and bounded repo-backed deployment actions through the repo-managed wrapper instead of ad hoc UI edits."
+      ],
+      "verification_commands": [
+        "make coolify-manage ACTION=whoami",
+        "make coolify-manage ACTION=list-applications"
       ],
       "execution_class": "mutation",
       "budget": {
@@ -3887,6 +4259,52 @@
         "escalation_action": "notify_and_abort"
       }
     },
+    "ephemeral-pool-reconcile": {
+      "description": "Keep the ADR 0186 prewarmed fixture pools topped up, record spillover decisions, and preserve one warm spare per common fixture profile when local capacity allows.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "fixture-pool-reconcile",
+        "command": "make fixture-pool-reconcile"
+      },
+      "preflight": {
+        "required": false,
+        "required_secret_ids": []
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "host_live",
+      "owner_runbook": "docs/runbooks/ephemeral-fixtures.md",
+      "implementation_refs": [
+        "Makefile",
+        "config/capacity-model.json",
+        "config/ephemeral-capacity-pools.json",
+        "config/windmill/scripts/ephemeral-pool-reconciler.py",
+        "docs/runbooks/ephemeral-fixtures.md",
+        "docs/schema/ephemeral-capacity-pools.schema.json",
+        "scripts/fixture_manager.py",
+        "tests/test_fixture_manager.py"
+      ],
+      "outputs": [
+        "Any missing warm members are recreated as stopped or lightly initialized fixtures ready for lease handoff.",
+        "Local exhaustion is reported as an explicit auxiliary-domain spillover requirement instead of silently borrowing standby capacity."
+      ],
+      "verification_commands": [
+        "python3 scripts/fixture_manager.py pool-status --json",
+        "python3 scripts/fixture_manager.py reconcile-pools --json"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 2400,
+        "max_steps": 300,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
     "check-platform-drift": {
       "description": "Run the ADR 0071 observation loop checks and emit structured findings from the controller command lane.",
       "lifecycle_status": "active",
@@ -4406,6 +4824,114 @@
       "verification_commands": [
         "make semaphore-manage ACTION=list-projects",
         "make semaphore-manage ACTION=run-template SEMAPHORE_ARGS='--template \"Semaphore Self-Test\" --wait'"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1200,
+        "max_steps": 250,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 1,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "converge-plane": {
+      "description": "Converge Plane on docker-runtime-lv3, provision its PostgreSQL backend on postgres-lv3, publish it at tasks.lv3.org, and verify the repo-managed ADR synchronization path.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "converge-plane",
+        "command": "HETZNER_DNS_API_TOKEN=... make converge-plane"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "bootstrap_ssh_private_key",
+          "hetzner_dns_api_token"
+        ],
+        "generated_secret_ids": [
+          "plane_database_password",
+          "plane_secret_key",
+          "plane_live_server_secret_key",
+          "plane_rabbitmq_password",
+          "plane_aws_secret_access_key",
+          "plane_bootstrap_admin_password",
+          "plane_api_token",
+          "plane_admin_auth"
+        ]
+      },
+      "validation_targets": [
+        "validate",
+        "syntax-check-plane"
+      ],
+      "live_impact": "guest_live",
+      "owner_runbook": "docs/runbooks/configure-plane.md",
+      "implementation_refs": [
+        "Makefile",
+        "playbooks/plane.yml",
+        "roles/plane_postgres",
+        "roles/plane_runtime",
+        "inventory/host_vars/proxmox_florin.yml",
+        "scripts/plane_bootstrap.py",
+        "scripts/plane_tool.py",
+        "scripts/sync_adrs_to_plane.py",
+        "platform/ansible/plane.py"
+      ],
+      "outputs": [
+        "A repo-managed Plane runtime on docker-runtime-lv3 with PostgreSQL on postgres-lv3, public publication at tasks.lv3.org, mirrored bootstrap credentials, and synchronized ADR issues in the seeded project."
+      ],
+      "verification_commands": [
+        "make syntax-check-plane",
+        "curl -fsS http://100.64.0.1:8011/",
+        "make plane-manage ACTION=whoami",
+        "make plane-manage ACTION=list-projects",
+        "make plane-manage ACTION=sync-adrs"
+      ],
+      "execution_class": "mutation",
+      "budget": {
+        "max_duration_seconds": 1800,
+        "max_steps": 350,
+        "max_concurrent_instances": 1,
+        "max_touched_hosts": 4,
+        "max_restarts": 0,
+        "max_rollback_depth": 1,
+        "escalation_action": "notify_and_abort"
+      }
+    },
+    "plane-manage": {
+      "description": "Run governed Plane API actions such as inspecting the bootstrap identity, listing projects, listing issues, creating one issue, or synchronizing ADRs into Plane.",
+      "lifecycle_status": "active",
+      "preferred_entrypoint": {
+        "kind": "make_target",
+        "target": "plane-manage",
+        "command": "make plane-manage ACTION=list-projects"
+      },
+      "preflight": {
+        "required": true,
+        "required_secret_ids": [
+          "plane_admin_auth"
+        ]
+      },
+      "validation_targets": [
+        "validate"
+      ],
+      "live_impact": "external_live",
+      "owner_runbook": "docs/runbooks/configure-plane.md",
+      "implementation_refs": [
+        "Makefile",
+        "scripts/plane_tool.py",
+        "scripts/sync_adrs_to_plane.py",
+        "platform/ansible/plane.py"
+      ],
+      "outputs": [
+        "Governed Plane workspace inspection and ADR synchronization through the repo-managed wrapper instead of ad hoc API calls."
+      ],
+      "verification_commands": [
+        "make plane-manage ACTION=whoami",
+        "make plane-manage ACTION=list-projects",
+        "make plane-manage ACTION=list-issues",
+        "make plane-manage ACTION=sync-adrs"
       ],
       "execution_class": "mutation",
       "budget": {

@@ -1,0 +1,11 @@
+# Playbook: playbooks/services/dify.yml
+# Purpose: Re-export the top-level Dify playbook through the services namespace used by grouped automation entrypoints.
+# Use case: Run when service-scoped orchestration needs to converge Dify via `playbooks/services/`.
+# Inputs: Inventory targeting and any variables consumed by `playbooks/dify.yml`.
+# Outputs: Delegates execution to the canonical Dify playbook without adding new runtime behavior.
+# Idempotency: Fully idempotent because this file only imports another playbook.
+# Dependencies: ADR 0165, ADR 0197, and playbooks/dify.yml.
+# depends_on:
+#   - playbooks/dify.yml
+---
+- import_playbook: ../dify.yml

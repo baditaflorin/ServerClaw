@@ -7,6 +7,7 @@ Keep `lv3.org` hostnames catalogued, validated, and provisioned through repo-man
 ## Canonical Sources
 
 - `config/subdomain-catalog.json`
+- `config/subdomain-exposure-registry.json`
 - `config/service-capability-catalog.json`
 - `roles/nginx_edge_publication/`
 - `inventory/host_vars/proxmox_florin.yml`
@@ -38,7 +39,8 @@ HETZNER_DNS_API_TOKEN=... make provision-subdomain FQDN=ops.lv3.org
 
 ## Exposure Audit
 
-The governed catalog is now paired with a derived exposure registry and live audit.
+The governed catalog is now paired with a derived canonical publication registry
+and live audit.
 
 Use it after catalog or edge-routing changes:
 
@@ -52,6 +54,8 @@ See [subdomain exposure audit](subdomain-exposure-audit.md) for the full operato
 What the target does:
 
 - validates the catalog and checks that the selected FQDN is provisionable
+- regenerates the canonical publication model plus delivery-adapter split used
+  by shared consumers
 - converges the DNS record through `roles/hetzner_dns_record`
 - if the FQDN already has a repo-managed edge route, re-runs `configure-edge-publication` so NGINX and the shared certificate set stay aligned
 

@@ -2,9 +2,10 @@
 from __future__ import annotations
 
 import argparse
+import http.client
 import json
 import os
-import time
+import sys
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -13,7 +14,39 @@ from pathlib import Path
 DEFAULT_HTTP_TIMEOUT_S = 10.0
 
 
+def resolve_repo_root(script_path: Path | None = None) -> Path:
+    candidate = (script_path or Path(__file__)).resolve()
+    for parent in (candidate.parent, *candidate.parents):
+        if (
+            (parent / "platform" / "__init__.py").exists()
+            and (
+                (parent / "platform" / "retry.py").exists()
+                or (parent / "platform" / "retry").is_dir()
+                or (parent / "platform" / "retry" / "__init__.py").exists()
+            )
+        ):
+            return parent
+    raise RuntimeError(f"Unable to resolve repository root from {candidate}")
+
+
+REPO_ROOT = resolve_repo_root()
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+if "platform" in sys.modules and not hasattr(sys.modules["platform"], "__path__"):
+    del sys.modules["platform"]
+
+from platform.retry import PlatformRetryError, RetryClass, RetryPolicy, with_retry
+
+
 class SyncError(RuntimeError):
+    pass
+
+
+class RetryableSyncError(SyncError):
+    pass
+
+
+class SyncTransportError(RetryableSyncError):
     pass
 
 
@@ -45,10 +78,11 @@ def request_json_or_text(
     except urllib.error.HTTPError as exc:
         status = exc.code
         body = exc.read().decode("utf-8")
-    except (urllib.error.URLError, TimeoutError, OSError) as exc:
-        raise SyncError(f"{method} {path} transport failure: {exc}") from exc
+    except (urllib.error.URLError, http.client.HTTPException, TimeoutError, OSError) as exc:
+        raise SyncTransportError(f"{method} {path} transport failure: {exc}") from exc
     if status not in expected_statuses:
-        raise SyncError(f"{method} {path} returned {status}: {body[:500]}")
+        error_cls = RetryableSyncError if status >= 500 or status in (408, 429) else SyncError
+        raise error_cls(f"{method} {path} returned {status}: {body[:500]}")
     return status, body
 
 
@@ -126,8 +160,11 @@ def sync_schedule(
     settle_interval_s: float,
     request_timeout_s: float,
 ) -> dict:
-    last_error = ""
-    for attempt in range(1, max_attempts + 1):
+    attempts = 0
+
+    def sync_attempt() -> dict:
+        nonlocal attempts
+        attempts += 1
         try:
             if schedule_exists(
                 base_url=base_url,
@@ -143,7 +180,7 @@ def sync_schedule(
                     spec=spec,
                     timeout_s=request_timeout_s,
                 )
-                return {"path": spec["path"], "attempts": attempt, "status": "updated"}
+                return {"path": spec["path"], "attempts": attempts, "status": "updated"}
             create_schedule(
                 base_url=base_url,
                 workspace=workspace,
@@ -151,11 +188,29 @@ def sync_schedule(
                 spec=spec,
                 timeout_s=request_timeout_s,
             )
-            return {"path": spec["path"], "attempts": attempt, "status": "created"}
-        except (OSError, SyncError) as exc:
-            last_error = str(exc)[:500]
-            time.sleep(settle_interval_s)
-    raise SyncError(f"failed to sync {spec['path']} after {max_attempts} attempts: {last_error}")
+            return {"path": spec["path"], "attempts": attempts, "status": "created"}
+        except (RetryableSyncError, OSError) as exc:
+            raise PlatformRetryError(
+                str(exc),
+                code="platform:windmill_seed_schedule_sync_pending",
+                retry_class=RetryClass.BACKOFF,
+            ) from exc
+
+    try:
+        return with_retry(
+            sync_attempt,
+            policy=RetryPolicy(
+                max_attempts=max_attempts,
+                base_delay_s=settle_interval_s,
+                max_delay_s=settle_interval_s,
+                multiplier=1.0,
+                jitter=False,
+                transient_max=0,
+            ),
+            error_context=f"windmill seed schedule sync for {spec['path']}",
+        )
+    except Exception as exc:
+        raise SyncError(f"failed to sync {spec['path']} after {max_attempts} attempts: {exc}") from exc
 
 
 def main() -> int:
@@ -170,7 +225,7 @@ def main() -> int:
 
     token = os.environ.get("WINDMILL_TOKEN", "").strip()
     if not token:
-        print(json.dumps({"status": "error", "reason": "WINDMILL_TOKEN is required"}), file=os.sys.stderr)
+        print(json.dumps({"status": "error", "reason": "WINDMILL_TOKEN is required"}), file=sys.stderr)
         return 2
 
     manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
@@ -200,7 +255,7 @@ def main() -> int:
                 indent=2,
                 sort_keys=True,
             ),
-            file=os.sys.stderr,
+            file=sys.stderr,
         )
         return 1
 

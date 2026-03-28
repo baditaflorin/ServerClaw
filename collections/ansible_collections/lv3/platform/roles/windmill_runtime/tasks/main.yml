@@ -166,6 +166,52 @@
   register: windmill_worker_checkout_checksum_marker_raw
   when: windmill_worker_checkout_checksum_marker.stat.exists
 
+- name: Collect controller-side integrity checksums for Windmill worker checkout sentinels
+  ansible.builtin.stat:
+    path: "{{ windmill_worker_checkout_repo_root_local_dir }}/{{ item }}"
+    checksum_algorithm: sha256
+  delegate_to: localhost
+  become: false
+  loop: "{{ windmill_worker_checkout_integrity_files }}"
+  register: windmill_worker_checkout_integrity_local
+
+- name: Assert controller-side Windmill worker checkout sentinels exist
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists | bool
+    fail_msg: >-
+      Windmill worker checkout integrity sentinel {{ item.item }} is missing from the controller workspace.
+  loop: "{{ windmill_worker_checkout_integrity_local.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+
+- name: Collect guest-side integrity checksums for Windmill worker checkout sentinels
+  ansible.builtin.stat:
+    path: "{{ windmill_worker_repo_checkout_host_path }}/{{ item.item }}"
+    checksum_algorithm: sha256
+  loop: "{{ windmill_worker_checkout_integrity_local.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  register: windmill_worker_checkout_integrity_remote
+
+- name: Initialize the Windmill worker checkout integrity drift tracker
+  ansible.builtin.set_fact:
+    windmill_worker_checkout_integrity_mismatch: false
+
+- name: Flag the Windmill worker checkout for refresh when integrity sentinels drift
+  ansible.builtin.set_fact:
+    windmill_worker_checkout_integrity_mismatch: true
+  loop: "{{ range(0, windmill_worker_checkout_integrity_local.results | length) | list }}"
+  loop_control:
+    label: "{{ windmill_worker_checkout_integrity_local.results[item].item }}"
+  when: >-
+    (not (windmill_worker_checkout_integrity_remote.results[item].stat.exists | default(false)))
+    or (
+      (windmill_worker_checkout_integrity_remote.results[item].stat.checksum | default(''))
+      !=
+      (windmill_worker_checkout_integrity_local.results[item].stat.checksum | default(''))
+    )
+
 - name: Decide whether the Windmill worker checkout needs to be refreshed
   ansible.builtin.set_fact:
     windmill_worker_checkout_needs_refresh: >-
@@ -175,6 +221,7 @@
           (windmill_worker_checkout_checksum_marker_raw.content | default('') | b64decode | trim)
           != (windmill_worker_checkout_archive_remote.checksum | default(''))
         )
+        or (windmill_worker_checkout_integrity_mismatch | default(false) | bool)
       }}
 
 - name: Expand the staged Windmill worker checkout on the guest when the archive changed
@@ -291,6 +338,12 @@
     msg: "Removed stale Python bytecode cache directories from the Windmill worker checkout"
   when: windmill_worker_checkout_python_cache_dirs.stdout | trim | length > 0
   changed_when: false
+
+- name: Remove stale packaging metadata from the Windmill worker checkout
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop: "{{ windmill_worker_checkout_stale_paths }}"
 
 - name: Remove the local staging archive for the Windmill worker checkout
   ansible.builtin.file:
@@ -1501,7 +1554,7 @@
     python3 {{ (playbook_dir | dirname ~ '/scripts/windmill_run_wait_result.py') | quote }}
     --base-url {{ windmill_base_url | quote }}
     --workspace {{ windmill_workspace_id | quote }}
-    --path {{ windmill_seed_scripts[0].path | quote }}
+    --path {{ windmill_healthcheck_script_path | quote }}
     --payload-json '{"probe":"live-verify"}'
     --timeout {{ windmill_seed_job_timeout_seconds }}
   args:

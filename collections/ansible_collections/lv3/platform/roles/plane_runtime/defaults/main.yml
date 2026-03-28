@@ -1,0 +1,111 @@
+---
+# Purpose: Declare the shared defaults for converging the Plane runtime, bootstrap artifacts, and controller access paths.
+# Use case: Used whenever the plane_runtime role renders the Plane stack, secrets, and validation commands.
+#
+# Inputs (required):
+#   - platform service topology (generated, required): Supplies Plane hostnames, URLs, and assigned ports.
+#   - container image catalog (generated, required): Supplies pinned Plane image references.
+#
+# Inputs (optional):
+#   - plane_app_release (str, optional, default=v1.2.3): Managed Plane application release marker.
+#   - plane_healthcheck_path (str, optional, default=/api/instances/): Health endpoint used for readiness verification.
+#
+# Outputs:
+#   - Default variable values consumed by the Plane runtime role tasks and templates.
+#
+# Idempotency: Fully idempotent
+#              This file only declares role defaults.
+#
+# Dependencies:
+#   - ADR 0193: Defines the Plane runtime, bootstrap flow, and controller lane.
+#   - Requires: Generated topology and image catalog facts to be current.
+#   - Role: plane_runtime — converges the Plane compose stack and bootstrap artifacts.
+#
+# Related ADRs: 0165, 0193
+# Related Runbooks: docs/runbooks/configure-plane.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
+plane_service_topology: "{{ hostvars['proxmox_florin'].lv3_service_topology | service_topology_get('plane') }}"
+plane_site_dir: /opt/plane
+plane_data_dir: "{{ plane_site_dir }}/data"
+plane_log_dir: "{{ plane_data_dir }}/logs"
+plane_minio_data_dir: "{{ plane_data_dir }}/minio"
+plane_valkey_data_dir: "{{ plane_data_dir }}/valkey"
+plane_rabbitmq_data_dir: "{{ plane_data_dir }}/rabbitmq"
+plane_migrator_log_dir: "{{ plane_log_dir }}/migrator"
+plane_secret_dir: /etc/lv3/plane
+plane_compose_file: "{{ plane_site_dir }}/docker-compose.yml"
+plane_env_file: "{{ compose_runtime_secret_root }}/plane/runtime.env"
+plane_legacy_env_file: "{{ plane_site_dir }}/plane.env"
+plane_openbao_agent_dir: "{{ plane_site_dir }}/openbao"
+plane_openbao_agent_image: "{{ openbao_agent_image }}"
+plane_openbao_agent_container_name: plane-openbao-agent
+plane_openbao_secret_path: services/plane/runtime-env
+plane_openbao_policy_name: lv3-service-plane-runtime
+plane_openbao_approle_name: plane-runtime
+plane_internal_port: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_port('plane', 'internal') }}"
+plane_internal_base_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('plane', 'internal') }}"
+plane_controller_url: "{{ hostvars['proxmox_florin'].platform_service_topology | platform_service_url('plane', 'controller') }}"
+plane_public_base_url: "https://{{ plane_service_topology.public_hostname }}"
+plane_app_release: v1.2.3
+plane_frontend_image: "{{ container_image_catalog.images.plane_frontend_runtime.ref }}"
+plane_space_image: "{{ container_image_catalog.images.plane_space_runtime.ref }}"
+plane_admin_image: "{{ container_image_catalog.images.plane_admin_runtime.ref }}"
+plane_live_image: "{{ container_image_catalog.images.plane_live_runtime.ref }}"
+plane_backend_image: "{{ container_image_catalog.images.plane_backend_runtime.ref }}"
+plane_proxy_image: "{{ container_image_catalog.images.plane_proxy_runtime.ref }}"
+plane_valkey_image: "{{ container_image_catalog.images.netbox_redis_runtime.ref }}"
+plane_rabbitmq_image: "{{ container_image_catalog.images.plane_rabbitmq_runtime.ref }}"
+plane_minio_image: "{{ container_image_catalog.images.langfuse_minio_runtime.ref }}"
+plane_web_container_name: plane-web
+plane_space_container_name: plane-space
+plane_admin_container_name: plane-admin
+plane_live_container_name: plane-live
+plane_api_container_name: plane-api
+plane_migrator_container_name: plane-migrator
+plane_worker_container_name: plane-worker
+plane_beat_worker_container_name: plane-beat-worker
+plane_proxy_container_name: plane-proxy
+plane_valkey_container_name: plane-valkey
+plane_rabbitmq_container_name: plane-rabbitmq
+plane_minio_container_name: plane-minio
+plane_database_name: plane
+plane_database_user: plane_admin
+plane_database_host: "{{ hostvars[hostvars['proxmox_florin'].postgres_ha.initial_primary].ansible_host }}"
+plane_database_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/plane/database-password.txt
+plane_local_artifact_dir: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/plane
+plane_secret_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/plane/secret-key.txt
+plane_live_server_secret_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/plane/live-server-secret-key.txt
+plane_rabbitmq_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/plane/rabbitmq-password.txt
+plane_aws_secret_access_key_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/plane/aws-secret-access-key.txt
+plane_bootstrap_admin_password_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/plane/bootstrap-admin-password.txt
+plane_admin_auth_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/plane/admin-auth.json
+plane_api_token_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/plane/api-token.txt
+plane_bootstrap_spec_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/plane/bootstrap-spec.json
+plane_sync_summary_local_file: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/plane/adr-sync-summary.json
+plane_secret_key_remote_file: "{{ plane_secret_dir }}/secret-key.txt"
+plane_live_server_secret_key_remote_file: "{{ plane_secret_dir }}/live-server-secret-key.txt"
+plane_rabbitmq_password_remote_file: "{{ plane_secret_dir }}/rabbitmq-password.txt"
+plane_aws_secret_access_key_remote_file: "{{ plane_secret_dir }}/aws-secret-access-key.txt"
+plane_bootstrap_admin_password_remote_file: "{{ plane_secret_dir }}/bootstrap-admin-password.txt"
+plane_minio_root_user: plane
+plane_aws_access_key_id: plane
+plane_s3_bucket_name: uploads
+plane_bootstrap_admin_email: ops@lv3.org
+plane_bootstrap_admin_first_name: Florin
+plane_bootstrap_admin_last_name: Badita
+plane_bootstrap_company_name: LV3
+plane_bootstrap_workspace_name: LV3 Platform
+plane_bootstrap_workspace_slug: lv3-platform
+plane_bootstrap_project_name: Architecture Decisions
+plane_bootstrap_project_identifier: ADR
+plane_bootstrap_api_token_label: LV3 Plane Automation
+plane_bootstrap_api_token_description: Repo-managed Plane automation token for ADR synchronization and governed maintenance tasks.
+plane_sync_adr_dir: "{{ playbook_dir }}/../docs/adr"
+plane_gunicorn_workers: 2
+plane_trusted_proxies:
+  - 127.0.0.1
+  - 10.10.10.10
+  - 100.64.0.1
+plane_healthcheck_path: /api/instances/

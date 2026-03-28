@@ -60,6 +60,7 @@ def build_report(payload):
     assert payload["status"] == "ok"
     assert payload["processed_count"] == 1
     assert payload["processed_runs"][0]["service_id"] == "netbox"
+    assert "correction_loop_id" in payload["processed_runs"][0]
 
 
 def test_wrapper_handles_stdlib_platform_collision(tmp_path: Path) -> None:
@@ -73,3 +74,4 @@ def test_wrapper_handles_stdlib_platform_collision(tmp_path: Path) -> None:
     assert payload["status"] == "ok"
     assert payload["processed_count"] == 1
     assert payload["processed_runs"][0]["service_id"] == "netbox"
+    assert payload["correction_loop_id"] == "runtime_self_correction_watchers"
