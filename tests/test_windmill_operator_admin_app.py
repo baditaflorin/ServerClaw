@@ -214,6 +214,24 @@ def test_operator_admin_raw_app_bundle_references_expected_backend_scripts() -> 
         assert payload["path"] == expected_path
 
 
+def test_operator_admin_raw_app_lockfile_and_runtime_sync_contract() -> None:
+    app_dir = REPO_ROOT / "config/windmill/apps/f/lv3/operator_access_admin.raw_app"
+    package_lock = json.loads((app_dir / "package-lock.json").read_text())
+    runtime_tasks = (
+        REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/tasks/main.yml"
+    ).read_text()
+
+    assert package_lock["lockfileVersion"] == 3
+    assert package_lock["packages"][""]["dependencies"]["shepherd.js"] == "15.2.2"
+    assert package_lock["packages"]["node_modules/shepherd.js"]["version"] == "15.2.2"
+    assert "- name: Install repo-managed Windmill raw app frontend dependencies" in runtime_tasks
+    assert "missing package-lock.json for {{ item.path }}" in runtime_tasks
+    assert "npm ci --no-audit --no-fund" in runtime_tasks
+    assert runtime_tasks.index("- name: Install repo-managed Windmill raw app frontend dependencies") < runtime_tasks.index(
+        "- name: Sync repo-managed Windmill raw apps"
+    )
+
+
 def test_operator_roster_script_returns_sanitized_roster(tmp_path: Path) -> None:
     repo_root = tmp_path / "repo"
     roster_path = repo_root / "config" / "operators.yaml"
