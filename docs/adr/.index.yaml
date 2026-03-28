@@ -7,9 +7,9 @@
 
 schema_version: 1
 generated: '2026-03-28'
-total_adrs: 216
+total_adrs: 217
 implementation_status_summary:
-  Implemented: 196
+  Implemented: 197
   Partial: 3
   Not Implemented: 16
   Deprecated: 1
@@ -3374,7 +3374,7 @@ adr_index:
     implemented_version: 0.177.25
   - adr: 0197
     title: Dify - Visual LLM Workflow and Agent Canvas
-    status: Accepted
+    status: Implemented
     implementation_status: Implemented
     date: '2026-03-27'
     concern: automation
@@ -3388,7 +3388,7 @@ adr_index:
     summary: 'Deploy Dify on docker-runtime-lv3 at agents.lv3.org behind the shared Keycloak-backed edge authentication flow.
       Connect '
     filename: 0197-dify-visual-llm-workflow-canvas.md
-    implemented_version: 0.177.12
+    implemented_version: 0.177.29
   - adr: 0198
     title: Qdrant Vector Search for Semantic Platform RAG
     status: Implemented

@@ -134,7 +134,7 @@ workstreams:
     canonical_truth:
       changelog_entry: integrated ADR 0197 by adding the repo-managed Dify visual workflow canvas on `docker-runtime-lv3`, wiring the governed `api.lv3.org` tool bridge plus workflow export path, and recording the verified live-apply evidence while the public `agents.lv3.org` DNS replay remains blocked by the Hetzner DNS write brownout
       release_bump: patch
-      included_in_repo_version: null
+      included_in_repo_version: 0.177.29
       latest_receipts:
         dify: 2026-03-28-adr-0197-dify-live-apply
   - id: ws-0193-main-merge

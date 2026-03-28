@@ -2,7 +2,7 @@
 
 - Status: Implemented
 - Implementation Status: Live applied
-- Implemented In Repo Version: 0.177.27
+- Implemented In Repo Version: 0.177.29
 - Implemented In Platform Version: 0.130.31
 - Implemented On: 2026-03-28
 - Date: 2026-03-27
@@ -49,7 +49,7 @@ The platform's named tools are published from `config/agent-tool-registry.json` 
 - The branch-local live apply converged Dify on `docker-runtime-lv3` and moved the internal listener to `8094` because `8093` was already occupied by the existing Plane proxy on the same guest.
 - Internal verification was completed through an SSH tunnel to `docker-runtime-lv3`, where `/healthz`, `/console/api/setup`, and the bootstrap flow all succeeded and the smoke workflow export was written to `platform/dify-workflows/lv3-dify-smoke.yml`.
 - The governed Dify tool bridge is live through `api.lv3.org`; `POST /v1/dify-tools/get-platform-status` now succeeds with the Dify tools API key and returns the governed platform-status payload.
-- The integrated `main` release is `0.177.27`, which records the repo-managed Dify runtime, the governed tool bridge, the committed smoke workflow export, and the branch-local live-apply receipt directly in canonical repository state.
+- The integrated `main` release is `0.177.29`, which records the repo-managed Dify runtime, the governed tool bridge, the committed smoke workflow export, and the branch-local live-apply receipt directly in canonical repository state.
 - Public `agents.lv3.org` hostname publication remains blocked outside the repo by the Hetzner DNS write brownout, so the public edge hostname still needs a follow-up replay from `main` once the provider-side DNS API recovers.
 
 ## Related ADRs

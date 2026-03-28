@@ -2,8 +2,8 @@
 
 - ADR: [ADR 0197](../adr/0197-dify-visual-llm-workflow-canvas.md)
 - Title: Live apply and end-to-end verification for the Dify visual workflow canvas
-- Status: implemented
-- Implemented In Repo Version: 0.177.27
+- Status: merged
+- Implemented In Repo Version: 0.177.29
 - Live Applied In Platform Version: 0.130.31
 - Implemented On: 2026-03-28
 - Live Applied On: 2026-03-28
@@ -42,7 +42,7 @@
 - The live runtime was verified internally through an SSH tunnel to `127.0.0.1:18094`, where `/healthz` returned healthy JSON, `/console/api/setup` reported `step=finished`, and `scripts/dify_smoke.py` completed with `tool_count: 11` and exported `platform/dify-workflows/lv3-dify-smoke.yml`.
 - The platform API gateway was extended to package the workflow-contract repo surfaces needed by governed Dify tool calls, and the governed bridge now returns `HTTP/2 200` from `https://api.lv3.org/v1/dify-tools/get-platform-status` with the live Dify tools API key.
 - The branch records receipt `2026-03-28-adr-0197-dify-live-apply` for the branch-local live apply, including the temporary manual OpenBao policy upsert and the `8093 -> 8094` Dify port reassignment made to avoid the pre-existing Plane proxy listener.
-- The integrated `main` release is `0.177.27`, so the protected integration files are now updated and the Dify runtime, catalogs, release notes, and canonical README truth are recorded on `origin/main`.
+- The integrated `main` release is `0.177.29`, so the protected integration files are now updated and the Dify runtime, catalogs, release notes, and canonical README truth are recorded on `origin/main`.
 - Public `agents.lv3.org` publication is still blocked outside the repo: `curl https://agents.lv3.org/` currently fails with `Could not resolve host: agents.lv3.org` because the Hetzner DNS write brownout prevented the edge publication step from being completed.
 
 ## Post-Merge Follow-Up

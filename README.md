@@ -128,7 +128,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.28` |
+| Repository version | `0.177.29` |
 | Platform version | `0.130.35` |
 | Observed check date | `2026-03-28` |
 | Observed OS | `Debian 13` |
@@ -1034,7 +1034,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.28` |
+| Repository version | `0.177.29` |
 | Platform version | `0.130.35` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1239,6 +1239,7 @@ This repository is intentionally opinionated:
 | `0192` | Live apply ADR 0192 capacity classes for standby, recovery, and preview workloads | `merged` | [ws-0192-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0192-live-apply.md) |
 | `0193` | Plane Kanban Task Board | `merged` | [adr-0193-plane-kanban-task-board.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0193-plane-kanban-task-board.md) |
 | `0196` | ADR 0196 live apply from latest origin/main | `merged` | [ws-0196-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0196-live-apply.md) |
+| `0197` | Dify visual workflow canvas live apply | `merged` | [ws-0197-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0197-live-apply.md) |
 | `0199` | Outline living knowledge wiki | `merged` | [adr-0199-outline-living-knowledge-wiki.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0199-live-apply/docs/workstreams/adr-0199-outline-living-knowledge-wiki.md) |
 | `0202` | Excalidraw auto generated architecture diagrams | `live_applied` | [adr-0202-excalidraw-auto-generated-architecture-diagrams.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0202-excalidraw-auto-generated-architecture-diagrams.md) |
 <!-- END GENERATED: merged-workstreams -->

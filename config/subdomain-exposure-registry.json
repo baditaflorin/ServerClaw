@@ -940,12 +940,12 @@
     }
   ],
   "summary": {
-    "catalog_total": 30,
-    "active_total": 26,
-    "active_public_dns_total": 22,
+    "catalog_total": 31,
+    "active_total": 27,
+    "active_public_dns_total": 23,
     "active_private_total": 4,
     "planned_total": 4,
-    "edge_total": 21,
-    "edge_oidc_total": 11
+    "edge_total": 22,
+    "edge_oidc_total": 12
   }
 }
