@@ -139,7 +139,14 @@
     mutation_audit_target: "{{ windmill_worker_repo_checkout_host_path }}"
   ansible.builtin.shell: |
     set -euo pipefail
-    tar -C "{{ windmill_worker_checkout_repo_root_local_dir }}" -czf "{{ windmill_worker_checkout_archive_local.path }}" {{ windmill_worker_checkout_sync_paths | map('quote') | join(' ') }}
+    tar \
+      --exclude='._*' \
+      --exclude='*/._*' \
+      --exclude='.DS_Store' \
+      --exclude='*/.DS_Store' \
+      -C "{{ windmill_worker_checkout_repo_root_local_dir }}" \
+      -czf "{{ windmill_worker_checkout_archive_local.path }}" \
+      {{ windmill_worker_checkout_sync_paths | map('quote') | join(' ') }}
   args:
     executable: /bin/bash
   delegate_to: localhost
@@ -238,6 +245,26 @@
   ansible.builtin.file:
     path: "{{ windmill_site_dir }}/worker-checkout.tar.gz"
     state: absent
+
+- name: Find AppleDouble artifacts in the Windmill worker checkout
+  ansible.builtin.shell: |
+    set -euo pipefail
+    find \
+      "{{ windmill_worker_repo_checkout_host_path }}" \
+      -type f \
+      \( -name '._*' -o -name '.DS_Store' \) \
+      -print \
+      -delete
+  args:
+    executable: /bin/bash
+  register: windmill_worker_checkout_appledouble_files
+  changed_when: windmill_worker_checkout_appledouble_files.stdout | trim | length > 0
+
+- name: Remove AppleDouble artifacts from the Windmill worker checkout
+  ansible.builtin.debug:
+    msg: "Removed AppleDouble artifacts from the Windmill worker checkout"
+  when: windmill_worker_checkout_appledouble_files.stdout | trim | length > 0
+  changed_when: false
 
 - name: Find stale Python bytecode files in the Windmill worker checkout
   ansible.builtin.shell: |

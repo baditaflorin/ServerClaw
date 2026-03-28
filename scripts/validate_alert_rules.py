@@ -25,6 +25,8 @@ def require_mapping(value: Any, path: str) -> dict[str, Any]:
 def load_rule_files(rules_dir: Path) -> list[tuple[Path, dict[str, Any]]]:
     payloads: list[tuple[Path, dict[str, Any]]] = []
     for path in sorted(rules_dir.glob("*.yml")):
+        if path.name.startswith("._"):
+            continue
         document = yaml.safe_load(path.read_text(encoding="utf-8"))
         payloads.append((path, require_mapping(document, str(path))))
     return payloads

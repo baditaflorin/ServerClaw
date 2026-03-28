@@ -66,7 +66,39 @@ run_uv_python() {
 }
 
 tracked_files() {
-  git -C "$REPO_ROOT" ls-files -- "$@"
+  if git -C "$REPO_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    git -C "$REPO_ROOT" ls-files -- "$@"
+    return 0
+  fi
+
+  python3 - "$REPO_ROOT" "$@" <<'PY'
+from pathlib import Path
+import sys
+
+repo_root = Path(sys.argv[1])
+patterns = sys.argv[2:]
+skip_dirs = {".ansible", ".git", ".local", ".pytest_cache", ".venv", ".worktrees"}
+seen: set[str] = set()
+
+for pattern in patterns:
+    iterator = repo_root.glob(pattern) if "/" in pattern else repo_root.rglob(pattern)
+    for path in sorted(iterator):
+        if not path.is_file():
+            continue
+        rel = path.relative_to(repo_root)
+        parts = rel.parts
+        if any(part in skip_dirs for part in parts[:-1]):
+            continue
+        if any(part.startswith("._") for part in parts):
+            continue
+        if rel.name == ".DS_Store":
+            continue
+        rel_posix = rel.as_posix()
+        if rel_posix in seen:
+            continue
+        seen.add(rel_posix)
+        print(rel_posix)
+PY
 }
 
 load_lines_into_array() {

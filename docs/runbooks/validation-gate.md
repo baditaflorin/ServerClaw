@@ -112,6 +112,7 @@ If the worker cannot pull the registry-backed `check-runner` images and the mani
 - `python3 -m uv run --with pyyaml python3 scripts/provider_boundary_catalog.py --validate`
 
 That fallback intentionally omits the full `data-models` stage because mirrored worker checkouts can lack the complete historical git ancestry needed to validate every live-apply receipt `source_commit`, even when the ADR 0207 provider-boundary contract itself is healthy.
+The mirrored worker checkout still needs the canonical generated-doc inputs (`README.md`, `VERSION`, `changelog.md`, `mkdocs.yml`, `roles/`, `versions/`, and `workstreams.yaml`) because the fallback keeps `generated-docs` and `generated-portals` enabled even without `.git`.
 
 ## Troubleshooting
 
@@ -119,7 +120,7 @@ That fallback intentionally omits the full `data-models` stage because mirrored 
 - if the build server is unreachable, rerun `make pre-push-gate`; the wrapper already falls back to local Docker execution
 - if two remote gate runs appear to reuse one checkout, set distinct `LV3_SESSION_ID` values and rerun so each session gets its own build-server workspace
 - if a remote gate run fails with `fatal: not a git repository` from a worktree path, rerun on the updated `main`; the remote sync now rewrites worktree metadata into `.git-remote/` inside the build workspace
-- if the Windmill post-merge gate points at a mirrored worker tree without `.git`, run it against a temporary single-branch clone instead of `/srv/proxmox_florin_server` so manifest steps that call `git ls-files` can still enumerate tracked playbooks
+- if the Windmill post-merge gate points at an older mirrored worker tree without the canonical generated-doc inputs, replay `windmill_runtime` first so `/srv/proxmox_florin_server` includes the full worker-safe validation surface before rerunning the gate
 - if the Windmill post-merge gate falls back locally because runner images cannot be pulled, treat the build-server `remote-validate` run as the authoritative full-manifest proof and use the fallback output to confirm the worker-safe ADR 0207 boundary checks still passed
 - if `packer-validate` falls back locally, inspect the build-worker plugin cache under `/opt/builds/.packer.d`; the remote gate expects the `github.com/hashicorp/proxmox` plugin to be prewarmed there when outbound GitHub access is unavailable
 - if a local fallback fails because Docker is unavailable, fix the local Docker daemon or restore build-server reachability before pushing

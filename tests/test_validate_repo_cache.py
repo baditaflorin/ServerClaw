@@ -73,6 +73,21 @@ def test_validate_repo_generated_portals_stage_does_not_require_make() -> None:
     assert 'make -C "$REPO_ROOT" docs' not in script
 
 
+def test_validate_repo_tracked_files_fall_back_without_git_metadata() -> None:
+    script = VALIDATE_REPO_SCRIPT.read_text()
+
+    assert 'rev-parse --is-inside-work-tree' in script
+    assert 'repo_root.glob(pattern) if "/" in pattern else repo_root.rglob(pattern)' in script
+    assert 'skip_dirs = {".ansible", ".git", ".local", ".pytest_cache", ".venv", ".worktrees"}' in script
+
+
+def test_validate_repo_tracked_files_skip_appledouble_artifacts() -> None:
+    script = VALIDATE_REPO_SCRIPT.read_text()
+
+    assert 'if any(part.startswith("._") for part in parts):' in script
+    assert 'if rel.name == ".DS_Store":' in script
+
+
 def test_check_role_argument_specs_avoids_bash4_only_mapfile() -> None:
     script = CHECK_ROLE_ARGUMENT_SPECS_SCRIPT.read_text()
 
@@ -87,3 +102,10 @@ def test_check_role_argument_specs_handles_missing_merge_base_history() -> None:
     assert "changed_from_base" in script
     assert "rev-parse --verify --quiet origin/main >/dev/null 2>/dev/null" in script
     assert "2>/dev/null" in script
+
+
+def test_check_role_argument_specs_falls_back_without_git_metadata() -> None:
+    script = CHECK_ROLE_ARGUMENT_SPECS_SCRIPT.read_text()
+
+    assert 'rev-parse --is-inside-work-tree >/dev/null 2>&1' in script
+    assert 'find "$REPO_ROOT/$COLLECTION_ROLES_ROOT" -mindepth 1 -maxdepth 1 -type d' in script

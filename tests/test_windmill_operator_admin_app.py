@@ -25,6 +25,20 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
         (REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml").read_text()
     )
 
+    assert defaults["windmill_platform_service_topology"] == "{{ hostvars[inventory_hostname].platform_service_topology }}"
+    assert defaults["windmill_server_port"] == (
+        "{{ windmill_platform_service_topology | platform_service_port('windmill', 'internal') }}"
+    )
+    assert defaults["windmill_host_proxy_port"] == (
+        "{{ windmill_platform_service_topology | platform_service_port('windmill', 'controller') }}"
+    )
+    assert defaults["windmill_private_base_url"] == (
+        "{{ windmill_platform_service_topology | platform_service_url('windmill', 'internal') }}"
+    )
+    assert defaults["windmill_base_url"] == (
+        "{{ windmill_platform_service_topology | platform_service_url('windmill', 'controller') }}"
+    )
+
     script_paths = {entry["path"] for entry in defaults["windmill_seed_scripts"]}
     raw_app_paths = {entry["path"] for entry in defaults["windmill_seed_raw_apps"]}
 
@@ -42,19 +56,26 @@ def test_windmill_defaults_seed_operator_admin_scripts_and_app() -> None:
     assert defaults["windmill_bootstrap_identity_login_type"] == "password"
     assert defaults["windmill_worker_checkout_repo_root_local_dir"] == "{{ playbook_dir }}/.."
     assert {
+        "README.md",
+        "VERSION",
         "ansible.cfg",
         "callback_plugins",
+        "changelog.md",
         "collections",
         "config",
         "docs",
         "filter_plugins",
         "inventory",
+        "mkdocs.yml",
         "migrations",
         "playbooks",
         "platform",
         "receipts",
         "scripts",
+        "versions",
         "windmill",
+        "workstreams.yaml",
+        "roles",
     }.issubset(set(defaults["windmill_worker_checkout_sync_paths"]))
     assert defaults["windmill_worker_checkout_checksum_file"] == "{{ windmill_site_dir }}/worker-checkout.sha256"
     assert defaults["windmill_worker_superadmin_secret_dir"] == "{{ windmill_worker_repo_checkout_host_path }}/.local/windmill"
@@ -320,8 +341,13 @@ def test_windmill_runtime_tasks_sync_raw_apps_via_wmill_cli() -> None:
     assert "BASE_INTERNAL_URL" in tasks
     assert "windmill_runtime_api_base_url" in tasks
     assert "Build the local staging archive for the Windmill worker checkout" in tasks
+    assert "--exclude='._*'" in tasks
+    assert "--exclude='*/._*'" in tasks
+    assert "--exclude='.DS_Store'" in tasks
     assert "changed_when: false" in tasks
     assert "Expand the staged Windmill worker checkout on the guest" in tasks
+    assert "Find AppleDouble artifacts in the Windmill worker checkout" in tasks
+    assert "Remove AppleDouble artifacts from the Windmill worker checkout" in tasks
     assert "Find stale Python bytecode files in the Windmill worker checkout" in tasks
     assert "Remove stale Python bytecode files from the Windmill worker checkout" in tasks
     assert "Find stale Python bytecode cache directories in the Windmill worker checkout" in tasks

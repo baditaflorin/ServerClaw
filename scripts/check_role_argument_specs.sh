@@ -5,6 +5,10 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 COLLECTION_ROLES_ROOT="collections/ansible_collections/lv3/platform/roles"
 
+repo_has_git_metadata() {
+  git -C "$REPO_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1
+}
+
 role_paths_from_files() {
   awk -F/ '
     $1 == "collections" && $2 == "ansible_collections" && $3 == "lv3" && $4 == "platform" && $5 == "roles" && $6 != "" {
@@ -14,6 +18,9 @@ role_paths_from_files() {
 }
 
 base_ref() {
+  if ! repo_has_git_metadata; then
+    return 1
+  fi
   if git -C "$REPO_ROOT" rev-parse --verify --quiet origin/main >/dev/null 2>/dev/null; then
     git -C "$REPO_ROOT" merge-base HEAD origin/main 2>/dev/null || git -C "$REPO_ROOT" rev-parse HEAD
   else
@@ -23,8 +30,16 @@ base_ref() {
 
 collect_candidate_roles() {
   local base
-  base="$(base_ref)"
   local changed_from_base=""
+
+  if ! repo_has_git_metadata; then
+    find "$REPO_ROOT/$COLLECTION_ROLES_ROOT" -mindepth 1 -maxdepth 1 -type d 2>/dev/null |
+      sed "s#^$REPO_ROOT/##" |
+      awk '!seen[$0]++'
+    return 0
+  fi
+
+  base="$(base_ref)"
 
   if ! changed_from_base="$(git -C "$REPO_ROOT" diff --name-only "$base"...HEAD -- "$COLLECTION_ROLES_ROOT" 2>/dev/null)"; then
     changed_from_base=""
