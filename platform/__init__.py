@@ -29,6 +29,7 @@ _REPO_SUBMODULES = {
     "ledger",
     "llm",
     "logging",
+    "use_cases",
     "world_state",
 }
 
