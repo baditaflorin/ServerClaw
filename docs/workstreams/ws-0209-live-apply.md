@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0209](../adr/0209-use-case-services-and-thin-delivery-adapters.md)
 - Title: Shared runbook use-case service with thin delivery adapters for CLI, API gateway, Windmill, and the ops portal
-- Status: in-progress
+- Status: ready
 - Implemented In Repo Version: N/A
 - Live Applied In Platform Version: N/A
 - Implemented On: N/A
@@ -12,7 +12,7 @@
 - Owner: codex
 - Depends On: `adr-0129-runbook-automation-executor`, `adr-0204-architecture-governance`
 - Conflicts With: none
-- Shared Surfaces: `platform/use_cases/`, `scripts/runbook_executor.py`, `scripts/api_gateway/main.py`, `scripts/ops_portal/app.py`, `collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/`, `docs/runbooks/`, `tests/`, `receipts/live-applies/`
+- Shared Surfaces: `platform/use_cases/`, `scripts/runbook_executor.py`, `scripts/api_gateway/main.py`, `scripts/ops_portal/app.py`, `collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/`, `config/workflow-catalog.json`, `config/command-catalog.json`, `docs/runbooks/`, `docs/diagrams/agent-coordination-map.excalidraw`, `tests/`, `receipts/live-applies/`
 
 ## Scope
 
@@ -37,16 +37,22 @@
 - `collections/ansible_collections/lv3/platform/roles/api_gateway_runtime/`
 - `Makefile`
 - `config/workflow-catalog.json`
+- `config/command-catalog.json`
 - `docs/runbooks/runbook-automation-executor.md`
 - `docs/runbooks/platform-operations-portal.md`
 - `docs/runbooks/ops-portal-down.md`
 - `docs/runbooks/validation-gate-status.yaml`
+- `docs/diagrams/agent-coordination-map.excalidraw`
 - `docs/adr/0209-use-case-services-and-thin-delivery-adapters.md`
 - `docs/workstreams/ws-0209-live-apply.md`
 - `tests/test_api_gateway.py`
+- `tests/test_api_gateway_runtime_role.py`
 - `tests/test_interactive_ops_portal.py`
 - `tests/test_runbook_executor.py`
 - `tests/test_runbook_executor_windmill.py`
+- `tests/test_validation_gate.py`
+- `tests/test_validation_gate_windmill.py`
+- `tests/test_windmill_operator_admin_app.py`
 
 ## Expected Live Surfaces
 
@@ -56,10 +62,12 @@
 
 ## Verification
 
-- `uv run --with pytest --with pyyaml --with httpx --with cryptography --with fastapi pytest tests/test_runbook_executor.py tests/test_runbook_executor_windmill.py tests/test_api_gateway.py tests/test_interactive_ops_portal.py -q`
+- `uv run --with pytest --with pyyaml --with fastapi==0.116.1 --with httpx==0.28.1 --with cryptography==45.0.6 --with PyJWT==2.10.1 --with jinja2==3.1.5 --with itsdangerous==2.2.0 --with python-multipart==0.0.20 pytest tests/test_runbook_executor.py tests/test_runbook_executor_windmill.py tests/test_api_gateway.py tests/test_api_gateway_runtime_role.py tests/test_interactive_ops_portal.py tests/test_validation_gate.py tests/test_validation_gate_windmill.py tests/test_windmill_operator_admin_app.py -q`
 - `python3 -m py_compile scripts/runbook_executor.py scripts/api_gateway/main.py scripts/ops_portal/app.py platform/use_cases/runbooks.py`
 - `make syntax-check-api-gateway`
 - `make syntax-check-ops-portal`
+- `python3 scripts/generate_diagrams.py --check`
+- `uv run --with pyyaml --with jsonschema python scripts/validate_repository_data_models.py --validate`
 - `./scripts/validate_repo.sh agent-standards`
 - live verification: list and execute `validation-gate-status` through the gateway, then confirm the same result renders through the ops portal adapter path
 
