@@ -14,5 +14,5 @@
     "esModuleInterop": true,
     "strict": true
   },
-  "include": ["App.tsx", "index.tsx", "wmill.d.ts"]
+  "include": ["App.tsx", "index.tsx", "touring.ts", "wmill.d.ts"]
 }

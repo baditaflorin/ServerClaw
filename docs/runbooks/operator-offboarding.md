@@ -2,6 +2,8 @@
 
 This runbook documents the repo-managed offboarding path introduced by ADR 0108.
 
+The same backend is also exposed through the Windmill operator admin app documented in [windmill-operator-access-admin.md](windmill-operator-access-admin.md), which now includes a guided `Off-board Operator` tour for browser-first use.
+
 ## Offboard One Operator
 
 ```bash

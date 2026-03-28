@@ -6,12 +6,12 @@
 # ============================================================================
 
 schema_version: 1
-generated: '2026-03-28'
+generated: '2026-03-29'
 total_adrs: 278
 implementation_status_summary:
-  Implemented: 215
+  Implemented: 217
   Partial: 4
-  Not Implemented: 58
+  Not Implemented: 56
   Deprecated: 1
 concerns:
   agent-coordination:
@@ -4092,7 +4092,7 @@ adr_index:
   - adr: '0242'
     title: Guided Human Onboarding Via Shepherd Tours
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: platform
     keywords:
@@ -4103,6 +4103,7 @@ adr_index:
       - tours
     summary: We will use Shepherd.js for guided first-run tours, contextual onboarding,
     filename: 0242-guided-human-onboarding-via-shepherd-tours.md
+    implemented_version: 0.177.58
   - adr: '0243'
     title: Component Stories, Accessibility, And UI Contracts Via Storybook, Playwright, And Axe-Core
     status: Accepted
@@ -4212,7 +4213,7 @@ adr_index:
   - adr: '0250'
     title: Log Ingestion And Queryability Canaries Via Loki Canary
     status: Accepted
-    implementation_status: Not Implemented
+    implementation_status: Implemented
     date: '2026-03-28'
     concern: monitoring
     keywords:
@@ -4224,6 +4225,7 @@ adr_index:
       - canary
     summary: We will use Loki Canary as the default end-to-end log-path assurance signal
     filename: 0250-log-ingestion-and-queryability-canaries-via-loki-canary.md
+    implemented_version: 0.177.57
   - adr: '0251'
     title: Stage-Scoped Smoke Suites And Promotion Gates
     status: Accepted

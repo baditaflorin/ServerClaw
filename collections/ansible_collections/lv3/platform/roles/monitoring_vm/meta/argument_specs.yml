@@ -1,3 +1,29 @@
+# Role Metadata File: monitoring_vm/meta/argument_specs.yml
+# Purpose: Declare the supported input contract for the monitoring VM role and its Loki Canary extensions.
+# Use case: Validated before role execution so monitoring stack converges fail early on missing or malformed inputs.
+#
+# Inputs (required):
+#   - monitoring_* role arguments: Service package, path, URL, and dashboard values consumed by the role.
+#
+# Inputs (optional):
+#   - monitoring_loki_canary_* role arguments: Canary timing and selector overrides for ADR 0250.
+#
+# Outputs:
+#   - Enforces the argument schema that gates monitoring VM role execution.
+#
+# Idempotency: Fully idempotent
+#              Schema-only metadata; does not mutate remote state.
+#
+# Dependencies:
+#   - ADR 0011: Defines the monitoring role surface.
+#   - ADR 0250: Extends the role contract for Loki Canary assurance.
+#   - Requires: ansible-core argument spec validation support.
+#
+# Related ADRs: 0011, 0250
+# Related Runbooks: docs/runbooks/monitoring-stack.md
+#
+# Author: LV3 Platform
+# Last Updated: 2026-03-28
 ---
 argument_specs:
   main:
@@ -49,6 +75,11 @@ argument_specs:
         required: true
         description:
           - Path where the generated SLO overview dashboard is copied before import.
+      monitoring_grafana_log_canary_dashboard_file:
+        type: path
+        required: true
+        description:
+          - Path where the generated log-canary overview dashboard is copied before import.
       monitoring_grafana_loki_datasource_name:
         type: str
         required: true
@@ -94,6 +125,16 @@ argument_specs:
         required: true
         description:
           - Guest-local Loki HTTP base URL used for verification.
+      monitoring_loki_canary_service_name:
+        type: str
+        required: true
+        description:
+          - Systemd service name used by the managed Loki Canary runtime.
+      monitoring_loki_canary_service_file:
+        type: path
+        required: true
+        description:
+          - Systemd service unit rendered for Loki Canary.
       monitoring_loki_retention_default:
         type: str
         required: false
