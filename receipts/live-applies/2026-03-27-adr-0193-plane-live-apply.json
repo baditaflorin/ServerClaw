@@ -3,13 +3,13 @@
   "receipt_id": "2026-03-27-adr-0193-plane-live-apply",
   "environment": "production",
   "applied_on": "2026-03-27",
-  "recorded_on": "2026-03-27",
+  "recorded_on": "2026-03-28",
   "recorded_by": "codex",
-  "source_commit": "73121fc9e2ac3272e59706a01f090535e32cbed9",
+  "source_commit": "6a8aa92b4ff1c6d46ff1a638eae1e2267698b7e1",
   "repo_version_context": "0.177.12",
   "workflow_id": "converge-plane",
   "adr": "0193",
-  "summary": "Live-applied the repo-managed Plane runtime, PostgreSQL access, Proxmox-host Tailscale proxy, controller-local bootstrap artifacts, and ADR synchronization path for ADR 0193, then verified the controller-facing Plane workflow end to end. The remaining public-edge browser verification is blocked by shared Hetzner DNS and NGINX static-site publication prerequisites outside the Plane runtime itself.",
+  "summary": "Live-applied and verified the repo-managed Plane service for ADR 0193 across the Proxmox host, postgres-lv3, docker-runtime-lv3, and nginx-lv3. The Plane controller endpoint, governed repo wrappers, full ADR synchronization flow, full playbook replay, and authenticated public tasks.lv3.org edge path all passed from this branch.",
   "targets": [
     {
       "kind": "host",
@@ -47,14 +47,14 @@
   ],
   "verification": [
     {
-      "check": "Focused Plane regression tests",
+      "check": "Focused Plane and edge regression tests",
       "result": "pass",
-      "observed": "`uv run --with pytest pytest -q tests/test_plane_client.py tests/test_plane_runtime_role.py` passed after adding ADR sync rate-limit retries, cached issue indexing, and the shared readiness-probe correction."
+      "observed": "`uv run --with pytest pytest -q tests/test_nginx_edge_publication_role.py tests/test_plane_client.py tests/test_plane_runtime_role.py` passed with 27 tests after adding Plane timeout retries, no-op issue update skips, sync timeout budget hardening, and the shared webroot ACME defaults."
     },
     {
       "check": "Plane syntax and targeted repo validation",
       "result": "pass",
-      "observed": "`make syntax-check-plane` passed, and `./scripts/validate_repo.sh agent-standards json health-probes workstream-surfaces alert-rules` passed after updating the workstream ownership manifest and the Plane readiness probe contract."
+      "observed": "`make syntax-check-plane` passed, and `./scripts/validate_repo.sh agent-standards json health-probes workstream-surfaces alert-rules` passed after recording the generated dependency-graph surface in the workstream ownership manifest."
     },
     {
       "check": "Plane runtime playbook replay",
@@ -64,47 +64,32 @@
     {
       "check": "Controller-facing Plane API",
       "result": "pass",
-      "observed": "A direct probe to `http://100.64.0.1:8011/api/instances/` returned `200 OK` with Plane instance metadata showing `current_version` `1.2.3` and `workspaces_exist: true`."
+      "observed": "`http://100.64.0.1:8011/api/instances/` returned `200 OK` with Plane instance metadata and `workspaces_exist: true`."
     },
     {
       "check": "Governed Plane wrappers",
       "result": "pass",
-      "observed": "`make plane-manage ACTION=whoami` returned the seeded `ops@lv3.org` identity on workspace `lv3-platform`, and `make plane-manage ACTION=list-projects PLANE_ARGS='--workspace lv3-platform'` returned the `Architecture Decisions` project with identifier `ADR`."
+      "observed": "`make plane-manage ACTION=whoami` returned `ops@lv3.org` on workspace `lv3-platform`, and `make plane-manage ACTION=list-projects PLANE_ARGS='--workspace lv3-platform'` returned the `Architecture Decisions` project with identifier `ADR`."
     },
     {
-      "check": "ADR synchronization",
+      "check": "Governed ADR synchronization",
       "result": "pass",
-      "observed": "`scripts/sync_adrs_to_plane.py` wrote `.local/plane/adr-sync-summary.json` with `count: 202`, and the live Plane issue list contains `ADR 0193: Plane Kanban Task Board` under external id `adr-0193`."
-    },
-    {
-      "check": "Plane container stack",
-      "result": "pass",
-      "observed": "An ad-hoc runtime check on `docker-runtime-lv3` showed the Plane API, web, proxy, admin, live, worker, MinIO, RabbitMQ, OpenBao agent, and Valkey containers running. `plane-space` remained up but reported `unhealthy`, which did not block the controller-facing API or ADR sync path."
-    },
-    {
-      "check": "Host-side proxy lane",
-      "result": "pass",
-      "observed": "The unscoped `playbooks/plane.yml` replay successfully converged the Proxmox Tailscale proxy lane before later stopping in the shared Hetzner DNS role, and the controller-facing Plane endpoint continued answering through `100.64.0.1:8011`."
+      "observed": "`make plane-manage ACTION=sync-adrs` completed successfully and returned `count: 202`, including live issue `ADR 0193: Plane Kanban Task Board` under external id `adr-0193`."
     },
     {
       "check": "Full multi-host replay",
-      "result": "partial",
-      "observed": "The unscoped `playbooks/plane.yml` replay stopped in `lv3.platform.hetzner_dns_records` because `HETZNER_DNS_API_TOKEN` was not present in the local shell environment. The secret is declared in `config/controller-local-secrets.json` as externally supplied input rather than a repo-stored file."
+      "result": "pass",
+      "observed": "`ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory/hosts.yml playbooks/plane.yml --private-key /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/ssh/hetzner_llm_agents_ed25519 -e env=production -e proxmox_guest_ssh_connection_mode=proxmox_host_jump` completed successfully across `proxmox_florin`, `postgres-lv3`, `docker-runtime-lv3`, and `nginx-lv3`. The Plane ADR sync task retried once and then converged."
     },
     {
       "check": "Public Plane edge publication",
-      "result": "partial",
-      "observed": "The full tier-2 replay reached `nginx-lv3` but failed in the shared `lv3.platform.nginx_edge_publication` role on unrelated missing `build/changelog-portal/` and `build/docs-portal/` directories. After that replay, `curl -k -I https://tasks.lv3.org/` still returned `308` to `https://nginx.lv3.org/`, so the public browser surface is not yet verified as live from this branch."
+      "result": "pass",
+      "observed": "`curl -k -I https://tasks.lv3.org/` returned `302` to `/oauth2/sign_in`, and probing that sign-in URL returned `302` into the shared `https://sso.lv3.org/realms/lv3/...` realm flow."
     },
     {
       "check": "Repo-wide validate target",
       "result": "partial",
-      "observed": "`make validate` still fails on pre-existing unrelated ansible-lint warnings in `control_plane_recovery`, `monitoring_vm`, `openbao_runtime`, and `windmill_runtime`; no Plane-specific validation failure remained."
-    },
-    {
-      "check": "Generic live-apply wrapper",
-      "result": "partial",
-      "observed": "`make live-apply-service service=plane env=production` is currently blocked by `check-canonical-truth` because the worktree's integrated `README.md` is stale. This branch intentionally does not rewrite protected integration files."
+      "observed": "`make validate` completed the generated-vars checks, full syntax suite, YAML lint, role argument specs, idempotency policy, preflight second-run checks, shell lint, JSON validation, compose runtime env guard, and retry guard, but still exited non-zero on pre-existing unrelated `ansible-lint` warnings in `control_plane_recovery`, `monitoring_vm`, `openbao_runtime`, and `windmill_runtime`."
     }
   ],
   "evidence_refs": [
@@ -115,19 +100,22 @@
     "playbooks/services/plane.yml",
     "collections/ansible_collections/lv3/platform/roles/plane_postgres/",
     "collections/ansible_collections/lv3/platform/roles/plane_runtime/",
+    "collections/ansible_collections/lv3/platform/roles/nginx_edge_publication/defaults/main.yml",
     "platform/ansible/plane.py",
     "scripts/plane_bootstrap.py",
     "scripts/plane_tool.py",
     "scripts/sync_adrs_to_plane.py",
     "config/health-probe-catalog.json",
+    "config/dependency-graph.json",
+    "docs/site-generated/architecture/dependency-graph.md",
     "workstreams.yaml",
+    "tests/test_nginx_edge_publication_role.py",
     "tests/test_plane_client.py",
     "tests/test_plane_runtime_role.py"
   ],
   "notes": [
-    "Before the durable repo path passed, a manual Hetzner DNS correction was made to restore `tasks.lv3.org` and the unrelated `logs.lv3.org` A records to `65.108.75.123`. The later unscoped replay could not re-verify DNS publication because `HETZNER_DNS_API_TOKEN` was not available in the local environment.",
-    "The Plane API-key wrapper originally failed from the worktree because `make plane-manage` did not pass the canonical controller-local auth file. The wrapper now uses `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/plane/admin-auth.json` explicitly.",
-    "The shared readiness probe catalog originally pointed Plane readiness at `/auth/sign-in/`, which returns `405` to `GET`. It now points at `/api/instances/`, matching the controller-safe verification path used by the Plane role.",
-    "Merge to `main` must still leave the protected integration files (`README.md`, `VERSION`, `changelog.md`, and `versions/stack.yaml`) for the final integration step, and must not claim the public `tasks.lv3.org` browser surface is verified until the shared NGINX publication prerequisites are satisfied."
+    "The shared NGINX edge certificate automation now defaults to the repo-managed `webroot` ACME path on `nginx-lv3`, which avoided the previous `_acme-challenge.tasks.lv3.org` DNS-01 propagation failure.",
+    "The governed Plane sync wrapper now uses a larger timeout budget and retry window so slow Plane PATCH responses can still converge through `make plane-manage ACTION=sync-adrs`.",
+    "This workstream branch intentionally leaves the protected integration files (`README.md`, `VERSION`, `changelog.md`, and `versions/stack.yaml`) for the final merge-to-main step."
   ]
 }
