@@ -721,6 +721,10 @@
           "Disable the new timer and path units before attempting further host-resident automation changes.",
           "Return the host to the last known-good systemd unit set from version control before retrying."
         ]
+      },
+      "execution": {
+        "profile": "docker_runtime_systemd_make",
+        "timeout_seconds": 900
       }
     },
     "converge-headscale": {
