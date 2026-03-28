@@ -19,9 +19,48 @@ oidc_client_secret="${GITEA_KEYCLOAK_CLIENT_SECRET}"
 token_file="{{ gitea_admin_token_remote_file }}"
 runner_token_file="{{ gitea_runner_registration_token_remote_file }}"
 hook_template="{{ gitea_prereceive_hook_template }}"
+release_bundle_private_key_secret_name="{{ gitea_release_bundle_cosign_private_key_secret_name }}"
+release_bundle_password_secret_name="{{ gitea_release_bundle_cosign_password_secret_name }}"
 
 exec_gitea() {
   docker exec "${container}" gitea "$@"
+}
+
+list_repo_action_secrets() {
+  curl -sS \
+    -H "Authorization: token ${token}" \
+    "${api_url}/api/v1/repos/${repo_org}/${repo_name}/actions/secrets"
+}
+
+put_repo_action_secret() {
+  local secret_name="$1"
+  local env_var_name="$2"
+  local description="$3"
+  local payload_file
+  payload_file="$(mktemp)"
+  python3 - "$env_var_name" "$description" >"${payload_file}" <<'PY'
+import json
+import os
+import sys
+
+env_var_name = sys.argv[1]
+description = sys.argv[2]
+print(
+    json.dumps(
+        {
+            "data": os.environ[env_var_name],
+            "description": description,
+        }
+    )
+)
+PY
+  curl -sS \
+    -X PUT \
+    -H "Authorization: token ${token}" \
+    -H 'Content-Type: application/json' \
+    --data-binary @"${payload_file}" \
+    "${api_url}/api/v1/repos/${repo_org}/${repo_name}/actions/secrets/${secret_name}" >/dev/null
+  rm -f "${payload_file}"
 }
 
 create_admin_output="$(docker exec "${container}" gitea admin user create \
@@ -115,6 +154,24 @@ rm -f /tmp/gitea-repo.json
 repo_hook_dir="{{ gitea_data_dir }}/git/repositories/${repo_org}/${repo_name}.git/custom_hooks"
 mkdir -p "${repo_hook_dir}"
 install -m 0750 "${hook_template}" "${repo_hook_dir}/pre-receive"
+
+repo_action_secrets="$(list_repo_action_secrets)"
+
+if ! grep -q "\"name\":\"${release_bundle_private_key_secret_name}\"" <<<"${repo_action_secrets}"; then
+  put_repo_action_secret \
+    "${release_bundle_private_key_secret_name}" \
+    "GITEA_RELEASE_BUNDLE_COSIGN_PRIVATE_KEY" \
+    "Cosign private key for ADR 0233 signed release bundles"
+  changed=true
+fi
+
+if ! grep -q "\"name\":\"${release_bundle_password_secret_name}\"" <<<"${repo_action_secrets}"; then
+  put_repo_action_secret \
+    "${release_bundle_password_secret_name}" \
+    "GITEA_RELEASE_BUNDLE_COSIGN_PASSWORD" \
+    "Cosign password for ADR 0233 signed release bundles"
+  changed=true
+fi
 
 if [[ "${changed}" == "true" ]]; then
   echo "GITEA_BOOTSTRAP_CHANGED=true"

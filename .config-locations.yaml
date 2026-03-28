@@ -215,6 +215,18 @@ inventory:
 
 automation:
 
+  keys/gitea-release-bundle-cosign.pub:
+    purpose: Committed ADR 0233 Cosign public verifier for signed private Gitea release bundles
+    owner: human
+    format: PEM public key
+    use_for: Verifying the detached Cosign signatures published alongside ADR 0233 release bundles
+    update_when: Rotating the release-bundle signing material
+    update_by: "python3 scripts/release_bundle.py init-signing --force"
+    related_files:
+      - "scripts/release_bundle.py: bundle build, publish, and verification helper"
+      - "docs/runbooks/signed-release-bundles.md: operator procedure"
+      - "config/controller-local-secrets.json: controller-local private-key and password contract"
+
   config/replaceability-review-catalog.json:
     purpose: Canonical ADR 0212 catalog of critical integrated product ADRs that must carry replaceability scorecards and vendor exit plans
     owner: human

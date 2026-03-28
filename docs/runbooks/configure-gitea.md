@@ -13,8 +13,23 @@ This runbook covers the private Gitea deployment introduced by ADR 0143.
 - Runner host: `docker-build-lv3`
 - Controller URL: `http://100.64.0.1:3009`
 - Local bootstrap artifacts: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/`
+- ADR 0233 public verifier: `keys/gitea-release-bundle-cosign.pub` in the active checkout
 
 ## Converge
+
+Before the first ADR 0233 replay, bootstrap the local signing material once:
+
+```bash
+python3 scripts/release_bundle.py init-signing
+```
+
+This writes:
+
+- `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/release-bundle-cosign.key`
+- `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/release-bundle-cosign.password.txt`
+- `keys/gitea-release-bundle-cosign.pub` in the current checkout
+
+Then run the managed converge so Gitea seeds the private repo Actions secrets:
 
 ```bash
 ansible-playbook -i inventory/hosts.yml playbooks/gitea.yml
@@ -40,7 +55,15 @@ test -s /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea
 test -s /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/runner-registration-token.txt
 ```
 
-4. Confirm the build worker container is running:
+4. Confirm the ADR 0233 signing material exists locally:
+
+```bash
+test -s /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/release-bundle-cosign.key
+test -s /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.local/gitea/release-bundle-cosign.password.txt
+test -s keys/gitea-release-bundle-cosign.pub
+```
+
+5. Confirm the build worker container is running:
 
 ```bash
 ansible docker-build-lv3 -i inventory/hosts.yml -b -m command -a "docker ps --filter name=lv3-gitea-runner --format {{.Names}}"
@@ -100,3 +123,5 @@ The canonical repository hook is installed under:
 - The bootstrap admin and runner registration tokens are mirrored locally for controlled operator workflows; keep `.local/gitea/` outside commits.
 - The private git push path enforces the server-side validation gate before a ref is accepted. A rejected push can fail before any Actions workflow is created.
 - The Gitea git SSH endpoint on port `2222` uses Gitea account keys, not the Proxmox host bootstrap key. For controlled automation from the operator workstation, the mirrored `ops-gitea` admin token over HTTP basic auth is the documented fallback.
+- ADR 0233 reuses the managed Gitea bootstrap path to seed the private repo Actions secrets `RELEASE_BUNDLE_COSIGN_PRIVATE_KEY` and `RELEASE_BUNDLE_COSIGN_PASSWORD`.
+- The signed bundle build, publish, and verification flow is documented in [signed-release-bundles.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/runbooks/signed-release-bundles.md).

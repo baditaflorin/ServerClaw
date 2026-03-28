@@ -3214,7 +3214,9 @@
       "preflight": {
         "required": true,
         "required_secret_ids": [
-          "bootstrap_ssh_private_key"
+          "bootstrap_ssh_private_key",
+          "gitea_release_bundle_cosign_private_key",
+          "gitea_release_bundle_cosign_password"
         ],
         "generated_secret_ids": [
           "gitea_database_password",
@@ -3235,17 +3237,21 @@
         "collections/ansible_collections/lv3/platform/roles/gitea_postgres",
         "collections/ansible_collections/lv3/platform/roles/gitea_runtime",
         "collections/ansible_collections/lv3/platform/roles/gitea_runner",
+        ".gitea/workflows/release-bundle.yml",
+        "scripts/release_bundle.py",
+        "docs/runbooks/signed-release-bundles.md",
         "inventory/host_vars/proxmox_florin.yml",
         "config/service-capability-catalog.json",
         "config/health-probe-catalog.json"
       ],
       "outputs": [
-        "A private Gitea runtime on docker-runtime-lv3 with Keycloak OIDC login, a PostgreSQL backend on postgres-lv3, the bootstrapped ops/proxmox_florin_server repository path, and a dedicated self-hosted Actions runner on docker-build-lv3."
+        "A private Gitea runtime on docker-runtime-lv3 with Keycloak OIDC login, a PostgreSQL backend on postgres-lv3, the bootstrapped ops/proxmox_florin_server repository path, a dedicated self-hosted Actions runner on docker-build-lv3, and the ADR 0233 release-bundle signing secrets seeded for server-resident publication."
       ],
       "verification_commands": [
         "make syntax-check-gitea",
         "curl -sf http://100.64.0.1:3009/api/v1/version",
-        "curl -sf http://100.64.0.1:3009/api/swagger >/dev/null"
+        "curl -sf http://100.64.0.1:3009/api/swagger >/dev/null",
+        "python3 scripts/release_bundle.py validate --public-key-path keys/gitea-release-bundle-cosign.pub"
       ],
       "execution_class": "mutation",
       "budget": {

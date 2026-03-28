@@ -1,0 +1,136 @@
+name: release-bundle
+
+on:
+  push:
+    branches:
+      - main
+      - "codex/**"
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: self-hosted
+    outputs:
+      release_tag: ${{ steps.publish.outputs.release_tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare tool cache
+        run: mkdir -p .tmp/bin .tmp/release-bundles
+
+      - name: Install cosign
+        run: |
+          set -euo pipefail
+          export COSIGN_VERSION="v3.0.2"
+          python3 - <<'PY'
+          import os
+          import stat
+          import urllib.request
+          from pathlib import Path
+
+          version = os.environ["COSIGN_VERSION"]
+          url = f"https://github.com/sigstore/cosign/releases/download/{version}/cosign-linux-amd64"
+          destination = Path(".tmp/bin/cosign")
+          destination.write_bytes(urllib.request.urlopen(url).read())
+          destination.chmod(destination.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+          PY
+          chmod 0755 "$PWD/.tmp/bin/cosign"
+
+      - name: Validate release bundle contract
+        run: |
+          set -euo pipefail
+          python3 scripts/release_bundle.py validate --public-key-path "$PWD/keys/gitea-release-bundle-cosign.pub"
+
+      - name: Materialize signing secrets
+        env:
+          RELEASE_BUNDLE_COSIGN_PRIVATE_KEY: ${{ secrets.RELEASE_BUNDLE_COSIGN_PRIVATE_KEY }}
+          RELEASE_BUNDLE_COSIGN_PASSWORD: ${{ secrets.RELEASE_BUNDLE_COSIGN_PASSWORD }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          output_dir = Path(".tmp/release-bundles")
+          output_dir.mkdir(parents=True, exist_ok=True)
+          (output_dir / "release-bundle-cosign.key").write_text(os.environ["RELEASE_BUNDLE_COSIGN_PRIVATE_KEY"])
+          (output_dir / "release-bundle-cosign.password.txt").write_text(
+              os.environ["RELEASE_BUNDLE_COSIGN_PASSWORD"].strip() + "\n"
+          )
+          PY
+          chmod 0600 \
+            "$PWD/.tmp/release-bundles/release-bundle-cosign.key" \
+            "$PWD/.tmp/release-bundles/release-bundle-cosign.password.txt"
+
+      - name: Publish signed bundle release
+        id: publish
+        env:
+          GITEA_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 scripts/release_bundle.py publish \
+            --gitea-url "${{ github.server_url }}" \
+            --repository "${{ github.repository }}" \
+            --ref-name "${{ github.ref_name }}" \
+            --ref-type "${{ github.ref_type }}" \
+            --commit "${{ github.sha }}" \
+            --output-dir "$PWD/.tmp/release-bundles" \
+            --public-key-path "$PWD/keys/gitea-release-bundle-cosign.pub" \
+            --private-key-path "$PWD/.tmp/release-bundles/release-bundle-cosign.key" \
+            --password-file "$PWD/.tmp/release-bundles/release-bundle-cosign.password.txt" \
+            --cosign-path "$PWD/.tmp/bin/cosign" \
+            > "$PWD/.tmp/release-bundle-publish.json"
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          payload = json.loads(Path(".tmp/release-bundle-publish.json").read_text())
+          with Path(os.environ["GITHUB_OUTPUT"]).open("a", encoding="utf-8") as handle:
+              handle.write(f"release_tag={payload['release_tag']}\n")
+          PY
+
+  verify:
+    runs-on: self-hosted
+    needs:
+      - publish
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare tool cache
+        run: mkdir -p .tmp/bin .tmp/release-verify
+
+      - name: Install cosign
+        run: |
+          set -euo pipefail
+          export COSIGN_VERSION="v3.0.2"
+          python3 - <<'PY'
+          import os
+          import stat
+          import urllib.request
+          from pathlib import Path
+
+          version = os.environ["COSIGN_VERSION"]
+          url = f"https://github.com/sigstore/cosign/releases/download/{version}/cosign-linux-amd64"
+          destination = Path(".tmp/bin/cosign")
+          destination.write_bytes(urllib.request.urlopen(url).read())
+          destination.chmod(destination.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+          PY
+          chmod 0755 "$PWD/.tmp/bin/cosign"
+
+      - name: Verify published bundle
+        env:
+          GITEA_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 scripts/release_bundle.py verify-release \
+            --gitea-url "${{ github.server_url }}" \
+            --repository "${{ github.repository }}" \
+            --release-tag "${{ needs.publish.outputs.release_tag }}" \
+            --output-dir "$PWD/.tmp/release-verify" \
+            --public-key-path "$PWD/keys/gitea-release-bundle-cosign.pub" \
+            --cosign-path "$PWD/.tmp/bin/cosign" \
+            > "$PWD/.tmp/release-bundle-verify.json"
+          cat "$PWD/.tmp/release-bundle-verify.json"
