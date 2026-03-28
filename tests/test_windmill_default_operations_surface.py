@@ -69,3 +69,32 @@ def test_default_operations_surface_verification_paths_are_declared() -> None:
     assert expected_paths.issubset(set(defaults["windmill_default_operations_surface_script_paths"]))
     assert "windmill_default_operations_surface_script_paths" in verify_tasks
     assert "/api/w/{{ windmill_workspace_id }}/scripts/get/p/" in verify_tasks
+
+
+def test_default_operations_surface_keeps_token_lifecycle_receipts_writable() -> None:
+    defaults = yaml.safe_load(
+        (REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml").read_text()
+    )
+    writable_paths = {entry["path"]: entry["mode"] for entry in defaults["windmill_worker_runtime_writable_directories"]}
+
+    assert writable_paths["{{ windmill_worker_repo_checkout_host_path }}/receipts/token-lifecycle"] == "1777"
+
+
+def test_worker_checkout_staging_paths_are_per_run() -> None:
+    tasks = (
+        REPO_ROOT
+        / "collections"
+        / "ansible_collections"
+        / "lv3"
+        / "platform"
+        / "roles"
+        / "windmill_runtime"
+        / "tasks"
+        / "main.yml"
+    ).read_text()
+
+    assert "Create a temporary remote path for the staged Windmill worker checkout archive" in tasks
+    assert "Create a temporary remote path for the staged Windmill worker checkout manifest" in tasks
+    assert "{{ windmill_worker_checkout_archive_remote_file.path }}" in tasks
+    assert "{{ windmill_worker_checkout_manifest_remote.path }}" in tasks
+    assert "{{ windmill_site_dir }}/worker-checkout.tar.gz" not in tasks

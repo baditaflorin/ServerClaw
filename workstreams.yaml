@@ -8216,6 +8216,7 @@ workstreams:
             - tests/test_weekly_capacity_report_windmill.py
             - tests/test_windmill_default_operations_surface.py
             - receipts/live-applies/2026-03-28-adr-0228-windmill-default-operations-surface-live-apply.json
-          mode: exclusive
+          mode: shared_contract
+          contract: adr-0228-windmill-default-operations-surface-v1
     ready_to_merge: false
     live_applied: false

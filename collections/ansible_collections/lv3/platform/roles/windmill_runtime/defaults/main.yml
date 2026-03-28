@@ -254,6 +254,8 @@ windmill_worker_checkout_prune_preserve_paths: >-
 windmill_worker_runtime_writable_directories:
   - path: "{{ windmill_worker_repo_checkout_host_path }}/receipts/fixtures"
     mode: "1777"
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/receipts/token-lifecycle"
+    mode: "1777"
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local"
     mode: "0755"
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/fixtures"

@@ -205,17 +205,31 @@
   tags:
     - mutation
 
+- name: Create a temporary remote path for the staged Windmill worker checkout archive
+  ansible.builtin.tempfile:
+    path: "{{ windmill_site_dir }}"
+    state: file
+    suffix: .tar.gz
+  register: windmill_worker_checkout_archive_remote_file
+
 - name: Copy the staged Windmill worker checkout archive to the guest
   ansible.builtin.copy:
     src: "{{ windmill_worker_checkout_archive_local.path }}"
-    dest: "{{ windmill_site_dir }}/worker-checkout.tar.gz"
+    dest: "{{ windmill_worker_checkout_archive_remote_file.path }}"
     mode: "0600"
   register: windmill_worker_checkout_archive_remote
+
+- name: Create a temporary remote path for the staged Windmill worker checkout manifest
+  ansible.builtin.tempfile:
+    path: "{{ windmill_site_dir }}"
+    state: file
+    suffix: .txt
+  register: windmill_worker_checkout_manifest_remote
 
 - name: Copy the staged Windmill worker checkout manifest to the guest
   ansible.builtin.copy:
     src: "{{ windmill_worker_checkout_manifest_local.path }}"
-    dest: "{{ windmill_worker_checkout_manifest_remote_file }}"
+    dest: "{{ windmill_worker_checkout_manifest_remote.path }}"
     mode: "0600"
 
 - name: Check whether the Windmill worker checkout checksum marker exists
@@ -290,7 +304,7 @@
 - name: Expand the staged Windmill worker checkout on the guest when the archive changed
   ansible.builtin.shell: |
     set -euo pipefail
-    tar -xzf "{{ windmill_site_dir }}/worker-checkout.tar.gz" \
+    tar -xzf "{{ windmill_worker_checkout_archive_remote_file.path }}" \
       --overwrite \
       -C "{{ windmill_worker_repo_checkout_host_path }}"
   args:
@@ -356,7 +370,7 @@
     executable: /bin/bash
   environment:
     LV3_WINDMILL_REPO_ROOT: "{{ windmill_worker_repo_checkout_host_path }}"
-    LV3_WINDMILL_MANIFEST_PATH: "{{ windmill_worker_checkout_manifest_remote_file }}"
+    LV3_WINDMILL_MANIFEST_PATH: "{{ windmill_worker_checkout_manifest_remote.path }}"
     LV3_WINDMILL_SYNC_PATHS_JSON: "{{ windmill_worker_checkout_sync_paths | to_json }}"
     LV3_WINDMILL_PRESERVE_PATHS_JSON: "{{ windmill_worker_checkout_prune_preserve_paths | to_json }}"
   register: windmill_worker_checkout_stale_files
@@ -476,12 +490,12 @@
 
 - name: Remove the staged Windmill worker checkout archive from the guest
   ansible.builtin.file:
-    path: "{{ windmill_site_dir }}/worker-checkout.tar.gz"
+    path: "{{ windmill_worker_checkout_archive_remote_file.path }}"
     state: absent
 
 - name: Remove the remote manifest for the Windmill worker checkout contents
   ansible.builtin.file:
-    path: "{{ windmill_worker_checkout_manifest_remote_file }}"
+    path: "{{ windmill_worker_checkout_manifest_remote.path }}"
     state: absent
 
 - name: Find AppleDouble artifacts in the Windmill worker checkout
