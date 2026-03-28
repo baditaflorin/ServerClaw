@@ -71,14 +71,16 @@ def test_default_operations_surface_verification_paths_are_declared() -> None:
     assert "/api/w/{{ windmill_workspace_id }}/scripts/get/p/" in verify_tasks
 
 
-def test_default_operations_surface_keeps_token_lifecycle_receipts_writable() -> None:
+def test_default_operations_surface_preserves_token_lifecycle_runtime_root() -> None:
     defaults = yaml.safe_load(
         (REPO_ROOT / "collections/ansible_collections/lv3/platform/roles/windmill_runtime/defaults/main.yml").read_text()
     )
+    mutable_paths = {entry["path"]: entry["mode"] for entry in defaults["windmill_worker_repo_mutable_directories"]}
     writable_paths = {entry["path"]: entry["mode"] for entry in defaults["windmill_worker_runtime_writable_directories"]}
 
-    assert writable_paths["{{ windmill_worker_repo_checkout_host_path }}/receipts/token-lifecycle"] == "1777"
-    assert writable_paths["{{ windmill_worker_repo_checkout_host_path }}/receipts/security-incidents"] == "1777"
+    assert mutable_paths["{{ windmill_worker_repo_checkout_host_path }}/.local/token-lifecycle"] == "0777"
+    assert "{{ windmill_worker_repo_checkout_host_path }}/receipts/token-lifecycle" not in writable_paths
+    assert "{{ windmill_worker_repo_checkout_host_path }}/receipts/security-incidents" not in writable_paths
 
 
 def test_worker_checkout_staging_paths_are_per_run() -> None:

@@ -6,7 +6,14 @@ from pathlib import Path
 
 def _prepare_runtime_directory(path: Path) -> Path:
     path.mkdir(parents=True, exist_ok=True)
-    path.chmod(0o1777)
+    if (path.stat().st_mode & 0o7777) != 0o1777:
+        try:
+            path.chmod(0o1777)
+        except OSError:
+            pass
+    probe = path / ".windmill-write-probe"
+    probe.write_text("", encoding="utf-8")
+    probe.unlink()
     return path
 
 
@@ -17,7 +24,7 @@ def main(
 ):
     repo_root = Path(repo_path)
     workflow = repo_root / "scripts" / "token_lifecycle.py"
-    receipt_dir = repo_root / "receipts" / "token-lifecycle"
+    receipt_dir = repo_root / ".local" / "token-lifecycle" / "receipts"
     if not workflow.exists():
         return {
             "status": "blocked",

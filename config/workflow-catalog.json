@@ -2001,7 +2001,7 @@
         "tests/test_token_lifecycle.py"
       ],
       "outputs": [
-        "A token inventory audit receipt under receipts/token-lifecycle/ with healthy, warning, expired, and remediation counts.",
+        "A token inventory audit receipt under receipts/token-lifecycle/ for CLI runs, or under .local/token-lifecycle/receipts/ from the Windmill wrapper, with healthy, warning, expired, and remediation counts.",
         "A mutation-ledger file event describing the audit summary."
       ],
       "verification_commands": [
@@ -2048,7 +2048,7 @@
         "tests/test_token_lifecycle.py"
       ],
       "outputs": [
-        "An exposure incident receipt under receipts/security-incidents/ capturing the exposure window, revocation, replacement, session invalidation, and impact steps.",
+        "An exposure incident receipt under receipts/security-incidents/ for CLI runs, or under .local/token-lifecycle/incidents/ from the Windmill wrapper, capturing the exposure window, revocation, replacement, session invalidation, and impact steps.",
         "Mutation-ledger file events for revocation and incident creation when the required hooks succeed."
       ],
       "verification_commands": [

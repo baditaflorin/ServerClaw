@@ -183,6 +183,8 @@ windmill_worker_repo_mutable_directories:
     mode: "0777"
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/governed-command/receipts"
     mode: "0777"
+  - path: "{{ windmill_worker_repo_checkout_host_path }}/.local/token-lifecycle"
+    mode: "0777"
 windmill_worker_repo_mutable_files:
   - path: "{{ windmill_worker_repo_checkout_host_path }}/config/operators.yaml"
     mode: "0666"
@@ -269,10 +271,6 @@ windmill_worker_checkout_prune_preserve_paths: >-
   }}
 windmill_worker_runtime_writable_directories:
   - path: "{{ windmill_worker_repo_checkout_host_path }}/receipts/fixtures"
-    mode: "1777"
-  - path: "{{ windmill_worker_repo_checkout_host_path }}/receipts/token-lifecycle"
-    mode: "1777"
-  - path: "{{ windmill_worker_repo_checkout_host_path }}/receipts/security-incidents"
     mode: "1777"
   - path: "{{ windmill_worker_repo_checkout_host_path }}/.local"
     mode: "0755"
