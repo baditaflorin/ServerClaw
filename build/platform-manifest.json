@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.55",
+  "repo_version": "0.177.56",
   "platform_version": "0.130.43",
-  "generated_at": "2026-03-28T21:54:11Z",
-  "next_refresh_at": "2026-03-28T22:54:11Z",
+  "generated_at": "2026-03-28T22:00:05Z",
+  "next_refresh_at": "2026-03-28T23:00:05Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -4062,10 +4062,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.54",
+    "last_version": "0.177.55",
     "deployed_at": "2026-03-28",
-    "summary": "records ADR 0226 exact-main evidence on the current mainline by preserving the repaired host control-loop systemd baseline, the canonical mainline replay receipt, and the shared release-truth surfaces while the current live platform baseline remains 0.130.43",
-    "release_notes_url": "docs/release-notes/0.177.55.md"
+    "summary": "accepted ADRs 0264 through 0273 to turn repeated gate bypasses, recovery repairs, restore failures, security drift, and public-endpoint mismatches into governed guardrails across validation, builder snapshots, waiver policy, bootstrap preflight, vulnerability budgets, Docker publication, backup coverage, restore warm-up, and DNS plus certificate admission",
+    "release_notes_url": "docs/release-notes/0.177.56.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",

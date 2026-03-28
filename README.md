@@ -137,7 +137,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.55` |
+| Repository version | `0.177.56` |
 | Platform version | `0.130.43` |
 | Observed check date | `2026-03-28` |
 | Observed OS | `Debian 13` |
@@ -933,6 +933,16 @@ this is still same-host recovery, not off-host disaster recovery
 - [ADR 0261: Playwright Browser Runners For ServerClaw Web Action And Extraction](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0261-playwright-browser-runners-for-serverclaw-web-action-and-extraction.md)
 - [ADR 0262: OpenFGA And Keycloak For Delegated ServerClaw Capability Authorization](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0262-openfga-and-keycloak-for-delegated-serverclaw-capability-authorization.md)
 - [ADR 0263: Qdrant, PostgreSQL, And Local Search As The ServerClaw Memory Substrate](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0263-qdrant-postgresql-and-local-search-as-the-serverclaw-memory-substrate.md)
+- [ADR 0264: Failure-Domain-Isolated Validation Lanes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0264-failure-domain-isolated-validation-lanes.md)
+- [ADR 0265: Immutable Validation Snapshots For Remote Builders And Schema Checks](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0265-immutable-validation-snapshots-for-remote-builders-and-schema-checks.md)
+- [ADR 0266: Validation Runner Capability Contracts And Environment Attestation](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0266-validation-runner-capability-contracts-and-environment-attestation.md)
+- [ADR 0267: Expiring Gate Bypass Waivers With Structured Reason Codes](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0267-expiring-gate-bypass-waivers-with-structured-reason-codes.md)
+- [ADR 0268: Fresh-Worktree Bootstrap Manifests For Generated Artifacts And Local Inputs](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0268-fresh-worktree-bootstrap-manifests-for-generated-artifacts-and-local-inputs.md)
+- [ADR 0269: Vulnerability Budgets And Image-Host Freshness Promotion Gates](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0269-vulnerability-budgets-and-image-host-freshness-promotion-gates.md)
+- [ADR 0270: Docker Publication Self-Healing And Port-Programming Assertions](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0270-docker-publication-self-healing-and-port-programming-assertions.md)
+- [ADR 0271: Backup Coverage Assertion Ledger And Backup-Of-Backup Policy](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0271-backup-coverage-assertion-ledger-and-backup-of-backup-policy.md)
+- [ADR 0272: Restore Readiness Ladders And Stateful Warm-Up Verification Profiles](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0272-restore-readiness-ladders-and-stateful-warm-up-verification-profiles.md)
+- [ADR 0273: Public Endpoint Admission Control For DNS Catalog And Certificate Concordance](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/adr/0273-public-endpoint-admission-control-for-dns-catalog-and-certificate-concordance.md)
 
 ### Workstream Documents
 - [Workstream ADR 0011: Monitoring Stack Rollout](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0011-monitoring.md)
@@ -1107,6 +1117,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0234: Human User Experience Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0234-human-user-experience-architecture-bundle.md)
 - [Workstream ADR 0244: Runtime Assurance Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0244-runtime-assurance-architecture-bundle.md)
 - [Workstream ADR 0254: ServerClaw Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0254-serverclaw-architecture-bundle.md)
+- [Workstream ADR 0264: Receipt-Driven Resilience Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0264-receipt-driven-resilience-architecture-bundle.md)
 - [Workstream ws-0021-edge-cert-repair: Shared Edge Certificate Expansion Repair](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0021-edge-cert-repair.md)
 - [Workstream ws-0101-live-apply: ADR 0101 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0101-live-apply.md)
 - [Workstream ws-0105-live-apply: Live Apply ADR 0105 From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0105-live-apply.md)
@@ -1163,7 +1174,7 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.55` |
+| Repository version | `0.177.56` |
 | Platform version | `0.130.43` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
@@ -1397,6 +1408,7 @@ This repository is intentionally opinionated:
 | `0234` | Human user experience architecture bundle | `merged` | [adr-0234-human-user-experience-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0234-human-user-experience-architecture-bundle.md) |
 | `0244` | Runtime assurance architecture bundle | `merged` | [adr-0244-runtime-assurance-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0244-runtime-assurance-architecture-bundle.md) |
 | `0254` | ServerClaw architecture bundle | `merged` | [adr-0254-serverclaw-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0254-serverclaw-architecture-bundle.md) |
+| `0264` | Receipt-driven resilience architecture bundle | `merged` | [adr-0264-receipt-driven-resilience-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0264-receipt-driven-resilience-architecture-bundle.md) |
 <!-- END GENERATED: merged-workstreams -->
 
 ## Planned workflow
