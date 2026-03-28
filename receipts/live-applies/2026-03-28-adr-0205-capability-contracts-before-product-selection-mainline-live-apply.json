@@ -6,7 +6,7 @@
   "recorded_on": "2026-03-28",
   "recorded_at": "2026-03-28T17:10:33Z",
   "recorded_by": "codex",
-  "source_commit": "e7fcf162af285572f4fc1c5376025917423eb0f9",
+  "source_commit": "64ba04234d982a6436feb138a4f9041e4f3b30d0",
   "repo_version_context": "0.177.41",
   "platform_version_context": "0.130.38",
   "workflow_id": "adr-0205-capability-contracts-before-product-selection-mainline-live-apply",
