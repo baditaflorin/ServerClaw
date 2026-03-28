@@ -3372,7 +3372,7 @@ adr_index:
     summary: We will make the platform-context retrieval path semantic by default while preserving the existing private-first
       operati
     filename: 0198-qdrant-vector-search-semantic-rag.md
-    implemented_version: 0.177.12
+    implemented_version: 0.177.24
   - adr: 0199
     title: Outline Living Knowledge Wiki
     status: Accepted

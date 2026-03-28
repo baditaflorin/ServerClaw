@@ -82,6 +82,8 @@ Portainer is now live on `docker-runtime-lv3` and reachable privately at `https:
 
 Private Ollama is now live on `docker-runtime-lv3` at `10.10.10.20:11434`, the repo-managed `llama3.2:3b` startup model is present, and Open WebUI now uses that connector privately through `host.docker.internal:11434` without publishing Ollama on the public edge.
 
+Semantic platform-context retrieval is now live on `docker-runtime-lv3` at `http://100.64.0.1:8010`: the committed `0.177.24` governed `main` replay on 2026-03-28 preserved the healthy Ollama-backed vector collection, the earlier same-day latest-main replay proved the bounded repair path for legacy `384` to `768` drift, and direct API plus operator CLI queries now verify `retrieval_backend: "vector"` end to end.
+
 The repository now also ships the repo-managed `lv3` operator CLI for terminal-first discovery, validation, status checks, and private control-plane entrypoints.
 The repository now also ships ADR 0156 session workspace isolation for controller automation and the remote build gateway: separate checkouts now resolve to separate session namespaces and remote build-server workspaces, and the first live verification from current `main` completed on 2026-03-26.
 The repository now also ships ADR 0170 timeout hierarchy primitives: `config/timeout-hierarchy.yaml`, shared deadline propagation helpers, validation for catalog and hardcoded timeout drift, and runtime timeout wiring across the API gateway, scheduler, world-state workers, drift helpers, and NetBox sync; the integrated mainline live apply on 2026-03-25 re-converged the API gateway and Windmill with those runtime paths active and hardened the shared OpenBao secret-injection helper to recover from sealed restarts.
@@ -126,7 +128,7 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.26` |
-| Platform version | `0.130.33` |
+| Platform version | `0.130.34` |
 | Observed check date | `2026-03-28` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -220,7 +222,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `operator_access` | `2026-03-27-adr-0108-operator-onboarding-mainline-live-apply` |
 | `ops_portal` | `2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply` |
 | `outline` | `2026-03-28-adr-0199-outline-living-knowledge-wiki-mainline-live-apply` |
-| `platform_context` | `2026-03-26-adr-0166-canonical-error-response-live-apply` |
+| `platform_context` | `2026-03-28-adr-0198-semantic-rag-mainline-live-apply` |
 | `platform_event_taxonomy` | `2026-03-26-adr-0124-platform-event-taxonomy-live-apply` |
 | `portainer` | `2026-03-22-adr-0055-portainer-live-apply` |
 | `postgres_vm` | `2026-03-22-adr-0026-postgres-vm-live-apply` |
@@ -1020,7 +1022,7 @@ Current values on `main`:
 | Field | Value |
 | --- | --- |
 | Repository version | `0.177.26` |
-| Platform version | `0.130.33` |
+| Platform version | `0.130.34` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
