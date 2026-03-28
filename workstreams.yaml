@@ -6479,7 +6479,7 @@ workstreams:
   - id: ws-0204-live-apply
     adr: "0204"
     title: Self-correcting automation loops live apply
-    status: ready
+    status: live_applied
     owner: codex
     branch: codex/ws-0204-live-apply
     worktree_path: /Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0204-live-apply
@@ -6555,11 +6555,18 @@ workstreams:
             - .config-locations.yaml
             - docs/adr/.index.yaml
           mode: exclusive
-    ready_to_merge: false
-    live_applied: false
+    ready_to_merge: true
+    live_applied: true
     canonical_truth:
       changelog_entry: implemented ADR 0204 by adding a governed correction-loop catalog, enforcing exact workflow coverage in repo validation, and wiring the live observation loop to persist and report its bounded self-correction contract
       release_bump: patch
+      latest_receipts:
+        windmill: 2026-03-28-adr-0204-self-correcting-automation-loops-live-apply
+      live_apply_verification:
+        windmill_observation_loop:
+          run_id: 71ec1385-9d52-471d-8fbf-e1fbcec6c6ca
+          correction_loop_id: runtime_self_correction_watchers
+          state: ESCALATED_FOR_APPROVAL
 
   - id: ws-0021-edge-cert-repair
     adr: "0021"

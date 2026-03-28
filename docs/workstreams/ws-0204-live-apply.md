@@ -2,7 +2,7 @@
 
 - ADR: [ADR 0204](../adr/0204-self-correcting-automation-loops.md)
 - Title: Governed correction-loop contracts plus live observation-loop replay
-- Status: ready
+- Status: live_applied
 - Branch: `codex/ws-0204-live-apply`
 - Worktree: `/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/.worktrees/ws-0204-live-apply`
 - Owner: codex
@@ -78,7 +78,9 @@
 
 ## Outcome
 
-- pending live apply and final merged-main integration
+- branch-local live apply succeeded on 2026-03-28 and the authenticated Windmill observation replay now returns `status: ok` with `correction_loop_id: runtime_self_correction_watchers`
+- the durable worker closure-loop state persisted the governed correction-loop snapshot for run `71ec1385-9d52-471d-8fbf-e1fbcec6c6ca` with `retry_budget_cycles: 3`
+- merge-to-main still remains: integrate the latest `origin/main`, rerun the repo gates, replay from merged main if required for protected truth updates, and only then update `VERSION`, `changelog.md`, `README.md`, and `versions/stack.yaml`
 
 ## Notes For The Next Assistant
 
