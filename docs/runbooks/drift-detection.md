@@ -7,6 +7,7 @@ ADR 0091 adds a repository-managed drift suite that compares the declared platfo
 - Local full run: `make drift-report ENV=production`
 - CLI route: `lv3 diff --env production`
 - Windmill workflow: `continuous-drift-detection`
+- Windmill script path: `f/lv3/continuous_drift_detection`
 - Latest receipts: `receipts/drift-reports/*.json`
 
 ## Receipt Shape

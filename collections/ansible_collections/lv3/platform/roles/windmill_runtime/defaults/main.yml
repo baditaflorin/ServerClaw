@@ -117,6 +117,24 @@ windmill_runtime_api_base_url: "http://127.0.0.1:{{ windmill_server_port }}"
 windmill_worker_api_base_url: "http://windmill_server:8000"
 windmill_healthcheck_script_path: f/lv3/windmill_healthcheck
 windmill_validation_gate_status_script_path: f/lv3/gate-status
+windmill_default_operations_surface_script_paths:
+  - f/lv3/post_merge_gate
+  - f/lv3/nightly_integration_tests
+  - f/lv3/run_triage
+  - f/lv3/runbook_executor
+  - f/lv3/calibrate_triage_rules
+  - f/lv3/continuous_drift_detection
+  - f/lv3/subdomain_exposure_audit
+  - f/lv3/restore_verification
+  - f/lv3/security_posture_scan
+  - f/lv3/weekly_security_scan
+  - f/lv3/audit_token_inventory
+  - f/lv3/token_exposure_response
+  - f/lv3/weekly_capacity_report
+  - f/lv3/collection_publish
+  - f/lv3/packer_template_rebuild
+  - f/lv3/fixture_expiry_reaper
+  - f/lv3/maintenance_window
 windmill_seed_job_timeout_seconds: 120
 windmill_worker_checkout_repo_root_local_dir: >-
   {{ lookup('ansible.builtin.env', 'PWD') | default(playbook_dir ~ '/..', true) }}
@@ -358,6 +376,91 @@ windmill_seed_scripts:
     language: python3
     summary: Maintain the LV3 build caches
     description: Repo-managed helper that purges the shared pip cache and checks the apt-cacher-ng report endpoint on the build server.
+  - path: f/lv3/post_merge_gate
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/post-merge-gate.py"
+    language: python3
+    summary: Post-merge validation gate
+    description: Repo-managed Windmill wrapper that re-runs the repository validation gate from the worker checkout after mainline changes land.
+  - path: f/lv3/nightly_integration_tests
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/nightly-integration-tests.py"
+    language: python3
+    summary: ADR 0111 nightly integration tests
+    description: Repo-managed Windmill wrapper that runs the production-oriented nightly integration suite and publishes the configured notifications.
+  - path: f/lv3/run_triage
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/run-triage.py"
+    language: python3
+    summary: ADR 0114 incident triage
+    description: Repo-managed Windmill wrapper that builds and optionally emits a triage report for one alert payload.
+  - path: f/lv3/runbook_executor
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/runbook-executor.py"
+    language: python3
+    summary: ADR 0129 runbook executor
+    description: Repo-managed Windmill wrapper that executes, resumes, or inspects structured runbooks from the mounted worker checkout.
+  - path: f/lv3/calibrate_triage_rules
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/calibrate-triage-rules.py"
+    language: python3
+    summary: ADR 0114 triage calibration
+    description: Repo-managed Windmill wrapper that calibrates triage rules from resolved cases and optionally posts the summary to Mattermost.
+  - path: f/lv3/continuous_drift_detection
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/continuous-drift-detection.py"
+    language: python3
+    summary: ADR 0091 continuous drift detection
+    description: Repo-managed Windmill wrapper that runs the multi-source drift suite and returns the latest report summary.
+  - path: f/lv3/subdomain_exposure_audit
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/subdomain-exposure-audit.py"
+    language: python3
+    summary: ADR 0139 subdomain exposure audit
+    description: Repo-managed Windmill wrapper that audits the subdomain exposure registry against live DNS and edge-auth behavior.
+  - path: f/lv3/restore_verification
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/restore-verification.py"
+    language: python3
+    summary: ADR 0099 restore verification
+    description: Repo-managed Windmill wrapper that runs the restore verification workflow and returns the latest receipt summary.
+  - path: f/lv3/security_posture_scan
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/security-posture-scan.py"
+    language: python3
+    summary: ADR 0102 security posture scan
+    description: Repo-managed Windmill wrapper that runs the security posture report from the worker checkout and returns the structured scan output.
+  - path: f/lv3/weekly_security_scan
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/weekly-security-scan.py"
+    language: python3
+    summary: ADR 0142 public surface security scan
+    description: Repo-managed Windmill wrapper that runs the public-surface security scan and stores one receipt.
+  - path: f/lv3/audit_token_inventory
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/audit-token-inventory.py"
+    language: python3
+    summary: ADR 0141 token inventory audit
+    description: Repo-managed Windmill wrapper that audits governed tokens against the lifecycle policy and returns the structured report.
+  - path: f/lv3/token_exposure_response
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/token-exposure-response.py"
+    language: python3
+    summary: ADR 0141 token exposure response
+    description: Repo-managed Windmill wrapper that executes the governed token exposure response workflow for one token.
+  - path: f/lv3/weekly_capacity_report
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/weekly-capacity-report.py"
+    language: python3
+    summary: ADR 0105 weekly capacity report
+    description: Repo-managed Windmill wrapper that renders the weekly platform capacity summary payload from the committed model.
+  - path: f/lv3/collection_publish
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/collection-publish.py"
+    language: python3
+    summary: Ansible collection publish
+    description: Repo-managed Windmill wrapper that builds and optionally publishes the lv3.platform collection to the configured Galaxy server.
+  - path: f/lv3/packer_template_rebuild
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/packer-template-rebuild.py"
+    language: python3
+    summary: Packer template rebuild
+    description: Repo-managed Windmill wrapper that rebuilds the governed VM template set and updates the template manifest.
+  - path: f/lv3/fixture_expiry_reaper
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/fixture-expiry-reaper.py"
+    language: python3
+    summary: Ephemeral fixture expiry reaper
+    description: Repo-managed Windmill wrapper that destroys expired ephemeral fixtures from the governed pool.
+  - path: f/lv3/maintenance_window
+    local_file: "{{ inventory_dir }}/../config/windmill/scripts/maintenance-window.py"
+    language: python3
+    summary: ADR 0080 maintenance window
+    description: Repo-managed Windmill wrapper that opens or closes one governed maintenance window through the shared protocol.
   - path: f/lv3/ephemeral_vm_reaper
     local_file: "{{ inventory_dir }}/../config/windmill/scripts/ephemeral-vm-reaper.py"
     language: python3

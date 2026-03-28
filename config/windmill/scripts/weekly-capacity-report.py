@@ -7,12 +7,14 @@ import json
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
-SCRIPTS_DIR = REPO_ROOT / "scripts"
-if str(SCRIPTS_DIR) not in sys.path:
-    sys.path.insert(0, str(SCRIPTS_DIR))
 
-from capacity_report import build_report, load_capacity_model, render_markdown
+def _load_capacity_report(repo_root: Path):
+    scripts_dir = repo_root / "scripts"
+    if str(scripts_dir) not in sys.path:
+        sys.path.insert(0, str(scripts_dir))
+    import capacity_report
+
+    return capacity_report
 
 
 def main(repo_path: str = "/srv/proxmox_florin_server", no_live_metrics: bool = False) -> dict[str, object]:
@@ -24,13 +26,14 @@ def main(repo_path: str = "/srv/proxmox_florin_server", no_live_metrics: bool = 
             "reason": f"missing capacity model at {model_path}",
         }
 
-    model = load_capacity_model(model_path)
-    report = build_report(model, with_live_metrics=not no_live_metrics)
+    capacity_report = _load_capacity_report(repo_root)
+    model = capacity_report.load_capacity_model(model_path)
+    report = capacity_report.build_report(model, with_live_metrics=not no_live_metrics)
     return {
         "status": "ok",
         "channel": "#platform-ops",
         "metrics_source": report.metrics_source,
-        "markdown": render_markdown(report),
+        "markdown": capacity_report.render_markdown(report),
     }
 
 
