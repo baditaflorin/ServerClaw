@@ -1,10 +1,10 @@
 {
   "$schema": "docs/schema/platform-manifest.schema.json",
   "manifest_version": "1.0.0",
-  "repo_version": "0.177.46",
+  "repo_version": "0.177.47",
   "platform_version": "0.130.41",
-  "generated_at": "2026-03-28T18:53:07Z",
-  "next_refresh_at": "2026-03-28T19:53:07Z",
+  "generated_at": "2026-03-28T19:13:56Z",
+  "next_refresh_at": "2026-03-28T20:13:56Z",
   "environment": "production",
   "identity": {
     "platform_name": "lv3.org",
@@ -4026,10 +4026,10 @@
     ]
   },
   "recent_changes": {
-    "last_version": "0.177.45",
+    "last_version": "0.177.46",
     "deployed_at": "2026-03-28",
-    "summary": "implemented ADR 0227 by routing governed commands through transient systemd-run units with repo-local secret staging, approved wrapper contracts, and durable receipts on the server-resident runtime",
-    "release_notes_url": "docs/release-notes/0.177.46.md"
+    "summary": "accepted ADRs 0234 through 0243 to define the human-facing UX stack for the",
+    "release_notes_url": "docs/release-notes/0.177.47.md"
   },
   "agentic_architecture": {
     "overview": "Intent-driven repository automation with validation, approval, release metadata, and runtime convergence routed through governed workflows.",
