@@ -1,6 +1,6 @@
 schema_version: 1.0.0
-repo_version: 0.177.37
-platform_version: 0.130.37
+repo_version: 0.177.39
+platform_version: 0.130.38
 
 live_apply_evidence:
   receipt_dir: receipts/live-applies
@@ -13,7 +13,7 @@ live_apply_evidence:
     mutation_ledger: 2026-03-27-adr-0115-mutation-ledger-mainline-live-apply
     public_edge_publication: 2026-03-28-adr-0021-shared-edge-certificate-repair-mainline-live-apply
     agent_coordination: 2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply
-    api_gateway: 2026-03-26-adr-0163-retry-taxonomy-live-apply
+    api_gateway: 2026-03-28-adr-0209-use-case-services-live-apply
     docker_runtime: 2026-03-22-adr-0023-docker-runtime-live-apply
     dozzle: 2026-03-26-adr-0150-dozzle-live-apply
     gitea: 2026-03-26-adr-0143-gitea-live-apply
@@ -30,7 +30,7 @@ live_apply_evidence:
     openbao: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
     vaultwarden: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
     certificate_lifecycle: 2026-03-27-adr-0101-certificate-lifecycle-main-live-apply
-    windmill: 2026-03-28-adr-0204-self-correcting-automation-loops-live-apply
+    windmill: 2026-03-28-adr-0209-use-case-services-live-apply
     self_correcting_automation_loops: 2026-03-28-adr-0204-self-correcting-automation-loops-live-apply
     budgeted_workflow_scheduler: 2026-03-27-adr-0119-budgeted-workflow-scheduler-mainline-live-apply
     observation_to_action_closure_loop: 2026-03-26-adr-0126-observation-to-action-closure-loop-live-apply
@@ -60,7 +60,7 @@ live_apply_evidence:
     secret_rotation: 2026-03-23-adr-0065-secret-rotation-live-apply
     semaphore: 2026-03-25-adr-0149-semaphore-live-apply
     searxng: 2026-03-26-adr-0148-searxng-live-apply
-    ops_portal: 2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply
+    ops_portal: 2026-03-28-adr-0209-use-case-services-live-apply
     ollama: 2026-03-27-adr-0176-inventory-sharding-mainline-live-apply
     operator_access: 2026-03-28-adr-0206-ports-and-adapters-live-apply
     preview_environment: 2026-03-27-adr-0185-ws-0185-live-apply-20260327t191234z
@@ -78,6 +78,7 @@ live_apply_evidence:
     fixture_pools: 2026-03-28-adr-0186-prewarmed-fixture-pools-live-apply
     seed_data_snapshots: 2026-03-28-adr-0187-anonymized-seed-data-snapshots-mainline-live-apply
     dify: 2026-03-28-adr-0197-dify-live-apply
+    shared_policy_packs: 2026-03-28-adr-0211-shared-policy-packs-and-rule-registries-mainline-live-apply
     openbao_operator_entity: 2026-03-28-adr-0206-ports-and-adapters-live-apply
     keycloak_operator_access: 2026-03-28-adr-0206-ports-and-adapters-live-apply
     operator_access_review: 2026-03-28-adr-0206-ports-and-adapters-live-apply
@@ -995,8 +996,8 @@ release_tracks:
     repo_version_bump_on: merge_to_main
     platform_version_bump_on: live_apply_from_main
   repo_versioning:
-    current: 0.177.37
+    current: 0.177.39
     meaning: version of this repository's automation, docs, and operational contract
   platform_versioning:
-    current: 0.130.37
+    current: 0.130.38
     meaning: intended platform release for the actual server configuration

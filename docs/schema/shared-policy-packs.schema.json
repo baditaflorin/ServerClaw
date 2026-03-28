@@ -1,0 +1,271 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/schema/shared-policy-packs.schema.json",
+  "title": "Shared Policy Packs",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schema_version",
+    "packs"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "docs/schema/shared-policy-packs.schema.json"
+    },
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "packs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "service_redundancy",
+        "capacity_classes",
+        "placement"
+      ],
+      "properties": {
+        "service_redundancy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "tiers",
+            "known_empty_locations",
+            "rehearsal_gate",
+            "max_supported_tier_by_failure_domain_count",
+            "standby_modes",
+            "control_plane_categories"
+          ],
+          "properties": {
+            "tiers": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "order",
+                  "standby_kind",
+                  "live_apply_mode",
+                  "enforce_standby_capacity"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "order": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "standby_kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "live_apply_mode": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "enforce_standby_capacity": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            },
+            "known_empty_locations": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true
+            },
+            "rehearsal_gate": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "required_tiers",
+                "allowed_results"
+              ],
+              "properties": {
+                "required_tiers": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true
+                },
+                "allowed_results": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "uniqueItems": true
+                }
+              }
+            },
+            "max_supported_tier_by_failure_domain_count": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "minimum_failure_domain_count",
+                  "tier"
+                ],
+                "properties": {
+                  "minimum_failure_domain_count": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "tier": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            },
+            "standby_modes": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true
+            },
+            "control_plane_categories": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true
+            }
+          }
+        },
+        "capacity_classes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "classes"
+          ],
+          "properties": {
+            "classes": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "id",
+                  "requester_class",
+                  "aliases",
+                  "declared_drill_borrow_from",
+                  "break_glass_borrow_from"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9][a-z0-9_-]*$"
+                  },
+                  "requester_class": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9][a-z0-9_-]*$"
+                  },
+                  "aliases": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9][a-z0-9_-]*$"
+                    },
+                    "uniqueItems": true
+                  },
+                  "declared_drill_borrow_from": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9][a-z0-9_-]*$"
+                    },
+                    "uniqueItems": true
+                  },
+                  "break_glass_borrow_from": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9][a-z0-9_-]*$"
+                    },
+                    "uniqueItems": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "placement": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "failure_domain_kinds",
+            "failure_domain_statuses",
+            "guest_placement_classes",
+            "environment_placement_classes",
+            "reserved_capacity_exclusions"
+          ],
+          "properties": {
+            "failure_domain_kinds": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true
+            },
+            "failure_domain_statuses": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true
+            },
+            "guest_placement_classes": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true
+            },
+            "environment_placement_classes": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true
+            },
+            "reserved_capacity_exclusions": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true
+            }
+          }
+        }
+      }
+    }
+  }
+}

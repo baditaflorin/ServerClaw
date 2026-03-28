@@ -121,6 +121,7 @@ ADR 0134 changelog redaction is now live on the shared authenticated edge: the p
 ADR 0102 security posture reporting is now live on production: the Windmill-compatible weekly security scan can execute end to end from the worker checkout through the private Proxmox jump path, and committed receipts now include both the first production report and the verified worker replay from 2026-03-26.
 The repository now also ships ADR 0142 public-surface security scanning: `make public-surface-security-scan ENV=production` writes structured receipts under `receipts/security-scan/`, uses `testssl.sh` and `nuclei` container runners for the live public HTTP or HTTPS surface, and can publish high or critical findings on `platform.security.*`; the live weekly schedule still requires apply from `main`.
 The repository now also ships ADR 0129 runbook automation: structured YAML, JSON, and Markdown-front-matter runbooks can execute through `lv3 runbook`, persist resumable run state under `.local/runbooks/runs/`, and reuse the current Windmill plus mutation-audit surfaces.
+The repository now also ships ADR 0209 use-case services and thin delivery adapters live on production: the API gateway and ops portal now expose the same shared structured runbook service already used by the CLI and Windmill wrapper, and the 2026-03-28 latest-main replay re-verified `validation-gate-status` end to end through the worker checkout, `api.lv3.org` gateway contract, and the interactive `ops.lv3.org` runbook launcher.
 The repository now also ships ADR 0137 crawl policy automation live on production: the shared public edge serves a universal `robots.txt`, emits `X-Robots-Tag: noindex, nofollow` across published hostnames, adds robots meta tags to repository-generated HTML surfaces, and includes `lv3.org` in the shared edge certificate definition.
 The repository now also ships the first ADR 0166 canonical error rollout live on production: `config/error-codes.yaml` and `scripts/canonical_errors.py` now normalize repo-managed gateway and platform-context failures behind one trace-id-backed error envelope, and the 2026-03-26 live replay from `main` verified the canonical `AUTH_TOKEN_MISSING` response on both `https://api.lv3.org/v1/health` and `http://100.64.0.1:8010/v1/platform-summary`.
 
@@ -130,8 +131,8 @@ The repository now also ships the first ADR 0166 canonical error rollout live on
 ### Current Values
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.37` |
-| Platform version | `0.130.37` |
+| Repository version | `0.177.39` |
+| Platform version | `0.130.38` |
 | Observed check date | `2026-03-28` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox version | `9.1.6` |
@@ -186,7 +187,7 @@ Template VM: `9000` `debian13-cloud-template`
 | Capability | Receipt |
 | --- | --- |
 | `agent_coordination` | `2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply` |
-| `api_gateway` | `2026-03-26-adr-0163-retry-taxonomy-live-apply` |
+| `api_gateway` | `2026-03-28-adr-0209-use-case-services-live-apply` |
 | `backup_vm` | `2026-03-22-adr-0029-backup-vm-live-apply` |
 | `budgeted_workflow_scheduler` | `2026-03-27-adr-0119-budgeted-workflow-scheduler-mainline-live-apply` |
 | `build_telemetry` | `2026-03-22-adr-0028-build-telemetry-live-apply` |
@@ -243,7 +244,7 @@ Template VM: `9000` `debian13-cloud-template`
 | `operator_access_runbooks` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `operator_access_validation` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
 | `operator_access_workflows` | `2026-03-28-adr-0206-ports-and-adapters-live-apply` |
-| `ops_portal` | `2026-03-26-adr-0161-real-time-agent-coordination-map-live-apply` |
+| `ops_portal` | `2026-03-28-adr-0209-use-case-services-live-apply` |
 | `outline` | `2026-03-28-adr-0199-outline-living-knowledge-wiki-mainline-live-apply` |
 | `plane` | `2026-03-28-adr-0193-plane-mainline-live-apply` |
 | `platform_context` | `2026-03-28-adr-0198-semantic-rag-mainline-live-apply` |
@@ -262,13 +263,14 @@ Template VM: `9000` `debian13-cloud-template`
 | `self_correcting_automation_loops` | `2026-03-28-adr-0204-self-correcting-automation-loops-live-apply` |
 | `semaphore` | `2026-03-25-adr-0149-semaphore-live-apply` |
 | `service_redundancy` | `2026-03-27-adr-0188-failover-rehearsal-gate-live-apply` |
+| `shared_policy_packs` | `2026-03-28-adr-0211-shared-policy-packs-and-rule-registries-mainline-live-apply` |
 | `short_lived_credentials_and_mtls` | `2026-03-22-adr-0047-short-lived-credentials-live-apply` |
 | `staging_environment` | `2026-03-27-adr-0183-staging-live-apply` |
 | `step_ca` | `2026-03-27-adr-0101-certificate-lifecycle-main-live-apply` |
 | `tempo_tracing` | `2026-03-22-adr-0053-tempo-traces-live-apply` |
 | `uptime_kuma` | `2026-03-22-adr-0027-uptime-kuma-live-apply` |
 | `vaultwarden` | `2026-03-27-adr-0101-certificate-lifecycle-main-live-apply` |
-| `windmill` | `2026-03-28-adr-0204-self-correcting-automation-loops-live-apply` |
+| `windmill` | `2026-03-28-adr-0209-use-case-services-live-apply` |
 | `world_state_materializer` | `2026-03-27-adr-0113-world-state-materializer-mainline-live-apply` |
 <!-- END GENERATED: platform-status -->
 
@@ -1046,6 +1048,7 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream ADR 0199: Outline Living Knowledge Wiki](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0199-outline-living-knowledge-wiki.md)
 - [Workstream ADR 0202: Excalidraw Auto Generated Architecture Diagrams](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0202-excalidraw-auto-generated-architecture-diagrams.md)
 - [Workstream ADR 0204: Architecture Governance Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0204-architecture-governance.md)
+- [Workstream WS-0211: Shared Policy Packs And Rule Registries Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0211-shared-policy-packs-and-rule-registries.md)
 - [Workstream ADR 0214: HA And Replication Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0214-ha-replication-architecture-bundle.md)
 - [Workstream ADR 0224: Server-Resident Operations Architecture Bundle](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0224-server-resident-operations-architecture-bundle.md)
 - [Workstream ws-0021-edge-cert-repair: Shared Edge Certificate Expansion Repair](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0021-edge-cert-repair.md)
@@ -1067,7 +1070,9 @@ this is still same-host recovery, not off-host disaster recovery
 - [Workstream WS-0204: Self-Correcting Automation Loops Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0204-live-apply.md)
 - [Workstream WS-0206: Ports And Adapters Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0206-live-apply.md)
 - [Workstream WS-0206 Main Merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0206-main-merge.md)
+- [Workstream WS-0209: Runbook Use-Case Service Live Apply](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0209-live-apply.md)
 - [Workstream ws-0210-live-apply: ADR 0210 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0210-live-apply.md)
+- [Workstream ws-0211-main-merge](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0211-main-merge.md)
 - [Workstream ws-0212-live-apply: ADR 0212 Live Apply From Latest `origin/main`](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0212-live-apply.md)
 <!-- END GENERATED: document-index -->
 
@@ -1086,8 +1091,8 @@ Current values on `main`:
 
 | Field | Value |
 | --- | --- |
-| Repository version | `0.177.37` |
-| Platform version | `0.130.37` |
+| Repository version | `0.177.39` |
+| Platform version | `0.130.38` |
 | Observed OS | `Debian 13` |
 | Observed Proxmox installed | `true` |
 | Observed PVE manager version | `9.1.6` |
@@ -1304,7 +1309,10 @@ This repository is intentionally opinionated:
 | `0204` | Self-correcting automation loops live apply | `merged` | [ws-0204-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0204-live-apply.md) |
 | `0206` | Live apply ADR 0206 ports and adapters for external integrations | `live_applied` | [ws-0206-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0206-live-apply.md) |
 | `0206` | Integrate ADR 0206 live apply into origin/main | `merged` | [ws-0206-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0206-main-merge.md) |
+| `0209` | Shared runbook use-case service with thin CLI, API gateway, Windmill, and ops portal adapters | `live_applied` | [ws-0209-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0209-live-apply.md) |
 | `0210` | Live apply canonical publication models over adapter-shaped vendor fields | `merged` | [ws-0210-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0210-live-apply.md) |
+| `0211` | Shared policy packs and rule registries live apply | `merged` | [adr-0211-shared-policy-packs-and-rule-registries.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0211-shared-policy-packs-and-rule-registries.md) |
+| `0211` | Integrate ADR 0211 shared policy registries into origin/main | `merged` | [ws-0211-main-merge.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0211-main-merge.md) |
 | `0212` | Replaceability scorecards and vendor exit plans live apply | `merged` | [ws-0212-live-apply.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/ws-0212-live-apply.md) |
 | `0214` | HA and replication architecture bundle for production and staging | `merged` | [adr-0214-ha-replication-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0214-ha-replication-architecture-bundle.md) |
 | `0224` | Server-resident operations architecture bundle | `merged` | [adr-0224-server-resident-operations-architecture-bundle.md](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/workstreams/adr-0224-server-resident-operations-architecture-bundle.md) |

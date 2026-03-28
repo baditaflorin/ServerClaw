@@ -3,10 +3,12 @@
 ## Purpose
 
 ADR 0192 separates spare capacity into protected classes so preview, recovery, and standby workflows stop competing through one opaque shared pool.
+The canonical class names, requester aliases, and borrow rules now live in `config/shared-policy-packs.json`.
 
 ## Repo Surfaces
 
 - [config/capacity-model.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/capacity-model.json)
+- [config/shared-policy-packs.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/config/shared-policy-packs.json)
 - [docs/schema/capacity-model.schema.json](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/docs/schema/capacity-model.schema.json)
 - [scripts/capacity_report.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/capacity_report.py)
 - [scripts/fixture_manager.py](/Users/live/Documents/GITHUB_PROJECTS/proxmox_florin_server/scripts/fixture_manager.py)
@@ -76,3 +78,4 @@ uv run --with pyyaml python scripts/fixture_manager.py list --no-refresh-health
 - `scripts/fixture_manager.py` now accepts both the legacy top-level `ephemeral_pool` shape and the reservation-backed `preview_burst` shape, but the canonical repo truth is the reservation-backed model.
 - `scripts/restore_verification.py` checks `recovery_reserved` before starting any destructive restore workflow so the drill fails fast when protected recovery headroom is missing.
 - `scripts/capacity_report.py --format json` is the machine-readable source for class totals, occupancy, and remaining headroom.
+- if a class name, alias, or borrow rule changes, update `config/shared-policy-packs.json` first and let validation fan that policy into the consuming tools

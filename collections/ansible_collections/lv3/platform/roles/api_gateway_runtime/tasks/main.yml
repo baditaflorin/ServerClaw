@@ -62,6 +62,10 @@
       mode: "0755"
     - path: "{{ api_gateway_data_dir }}"
       mode: "0755"
+    - path: "{{ api_gateway_data_dir }}/runbooks"
+      mode: "0755"
+    - path: "{{ api_gateway_data_dir }}/runbooks/runs"
+      mode: "0755"
     - path: "{{ api_gateway_data_dir }}/receipts/drift-reports"
       mode: "0755"
 
@@ -95,6 +99,24 @@
   when: api_gateway_platform_context_token_stat.stat.exists
   no_log: true
 
+- name: Ensure nested parent directories for managed API gateway source files exist
+  ansible.builtin.file:
+    path: "{{ api_gateway_service_dir }}/{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: >-
+    {{
+      api_gateway_sources
+      | map(attribute='dest')
+      | map('dirname')
+      | reject('equalto', '')
+      | reject('equalto', '.')
+      | unique
+      | list
+    }}
+
 - name: Sync the API gateway application sources
   ansible.builtin.copy:
     src: "{{ item.src }}"
@@ -112,6 +134,14 @@
   loop_control:
     loop_var: api_gateway_tree_sync_spec
     label: "{{ api_gateway_tree_sync_spec.name }}"
+
+- name: Remove stale managed API gateway config bundle entries
+  ansible.builtin.file:
+    path: "{{ api_gateway_config_dir }}/{{ item.dest }}"
+    state: absent
+  loop: "{{ api_gateway_config_sources }}"
+  loop_control:
+    label: "{{ item.dest }}"
 
 - name: Sync the API gateway runtime config bundle
   ansible.builtin.copy:

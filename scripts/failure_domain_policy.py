@@ -9,17 +9,19 @@ import sys
 from typing import Any, Final
 
 from controller_automation_toolkit import emit_cli_error, load_json, load_yaml, repo_path
+from shared_policy_packs import load_shared_policy_packs
 
 
 HOST_VARS_PATH: Final = repo_path("inventory", "host_vars", "proxmox_florin.yml")
 ENVIRONMENT_TOPOLOGY_PATH: Final = repo_path("config", "environment-topology.json")
 SERVICE_CATALOG_PATH: Final = repo_path("config", "service-capability-catalog.json")
 
-ALLOWED_DOMAIN_KINDS = {"host", "cloud"}
-ALLOWED_DOMAIN_STATUSES = {"active", "planned"}
-ALLOWED_GUEST_PLACEMENT_CLASSES = {"primary", "standby", "recovery", "fixture"}
-ALLOWED_ENVIRONMENT_PLACEMENT_CLASSES = {"preview", "fixture"}
-ALLOWED_RESERVED_CAPACITY_EXCLUSIONS = {"standby", "recovery"}
+SHARED_POLICIES = load_shared_policy_packs()
+ALLOWED_DOMAIN_KINDS = SHARED_POLICIES.failure_domain_kinds
+ALLOWED_DOMAIN_STATUSES = SHARED_POLICIES.failure_domain_statuses
+ALLOWED_GUEST_PLACEMENT_CLASSES = SHARED_POLICIES.guest_placement_classes
+ALLOWED_ENVIRONMENT_PLACEMENT_CLASSES = SHARED_POLICIES.environment_placement_classes
+ALLOWED_RESERVED_CAPACITY_EXCLUSIONS = SHARED_POLICIES.reserved_capacity_exclusions
 LIVE_LABEL_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 
 

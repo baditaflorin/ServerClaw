@@ -156,11 +156,8 @@
         },
         "capacity_class": {
           "type": "string",
-          "enum": [
-            "ha_reserved",
-            "recovery_reserved",
-            "preview_burst"
-          ]
+          "minLength": 1,
+          "description": "Validated against config/shared-policy-packs.json."
         },
         "disk_paths": {
           "type": "array",
@@ -204,11 +201,8 @@
         },
         "capacity_class": {
           "type": "string",
-          "enum": [
-            "ha_reserved",
-            "recovery_reserved",
-            "preview_burst"
-          ]
+          "minLength": 1,
+          "description": "Validated against config/shared-policy-packs.json."
         },
         "service_id": {
           "type": "string",
